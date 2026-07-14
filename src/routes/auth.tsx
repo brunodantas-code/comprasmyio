@@ -1,0 +1,135 @@
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { toast } from "sonner";
+import { Package } from "lucide-react";
+import { z } from "zod";
+
+export const Route = createFileRoute("/auth")({
+  component: AuthPage,
+});
+
+const signInSchema = z.object({
+  email: z.string().trim().email("E-mail inválido").max(255),
+  password: z.string().min(6, "Mínimo 6 caracteres").max(72),
+});
+const signUpSchema = signInSchema.extend({
+  full_name: z.string().trim().min(2, "Informe seu nome").max(100),
+});
+
+function AuthPage() {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) navigate({ to: "/dashboard" });
+    });
+  }, [navigate]);
+
+  async function handleSignIn(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const parsed = signInSchema.safeParse({ email: fd.get("email"), password: fd.get("password") });
+    if (!parsed.success) return toast.error(parsed.error.issues[0].message);
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword(parsed.data);
+    setLoading(false);
+    if (error) return toast.error(error.message);
+    navigate({ to: "/dashboard" });
+  }
+
+  async function handleSignUp(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const parsed = signUpSchema.safeParse({
+      email: fd.get("email"),
+      password: fd.get("password"),
+      full_name: fd.get("full_name"),
+    });
+    if (!parsed.success) return toast.error(parsed.error.issues[0].message);
+    setLoading(true);
+    const { error } = await supabase.auth.signUp({
+      email: parsed.data.email,
+      password: parsed.data.password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/dashboard`,
+        data: { full_name: parsed.data.full_name },
+      },
+    });
+    setLoading(false);
+    if (error) return toast.error(error.message);
+    toast.success("Conta criada! Se pedirmos confirmação de e-mail, verifique sua caixa.");
+    // If confirmations disabled, session already exists.
+    const { data } = await supabase.auth.getSession();
+    if (data.session) navigate({ to: "/dashboard" });
+  }
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+      <div className="w-full max-w-md">
+        <Link to="/" className="mb-6 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+          <Package className="h-4 w-4 text-primary" /> ComprAqui
+        </Link>
+        <Card>
+          <CardHeader>
+            <CardTitle>Acesse sua conta</CardTitle>
+            <CardDescription>Entre ou crie uma conta para começar.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="signin">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="signin">Entrar</TabsTrigger>
+                <TabsTrigger value="signup">Criar conta</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="signin">
+                <form onSubmit={handleSignIn} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signin-email">E-mail</Label>
+                    <Input id="signin-email" name="email" type="email" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signin-password">Senha</Label>
+                    <Input id="signin-password" name="password" type="password" required />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading ? "Entrando..." : "Entrar"}
+                  </Button>
+                </form>
+              </TabsContent>
+
+              <TabsContent value="signup">
+                <form onSubmit={handleSignUp} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-name">Nome completo</Label>
+                    <Input id="signup-name" name="full_name" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-email">E-mail</Label>
+                    <Input id="signup-email" name="email" type="email" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-password">Senha</Label>
+                    <Input id="signup-password" name="password" type="password" required />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading ? "Criando..." : "Criar conta"}
+                  </Button>
+                  <p className="text-xs text-muted-foreground">
+                    Novos usuários entram como <strong>solicitante</strong>. Um admin pode promover o papel depois.
+                  </p>
+                </form>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
