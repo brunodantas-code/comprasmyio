@@ -516,6 +516,7 @@ function OrdersTable({
             <TableHead>Entrega</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Obs.</TableHead>
+            <TableHead>Anexos</TableHead>
             <TableHead className="text-right">Ações</TableHead>
           </TableRow>
         </TableHeader>
