@@ -96,6 +96,7 @@ export type Database = {
       }
       purchase_orders: {
         Row: {
+          attachments: Json
           buyer_notes: string | null
           created_at: string
           delivery_point: string
@@ -111,6 +112,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          attachments?: Json
           buyer_notes?: string | null
           created_at?: string
           delivery_point: string
@@ -126,6 +128,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          attachments?: Json
           buyer_notes?: string | null
           created_at?: string
           delivery_point?: string

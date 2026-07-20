@@ -15,7 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Package, LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText } from "lucide-react";
-import { Trash2 } from "lucide-react";
+import { Trash2, Paperclip, X, Download } from "lucide-react";
 import { z } from "zod";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
@@ -34,9 +34,97 @@ type Order = {
   delivery_point: string;
   status: "pendente" | "comprado" | "aguardando" | "a_caminho" | "cancelado" | "entregue";
   buyer_notes: string | null;
+  attachments: Attachment[] | null;
   created_at: string;
   updated_at: string;
 };
+
+type Attachment = { path: string; name: string; size: number; type: string };
+
+const ATTACHMENTS_BUCKET = "order-attachments";
+
+async function uploadOrderAttachments(orderId: string, files: File[]): Promise<Attachment[]> {
+  const out: Attachment[] = [];
+  for (const f of files) {
+    const safe = f.name.replace(/[^\w.\-]+/g, "_");
+    const path = `${orderId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${safe}`;
+    const { error } = await supabase.storage.from(ATTACHMENTS_BUCKET).upload(path, f, {
+      contentType: f.type || "application/octet-stream",
+      upsert: false,
+    });
+    if (error) throw error;
+    out.push({ path, name: f.name, size: f.size, type: f.type });
+  }
+  return out;
+}
+
+async function openAttachment(path: string) {
+  const { data, error } = await supabase.storage.from(ATTACHMENTS_BUCKET).createSignedUrl(path, 60 * 10);
+  if (error || !data?.signedUrl) return toast.error(error?.message || "Falha ao abrir");
+  window.open(data.signedUrl, "_blank", "noopener");
+}
+
+function FilePicker({ files, setFiles, label = "Anexar arquivos" }: { files: File[]; setFiles: (f: File[]) => void; label?: string }) {
+  return (
+    <div className="space-y-2">
+      <Label className="flex items-center gap-2"><Paperclip className="h-4 w-4" />{label} <span className="text-muted-foreground text-xs">(fotos ou documentos)</span></Label>
+      <Input
+        type="file"
+        multiple
+        accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt"
+        onChange={(e) => {
+          const fs = Array.from(e.target.files ?? []);
+          setFiles([...files, ...fs]);
+          e.target.value = "";
+        }}
+      />
+      {files.length > 0 && (
+        <ul className="space-y-1 text-xs">
+          {files.map((f, i) => (
+            <li key={i} className="flex items-center justify-between rounded border px-2 py-1">
+              <span className="truncate">{f.name} <span className="text-muted-foreground">({Math.round(f.size / 1024)} KB)</span></span>
+              <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => setFiles(files.filter((_, j) => j !== i))}>
+                <X className="h-3 w-3" />
+              </Button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function ExistingAttachments({ orderId, attachments, canRemove }: { orderId: string; attachments: Attachment[]; canRemove?: boolean }) {
+  const qc = useQueryClient();
+  const remove = useMutation({
+    mutationFn: async (att: Attachment) => {
+      const { error: se } = await supabase.storage.from(ATTACHMENTS_BUCKET).remove([att.path]);
+      if (se) throw se;
+      const next = attachments.filter((a) => a.path !== att.path);
+      const { error } = await supabase.from("purchase_orders").update({ attachments: next }).eq("id", orderId);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["orders"] }),
+    onError: (e: Error) => toast.error(e.message),
+  });
+  if (!attachments.length) return <p className="text-xs text-muted-foreground">Nenhum anexo.</p>;
+  return (
+    <ul className="space-y-1 text-xs">
+      {attachments.map((a) => (
+        <li key={a.path} className="flex items-center justify-between rounded border px-2 py-1">
+          <button type="button" onClick={() => openAttachment(a.path)} className="inline-flex items-center gap-1 truncate text-primary hover:underline">
+            <Download className="h-3 w-3" />{a.name}
+          </button>
+          {canRemove && (
+            <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => remove.mutate(a)} disabled={remove.isPending}>
+              <X className="h-3 w-3" />
+            </Button>
+          )}
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 const STATUS_LABELS: Record<Order["status"], string> = {
   pendente: "Pendente",
@@ -163,10 +251,11 @@ function NewOrder({ userId }: { userId: string }) {
   const { data: projects, isLoading } = useProjects();
   const qc = useQueryClient();
   const [projectId, setProjectId] = useState("");
+  const [files, setFiles] = useState<File[]>([]);
 
   const submit = useMutation({
     mutationFn: async (values: z.infer<typeof newOrderSchema>) => {
-      const { error } = await supabase.from("purchase_orders").insert({
+      const { data, error } = await supabase.from("purchase_orders").insert({
         project_id: values.project_id,
         item_name: values.item_name,
         item_link: values.item_link ?? null,
@@ -175,8 +264,13 @@ function NewOrder({ userId }: { userId: string }) {
         requester_notes: values.requester_notes ?? null,
         delivery_point: values.delivery_point,
         requester_id: userId,
-      });
+      }).select("id").single();
       if (error) throw error;
+      if (files.length && data?.id) {
+        const uploaded = await uploadOrderAttachments(data.id, files);
+        const { error: ue } = await supabase.from("purchase_orders").update({ attachments: uploaded }).eq("id", data.id);
+        if (ue) throw ue;
+      }
     },
     onSuccess: () => {
       toast.success("Pedido criado!");
@@ -202,6 +296,7 @@ function NewOrder({ userId }: { userId: string }) {
       onSuccess: () => {
         (e.target as HTMLFormElement).reset();
         setProjectId("");
+        setFiles([]);
       },
     });
   }
@@ -254,6 +349,7 @@ function NewOrder({ userId }: { userId: string }) {
               <Label htmlFor="requester_notes">Observações <span className="text-muted-foreground">(opcional)</span></Label>
               <Textarea id="requester_notes" name="requester_notes" placeholder="Detalhes adicionais para o comprador" />
             </div>
+            <FilePicker files={files} setFiles={setFiles} />
             <Button type="submit" disabled={submit.isPending}>
               {submit.isPending ? "Enviando..." : "Criar pedido"}
             </Button>
@@ -420,6 +516,7 @@ function OrdersTable({
             <TableHead>Entrega</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Obs.</TableHead>
+            <TableHead>Anexos</TableHead>
             <TableHead className="text-right">Ações</TableHead>
           </TableRow>
         </TableHeader>
@@ -446,6 +543,9 @@ function OrdersTable({
               <TableCell className="max-w-[200px] text-sm text-muted-foreground">{o.delivery_point}</TableCell>
               <TableCell><Badge variant={STATUS_VARIANT[o.status]}>{STATUS_LABELS[o.status]}</Badge></TableCell>
               <TableCell className="max-w-[220px] whitespace-pre-wrap text-xs text-muted-foreground">{o.buyer_notes || "—"}</TableCell>
+              <TableCell className="max-w-[200px]">
+                <ExistingAttachments orderId={o.id} attachments={o.attachments ?? []} />
+              </TableCell>
               <TableCell className="text-right space-x-2 whitespace-nowrap">
                 {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
                 {canEdit && <EditOrderDialog order={o} />}
@@ -464,16 +564,23 @@ function EditOrderDialog({ order }: { order: Order }) {
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<Order["status"]>(order.status);
   const [notes, setNotes] = useState(order.buyer_notes ?? "");
+  const [files, setFiles] = useState<File[]>([]);
 
   const save = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("purchase_orders").update({ status, buyer_notes: notes || null }).eq("id", order.id);
+      let attachments = order.attachments ?? [];
+      if (files.length) {
+        const uploaded = await uploadOrderAttachments(order.id, files);
+        attachments = [...attachments, ...uploaded];
+      }
+      const { error } = await supabase.from("purchase_orders").update({ status, buyer_notes: notes || null, attachments }).eq("id", order.id);
       if (error) throw error;
     },
     onSuccess: () => {
       toast.success("Pedido atualizado");
       qc.invalidateQueries({ queryKey: ["orders"] });
       qc.invalidateQueries({ queryKey: ["logs"] });
+      setFiles([]);
       setOpen(false);
     },
     onError: (e: Error) => toast.error(e.message),
@@ -482,7 +589,7 @@ function EditOrderDialog({ order }: { order: Order }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild><Button size="sm" variant="outline">Editar</Button></DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{order.item_name}</DialogTitle>
           <DialogDescription>Atualize o status e adicione observações (ex.: palavra-passe do entregador).</DialogDescription>
@@ -501,6 +608,11 @@ function EditOrderDialog({ order }: { order: Order }) {
             <Label>Observações</Label>
             <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={4} placeholder="Ex.: palavra-passe = laranja" />
           </div>
+          <div className="space-y-2">
+            <Label>Anexos existentes</Label>
+            <ExistingAttachments orderId={order.id} attachments={order.attachments ?? []} canRemove />
+          </div>
+          <FilePicker files={files} setFiles={setFiles} label="Adicionar novos anexos" />
         </div>
         <DialogFooter>
           <Button onClick={() => save.mutate()} disabled={save.isPending}>
@@ -524,9 +636,15 @@ function EditRequesterDialog({ order }: { order: Order }) {
   const { data: projects } = useProjects();
   const [open, setOpen] = useState(false);
   const [projectId, setProjectId] = useState(order.project_id);
+  const [files, setFiles] = useState<File[]>([]);
 
   const save = useMutation({
     mutationFn: async (v: z.infer<typeof newOrderSchema>) => {
+      let attachments = order.attachments ?? [];
+      if (files.length) {
+        const uploaded = await uploadOrderAttachments(order.id, files);
+        attachments = [...attachments, ...uploaded];
+      }
       const { error } = await supabase.from("purchase_orders").update({
         project_id: v.project_id,
         item_name: v.item_name,
@@ -535,12 +653,14 @@ function EditRequesterDialog({ order }: { order: Order }) {
         recipient: v.recipient,
         requester_notes: v.requester_notes ?? null,
         delivery_point: v.delivery_point,
+        attachments,
       }).eq("id", order.id);
       if (error) throw error;
     },
     onSuccess: () => {
       toast.success("Pedido atualizado");
       qc.invalidateQueries({ queryKey: ["orders"] });
+      setFiles([]);
       setOpen(false);
     },
     onError: (e: Error) => toast.error(e.message),
@@ -606,6 +726,11 @@ function EditRequesterDialog({ order }: { order: Order }) {
             <Label htmlFor={`e-notes-${order.id}`}>Observações <span className="text-muted-foreground">(opcional)</span></Label>
             <Textarea id={`e-notes-${order.id}`} name="requester_notes" defaultValue={order.requester_notes ?? ""} />
           </div>
+          <div className="space-y-2">
+            <Label>Anexos existentes</Label>
+            <ExistingAttachments orderId={order.id} attachments={order.attachments ?? []} canRemove />
+          </div>
+          <FilePicker files={files} setFiles={setFiles} label="Adicionar novos anexos" />
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
             <Button type="submit" disabled={save.isPending}>{save.isPending ? "Salvando..." : "Salvar"}</Button>
