@@ -292,7 +292,7 @@ function MyOrders({ userId }: { userId: string }) {
       <CardContent>
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
           !orders?.length ? <p className="text-sm text-muted-foreground">Nenhum pedido ainda.</p> :
-          <OrdersTable orders={orders} projectName={projectName} showRequester={false} />
+          <OrdersTable orders={orders} projectName={projectName} showRequester={false} canEditRequester />
         }
       </CardContent>
     </Card>
@@ -351,7 +351,7 @@ function BuyerQueue() {
 /* ---------- Orders table ---------- */
 
 function OrdersTable({
-  orders, projectName, requesterName, showRequester, canEdit, canDelete,
+  orders, projectName, requesterName, showRequester, canEdit, canDelete, canEditRequester,
 }: {
   orders: Order[];
   projectName: (id: string) => string;
@@ -359,6 +359,7 @@ function OrdersTable({
   showRequester?: boolean;
   canEdit?: boolean;
   canDelete?: boolean;
+  canEditRequester?: boolean;
 }) {
   return (
     <div className="overflow-x-auto">
@@ -400,6 +401,7 @@ function OrdersTable({
               <TableCell><Badge variant={STATUS_VARIANT[o.status]}>{STATUS_LABELS[o.status]}</Badge></TableCell>
               <TableCell className="max-w-[220px] whitespace-pre-wrap text-xs text-muted-foreground">{o.buyer_notes || "—"}</TableCell>
               <TableCell className="text-right space-x-2 whitespace-nowrap">
+                {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
                 {canEdit && <EditOrderDialog order={o} />}
                 {canDelete && <DeleteOrderDialog order={o} />}
               </TableCell>
