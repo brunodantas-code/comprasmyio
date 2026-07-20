@@ -636,9 +636,15 @@ function EditRequesterDialog({ order }: { order: Order }) {
   const { data: projects } = useProjects();
   const [open, setOpen] = useState(false);
   const [projectId, setProjectId] = useState(order.project_id);
+  const [files, setFiles] = useState<File[]>([]);
 
   const save = useMutation({
     mutationFn: async (v: z.infer<typeof newOrderSchema>) => {
+      let attachments = order.attachments ?? [];
+      if (files.length) {
+        const uploaded = await uploadOrderAttachments(order.id, files);
+        attachments = [...attachments, ...uploaded];
+      }
       const { error } = await supabase.from("purchase_orders").update({
         project_id: v.project_id,
         item_name: v.item_name,
@@ -647,12 +653,14 @@ function EditRequesterDialog({ order }: { order: Order }) {
         recipient: v.recipient,
         requester_notes: v.requester_notes ?? null,
         delivery_point: v.delivery_point,
+        attachments,
       }).eq("id", order.id);
       if (error) throw error;
     },
     onSuccess: () => {
       toast.success("Pedido atualizado");
       qc.invalidateQueries({ queryKey: ["orders"] });
+      setFiles([]);
       setOpen(false);
     },
     onError: (e: Error) => toast.error(e.message),
@@ -718,6 +726,11 @@ function EditRequesterDialog({ order }: { order: Order }) {
             <Label htmlFor={`e-notes-${order.id}`}>Observações <span className="text-muted-foreground">(opcional)</span></Label>
             <Textarea id={`e-notes-${order.id}`} name="requester_notes" defaultValue={order.requester_notes ?? ""} />
           </div>
+          <div className="space-y-2">
+            <Label>Anexos existentes</Label>
+            <ExistingAttachments orderId={order.id} attachments={order.attachments ?? []} canRemove />
+          </div>
+          <FilePicker files={files} setFiles={setFiles} label="Adicionar novos anexos" />
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
             <Button type="submit" disabled={save.isPending}>{save.isPending ? "Salvando..." : "Salvar"}</Button>
