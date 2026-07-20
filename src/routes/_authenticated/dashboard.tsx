@@ -306,6 +306,8 @@ function BuyerQueue() {
   const { data: profiles } = useProfilesMap();
   const { data: me } = useCurrentUser();
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [projectFilter, setProjectFilter] = useState<string>("all");
+  const [groupByProject, setGroupByProject] = useState(false);
 
   const { data: orders, isLoading } = useQuery({
     queryKey: ["orders", "all"],
@@ -319,30 +321,74 @@ function BuyerQueue() {
     },
   });
 
-  const filtered = orders?.filter((o) => statusFilter === "all" || o.status === statusFilter) ?? [];
+  const filtered = orders?.filter((o) =>
+    (statusFilter === "all" || o.status === statusFilter) &&
+    (projectFilter === "all" || o.project_id === projectFilter)
+  ) ?? [];
   const projectName = (id: string) => projects?.find((p) => p.id === id)?.name ?? "—";
   const requesterName = (id: string) => profiles?.get(id)?.full_name || profiles?.get(id)?.email || "—";
 
+  const grouped = groupByProject
+    ? Array.from(
+        filtered.reduce((map, o) => {
+          const arr = map.get(o.project_id) ?? [];
+          arr.push(o);
+          map.set(o.project_id, arr);
+          return map;
+        }, new Map<string, Order[]>()).entries()
+      ).sort((a, b) => projectName(a[0]).localeCompare(projectName(b[0])))
+    : null;
+
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between gap-4">
+      <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <CardTitle>Fila de compras</CardTitle>
           <CardDescription>Todos os pedidos. Atualize status e adicione observações.</CardDescription>
         </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos</SelectItem>
-            {Object.entries(STATUS_LABELS).map(([v, l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}
-          </SelectContent>
-        </Select>
+        <div className="flex flex-wrap items-center gap-2">
+          <Select value={projectFilter} onValueChange={setProjectFilter}>
+            <SelectTrigger className="w-[200px]"><SelectValue placeholder="Projeto" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os projetos</SelectItem>
+              {projects?.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os status</SelectItem>
+              {Object.entries(STATUS_LABELS).map(([v, l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Button
+            type="button"
+            variant={groupByProject ? "default" : "outline"}
+            size="sm"
+            onClick={() => setGroupByProject((v) => !v)}
+          >
+            Agrupar por projeto
+          </Button>
+        </div>
       </CardHeader>
-      <CardContent>
-        {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
-          !filtered.length ? <p className="text-sm text-muted-foreground">Nada por aqui.</p> :
+      <CardContent className="space-y-6">
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">Carregando...</p>
+        ) : !filtered.length ? (
+          <p className="text-sm text-muted-foreground">Nada por aqui.</p>
+        ) : grouped ? (
+          grouped.map(([pid, list]) => (
+            <div key={pid} className="space-y-2">
+              <div className="flex items-center justify-between border-b pb-1">
+                <h3 className="text-sm font-semibold">{projectName(pid)}</h3>
+                <span className="text-xs text-muted-foreground">{list.length} pedido(s)</span>
+              </div>
+              <OrdersTable orders={list} projectName={projectName} requesterName={requesterName} showRequester canEdit canDelete={me?.isAdmin} />
+            </div>
+          ))
+        ) : (
           <OrdersTable orders={filtered} projectName={projectName} requesterName={requesterName} showRequester canEdit canDelete={me?.isAdmin} />
-        }
+        )}
       </CardContent>
     </Card>
   );
