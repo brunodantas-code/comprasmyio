@@ -564,16 +564,23 @@ function EditOrderDialog({ order }: { order: Order }) {
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<Order["status"]>(order.status);
   const [notes, setNotes] = useState(order.buyer_notes ?? "");
+  const [files, setFiles] = useState<File[]>([]);
 
   const save = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("purchase_orders").update({ status, buyer_notes: notes || null }).eq("id", order.id);
+      let attachments = order.attachments ?? [];
+      if (files.length) {
+        const uploaded = await uploadOrderAttachments(order.id, files);
+        attachments = [...attachments, ...uploaded];
+      }
+      const { error } = await supabase.from("purchase_orders").update({ status, buyer_notes: notes || null, attachments }).eq("id", order.id);
       if (error) throw error;
     },
     onSuccess: () => {
       toast.success("Pedido atualizado");
       qc.invalidateQueries({ queryKey: ["orders"] });
       qc.invalidateQueries({ queryKey: ["logs"] });
+      setFiles([]);
       setOpen(false);
     },
     onError: (e: Error) => toast.error(e.message),
@@ -582,7 +589,7 @@ function EditOrderDialog({ order }: { order: Order }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild><Button size="sm" variant="outline">Editar</Button></DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{order.item_name}</DialogTitle>
           <DialogDescription>Atualize o status e adicione observações (ex.: palavra-passe do entregador).</DialogDescription>
@@ -601,6 +608,11 @@ function EditOrderDialog({ order }: { order: Order }) {
             <Label>Observações</Label>
             <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={4} placeholder="Ex.: palavra-passe = laranja" />
           </div>
+          <div className="space-y-2">
+            <Label>Anexos existentes</Label>
+            <ExistingAttachments orderId={order.id} attachments={order.attachments ?? []} canRemove />
+          </div>
+          <FilePicker files={files} setFiles={setFiles} label="Adicionar novos anexos" />
         </div>
         <DialogFooter>
           <Button onClick={() => save.mutate()} disabled={save.isPending}>
