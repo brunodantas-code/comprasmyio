@@ -15,7 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Package, LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText } from "lucide-react";
-import { Trash2 } from "lucide-react";
+import { Trash2, Paperclip, X, Download } from "lucide-react";
 import { z } from "zod";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
@@ -34,9 +34,97 @@ type Order = {
   delivery_point: string;
   status: "pendente" | "comprado" | "aguardando" | "a_caminho" | "cancelado" | "entregue";
   buyer_notes: string | null;
+  attachments: Attachment[] | null;
   created_at: string;
   updated_at: string;
 };
+
+type Attachment = { path: string; name: string; size: number; type: string };
+
+const ATTACHMENTS_BUCKET = "order-attachments";
+
+async function uploadOrderAttachments(orderId: string, files: File[]): Promise<Attachment[]> {
+  const out: Attachment[] = [];
+  for (const f of files) {
+    const safe = f.name.replace(/[^\w.\-]+/g, "_");
+    const path = `${orderId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${safe}`;
+    const { error } = await supabase.storage.from(ATTACHMENTS_BUCKET).upload(path, f, {
+      contentType: f.type || "application/octet-stream",
+      upsert: false,
+    });
+    if (error) throw error;
+    out.push({ path, name: f.name, size: f.size, type: f.type });
+  }
+  return out;
+}
+
+async function openAttachment(path: string) {
+  const { data, error } = await supabase.storage.from(ATTACHMENTS_BUCKET).createSignedUrl(path, 60 * 10);
+  if (error || !data?.signedUrl) return toast.error(error?.message || "Falha ao abrir");
+  window.open(data.signedUrl, "_blank", "noopener");
+}
+
+function FilePicker({ files, setFiles, label = "Anexar arquivos" }: { files: File[]; setFiles: (f: File[]) => void; label?: string }) {
+  return (
+    <div className="space-y-2">
+      <Label className="flex items-center gap-2"><Paperclip className="h-4 w-4" />{label} <span className="text-muted-foreground text-xs">(fotos ou documentos)</span></Label>
+      <Input
+        type="file"
+        multiple
+        accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt"
+        onChange={(e) => {
+          const fs = Array.from(e.target.files ?? []);
+          setFiles([...files, ...fs]);
+          e.target.value = "";
+        }}
+      />
+      {files.length > 0 && (
+        <ul className="space-y-1 text-xs">
+          {files.map((f, i) => (
+            <li key={i} className="flex items-center justify-between rounded border px-2 py-1">
+              <span className="truncate">{f.name} <span className="text-muted-foreground">({Math.round(f.size / 1024)} KB)</span></span>
+              <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => setFiles(files.filter((_, j) => j !== i))}>
+                <X className="h-3 w-3" />
+              </Button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function ExistingAttachments({ orderId, attachments, canRemove }: { orderId: string; attachments: Attachment[]; canRemove?: boolean }) {
+  const qc = useQueryClient();
+  const remove = useMutation({
+    mutationFn: async (att: Attachment) => {
+      const { error: se } = await supabase.storage.from(ATTACHMENTS_BUCKET).remove([att.path]);
+      if (se) throw se;
+      const next = attachments.filter((a) => a.path !== att.path);
+      const { error } = await supabase.from("purchase_orders").update({ attachments: next }).eq("id", orderId);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["orders"] }),
+    onError: (e: Error) => toast.error(e.message),
+  });
+  if (!attachments.length) return <p className="text-xs text-muted-foreground">Nenhum anexo.</p>;
+  return (
+    <ul className="space-y-1 text-xs">
+      {attachments.map((a) => (
+        <li key={a.path} className="flex items-center justify-between rounded border px-2 py-1">
+          <button type="button" onClick={() => openAttachment(a.path)} className="inline-flex items-center gap-1 truncate text-primary hover:underline">
+            <Download className="h-3 w-3" />{a.name}
+          </button>
+          {canRemove && (
+            <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => remove.mutate(a)} disabled={remove.isPending}>
+              <X className="h-3 w-3" />
+            </Button>
+          )}
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 const STATUS_LABELS: Record<Order["status"], string> = {
   pendente: "Pendente",
