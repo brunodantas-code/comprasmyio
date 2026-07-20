@@ -480,19 +480,7 @@ function EditRequesterDialog({ order }: { order: Order }) {
   const [projectId, setProjectId] = useState(order.project_id);
 
   const save = useMutation({
-    mutationFn: async (e: React.FormEvent<HTMLFormElement>) => {
-      const fd = new FormData(e.currentTarget);
-      const parsed = newOrderSchema.safeParse({
-        project_id: projectId,
-        item_name: fd.get("item_name"),
-        item_link: fd.get("item_link") || undefined,
-        quantity: fd.get("quantity"),
-        recipient: fd.get("recipient"),
-        requester_notes: fd.get("requester_notes") || undefined,
-        delivery_point: fd.get("delivery_point"),
-      });
-      if (!parsed.success) throw new Error(parsed.error.issues[0].message);
-      const v = parsed.data;
+    mutationFn: async (v: z.infer<typeof newOrderSchema>) => {
       const { error } = await supabase.from("purchase_orders").update({
         project_id: v.project_id,
         item_name: v.item_name,
@@ -514,7 +502,18 @@ function EditRequesterDialog({ order }: { order: Order }) {
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    save.mutate(e);
+    const fd = new FormData(e.currentTarget);
+    const parsed = newOrderSchema.safeParse({
+      project_id: projectId,
+      item_name: fd.get("item_name"),
+      item_link: fd.get("item_link") || undefined,
+      quantity: fd.get("quantity"),
+      recipient: fd.get("recipient"),
+      requester_notes: fd.get("requester_notes") || undefined,
+      delivery_point: fd.get("delivery_point"),
+    });
+    if (!parsed.success) return toast.error(parsed.error.issues[0].message);
+    save.mutate(parsed.data);
   }
 
   return (
