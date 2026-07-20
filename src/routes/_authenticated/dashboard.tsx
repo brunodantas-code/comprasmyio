@@ -349,13 +349,14 @@ function BuyerQueue() {
 /* ---------- Orders table ---------- */
 
 function OrdersTable({
-  orders, projectName, requesterName, showRequester, canEdit,
+  orders, projectName, requesterName, showRequester, canEdit, canDelete,
 }: {
   orders: Order[];
   projectName: (id: string) => string;
   requesterName?: (id: string) => string;
   showRequester?: boolean;
   canEdit?: boolean;
+  canDelete?: boolean;
 }) {
   return (
     <div className="overflow-x-auto">
@@ -363,8 +364,10 @@ function OrdersTable({
         <TableHeader>
           <TableRow>
             <TableHead>Item</TableHead>
+            <TableHead>Qtd</TableHead>
             <TableHead>Projeto</TableHead>
             {showRequester && <TableHead>Solicitante</TableHead>}
+            <TableHead>Destinatário</TableHead>
             <TableHead>Entrega</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Obs.</TableHead>
@@ -376,17 +379,27 @@ function OrdersTable({
             <TableRow key={o.id}>
               <TableCell>
                 <div className="font-medium">{o.item_name}</div>
-                <a href={o.item_link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
-                  ver link <ExternalLink className="h-3 w-3" />
-                </a>
+                {o.item_link ? (
+                  <a href={o.item_link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+                    ver link <ExternalLink className="h-3 w-3" />
+                  </a>
+                ) : (
+                  <span className="text-xs text-muted-foreground">sem link</span>
+                )}
+                {o.requester_notes && (
+                  <div className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap">{o.requester_notes}</div>
+                )}
               </TableCell>
+              <TableCell>{o.quantity}</TableCell>
               <TableCell>{projectName(o.project_id)}</TableCell>
               {showRequester && <TableCell>{requesterName?.(o.requester_id)}</TableCell>}
+              <TableCell className="text-sm">{o.recipient || "—"}</TableCell>
               <TableCell className="max-w-[200px] text-sm text-muted-foreground">{o.delivery_point}</TableCell>
               <TableCell><Badge variant={STATUS_VARIANT[o.status]}>{STATUS_LABELS[o.status]}</Badge></TableCell>
               <TableCell className="max-w-[220px] whitespace-pre-wrap text-xs text-muted-foreground">{o.buyer_notes || "—"}</TableCell>
-              <TableCell className="text-right">
+              <TableCell className="text-right space-x-2 whitespace-nowrap">
                 {canEdit && <EditOrderDialog order={o} />}
+                {canDelete && <DeleteOrderDialog order={o} />}
               </TableCell>
             </TableRow>
           ))}
