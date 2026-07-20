@@ -26,7 +26,10 @@ type Order = {
   project_id: string;
   requester_id: string;
   item_name: string;
-  item_link: string;
+  item_link: string | null;
+  quantity: number;
+  recipient: string;
+  requester_notes: string | null;
   delivery_point: string;
   status: "pendente" | "comprado" | "aguardando" | "a_caminho" | "cancelado" | "entregue";
   buyer_notes: string | null;
@@ -148,7 +151,10 @@ function useProfilesMap() {
 const newOrderSchema = z.object({
   project_id: z.string().uuid("Selecione um projeto"),
   item_name: z.string().trim().min(2).max(200),
-  item_link: z.string().trim().url("Link inválido").max(2000),
+  item_link: z.string().trim().max(2000).url("Link inválido").optional().or(z.literal("").transform(() => undefined)),
+  quantity: z.coerce.number().int().positive("Quantidade inválida").max(100000),
+  recipient: z.string().trim().min(2, "Informe o destinatário").max(200),
+  requester_notes: z.string().trim().max(2000).optional().or(z.literal("").transform(() => undefined)),
   delivery_point: z.string().trim().min(3).max(300),
 });
 
@@ -160,7 +166,13 @@ function NewOrder({ userId }: { userId: string }) {
   const submit = useMutation({
     mutationFn: async (values: z.infer<typeof newOrderSchema>) => {
       const { error } = await supabase.from("purchase_orders").insert({
-        ...values,
+        project_id: values.project_id,
+        item_name: values.item_name,
+        item_link: values.item_link ?? null,
+        quantity: values.quantity,
+        recipient: values.recipient,
+        requester_notes: values.requester_notes ?? null,
+        delivery_point: values.delivery_point,
         requester_id: userId,
       });
       if (error) throw error;
@@ -178,7 +190,10 @@ function NewOrder({ userId }: { userId: string }) {
     const parsed = newOrderSchema.safeParse({
       project_id: projectId,
       item_name: fd.get("item_name"),
-      item_link: fd.get("item_link"),
+      item_link: fd.get("item_link") || undefined,
+      quantity: fd.get("quantity"),
+      recipient: fd.get("recipient"),
+      requester_notes: fd.get("requester_notes") || undefined,
       delivery_point: fd.get("delivery_point"),
     });
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
@@ -216,13 +231,27 @@ function NewOrder({ userId }: { userId: string }) {
               <Label htmlFor="item_name">Nome do item</Label>
               <Input id="item_name" name="item_name" required />
             </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="quantity">Quantidade</Label>
+                <Input id="quantity" name="quantity" type="number" min={1} defaultValue={1} required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="recipient">Destinatário</Label>
+                <Input id="recipient" name="recipient" placeholder="Nome de quem recebe" required />
+              </div>
+            </div>
             <div className="space-y-2">
-              <Label htmlFor="item_link">Link do item</Label>
-              <Input id="item_link" name="item_link" type="url" placeholder="https://..." required />
+              <Label htmlFor="item_link">Link de compra <span className="text-muted-foreground">(opcional)</span></Label>
+              <Input id="item_link" name="item_link" type="url" placeholder="https://..." />
             </div>
             <div className="space-y-2">
               <Label htmlFor="delivery_point">Ponto de entrega</Label>
               <Textarea id="delivery_point" name="delivery_point" placeholder="Ex.: Rua X, 123, com João no portão" required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="requester_notes">Observações <span className="text-muted-foreground">(opcional)</span></Label>
+              <Textarea id="requester_notes" name="requester_notes" placeholder="Detalhes adicionais para o comprador" />
             </div>
             <Button type="submit" disabled={submit.isPending}>
               {submit.isPending ? "Enviando..." : "Criar pedido"}
