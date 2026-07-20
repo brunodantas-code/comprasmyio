@@ -100,10 +100,13 @@ export type Database = {
           created_at: string
           delivery_point: string
           id: string
-          item_link: string
+          item_link: string | null
           item_name: string
           project_id: string
+          quantity: number
+          recipient: string
           requester_id: string
+          requester_notes: string | null
           status: Database["public"]["Enums"]["order_status"]
           updated_at: string
         }
@@ -112,10 +115,13 @@ export type Database = {
           created_at?: string
           delivery_point: string
           id?: string
-          item_link: string
+          item_link?: string | null
           item_name: string
           project_id: string
+          quantity?: number
+          recipient?: string
           requester_id: string
+          requester_notes?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           updated_at?: string
         }
@@ -124,10 +130,13 @@ export type Database = {
           created_at?: string
           delivery_point?: string
           id?: string
-          item_link?: string
+          item_link?: string | null
           item_name?: string
           project_id?: string
+          quantity?: number
+          recipient?: string
           requester_id?: string
+          requester_notes?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           updated_at?: string
         }

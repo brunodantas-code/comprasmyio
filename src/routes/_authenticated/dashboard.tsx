@@ -15,6 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Package, LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { z } from "zod";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
@@ -26,7 +27,10 @@ type Order = {
   project_id: string;
   requester_id: string;
   item_name: string;
-  item_link: string;
+  item_link: string | null;
+  quantity: number;
+  recipient: string;
+  requester_notes: string | null;
   delivery_point: string;
   status: "pendente" | "comprado" | "aguardando" | "a_caminho" | "cancelado" | "entregue";
   buyer_notes: string | null;
@@ -148,7 +152,10 @@ function useProfilesMap() {
 const newOrderSchema = z.object({
   project_id: z.string().uuid("Selecione um projeto"),
   item_name: z.string().trim().min(2).max(200),
-  item_link: z.string().trim().url("Link inválido").max(2000),
+  item_link: z.string().trim().max(2000).url("Link inválido").optional().or(z.literal("").transform(() => undefined)),
+  quantity: z.coerce.number().int().positive("Quantidade inválida").max(100000),
+  recipient: z.string().trim().min(2, "Informe o destinatário").max(200),
+  requester_notes: z.string().trim().max(2000).optional().or(z.literal("").transform(() => undefined)),
   delivery_point: z.string().trim().min(3).max(300),
 });
 
@@ -160,7 +167,13 @@ function NewOrder({ userId }: { userId: string }) {
   const submit = useMutation({
     mutationFn: async (values: z.infer<typeof newOrderSchema>) => {
       const { error } = await supabase.from("purchase_orders").insert({
-        ...values,
+        project_id: values.project_id,
+        item_name: values.item_name,
+        item_link: values.item_link ?? null,
+        quantity: values.quantity,
+        recipient: values.recipient,
+        requester_notes: values.requester_notes ?? null,
+        delivery_point: values.delivery_point,
         requester_id: userId,
       });
       if (error) throw error;
@@ -178,7 +191,10 @@ function NewOrder({ userId }: { userId: string }) {
     const parsed = newOrderSchema.safeParse({
       project_id: projectId,
       item_name: fd.get("item_name"),
-      item_link: fd.get("item_link"),
+      item_link: fd.get("item_link") || undefined,
+      quantity: fd.get("quantity"),
+      recipient: fd.get("recipient"),
+      requester_notes: fd.get("requester_notes") || undefined,
       delivery_point: fd.get("delivery_point"),
     });
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
@@ -216,13 +232,27 @@ function NewOrder({ userId }: { userId: string }) {
               <Label htmlFor="item_name">Nome do item</Label>
               <Input id="item_name" name="item_name" required />
             </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="quantity">Quantidade</Label>
+                <Input id="quantity" name="quantity" type="number" min={1} defaultValue={1} required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="recipient">Destinatário</Label>
+                <Input id="recipient" name="recipient" placeholder="Nome de quem recebe" required />
+              </div>
+            </div>
             <div className="space-y-2">
-              <Label htmlFor="item_link">Link do item</Label>
-              <Input id="item_link" name="item_link" type="url" placeholder="https://..." required />
+              <Label htmlFor="item_link">Link de compra <span className="text-muted-foreground">(opcional)</span></Label>
+              <Input id="item_link" name="item_link" type="url" placeholder="https://..." />
             </div>
             <div className="space-y-2">
               <Label htmlFor="delivery_point">Ponto de entrega</Label>
               <Textarea id="delivery_point" name="delivery_point" placeholder="Ex.: Rua X, 123, com João no portão" required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="requester_notes">Observações <span className="text-muted-foreground">(opcional)</span></Label>
+              <Textarea id="requester_notes" name="requester_notes" placeholder="Detalhes adicionais para o comprador" />
             </div>
             <Button type="submit" disabled={submit.isPending}>
               {submit.isPending ? "Enviando..." : "Criar pedido"}
@@ -274,6 +304,7 @@ function MyOrders({ userId }: { userId: string }) {
 function BuyerQueue() {
   const { data: projects } = useProjects();
   const { data: profiles } = useProfilesMap();
+  const { data: me } = useCurrentUser();
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const { data: orders, isLoading } = useQuery({
@@ -310,7 +341,7 @@ function BuyerQueue() {
       <CardContent>
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
           !filtered.length ? <p className="text-sm text-muted-foreground">Nada por aqui.</p> :
-          <OrdersTable orders={filtered} projectName={projectName} requesterName={requesterName} showRequester canEdit />
+          <OrdersTable orders={filtered} projectName={projectName} requesterName={requesterName} showRequester canEdit canDelete={me?.isAdmin} />
         }
       </CardContent>
     </Card>
@@ -320,13 +351,14 @@ function BuyerQueue() {
 /* ---------- Orders table ---------- */
 
 function OrdersTable({
-  orders, projectName, requesterName, showRequester, canEdit,
+  orders, projectName, requesterName, showRequester, canEdit, canDelete,
 }: {
   orders: Order[];
   projectName: (id: string) => string;
   requesterName?: (id: string) => string;
   showRequester?: boolean;
   canEdit?: boolean;
+  canDelete?: boolean;
 }) {
   return (
     <div className="overflow-x-auto">
@@ -334,8 +366,10 @@ function OrdersTable({
         <TableHeader>
           <TableRow>
             <TableHead>Item</TableHead>
+            <TableHead>Qtd</TableHead>
             <TableHead>Projeto</TableHead>
             {showRequester && <TableHead>Solicitante</TableHead>}
+            <TableHead>Destinatário</TableHead>
             <TableHead>Entrega</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Obs.</TableHead>
@@ -347,17 +381,27 @@ function OrdersTable({
             <TableRow key={o.id}>
               <TableCell>
                 <div className="font-medium">{o.item_name}</div>
-                <a href={o.item_link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
-                  ver link <ExternalLink className="h-3 w-3" />
-                </a>
+                {o.item_link ? (
+                  <a href={o.item_link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+                    ver link <ExternalLink className="h-3 w-3" />
+                  </a>
+                ) : (
+                  <span className="text-xs text-muted-foreground">sem link</span>
+                )}
+                {o.requester_notes && (
+                  <div className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap">{o.requester_notes}</div>
+                )}
               </TableCell>
+              <TableCell>{o.quantity}</TableCell>
               <TableCell>{projectName(o.project_id)}</TableCell>
               {showRequester && <TableCell>{requesterName?.(o.requester_id)}</TableCell>}
+              <TableCell className="text-sm">{o.recipient || "—"}</TableCell>
               <TableCell className="max-w-[200px] text-sm text-muted-foreground">{o.delivery_point}</TableCell>
               <TableCell><Badge variant={STATUS_VARIANT[o.status]}>{STATUS_LABELS[o.status]}</Badge></TableCell>
               <TableCell className="max-w-[220px] whitespace-pre-wrap text-xs text-muted-foreground">{o.buyer_notes || "—"}</TableCell>
-              <TableCell className="text-right">
+              <TableCell className="text-right space-x-2 whitespace-nowrap">
                 {canEdit && <EditOrderDialog order={o} />}
+                {canDelete && <DeleteOrderDialog order={o} />}
               </TableCell>
             </TableRow>
           ))}
@@ -421,6 +465,52 @@ function EditOrderDialog({ order }: { order: Order }) {
 }
 
 /* ---------- Projects admin ---------- */
+
+function DeleteOrderDialog({ order }: { order: Order }) {
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [confirm, setConfirm] = useState("");
+
+  const del = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from("purchase_orders").delete().eq("id", order.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Pedido excluído");
+      qc.invalidateQueries({ queryKey: ["orders"] });
+      qc.invalidateQueries({ queryKey: ["logs"] });
+      setOpen(false);
+      setConfirm("");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const canConfirm = confirm.trim().toLowerCase() === "excluir";
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setConfirm(""); }}>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="destructive"><Trash2 className="h-4 w-4" /></Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Excluir pedido</DialogTitle>
+          <DialogDescription>
+            Esta ação apaga <strong>{order.item_name}</strong> e todo o seu histórico. Digite <strong>excluir</strong> para confirmar.
+          </DialogDescription>
+        </DialogHeader>
+        <Input value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder='digite "excluir"' />
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+          <Button variant="destructive" disabled={!canConfirm || del.isPending} onClick={() => del.mutate()}>
+            {del.isPending ? "Excluindo..." : "Excluir definitivamente"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 function ProjectsAdmin({ userId }: { userId: string }) {
   const qc = useQueryClient();
