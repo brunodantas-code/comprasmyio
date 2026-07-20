@@ -542,6 +542,9 @@ function OrdersTable({
               <TableCell className="max-w-[200px] text-sm text-muted-foreground">{o.delivery_point}</TableCell>
               <TableCell><Badge variant={STATUS_VARIANT[o.status]}>{STATUS_LABELS[o.status]}</Badge></TableCell>
               <TableCell className="max-w-[220px] whitespace-pre-wrap text-xs text-muted-foreground">{o.buyer_notes || "—"}</TableCell>
+              <TableCell className="max-w-[200px]">
+                <ExistingAttachments orderId={o.id} attachments={o.attachments ?? []} />
+              </TableCell>
               <TableCell className="text-right space-x-2 whitespace-nowrap">
                 {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
                 {canEdit && <EditOrderDialog order={o} />}
