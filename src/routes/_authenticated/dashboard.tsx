@@ -303,6 +303,7 @@ function MyOrders({ userId }: { userId: string }) {
 function BuyerQueue() {
   const { data: projects } = useProjects();
   const { data: profiles } = useProfilesMap();
+  const { data: me } = useCurrentUser();
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const { data: orders, isLoading } = useQuery({
@@ -339,7 +340,7 @@ function BuyerQueue() {
       <CardContent>
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
           !filtered.length ? <p className="text-sm text-muted-foreground">Nada por aqui.</p> :
-          <OrdersTable orders={filtered} projectName={projectName} requesterName={requesterName} showRequester canEdit />
+          <OrdersTable orders={filtered} projectName={projectName} requesterName={requesterName} showRequester canEdit canDelete={me?.isAdmin} />
         }
       </CardContent>
     </Card>
