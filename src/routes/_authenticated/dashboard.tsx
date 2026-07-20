@@ -251,10 +251,11 @@ function NewOrder({ userId }: { userId: string }) {
   const { data: projects, isLoading } = useProjects();
   const qc = useQueryClient();
   const [projectId, setProjectId] = useState("");
+  const [files, setFiles] = useState<File[]>([]);
 
   const submit = useMutation({
     mutationFn: async (values: z.infer<typeof newOrderSchema>) => {
-      const { error } = await supabase.from("purchase_orders").insert({
+      const { data, error } = await supabase.from("purchase_orders").insert({
         project_id: values.project_id,
         item_name: values.item_name,
         item_link: values.item_link ?? null,
@@ -263,8 +264,13 @@ function NewOrder({ userId }: { userId: string }) {
         requester_notes: values.requester_notes ?? null,
         delivery_point: values.delivery_point,
         requester_id: userId,
-      });
+      }).select("id").single();
       if (error) throw error;
+      if (files.length && data?.id) {
+        const uploaded = await uploadOrderAttachments(data.id, files);
+        const { error: ue } = await supabase.from("purchase_orders").update({ attachments: uploaded }).eq("id", data.id);
+        if (ue) throw ue;
+      }
     },
     onSuccess: () => {
       toast.success("Pedido criado!");
@@ -290,6 +296,7 @@ function NewOrder({ userId }: { userId: string }) {
       onSuccess: () => {
         (e.target as HTMLFormElement).reset();
         setProjectId("");
+        setFiles([]);
       },
     });
   }
@@ -342,6 +349,7 @@ function NewOrder({ userId }: { userId: string }) {
               <Label htmlFor="requester_notes">Observações <span className="text-muted-foreground">(opcional)</span></Label>
               <Textarea id="requester_notes" name="requester_notes" placeholder="Detalhes adicionais para o comprador" />
             </div>
+            <FilePicker files={files} setFiles={setFiles} />
             <Button type="submit" disabled={submit.isPending}>
               {submit.isPending ? "Enviando..." : "Criar pedido"}
             </Button>
