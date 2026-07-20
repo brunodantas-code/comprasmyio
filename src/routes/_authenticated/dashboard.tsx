@@ -469,6 +469,109 @@ function EditOrderDialog({ order }: { order: Order }) {
 /* ---------- Projects admin ---------- */
 
 function DeleteOrderDialog({ order }: { order: Order }) {
+  // moved below
+  return <InternalDeleteOrderDialog order={order} />;
+}
+
+function EditRequesterDialog({ order }: { order: Order }) {
+  const qc = useQueryClient();
+  const { data: projects } = useProjects();
+  const [open, setOpen] = useState(false);
+  const [projectId, setProjectId] = useState(order.project_id);
+
+  const save = useMutation({
+    mutationFn: async (e: React.FormEvent<HTMLFormElement>) => {
+      const fd = new FormData(e.currentTarget);
+      const parsed = newOrderSchema.safeParse({
+        project_id: projectId,
+        item_name: fd.get("item_name"),
+        item_link: fd.get("item_link") || undefined,
+        quantity: fd.get("quantity"),
+        recipient: fd.get("recipient"),
+        requester_notes: fd.get("requester_notes") || undefined,
+        delivery_point: fd.get("delivery_point"),
+      });
+      if (!parsed.success) throw new Error(parsed.error.issues[0].message);
+      const v = parsed.data;
+      const { error } = await supabase.from("purchase_orders").update({
+        project_id: v.project_id,
+        item_name: v.item_name,
+        item_link: v.item_link ?? null,
+        quantity: v.quantity,
+        recipient: v.recipient,
+        requester_notes: v.requester_notes ?? null,
+        delivery_point: v.delivery_point,
+      }).eq("id", order.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Pedido atualizado");
+      qc.invalidateQueries({ queryKey: ["orders"] });
+      setOpen(false);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    save.mutate(e);
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild><Button size="sm" variant="outline">Editar</Button></DialogTrigger>
+      <DialogContent className="max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Editar pedido</DialogTitle>
+          <DialogDescription>Você pode editar enquanto o pedido está pendente.</DialogDescription>
+        </DialogHeader>
+        <form onSubmit={onSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label>Projeto</Label>
+            <Select value={projectId} onValueChange={setProjectId}>
+              <SelectTrigger><SelectValue placeholder="Selecione o projeto" /></SelectTrigger>
+              <SelectContent>
+                {(projects ?? []).map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor={`e-name-${order.id}`}>Nome do item</Label>
+            <Input id={`e-name-${order.id}`} name="item_name" defaultValue={order.item_name} required />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor={`e-qty-${order.id}`}>Quantidade</Label>
+              <Input id={`e-qty-${order.id}`} name="quantity" type="number" min={1} defaultValue={order.quantity} required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor={`e-rec-${order.id}`}>Destinatário</Label>
+              <Input id={`e-rec-${order.id}`} name="recipient" defaultValue={order.recipient} required />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor={`e-link-${order.id}`}>Link de compra <span className="text-muted-foreground">(opcional)</span></Label>
+            <Input id={`e-link-${order.id}`} name="item_link" type="url" defaultValue={order.item_link ?? ""} placeholder="https://..." />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor={`e-deliv-${order.id}`}>Ponto de entrega</Label>
+            <Textarea id={`e-deliv-${order.id}`} name="delivery_point" defaultValue={order.delivery_point} required />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor={`e-notes-${order.id}`}>Observações <span className="text-muted-foreground">(opcional)</span></Label>
+            <Textarea id={`e-notes-${order.id}`} name="requester_notes" defaultValue={order.requester_notes ?? ""} />
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+            <Button type="submit" disabled={save.isPending}>{save.isPending ? "Salvando..." : "Salvar"}</Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function InternalDeleteOrderDialog({ order }: { order: Order }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [confirm, setConfirm] = useState("");
