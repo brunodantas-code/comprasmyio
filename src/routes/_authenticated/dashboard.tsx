@@ -549,6 +549,7 @@ function OrdersTable({
             {showRequester && <TableHead>Solicitante</TableHead>}
             <TableHead>Destinatário</TableHead>
             <TableHead>Entrega</TableHead>
+            <TableHead>Prazo</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Obs.</TableHead>
             <TableHead>Anexos</TableHead>
@@ -576,7 +577,13 @@ function OrdersTable({
               {showRequester && <TableCell>{requesterName?.(o.requester_id)}</TableCell>}
               <TableCell className="text-sm">{o.recipient || "—"}</TableCell>
               <TableCell className="max-w-[200px] text-sm text-muted-foreground">{o.delivery_point}</TableCell>
-              <TableCell><Badge variant={STATUS_VARIANT[o.status]}>{STATUS_LABELS[o.status]}</Badge></TableCell>
+              <TableCell className="text-xs">
+                <div>{DEADLINE_LABELS[o.deadline_type]}</div>
+                {o.deadline_type === "customizado" && o.deadline_date && (
+                  <div className="text-muted-foreground">{new Date(o.deadline_date + "T00:00:00").toLocaleDateString("pt-BR")}</div>
+                )}
+              </TableCell>
+              <TableCell><Badge className={STATUS_CLASSES[o.status]}>{STATUS_LABELS[o.status]}</Badge></TableCell>
               <TableCell className="max-w-[220px] whitespace-pre-wrap text-xs text-muted-foreground">{o.buyer_notes || "—"}</TableCell>
               <TableCell className="max-w-[200px]">
                 <ExistingAttachments orderId={o.id} attachments={o.attachments ?? []} />
