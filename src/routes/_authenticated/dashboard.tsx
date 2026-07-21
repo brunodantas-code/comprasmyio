@@ -250,6 +250,11 @@ const newOrderSchema = z.object({
   recipient: z.string().trim().min(2, "Informe o destinatário").max(200),
   requester_notes: z.string().trim().max(2000).optional().or(z.literal("").transform(() => undefined)),
   delivery_point: z.string().trim().min(3).max(300),
+  deadline_type: z.enum(["urgente", "esta_semana", "este_mes", "customizado"]),
+  deadline_date: z.string().trim().optional().or(z.literal("").transform(() => undefined)),
+}).refine((v) => v.deadline_type !== "customizado" || !!v.deadline_date, {
+  message: "Informe a data limite",
+  path: ["deadline_date"],
 });
 
 function NewOrder({ userId }: { userId: string }) {
