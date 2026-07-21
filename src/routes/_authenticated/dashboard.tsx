@@ -679,6 +679,8 @@ function EditRequesterDialog({ order }: { order: Order }) {
   const [open, setOpen] = useState(false);
   const [projectId, setProjectId] = useState(order.project_id);
   const [files, setFiles] = useState<File[]>([]);
+  const [deadlineType, setDeadlineType] = useState<Order["deadline_type"]>(order.deadline_type);
+  const [deadlineDate, setDeadlineDate] = useState(order.deadline_date ?? "");
 
   const save = useMutation({
     mutationFn: async (v: z.infer<typeof newOrderSchema>) => {
@@ -695,6 +697,8 @@ function EditRequesterDialog({ order }: { order: Order }) {
         recipient: v.recipient,
         requester_notes: v.requester_notes ?? null,
         delivery_point: v.delivery_point,
+        deadline_type: v.deadline_type,
+        deadline_date: v.deadline_type === "customizado" ? (v.deadline_date ?? null) : null,
         attachments,
       }).eq("id", order.id);
       if (error) throw error;
@@ -719,6 +723,8 @@ function EditRequesterDialog({ order }: { order: Order }) {
       recipient: fd.get("recipient"),
       requester_notes: fd.get("requester_notes") || undefined,
       delivery_point: fd.get("delivery_point"),
+      deadline_type: deadlineType,
+      deadline_date: deadlineDate || undefined,
     });
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
     save.mutate(parsed.data);
@@ -763,6 +769,23 @@ function EditRequesterDialog({ order }: { order: Order }) {
           <div className="space-y-2">
             <Label htmlFor={`e-deliv-${order.id}`}>Ponto de entrega</Label>
             <Textarea id={`e-deliv-${order.id}`} name="delivery_point" defaultValue={order.delivery_point} required />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label>Prazo de recebimento</Label>
+              <Select value={deadlineType} onValueChange={(v) => setDeadlineType(v as Order["deadline_type"])}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {Object.entries(DEADLINE_LABELS).map(([v, l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            {deadlineType === "customizado" && (
+              <div className="space-y-2">
+                <Label htmlFor={`e-deadline-${order.id}`}>Data limite</Label>
+                <Input id={`e-deadline-${order.id}`} type="date" value={deadlineDate} onChange={(e) => setDeadlineDate(e.target.value)} required />
+              </div>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor={`e-notes-${order.id}`}>Observações <span className="text-muted-foreground">(opcional)</span></Label>
