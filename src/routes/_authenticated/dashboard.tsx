@@ -32,7 +32,9 @@ type Order = {
   recipient: string;
   requester_notes: string | null;
   delivery_point: string;
-  status: "pendente" | "comprado" | "aguardando" | "a_caminho" | "cancelado" | "entregue";
+  status: "pendente" | "comprado_aguardando" | "entregue" | "cancelado";
+  deadline_type: "urgente" | "esta_semana" | "este_mes" | "customizado";
+  deadline_date: string | null;
   buyer_notes: string | null;
   attachments: Attachment[] | null;
   created_at: string;
@@ -128,20 +130,23 @@ function ExistingAttachments({ orderId, attachments, canRemove }: { orderId: str
 
 const STATUS_LABELS: Record<Order["status"], string> = {
   pendente: "Pendente",
-  comprado: "Comprado",
-  aguardando: "Aguardando",
-  a_caminho: "A caminho",
-  cancelado: "Cancelado",
+  comprado_aguardando: "Comprado e aguardando envio",
   entregue: "Entregue",
+  cancelado: "Cancelado",
 };
 
-const STATUS_VARIANT: Record<Order["status"], "default" | "secondary" | "destructive" | "outline"> = {
-  pendente: "outline",
-  comprado: "secondary",
-  aguardando: "secondary",
-  a_caminho: "default",
-  cancelado: "destructive",
-  entregue: "default",
+const STATUS_CLASSES: Record<Order["status"], string> = {
+  pendente: "bg-yellow-500 hover:bg-yellow-500 text-black border-transparent",
+  comprado_aguardando: "bg-green-600 hover:bg-green-600 text-white border-transparent",
+  entregue: "bg-blue-600 hover:bg-blue-600 text-white border-transparent",
+  cancelado: "bg-red-600 hover:bg-red-600 text-white border-transparent",
+};
+
+const DEADLINE_LABELS: Record<Order["deadline_type"], string> = {
+  urgente: "Urgente",
+  esta_semana: "Esta semana",
+  este_mes: "Este mês",
+  customizado: "Data específica",
 };
 
 function Dashboard() {
@@ -245,6 +250,11 @@ const newOrderSchema = z.object({
   recipient: z.string().trim().min(2, "Informe o destinatário").max(200),
   requester_notes: z.string().trim().max(2000).optional().or(z.literal("").transform(() => undefined)),
   delivery_point: z.string().trim().min(3).max(300),
+  deadline_type: z.enum(["urgente", "esta_semana", "este_mes", "customizado"]),
+  deadline_date: z.string().trim().optional().or(z.literal("").transform(() => undefined)),
+}).refine((v) => v.deadline_type !== "customizado" || !!v.deadline_date, {
+  message: "Informe a data limite",
+  path: ["deadline_date"],
 });
 
 function NewOrder({ userId }: { userId: string }) {
@@ -252,6 +262,8 @@ function NewOrder({ userId }: { userId: string }) {
   const qc = useQueryClient();
   const [projectId, setProjectId] = useState("");
   const [files, setFiles] = useState<File[]>([]);
+  const [deadlineType, setDeadlineType] = useState<Order["deadline_type"]>("esta_semana");
+  const [deadlineDate, setDeadlineDate] = useState("");
 
   const submit = useMutation({
     mutationFn: async (values: z.infer<typeof newOrderSchema>) => {
@@ -263,6 +275,8 @@ function NewOrder({ userId }: { userId: string }) {
         recipient: values.recipient,
         requester_notes: values.requester_notes ?? null,
         delivery_point: values.delivery_point,
+        deadline_type: values.deadline_type,
+        deadline_date: values.deadline_type === "customizado" ? (values.deadline_date ?? null) : null,
         requester_id: userId,
       }).select("id").single();
       if (error) throw error;
@@ -290,6 +304,8 @@ function NewOrder({ userId }: { userId: string }) {
       recipient: fd.get("recipient"),
       requester_notes: fd.get("requester_notes") || undefined,
       delivery_point: fd.get("delivery_point"),
+      deadline_type: deadlineType,
+      deadline_date: deadlineDate || undefined,
     });
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
     submit.mutate(parsed.data, {
@@ -297,6 +313,8 @@ function NewOrder({ userId }: { userId: string }) {
         (e.target as HTMLFormElement).reset();
         setProjectId("");
         setFiles([]);
+        setDeadlineType("esta_semana");
+        setDeadlineDate("");
       },
     });
   }
@@ -344,6 +362,23 @@ function NewOrder({ userId }: { userId: string }) {
             <div className="space-y-2">
               <Label htmlFor="delivery_point">Ponto de entrega</Label>
               <Textarea id="delivery_point" name="delivery_point" placeholder="Ex.: Rua X, 123, com João no portão" required />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Prazo de recebimento</Label>
+                <Select value={deadlineType} onValueChange={(v) => setDeadlineType(v as Order["deadline_type"])}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(DEADLINE_LABELS).map(([v, l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              {deadlineType === "customizado" && (
+                <div className="space-y-2">
+                  <Label htmlFor="deadline_date">Data limite</Label>
+                  <Input id="deadline_date" type="date" value={deadlineDate} onChange={(e) => setDeadlineDate(e.target.value)} required />
+                </div>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="requester_notes">Observações <span className="text-muted-foreground">(opcional)</span></Label>
@@ -514,6 +549,7 @@ function OrdersTable({
             {showRequester && <TableHead>Solicitante</TableHead>}
             <TableHead>Destinatário</TableHead>
             <TableHead>Entrega</TableHead>
+            <TableHead>Prazo</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Obs.</TableHead>
             <TableHead>Anexos</TableHead>
@@ -541,7 +577,13 @@ function OrdersTable({
               {showRequester && <TableCell>{requesterName?.(o.requester_id)}</TableCell>}
               <TableCell className="text-sm">{o.recipient || "—"}</TableCell>
               <TableCell className="max-w-[200px] text-sm text-muted-foreground">{o.delivery_point}</TableCell>
-              <TableCell><Badge variant={STATUS_VARIANT[o.status]}>{STATUS_LABELS[o.status]}</Badge></TableCell>
+              <TableCell className="text-xs">
+                <div>{DEADLINE_LABELS[o.deadline_type]}</div>
+                {o.deadline_type === "customizado" && o.deadline_date && (
+                  <div className="text-muted-foreground">{new Date(o.deadline_date + "T00:00:00").toLocaleDateString("pt-BR")}</div>
+                )}
+              </TableCell>
+              <TableCell><Badge className={STATUS_CLASSES[o.status]}>{STATUS_LABELS[o.status]}</Badge></TableCell>
               <TableCell className="max-w-[220px] whitespace-pre-wrap text-xs text-muted-foreground">{o.buyer_notes || "—"}</TableCell>
               <TableCell className="max-w-[200px]">
                 <ExistingAttachments orderId={o.id} attachments={o.attachments ?? []} />
@@ -637,6 +679,8 @@ function EditRequesterDialog({ order }: { order: Order }) {
   const [open, setOpen] = useState(false);
   const [projectId, setProjectId] = useState(order.project_id);
   const [files, setFiles] = useState<File[]>([]);
+  const [deadlineType, setDeadlineType] = useState<Order["deadline_type"]>(order.deadline_type);
+  const [deadlineDate, setDeadlineDate] = useState(order.deadline_date ?? "");
 
   const save = useMutation({
     mutationFn: async (v: z.infer<typeof newOrderSchema>) => {
@@ -653,6 +697,8 @@ function EditRequesterDialog({ order }: { order: Order }) {
         recipient: v.recipient,
         requester_notes: v.requester_notes ?? null,
         delivery_point: v.delivery_point,
+        deadline_type: v.deadline_type,
+        deadline_date: v.deadline_type === "customizado" ? (v.deadline_date ?? null) : null,
         attachments,
       }).eq("id", order.id);
       if (error) throw error;
@@ -677,6 +723,8 @@ function EditRequesterDialog({ order }: { order: Order }) {
       recipient: fd.get("recipient"),
       requester_notes: fd.get("requester_notes") || undefined,
       delivery_point: fd.get("delivery_point"),
+      deadline_type: deadlineType,
+      deadline_date: deadlineDate || undefined,
     });
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
     save.mutate(parsed.data);
@@ -721,6 +769,23 @@ function EditRequesterDialog({ order }: { order: Order }) {
           <div className="space-y-2">
             <Label htmlFor={`e-deliv-${order.id}`}>Ponto de entrega</Label>
             <Textarea id={`e-deliv-${order.id}`} name="delivery_point" defaultValue={order.delivery_point} required />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label>Prazo de recebimento</Label>
+              <Select value={deadlineType} onValueChange={(v) => setDeadlineType(v as Order["deadline_type"])}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {Object.entries(DEADLINE_LABELS).map(([v, l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            {deadlineType === "customizado" && (
+              <div className="space-y-2">
+                <Label htmlFor={`e-deadline-${order.id}`}>Data limite</Label>
+                <Input id={`e-deadline-${order.id}`} type="date" value={deadlineDate} onChange={(e) => setDeadlineDate(e.target.value)} required />
+              </div>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor={`e-notes-${order.id}`}>Observações <span className="text-muted-foreground">(opcional)</span></Label>

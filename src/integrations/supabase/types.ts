@@ -99,6 +99,8 @@ export type Database = {
           attachments: Json
           buyer_notes: string | null
           created_at: string
+          deadline_date: string | null
+          deadline_type: Database["public"]["Enums"]["deadline_type"]
           delivery_point: string
           id: string
           item_link: string | null
@@ -115,6 +117,8 @@ export type Database = {
           attachments?: Json
           buyer_notes?: string | null
           created_at?: string
+          deadline_date?: string | null
+          deadline_type?: Database["public"]["Enums"]["deadline_type"]
           delivery_point: string
           id?: string
           item_link?: string | null
@@ -131,6 +135,8 @@ export type Database = {
           attachments?: Json
           buyer_notes?: string | null
           created_at?: string
+          deadline_date?: string | null
+          deadline_type?: Database["public"]["Enums"]["deadline_type"]
           delivery_point?: string
           id?: string
           item_link?: string | null
@@ -189,13 +195,12 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "comprador" | "solicitante"
+      deadline_type: "urgente" | "esta_semana" | "este_mes" | "customizado"
       order_status:
         | "pendente"
-        | "comprado"
-        | "aguardando"
-        | "a_caminho"
-        | "cancelado"
+        | "comprado_aguardando"
         | "entregue"
+        | "cancelado"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -324,13 +329,12 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "comprador", "solicitante"],
+      deadline_type: ["urgente", "esta_semana", "este_mes", "customizado"],
       order_status: [
         "pendente",
-        "comprado",
-        "aguardando",
-        "a_caminho",
-        "cancelado",
+        "comprado_aguardando",
         "entregue",
+        "cancelado",
       ],
     },
   },
