@@ -32,7 +32,9 @@ type Order = {
   recipient: string;
   requester_notes: string | null;
   delivery_point: string;
-  status: "pendente" | "comprado" | "aguardando" | "a_caminho" | "cancelado" | "entregue";
+  status: "pendente" | "comprado_aguardando" | "entregue" | "cancelado";
+  deadline_type: "urgente" | "esta_semana" | "este_mes" | "customizado";
+  deadline_date: string | null;
   buyer_notes: string | null;
   attachments: Attachment[] | null;
   created_at: string;
@@ -128,20 +130,23 @@ function ExistingAttachments({ orderId, attachments, canRemove }: { orderId: str
 
 const STATUS_LABELS: Record<Order["status"], string> = {
   pendente: "Pendente",
-  comprado: "Comprado",
-  aguardando: "Aguardando",
-  a_caminho: "A caminho",
-  cancelado: "Cancelado",
+  comprado_aguardando: "Comprado e aguardando envio",
   entregue: "Entregue",
+  cancelado: "Cancelado",
 };
 
-const STATUS_VARIANT: Record<Order["status"], "default" | "secondary" | "destructive" | "outline"> = {
-  pendente: "outline",
-  comprado: "secondary",
-  aguardando: "secondary",
-  a_caminho: "default",
-  cancelado: "destructive",
-  entregue: "default",
+const STATUS_CLASSES: Record<Order["status"], string> = {
+  pendente: "bg-yellow-500 hover:bg-yellow-500 text-black border-transparent",
+  comprado_aguardando: "bg-green-600 hover:bg-green-600 text-white border-transparent",
+  entregue: "bg-blue-600 hover:bg-blue-600 text-white border-transparent",
+  cancelado: "bg-red-600 hover:bg-red-600 text-white border-transparent",
+};
+
+const DEADLINE_LABELS: Record<Order["deadline_type"], string> = {
+  urgente: "Urgente",
+  esta_semana: "Esta semana",
+  este_mes: "Este mês",
+  customizado: "Data específica",
 };
 
 function Dashboard() {
