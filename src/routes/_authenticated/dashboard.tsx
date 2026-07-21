@@ -262,6 +262,8 @@ function NewOrder({ userId }: { userId: string }) {
   const qc = useQueryClient();
   const [projectId, setProjectId] = useState("");
   const [files, setFiles] = useState<File[]>([]);
+  const [deadlineType, setDeadlineType] = useState<Order["deadline_type"]>("esta_semana");
+  const [deadlineDate, setDeadlineDate] = useState("");
 
   const submit = useMutation({
     mutationFn: async (values: z.infer<typeof newOrderSchema>) => {
@@ -273,6 +275,8 @@ function NewOrder({ userId }: { userId: string }) {
         recipient: values.recipient,
         requester_notes: values.requester_notes ?? null,
         delivery_point: values.delivery_point,
+        deadline_type: values.deadline_type,
+        deadline_date: values.deadline_type === "customizado" ? (values.deadline_date ?? null) : null,
         requester_id: userId,
       }).select("id").single();
       if (error) throw error;
@@ -300,6 +304,8 @@ function NewOrder({ userId }: { userId: string }) {
       recipient: fd.get("recipient"),
       requester_notes: fd.get("requester_notes") || undefined,
       delivery_point: fd.get("delivery_point"),
+      deadline_type: deadlineType,
+      deadline_date: deadlineDate || undefined,
     });
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
     submit.mutate(parsed.data, {
@@ -307,6 +313,8 @@ function NewOrder({ userId }: { userId: string }) {
         (e.target as HTMLFormElement).reset();
         setProjectId("");
         setFiles([]);
+        setDeadlineType("esta_semana");
+        setDeadlineDate("");
       },
     });
   }
@@ -354,6 +362,23 @@ function NewOrder({ userId }: { userId: string }) {
             <div className="space-y-2">
               <Label htmlFor="delivery_point">Ponto de entrega</Label>
               <Textarea id="delivery_point" name="delivery_point" placeholder="Ex.: Rua X, 123, com João no portão" required />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Prazo de recebimento</Label>
+                <Select value={deadlineType} onValueChange={(v) => setDeadlineType(v as Order["deadline_type"])}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(DEADLINE_LABELS).map(([v, l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              {deadlineType === "customizado" && (
+                <div className="space-y-2">
+                  <Label htmlFor="deadline_date">Data limite</Label>
+                  <Input id="deadline_date" type="date" value={deadlineDate} onChange={(e) => setDeadlineDate(e.target.value)} required />
+                </div>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="requester_notes">Observações <span className="text-muted-foreground">(opcional)</span></Label>
