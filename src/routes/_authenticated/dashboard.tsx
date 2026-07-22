@@ -464,6 +464,8 @@ function NewOrder({ userId }: { userId: string }) {
 
 function MyOrders({ userId }: { userId: string }) {
   const { data: projects } = useProjects();
+  const [deliveredMode, setDeliveredMode] = useState<DeliveredMode>("all");
+  const [deliveredFrom, setDeliveredFrom] = useState("");
   const { data: orders, isLoading } = useQuery({
     queryKey: ["orders", "mine", userId],
     queryFn: async () => {
@@ -478,17 +480,22 @@ function MyOrders({ userId }: { userId: string }) {
   });
 
   const projectName = (id: string) => projects?.find((p) => p.id === id)?.name ?? "—";
+  const visible = filterDelivered(orders ?? [], deliveredMode, deliveredFrom);
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Meus pedidos</CardTitle>
-        <CardDescription>Acompanhe o status dos seus pedidos de compra.</CardDescription>
+      <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <CardTitle>Meus pedidos</CardTitle>
+          <CardDescription>Acompanhe o status dos seus pedidos de compra.</CardDescription>
+        </div>
+        <DeliveredFilter mode={deliveredMode} setMode={setDeliveredMode} fromDate={deliveredFrom} setFromDate={setDeliveredFrom} />
       </CardHeader>
       <CardContent>
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
           !orders?.length ? <p className="text-sm text-muted-foreground">Nenhum pedido ainda.</p> :
-          <OrdersTable orders={orders} projectName={projectName} showRequester={false} canEditRequester />
+          !visible.length ? <p className="text-sm text-muted-foreground">Nenhum pedido para exibir com o filtro atual.</p> :
+          <OrdersTable orders={visible} projectName={projectName} showRequester={false} canEditRequester />
         }
       </CardContent>
     </Card>
