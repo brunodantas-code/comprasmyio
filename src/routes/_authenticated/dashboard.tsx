@@ -149,6 +149,71 @@ const DEADLINE_LABELS: Record<Order["deadline_type"], string> = {
   customizado: "Data específica",
 };
 
+type DeliveredMode = "all" | "this_week" | "this_month" | "from_date" | "hide_all";
+
+const DELIVERED_LABELS: Record<DeliveredMode, string> = {
+  all: "Mostrar todos os entregues",
+  this_week: "Entregues só desta semana",
+  this_month: "Entregues só deste mês",
+  from_date: "Entregues a partir de...",
+  hide_all: "Ocultar todos os entregues",
+};
+
+function filterDelivered(orders: Order[], mode: DeliveredMode, fromDate: string): Order[] {
+  if (mode === "all") return orders;
+  const now = new Date();
+  return orders.filter((o) => {
+    if (o.status !== "entregue") return true;
+    if (mode === "hide_all") return false;
+    const ref = new Date(o.updated_at);
+    if (mode === "this_week") {
+      const start = new Date(now);
+      const diff = (start.getDay() + 6) % 7; // segunda-feira como início
+      start.setDate(start.getDate() - diff);
+      start.setHours(0, 0, 0, 0);
+      return ref >= start;
+    }
+    if (mode === "this_month") {
+      const start = new Date(now.getFullYear(), now.getMonth(), 1);
+      return ref >= start;
+    }
+    if (mode === "from_date") {
+      if (!fromDate) return true;
+      const start = new Date(fromDate + "T00:00:00");
+      return ref >= start;
+    }
+    return true;
+  });
+}
+
+function DeliveredFilter({
+  mode, setMode, fromDate, setFromDate,
+}: {
+  mode: DeliveredMode;
+  setMode: (m: DeliveredMode) => void;
+  fromDate: string;
+  setFromDate: (s: string) => void;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <Select value={mode} onValueChange={(v) => setMode(v as DeliveredMode)}>
+        <SelectTrigger className="w-[240px]"><SelectValue /></SelectTrigger>
+        <SelectContent>
+          {Object.entries(DELIVERED_LABELS).map(([v, l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}
+        </SelectContent>
+      </Select>
+      {mode === "from_date" && (
+        <Input
+          type="date"
+          value={fromDate}
+          onChange={(e) => setFromDate(e.target.value)}
+          className="w-[160px]"
+        />
+      )}
+    </div>
+  );
+}
+
 function Dashboard() {
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -399,6 +464,8 @@ function NewOrder({ userId }: { userId: string }) {
 
 function MyOrders({ userId }: { userId: string }) {
   const { data: projects } = useProjects();
+  const [deliveredMode, setDeliveredMode] = useState<DeliveredMode>("all");
+  const [deliveredFrom, setDeliveredFrom] = useState("");
   const { data: orders, isLoading } = useQuery({
     queryKey: ["orders", "mine", userId],
     queryFn: async () => {
@@ -413,17 +480,22 @@ function MyOrders({ userId }: { userId: string }) {
   });
 
   const projectName = (id: string) => projects?.find((p) => p.id === id)?.name ?? "—";
+  const visible = filterDelivered(orders ?? [], deliveredMode, deliveredFrom);
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Meus pedidos</CardTitle>
-        <CardDescription>Acompanhe o status dos seus pedidos de compra.</CardDescription>
+      <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <CardTitle>Meus pedidos</CardTitle>
+          <CardDescription>Acompanhe o status dos seus pedidos de compra.</CardDescription>
+        </div>
+        <DeliveredFilter mode={deliveredMode} setMode={setDeliveredMode} fromDate={deliveredFrom} setFromDate={setDeliveredFrom} />
       </CardHeader>
       <CardContent>
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
           !orders?.length ? <p className="text-sm text-muted-foreground">Nenhum pedido ainda.</p> :
-          <OrdersTable orders={orders} projectName={projectName} showRequester={false} canEditRequester />
+          !visible.length ? <p className="text-sm text-muted-foreground">Nenhum pedido para exibir com o filtro atual.</p> :
+          <OrdersTable orders={visible} projectName={projectName} showRequester={false} canEditRequester />
         }
       </CardContent>
     </Card>
@@ -439,6 +511,8 @@ function BuyerQueue() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [projectFilter, setProjectFilter] = useState<string>("all");
   const [groupByProject, setGroupByProject] = useState(false);
+  const [deliveredMode, setDeliveredMode] = useState<DeliveredMode>("all");
+  const [deliveredFrom, setDeliveredFrom] = useState("");
 
   const { data: orders, isLoading } = useQuery({
     queryKey: ["orders", "all"],
@@ -452,10 +526,11 @@ function BuyerQueue() {
     },
   });
 
-  const filtered = orders?.filter((o) =>
+  const baseFiltered = orders?.filter((o) =>
     (statusFilter === "all" || o.status === statusFilter) &&
     (projectFilter === "all" || o.project_id === projectFilter)
   ) ?? [];
+  const filtered = filterDelivered(baseFiltered, deliveredMode, deliveredFrom);
   const projectName = (id: string) => projects?.find((p) => p.id === id)?.name ?? "—";
   const requesterName = (id: string) => profiles?.get(id)?.full_name || profiles?.get(id)?.email || "—";
 
@@ -500,6 +575,7 @@ function BuyerQueue() {
           >
             Agrupar por projeto
           </Button>
+          <DeliveredFilter mode={deliveredMode} setMode={setDeliveredMode} fromDate={deliveredFrom} setFromDate={setDeliveredFrom} />
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
