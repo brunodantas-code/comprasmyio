@@ -511,6 +511,8 @@ function BuyerQueue() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [projectFilter, setProjectFilter] = useState<string>("all");
   const [groupByProject, setGroupByProject] = useState(false);
+  const [deliveredMode, setDeliveredMode] = useState<DeliveredMode>("all");
+  const [deliveredFrom, setDeliveredFrom] = useState("");
 
   const { data: orders, isLoading } = useQuery({
     queryKey: ["orders", "all"],
@@ -524,10 +526,11 @@ function BuyerQueue() {
     },
   });
 
-  const filtered = orders?.filter((o) =>
+  const baseFiltered = orders?.filter((o) =>
     (statusFilter === "all" || o.status === statusFilter) &&
     (projectFilter === "all" || o.project_id === projectFilter)
   ) ?? [];
+  const filtered = filterDelivered(baseFiltered, deliveredMode, deliveredFrom);
   const projectName = (id: string) => projects?.find((p) => p.id === id)?.name ?? "—";
   const requesterName = (id: string) => profiles?.get(id)?.full_name || profiles?.get(id)?.email || "—";
 
@@ -572,6 +575,7 @@ function BuyerQueue() {
           >
             Agrupar por projeto
           </Button>
+          <DeliveredFilter mode={deliveredMode} setMode={setDeliveredMode} fromDate={deliveredFrom} setFromDate={setDeliveredFrom} />
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
