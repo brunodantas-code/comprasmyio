@@ -511,6 +511,7 @@ function MyOrders({ userId }: { userId: string }) {
   const { data: projects } = useProjects();
   const [deliveredMode, setDeliveredMode] = useState<DeliveredMode>("all");
   const [deliveredFrom, setDeliveredFrom] = useState("");
+  const [statusSelected, setStatusSelected] = useState<Order["status"][]>([...STATUS_KEYS]);
   const { data: orders, isLoading } = useQuery({
     queryKey: ["orders", "mine", userId],
     queryFn: async () => {
@@ -525,7 +526,8 @@ function MyOrders({ userId }: { userId: string }) {
   });
 
   const projectName = (id: string) => projects?.find((p) => p.id === id)?.name ?? "—";
-  const visible = filterDelivered(orders ?? [], deliveredMode, deliveredFrom);
+  const statusFiltered = (orders ?? []).filter((o) => statusSelected.includes(o.status));
+  const visible = filterDelivered(statusFiltered, deliveredMode, deliveredFrom);
 
   return (
     <Card>
@@ -534,7 +536,10 @@ function MyOrders({ userId }: { userId: string }) {
           <CardTitle>Meus pedidos</CardTitle>
           <CardDescription>Acompanhe o status dos seus pedidos de compra.</CardDescription>
         </div>
-        <DeliveredFilter mode={deliveredMode} setMode={setDeliveredMode} fromDate={deliveredFrom} setFromDate={setDeliveredFrom} />
+        <div className="flex flex-wrap items-center gap-2">
+          <StatusMultiFilter selected={statusSelected} setSelected={setStatusSelected} />
+          <DeliveredFilter mode={deliveredMode} setMode={setDeliveredMode} fromDate={deliveredFrom} setFromDate={setDeliveredFrom} />
+        </div>
       </CardHeader>
       <CardContent>
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
