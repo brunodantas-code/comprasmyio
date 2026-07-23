@@ -1080,6 +1080,71 @@ function UsersAdmin() {
 
 /* ---------- Logs ---------- */
 
+function StatusHistoryDialog({ order }: { order: Order }) {
+  const [open, setOpen] = useState(false);
+  const { data: profiles } = useProfilesMap();
+  const { data: logs, isLoading } = useQuery({
+    queryKey: ["order-logs", order.id],
+    enabled: open,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("order_logs")
+        .select("id, actor_id, action, details, created_at")
+        .eq("order_id", order.id)
+        .in("action", ["criado", "status_alterado"])
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const nameFor = (id: string | null) => {
+    if (!id) return "—";
+    const p = profiles?.get(id);
+    return p?.full_name || p?.email || "—";
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <button type="button" className="cursor-pointer">
+          <Badge className={STATUS_CLASSES[order.status]}>{STATUS_LABELS[order.status]}</Badge>
+        </button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Histórico de status</DialogTitle>
+          <DialogDescription>{order.item_name}</DialogDescription>
+        </DialogHeader>
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">Carregando...</p>
+        ) : !logs?.length ? (
+          <p className="text-sm text-muted-foreground">Sem histórico.</p>
+        ) : (
+          <ol className="space-y-3">
+            {logs.map((l) => {
+              const d = (l.details ?? {}) as { status?: Order["status"]; de?: Order["status"]; para?: Order["status"] };
+              const isCreation = l.action === "criado";
+              const statusKey = isCreation ? d.status : d.para;
+              const label = statusKey ? STATUS_LABELS[statusKey] : l.action;
+              const cls = statusKey ? STATUS_CLASSES[statusKey] : "";
+              return (
+                <li key={l.id} className="flex items-start gap-3 border-l-2 border-muted pl-3">
+                  <Badge className={cls}>{label}</Badge>
+                  <div className="text-sm">
+                    <div>{isCreation ? "criado por" : "alterado por"} <span className="font-medium">{nameFor(l.actor_id)}</span></div>
+                    <div className="text-xs text-muted-foreground">{new Date(l.created_at).toLocaleString("pt-BR")}</div>
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function LogsAdmin() {
   const { data: profiles } = useProfilesMap();
   const { data: logs, isLoading } = useQuery({
