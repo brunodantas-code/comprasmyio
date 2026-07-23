@@ -659,7 +659,7 @@ function OrdersTable({
                   <div className="text-muted-foreground">{new Date(o.deadline_date + "T00:00:00").toLocaleDateString("pt-BR")}</div>
                 )}
               </TableCell>
-              <TableCell><Badge className={STATUS_CLASSES[o.status]}>{STATUS_LABELS[o.status]}</Badge></TableCell>
+              <TableCell><StatusHistoryDialog order={o} /></TableCell>
               <TableCell className="max-w-[220px] whitespace-pre-wrap text-xs text-muted-foreground">{o.buyer_notes || "—"}</TableCell>
               <TableCell className="max-w-[200px]">
                 <ExistingAttachments orderId={o.id} attachments={o.attachments ?? []} />
