@@ -558,7 +558,7 @@ function BuyerQueue() {
   const { data: projects } = useProjects();
   const { data: profiles } = useProfilesMap();
   const { data: me } = useCurrentUser();
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [statusSelected, setStatusSelected] = useState<Order["status"][]>([...STATUS_KEYS]);
   const [projectFilter, setProjectFilter] = useState<string>("all");
   const [groupByProject, setGroupByProject] = useState(false);
   const [deliveredMode, setDeliveredMode] = useState<DeliveredMode>("all");
@@ -577,7 +577,7 @@ function BuyerQueue() {
   });
 
   const baseFiltered = orders?.filter((o) =>
-    (statusFilter === "all" || o.status === statusFilter) &&
+    statusSelected.includes(o.status) &&
     (projectFilter === "all" || o.project_id === projectFilter)
   ) ?? [];
   const filtered = filterDelivered(baseFiltered, deliveredMode, deliveredFrom);
@@ -610,13 +610,7 @@ function BuyerQueue() {
               {projects?.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
             </SelectContent>
           </Select>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os status</SelectItem>
-              {Object.entries(STATUS_LABELS).map(([v, l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}
-            </SelectContent>
-          </Select>
+          <StatusMultiFilter selected={statusSelected} setSelected={setStatusSelected} />
           <Button
             type="button"
             variant={groupByProject ? "default" : "outline"}
