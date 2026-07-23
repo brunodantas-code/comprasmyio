@@ -1167,11 +1167,18 @@ function StatusHistoryDialog({ order }: { order: Order }) {
         ) : (
           <ol className="space-y-3">
             {logs.map((l) => {
-              const d = (l.details ?? {}) as { status?: Order["status"]; de?: Order["status"]; para?: Order["status"] };
+              const d = (l.details ?? {}) as { status?: string; de?: string; para?: string };
               const isCreation = l.action === "criado";
-              const statusKey = isCreation ? d.status : d.para;
-              const label = statusKey ? STATUS_LABELS[statusKey] : l.action;
-              const cls = statusKey ? STATUS_CLASSES[statusKey] : "";
+              const rawStatus = isCreation ? d.status : d.para;
+              // Mapeia status legados (antes da simplificação do enum) para os atuais
+              const legacyMap: Record<string, Order["status"]> = {
+                comprado: "comprado_aguardando",
+                aguardando: "comprado_aguardando",
+                a_caminho: "comprado_aguardando",
+              };
+              const statusKey = (rawStatus && (legacyMap[rawStatus] ?? (rawStatus as Order["status"]))) as Order["status"] | undefined;
+              const label = statusKey && STATUS_LABELS[statusKey] ? STATUS_LABELS[statusKey] : (rawStatus ?? l.action);
+              const cls = statusKey && STATUS_CLASSES[statusKey] ? STATUS_CLASSES[statusKey] : "bg-muted text-foreground border-transparent";
               return (
                 <li key={l.id} className="flex items-start gap-3 border-l-2 border-muted pl-3">
                   <Badge className={cls}>{label}</Badge>
