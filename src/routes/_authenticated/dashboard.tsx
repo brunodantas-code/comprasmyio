@@ -13,8 +13,10 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { Package, LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText } from "lucide-react";
+import { Package, LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter } from "lucide-react";
 import { Trash2, Paperclip, X, Download } from "lucide-react";
 import { z } from "zod";
 
@@ -148,6 +150,49 @@ const DEADLINE_LABELS: Record<Order["deadline_type"], string> = {
   este_mes: "Este mês",
   customizado: "Data específica",
 };
+
+const STATUS_KEYS = Object.keys(STATUS_LABELS) as Order["status"][];
+
+function StatusMultiFilter({ selected, setSelected }: { selected: Order["status"][]; setSelected: (s: Order["status"][]) => void }) {
+  const allOn = selected.length === STATUS_KEYS.length;
+  const toggle = (k: Order["status"]) => {
+    setSelected(selected.includes(k) ? selected.filter((s) => s !== k) : [...selected, k]);
+  };
+  const label = allOn
+    ? "Todos os status"
+    : selected.length === 0
+    ? "Nenhum status"
+    : selected.length === 1
+    ? STATUS_LABELS[selected[0]]
+    : `${selected.length} status`;
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button type="button" variant="outline" size="sm" className="w-[200px] justify-start">
+          <Filter className="mr-2 h-4 w-4" />
+          <span className="truncate">{label}</span>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-[240px] p-2">
+        <div className="flex items-center justify-between px-2 py-1 text-xs text-muted-foreground">
+          <span>Filtrar status</span>
+          <button type="button" className="hover:underline" onClick={() => setSelected(allOn ? [] : [...STATUS_KEYS])}>
+            {allOn ? "Limpar" : "Todos"}
+          </button>
+        </div>
+        <div className="space-y-1">
+          {STATUS_KEYS.map((k) => (
+            <label key={k} className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent">
+              <Checkbox checked={selected.includes(k)} onCheckedChange={() => toggle(k)} />
+              <span className={`inline-block h-2 w-2 rounded-full ${STATUS_CLASSES[k].split(" ")[0]}`} />
+              {STATUS_LABELS[k]}
+            </label>
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
 
 type DeliveredMode = "all" | "this_week" | "this_month" | "from_date" | "hide_all";
 
@@ -466,6 +511,7 @@ function MyOrders({ userId }: { userId: string }) {
   const { data: projects } = useProjects();
   const [deliveredMode, setDeliveredMode] = useState<DeliveredMode>("all");
   const [deliveredFrom, setDeliveredFrom] = useState("");
+  const [statusSelected, setStatusSelected] = useState<Order["status"][]>([...STATUS_KEYS]);
   const { data: orders, isLoading } = useQuery({
     queryKey: ["orders", "mine", userId],
     queryFn: async () => {
@@ -480,7 +526,8 @@ function MyOrders({ userId }: { userId: string }) {
   });
 
   const projectName = (id: string) => projects?.find((p) => p.id === id)?.name ?? "—";
-  const visible = filterDelivered(orders ?? [], deliveredMode, deliveredFrom);
+  const statusFiltered = (orders ?? []).filter((o) => statusSelected.includes(o.status));
+  const visible = filterDelivered(statusFiltered, deliveredMode, deliveredFrom);
 
   return (
     <Card>
@@ -489,7 +536,10 @@ function MyOrders({ userId }: { userId: string }) {
           <CardTitle>Meus pedidos</CardTitle>
           <CardDescription>Acompanhe o status dos seus pedidos de compra.</CardDescription>
         </div>
-        <DeliveredFilter mode={deliveredMode} setMode={setDeliveredMode} fromDate={deliveredFrom} setFromDate={setDeliveredFrom} />
+        <div className="flex flex-wrap items-center gap-2">
+          <StatusMultiFilter selected={statusSelected} setSelected={setStatusSelected} />
+          <DeliveredFilter mode={deliveredMode} setMode={setDeliveredMode} fromDate={deliveredFrom} setFromDate={setDeliveredFrom} />
+        </div>
       </CardHeader>
       <CardContent>
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
@@ -508,7 +558,7 @@ function BuyerQueue() {
   const { data: projects } = useProjects();
   const { data: profiles } = useProfilesMap();
   const { data: me } = useCurrentUser();
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [statusSelected, setStatusSelected] = useState<Order["status"][]>([...STATUS_KEYS]);
   const [projectFilter, setProjectFilter] = useState<string>("all");
   const [groupByProject, setGroupByProject] = useState(false);
   const [deliveredMode, setDeliveredMode] = useState<DeliveredMode>("all");
@@ -527,7 +577,7 @@ function BuyerQueue() {
   });
 
   const baseFiltered = orders?.filter((o) =>
-    (statusFilter === "all" || o.status === statusFilter) &&
+    statusSelected.includes(o.status) &&
     (projectFilter === "all" || o.project_id === projectFilter)
   ) ?? [];
   const filtered = filterDelivered(baseFiltered, deliveredMode, deliveredFrom);
@@ -560,13 +610,7 @@ function BuyerQueue() {
               {projects?.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
             </SelectContent>
           </Select>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os status</SelectItem>
-              {Object.entries(STATUS_LABELS).map(([v, l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}
-            </SelectContent>
-          </Select>
+          <StatusMultiFilter selected={statusSelected} setSelected={setStatusSelected} />
           <Button
             type="button"
             variant={groupByProject ? "default" : "outline"}
