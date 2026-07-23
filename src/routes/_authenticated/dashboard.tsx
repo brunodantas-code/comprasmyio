@@ -151,6 +151,49 @@ const DEADLINE_LABELS: Record<Order["deadline_type"], string> = {
   customizado: "Data específica",
 };
 
+const STATUS_KEYS = Object.keys(STATUS_LABELS) as Order["status"][];
+
+function StatusMultiFilter({ selected, setSelected }: { selected: Order["status"][]; setSelected: (s: Order["status"][]) => void }) {
+  const allOn = selected.length === STATUS_KEYS.length;
+  const toggle = (k: Order["status"]) => {
+    setSelected(selected.includes(k) ? selected.filter((s) => s !== k) : [...selected, k]);
+  };
+  const label = allOn
+    ? "Todos os status"
+    : selected.length === 0
+    ? "Nenhum status"
+    : selected.length === 1
+    ? STATUS_LABELS[selected[0]]
+    : `${selected.length} status`;
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button type="button" variant="outline" size="sm" className="w-[200px] justify-start">
+          <Filter className="mr-2 h-4 w-4" />
+          <span className="truncate">{label}</span>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-[240px] p-2">
+        <div className="flex items-center justify-between px-2 py-1 text-xs text-muted-foreground">
+          <span>Filtrar status</span>
+          <button type="button" className="hover:underline" onClick={() => setSelected(allOn ? [] : [...STATUS_KEYS])}>
+            {allOn ? "Limpar" : "Todos"}
+          </button>
+        </div>
+        <div className="space-y-1">
+          {STATUS_KEYS.map((k) => (
+            <label key={k} className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent">
+              <Checkbox checked={selected.includes(k)} onCheckedChange={() => toggle(k)} />
+              <span className={`inline-block h-2 w-2 rounded-full ${STATUS_CLASSES[k].split(" ")[0]}`} />
+              {STATUS_LABELS[k]}
+            </label>
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 type DeliveredMode = "all" | "this_week" | "this_month" | "from_date" | "hide_all";
 
 const DELIVERED_LABELS: Record<DeliveredMode, string> = {
