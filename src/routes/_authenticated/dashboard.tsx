@@ -351,6 +351,57 @@ function useProfilesMap() {
   });
 }
 
+/* ---------- Materials library ---------- */
+
+type Material = { id: string; name: string; link: string | null };
+
+function useMaterials() {
+  return useQuery({
+    queryKey: ["materials"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("materials").select("id, name, link").order("name");
+      if (error) throw error;
+      return (data ?? []) as Material[];
+    },
+  });
+}
+
+function MaterialPicker({ onPick }: { onPick: (m: Material) => void }) {
+  const { data: materials, isLoading } = useMaterials();
+  const [open, setOpen] = useState(false);
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button type="button" variant="outline" size="sm">
+          <Library className="mr-1 h-4 w-4" /> Biblioteca
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[320px] p-0" align="end">
+        <Command>
+          <CommandInput placeholder="Buscar material..." />
+          <CommandList>
+            <CommandEmpty>{isLoading ? "Carregando..." : "Nenhum material cadastrado."}</CommandEmpty>
+            <CommandGroup>
+              {(materials ?? []).map((m) => (
+                <CommandItem
+                  key={m.id}
+                  value={m.name}
+                  onSelect={() => { onPick(m); setOpen(false); }}
+                >
+                  <div className="flex min-w-0 flex-col">
+                    <span className="truncate">{m.name}</span>
+                    {m.link && <span className="truncate text-xs text-muted-foreground">{m.link}</span>}
+                  </div>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 /* ---------- New order ---------- */
 
 const newOrderSchema = z.object({
