@@ -1113,6 +1113,87 @@ function ProjectsAdmin({ userId }: { userId: string }) {
 
 /* ---------- Users admin ---------- */
 
+function MaterialsAdmin() {
+  const qc = useQueryClient();
+  const { data: materials, isLoading } = useMaterials();
+
+  const create = useMutation({
+    mutationFn: async (v: { name: string; link: string | null }) => {
+      const { error } = await supabase.from("materials").insert(v);
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success("Material adicionado"); qc.invalidateQueries({ queryKey: ["materials"] }); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const remove = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("materials").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success("Material removido"); qc.invalidateQueries({ queryKey: ["materials"] }); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  function onCreate(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const name = String(fd.get("name") || "").trim();
+    const link = String(fd.get("link") || "").trim();
+    if (name.length < 2) return toast.error("Nome muito curto");
+    if (link && !/^https?:\/\//i.test(link)) return toast.error("Link inválido");
+    create.mutate({ name, link: link || null }, { onSuccess: () => (e.target as HTMLFormElement).reset() });
+  }
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-[1fr_1.5fr]">
+      <Card>
+        <CardHeader>
+          <CardTitle>Novo material</CardTitle>
+          <CardDescription>Cadastre itens que aparecerão como sugestão nos novos pedidos.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={onCreate} className="space-y-4">
+            <div className="space-y-2"><Label htmlFor="m-name">Nome</Label><Input id="m-name" name="name" required /></div>
+            <div className="space-y-2"><Label htmlFor="m-link">Link <span className="text-muted-foreground">(opcional)</span></Label><Input id="m-link" name="link" type="url" placeholder="https://..." /></div>
+            <Button type="submit" disabled={create.isPending}>Adicionar</Button>
+          </form>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader><CardTitle>Biblioteca de materiais</CardTitle></CardHeader>
+        <CardContent>
+          {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
+            !materials?.length ? <p className="text-sm text-muted-foreground">Nenhum material cadastrado.</p> :
+            <Table>
+              <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Link</TableHead><TableHead /></TableRow></TableHeader>
+              <TableBody>
+                {materials.map((m) => (
+                  <TableRow key={m.id}>
+                    <TableCell className="font-medium">{m.name}</TableCell>
+                    <TableCell className="text-sm">
+                      {m.link ? (
+                        <a href={m.link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-primary hover:underline">
+                          <ExternalLink className="h-3 w-3" /> Abrir
+                        </a>
+                      ) : <span className="text-muted-foreground">—</span>}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button size="sm" variant="ghost" onClick={() => remove.mutate(m.id)}>Excluir</Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          }
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+/* ---------- Users admin ---------- */
+
 function UsersAdmin() {
   const qc = useQueryClient();
   const { data, isLoading } = useQuery({
