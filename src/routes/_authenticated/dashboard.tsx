@@ -1111,8 +1111,6 @@ function ProjectsAdmin({ userId }: { userId: string }) {
   );
 }
 
-/* ---------- Users admin ---------- */
-
 function MaterialsAdmin() {
   const qc = useQueryClient();
   const { data: materials, isLoading } = useMaterials();
