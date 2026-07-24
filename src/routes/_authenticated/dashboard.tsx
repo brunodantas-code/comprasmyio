@@ -866,6 +866,8 @@ function EditRequesterDialog({ order }: { order: Order }) {
   const [files, setFiles] = useState<File[]>([]);
   const [deadlineType, setDeadlineType] = useState<Order["deadline_type"]>(order.deadline_type);
   const [deadlineDate, setDeadlineDate] = useState(order.deadline_date ?? "");
+  const [itemName, setItemName] = useState(order.item_name);
+  const [itemLink, setItemLink] = useState(order.item_link ?? "");
 
   const save = useMutation({
     mutationFn: async (v: z.infer<typeof newOrderSchema>) => {
@@ -902,8 +904,8 @@ function EditRequesterDialog({ order }: { order: Order }) {
     const fd = new FormData(e.currentTarget);
     const parsed = newOrderSchema.safeParse({
       project_id: projectId,
-      item_name: fd.get("item_name"),
-      item_link: fd.get("item_link") || undefined,
+      item_name: itemName,
+      item_link: itemLink || undefined,
       quantity: fd.get("quantity"),
       recipient: fd.get("recipient"),
       requester_notes: fd.get("requester_notes") || undefined,
@@ -934,8 +936,11 @@ function EditRequesterDialog({ order }: { order: Order }) {
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor={`e-name-${order.id}`}>Nome do item</Label>
-            <Input id={`e-name-${order.id}`} name="item_name" defaultValue={order.item_name} required />
+            <div className="flex items-center justify-between">
+              <Label htmlFor={`e-name-${order.id}`}>Nome do item</Label>
+              <MaterialPicker onPick={(m) => { setItemName(m.name); if (m.link) setItemLink(m.link); }} />
+            </div>
+            <Input id={`e-name-${order.id}`} value={itemName} onChange={(e) => setItemName(e.target.value)} required />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
@@ -949,7 +954,7 @@ function EditRequesterDialog({ order }: { order: Order }) {
           </div>
           <div className="space-y-2">
             <Label htmlFor={`e-link-${order.id}`}>Link de compra <span className="text-muted-foreground">(opcional)</span></Label>
-            <Input id={`e-link-${order.id}`} name="item_link" type="url" defaultValue={order.item_link ?? ""} placeholder="https://..." />
+            <Input id={`e-link-${order.id}`} type="url" value={itemLink} onChange={(e) => setItemLink(e.target.value)} placeholder="https://..." />
           </div>
           <div className="space-y-2">
             <Label htmlFor={`e-deliv-${order.id}`}>Ponto de entrega</Label>
