@@ -311,6 +311,7 @@ function Dashboard() {
               <TabsTrigger value="queue"><ShoppingCart className="mr-2 h-4 w-4" />Fila de compras</TabsTrigger>
             )}
             {me.isAdmin && <TabsTrigger value="projects"><FolderKanban className="mr-2 h-4 w-4" />Projetos</TabsTrigger>}
+            {me.isAdmin && <TabsTrigger value="materials"><Library className="mr-2 h-4 w-4" />Materiais</TabsTrigger>}
             {me.isAdmin && <TabsTrigger value="users"><Users className="mr-2 h-4 w-4" />Usuários</TabsTrigger>}
             {me.isAdmin && <TabsTrigger value="logs"><ScrollText className="mr-2 h-4 w-4" />Logs</TabsTrigger>}
           </TabsList>
@@ -319,6 +320,7 @@ function Dashboard() {
           <TabsContent value="new"><NewOrder userId={me.id} /></TabsContent>
           {(me.isComprador || me.isAdmin) && <TabsContent value="queue"><BuyerQueue /></TabsContent>}
           {me.isAdmin && <TabsContent value="projects"><ProjectsAdmin userId={me.id} /></TabsContent>}
+          {me.isAdmin && <TabsContent value="materials"><MaterialsAdmin /></TabsContent>}
           {me.isAdmin && <TabsContent value="users"><UsersAdmin /></TabsContent>}
           {me.isAdmin && <TabsContent value="logs"><LogsAdmin /></TabsContent>}
         </Tabs>
