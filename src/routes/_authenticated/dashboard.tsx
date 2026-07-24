@@ -15,8 +15,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { toast } from "sonner";
-import { Package, LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter } from "lucide-react";
+import { Package, LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Library } from "lucide-react";
 import { Trash2, Paperclip, X, Download } from "lucide-react";
 import { z } from "zod";
 
@@ -310,6 +311,7 @@ function Dashboard() {
               <TabsTrigger value="queue"><ShoppingCart className="mr-2 h-4 w-4" />Fila de compras</TabsTrigger>
             )}
             {me.isAdmin && <TabsTrigger value="projects"><FolderKanban className="mr-2 h-4 w-4" />Projetos</TabsTrigger>}
+            {me.isAdmin && <TabsTrigger value="materials"><Library className="mr-2 h-4 w-4" />Materiais</TabsTrigger>}
             {me.isAdmin && <TabsTrigger value="users"><Users className="mr-2 h-4 w-4" />Usuários</TabsTrigger>}
             {me.isAdmin && <TabsTrigger value="logs"><ScrollText className="mr-2 h-4 w-4" />Logs</TabsTrigger>}
           </TabsList>
@@ -318,6 +320,7 @@ function Dashboard() {
           <TabsContent value="new"><NewOrder userId={me.id} /></TabsContent>
           {(me.isComprador || me.isAdmin) && <TabsContent value="queue"><BuyerQueue /></TabsContent>}
           {me.isAdmin && <TabsContent value="projects"><ProjectsAdmin userId={me.id} /></TabsContent>}
+          {me.isAdmin && <TabsContent value="materials"><MaterialsAdmin /></TabsContent>}
           {me.isAdmin && <TabsContent value="users"><UsersAdmin /></TabsContent>}
           {me.isAdmin && <TabsContent value="logs"><LogsAdmin /></TabsContent>}
         </Tabs>
@@ -350,6 +353,57 @@ function useProfilesMap() {
   });
 }
 
+/* ---------- Materials library ---------- */
+
+type Material = { id: string; name: string; link: string | null };
+
+function useMaterials() {
+  return useQuery({
+    queryKey: ["materials"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("materials").select("id, name, link").order("name");
+      if (error) throw error;
+      return (data ?? []) as Material[];
+    },
+  });
+}
+
+function MaterialPicker({ onPick }: { onPick: (m: Material) => void }) {
+  const { data: materials, isLoading } = useMaterials();
+  const [open, setOpen] = useState(false);
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button type="button" variant="outline" size="sm">
+          <Library className="mr-1 h-4 w-4" /> Biblioteca
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[320px] p-0" align="end">
+        <Command>
+          <CommandInput placeholder="Buscar material..." />
+          <CommandList>
+            <CommandEmpty>{isLoading ? "Carregando..." : "Nenhum material cadastrado."}</CommandEmpty>
+            <CommandGroup>
+              {(materials ?? []).map((m) => (
+                <CommandItem
+                  key={m.id}
+                  value={m.name}
+                  onSelect={() => { onPick(m); setOpen(false); }}
+                >
+                  <div className="flex min-w-0 flex-col">
+                    <span className="truncate">{m.name}</span>
+                    {m.link && <span className="truncate text-xs text-muted-foreground">{m.link}</span>}
+                  </div>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 /* ---------- New order ---------- */
 
 const newOrderSchema = z.object({
@@ -374,6 +428,8 @@ function NewOrder({ userId }: { userId: string }) {
   const [files, setFiles] = useState<File[]>([]);
   const [deadlineType, setDeadlineType] = useState<Order["deadline_type"]>("esta_semana");
   const [deadlineDate, setDeadlineDate] = useState("");
+  const [itemName, setItemName] = useState("");
+  const [itemLink, setItemLink] = useState("");
 
   const submit = useMutation({
     mutationFn: async (values: z.infer<typeof newOrderSchema>) => {
@@ -408,8 +464,8 @@ function NewOrder({ userId }: { userId: string }) {
     const fd = new FormData(e.currentTarget);
     const parsed = newOrderSchema.safeParse({
       project_id: projectId,
-      item_name: fd.get("item_name"),
-      item_link: fd.get("item_link") || undefined,
+      item_name: itemName,
+      item_link: itemLink || undefined,
       quantity: fd.get("quantity"),
       recipient: fd.get("recipient"),
       requester_notes: fd.get("requester_notes") || undefined,
@@ -425,6 +481,8 @@ function NewOrder({ userId }: { userId: string }) {
         setFiles([]);
         setDeadlineType("esta_semana");
         setDeadlineDate("");
+        setItemName("");
+        setItemLink("");
       },
     });
   }
@@ -452,8 +510,17 @@ function NewOrder({ userId }: { userId: string }) {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="item_name">Nome do item</Label>
-              <Input id="item_name" name="item_name" required />
+              <div className="flex items-center justify-between">
+                <Label htmlFor="item_name">Nome do item</Label>
+                <MaterialPicker onPick={(m) => { setItemName(m.name); if (m.link) setItemLink(m.link); }} />
+              </div>
+              <Input
+                id="item_name"
+                value={itemName}
+                onChange={(e) => setItemName(e.target.value)}
+                placeholder="Digite ou selecione da biblioteca"
+                required
+              />
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
@@ -467,7 +534,7 @@ function NewOrder({ userId }: { userId: string }) {
             </div>
             <div className="space-y-2">
               <Label htmlFor="item_link">Link de compra <span className="text-muted-foreground">(opcional)</span></Label>
-              <Input id="item_link" name="item_link" type="url" placeholder="https://..." />
+              <Input id="item_link" type="url" placeholder="https://..." value={itemLink} onChange={(e) => setItemLink(e.target.value)} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="delivery_point">Ponto de entrega</Label>
@@ -801,6 +868,8 @@ function EditRequesterDialog({ order }: { order: Order }) {
   const [files, setFiles] = useState<File[]>([]);
   const [deadlineType, setDeadlineType] = useState<Order["deadline_type"]>(order.deadline_type);
   const [deadlineDate, setDeadlineDate] = useState(order.deadline_date ?? "");
+  const [itemName, setItemName] = useState(order.item_name);
+  const [itemLink, setItemLink] = useState(order.item_link ?? "");
 
   const save = useMutation({
     mutationFn: async (v: z.infer<typeof newOrderSchema>) => {
@@ -837,8 +906,8 @@ function EditRequesterDialog({ order }: { order: Order }) {
     const fd = new FormData(e.currentTarget);
     const parsed = newOrderSchema.safeParse({
       project_id: projectId,
-      item_name: fd.get("item_name"),
-      item_link: fd.get("item_link") || undefined,
+      item_name: itemName,
+      item_link: itemLink || undefined,
       quantity: fd.get("quantity"),
       recipient: fd.get("recipient"),
       requester_notes: fd.get("requester_notes") || undefined,
@@ -869,8 +938,11 @@ function EditRequesterDialog({ order }: { order: Order }) {
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor={`e-name-${order.id}`}>Nome do item</Label>
-            <Input id={`e-name-${order.id}`} name="item_name" defaultValue={order.item_name} required />
+            <div className="flex items-center justify-between">
+              <Label htmlFor={`e-name-${order.id}`}>Nome do item</Label>
+              <MaterialPicker onPick={(m) => { setItemName(m.name); if (m.link) setItemLink(m.link); }} />
+            </div>
+            <Input id={`e-name-${order.id}`} value={itemName} onChange={(e) => setItemName(e.target.value)} required />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
@@ -884,7 +956,7 @@ function EditRequesterDialog({ order }: { order: Order }) {
           </div>
           <div className="space-y-2">
             <Label htmlFor={`e-link-${order.id}`}>Link de compra <span className="text-muted-foreground">(opcional)</span></Label>
-            <Input id={`e-link-${order.id}`} name="item_link" type="url" defaultValue={order.item_link ?? ""} placeholder="https://..." />
+            <Input id={`e-link-${order.id}`} type="url" value={itemLink} onChange={(e) => setItemLink(e.target.value)} placeholder="https://..." />
           </div>
           <div className="space-y-2">
             <Label htmlFor={`e-deliv-${order.id}`}>Ponto de entrega</Label>
@@ -1029,6 +1101,85 @@ function ProjectsAdmin({ userId }: { userId: string }) {
                     <TableCell className="text-sm text-muted-foreground">{p.description || "—"}</TableCell>
                     <TableCell className="text-right">
                       <Button size="sm" variant="ghost" onClick={() => remove.mutate(p.id)}>Excluir</Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          }
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function MaterialsAdmin() {
+  const qc = useQueryClient();
+  const { data: materials, isLoading } = useMaterials();
+
+  const create = useMutation({
+    mutationFn: async (v: { name: string; link: string | null }) => {
+      const { error } = await supabase.from("materials").insert(v);
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success("Material adicionado"); qc.invalidateQueries({ queryKey: ["materials"] }); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const remove = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("materials").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success("Material removido"); qc.invalidateQueries({ queryKey: ["materials"] }); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  function onCreate(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const name = String(fd.get("name") || "").trim();
+    const link = String(fd.get("link") || "").trim();
+    if (name.length < 2) return toast.error("Nome muito curto");
+    if (link && !/^https?:\/\//i.test(link)) return toast.error("Link inválido");
+    create.mutate({ name, link: link || null }, { onSuccess: () => (e.target as HTMLFormElement).reset() });
+  }
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-[1fr_1.5fr]">
+      <Card>
+        <CardHeader>
+          <CardTitle>Novo material</CardTitle>
+          <CardDescription>Cadastre itens que aparecerão como sugestão nos novos pedidos.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={onCreate} className="space-y-4">
+            <div className="space-y-2"><Label htmlFor="m-name">Nome</Label><Input id="m-name" name="name" required /></div>
+            <div className="space-y-2"><Label htmlFor="m-link">Link <span className="text-muted-foreground">(opcional)</span></Label><Input id="m-link" name="link" type="url" placeholder="https://..." /></div>
+            <Button type="submit" disabled={create.isPending}>Adicionar</Button>
+          </form>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader><CardTitle>Biblioteca de materiais</CardTitle></CardHeader>
+        <CardContent>
+          {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
+            !materials?.length ? <p className="text-sm text-muted-foreground">Nenhum material cadastrado.</p> :
+            <Table>
+              <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Link</TableHead><TableHead /></TableRow></TableHeader>
+              <TableBody>
+                {materials.map((m) => (
+                  <TableRow key={m.id}>
+                    <TableCell className="font-medium">{m.name}</TableCell>
+                    <TableCell className="text-sm">
+                      {m.link ? (
+                        <a href={m.link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-primary hover:underline">
+                          <ExternalLink className="h-3 w-3" /> Abrir
+                        </a>
+                      ) : <span className="text-muted-foreground">—</span>}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button size="sm" variant="ghost" onClick={() => remove.mutate(m.id)}>Excluir</Button>
                     </TableCell>
                   </TableRow>
                 ))}
