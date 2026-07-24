@@ -426,6 +426,8 @@ function NewOrder({ userId }: { userId: string }) {
   const [files, setFiles] = useState<File[]>([]);
   const [deadlineType, setDeadlineType] = useState<Order["deadline_type"]>("esta_semana");
   const [deadlineDate, setDeadlineDate] = useState("");
+  const [itemName, setItemName] = useState("");
+  const [itemLink, setItemLink] = useState("");
 
   const submit = useMutation({
     mutationFn: async (values: z.infer<typeof newOrderSchema>) => {
@@ -460,8 +462,8 @@ function NewOrder({ userId }: { userId: string }) {
     const fd = new FormData(e.currentTarget);
     const parsed = newOrderSchema.safeParse({
       project_id: projectId,
-      item_name: fd.get("item_name"),
-      item_link: fd.get("item_link") || undefined,
+      item_name: itemName,
+      item_link: itemLink || undefined,
       quantity: fd.get("quantity"),
       recipient: fd.get("recipient"),
       requester_notes: fd.get("requester_notes") || undefined,
@@ -477,6 +479,8 @@ function NewOrder({ userId }: { userId: string }) {
         setFiles([]);
         setDeadlineType("esta_semana");
         setDeadlineDate("");
+        setItemName("");
+        setItemLink("");
       },
     });
   }
@@ -504,8 +508,17 @@ function NewOrder({ userId }: { userId: string }) {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="item_name">Nome do item</Label>
-              <Input id="item_name" name="item_name" required />
+              <div className="flex items-center justify-between">
+                <Label htmlFor="item_name">Nome do item</Label>
+                <MaterialPicker onPick={(m) => { setItemName(m.name); if (m.link) setItemLink(m.link); }} />
+              </div>
+              <Input
+                id="item_name"
+                value={itemName}
+                onChange={(e) => setItemName(e.target.value)}
+                placeholder="Digite ou selecione da biblioteca"
+                required
+              />
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
@@ -519,7 +532,7 @@ function NewOrder({ userId }: { userId: string }) {
             </div>
             <div className="space-y-2">
               <Label htmlFor="item_link">Link de compra <span className="text-muted-foreground">(opcional)</span></Label>
-              <Input id="item_link" name="item_link" type="url" placeholder="https://..." />
+              <Input id="item_link" type="url" placeholder="https://..." value={itemLink} onChange={(e) => setItemLink(e.target.value)} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="delivery_point">Ponto de entrega</Label>
