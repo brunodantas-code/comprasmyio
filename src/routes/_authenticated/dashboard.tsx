@@ -795,6 +795,32 @@ function OrdersTable({
   );
 }
 
+function ConfirmReceiptActions({ order }: { order: Order }) {
+  const qc = useQueryClient();
+  const setStatus = useMutation({
+    mutationFn: async (status: Order["status"]) => {
+      const { error } = await supabase.from("purchase_orders").update({ status }).eq("id", order.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["orders"] });
+      toast.success("Recebimento confirmado.");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <>
+      <Button size="sm" variant="outline" disabled={setStatus.isPending} onClick={() => setStatus.mutate("recebido_ok")}>
+        Recebido corretamente
+      </Button>
+      <Button size="sm" variant="outline" disabled={setStatus.isPending} onClick={() => setStatus.mutate("recebido_problema")}>
+        Recebido com problemas
+      </Button>
+    </>
+  );
+}
+
 function EditOrderDialog({ order }: { order: Order }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
