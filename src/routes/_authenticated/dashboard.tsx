@@ -35,7 +35,7 @@ type Order = {
   recipient: string;
   requester_notes: string | null;
   delivery_point: string;
-  status: "pendente" | "comprado_aguardando" | "entregue" | "cancelado";
+  status: "pendente" | "comprado_aguardando" | "entregue" | "cancelado" | "recebido_ok" | "recebido_problema";
   deadline_type: "urgente" | "esta_semana" | "este_mes" | "customizado";
   deadline_date: string | null;
   buyer_notes: string | null;
@@ -136,6 +136,8 @@ const STATUS_LABELS: Record<Order["status"], string> = {
   comprado_aguardando: "Comprado e aguardando envio",
   entregue: "Entregue",
   cancelado: "Cancelado",
+  recebido_ok: "Recebido corretamente",
+  recebido_problema: "Recebido com problemas",
 };
 
 const STATUS_CLASSES: Record<Order["status"], string> = {
@@ -143,7 +145,11 @@ const STATUS_CLASSES: Record<Order["status"], string> = {
   comprado_aguardando: "bg-green-600 hover:bg-green-600 text-white border-transparent",
   entregue: "bg-blue-600 hover:bg-blue-600 text-white border-transparent",
   cancelado: "bg-red-600 hover:bg-red-600 text-white border-transparent",
+  recebido_ok: "bg-slate-200 hover:bg-slate-200 text-slate-700 border-transparent",
+  recebido_problema: "bg-orange-500 hover:bg-orange-500 text-white border-transparent",
 };
+
+const BUYER_STATUS_KEYS: Order["status"][] = ["pendente", "comprado_aguardando", "entregue", "cancelado"];
 
 const DEADLINE_LABELS: Record<Order["deadline_type"], string> = {
   urgente: "Urgente",
@@ -209,7 +215,7 @@ function filterDelivered(orders: Order[], mode: DeliveredMode, fromDate: string)
   if (mode === "all") return orders;
   const now = new Date();
   return orders.filter((o) => {
-    if (o.status !== "entregue") return true;
+    if (o.status !== "entregue" && o.status !== "recebido_ok" && o.status !== "recebido_problema") return true;
     if (mode === "hide_all") return false;
     const ref = new Date(o.updated_at);
     if (mode === "this_week") {
@@ -777,6 +783,7 @@ function OrdersTable({
               </TableCell>
               <TableCell className="text-right space-x-2 whitespace-nowrap">
                 {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
+                {canEditRequester && o.status === "entregue" && <ConfirmReceiptActions order={o} />}
                 {canEdit && <EditOrderDialog order={o} />}
                 {canDelete && <DeleteOrderDialog order={o} />}
               </TableCell>
@@ -785,6 +792,32 @@ function OrdersTable({
         </TableBody>
       </Table>
     </div>
+  );
+}
+
+function ConfirmReceiptActions({ order }: { order: Order }) {
+  const qc = useQueryClient();
+  const setStatus = useMutation({
+    mutationFn: async (status: Order["status"]) => {
+      const { error } = await supabase.from("purchase_orders").update({ status }).eq("id", order.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["orders"] });
+      toast.success("Recebimento confirmado.");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <>
+      <Button size="sm" variant="outline" disabled={setStatus.isPending} onClick={() => setStatus.mutate("recebido_ok")}>
+        Recebido corretamente
+      </Button>
+      <Button size="sm" variant="outline" disabled={setStatus.isPending} onClick={() => setStatus.mutate("recebido_problema")}>
+        Recebido com problemas
+      </Button>
+    </>
   );
 }
 
@@ -829,7 +862,9 @@ function EditOrderDialog({ order }: { order: Order }) {
             <Select value={status} onValueChange={(v) => setStatus(v as Order["status"])}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                {Object.entries(STATUS_LABELS).map(([v, l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}
+                {(BUYER_STATUS_KEYS.includes(status) ? BUYER_STATUS_KEYS : [...BUYER_STATUS_KEYS, status]).map((v) => (
+                  <SelectItem key={v} value={v}>{STATUS_LABELS[v]}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
