@@ -915,6 +915,7 @@ function EditRequesterDialog({ order }: { order: Order }) {
   const [deadlineDate, setDeadlineDate] = useState(order.deadline_date ?? "");
   const [itemName, setItemName] = useState(order.item_name);
   const [itemLink, setItemLink] = useState(order.item_link ?? "");
+  const [materialId, setMaterialId] = useState<string | null>(order.material_id ?? null);
 
   const save = useMutation({
     mutationFn: async (v: z.infer<typeof newOrderSchema>) => {
@@ -927,6 +928,7 @@ function EditRequesterDialog({ order }: { order: Order }) {
         project_id: v.project_id,
         item_name: v.item_name,
         item_link: v.item_link ?? null,
+        material_id: materialId,
         quantity: v.quantity,
         recipient: v.recipient,
         requester_notes: v.requester_notes ?? null,
@@ -985,9 +987,9 @@ function EditRequesterDialog({ order }: { order: Order }) {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor={`e-name-${order.id}`}>Nome do item</Label>
-              <MaterialPicker onPick={(m) => { setItemName(m.name); if (m.link) setItemLink(m.link); }} />
+              <MaterialPicker onPick={(m) => { setItemName(m.name); setMaterialId(m.id); if (m.link) setItemLink(m.link); }} />
             </div>
-            <Input id={`e-name-${order.id}`} value={itemName} onChange={(e) => setItemName(e.target.value)} required />
+            <Input id={`e-name-${order.id}`} value={itemName} onChange={(e) => { setItemName(e.target.value); setMaterialId(null); }} required />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
