@@ -814,6 +814,8 @@ function ConfirmReceiptActions({ order }: { order: Order }) {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["orders"] });
+      qc.invalidateQueries({ queryKey: ["material-stock"] });
+      qc.invalidateQueries({ queryKey: ["stock-movements"] });
       toast.success("Recebimento confirmado.");
     },
     onError: (e: Error) => toast.error(e.message),
