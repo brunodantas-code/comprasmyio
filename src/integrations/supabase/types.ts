@@ -132,6 +132,7 @@ export type Database = {
           id: string
           item_link: string | null
           item_name: string
+          material_id: string | null
           project_id: string
           quantity: number
           recipient: string
@@ -150,6 +151,7 @@ export type Database = {
           id?: string
           item_link?: string | null
           item_name: string
+          material_id?: string | null
           project_id: string
           quantity?: number
           recipient?: string
@@ -168,6 +170,7 @@ export type Database = {
           id?: string
           item_link?: string | null
           item_name?: string
+          material_id?: string | null
           project_id?: string
           quantity?: number
           recipient?: string
@@ -178,10 +181,79 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "purchase_orders_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "material_stock"
+            referencedColumns: ["material_id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "purchase_orders_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_movements: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          material_id: string
+          order_id: string | null
+          quantity: number
+          reason: string | null
+          type: Database["public"]["Enums"]["stock_movement_type"]
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          material_id: string
+          order_id?: string | null
+          quantity: number
+          reason?: string | null
+          type: Database["public"]["Enums"]["stock_movement_type"]
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          material_id?: string
+          order_id?: string | null
+          quantity?: number
+          reason?: string | null
+          type?: Database["public"]["Enums"]["stock_movement_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_movements_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "material_stock"
+            referencedColumns: ["material_id"]
+          },
+          {
+            foreignKeyName: "stock_movements_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movements_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
             referencedColumns: ["id"]
           },
         ]
@@ -209,7 +281,18 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      material_stock: {
+        Row: {
+          balance: number | null
+          last_movement_at: string | null
+          link: string | null
+          material_id: string | null
+          name: string | null
+          total_in: number | null
+          total_out: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
@@ -230,6 +313,7 @@ export type Database = {
         | "cancelado"
         | "recebido_ok"
         | "recebido_problema"
+      stock_movement_type: "entrada" | "saida" | "ajuste"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -367,6 +451,7 @@ export const Constants = {
         "recebido_ok",
         "recebido_problema",
       ],
+      stock_movement_type: ["entrada", "saida", "ajuste"],
     },
   },
 } as const

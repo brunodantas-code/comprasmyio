@@ -1,0 +1,391 @@
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { toast } from "sonner";
+import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search } from "lucide-react";
+
+type StockRow = {
+  material_id: string;
+  name: string;
+  link: string | null;
+  balance: number;
+  total_in: number;
+  total_out: number;
+  last_movement_at: string | null;
+};
+
+type MovementType = "entrada" | "saida" | "ajuste";
+
+type Movement = {
+  id: string;
+  material_id: string;
+  quantity: number;
+  type: MovementType;
+  reason: string | null;
+  order_id: string | null;
+  created_by: string | null;
+  created_at: string;
+};
+
+const MOVEMENT_LABELS: Record<MovementType, string> = {
+  entrada: "Entrada",
+  saida: "Saída",
+  ajuste: "Ajuste",
+};
+
+const MOVEMENT_CLASSES: Record<MovementType, string> = {
+  entrada: "bg-green-100 text-green-800 border-green-300",
+  saida: "bg-orange-100 text-orange-800 border-orange-300",
+  ajuste: "bg-blue-100 text-blue-800 border-blue-300",
+};
+
+function fmt(d: string) {
+  return new Date(d).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+}
+
+function useStock() {
+  return useQuery({
+    queryKey: ["material-stock"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("material_stock").select("*").order("name");
+      if (error) throw error;
+      return (data ?? []) as StockRow[];
+    },
+  });
+}
+
+function useMovements() {
+  return useQuery({
+    queryKey: ["stock-movements"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("stock_movements")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(300);
+      if (error) throw error;
+      return (data ?? []) as Movement[];
+    },
+  });
+}
+
+function useStockProfiles() {
+  return useQuery({
+    queryKey: ["profiles-map"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("profiles").select("id, full_name, email");
+      if (error) throw error;
+      const map: Record<string, string> = {};
+      for (const p of data ?? []) map[p.id] = p.full_name || p.email || p.id;
+      return map;
+    },
+  });
+}
+
+function MovementDialog({
+  row,
+  userId,
+  type,
+  trigger,
+}: {
+  row: StockRow;
+  userId: string;
+  type: MovementType;
+  trigger: React.ReactNode;
+}) {
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+
+  const save = useMutation({
+    mutationFn: async (v: { quantity: number; reason: string | null }) => {
+      const { error } = await supabase.from("stock_movements").insert({
+        material_id: row.material_id,
+        quantity: v.quantity,
+        type,
+        reason: v.reason,
+        created_by: userId,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success(type === "saida" ? "Baixa registrada" : "Movimentação registrada");
+      qc.invalidateQueries({ queryKey: ["material-stock"] });
+      qc.invalidateQueries({ queryKey: ["stock-movements"] });
+      setOpen(false);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const quantity = Number(fd.get("quantity"));
+    const reason = String(fd.get("reason") || "").trim();
+    if (!Number.isInteger(quantity) || quantity <= 0) return toast.error("Quantidade inválida");
+    if (type === "saida" && quantity > row.balance) return toast.error("Saldo insuficiente em estoque");
+    save.mutate({ quantity, reason: reason || null });
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            {type === "saida" ? "Dar baixa" : type === "entrada" ? "Entrada manual" : "Ajuste"} — {row.name}
+          </DialogTitle>
+          <DialogDescription>Saldo atual: {row.balance}</DialogDescription>
+        </DialogHeader>
+        <form onSubmit={onSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor={`qty-${type}-${row.material_id}`}>Quantidade</Label>
+            <Input id={`qty-${type}-${row.material_id}`} name="quantity" type="number" min={1} defaultValue={1} required />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor={`reason-${type}-${row.material_id}`}>
+              Motivo <span className="text-muted-foreground">(opcional)</span>
+            </Label>
+            <Input
+              id={`reason-${type}-${row.material_id}`}
+              name="reason"
+              placeholder={type === "saida" ? "Ex.: usado na obra do projeto X" : "Ex.: compra fora do sistema"}
+            />
+          </div>
+          <DialogFooter>
+            <Button type="submit" disabled={save.isPending}>Confirmar</Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function HistoryDialog({ row }: { row: StockRow }) {
+  const [open, setOpen] = useState(false);
+  const { data: movements } = useMovements();
+  const { data: profiles } = useStockProfiles();
+  const list = (movements ?? []).filter((m) => m.material_id === row.material_id);
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="ghost" title="Histórico">
+          <History className="h-4 w-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Histórico — {row.name}</DialogTitle>
+          <DialogDescription>Entradas e saídas registradas.</DialogDescription>
+        </DialogHeader>
+        {!list.length ? (
+          <p className="text-sm text-muted-foreground">Nenhuma movimentação ainda.</p>
+        ) : (
+          <ul className="space-y-3">
+            {list.map((m) => (
+              <li key={m.id} className="flex items-start gap-3 border-l-2 border-border pl-3">
+                <Badge variant="outline" className={MOVEMENT_CLASSES[m.type]}>
+                  {MOVEMENT_LABELS[m.type]} {m.type === "saida" ? "-" : "+"}
+                  {m.quantity}
+                </Badge>
+                <div className="min-w-0 text-sm">
+                  <div className="text-muted-foreground">{fmt(m.created_at)}</div>
+                  <div>{m.created_by ? (profiles?.[m.created_by] ?? "Usuário") : "Sistema"}</div>
+                  {m.reason && <div className="text-muted-foreground">{m.reason}</div>}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function StockTab({ userId }: { userId: string }) {
+  const { data: stock, isLoading } = useStock();
+  const { data: movements } = useMovements();
+  const { data: profiles } = useStockProfiles();
+  const [search, setSearch] = useState("");
+  const [view, setView] = useState<"all" | "with" | "zero">("all");
+
+  const rows = (stock ?? [])
+    .filter((r) => r.name.toLowerCase().includes(search.trim().toLowerCase()))
+    .filter((r) => (view === "with" ? r.balance > 0 : view === "zero" ? r.balance <= 0 : true));
+
+  const totalItems = (stock ?? []).reduce((acc, r) => acc + Math.max(r.balance, 0), 0);
+
+  return (
+    <div className="space-y-6">
+      <div className="grid gap-4 sm:grid-cols-3">
+        <Card>
+          <CardHeader className="pb-2"><CardDescription>Materiais cadastrados</CardDescription></CardHeader>
+          <CardContent className="text-2xl font-semibold">{stock?.length ?? 0}</CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardDescription>Itens em estoque</CardDescription></CardHeader>
+          <CardContent className="text-2xl font-semibold">{totalItems}</CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardDescription>Materiais zerados</CardDescription></CardHeader>
+          <CardContent className="text-2xl font-semibold">
+            {(stock ?? []).filter((r) => r.balance <= 0).length}
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <CardTitle>Estoque por material</CardTitle>
+            <CardDescription>
+              A entrada é automática quando o solicitante confirma "Recebido corretamente" em um pedido feito pela biblioteca.
+            </CardDescription>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Buscar material"
+                className="w-[200px] pl-8"
+              />
+            </div>
+            <Select value={view} onValueChange={(v) => setView(v as "all" | "with" | "zero")}>
+              <SelectTrigger className="w-[170px]"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="with">Com saldo</SelectItem>
+                <SelectItem value="zero">Sem saldo</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <p className="text-sm text-muted-foreground">Carregando...</p>
+          ) : !rows.length ? (
+            <p className="text-sm text-muted-foreground">Nenhum material encontrado.</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Material</TableHead>
+                  <TableHead className="text-right">Saldo</TableHead>
+                  <TableHead className="text-right">Entradas</TableHead>
+                  <TableHead className="text-right">Saídas</TableHead>
+                  <TableHead>Última movimentação</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {rows.map((r) => (
+                  <TableRow key={r.material_id}>
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-2">
+                        <span>{r.name}</span>
+                        {r.link && (
+                          <a href={r.link} target="_blank" rel="noreferrer" className="text-primary hover:underline">
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Badge
+                        variant="outline"
+                        className={r.balance > 0 ? "bg-green-100 text-green-800 border-green-300" : "bg-muted text-muted-foreground"}
+                      >
+                        {r.balance}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right text-sm text-muted-foreground">{r.total_in}</TableCell>
+                    <TableCell className="text-right text-sm text-muted-foreground">{r.total_out}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {r.last_movement_at ? fmt(r.last_movement_at) : "—"}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex justify-end gap-1">
+                        <MovementDialog
+                          row={r}
+                          userId={userId}
+                          type="entrada"
+                          trigger={
+                            <Button size="sm" variant="outline">
+                              <ArrowDownCircle className="mr-1 h-4 w-4" /> Entrada
+                            </Button>
+                          }
+                        />
+                        <MovementDialog
+                          row={r}
+                          userId={userId}
+                          type="saida"
+                          trigger={
+                            <Button size="sm" variant="outline" disabled={r.balance <= 0}>
+                              <ArrowUpCircle className="mr-1 h-4 w-4" /> Dar baixa
+                            </Button>
+                          }
+                        />
+                        <HistoryDialog row={r} />
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Movimentações recentes</CardTitle>
+          <CardDescription>Histórico completo de entradas e saídas.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {!movements?.length ? (
+            <p className="text-sm text-muted-foreground">Nenhuma movimentação registrada.</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Data</TableHead>
+                  <TableHead>Material</TableHead>
+                  <TableHead>Tipo</TableHead>
+                  <TableHead className="text-right">Qtd.</TableHead>
+                  <TableHead>Motivo</TableHead>
+                  <TableHead>Responsável</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {movements.slice(0, 50).map((m) => (
+                  <TableRow key={m.id}>
+                    <TableCell className="whitespace-nowrap text-sm text-muted-foreground">{fmt(m.created_at)}</TableCell>
+                    <TableCell className="font-medium">
+                      {(stock ?? []).find((s) => s.material_id === m.material_id)?.name ?? "—"}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className={MOVEMENT_CLASSES[m.type]}>{MOVEMENT_LABELS[m.type]}</Badge>
+                    </TableCell>
+                    <TableCell className="text-right">{m.type === "saida" ? "-" : "+"}{m.quantity}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{m.reason ?? "—"}</TableCell>
+                    <TableCell className="text-sm">{m.created_by ? (profiles?.[m.created_by] ?? "Usuário") : "Sistema"}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
