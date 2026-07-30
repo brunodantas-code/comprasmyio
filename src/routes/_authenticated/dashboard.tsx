@@ -440,6 +440,7 @@ function NewOrder({ userId }: { userId: string }) {
   const [deadlineDate, setDeadlineDate] = useState("");
   const [itemName, setItemName] = useState("");
   const [itemLink, setItemLink] = useState("");
+  const [materialId, setMaterialId] = useState<string | null>(null);
 
   const submit = useMutation({
     mutationFn: async (values: z.infer<typeof newOrderSchema>) => {
@@ -447,6 +448,7 @@ function NewOrder({ userId }: { userId: string }) {
         project_id: values.project_id,
         item_name: values.item_name,
         item_link: values.item_link ?? null,
+        material_id: materialId,
         quantity: values.quantity,
         recipient: values.recipient,
         requester_notes: values.requester_notes ?? null,
@@ -493,6 +495,7 @@ function NewOrder({ userId }: { userId: string }) {
         setDeadlineDate("");
         setItemName("");
         setItemLink("");
+        setMaterialId(null);
       },
     });
   }
@@ -522,15 +525,18 @@ function NewOrder({ userId }: { userId: string }) {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="item_name">Nome do item</Label>
-                <MaterialPicker onPick={(m) => { setItemName(m.name); if (m.link) setItemLink(m.link); }} />
+                <MaterialPicker onPick={(m) => { setItemName(m.name); setMaterialId(m.id); if (m.link) setItemLink(m.link); }} />
               </div>
               <Input
                 id="item_name"
                 value={itemName}
-                onChange={(e) => setItemName(e.target.value)}
+                onChange={(e) => { setItemName(e.target.value); setMaterialId(null); }}
                 placeholder="Digite ou selecione da biblioteca"
                 required
               />
+              {materialId && (
+                <p className="text-xs text-muted-foreground">Vinculado à biblioteca — ao receber, entra automaticamente no estoque.</p>
+              )}
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
