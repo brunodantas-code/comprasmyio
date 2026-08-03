@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Trash2, Factory } from "lucide-react";
+import { Plus, Trash2, Factory, Pencil } from "lucide-react";
 
 export const MYIO_PRODUCTS = [
   "Myio Switch normal",
