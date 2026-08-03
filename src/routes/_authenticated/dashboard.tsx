@@ -17,10 +17,11 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Checkbox } from "@/components/ui/checkbox";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { toast } from "sonner";
-import { Package, LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Library, Boxes } from "lucide-react";
+import { Package, LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Library, Boxes, Factory } from "lucide-react";
 import { Trash2, Paperclip, X, Download } from "lucide-react";
 import { z } from "zod";
 import { StockTab } from "@/components/stock-tab";
+import { MyioOrdersTab } from "@/components/myio-orders-tab";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   component: Dashboard,
@@ -321,6 +322,7 @@ function Dashboard() {
             <TabsTrigger value="stock"><Boxes className="mr-2 h-4 w-4" />Estoque</TabsTrigger>
             {me.isAdmin && <TabsTrigger value="projects"><FolderKanban className="mr-2 h-4 w-4" />Projetos</TabsTrigger>}
             {me.isAdmin && <TabsTrigger value="materials"><Library className="mr-2 h-4 w-4" />Materiais</TabsTrigger>}
+            {me.isAdmin && <TabsTrigger value="myio"><Factory className="mr-2 h-4 w-4" />Pedidos Produtos Myio</TabsTrigger>}
             {me.isAdmin && <TabsTrigger value="users"><Users className="mr-2 h-4 w-4" />Usuários</TabsTrigger>}
             {me.isAdmin && <TabsTrigger value="logs"><ScrollText className="mr-2 h-4 w-4" />Logs</TabsTrigger>}
           </TabsList>
@@ -331,6 +333,7 @@ function Dashboard() {
           <TabsContent value="stock"><StockTab userId={me.id} /></TabsContent>
           {me.isAdmin && <TabsContent value="projects"><ProjectsAdmin userId={me.id} /></TabsContent>}
           {me.isAdmin && <TabsContent value="materials"><MaterialsAdmin /></TabsContent>}
+            {me.isAdmin && <TabsContent value="myio"><MyioOrdersTab userId={me.id} /></TabsContent>}
           {me.isAdmin && <TabsContent value="users"><UsersAdmin /></TabsContent>}
           {me.isAdmin && <TabsContent value="logs"><LogsAdmin /></TabsContent>}
         </Tabs>
