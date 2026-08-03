@@ -192,9 +192,13 @@ function DeleteMyioOrder({ id }: { id: string }) {
           <DialogTitle>Excluir pedido</DialogTitle>
           <DialogDescription>Digite "excluir" para confirmar. Esta ação é definitiva.</DialogDescription>
         </DialogHeader>
-        <Input value={text} onChange={(e) => setText(e.target.value)} placeholder="excluir" />
+        <Input value={text} onChange={(e) => setText(e.target.value)} placeholder='digite "excluir"' />
         <DialogFooter>
-          <Button variant="destructive" disabled={text !== "excluir" || mutation.isPending} onClick={() => mutation.mutate()}>
+          <Button
+            variant="destructive"
+            disabled={text.trim().toLowerCase() !== "excluir" || mutation.isPending}
+            onClick={() => mutation.mutate()}
+          >
             Excluir
           </Button>
         </DialogFooter>
