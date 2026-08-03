@@ -165,6 +165,119 @@ function NewMyioOrderDialog({ userId }: { userId: string }) {
 }
 
 function DeleteMyioOrder({ id }: { id: string }) {
+  return <DeleteMyioOrderInner id={id} />;
+}
+
+function EditMyioOrderDialog({ order }: { order: MyioOrder }) {
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState(order.title);
+  const [client, setClient] = useState(order.client_name);
+  const [date, setDate] = useState(order.delivery_date?.slice(0, 10) ?? "");
+  const [notes, setNotes] = useState(order.notes ?? "");
+  const [qty, setQty] = useState<Record<string, string>>({});
+
+  const load = () => {
+    setTitle(order.title);
+    setClient(order.client_name);
+    setDate(order.delivery_date?.slice(0, 10) ?? "");
+    setNotes(order.notes ?? "");
+    const map: Record<string, string> = {};
+    order.myio_order_items.forEach((i) => { map[i.product] = String(i.quantity); });
+    setQty(map);
+  };
+
+  const mutation = useMutation({
+    mutationFn: async () => {
+      const items = MYIO_PRODUCTS
+        .map((p) => ({ product: p, quantity: parseInt(qty[p] ?? "", 10) }))
+        .filter((i) => Number.isFinite(i.quantity) && i.quantity > 0);
+      if (!date) throw new Error("Informe a data de entrega.");
+      if (items.length === 0) throw new Error("Adicione a quantidade de pelo menos um produto.");
+
+      const { error } = await supabase
+        .from("myio_orders")
+        .update({ title, client_name: client, delivery_date: date, notes: notes || null })
+        .eq("id", order.id);
+      if (error) throw error;
+
+      const { error: delError } = await supabase.from("myio_order_items").delete().eq("order_id", order.id);
+      if (delError) throw delError;
+
+      const { error: insError } = await supabase
+        .from("myio_order_items")
+        .insert(items.map((i) => ({ ...i, order_id: order.id })));
+      if (insError) throw insError;
+    },
+    onSuccess: () => {
+      toast.success("Pedido atualizado.");
+      qc.invalidateQueries({ queryKey: ["myio-orders"] });
+      setOpen(false);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (o) load(); }}>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="icon"><Pencil className="h-4 w-4" /></Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Editar pedido Myio</DialogTitle>
+          <DialogDescription>Atualize os dados e as quantidades por produto.</DialogDescription>
+        </DialogHeader>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor={`edit-title-${order.id}`}>Identificação do pedido</Label>
+            <Input id={`edit-title-${order.id}`} value={title} onChange={(e) => setTitle(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor={`edit-client-${order.id}`}>Cliente</Label>
+            <Input id={`edit-client-${order.id}`} value={client} onChange={(e) => setClient(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor={`edit-date-${order.id}`}>Data de entrega</Label>
+            <Input id={`edit-date-${order.id}`} type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Produtos</Label>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {MYIO_PRODUCTS.map((p) => (
+              <div key={p} className="flex items-center justify-between gap-3 rounded-md border p-2">
+                <span className="text-sm">{p}</span>
+                <Input
+                  type="number"
+                  min={0}
+                  className="w-20"
+                  value={qty[p] ?? ""}
+                  onChange={(e) => setQty((prev) => ({ ...prev, [p]: e.target.value }))}
+                  placeholder="0"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor={`edit-notes-${order.id}`}>Observações</Label>
+          <Textarea id={`edit-notes-${order.id}`} value={notes} onChange={(e) => setNotes(e.target.value)} />
+        </div>
+
+        <DialogFooter>
+          <Button onClick={() => mutation.mutate()} disabled={mutation.isPending}>
+            {mutation.isPending ? "Salvando..." : "Salvar alterações"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function DeleteMyioOrderInner({ id }: { id: string }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [text, setText] = useState("");
