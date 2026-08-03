@@ -41,6 +41,74 @@ export type Database = {
         }
         Relationships: []
       }
+      myio_order_items: {
+        Row: {
+          created_at: string
+          id: string
+          order_id: string
+          product: string
+          quantity: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_id: string
+          product: string
+          quantity?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_id?: string
+          product?: string
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "myio_order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "myio_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      myio_orders: {
+        Row: {
+          client_name: string
+          created_at: string
+          created_by: string | null
+          delivery_date: string
+          id: string
+          notes: string | null
+          status: Database["public"]["Enums"]["myio_order_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          client_name?: string
+          created_at?: string
+          created_by?: string | null
+          delivery_date: string
+          id?: string
+          notes?: string | null
+          status?: Database["public"]["Enums"]["myio_order_status"]
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          client_name?: string
+          created_at?: string
+          created_by?: string | null
+          delivery_date?: string
+          id?: string
+          notes?: string | null
+          status?: Database["public"]["Enums"]["myio_order_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       order_logs: {
         Row: {
           action: string
@@ -306,6 +374,11 @@ export type Database = {
     Enums: {
       app_role: "admin" | "comprador" | "solicitante"
       deadline_type: "urgente" | "esta_semana" | "este_mes" | "customizado"
+      myio_order_status:
+        | "pendente"
+        | "produzindo"
+        | "pronto_entrega"
+        | "entregue_cliente"
       order_status:
         | "pendente"
         | "comprado_aguardando"
@@ -443,6 +516,12 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "comprador", "solicitante"],
       deadline_type: ["urgente", "esta_semana", "este_mes", "customizado"],
+      myio_order_status: [
+        "pendente",
+        "produzindo",
+        "pronto_entrega",
+        "entregue_cliente",
+      ],
       order_status: [
         "pendente",
         "comprado_aguardando",
