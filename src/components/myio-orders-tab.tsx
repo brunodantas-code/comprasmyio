@@ -371,7 +371,7 @@ export function MyioOrdersTab({ userId }: { userId: string }) {
                 <TableHead>Entrega</TableHead>
                 <TableHead>Produtos</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead className="w-10" />
+                <TableHead className="w-20" />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -405,7 +405,12 @@ export function MyioOrdersTab({ userId }: { userId: string }) {
                       </Select>
                     </div>
                   </TableCell>
-                  <TableCell><DeleteMyioOrder id={o.id} /></TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1">
+                      <EditMyioOrderDialog order={o} />
+                      <DeleteMyioOrder id={o.id} />
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
