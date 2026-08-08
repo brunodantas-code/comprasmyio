@@ -42,6 +42,8 @@ type Order = {
   deadline_type: "urgente" | "esta_semana" | "este_mes" | "customizado";
   deadline_date: string | null;
   buyer_notes: string | null;
+  passphrase: string | null;
+  delivery_forecast: string | null;
   attachments: Attachment[] | null;
   created_at: string;
   updated_at: string;
@@ -149,7 +151,8 @@ const STATUS_CLASSES: Record<Order["status"], string> = {
   entregue: "bg-blue-600 hover:bg-blue-600 text-white border-transparent",
   cancelado: "bg-red-600 hover:bg-red-600 text-white border-transparent",
   recebido_ok: "bg-slate-200 hover:bg-slate-200 text-slate-700 border-transparent",
-  recebido_problema: "bg-orange-500 hover:bg-orange-500 text-white border-transparent",
+  recebido_problema:
+    "bg-amber-100 hover:bg-amber-100 text-amber-900 border-transparent animate-soft-amber-pulse",
 };
 
 const BUYER_STATUS_KEYS: Order["status"][] = ["pendente", "comprado_aguardando", "entregue", "cancelado"];
