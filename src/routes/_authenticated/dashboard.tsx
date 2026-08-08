@@ -793,7 +793,20 @@ function OrdersTable({
                 )}
               </TableCell>
               <TableCell><StatusHistoryDialog order={o} /></TableCell>
-              <TableCell className="max-w-[220px] whitespace-pre-wrap text-xs text-muted-foreground">{o.buyer_notes || "—"}</TableCell>
+              <TableCell className="max-w-[220px] text-xs text-muted-foreground">
+                <div className="whitespace-pre-wrap">{o.buyer_notes || "—"}</div>
+                {o.passphrase && (
+                  <div className="mt-1 text-foreground">
+                    <span className="font-medium">Palavra passe:</span> {o.passphrase}
+                  </div>
+                )}
+                {o.delivery_forecast && (
+                  <div className="mt-1">
+                    <span className="font-medium">Previsão:</span>{" "}
+                    {new Date(o.delivery_forecast + "T00:00:00").toLocaleDateString("pt-BR")}
+                  </div>
+                )}
+              </TableCell>
               <TableCell className="max-w-[200px]">
                 <ExistingAttachments orderId={o.id} attachments={o.attachments ?? []} />
               </TableCell>
@@ -844,6 +857,8 @@ function EditOrderDialog({ order }: { order: Order }) {
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<Order["status"]>(order.status);
   const [notes, setNotes] = useState(order.buyer_notes ?? "");
+  const [passphrase, setPassphrase] = useState(order.passphrase ?? "");
+  const [forecast, setForecast] = useState(order.delivery_forecast ?? "");
   const [files, setFiles] = useState<File[]>([]);
 
   const save = useMutation({
@@ -853,7 +868,16 @@ function EditOrderDialog({ order }: { order: Order }) {
         const uploaded = await uploadOrderAttachments(order.id, files);
         attachments = [...attachments, ...uploaded];
       }
-      const { error } = await supabase.from("purchase_orders").update({ status, buyer_notes: notes || null, attachments }).eq("id", order.id);
+      const { error } = await supabase
+        .from("purchase_orders")
+        .update({
+          status,
+          buyer_notes: notes || null,
+          passphrase: passphrase || null,
+          delivery_forecast: forecast || null,
+          attachments,
+        })
+        .eq("id", order.id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -885,6 +909,14 @@ function EditOrderDialog({ order }: { order: Order }) {
                 ))}
               </SelectContent>
             </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Palavra passe</Label>
+            <Input value={passphrase} onChange={(e) => setPassphrase(e.target.value)} placeholder="Ex.: laranja" />
+          </div>
+          <div className="space-y-2">
+            <Label>Previsão de entrega</Label>
+            <Input type="date" value={forecast} onChange={(e) => setForecast(e.target.value)} />
           </div>
           <div className="space-y-2">
             <Label>Observações</Label>
