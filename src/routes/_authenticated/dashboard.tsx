@@ -763,7 +763,7 @@ function OrdersTable({
             <TableHead>Previsão de entrega</TableHead>
             <TableHead>Palavra passe</TableHead>
             <TableHead>Obs.</TableHead>
-            <TableHead>Anexos</TableHead>
+            <TableHead className="w-[110px]">Anexos</TableHead>
             <TableHead className="text-right">Ações</TableHead>
           </TableRow>
         </TableHeader>
@@ -795,18 +795,18 @@ function OrdersTable({
                 )}
               </TableCell>
               <TableCell><StatusHistoryDialog order={o} /></TableCell>
-              <TableCell className="text-sm whitespace-nowrap">
+              <TableCell className="text-sm font-semibold text-foreground whitespace-nowrap">
                 {o.delivery_forecast
                   ? new Date(o.delivery_forecast + "T00:00:00").toLocaleDateString("pt-BR")
                   : "—"}
               </TableCell>
-              <TableCell className="max-w-[180px] text-sm whitespace-pre-wrap">
+              <TableCell className="max-w-[180px] text-sm font-semibold text-foreground whitespace-pre-wrap">
                 {o.passphrase || "—"}
               </TableCell>
               <TableCell className="max-w-[220px] text-xs text-muted-foreground">
                 <div className="whitespace-pre-wrap">{o.buyer_notes || "—"}</div>
               </TableCell>
-              <TableCell className="max-w-[200px]">
+              <TableCell className="w-[110px] max-w-[110px] text-xs">
                 <ExistingAttachments orderId={o.id} attachments={o.attachments ?? []} />
               </TableCell>
               <TableCell className="text-right space-x-2 whitespace-nowrap">
