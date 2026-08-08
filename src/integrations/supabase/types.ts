@@ -196,11 +196,13 @@ export type Database = {
           created_at: string
           deadline_date: string | null
           deadline_type: Database["public"]["Enums"]["deadline_type"]
+          delivery_forecast: string | null
           delivery_point: string
           id: string
           item_link: string | null
           item_name: string
           material_id: string | null
+          passphrase: string | null
           project_id: string
           quantity: number
           recipient: string
@@ -215,11 +217,13 @@ export type Database = {
           created_at?: string
           deadline_date?: string | null
           deadline_type?: Database["public"]["Enums"]["deadline_type"]
+          delivery_forecast?: string | null
           delivery_point: string
           id?: string
           item_link?: string | null
           item_name: string
           material_id?: string | null
+          passphrase?: string | null
           project_id: string
           quantity?: number
           recipient?: string
@@ -234,11 +238,13 @@ export type Database = {
           created_at?: string
           deadline_date?: string | null
           deadline_type?: Database["public"]["Enums"]["deadline_type"]
+          delivery_forecast?: string | null
           delivery_point?: string
           id?: string
           item_link?: string | null
           item_name?: string
           material_id?: string | null
+          passphrase?: string | null
           project_id?: string
           quantity?: number
           recipient?: string
