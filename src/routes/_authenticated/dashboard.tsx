@@ -760,6 +760,8 @@ function OrdersTable({
             <TableHead>Entrega</TableHead>
             <TableHead>Prazo</TableHead>
             <TableHead>Status</TableHead>
+            <TableHead>Previsão de entrega</TableHead>
+            <TableHead>Palavra passe</TableHead>
             <TableHead>Obs.</TableHead>
             <TableHead>Anexos</TableHead>
             <TableHead className="text-right">Ações</TableHead>
@@ -793,19 +795,16 @@ function OrdersTable({
                 )}
               </TableCell>
               <TableCell><StatusHistoryDialog order={o} /></TableCell>
+              <TableCell className="text-sm whitespace-nowrap">
+                {o.delivery_forecast
+                  ? new Date(o.delivery_forecast + "T00:00:00").toLocaleDateString("pt-BR")
+                  : "—"}
+              </TableCell>
+              <TableCell className="max-w-[180px] text-sm whitespace-pre-wrap">
+                {o.passphrase || "—"}
+              </TableCell>
               <TableCell className="max-w-[220px] text-xs text-muted-foreground">
                 <div className="whitespace-pre-wrap">{o.buyer_notes || "—"}</div>
-                {o.passphrase && (
-                  <div className="mt-1 text-foreground">
-                    <span className="font-medium">Palavra passe:</span> {o.passphrase}
-                  </div>
-                )}
-                {o.delivery_forecast && (
-                  <div className="mt-1">
-                    <span className="font-medium">Previsão:</span>{" "}
-                    {new Date(o.delivery_forecast + "T00:00:00").toLocaleDateString("pt-BR")}
-                  </div>
-                )}
               </TableCell>
               <TableCell className="max-w-[200px]">
                 <ExistingAttachments orderId={o.id} attachments={o.attachments ?? []} />
