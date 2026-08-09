@@ -217,31 +217,42 @@ const DELIVERED_LABELS: Record<DeliveredMode, string> = {
   hide_all: "Ocultar todos os entregues",
 };
 
-function filterDelivered(orders: Order[], mode: DeliveredMode, fromDate: string): Order[] {
-  if (mode === "all") return orders;
-  const now = new Date();
-  return orders.filter((o) => {
-    if (o.status !== "entregue" && o.status !== "recebido_ok" && o.status !== "recebido_problema") return true;
-    if (mode === "hide_all") return false;
-    const ref = new Date(o.updated_at);
-    if (mode === "this_week") {
-      const start = new Date(now);
-      const diff = (start.getDay() + 6) % 7; // segunda-feira como início
-      start.setDate(start.getDate() - diff);
-      start.setHours(0, 0, 0, 0);
-      return ref >= start;
-    }
-    if (mode === "this_month") {
-      const start = new Date(now.getFullYear(), now.getMonth(), 1);
-      return ref >= start;
-    }
-    if (mode === "from_date") {
-      if (!fromDate) return true;
-      const start = new Date(fromDate + "T00:00:00");
-      return ref >= start;
-    }
-    return true;
+function sortProblemFirst(orders: Order[]): Order[] {
+  return [...orders].sort((a, b) => {
+    if (a.status === "recebido_problema" && b.status !== "recebido_problema") return -1;
+    if (b.status === "recebido_problema" && a.status !== "recebido_problema") return 1;
+    return 0;
   });
+}
+
+function filterDelivered(orders: Order[], mode: DeliveredMode, fromDate: string): Order[] {
+  let result = orders;
+  if (mode !== "all") {
+    const now = new Date();
+    result = orders.filter((o) => {
+      if (o.status !== "entregue" && o.status !== "recebido_ok" && o.status !== "recebido_problema") return true;
+      if (mode === "hide_all") return false;
+      const ref = new Date(o.updated_at);
+      if (mode === "this_week") {
+        const start = new Date(now);
+        const diff = (start.getDay() + 6) % 7; // segunda-feira como início
+        start.setDate(start.getDate() - diff);
+        start.setHours(0, 0, 0, 0);
+        return ref >= start;
+      }
+      if (mode === "this_month") {
+        const start = new Date(now.getFullYear(), now.getMonth(), 1);
+        return ref >= start;
+      }
+      if (mode === "from_date") {
+        if (!fromDate) return true;
+        const start = new Date(fromDate + "T00:00:00");
+        return ref >= start;
+      }
+      return true;
+    });
+  }
+  return sortProblemFirst(result);
 }
 
 function DeliveredFilter({
