@@ -347,7 +347,7 @@ export function MyioOrdersTab({ userId }: { userId: string }) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("myio_orders")
-        .select("id, title, client_name, delivery_date, status, notes, created_at, myio_order_items(id, product, quantity)")
+        .select("id, title, client_name, delivery_date, status, notes, created_at, project_id, projects(name), myio_order_items(id, product, quantity)")
         .order("delivery_date", { ascending: true });
       if (error) throw error;
       return (data ?? []) as unknown as MyioOrder[];
@@ -386,8 +386,7 @@ export function MyioOrdersTab({ userId }: { userId: string }) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Pedido</TableHead>
-                <TableHead>Cliente</TableHead>
+                <TableHead>Projeto</TableHead>
                 <TableHead>Entrega</TableHead>
                 <TableHead>Produtos</TableHead>
                 <TableHead>Status</TableHead>
@@ -398,10 +397,9 @@ export function MyioOrdersTab({ userId }: { userId: string }) {
               {list.map((o) => (
                 <TableRow key={o.id}>
                   <TableCell className="font-medium">
-                    {o.title || "—"}
+                    {o.projects?.name || "—"}
                     {o.notes && <p className="text-xs text-muted-foreground">{o.notes}</p>}
                   </TableCell>
-                  <TableCell>{o.client_name || "—"}</TableCell>
                   <TableCell>{formatDate(o.delivery_date)}</TableCell>
                   <TableCell>
                     <div className="space-y-1">
