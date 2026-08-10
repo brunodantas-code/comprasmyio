@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      clients: {
+        Row: {
+          cnpj: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          cnpj?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          cnpj?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       materials: {
         Row: {
           created_at: string
@@ -168,6 +195,7 @@ export type Database = {
       projects: {
         Row: {
           client_cnpj: string | null
+          client_id: string | null
           client_name: string
           created_at: string
           created_by: string | null
@@ -177,6 +205,7 @@ export type Database = {
         }
         Insert: {
           client_cnpj?: string | null
+          client_id?: string | null
           client_name?: string
           created_at?: string
           created_by?: string | null
@@ -186,6 +215,7 @@ export type Database = {
         }
         Update: {
           client_cnpj?: string | null
+          client_id?: string | null
           client_name?: string
           created_at?: string
           created_by?: string | null
@@ -193,7 +223,15 @@ export type Database = {
           id?: string
           name?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "projects_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       purchase_orders: {
         Row: {
