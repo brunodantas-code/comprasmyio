@@ -167,6 +167,8 @@ export type Database = {
       }
       projects: {
         Row: {
+          client_cnpj: string | null
+          client_name: string
           created_at: string
           created_by: string | null
           description: string | null
@@ -174,6 +176,8 @@ export type Database = {
           name: string
         }
         Insert: {
+          client_cnpj?: string | null
+          client_name?: string
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -181,6 +185,8 @@ export type Database = {
           name: string
         }
         Update: {
+          client_cnpj?: string | null
+          client_name?: string
           created_at?: string
           created_by?: string | null
           description?: string | null
