@@ -53,6 +53,8 @@ type MyioOrder = {
   status: MyioStatus;
   notes: string | null;
   created_at: string;
+  project_id: string | null;
+  projects: { name: string } | null;
   myio_order_items: { id: string; product: string; quantity: number }[];
 };
 
@@ -62,17 +64,28 @@ function formatDate(d: string | null) {
   return `${day}/${m}/${y}`;
 }
 
+function useProjects() {
+  return useQuery({
+    queryKey: ["projects-for-myio"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("projects").select("id, name").order("name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
 function NewMyioOrderDialog({ userId }: { userId: string }) {
   const qc = useQueryClient();
+  const { data: projects } = useProjects();
   const [open, setOpen] = useState(false);
-  const [title, setTitle] = useState("");
-  const [client, setClient] = useState("");
+  const [projectId, setProjectId] = useState("");
   const [date, setDate] = useState("");
   const [notes, setNotes] = useState("");
   const [qty, setQty] = useState<Record<string, string>>({});
 
   const reset = () => {
-    setTitle(""); setClient(""); setDate(""); setNotes(""); setQty({});
+    setProjectId(""); setDate(""); setNotes(""); setQty({});
   };
 
   const mutation = useMutation({
@@ -81,11 +94,12 @@ function NewMyioOrderDialog({ userId }: { userId: string }) {
         .map((p) => ({ product: p, quantity: parseInt(qty[p] ?? "", 10) }))
         .filter((i) => Number.isFinite(i.quantity) && i.quantity > 0);
       if (!date) throw new Error("Informe a data de entrega.");
+      if (!projectId) throw new Error("Selecione um projeto.");
       if (items.length === 0) throw new Error("Adicione a quantidade de pelo menos um produto.");
 
       const { data: order, error } = await supabase
         .from("myio_orders")
-        .insert({ title, client_name: client, delivery_date: date, notes: notes || null, created_by: userId })
+        .insert({ project_id: projectId, delivery_date: date, notes: notes || null, created_by: userId })
         .select("id")
         .single();
       if (error) throw error;
@@ -112,17 +126,20 @@ function NewMyioOrderDialog({ userId }: { userId: string }) {
       <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Novo pedido de produtos Myio</DialogTitle>
-          <DialogDescription>Defina a data de entrega e as quantidades por produto.</DialogDescription>
+          <DialogDescription>Selecione o projeto, a data de entrega e as quantidades por produto.</DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="myio-title">Identificação do pedido</Label>
-            <Input id="myio-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ex.: Lote 42" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="myio-client">Cliente</Label>
-            <Input id="myio-client" value={client} onChange={(e) => setClient(e.target.value)} placeholder="Opcional" />
+            <Label>Projeto</Label>
+            <Select value={projectId} onValueChange={setProjectId}>
+              <SelectTrigger><SelectValue placeholder="Selecione um projeto" /></SelectTrigger>
+              <SelectContent>
+                {(projects ?? []).map((p) => (
+                  <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-2">
             <Label htmlFor="myio-date">Data de entrega</Label>
@@ -170,16 +187,15 @@ function DeleteMyioOrder({ id }: { id: string }) {
 
 function EditMyioOrderDialog({ order }: { order: MyioOrder }) {
   const qc = useQueryClient();
+  const { data: projects } = useProjects();
   const [open, setOpen] = useState(false);
-  const [title, setTitle] = useState(order.title);
-  const [client, setClient] = useState(order.client_name);
+  const [projectId, setProjectId] = useState(order.project_id ?? "");
   const [date, setDate] = useState(order.delivery_date?.slice(0, 10) ?? "");
   const [notes, setNotes] = useState(order.notes ?? "");
   const [qty, setQty] = useState<Record<string, string>>({});
 
   const load = () => {
-    setTitle(order.title);
-    setClient(order.client_name);
+    setProjectId(order.project_id ?? "");
     setDate(order.delivery_date?.slice(0, 10) ?? "");
     setNotes(order.notes ?? "");
     const map: Record<string, string> = {};
@@ -193,11 +209,12 @@ function EditMyioOrderDialog({ order }: { order: MyioOrder }) {
         .map((p) => ({ product: p, quantity: parseInt(qty[p] ?? "", 10) }))
         .filter((i) => Number.isFinite(i.quantity) && i.quantity > 0);
       if (!date) throw new Error("Informe a data de entrega.");
+      if (!projectId) throw new Error("Selecione um projeto.");
       if (items.length === 0) throw new Error("Adicione a quantidade de pelo menos um produto.");
 
       const { error } = await supabase
         .from("myio_orders")
-        .update({ title, client_name: client, delivery_date: date, notes: notes || null })
+        .update({ project_id: projectId, delivery_date: date, notes: notes || null })
         .eq("id", order.id);
       if (error) throw error;
 
@@ -230,12 +247,15 @@ function EditMyioOrderDialog({ order }: { order: MyioOrder }) {
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor={`edit-title-${order.id}`}>Identificação do pedido</Label>
-            <Input id={`edit-title-${order.id}`} value={title} onChange={(e) => setTitle(e.target.value)} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor={`edit-client-${order.id}`}>Cliente</Label>
-            <Input id={`edit-client-${order.id}`} value={client} onChange={(e) => setClient(e.target.value)} />
+            <Label>Projeto</Label>
+            <Select value={projectId} onValueChange={setProjectId}>
+              <SelectTrigger><SelectValue placeholder="Selecione um projeto" /></SelectTrigger>
+              <SelectContent>
+                {(projects ?? []).map((p) => (
+                  <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-2">
             <Label htmlFor={`edit-date-${order.id}`}>Data de entrega</Label>
@@ -327,7 +347,7 @@ export function MyioOrdersTab({ userId }: { userId: string }) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("myio_orders")
-        .select("id, title, client_name, delivery_date, status, notes, created_at, myio_order_items(id, product, quantity)")
+        .select("id, title, client_name, delivery_date, status, notes, created_at, project_id, projects(name), myio_order_items(id, product, quantity)")
         .order("delivery_date", { ascending: true });
       if (error) throw error;
       return (data ?? []) as unknown as MyioOrder[];
@@ -366,8 +386,7 @@ export function MyioOrdersTab({ userId }: { userId: string }) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Pedido</TableHead>
-                <TableHead>Cliente</TableHead>
+                <TableHead>Projeto</TableHead>
                 <TableHead>Entrega</TableHead>
                 <TableHead>Produtos</TableHead>
                 <TableHead>Status</TableHead>
@@ -378,10 +397,9 @@ export function MyioOrdersTab({ userId }: { userId: string }) {
               {list.map((o) => (
                 <TableRow key={o.id}>
                   <TableCell className="font-medium">
-                    {o.title || "—"}
+                    {o.projects?.name || "—"}
                     {o.notes && <p className="text-xs text-muted-foreground">{o.notes}</p>}
                   </TableCell>
-                  <TableCell>{o.client_name || "—"}</TableCell>
                   <TableCell>{formatDate(o.delivery_date)}</TableCell>
                   <TableCell>
                     <div className="space-y-1">

@@ -108,6 +108,7 @@ export type Database = {
           delivery_date: string
           id: string
           notes: string | null
+          project_id: string | null
           status: Database["public"]["Enums"]["myio_order_status"]
           title: string
           updated_at: string
@@ -119,6 +120,7 @@ export type Database = {
           delivery_date: string
           id?: string
           notes?: string | null
+          project_id?: string | null
           status?: Database["public"]["Enums"]["myio_order_status"]
           title?: string
           updated_at?: string
@@ -130,11 +132,20 @@ export type Database = {
           delivery_date?: string
           id?: string
           notes?: string | null
+          project_id?: string | null
           status?: Database["public"]["Enums"]["myio_order_status"]
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "myio_orders_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       order_logs: {
         Row: {
