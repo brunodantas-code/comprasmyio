@@ -187,16 +187,15 @@ function DeleteMyioOrder({ id }: { id: string }) {
 
 function EditMyioOrderDialog({ order }: { order: MyioOrder }) {
   const qc = useQueryClient();
+  const { data: projects } = useProjects();
   const [open, setOpen] = useState(false);
-  const [title, setTitle] = useState(order.title);
-  const [client, setClient] = useState(order.client_name);
+  const [projectId, setProjectId] = useState(order.project_id ?? "");
   const [date, setDate] = useState(order.delivery_date?.slice(0, 10) ?? "");
   const [notes, setNotes] = useState(order.notes ?? "");
   const [qty, setQty] = useState<Record<string, string>>({});
 
   const load = () => {
-    setTitle(order.title);
-    setClient(order.client_name);
+    setProjectId(order.project_id ?? "");
     setDate(order.delivery_date?.slice(0, 10) ?? "");
     setNotes(order.notes ?? "");
     const map: Record<string, string> = {};
@@ -210,11 +209,12 @@ function EditMyioOrderDialog({ order }: { order: MyioOrder }) {
         .map((p) => ({ product: p, quantity: parseInt(qty[p] ?? "", 10) }))
         .filter((i) => Number.isFinite(i.quantity) && i.quantity > 0);
       if (!date) throw new Error("Informe a data de entrega.");
+      if (!projectId) throw new Error("Selecione um projeto.");
       if (items.length === 0) throw new Error("Adicione a quantidade de pelo menos um produto.");
 
       const { error } = await supabase
         .from("myio_orders")
-        .update({ title, client_name: client, delivery_date: date, notes: notes || null })
+        .update({ project_id: projectId, delivery_date: date, notes: notes || null })
         .eq("id", order.id);
       if (error) throw error;
 
@@ -247,12 +247,15 @@ function EditMyioOrderDialog({ order }: { order: MyioOrder }) {
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor={`edit-title-${order.id}`}>Identificação do pedido</Label>
-            <Input id={`edit-title-${order.id}`} value={title} onChange={(e) => setTitle(e.target.value)} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor={`edit-client-${order.id}`}>Cliente</Label>
-            <Input id={`edit-client-${order.id}`} value={client} onChange={(e) => setClient(e.target.value)} />
+            <Label>Projeto</Label>
+            <Select value={projectId} onValueChange={setProjectId}>
+              <SelectTrigger><SelectValue placeholder="Selecione um projeto" /></SelectTrigger>
+              <SelectContent>
+                {(projects ?? []).map((p) => (
+                  <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-2">
             <Label htmlFor={`edit-date-${order.id}`}>Data de entrega</Label>
