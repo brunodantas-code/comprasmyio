@@ -53,6 +53,8 @@ type MyioOrder = {
   status: MyioStatus;
   notes: string | null;
   created_at: string;
+  project_id: string | null;
+  projects: { name: string } | null;
   myio_order_items: { id: string; product: string; quantity: number }[];
 };
 
@@ -62,17 +64,28 @@ function formatDate(d: string | null) {
   return `${day}/${m}/${y}`;
 }
 
+function useProjects() {
+  return useQuery({
+    queryKey: ["projects-for-myio"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("projects").select("id, name").order("name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
 function NewMyioOrderDialog({ userId }: { userId: string }) {
   const qc = useQueryClient();
+  const { data: projects } = useProjects();
   const [open, setOpen] = useState(false);
-  const [title, setTitle] = useState("");
-  const [client, setClient] = useState("");
+  const [projectId, setProjectId] = useState("");
   const [date, setDate] = useState("");
   const [notes, setNotes] = useState("");
   const [qty, setQty] = useState<Record<string, string>>({});
 
   const reset = () => {
-    setTitle(""); setClient(""); setDate(""); setNotes(""); setQty({});
+    setProjectId(""); setDate(""); setNotes(""); setQty({});
   };
 
   const mutation = useMutation({
@@ -81,11 +94,12 @@ function NewMyioOrderDialog({ userId }: { userId: string }) {
         .map((p) => ({ product: p, quantity: parseInt(qty[p] ?? "", 10) }))
         .filter((i) => Number.isFinite(i.quantity) && i.quantity > 0);
       if (!date) throw new Error("Informe a data de entrega.");
+      if (!projectId) throw new Error("Selecione um projeto.");
       if (items.length === 0) throw new Error("Adicione a quantidade de pelo menos um produto.");
 
       const { data: order, error } = await supabase
         .from("myio_orders")
-        .insert({ title, client_name: client, delivery_date: date, notes: notes || null, created_by: userId })
+        .insert({ project_id: projectId, delivery_date: date, notes: notes || null, created_by: userId })
         .select("id")
         .single();
       if (error) throw error;
@@ -112,17 +126,20 @@ function NewMyioOrderDialog({ userId }: { userId: string }) {
       <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Novo pedido de produtos Myio</DialogTitle>
-          <DialogDescription>Defina a data de entrega e as quantidades por produto.</DialogDescription>
+          <DialogDescription>Selecione o projeto, a data de entrega e as quantidades por produto.</DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="myio-title">Identificação do pedido</Label>
-            <Input id="myio-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ex.: Lote 42" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="myio-client">Cliente</Label>
-            <Input id="myio-client" value={client} onChange={(e) => setClient(e.target.value)} placeholder="Opcional" />
+            <Label>Projeto</Label>
+            <Select value={projectId} onValueChange={setProjectId}>
+              <SelectTrigger><SelectValue placeholder="Selecione um projeto" /></SelectTrigger>
+              <SelectContent>
+                {(projects ?? []).map((p) => (
+                  <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-2">
             <Label htmlFor="myio-date">Data de entrega</Label>
