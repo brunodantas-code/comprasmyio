@@ -17,11 +17,12 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Checkbox } from "@/components/ui/checkbox";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { toast } from "sonner";
-import { Package, LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Library, Boxes, Factory } from "lucide-react";
+import { Package, LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Library, Boxes, Factory, Building2 } from "lucide-react";
 import { Trash2, Paperclip, X, Download } from "lucide-react";
 import { z } from "zod";
 import { StockTab } from "@/components/stock-tab";
 import { MyioOrdersTab } from "@/components/myio-orders-tab";
+import { ClientsTab, useClients } from "@/components/clients-tab";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   component: Dashboard,
@@ -335,6 +336,7 @@ function Dashboard() {
             )}
             <TabsTrigger value="stock"><Boxes className="mr-2 h-4 w-4" />Estoque</TabsTrigger>
             {me.isAdmin && <TabsTrigger value="projects"><FolderKanban className="mr-2 h-4 w-4" />Projetos</TabsTrigger>}
+            {me.isAdmin && <TabsTrigger value="clients"><Building2 className="mr-2 h-4 w-4" />Clientes</TabsTrigger>}
             {me.isAdmin && <TabsTrigger value="materials"><Library className="mr-2 h-4 w-4" />Materiais</TabsTrigger>}
             {me.isAdmin && <TabsTrigger value="myio"><Factory className="mr-2 h-4 w-4" />Pedidos Produtos Myio</TabsTrigger>}
             {me.isAdmin && <TabsTrigger value="users"><Users className="mr-2 h-4 w-4" />Usuários</TabsTrigger>}
@@ -346,6 +348,7 @@ function Dashboard() {
           {(me.isComprador || me.isAdmin) && <TabsContent value="queue"><BuyerQueue /></TabsContent>}
           <TabsContent value="stock"><StockTab userId={me.id} /></TabsContent>
           {me.isAdmin && <TabsContent value="projects"><ProjectsAdmin userId={me.id} /></TabsContent>}
+          {me.isAdmin && <TabsContent value="clients"><ClientsTab userId={me.id} /></TabsContent>}
           {me.isAdmin && <TabsContent value="materials"><MaterialsAdmin /></TabsContent>}
             {me.isAdmin && <TabsContent value="myio"><MyioOrdersTab userId={me.id} /></TabsContent>}
           {me.isAdmin && <TabsContent value="users"><UsersAdmin /></TabsContent>}
@@ -1144,9 +1147,11 @@ function InternalDeleteOrderDialog({ order }: { order: Order }) {
 function ProjectsAdmin({ userId }: { userId: string }) {
   const qc = useQueryClient();
   const { data: projects, isLoading } = useProjects();
+  const { data: clients } = useClients();
+  const [clientId, setClientId] = useState<string>("none");
 
   const create = useMutation({
-    mutationFn: async (v: { name: string; description: string; client_name: string; client_cnpj: string | null }) => {
+    mutationFn: async (v: { name: string; description: string; client_id: string | null }) => {
       const { error } = await supabase.from("projects").insert({ ...v, created_by: userId });
       if (error) throw error;
     },
@@ -1168,11 +1173,14 @@ function ProjectsAdmin({ userId }: { userId: string }) {
     const fd = new FormData(e.currentTarget);
     const name = String(fd.get("name") || "").trim();
     const description = String(fd.get("description") || "").trim();
-    const client_name = String(fd.get("client_name") || "").trim();
-    const client_cnpj = String(fd.get("client_cnpj") || "").trim();
     if (name.length < 2) return toast.error("Nome muito curto");
-    create.mutate({ name, description, client_name, client_cnpj: client_cnpj || null }, { onSuccess: () => (e.target as HTMLFormElement).reset() });
+    create.mutate(
+      { name, description, client_id: clientId === "none" ? null : clientId },
+      { onSuccess: () => { (e.target as HTMLFormElement).reset(); setClientId("none"); } },
+    );
   }
+
+  const clientOf = (p: { client_id?: string | null }) => clients?.find((c) => c.id === p.client_id);
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_1.5fr]">
@@ -1181,8 +1189,16 @@ function ProjectsAdmin({ userId }: { userId: string }) {
         <CardContent>
           <form onSubmit={onCreate} className="space-y-4">
             <div className="space-y-2"><Label htmlFor="p-name">Nome do projeto</Label><Input id="p-name" name="name" required /></div>
-            <div className="space-y-2"><Label htmlFor="p-client">Nome do cliente</Label><Input id="p-client" name="client_name" /></div>
-            <div className="space-y-2"><Label htmlFor="p-cnpj">CNPJ do cliente</Label><Input id="p-cnpj" name="client_cnpj" placeholder="00.000.000/0000-00" /></div>
+            <div className="space-y-2">
+              <Label>Cliente</Label>
+              <Select value={clientId} onValueChange={setClientId}>
+                <SelectTrigger><SelectValue placeholder="Selecione (opcional)" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Sem cliente</SelectItem>
+                  {(clients ?? []).map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="space-y-2"><Label htmlFor="p-desc">Descrição</Label><Textarea id="p-desc" name="description" /></div>
             <Button type="submit" disabled={create.isPending}>Criar</Button>
           </form>
@@ -1199,8 +1215,8 @@ function ProjectsAdmin({ userId }: { userId: string }) {
                 {projects.map((p) => (
                   <TableRow key={p.id}>
                     <TableCell className="font-medium">{p.name}</TableCell>
-                    <TableCell className="text-sm">{p.client_name || "—"}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{p.client_cnpj || "—"}</TableCell>
+                    <TableCell className="text-sm">{clientOf(p)?.name || p.client_name || "—"}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{clientOf(p)?.cnpj || p.client_cnpj || "—"}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">{p.description || "—"}</TableCell>
                     <TableCell className="text-right">
                       <Button size="sm" variant="ghost" onClick={() => remove.mutate(p.id)}>Excluir</Button>
