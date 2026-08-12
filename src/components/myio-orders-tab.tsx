@@ -391,12 +391,12 @@ export function MyioOrdersTab({ userId }: { userId: string }) {
         </div>
         <div className="flex items-center gap-2">
           <Select
-            value={statusFilter.size === STATUS_KEYS.length ? "all" : Array.from(statusFilter).join(",")}
+            value={statusFilter.size === STATUS_KEYS.length ? "all" : (Array.from(statusFilter)[0] ?? "all")}
             onValueChange={(v) => {
               if (v === "all") {
                 setStatusFilter(new Set(STATUS_KEYS));
               } else {
-                setStatusFilter(new Set(v.split(",") as MyioStatus[]));
+                setStatusFilter(new Set([v as MyioStatus]));
               }
             }}
           >
