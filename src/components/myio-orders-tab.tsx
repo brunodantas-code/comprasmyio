@@ -351,6 +351,9 @@ function DeleteMyioOrderInner({ id }: { id: string }) {
 
 export function MyioOrdersTab({ userId }: { userId: string }) {
   const qc = useQueryClient();
+  const [statusFilter, setStatusFilter] = useState<Set<MyioStatus>>(
+    new Set(Object.keys(STATUS_LABELS) as MyioStatus[])
+  );
   const { data: orders, isLoading } = useQuery({
     queryKey: ["myio-orders"],
     queryFn: async () => {
