@@ -54,6 +54,8 @@ const STATUS_CLASSES: Record<MyioStatus, string> = {
   entregue_cliente: "bg-blue-100 text-blue-800 border-blue-300",
 };
 
+const STATUS_KEYS = Object.keys(STATUS_LABELS) as MyioStatus[];
+
 type MyioOrder = {
   id: string;
   title: string;
@@ -351,6 +353,9 @@ function DeleteMyioOrderInner({ id }: { id: string }) {
 
 export function MyioOrdersTab({ userId }: { userId: string }) {
   const qc = useQueryClient();
+  const [statusFilter, setStatusFilter] = useState<Set<MyioStatus>>(
+    new Set(Object.keys(STATUS_LABELS) as MyioStatus[])
+  );
   const { data: orders, isLoading } = useQuery({
     queryKey: ["myio-orders"],
     queryFn: async () => {
@@ -375,7 +380,7 @@ export function MyioOrdersTab({ userId }: { userId: string }) {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const list = orders ?? [];
+  const list = (orders ?? []).filter((o) => statusFilter.has(o.status));
 
   return (
     <Card>
@@ -384,7 +389,27 @@ export function MyioOrdersTab({ userId }: { userId: string }) {
           <CardTitle className="flex items-center gap-2"><Factory className="h-5 w-5" />Pedidos Produtos Myio</CardTitle>
           <CardDescription>Controle de produção e entrega dos produtos Myio.</CardDescription>
         </div>
-        <NewMyioOrderDialog userId={userId} />
+        <div className="flex items-center gap-2">
+          <Select
+            value={statusFilter.size === STATUS_KEYS.length ? "all" : (Array.from(statusFilter)[0] ?? "all")}
+            onValueChange={(v) => {
+              if (v === "all") {
+                setStatusFilter(new Set(STATUS_KEYS));
+              } else {
+                setStatusFilter(new Set([v as MyioStatus]));
+              }
+            }}
+          >
+            <SelectTrigger className="h-9 w-52"><SelectValue placeholder="Filtrar status" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os status</SelectItem>
+              {STATUS_KEYS.map((s) => (
+                <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <NewMyioOrderDialog userId={userId} />
+        </div>
       </CardHeader>
       <CardContent>
         {isLoading ? (
