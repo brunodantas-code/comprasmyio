@@ -107,6 +107,7 @@ export type Database = {
           created_by: string | null
           delivery_date: string
           id: string
+          is_replacement: boolean
           notes: string | null
           project_id: string | null
           status: Database["public"]["Enums"]["myio_order_status"]
@@ -119,6 +120,7 @@ export type Database = {
           created_by?: string | null
           delivery_date: string
           id?: string
+          is_replacement?: boolean
           notes?: string | null
           project_id?: string | null
           status?: Database["public"]["Enums"]["myio_order_status"]
@@ -131,6 +133,7 @@ export type Database = {
           created_by?: string | null
           delivery_date?: string
           id?: string
+          is_replacement?: boolean
           notes?: string | null
           project_id?: string | null
           status?: Database["public"]["Enums"]["myio_order_status"]
@@ -146,6 +149,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      myio_product_images: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          image_url: string
+          product: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          image_url: string
+          product: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          image_url?: string
+          product?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       order_logs: {
         Row: {
