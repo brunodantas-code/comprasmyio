@@ -54,6 +54,8 @@ const STATUS_CLASSES: Record<MyioStatus, string> = {
   entregue_cliente: "bg-blue-100 text-blue-800 border-blue-300",
 };
 
+const STATUS_KEYS = Object.keys(STATUS_LABELS) as MyioStatus[];
+
 type MyioOrder = {
   id: string;
   title: string;
