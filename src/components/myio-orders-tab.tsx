@@ -27,6 +27,15 @@ export const MYIO_PRODUCTS = [
   "Myio 3F TC 2000A",
   "Myio Central",
   "Myio Remote",
+  "Hidrômetro Unijato DN20 (3/4)",
+  "Hidrômetro Multijato DN25 (1\")",
+  "Hidrômetro Multijato DN40 (1\" 1/4)",
+  "Hidrômetro Flange Multijato DN50",
+  "Hidrômetro Flange Woltman DN80",
+  "Hidrômetro Flange Woltman DN100",
+  "Sensor 3D Plano Parafuso Akvometer",
+  "Sensor 3D Vertical Hidrômetro",
+  "Sensor Sirius ACB Mensolarb",
 ] as const;
 
 type MyioStatus = "pendente" | "produzindo" | "pronto_entrega" | "entregue_cliente";
