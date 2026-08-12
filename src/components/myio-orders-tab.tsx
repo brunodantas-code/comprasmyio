@@ -10,6 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ProductImageUploader, ProductThumb, useProductImages } from "@/components/myio-product-image";
 import { toast } from "sonner";
 import { Plus, Trash2, Factory, Pencil } from "lucide-react";
 
@@ -65,6 +67,7 @@ type MyioOrder = {
   notes: string | null;
   created_at: string;
   project_id: string | null;
+  is_replacement: boolean | null;
   projects: { name: string } | null;
   myio_order_items: { id: string; product: string; quantity: number }[];
 };
@@ -89,14 +92,16 @@ function useProjects() {
 function NewMyioOrderDialog({ userId }: { userId: string }) {
   const qc = useQueryClient();
   const { data: projects } = useProjects();
+  const { data: images } = useProductImages();
   const [open, setOpen] = useState(false);
   const [projectId, setProjectId] = useState("");
   const [date, setDate] = useState("");
   const [notes, setNotes] = useState("");
+  const [isReplacement, setIsReplacement] = useState(false);
   const [qty, setQty] = useState<Record<string, string>>({});
 
   const reset = () => {
-    setProjectId(""); setDate(""); setNotes(""); setQty({});
+    setProjectId(""); setDate(""); setNotes(""); setQty({}); setIsReplacement(false);
   };
 
   const mutation = useMutation({
@@ -110,7 +115,7 @@ function NewMyioOrderDialog({ userId }: { userId: string }) {
 
       const { data: order, error } = await supabase
         .from("myio_orders")
-        .insert({ project_id: projectId, delivery_date: date, notes: notes || null, created_by: userId })
+        .insert({ project_id: projectId, delivery_date: date, notes: notes || null, created_by: userId, is_replacement: isReplacement })
         .select("id")
         .single();
       if (error) throw error;
@@ -158,12 +163,21 @@ function NewMyioOrderDialog({ userId }: { userId: string }) {
           </div>
         </div>
 
+        <div className="flex items-center gap-2 rounded-md border p-3">
+          <Checkbox id="myio-replacement" checked={isReplacement} onCheckedChange={(v) => setIsReplacement(v === true)} />
+          <Label htmlFor="myio-replacement" className="cursor-pointer font-normal">Produto de reposição</Label>
+        </div>
+
         <div className="space-y-2">
           <Label>Produtos</Label>
+          <p className="text-xs text-muted-foreground">Clique na miniatura para adicionar ou trocar a foto do produto.</p>
           <div className="grid gap-2 sm:grid-cols-2">
             {MYIO_PRODUCTS.map((p) => (
               <div key={p} className="flex items-center justify-between gap-3 rounded-md border p-2">
-                <span className="text-sm">{p}</span>
+                <div className="flex min-w-0 items-center gap-2">
+                  <ProductImageUploader product={p} url={images?.[p]} userId={userId} />
+                  <span className="text-sm">{p}</span>
+                </div>
                 <Input
                   type="number"
                   min={0}
@@ -196,19 +210,22 @@ function DeleteMyioOrder({ id }: { id: string }) {
   return <DeleteMyioOrderInner id={id} />;
 }
 
-function EditMyioOrderDialog({ order }: { order: MyioOrder }) {
+function EditMyioOrderDialog({ order, userId }: { order: MyioOrder; userId: string }) {
   const qc = useQueryClient();
   const { data: projects } = useProjects();
+  const { data: images } = useProductImages();
   const [open, setOpen] = useState(false);
   const [projectId, setProjectId] = useState(order.project_id ?? "");
   const [date, setDate] = useState(order.delivery_date?.slice(0, 10) ?? "");
   const [notes, setNotes] = useState(order.notes ?? "");
+  const [isReplacement, setIsReplacement] = useState(!!order.is_replacement);
   const [qty, setQty] = useState<Record<string, string>>({});
 
   const load = () => {
     setProjectId(order.project_id ?? "");
     setDate(order.delivery_date?.slice(0, 10) ?? "");
     setNotes(order.notes ?? "");
+    setIsReplacement(!!order.is_replacement);
     const map: Record<string, string> = {};
     order.myio_order_items.forEach((i) => { map[i.product] = String(i.quantity); });
     setQty(map);
@@ -225,7 +242,7 @@ function EditMyioOrderDialog({ order }: { order: MyioOrder }) {
 
       const { error } = await supabase
         .from("myio_orders")
-        .update({ project_id: projectId, delivery_date: date, notes: notes || null })
+        .update({ project_id: projectId, delivery_date: date, notes: notes || null, is_replacement: isReplacement })
         .eq("id", order.id);
       if (error) throw error;
 
@@ -274,12 +291,24 @@ function EditMyioOrderDialog({ order }: { order: MyioOrder }) {
           </div>
         </div>
 
+        <div className="flex items-center gap-2 rounded-md border p-3">
+          <Checkbox
+            id={`edit-replacement-${order.id}`}
+            checked={isReplacement}
+            onCheckedChange={(v) => setIsReplacement(v === true)}
+          />
+          <Label htmlFor={`edit-replacement-${order.id}`} className="cursor-pointer font-normal">Produto de reposição</Label>
+        </div>
+
         <div className="space-y-2">
           <Label>Produtos</Label>
           <div className="grid gap-2 sm:grid-cols-2">
             {MYIO_PRODUCTS.map((p) => (
               <div key={p} className="flex items-center justify-between gap-3 rounded-md border p-2">
-                <span className="text-sm">{p}</span>
+                <div className="flex min-w-0 items-center gap-2">
+                  <ProductImageUploader product={p} url={images?.[p]} userId={userId} />
+                  <span className="text-sm">{p}</span>
+                </div>
                 <Input
                   type="number"
                   min={0}
