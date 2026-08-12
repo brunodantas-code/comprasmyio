@@ -378,7 +378,7 @@ export function MyioOrdersTab({ userId }: { userId: string }) {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const list = orders ?? [];
+  const list = (orders ?? []).filter((o) => statusFilter.has(o.status));
 
   return (
     <Card>
@@ -387,7 +387,27 @@ export function MyioOrdersTab({ userId }: { userId: string }) {
           <CardTitle className="flex items-center gap-2"><Factory className="h-5 w-5" />Pedidos Produtos Myio</CardTitle>
           <CardDescription>Controle de produção e entrega dos produtos Myio.</CardDescription>
         </div>
-        <NewMyioOrderDialog userId={userId} />
+        <div className="flex items-center gap-2">
+          <Select
+            value={statusFilter.size === STATUS_KEYS.length ? "all" : Array.from(statusFilter).join(",")}
+            onValueChange={(v) => {
+              if (v === "all") {
+                setStatusFilter(new Set(STATUS_KEYS));
+              } else {
+                setStatusFilter(new Set(v.split(",") as MyioStatus[]));
+              }
+            }}
+          >
+            <SelectTrigger className="h-9 w-52"><SelectValue placeholder="Filtrar status" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os status</SelectItem>
+              {STATUS_KEYS.map((s) => (
+                <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <NewMyioOrderDialog userId={userId} />
+        </div>
       </CardHeader>
       <CardContent>
         {isLoading ? (
