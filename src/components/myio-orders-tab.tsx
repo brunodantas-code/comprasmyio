@@ -382,6 +382,7 @@ function DeleteMyioOrderInner({ id }: { id: string }) {
 
 export function MyioOrdersTab({ userId }: { userId: string }) {
   const qc = useQueryClient();
+  const { data: images } = useProductImages();
   const [statusFilter, setStatusFilter] = useState<Set<MyioStatus>>(
     new Set(Object.keys(STATUS_LABELS) as MyioStatus[])
   );
@@ -461,14 +462,18 @@ export function MyioOrdersTab({ userId }: { userId: string }) {
                 <TableRow key={o.id}>
                   <TableCell className="font-medium">
                     {o.projects?.name || "—"}
+                    {o.is_replacement && (
+                      <Badge variant="outline" className="ml-2 border-orange-300 bg-orange-100 text-orange-800">Reposição</Badge>
+                    )}
                     {o.notes && <p className="text-xs text-muted-foreground">{o.notes}</p>}
                   </TableCell>
                   <TableCell>{formatDate(o.delivery_date)}</TableCell>
                   <TableCell>
                     <div className="space-y-1">
                       {o.myio_order_items.map((i) => (
-                        <div key={i.id} className="text-xs">
-                          <span className="font-medium">{i.quantity}x</span> {i.product}
+                        <div key={i.id} className="flex items-center gap-2 text-xs">
+                          <ProductThumb url={images?.[i.product]} name={i.product} size={28} />
+                          <span><span className="font-medium">{i.quantity}x</span> {i.product}</span>
                         </div>
                       ))}
                     </div>
