@@ -1235,6 +1235,8 @@ function ProjectsAdmin({ userId }: { userId: string }) {
 function MaterialsAdmin() {
   const qc = useQueryClient();
   const { data: materials, isLoading } = useMaterials();
+  const [search, setSearch] = useState("");
+  const [editing, setEditing] = useState<{ id: string; name: string; link: string } | null>(null);
 
   const create = useMutation({
     mutationFn: async (v: { name: string; link: string | null }) => {
@@ -1253,6 +1255,29 @@ function MaterialsAdmin() {
     onSuccess: () => { toast.success("Material removido"); qc.invalidateQueries({ queryKey: ["materials"] }); },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  const update = useMutation({
+    mutationFn: async (v: { id: string; name: string; link: string | null }) => {
+      const { error } = await supabase.from("materials").update({ name: v.name, link: v.link }).eq("id", v.id);
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success("Material atualizado"); setEditing(null); qc.invalidateQueries({ queryKey: ["materials"] }); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const term = search.trim().toLowerCase();
+  const filtered = (materials ?? []).filter((m) =>
+    !term || m.name.toLowerCase().includes(term) || (m.link ?? "").toLowerCase().includes(term)
+  );
+
+  function onSaveEdit() {
+    if (!editing) return;
+    const name = editing.name.trim();
+    const link = editing.link.trim();
+    if (name.length < 2) return toast.error("Nome muito curto");
+    if (link && !/^https?:\/\//i.test(link)) return toast.error("Link inválido");
+    update.mutate({ id: editing.id, name, link: link || null });
+  }
 
   function onCreate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -1280,16 +1305,29 @@ function MaterialsAdmin() {
         </CardContent>
       </Card>
       <Card>
-        <CardHeader><CardTitle>Biblioteca de materiais</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle>Biblioteca de materiais</CardTitle>
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar por nome ou link..."
+            className="mt-2"
+          />
+        </CardHeader>
         <CardContent>
           {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
             !materials?.length ? <p className="text-sm text-muted-foreground">Nenhum material cadastrado.</p> :
+            !filtered.length ? <p className="text-sm text-muted-foreground">Nenhum material encontrado para "{search}".</p> :
             <Table>
               <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Link</TableHead><TableHead /></TableRow></TableHeader>
               <TableBody>
-                {materials.map((m) => (
+                {filtered.map((m) => (
                   <TableRow key={m.id}>
-                    <TableCell className="font-medium">{m.name}</TableCell>
+                    <TableCell className="font-medium">
+                      {m.link ? (
+                        <a href={m.link} target="_blank" rel="noreferrer" className="hover:underline">{m.name}</a>
+                      ) : m.name}
+                    </TableCell>
                     <TableCell className="text-sm">
                       {m.link ? (
                         <a href={m.link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-primary hover:underline">
@@ -1298,6 +1336,7 @@ function MaterialsAdmin() {
                       ) : <span className="text-muted-foreground">—</span>}
                     </TableCell>
                     <TableCell className="text-right">
+                      <Button size="sm" variant="ghost" onClick={() => setEditing({ id: m.id, name: m.name, link: m.link ?? "" })}>Editar</Button>
                       <Button size="sm" variant="ghost" onClick={() => remove.mutate(m.id)}>Excluir</Button>
                     </TableCell>
                   </TableRow>
@@ -1307,6 +1346,28 @@ function MaterialsAdmin() {
           }
         </CardContent>
       </Card>
+      <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar material</DialogTitle>
+            <DialogDescription>Atualize o nome e o link do material.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-m-name">Nome</Label>
+              <Input id="edit-m-name" value={editing?.name ?? ""} onChange={(e) => setEditing((p) => p && { ...p, name: e.target.value })} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-m-link">Link <span className="text-muted-foreground">(opcional)</span></Label>
+              <Input id="edit-m-link" value={editing?.link ?? ""} onChange={(e) => setEditing((p) => p && { ...p, link: e.target.value })} placeholder="https://..." />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditing(null)}>Cancelar</Button>
+            <Button onClick={onSaveEdit} disabled={update.isPending}>Salvar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
