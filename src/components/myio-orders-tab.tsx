@@ -488,7 +488,7 @@ export function MyioOrdersTab({ userId }: { userId: string }) {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
-                      <EditMyioOrderDialog order={o} />
+                      <EditMyioOrderDialog order={o} userId={userId} />
                       <DeleteMyioOrder id={o.id} />
                     </div>
                   </TableCell>
