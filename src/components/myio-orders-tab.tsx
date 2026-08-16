@@ -455,6 +455,7 @@ export function MyioOrdersTab({ userId }: { userId: string }) {
             <TableHeader>
               <TableRow>
                 <TableHead>Projeto</TableHead>
+                <TableHead>Reposição</TableHead>
                 <TableHead>Entrega</TableHead>
                 <TableHead>Produtos</TableHead>
                 <TableHead>Status</TableHead>
