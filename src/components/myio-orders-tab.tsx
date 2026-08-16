@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ProductImageUploader, ProductThumb, useProductImages } from "@/components/myio-product-image";
+import { ProductImageUploader, ProductPhotoPreview, useProductImages } from "@/components/myio-product-image";
 import { toast } from "sonner";
 import { Plus, Trash2, Factory, Pencil } from "lucide-react";
 
@@ -472,8 +472,9 @@ export function MyioOrdersTab({ userId }: { userId: string }) {
                     <div className="space-y-1">
                       {o.myio_order_items.map((i) => (
                         <div key={i.id} className="flex items-center gap-2 text-xs">
-                          <ProductThumb url={images?.[i.product]} name={i.product} size={28} />
-                          <span><span className="font-medium">{i.quantity}x</span> {i.product}</span>
+                          <ProductPhotoPreview product={i.product} url={images?.[i.product]} size={28}>
+                            <span><span className="font-medium">{i.quantity}x</span> {i.product}</span>
+                          </ProductPhotoPreview>
                         </div>
                       ))}
                     </div>
