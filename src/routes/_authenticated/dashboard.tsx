@@ -338,7 +338,7 @@ function Dashboard() {
             {me.isAdmin && <TabsTrigger value="projects"><FolderKanban className="mr-2 h-4 w-4" />Projetos</TabsTrigger>}
             {me.isAdmin && <TabsTrigger value="clients"><Building2 className="mr-2 h-4 w-4" />Clientes</TabsTrigger>}
             {me.isAdmin && <TabsTrigger value="materials"><Library className="mr-2 h-4 w-4" />Materiais</TabsTrigger>}
-            {me.isAdmin && <TabsTrigger value="myio"><Factory className="mr-2 h-4 w-4" />Pedidos Produtos Myio</TabsTrigger>}
+            {me.isAdmin && <TabsTrigger value="myio"><Factory className="mr-2 h-4 w-4" />Pedidos de Projetos Myio</TabsTrigger>}
             {me.isAdmin && <TabsTrigger value="users"><Users className="mr-2 h-4 w-4" />Usuários</TabsTrigger>}
             {me.isAdmin && <TabsTrigger value="logs"><ScrollText className="mr-2 h-4 w-4" />Logs</TabsTrigger>}
           </TabsList>

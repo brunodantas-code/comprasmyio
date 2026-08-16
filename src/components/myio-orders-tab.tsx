@@ -416,7 +416,7 @@ export function MyioOrdersTab({ userId }: { userId: string }) {
     <Card>
       <CardHeader className="flex flex-row items-start justify-between gap-4">
         <div>
-          <CardTitle className="flex items-center gap-2"><Factory className="h-5 w-5" />Pedidos Produtos Myio</CardTitle>
+          <CardTitle className="flex items-center gap-2"><Factory className="h-5 w-5" />Pedidos de Projetos Myio</CardTitle>
           <CardDescription>Controle de produção e entrega dos produtos Myio.</CardDescription>
         </div>
         <div className="flex items-center gap-2">
