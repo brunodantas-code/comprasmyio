@@ -1,8 +1,9 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ImagePlus } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const BUCKET = "product-images";
 
@@ -47,6 +48,14 @@ export function ProductThumb({ url, name, size = 40 }: { url?: string; name: str
 }
 
 export function ProductImageUploader({
+  product,
+  url,
+  userId,
+}: {
+  product: string;
+  url?: string;
+  userId: string;
+}) {
   product,
   url,
   userId,
