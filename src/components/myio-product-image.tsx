@@ -119,7 +119,7 @@ export function ProductPhotoPreview({
         onClick={() => url && setOpen(true)}
         className={`flex min-w-0 items-center gap-2 text-left ${url ? "cursor-zoom-in hover:opacity-80" : "cursor-default"}`}
       >
-        <ProductThumb url={url} name={product} size={size} />
+        {size > 0 && <ProductThumb url={url} name={product} size={size} />}
         {children}
       </button>
       <Dialog open={open} onOpenChange={setOpen}>
