@@ -455,6 +455,7 @@ export function MyioOrdersTab({ userId }: { userId: string }) {
             <TableHeader>
               <TableRow>
                 <TableHead>Projeto</TableHead>
+                <TableHead>Reposição</TableHead>
                 <TableHead>Entrega</TableHead>
                 <TableHead>Produtos</TableHead>
                 <TableHead>Status</TableHead>
@@ -466,10 +467,14 @@ export function MyioOrdersTab({ userId }: { userId: string }) {
                 <TableRow key={o.id}>
                   <TableCell className="font-medium">
                     {o.projects?.name || "—"}
-                    {o.is_replacement && (
-                      <Badge variant="outline" className="ml-2 border-orange-300 bg-orange-100 text-orange-800">Reposição</Badge>
-                    )}
                     {o.notes && <p className="text-xs text-muted-foreground">{o.notes}</p>}
+                  </TableCell>
+                  <TableCell>
+                    {o.is_replacement ? (
+                      <Badge variant="outline" className="border-orange-300 bg-orange-100 text-orange-800">Sim</Badge>
+                    ) : (
+                      <span className="text-sm text-muted-foreground">Não</span>
+                    )}
                   </TableCell>
                   <TableCell>{formatDate(o.delivery_date)}</TableCell>
                   <TableCell>
