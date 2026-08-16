@@ -57,6 +57,15 @@ export function ProductImageUploader({
   userId: string;
 }) {
   const qc = useQueryClient();
+  product,
+  url,
+  userId,
+}: {
+  product: string;
+  url?: string;
+  userId: string;
+}) {
+  const qc = useQueryClient();
   const inputRef = useRef<HTMLInputElement>(null);
 
   const onFile = async (file: File) => {
