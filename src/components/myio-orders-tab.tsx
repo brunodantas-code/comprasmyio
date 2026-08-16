@@ -176,7 +176,9 @@ function NewMyioOrderDialog({ userId }: { userId: string }) {
               <div key={p} className="flex items-center justify-between gap-3 rounded-md border p-2">
                 <div className="flex min-w-0 items-center gap-2">
                   <ProductImageUploader product={p} url={images?.[p]} userId={userId} />
-                  <span className="text-sm">{p}</span>
+                  <ProductPhotoPreview product={p} url={images?.[p]} size={0}>
+                    <span className="text-sm">{p}</span>
+                  </ProductPhotoPreview>
                 </div>
                 <Input
                   type="number"
