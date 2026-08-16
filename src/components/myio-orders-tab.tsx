@@ -395,7 +395,7 @@ export function MyioOrdersTab({ userId }: { userId: string }) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("myio_orders")
-        .select("id, title, client_name, delivery_date, status, notes, created_at, project_id, projects(name), myio_order_items(id, product, quantity)")
+        .select("id, title, client_name, delivery_date, status, notes, created_at, project_id, is_replacement, projects(name), myio_order_items(id, product, quantity)")
         .order("delivery_date", { ascending: true });
       if (error) throw error;
       return (data ?? []) as unknown as MyioOrder[];
