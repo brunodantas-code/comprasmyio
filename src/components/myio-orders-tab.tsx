@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ProductImageUploader, ProductThumb, useProductImages } from "@/components/myio-product-image";
+import { ProductImageUploader, ProductPhotoPreview, useProductImages } from "@/components/myio-product-image";
 import { toast } from "sonner";
 import { Plus, Trash2, Factory, Pencil } from "lucide-react";
 
@@ -176,7 +176,9 @@ function NewMyioOrderDialog({ userId }: { userId: string }) {
               <div key={p} className="flex items-center justify-between gap-3 rounded-md border p-2">
                 <div className="flex min-w-0 items-center gap-2">
                   <ProductImageUploader product={p} url={images?.[p]} userId={userId} />
-                  <span className="text-sm">{p}</span>
+                  <ProductPhotoPreview product={p} url={images?.[p]} size={0}>
+                    <span className="text-sm">{p}</span>
+                  </ProductPhotoPreview>
                 </div>
                 <Input
                   type="number"
@@ -307,7 +309,9 @@ function EditMyioOrderDialog({ order, userId }: { order: MyioOrder; userId: stri
               <div key={p} className="flex items-center justify-between gap-3 rounded-md border p-2">
                 <div className="flex min-w-0 items-center gap-2">
                   <ProductImageUploader product={p} url={images?.[p]} userId={userId} />
-                  <span className="text-sm">{p}</span>
+                  <ProductPhotoPreview product={p} url={images?.[p]} size={0}>
+                    <span className="text-sm">{p}</span>
+                  </ProductPhotoPreview>
                 </div>
                 <Input
                   type="number"
@@ -472,8 +476,9 @@ export function MyioOrdersTab({ userId }: { userId: string }) {
                     <div className="space-y-1">
                       {o.myio_order_items.map((i) => (
                         <div key={i.id} className="flex items-center gap-2 text-xs">
-                          <ProductThumb url={images?.[i.product]} name={i.product} size={28} />
-                          <span><span className="font-medium">{i.quantity}x</span> {i.product}</span>
+                          <ProductPhotoPreview product={i.product} url={images?.[i.product]} size={28}>
+                            <span><span className="font-medium">{i.quantity}x</span> {i.product}</span>
+                          </ProductPhotoPreview>
                         </div>
                       ))}
                     </div>
