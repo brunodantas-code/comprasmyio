@@ -98,3 +98,38 @@ export function ProductImageUploader({
     </button>
   );
 }
+
+export function ProductPhotoPreview({
+  product,
+  url,
+  size = 28,
+  children,
+}: {
+  product: string;
+  url?: string;
+  size?: number;
+  children?: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button
+        type="button"
+        title={url ? "Ver foto maior" : "Sem foto cadastrada"}
+        onClick={() => url && setOpen(true)}
+        className={`flex min-w-0 items-center gap-2 text-left ${url ? "cursor-zoom-in hover:opacity-80" : "cursor-default"}`}
+      >
+        <ProductThumb url={url} name={product} size={size} />
+        {children}
+      </button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{product}</DialogTitle>
+          </DialogHeader>
+          {url && <img src={url} alt={product} className="max-h-[70vh] w-full rounded-md object-contain" />}
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
