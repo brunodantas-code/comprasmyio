@@ -14,6 +14,79 @@ export type Database = {
   }
   public: {
     Tables: {
+      assembly_release_items: {
+        Row: {
+          created_at: string
+          id: string
+          material_id: string
+          quantity: number
+          release_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          material_id: string
+          quantity: number
+          release_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          material_id?: string
+          quantity?: number
+          release_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assembly_release_items_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "material_stock"
+            referencedColumns: ["material_id"]
+          },
+          {
+            foreignKeyName: "assembly_release_items_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assembly_release_items_release_id_fkey"
+            columns: ["release_id"]
+            isOneToOne: false
+            referencedRelation: "assembly_releases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assembly_releases: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string | null
+          photo_url: string
+          responsibles: string[]
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          photo_url: string
+          responsibles?: string[]
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          photo_url?: string
+          responsibles?: string[]
+        }
+        Relationships: []
+      }
       clients: {
         Row: {
           cnpj: string | null
