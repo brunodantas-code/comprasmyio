@@ -297,6 +297,12 @@ export function HomologateDialog({
     setUnits(Array.from({ length: n }, (_, i) => units[i] ?? ""));
   }
 
+  useEffect(() => {
+    const max = sizes[sizes.length - 1] ?? 1;
+    if (boxSize > max) changeSize(max);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sizes.join(",")]);
+
   function reset() {
     setBoxQr("");
     setNotes("");
