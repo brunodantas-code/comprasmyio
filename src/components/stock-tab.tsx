@@ -332,6 +332,8 @@ function StockSection({ userId, location }: { userId: string; location: StockLoc
       {location === "almoxarifado" && (
         <AssemblyReleasesCard
           materialNames={materialNames}
+          userId={userId}
+          homologable
           title="Produtos para homologar"
           description="Produtos montados liberados pela fábrica, aguardando homologação."
         />

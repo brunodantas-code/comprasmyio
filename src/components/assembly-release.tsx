@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Camera, ImageUp, PackageCheck, Search } from "lucide-react";
+import { HomologateDialog } from "@/components/homologation";
 
 const BUCKET = "assembly-photos";
 
