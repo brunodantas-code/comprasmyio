@@ -1,0 +1,320 @@
+import { useMemo, useRef, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { PackageCheck, Search } from "lucide-react";
+
+const BUCKET = "assembly-photos";
+
+type MaterialRow = { id: string; name: string };
+
+function useAlmoxarifadoMaterials() {
+  return useQuery({
+    queryKey: ["materials", "almoxarifado"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("materials")
+        .select("id, name")
+        .eq("location", "almoxarifado")
+        .order("name");
+      if (error) throw error;
+      return (data ?? []) as MaterialRow[];
+    },
+  });
+}
+
+function useProfilesList() {
+  return useQuery({
+    queryKey: ["profiles-list"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("profiles").select("id, full_name, email").order("full_name");
+      if (error) throw error;
+      return (data ?? []) as { id: string; full_name: string | null; email: string | null }[];
+    },
+  });
+}
+
+export function useAssemblyReleases() {
+  return useQuery({
+    queryKey: ["assembly-releases"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("assembly_releases")
+        .select("id, photo_url, responsibles, notes, created_by, created_at, assembly_release_items(id, quantity, material_id)")
+        .order("created_at", { ascending: false })
+        .limit(100);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+export function ReleaseAssembledDialog({ userId }: { userId: string }) {
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [qty, setQty] = useState<Record<string, string>>({});
+  const [people, setPeople] = useState<string[]>([]);
+  const [file, setFile] = useState<File | null>(null);
+  const [notes, setNotes] = useState("");
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const { data: materials } = useAlmoxarifadoMaterials();
+  const { data: profiles } = useProfilesList();
+
+  const filtered = useMemo(
+    () => (materials ?? []).filter((m) => m.name.toLowerCase().includes(search.trim().toLowerCase())),
+    [materials, search],
+  );
+
+  function reset() {
+    setQty({});
+    setPeople([]);
+    setFile(null);
+    setNotes("");
+    setSearch("");
+    if (fileRef.current) fileRef.current.value = "";
+  }
+
+  const save = useMutation({
+    mutationFn: async () => {
+      const items = Object.entries(qty)
+        .map(([material_id, v]) => ({ material_id, quantity: Number(v) }))
+        .filter((i) => Number.isInteger(i.quantity) && i.quantity > 0);
+      if (!items.length) throw new Error("Selecione ao menos um produto com quantidade");
+      if (!people.length) throw new Error("Selecione ao menos um responsável pela montagem");
+      if (!file) throw new Error("Anexe a foto dos produtos montados");
+
+      const ext = file.name.split(".").pop() ?? "jpg";
+      const path = `${crypto.randomUUID()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from(BUCKET).upload(path, file);
+      if (upErr) throw upErr;
+
+      const { data: release, error } = await supabase
+        .from("assembly_releases")
+        .insert({ photo_url: path, responsibles: people, notes: notes.trim() || null, created_by: userId })
+        .select("id")
+        .single();
+      if (error) throw error;
+
+      const { error: itemsErr } = await supabase
+        .from("assembly_release_items")
+        .insert(items.map((i) => ({ ...i, release_id: release.id })));
+      if (itemsErr) throw itemsErr;
+    },
+    onSuccess: () => {
+      toast.success("Produto montado liberado");
+      qc.invalidateQueries({ queryKey: ["assembly-releases"] });
+      setOpen(false);
+      reset();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        setOpen(o);
+        if (!o) reset();
+      }}
+    >
+      <DialogTrigger asChild>
+        <Button size="sm" className="bg-blue-600 text-white hover:bg-blue-700">
+          <PackageCheck className="mr-1 h-4 w-4" /> Liberar Produto Montado
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Liberar produto montado</DialogTitle>
+          <DialogDescription>Todos os campos são obrigatórios.</DialogDescription>
+        </DialogHeader>
+
+        <form
+          className="space-y-5"
+          onSubmit={(e) => {
+            e.preventDefault();
+            save.mutate();
+          }}
+        >
+          <div className="space-y-2">
+            <Label>Produtos e quantidades</Label>
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Buscar produto do almoxarifado"
+                className="pl-8"
+              />
+            </div>
+            <div className="max-h-64 space-y-1 overflow-y-auto rounded border p-2">
+              {!filtered.length ? (
+                <p className="p-2 text-sm text-muted-foreground">Nenhum produto encontrado no almoxarifado.</p>
+              ) : (
+                filtered.map((m) => (
+                  <div key={m.id} className="flex items-center justify-between gap-3 rounded px-2 py-1 hover:bg-muted/50">
+                    <span className="text-sm">{m.name}</span>
+                    <Input
+                      type="number"
+                      min={0}
+                      className="w-24"
+                      value={qty[m.id] ?? ""}
+                      onChange={(e) => setQty((p) => ({ ...p, [m.id]: e.target.value }))}
+                      placeholder="0"
+                    />
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Responsáveis pela montagem</Label>
+            <div className="max-h-40 space-y-1 overflow-y-auto rounded border p-2">
+              {(profiles ?? []).map((p) => {
+                const checked = people.includes(p.id);
+                return (
+                  <label key={p.id} className="flex cursor-pointer items-center gap-2 rounded px-2 py-1 hover:bg-muted/50">
+                    <Checkbox
+                      checked={checked}
+                      onCheckedChange={(v) =>
+                        setPeople((prev) => (v ? [...prev, p.id] : prev.filter((id) => id !== p.id)))
+                      }
+                    />
+                    <span className="text-sm">{p.full_name || p.email || p.id}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="assembly-photo">Foto dos produtos montados</Label>
+            <Input
+              id="assembly-photo"
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="assembly-notes">Observações</Label>
+            <Textarea
+              id="assembly-notes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Detalhes da montagem"
+            />
+          </div>
+
+          <DialogFooter>
+            <Button type="submit" disabled={save.isPending} className="bg-blue-600 text-white hover:bg-blue-700">
+              {save.isPending ? "Liberando..." : "Liberar"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function PhotoCell({ path }: { path: string }) {
+  const { data: url } = useQuery({
+    queryKey: ["assembly-photo", path],
+    queryFn: async () => {
+      const { data } = await supabase.storage.from(BUCKET).createSignedUrl(path, 60 * 60);
+      return data?.signedUrl ?? null;
+    },
+  });
+  const [open, setOpen] = useState(false);
+  if (!url) return <span className="text-muted-foreground">—</span>;
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <img src={url} alt="Produtos montados" className="h-12 w-12 cursor-pointer rounded border object-cover" />
+      </DialogTrigger>
+      <DialogContent className="max-w-3xl">
+        <DialogHeader>
+          <DialogTitle>Produtos montados</DialogTitle>
+        </DialogHeader>
+        <img src={url} alt="Produtos montados" className="max-h-[70vh] w-full rounded object-contain" />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function AssemblyReleasesCard({ materialNames }: { materialNames: Record<string, string> }) {
+  const { data: releases } = useAssemblyReleases();
+  const { data: profiles } = useProfilesList();
+  const nameOf = (id: string) => {
+    const p = (profiles ?? []).find((x) => x.id === id);
+    return p?.full_name || p?.email || "Usuário";
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Produtos montados liberados</CardTitle>
+        <CardDescription>Histórico de liberações da fábrica.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {!releases?.length ? (
+          <p className="text-sm text-muted-foreground">Nenhuma liberação registrada.</p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Data</TableHead>
+                <TableHead>Produtos</TableHead>
+                <TableHead>Responsáveis</TableHead>
+                <TableHead>Foto</TableHead>
+                <TableHead>Observações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {releases.map((r) => (
+                <TableRow key={r.id}>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {new Date(r.created_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1">
+                      {(r.assembly_release_items ?? []).map((i) => (
+                        <Badge key={i.id} variant="outline">
+                          {materialNames[i.material_id] ?? "Produto"} × {i.quantity}
+                        </Badge>
+                      ))}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-sm">{(r.responsibles ?? []).map(nameOf).join(", ")}</TableCell>
+                  <TableCell><PhotoCell path={r.photo_url} /></TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{r.notes ?? "—"}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
