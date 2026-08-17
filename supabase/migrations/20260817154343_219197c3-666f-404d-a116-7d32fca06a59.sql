@@ -1,0 +1,1 @@
+ALTER VIEW public.material_stock SET (security_invoker = on);

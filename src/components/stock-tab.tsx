@@ -9,17 +9,27 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search } from "lucide-react";
+import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Plus } from "lucide-react";
 
 type StockRow = {
   material_id: string;
   name: string;
   link: string | null;
+  location: StockLocation;
   balance: number;
   total_in: number;
   total_out: number;
   last_movement_at: string | null;
+};
+
+type StockLocation = "almoxarifado" | "fabrica" | "escritorio";
+
+const LOCATION_LABELS: Record<StockLocation, string> = {
+  almoxarifado: "Almoxarifado",
+  fabrica: "Fábrica",
+  escritorio: "Escritório",
 };
 
 type MovementType = "entrada" | "saida" | "ajuste";
@@ -211,33 +221,108 @@ function HistoryDialog({ row }: { row: StockRow }) {
 }
 
 export function StockTab({ userId }: { userId: string }) {
+  return (
+    <Tabs defaultValue="almoxarifado" className="space-y-4">
+      <TabsList>
+        <TabsTrigger value="almoxarifado">Almoxarifado</TabsTrigger>
+        <TabsTrigger value="fabrica">Fábrica</TabsTrigger>
+        <TabsTrigger value="escritorio">Escritório</TabsTrigger>
+      </TabsList>
+      {(Object.keys(LOCATION_LABELS) as StockLocation[]).map((loc) => (
+        <TabsContent key={loc} value={loc}>
+          <StockSection userId={userId} location={loc} />
+        </TabsContent>
+      ))}
+    </Tabs>
+  );
+}
+
+function AddMaterialDialog({ location, userId }: { location: StockLocation; userId: string }) {
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const save = useMutation({
+    mutationFn: async (v: { name: string; link: string | null }) => {
+      const { error } = await supabase.from("materials").insert({ ...v, location, created_by: userId });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Item adicionado");
+      qc.invalidateQueries({ queryKey: ["material-stock"] });
+      qc.invalidateQueries({ queryKey: ["materials"] });
+      setOpen(false);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const name = String(fd.get("name") || "").trim();
+    const link = String(fd.get("link") || "").trim();
+    if (!name) return toast.error("Informe o nome do item");
+    save.mutate({ name, link: link || null });
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm"><Plus className="mr-1 h-4 w-4" /> Adicionar item</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Novo item — {LOCATION_LABELS[location]}</DialogTitle>
+          <DialogDescription>O item fica disponível para entradas e baixas neste local.</DialogDescription>
+        </DialogHeader>
+        <form onSubmit={onSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor={`name-${location}`}>Nome</Label>
+            <Input id={`name-${location}`} name="name" required />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor={`link-${location}`}>Link <span className="text-muted-foreground">(opcional)</span></Label>
+            <Input id={`link-${location}`} name="link" type="url" placeholder="https://" />
+          </div>
+          <DialogFooter>
+            <Button type="submit" disabled={save.isPending}>Salvar</Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function StockSection({ userId, location }: { userId: string; location: StockLocation }) {
   const { data: stock, isLoading } = useStock();
   const { data: movements } = useMovements();
   const { data: profiles } = useStockProfiles();
   const [search, setSearch] = useState("");
   const [view, setView] = useState<"all" | "with" | "zero">("all");
 
-  const rows = (stock ?? [])
+  const scoped = (stock ?? []).filter((r) => (r.location ?? "fabrica") === location);
+  const scopedIds = new Set(scoped.map((r) => r.material_id));
+  const scopedMovements = (movements ?? []).filter((m) => scopedIds.has(m.material_id));
+
+  const rows = scoped
     .filter((r) => r.name.toLowerCase().includes(search.trim().toLowerCase()))
     .filter((r) => (view === "with" ? r.balance > 0 : view === "zero" ? r.balance <= 0 : true));
 
-  const totalItems = (stock ?? []).reduce((acc, r) => acc + Math.max(r.balance, 0), 0);
+  const totalItems = scoped.reduce((acc, r) => acc + Math.max(r.balance, 0), 0);
 
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-3">
         <Card>
-          <CardHeader className="pb-2"><CardDescription>Materiais cadastrados</CardDescription></CardHeader>
-          <CardContent className="text-2xl font-semibold">{stock?.length ?? 0}</CardContent>
+          <CardHeader className="pb-2"><CardDescription>Itens cadastrados</CardDescription></CardHeader>
+          <CardContent className="text-2xl font-semibold">{scoped.length}</CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardDescription>Itens em estoque</CardDescription></CardHeader>
           <CardContent className="text-2xl font-semibold">{totalItems}</CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2"><CardDescription>Materiais zerados</CardDescription></CardHeader>
+          <CardHeader className="pb-2"><CardDescription>Itens zerados</CardDescription></CardHeader>
           <CardContent className="text-2xl font-semibold">
-            {(stock ?? []).filter((r) => r.balance <= 0).length}
+            {scoped.filter((r) => r.balance <= 0).length}
           </CardContent>
         </Card>
       </div>
@@ -245,12 +330,15 @@ export function StockTab({ userId }: { userId: string }) {
       <Card>
         <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <CardTitle>Estoque por material</CardTitle>
+            <CardTitle>Estoque — {LOCATION_LABELS[location]}</CardTitle>
             <CardDescription>
-              A entrada é automática quando o solicitante confirma "Recebido corretamente" em um pedido feito pela biblioteca.
+              {location === "almoxarifado"
+                ? "Adicione itens e registre entradas e baixas do almoxarifado."
+                : 'A entrada é automática quando o solicitante confirma "Recebido corretamente" em um pedido feito pela biblioteca.'}
             </CardDescription>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            <AddMaterialDialog location={location} userId={userId} />
             <div className="relative">
               <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
@@ -352,7 +440,7 @@ export function StockTab({ userId }: { userId: string }) {
           <CardDescription>Histórico completo de entradas e saídas.</CardDescription>
         </CardHeader>
         <CardContent>
-          {!movements?.length ? (
+          {!scopedMovements.length ? (
             <p className="text-sm text-muted-foreground">Nenhuma movimentação registrada.</p>
           ) : (
             <Table>
@@ -367,7 +455,7 @@ export function StockTab({ userId }: { userId: string }) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {movements.slice(0, 50).map((m) => (
+                {scopedMovements.slice(0, 50).map((m) => (
                   <TableRow key={m.id}>
                     <TableCell className="whitespace-nowrap text-sm text-muted-foreground">{fmt(m.created_at)}</TableCell>
                     <TableCell className="font-medium">
