@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Camera, CheckCircle2, QrCode } from "lucide-react";
+import { Camera, CheckCircle2, QrCode, Image as ImageIcon, Keyboard } from "lucide-react";
 
 export const BOX_SIZES = [1, 10, 50, 100, 224] as const;
 
@@ -131,6 +131,90 @@ function QrScannerDialog({ onResult, label }: { onResult: (v: string) => void; l
   );
 }
 
+function GalleryQrButton({ label, onResult }: { label: string; onResult: (v: string) => void }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  return (
+    <>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={async (e) => {
+          const file = e.target.files?.[0];
+          e.target.value = "";
+          if (!file) return;
+          setBusy(true);
+          const url = URL.createObjectURL(file);
+          try {
+            const reader = new BrowserMultiFormatReader();
+            const result = await reader.decodeFromImageUrl(url);
+            onResult(result.getText());
+          } catch {
+            toast.error("Nenhum QR Code encontrado nesta imagem");
+          } finally {
+            URL.revokeObjectURL(url);
+            setBusy(false);
+          }
+        }}
+      />
+      <Button
+        type="button"
+        variant="outline"
+        size="icon"
+        disabled={busy}
+        title={`${label} — escolher da galeria`}
+        onClick={() => inputRef.current?.click()}
+      >
+        <ImageIcon className="h-4 w-4" />
+      </Button>
+    </>
+  );
+}
+
+function ManualQrDialog({ label, value, onResult }: { label: string; value: string; onResult: (v: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const [text, setText] = useState(value);
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        setOpen(o);
+        if (o) setText(value);
+      }}
+    >
+      <DialogTrigger asChild>
+        <Button type="button" variant="outline" size="icon" title={`${label} — digitar manualmente`}>
+          <Keyboard className="h-4 w-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Adicionar manualmente</DialogTitle>
+          <DialogDescription>{label}</DialogDescription>
+        </DialogHeader>
+        <Input value={text} onChange={(e) => setText(e.target.value)} placeholder="https://..." autoFocus />
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            Cancelar
+          </Button>
+          <Button
+            type="button"
+            onClick={() => {
+              if (!text.trim()) return toast.error("Informe o valor do QR Code");
+              onResult(text.trim());
+              setOpen(false);
+            }}
+          >
+            Salvar
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function QrField({
   label,
   value,
@@ -141,9 +225,11 @@ function QrField({
   onChange: (v: string) => void;
 }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-wrap items-center gap-2">
       <span className="w-56 shrink-0 text-sm">{label}</span>
-      <Input value={value} onChange={(e) => onChange(e.target.value)} placeholder="https://..." />
+      <Input className="min-w-40 flex-1" value={value} onChange={(e) => onChange(e.target.value)} placeholder="https://..." />
+      <ManualQrDialog label={label} value={value} onResult={onChange} />
+      <GalleryQrButton label={label} onResult={onChange} />
       <QrScannerDialog label={label} onResult={onChange} />
     </div>
   );
