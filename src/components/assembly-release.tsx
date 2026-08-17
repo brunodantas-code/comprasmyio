@@ -306,7 +306,15 @@ function PhotoCell({ path }: { path: string }) {
   );
 }
 
-export function AssemblyReleasesCard({ materialNames }: { materialNames: Record<string, string> }) {
+export function AssemblyReleasesCard({
+  materialNames,
+  title = "Produtos montados liberados",
+  description = "Histórico de liberações da fábrica.",
+}: {
+  materialNames: Record<string, string>;
+  title?: string;
+  description?: string;
+}) {
   const { data: releases } = useAssemblyReleases();
   const { data: profiles } = useProfilesList();
   const nameOf = (id: string) => {
@@ -317,12 +325,12 @@ export function AssemblyReleasesCard({ materialNames }: { materialNames: Record<
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Produtos montados liberados</CardTitle>
-        <CardDescription>Histórico de liberações da fábrica.</CardDescription>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
         {!releases?.length ? (
-          <p className="text-sm text-muted-foreground">Nenhuma liberação registrada.</p>
+          <p className="text-sm text-muted-foreground">Nenhum produto liberado até o momento.</p>
         ) : (
           <Table>
             <TableHeader>
