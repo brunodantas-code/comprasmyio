@@ -12,6 +12,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Plus } from "lucide-react";
+import { ReleaseAssembledDialog, AssemblyReleasesCard } from "@/components/assembly-release";
 
 type StockRow = {
   material_id: string;
@@ -307,6 +308,7 @@ function StockSection({ userId, location }: { userId: string; location: StockLoc
     .filter((r) => (view === "with" ? r.balance > 0 : view === "zero" ? r.balance <= 0 : true));
 
   const totalItems = scoped.reduce((acc, r) => acc + Math.max(r.balance, 0), 0);
+  const materialNames = Object.fromEntries((stock ?? []).map((r) => [r.material_id, r.name]));
 
   return (
     <div className="space-y-6">
@@ -339,6 +341,7 @@ function StockSection({ userId, location }: { userId: string; location: StockLoc
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <AddMaterialDialog location={location} userId={userId} />
+            {location === "fabrica" && <ReleaseAssembledDialog userId={userId} />}
             <div className="relative">
               <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
@@ -474,6 +477,8 @@ function StockSection({ userId, location }: { userId: string; location: StockLoc
           )}
         </CardContent>
       </Card>
+
+      {location === "fabrica" && <AssemblyReleasesCard materialNames={materialNames} />}
     </div>
   );
 }
