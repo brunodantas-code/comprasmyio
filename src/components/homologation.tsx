@@ -478,3 +478,116 @@ export function HomologateDialog({
     </Dialog>
   );
 }
+
+/* ---------------- QR viewer (caixas homologadas) ---------------- */
+
+function QrImage({ value, size = 128 }: { value: string; size?: number }) {
+  const [src, setSrc] = useState<string | null>(null);
+  useEffect(() => {
+    let alive = true;
+    import("qrcode").then((m) =>
+      m.toDataURL(value, { width: size, margin: 1 }).then((url) => {
+        if (alive) setSrc(url);
+      }),
+    );
+    return () => {
+      alive = false;
+    };
+  }, [value, size]);
+  return src ? (
+    <img src={src} width={size} height={size} alt={`QR Code ${value}`} className="rounded bg-white" />
+  ) : (
+    <div className="rounded bg-muted" style={{ width: size, height: size }} />
+  );
+}
+
+export function StockQrDialog({ stockName, trigger }: { stockName: string; trigger: React.ReactNode }) {
+  const [open, setOpen] = useState(false);
+  const m = stockName.match(/^(.*) — Caixa de (\d+)$/);
+  const baseName = m ? m[1] : stockName;
+  const boxSize = m ? Number(m[2]) : 1;
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["homologations-qr", baseName, boxSize],
+    enabled: open,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("homologations")
+        .select("id, box_size, box_qr, notes, created_at, materials(name), homologation_units(position, qr_value)")
+        .eq("box_size", boxSize)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []).filter((h) => (h.materials as { name: string } | null)?.name === baseName);
+    },
+  });
+
+  const boxes = data ?? [];
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogContent className="max-h-[88vh] max-w-4xl overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>QR Codes — {stockName}</DialogTitle>
+          <DialogDescription>
+            {boxSize === 1
+              ? "QR Code de cada produto unitário homologado."
+              : "QR Code de cada caixa e a vista explodida com os QR Codes de todos os dispositivos."}
+          </DialogDescription>
+        </DialogHeader>
+
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">Carregando...</p>
+        ) : !boxes.length ? (
+          <p className="text-sm text-muted-foreground">Nenhuma homologação registrada para este item.</p>
+        ) : (
+          <div className="space-y-5">
+            {boxes.map((h, idx) => {
+              const units = [...(h.homologation_units ?? [])].sort((a, b) => a.position - b.position);
+              return (
+                <div key={h.id} className="rounded-lg border p-4">
+                  <div className="flex flex-wrap items-start gap-4">
+                    {h.box_size > 1 && (
+                      <div className="flex flex-col items-center gap-2">
+                        {h.box_qr ? <QrImage value={h.box_qr} size={140} /> : (
+                          <div className="flex h-[140px] w-[140px] items-center justify-center rounded bg-muted text-xs text-muted-foreground">
+                            sem QR
+                          </div>
+                        )}
+                        <Badge variant="outline">Caixa {boxes.length - idx}</Badge>
+                        {h.box_qr && (
+                          <span className="max-w-[160px] break-all text-center text-[10px] text-muted-foreground">
+                            {h.box_qr}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1 space-y-2">
+                      <div className="text-sm text-muted-foreground">
+                        {new Date(h.created_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })} ·{" "}
+                        {units.length} dispositivo(s)
+                      </div>
+                      <p className="text-sm font-medium">Vista explodida</p>
+                      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-5">
+                        {units.map((u) => (
+                          <div key={u.position} className="flex flex-col items-center gap-1 rounded border p-2">
+                            <QrImage value={u.qr_value} size={96} />
+                            <span className="text-xs font-medium">#{u.position}</span>
+                            <span className="w-full break-all text-center text-[10px] text-muted-foreground">
+                              {u.qr_value}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                      {h.notes && <p className="text-sm text-muted-foreground">{h.notes}</p>}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}

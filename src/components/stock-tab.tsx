@@ -13,6 +13,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Plus } from "lucide-react";
 import { ReleaseAssembledDialog, AssemblyReleasesCard } from "@/components/assembly-release";
+import { StockQrDialog } from "@/components/homologation";
 
 type StockRow = {
   material_id: string;
@@ -393,7 +394,14 @@ function StockSection({ userId, location }: { userId: string; location: StockLoc
                   <TableRow key={r.material_id}>
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-2">
-                        <span>{r.name}</span>
+                        <StockQrDialog
+                          stockName={r.name}
+                          trigger={
+                            <button type="button" className="text-left hover:underline">
+                              {r.name}
+                            </button>
+                          }
+                        />
                         {r.link && (
                           <a href={r.link} target="_blank" rel="noreferrer" className="text-primary hover:underline">
                             <ExternalLink className="h-3 w-3" />
