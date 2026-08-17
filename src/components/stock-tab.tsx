@@ -440,7 +440,7 @@ function StockSection({ userId, location }: { userId: string; location: StockLoc
           <CardDescription>Histórico completo de entradas e saídas.</CardDescription>
         </CardHeader>
         <CardContent>
-          {!movements?.length ? (
+          {!scopedMovements.length ? (
             <p className="text-sm text-muted-foreground">Nenhuma movimentação registrada.</p>
           ) : (
             <Table>
@@ -455,7 +455,7 @@ function StockSection({ userId, location }: { userId: string; location: StockLoc
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {movements.slice(0, 50).map((m) => (
+                {scopedMovements.slice(0, 50).map((m) => (
                   <TableRow key={m.id}>
                     <TableCell className="whitespace-nowrap text-sm text-muted-foreground">{fmt(m.created_at)}</TableCell>
                     <TableCell className="font-medium">
