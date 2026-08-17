@@ -21,10 +21,16 @@ import {
 import { toast } from "sonner";
 import { Camera, ImageUp, PackageCheck, Search } from "lucide-react";
 import { HomologateDialog, useHomologations } from "@/components/homologation";
+import { MYIO_PRODUCTS } from "@/components/myio-orders-tab";
 
 const BUCKET = "assembly-photos";
 
 type MaterialRow = { id: string; name: string };
+
+const normalizeName = (s: string) =>
+  s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
+
+const ALLOWED_PRODUCTS = new Set(MYIO_PRODUCTS.map(normalizeName));
 
 function useAlmoxarifadoMaterials() {
   return useQuery({
@@ -82,7 +88,10 @@ export function ReleaseAssembledDialog({ userId }: { userId: string }) {
   const { data: profiles } = useProfilesList();
 
   const filtered = useMemo(
-    () => (materials ?? []).filter((m) => m.name.toLowerCase().includes(search.trim().toLowerCase())),
+    () =>
+      (materials ?? [])
+        .filter((m) => ALLOWED_PRODUCTS.has(normalizeName(m.name)))
+        .filter((m) => m.name.toLowerCase().includes(search.trim().toLowerCase())),
     [materials, search],
   );
 
