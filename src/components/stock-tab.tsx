@@ -329,6 +329,14 @@ function StockSection({ userId, location }: { userId: string; location: StockLoc
         </Card>
       </div>
 
+      {location === "almoxarifado" && (
+        <AssemblyReleasesCard
+          materialNames={materialNames}
+          title="Produtos para homologar"
+          description="Produtos montados liberados pela fábrica, aguardando homologação."
+        />
+      )}
+
       <Card>
         <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
