@@ -477,6 +477,8 @@ function StockSection({ userId, location }: { userId: string; location: StockLoc
           )}
         </CardContent>
       </Card>
+
+      {location === "fabrica" && <AssemblyReleasesCard materialNames={materialNames} />}
     </div>
   );
 }
