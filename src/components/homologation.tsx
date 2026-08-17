@@ -227,7 +227,7 @@ function QrField({
   return (
     <div className="flex flex-wrap items-center gap-2">
       <span className="w-56 shrink-0 text-sm">{label}</span>
-      <Input className="min-w-40 flex-1" value={value} onChange={(e) => onChange(e.target.value)} placeholder="https://..." />
+      <Input className="min-w-40 flex-1" value={value} readOnly placeholder="https://..." />
       <ManualQrDialog label={label} value={value} onResult={onChange} />
       <GalleryQrButton label={label} onResult={onChange} />
       <QrScannerDialog label={label} onResult={onChange} />
