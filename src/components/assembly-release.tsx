@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Camera, ImageUp, PackageCheck, Search } from "lucide-react";
+import { HomologateDialog } from "@/components/homologation";
 
 const BUCKET = "assembly-photos";
 
@@ -310,10 +311,14 @@ export function AssemblyReleasesCard({
   materialNames,
   title = "Produtos montados liberados",
   description = "Histórico de liberações da fábrica.",
+  userId,
+  homologable = false,
 }: {
   materialNames: Record<string, string>;
   title?: string;
   description?: string;
+  userId?: string;
+  homologable?: boolean;
 }) {
   const { data: releases } = useAssemblyReleases();
   const { data: profiles } = useProfilesList();
@@ -350,11 +355,36 @@ export function AssemblyReleasesCard({
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
-                      {(r.assembly_release_items ?? []).map((i) => (
-                        <Badge key={i.id} variant="outline">
-                          {materialNames[i.material_id] ?? "Produto"} × {i.quantity}
-                        </Badge>
-                      ))}
+                      {(r.assembly_release_items ?? []).map((i) => {
+                        const label = `${materialNames[i.material_id] ?? "Produto"} × ${i.quantity}`;
+                        if (!homologable || !userId) {
+                          return (
+                            <Badge key={i.id} variant="outline">
+                              {label}
+                            </Badge>
+                          );
+                        }
+                        return (
+                          <HomologateDialog
+                            key={i.id}
+                            releaseId={r.id}
+                            materialId={i.material_id}
+                            materialName={materialNames[i.material_id] ?? "Produto"}
+                            quantity={i.quantity}
+                            userId={userId}
+                            trigger={
+                              <button type="button" title="Homologar produto">
+                                <Badge
+                                  variant="outline"
+                                  className="cursor-pointer hover:bg-blue-50 hover:border-blue-300"
+                                >
+                                  {label}
+                                </Badge>
+                              </button>
+                            }
+                          />
+                        );
+                      })}
                     </div>
                   </TableCell>
                   <TableCell className="text-sm">{(r.responsibles ?? []).map(nameOf).join(", ")}</TableCell>

@@ -114,6 +114,96 @@ export type Database = {
         }
         Relationships: []
       }
+      homologation_units: {
+        Row: {
+          created_at: string
+          homologation_id: string
+          id: string
+          position: number
+          qr_value: string
+        }
+        Insert: {
+          created_at?: string
+          homologation_id: string
+          id?: string
+          position: number
+          qr_value: string
+        }
+        Update: {
+          created_at?: string
+          homologation_id?: string
+          id?: string
+          position?: number
+          qr_value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homologation_units_homologation_id_fkey"
+            columns: ["homologation_id"]
+            isOneToOne: false
+            referencedRelation: "homologations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      homologations: {
+        Row: {
+          box_qr: string | null
+          box_size: number
+          created_at: string
+          created_by: string | null
+          id: string
+          material_id: string
+          notes: string | null
+          release_id: string
+          responsible_id: string | null
+        }
+        Insert: {
+          box_qr?: string | null
+          box_size: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          material_id: string
+          notes?: string | null
+          release_id: string
+          responsible_id?: string | null
+        }
+        Update: {
+          box_qr?: string | null
+          box_size?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          material_id?: string
+          notes?: string | null
+          release_id?: string
+          responsible_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homologations_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "material_stock"
+            referencedColumns: ["material_id"]
+          },
+          {
+            foreignKeyName: "homologations_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homologations_release_id_fkey"
+            columns: ["release_id"]
+            isOneToOne: false
+            referencedRelation: "assembly_releases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       materials: {
         Row: {
           created_at: string
