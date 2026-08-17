@@ -9,8 +9,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search } from "lucide-react";
+import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Plus } from "lucide-react";
 
 type StockRow = {
   material_id: string;
