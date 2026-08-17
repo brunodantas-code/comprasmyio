@@ -19,7 +19,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { PackageCheck, Search } from "lucide-react";
+import { Camera, ImageUp, PackageCheck, Search } from "lucide-react";
 
 const BUCKET = "assembly-photos";
 
@@ -75,6 +75,7 @@ export function ReleaseAssembledDialog({ userId }: { userId: string }) {
   const [file, setFile] = useState<File | null>(null);
   const [notes, setNotes] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
 
   const { data: materials } = useAlmoxarifadoMaterials();
   const { data: profiles } = useProfilesList();
@@ -91,6 +92,7 @@ export function ReleaseAssembledDialog({ userId }: { userId: string }) {
     setNotes("");
     setSearch("");
     if (fileRef.current) fileRef.current.value = "";
+    if (cameraRef.current) cameraRef.current.value = "";
   }
 
   const save = useMutation({
@@ -207,14 +209,55 @@ export function ReleaseAssembledDialog({ userId }: { userId: string }) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="assembly-photo">Foto dos produtos montados</Label>
-            <Input
-              id="assembly-photo"
+            <Label>Foto dos produtos montados</Label>
+            <input
               ref={fileRef}
               type="file"
               accept="image/*"
+              className="hidden"
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
             />
+            <input
+              ref={cameraRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            />
+            <div className="flex flex-wrap gap-2">
+              <Button type="button" variant="outline" onClick={() => cameraRef.current?.click()}>
+                <Camera className="mr-1 h-4 w-4" /> Tirar foto
+              </Button>
+              <Button type="button" variant="outline" onClick={() => fileRef.current?.click()}>
+                <ImageUp className="mr-1 h-4 w-4" /> Escolher da galeria
+              </Button>
+            </div>
+            {file ? (
+              <div className="flex items-center gap-3 rounded border p-2">
+                <img
+                  src={URL.createObjectURL(file)}
+                  alt="Pré-visualização"
+                  className="h-16 w-16 rounded border object-cover"
+                />
+                <span className="truncate text-sm text-muted-foreground">{file.name}</span>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  className="ml-auto"
+                  onClick={() => {
+                    setFile(null);
+                    if (fileRef.current) fileRef.current.value = "";
+                    if (cameraRef.current) cameraRef.current.value = "";
+                  }}
+                >
+                  Remover
+                </Button>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">Nenhuma foto selecionada.</p>
+            )}
           </div>
 
           <div className="space-y-2">
