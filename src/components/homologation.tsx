@@ -272,7 +272,11 @@ export function HomologateDialog({
 }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
-  const sizes = useMemo(() => BOX_SIZES.filter((s) => s <= Math.max(quantity, 1)), [quantity]);
+  const { data: existing } = useHomologations(releaseId);
+  const done = (existing ?? []).filter((h) => h.material_id === materialId);
+  const alreadyHomologated = done.reduce((a, h) => a + (h.homologation_units?.length ?? 0), 0);
+  const remaining = Math.max(quantity - alreadyHomologated, 0);
+  const sizes = useMemo(() => BOX_SIZES.filter((s) => s <= Math.max(remaining, 1)), [remaining]);
   const [boxSize, setBoxSize] = useState<number>(sizes[sizes.length - 1] ?? 1);
   const [boxQr, setBoxQr] = useState("");
   const [units, setUnits] = useState<string[]>([""]);
@@ -288,14 +292,16 @@ export function HomologateDialog({
   });
   const [responsible, setResponsible] = useState(userId);
 
-  const { data: existing } = useHomologations(releaseId);
-  const done = (existing ?? []).filter((h) => h.material_id === materialId);
-  const alreadyHomologated = done.reduce((a, h) => a + (h.homologation_units?.length ?? 0), 0);
-
   function changeSize(n: number) {
     setBoxSize(n);
     setUnits(Array.from({ length: n }, (_, i) => units[i] ?? ""));
   }
+
+  useEffect(() => {
+    const max = sizes[sizes.length - 1] ?? 1;
+    if (boxSize > max) changeSize(max);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sizes.join(",")]);
 
   function reset() {
     setBoxQr("");
@@ -306,6 +312,8 @@ export function HomologateDialog({
   const save = useMutation({
     mutationFn: async () => {
       const filled = units.map((u) => u.trim());
+      if (remaining <= 0) throw new Error("Todos os produtos deste item já foram homologados");
+      if (boxSize > remaining) throw new Error(`Restam apenas ${remaining} produto(s) para homologar`);
       if (boxSize > 1 && !boxQr.trim()) throw new Error("Leia o QR Code da caixa");
       if (filled.some((u) => !u)) throw new Error("Preencha o QR Code de todos os produtos unitários");
       const uniq = new Set(filled);
@@ -331,10 +339,40 @@ export function HomologateDialog({
         .from("homologation_units")
         .insert(filled.map((qr_value, i) => ({ homologation_id: hom.id, position: i + 1, qr_value })));
       if (unitsErr) throw unitsErr;
+
+      // Entrada no Estoque — Almoxarifado (item unitário ou modelo de caixa)
+      const stockName = boxSize === 1 ? materialName : `${materialName} — Caixa de ${boxSize}`;
+      const { data: found } = await supabase
+        .from("materials")
+        .select("id")
+        .eq("name", stockName)
+        .eq("location", "almoxarifado")
+        .maybeSingle();
+      let stockMaterialId = found?.id as string | undefined;
+      if (!stockMaterialId) {
+        const { data: created, error: matErr } = await supabase
+          .from("materials")
+          .insert({ name: stockName, location: "almoxarifado", created_by: userId })
+          .select("id")
+          .single();
+        if (matErr) throw new Error("Não foi possível criar o item no estoque do almoxarifado: " + matErr.message);
+        stockMaterialId = created.id;
+      }
+      const { error: stockErr } = await supabase.from("stock_movements").insert({
+        material_id: stockMaterialId,
+        quantity: boxSize === 1 ? 1 : 1,
+        type: "entrada",
+        reason: boxSize === 1 ? "Homologação — produto unitário" : `Homologação — caixa de ${boxSize}`,
+        created_by: userId,
+      });
+      if (stockErr) throw stockErr;
     },
     onSuccess: () => {
-      toast.success("Produtos homologados e liberados");
+      toast.success("Produtos homologados e adicionados ao estoque do almoxarifado");
       qc.invalidateQueries({ queryKey: ["homologations"] });
+      qc.invalidateQueries({ queryKey: ["material-stock"] });
+      qc.invalidateQueries({ queryKey: ["stock-movements"] });
+      qc.invalidateQueries({ queryKey: ["materials"] });
       setOpen(false);
       reset();
     },
@@ -354,7 +392,7 @@ export function HomologateDialog({
         <DialogHeader>
           <DialogTitle>Homologar — {materialName}</DialogTitle>
           <DialogDescription>
-            Liberados: {quantity} · Já homologados: {alreadyHomologated}
+            Liberados: {quantity} · Já homologados: {alreadyHomologated} · Restantes: {remaining}
           </DialogDescription>
         </DialogHeader>
 
@@ -431,7 +469,7 @@ export function HomologateDialog({
           )}
 
           <DialogFooter>
-            <Button type="submit" disabled={save.isPending} className="bg-blue-600 text-white hover:bg-blue-700">
+            <Button type="submit" disabled={save.isPending || remaining <= 0} className="bg-blue-600 text-white hover:bg-blue-700">
               <QrCode className="mr-1 h-4 w-4" /> {save.isPending ? "Liberando..." : "Liberar"}
             </Button>
           </DialogFooter>
