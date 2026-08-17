@@ -312,17 +312,17 @@ function StockSection({ userId, location }: { userId: string; location: StockLoc
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-3">
         <Card>
-          <CardHeader className="pb-2"><CardDescription>Materiais cadastrados</CardDescription></CardHeader>
-          <CardContent className="text-2xl font-semibold">{stock?.length ?? 0}</CardContent>
+          <CardHeader className="pb-2"><CardDescription>Itens cadastrados</CardDescription></CardHeader>
+          <CardContent className="text-2xl font-semibold">{scoped.length}</CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardDescription>Itens em estoque</CardDescription></CardHeader>
           <CardContent className="text-2xl font-semibold">{totalItems}</CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2"><CardDescription>Materiais zerados</CardDescription></CardHeader>
+          <CardHeader className="pb-2"><CardDescription>Itens zerados</CardDescription></CardHeader>
           <CardContent className="text-2xl font-semibold">
-            {(stock ?? []).filter((r) => r.balance <= 0).length}
+            {scoped.filter((r) => r.balance <= 0).length}
           </CardContent>
         </Card>
       </div>
@@ -330,12 +330,15 @@ function StockSection({ userId, location }: { userId: string; location: StockLoc
       <Card>
         <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <CardTitle>Estoque por material</CardTitle>
+            <CardTitle>Estoque — {LOCATION_LABELS[location]}</CardTitle>
             <CardDescription>
-              A entrada é automática quando o solicitante confirma "Recebido corretamente" em um pedido feito pela biblioteca.
+              {location === "almoxarifado"
+                ? "Adicione itens e registre entradas e baixas do almoxarifado."
+                : 'A entrada é automática quando o solicitante confirma "Recebido corretamente" em um pedido feito pela biblioteca.'}
             </CardDescription>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            <AddMaterialDialog location={location} userId={userId} />
             <div className="relative">
               <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
