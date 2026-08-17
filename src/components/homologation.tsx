@@ -28,29 +28,70 @@ function QrScannerDialog({ onResult, label }: { onResult: (v: string) => void; l
   const [open, setOpen] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [error, setError] = useState<string | null>(null);
+  const [starting, setStarting] = useState(false);
 
   useEffect(() => {
     if (!open) return;
     let stopped = false;
     let controls: { stop: () => void } | undefined;
+    let stream: MediaStream | undefined;
     const reader = new BrowserMultiFormatReader();
     (async () => {
+      setError(null);
+      setStarting(true);
       try {
-        controls = await reader.decodeFromVideoDevice(undefined, videoRef.current!, (result) => {
+        if (!navigator.mediaDevices?.getUserMedia) {
+          throw new Error("insecure");
+        }
+        // wait for the <video> to be mounted inside the dialog
+        for (let i = 0; i < 40 && !videoRef.current; i++) {
+          await new Promise((r) => setTimeout(r, 50));
+        }
+        if (stopped || !videoRef.current) return;
+
+        // prefer the rear camera on phones, fall back to any camera
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: { ideal: "environment" } },
+            audio: false,
+          });
+        } catch {
+          stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+        }
+        if (stopped) {
+          stream.getTracks().forEach((t) => t.stop());
+          return;
+        }
+        setStarting(false);
+        controls = await reader.decodeFromStream(stream, videoRef.current, (result) => {
           if (result && !stopped) {
             stopped = true;
             onResult(result.getText());
             controls?.stop();
+            stream?.getTracks().forEach((t) => t.stop());
             setOpen(false);
           }
         });
-      } catch {
-        setError("Não foi possível acessar a câmera. Verifique as permissões.");
+      } catch (e) {
+        setStarting(false);
+        const err = e as { name?: string; message?: string };
+        if (!window.isSecureContext || err.message === "insecure") {
+          setError("A câmera só funciona em conexão segura (https). Abra o app pelo link https.");
+        } else if (err.name === "NotAllowedError") {
+          setError("Permissão de câmera negada. Toque no cadeado da barra de endereço e permita a câmera.");
+        } else if (err.name === "NotFoundError") {
+          setError("Nenhuma câmera encontrada neste dispositivo.");
+        } else if (err.name === "NotReadableError") {
+          setError("A câmera está em uso por outro app. Feche-o e tente novamente.");
+        } else {
+          setError("Não foi possível acessar a câmera. Verifique as permissões do navegador.");
+        }
       }
     })();
     return () => {
       stopped = true;
       controls?.stop();
+      stream?.getTracks().forEach((t) => t.stop());
     };
   }, [open, onResult]);
 
@@ -67,9 +108,23 @@ function QrScannerDialog({ onResult, label }: { onResult: (v: string) => void; l
           <DialogDescription>Aponte a câmera para o QR Code. O link é extraído automaticamente.</DialogDescription>
         </DialogHeader>
         {error ? (
-          <p className="text-sm text-destructive">{error}</p>
+          <div className="space-y-3">
+            <p className="text-sm text-destructive">{error}</p>
+            <Button type="button" variant="outline" size="sm" onClick={() => { setError(null); setOpen(false); setTimeout(() => setOpen(true), 100); }}>
+              Tentar novamente
+            </Button>
+          </div>
         ) : (
-          <video ref={videoRef} className="w-full rounded border bg-black" muted playsInline />
+          <>
+            <video
+              ref={videoRef}
+              className="aspect-square w-full rounded border bg-black object-cover"
+              muted
+              autoPlay
+              playsInline
+            />
+            {starting && <p className="text-sm text-muted-foreground">Iniciando câmera...</p>}
+          </>
         )}
       </DialogContent>
     </Dialog>
