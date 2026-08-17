@@ -47,6 +47,7 @@ export type Database = {
           created_by: string | null
           id: string
           link: string | null
+          location: string
           name: string
           updated_at: string
         }
@@ -55,6 +56,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           link?: string | null
+          location?: string
           name: string
           updated_at?: string
         }
@@ -63,6 +65,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           link?: string | null
+          location?: string
           name?: string
           updated_at?: string
         }
@@ -445,6 +448,7 @@ export type Database = {
           balance: number | null
           last_movement_at: string | null
           link: string | null
+          location: string | null
           material_id: string | null
           name: string | null
           total_in: number | null
