@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Camera, ImageUp, PackageCheck, Search } from "lucide-react";
-import { HomologateDialog } from "@/components/homologation";
+import { HomologateDialog, useHomologations } from "@/components/homologation";
 
 const BUCKET = "assembly-photos";
 
@@ -322,6 +322,11 @@ export function AssemblyReleasesCard({
 }) {
   const { data: releases } = useAssemblyReleases();
   const { data: profiles } = useProfilesList();
+  const { data: homologations } = useHomologations();
+  const homologatedFor = (releaseId: string, materialId: string) =>
+    (homologations ?? [])
+      .filter((h) => h.release_id === releaseId && h.material_id === materialId)
+      .reduce((a, h) => a + (h.homologation_units?.length ?? 0), 0);
   const nameOf = (id: string) => {
     const p = (profiles ?? []).find((x) => x.id === id);
     return p?.full_name || p?.email || "Usuário";
@@ -356,11 +361,14 @@ export function AssemblyReleasesCard({
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
                       {(r.assembly_release_items ?? []).map((i) => {
-                        const label = `${materialNames[i.material_id] ?? "Produto"} × ${i.quantity}`;
-                        if (!homologable || !userId) {
+                        const remaining = Math.max(i.quantity - homologatedFor(r.id, i.material_id), 0);
+                        const label = homologable
+                          ? `${materialNames[i.material_id] ?? "Produto"} × ${remaining}`
+                          : `${materialNames[i.material_id] ?? "Produto"} × ${i.quantity}`;
+                        if (!homologable || !userId || remaining <= 0) {
                           return (
-                            <Badge key={i.id} variant="outline">
-                              {label}
+                            <Badge key={i.id} variant="outline" className={homologable && remaining <= 0 ? "opacity-50 line-through" : undefined}>
+                              {homologable && remaining <= 0 ? `${materialNames[i.material_id] ?? "Produto"} · homologado` : label}
                             </Badge>
                           );
                         }
