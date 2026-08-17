@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Camera, CheckCircle2, QrCode } from "lucide-react";
+import { Camera, CheckCircle2, QrCode, Image as ImageIcon, Keyboard } from "lucide-react";
 
 export const BOX_SIZES = [1, 10, 50, 100, 224] as const;
 
