@@ -30,7 +30,7 @@ type MaterialRow = { id: string; name: string };
 const normalizeName = (s: string) =>
   s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
 
-const ALLOWED_PRODUCTS = new Set(MYIO_PRODUCTS.map(normalizeName));
+const ALLOWED_PREFIXES = MYIO_PRODUCTS.map(normalizeName).sort((a, b) => b.length - a.length);
 
 function useAlmoxarifadoMaterials() {
   return useQuery({
