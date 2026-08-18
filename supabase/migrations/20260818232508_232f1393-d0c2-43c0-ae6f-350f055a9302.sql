@@ -1,0 +1,1 @@
+INSERT INTO public.materials (name, location) VALUES ('Myio 3F', 'almoxarifado') ON CONFLICT DO NOTHING;

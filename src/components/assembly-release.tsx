@@ -30,7 +30,7 @@ type MaterialRow = { id: string; name: string };
 const normalizeName = (s: string) =>
   s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
 
-const ALLOWED_PREFIXES = MYIO_PRODUCTS.map(normalizeName).sort((a, b) => b.length - a.length);
+const ALLOWED_PRODUCTS = new Set(MYIO_PRODUCTS.map(normalizeName));
 
 function useAlmoxarifadoMaterials() {
   return useQuery({
@@ -90,10 +90,7 @@ export function ReleaseAssembledDialog({ userId }: { userId: string }) {
   const filtered = useMemo(
     () =>
       (materials ?? [])
-        .filter((m) => {
-          const n = normalizeName(m.name);
-          return ALLOWED_PREFIXES.some((p) => n === p || n.startsWith(p));
-        })
+        .filter((m) => ALLOWED_PRODUCTS.has(normalizeName(m.name)))
         .filter((m) => m.name.toLowerCase().includes(search.trim().toLowerCase())),
     [materials, search],
   );
