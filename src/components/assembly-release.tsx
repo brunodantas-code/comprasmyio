@@ -90,7 +90,10 @@ export function ReleaseAssembledDialog({ userId }: { userId: string }) {
   const filtered = useMemo(
     () =>
       (materials ?? [])
-        .filter((m) => ALLOWED_PRODUCTS.has(normalizeName(m.name)))
+        .filter((m) => {
+          const n = normalizeName(m.name);
+          return ALLOWED_PREFIXES.some((p) => n === p || n.startsWith(p));
+        })
         .filter((m) => m.name.toLowerCase().includes(search.trim().toLowerCase())),
     [materials, search],
   );
