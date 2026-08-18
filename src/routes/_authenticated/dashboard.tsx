@@ -1412,7 +1412,7 @@ function UsersAdmin() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const allRoles: AppRole[] = ["admin", "comprador", "solicitante"];
+  const allRoles: AppRole[] = ["admin", "comprador", "solicitante", "fabrica"];
 
   return (
     <Card>
