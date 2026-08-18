@@ -222,15 +222,18 @@ function HistoryDialog({ row }: { row: StockRow }) {
   );
 }
 
-export function StockTab({ userId }: { userId: string }) {
+export function StockTab({ userId, onlyLocation }: { userId: string; onlyLocation?: StockLocation }) {
+  const locations = (Object.keys(LOCATION_LABELS) as StockLocation[]).filter(
+    (loc) => !onlyLocation || loc === onlyLocation,
+  );
   return (
-    <Tabs defaultValue="almoxarifado" className="space-y-4">
+    <Tabs defaultValue={locations[0]} className="space-y-4">
       <TabsList>
-        <TabsTrigger value="almoxarifado">Almoxarifado</TabsTrigger>
-        <TabsTrigger value="fabrica">Fábrica</TabsTrigger>
-        <TabsTrigger value="escritorio">Escritório</TabsTrigger>
+        {locations.map((loc) => (
+          <TabsTrigger key={loc} value={loc}>{LOCATION_LABELS[loc]}</TabsTrigger>
+        ))}
       </TabsList>
-      {(Object.keys(LOCATION_LABELS) as StockLocation[]).map((loc) => (
+      {locations.map((loc) => (
         <TabsContent key={loc} value={loc}>
           <StockSection userId={userId} location={loc} />
         </TabsContent>
