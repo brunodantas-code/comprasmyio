@@ -300,6 +300,7 @@ function Dashboard() {
     return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Carregando...</div>;
   }
 
+  const fabricaOnly = me.isFabrica && !me.isAdmin && !me.isComprador;
   const defaultTab = me.isComprador ? "queue" : me.isAdmin ? "queue" : "mine";
 
   return (
@@ -338,7 +339,7 @@ function Dashboard() {
             {me.isAdmin && <TabsTrigger value="projects"><FolderKanban className="mr-2 h-4 w-4" />Projetos</TabsTrigger>}
             {me.isAdmin && <TabsTrigger value="clients"><Building2 className="mr-2 h-4 w-4" />Clientes</TabsTrigger>}
             {me.isAdmin && <TabsTrigger value="materials"><Library className="mr-2 h-4 w-4" />Materiais</TabsTrigger>}
-            {me.isAdmin && <TabsTrigger value="myio"><Factory className="mr-2 h-4 w-4" />Pedidos de Projetos Myio</TabsTrigger>}
+            {(me.isAdmin || fabricaOnly) && <TabsTrigger value="myio"><Factory className="mr-2 h-4 w-4" />Pedidos de Projetos Myio</TabsTrigger>}
             {me.isAdmin && <TabsTrigger value="users"><Users className="mr-2 h-4 w-4" />Usuários</TabsTrigger>}
             {me.isAdmin && <TabsTrigger value="logs"><ScrollText className="mr-2 h-4 w-4" />Logs</TabsTrigger>}
           </TabsList>
@@ -346,11 +347,13 @@ function Dashboard() {
           <TabsContent value="mine"><MyOrders userId={me.id} /></TabsContent>
           <TabsContent value="new"><NewOrder userId={me.id} /></TabsContent>
           {(me.isComprador || me.isAdmin) && <TabsContent value="queue"><BuyerQueue /></TabsContent>}
-          <TabsContent value="stock"><StockTab userId={me.id} /></TabsContent>
+          <TabsContent value="stock"><StockTab userId={me.id} onlyLocation={fabricaOnly ? "fabrica" : undefined} /></TabsContent>
           {me.isAdmin && <TabsContent value="projects"><ProjectsAdmin userId={me.id} /></TabsContent>}
           {me.isAdmin && <TabsContent value="clients"><ClientsTab userId={me.id} /></TabsContent>}
           {me.isAdmin && <TabsContent value="materials"><MaterialsAdmin /></TabsContent>}
-            {me.isAdmin && <TabsContent value="myio"><MyioOrdersTab userId={me.id} /></TabsContent>}
+            {(me.isAdmin || fabricaOnly) && (
+              <TabsContent value="myio"><MyioOrdersTab userId={me.id} canManage={me.isAdmin} /></TabsContent>
+            )}
           {me.isAdmin && <TabsContent value="users"><UsersAdmin /></TabsContent>}
           {me.isAdmin && <TabsContent value="logs"><LogsAdmin /></TabsContent>}
         </Tabs>
@@ -1409,7 +1412,7 @@ function UsersAdmin() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const allRoles: AppRole[] = ["admin", "comprador", "solicitante"];
+  const allRoles: AppRole[] = ["admin", "comprador", "solicitante", "fabrica"];
 
   return (
     <Card>

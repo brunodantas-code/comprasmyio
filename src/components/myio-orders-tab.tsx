@@ -374,7 +374,7 @@ function DeleteMyioOrderInner({ id }: { id: string }) {
   );
 }
 
-export function MyioOrdersTab({ userId }: { userId: string }) {
+export function MyioOrdersTab({ userId, canManage = true }: { userId: string; canManage?: boolean }) {
   const qc = useQueryClient();
   const { data: images } = useProductImages();
   const [statusFilter, setStatusFilter] = useState<Set<MyioStatus>>(
@@ -432,7 +432,7 @@ export function MyioOrdersTab({ userId }: { userId: string }) {
               ))}
             </SelectContent>
           </Select>
-          <NewMyioOrderDialog userId={userId} />
+          {canManage && <NewMyioOrderDialog userId={userId} />}
         </div>
       </CardHeader>
       <CardContent>
@@ -449,7 +449,7 @@ export function MyioOrdersTab({ userId }: { userId: string }) {
                 <TableHead>Entrega</TableHead>
                 <TableHead>Produtos</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead className="w-20" />
+                {canManage && <TableHead className="w-20" />}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -481,6 +481,7 @@ export function MyioOrdersTab({ userId }: { userId: string }) {
                   <TableCell>
                     <div className="space-y-2">
                       <Badge variant="outline" className={STATUS_CLASSES[o.status]}>{STATUS_LABELS[o.status]}</Badge>
+                      {canManage && (
                       <Select value={o.status} onValueChange={(v) => statusMutation.mutate({ id: o.id, status: v as MyioStatus })}>
                         <SelectTrigger className="h-8 w-52"><SelectValue /></SelectTrigger>
                         <SelectContent>
@@ -489,14 +490,17 @@ export function MyioOrdersTab({ userId }: { userId: string }) {
                           ))}
                         </SelectContent>
                       </Select>
+                      )}
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <EditMyioOrderDialog order={o} userId={userId} />
-                      <DeleteMyioOrder id={o.id} />
-                    </div>
-                  </TableCell>
+                  {canManage && (
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <EditMyioOrderDialog order={o} userId={userId} />
+                        <DeleteMyioOrder id={o.id} />
+                      </div>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>
