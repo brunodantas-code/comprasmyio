@@ -664,6 +664,7 @@ function StockSection({ userId, location, canDelete }: { userId: string; locatio
                           }
                         />
                         <HistoryDialog row={r} />
+                        {canDelete && <DeleteMaterialDialog row={r} />}
                       </div>
                     </TableCell>
                   </TableRow>
