@@ -30,6 +30,7 @@ import { StockSimulatorDialog, ProductionCapacityCard } from "@/components/stock
 import { StockQrDialog } from "@/components/homologation";
 import { BomSettingsDialog } from "@/components/bom-settings";
 import { UnitProductsCard } from "@/components/unit-products";
+import { QrCheckSection } from "@/components/qr-check";
 
 type StockRow = {
   material_id: string;
@@ -320,12 +321,17 @@ export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; 
     tabs.push(loc);
     if (loc === "fabrica" && showHomologacao) tabs.push("homologacao");
   });
+  if (!onlyLocation) tabs.push("qr-check");
   return (
     <Tabs defaultValue={tabs[0]} className="space-y-4">
       <TabsList>
         {tabs.map((t) => (
-          <TabsTrigger key={t} value={t}>
-            {t === "homologacao" ? "Homologação" : LOCATION_LABELS[t as StockLocation]}
+          <TabsTrigger key={t} value={t} className={t === "qr-check" ? "ml-2" : undefined}>
+            {t === "homologacao"
+              ? "Homologação"
+              : t === "qr-check"
+                ? "Checar QR Code"
+                : LOCATION_LABELS[t as StockLocation]}
           </TabsTrigger>
         ))}
       </TabsList>
@@ -337,6 +343,11 @@ export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; 
       {showHomologacao && (
         <TabsContent value="homologacao">
           <HomologationSection userId={userId} canDelete={canDelete} />
+        </TabsContent>
+      )}
+      {!onlyLocation && (
+        <TabsContent value="qr-check">
+          <QrCheckSection />
         </TabsContent>
       )}
     </Tabs>

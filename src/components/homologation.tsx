@@ -24,7 +24,7 @@ export const BOX_SIZES = [1, 10, 50, 100, 224] as const;
 
 /* ---------------- QR scanner ---------------- */
 
-function QrScannerDialog({ onResult, label }: { onResult: (v: string) => void; label: string }) {
+export function QrScannerDialog({ onResult, label }: { onResult: (v: string) => void; label: string }) {
   const [open, setOpen] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [error, setError] = useState<string | null>(null);
@@ -131,7 +131,7 @@ function QrScannerDialog({ onResult, label }: { onResult: (v: string) => void; l
   );
 }
 
-function GalleryQrButton({ label, onResult }: { label: string; onResult: (v: string) => void }) {
+export function GalleryQrButton({ label, onResult }: { label: string; onResult: (v: string) => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   return (
@@ -173,7 +173,7 @@ function GalleryQrButton({ label, onResult }: { label: string; onResult: (v: str
   );
 }
 
-function ManualQrDialog({ label, value, onResult }: { label: string; value: string; onResult: (v: string) => void }) {
+export function ManualQrDialog({ label, value, onResult }: { label: string; value: string; onResult: (v: string) => void }) {
   const [open, setOpen] = useState(false);
   const [text, setText] = useState(value);
   return (

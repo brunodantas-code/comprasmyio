@@ -1,0 +1,293 @@
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { QrScannerDialog, GalleryQrButton, ManualQrDialog } from "@/components/homologation";
+import { MapPin, QrCode, Search, X } from "lucide-react";
+
+function fmt(d: string) {
+  return new Date(d).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+}
+
+type Event = { at: string; title: string; detail?: string };
+
+type Release = {
+  id: string;
+  created_at: string;
+  responsibles: string[];
+  photo_url: string;
+  notes: string | null;
+};
+
+function useQrTrace(code: string) {
+  return useQuery({
+    queryKey: ["qr-trace", code],
+    enabled: !!code,
+    queryFn: async () => {
+      const [unitRes, boxRes, unitProdRes, profilesRes] = await Promise.all([
+        supabase
+          .from("homologation_units")
+          .select(
+            "id, position, qr_value, homologation_id, homologations(id, box_size, box_qr, notes, created_at, responsible_id, release_id, material_id, materials(name))",
+          )
+          .eq("qr_value", code)
+          .maybeSingle(),
+        supabase
+          .from("homologations")
+          .select("id, box_size, box_qr, notes, created_at, responsible_id, release_id, material_id, materials(name), homologation_units(position, qr_value)")
+          .eq("box_qr", code)
+          .maybeSingle(),
+        supabase
+          .from("unit_products")
+          .select("id, status, installed_at, notes, created_at, material_id, materials(name)")
+          .eq("label", code)
+          .maybeSingle(),
+        supabase.from("profiles").select("id, full_name, email"),
+      ]);
+
+      const names: Record<string, string> = {};
+      for (const p of profilesRes.data ?? []) names[p.id] = p.full_name || p.email || p.id;
+
+      const hom =
+        (unitRes.data?.homologations as Record<string, unknown> | null) ??
+        (boxRes.data as Record<string, unknown> | null) ??
+        null;
+
+      let release: Release | null = null;
+      if (hom?.["release_id"]) {
+        const { data } = await supabase
+          .from("assembly_releases")
+          .select("id, created_at, responsibles, photo_url, notes")
+          .eq("id", hom["release_id"] as string)
+          .maybeSingle();
+        release = (data as Release | null) ?? null;
+      }
+
+      const unitProd = unitProdRes.data as
+        | { id: string; status: string; installed_at: string | null; notes: string | null; created_at: string; materials: { name: string } | null }
+        | null;
+
+      const materialName =
+        (hom?.["materials"] as { name: string } | null)?.name ?? unitProd?.materials?.name ?? null;
+
+      const events: Event[] = [];
+      if (release) {
+        events.push({
+          at: release.created_at,
+          title: "Produto montado liberado na Fábrica",
+          detail: `Responsáveis: ${(release.responsibles ?? []).map((r) => names[r] ?? r).join(", ") || "—"}`,
+        });
+      }
+      if (hom) {
+        const boxSize = hom["box_size"] as number;
+        events.push({
+          at: hom["created_at"] as string,
+          title: "Homologado / etiquetado",
+          detail:
+            (boxSize === 1 ? "Produto unitário" : `Caixa de ${boxSize}`) +
+            (hom["responsible_id"] ? ` · Responsável: ${names[hom["responsible_id"] as string] ?? "—"}` : ""),
+        });
+        events.push({
+          at: hom["created_at"] as string,
+          title: "Entrada no Estoque — Almoxarifado",
+          detail: boxSize === 1 ? materialName ?? "" : `${materialName ?? ""} — Caixa de ${boxSize}`,
+        });
+      }
+      if (unitProd) {
+        events.push({ at: unitProd.created_at, title: "Enviado para a Unidade (cliente)", detail: "Situação inicial: parado" });
+        if (unitProd.status === "instalado" && unitProd.installed_at) {
+          events.push({ at: unitProd.installed_at, title: "Instalado na unidade do cliente" });
+        }
+      }
+      events.sort((a, b) => +new Date(a.at) - +new Date(b.at));
+
+      let location = "Não encontrado";
+      if (unitProd) location = unitProd.status === "instalado" ? "Unidade (cliente) — instalado" : "Unidade (cliente) — parado";
+      else if (hom) location = "Estoque — Almoxarifado";
+
+      return {
+        found: !!hom || !!unitProd,
+        isBox: !!boxRes.data,
+        materialName,
+        position: unitRes.data?.position ?? null,
+        boxSize: (hom?.["box_size"] as number | undefined) ?? null,
+        boxQr: (hom?.["box_qr"] as string | null) ?? null,
+        boxUnits:
+          ((boxRes.data?.homologation_units ?? []) as { position: number; qr_value: string }[]).sort(
+            (a, b) => a.position - b.position,
+          ),
+        notes: (hom?.["notes"] as string | null) ?? null,
+        release,
+        location,
+        events,
+      };
+    },
+  });
+}
+
+export function QrCheckSection() {
+  const [input, setInput] = useState("");
+  const [code, setCode] = useState("");
+  const { data, isFetching } = useQrTrace(code);
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Checar QR Code</CardTitle>
+          <CardDescription>
+            Escaneie com a câmera, importe uma foto da galeria ou digite o código para ver onde o produto está e todo o
+            seu histórico.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative min-w-[240px] flex-1">
+              <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") setCode(input.trim());
+                }}
+                placeholder="Código do QR (https://...)"
+                className="pl-8"
+              />
+            </div>
+            <Button type="button" onClick={() => setCode(input.trim())} disabled={!input.trim()}>
+              <QrCode className="mr-1 h-4 w-4" /> Checar
+            </Button>
+            <ManualQrDialog
+              label="Digitar código do QR"
+              value={input}
+              onResult={(v) => {
+                setInput(v);
+                setCode(v);
+              }}
+            />
+            <GalleryQrButton
+              label="Importar da galeria"
+              onResult={(v) => {
+                setInput(v);
+                setCode(v);
+              }}
+            />
+            <QrScannerDialog
+              label="Escanear com a câmera"
+              onResult={(v) => {
+                setInput(v);
+                setCode(v);
+              }}
+            />
+            {!!code && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  setCode("");
+                  setInput("");
+                }}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {!!code && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex flex-wrap items-center gap-2">
+              <MapPin className="h-4 w-4" />
+              {isFetching ? "Buscando..." : data?.found ? data.location : "QR Code não encontrado"}
+            </CardTitle>
+            <CardDescription className="break-all">{code}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            {isFetching ? (
+              <p className="text-sm text-muted-foreground">Carregando histórico...</p>
+            ) : !data?.found ? (
+              <p className="text-sm text-muted-foreground">
+                Este QR Code não está vinculado a nenhuma homologação ou produto registrado.
+              </p>
+            ) : (
+              <>
+                <div className="flex flex-wrap items-center gap-2">
+                  {data.materialName && <Badge variant="outline">{data.materialName}</Badge>}
+                  <Badge variant="outline">
+                    {data.isBox
+                      ? `QR da caixa de ${data.boxSize}`
+                      : data.boxSize === 1
+                        ? "Produto unitário"
+                        : `Produto ${data.position ?? "?"} de ${data.boxSize} (caixa)`}
+                  </Badge>
+                  {!data.isBox && data.boxQr && (
+                    <Badge variant="outline" className="max-w-[320px] break-all">
+                      Caixa: {data.boxQr}
+                    </Badge>
+                  )}
+                </div>
+
+                <div className="space-y-3">
+                  <p className="text-sm font-medium">Histórico</p>
+                  <ol className="space-y-3 border-l pl-4">
+                    {data.events.map((e, i) => (
+                      <li key={i} className="relative">
+                        <span className="absolute -left-[21px] top-1.5 h-2 w-2 rounded-full bg-primary" />
+                        <p className="text-sm font-medium">{e.title}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {fmt(e.at)}
+                          {e.detail ? ` · ${e.detail}` : ""}
+                        </p>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+
+                {data.isBox && !!data.boxUnits.length && (
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium">Produtos dentro desta caixa</p>
+                    <ul className="space-y-1 text-xs text-muted-foreground">
+                      {data.boxUnits.map((u) => (
+                        <li key={u.position} className="break-all">
+                          #{u.position} — {u.qr_value}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {data.release?.photo_url && (
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium">Foto da montagem</p>
+                    <ReleasePhoto path={data.release.photo_url} />
+                  </div>
+                )}
+
+                {data.notes && <p className="text-sm text-muted-foreground">Observações: {data.notes}</p>}
+              </>
+            )}
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+function ReleasePhoto({ path }: { path: string }) {
+  const { data } = useQuery({
+    queryKey: ["assembly-photo", path],
+    queryFn: async () => {
+      if (path.startsWith("http")) return path;
+      const { data } = await supabase.storage.from("assembly-photos").createSignedUrl(path, 3600);
+      return data?.signedUrl ?? null;
+    },
+  });
+  if (!data) return null;
+  return <img src={data} alt="Foto da montagem" className="max-h-64 rounded border object-contain" />;
+}
