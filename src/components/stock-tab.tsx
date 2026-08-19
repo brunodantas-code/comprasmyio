@@ -45,9 +45,9 @@ type StockLocation = "almoxarifado" | "fabrica" | "unidade" | "tecnico" | "trans
 const LOCATION_LABELS: Record<StockLocation, string> = {
   fabrica: "Fábrica",
   almoxarifado: "Almoxarifado",
+  transito: "Em Trânsito",
   unidade: "Unidade (cliente)",
   tecnico: "Técnico",
-  transito: "Em Trânsito",
 };
 
 type MovementType = "entrada" | "saida" | "ajuste";
