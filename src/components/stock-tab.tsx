@@ -575,6 +575,7 @@ function StockSection({ userId, location, canDelete }: { userId: string; locatio
           userId={userId}
           homologable
           canDelete={canDelete}
+          canReportIssue
           title="Produtos para homologar"
           description="Produtos montados liberados pela fábrica, aguardando homologação."
         />
@@ -738,7 +739,9 @@ function StockSection({ userId, location, canDelete }: { userId: string; locatio
         </CardContent>
       </Card>
 
-      {location === "fabrica" && <AssemblyReleasesCard materialNames={materialNames} />}
+      {location === "fabrica" && (
+        <AssemblyReleasesCard materialNames={materialNames} userId={userId} canCorrect canDelete={canDelete} />
+      )}
     </div>
   );
 }

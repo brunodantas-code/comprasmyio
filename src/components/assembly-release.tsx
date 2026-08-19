@@ -19,7 +19,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Camera, ImageUp, PackageCheck, Search, Trash2 } from "lucide-react";
+import { AlertTriangle, Camera, ImageUp, PackageCheck, Pencil, Search, Trash2 } from "lucide-react";
 import { HomologateDialog, useHomologations } from "@/components/homologation";
 const BUCKET = "assembly-photos";
 
@@ -65,6 +65,327 @@ export function useAssemblyReleases() {
       return data ?? [];
     },
   });
+}
+
+/* ---------------- Divergências de quantidade ---------------- */
+
+export type ReleaseIssue = {
+  id: string;
+  release_id: string;
+  item_id: string | null;
+  material_id: string | null;
+  reported_quantity: number | null;
+  message: string;
+  status: string;
+  resolution_note: string | null;
+  reported_by: string | null;
+  resolved_by: string | null;
+  resolved_at: string | null;
+  created_at: string;
+};
+
+export function useReleaseIssues() {
+  return useQuery({
+    queryKey: ["assembly-release-issues"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("assembly_release_issues")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as ReleaseIssue[];
+    },
+  });
+}
+
+type ReleaseItem = { id: string; quantity: number; material_id: string };
+
+function ReportIssueDialog({
+  release,
+  materialNames,
+  userId,
+}: {
+  release: { id: string; assembly_release_items?: ReleaseItem[] | null };
+  materialNames: Record<string, string>;
+  userId: string;
+}) {
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const items = release.assembly_release_items ?? [];
+  const [itemId, setItemId] = useState<string>("");
+  const [qtyValue, setQtyValue] = useState("");
+  const [message, setMessage] = useState("");
+
+  const report = useMutation({
+    mutationFn: async () => {
+      if (!message.trim()) throw new Error("Descreva a divergência encontrada");
+      const item = items.find((i) => i.id === itemId) ?? null;
+      const qty = qtyValue.trim() === "" ? null : Number(qtyValue);
+      if (qty !== null && (!Number.isInteger(qty) || qty < 0)) throw new Error("Quantidade correta inválida");
+      const { error } = await supabase.from("assembly_release_issues").insert({
+        release_id: release.id,
+        item_id: item?.id ?? null,
+        material_id: item?.material_id ?? null,
+        reported_quantity: qty,
+        message: message.trim(),
+        reported_by: userId,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Divergência sinalizada para a fábrica");
+      qc.invalidateQueries({ queryKey: ["assembly-release-issues"] });
+      setOpen(false);
+      setItemId("");
+      setQtyValue("");
+      setMessage("");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="ghost" title="Sinalizar divergência" className="h-8 w-8 p-0">
+          <AlertTriangle className="h-4 w-4 text-amber-600" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Sinalizar divergência</DialogTitle>
+          <DialogDescription>
+            Avise a fábrica quando a quantidade recebida não bater com a liberada. A fábrica corrige e o estoque é
+            ajustado automaticamente.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label>Produto (opcional)</Label>
+            <select
+              className="h-9 w-full rounded-md border bg-background px-2 text-sm"
+              value={itemId}
+              onChange={(e) => setItemId(e.target.value)}
+            >
+              <option value="">Toda a liberação</option>
+              {items.map((i) => (
+                <option key={i.id} value={i.id}>
+                  {materialNames[i.material_id] ?? "Produto"} — liberado {i.quantity}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="issue-qty">Quantidade correta (opcional)</Label>
+            <Input
+              id="issue-qty"
+              type="number"
+              min={0}
+              value={qtyValue}
+              onChange={(e) => setQtyValue(e.target.value)}
+              placeholder="Ex.: 8"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="issue-msg">O que foi encontrado</Label>
+            <Textarea
+              id="issue-msg"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Ex.: chegaram 8 unidades, mas foram liberadas 10"
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+          <Button disabled={report.isPending} onClick={() => report.mutate()}>
+            {report.isPending ? "Enviando..." : "Sinalizar"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function CorrectReleaseDialog({
+  release,
+  materialNames,
+  issues,
+  userId,
+  minQuantities,
+}: {
+  release: { id: string; assembly_release_items?: ReleaseItem[] | null };
+  materialNames: Record<string, string>;
+  issues: ReleaseIssue[];
+  userId: string;
+  minQuantities: Record<string, number>;
+}) {
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const items = release.assembly_release_items ?? [];
+  const [values, setValues] = useState<Record<string, string>>({});
+  const [note, setNote] = useState("");
+
+  const openIssues = issues.filter((i) => i.status === "aberta");
+
+  function start(o: boolean) {
+    setOpen(o);
+    if (o) {
+      setValues(Object.fromEntries(items.map((i) => [i.id, String(i.quantity)])));
+      setNote("");
+    }
+  }
+
+  const save = useMutation({
+    mutationFn: async () => {
+      const changes = items
+        .map((i) => ({ item: i, next: Number(values[i.id] ?? i.quantity) }))
+        .filter((c) => Number.isInteger(c.next) && c.next !== c.item.quantity);
+      if (!changes.length && !openIssues.length) throw new Error("Nenhuma alteração informada");
+
+      for (const c of changes) {
+        if (c.next < 1) throw new Error("A quantidade corrigida deve ser no mínimo 1");
+        const min = minQuantities[c.item.id] ?? 0;
+        if (c.next < min)
+          throw new Error(
+            `${materialNames[c.item.material_id] ?? "Produto"}: já foram homologadas ${min} unidades, não é possível reduzir abaixo disso`,
+          );
+      }
+
+      if (changes.length) {
+        // ajusta o consumo de componentes conforme a diferença
+        const productIds = changes.map((c) => c.item.material_id);
+        const { data: boms, error: bomErr } = await supabase
+          .from("product_boms")
+          .select("product_material_id, component_material_id, quantity")
+          .in("product_material_id", productIds);
+        if (bomErr) throw bomErr;
+        const { data: lossRows } = await supabase
+          .from("materials")
+          .select("id, loss_percent")
+          .in("id", productIds);
+        const lossOf = (id: string) => Number(lossRows?.find((l) => l.id === id)?.loss_percent ?? 0);
+
+        const delta = new Map<string, number>();
+        for (const b of boms ?? []) {
+          const change = changes.find((c) => c.item.material_id === b.product_material_id);
+          if (!change) continue;
+          const diff = change.next - change.item.quantity;
+          const total = Number(b.quantity) * diff * (1 + lossOf(b.product_material_id) / 100);
+          if (total !== 0) {
+            delta.set(b.component_material_id, (delta.get(b.component_material_id) ?? 0) + total);
+          }
+        }
+
+        const movements = [...delta.entries()]
+          .map(([material_id, q]) => ({ material_id, q: Math.round(q * 1000) / 1000 }))
+          .filter((m) => m.q !== 0)
+          .map((m) => ({
+            material_id: m.material_id,
+            quantity: Math.abs(m.q),
+            type: (m.q > 0 ? "saida" : "entrada") as "saida" | "entrada",
+            reason: "Correção de liberação de montagem",
+            created_by: userId,
+          }));
+        if (movements.length) {
+          const { error: movErr } = await supabase.from("stock_movements").insert(movements);
+          if (movErr) throw movErr;
+        }
+
+        for (const c of changes) {
+          const { error } = await supabase
+            .from("assembly_release_items")
+            .update({ quantity: c.next })
+            .eq("id", c.item.id);
+          if (error) throw error;
+        }
+      }
+
+      if (openIssues.length) {
+        const { error } = await supabase
+          .from("assembly_release_issues")
+          .update({
+            status: "resolvida",
+            resolution_note: note.trim() || null,
+            resolved_by: userId,
+            resolved_at: new Date().toISOString(),
+          })
+          .in("id", openIssues.map((i) => i.id));
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      toast.success("Liberação corrigida");
+      qc.invalidateQueries({ queryKey: ["assembly-releases"] });
+      qc.invalidateQueries({ queryKey: ["assembly-release-issues"] });
+      qc.invalidateQueries({ queryKey: ["material-stock"] });
+      qc.invalidateQueries({ queryKey: ["stock-movements"] });
+      setOpen(false);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={start}>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="ghost" title="Corrigir quantidades" className="h-8 w-8 p-0">
+          <Pencil className="h-4 w-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Corrigir quantidades liberadas</DialogTitle>
+          <DialogDescription>
+            O consumo de componentes da fábrica é ajustado automaticamente pela diferença.
+          </DialogDescription>
+        </DialogHeader>
+
+        {openIssues.length > 0 && (
+          <div className="space-y-2 rounded border border-amber-300 bg-amber-50 p-3 text-sm">
+            <p className="font-medium text-amber-800">Divergências sinalizadas pelo almoxarifado</p>
+            {openIssues.map((i) => (
+              <p key={i.id} className="text-amber-900">
+                {i.material_id ? `${materialNames[i.material_id] ?? "Produto"}: ` : ""}
+                {i.message}
+                {i.reported_quantity !== null ? ` (quantidade correta: ${i.reported_quantity})` : ""}
+              </p>
+            ))}
+          </div>
+        )}
+
+        <div className="space-y-2">
+          {items.map((i) => (
+            <div key={i.id} className="flex items-center justify-between gap-3 rounded border px-3 py-2">
+              <span className="text-sm">{materialNames[i.material_id] ?? "Produto"}</span>
+              <Input
+                type="number"
+                min={Math.max(minQuantities[i.id] ?? 1, 1)}
+                className="w-24"
+                value={values[i.id] ?? ""}
+                onChange={(e) => setValues((p) => ({ ...p, [i.id]: e.target.value }))}
+              />
+            </div>
+          ))}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="correction-note">Observação da correção</Label>
+          <Textarea
+            id="correction-note"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="Ex.: contagem conferida, quantidade ajustada para 8"
+          />
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+          <Button disabled={save.isPending} onClick={() => save.mutate()}>
+            {save.isPending ? "Salvando..." : "Salvar correção"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
 }
 
 export function ReleaseAssembledDialog({ userId }: { userId: string }) {
@@ -428,6 +749,8 @@ export function AssemblyReleasesCard({
   userId,
   homologable = false,
   canDelete = false,
+  canReportIssue = false,
+  canCorrect = false,
 }: {
   materialNames: Record<string, string>;
   title?: string;
@@ -435,10 +758,14 @@ export function AssemblyReleasesCard({
   userId?: string;
   homologable?: boolean;
   canDelete?: boolean;
+  canReportIssue?: boolean;
+  canCorrect?: boolean;
 }) {
   const { data: releases } = useAssemblyReleases();
   const { data: profiles } = useProfilesList();
   const { data: homologations } = useHomologations();
+  const { data: issues } = useReleaseIssues();
+  const issuesFor = (releaseId: string) => (issues ?? []).filter((i) => i.release_id === releaseId);
   const homologatedFor = (releaseId: string, materialId: string) =>
     (homologations ?? [])
       .filter((h) => h.release_id === releaseId && h.material_id === materialId)
@@ -466,12 +793,15 @@ export function AssemblyReleasesCard({
                 <TableHead>Responsáveis</TableHead>
                 <TableHead>Foto</TableHead>
                 <TableHead>Observações</TableHead>
-                {canDelete && <TableHead className="w-10">Ações</TableHead>}
+                {(canDelete || canReportIssue || canCorrect) && <TableHead className="w-28">Ações</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
-              {releases.map((r) => (
-                <TableRow key={r.id}>
+              {releases.map((r) => {
+                const relIssues = issuesFor(r.id);
+                const openIssues = relIssues.filter((i) => i.status === "aberta");
+                return (
+                <TableRow key={r.id} className={openIssues.length ? "bg-amber-50/70" : undefined}>
                   <TableCell className="text-sm text-muted-foreground">
                     {new Date(r.created_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
                   </TableCell>
@@ -511,17 +841,50 @@ export function AssemblyReleasesCard({
                         );
                       })}
                     </div>
+                    {openIssues.length > 0 && (
+                      <div className="mt-2 space-y-1">
+                        {openIssues.map((i) => (
+                          <p key={i.id} className="flex items-start gap-1 text-xs text-amber-700">
+                            <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />
+                            <span>
+                              {i.message}
+                              {i.reported_quantity !== null ? ` — correto: ${i.reported_quantity}` : ""}
+                            </span>
+                          </p>
+                        ))}
+                      </div>
+                    )}
                   </TableCell>
                   <TableCell className="text-sm">{(r.responsibles ?? []).map(nameOf).join(", ")}</TableCell>
                   <TableCell><PhotoCell path={r.photo_url} /></TableCell>
                   <TableCell className="text-sm text-muted-foreground">{r.notes ?? "—"}</TableCell>
-                  {canDelete && (
+                  {(canDelete || canReportIssue || canCorrect) && (
                     <TableCell>
-                      <DeleteReleaseDialog release={r} />
+                      <div className="flex items-center gap-1">
+                        {canReportIssue && userId && (
+                          <ReportIssueDialog release={r} materialNames={materialNames} userId={userId} />
+                        )}
+                        {canCorrect && userId && (
+                          <CorrectReleaseDialog
+                            release={r}
+                            materialNames={materialNames}
+                            issues={relIssues}
+                            userId={userId}
+                            minQuantities={Object.fromEntries(
+                              (r.assembly_release_items ?? []).map((i) => [
+                                i.id,
+                                homologatedFor(r.id, i.material_id),
+                              ]),
+                            )}
+                          />
+                        )}
+                        {canDelete && <DeleteReleaseDialog release={r} />}
+                      </div>
                     </TableCell>
                   )}
                 </TableRow>
-              ))}
+                );
+              })}
             </TableBody>
           </Table>
         )}
