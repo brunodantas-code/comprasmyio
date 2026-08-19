@@ -572,6 +572,7 @@ function StockSection({ userId, location, canDelete }: { userId: string; locatio
           materialNames={materialNames}
           userId={userId}
           homologable
+          canDelete={canDelete}
           title="Produtos para homologar"
           description="Produtos montados liberados pela fábrica, aguardando homologação."
         />

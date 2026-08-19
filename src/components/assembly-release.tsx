@@ -19,7 +19,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Camera, ImageUp, PackageCheck, Search } from "lucide-react";
+import { Camera, ImageUp, PackageCheck, Search, Trash2 } from "lucide-react";
 import { HomologateDialog, useHomologations } from "@/components/homologation";
 const BUCKET = "assembly-photos";
 
@@ -348,18 +348,93 @@ function PhotoCell({ path }: { path: string }) {
   );
 }
 
+function DeleteReleaseDialog({ release }: { release: { id: string; photo_url: string; created_at: string } }) {
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [text, setText] = useState("");
+  const [pending, setPending] = useState(false);
+
+  const remove = useMutation({
+    mutationFn: async () => {
+      if (text.trim().toLowerCase() !== "excluir") throw new Error('Digite "excluir" para confirmar');
+      setPending(true);
+      // Remove homologações associadas (a tabela tem ON DELETE CASCADE, mas garantimos)
+      await supabase.from("homologations").delete().eq("release_id", release.id);
+      // Itens da liberação (cascade, mas explícito por segurança)
+      await supabase.from("assembly_release_items").delete().eq("release_id", release.id);
+      // Registro principal
+      const { error } = await supabase.from("assembly_releases").delete().eq("id", release.id);
+      if (error) throw error;
+      // Foto do storage (best-effort)
+      await supabase.storage.from(BUCKET).remove([release.photo_url]);
+    },
+    onSuccess: () => {
+      toast.success("Liberação excluída");
+      qc.invalidateQueries({ queryKey: ["assembly-releases"] });
+      qc.invalidateQueries({ queryKey: ["material-stock"] });
+      qc.invalidateQueries({ queryKey: ["stock-movements"] });
+      qc.invalidateQueries({ queryKey: ["homologations"] });
+      setOpen(false);
+      setText("");
+    },
+    onError: (e: Error) => toast.error(e.message),
+    onSettled: () => setPending(false),
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setText(""); }}>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="ghost" title="Excluir liberação" className="h-8 w-8 p-0">
+          <Trash2 className="h-4 w-4 text-destructive" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Excluir liberação</DialogTitle>
+          <DialogDescription>
+            A liberação de {new Date(release.created_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
+            {" "}será removida junto com seus itens e homologações associadas.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-2">
+          <Label htmlFor="delete-confirm">Digite "excluir" para confirmar</Label>
+          <Input
+            id="delete-confirm"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="excluir"
+            autoFocus
+          />
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+          <Button
+            variant="destructive"
+            disabled={pending || text.trim().toLowerCase() !== "excluir"}
+            onClick={() => remove.mutate()}
+          >
+            {pending ? "Excluindo..." : "Excluir"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function AssemblyReleasesCard({
   materialNames,
   title = "Produtos montados liberados",
   description = "Histórico de liberações da fábrica.",
   userId,
   homologable = false,
+  canDelete = false,
 }: {
   materialNames: Record<string, string>;
   title?: string;
   description?: string;
   userId?: string;
   homologable?: boolean;
+  canDelete?: boolean;
 }) {
   const { data: releases } = useAssemblyReleases();
   const { data: profiles } = useProfilesList();
@@ -391,6 +466,7 @@ export function AssemblyReleasesCard({
                 <TableHead>Responsáveis</TableHead>
                 <TableHead>Foto</TableHead>
                 <TableHead>Observações</TableHead>
+                {canDelete && <TableHead className="w-10">Ações</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -439,6 +515,11 @@ export function AssemblyReleasesCard({
                   <TableCell className="text-sm">{(r.responsibles ?? []).map(nameOf).join(", ")}</TableCell>
                   <TableCell><PhotoCell path={r.photo_url} /></TableCell>
                   <TableCell className="text-sm text-muted-foreground">{r.notes ?? "—"}</TableCell>
+                  {canDelete && (
+                    <TableCell>
+                      <DeleteReleaseDialog release={r} />
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>
