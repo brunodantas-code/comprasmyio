@@ -226,7 +226,6 @@ export function BomSettingsDialog() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  return (
   const setManufactured = useMutation({
     mutationFn: async (v: { id: string; value: boolean }) => {
       const { error } = await supabase.from("materials").update({ is_manufactured: v.value }).eq("id", v.id);
@@ -241,6 +240,7 @@ export function BomSettingsDialog() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button size="sm" variant="outline" title="Regras de componentes por produto">
