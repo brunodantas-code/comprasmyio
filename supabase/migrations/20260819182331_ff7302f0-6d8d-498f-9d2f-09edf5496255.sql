@@ -1,0 +1,1 @@
+GRANT INSERT, UPDATE, DELETE ON public.product_boms TO authenticated;
