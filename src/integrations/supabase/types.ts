@@ -378,6 +378,59 @@ export type Database = {
           },
         ]
       }
+      product_boms: {
+        Row: {
+          component_material_id: string
+          created_at: string
+          id: string
+          product_material_id: string
+          quantity: number
+        }
+        Insert: {
+          component_material_id: string
+          created_at?: string
+          id?: string
+          product_material_id: string
+          quantity: number
+        }
+        Update: {
+          component_material_id?: string
+          created_at?: string
+          id?: string
+          product_material_id?: string
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_boms_component_material_id_fkey"
+            columns: ["component_material_id"]
+            isOneToOne: false
+            referencedRelation: "material_stock"
+            referencedColumns: ["material_id"]
+          },
+          {
+            foreignKeyName: "product_boms_component_material_id_fkey"
+            columns: ["component_material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_boms_product_material_id_fkey"
+            columns: ["product_material_id"]
+            isOneToOne: false
+            referencedRelation: "material_stock"
+            referencedColumns: ["material_id"]
+          },
+          {
+            foreignKeyName: "product_boms_product_material_id_fkey"
+            columns: ["product_material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
