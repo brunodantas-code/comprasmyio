@@ -749,6 +749,8 @@ export function AssemblyReleasesCard({
   userId,
   homologable = false,
   canDelete = false,
+  canReportIssue = false,
+  canCorrect = false,
 }: {
   materialNames: Record<string, string>;
   title?: string;
@@ -756,10 +758,14 @@ export function AssemblyReleasesCard({
   userId?: string;
   homologable?: boolean;
   canDelete?: boolean;
+  canReportIssue?: boolean;
+  canCorrect?: boolean;
 }) {
   const { data: releases } = useAssemblyReleases();
   const { data: profiles } = useProfilesList();
   const { data: homologations } = useHomologations();
+  const { data: issues } = useReleaseIssues();
+  const issuesFor = (releaseId: string) => (issues ?? []).filter((i) => i.release_id === releaseId);
   const homologatedFor = (releaseId: string, materialId: string) =>
     (homologations ?? [])
       .filter((h) => h.release_id === releaseId && h.material_id === materialId)
@@ -787,12 +793,15 @@ export function AssemblyReleasesCard({
                 <TableHead>Responsáveis</TableHead>
                 <TableHead>Foto</TableHead>
                 <TableHead>Observações</TableHead>
-                {canDelete && <TableHead className="w-10">Ações</TableHead>}
+                {(canDelete || canReportIssue || canCorrect) && <TableHead className="w-28">Ações</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
-              {releases.map((r) => (
-                <TableRow key={r.id}>
+              {releases.map((r) => {
+                const relIssues = issuesFor(r.id);
+                const openIssues = relIssues.filter((i) => i.status === "aberta");
+                return (
+                <TableRow key={r.id} className={openIssues.length ? "bg-amber-50/70" : undefined}>
                   <TableCell className="text-sm text-muted-foreground">
                     {new Date(r.created_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
                   </TableCell>
@@ -832,17 +841,50 @@ export function AssemblyReleasesCard({
                         );
                       })}
                     </div>
+                    {openIssues.length > 0 && (
+                      <div className="mt-2 space-y-1">
+                        {openIssues.map((i) => (
+                          <p key={i.id} className="flex items-start gap-1 text-xs text-amber-700">
+                            <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />
+                            <span>
+                              {i.message}
+                              {i.reported_quantity !== null ? ` — correto: ${i.reported_quantity}` : ""}
+                            </span>
+                          </p>
+                        ))}
+                      </div>
+                    )}
                   </TableCell>
                   <TableCell className="text-sm">{(r.responsibles ?? []).map(nameOf).join(", ")}</TableCell>
                   <TableCell><PhotoCell path={r.photo_url} /></TableCell>
                   <TableCell className="text-sm text-muted-foreground">{r.notes ?? "—"}</TableCell>
-                  {canDelete && (
+                  {(canDelete || canReportIssue || canCorrect) && (
                     <TableCell>
-                      <DeleteReleaseDialog release={r} />
+                      <div className="flex items-center gap-1">
+                        {canReportIssue && userId && (
+                          <ReportIssueDialog release={r} materialNames={materialNames} userId={userId} />
+                        )}
+                        {canCorrect && userId && (
+                          <CorrectReleaseDialog
+                            release={r}
+                            materialNames={materialNames}
+                            issues={relIssues}
+                            userId={userId}
+                            minQuantities={Object.fromEntries(
+                              (r.assembly_release_items ?? []).map((i) => [
+                                i.id,
+                                homologatedFor(r.id, i.material_id),
+                              ]),
+                            )}
+                          />
+                        )}
+                        {canDelete && <DeleteReleaseDialog release={r} />}
+                      </div>
                     </TableCell>
                   )}
                 </TableRow>
-              ))}
+                );
+              })}
             </TableBody>
           </Table>
         )}
