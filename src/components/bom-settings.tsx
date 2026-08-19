@@ -227,6 +227,20 @@ export function BomSettingsDialog() {
   });
 
   return (
+  const setManufactured = useMutation({
+    mutationFn: async (v: { id: string; value: boolean }) => {
+      const { error } = await supabase.from("materials").update({ is_manufactured: v.value }).eq("id", v.id);
+      if (error) throw error;
+      return v;
+    },
+    onSuccess: (v) => {
+      toast.success(v.value ? "Produto voltou para a Fábrica" : "Produto removido das listas da Fábrica");
+      if (!v.value && selected === v.id) setProductId("");
+      qc.invalidateQueries({ queryKey: ["materials"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button size="sm" variant="outline" title="Regras de componentes por produto">
