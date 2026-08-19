@@ -664,6 +664,11 @@ function StockSection({ userId, location, canDelete }: { userId: string; locatio
 
   return (
     <div className="space-y-6">
+      {location === "almoxarifado" ? (
+        <MyioDemandCard
+          balances={Object.fromEntries(scoped.map((r) => [r.name.trim().toLowerCase(), r.balance]))}
+        />
+      ) : (
       <div className="grid gap-4 sm:grid-cols-3">
         <Card>
           <CardHeader className="pb-2"><CardDescription>Itens cadastrados</CardDescription></CardHeader>
@@ -680,6 +685,7 @@ function StockSection({ userId, location, canDelete }: { userId: string; locatio
           </CardContent>
         </Card>
       </div>
+      )}
 
       {location === "fabrica" && (
         <AssemblyReleasesCard materialNames={materialNames} userId={userId} canCorrect canDelete={canDelete} />
