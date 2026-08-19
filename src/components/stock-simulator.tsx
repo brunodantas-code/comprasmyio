@@ -219,6 +219,7 @@ export function StockSimulatorDialog({ userId }: { userId?: string }) {
 
 export function ProductionCapacityCard() {
   const [search, setSearch] = useState("");
+  const [limitDialog, setLimitDialog] = useState<{ name: string; items: { name: string; can: number; per: number; balance: number }[] } | null>(null);
 
   const { data: materials } = useQuery({
     queryKey: ["materials", "all"],
