@@ -263,22 +263,41 @@ export function ProductionCapacityCard() {
       .map((p) => {
         const factor = 1 + Number(p.loss_percent ?? 0) / 100;
         const items = (boms ?? []).filter((b) => b.product_material_id === p.id);
-        if (items.length === 0) return { id: p.id, name: p.name, possible: null as number | null, limiter: null as string | null, missing: 0 };
+        if (items.length === 0)
+          return {
+            id: p.id,
+            name: p.name,
+            possible: null as number | null,
+            limiter: null as string | null,
+            missing: 0,
+            allLimiters: [] as { name: string; can: number; per: number; balance: number }[],
+          };
         let possible = Infinity;
         let limiter: string | null = null;
         let missing = 0;
+        const allLimiters: { name: string; can: number; per: number; balance: number }[] = [];
         for (const b of items) {
           const per = Number(b.quantity) * factor;
           if (!(per > 0)) continue;
           const bal = balanceOf(b.component_material_id);
           const can = Math.floor(bal / per);
           if (bal <= 0) missing += 1;
+          const cname = (materials ?? []).find((m) => m.id === b.component_material_id)?.name ?? "Material";
+          allLimiters.push({ name: cname, can, per, balance: bal });
           if (can < possible) {
             possible = can;
-            limiter = (materials ?? []).find((m) => m.id === b.component_material_id)?.name ?? null;
+            limiter = cname;
           }
         }
-        return { id: p.id, name: p.name, possible: Number.isFinite(possible) ? possible : null, limiter, missing };
+        allLimiters.sort((a, b) => a.can - b.can);
+        return {
+          id: p.id,
+          name: p.name,
+          possible: Number.isFinite(possible) ? possible : null,
+          limiter,
+          missing,
+          allLimiters,
+        };
       })
       .sort((a, b) => (b.possible ?? -1) - (a.possible ?? -1));
     // eslint-disable-next-line react-hooks/exhaustive-deps
