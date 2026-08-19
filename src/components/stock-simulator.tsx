@@ -18,7 +18,7 @@ import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FlaskConical, Search, ListTree } from "lucide-react";
 
-type Material = { id: string; name: string; location: string; is_product: boolean; loss_percent?: number | null };
+type Material = { id: string; name: string; location: string; is_product: boolean; is_manufactured?: boolean | null; loss_percent?: number | null };
 type Bom = { id: string; product_material_id: string; component_material_id: string; quantity: number };
 
 const normalize = (s: string) =>
@@ -35,7 +35,7 @@ export function StockSimulatorDialog({ userId }: { userId?: string }) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("materials")
-        .select("id, name, location, is_product, loss_percent")
+        .select("id, name, location, is_product, is_manufactured, loss_percent")
         .order("name");
       if (error) throw error;
       return (data ?? []) as Material[];
@@ -56,7 +56,7 @@ export function StockSimulatorDialog({ userId }: { userId?: string }) {
   const products = useMemo(
     () =>
       (materials ?? [])
-        .filter((m) => m.is_product)
+        .filter((m) => m.is_product && m.is_manufactured !== false)
         .filter((m, i, arr) => arr.findIndex((x) => normalize(x.name) === normalize(m.name)) === i),
     [materials],
   );
@@ -226,7 +226,7 @@ export function ProductionCapacityCard() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("materials")
-        .select("id, name, location, is_product, loss_percent")
+        .select("id, name, location, is_product, is_manufactured, loss_percent")
         .order("name");
       if (error) throw error;
       return (data ?? []) as Material[];
@@ -257,7 +257,7 @@ export function ProductionCapacityCard() {
 
   const rows = useMemo(() => {
     const products = (materials ?? [])
-      .filter((m) => m.is_product)
+      .filter((m) => m.is_product && m.is_manufactured !== false)
       .filter((m, i, arr) => arr.findIndex((x) => normalize(x.name) === normalize(m.name)) === i);
 
     return products

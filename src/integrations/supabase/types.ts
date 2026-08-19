@@ -283,6 +283,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          is_manufactured: boolean
           is_product: boolean
           link: string | null
           location: string
@@ -294,6 +295,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          is_manufactured?: boolean
           is_product?: boolean
           link?: string | null
           location?: string
@@ -305,6 +307,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          is_manufactured?: boolean
           is_product?: boolean
           link?: string | null
           location?: string

@@ -16,9 +16,9 @@ import {
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Check, PackagePlus, Percent, Plus, Search, Settings, Trash2 } from "lucide-react";
+import { Check, FactoryIcon, PackagePlus, Percent, Plus, RotateCcw, Search, Settings, Trash2 } from "lucide-react";
 
-type Material = { id: string; name: string; location: string; is_product: boolean; loss_percent?: number | null };
+type Material = { id: string; name: string; location: string; is_product: boolean; is_manufactured?: boolean | null; loss_percent?: number | null };
 type Bom = { id: string; product_material_id: string; component_material_id: string; quantity: number };
 
 const normalize = (s: string) =>
@@ -30,7 +30,7 @@ function useMaterialsAll() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("materials")
-        .select("id, name, location, is_product, loss_percent")
+        .select("id, name, location, is_product, is_manufactured, loss_percent")
         .order("name");
       if (error) throw error;
       return (data ?? []) as Material[];
@@ -105,12 +105,16 @@ export function BomSettingsDialog() {
   const products = useMemo(
     () =>
       (materials ?? [])
-        .filter((m) => m.is_product)
+        .filter((m) => m.is_product && m.is_manufactured !== false)
         .filter((m, i, arr) => arr.findIndex((x) => normalize(x.name) === normalize(m.name)) === i),
     [materials],
   );
   const components = useMemo(
     () => (materials ?? []).filter((m) => m.location === "fabrica"),
+    [materials],
+  );
+  const nonManufactured = useMemo(
+    () => (materials ?? []).filter((m) => m.is_product && m.is_manufactured === false),
     [materials],
   );
   const nameOf = (id: string) => (materials ?? []).find((m) => m.id === id)?.name ?? "Material";
@@ -222,6 +226,20 @@ export function BomSettingsDialog() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const setManufactured = useMutation({
+    mutationFn: async (v: { id: string; value: boolean }) => {
+      const { error } = await supabase.from("materials").update({ is_manufactured: v.value }).eq("id", v.id);
+      if (error) throw error;
+      return v;
+    },
+    onSuccess: (v) => {
+      toast.success(v.value ? "Produto voltou para a Fábrica" : "Produto removido das listas da Fábrica");
+      if (!v.value && selected === v.id) setProductId("");
+      qc.invalidateQueries({ queryKey: ["materials"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -256,7 +274,42 @@ export function BomSettingsDialog() {
             />
           </div>
           <Badge variant="outline">{rows.length} componentes</Badge>
+          {selected && (
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={setManufactured.isPending}
+              onClick={() => setManufactured.mutate({ id: selected, value: false })}
+              title="Remover das listas da Fábrica (continua no Almoxarifado)"
+            >
+              <FactoryIcon className="mr-1 h-4 w-4" /> Não é produzido aqui
+            </Button>
+          )}
         </div>
+
+        {nonManufactured.length > 0 && (
+          <div className="space-y-2 rounded border p-3">
+            <Label>Produtos não produzidos pela Fábrica</Label>
+            <div className="flex flex-wrap gap-2">
+              {nonManufactured.map((m) => (
+                <Button
+                  key={m.id}
+                  size="sm"
+                  variant="ghost"
+                  disabled={setManufactured.isPending}
+                  onClick={() => setManufactured.mutate({ id: m.id, value: true })}
+                  title="Voltar para as listas da Fábrica"
+                >
+                  <RotateCcw className="mr-1 h-4 w-4" /> {m.name}
+                </Button>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Eles continuam disponíveis no Almoxarifado, mas não aparecem em "Liberar produto montado", regras de
+              componentes nem na capacidade de produção. Clique para reativar.
+            </p>
+          </div>
+        )}
 
         <div className="space-y-2 rounded border p-3">
           <Label>Perda (%)</Label>
