@@ -667,7 +667,7 @@ function BuyerQueue() {
   const [statusSelected, setStatusSelected] = useState<Order["status"][]>([...STATUS_KEYS]);
   const [projectFilter, setProjectFilter] = useState<string>("all");
   const [groupByProject, setGroupByProject] = useState(false);
-  const [deliveredMode, setDeliveredMode] = useState<DeliveredMode>("all");
+  const [deliveredMode, setDeliveredMode] = useState<DeliveredMode>("this_month");
   const [deliveredFrom, setDeliveredFrom] = useState("");
 
   const { data: orders, isLoading } = useQuery({
