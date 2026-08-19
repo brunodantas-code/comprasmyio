@@ -21,16 +21,9 @@ import {
 import { toast } from "sonner";
 import { Camera, ImageUp, PackageCheck, Search } from "lucide-react";
 import { HomologateDialog, useHomologations } from "@/components/homologation";
-import { MYIO_PRODUCTS } from "@/components/myio-orders-tab";
-
 const BUCKET = "assembly-photos";
 
 type MaterialRow = { id: string; name: string };
-
-const normalizeName = (s: string) =>
-  s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
-
-const ALLOWED_PRODUCTS = new Set(MYIO_PRODUCTS.map(normalizeName));
 
 function useAlmoxarifadoMaterials() {
   return useQuery({
