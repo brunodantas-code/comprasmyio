@@ -43,8 +43,8 @@ type StockRow = {
 type StockLocation = "almoxarifado" | "fabrica" | "unidade" | "tecnico" | "transito";
 
 const LOCATION_LABELS: Record<StockLocation, string> = {
-  almoxarifado: "Almoxarifado",
   fabrica: "Fábrica",
+  almoxarifado: "Almoxarifado",
   unidade: "Unidade (cliente)",
   tecnico: "Técnico",
   transito: "Em Trânsito",
