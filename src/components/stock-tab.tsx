@@ -13,7 +13,18 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 import { toast } from "sonner";
-import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Plus, Library } from "lucide-react";
+import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Plus, Library, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { ReleaseAssembledDialog, AssemblyReleasesCard } from "@/components/assembly-release";
 import { StockQrDialog } from "@/components/homologation";
 import { BomSettingsDialog } from "@/components/bom-settings";
@@ -225,7 +236,57 @@ function HistoryDialog({ row }: { row: StockRow }) {
   );
 }
 
-export function StockTab({ userId, onlyLocation }: { userId: string; onlyLocation?: StockLocation }) {
+function DeleteMaterialDialog({ row }: { row: StockRow }) {
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const del = useMutation({
+    mutationFn: async () => {
+      // Remove movimentações vinculadas para não bloquear o FK, depois o material.
+      const { error: mErr } = await supabase.from("stock_movements").delete().eq("material_id", row.material_id);
+      if (mErr) throw mErr;
+      const { error } = await supabase.from("materials").delete().eq("id", row.material_id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Item excluído");
+      qc.invalidateQueries({ queryKey: ["material-stock"] });
+      qc.invalidateQueries({ queryKey: ["stock-movements"] });
+      qc.invalidateQueries({ queryKey: ["materials"] });
+      setOpen(false);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <AlertDialog open={open} onOpenChange={setOpen}>
+      <AlertDialogTrigger asChild>
+        <Button size="sm" variant="ghost" title="Excluir item">
+          <Trash2 className="h-4 w-4 text-destructive" />
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Excluir "{row.name}"?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Esta ação remove o item e todo o seu histórico de movimentações deste local. Não é possível desfazer.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogAction
+            disabled={del.isPending}
+            onClick={() => del.mutate()}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            Excluir
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
+export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; canDelete?: boolean; onlyLocation?: StockLocation }) {
   const locations = (Object.keys(LOCATION_LABELS) as StockLocation[]).filter(
     (loc) => !onlyLocation || loc === onlyLocation,
   );
@@ -238,7 +299,7 @@ export function StockTab({ userId, onlyLocation }: { userId: string; onlyLocatio
       </TabsList>
       {locations.map((loc) => (
         <TabsContent key={loc} value={loc}>
-          <StockSection userId={userId} location={loc} />
+          <StockSection userId={userId} location={loc} canDelete={canDelete} />
         </TabsContent>
       ))}
     </Tabs>
@@ -450,7 +511,7 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
   );
 }
 
-function StockSection({ userId, location }: { userId: string; location: StockLocation }) {
+function StockSection({ userId, location, canDelete }: { userId: string; location: StockLocation; canDelete?: boolean }) {
   const { data: stock, isLoading } = useStock();
   const { data: movements } = useMovements();
   const { data: profiles } = useStockProfiles();
@@ -603,6 +664,7 @@ function StockSection({ userId, location }: { userId: string; location: StockLoc
                           }
                         />
                         <HistoryDialog row={r} />
+                        {canDelete && <DeleteMaterialDialog row={r} />}
                       </div>
                     </TableCell>
                   </TableRow>
