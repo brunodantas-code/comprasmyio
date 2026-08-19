@@ -199,6 +199,27 @@ export function BomSettingsDialog() {
 
   const available = components.filter((c) => !rows.some((r) => r.component_material_id === c.id));
 
+  const applyLoss = useMutation({
+    mutationFn: async () => {
+      const pct = Number(loss.replace(",", "."));
+      if (!Number.isFinite(pct) || pct <= 0) throw new Error("Informe uma porcentagem de perda válida");
+      const target = (boms ?? []).filter((b) => b.product_material_id === selected);
+      if (!target.length) throw new Error("Nenhum componente para atualizar");
+      for (const b of target) {
+        const q = Math.round(Number(b.quantity) * (1 + pct / 100) * 1000) / 1000;
+        const { error } = await supabase.from("product_boms").update({ quantity: q }).eq("id", b.id);
+        if (error) throw error;
+      }
+      return target.length;
+    },
+    onSuccess: (n) => {
+      toast.success(`Perda aplicada em ${n} componentes`);
+      setLoss("");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
