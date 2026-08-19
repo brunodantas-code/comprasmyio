@@ -615,7 +615,7 @@ function NewOrder({ userId }: { userId: string }) {
 
 function MyOrders({ userId }: { userId: string }) {
   const { data: projects } = useProjects();
-  const [deliveredMode, setDeliveredMode] = useState<DeliveredMode>("all");
+  const [deliveredMode, setDeliveredMode] = useState<DeliveredMode>("this_month");
   const [deliveredFrom, setDeliveredFrom] = useState("");
   const [statusSelected, setStatusSelected] = useState<Order["status"][]>([...STATUS_KEYS]);
   const { data: orders, isLoading } = useQuery({
