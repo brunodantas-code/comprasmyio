@@ -301,7 +301,7 @@ function Dashboard() {
   }
 
   const fabricaOnly = me.isFabrica && !me.isAdmin && !me.isComprador;
-  const defaultTab = me.isComprador ? "queue" : me.isAdmin ? "queue" : "mine";
+  const defaultTab = me.isComprador ? "queue" : me.isAdmin ? "queue" : "pedidos";
 
   return (
     <div className="min-h-screen bg-background">
@@ -330,32 +330,57 @@ function Dashboard() {
       <main className="mx-auto max-w-7xl px-6 py-8">
         <Tabs defaultValue={defaultTab}>
           <TabsList className="mb-6 flex-wrap">
-            <TabsTrigger value="mine"><ClipboardList className="mr-2 h-4 w-4" />Meus pedidos</TabsTrigger>
-            <TabsTrigger value="new"><Plus className="mr-2 h-4 w-4" />Novo pedido</TabsTrigger>
+            <TabsTrigger value="pedidos"><ClipboardList className="mr-2 h-4 w-4" />Pedidos</TabsTrigger>
             {(me.isComprador || me.isAdmin) && (
               <TabsTrigger value="queue"><ShoppingCart className="mr-2 h-4 w-4" />Fila de compras</TabsTrigger>
             )}
             <TabsTrigger value="stock"><Boxes className="mr-2 h-4 w-4" />Estoque</TabsTrigger>
-            {me.isAdmin && <TabsTrigger value="projects"><FolderKanban className="mr-2 h-4 w-4" />Projetos</TabsTrigger>}
-            {me.isAdmin && <TabsTrigger value="clients"><Building2 className="mr-2 h-4 w-4" />Clientes</TabsTrigger>}
+            {me.isAdmin && <TabsTrigger value="projects"><FolderKanban className="mr-2 h-4 w-4" />Projetos e clientes</TabsTrigger>}
             {me.isAdmin && <TabsTrigger value="materials"><Library className="mr-2 h-4 w-4" />Materiais</TabsTrigger>}
             {(me.isAdmin || fabricaOnly) && <TabsTrigger value="myio"><Factory className="mr-2 h-4 w-4" />Pedidos de Projetos Myio</TabsTrigger>}
-            {me.isAdmin && <TabsTrigger value="users"><Users className="mr-2 h-4 w-4" />Usuários</TabsTrigger>}
-            {me.isAdmin && <TabsTrigger value="logs"><ScrollText className="mr-2 h-4 w-4" />Logs</TabsTrigger>}
+            {me.isAdmin && <TabsTrigger value="admin"><Users className="mr-2 h-4 w-4" />Usuários e logs</TabsTrigger>}
           </TabsList>
 
-          <TabsContent value="mine"><MyOrders userId={me.id} /></TabsContent>
-          <TabsContent value="new"><NewOrder userId={me.id} /></TabsContent>
+          <TabsContent value="pedidos">
+            <Tabs defaultValue="mine">
+              <TabsList className="mb-4">
+                <TabsTrigger value="mine"><ClipboardList className="mr-2 h-4 w-4" />Meus pedidos</TabsTrigger>
+                <TabsTrigger value="new"><Plus className="mr-2 h-4 w-4" />Novo pedido</TabsTrigger>
+              </TabsList>
+              <TabsContent value="mine"><MyOrders userId={me.id} /></TabsContent>
+              <TabsContent value="new"><NewOrder userId={me.id} /></TabsContent>
+            </Tabs>
+          </TabsContent>
           {(me.isComprador || me.isAdmin) && <TabsContent value="queue"><BuyerQueue /></TabsContent>}
           <TabsContent value="stock"><StockTab userId={me.id} canDelete={me.isAdmin} onlyLocation={fabricaOnly ? "fabrica" : undefined} /></TabsContent>
-          {me.isAdmin && <TabsContent value="projects"><ProjectsAdmin userId={me.id} /></TabsContent>}
-          {me.isAdmin && <TabsContent value="clients"><ClientsTab userId={me.id} /></TabsContent>}
+          {me.isAdmin && (
+            <TabsContent value="projects">
+              <Tabs defaultValue="projetos">
+                <TabsList className="mb-4">
+                  <TabsTrigger value="projetos"><FolderKanban className="mr-2 h-4 w-4" />Projetos</TabsTrigger>
+                  <TabsTrigger value="clientes"><Building2 className="mr-2 h-4 w-4" />Clientes</TabsTrigger>
+                </TabsList>
+                <TabsContent value="projetos"><ProjectsAdmin userId={me.id} /></TabsContent>
+                <TabsContent value="clientes"><ClientsTab userId={me.id} /></TabsContent>
+              </Tabs>
+            </TabsContent>
+          )}
           {me.isAdmin && <TabsContent value="materials"><MaterialsAdmin /></TabsContent>}
             {(me.isAdmin || fabricaOnly) && (
               <TabsContent value="myio"><MyioOrdersTab userId={me.id} canManage={me.isAdmin} /></TabsContent>
             )}
-          {me.isAdmin && <TabsContent value="users"><UsersAdmin /></TabsContent>}
-          {me.isAdmin && <TabsContent value="logs"><LogsAdmin /></TabsContent>}
+          {me.isAdmin && (
+            <TabsContent value="admin">
+              <Tabs defaultValue="usuarios">
+                <TabsList className="mb-4">
+                  <TabsTrigger value="usuarios"><Users className="mr-2 h-4 w-4" />Usuários</TabsTrigger>
+                  <TabsTrigger value="logs"><ScrollText className="mr-2 h-4 w-4" />Logs</TabsTrigger>
+                </TabsList>
+                <TabsContent value="usuarios"><UsersAdmin /></TabsContent>
+                <TabsContent value="logs"><LogsAdmin /></TabsContent>
+              </Tabs>
+            </TabsContent>
+          )}
         </Tabs>
       </main>
     </div>
