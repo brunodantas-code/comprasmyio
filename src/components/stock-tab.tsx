@@ -10,8 +10,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 import { toast } from "sonner";
-import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Plus } from "lucide-react";
+import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Plus, Library } from "lucide-react";
 import { ReleaseAssembledDialog, AssemblyReleasesCard } from "@/components/assembly-release";
 import { StockQrDialog } from "@/components/homologation";
 import { BomSettingsDialog } from "@/components/bom-settings";
@@ -250,6 +252,8 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
   const [importId, setImportId] = useState("");
   const [importSearch, setImportSearch] = useState("");
   const [importIds, setImportIds] = useState<string[]>([]);
+  const [newName, setNewName] = useState("");
+  const [newLink, setNewLink] = useState("");
 
   const { data: allMaterials } = useQuery({
     queryKey: ["materials", "library"],
@@ -308,15 +312,14 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const fd = new FormData(e.currentTarget);
-    const name = String(fd.get("name") || "").trim();
-    const link = String(fd.get("link") || "").trim();
+    const name = newName.trim();
+    const link = newLink.trim();
     if (!name) return toast.error("Informe o nome do item");
     save.mutate({ name, link: link || null });
   }
 
   return (
-    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) { setMode("new"); setImportId(""); setImportIds([]); setImportSearch(""); } }}>
+    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) { setMode("new"); setImportId(""); setImportIds([]); setImportSearch(""); setNewName(""); setNewLink(""); } }}>
       <DialogTrigger asChild>
         <Button size="sm"><Plus className="mr-1 h-4 w-4" /> Adicionar item</Button>
       </DialogTrigger>
@@ -392,12 +395,50 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
         ) : (
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor={`name-${location}`}>Nome</Label>
-            <Input id={`name-${location}`} name="name" required />
+            <div className="flex items-center justify-between gap-2">
+              <Label htmlFor={`name-${location}`}>Nome</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button type="button" variant="outline" size="sm">
+                    <Library className="mr-1 h-4 w-4" /> Biblioteca
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[320px] p-0" align="end">
+                  <Command>
+                    <CommandInput placeholder="Buscar material..." />
+                    <CommandList>
+                      <CommandEmpty>Nenhum material cadastrado.</CommandEmpty>
+                      <CommandGroup>
+                        {(allMaterials ?? []).map((m) => (
+                          <CommandItem
+                            key={m.id}
+                            value={m.name}
+                            onSelect={() => { setNewName(m.name); setNewLink(m.link ?? ""); }}
+                          >
+                            <div className="flex min-w-0 flex-col">
+                              <span className="truncate">{m.name}</span>
+                              {m.link && <span className="truncate text-xs text-muted-foreground">{m.link}</span>}
+                            </div>
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </div>
+            <Input
+              id={`name-${location}`}
+              name="name"
+              required
+              placeholder="Digite ou selecione da biblioteca"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor={`link-${location}`}>Link <span className="text-muted-foreground">(opcional)</span></Label>
-            <Input id={`link-${location}`} name="link" type="url" placeholder="https://" />
+            <Input id={`link-${location}`} name="link" type="url" placeholder="https://" value={newLink} onChange={(e) => setNewLink(e.target.value)} />
           </div>
           <DialogFooter>
             <Button type="submit" disabled={save.isPending}>Salvar</Button>
