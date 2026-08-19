@@ -13,7 +13,18 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 import { toast } from "sonner";
-import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Plus, Library } from "lucide-react";
+import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Plus, Library, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { ReleaseAssembledDialog, AssemblyReleasesCard } from "@/components/assembly-release";
 import { StockQrDialog } from "@/components/homologation";
 import { BomSettingsDialog } from "@/components/bom-settings";
