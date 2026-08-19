@@ -239,6 +239,7 @@ function HistoryDialog({ row }: { row: StockRow }) {
 function DeleteMaterialDialog({ row }: { row: StockRow }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [confirmText, setConfirmText] = useState("");
   const del = useMutation({
     mutationFn: async () => {
       // Remove movimentações vinculadas para não bloquear o FK, depois o material.
@@ -248,17 +249,26 @@ function DeleteMaterialDialog({ row }: { row: StockRow }) {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Item excluído");
+      toast.success("Item excluída");
       qc.invalidateQueries({ queryKey: ["material-stock"] });
       qc.invalidateQueries({ queryKey: ["stock-movements"] });
       qc.invalidateQueries({ queryKey: ["materials"] });
       setOpen(false);
+      setConfirmText("");
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const canConfirm = confirmText.trim().toLowerCase() === "excluir";
+
   return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
+    <AlertDialog
+      open={open}
+      onOpenChange={(v) => {
+        setOpen(v);
+        if (!v) setConfirmText("");
+      }}
+    >
       <AlertDialogTrigger asChild>
         <Button size="sm" variant="ghost" title="Excluir item">
           <Trash2 className="h-4 w-4 text-destructive" />
@@ -269,12 +279,21 @@ function DeleteMaterialDialog({ row }: { row: StockRow }) {
           <AlertDialogTitle>Excluir "{row.name}"?</AlertDialogTitle>
           <AlertDialogDescription>
             Esta ação remove o item e todo o seu histórico de movimentações deste local. Não é possível desfazer.
+            <br />
+            Para confirmar, digite <strong>excluir</strong> no campo abaixo.
           </AlertDialogDescription>
         </AlertDialogHeader>
+        <Input
+          value={confirmText}
+          onChange={(e) => setConfirmText(e.target.value)}
+          placeholder="Digite: excluir"
+          autoFocus
+          className="mt-2"
+        />
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
           <AlertDialogAction
-            disabled={del.isPending}
+            disabled={del.isPending || !canConfirm}
             onClick={() => del.mutate()}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
