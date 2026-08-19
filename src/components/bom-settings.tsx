@@ -258,6 +258,7 @@ export function BomSettingsDialog() {
 
         <div className="space-y-2 rounded border p-3">
           <Label>Criar novo produto</Label>
+        </div>
           <div className="flex flex-wrap items-center gap-2">
             <Input
               value={newProductName}
