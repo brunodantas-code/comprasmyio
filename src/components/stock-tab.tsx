@@ -581,6 +581,10 @@ function StockSection({ userId, location, canDelete }: { userId: string; locatio
         />
       )}
 
+      {location === "fabrica" && (
+        <AssemblyReleasesCard materialNames={materialNames} userId={userId} canCorrect canDelete={canDelete} />
+      )}
+
       <Card>
         <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -738,10 +742,6 @@ function StockSection({ userId, location, canDelete }: { userId: string; locatio
           )}
         </CardContent>
       </Card>
-
-      {location === "fabrica" && (
-        <AssemblyReleasesCard materialNames={materialNames} userId={userId} canCorrect canDelete={canDelete} />
-      )}
     </div>
   );
 }
