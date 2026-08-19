@@ -14,6 +14,80 @@ export type Database = {
   }
   public: {
     Tables: {
+      assembly_release_issues: {
+        Row: {
+          created_at: string
+          id: string
+          item_id: string | null
+          material_id: string | null
+          message: string
+          release_id: string
+          reported_by: string | null
+          reported_quantity: number | null
+          resolution_note: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          item_id?: string | null
+          material_id?: string | null
+          message: string
+          release_id: string
+          reported_by?: string | null
+          reported_quantity?: number | null
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item_id?: string | null
+          material_id?: string | null
+          message?: string
+          release_id?: string
+          reported_by?: string | null
+          reported_quantity?: number | null
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assembly_release_issues_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "assembly_release_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assembly_release_issues_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "material_stock"
+            referencedColumns: ["material_id"]
+          },
+          {
+            foreignKeyName: "assembly_release_issues_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assembly_release_issues_release_id_fkey"
+            columns: ["release_id"]
+            isOneToOne: false
+            referencedRelation: "assembly_releases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assembly_release_items: {
         Row: {
           created_at: string
