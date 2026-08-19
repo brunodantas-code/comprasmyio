@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Check, PackagePlus, Plus, Search, Settings, Trash2 } from "lucide-react";
+import { Check, PackagePlus, Percent, Plus, Search, Settings, Trash2 } from "lucide-react";
 
 type Material = { id: string; name: string; location: string; is_product: boolean };
 type Bom = { id: string; product_material_id: string; component_material_id: string; quantity: number };
@@ -53,6 +53,11 @@ function useBoms() {
 
 function QtyCell({ bom, onSave, saving }: { bom: Bom; onSave: (q: number) => void; saving: boolean }) {
   const [value, setValue] = useState(String(bom.quantity));
+  const [synced, setSynced] = useState(String(bom.quantity));
+  if (synced !== String(bom.quantity)) {
+    setSynced(String(bom.quantity));
+    setValue(String(bom.quantity));
+  }
   const dirty = Number(value) !== Number(bom.quantity);
   return (
     <div className="flex items-center justify-end gap-1">
