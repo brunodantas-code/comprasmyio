@@ -31,6 +31,7 @@ import { StockQrDialog } from "@/components/homologation";
 import { BomSettingsDialog } from "@/components/bom-settings";
 import { UnitProductsCard } from "@/components/unit-products";
 import { QrCheckSection } from "@/components/qr-check";
+import { MyioDemandCard } from "@/components/myio-demand";
 
 type StockRow = {
   material_id: string;
