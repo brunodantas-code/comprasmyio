@@ -27,7 +27,7 @@ type MaterialRow = { id: string; name: string };
 
 function useAlmoxarifadoMaterials() {
   return useQuery({
-    queryKey: ["materials", "almoxarifado"],
+    queryKey: ["materials", "almoxarifado", "products"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("materials")
