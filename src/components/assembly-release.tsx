@@ -132,9 +132,14 @@ export function ReleaseAssembledDialog({ userId }: { userId: string }) {
       if (bomErr) throw bomErr;
 
       const consumption = new Map<string, number>();
+      const { data: lossRows } = await supabase
+        .from("materials")
+        .select("id, loss_percent")
+        .in("id", items.map((i) => i.material_id));
+      const lossOf = (id: string) => Number(lossRows?.find((l) => l.id === id)?.loss_percent ?? 0);
       for (const b of boms ?? []) {
         const produced = items.find((i) => i.material_id === b.product_material_id)?.quantity ?? 0;
-        const total = Number(b.quantity) * produced;
+        const total = Number(b.quantity) * produced * (1 + lossOf(b.product_material_id) / 100);
         if (total > 0) {
           consumption.set(
             b.component_material_id,

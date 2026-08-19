@@ -18,7 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { Check, PackagePlus, Percent, Plus, Search, Settings, Trash2 } from "lucide-react";
 
-type Material = { id: string; name: string; location: string; is_product: boolean };
+type Material = { id: string; name: string; location: string; is_product: boolean; loss_percent?: number | null };
 type Bom = { id: string; product_material_id: string; component_material_id: string; quantity: number };
 
 const normalize = (s: string) =>
@@ -30,7 +30,7 @@ function useMaterialsAll() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("materials")
-        .select("id, name, location, is_product")
+        .select("id, name, location, is_product, loss_percent")
         .order("name");
       if (error) throw error;
       return (data ?? []) as Material[];
@@ -97,6 +97,7 @@ export function BomSettingsDialog() {
   const [newQty, setNewQty] = useState("1");
   const [newProductName, setNewProductName] = useState("");
   const [loss, setLoss] = useState("");
+  const [lossSynced, setLossSynced] = useState("");
 
   const { data: materials } = useMaterialsAll();
   const { data: boms } = useBoms();
@@ -199,23 +200,24 @@ export function BomSettingsDialog() {
 
   const available = components.filter((c) => !rows.some((r) => r.component_material_id === c.id));
 
+  const savedLoss = Number((materials ?? []).find((m) => m.id === selected)?.loss_percent ?? 0);
+  if (lossSynced !== `${selected}:${savedLoss}`) {
+    setLossSynced(`${selected}:${savedLoss}`);
+    setLoss(String(savedLoss));
+  }
+
   const applyLoss = useMutation({
-    mutationFn: async () => {
-      const pct = Number(loss.replace(",", "."));
-      if (!Number.isFinite(pct) || pct <= 0) throw new Error("Informe uma porcentagem de perda válida");
-      const target = (boms ?? []).filter((b) => b.product_material_id === selected);
-      if (!target.length) throw new Error("Nenhum componente para atualizar");
-      for (const b of target) {
-        const q = Math.round(Number(b.quantity) * (1 + pct / 100) * 1000) / 1000;
-        const { error } = await supabase.from("product_boms").update({ quantity: q }).eq("id", b.id);
-        if (error) throw error;
-      }
-      return target.length;
+    mutationFn: async (pctRaw: number) => {
+      if (!selected) throw new Error("Selecione um produto");
+      if (!Number.isFinite(pctRaw) || pctRaw < 0) throw new Error("Porcentagem de perda inválida");
+      const { error } = await supabase.from("materials").update({ loss_percent: pctRaw }).eq("id", selected);
+      if (error) throw error;
+      return pctRaw;
     },
-    onSuccess: (n) => {
-      toast.success(`Perda aplicada em ${n} componentes`);
-      setLoss("");
-      invalidate();
+    onSuccess: (pct) => {
+      toast.success(pct > 0 ? `Perda de ${pct}% salva` : "Perda removida");
+      setLossSynced("");
+      qc.invalidateQueries({ queryKey: ["materials"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -268,13 +270,28 @@ export function BomSettingsDialog() {
               placeholder="Ex.: 20"
               className="w-32"
             />
-            <Button size="sm" variant="outline" disabled={applyLoss.isPending} onClick={() => applyLoss.mutate()}>
-              <Percent className="mr-1 h-4 w-4" /> Aplicar perda
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={applyLoss.isPending}
+              onClick={() => applyLoss.mutate(Number(loss.replace(",", ".")) || 0)}
+            >
+              <Percent className="mr-1 h-4 w-4" /> Salvar perda
             </Button>
+            {savedLoss > 0 && (
+              <Button
+                size="sm"
+                variant="ghost"
+                disabled={applyLoss.isPending}
+                onClick={() => applyLoss.mutate(0)}
+              >
+                Remover perda
+              </Button>
+            )}
           </div>
           <p className="text-xs text-muted-foreground">
-            Acresce a porcentagem informada em todas as quantidades por unidade deste produto. Você pode ajustar cada
-            item manualmente depois.
+            A perda fica salva neste produto e é aplicada sobre todas as quantidades por unidade na hora de liberar a
+            montagem. Perda atual: {savedLoss}%.
           </p>
         </div>
 
@@ -302,13 +319,14 @@ export function BomSettingsDialog() {
               <TableRow>
                 <TableHead>Componente</TableHead>
                 <TableHead className="text-right">Qtd. por unidade</TableHead>
+                <TableHead className="text-right">Com perda</TableHead>
                 <TableHead className="w-10" />
               </TableRow>
             </TableHeader>
             <TableBody>
               {!rows.length ? (
                 <TableRow>
-                  <TableCell colSpan={3} className="text-sm text-muted-foreground">
+                  <TableCell colSpan={4} className="text-sm text-muted-foreground">
                     Nenhum componente cadastrado para este produto.
                   </TableCell>
                 </TableRow>
@@ -322,6 +340,9 @@ export function BomSettingsDialog() {
                         saving={update.isPending}
                         onSave={(q) => update.mutate({ id: b.id, quantity: q })}
                       />
+                    </TableCell>
+                    <TableCell className="text-right text-sm text-muted-foreground">
+                      {Math.round(Number(b.quantity) * (1 + savedLoss / 100) * 1000) / 1000}
                     </TableCell>
                     <TableCell>
                       <Button
