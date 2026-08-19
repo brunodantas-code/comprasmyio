@@ -63,7 +63,7 @@ function useQrTrace(code: string) {
           .select("id, created_at, responsibles, photo_url, notes")
           .eq("id", hom["release_id"] as string)
           .maybeSingle();
-        release = (data as typeof release) ?? null;
+        release = (data as Release | null) ?? null;
       }
 
       const unitProd = unitProdRes.data as
