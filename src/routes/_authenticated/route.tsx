@@ -4,9 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
   beforeLoad: async () => {
-    const { data, error } = await supabase.auth.getUser();
-    if (error || !data.user) throw redirect({ to: "/auth" });
-    return { user: data.user };
+    // getSession lê o token local (sem rede), evitando falhas transitórias
+    // de rede derrubarem a rota ao trocar de aba.
+    const { data } = await supabase.auth.getSession();
+    const user = data.session?.user;
+    if (!user) throw redirect({ to: "/auth" });
+    return { user };
   },
   component: () => <Outlet />,
 });
