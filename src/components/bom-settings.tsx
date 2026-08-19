@@ -270,13 +270,28 @@ export function BomSettingsDialog() {
               placeholder="Ex.: 20"
               className="w-32"
             />
-            <Button size="sm" variant="outline" disabled={applyLoss.isPending} onClick={() => applyLoss.mutate()}>
-              <Percent className="mr-1 h-4 w-4" /> Aplicar perda
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={applyLoss.isPending}
+              onClick={() => applyLoss.mutate(Number(loss.replace(",", ".")) || 0)}
+            >
+              <Percent className="mr-1 h-4 w-4" /> Salvar perda
             </Button>
+            {savedLoss > 0 && (
+              <Button
+                size="sm"
+                variant="ghost"
+                disabled={applyLoss.isPending}
+                onClick={() => applyLoss.mutate(0)}
+              >
+                Remover perda
+              </Button>
+            )}
           </div>
           <p className="text-xs text-muted-foreground">
-            Acresce a porcentagem informada em todas as quantidades por unidade deste produto. Você pode ajustar cada
-            item manualmente depois.
+            A perda fica salva neste produto e é aplicada sobre todas as quantidades por unidade na hora de liberar a
+            montagem. Perda atual: {savedLoss}%.
           </p>
         </div>
 
