@@ -79,6 +79,30 @@ function useProjects() {
   });
 }
 
+function useMyioProductOptions() {
+  const { data } = useQuery({
+    queryKey: ["almoxarifado-materials-for-myio"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("materials")
+        .select("name, location")
+        .eq("location", "almoxarifado")
+        .order("name");
+      if (error) throw error;
+      return (data ?? []).map((m) => m.name);
+    },
+  });
+  const seen = new Set<string>();
+  const list: string[] = [];
+  [...MYIO_PRODUCTS, ...(data ?? [])].forEach((n) => {
+    const key = n.trim().toLowerCase();
+    if (!key || seen.has(key)) return;
+    seen.add(key);
+    list.push(n);
+  });
+  return list;
+}
+
 function NewMyioOrderDialog({ userId }: { userId: string }) {
   const qc = useQueryClient();
   const { data: projects } = useProjects();
