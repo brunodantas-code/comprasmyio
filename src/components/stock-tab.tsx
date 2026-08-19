@@ -26,7 +26,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { ReleaseAssembledDialog, AssemblyReleasesCard } from "@/components/assembly-release";
-import { StockSimulatorDialog } from "@/components/stock-simulator";
+import { StockSimulatorDialog, ProductionCapacityCard } from "@/components/stock-simulator";
 import { StockQrDialog } from "@/components/homologation";
 import { BomSettingsDialog } from "@/components/bom-settings";
 
@@ -585,6 +585,8 @@ function StockSection({ userId, location, canDelete }: { userId: string; locatio
       {location === "fabrica" && (
         <AssemblyReleasesCard materialNames={materialNames} userId={userId} canCorrect canDelete={canDelete} />
       )}
+
+      {location === "fabrica" && <ProductionCapacityCard />}
 
       <Card>
         <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">

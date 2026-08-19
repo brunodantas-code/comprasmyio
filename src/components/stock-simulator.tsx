@@ -15,6 +15,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FlaskConical, Search } from "lucide-react";
 
 type Material = { id: string; name: string; location: string; is_product: boolean; loss_percent?: number | null };
@@ -103,7 +104,7 @@ export function StockSimulatorDialog({ userId }: { userId?: string }) {
       return rows.length;
     },
     onSuccess: (n) => {
-      qc.invalidateQueries({ queryKey: ["stock"] });
+      qc.invalidateQueries({ queryKey: ["material-stock"] });
       qc.invalidateQueries({ queryKey: ["stock-movements"] });
       toast.success(`Estoque simulado: ${n} componentes abastecidos.`);
       setQtys({});
@@ -213,5 +214,146 @@ export function StockSimulatorDialog({ userId }: { userId?: string }) {
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+export function ProductionCapacityCard() {
+  const [search, setSearch] = useState("");
+
+  const { data: materials } = useQuery({
+    queryKey: ["materials", "all"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("materials")
+        .select("id, name, location, is_product, loss_percent")
+        .order("name");
+      if (error) throw error;
+      return (data ?? []) as Material[];
+    },
+  });
+
+  const { data: boms } = useQuery({
+    queryKey: ["product-boms"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("product_boms")
+        .select("id, product_material_id, component_material_id, quantity");
+      if (error) throw error;
+      return (data ?? []) as Bom[];
+    },
+  });
+
+  const { data: stock } = useQuery({
+    queryKey: ["material-stock"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("material_stock").select("material_id, name, balance");
+      if (error) throw error;
+      return (data ?? []) as { material_id: string; name: string; balance: number }[];
+    },
+  });
+
+  const balanceOf = (id: string) => Number((stock ?? []).find((s) => s.material_id === id)?.balance ?? 0);
+
+  const rows = useMemo(() => {
+    const products = (materials ?? [])
+      .filter((m) => m.is_product)
+      .filter((m, i, arr) => arr.findIndex((x) => normalize(x.name) === normalize(m.name)) === i);
+
+    return products
+      .map((p) => {
+        const factor = 1 + Number(p.loss_percent ?? 0) / 100;
+        const items = (boms ?? []).filter((b) => b.product_material_id === p.id);
+        if (items.length === 0) return { id: p.id, name: p.name, possible: null as number | null, limiter: null as string | null, missing: 0 };
+        let possible = Infinity;
+        let limiter: string | null = null;
+        let missing = 0;
+        for (const b of items) {
+          const per = Number(b.quantity) * factor;
+          if (!(per > 0)) continue;
+          const bal = balanceOf(b.component_material_id);
+          const can = Math.floor(bal / per);
+          if (bal <= 0) missing += 1;
+          if (can < possible) {
+            possible = can;
+            limiter = (materials ?? []).find((m) => m.id === b.component_material_id)?.name ?? null;
+          }
+        }
+        return { id: p.id, name: p.name, possible: Number.isFinite(possible) ? possible : null, limiter, missing };
+      })
+      .sort((a, b) => (b.possible ?? -1) - (a.possible ?? -1));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [materials, boms, stock]);
+
+  const visible = useMemo(() => {
+    const q = normalize(search);
+    return q ? rows.filter((r) => normalize(r.name).includes(q)) : rows;
+  }, [rows, search]);
+
+  return (
+    <Card>
+      <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <CardTitle>Capacidade de produção</CardTitle>
+          <CardDescription>
+            Com o estoque atual de componentes, quantas unidades de cada produto é possível montar (regras de
+            componentes + perda).
+          </CardDescription>
+        </div>
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            className="w-full pl-8 sm:w-64"
+            placeholder="Buscar produto"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Produto</TableHead>
+              <TableHead className="text-right">Pode produzir</TableHead>
+              <TableHead>Componente limitante</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {visible.map((r) => (
+              <TableRow key={r.id}>
+                <TableCell className="font-medium">{r.name}</TableCell>
+                <TableCell className="text-right">
+                  {r.possible === null ? (
+                    <span className="text-sm text-muted-foreground">sem regras</span>
+                  ) : (
+                    <Badge
+                      variant="outline"
+                      className={
+                        r.possible > 0
+                          ? "border-green-300 bg-green-100 text-green-800"
+                          : "border-red-300 bg-red-100 text-red-800"
+                      }
+                    >
+                      {r.possible} un.
+                    </Badge>
+                  )}
+                </TableCell>
+                <TableCell className="text-sm text-muted-foreground">
+                  {r.limiter ?? "—"}
+                  {r.missing > 0 && <span className="ml-2 text-amber-700">({r.missing} componente(s) zerado(s))</span>}
+                </TableCell>
+              </TableRow>
+            ))}
+            {visible.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={3} className="text-sm text-muted-foreground">
+                  Nenhum produto encontrado.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
   );
 }
