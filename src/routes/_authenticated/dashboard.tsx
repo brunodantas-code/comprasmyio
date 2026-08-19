@@ -347,7 +347,7 @@ function Dashboard() {
           <TabsContent value="mine"><MyOrders userId={me.id} /></TabsContent>
           <TabsContent value="new"><NewOrder userId={me.id} /></TabsContent>
           {(me.isComprador || me.isAdmin) && <TabsContent value="queue"><BuyerQueue /></TabsContent>}
-          <TabsContent value="stock"><StockTab userId={me.id} onlyLocation={fabricaOnly ? "fabrica" : undefined} /></TabsContent>
+          <TabsContent value="stock"><StockTab userId={me.id} canDelete={me.isAdmin} onlyLocation={fabricaOnly ? "fabrica" : undefined} /></TabsContent>
           {me.isAdmin && <TabsContent value="projects"><ProjectsAdmin userId={me.id} /></TabsContent>}
           {me.isAdmin && <TabsContent value="clients"><ClientsTab userId={me.id} /></TabsContent>}
           {me.isAdmin && <TabsContent value="materials"><MaterialsAdmin /></TabsContent>}
