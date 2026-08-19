@@ -274,7 +274,42 @@ export function BomSettingsDialog() {
             />
           </div>
           <Badge variant="outline">{rows.length} componentes</Badge>
+          {selected && (
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={setManufactured.isPending}
+              onClick={() => setManufactured.mutate({ id: selected, value: false })}
+              title="Remover das listas da Fábrica (continua no Almoxarifado)"
+            >
+              <FactoryIcon className="mr-1 h-4 w-4" /> Não é produzido aqui
+            </Button>
+          )}
         </div>
+
+        {nonManufactured.length > 0 && (
+          <div className="space-y-2 rounded border p-3">
+            <Label>Produtos não produzidos pela Fábrica</Label>
+            <div className="flex flex-wrap gap-2">
+              {nonManufactured.map((m) => (
+                <Button
+                  key={m.id}
+                  size="sm"
+                  variant="ghost"
+                  disabled={setManufactured.isPending}
+                  onClick={() => setManufactured.mutate({ id: m.id, value: true })}
+                  title="Voltar para as listas da Fábrica"
+                >
+                  <RotateCcw className="mr-1 h-4 w-4" /> {m.name}
+                </Button>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Eles continuam disponíveis no Almoxarifado, mas não aparecem em "Liberar produto montado", regras de
+              componentes nem na capacidade de produção. Clique para reativar.
+            </p>
+          </div>
+        )}
 
         <div className="space-y-2 rounded border p-3">
           <Label>Perda (%)</Label>
