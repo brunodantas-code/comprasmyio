@@ -246,6 +246,29 @@ export function StockTab({ userId, onlyLocation }: { userId: string; onlyLocatio
 function AddMaterialDialog({ location, userId }: { location: StockLocation; userId: string }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState<"new" | "import">("new");
+  const [importId, setImportId] = useState("");
+
+  const { data: allMaterials } = useQuery({
+    queryKey: ["materials", "library"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("materials")
+        .select("id, name, link, location")
+        .order("name");
+      if (error) throw error;
+      return (data ?? []) as { id: string; name: string; link: string | null; location: string }[];
+    },
+    enabled: open,
+  });
+
+  const here = new Set(
+    (allMaterials ?? []).filter((m) => m.location === location).map((m) => m.name.trim().toLowerCase()),
+  );
+  const importable = (allMaterials ?? []).filter(
+    (m) => m.location !== location && !here.has(m.name.trim().toLowerCase()),
+  );
+
   const save = useMutation({
     mutationFn: async (v: { name: string; link: string | null }) => {
       const { error } = await supabase.from("materials").insert({ ...v, location, created_by: userId });
@@ -256,6 +279,7 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
       qc.invalidateQueries({ queryKey: ["material-stock"] });
       qc.invalidateQueries({ queryKey: ["materials"] });
       setOpen(false);
+      setImportId("");
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -270,7 +294,7 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) { setMode("new"); setImportId(""); } }}>
       <DialogTrigger asChild>
         <Button size="sm"><Plus className="mr-1 h-4 w-4" /> Adicionar item</Button>
       </DialogTrigger>
@@ -279,6 +303,47 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
           <DialogTitle>Novo item — {LOCATION_LABELS[location]}</DialogTitle>
           <DialogDescription>O item fica disponível para entradas e baixas neste local.</DialogDescription>
         </DialogHeader>
+        <div className="flex gap-2">
+          <Button type="button" size="sm" variant={mode === "new" ? "default" : "outline"} onClick={() => setMode("new")}>
+            Criar novo
+          </Button>
+          <Button type="button" size="sm" variant={mode === "import" ? "default" : "outline"} onClick={() => setMode("import")}>
+            Importar da biblioteca
+          </Button>
+        </div>
+        {mode === "import" ? (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Material existente</Label>
+              <Select value={importId} onValueChange={setImportId}>
+                <SelectTrigger><SelectValue placeholder="Selecione um material" /></SelectTrigger>
+                <SelectContent className="max-h-72">
+                  {importable.map((m) => (
+                    <SelectItem key={m.id} value={m.id}>
+                      {m.name} — {LOCATION_LABELS[m.location as StockLocation] ?? m.location}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {!importable.length && (
+                <p className="text-xs text-muted-foreground">Nenhum material disponível para importar.</p>
+              )}
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                disabled={save.isPending || !importId}
+                onClick={() => {
+                  const m = importable.find((x) => x.id === importId);
+                  if (!m) return toast.error("Selecione um material");
+                  save.mutate({ name: m.name, link: m.link ?? null });
+                }}
+              >
+                Importar
+              </Button>
+            </DialogFooter>
+          </div>
+        ) : (
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor={`name-${location}`}>Nome</Label>
@@ -292,6 +357,7 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
             <Button type="submit" disabled={save.isPending}>Salvar</Button>
           </DialogFooter>
         </form>
+        )}
       </DialogContent>
     </Dialog>
   );
