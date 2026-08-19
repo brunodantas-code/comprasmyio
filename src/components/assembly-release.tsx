@@ -19,7 +19,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Camera, ImageUp, PackageCheck, Search } from "lucide-react";
+import { Camera, ImageUp, PackageCheck, Search, Trash2 } from "lucide-react";
 import { HomologateDialog, useHomologations } from "@/components/homologation";
 const BUCKET = "assembly-photos";
 
