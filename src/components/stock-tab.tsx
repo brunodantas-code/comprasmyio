@@ -511,7 +511,7 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
   );
 }
 
-function StockSection({ userId, location }: { userId: string; location: StockLocation }) {
+function StockSection({ userId, location, canDelete }: { userId: string; location: StockLocation; canDelete?: boolean }) {
   const { data: stock, isLoading } = useStock();
   const { data: movements } = useMovements();
   const { data: profiles } = useStockProfiles();
