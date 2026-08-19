@@ -79,10 +79,35 @@ function useProjects() {
   });
 }
 
+function useMyioProductOptions() {
+  const { data } = useQuery({
+    queryKey: ["almoxarifado-materials-for-myio"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("materials")
+        .select("name, location")
+        .eq("location", "almoxarifado")
+        .order("name");
+      if (error) throw error;
+      return (data ?? []).map((m) => m.name);
+    },
+  });
+  const seen = new Set<string>();
+  const list: string[] = [];
+  [...MYIO_PRODUCTS, ...(data ?? [])].forEach((n) => {
+    const key = n.trim().toLowerCase();
+    if (!key || seen.has(key)) return;
+    seen.add(key);
+    list.push(n);
+  });
+  return list;
+}
+
 function NewMyioOrderDialog({ userId }: { userId: string }) {
   const qc = useQueryClient();
   const { data: projects } = useProjects();
   const { data: images } = useProductImages();
+  const products = useMyioProductOptions();
   const [open, setOpen] = useState(false);
   const [projectId, setProjectId] = useState("");
   const [date, setDate] = useState("");
@@ -96,7 +121,7 @@ function NewMyioOrderDialog({ userId }: { userId: string }) {
 
   const mutation = useMutation({
     mutationFn: async () => {
-      const items = MYIO_PRODUCTS
+      const items = products
         .map((p) => ({ product: p, quantity: parseInt(qty[p] ?? "", 10) }))
         .filter((i) => Number.isFinite(i.quantity) && i.quantity > 0);
       if (!date) throw new Error("Informe a data de entrega.");
@@ -162,7 +187,7 @@ function NewMyioOrderDialog({ userId }: { userId: string }) {
           <Label>Produtos</Label>
           <p className="text-xs text-muted-foreground">Clique na miniatura para adicionar ou trocar a foto do produto.</p>
           <div className="grid gap-2 sm:grid-cols-2">
-            {MYIO_PRODUCTS.map((p) => (
+            {products.map((p) => (
               <div key={p} className="flex items-center justify-between gap-3 rounded-md border p-2">
                 <div className="flex min-w-0 items-center gap-2">
                   <ProductImageUploader product={p} url={images?.[p]} userId={userId} />
@@ -206,6 +231,7 @@ function EditMyioOrderDialog({ order, userId }: { order: MyioOrder; userId: stri
   const qc = useQueryClient();
   const { data: projects } = useProjects();
   const { data: images } = useProductImages();
+  const products = useMyioProductOptions();
   const [open, setOpen] = useState(false);
   const [projectId, setProjectId] = useState(order.project_id ?? "");
   const [date, setDate] = useState(order.delivery_date?.slice(0, 10) ?? "");
@@ -225,7 +251,7 @@ function EditMyioOrderDialog({ order, userId }: { order: MyioOrder; userId: stri
 
   const mutation = useMutation({
     mutationFn: async () => {
-      const items = MYIO_PRODUCTS
+      const items = products
         .map((p) => ({ product: p, quantity: parseInt(qty[p] ?? "", 10) }))
         .filter((i) => Number.isFinite(i.quantity) && i.quantity > 0);
       if (!date) throw new Error("Informe a data de entrega.");
@@ -295,7 +321,7 @@ function EditMyioOrderDialog({ order, userId }: { order: MyioOrder; userId: stri
         <div className="space-y-2">
           <Label>Produtos</Label>
           <div className="grid gap-2 sm:grid-cols-2">
-            {MYIO_PRODUCTS.map((p) => (
+            {products.map((p) => (
               <div key={p} className="flex items-center justify-between gap-3 rounded-md border p-2">
                 <div className="flex min-w-0 items-center gap-2">
                   <ProductImageUploader product={p} url={images?.[p]} userId={userId} />
