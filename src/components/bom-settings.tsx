@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Check, PackagePlus, Plus, Search, Settings, Trash2 } from "lucide-react";
+import { Check, PackagePlus, Percent, Plus, Search, Settings, Trash2 } from "lucide-react";
 
 type Material = { id: string; name: string; location: string; is_product: boolean };
 type Bom = { id: string; product_material_id: string; component_material_id: string; quantity: number };
@@ -53,6 +53,11 @@ function useBoms() {
 
 function QtyCell({ bom, onSave, saving }: { bom: Bom; onSave: (q: number) => void; saving: boolean }) {
   const [value, setValue] = useState(String(bom.quantity));
+  const [synced, setSynced] = useState(String(bom.quantity));
+  if (synced !== String(bom.quantity)) {
+    setSynced(String(bom.quantity));
+    setValue(String(bom.quantity));
+  }
   const dirty = Number(value) !== Number(bom.quantity);
   return (
     <div className="flex items-center justify-end gap-1">
@@ -91,6 +96,7 @@ export function BomSettingsDialog() {
   const [newComponent, setNewComponent] = useState("");
   const [newQty, setNewQty] = useState("1");
   const [newProductName, setNewProductName] = useState("");
+  const [loss, setLoss] = useState("");
 
   const { data: materials } = useMaterialsAll();
   const { data: boms } = useBoms();
@@ -193,6 +199,27 @@ export function BomSettingsDialog() {
 
   const available = components.filter((c) => !rows.some((r) => r.component_material_id === c.id));
 
+  const applyLoss = useMutation({
+    mutationFn: async () => {
+      const pct = Number(loss.replace(",", "."));
+      if (!Number.isFinite(pct) || pct <= 0) throw new Error("Informe uma porcentagem de perda válida");
+      const target = (boms ?? []).filter((b) => b.product_material_id === selected);
+      if (!target.length) throw new Error("Nenhum componente para atualizar");
+      for (const b of target) {
+        const q = Math.round(Number(b.quantity) * (1 + pct / 100) * 1000) / 1000;
+        const { error } = await supabase.from("product_boms").update({ quantity: q }).eq("id", b.id);
+        if (error) throw error;
+      }
+      return target.length;
+    },
+    onSuccess: (n) => {
+      toast.success(`Perda aplicada em ${n} componentes`);
+      setLoss("");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -227,6 +254,28 @@ export function BomSettingsDialog() {
             />
           </div>
           <Badge variant="outline">{rows.length} componentes</Badge>
+        </div>
+
+        <div className="space-y-2 rounded border p-3">
+          <Label>Perda (%)</Label>
+          <div className="flex flex-wrap items-center gap-2">
+            <Input
+              type="number"
+              step="0.1"
+              min="0"
+              value={loss}
+              onChange={(e) => setLoss(e.target.value)}
+              placeholder="Ex.: 20"
+              className="w-32"
+            />
+            <Button size="sm" variant="outline" disabled={applyLoss.isPending} onClick={() => applyLoss.mutate()}>
+              <Percent className="mr-1 h-4 w-4" /> Aplicar perda
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Acresce a porcentagem informada em todas as quantidades por unidade deste produto. Você pode ajustar cada
+            item manualmente depois.
+          </p>
         </div>
 
         <div className="space-y-2 rounded border p-3">
