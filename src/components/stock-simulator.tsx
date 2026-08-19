@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FlaskConical, Search } from "lucide-react";
+import { FlaskConical, Search, ListTree } from "lucide-react";
 
 type Material = { id: string; name: string; location: string; is_product: boolean; loss_percent?: number | null };
 type Bom = { id: string; product_material_id: string; component_material_id: string; quantity: number };
@@ -219,6 +219,7 @@ export function StockSimulatorDialog({ userId }: { userId?: string }) {
 
 export function ProductionCapacityCard() {
   const [search, setSearch] = useState("");
+  const [limitDialog, setLimitDialog] = useState<{ name: string; items: { name: string; can: number; per: number; balance: number }[] } | null>(null);
 
   const { data: materials } = useQuery({
     queryKey: ["materials", "all"],
@@ -263,22 +264,41 @@ export function ProductionCapacityCard() {
       .map((p) => {
         const factor = 1 + Number(p.loss_percent ?? 0) / 100;
         const items = (boms ?? []).filter((b) => b.product_material_id === p.id);
-        if (items.length === 0) return { id: p.id, name: p.name, possible: null as number | null, limiter: null as string | null, missing: 0 };
+        if (items.length === 0)
+          return {
+            id: p.id,
+            name: p.name,
+            possible: null as number | null,
+            limiter: null as string | null,
+            missing: 0,
+            allLimiters: [] as { name: string; can: number; per: number; balance: number }[],
+          };
         let possible = Infinity;
         let limiter: string | null = null;
         let missing = 0;
+        const allLimiters: { name: string; can: number; per: number; balance: number }[] = [];
         for (const b of items) {
           const per = Number(b.quantity) * factor;
           if (!(per > 0)) continue;
           const bal = balanceOf(b.component_material_id);
           const can = Math.floor(bal / per);
           if (bal <= 0) missing += 1;
+          const cname = (materials ?? []).find((m) => m.id === b.component_material_id)?.name ?? "Material";
+          allLimiters.push({ name: cname, can, per, balance: bal });
           if (can < possible) {
             possible = can;
-            limiter = (materials ?? []).find((m) => m.id === b.component_material_id)?.name ?? null;
+            limiter = cname;
           }
         }
-        return { id: p.id, name: p.name, possible: Number.isFinite(possible) ? possible : null, limiter, missing };
+        allLimiters.sort((a, b) => a.can - b.can);
+        return {
+          id: p.id,
+          name: p.name,
+          possible: Number.isFinite(possible) ? possible : null,
+          limiter,
+          missing,
+          allLimiters,
+        };
       })
       .sort((a, b) => (b.possible ?? -1) - (a.possible ?? -1));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -339,8 +359,28 @@ export function ProductionCapacityCard() {
                   )}
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground">
-                  {r.limiter ?? "—"}
-                  {r.missing > 0 && <span className="ml-2 text-amber-700">({r.missing} componente(s) zerado(s))</span>}
+                  {r.allLimiters.length === 0 ? (
+                    <span>—</span>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span>
+                        {r.limiter}
+                        {r.missing > 0 && (
+                          <span className="ml-2 text-amber-700">({r.missing} componente(s) zerado(s))</span>
+                        )}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2"
+                        onClick={() => setLimitDialog({ name: r.name, items: r.allLimiters })}
+                        title="Ver todos os componentes"
+                      >
+                        <ListTree className="h-4 w-4" />
+                        <span className="ml-1 text-xs">{r.allLimiters.length}</span>
+                      </Button>
+                    </div>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
@@ -354,6 +394,61 @@ export function ProductionCapacityCard() {
           </TableBody>
         </Table>
       </CardContent>
+
+      <Dialog open={limitDialog !== null} onOpenChange={(o) => !o && setLimitDialog(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Componentes limitantes — {limitDialog?.name}</DialogTitle>
+            <DialogDescription>
+              Lista completa de componentes necessários, ordenada do mais limitante ao menos limitante.
+              "Pode produzir" indica quantas unidades daquele produto o estoque atual do componente permite montar.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-[60vh] overflow-y-auto rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Componente</TableHead>
+                  <TableHead className="text-right">Pode produzir</TableHead>
+                  <TableHead className="text-right">Em estoque</TableHead>
+                  <TableHead className="text-right">Por unidade</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {(limitDialog?.items ?? []).map((it, idx) => (
+                  <TableRow key={idx}>
+                    <TableCell className="font-medium">
+                      {it.name}
+                      {idx === 0 && (
+                        <Badge variant="outline" className="ml-2 border-amber-300 bg-amber-100 text-amber-800">
+                          limitante
+                        </Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Badge
+                        variant="outline"
+                        className={
+                          it.can > 0
+                            ? "border-green-300 bg-green-100 text-green-800"
+                            : "border-red-300 bg-red-100 text-red-800"
+                        }
+                      >
+                        {it.can} un.
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">{it.balance}</TableCell>
+                    <TableCell className="text-right text-muted-foreground">{it.per}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setLimitDialog(null)}>Fechar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
