@@ -319,13 +319,14 @@ export function BomSettingsDialog() {
               <TableRow>
                 <TableHead>Componente</TableHead>
                 <TableHead className="text-right">Qtd. por unidade</TableHead>
+                <TableHead className="text-right">Com perda</TableHead>
                 <TableHead className="w-10" />
               </TableRow>
             </TableHeader>
             <TableBody>
               {!rows.length ? (
                 <TableRow>
-                  <TableCell colSpan={3} className="text-sm text-muted-foreground">
+                  <TableCell colSpan={4} className="text-sm text-muted-foreground">
                     Nenhum componente cadastrado para este produto.
                   </TableCell>
                 </TableRow>
@@ -339,6 +340,9 @@ export function BomSettingsDialog() {
                         saving={update.isPending}
                         onSave={(q) => update.mutate({ id: b.id, quantity: q })}
                       />
+                    </TableCell>
+                    <TableCell className="text-right text-sm text-muted-foreground">
+                      {Math.round(Number(b.quantity) * (1 + savedLoss / 100) * 1000) / 1000}
                     </TableCell>
                     <TableCell>
                       <Button
