@@ -219,7 +219,7 @@ export function StockSimulatorDialog({ userId }: { userId?: string }) {
 
 export function ProductionCapacityCard() {
   const [search, setSearch] = useState("");
-  const [limitDialog, setLimitDialog] = useState<{ name: string; items: { name: string; can: number; per: number; balance: number }[] } | null>(null);
+  const [limitDialog, setLimitDialog] = useState<{ name: string; possible: number | null; items: { name: string; can: number; per: number; balance: number }[] } | null>(null);
 
   const { data: materials } = useQuery({
     queryKey: ["materials", "all"],
@@ -361,18 +361,21 @@ export function ProductionCapacityCard() {
                 <TableCell className="text-sm text-muted-foreground">
                   {r.allLimiters.length === 0 ? (
                     <span>—</span>
-                  ) : (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 px-2"
-                      onClick={() => setLimitDialog({ name: r.name, items: r.allLimiters })}
-                      title="Ver todos os componentes limitantes"
-                    >
-                      <ListTree className="h-4 w-4" />
-                      <span className="ml-1 text-xs">{r.allLimiters.length} componente(s)</span>
-                    </Button>
-                  )}
+                  ) : (() => {
+                    const limiters = r.allLimiters.filter((it) => it.can === (r.possible ?? 0));
+                    return (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2"
+                        onClick={() => setLimitDialog({ name: r.name, possible: r.possible, items: limiters })}
+                        title="Ver componentes limitantes"
+                      >
+                        <ListTree className="h-4 w-4" />
+                        <span className="ml-1 text-xs">{limiters.length} limitante(s)</span>
+                      </Button>
+                    );
+                  })()}
                 </TableCell>
               </TableRow>
             ))}
@@ -390,10 +393,15 @@ export function ProductionCapacityCard() {
       <Dialog open={limitDialog !== null} onOpenChange={(o) => !o && setLimitDialog(null)}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Componentes limitantes — {limitDialog?.name}</DialogTitle>
+            <DialogTitle>
+              Componentes limitantes — {limitDialog?.name}
+            </DialogTitle>
             <DialogDescription>
-              Lista completa de componentes necessários, ordenada do mais limitante ao menos limitante.
-              "Pode produzir" indica quantas unidades daquele produto o estoque atual do componente permite montar.
+              {limitDialog?.possible !== null && limitDialog?.possible !== undefined ? (
+                <>Quantidade máxima produzível: <strong>{limitDialog.possible} un.</strong>. Componentes que limitam essa produção:</>
+              ) : (
+                <>Componentes que limitam a produção.</>
+              )}
             </DialogDescription>
           </DialogHeader>
           <div className="max-h-[60vh] overflow-y-auto rounded-md border">
