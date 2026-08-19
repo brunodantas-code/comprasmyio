@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FlaskConical, Search } from "lucide-react";
+import { FlaskConical, Search, ListTree } from "lucide-react";
 
 type Material = { id: string; name: string; location: string; is_product: boolean; loss_percent?: number | null };
 type Bom = { id: string; product_material_id: string; component_material_id: string; quantity: number };
