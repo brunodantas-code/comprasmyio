@@ -94,7 +94,7 @@ function AddUnitProductDialog({ materials, userId }: { materials: MaterialOption
   const save = useMutation({
     mutationFn: async () => {
       if (!materialId) throw new Error("Selecione o produto");
-      const rows = selected.length
+      const rows: { material_id: string; label: string | null; notes: string | null; created_by: string }[] = selected.length
         ? selected.map((label) => ({ material_id: materialId, label, notes: notes.trim() || null, created_by: userId }))
         : Array.from({ length: Math.max(quantity, 1) }, () => ({
             material_id: materialId,
