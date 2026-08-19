@@ -40,6 +40,7 @@ function useAlmoxarifadoMaterials() {
         .from("materials")
         .select("id, name")
         .eq("location", "almoxarifado")
+        .eq("is_product", true)
         .order("name");
       if (error) throw error;
       return (data ?? []) as MaterialRow[];
@@ -90,7 +91,6 @@ export function ReleaseAssembledDialog({ userId }: { userId: string }) {
   const filtered = useMemo(
     () =>
       (materials ?? [])
-        .filter((m) => ALLOWED_PRODUCTS.has(normalizeName(m.name)))
         .filter((m) => m.name.toLowerCase().includes(search.trim().toLowerCase())),
     [materials, search],
   );
