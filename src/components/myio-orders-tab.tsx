@@ -94,7 +94,7 @@ function useMyioProductOptions() {
   });
   const seen = new Set<string>();
   const list: string[] = [];
-  [...MYIO_PRODUCTS, ...(data ?? [])].forEach((n) => {
+  (data ?? []).forEach((n) => {
     const key = n.trim().toLowerCase();
     if (!key || seen.has(key)) return;
     seen.add(key);
