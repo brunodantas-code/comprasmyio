@@ -167,7 +167,7 @@ export function ReleaseAssembledDialog({ userId }: { userId: string }) {
       toast.success("Produto montado liberado");
       qc.invalidateQueries({ queryKey: ["assembly-releases"] });
       qc.invalidateQueries({ queryKey: ["material-stock"] });
-      qc.invalidateQueries({ queryKey: ["stock"] });
+      qc.invalidateQueries({ queryKey: ["stock-movements"] });
       setOpen(false);
       reset();
     },
