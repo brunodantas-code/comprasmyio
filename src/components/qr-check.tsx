@@ -14,6 +14,14 @@ function fmt(d: string) {
 
 type Event = { at: string; title: string; detail?: string };
 
+type Release = {
+  id: string;
+  created_at: string;
+  responsibles: string[];
+  photo_url: string;
+  notes: string | null;
+};
+
 function useQrTrace(code: string) {
   return useQuery({
     queryKey: ["qr-trace", code],
@@ -48,7 +56,7 @@ function useQrTrace(code: string) {
         (boxRes.data as Record<string, unknown> | null) ??
         null;
 
-      let release: { id: string; created_at: string; responsibles: string[]; photo_url: string; notes: string | null } | null = null;
+      let release: Release | null = null;
       if (hom?.["release_id"]) {
         const { data } = await supabase
           .from("assembly_releases")
