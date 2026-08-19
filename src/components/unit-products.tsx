@@ -1,0 +1,392 @@
+import { useMemo, useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "sonner";
+import { CheckCircle2, PauseCircle, Plus, Trash2 } from "lucide-react";
+
+type UnitProduct = {
+  id: string;
+  material_id: string;
+  label: string | null;
+  status: "parado" | "instalado";
+  installed_at: string | null;
+  notes: string | null;
+  created_at: string;
+};
+
+type MaterialOption = { material_id: string; name: string };
+
+function fmt(d: string) {
+  return new Date(d).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+}
+
+function useUnitProducts() {
+  return useQuery({
+    queryKey: ["unit-products"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("unit_products")
+        .select("id, material_id, label, status, installed_at, notes, created_at")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as UnitProduct[];
+    },
+  });
+}
+
+/** QR Codes homologados para um material (pelo nome do item de estoque). */
+function useHomologatedLabels(materialName: string | undefined) {
+  return useQuery({
+    queryKey: ["homologated-labels", materialName ?? ""],
+    enabled: !!materialName,
+    queryFn: async () => {
+      const base = materialName!.replace(/ — Caixa de \d+$/, "");
+      const { data, error } = await supabase
+        .from("homologations")
+        .select("id, box_size, materials(name), homologation_units(position, qr_value)")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? [])
+        .filter((h) => (h.materials as { name: string } | null)?.name === base)
+        .flatMap((h) => (h.homologation_units ?? []).map((u) => u.qr_value as string));
+    },
+  });
+}
+
+function AddUnitProductDialog({ materials, userId }: { materials: MaterialOption[]; userId: string }) {
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [materialId, setMaterialId] = useState("");
+  const [quantity, setQuantity] = useState(1);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [notes, setNotes] = useState("");
+
+  const materialName = materials.find((m) => m.material_id === materialId)?.name;
+  const { data: labels } = useHomologatedLabels(materialName);
+  const { data: existing } = useUnitProducts();
+  const used = new Set((existing ?? []).map((p) => p.label).filter(Boolean) as string[]);
+  const available = useMemo(() => (labels ?? []).filter((l) => !used.has(l)), [labels, used]);
+
+  function reset() {
+    setMaterialId("");
+    setQuantity(1);
+    setSelected([]);
+    setNotes("");
+  }
+
+  const save = useMutation({
+    mutationFn: async () => {
+      if (!materialId) throw new Error("Selecione o produto");
+      const rows: { material_id: string; label: string | null; notes: string | null; created_by: string }[] = selected.length
+        ? selected.map((label) => ({ material_id: materialId, label, notes: notes.trim() || null, created_by: userId }))
+        : Array.from({ length: Math.max(quantity, 1) }, () => ({
+            material_id: materialId,
+            label: null,
+            notes: notes.trim() || null,
+            created_by: userId,
+          }));
+      const { error } = await supabase.from("unit_products").insert(rows);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Produtos adicionados à unidade como parados");
+      qc.invalidateQueries({ queryKey: ["unit-products"] });
+      setOpen(false);
+      reset();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        setOpen(o);
+        if (!o) reset();
+      }}
+    >
+      <DialogTrigger asChild>
+        <Button size="sm">
+          <Plus className="mr-1 h-4 w-4" /> Adicionar produto
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[88vh] max-w-2xl overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Adicionar produto na unidade</DialogTitle>
+          <DialogDescription>
+            Todo produto entra como <strong>parado</strong>. Depois use “Marcar como instalado”.
+          </DialogDescription>
+        </DialogHeader>
+
+        <form
+          className="space-y-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            save.mutate();
+          }}
+        >
+          <div className="space-y-2">
+            <Label>Produto</Label>
+            <Select
+              value={materialId}
+              onValueChange={(v) => {
+                setMaterialId(v);
+                setSelected([]);
+              }}
+            >
+              <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+              <SelectContent>
+                {materials.map((m) => (
+                  <SelectItem key={m.material_id} value={m.material_id}>{m.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {!!materialId && (
+            <div className="space-y-2 rounded border p-3">
+              <p className="text-sm font-medium">Etiquetas homologadas disponíveis</p>
+              {!available.length ? (
+                <p className="text-sm text-muted-foreground">
+                  Nenhuma etiqueta disponível para este produto. Informe apenas a quantidade abaixo.
+                </p>
+              ) : (
+                <div className="max-h-56 space-y-2 overflow-y-auto">
+                  {available.map((l) => (
+                    <label key={l} className="flex items-center gap-2 text-sm">
+                      <Checkbox
+                        checked={selected.includes(l)}
+                        onCheckedChange={(c) =>
+                          setSelected((prev) => (c ? [...prev, l] : prev.filter((x) => x !== l)))
+                        }
+                      />
+                      <span className="break-all">{l}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {!selected.length && (
+            <div className="space-y-2">
+              <Label htmlFor="unit-qty">Quantidade (sem etiqueta)</Label>
+              <Input
+                id="unit-qty"
+                type="number"
+                min={1}
+                value={quantity}
+                onChange={(e) => setQuantity(Number(e.target.value))}
+                className="w-40"
+              />
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="unit-notes">Observações</Label>
+            <Input id="unit-notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
+          </div>
+
+          <DialogFooter>
+            <Button type="submit" disabled={save.isPending}>
+              {save.isPending ? "Salvando..." : `Adicionar ${selected.length || Math.max(quantity, 1)} produto(s)`}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function ProductsTable({
+  rows,
+  names,
+  onToggle,
+  onDelete,
+  canDelete,
+  installed,
+}: {
+  rows: UnitProduct[];
+  names: Record<string, string>;
+  onToggle: (p: UnitProduct) => void;
+  onDelete: (id: string) => void;
+  canDelete?: boolean;
+  installed: boolean;
+}) {
+  if (!rows.length) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        {installed ? "Nenhum produto instalado." : "Nenhum produto parado."}
+      </p>
+    );
+  }
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Produto</TableHead>
+          <TableHead>Etiqueta (QR)</TableHead>
+          <TableHead>{installed ? "Instalado em" : "Na unidade desde"}</TableHead>
+          <TableHead className="text-right">Ações</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {rows.map((p) => (
+          <TableRow key={p.id}>
+            <TableCell className="font-medium">{names[p.material_id] ?? "—"}</TableCell>
+            <TableCell className="max-w-[280px] break-all text-sm text-muted-foreground">
+              {p.label ?? <span className="italic">sem etiqueta</span>}
+            </TableCell>
+            <TableCell className="text-sm text-muted-foreground">
+              {installed ? (p.installed_at ? fmt(p.installed_at) : "—") : fmt(p.created_at)}
+            </TableCell>
+            <TableCell>
+              <div className="flex justify-end gap-1">
+                <Button size="sm" variant="outline" onClick={() => onToggle(p)}>
+                  {installed ? (
+                    <>
+                      <PauseCircle className="mr-1 h-4 w-4" /> Marcar como parado
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="mr-1 h-4 w-4" /> Marcar como instalado
+                    </>
+                  )}
+                </Button>
+                {canDelete && (
+                  <Button size="sm" variant="outline" onClick={() => onDelete(p.id)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+}
+
+export function UnitProductsCard({
+  materials,
+  userId,
+  canDelete,
+}: {
+  materials: MaterialOption[];
+  userId: string;
+  canDelete?: boolean;
+}) {
+  const qc = useQueryClient();
+  const { data, isLoading } = useUnitProducts();
+  const names = Object.fromEntries(materials.map((m) => [m.material_id, m.name]));
+  const rows = data ?? [];
+  const installed = rows.filter((p) => p.status === "instalado");
+  const stopped = rows.filter((p) => p.status === "parado");
+
+  const toggle = useMutation({
+    mutationFn: async (p: UnitProduct) => {
+      const next = p.status === "instalado" ? "parado" : "instalado";
+      const { error } = await supabase
+        .from("unit_products")
+        .update({ status: next, installed_at: next === "instalado" ? new Date().toISOString() : null })
+        .eq("id", p.id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["unit-products"] }),
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const remove = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("unit_products").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Registro removido");
+      qc.invalidateQueries({ queryKey: ["unit-products"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <div className="space-y-6">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Card>
+          <CardHeader className="pb-2"><CardDescription>Produtos instalados</CardDescription></CardHeader>
+          <CardContent className="text-2xl font-semibold text-green-700">{installed.length}</CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardDescription>Produtos parados</CardDescription></CardHeader>
+          <CardContent className="text-2xl font-semibold text-amber-700">{stopped.length}</CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <CardTitle>Produtos na unidade</CardTitle>
+            <CardDescription>
+              Controle de produtos instalados e parados no cliente, com as etiquetas (QR) da homologação.
+            </CardDescription>
+          </div>
+          <AddUnitProductDialog materials={materials} userId={userId} />
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {isLoading ? (
+            <p className="text-sm text-muted-foreground">Carregando...</p>
+          ) : (
+            <>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="border-green-300 bg-green-100 text-green-800">
+                    Instalados · {installed.length}
+                  </Badge>
+                </div>
+                <ProductsTable
+                  rows={installed}
+                  names={names}
+                  installed
+                  canDelete={canDelete}
+                  onToggle={(p) => toggle.mutate(p)}
+                  onDelete={(id) => remove.mutate(id)}
+                />
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="border-amber-300 bg-amber-100 text-amber-800">
+                    Parados · {stopped.length}
+                  </Badge>
+                </div>
+                <ProductsTable
+                  rows={stopped}
+                  names={names}
+                  installed={false}
+                  canDelete={canDelete}
+                  onToggle={(p) => toggle.mutate(p)}
+                  onDelete={(id) => remove.mutate(id)}
+                />
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

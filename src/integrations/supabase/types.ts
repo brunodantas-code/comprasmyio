@@ -719,6 +719,57 @@ export type Database = {
           },
         ]
       }
+      unit_products: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          installed_at: string | null
+          label: string | null
+          material_id: string
+          notes: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          installed_at?: string | null
+          label?: string | null
+          material_id: string
+          notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          installed_at?: string | null
+          label?: string | null
+          material_id?: string
+          notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "unit_products_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "material_stock"
+            referencedColumns: ["material_id"]
+          },
+          {
+            foreignKeyName: "unit_products_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string

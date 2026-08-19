@@ -29,6 +29,7 @@ import { ReleaseAssembledDialog, AssemblyReleasesCard } from "@/components/assem
 import { StockSimulatorDialog, ProductionCapacityCard } from "@/components/stock-simulator";
 import { StockQrDialog } from "@/components/homologation";
 import { BomSettingsDialog } from "@/components/bom-settings";
+import { UnitProductsCard } from "@/components/unit-products";
 
 type StockRow = {
   material_id: string;
@@ -674,6 +675,14 @@ function StockSection({ userId, location, canDelete }: { userId: string; locatio
       )}
 
       {location === "fabrica" && <ProductionCapacityCard />}
+
+      {location === "unidade" && (
+        <UnitProductsCard
+          materials={scoped.map((r) => ({ material_id: r.material_id, name: r.name }))}
+          userId={userId}
+          canDelete={canDelete}
+        />
+      )}
 
       <Card>
         <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
