@@ -313,11 +313,19 @@ export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; 
   const locations = (Object.keys(LOCATION_LABELS) as StockLocation[]).filter(
     (loc) => !onlyLocation || loc === onlyLocation,
   );
+  const showHomologacao = !onlyLocation;
+  const tabs: string[] = [];
+  locations.forEach((loc) => {
+    tabs.push(loc);
+    if (loc === "fabrica" && showHomologacao) tabs.push("homologacao");
+  });
   return (
-    <Tabs defaultValue={locations[0]} className="space-y-4">
+    <Tabs defaultValue={tabs[0]} className="space-y-4">
       <TabsList>
-        {locations.map((loc) => (
-          <TabsTrigger key={loc} value={loc}>{LOCATION_LABELS[loc]}</TabsTrigger>
+        {tabs.map((t) => (
+          <TabsTrigger key={t} value={t}>
+            {t === "homologacao" ? "Homologação" : LOCATION_LABELS[t as StockLocation]}
+          </TabsTrigger>
         ))}
       </TabsList>
       {locations.map((loc) => (
@@ -325,7 +333,28 @@ export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; 
           <StockSection userId={userId} location={loc} canDelete={canDelete} />
         </TabsContent>
       ))}
+      {showHomologacao && (
+        <TabsContent value="homologacao">
+          <HomologationSection userId={userId} canDelete={canDelete} />
+        </TabsContent>
+      )}
     </Tabs>
+  );
+}
+
+function HomologationSection({ userId, canDelete }: { userId: string; canDelete?: boolean }) {
+  const { data: stock } = useStock();
+  const materialNames = Object.fromEntries((stock ?? []).map((r) => [r.material_id, r.name]));
+  return (
+    <AssemblyReleasesCard
+      materialNames={materialNames}
+      userId={userId}
+      homologable
+      canDelete={canDelete}
+      canReportIssue
+      title="Produtos para homologar"
+      description="Etiquetagem e homologação dos produtos montados. Após homologados em caixas, seguem para o estoque do almoxarifado."
+    />
   );
 }
 
@@ -639,18 +668,6 @@ function StockSection({ userId, location, canDelete }: { userId: string; locatio
           </CardContent>
         </Card>
       </div>
-
-      {location === "almoxarifado" && (
-        <AssemblyReleasesCard
-          materialNames={materialNames}
-          userId={userId}
-          homologable
-          canDelete={canDelete}
-          canReportIssue
-          title="Produtos para homologar"
-          description="Produtos montados liberados pela fábrica, aguardando homologação."
-        />
-      )}
 
       {location === "fabrica" && (
         <AssemblyReleasesCard materialNames={materialNames} userId={userId} canCorrect canDelete={canDelete} />
