@@ -404,6 +404,11 @@ export function ProductionCapacityCard() {
               )}
             </DialogDescription>
           </DialogHeader>
+          {(limitDialog?.items ?? []).length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Nenhum componente limitando a produção no momento.
+            </p>
+          ) : (
           <div className="max-h-[60vh] overflow-y-auto rounded-md border">
             <Table>
               <TableHeader>
