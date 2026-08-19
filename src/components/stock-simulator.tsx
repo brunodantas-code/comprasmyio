@@ -359,8 +359,28 @@ export function ProductionCapacityCard() {
                   )}
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground">
-                  {r.limiter ?? "—"}
-                  {r.missing > 0 && <span className="ml-2 text-amber-700">({r.missing} componente(s) zerado(s))</span>}
+                  {r.allLimiters.length === 0 ? (
+                    <span>—</span>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span>
+                        {r.limiter}
+                        {r.missing > 0 && (
+                          <span className="ml-2 text-amber-700">({r.missing} componente(s) zerado(s))</span>
+                        )}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2"
+                        onClick={() => setLimitDialog({ name: r.name, items: r.allLimiters })}
+                        title="Ver todos os componentes"
+                      >
+                        <ListTree className="h-4 w-4" />
+                        <span className="ml-1 text-xs">{r.allLimiters.length}</span>
+                      </Button>
+                    </div>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
