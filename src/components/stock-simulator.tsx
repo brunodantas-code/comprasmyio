@@ -1,0 +1,217 @@
+import { useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { FlaskConical, Search } from "lucide-react";
+
+type Material = { id: string; name: string; location: string; is_product: boolean; loss_percent?: number | null };
+type Bom = { id: string; product_material_id: string; component_material_id: string; quantity: number };
+
+const normalize = (s: string) =>
+  s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
+
+export function StockSimulatorDialog({ userId }: { userId?: string }) {
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [qtys, setQtys] = useState<Record<string, string>>({});
+
+  const { data: materials } = useQuery({
+    queryKey: ["materials", "all"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("materials")
+        .select("id, name, location, is_product, loss_percent")
+        .order("name");
+      if (error) throw error;
+      return (data ?? []) as Material[];
+    },
+  });
+
+  const { data: boms } = useQuery({
+    queryKey: ["product-boms"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("product_boms")
+        .select("id, product_material_id, component_material_id, quantity");
+      if (error) throw error;
+      return (data ?? []) as Bom[];
+    },
+  });
+
+  const products = useMemo(
+    () =>
+      (materials ?? [])
+        .filter((m) => m.is_product)
+        .filter((m, i, arr) => arr.findIndex((x) => normalize(x.name) === normalize(m.name)) === i),
+    [materials],
+  );
+
+  const visibleProducts = useMemo(() => {
+    const q = normalize(search);
+    return q ? products.filter((p) => normalize(p.name).includes(q)) : products;
+  }, [products, search]);
+
+  const nameOf = (id: string) => (materials ?? []).find((m) => m.id === id)?.name ?? "Material";
+
+  // Componentes necessários = soma(qtd produto x qtd BOM x (1 + perda%))
+  const needed = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const p of products) {
+      const q = Number(qtys[p.id] ?? "");
+      if (!(q > 0)) continue;
+      const factor = 1 + Number(p.loss_percent ?? 0) / 100;
+      for (const b of boms ?? []) {
+        if (b.product_material_id !== p.id) continue;
+        const add = q * Number(b.quantity) * factor;
+        map.set(b.component_material_id, (map.get(b.component_material_id) ?? 0) + add);
+      }
+    }
+    return [...map.entries()]
+      .map(([id, qty]) => ({ id, name: nameOf(id), qty: Math.ceil(qty * 1000) / 1000 }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [products, boms, qtys, materials]);
+
+  const totalProducts = products.reduce((s, p) => s + (Number(qtys[p.id] ?? "") || 0), 0);
+
+  const run = useMutation({
+    mutationFn: async () => {
+      if (needed.length === 0) throw new Error("Informe a quantidade de ao menos um produto com regras cadastradas.");
+      const rows = needed.map((n) => ({
+        material_id: n.id,
+        quantity: n.qty,
+        type: "entrada" as const,
+        reason: "Simulação de estoque (regras de componentes)",
+        created_by: userId ?? null,
+      }));
+      const { error } = await supabase.from("stock_movements").insert(rows);
+      if (error) throw error;
+      return rows.length;
+    },
+    onSuccess: (n) => {
+      qc.invalidateQueries({ queryKey: ["stock"] });
+      qc.invalidateQueries({ queryKey: ["stock-movements"] });
+      toast.success(`Estoque simulado: ${n} componentes abastecidos.`);
+      setQtys({});
+      setOpen(false);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm" title="Simulador de estoque">
+          <FlaskConical className="mr-2 h-4 w-4" />
+          Simulador
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Simulador de estoque por produto</DialogTitle>
+          <DialogDescription>
+            Informe quantos produtos você quer simular. O sistema calcula os componentes pelas regras (incluindo
+            perda) e dá entrada automática no estoque da fábrica.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            className="pl-8"
+            placeholder="Buscar produto"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Produto</TableHead>
+                <TableHead className="w-32 text-right">Quantidade</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {visibleProducts.map((p) => (
+                <TableRow key={p.id}>
+                  <TableCell className="font-medium">
+                    {p.name}
+                    {Number(p.loss_percent ?? 0) > 0 && (
+                      <Badge variant="outline" className="ml-2">perda {Number(p.loss_percent)}%</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Input
+                      type="number"
+                      min="0"
+                      className="w-24 text-right"
+                      value={qtys[p.id] ?? ""}
+                      placeholder="0"
+                      onChange={(e) => setQtys((s) => ({ ...s, [p.id]: e.target.value }))}
+                    />
+                  </TableCell>
+                </TableRow>
+              ))}
+              {visibleProducts.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={2} className="text-sm text-muted-foreground">
+                    Nenhum produto encontrado.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+
+        {needed.length > 0 && (
+          <div className="rounded-md border">
+            <div className="border-b px-3 py-2 text-sm font-medium">
+              Prévia — {needed.length} componentes para {totalProducts} produto(s)
+            </div>
+            <div className="max-h-64 overflow-y-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Componente</TableHead>
+                    <TableHead className="text-right">Entrada</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {needed.map((n) => (
+                    <TableRow key={n.id}>
+                      <TableCell>{n.name}</TableCell>
+                      <TableCell className="text-right">+{n.qty}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        )}
+
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => setQtys({})}>Limpar</Button>
+          <Button onClick={() => run.mutate()} disabled={run.isPending || needed.length === 0}>
+            Abastecer estoque
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
