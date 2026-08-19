@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Plus } from "lucide-react";
 import { ReleaseAssembledDialog, AssemblyReleasesCard } from "@/components/assembly-release";
 import { StockQrDialog } from "@/components/homologation";
+import { BomSettingsDialog } from "@/components/bom-settings";
 
 type StockRow = {
   material_id: string;
@@ -356,6 +357,7 @@ function StockSection({ userId, location }: { userId: string; location: StockLoc
           <div className="flex flex-wrap items-center gap-2">
             <AddMaterialDialog location={location} userId={userId} />
             {location === "fabrica" && <ReleaseAssembledDialog userId={userId} />}
+            {location === "fabrica" && <BomSettingsDialog />}
             <div className="relative">
               <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
