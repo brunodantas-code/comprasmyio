@@ -257,8 +257,29 @@ export function BomSettingsDialog() {
         </div>
 
         <div className="space-y-2 rounded border p-3">
-          <Label>Criar novo produto</Label>
+          <Label>Perda (%)</Label>
+          <div className="flex flex-wrap items-center gap-2">
+            <Input
+              type="number"
+              step="0.1"
+              min="0"
+              value={loss}
+              onChange={(e) => setLoss(e.target.value)}
+              placeholder="Ex.: 20"
+              className="w-32"
+            />
+            <Button size="sm" variant="outline" disabled={applyLoss.isPending} onClick={() => applyLoss.mutate()}>
+              <Percent className="mr-1 h-4 w-4" /> Aplicar perda
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Acresce a porcentagem informada em todas as quantidades por unidade deste produto. Você pode ajustar cada
+            item manualmente depois.
+          </p>
         </div>
+
+        <div className="space-y-2 rounded border p-3">
+          <Label>Criar novo produto</Label>
           <div className="flex flex-wrap items-center gap-2">
             <Input
               value={newProductName}
