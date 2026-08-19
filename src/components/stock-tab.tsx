@@ -533,6 +533,81 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
   );
 }
 
+function ResetStockDialog({
+  rows,
+  userId,
+  location,
+}: {
+  rows: StockRow[];
+  userId: string;
+  location: StockLocation;
+}) {
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [confirm, setConfirm] = useState("");
+
+  const withBalance = rows.filter((r) => Number(r.balance) > 0);
+
+  const reset = useMutation({
+    mutationFn: async () => {
+      if (!withBalance.length) return;
+      const { error } = await supabase.from("stock_movements").insert(
+        withBalance.map((r) => ({
+          material_id: r.material_id,
+          quantity: Number(r.balance),
+          type: "saida" as MovementType,
+          reason: `Zeragem do estoque — ${LOCATION_LABELS[location]}`,
+          created_by: userId,
+        })),
+      );
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Estoque zerado");
+      qc.invalidateQueries({ queryKey: ["material-stock"] });
+      qc.invalidateQueries({ queryKey: ["stock-movements"] });
+      setConfirm("");
+      setOpen(false);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        setOpen(v);
+        if (!v) setConfirm("");
+      }}
+    >
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm" className="text-destructive">
+          <Eraser className="mr-2 h-4 w-4" /> Zerar estoque
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Zerar estoque — {LOCATION_LABELS[location]}</DialogTitle>
+          <DialogDescription>
+            Serão registradas saídas para {withBalance.length} item(ns) com saldo, deixando todos em zero. O histórico
+            de movimentações é preservado. Digite <strong>zerar</strong> para confirmar.
+          </DialogDescription>
+        </DialogHeader>
+        <Input value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="zerar" />
+        <DialogFooter>
+          <Button
+            variant="destructive"
+            disabled={confirm.trim().toLowerCase() !== "zerar" || !withBalance.length || reset.isPending}
+            onClick={() => reset.mutate()}
+          >
+            Zerar estoque
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function StockSection({ userId, location, canDelete }: { userId: string; location: StockLocation; canDelete?: boolean }) {
   const { data: stock, isLoading } = useStock();
   const { data: movements } = useMovements();
