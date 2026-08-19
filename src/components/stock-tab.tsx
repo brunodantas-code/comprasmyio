@@ -41,7 +41,7 @@ type StockRow = {
   last_movement_at: string | null;
 };
 
-type StockLocation = "almoxarifado" | "fabrica" | "unidade" | "tecnico" | "transito";
+type StockLocation = "almoxarifado" | "fabrica" | "unidade" | "tecnico" | "transito" | "perdido";
 
 const LOCATION_LABELS: Record<StockLocation, string> = {
   fabrica: "Fábrica",
@@ -49,6 +49,7 @@ const LOCATION_LABELS: Record<StockLocation, string> = {
   transito: "Em Trânsito",
   unidade: "Unidade (cliente)",
   tecnico: "Técnico",
+  perdido: "Perdido",
 };
 
 type MovementType = "entrada" | "saida" | "ajuste";
