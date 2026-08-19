@@ -212,6 +212,7 @@ export type Database = {
           is_product: boolean
           link: string | null
           location: string
+          loss_percent: number
           name: string
           updated_at: string
         }
@@ -222,6 +223,7 @@ export type Database = {
           is_product?: boolean
           link?: string | null
           location?: string
+          loss_percent?: number
           name: string
           updated_at?: string
         }
@@ -232,6 +234,7 @@ export type Database = {
           is_product?: boolean
           link?: string | null
           location?: string
+          loss_percent?: number
           name?: string
           updated_at?: string
         }

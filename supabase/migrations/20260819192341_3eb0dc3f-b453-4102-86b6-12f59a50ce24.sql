@@ -1,0 +1,1 @@
+ALTER TABLE public.materials ADD COLUMN IF NOT EXISTS loss_percent numeric NOT NULL DEFAULT 0;
