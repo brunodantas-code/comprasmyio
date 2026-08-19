@@ -515,6 +515,11 @@ export function AssemblyReleasesCard({
                   <TableCell className="text-sm">{(r.responsibles ?? []).map(nameOf).join(", ")}</TableCell>
                   <TableCell><PhotoCell path={r.photo_url} /></TableCell>
                   <TableCell className="text-sm text-muted-foreground">{r.notes ?? "—"}</TableCell>
+                  {canDelete && (
+                    <TableCell>
+                      <DeleteReleaseDialog release={r} />
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>
