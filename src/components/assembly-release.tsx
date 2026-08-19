@@ -466,6 +466,7 @@ export function AssemblyReleasesCard({
                 <TableHead>Responsáveis</TableHead>
                 <TableHead>Foto</TableHead>
                 <TableHead>Observações</TableHead>
+                {canDelete && <TableHead className="w-10">Ações</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
