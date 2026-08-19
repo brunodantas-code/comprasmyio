@@ -13,7 +13,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 import { toast } from "sonner";
-import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Plus, Library, Trash2 } from "lucide-react";
+import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Plus, Library, Trash2, Eraser } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -678,6 +678,7 @@ function StockSection({ userId, location, canDelete }: { userId: string; locatio
             {location === "fabrica" && <ReleaseAssembledDialog userId={userId} />}
             {location === "fabrica" && <BomSettingsDialog />}
             {location === "fabrica" && <StockSimulatorDialog userId={userId} />}
+            <ResetStockDialog rows={scoped} userId={userId} location={location} />
             <div className="relative">
               <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
