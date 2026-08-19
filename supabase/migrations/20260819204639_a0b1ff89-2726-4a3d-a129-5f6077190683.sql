@@ -1,0 +1,1 @@
+ALTER TABLE public.materials ADD COLUMN IF NOT EXISTS is_manufactured boolean NOT NULL DEFAULT true;
