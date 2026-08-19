@@ -546,21 +546,15 @@ function ResetStockDialog({
   const [open, setOpen] = useState(false);
   const [confirm, setConfirm] = useState("");
 
-  const withBalance = rows.filter((r) => Number(r.balance) > 0);
+  const ids = rows.map((r) => r.material_id);
 
   const reset = useMutation({
     mutationFn: async () => {
-      if (!withBalance.length) return;
-      const { error } = await supabase.from("stock_movements").insert(
-        withBalance.map((r) => ({
-          material_id: r.material_id,
-          quantity: Number(r.balance),
-          type: "saida" as MovementType,
-          reason: `Zeragem do estoque — ${LOCATION_LABELS[location]}`,
-          created_by: userId,
-        })),
-      );
-      if (error) throw error;
+      if (!ids.length) return;
+      for (let i = 0; i < ids.length; i += 100) {
+        const { error } = await supabase.from("stock_movements").delete().in("material_id", ids.slice(i, i + 100));
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
       toast.success("Estoque zerado");
@@ -589,15 +583,15 @@ function ResetStockDialog({
         <DialogHeader>
           <DialogTitle>Zerar estoque — {LOCATION_LABELS[location]}</DialogTitle>
           <DialogDescription>
-            Serão registradas saídas para {withBalance.length} item(ns) com saldo, deixando todos em zero. O histórico
-            de movimentações é preservado. Digite <strong>zerar</strong> para confirmar.
+            Todos os saldos deste local serão zerados e todas as movimentações dos {ids.length} item(ns) serão
+            apagadas do histórico. Esta ação não pode ser desfeita. Digite <strong>zerar</strong> para confirmar.
           </DialogDescription>
         </DialogHeader>
         <Input value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="zerar" />
         <DialogFooter>
           <Button
             variant="destructive"
-            disabled={confirm.trim().toLowerCase() !== "zerar" || !withBalance.length || reset.isPending}
+            disabled={confirm.trim().toLowerCase() !== "zerar" || !ids.length || reset.isPending}
             onClick={() => reset.mutate()}
           >
             Zerar estoque
