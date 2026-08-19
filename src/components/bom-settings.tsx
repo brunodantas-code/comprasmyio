@@ -16,21 +16,22 @@ import {
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Check, Plus, Search, Settings, Trash2 } from "lucide-react";
-import { MYIO_PRODUCTS } from "@/components/myio-orders-tab";
+import { Check, PackagePlus, Plus, Search, Settings, Trash2 } from "lucide-react";
 
-type Material = { id: string; name: string; location: string };
+type Material = { id: string; name: string; location: string; is_product: boolean };
 type Bom = { id: string; product_material_id: string; component_material_id: string; quantity: number };
 
 const normalize = (s: string) =>
   s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
-const ALLOWED = new Set(MYIO_PRODUCTS.map(normalize));
 
 function useMaterialsAll() {
   return useQuery({
     queryKey: ["materials", "all"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("materials").select("id, name, location").order("name");
+      const { data, error } = await supabase
+        .from("materials")
+        .select("id, name, location, is_product")
+        .order("name");
       if (error) throw error;
       return (data ?? []) as Material[];
     },
@@ -89,6 +90,7 @@ export function BomSettingsDialog() {
   const [search, setSearch] = useState("");
   const [newComponent, setNewComponent] = useState("");
   const [newQty, setNewQty] = useState("1");
+  const [newProductName, setNewProductName] = useState("");
 
   const { data: materials } = useMaterialsAll();
   const { data: boms } = useBoms();
@@ -96,7 +98,7 @@ export function BomSettingsDialog() {
   const products = useMemo(
     () =>
       (materials ?? [])
-        .filter((m) => ALLOWED.has(normalize(m.name)))
+        .filter((m) => m.is_product)
         .filter((m, i, arr) => arr.findIndex((x) => normalize(x.name) === normalize(m.name)) === i),
     [materials],
   );
@@ -113,6 +115,37 @@ export function BomSettingsDialog() {
     .sort((a, b) => nameOf(a.component_material_id).localeCompare(nameOf(b.component_material_id)));
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["product-boms"] });
+
+  const createProduct = useMutation({
+    mutationFn: async () => {
+      const name = newProductName.trim();
+      if (!name) throw new Error("Informe o nome do produto");
+      const existing = (materials ?? []).find((m) => normalize(m.name) === normalize(name));
+      if (existing) {
+        if (existing.is_product && existing.location === "almoxarifado") return existing.id;
+        const { error } = await supabase
+          .from("materials")
+          .update({ is_product: true, location: "almoxarifado" })
+          .eq("id", existing.id);
+        if (error) throw error;
+        return existing.id;
+      }
+      const { data, error } = await supabase
+        .from("materials")
+        .insert({ name, location: "almoxarifado", is_product: true })
+        .select("id")
+        .single();
+      if (error) throw error;
+      return data.id as string;
+    },
+    onSuccess: (id) => {
+      toast.success("Produto criado");
+      setNewProductName("");
+      setProductId(id);
+      qc.invalidateQueries({ queryKey: ["materials"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   const update = useMutation({
     mutationFn: async (v: { id: string; quantity: number }) => {
@@ -194,6 +227,24 @@ export function BomSettingsDialog() {
             />
           </div>
           <Badge variant="outline">{rows.length} componentes</Badge>
+        </div>
+
+        <div className="space-y-2 rounded border p-3">
+          <Label>Criar novo produto</Label>
+          <div className="flex flex-wrap items-center gap-2">
+            <Input
+              value={newProductName}
+              onChange={(e) => setNewProductName(e.target.value)}
+              placeholder="Nome do novo produto"
+              className="w-[280px]"
+            />
+            <Button size="sm" disabled={createProduct.isPending} onClick={() => createProduct.mutate()}>
+              <PackagePlus className="mr-1 h-4 w-4" /> Criar produto
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            O produto entra na lista de "Liberar produto montado" e segue o fluxo normal de homologação e estoque.
+          </p>
         </div>
 
         <div className="rounded border">
