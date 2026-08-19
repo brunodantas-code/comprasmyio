@@ -248,6 +248,8 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<"new" | "import">("new");
   const [importId, setImportId] = useState("");
+  const [importSearch, setImportSearch] = useState("");
+  const [importIds, setImportIds] = useState<string[]>([]);
 
   const { data: allMaterials } = useQuery({
     queryKey: ["materials", "library"],
@@ -281,6 +283,26 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
       setOpen(false);
       setImportId("");
     },
+  });
+
+  const importMany = useMutation({
+    mutationFn: async (ids: string[]) => {
+      const rows = (allMaterials ?? [])
+        .filter((m) => ids.includes(m.id))
+        .map((m) => ({ name: m.name, link: m.link ?? null, location, created_by: userId }));
+      if (!rows.length) throw new Error("Selecione ao menos um material");
+      const { error } = await supabase.from("materials").insert(rows);
+      if (error) throw error;
+      return rows.length;
+    },
+    onSuccess: (n) => {
+      toast.success(`${n} item(ns) importado(s)`);
+      qc.invalidateQueries({ queryKey: ["material-stock"] });
+      qc.invalidateQueries({ queryKey: ["materials"] });
+      setOpen(false);
+      setImportIds([]);
+      setImportSearch("");
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -294,7 +316,7 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
   }
 
   return (
-    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) { setMode("new"); setImportId(""); } }}>
+    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) { setMode("new"); setImportId(""); setImportIds([]); setImportSearch(""); } }}>
       <DialogTrigger asChild>
         <Button size="sm"><Plus className="mr-1 h-4 w-4" /> Adicionar item</Button>
       </DialogTrigger>
@@ -314,17 +336,45 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
         {mode === "import" ? (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Material existente</Label>
-              <Select value={importId} onValueChange={setImportId}>
-                <SelectTrigger><SelectValue placeholder="Selecione um material" /></SelectTrigger>
-                <SelectContent className="max-h-72">
-                  {importable.map((m) => (
-                    <SelectItem key={m.id} value={m.id}>
-                      {m.name} — {LOCATION_LABELS[m.location as StockLocation] ?? m.location}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label>Biblioteca de materiais</Label>
+              <Input
+                value={importSearch}
+                onChange={(e) => setImportSearch(e.target.value)}
+                placeholder="Buscar por nome..."
+              />
+              <div className="max-h-72 overflow-y-auto rounded-md border divide-y">
+                {importable
+                  .filter((m) => m.name.toLowerCase().includes(importSearch.trim().toLowerCase()))
+                  .map((m) => {
+                    const checked = importIds.includes(m.id);
+                    return (
+                      <label
+                        key={m.id}
+                        className="flex cursor-pointer items-start gap-3 p-2 text-sm hover:bg-muted/50"
+                      >
+                        <input
+                          type="checkbox"
+                          className="mt-1"
+                          checked={checked}
+                          onChange={() =>
+                            setImportIds((prev) =>
+                              checked ? prev.filter((x) => x !== m.id) : [...prev, m.id],
+                            )
+                          }
+                        />
+                        <span>
+                          <span className="font-medium">{m.name}</span>
+                          <span className="block text-xs text-muted-foreground">
+                            {LOCATION_LABELS[m.location as StockLocation] ?? m.location}
+                          </span>
+                        </span>
+                      </label>
+                    );
+                  })}
+                {!importable.filter((m) => m.name.toLowerCase().includes(importSearch.trim().toLowerCase())).length && (
+                  <p className="p-3 text-xs text-muted-foreground">Nenhum material encontrado.</p>
+                )}
+              </div>
               {!importable.length && (
                 <p className="text-xs text-muted-foreground">Nenhum material disponível para importar.</p>
               )}
@@ -332,14 +382,10 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
             <DialogFooter>
               <Button
                 type="button"
-                disabled={save.isPending || !importId}
-                onClick={() => {
-                  const m = importable.find((x) => x.id === importId);
-                  if (!m) return toast.error("Selecione um material");
-                  save.mutate({ name: m.name, link: m.link ?? null });
-                }}
+                disabled={importMany.isPending || !importIds.length}
+                onClick={() => importMany.mutate(importIds)}
               >
-                Importar
+                Importar {importIds.length ? `(${importIds.length})` : ""}
               </Button>
             </DialogFooter>
           </div>
