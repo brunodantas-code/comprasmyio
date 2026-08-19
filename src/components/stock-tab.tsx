@@ -304,7 +304,6 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
       setImportSearch("");
     },
     onError: (e: Error) => toast.error(e.message),
-    onError: (e: Error) => toast.error(e.message),
   });
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
