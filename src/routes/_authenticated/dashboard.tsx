@@ -615,7 +615,7 @@ function NewOrder({ userId }: { userId: string }) {
 
 function MyOrders({ userId }: { userId: string }) {
   const { data: projects } = useProjects();
-  const [deliveredMode, setDeliveredMode] = useState<DeliveredMode>("all");
+  const [deliveredMode, setDeliveredMode] = useState<DeliveredMode>("this_month");
   const [deliveredFrom, setDeliveredFrom] = useState("");
   const [statusSelected, setStatusSelected] = useState<Order["status"][]>([...STATUS_KEYS]);
   const { data: orders, isLoading } = useQuery({
@@ -667,7 +667,7 @@ function BuyerQueue() {
   const [statusSelected, setStatusSelected] = useState<Order["status"][]>([...STATUS_KEYS]);
   const [projectFilter, setProjectFilter] = useState<string>("all");
   const [groupByProject, setGroupByProject] = useState(false);
-  const [deliveredMode, setDeliveredMode] = useState<DeliveredMode>("all");
+  const [deliveredMode, setDeliveredMode] = useState<DeliveredMode>("this_month");
   const [deliveredFrom, setDeliveredFrom] = useState("");
 
   const { data: orders, isLoading } = useQuery({
