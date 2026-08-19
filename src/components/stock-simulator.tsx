@@ -394,6 +394,61 @@ export function ProductionCapacityCard() {
           </TableBody>
         </Table>
       </CardContent>
+
+      <Dialog open={limitDialog !== null} onOpenChange={(o) => !o && setLimitDialog(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Componentes limitantes — {limitDialog?.name}</DialogTitle>
+            <DialogDescription>
+              Lista completa de componentes necessários, ordenada do mais limitante ao menos limitante.
+              "Pode produzir" indica quantas unidades daquele produto o estoque atual do componente permite montar.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-[60vh] overflow-y-auto rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Componente</TableHead>
+                  <TableHead className="text-right">Pode produzir</TableHead>
+                  <TableHead className="text-right">Em estoque</TableHead>
+                  <TableHead className="text-right">Por unidade</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {(limitDialog?.items ?? []).map((it, idx) => (
+                  <TableRow key={idx}>
+                    <TableCell className="font-medium">
+                      {it.name}
+                      {idx === 0 && (
+                        <Badge variant="outline" className="ml-2 border-amber-300 bg-amber-100 text-amber-800">
+                          limitante
+                        </Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Badge
+                        variant="outline"
+                        className={
+                          it.can > 0
+                            ? "border-green-300 bg-green-100 text-green-800"
+                            : "border-red-300 bg-red-100 text-red-800"
+                        }
+                      >
+                        {it.can} un.
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">{it.balance}</TableCell>
+                    <TableCell className="text-right text-muted-foreground">{it.per}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setLimitDialog(null)}>Fechar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
