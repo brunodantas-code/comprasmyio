@@ -130,10 +130,44 @@ export function ReleaseAssembledDialog({ userId }: { userId: string }) {
         .from("assembly_release_items")
         .insert(items.map((i) => ({ ...i, release_id: release.id })));
       if (itemsErr) throw itemsErr;
+
+      // Baixa automática dos componentes conforme a ficha técnica (BOM)
+      const { data: boms, error: bomErr } = await supabase
+        .from("product_boms")
+        .select("product_material_id, component_material_id, quantity")
+        .in("product_material_id", items.map((i) => i.material_id));
+      if (bomErr) throw bomErr;
+
+      const consumption = new Map<string, number>();
+      for (const b of boms ?? []) {
+        const produced = items.find((i) => i.material_id === b.product_material_id)?.quantity ?? 0;
+        const total = Number(b.quantity) * produced;
+        if (total > 0) {
+          consumption.set(
+            b.component_material_id,
+            (consumption.get(b.component_material_id) ?? 0) + total,
+          );
+        }
+      }
+
+      if (consumption.size) {
+        const { error: movErr } = await supabase.from("stock_movements").insert(
+          [...consumption.entries()].map(([material_id, quantity]) => ({
+            material_id,
+            quantity: Math.round(quantity * 1000) / 1000,
+            type: "saida" as const,
+            reason: "Consumo de montagem",
+            created_by: userId,
+          })),
+        );
+        if (movErr) throw movErr;
+      }
     },
     onSuccess: () => {
       toast.success("Produto montado liberado");
       qc.invalidateQueries({ queryKey: ["assembly-releases"] });
+      qc.invalidateQueries({ queryKey: ["material-stock"] });
+      qc.invalidateQueries({ queryKey: ["stock"] });
       setOpen(false);
       reset();
     },
