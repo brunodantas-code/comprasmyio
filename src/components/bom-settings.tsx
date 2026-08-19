@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Check, PackagePlus, Percent, Plus, Search, Settings, Trash2 } from "lucide-react";
+import { Check, FactoryIcon, PackagePlus, Percent, Plus, RotateCcw, Search, Settings, Trash2 } from "lucide-react";
 
 type Material = { id: string; name: string; location: string; is_product: boolean; is_manufactured?: boolean | null; loss_percent?: number | null };
 type Bom = { id: string; product_material_id: string; component_material_id: string; quantity: number };
@@ -111,6 +111,10 @@ export function BomSettingsDialog() {
   );
   const components = useMemo(
     () => (materials ?? []).filter((m) => m.location === "fabrica"),
+    [materials],
+  );
+  const nonManufactured = useMemo(
+    () => (materials ?? []).filter((m) => m.is_product && m.is_manufactured === false),
     [materials],
   );
   const nameOf = (id: string) => (materials ?? []).find((m) => m.id === id)?.name ?? "Material";
