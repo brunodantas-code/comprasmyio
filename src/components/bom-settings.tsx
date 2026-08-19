@@ -96,6 +96,7 @@ export function BomSettingsDialog() {
   const [newComponent, setNewComponent] = useState("");
   const [newQty, setNewQty] = useState("1");
   const [newProductName, setNewProductName] = useState("");
+  const [loss, setLoss] = useState("");
 
   const { data: materials } = useMaterialsAll();
   const { data: boms } = useBoms();
