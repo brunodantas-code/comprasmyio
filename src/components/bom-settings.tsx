@@ -97,6 +97,7 @@ export function BomSettingsDialog() {
   const [newQty, setNewQty] = useState("1");
   const [newProductName, setNewProductName] = useState("");
   const [loss, setLoss] = useState("");
+  const [lossSynced, setLossSynced] = useState("");
 
   const { data: materials } = useMaterialsAll();
   const { data: boms } = useBoms();
@@ -199,23 +200,24 @@ export function BomSettingsDialog() {
 
   const available = components.filter((c) => !rows.some((r) => r.component_material_id === c.id));
 
+  const savedLoss = Number((materials ?? []).find((m) => m.id === selected)?.loss_percent ?? 0);
+  if (lossSynced !== `${selected}:${savedLoss}`) {
+    setLossSynced(`${selected}:${savedLoss}`);
+    setLoss(String(savedLoss));
+  }
+
   const applyLoss = useMutation({
-    mutationFn: async () => {
-      const pct = Number(loss.replace(",", "."));
-      if (!Number.isFinite(pct) || pct <= 0) throw new Error("Informe uma porcentagem de perda válida");
-      const target = (boms ?? []).filter((b) => b.product_material_id === selected);
-      if (!target.length) throw new Error("Nenhum componente para atualizar");
-      for (const b of target) {
-        const q = Math.round(Number(b.quantity) * (1 + pct / 100) * 1000) / 1000;
-        const { error } = await supabase.from("product_boms").update({ quantity: q }).eq("id", b.id);
-        if (error) throw error;
-      }
-      return target.length;
+    mutationFn: async (pctRaw: number) => {
+      if (!selected) throw new Error("Selecione um produto");
+      if (!Number.isFinite(pctRaw) || pctRaw < 0) throw new Error("Porcentagem de perda inválida");
+      const { error } = await supabase.from("materials").update({ loss_percent: pctRaw }).eq("id", selected);
+      if (error) throw error;
+      return pctRaw;
     },
-    onSuccess: (n) => {
-      toast.success(`Perda aplicada em ${n} componentes`);
-      setLoss("");
-      invalidate();
+    onSuccess: (pct) => {
+      toast.success(pct > 0 ? `Perda de ${pct}% salva` : "Perda removida");
+      setLossSynced("");
+      qc.invalidateQueries({ queryKey: ["materials"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
