@@ -18,7 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { Check, PackagePlus, Percent, Plus, Search, Settings, Trash2 } from "lucide-react";
 
-type Material = { id: string; name: string; location: string; is_product: boolean; loss_percent?: number | null };
+type Material = { id: string; name: string; location: string; is_product: boolean; is_manufactured?: boolean | null; loss_percent?: number | null };
 type Bom = { id: string; product_material_id: string; component_material_id: string; quantity: number };
 
 const normalize = (s: string) =>
@@ -30,7 +30,7 @@ function useMaterialsAll() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("materials")
-        .select("id, name, location, is_product, loss_percent")
+        .select("id, name, location, is_product, is_manufactured, loss_percent")
         .order("name");
       if (error) throw error;
       return (data ?? []) as Material[];
@@ -105,7 +105,7 @@ export function BomSettingsDialog() {
   const products = useMemo(
     () =>
       (materials ?? [])
-        .filter((m) => m.is_product)
+        .filter((m) => m.is_product && m.is_manufactured !== false)
         .filter((m, i, arr) => arr.findIndex((x) => normalize(x.name) === normalize(m.name)) === i),
     [materials],
   );

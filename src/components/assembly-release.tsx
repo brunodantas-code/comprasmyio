@@ -34,6 +34,7 @@ function useAlmoxarifadoMaterials() {
         .select("id, name")
         .eq("location", "almoxarifado")
         .eq("is_product", true)
+        .neq("is_manufactured", false)
         .order("name");
       if (error) throw error;
       return (data ?? []) as MaterialRow[];
