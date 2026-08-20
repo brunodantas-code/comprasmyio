@@ -187,7 +187,7 @@ function StatusMultiFilter({ selected, setSelected }: { selected: Order["status"
           <span className="truncate">{label}</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-full sm:w-[240px] p-2">
+      <PopoverContent align="end" className="w-[min(15rem,calc(100vw-2rem))] p-2">
         <div className="flex items-center justify-between px-2 py-1 text-xs text-muted-foreground">
           <span>Filtrar status</span>
           <button type="button" className="hover:underline" onClick={() => setSelected(allOn ? [] : [...STATUS_KEYS])}>
@@ -436,7 +436,7 @@ function MaterialPicker({ onPick }: { onPick: (m: Material) => void }) {
           <Library className="mr-1 h-4 w-4" /> Biblioteca
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full sm:w-[320px] p-0" align="end">
+      <PopoverContent className="w-[min(20rem,calc(100vw-2rem))] p-0" align="end">
         <Command>
           <CommandInput placeholder="Buscar material..." />
           <CommandList>
@@ -805,7 +805,7 @@ function OrdersTable({
             <TableHead>Previsão de entrega</TableHead>
             <TableHead>Palavra passe</TableHead>
             <TableHead>Obs.</TableHead>
-            <TableHead className="w-full sm:w-[110px]">Anexos</TableHead>
+            <TableHead className="w-[110px]">Anexos</TableHead>
             <TableHead className="text-right">Ações</TableHead>
           </TableRow>
         </TableHeader>

@@ -680,7 +680,7 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
                     <Library className="mr-1 h-4 w-4" /> Biblioteca
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-full sm:w-[320px] p-0" align="end">
+                <PopoverContent className="w-[min(20rem,calc(100vw-2rem))] p-0" align="end">
                   <Command>
                     <CommandInput placeholder="Buscar material..." />
                     <CommandList>
