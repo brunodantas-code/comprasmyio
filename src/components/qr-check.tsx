@@ -12,6 +12,17 @@ function fmt(d: string) {
   return new Date(d).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
 }
 
+const STAGE_LABELS: Record<string, string> = {
+  fabrica: "Fábrica",
+  almoxarifado: "Estoque",
+  distribuicao: "Distribuição",
+  transito: "Trânsito",
+  unidade: "Unidade",
+  tecnico: "Técnico",
+  perdido: "Perdido",
+  escritorio: "Escritório",
+};
+
 type Event = { at: string; title: string; detail?: string };
 
 type Release = {
@@ -205,7 +216,7 @@ function useQrTrace(code: string) {
       }
 
       return {
-        found: !!hom || !!unitProd,
+        found: !!hom || !!unitProd || !!delivery,
         isBox: !!boxRes.data,
         materialName,
         stage,
@@ -319,6 +330,7 @@ export function QrCheckSection() {
               <>
                 <div className="flex flex-wrap items-center gap-2">
                   {data.materialName && <Badge variant="outline">{data.materialName}</Badge>}
+                  {data.stage && <Badge>{STAGE_LABELS[data.stage] ?? data.stage}</Badge>}
                   <Badge variant="outline">
                     {data.isBox
                       ? `QR da caixa de ${data.boxSize}`
@@ -332,6 +344,28 @@ export function QrCheckSection() {
                     </Badge>
                   )}
                 </div>
+
+                {(data.order || data.shipment) && (
+                  <div className="space-y-1 rounded-md border p-3 text-xs">
+                    {data.order && (
+                      <>
+                        <p className="text-sm font-medium">Pedido vinculado</p>
+                        <p className="text-muted-foreground">
+                          {data.order.title} · {data.order.client_name}
+                        </p>
+                      </>
+                    )}
+                    {data.shipment && (
+                      <div className="pt-1 text-muted-foreground">
+                        <p className="text-sm font-medium text-foreground">Envio</p>
+                        <p>Endereço: {data.shipment.address}</p>
+                        <p>Método: {data.shipment.shipping_method}</p>
+                        <p>Responsável: {data.shipment.responsible}</p>
+                        <p className="break-all">Rastreio: {data.shipment.tracking_code}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <div className="space-y-3">
                   <p className="text-sm font-medium">Histórico</p>
