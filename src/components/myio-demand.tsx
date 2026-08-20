@@ -72,16 +72,17 @@ function ResolveItemDialog({
           <Button variant="ghost" onClick={onClose} disabled={pending}>
             Cancelar
           </Button>
-          <div className="flex gap-2">
+          {state?.isManufactured ? (
             <Button variant="outline" disabled={pending} onClick={() => onConfirm("produce", qty)}>
               <Factory className="mr-2 h-4 w-4" />
               Produzir
             </Button>
+          ) : (
             <Button disabled={pending} onClick={() => onConfirm("buy", qty)}>
               <ShoppingCart className="mr-2 h-4 w-4" />
               Comprar
             </Button>
-          </div>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
