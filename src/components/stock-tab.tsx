@@ -1014,7 +1014,7 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
         />
       ) : location === "fabrica" ? (
         <ProductionQueueCard balances={almoxarifadoBalances} />
-      ) : (
+      ) : location === "unidade" || location === "transito" ? null : (
       <div className="grid gap-4 sm:grid-cols-3">
         <Card>
           <CardHeader className="pb-2"><CardDescription>Itens cadastrados</CardDescription></CardHeader>
@@ -1069,7 +1069,7 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
             moveTo="myio"
           />
         </>
-      ) : location === "unidade" ? null : (
+      ) : location === "unidade" || location === "transito" ? null : (
         <StockTableCard
           title={`Estoque — ${LOCATION_LABELS[location]}`}
           description='A entrada é automática quando o solicitante confirma "Recebido corretamente" em um pedido feito pela biblioteca.'
