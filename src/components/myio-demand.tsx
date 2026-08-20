@@ -220,7 +220,7 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
                   size="sm"
                   className="ml-auto"
                   disabled={resolveMutation.isPending}
-                  onClick={() => resolveMutation.mutate(o)}
+                  onClick={() => resolveMutation.mutate({ order: o })}
                 >
                   {resolveMutation.isPending ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
