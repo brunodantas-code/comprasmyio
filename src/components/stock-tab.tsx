@@ -675,8 +675,37 @@ function StockSection({ userId, location, canDelete }: { userId: string; locatio
   return <StockSectionInner userId={userId} location={location} canDelete={canDelete} />;
 }
 
+function MoveOriginButton({ row, target }: { row: StockRow; target: "myio" | "terceiros" }) {
+  const qc = useQueryClient();
+  const move = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("materials")
+        .update({ is_manufactured: target === "myio" })
+        .eq("id", row.material_id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success(target === "myio" ? "Movido para Almoxarifado Myio" : "Movido para Almoxarifado Terceiros");
+      qc.invalidateQueries({ queryKey: ["materials-manufactured-map"] });
+      qc.invalidateQueries({ queryKey: ["materials"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  return (
+    <Button
+      size="sm"
+      variant="ghost"
+      disabled={move.isPending}
+      onClick={() => move.mutate()}
+      title={target === "myio" ? "Mover para Almoxarifado Myio (fabricado)" : "Mover para Almoxarifado Terceiros (comprado)"}
+    >
+      <ArrowLeftRight className="h-4 w-4" />
+    </Button>
+  );
+}
+
 function StockTableCard({
-  const _unused = 0;
   title,
   description,
   rows,
