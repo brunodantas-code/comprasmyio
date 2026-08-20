@@ -1085,6 +1085,11 @@ export type Database = {
           installed_at: string | null
           label: string | null
           material_id: string | null
+          move_notes: string | null
+          move_photo_url: string | null
+          moved_at: string | null
+          moved_technician: string | null
+          moved_to: string | null
           notes: string | null
           order_id: string | null
           product: string | null
@@ -1099,6 +1104,11 @@ export type Database = {
           installed_at?: string | null
           label?: string | null
           material_id?: string | null
+          move_notes?: string | null
+          move_photo_url?: string | null
+          moved_at?: string | null
+          moved_technician?: string | null
+          moved_to?: string | null
           notes?: string | null
           order_id?: string | null
           product?: string | null
@@ -1113,6 +1123,11 @@ export type Database = {
           installed_at?: string | null
           label?: string | null
           material_id?: string | null
+          move_notes?: string | null
+          move_photo_url?: string | null
+          moved_at?: string | null
+          moved_technician?: string | null
+          moved_to?: string | null
           notes?: string | null
           order_id?: string | null
           product?: string | null
