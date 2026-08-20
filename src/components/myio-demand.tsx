@@ -240,7 +240,7 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
       const { data, error } = await supabase
         .from("myio_orders")
         .select("id, delivery_date, status, notes, is_replacement, project_id, projects(name), myio_order_items(id, product, quantity)")
-        .neq("status", "entregue_cliente")
+        .in("status", ["pendente", "produzindo"])
         .order("delivery_date", { ascending: true });
       if (error) throw error;
       return (data ?? []) as unknown as DemandOrder[];

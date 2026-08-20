@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { DistributionCard } from "@/components/distribution";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 import { toast } from "sonner";
@@ -333,6 +334,7 @@ export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; 
   const tabs: string[] = [];
   locations.forEach((loc) => {
     tabs.push(loc);
+    if (loc === "almoxarifado") tabs.push("distribuicao");
     if (loc === "fabrica" && showHomologacao) tabs.push("homologacao");
   });
   if (!onlyLocation) tabs.push("qr-check");
@@ -343,9 +345,11 @@ export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; 
           <TabsTrigger key={t} value={t} className={t === "qr-check" ? "ml-2" : undefined}>
             {t === "homologacao"
               ? "Homologação"
-              : t === "qr-check"
-                ? "Checar QR Code"
-                : LOCATION_LABELS[t as StockLocation]}
+              : t === "distribuicao"
+                ? "Distribuição"
+                : t === "qr-check"
+                  ? "Checar QR Code"
+                  : LOCATION_LABELS[t as StockLocation]}
           </TabsTrigger>
         ))}
       </TabsList>
@@ -354,6 +358,11 @@ export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; 
           <StockSection userId={userId} location={loc} canDelete={canDelete} />
         </TabsContent>
       ))}
+      {locations.includes("almoxarifado") && (
+        <TabsContent value="distribuicao">
+          <DistributionCard />
+        </TabsContent>
+      )}
       {showHomologacao && (
         <TabsContent value="homologacao">
           <HomologationSection userId={userId} canDelete={canDelete} />
