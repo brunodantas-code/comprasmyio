@@ -1,11 +1,92 @@
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ClipboardList, Factory, Loader2, Wand2 } from "lucide-react";
+import { ClipboardList, Factory, Loader2, ShoppingCart, Wand2 } from "lucide-react";
 import { toast } from "sonner";
+
+type DemandItem = { id: string; product: string; quantity: number };
+
+type ItemDialogState = {
+  order: DemandOrder;
+  item: DemandItem;
+  missing: number;
+  isManufactured: boolean;
+};
+
+function ResolveItemDialog({
+  state,
+  onClose,
+  onConfirm,
+  pending,
+}: {
+  state: ItemDialogState | null;
+  onClose: () => void;
+  onConfirm: (mode: "produce" | "buy", quantity: number) => void;
+  pending: boolean;
+}) {
+  const [qty, setQty] = useState(1);
+  return (
+    <Dialog
+      open={!!state}
+      onOpenChange={(o) => {
+        if (!o) onClose();
+        else if (state) setQty(state.missing);
+      }}
+    >
+      <DialogContent
+        onOpenAutoFocus={() => {
+          if (state) setQty(state.missing);
+        }}
+      >
+        <DialogHeader>
+          <DialogTitle>Resolver item</DialogTitle>
+          <DialogDescription>
+            {state?.item.product} — faltam {state?.missing} unidade(s).
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-2">
+          <Label htmlFor="resolve-qty">Quantidade</Label>
+          <Input
+            id="resolve-qty"
+            type="number"
+            min={1}
+            value={qty}
+            onChange={(e) => setQty(Math.max(1, Number(e.target.value) || 1))}
+          />
+        </div>
+        <DialogFooter className="gap-2 sm:justify-between">
+          <Button variant="ghost" onClick={onClose} disabled={pending}>
+            Cancelar
+          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" disabled={pending} onClick={() => onConfirm("produce", qty)}>
+              <Factory className="mr-2 h-4 w-4" />
+              Produzir
+            </Button>
+            <Button disabled={pending} onClick={() => onConfirm("buy", qty)}>
+              <ShoppingCart className="mr-2 h-4 w-4" />
+              Comprar
+            </Button>
+          </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 type DemandOrder = {
   id: string;
@@ -33,6 +114,7 @@ function formatDate(d: string | null) {
 
 export function MyioDemandCard({ balances }: { balances: Record<string, number> }) {
   const queryClient = useQueryClient();
+  const [itemDialog, setItemDialog] = useState<ItemDialogState | null>(null);
   const { data: orders, isLoading } = useQuery({
     queryKey: ["myio-demand"],
     queryFn: async () => {
@@ -84,20 +166,29 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
   });
 
   const resolveMutation = useMutation({
-    mutationFn: async (order: DemandOrder) => {
+    mutationFn: async (vars: {
+      order: DemandOrder;
+      items?: DemandItem[];
+      mode?: "produce" | "buy";
+      quantity?: number;
+    }) => {
+      const { order, mode } = vars;
       const { data: userData } = await supabase.auth.getUser();
       const userId = userData.user?.id ?? null;
 
-      const pending = order.myio_order_items.filter((i) => {
+      const source = vars.items ?? order.myio_order_items;
+      const pending = source.filter((i) => {
         const bal = balances[i.product.trim().toLowerCase()] ?? 0;
         return i.quantity - bal > 0 && !(resolvedItemIds?.has(i.id) ?? false);
       });
       if (pending.length === 0) return { produce: 0, buy: 0 };
 
-      const toProduce = pending.filter((i) => manufacturedNames.has(i.product.trim().toLowerCase()));
-      const toBuy = pending.filter((i) => !manufacturedNames.has(i.product.trim().toLowerCase()));
+      const isProduce = (i: DemandItem) =>
+        mode ? mode === "produce" : manufacturedNames.has(i.product.trim().toLowerCase());
+      const toProduce = pending.filter(isProduce);
+      const toBuy = pending.filter((i) => !isProduce(i));
       const missing = (i: { product: string; quantity: number }) =>
-        i.quantity - (balances[i.product.trim().toLowerCase()] ?? 0);
+        vars.quantity ?? i.quantity - (balances[i.product.trim().toLowerCase()] ?? 0);
 
       if (toProduce.length) {
         const { error } = await supabase.from("production_demands").insert(
@@ -198,7 +289,7 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
                   size="sm"
                   className="ml-auto"
                   disabled={resolveMutation.isPending}
-                  onClick={() => resolveMutation.mutate(o)}
+                  onClick={() => resolveMutation.mutate({ order: o })}
                 >
                   {resolveMutation.isPending ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -236,14 +327,23 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
                             <Badge variant="outline" className="border-slate-300 bg-slate-100 text-slate-700">
                               {isManufactured ? "Enviado à fábrica" : "Na fila de compras"}
                             </Badge>
-                          ) : isManufactured ? (
-                            <Badge variant="outline" className="border-blue-300 bg-blue-100 text-blue-800">
-                              Produzir {i.quantity - bal}
-                            </Badge>
                           ) : (
-                            <Badge variant="outline" className="border-red-300 bg-red-100 text-red-800">
-                              Faltam {i.quantity - bal}
-                            </Badge>
+                            <button
+                              type="button"
+                              className="cursor-pointer"
+                              onClick={() => setItemDialog({ order: o, item: i, missing: i.quantity - bal, isManufactured })}
+                            >
+                              <Badge
+                                variant="outline"
+                                className={
+                                  isManufactured
+                                    ? "border-blue-300 bg-blue-100 text-blue-800 hover:bg-blue-200"
+                                    : "border-red-300 bg-red-100 text-red-800 hover:bg-red-200"
+                                }
+                              >
+                                {isManufactured ? "Produzir" : "Faltam"} {i.quantity - bal}
+                              </Badge>
+                            </button>
                           )}
                         </TableCell>
                       </TableRow>
@@ -255,6 +355,18 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
           ))
         )}
       </CardContent>
+      <ResolveItemDialog
+        state={itemDialog}
+        onClose={() => setItemDialog(null)}
+        pending={resolveMutation.isPending}
+        onConfirm={(mode, quantity) => {
+          if (!itemDialog) return;
+          resolveMutation.mutate(
+            { order: itemDialog.order, items: [itemDialog.item], mode, quantity },
+            { onSettled: () => setItemDialog(null) },
+          );
+        }}
+      />
     </Card>
   );
 }
