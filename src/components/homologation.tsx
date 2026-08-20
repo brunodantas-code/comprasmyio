@@ -340,8 +340,8 @@ export function HomologateDialog({
         .insert(filled.map((qr_value, i) => ({ homologation_id: hom.id, position: i + 1, qr_value })));
       if (unitsErr) throw unitsErr;
 
-      // Entrada no Estoque — Almoxarifado (item unitário ou modelo de caixa)
-      const stockName = boxSize === 1 ? materialName : `${materialName} — Caixa de ${boxSize}`;
+      // Entrada no Estoque — Almoxarifado (sempre no produto, mesmo quando embalado em caixa)
+      const stockName = materialName;
       const { data: found } = await supabase
         .from("materials")
         .select("id")
@@ -360,7 +360,7 @@ export function HomologateDialog({
       }
       const { error: stockErr } = await supabase.from("stock_movements").insert({
         material_id: stockMaterialId,
-        quantity: boxSize === 1 ? 1 : 1,
+        quantity: boxSize,
         type: "entrada",
         reason: boxSize === 1 ? "Homologação — produto unitário" : `Homologação — caixa de ${boxSize}`,
         created_by: userId,
@@ -373,6 +373,7 @@ export function HomologateDialog({
       qc.invalidateQueries({ queryKey: ["material-stock"] });
       qc.invalidateQueries({ queryKey: ["stock-movements"] });
       qc.invalidateQueries({ queryKey: ["materials"] });
+      qc.invalidateQueries({ queryKey: ["boxes-list"] });
       setOpen(false);
       reset();
     },
