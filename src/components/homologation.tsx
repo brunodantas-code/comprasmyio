@@ -427,7 +427,7 @@ export function HomologateDialog({
             <div className="space-y-2">
               <Label>Tipo de caixa</Label>
               <Select value={String(boxSize)} onValueChange={(v) => changeSize(Number(v))}>
-                <SelectTrigger className="w-[220px]"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="w-full sm:w-[220px]"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {sizes.map((s) => (
                     <SelectItem key={s} value={String(s)}>
@@ -656,7 +656,7 @@ export function BoxesCard() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Buscar caixa"
-          className="w-[200px]"
+          className="w-full sm:w-[200px]"
         />
       </CardHeader>
       <CardContent>

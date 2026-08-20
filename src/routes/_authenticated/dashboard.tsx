@@ -182,12 +182,12 @@ function StatusMultiFilter({ selected, setSelected }: { selected: Order["status"
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button type="button" variant="outline" size="sm" className="w-[200px] justify-start">
+        <Button type="button" variant="outline" size="sm" className="w-full justify-start sm:w-[200px]">
           <Filter className="mr-2 h-4 w-4" />
           <span className="truncate">{label}</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-[240px] p-2">
+      <PopoverContent align="end" className="w-full sm:w-[240px] p-2">
         <div className="flex items-center justify-between px-2 py-1 text-xs text-muted-foreground">
           <span>Filtrar status</span>
           <button type="button" className="hover:underline" onClick={() => setSelected(allOn ? [] : [...STATUS_KEYS])}>
@@ -267,7 +267,7 @@ function DeliveredFilter({
   return (
     <div className="flex flex-wrap items-center gap-2">
       <Select value={mode} onValueChange={(v) => setMode(v as DeliveredMode)}>
-        <SelectTrigger className="w-[240px]"><SelectValue /></SelectTrigger>
+        <SelectTrigger className="w-full sm:w-[240px]"><SelectValue /></SelectTrigger>
         <SelectContent>
           {Object.entries(DELIVERED_LABELS).map(([v, l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}
         </SelectContent>
@@ -277,7 +277,7 @@ function DeliveredFilter({
           type="date"
           value={fromDate}
           onChange={(e) => setFromDate(e.target.value)}
-          className="w-[160px]"
+          className="w-full sm:w-[160px]"
         />
       )}
     </div>
@@ -436,7 +436,7 @@ function MaterialPicker({ onPick }: { onPick: (m: Material) => void }) {
           <Library className="mr-1 h-4 w-4" /> Biblioteca
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[320px] p-0" align="end">
+      <PopoverContent className="w-full sm:w-[320px] p-0" align="end">
         <Command>
           <CommandInput placeholder="Buscar material..." />
           <CommandList>
@@ -735,7 +735,7 @@ function BuyerQueue() {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Select value={projectFilter} onValueChange={setProjectFilter}>
-            <SelectTrigger className="w-[200px]"><SelectValue placeholder="Projeto" /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-[200px]"><SelectValue placeholder="Projeto" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos os projetos</SelectItem>
               {projects?.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
@@ -805,7 +805,7 @@ function OrdersTable({
             <TableHead>Previsão de entrega</TableHead>
             <TableHead>Palavra passe</TableHead>
             <TableHead>Obs.</TableHead>
-            <TableHead className="w-[110px]">Anexos</TableHead>
+            <TableHead className="w-full sm:w-[110px]">Anexos</TableHead>
             <TableHead className="text-right">Ações</TableHead>
           </TableRow>
         </TableHeader>
@@ -848,7 +848,7 @@ function OrdersTable({
               <TableCell className="max-w-[220px] text-xs text-muted-foreground">
                 <div className="whitespace-pre-wrap">{o.buyer_notes || "—"}</div>
               </TableCell>
-              <TableCell className="w-[110px] max-w-[110px] text-xs">
+              <TableCell className="w-full sm:w-[110px] max-w-[110px] text-xs">
                 <ExistingAttachments orderId={o.id} attachments={o.attachments ?? []} />
               </TableCell>
               <TableCell className="text-right space-x-2 whitespace-nowrap">

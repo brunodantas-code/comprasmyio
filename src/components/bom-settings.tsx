@@ -257,7 +257,7 @@ export function BomSettingsDialog() {
 
         <div className="flex flex-wrap items-center gap-2">
           <Select value={selected} onValueChange={setProductId}>
-            <SelectTrigger className="w-[280px]"><SelectValue placeholder="Selecione o produto" /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-[280px]"><SelectValue placeholder="Selecione o produto" /></SelectTrigger>
             <SelectContent>
               {products.map((p) => (
                 <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
@@ -270,7 +270,7 @@ export function BomSettingsDialog() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar componente"
-              className="w-[200px] pl-8"
+              className="w-full pl-8 sm:w-[200px]"
             />
           </div>
           <Badge variant="outline">{rows.length} componentes</Badge>
@@ -355,7 +355,7 @@ export function BomSettingsDialog() {
               value={newProductName}
               onChange={(e) => setNewProductName(e.target.value)}
               placeholder="Nome do novo produto"
-              className="w-[280px]"
+              className="w-full sm:w-[280px]"
             />
             <Button size="sm" disabled={createProduct.isPending} onClick={() => createProduct.mutate()}>
               <PackagePlus className="mr-1 h-4 w-4" /> Criar produto
@@ -419,7 +419,7 @@ export function BomSettingsDialog() {
           <Label>Adicionar componente à regra</Label>
           <div className="flex flex-wrap items-center gap-2">
             <Select value={newComponent} onValueChange={setNewComponent}>
-              <SelectTrigger className="w-[280px]"><SelectValue placeholder="Componente do estoque da fábrica" /></SelectTrigger>
+              <SelectTrigger className="w-full sm:w-[280px]"><SelectValue placeholder="Componente do estoque da fábrica" /></SelectTrigger>
               <SelectContent className="max-h-72">
                 {available.map((c) => (
                   <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
