@@ -420,6 +420,7 @@ export function ProductionQueueCard({ balances }: { balances?: Record<string, nu
       syncingRef.current = false;
     },
   });
+  const autoSyncMutate = autoSync.mutate;
 
   useEffect(() => {
     if (syncingRef.current || !rows || !balances) return;
