@@ -20,6 +20,74 @@ import { toast } from "sonner";
 
 type DemandItem = { id: string; product: string; quantity: number };
 
+type ItemDialogState = {
+  order: DemandOrder;
+  item: DemandItem;
+  missing: number;
+  isManufactured: boolean;
+};
+
+function ResolveItemDialog({
+  state,
+  onClose,
+  onConfirm,
+  pending,
+}: {
+  state: ItemDialogState | null;
+  onClose: () => void;
+  onConfirm: (mode: "produce" | "buy", quantity: number) => void;
+  pending: boolean;
+}) {
+  const [qty, setQty] = useState(1);
+  return (
+    <Dialog
+      open={!!state}
+      onOpenChange={(o) => {
+        if (!o) onClose();
+        else if (state) setQty(state.missing);
+      }}
+    >
+      <DialogContent
+        onOpenAutoFocus={() => {
+          if (state) setQty(state.missing);
+        }}
+      >
+        <DialogHeader>
+          <DialogTitle>Resolver item</DialogTitle>
+          <DialogDescription>
+            {state?.item.product} — faltam {state?.missing} unidade(s).
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-2">
+          <Label htmlFor="resolve-qty">Quantidade</Label>
+          <Input
+            id="resolve-qty"
+            type="number"
+            min={1}
+            value={qty}
+            onChange={(e) => setQty(Math.max(1, Number(e.target.value) || 1))}
+          />
+        </div>
+        <DialogFooter className="gap-2 sm:justify-between">
+          <Button variant="ghost" onClick={onClose} disabled={pending}>
+            Cancelar
+          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" disabled={pending} onClick={() => onConfirm("produce", qty)}>
+              <Factory className="mr-2 h-4 w-4" />
+              Produzir
+            </Button>
+            <Button disabled={pending} onClick={() => onConfirm("buy", qty)}>
+              <ShoppingCart className="mr-2 h-4 w-4" />
+              Comprar
+            </Button>
+          </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 type DemandOrder = {
   id: string;
   delivery_date: string;
