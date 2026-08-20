@@ -20,6 +20,23 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { ArrowRightLeft, HardHat, History } from "lucide-react";
 
+function DispatchPhoto({ path }: { path: string }) {
+  const { data } = useQuery({
+    queryKey: ["assembly-photo", path],
+    queryFn: async () => {
+      if (path.startsWith("http")) return path;
+      const { data } = await supabase.storage.from("assembly-photos").createSignedUrl(path, 3600);
+      return data?.signedUrl ?? null;
+    },
+  });
+  if (!data) return null;
+  return (
+    <a href={data} target="_blank" rel="noreferrer">
+      <img src={data} alt="Foto do material com o técnico" className="h-12 w-12 rounded border object-cover" />
+    </a>
+  );
+}
+
 type Destination = "unidade" | "perdido" | "almoxarifado";
 
 const DEST_LABELS: Record<Destination, string> = {
