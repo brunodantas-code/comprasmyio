@@ -258,14 +258,23 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
                             <Badge variant="outline" className="border-slate-300 bg-slate-100 text-slate-700">
                               {isManufactured ? "Enviado à fábrica" : "Na fila de compras"}
                             </Badge>
-                          ) : isManufactured ? (
-                            <Badge variant="outline" className="border-blue-300 bg-blue-100 text-blue-800">
-                              Produzir {i.quantity - bal}
-                            </Badge>
                           ) : (
-                            <Badge variant="outline" className="border-red-300 bg-red-100 text-red-800">
-                              Faltam {i.quantity - bal}
-                            </Badge>
+                            <button
+                              type="button"
+                              className="cursor-pointer"
+                              onClick={() => setItemDialog({ order: o, item: i, missing: i.quantity - bal, isManufactured })}
+                            >
+                              <Badge
+                                variant="outline"
+                                className={
+                                  isManufactured
+                                    ? "border-blue-300 bg-blue-100 text-blue-800 hover:bg-blue-200"
+                                    : "border-red-300 bg-red-100 text-red-800 hover:bg-red-200"
+                                }
+                              >
+                                {isManufactured ? "Produzir" : "Faltam"} {i.quantity - bal}
+                              </Badge>
+                            </button>
                           )}
                         </TableCell>
                       </TableRow>
@@ -277,6 +286,18 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
           ))
         )}
       </CardContent>
+      <ResolveItemDialog
+        state={itemDialog}
+        onClose={() => setItemDialog(null)}
+        pending={resolveMutation.isPending}
+        onConfirm={(mode, quantity) => {
+          if (!itemDialog) return;
+          resolveMutation.mutate(
+            { order: itemDialog.order, items: [itemDialog.item], mode, quantity },
+            { onSettled: () => setItemDialog(null) },
+          );
+        }}
+      />
     </Card>
   );
 }
