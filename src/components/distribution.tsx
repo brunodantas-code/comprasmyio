@@ -510,11 +510,13 @@ export function TransitCard() {
         .update({ status: "entregue_cliente" })
         .eq("id", orderId);
       if (error) throw error;
+      await createUnitProductsForOrder(orderId, null, "Entrega ao cliente");
     },
     onSuccess: () => {
       toast.success("Pedido entregue ao cliente.");
       queryClient.invalidateQueries({ queryKey: ["myio-transit"] });
       queryClient.invalidateQueries({ queryKey: ["myio-orders"] });
+      queryClient.invalidateQueries({ queryKey: ["unit-products"] });
     },
     onError: (e: any) => toast.error(e.message ?? "Erro ao concluir entrega"),
   });
