@@ -15,6 +15,7 @@ function fmt(d: string) {
 const STAGE_LABELS: Record<string, string> = {
   fabrica: "Fábrica",
   almoxarifado: "Estoque",
+  homologacao: "Homologação",
   distribuicao: "Distribuição",
   transito: "Trânsito",
   unidade: "Unidade",
@@ -531,6 +532,7 @@ export function QrCheckSection() {
                           {fmt(e.at)}
                           {e.detail ? ` · ${e.detail}` : ""}
                         </p>
+                        {e.photo && <ReleasePhoto path={e.photo} className="mt-2 max-h-40" />}
                       </li>
                     ))}
                   </ol>
