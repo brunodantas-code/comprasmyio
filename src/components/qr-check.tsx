@@ -23,7 +23,7 @@ const STAGE_LABELS: Record<string, string> = {
   escritorio: "Escritório",
 };
 
-type Event = { at: string; title: string; detail?: string };
+type Event = { at: string; title: string; detail?: string; stage?: string; photo?: string | null };
 
 type Release = {
   id: string;
@@ -38,7 +38,7 @@ function useQrTrace(code: string) {
     queryKey: ["qr-trace", code],
     enabled: !!code,
     queryFn: async () => {
-      const [unitRes, boxRes, unitProdRes, profilesRes, deliveryQrRes] = await Promise.all([
+      const [unitRes, boxRes, unitProdRes, profilesRes, deliveryQrRes, movQrRes] = await Promise.all([
         supabase
           .from("homologation_units")
           .select(
@@ -53,7 +53,9 @@ function useQrTrace(code: string) {
           .maybeSingle(),
         supabase
           .from("unit_products")
-          .select("id, status, installed_at, notes, created_at, material_id, materials(name)")
+          .select(
+            "id, status, installed_at, notes, created_at, material_id, product, moved_to, moved_technician, moved_at, move_notes, move_photo_url, project_id, materials(name), projects(name)",
+          )
           .eq("label", code)
           .maybeSingle(),
         supabase.from("profiles").select("id, full_name, email"),
@@ -66,6 +68,13 @@ function useQrTrace(code: string) {
           .order("created_at", { ascending: false })
           .limit(1)
           .maybeSingle(),
+        supabase
+          .from("stock_movement_qrs")
+          .select(
+            "id, qr_value, box_qr, created_at, movement_id, stock_movements(id, type, quantity, reason, responsible, photo_url, created_at, created_by, material_id, materials(name, location))",
+          )
+          .or(`qr_value.eq.${code},box_qr.eq.${code}`)
+          .order("created_at", { ascending: true }),
       ]);
 
       const names: Record<string, string> = {};
@@ -87,7 +96,21 @@ function useQrTrace(code: string) {
       }
 
       const unitProd = unitProdRes.data as
-        | { id: string; status: string; installed_at: string | null; notes: string | null; created_at: string; materials: { name: string } | null }
+        | {
+            id: string;
+            status: string;
+            installed_at: string | null;
+            notes: string | null;
+            created_at: string;
+            product: string | null;
+            moved_to: string | null;
+            moved_technician: string | null;
+            moved_at: string | null;
+            move_notes: string | null;
+            move_photo_url: string | null;
+            materials: { name: string } | null;
+            projects: { name: string } | null;
+          }
         | null;
 
       const dq = deliveryQrRes.data as
