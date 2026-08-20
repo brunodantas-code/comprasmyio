@@ -44,6 +44,21 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
 
   const list = (orders ?? []).filter((o) => o.myio_order_items.length > 0);
 
+  const { data: manufacturedNames } = useQuery({
+    queryKey: ["manufactured-material-names"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("materials")
+        .select("name, is_product, is_manufactured");
+      if (error) throw error;
+      return new Set(
+        (data ?? [])
+          .filter((m: any) => m.is_product && m.is_manufactured !== false)
+          .map((m: any) => String(m.name).trim().toLowerCase()),
+      );
+    },
+  });
+
   return (
     <Card>
       <CardHeader>
@@ -85,6 +100,7 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
                   {o.myio_order_items.map((i) => {
                     const bal = balances[i.product.trim().toLowerCase()] ?? 0;
                     const ok = bal >= i.quantity;
+                    const isManufactured = manufacturedNames?.has(i.product.trim().toLowerCase()) ?? false;
                     return (
                       <TableRow key={i.id}>
                         <TableCell>{i.product}</TableCell>
@@ -93,6 +109,10 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
                         <TableCell>
                           {ok ? (
                             <Badge variant="outline" className="border-green-300 bg-green-100 text-green-800">Disponível</Badge>
+                          ) : isManufactured ? (
+                            <Badge variant="outline" className="border-blue-300 bg-blue-100 text-blue-800">
+                              Produzir {i.quantity - bal}
+                            </Badge>
                           ) : (
                             <Badge variant="outline" className="border-red-300 bg-red-100 text-red-800">
                               Faltam {i.quantity - bal}
