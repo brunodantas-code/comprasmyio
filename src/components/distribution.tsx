@@ -638,16 +638,33 @@ function FoundMerchandiseDialog({ orderId, notes }: { orderId: string; notes: st
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState("");
   const [sector, setSector] = useState<string>("");
+  const [projectId, setProjectId] = useState<string>("");
+  const { data: projects } = useQuery({
+    queryKey: ["projects-for-found"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("projects").select("id, name").order("name");
+      if (error) throw error;
+      return (data ?? []) as { id: string; name: string }[];
+    },
+  });
 
   const found = useMutation({
     mutationFn: async () => {
       const target = FOUND_SECTORS.find((s) => s.value === sector);
       if (!target) throw new Error("Selecione o setor.");
+      if (sector === "unidade" && !projectId) throw new Error("Selecione o projeto (unidade do cliente).");
       const stamp = new Date().toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
-      const entry = `[Mercadoria encontrada em ${stamp} — setor: ${target.label}] ${reason.trim()}`;
+      const projectName = projects?.find((p) => p.id === projectId)?.name;
+      const entry = `[Mercadoria encontrada em ${stamp} — setor: ${target.label}${
+        sector === "unidade" && projectName ? ` — projeto: ${projectName}` : ""
+      }] ${reason.trim()}`;
       const { error } = await supabase
         .from("myio_orders")
-        .update({ status: target.status as never, notes: notes ? `${notes}\n${entry}` : entry })
+        .update({
+          status: target.status as never,
+          notes: notes ? `${notes}\n${entry}` : entry,
+          ...(sector === "unidade" ? { project_id: projectId } : {}),
+        } as never)
         .eq("id", orderId);
       if (error) throw error;
     },
@@ -656,6 +673,7 @@ function FoundMerchandiseDialog({ orderId, notes }: { orderId: string; notes: st
       setOpen(false);
       setReason("");
       setSector("");
+      setProjectId("");
       ["myio-lost", "myio-transit", "myio-distribution", "myio-orders", "myio-demand"].forEach((k) =>
         queryClient.invalidateQueries({ queryKey: [k] }),
       );
@@ -687,6 +705,19 @@ function FoundMerchandiseDialog({ orderId, notes }: { orderId: string; notes: st
               </SelectContent>
             </Select>
           </div>
+          {sector === "unidade" && (
+            <div className="space-y-2">
+              <Label>Projeto / unidade do cliente (obrigatório)</Label>
+              <Select value={projectId} onValueChange={setProjectId}>
+                <SelectTrigger><SelectValue placeholder="Selecione o projeto" /></SelectTrigger>
+                <SelectContent>
+                  {(projects ?? []).map((p) => (
+                    <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <div className="space-y-2">
             <Label htmlFor={`found-reason-${orderId}`}>Observação (obrigatório)</Label>
             <Textarea
@@ -700,7 +731,10 @@ function FoundMerchandiseDialog({ orderId, notes }: { orderId: string; notes: st
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-          <Button disabled={!reason.trim() || !sector || found.isPending} onClick={() => found.mutate()}>
+          <Button
+            disabled={!reason.trim() || !sector || (sector === "unidade" && !projectId) || found.isPending}
+            onClick={() => found.mutate()}
+          >
             {found.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Confirmar
           </Button>
