@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ProductImageUploader, ProductPhotoPreview, useProductImages } from "@/components/myio-product-image";
+import { ItemDeliveriesDialog } from "@/components/myio-delivery-qr";
 import { toast } from "sonner";
 import { Plus, Trash2, Factory, Pencil, Check } from "lucide-react";
 
@@ -510,7 +511,18 @@ export function MyioOrdersTab({ userId, canManage = true }: { userId: string; ca
                             <span><span className="font-medium">{i.quantity}x</span> {i.product}</span>
                           </ProductPhotoPreview>
                           {deliveredItemIds?.has(i.id) && (
-                            <Check className="h-4 w-4 shrink-0 text-green-600" aria-label="Baixa registrada" />
+                            <ItemDeliveriesDialog
+                              orderItemId={i.id}
+                              product={i.product}
+                              trigger={
+                                <span
+                                  className="inline-flex items-center rounded p-0.5 hover:bg-muted"
+                                  title="Ver QR codes e fotos vinculados"
+                                >
+                                  <Check className="h-4 w-4 shrink-0 text-green-600" aria-label="Baixa registrada" />
+                                </span>
+                              }
+                            />
                           )}
                         </div>
                       ))}
