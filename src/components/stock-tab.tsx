@@ -675,6 +675,7 @@ function StockSection({ userId, location, canDelete }: { userId: string; locatio
   const { data: stock, isLoading } = useStock();
   const { data: movements } = useMovements();
   const { data: profiles } = useStockProfiles();
+  const { data: manufactured } = useManufacturedMap();
   const [search, setSearch] = useState("");
   const [view, setView] = useState<"all" | "with" | "zero">("all");
 
@@ -693,6 +694,33 @@ function StockSection({ userId, location, canDelete }: { userId: string; locatio
 
   const almoxarifadoBalances = Object.fromEntries(
     (stock ?? []).filter((r) => (r.location ?? "fabrica") === "almoxarifado").map((r) => [r.name.trim().toLowerCase(), r.balance]),
+  );
+
+  const toolbar = (
+    <>
+      <AddMaterialDialog location={location} userId={userId} />
+      {location === "fabrica" && <ReleaseAssembledDialog userId={userId} />}
+      {location === "fabrica" && <BomSettingsDialog />}
+      {location === "fabrica" && <StockSimulatorDialog userId={userId} />}
+      <ResetStockDialog rows={scoped} userId={userId} location={location} />
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Buscar material"
+          className="w-[200px] pl-8"
+        />
+      </div>
+      <Select value={view} onValueChange={(v) => setView(v as "all" | "with" | "zero")}>
+        <SelectTrigger className="w-[170px]"><SelectValue /></SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">Todos</SelectItem>
+          <SelectItem value="with">Com saldo</SelectItem>
+          <SelectItem value="zero">Sem saldo</SelectItem>
+        </SelectContent>
+      </Select>
+    </>
   );
 
   return (
