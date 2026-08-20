@@ -18,7 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ItemDeliveriesDialog } from "@/components/myio-delivery-qr";
-import { AlertTriangle, CheckCircle2, FileText, Loader2, Send, Truck, Undo2, Upload } from "lucide-react";
+import { AlertTriangle, CheckCircle2, FileText, Loader2, PackageSearch, Send, Truck, Undo2, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 const PROOF_BUCKET = "assembly-photos";
@@ -625,6 +625,91 @@ export function TransitCard() {
   );
 }
 
+const FOUND_SECTORS = [
+  { value: "unidade", label: "Unidade (cliente)", status: "entregue_cliente" },
+  { value: "distribuicao", label: "Distribuição", status: "pronto_entrega" },
+  { value: "tecnico", label: "Técnico", status: "entregue_cliente" },
+  { value: "transito", label: "Trânsito", status: "em_transito" },
+  { value: "almoxarifado", label: "Almoxarifado", status: "produzindo" },
+] as const;
+
+function FoundMerchandiseDialog({ orderId, notes }: { orderId: string; notes: string | null }) {
+  const queryClient = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState("");
+  const [sector, setSector] = useState<string>("");
+
+  const found = useMutation({
+    mutationFn: async () => {
+      const target = FOUND_SECTORS.find((s) => s.value === sector);
+      if (!target) throw new Error("Selecione o setor.");
+      const stamp = new Date().toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+      const entry = `[Mercadoria encontrada em ${stamp} — setor: ${target.label}] ${reason.trim()}`;
+      const { error } = await supabase
+        .from("myio_orders")
+        .update({ status: target.status as never, notes: notes ? `${notes}\n${entry}` : entry })
+        .eq("id", orderId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Mercadoria encontrada e movida de setor.");
+      setOpen(false);
+      setReason("");
+      setSector("");
+      ["myio-lost", "myio-transit", "myio-distribution", "myio-orders", "myio-demand"].forEach((k) =>
+        queryClient.invalidateQueries({ queryKey: [k] }),
+      );
+    },
+    onError: (e: any) => toast.error(e.message ?? "Erro ao registrar"),
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <Button size="sm" variant="outline" onClick={() => setOpen(true)}>
+        <PackageSearch className="mr-2 h-4 w-4" /> Mercadoria encontrada
+      </Button>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Mercadoria encontrada</DialogTitle>
+          <DialogDescription>
+            Informe onde a mercadoria foi localizada. O pedido será movido automaticamente para o setor escolhido.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label>Setor atual (obrigatório)</Label>
+            <Select value={sector} onValueChange={setSector}>
+              <SelectTrigger><SelectValue placeholder="Selecione o setor" /></SelectTrigger>
+              <SelectContent>
+                {FOUND_SECTORS.map((s) => (
+                  <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor={`found-reason-${orderId}`}>Observação (obrigatório)</Label>
+            <Textarea
+              id={`found-reason-${orderId}`}
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder="Ex.: localizado na transportadora, já entregue ao técnico..."
+              rows={4}
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+          <Button disabled={!reason.trim() || !sector || found.isPending} onClick={() => found.mutate()}>
+            {found.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Confirmar
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function LostCard() {
   const { data: orders, isLoading } = useQuery({
     queryKey: ["myio-lost"],
@@ -667,6 +752,9 @@ export function LostCard() {
                   <Badge variant="outline" className="border-red-300 bg-red-100 text-red-800">
                     Perdido
                   </Badge>
+                  <div className="ml-auto">
+                    <FoundMerchandiseDialog orderId={o.id} notes={o.notes} />
+                  </div>
                 </div>
                 {o.notes && (
                   <p className="whitespace-pre-line text-xs text-muted-foreground">{o.notes}</p>
