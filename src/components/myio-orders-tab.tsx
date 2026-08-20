@@ -107,6 +107,14 @@ function NewMyioOrderDialog({ userId }: { userId: string }) {
   const qc = useQueryClient();
   const { data: projects } = useProjects();
   const { data: images } = useProductImages();
+  const { data: deliveredItemIds } = useQuery({
+    queryKey: ["myio-item-deliveries"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("myio_item_deliveries").select("order_item_id");
+      if (error) throw error;
+      return new Set((data ?? []).map((r) => r.order_item_id));
+    },
+  });
   const products = useMyioProductOptions();
   const [open, setOpen] = useState(false);
   const [projectId, setProjectId] = useState("");
@@ -500,6 +508,9 @@ export function MyioOrdersTab({ userId, canManage = true }: { userId: string; ca
                           <ProductPhotoPreview product={i.product} url={images?.[i.product]} size={28}>
                             <span><span className="font-medium">{i.quantity}x</span> {i.product}</span>
                           </ProductPhotoPreview>
+                          {deliveredItemIds?.has(i.id) && (
+                            <Check className="h-4 w-4 shrink-0 text-green-600" aria-label="Baixa registrada" />
+                          )}
                         </div>
                       ))}
                     </div>
