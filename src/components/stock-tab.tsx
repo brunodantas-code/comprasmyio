@@ -672,6 +672,122 @@ function ResetStockDialog({
 }
 
 function StockSection({ userId, location, canDelete }: { userId: string; location: StockLocation; canDelete?: boolean }) {
+  return <StockSectionInner userId={userId} location={location} canDelete={canDelete} />;
+}
+
+function StockTableCard({
+  title,
+  description,
+  rows,
+  isLoading,
+  userId,
+  canDelete,
+  actions,
+}: {
+  title: string;
+  description: string;
+  rows: StockRow[];
+  isLoading?: boolean;
+  userId: string;
+  canDelete?: boolean;
+  actions?: React.ReactNode;
+}) {
+  return (
+    <Card>
+      <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <CardTitle>{title}</CardTitle>
+          <CardDescription>{description}</CardDescription>
+        </div>
+        {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">Carregando...</p>
+        ) : !rows.length ? (
+          <p className="text-sm text-muted-foreground">Nenhum material encontrado.</p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Material</TableHead>
+                <TableHead className="text-right">Saldo</TableHead>
+                <TableHead className="text-right">Entradas</TableHead>
+                <TableHead className="text-right">Saídas</TableHead>
+                <TableHead>Última movimentação</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rows.map((r) => (
+                <TableRow key={r.material_id}>
+                  <TableCell className="font-medium">
+                    <div className="flex items-center gap-2">
+                      <StockQrDialog
+                        stockName={r.name}
+                        trigger={
+                          <button type="button" className="text-left hover:underline">
+                            {r.name}
+                          </button>
+                        }
+                      />
+                      {r.link && (
+                        <a href={r.link} target="_blank" rel="noreferrer" className="text-primary hover:underline">
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Badge
+                      variant="outline"
+                      className={r.balance > 0 ? "bg-green-100 text-green-800 border-green-300" : "bg-muted text-muted-foreground"}
+                    >
+                      {r.balance}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right text-sm text-muted-foreground">{r.total_in}</TableCell>
+                  <TableCell className="text-right text-sm text-muted-foreground">{r.total_out}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {r.last_movement_at ? fmt(r.last_movement_at) : "—"}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex justify-end gap-1">
+                      <MovementDialog
+                        row={r}
+                        userId={userId}
+                        type="entrada"
+                        trigger={
+                          <Button size="sm" variant="outline">
+                            <ArrowDownCircle className="mr-1 h-4 w-4" /> Entrada
+                          </Button>
+                        }
+                      />
+                      <MovementDialog
+                        row={r}
+                        userId={userId}
+                        type="saida"
+                        trigger={
+                          <Button size="sm" variant="outline" disabled={r.balance <= 0}>
+                            <ArrowUpCircle className="mr-1 h-4 w-4" /> Dar baixa
+                          </Button>
+                        }
+                      />
+                      <HistoryDialog row={r} />
+                      {canDelete && <DeleteMaterialDialog row={r} />}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function StockSectionInner({ userId, location, canDelete }: { userId: string; location: StockLocation; canDelete?: boolean }) {
   const { data: stock, isLoading } = useStock();
   const { data: movements } = useMovements();
   const { data: profiles } = useStockProfiles();
