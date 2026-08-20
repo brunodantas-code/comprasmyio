@@ -848,7 +848,7 @@ function OrdersTable({
               <TableCell className="max-w-[220px] text-xs text-muted-foreground">
                 <div className="whitespace-pre-wrap">{o.buyer_notes || "—"}</div>
               </TableCell>
-              <TableCell className="w-full sm:w-[110px] max-w-[110px] text-xs">
+              <TableCell className="w-[110px] max-w-[110px] text-xs">
                 <ExistingAttachments orderId={o.id} attachments={o.attachments ?? []} />
               </TableCell>
               <TableCell className="text-right space-x-2 whitespace-nowrap">
