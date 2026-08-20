@@ -175,12 +175,13 @@ function useQrTrace(code: string) {
         responsible: string;
         tracking_code: string;
         notes: string | null;
+        proof_url: string | null;
       };
       let shipment: Shipment | null = null;
       if (order) {
         const { data } = await supabase
           .from("myio_shipments")
-          .select("created_at, address, shipping_method, responsible, tracking_code, notes")
+          .select("created_at, address, shipping_method, responsible, tracking_code, notes, proof_url")
           .eq("order_id", order.id)
           .order("created_at", { ascending: false })
           .limit(1)
@@ -189,9 +190,16 @@ function useQrTrace(code: string) {
       }
 
       const materialName =
-        (hom?.["materials"] as { name: string } | null)?.name ?? unitProd?.materials?.name ?? null;
+        (hom?.["materials"] as { name: string } | null)?.name ??
+        unitProd?.materials?.name ??
+        unitProd?.product ??
+        movements[0]?.materials?.name ??
+        delivery?.product ??
+        null;
       const materialLocation =
-        ((hom?.["materials"] as { location?: string } | null)?.location as string | undefined) ?? null;
+        ((hom?.["materials"] as { location?: string } | null)?.location as string | undefined) ??
+        movements[movements.length - 1]?.materials?.location ??
+        null;
 
       const events: Event[] = [];
       if (release) {
@@ -199,6 +207,8 @@ function useQrTrace(code: string) {
           at: release.created_at,
           title: "Produto montado liberado na Fábrica",
           detail: `Responsáveis: ${(release.responsibles ?? []).map((r) => names[r] ?? r).join(", ") || "—"}`,
+          stage: "fabrica",
+          photo: release.photo_url,
         });
       }
       if (hom) {
@@ -209,17 +219,80 @@ function useQrTrace(code: string) {
           detail:
             (boxSize === 1 ? "Produto unitário" : `Caixa de ${boxSize}`) +
             (hom["responsible_id"] ? ` · Responsável: ${names[hom["responsible_id"] as string] ?? "—"}` : ""),
+          stage: "homologacao",
         });
         events.push({
           at: hom["created_at"] as string,
           title: "Entrada no Estoque — Almoxarifado",
           detail: boxSize === 1 ? materialName ?? "" : `${materialName ?? ""} — Caixa de ${boxSize}`,
+          stage: "almoxarifado",
         });
       }
+
+      for (const m of movements) {
+        const who = m.responsible || (m.created_by ? names[m.created_by] : "") || "";
+        const loc = m.materials?.location ?? "almoxarifado";
+        if (m.type === "saida") {
+          events.push({
+            at: m.created_at,
+            title: `Baixa no estoque (${STAGE_LABELS[loc] ?? loc})`,
+            detail: [m.reason, who ? `Responsável: ${who}` : "", `Qtd: ${m.quantity}`].filter(Boolean).join(" · "),
+            photo: m.photo_url,
+            stage: "tecnico",
+          });
+        } else if (m.type === "entrada") {
+          events.push({
+            at: m.created_at,
+            title: `Entrada no Estoque — ${STAGE_LABELS[loc] ?? loc}`,
+            detail: [m.reason, who ? `Responsável: ${who}` : "", `Qtd: ${m.quantity}`].filter(Boolean).join(" · "),
+            photo: m.photo_url,
+            stage: loc,
+          });
+        } else {
+          events.push({
+            at: m.created_at,
+            title: "Ajuste de estoque",
+            detail: [m.reason, who ? `Responsável: ${who}` : ""].filter(Boolean).join(" · "),
+            photo: m.photo_url,
+          });
+        }
+      }
+
+      for (const t of techMoves) {
+        const destStage =
+          t.destination === "unidade" ? "unidade" : t.destination === "perdido" ? "perdido" : t.destination === "almoxarifado" ? "almoxarifado" : "tecnico";
+        events.push({
+          at: t.created_at,
+          title: `Movido pelo técnico → ${STAGE_LABELS[destStage] ?? t.destination}`,
+          detail: [`Técnico: ${t.technician}`, t.projects?.name ? `Projeto: ${t.projects.name}` : "", t.notes].filter(Boolean).join(" · "),
+          stage: destStage,
+        });
+      }
+
       if (unitProd) {
-        events.push({ at: unitProd.created_at, title: "Enviado para a Unidade (cliente)", detail: "Situação inicial: parado" });
+        events.push({
+          at: unitProd.created_at,
+          title: "Enviado para a Unidade (cliente)",
+          detail: [unitProd.projects?.name ? `Projeto: ${unitProd.projects.name}` : "", "Situação inicial: parado"]
+            .filter(Boolean)
+            .join(" · "),
+          stage: "unidade",
+        });
         if (unitProd.status === "instalado" && unitProd.installed_at) {
-          events.push({ at: unitProd.installed_at, title: "Instalado na unidade do cliente" });
+          events.push({ at: unitProd.installed_at, title: "Instalado na unidade do cliente", stage: "unidade" });
+        }
+        if (unitProd.moved_to && unitProd.moved_at) {
+          const destStage =
+            unitProd.moved_to === "tecnico" ? "tecnico" : unitProd.moved_to === "perdido" ? "perdido" : "almoxarifado";
+          events.push({
+            at: unitProd.moved_at,
+            title: `Saiu da unidade → ${STAGE_LABELS[destStage] ?? unitProd.moved_to}`,
+            detail: [unitProd.moved_technician ? `Técnico: ${unitProd.moved_technician}` : "", unitProd.move_notes]
+              .filter(Boolean)
+              .join(" · "),
+            photo: unitProd.move_photo_url,
+            stage: destStage,
+          });
         }
       }
       if (delivery && order) {
@@ -227,9 +300,11 @@ function useQrTrace(code: string) {
           at: delivery.created_at,
           title: "Baixa no Almoxarifado (separado para pedido)",
           detail: `${order.title} · ${order.client_name} · ${delivery.product}`,
+          photo: delivery.photo_url,
+          stage: "distribuicao",
         });
         if (order.status === "pronto_entrega") {
-          events.push({ at: delivery.created_at, title: "Aguardando em Distribuição", detail: order.title });
+          events.push({ at: delivery.created_at, title: "Aguardando em Distribuição", detail: order.title, stage: "distribuicao" });
         }
       }
       if (shipment) {
@@ -237,12 +312,14 @@ function useQrTrace(code: string) {
           at: shipment.created_at,
           title: "Enviado — Em trânsito",
           detail: `${shipment.shipping_method} · Resp.: ${shipment.responsible} · Rastreio: ${shipment.tracking_code}`,
+          photo: shipment.proof_url,
+          stage: "transito",
         });
         if (order?.status === "entregue_cliente") {
-          events.push({ at: shipment.created_at, title: "Entregue ao cliente", detail: shipment.address });
+          events.push({ at: shipment.created_at, title: "Entregue ao cliente", detail: shipment.address, stage: "unidade" });
         }
         if (order?.status === "perdido") {
-          events.push({ at: shipment.created_at, title: "Mercadoria perdida", detail: shipment.address });
+          events.push({ at: shipment.created_at, title: "Mercadoria perdida", detail: shipment.address, stage: "perdido" });
         }
       }
       events.sort((a, b) => +new Date(a.at) - +new Date(b.at));
@@ -259,7 +336,7 @@ function useQrTrace(code: string) {
 
       let location = "Não encontrado";
       let stage: string | null = null;
-      if (unitProd) {
+      if (unitProd && !unitProd.moved_to) {
         location = unitProd.status === "instalado" ? "Unidade (cliente) — instalado" : "Unidade (cliente) — parado";
         stage = "unidade";
       } else if (order?.status === "entregue_cliente") {
@@ -282,14 +359,23 @@ function useQrTrace(code: string) {
         stage = materialLocation ?? "almoxarifado";
       }
 
+      const lastStaged = [...events].reverse().find((e) => !!e.stage && e.stage !== "homologacao");
+      if (lastStaged?.stage && (unitProd?.moved_to || movements.length || techMoves.length)) {
+        stage = lastStaged.stage;
+        location = STOCK_LABELS[lastStaged.stage] ?? STAGE_LABELS[lastStaged.stage] ?? location;
+      }
+
       return {
-        found: !!hom || !!unitProd || !!delivery,
+        found: !!hom || !!unitProd || !!delivery || movements.length > 0,
         isBox: !!boxRes.data,
         materialName,
         stage,
         order,
         shipment,
         delivery,
+        movements,
+        techMoves,
+        unitProd,
         position: unitRes.data?.position ?? null,
         boxSize: (hom?.["box_size"] as number | undefined) ?? null,
         boxQr: (hom?.["box_qr"] as string | null) ?? null,
