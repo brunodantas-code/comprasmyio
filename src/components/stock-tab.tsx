@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,8 @@ import { DistributionCard, TransitCard, LostCard } from "@/components/distributi
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 import { toast } from "sonner";
-import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Plus, Library, Trash2, Eraser, ArrowLeftRight } from "lucide-react";
+import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Plus, Library, Trash2, Eraser, ArrowLeftRight, Camera, Upload } from "lucide-react";
+import { QrLinkPicker, type LinkedQr } from "@/components/myio-delivery-qr";
 import {
   AlertDialog,
   AlertDialogAction,
