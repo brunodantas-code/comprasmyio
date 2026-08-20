@@ -351,7 +351,7 @@ export function UnitProductsCard({
               Controle de produtos instalados e parados no cliente, com as etiquetas (QR) da homologação.
             </CardDescription>
           </div>
-          <AddUnitProductDialog materials={materials} userId={userId} />
+          {null}
         </CardHeader>
         <CardContent className="space-y-6">
           {isLoading ? (
