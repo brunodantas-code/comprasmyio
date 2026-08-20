@@ -1,11 +1,24 @@
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ClipboardList, Factory, Loader2, Wand2 } from "lucide-react";
+import { ClipboardList, Factory, Loader2, ShoppingCart, Wand2 } from "lucide-react";
 import { toast } from "sonner";
+
+type DemandItem = { id: string; product: string; quantity: number };
 
 type DemandOrder = {
   id: string;
