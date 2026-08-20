@@ -123,6 +123,19 @@ function useStockProfiles() {
   });
 }
 
+function useManufacturedMap() {
+  return useQuery({
+    queryKey: ["materials-manufactured-map"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("materials").select("id, is_manufactured");
+      if (error) throw error;
+      const map: Record<string, boolean> = {};
+      for (const m of data ?? []) map[m.id] = !!m.is_manufactured;
+      return map;
+    },
+  });
+}
+
 function MovementDialog({
   row,
   userId,
@@ -659,9 +672,126 @@ function ResetStockDialog({
 }
 
 function StockSection({ userId, location, canDelete }: { userId: string; location: StockLocation; canDelete?: boolean }) {
+  return <StockSectionInner userId={userId} location={location} canDelete={canDelete} />;
+}
+
+function StockTableCard({
+  title,
+  description,
+  rows,
+  isLoading,
+  userId,
+  canDelete,
+  actions,
+}: {
+  title: string;
+  description: string;
+  rows: StockRow[];
+  isLoading?: boolean;
+  userId: string;
+  canDelete?: boolean;
+  actions?: React.ReactNode;
+}) {
+  return (
+    <Card>
+      <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <CardTitle>{title}</CardTitle>
+          <CardDescription>{description}</CardDescription>
+        </div>
+        {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">Carregando...</p>
+        ) : !rows.length ? (
+          <p className="text-sm text-muted-foreground">Nenhum material encontrado.</p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Material</TableHead>
+                <TableHead className="text-right">Saldo</TableHead>
+                <TableHead className="text-right">Entradas</TableHead>
+                <TableHead className="text-right">Saídas</TableHead>
+                <TableHead>Última movimentação</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rows.map((r) => (
+                <TableRow key={r.material_id}>
+                  <TableCell className="font-medium">
+                    <div className="flex items-center gap-2">
+                      <StockQrDialog
+                        stockName={r.name}
+                        trigger={
+                          <button type="button" className="text-left hover:underline">
+                            {r.name}
+                          </button>
+                        }
+                      />
+                      {r.link && (
+                        <a href={r.link} target="_blank" rel="noreferrer" className="text-primary hover:underline">
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Badge
+                      variant="outline"
+                      className={r.balance > 0 ? "bg-green-100 text-green-800 border-green-300" : "bg-muted text-muted-foreground"}
+                    >
+                      {r.balance}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right text-sm text-muted-foreground">{r.total_in}</TableCell>
+                  <TableCell className="text-right text-sm text-muted-foreground">{r.total_out}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {r.last_movement_at ? fmt(r.last_movement_at) : "—"}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex justify-end gap-1">
+                      <MovementDialog
+                        row={r}
+                        userId={userId}
+                        type="entrada"
+                        trigger={
+                          <Button size="sm" variant="outline">
+                            <ArrowDownCircle className="mr-1 h-4 w-4" /> Entrada
+                          </Button>
+                        }
+                      />
+                      <MovementDialog
+                        row={r}
+                        userId={userId}
+                        type="saida"
+                        trigger={
+                          <Button size="sm" variant="outline" disabled={r.balance <= 0}>
+                            <ArrowUpCircle className="mr-1 h-4 w-4" /> Dar baixa
+                          </Button>
+                        }
+                      />
+                      <HistoryDialog row={r} />
+                      {canDelete && <DeleteMaterialDialog row={r} />}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function StockSectionInner({ userId, location, canDelete }: { userId: string; location: StockLocation; canDelete?: boolean }) {
   const { data: stock, isLoading } = useStock();
   const { data: movements } = useMovements();
   const { data: profiles } = useStockProfiles();
+  const { data: manufactured } = useManufacturedMap();
   const [search, setSearch] = useState("");
   const [view, setView] = useState<"all" | "with" | "zero">("all");
 
@@ -680,6 +810,33 @@ function StockSection({ userId, location, canDelete }: { userId: string; locatio
 
   const almoxarifadoBalances = Object.fromEntries(
     (stock ?? []).filter((r) => (r.location ?? "fabrica") === "almoxarifado").map((r) => [r.name.trim().toLowerCase(), r.balance]),
+  );
+
+  const toolbar = (
+    <>
+      <AddMaterialDialog location={location} userId={userId} />
+      {location === "fabrica" && <ReleaseAssembledDialog userId={userId} />}
+      {location === "fabrica" && <BomSettingsDialog />}
+      {location === "fabrica" && <StockSimulatorDialog userId={userId} />}
+      <ResetStockDialog rows={scoped} userId={userId} location={location} />
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Buscar material"
+          className="w-[200px] pl-8"
+        />
+      </div>
+      <Select value={view} onValueChange={(v) => setView(v as "all" | "with" | "zero")}>
+        <SelectTrigger className="w-[170px]"><SelectValue /></SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">Todos</SelectItem>
+          <SelectItem value="with">Com saldo</SelectItem>
+          <SelectItem value="zero">Sem saldo</SelectItem>
+        </SelectContent>
+      </Select>
+    </>
   );
 
   return (
@@ -723,124 +880,37 @@ function StockSection({ userId, location, canDelete }: { userId: string; locatio
         />
       )}
 
-      <Card>
-        <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <CardTitle>Estoque — {LOCATION_LABELS[location]}</CardTitle>
-            <CardDescription>
-              {location === "almoxarifado"
-                ? "Adicione itens e registre entradas e baixas do almoxarifado."
-                : 'A entrada é automática quando o solicitante confirma "Recebido corretamente" em um pedido feito pela biblioteca.'}
-            </CardDescription>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <AddMaterialDialog location={location} userId={userId} />
-            {location === "fabrica" && <ReleaseAssembledDialog userId={userId} />}
-            {location === "fabrica" && <BomSettingsDialog />}
-            {location === "fabrica" && <StockSimulatorDialog userId={userId} />}
-            <ResetStockDialog rows={scoped} userId={userId} location={location} />
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Buscar material"
-                className="w-[200px] pl-8"
-              />
-            </div>
-            <Select value={view} onValueChange={(v) => setView(v as "all" | "with" | "zero")}>
-              <SelectTrigger className="w-[170px]"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
-                <SelectItem value="with">Com saldo</SelectItem>
-                <SelectItem value="zero">Sem saldo</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <p className="text-sm text-muted-foreground">Carregando...</p>
-          ) : !rows.length ? (
-            <p className="text-sm text-muted-foreground">Nenhum material encontrado.</p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Material</TableHead>
-                  <TableHead className="text-right">Saldo</TableHead>
-                  <TableHead className="text-right">Entradas</TableHead>
-                  <TableHead className="text-right">Saídas</TableHead>
-                  <TableHead>Última movimentação</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {rows.map((r) => (
-                  <TableRow key={r.material_id}>
-                    <TableCell className="font-medium">
-                      <div className="flex items-center gap-2">
-                        <StockQrDialog
-                          stockName={r.name}
-                          trigger={
-                            <button type="button" className="text-left hover:underline">
-                              {r.name}
-                            </button>
-                          }
-                        />
-                        {r.link && (
-                          <a href={r.link} target="_blank" rel="noreferrer" className="text-primary hover:underline">
-                            <ExternalLink className="h-3 w-3" />
-                          </a>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Badge
-                        variant="outline"
-                        className={r.balance > 0 ? "bg-green-100 text-green-800 border-green-300" : "bg-muted text-muted-foreground"}
-                      >
-                        {r.balance}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right text-sm text-muted-foreground">{r.total_in}</TableCell>
-                    <TableCell className="text-right text-sm text-muted-foreground">{r.total_out}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {r.last_movement_at ? fmt(r.last_movement_at) : "—"}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex justify-end gap-1">
-                        <MovementDialog
-                          row={r}
-                          userId={userId}
-                          type="entrada"
-                          trigger={
-                            <Button size="sm" variant="outline">
-                              <ArrowDownCircle className="mr-1 h-4 w-4" /> Entrada
-                            </Button>
-                          }
-                        />
-                        <MovementDialog
-                          row={r}
-                          userId={userId}
-                          type="saida"
-                          trigger={
-                            <Button size="sm" variant="outline" disabled={r.balance <= 0}>
-                              <ArrowUpCircle className="mr-1 h-4 w-4" /> Dar baixa
-                            </Button>
-                          }
-                        />
-                        <HistoryDialog row={r} />
-                        {canDelete && <DeleteMaterialDialog row={r} />}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+      {location === "almoxarifado" ? (
+        <>
+          <StockTableCard
+            title="Estoque — Almoxarifado Myio"
+            description="Produtos produzidos pela Myio."
+            rows={rows.filter((r) => manufactured?.[r.material_id])}
+            isLoading={isLoading}
+            userId={userId}
+            canDelete={canDelete}
+            actions={toolbar}
+          />
+          <StockTableCard
+            title="Estoque — Almoxarifado Terceiros"
+            description="Itens comprados de terceiros."
+            rows={rows.filter((r) => !manufactured?.[r.material_id])}
+            isLoading={isLoading}
+            userId={userId}
+            canDelete={canDelete}
+          />
+        </>
+      ) : (
+        <StockTableCard
+          title={`Estoque — ${LOCATION_LABELS[location]}`}
+          description='A entrada é automática quando o solicitante confirma "Recebido corretamente" em um pedido feito pela biblioteca.'
+          rows={rows}
+          isLoading={isLoading}
+          userId={userId}
+          canDelete={canDelete}
+          actions={toolbar}
+        />
+      )}
 
       {location === "almoxarifado" && <BoxesCard />}
 
