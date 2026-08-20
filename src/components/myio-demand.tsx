@@ -600,8 +600,6 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
 }
 
 export function ProductionQueueCard({ balances }: { balances?: Record<string, number> }) {
-  const queryClient = useQueryClient();
-  const syncingRef = useRef(false);
   const { data: rows, isLoading } = useQuery({
     queryKey: ["production-demands"],
     queryFn: async () => {
@@ -620,63 +618,6 @@ export function ProductionQueueCard({ balances }: { balances?: Record<string, nu
     },
   });
 
-  // Conclui automaticamente as demandas já cobertas pelo estoque do almoxarifado.
-  // Quando o saldo atinge a quantidade exigida, a demanda é zerada e sai da fila.
-  const autoSync = useMutation({
-    mutationFn: async (ops: { conclude: string[]; reduce: { id: string; qty: number }[] }) => {
-      if (ops.conclude.length) {
-        const { error } = await supabase
-          .from("production_demands")
-          .update({ status: "concluido" })
-          .in("id", ops.conclude);
-        if (error) throw error;
-      }
-      for (const r of ops.reduce) {
-        const { error } = await supabase
-          .from("production_demands")
-          .update({ quantity: r.qty })
-          .eq("id", r.id);
-        if (error) throw error;
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["production-demands"] });
-      queryClient.invalidateQueries({ queryKey: ["demand-resolved-items"] });
-    },
-    onSettled: () => {
-      syncingRef.current = false;
-    },
-  });
-  const autoSyncMutate = autoSync.mutate;
-
-  useEffect(() => {
-    if (syncingRef.current || !rows || !balances) return;
-    const byProduct = new Map<string, typeof rows>();
-    rows.forEach((r) => {
-      const key = r.product.trim().toLowerCase();
-      byProduct.set(key, [...(byProduct.get(key) ?? []), r]);
-    });
-    const conclude: string[] = [];
-    const reduce: { id: string; qty: number }[] = [];
-    for (const [key, demands] of byProduct) {
-      let available = balances[key] ?? 0;
-      if (available <= 0) continue;
-      for (const d of demands) {
-        if (available <= 0) break;
-        if (d.quantity <= available) {
-          conclude.push(d.id);
-          available -= d.quantity;
-        } else {
-          reduce.push({ id: d.id, qty: d.quantity - available });
-          available = 0;
-        }
-      }
-    }
-    if (!conclude.length && !reduce.length) return;
-    syncingRef.current = true;
-    autoSyncMutate({ conclude, reduce });
-  }, [rows, balances, autoSyncMutate]);
-
   const grouped = new Map<string, { product: string; total: number; ids: string[]; projects: string[] }>();
   (rows ?? []).forEach((r) => {
     const key = r.product.trim().toLowerCase();
@@ -689,19 +630,6 @@ export function ProductionQueueCard({ balances }: { balances?: Record<string, nu
   });
   const list = [...grouped.values()].sort((a, b) => b.total - a.total);
 
-  const done = useMutation({
-    mutationFn: async (ids: string[]) => {
-      const { error } = await supabase.from("production_demands").update({ status: "concluido" }).in("id", ids);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast.success("Demanda de produção concluída.");
-      queryClient.invalidateQueries({ queryKey: ["production-demands"] });
-      queryClient.invalidateQueries({ queryKey: ["demand-resolved-items"] });
-    },
-    onError: (e: any) => toast.error(e.message ?? "Erro"),
-  });
-
   return (
     <Card>
       <CardHeader>
@@ -710,8 +638,8 @@ export function ProductionQueueCard({ balances }: { balances?: Record<string, nu
           Fila de produção
         </CardTitle>
         <CardDescription>
-          Produtos que precisam ser fabricados, somados conforme a demanda dos pedidos Myio chega. Quando o
-          estoque do almoxarifado atinge a quantidade exigida, a demanda é concluída automaticamente.
+          Produtos que precisam ser fabricados, somados conforme a demanda dos pedidos Myio chega. A fila só é
+          reduzida quando o produto montado é liberado pela fábrica.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -726,7 +654,6 @@ export function ProductionQueueCard({ balances }: { balances?: Record<string, nu
                 <TableHead>Produto</TableHead>
                 <TableHead className="w-32">A produzir</TableHead>
                 <TableHead>Projetos</TableHead>
-                <TableHead className="w-32">Ação</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -744,11 +671,6 @@ export function ProductionQueueCard({ balances }: { balances?: Record<string, nu
                       )}
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">{g.projects.join(", ") || "—"}</TableCell>
-                    <TableCell>
-                      <Button size="sm" variant="outline" disabled={done.isPending} onClick={() => done.mutate(g.ids)}>
-                        Concluir
-                      </Button>
-                    </TableCell>
                   </TableRow>
                 );
               })}
