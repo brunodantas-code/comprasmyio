@@ -96,9 +96,15 @@ function useQrTrace(code: string) {
       const delivery = dq?.myio_item_deliveries ?? null;
       const order = delivery?.myio_orders ?? null;
 
-      let shipment:
-        | { created_at: string; address: string; shipping_method: string; responsible: string; tracking_code: string; notes: string | null }
-        | null = null;
+      type Shipment = {
+        created_at: string;
+        address: string;
+        shipping_method: string;
+        responsible: string;
+        tracking_code: string;
+        notes: string | null;
+      };
+      let shipment: Shipment | null = null;
       if (order) {
         const { data } = await supabase
           .from("myio_shipments")
@@ -107,7 +113,7 @@ function useQrTrace(code: string) {
           .order("created_at", { ascending: false })
           .limit(1)
           .maybeSingle();
-        shipment = (data as typeof shipment) ?? null;
+        shipment = (data as Shipment | null) ?? null;
       }
 
       const materialName =
