@@ -27,17 +27,17 @@ function useQrTrace(code: string) {
     queryKey: ["qr-trace", code],
     enabled: !!code,
     queryFn: async () => {
-      const [unitRes, boxRes, unitProdRes, profilesRes] = await Promise.all([
+      const [unitRes, boxRes, unitProdRes, profilesRes, deliveryQrRes] = await Promise.all([
         supabase
           .from("homologation_units")
           .select(
-            "id, position, qr_value, homologation_id, homologations(id, box_size, box_qr, notes, created_at, responsible_id, release_id, material_id, materials(name))",
+            "id, position, qr_value, homologation_id, homologations(id, box_size, box_qr, notes, created_at, responsible_id, release_id, material_id, materials(name, location))",
           )
           .eq("qr_value", code)
           .maybeSingle(),
         supabase
           .from("homologations")
-          .select("id, box_size, box_qr, notes, created_at, responsible_id, release_id, material_id, materials(name), homologation_units(position, qr_value)")
+          .select("id, box_size, box_qr, notes, created_at, responsible_id, release_id, material_id, materials(name, location), homologation_units(position, qr_value)")
           .eq("box_qr", code)
           .maybeSingle(),
         supabase
@@ -46,6 +46,15 @@ function useQrTrace(code: string) {
           .eq("label", code)
           .maybeSingle(),
         supabase.from("profiles").select("id, full_name, email"),
+        supabase
+          .from("myio_delivery_qrs")
+          .select(
+            "id, qr_value, box_qr, created_at, delivery_id, myio_item_deliveries(id, quantity, created_at, order_id, product, myio_orders(id, title, client_name, status, delivery_date))",
+          )
+          .or(`qr_value.eq.${code},box_qr.eq.${code}`)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
       ]);
 
       const names: Record<string, string> = {};
@@ -70,8 +79,41 @@ function useQrTrace(code: string) {
         | { id: string; status: string; installed_at: string | null; notes: string | null; created_at: string; materials: { name: string } | null }
         | null;
 
+      const dq = deliveryQrRes.data as
+        | {
+            created_at: string;
+            delivery_id: string;
+            myio_item_deliveries: {
+              id: string;
+              quantity: number;
+              created_at: string;
+              order_id: string;
+              product: string;
+              myio_orders: { id: string; title: string; client_name: string; status: string; delivery_date: string } | null;
+            } | null;
+          }
+        | null;
+      const delivery = dq?.myio_item_deliveries ?? null;
+      const order = delivery?.myio_orders ?? null;
+
+      let shipment:
+        | { created_at: string; address: string; shipping_method: string; responsible: string; tracking_code: string; notes: string | null }
+        | null = null;
+      if (order) {
+        const { data } = await supabase
+          .from("myio_shipments")
+          .select("created_at, address, shipping_method, responsible, tracking_code, notes")
+          .eq("order_id", order.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        shipment = (data as typeof shipment) ?? null;
+      }
+
       const materialName =
         (hom?.["materials"] as { name: string } | null)?.name ?? unitProd?.materials?.name ?? null;
+      const materialLocation =
+        ((hom?.["materials"] as { location?: string } | null)?.location as string | undefined) ?? null;
 
       const events: Event[] = [];
       if (release) {
@@ -102,16 +144,68 @@ function useQrTrace(code: string) {
           events.push({ at: unitProd.installed_at, title: "Instalado na unidade do cliente" });
         }
       }
+      if (delivery && order) {
+        events.push({
+          at: delivery.created_at,
+          title: "Baixa no Almoxarifado (separado para pedido)",
+          detail: `${order.title} · ${order.client_name} · ${delivery.product}`,
+        });
+        if (order.status === "pronto_entrega") {
+          events.push({ at: delivery.created_at, title: "Aguardando em Distribuição", detail: order.title });
+        }
+      }
+      if (shipment) {
+        events.push({
+          at: shipment.created_at,
+          title: "Enviado — Em trânsito",
+          detail: `${shipment.shipping_method} · Resp.: ${shipment.responsible} · Rastreio: ${shipment.tracking_code}`,
+        });
+        if (order?.status === "entregue_cliente") {
+          events.push({ at: shipment.created_at, title: "Entregue ao cliente", detail: shipment.address });
+        }
+      }
       events.sort((a, b) => +new Date(a.at) - +new Date(b.at));
 
+      const STOCK_LABELS: Record<string, string> = {
+        fabrica: "Estoque — Fábrica",
+        almoxarifado: "Estoque — Almoxarifado",
+        transito: "Em Trânsito",
+        unidade: "Unidade (cliente)",
+        tecnico: "Técnico",
+        perdido: "Perdido",
+        escritorio: "Escritório",
+      };
+
       let location = "Não encontrado";
-      if (unitProd) location = unitProd.status === "instalado" ? "Unidade (cliente) — instalado" : "Unidade (cliente) — parado";
-      else if (hom) location = "Estoque — Almoxarifado";
+      let stage: string | null = null;
+      if (unitProd) {
+        location = unitProd.status === "instalado" ? "Unidade (cliente) — instalado" : "Unidade (cliente) — parado";
+        stage = "unidade";
+      } else if (order?.status === "entregue_cliente") {
+        location = "Unidade (cliente) — entregue";
+        stage = "unidade";
+      } else if (order?.status === "em_transito") {
+        location = "Em Trânsito";
+        stage = "transito";
+      } else if (order?.status === "pronto_entrega") {
+        location = "Distribuição — aguardando envio";
+        stage = "distribuicao";
+      } else if (delivery) {
+        location = "Distribuição — separado para pedido";
+        stage = "distribuicao";
+      } else if (hom) {
+        location = STOCK_LABELS[materialLocation ?? "almoxarifado"] ?? "Estoque — Almoxarifado";
+        stage = materialLocation ?? "almoxarifado";
+      }
 
       return {
         found: !!hom || !!unitProd,
         isBox: !!boxRes.data,
         materialName,
+        stage,
+        order,
+        shipment,
+        delivery,
         position: unitRes.data?.position ?? null,
         boxSize: (hom?.["box_size"] as number | undefined) ?? null,
         boxQr: (hom?.["box_qr"] as string | null) ?? null,
