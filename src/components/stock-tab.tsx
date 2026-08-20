@@ -68,6 +68,7 @@ type Movement = {
   order_id: string | null;
   created_by: string | null;
   created_at: string;
+  responsible?: string | null;
 };
 
 const MOVEMENT_LABELS: Record<MovementType, string> = {
@@ -351,6 +352,7 @@ function HistoryDialog({ row }: { row: StockRow }) {
                 <div className="min-w-0 text-sm">
                   <div className="text-muted-foreground">{fmt(m.created_at)}</div>
                   <div>{m.created_by ? (profiles?.[m.created_by] ?? "Usuário") : "Sistema"}</div>
+                  {m.responsible && <div className="text-muted-foreground">Destinado a: {m.responsible}</div>}
                   {m.reason && <div className="text-muted-foreground">{m.reason}</div>}
                 </div>
               </li>
