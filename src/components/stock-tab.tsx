@@ -112,7 +112,7 @@ function useMovements() {
 
 function useStockProfiles() {
   return useQuery({
-    queryKey: ["profiles-map"],
+    queryKey: ["profiles-name-map"],
     queryFn: async () => {
       const { data, error } = await supabase.from("profiles").select("id, full_name, email");
       if (error) throw error;
