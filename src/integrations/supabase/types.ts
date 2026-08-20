@@ -1009,6 +1009,74 @@ export type Database = {
           },
         ]
       }
+      technician_moves: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          destination: string
+          id: string
+          material_id: string
+          movement_id: string
+          notes: string | null
+          project_id: string | null
+          quantity: number
+          technician: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          destination: string
+          id?: string
+          material_id: string
+          movement_id: string
+          notes?: string | null
+          project_id?: string | null
+          quantity: number
+          technician: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          destination?: string
+          id?: string
+          material_id?: string
+          movement_id?: string
+          notes?: string | null
+          project_id?: string | null
+          quantity?: number
+          technician?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "technician_moves_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "material_stock"
+            referencedColumns: ["material_id"]
+          },
+          {
+            foreignKeyName: "technician_moves_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_moves_movement_id_fkey"
+            columns: ["movement_id"]
+            isOneToOne: false
+            referencedRelation: "stock_movements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_moves_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       unit_products: {
         Row: {
           created_at: string
@@ -1018,6 +1086,7 @@ export type Database = {
           label: string | null
           material_id: string
           notes: string | null
+          project_id: string | null
           status: string
           updated_at: string
         }
@@ -1029,6 +1098,7 @@ export type Database = {
           label?: string | null
           material_id: string
           notes?: string | null
+          project_id?: string | null
           status?: string
           updated_at?: string
         }
@@ -1040,6 +1110,7 @@ export type Database = {
           label?: string | null
           material_id?: string
           notes?: string | null
+          project_id?: string | null
           status?: string
           updated_at?: string
         }
@@ -1056,6 +1127,13 @@ export type Database = {
             columns: ["material_id"]
             isOneToOne: false
             referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "unit_products_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]

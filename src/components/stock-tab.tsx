@@ -34,6 +34,7 @@ import { BomSettingsDialog } from "@/components/bom-settings";
 import { UnitProductsCard } from "@/components/unit-products";
 import { QrCheckSection } from "@/components/qr-check";
 import { MyioDemandCard, ProductionQueueCard } from "@/components/myio-demand";
+import { TechnicianItemsCard } from "@/components/technician-items";
 
 type StockRow = {
   material_id: string;
@@ -472,6 +473,11 @@ export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; 
               <LostCard />
               <StockSection userId={userId} location={loc} canDelete={canDelete} />
             </div>
+          ) : loc === "tecnico" ? (
+            <div className="space-y-4">
+              <TechnicianSection userId={userId} />
+              <StockSection userId={userId} location={loc} canDelete={canDelete} />
+            </div>
           ) : (
             <StockSection userId={userId} location={loc} canDelete={canDelete} />
           )}
@@ -494,6 +500,12 @@ export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; 
       )}
     </Tabs>
   );
+}
+
+function TechnicianSection({ userId }: { userId: string }) {
+  const { data: stock } = useStock();
+  const materialNames = Object.fromEntries((stock ?? []).map((r) => [r.material_id, r.name]));
+  return <TechnicianItemsCard userId={userId} materialNames={materialNames} />;
 }
 
 function HomologationSection({ userId, canDelete }: { userId: string; canDelete?: boolean }) {
