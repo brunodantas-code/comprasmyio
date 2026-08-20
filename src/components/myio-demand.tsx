@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Camera, ClipboardList, Factory, Loader2, ShoppingCart, Upload, Wand2 } from "lucide-react";
 import { toast } from "sonner";
+import { QrLinkPicker, type LinkedQr } from "@/components/myio-delivery-qr";
 
 const PHOTO_BUCKET = "assembly-photos";
 
@@ -32,11 +33,12 @@ function DeliverItemDialog({
 }: {
   state: DeliverState | null;
   onClose: () => void;
-  onConfirm: (quantity: number, file: File) => void;
+  onConfirm: (quantity: number, file: File, qrs: LinkedQr[]) => void;
   pending: boolean;
 }) {
   const [qty, setQty] = useState(1);
   const [file, setFile] = useState<File | null>(null);
+  const [qrs, setQrs] = useState<LinkedQr[]>([]);
   const cameraRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
 
@@ -48,9 +50,11 @@ function DeliverItemDialog({
       }}
     >
       <DialogContent
+        className="max-h-[85vh] overflow-y-auto"
         onOpenAutoFocus={() => {
           if (state) setQty(Math.min(state.item.quantity, state.available));
           setFile(null);
+          setQrs([]);
         }}
       >
         <DialogHeader>
@@ -66,10 +70,17 @@ function DeliverItemDialog({
               id="deliver-qty"
               type="number"
               min={1}
-              value={qty}
+              value={qrs.length ? qrs.length : qty}
+              disabled={qrs.length > 0}
               onChange={(e) => setQty(Math.max(1, Number(e.target.value) || 1))}
             />
+            {qrs.length > 0 && (
+              <p className="text-xs text-muted-foreground">
+                Quantidade definida pelos QR codes vinculados.
+              </p>
+            )}
           </div>
+          <QrLinkPicker value={qrs} onChange={setQrs} />
           <div className="space-y-2">
             <Label>Foto do material (obrigatória)</Label>
             <div className="flex gap-2">
@@ -107,7 +118,7 @@ function DeliverItemDialog({
           <Button
             disabled={pending || !file}
             onClick={() => {
-              if (file) onConfirm(qty, file);
+              if (file) onConfirm(qrs.length ? qrs.length : qty, file, qrs);
             }}
           >
             {pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -370,8 +381,8 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
   });
 
   const deliverMutation = useMutation({
-    mutationFn: async (vars: { state: DeliverState; quantity: number; file: File }) => {
-      const { state, quantity, file } = vars;
+    mutationFn: async (vars: { state: DeliverState; quantity: number; file: File; qrs: LinkedQr[] }) => {
+      const { state, quantity, file, qrs } = vars;
       const { data: userData } = await supabase.auth.getUser();
       const userId = userData.user?.id ?? null;
       if (!userId) throw new Error("Sessão expirada.");
@@ -393,15 +404,29 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
         if (smErr) throw smErr;
       }
 
-      const { error: delErr } = await supabase.from("myio_item_deliveries").insert({
+      const { data: delivery, error: delErr } = await supabase.from("myio_item_deliveries").insert({
         order_id: state.order.id,
         order_item_id: state.item.id,
         product: state.item.product,
         quantity,
         photo_url: path,
         created_by: userId,
-      });
+      }).select("id").single();
       if (delErr) throw delErr;
+
+      if (qrs.length) {
+        const { error: qrErr } = await supabase.from("myio_delivery_qrs").insert(
+          qrs.map((q) => ({
+            delivery_id: delivery.id,
+            order_item_id: state.item.id,
+            qr_value: q.qr_value,
+            box_qr: q.box_qr,
+            homologation_unit_id: q.homologation_unit_id,
+            created_by: userId,
+          })),
+        );
+        if (qrErr) throw qrErr;
+      }
 
       const doneIds = new Set([...(deliveredItemIds ?? []), state.item.id]);
       const allDone = state.order.myio_order_items.every((i) => doneIds.has(i.id));
@@ -418,6 +443,7 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
     onSuccess: (r) => {
       toast.success(r.allDone ? "Baixa registrada. Pedido pronto para entrega." : "Baixa registrada.");
       queryClient.invalidateQueries({ queryKey: ["myio-item-deliveries"] });
+      queryClient.invalidateQueries({ queryKey: ["myio-item-delivery-details"] });
       queryClient.invalidateQueries({ queryKey: ["myio-demand"] });
       queryClient.invalidateQueries({ queryKey: ["myio-orders"] });
       queryClient.invalidateQueries({ queryKey: ["stock-movements"] });
@@ -555,9 +581,9 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
         state={deliverDialog}
         onClose={() => setDeliverDialog(null)}
         pending={deliverMutation.isPending}
-        onConfirm={(quantity, file) => {
+        onConfirm={(quantity, file, qrs) => {
           if (!deliverDialog) return;
-          deliverMutation.mutate({ state: deliverDialog, quantity, file });
+          deliverMutation.mutate({ state: deliverDialog, quantity, file, qrs });
         }}
       />
     </Card>
