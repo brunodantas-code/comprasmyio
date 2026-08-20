@@ -17,6 +17,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
 import { Camera, CheckCircle2, QrCode, Image as ImageIcon, Keyboard } from "lucide-react";
 
@@ -340,8 +342,8 @@ export function HomologateDialog({
         .insert(filled.map((qr_value, i) => ({ homologation_id: hom.id, position: i + 1, qr_value })));
       if (unitsErr) throw unitsErr;
 
-      // Entrada no Estoque — Almoxarifado (item unitário ou modelo de caixa)
-      const stockName = boxSize === 1 ? materialName : `${materialName} — Caixa de ${boxSize}`;
+      // Entrada no Estoque — Almoxarifado (sempre no produto, mesmo quando embalado em caixa)
+      const stockName = materialName;
       const { data: found } = await supabase
         .from("materials")
         .select("id")
@@ -360,7 +362,7 @@ export function HomologateDialog({
       }
       const { error: stockErr } = await supabase.from("stock_movements").insert({
         material_id: stockMaterialId,
-        quantity: boxSize === 1 ? 1 : 1,
+        quantity: boxSize,
         type: "entrada",
         reason: boxSize === 1 ? "Homologação — produto unitário" : `Homologação — caixa de ${boxSize}`,
         created_by: userId,
@@ -373,6 +375,7 @@ export function HomologateDialog({
       qc.invalidateQueries({ queryKey: ["material-stock"] });
       qc.invalidateQueries({ queryKey: ["stock-movements"] });
       qc.invalidateQueries({ queryKey: ["materials"] });
+      qc.invalidateQueries({ queryKey: ["boxes-list"] });
       setOpen(false);
       reset();
     },
@@ -587,6 +590,151 @@ export function StockQrDialog({ stockName, trigger }: { stockName: string; trigg
             })}
           </div>
         )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/* ---------------- Lista de caixas (separada do estoque de produtos) ---------------- */
+
+type BoxRow = {
+  id: string;
+  box_size: number;
+  box_qr: string | null;
+  notes: string | null;
+  created_at: string;
+  materials: { name: string } | null;
+  homologation_units: { position: number; qr_value: string }[];
+};
+
+export function BoxesCard() {
+  const [search, setSearch] = useState("");
+  const { data, isLoading } = useQuery({
+    queryKey: ["boxes-list"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("homologations")
+        .select("id, box_size, box_qr, notes, created_at, materials(name), homologation_units(position, qr_value)")
+        .gt("box_size", 1)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as unknown as BoxRow[];
+    },
+  });
+
+  const rows = (data ?? []).filter((b) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return (b.materials?.name ?? "").toLowerCase().includes(q) || (b.box_qr ?? "").toLowerCase().includes(q);
+  });
+
+  return (
+    <Card>
+      <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <CardTitle>Caixas</CardTitle>
+          <CardDescription>
+            Cada caixa tem seu próprio QR Code. Os produtos dentro dela já entraram no estoque principal. Clique em uma
+            caixa para ver os produtos e seus QR Codes.
+          </CardDescription>
+        </div>
+        <Input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Buscar caixa"
+          className="w-[200px]"
+        />
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">Carregando...</p>
+        ) : !rows.length ? (
+          <p className="text-sm text-muted-foreground">Nenhuma caixa homologada.</p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Caixa</TableHead>
+                <TableHead>Produto</TableHead>
+                <TableHead className="text-right">Produtos</TableHead>
+                <TableHead>QR Code da caixa</TableHead>
+                <TableHead>Homologada em</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rows.map((b) => (
+                <TableRow key={b.id}>
+                  <TableCell className="font-medium">
+                    <BoxDetailsDialog
+                      box={b}
+                      trigger={
+                        <button type="button" className="text-left hover:underline">
+                          Caixa de {b.box_size}
+                        </button>
+                      }
+                    />
+                  </TableCell>
+                  <TableCell>{b.materials?.name ?? "—"}</TableCell>
+                  <TableCell className="text-right">
+                    <Badge variant="outline">{b.homologation_units?.length ?? 0}</Badge>
+                  </TableCell>
+                  <TableCell className="max-w-[280px] break-all text-xs text-muted-foreground">
+                    {b.box_qr ?? "—"}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
+                    {new Date(b.created_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function BoxDetailsDialog({ box, trigger }: { box: BoxRow; trigger: React.ReactNode }) {
+  const [open, setOpen] = useState(false);
+  const units = [...(box.homologation_units ?? [])].sort((a, b) => a.position - b.position);
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogContent className="max-h-[88vh] max-w-4xl overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>
+            Caixa de {box.box_size} — {box.materials?.name ?? ""}
+          </DialogTitle>
+          <DialogDescription>QR Code da caixa e de cada produto dentro dela.</DialogDescription>
+        </DialogHeader>
+        <div className="flex flex-wrap items-start gap-4">
+          <div className="flex flex-col items-center gap-2">
+            {box.box_qr ? (
+              <QrImage value={box.box_qr} size={140} />
+            ) : (
+              <div className="flex h-[140px] w-[140px] items-center justify-center rounded bg-muted text-xs text-muted-foreground">
+                sem QR
+              </div>
+            )}
+            <Badge variant="outline">QR da caixa</Badge>
+            {box.box_qr && (
+              <span className="max-w-[160px] break-all text-center text-[10px] text-muted-foreground">{box.box_qr}</span>
+            )}
+          </div>
+          <div className="min-w-0 flex-1 space-y-2">
+            <p className="text-sm font-medium">Produtos na caixa ({units.length})</p>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-5">
+              {units.map((u) => (
+                <div key={u.position} className="flex flex-col items-center gap-1 rounded border p-2">
+                  <QrImage value={u.qr_value} size={96} />
+                  <span className="text-xs font-medium">#{u.position}</span>
+                  <span className="w-full break-all text-center text-[10px] text-muted-foreground">{u.qr_value}</span>
+                </div>
+              ))}
+            </div>
+            {box.notes && <p className="text-sm text-muted-foreground">{box.notes}</p>}
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
