@@ -528,13 +528,12 @@ export function StockQrDialog({ stockName, trigger }: { stockName: string; trigg
   const boxSize = m ? Number(m[2]) : 1;
 
   const { data, isLoading } = useQuery({
-    queryKey: ["homologations-qr", baseName, boxSize],
+    queryKey: ["homologations-qr", baseName],
     enabled: open,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("homologations")
         .select("id, box_size, box_qr, notes, created_at, materials(name), homologation_units(position, qr_value)")
-        .eq("box_size", boxSize)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []).filter((h) => (h.materials as { name: string } | null)?.name === baseName);
@@ -550,9 +549,7 @@ export function StockQrDialog({ stockName, trigger }: { stockName: string; trigg
         <DialogHeader>
           <DialogTitle>QR Codes — {stockName}</DialogTitle>
           <DialogDescription>
-            {boxSize === 1
-              ? "QR Code de cada produto unitário homologado."
-              : "QR Code de cada caixa e a vista explodida com os QR Codes de todos os dispositivos."}
+            Todos os QR Codes homologados deste produto — unitários e os que estão dentro de caixas.
           </DialogDescription>
         </DialogHeader>
 
