@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,8 @@ import { DistributionCard, TransitCard, LostCard } from "@/components/distributi
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 import { toast } from "sonner";
-import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Plus, Library, Trash2, Eraser, ArrowLeftRight } from "lucide-react";
+import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Plus, Library, Trash2, Eraser, ArrowLeftRight, Camera, Upload } from "lucide-react";
+import { QrLinkPicker, type LinkedQr } from "@/components/myio-delivery-qr";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -67,6 +68,7 @@ type Movement = {
   order_id: string | null;
   created_by: string | null;
   created_at: string;
+  responsible?: string | null;
 };
 
 const MOVEMENT_LABELS: Record<MovementType, string> = {
@@ -142,30 +144,69 @@ function MovementDialog({
   userId,
   type,
   trigger,
+  isManufactured: isManufacturedProp,
 }: {
   row: StockRow;
   userId: string;
   type: MovementType;
   trigger: React.ReactNode;
+  isManufactured?: boolean;
 }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
+  const { data: profiles } = useStockProfiles();
+  const { data: manufacturedMap } = useManufacturedMap();
+  const isManufactured = isManufacturedProp ?? !!manufacturedMap?.[row.material_id];
+  const [responsible, setResponsible] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [qrs, setQrs] = useState<LinkedQr[]>([]);
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const galleryRef = useRef<HTMLInputElement>(null);
+  const isExit = type === "saida";
+  const needsQr = isExit && !!isManufactured;
 
   const save = useMutation({
     mutationFn: async (v: { quantity: number; reason: string | null }) => {
-      const { error } = await supabase.from("stock_movements").insert({
-        material_id: row.material_id,
-        quantity: v.quantity,
-        type,
-        reason: v.reason,
-        created_by: userId,
-      });
+      let photo_url: string | null = null;
+      if (isExit && file) {
+        const path = `stock-exits/${row.material_id}/${crypto.randomUUID()}-${file.name}`;
+        const { error: upErr } = await supabase.storage.from("assembly-photos").upload(path, file);
+        if (upErr) throw upErr;
+        photo_url = path;
+      }
+      const { data: movement, error } = await supabase
+        .from("stock_movements")
+        .insert({
+          material_id: row.material_id,
+          quantity: v.quantity,
+          type,
+          reason: v.reason,
+          created_by: userId,
+          ...(isExit ? { responsible: responsible.trim(), photo_url } : {}),
+        } as never)
+        .select("id")
+        .single();
       if (error) throw error;
+      if (isExit && qrs.length) {
+        const { error: qrErr } = await supabase.from("stock_movement_qrs").insert(
+          qrs.map((q) => ({
+            movement_id: (movement as { id: string }).id,
+            qr_value: q.qr_value,
+            box_qr: q.box_qr,
+            homologation_unit_id: q.homologation_unit_id,
+            created_by: userId,
+          })) as never,
+        );
+        if (qrErr) throw qrErr;
+      }
     },
     onSuccess: () => {
       toast.success(type === "saida" ? "Baixa registrada" : "Movimentação registrada");
       qc.invalidateQueries({ queryKey: ["material-stock"] });
       qc.invalidateQueries({ queryKey: ["stock-movements"] });
+      setResponsible("");
+      setFile(null);
+      setQrs([]);
       setOpen(false);
     },
     onError: (e: Error) => toast.error(e.message),
@@ -174,17 +215,22 @@ function MovementDialog({
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    const quantity = Number(fd.get("quantity"));
+    const quantity = needsQr && qrs.length ? qrs.length : Number(fd.get("quantity"));
     const reason = String(fd.get("reason") || "").trim();
     if (!Number.isInteger(quantity) || quantity <= 0) return toast.error("Quantidade inválida");
     if (type === "saida" && quantity > row.balance) return toast.error("Saldo insuficiente em estoque");
+    if (isExit && !responsible.trim()) return toast.error("Informe o técnico/responsável");
+    if (needsQr && qrs.length === 0) return toast.error("Vincule ao menos um QR code");
+    if (needsQr && !file) return toast.error("Foto obrigatória para produtos Myio");
     save.mutate({ quantity, reason: reason || null });
   }
+
+  const profileNames = Object.values(profiles ?? {}).sort((a, b) => a.localeCompare(b));
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {type === "saida" ? "Dar baixa" : type === "entrada" ? "Entrada manual" : "Ajuste"} — {row.name}
@@ -194,8 +240,68 @@ function MovementDialog({
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor={`qty-${type}-${row.material_id}`}>Quantidade</Label>
-            <Input id={`qty-${type}-${row.material_id}`} name="quantity" type="number" min={1} defaultValue={1} required />
+            <Input
+              id={`qty-${type}-${row.material_id}`}
+              name="quantity"
+              type="number"
+              min={1}
+              defaultValue={1}
+              value={needsQr && qrs.length ? qrs.length : undefined}
+              disabled={needsQr && qrs.length > 0}
+              readOnly={needsQr && qrs.length > 0}
+              required
+            />
+            {needsQr && qrs.length > 0 && (
+              <p className="text-xs text-muted-foreground">Quantidade definida pelos QR codes vinculados.</p>
+            )}
           </div>
+          {isExit && (
+            <div className="space-y-2">
+              <Label htmlFor={`resp-${row.material_id}`}>Técnico / responsável (obrigatório)</Label>
+              <Input
+                id={`resp-${row.material_id}`}
+                list={`resp-list-${row.material_id}`}
+                value={responsible}
+                onChange={(e) => setResponsible(e.target.value)}
+                placeholder="Nome do técnico ou responsável"
+              />
+              <datalist id={`resp-list-${row.material_id}`}>
+                {profileNames.map((n) => (
+                  <option key={n} value={n} />
+                ))}
+              </datalist>
+            </div>
+          )}
+          {needsQr && <QrLinkPicker value={qrs} onChange={setQrs} required />}
+          {isExit && (
+            <div className="space-y-2">
+              <Label>Foto do material {isManufactured ? "(obrigatória)" : "(opcional)"}</Label>
+              <div className="flex gap-2">
+                <Button type="button" variant="outline" onClick={() => cameraRef.current?.click()}>
+                  <Camera className="mr-2 h-4 w-4" /> Câmera
+                </Button>
+                <Button type="button" variant="outline" onClick={() => galleryRef.current?.click()}>
+                  <Upload className="mr-2 h-4 w-4" /> Galeria
+                </Button>
+              </div>
+              <input
+                ref={cameraRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              />
+              <input
+                ref={galleryRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              />
+              {file && <p className="text-xs text-muted-foreground">{file.name}</p>}
+            </div>
+          )}
           <div className="space-y-2">
             <Label htmlFor={`reason-${type}-${row.material_id}`}>
               Motivo <span className="text-muted-foreground">(opcional)</span>
@@ -246,6 +352,7 @@ function HistoryDialog({ row }: { row: StockRow }) {
                 <div className="min-w-0 text-sm">
                   <div className="text-muted-foreground">{fmt(m.created_at)}</div>
                   <div>{m.created_by ? (profiles?.[m.created_by] ?? "Usuário") : "Sistema"}</div>
+                  {m.responsible && <div className="text-muted-foreground">Destinado a: {m.responsible}</div>}
                   {m.reason && <div className="text-muted-foreground">{m.reason}</div>}
                 </div>
               </li>
