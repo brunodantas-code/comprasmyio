@@ -164,3 +164,12 @@
     animation: none;
   }
 }
+
+/* Rolagem horizontal sem barra visível (abas em telas pequenas) */
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
