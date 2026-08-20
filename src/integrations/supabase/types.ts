@@ -1064,6 +1064,7 @@ export type Database = {
         | "pronto_entrega"
         | "entregue_cliente"
         | "em_transito"
+        | "perdido"
       order_status:
         | "pendente"
         | "comprado_aguardando"
@@ -1207,6 +1208,7 @@ export const Constants = {
         "pronto_entrega",
         "entregue_cliente",
         "em_transito",
+        "perdido",
       ],
       order_status: [
         "pendente",
