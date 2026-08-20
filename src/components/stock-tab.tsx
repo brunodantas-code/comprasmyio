@@ -829,6 +829,8 @@ function StockSection({ userId, location, canDelete }: { userId: string; locatio
         </CardContent>
       </Card>
 
+      {location === "almoxarifado" && <BoxesCard />}
+
       <Card>
         <CardHeader>
           <CardTitle>Movimentações recentes</CardTitle>
