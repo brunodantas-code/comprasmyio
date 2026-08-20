@@ -333,6 +333,7 @@ export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; 
   const tabs: string[] = [];
   locations.forEach((loc) => {
     tabs.push(loc);
+    if (loc === "almoxarifado") tabs.push("distribuicao");
     if (loc === "fabrica" && showHomologacao) tabs.push("homologacao");
   });
   if (!onlyLocation) tabs.push("qr-check");
@@ -343,9 +344,11 @@ export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; 
           <TabsTrigger key={t} value={t} className={t === "qr-check" ? "ml-2" : undefined}>
             {t === "homologacao"
               ? "Homologação"
-              : t === "qr-check"
-                ? "Checar QR Code"
-                : LOCATION_LABELS[t as StockLocation]}
+              : t === "distribuicao"
+                ? "Distribuição"
+                : t === "qr-check"
+                  ? "Checar QR Code"
+                  : LOCATION_LABELS[t as StockLocation]}
           </TabsTrigger>
         ))}
       </TabsList>
@@ -354,6 +357,11 @@ export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; 
           <StockSection userId={userId} location={loc} canDelete={canDelete} />
         </TabsContent>
       ))}
+      {locations.includes("almoxarifado") && (
+        <TabsContent value="distribuicao">
+          <DistributionCard />
+        </TabsContent>
+      )}
       {showHomologacao && (
         <TabsContent value="homologacao">
           <HomologationSection userId={userId} canDelete={canDelete} />
