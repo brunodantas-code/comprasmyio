@@ -663,6 +663,10 @@ function StockSection({ userId, location, canDelete }: { userId: string; locatio
   const totalItems = scoped.reduce((acc, r) => acc + Math.max(r.balance, 0), 0);
   const materialNames = Object.fromEntries((stock ?? []).map((r) => [r.material_id, r.name]));
 
+  const almoxarifadoBalances = Object.fromEntries(
+    (stock ?? []).filter((r) => (r.location ?? "fabrica") === "almoxarifado").map((r) => [r.name.trim().toLowerCase(), r.balance]),
+  );
+
   return (
     <div className="space-y-6">
       {location === "almoxarifado" ? (
@@ -670,7 +674,7 @@ function StockSection({ userId, location, canDelete }: { userId: string; locatio
           balances={Object.fromEntries(scoped.map((r) => [r.name.trim().toLowerCase(), r.balance]))}
         />
       ) : location === "fabrica" ? (
-        <ProductionQueueCard />
+        <ProductionQueueCard balances={almoxarifadoBalances} />
       ) : (
       <div className="grid gap-4 sm:grid-cols-3">
         <Card>
