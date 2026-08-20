@@ -464,7 +464,7 @@ export function MyioOrdersTab({ userId, canManage = true }: { userId: string; ca
               }
             }}
           >
-            <SelectTrigger className="h-9 w-52"><SelectValue placeholder="Filtrar status" /></SelectTrigger>
+            <SelectTrigger className="h-9 w-full sm:w-52"><SelectValue placeholder="Filtrar status" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos os status</SelectItem>
               {STATUS_KEYS.map((s) => (
