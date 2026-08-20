@@ -245,6 +245,7 @@ function ProductsTable({
       <TableHeader>
         <TableRow>
           <TableHead>Produto</TableHead>
+          <TableHead>Projeto</TableHead>
           <TableHead>Etiqueta (QR)</TableHead>
           <TableHead>{installed ? "Instalado em" : "Na unidade desde"}</TableHead>
           <TableHead className="text-right">Ações</TableHead>
@@ -253,7 +254,8 @@ function ProductsTable({
       <TableBody>
         {rows.map((p) => (
           <TableRow key={p.id}>
-            <TableCell className="font-medium">{names[p.material_id] ?? "—"}</TableCell>
+            <TableCell className="font-medium">{p.product ?? names[p.material_id] ?? "—"}</TableCell>
+            <TableCell className="text-sm text-muted-foreground">{p.projects?.name ?? "—"}</TableCell>
             <TableCell className="max-w-[280px] break-all text-sm text-muted-foreground">
               {p.label ?? <span className="italic">sem etiqueta</span>}
             </TableCell>
