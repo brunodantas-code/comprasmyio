@@ -322,6 +322,22 @@ export function HomologateDialog({
       if (uniq.size !== filled.length) throw new Error("Existem QR Codes repetidos");
       if (!responsible) throw new Error("Selecione o responsável");
 
+      // Não pode existir QR Code repetido no banco (caixas ou unidades já homologadas)
+      const allQrs = boxSize > 1 ? [boxQr.trim(), ...filled] : filled;
+      const [{ data: dupUnits, error: dupUnitsErr }, { data: dupBoxes, error: dupBoxesErr }] = await Promise.all([
+        supabase.from("homologation_units").select("qr_value").in("qr_value", allQrs),
+        supabase.from("homologations").select("box_qr").in("box_qr", allQrs),
+      ]);
+      if (dupUnitsErr) throw dupUnitsErr;
+      if (dupBoxesErr) throw dupBoxesErr;
+      const existing = [
+        ...(dupUnits ?? []).map((d) => d.qr_value),
+        ...(dupBoxes ?? []).map((d) => d.box_qr).filter(Boolean),
+      ];
+      if (existing.length > 0) {
+        throw new Error(`QR Code já cadastrado no banco: ${Array.from(new Set(existing)).join(", ")}`);
+      }
+
       const { data: hom, error } = await supabase
         .from("homologations")
         .insert({
