@@ -667,6 +667,39 @@ function FoundMerchandiseDialog({ orderId, notes }: { orderId: string; notes: st
         } as never)
         .eq("id", orderId);
       if (error) throw error;
+
+      if (sector === "unidade") {
+        const [{ data: items }, { data: mats }, { data: auth }] = await Promise.all([
+          supabase.from("myio_order_items").select("product, quantity").eq("order_id", orderId),
+          supabase.from("materials").select("id, name"),
+          supabase.auth.getUser(),
+        ]);
+        const byName = new Map((mats ?? []).map((m) => [m.name.trim().toLowerCase(), m.id]));
+        const rows: {
+          material_id: string;
+          project_id: string;
+          status: string;
+          notes: string | null;
+          created_by: string | null;
+        }[] = [];
+        for (const it of items ?? []) {
+          const materialId = byName.get(it.product.trim().toLowerCase());
+          if (!materialId) continue;
+          for (let i = 0; i < Math.max(it.quantity ?? 1, 1); i++) {
+            rows.push({
+              material_id: materialId,
+              project_id: projectId,
+              status: "parado",
+              notes: entry,
+              created_by: auth?.user?.id ?? null,
+            });
+          }
+        }
+        if (rows.length) {
+          const { error: upErr } = await supabase.from("unit_products").insert(rows as never);
+          if (upErr) throw upErr;
+        }
+      }
     },
     onSuccess: () => {
       toast.success("Mercadoria encontrada e movida de setor.");
@@ -674,7 +707,7 @@ function FoundMerchandiseDialog({ orderId, notes }: { orderId: string; notes: st
       setReason("");
       setSector("");
       setProjectId("");
-      ["myio-lost", "myio-transit", "myio-distribution", "myio-orders", "myio-demand"].forEach((k) =>
+      ["myio-lost", "myio-transit", "myio-distribution", "myio-orders", "myio-demand", "unit-products"].forEach((k) =>
         queryClient.invalidateQueries({ queryKey: [k] }),
       );
     },
