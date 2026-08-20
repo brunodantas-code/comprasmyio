@@ -447,8 +447,8 @@ export function ProductionQueueCard({ balances }: { balances?: Record<string, nu
     }
     if (!conclude.length && !reduce.length) return;
     syncingRef.current = true;
-    autoSync.mutate({ conclude, reduce });
-  }, [rows, balances, autoSync]);
+    autoSyncMutate({ conclude, reduce });
+  }, [rows, balances, autoSyncMutate]);
 
   const grouped = new Map<string, { product: string; total: number; ids: string[]; projects: string[] }>();
   (rows ?? []).forEach((r) => {
