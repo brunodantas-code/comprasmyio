@@ -41,6 +41,7 @@ type Dispatch = {
   responsible: string | null;
   reason: string | null;
   created_at: string;
+  photo_url: string | null;
 };
 
 type Move = {
@@ -65,11 +66,28 @@ function useDispatches() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("stock_movements")
-        .select("id, material_id, quantity, responsible, reason, created_at")
+        .select("id, material_id, quantity, responsible, reason, created_at, photo_url")
         .eq("type", "saida")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return ((data ?? []) as Dispatch[]).filter((d) => !!d.responsible?.trim());
+    },
+  });
+}
+
+function useDispatchQrs() {
+  return useQuery({
+    queryKey: ["technician-dispatch-qrs"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("stock_movement_qrs")
+        .select("movement_id, qr_value, box_qr");
+      if (error) throw error;
+      const map: Record<string, string[]> = {};
+      ((data ?? []) as { movement_id: string; qr_value: string; box_qr: string | null }[]).forEach((q) => {
+        (map[q.movement_id] ??= []).push(q.box_qr ? `${q.box_qr} / ${q.qr_value}` : q.qr_value);
+      });
+      return map;
     },
   });
 }
