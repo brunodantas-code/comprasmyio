@@ -502,17 +502,13 @@ export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; 
   );
 }
 
-function HomologationSection({ userId, canDelete }: { userId: string; canDelete?: boolean }) {
-  return null as never;
-}
-
 function TechnicianSection({ userId }: { userId: string }) {
   const { data: stock } = useStock();
   const materialNames = Object.fromEntries((stock ?? []).map((r) => [r.material_id, r.name]));
   return <TechnicianItemsCard userId={userId} materialNames={materialNames} />;
 }
 
-function HomologationSectionImpl({ userId, canDelete }: { userId: string; canDelete?: boolean }) {
+function HomologationSection({ userId, canDelete }: { userId: string; canDelete?: boolean }) {
   const { data: stock } = useStock();
   const materialNames = Object.fromEntries((stock ?? []).map((r) => [r.material_id, r.name]));
   return (
