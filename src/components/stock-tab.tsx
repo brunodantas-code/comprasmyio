@@ -917,20 +917,22 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
         <>
           <StockTableCard
             title="Estoque — Almoxarifado Myio"
-            description="Produtos produzidos pela Myio."
+            description='Produtos produzidos pela Myio. Use o botão de troca para mover um item para "Terceiros".'
             rows={rows.filter((r) => manufactured?.[r.material_id])}
             isLoading={isLoading}
             userId={userId}
             canDelete={canDelete}
             actions={toolbar}
+            moveTo="terceiros"
           />
           <StockTableCard
             title="Estoque — Almoxarifado Terceiros"
-            description="Itens comprados de terceiros."
+            description='Itens comprados de terceiros. Use o botão de troca para mover um item para "Myio".'
             rows={rows.filter((r) => !manufactured?.[r.material_id])}
             isLoading={isLoading}
             userId={userId}
             canDelete={canDelete}
+            moveTo="myio"
           />
         </>
       ) : (
