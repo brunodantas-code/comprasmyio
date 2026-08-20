@@ -15,6 +15,7 @@ function fmt(d: string) {
 const STAGE_LABELS: Record<string, string> = {
   fabrica: "Fábrica",
   almoxarifado: "Estoque",
+  homologacao: "Homologação",
   distribuicao: "Distribuição",
   transito: "Trânsito",
   unidade: "Unidade",
@@ -23,7 +24,7 @@ const STAGE_LABELS: Record<string, string> = {
   escritorio: "Escritório",
 };
 
-type Event = { at: string; title: string; detail?: string };
+type Event = { at: string; title: string; detail?: string; stage?: string; photo?: string | null };
 
 type Release = {
   id: string;
@@ -38,7 +39,7 @@ function useQrTrace(code: string) {
     queryKey: ["qr-trace", code],
     enabled: !!code,
     queryFn: async () => {
-      const [unitRes, boxRes, unitProdRes, profilesRes, deliveryQrRes] = await Promise.all([
+      const [unitRes, boxRes, unitProdRes, profilesRes, deliveryQrRes, movQrRes] = await Promise.all([
         supabase
           .from("homologation_units")
           .select(
@@ -53,19 +54,28 @@ function useQrTrace(code: string) {
           .maybeSingle(),
         supabase
           .from("unit_products")
-          .select("id, status, installed_at, notes, created_at, material_id, materials(name)")
+          .select(
+            "id, status, installed_at, notes, created_at, material_id, product, moved_to, moved_technician, moved_at, move_notes, move_photo_url, project_id, materials(name), projects(name)",
+          )
           .eq("label", code)
           .maybeSingle(),
         supabase.from("profiles").select("id, full_name, email"),
         supabase
           .from("myio_delivery_qrs")
           .select(
-            "id, qr_value, box_qr, created_at, delivery_id, myio_item_deliveries(id, quantity, created_at, order_id, product, myio_orders(id, title, client_name, status, delivery_date))",
+            "id, qr_value, box_qr, created_at, delivery_id, myio_item_deliveries(id, quantity, created_at, order_id, product, photo_url, myio_orders(id, title, client_name, status, delivery_date))",
           )
           .or(`qr_value.eq.${code},box_qr.eq.${code}`)
           .order("created_at", { ascending: false })
           .limit(1)
           .maybeSingle(),
+        supabase
+          .from("stock_movement_qrs")
+          .select(
+            "id, qr_value, box_qr, created_at, movement_id, stock_movements(id, type, quantity, reason, responsible, photo_url, created_at, created_by, material_id, materials(name, location))",
+          )
+          .or(`qr_value.eq.${code},box_qr.eq.${code}`)
+          .order("created_at", { ascending: true }),
       ]);
 
       const names: Record<string, string> = {};
@@ -87,7 +97,21 @@ function useQrTrace(code: string) {
       }
 
       const unitProd = unitProdRes.data as
-        | { id: string; status: string; installed_at: string | null; notes: string | null; created_at: string; materials: { name: string } | null }
+        | {
+            id: string;
+            status: string;
+            installed_at: string | null;
+            notes: string | null;
+            created_at: string;
+            product: string | null;
+            moved_to: string | null;
+            moved_technician: string | null;
+            moved_at: string | null;
+            move_notes: string | null;
+            move_photo_url: string | null;
+            materials: { name: string } | null;
+            projects: { name: string } | null;
+          }
         | null;
 
       const dq = deliveryQrRes.data as
@@ -100,12 +124,50 @@ function useQrTrace(code: string) {
               created_at: string;
               order_id: string;
               product: string;
+              photo_url: string | null;
               myio_orders: { id: string; title: string; client_name: string; status: string; delivery_date: string } | null;
             } | null;
           }
         | null;
       const delivery = dq?.myio_item_deliveries ?? null;
       const order = delivery?.myio_orders ?? null;
+
+      type MovementRow = {
+        id: string;
+        type: string;
+        quantity: number;
+        reason: string | null;
+        responsible: string | null;
+        photo_url: string | null;
+        created_at: string;
+        created_by: string | null;
+        materials: { name: string; location: string } | null;
+      };
+      const movements = ((movQrRes.data ?? []) as { stock_movements: MovementRow | null }[])
+        .map((r) => r.stock_movements)
+        .filter((m): m is MovementRow => !!m)
+        .sort((a, b) => +new Date(a.created_at) - +new Date(b.created_at));
+
+      type TechMove = {
+        created_at: string;
+        technician: string;
+        destination: string;
+        quantity: number;
+        notes: string | null;
+        projects: { name: string } | null;
+      };
+      let techMoves: TechMove[] = [];
+      if (movements.length) {
+        const { data } = await supabase
+          .from("technician_moves")
+          .select("created_at, technician, destination, quantity, notes, projects(name)")
+          .in(
+            "movement_id",
+            movements.map((m) => m.id),
+          )
+          .order("created_at", { ascending: true });
+        techMoves = (data ?? []) as unknown as TechMove[];
+      }
 
       type Shipment = {
         created_at: string;
@@ -114,12 +176,13 @@ function useQrTrace(code: string) {
         responsible: string;
         tracking_code: string;
         notes: string | null;
+        proof_url: string | null;
       };
       let shipment: Shipment | null = null;
       if (order) {
         const { data } = await supabase
           .from("myio_shipments")
-          .select("created_at, address, shipping_method, responsible, tracking_code, notes")
+          .select("created_at, address, shipping_method, responsible, tracking_code, notes, proof_url")
           .eq("order_id", order.id)
           .order("created_at", { ascending: false })
           .limit(1)
@@ -128,9 +191,16 @@ function useQrTrace(code: string) {
       }
 
       const materialName =
-        (hom?.["materials"] as { name: string } | null)?.name ?? unitProd?.materials?.name ?? null;
+        (hom?.["materials"] as { name: string } | null)?.name ??
+        unitProd?.materials?.name ??
+        unitProd?.product ??
+        movements[0]?.materials?.name ??
+        delivery?.product ??
+        null;
       const materialLocation =
-        ((hom?.["materials"] as { location?: string } | null)?.location as string | undefined) ?? null;
+        ((hom?.["materials"] as { location?: string } | null)?.location as string | undefined) ??
+        movements[movements.length - 1]?.materials?.location ??
+        null;
 
       const events: Event[] = [];
       if (release) {
@@ -138,6 +208,8 @@ function useQrTrace(code: string) {
           at: release.created_at,
           title: "Produto montado liberado na Fábrica",
           detail: `Responsáveis: ${(release.responsibles ?? []).map((r) => names[r] ?? r).join(", ") || "—"}`,
+          stage: "fabrica",
+          photo: release.photo_url,
         });
       }
       if (hom) {
@@ -148,17 +220,80 @@ function useQrTrace(code: string) {
           detail:
             (boxSize === 1 ? "Produto unitário" : `Caixa de ${boxSize}`) +
             (hom["responsible_id"] ? ` · Responsável: ${names[hom["responsible_id"] as string] ?? "—"}` : ""),
+          stage: "homologacao",
         });
         events.push({
           at: hom["created_at"] as string,
           title: "Entrada no Estoque — Almoxarifado",
           detail: boxSize === 1 ? materialName ?? "" : `${materialName ?? ""} — Caixa de ${boxSize}`,
+          stage: "almoxarifado",
         });
       }
+
+      for (const m of movements) {
+        const who = m.responsible || (m.created_by ? names[m.created_by] : "") || "";
+        const loc = m.materials?.location ?? "almoxarifado";
+        if (m.type === "saida") {
+          events.push({
+            at: m.created_at,
+            title: `Baixa no estoque (${STAGE_LABELS[loc] ?? loc})`,
+            detail: [m.reason, who ? `Responsável: ${who}` : "", `Qtd: ${m.quantity}`].filter(Boolean).join(" · "),
+            photo: m.photo_url,
+            stage: "tecnico",
+          });
+        } else if (m.type === "entrada") {
+          events.push({
+            at: m.created_at,
+            title: `Entrada no Estoque — ${STAGE_LABELS[loc] ?? loc}`,
+            detail: [m.reason, who ? `Responsável: ${who}` : "", `Qtd: ${m.quantity}`].filter(Boolean).join(" · "),
+            photo: m.photo_url,
+            stage: loc,
+          });
+        } else {
+          events.push({
+            at: m.created_at,
+            title: "Ajuste de estoque",
+            detail: [m.reason, who ? `Responsável: ${who}` : ""].filter(Boolean).join(" · "),
+            photo: m.photo_url,
+          });
+        }
+      }
+
+      for (const t of techMoves) {
+        const destStage =
+          t.destination === "unidade" ? "unidade" : t.destination === "perdido" ? "perdido" : t.destination === "almoxarifado" ? "almoxarifado" : "tecnico";
+        events.push({
+          at: t.created_at,
+          title: `Movido pelo técnico → ${STAGE_LABELS[destStage] ?? t.destination}`,
+          detail: [`Técnico: ${t.technician}`, t.projects?.name ? `Projeto: ${t.projects.name}` : "", t.notes].filter(Boolean).join(" · "),
+          stage: destStage,
+        });
+      }
+
       if (unitProd) {
-        events.push({ at: unitProd.created_at, title: "Enviado para a Unidade (cliente)", detail: "Situação inicial: parado" });
+        events.push({
+          at: unitProd.created_at,
+          title: "Enviado para a Unidade (cliente)",
+          detail: [unitProd.projects?.name ? `Projeto: ${unitProd.projects.name}` : "", "Situação inicial: parado"]
+            .filter(Boolean)
+            .join(" · "),
+          stage: "unidade",
+        });
         if (unitProd.status === "instalado" && unitProd.installed_at) {
-          events.push({ at: unitProd.installed_at, title: "Instalado na unidade do cliente" });
+          events.push({ at: unitProd.installed_at, title: "Instalado na unidade do cliente", stage: "unidade" });
+        }
+        if (unitProd.moved_to && unitProd.moved_at) {
+          const destStage =
+            unitProd.moved_to === "tecnico" ? "tecnico" : unitProd.moved_to === "perdido" ? "perdido" : "almoxarifado";
+          events.push({
+            at: unitProd.moved_at,
+            title: `Saiu da unidade → ${STAGE_LABELS[destStage] ?? unitProd.moved_to}`,
+            detail: [unitProd.moved_technician ? `Técnico: ${unitProd.moved_technician}` : "", unitProd.move_notes]
+              .filter(Boolean)
+              .join(" · "),
+            photo: unitProd.move_photo_url,
+            stage: destStage,
+          });
         }
       }
       if (delivery && order) {
@@ -166,9 +301,11 @@ function useQrTrace(code: string) {
           at: delivery.created_at,
           title: "Baixa no Almoxarifado (separado para pedido)",
           detail: `${order.title} · ${order.client_name} · ${delivery.product}`,
+          photo: delivery.photo_url,
+          stage: "distribuicao",
         });
         if (order.status === "pronto_entrega") {
-          events.push({ at: delivery.created_at, title: "Aguardando em Distribuição", detail: order.title });
+          events.push({ at: delivery.created_at, title: "Aguardando em Distribuição", detail: order.title, stage: "distribuicao" });
         }
       }
       if (shipment) {
@@ -176,12 +313,14 @@ function useQrTrace(code: string) {
           at: shipment.created_at,
           title: "Enviado — Em trânsito",
           detail: `${shipment.shipping_method} · Resp.: ${shipment.responsible} · Rastreio: ${shipment.tracking_code}`,
+          photo: shipment.proof_url,
+          stage: "transito",
         });
         if (order?.status === "entregue_cliente") {
-          events.push({ at: shipment.created_at, title: "Entregue ao cliente", detail: shipment.address });
+          events.push({ at: shipment.created_at, title: "Entregue ao cliente", detail: shipment.address, stage: "unidade" });
         }
         if (order?.status === "perdido") {
-          events.push({ at: shipment.created_at, title: "Mercadoria perdida", detail: shipment.address });
+          events.push({ at: shipment.created_at, title: "Mercadoria perdida", detail: shipment.address, stage: "perdido" });
         }
       }
       events.sort((a, b) => +new Date(a.at) - +new Date(b.at));
@@ -198,7 +337,7 @@ function useQrTrace(code: string) {
 
       let location = "Não encontrado";
       let stage: string | null = null;
-      if (unitProd) {
+      if (unitProd && !unitProd.moved_to) {
         location = unitProd.status === "instalado" ? "Unidade (cliente) — instalado" : "Unidade (cliente) — parado";
         stage = "unidade";
       } else if (order?.status === "entregue_cliente") {
@@ -221,14 +360,23 @@ function useQrTrace(code: string) {
         stage = materialLocation ?? "almoxarifado";
       }
 
+      const lastStaged = [...events].reverse().find((e) => !!e.stage && e.stage !== "homologacao");
+      if (lastStaged?.stage && (unitProd?.moved_to || movements.length || techMoves.length)) {
+        stage = lastStaged.stage;
+        location = STOCK_LABELS[lastStaged.stage] ?? STAGE_LABELS[lastStaged.stage] ?? location;
+      }
+
       return {
-        found: !!hom || !!unitProd || !!delivery,
+        found: !!hom || !!unitProd || !!delivery || movements.length > 0,
         isBox: !!boxRes.data,
         materialName,
         stage,
         order,
         shipment,
         delivery,
+        movements,
+        techMoves,
+        unitProd,
         position: unitRes.data?.position ?? null,
         boxSize: (hom?.["box_size"] as number | undefined) ?? null,
         boxQr: (hom?.["box_qr"] as string | null) ?? null,
@@ -384,6 +532,7 @@ export function QrCheckSection() {
                           {fmt(e.at)}
                           {e.detail ? ` · ${e.detail}` : ""}
                         </p>
+                        {e.photo && <ReleasePhoto path={e.photo} className="mt-2 max-h-40" />}
                       </li>
                     ))}
                   </ol>
@@ -419,7 +568,7 @@ export function QrCheckSection() {
   );
 }
 
-function ReleasePhoto({ path }: { path: string }) {
+function ReleasePhoto({ path, className }: { path: string; className?: string }) {
   const { data } = useQuery({
     queryKey: ["assembly-photo", path],
     queryFn: async () => {
@@ -429,5 +578,5 @@ function ReleasePhoto({ path }: { path: string }) {
     },
   });
   if (!data) return null;
-  return <img src={data} alt="Foto da montagem" className="max-h-64 rounded border object-contain" />;
+  return <img src={data} alt="Foto do registro" className={`max-h-64 rounded border object-contain ${className ?? ""}`} />;
 }
