@@ -474,10 +474,7 @@ export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; 
               <StockSection userId={userId} location={loc} canDelete={canDelete} />
             </div>
           ) : loc === "tecnico" ? (
-            <div className="space-y-4">
-              <TechnicianSection userId={userId} />
-              <StockSection userId={userId} location={loc} canDelete={canDelete} />
-            </div>
+            <TechnicianSection userId={userId} />
           ) : (
             <StockSection userId={userId} location={loc} canDelete={canDelete} />
           )}
