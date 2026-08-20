@@ -401,6 +401,7 @@ function ProductsTable({
   onDelete,
   canDelete,
   installed,
+  userId,
 }: {
   rows: UnitProduct[];
   names: Record<string, string>;
@@ -408,6 +409,7 @@ function ProductsTable({
   onDelete: (id: string) => void;
   canDelete?: boolean;
   installed: boolean;
+  userId: string;
 }) {
   if (!rows.length) {
     return (
@@ -451,6 +453,11 @@ function ProductsTable({
                     </>
                   )}
                 </Button>
+                <MoveUnitProductDialog
+                  product={p}
+                  productName={p.product ?? names[p.material_id] ?? "Produto"}
+                  userId={userId}
+                />
                 {canDelete && (
                   <Button size="sm" variant="outline" onClick={() => onDelete(p.id)}>
                     <Trash2 className="h-4 w-4" />
