@@ -34,6 +34,7 @@ import { BomSettingsDialog } from "@/components/bom-settings";
 import { UnitProductsCard } from "@/components/unit-products";
 import { QrCheckSection } from "@/components/qr-check";
 import { MyioDemandCard, ProductionQueueCard } from "@/components/myio-demand";
+import { TechnicianItemsCard } from "@/components/technician-items";
 
 type StockRow = {
   material_id: string;
@@ -470,6 +471,11 @@ export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; 
           ) : loc === "perdido" ? (
             <div className="space-y-4">
               <LostCard />
+              <StockSection userId={userId} location={loc} canDelete={canDelete} />
+            </div>
+          ) : loc === "tecnico" ? (
+            <div className="space-y-4">
+              <TechnicianSection userId={userId} />
               <StockSection userId={userId} location={loc} canDelete={canDelete} />
             </div>
           ) : (
