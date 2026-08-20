@@ -448,12 +448,12 @@ export function MyioOrdersTab({ userId, canManage = true }: { userId: string; ca
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-start justify-between gap-4">
-        <div>
-          <CardTitle className="flex items-center gap-2"><Factory className="h-5 w-5" />Pedidos de Projetos Myio</CardTitle>
+      <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <CardTitle className="flex items-center gap-2"><Factory className="h-5 w-5 shrink-0" />Pedidos de Projetos Myio</CardTitle>
           <CardDescription>Controle de produção e entrega dos produtos Myio.</CardDescription>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Select
             value={statusFilter.size === STATUS_KEYS.length ? "all" : (Array.from(statusFilter)[0] ?? "all")}
             onValueChange={(v) => {
