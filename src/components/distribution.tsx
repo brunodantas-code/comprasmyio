@@ -18,7 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ItemDeliveriesDialog } from "@/components/myio-delivery-qr";
-import { CheckCircle2, FileText, Loader2, Send, Truck, Upload } from "lucide-react";
+import { CheckCircle2, FileText, Loader2, Send, Truck, Undo2, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 const PROOF_BUCKET = "assembly-photos";
@@ -360,6 +360,69 @@ function ProofLink({ path }: { path: string }) {
   );
 }
 
+function ReturnToDistributionDialog({ orderId, notes }: { orderId: string; notes: string | null }) {
+  const queryClient = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState("");
+
+  const back = useMutation({
+    mutationFn: async () => {
+      const stamp = new Date().toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+      const entry = `[Retornado para Distribuição em ${stamp}] ${reason.trim()}`;
+      const { error } = await supabase
+        .from("myio_orders")
+        .update({ status: "pronto_entrega", notes: notes ? `${notes}\n${entry}` : entry })
+        .eq("id", orderId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Pedido retornado para Distribuição.");
+      setOpen(false);
+      setReason("");
+      queryClient.invalidateQueries({ queryKey: ["myio-transit"] });
+      queryClient.invalidateQueries({ queryKey: ["myio-distribution"] });
+      queryClient.invalidateQueries({ queryKey: ["myio-orders"] });
+    },
+    onError: (e: any) => toast.error(e.message ?? "Erro ao retornar o pedido"),
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <Button size="sm" variant="outline" onClick={() => setOpen(true)}>
+        <Undo2 className="mr-2 h-4 w-4" />
+        Retornar para distribuição
+      </Button>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Retornar para Distribuição</DialogTitle>
+          <DialogDescription>
+            Explique o motivo do retorno. O pedido volta para a sub-aba Distribuição.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-2">
+          <Label htmlFor={`return-reason-${orderId}`}>Observação (obrigatório)</Label>
+          <Textarea
+            id={`return-reason-${orderId}`}
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder="Ex.: endereço incorreto, transportadora recusou a carga..."
+            rows={4}
+          />
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>
+            Cancelar
+          </Button>
+          <Button disabled={!reason.trim() || back.isPending} onClick={() => back.mutate()}>
+            {back.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Retornar
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function TransitCard() {
   const queryClient = useQueryClient();
 
@@ -433,6 +496,7 @@ export function TransitCard() {
                     )}
                     Entregue ao cliente
                   </Button>
+                  <ReturnToDistributionDialog orderId={o.id} notes={o.notes} />
                 </div>
                 {s && (
                   <div className="grid gap-1 rounded-md border p-3 text-xs text-muted-foreground sm:grid-cols-2">
