@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { CheckCircle2, PauseCircle, Plus, Trash2 } from "lucide-react";
+import { ArrowRightLeft, Camera, CheckCircle2, ImageUp, PauseCircle, Plus, Trash2 } from "lucide-react";
 
 type UnitProduct = {
   id: string;
@@ -32,6 +32,14 @@ type UnitProduct = {
   installed_at: string | null;
   notes: string | null;
   created_at: string;
+};
+
+type MoveDestination = "tecnico" | "almoxarifado" | "perdido";
+
+const MOVE_LABELS: Record<MoveDestination, string> = {
+  tecnico: "Técnico",
+  almoxarifado: "Almoxarifado",
+  perdido: "Perdido",
 };
 
 type MaterialOption = { material_id: string; name: string };
@@ -47,11 +55,179 @@ function useUnitProducts() {
       const { data, error } = await supabase
         .from("unit_products")
         .select("id, material_id, product, project_id, label, status, installed_at, notes, created_at, projects(name)")
+        .is("moved_to", null)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as unknown as UnitProduct[];
     },
   });
+}
+
+function MoveUnitProductDialog({
+  product,
+  productName,
+  userId,
+}: {
+  product: UnitProduct;
+  productName: string;
+  userId: string;
+}) {
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [destination, setDestination] = useState<MoveDestination | "">("");
+  const [technician, setTechnician] = useState("");
+  const [notes, setNotes] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const galleryRef = useRef<HTMLInputElement>(null);
+
+  function reset() {
+    setDestination("");
+    setTechnician("");
+    setNotes("");
+    setFile(null);
+  }
+
+  const save = useMutation({
+    mutationFn: async () => {
+      if (!destination) throw new Error("Selecione o destino.");
+      if (destination === "tecnico" && !technician.trim()) throw new Error("Informe o nome do técnico.");
+      if (!file) throw new Error("Anexe uma foto do produto.");
+
+      const path = `unit-moves/${product.id}/${crypto.randomUUID()}-${file.name}`;
+      const { error: upErr } = await supabase.storage.from("assembly-photos").upload(path, file);
+      if (upErr) throw upErr;
+
+      const { error } = await supabase
+        .from("unit_products")
+        .update({
+          moved_to: destination,
+          moved_technician: destination === "tecnico" ? technician.trim() : null,
+          move_photo_url: path,
+          move_notes: notes.trim() || null,
+          moved_at: new Date().toISOString(),
+        } as never)
+        .eq("id", product.id);
+      if (error) throw error;
+
+      if (product.material_id) {
+        const reason =
+          destination === "tecnico"
+            ? `Saída da unidade para o técnico ${technician.trim()}`
+            : destination === "almoxarifado"
+              ? "Retorno da unidade para o almoxarifado"
+              : "Produto da unidade marcado como perdido";
+        const { error: mvErr } = await supabase.from("stock_movements").insert({
+          material_id: product.material_id,
+          quantity: 1,
+          type: destination === "almoxarifado" ? "entrada" : "saida",
+          reason: notes.trim() ? `${reason} — ${notes.trim()}` : reason,
+          responsible: destination === "tecnico" ? technician.trim() : null,
+          photo_url: path,
+          created_by: userId,
+        } as never);
+        if (mvErr) throw mvErr;
+      }
+    },
+    onSuccess: () => {
+      toast.success("Produto movido.");
+      qc.invalidateQueries({ queryKey: ["unit-products"] });
+      qc.invalidateQueries({ queryKey: ["material-stock"] });
+      qc.invalidateQueries({ queryKey: ["stock-movements"] });
+      qc.invalidateQueries({ queryKey: ["technician-dispatches"] });
+      setOpen(false);
+      reset();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        setOpen(o);
+        if (!o) reset();
+      }}
+    >
+      <DialogTrigger asChild>
+        <Button size="sm" variant="outline">
+          <ArrowRightLeft className="mr-1 h-4 w-4" /> Mover
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[88vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Mover produto — {productName}</DialogTitle>
+          <DialogDescription>Registre a foto e o destino do produto que sai da unidade.</DialogDescription>
+        </DialogHeader>
+
+        <form
+          className="space-y-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            save.mutate();
+          }}
+        >
+          <div className="space-y-2">
+            <Label>Foto (obrigatória)</Label>
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" size="sm" onClick={() => cameraRef.current?.click()}>
+                <Camera className="mr-1 h-4 w-4" /> Câmera
+              </Button>
+              <Button type="button" variant="outline" size="sm" onClick={() => galleryRef.current?.click()}>
+                <ImageUp className="mr-1 h-4 w-4" /> Galeria
+              </Button>
+            </div>
+            <input
+              ref={cameraRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            />
+            <input
+              ref={galleryRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            />
+            <p className="text-sm text-muted-foreground">{file ? file.name : "Nenhuma foto selecionada"}</p>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Destino</Label>
+            <Select value={destination} onValueChange={(v) => setDestination(v as MoveDestination)}>
+              <SelectTrigger><SelectValue placeholder="Selecione o destino" /></SelectTrigger>
+              <SelectContent>
+                {(Object.keys(MOVE_LABELS) as MoveDestination[]).map((d) => (
+                  <SelectItem key={d} value={d}>{MOVE_LABELS[d]}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {destination === "tecnico" && (
+            <div className="space-y-2">
+              <Label htmlFor="move-tech">Nome do técnico</Label>
+              <Input id="move-tech" value={technician} onChange={(e) => setTechnician(e.target.value)} />
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="move-notes">Observações</Label>
+            <Input id="move-notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
+          </div>
+
+          <DialogFooter>
+            <Button type="submit" disabled={save.isPending}>
+              {save.isPending ? "Movendo..." : "Confirmar movimentação"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
 }
 
 /** QR Codes homologados para um material (pelo nome do item de estoque). */
