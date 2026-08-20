@@ -1,9 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ClipboardList } from "lucide-react";
+import { ClipboardList, Factory, Loader2, Wand2 } from "lucide-react";
+import { toast } from "sonner";
 
 type DemandOrder = {
   id: string;
@@ -11,6 +13,7 @@ type DemandOrder = {
   status: string;
   notes: string | null;
   is_replacement: boolean | null;
+  project_id: string | null;
   projects: { name: string } | null;
   myio_order_items: { id: string; product: string; quantity: number }[];
 };
@@ -29,12 +32,13 @@ function formatDate(d: string | null) {
 }
 
 export function MyioDemandCard({ balances }: { balances: Record<string, number> }) {
+  const queryClient = useQueryClient();
   const { data: orders, isLoading } = useQuery({
     queryKey: ["myio-demand"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("myio_orders")
-        .select("id, delivery_date, status, notes, is_replacement, projects(name), myio_order_items(id, product, quantity)")
+        .select("id, delivery_date, status, notes, is_replacement, project_id, projects(name), myio_order_items(id, product, quantity)")
         .neq("status", "entregue_cliente")
         .order("delivery_date", { ascending: true });
       if (error) throw error;
@@ -44,19 +48,124 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
 
   const list = (orders ?? []).filter((o) => o.myio_order_items.length > 0);
 
-  const { data: manufacturedNames } = useQuery({
+  const { data: materials } = useQuery({
     queryKey: ["manufactured-material-names"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("materials")
-        .select("name, is_product, is_manufactured");
+        .select("id, name, link, is_product, is_manufactured");
       if (error) throw error;
+      return (data ?? []) as { id: string; name: string; link: string | null; is_product: boolean | null; is_manufactured: boolean | null }[];
+    },
+  });
+
+  const manufacturedNames = new Set(
+    (materials ?? [])
+      .filter((m) => m.is_product && m.is_manufactured !== false)
+      .map((m) => m.name.trim().toLowerCase()),
+  );
+  const materialByName = new Map((materials ?? []).map((m) => [m.name.trim().toLowerCase(), m]));
+
+  const { data: resolvedItemIds } = useQuery({
+    queryKey: ["demand-resolved-items"],
+    queryFn: async () => {
+      const [prod, buy] = await Promise.all([
+        supabase.from("production_demands").select("order_item_id"),
+        supabase.from("purchase_demands").select("order_item_id"),
+      ]);
+      if (prod.error) throw prod.error;
+      if (buy.error) throw buy.error;
       return new Set(
-        (data ?? [])
-          .filter((m: any) => m.is_product && m.is_manufactured !== false)
-          .map((m: any) => String(m.name).trim().toLowerCase()),
+        [...(prod.data ?? []), ...(buy.data ?? [])]
+          .map((r) => r.order_item_id)
+          .filter(Boolean) as string[],
       );
     },
+  });
+
+  const resolveMutation = useMutation({
+    mutationFn: async (order: DemandOrder) => {
+      const { data: userData } = await supabase.auth.getUser();
+      const userId = userData.user?.id ?? null;
+
+      const pending = order.myio_order_items.filter((i) => {
+        const bal = balances[i.product.trim().toLowerCase()] ?? 0;
+        return i.quantity - bal > 0 && !(resolvedItemIds?.has(i.id) ?? false);
+      });
+      if (pending.length === 0) return { produce: 0, buy: 0 };
+
+      const toProduce = pending.filter((i) => manufacturedNames.has(i.product.trim().toLowerCase()));
+      const toBuy = pending.filter((i) => !manufacturedNames.has(i.product.trim().toLowerCase()));
+      const missing = (i: { product: string; quantity: number }) =>
+        i.quantity - (balances[i.product.trim().toLowerCase()] ?? 0);
+
+      if (toProduce.length) {
+        const { error } = await supabase.from("production_demands").insert(
+          toProduce.map((i) => ({
+            order_item_id: i.id,
+            order_id: order.id,
+            product: i.product,
+            quantity: missing(i),
+            created_by: userId,
+          })),
+        );
+        if (error) throw error;
+      }
+
+      if (toBuy.length) {
+        if (!order.project_id) {
+          throw new Error("Este pedido Myio não está vinculado a um projeto — associe um projeto para enviar à fila de compras.");
+        }
+        if (!userId) throw new Error("Sessão expirada.");
+        const created: { id: string; item: typeof toBuy[number] }[] = [];
+        for (const i of toBuy) {
+          const mat = materialByName.get(i.product.trim().toLowerCase());
+          const { data, error } = await supabase
+            .from("purchase_orders")
+            .insert({
+              project_id: order.project_id,
+              requester_id: userId,
+              item_name: i.product,
+              item_link: mat?.link ?? null,
+              material_id: mat?.id ?? null,
+              quantity: missing(i),
+              recipient: "Almoxarifado",
+              delivery_point: "Almoxarifado",
+              deadline_type: "customizado" as const,
+              deadline_date: order.delivery_date,
+              requester_notes: `Demanda automática do pedido Myio (${order.projects?.name ?? "sem projeto"}) — entrega ${formatDate(order.delivery_date)}.`,
+            })
+            .select("id")
+            .single();
+          if (error) throw error;
+          created.push({ id: data.id, item: i });
+        }
+        const { error: pdErr } = await supabase.from("purchase_demands").insert(
+          created.map((c) => ({
+            order_item_id: c.item.id,
+            order_id: order.id,
+            purchase_order_id: c.id,
+            product: c.item.product,
+            quantity: missing(c.item),
+            created_by: userId,
+          })),
+        );
+        if (pdErr) throw pdErr;
+      }
+
+      return { produce: toProduce.length, buy: toBuy.length };
+    },
+    onSuccess: (r) => {
+      if (r.produce === 0 && r.buy === 0) {
+        toast.info("Nada pendente para resolver neste pedido.");
+      } else {
+        toast.success(`${r.buy} item(ns) na fila de compras e ${r.produce} item(ns) na fila de produção.`);
+      }
+      queryClient.invalidateQueries({ queryKey: ["demand-resolved-items"] });
+      queryClient.invalidateQueries({ queryKey: ["production-demands"] });
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+    },
+    onError: (e: any) => toast.error(e.message ?? "Erro ao resolver demanda"),
   });
 
   return (
@@ -85,6 +194,19 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
                 {o.is_replacement && (
                   <Badge variant="outline" className="border-orange-300 bg-orange-100 text-orange-800">Reposição</Badge>
                 )}
+                <Button
+                  size="sm"
+                  className="ml-auto"
+                  disabled={resolveMutation.isPending}
+                  onClick={() => resolveMutation.mutate(o)}
+                >
+                  {resolveMutation.isPending ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Wand2 className="mr-2 h-4 w-4" />
+                  )}
+                  Resolver
+                </Button>
               </div>
               {o.notes && <p className="text-xs text-muted-foreground">{o.notes}</p>}
               <Table>
@@ -100,7 +222,8 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
                   {o.myio_order_items.map((i) => {
                     const bal = balances[i.product.trim().toLowerCase()] ?? 0;
                     const ok = bal >= i.quantity;
-                    const isManufactured = manufacturedNames?.has(i.product.trim().toLowerCase()) ?? false;
+                    const isManufactured = manufacturedNames.has(i.product.trim().toLowerCase());
+                    const sent = resolvedItemIds?.has(i.id) ?? false;
                     return (
                       <TableRow key={i.id}>
                         <TableCell>{i.product}</TableCell>
@@ -109,6 +232,10 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
                         <TableCell>
                           {ok ? (
                             <Badge variant="outline" className="border-green-300 bg-green-100 text-green-800">Disponível</Badge>
+                          ) : sent ? (
+                            <Badge variant="outline" className="border-slate-300 bg-slate-100 text-slate-700">
+                              {isManufactured ? "Enviado à fábrica" : "Na fila de compras"}
+                            </Badge>
                           ) : isManufactured ? (
                             <Badge variant="outline" className="border-blue-300 bg-blue-100 text-blue-800">
                               Produzir {i.quantity - bal}
@@ -126,6 +253,98 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
               </Table>
             </div>
           ))
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+export function ProductionQueueCard() {
+  const queryClient = useQueryClient();
+  const { data: rows, isLoading } = useQuery({
+    queryKey: ["production-demands"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("production_demands")
+        .select("id, product, quantity, status, created_at, order_id, myio_orders(delivery_date, projects(name))")
+        .eq("status", "pendente")
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as unknown as {
+        id: string;
+        product: string;
+        quantity: number;
+        myio_orders: { delivery_date: string; projects: { name: string } | null } | null;
+      }[];
+    },
+  });
+
+  const grouped = new Map<string, { product: string; total: number; ids: string[]; projects: string[] }>();
+  (rows ?? []).forEach((r) => {
+    const key = r.product.trim().toLowerCase();
+    const g = grouped.get(key) ?? { product: r.product, total: 0, ids: [], projects: [] };
+    g.total += r.quantity;
+    g.ids.push(r.id);
+    const p = r.myio_orders?.projects?.name;
+    if (p && !g.projects.includes(p)) g.projects.push(p);
+    grouped.set(key, g);
+  });
+  const list = [...grouped.values()].sort((a, b) => b.total - a.total);
+
+  const done = useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { error } = await supabase.from("production_demands").update({ status: "concluido" }).in("id", ids);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Demanda de produção concluída.");
+      queryClient.invalidateQueries({ queryKey: ["production-demands"] });
+      queryClient.invalidateQueries({ queryKey: ["demand-resolved-items"] });
+    },
+    onError: (e: any) => toast.error(e.message ?? "Erro"),
+  });
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Factory className="h-5 w-5" />
+          Fila de produção
+        </CardTitle>
+        <CardDescription>
+          Produtos que precisam ser fabricados, somados conforme a demanda dos pedidos Myio chega.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">Carregando...</p>
+        ) : list.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Nenhuma produção pendente.</p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Produto</TableHead>
+                <TableHead className="w-32">A produzir</TableHead>
+                <TableHead>Projetos</TableHead>
+                <TableHead className="w-32">Ação</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {list.map((g) => (
+                <TableRow key={g.product}>
+                  <TableCell>{g.product}</TableCell>
+                  <TableCell className="font-semibold">{g.total}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground">{g.projects.join(", ") || "—"}</TableCell>
+                  <TableCell>
+                    <Button size="sm" variant="outline" disabled={done.isPending} onClick={() => done.mutate(g.ids)}>
+                      Concluir
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         )}
       </CardContent>
     </Card>
