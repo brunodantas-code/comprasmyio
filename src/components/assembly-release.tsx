@@ -520,6 +520,8 @@ export function ReleaseAssembledDialog({ userId }: { userId: string }) {
       qc.invalidateQueries({ queryKey: ["assembly-releases"] });
       qc.invalidateQueries({ queryKey: ["material-stock"] });
       qc.invalidateQueries({ queryKey: ["stock-movements"] });
+      qc.invalidateQueries({ queryKey: ["production-demands"] });
+      qc.invalidateQueries({ queryKey: ["demand-resolved-items"] });
       setOpen(false);
       reset();
     },
