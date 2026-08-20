@@ -568,7 +568,7 @@ export function QrCheckSection() {
   );
 }
 
-function ReleasePhoto({ path }: { path: string }) {
+function ReleasePhoto({ path, className }: { path: string; className?: string }) {
   const { data } = useQuery({
     queryKey: ["assembly-photo", path],
     queryFn: async () => {
@@ -578,5 +578,5 @@ function ReleasePhoto({ path }: { path: string }) {
     },
   });
   if (!data) return null;
-  return <img src={data} alt="Foto da montagem" className="max-h-64 rounded border object-contain" />;
+  return <img src={data} alt="Foto do registro" className={`max-h-64 rounded border object-contain ${className ?? ""}`} />;
 }
