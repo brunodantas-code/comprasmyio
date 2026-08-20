@@ -143,7 +143,7 @@ function MovementDialog({
   userId,
   type,
   trigger,
-  isManufactured,
+  isManufactured: isManufacturedProp,
 }: {
   row: StockRow;
   userId: string;
@@ -154,6 +154,8 @@ function MovementDialog({
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const { data: profiles } = useStockProfiles();
+  const { data: manufacturedMap } = useManufacturedMap();
+  const isManufactured = isManufacturedProp ?? !!manufacturedMap?.[row.material_id];
   const [responsible, setResponsible] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [qrs, setQrs] = useState<LinkedQr[]>([]);
