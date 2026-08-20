@@ -123,6 +123,19 @@ function useStockProfiles() {
   });
 }
 
+function useManufacturedMap() {
+  return useQuery({
+    queryKey: ["materials-manufactured-map"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("materials").select("id, is_manufactured");
+      if (error) throw error;
+      const map: Record<string, boolean> = {};
+      for (const m of data ?? []) map[m.id] = !!m.is_manufactured;
+      return map;
+    },
+  });
+}
+
 function MovementDialog({
   row,
   userId,
