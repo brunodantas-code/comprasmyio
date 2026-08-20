@@ -24,6 +24,9 @@ import { CheckCircle2, PauseCircle, Plus, Trash2 } from "lucide-react";
 type UnitProduct = {
   id: string;
   material_id: string;
+  product: string | null;
+  project_id: string | null;
+  projects?: { name: string } | null;
   label: string | null;
   status: "parado" | "instalado";
   installed_at: string | null;
@@ -43,10 +46,10 @@ function useUnitProducts() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("unit_products")
-        .select("id, material_id, label, status, installed_at, notes, created_at")
+        .select("id, material_id, product, project_id, label, status, installed_at, notes, created_at, projects(name)")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return (data ?? []) as UnitProduct[];
+      return (data ?? []) as unknown as UnitProduct[];
     },
   });
 }
@@ -242,6 +245,7 @@ function ProductsTable({
       <TableHeader>
         <TableRow>
           <TableHead>Produto</TableHead>
+          <TableHead>Projeto</TableHead>
           <TableHead>Etiqueta (QR)</TableHead>
           <TableHead>{installed ? "Instalado em" : "Na unidade desde"}</TableHead>
           <TableHead className="text-right">Ações</TableHead>
@@ -250,7 +254,8 @@ function ProductsTable({
       <TableBody>
         {rows.map((p) => (
           <TableRow key={p.id}>
-            <TableCell className="font-medium">{names[p.material_id] ?? "—"}</TableCell>
+            <TableCell className="font-medium">{p.product ?? names[p.material_id] ?? "—"}</TableCell>
+            <TableCell className="text-sm text-muted-foreground">{p.projects?.name ?? "—"}</TableCell>
             <TableCell className="max-w-[280px] break-all text-sm text-muted-foreground">
               {p.label ?? <span className="italic">sem etiqueta</span>}
             </TableCell>

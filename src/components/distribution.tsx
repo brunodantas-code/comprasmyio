@@ -485,6 +485,37 @@ function LostMerchandiseDialog({ orderId, notes }: { orderId: string; notes: str
   );
 }
 
+async function createUnitProductsForOrder(orderId: string, projectId: string | null, note: string) {
+  const [{ data: order }, { data: items }, { data: mats }, { data: auth }] = await Promise.all([
+    supabase.from("myio_orders").select("project_id").eq("id", orderId).maybeSingle(),
+    supabase.from("myio_order_items").select("product, quantity").eq("order_id", orderId),
+    supabase.from("materials").select("id, name"),
+    supabase.auth.getUser(),
+  ]);
+  const { data: already } = await supabase.from("unit_products").select("id").eq("order_id", orderId).limit(1);
+  if (already?.length) return;
+  const byName = new Map((mats ?? []).map((m) => [m.name.trim().toLowerCase(), m.id]));
+  const rows: Record<string, unknown>[] = [];
+  for (const it of items ?? []) {
+    const materialId = byName.get(it.product.trim().toLowerCase()) ?? null;
+    for (let i = 0; i < Math.max(it.quantity ?? 1, 1); i++) {
+      rows.push({
+        material_id: materialId,
+        product: it.product,
+        order_id: orderId,
+        project_id: projectId ?? (order as { project_id: string | null } | null)?.project_id ?? null,
+        status: "parado",
+        notes: note,
+        created_by: auth?.user?.id ?? null,
+      });
+    }
+  }
+  if (rows.length) {
+    const { error } = await supabase.from("unit_products").insert(rows as never);
+    if (error) throw error;
+  }
+}
+
 export function TransitCard() {
   const queryClient = useQueryClient();
 
@@ -510,11 +541,13 @@ export function TransitCard() {
         .update({ status: "entregue_cliente" })
         .eq("id", orderId);
       if (error) throw error;
+      await createUnitProductsForOrder(orderId, null, "Entrega ao cliente");
     },
     onSuccess: () => {
       toast.success("Pedido entregue ao cliente.");
       queryClient.invalidateQueries({ queryKey: ["myio-transit"] });
       queryClient.invalidateQueries({ queryKey: ["myio-orders"] });
+      queryClient.invalidateQueries({ queryKey: ["unit-products"] });
     },
     onError: (e: any) => toast.error(e.message ?? "Erro ao concluir entrega"),
   });
@@ -669,36 +702,7 @@ function FoundMerchandiseDialog({ orderId, notes }: { orderId: string; notes: st
       if (error) throw error;
 
       if (sector === "unidade") {
-        const [{ data: items }, { data: mats }, { data: auth }] = await Promise.all([
-          supabase.from("myio_order_items").select("product, quantity").eq("order_id", orderId),
-          supabase.from("materials").select("id, name"),
-          supabase.auth.getUser(),
-        ]);
-        const byName = new Map((mats ?? []).map((m) => [m.name.trim().toLowerCase(), m.id]));
-        const rows: {
-          material_id: string;
-          project_id: string;
-          status: string;
-          notes: string | null;
-          created_by: string | null;
-        }[] = [];
-        for (const it of items ?? []) {
-          const materialId = byName.get(it.product.trim().toLowerCase());
-          if (!materialId) continue;
-          for (let i = 0; i < Math.max(it.quantity ?? 1, 1); i++) {
-            rows.push({
-              material_id: materialId,
-              project_id: projectId,
-              status: "parado",
-              notes: entry,
-              created_by: auth?.user?.id ?? null,
-            });
-          }
-        }
-        if (rows.length) {
-          const { error: upErr } = await supabase.from("unit_products").insert(rows as never);
-          if (upErr) throw upErr;
-        }
+        await createUnitProductsForOrder(orderId, projectId, entry);
       }
     },
     onSuccess: () => {

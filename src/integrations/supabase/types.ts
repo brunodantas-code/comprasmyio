@@ -1084,8 +1084,10 @@ export type Database = {
           id: string
           installed_at: string | null
           label: string | null
-          material_id: string
+          material_id: string | null
           notes: string | null
+          order_id: string | null
+          product: string | null
           project_id: string | null
           status: string
           updated_at: string
@@ -1096,8 +1098,10 @@ export type Database = {
           id?: string
           installed_at?: string | null
           label?: string | null
-          material_id: string
+          material_id?: string | null
           notes?: string | null
+          order_id?: string | null
+          product?: string | null
           project_id?: string | null
           status?: string
           updated_at?: string
@@ -1108,8 +1112,10 @@ export type Database = {
           id?: string
           installed_at?: string | null
           label?: string | null
-          material_id?: string
+          material_id?: string | null
           notes?: string | null
+          order_id?: string | null
+          product?: string | null
           project_id?: string | null
           status?: string
           updated_at?: string
@@ -1127,6 +1133,13 @@ export type Database = {
             columns: ["material_id"]
             isOneToOne: false
             referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "unit_products_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "myio_orders"
             referencedColumns: ["id"]
           },
           {
