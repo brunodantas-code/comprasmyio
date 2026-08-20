@@ -457,7 +457,7 @@ export function HomologateDialog({
             ))}
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
             <div className="space-y-2">
               <Label>Responsável</Label>
               <Select value={responsible} onValueChange={setResponsible}>

@@ -586,7 +586,7 @@ function NewOrder({ userId }: { userId: string }) {
                 <p className="text-xs text-muted-foreground">Vinculado à biblioteca — ao receber, entra automaticamente no estoque.</p>
               )}
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="quantity">Quantidade</Label>
                 <Input id="quantity" name="quantity" type="number" min={1} defaultValue={1} required />
@@ -604,7 +604,7 @@ function NewOrder({ userId }: { userId: string }) {
               <Label htmlFor="delivery_point">Ponto de entrega</Label>
               <Textarea id="delivery_point" name="delivery_point" placeholder="Ex.: Rua X, 123, com João no portão" required />
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>Prazo de recebimento</Label>
                 <Select value={deadlineType} onValueChange={(v) => setDeadlineType(v as Order["deadline_type"])}>
@@ -1072,7 +1072,7 @@ function EditRequesterDialog({ order }: { order: Order }) {
             </div>
             <Input id={`e-name-${order.id}`} value={itemName} onChange={(e) => { setItemName(e.target.value); setMaterialId(null); }} required />
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor={`e-qty-${order.id}`}>Quantidade</Label>
               <Input id={`e-qty-${order.id}`} name="quantity" type="number" min={1} defaultValue={order.quantity} required />
@@ -1090,7 +1090,7 @@ function EditRequesterDialog({ order }: { order: Order }) {
             <Label htmlFor={`e-deliv-${order.id}`}>Ponto de entrega</Label>
             <Textarea id={`e-deliv-${order.id}`} name="delivery_point" defaultValue={order.delivery_point} required />
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
             <div className="space-y-2">
               <Label>Prazo de recebimento</Label>
               <Select value={deadlineType} onValueChange={(v) => setDeadlineType(v as Order["deadline_type"])}>
@@ -1211,7 +1211,7 @@ function ProjectsAdmin({ userId }: { userId: string }) {
   const clientOf = (p: { client_id?: string | null }) => clients?.find((c) => c.id === p.client_id);
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_1.5fr]">
+    <div className="grid gap-6 [&>*]:min-w-0 lg:grid-cols-[1fr_1.5fr]">
       <Card>
         <CardHeader><CardTitle>Novo projeto</CardTitle></CardHeader>
         <CardContent>
@@ -1318,7 +1318,7 @@ function MaterialsAdmin() {
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_1.5fr]">
+    <div className="grid gap-6 [&>*]:min-w-0 lg:grid-cols-[1fr_1.5fr]">
       <Card>
         <CardHeader>
           <CardTitle>Novo material</CardTitle>

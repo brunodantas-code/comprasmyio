@@ -517,7 +517,7 @@ export function UnitProductsCard({
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
         <Card>
           <CardHeader className="pb-2"><CardDescription>Produtos instalados</CardDescription></CardHeader>
           <CardContent className="text-2xl font-semibold text-green-700">{installed.length}</CardContent>

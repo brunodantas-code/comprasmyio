@@ -166,7 +166,7 @@ function NewMyioOrderDialog({ userId }: { userId: string }) {
           <DialogDescription>Selecione o projeto, a data de entrega e as quantidades por produto.</DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
           <div className="space-y-2">
             <Label>Projeto</Label>
             <Select value={projectId} onValueChange={setProjectId}>
@@ -192,7 +192,7 @@ function NewMyioOrderDialog({ userId }: { userId: string }) {
         <div className="space-y-2">
           <Label>Produtos</Label>
           <p className="text-xs text-muted-foreground">Clique na miniatura para adicionar ou trocar a foto do produto.</p>
-          <div className="grid gap-2 sm:grid-cols-2">
+          <div className="grid gap-2 [&>*]:min-w-0 sm:grid-cols-2">
             {products.map((p) => (
               <div key={p} className="flex items-center justify-between gap-3 rounded-md border p-2">
                 <div className="flex min-w-0 items-center gap-2">
@@ -297,7 +297,7 @@ function EditMyioOrderDialog({ order, userId }: { order: MyioOrder; userId: stri
           <DialogDescription>Atualize os dados e as quantidades por produto.</DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
           <div className="space-y-2">
             <Label>Projeto</Label>
             <Select value={projectId} onValueChange={setProjectId}>
@@ -326,7 +326,7 @@ function EditMyioOrderDialog({ order, userId }: { order: MyioOrder; userId: stri
 
         <div className="space-y-2">
           <Label>Produtos</Label>
-          <div className="grid gap-2 sm:grid-cols-2">
+          <div className="grid gap-2 [&>*]:min-w-0 sm:grid-cols-2">
             {products.map((p) => (
               <div key={p} className="flex items-center justify-between gap-3 rounded-md border p-2">
                 <div className="flex min-w-0 items-center gap-2">
@@ -448,12 +448,12 @@ export function MyioOrdersTab({ userId, canManage = true }: { userId: string; ca
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-start justify-between gap-4">
-        <div>
-          <CardTitle className="flex items-center gap-2"><Factory className="h-5 w-5" />Pedidos de Projetos Myio</CardTitle>
+      <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <CardTitle className="flex items-center gap-2"><Factory className="h-5 w-5 shrink-0" />Pedidos de Projetos Myio</CardTitle>
           <CardDescription>Controle de produção e entrega dos produtos Myio.</CardDescription>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Select
             value={statusFilter.size === STATUS_KEYS.length ? "all" : (Array.from(statusFilter)[0] ?? "all")}
             onValueChange={(v) => {
@@ -464,7 +464,7 @@ export function MyioOrdersTab({ userId, canManage = true }: { userId: string; ca
               }
             }}
           >
-            <SelectTrigger className="h-9 w-52"><SelectValue placeholder="Filtrar status" /></SelectTrigger>
+            <SelectTrigger className="h-9 w-full sm:w-52"><SelectValue placeholder="Filtrar status" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos os status</SelectItem>
               {STATUS_KEYS.map((s) => (

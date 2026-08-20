@@ -409,8 +409,8 @@ export function QrCheckSection() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="relative min-w-[240px] flex-1">
+          <div className="flex flex-wrap items-center gap-2 [&>button]:w-full sm:[&>button]:w-auto">
+            <div className="relative w-full flex-1 sm:min-w-[240px]">
               <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 value={input}
