@@ -62,7 +62,7 @@ function useQrTrace(code: string) {
         supabase
           .from("myio_delivery_qrs")
           .select(
-            "id, qr_value, box_qr, created_at, delivery_id, myio_item_deliveries(id, quantity, created_at, order_id, product, myio_orders(id, title, client_name, status, delivery_date))",
+            "id, qr_value, box_qr, created_at, delivery_id, myio_item_deliveries(id, quantity, created_at, order_id, product, photo_url, myio_orders(id, title, client_name, status, delivery_date))",
           )
           .or(`qr_value.eq.${code},box_qr.eq.${code}`)
           .order("created_at", { ascending: false })
@@ -123,12 +123,50 @@ function useQrTrace(code: string) {
               created_at: string;
               order_id: string;
               product: string;
+              photo_url: string | null;
               myio_orders: { id: string; title: string; client_name: string; status: string; delivery_date: string } | null;
             } | null;
           }
         | null;
       const delivery = dq?.myio_item_deliveries ?? null;
       const order = delivery?.myio_orders ?? null;
+
+      type MovementRow = {
+        id: string;
+        type: string;
+        quantity: number;
+        reason: string | null;
+        responsible: string | null;
+        photo_url: string | null;
+        created_at: string;
+        created_by: string | null;
+        materials: { name: string; location: string } | null;
+      };
+      const movements = ((movQrRes.data ?? []) as { stock_movements: MovementRow | null }[])
+        .map((r) => r.stock_movements)
+        .filter((m): m is MovementRow => !!m)
+        .sort((a, b) => +new Date(a.created_at) - +new Date(b.created_at));
+
+      type TechMove = {
+        created_at: string;
+        technician: string;
+        destination: string;
+        quantity: number;
+        notes: string | null;
+        projects: { name: string } | null;
+      };
+      let techMoves: TechMove[] = [];
+      if (movements.length) {
+        const { data } = await supabase
+          .from("technician_moves")
+          .select("created_at, technician, destination, quantity, notes, projects(name)")
+          .in(
+            "movement_id",
+            movements.map((m) => m.id),
+          )
+          .order("created_at", { ascending: true });
+        techMoves = (data ?? []) as unknown as TechMove[];
+      }
 
       type Shipment = {
         created_at: string;
