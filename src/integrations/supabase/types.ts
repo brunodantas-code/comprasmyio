@@ -529,6 +529,53 @@ export type Database = {
         }
         Relationships: []
       }
+      myio_shipments: {
+        Row: {
+          address: string
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string | null
+          order_id: string
+          proof_url: string
+          responsible: string
+          shipping_method: string
+          tracking_code: string
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          order_id: string
+          proof_url: string
+          responsible: string
+          shipping_method: string
+          tracking_code: string
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          order_id?: string
+          proof_url?: string
+          responsible?: string
+          shipping_method?: string
+          tracking_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "myio_shipments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "myio_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_logs: {
         Row: {
           action: string
@@ -1016,6 +1063,7 @@ export type Database = {
         | "produzindo"
         | "pronto_entrega"
         | "entregue_cliente"
+        | "em_transito"
       order_status:
         | "pendente"
         | "comprado_aguardando"
@@ -1158,6 +1206,7 @@ export const Constants = {
         "produzindo",
         "pronto_entrega",
         "entregue_cliente",
+        "em_transito",
       ],
       order_status: [
         "pendente",
