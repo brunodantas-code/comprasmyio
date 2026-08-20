@@ -97,20 +97,29 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
   });
 
   const resolveMutation = useMutation({
-    mutationFn: async (order: DemandOrder) => {
+    mutationFn: async (vars: {
+      order: DemandOrder;
+      items?: DemandItem[];
+      mode?: "produce" | "buy";
+      quantity?: number;
+    }) => {
+      const { order, mode } = vars;
       const { data: userData } = await supabase.auth.getUser();
       const userId = userData.user?.id ?? null;
 
-      const pending = order.myio_order_items.filter((i) => {
+      const source = vars.items ?? order.myio_order_items;
+      const pending = source.filter((i) => {
         const bal = balances[i.product.trim().toLowerCase()] ?? 0;
         return i.quantity - bal > 0 && !(resolvedItemIds?.has(i.id) ?? false);
       });
       if (pending.length === 0) return { produce: 0, buy: 0 };
 
-      const toProduce = pending.filter((i) => manufacturedNames.has(i.product.trim().toLowerCase()));
-      const toBuy = pending.filter((i) => !manufacturedNames.has(i.product.trim().toLowerCase()));
+      const isProduce = (i: DemandItem) =>
+        mode ? mode === "produce" : manufacturedNames.has(i.product.trim().toLowerCase());
+      const toProduce = pending.filter(isProduce);
+      const toBuy = pending.filter((i) => !isProduce(i));
       const missing = (i: { product: string; quantity: number }) =>
-        i.quantity - (balances[i.product.trim().toLowerCase()] ?? 0);
+        vars.quantity ?? i.quantity - (balances[i.product.trim().toLowerCase()] ?? 0);
 
       if (toProduce.length) {
         const { error } = await supabase.from("production_demands").insert(
