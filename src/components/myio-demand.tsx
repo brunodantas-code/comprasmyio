@@ -114,6 +114,7 @@ function formatDate(d: string | null) {
 
 export function MyioDemandCard({ balances }: { balances: Record<string, number> }) {
   const queryClient = useQueryClient();
+  const [itemDialog, setItemDialog] = useState<ItemDialogState | null>(null);
   const { data: orders, isLoading } = useQuery({
     queryKey: ["myio-demand"],
     queryFn: async () => {
