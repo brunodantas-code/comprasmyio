@@ -13,7 +13,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { ProductImageUploader, ProductPhotoPreview, useProductImages } from "@/components/myio-product-image";
 import { toast } from "sonner";
-import { Plus, Trash2, Factory, Pencil } from "lucide-react";
+import { Plus, Trash2, Factory, Pencil, Check } from "lucide-react";
 
 export const MYIO_PRODUCTS = [
   "Myio 3F",
@@ -107,14 +107,6 @@ function NewMyioOrderDialog({ userId }: { userId: string }) {
   const qc = useQueryClient();
   const { data: projects } = useProjects();
   const { data: images } = useProductImages();
-  const { data: deliveredItemIds } = useQuery({
-    queryKey: ["myio-item-deliveries"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("myio_item_deliveries").select("order_item_id");
-      if (error) throw error;
-      return new Set((data ?? []).map((r) => r.order_item_id));
-    },
-  });
   const products = useMyioProductOptions();
   const [open, setOpen] = useState(false);
   const [projectId, setProjectId] = useState("");
