@@ -68,9 +68,11 @@ async function alreadyUsed(values: string[]) {
 export function QrLinkPicker({
   value,
   onChange,
+  required,
 }: {
   value: LinkedQr[];
   onChange: (v: LinkedQr[]) => void;
+  required?: boolean;
 }) {
   const add = async (code: string) => {
     try {
@@ -96,7 +98,7 @@ export function QrLinkPicker({
 
   return (
     <div className="space-y-2">
-      <Label>QR codes vinculados (opcional)</Label>
+      <Label>QR codes vinculados {required ? "(obrigatório)" : "(opcional)"}</Label>
       <div className="flex flex-wrap gap-2">
         <ManualQrDialog label="Digitar código" value="" onResult={add} />
         <GalleryQrButton label="Galeria" onResult={add} />
