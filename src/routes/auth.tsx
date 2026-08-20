@@ -25,6 +25,7 @@ const signUpSchema = signInSchema.extend({
 function AuthPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [forgot, setForgot] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -70,6 +71,21 @@ function AuthPage() {
     if (data.session) navigate({ to: "/dashboard" });
   }
 
+  async function handleForgot(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const email = String(fd.get("email") ?? "").trim();
+    if (!z.string().email().safeParse(email).success) return toast.error("E-mail inválido");
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setLoading(false);
+    if (error) return toast.error(error.message);
+    toast.success("Enviamos um link de redefinição para o seu e-mail.");
+    setForgot(false);
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
       <div className="w-full max-w-md">
@@ -89,6 +105,20 @@ function AuthPage() {
               </TabsList>
 
               <TabsContent value="signin">
+                {forgot ? (
+                  <form onSubmit={handleForgot} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="forgot-email">E-mail da conta</Label>
+                      <Input id="forgot-email" name="email" type="email" required />
+                    </div>
+                    <Button type="submit" className="w-full" disabled={loading}>
+                      {loading ? "Enviando..." : "Enviar link de redefinição"}
+                    </Button>
+                    <Button type="button" variant="ghost" className="w-full" onClick={() => setForgot(false)}>
+                      Voltar
+                    </Button>
+                  </form>
+                ) : (
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="signin-email">E-mail</Label>
@@ -101,7 +131,15 @@ function AuthPage() {
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading ? "Entrando..." : "Entrar"}
                   </Button>
+                  <button
+                    type="button"
+                    onClick={() => setForgot(true)}
+                    className="w-full text-sm text-muted-foreground underline-offset-4 hover:underline"
+                  >
+                    Esqueceu a senha?
+                  </button>
                 </form>
+                )}
               </TabsContent>
 
               <TabsContent value="signup">
