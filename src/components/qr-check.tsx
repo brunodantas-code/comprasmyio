@@ -180,6 +180,9 @@ function useQrTrace(code: string) {
         if (order?.status === "entregue_cliente") {
           events.push({ at: shipment.created_at, title: "Entregue ao cliente", detail: shipment.address });
         }
+        if (order?.status === "perdido") {
+          events.push({ at: shipment.created_at, title: "Mercadoria perdida", detail: shipment.address });
+        }
       }
       events.sort((a, b) => +new Date(a.at) - +new Date(b.at));
 
@@ -204,6 +207,9 @@ function useQrTrace(code: string) {
       } else if (order?.status === "em_transito") {
         location = "Em Trânsito";
         stage = "transito";
+      } else if (order?.status === "perdido") {
+        location = "Perdido";
+        stage = "perdido";
       } else if (order?.status === "pronto_entrega") {
         location = "Distribuição — aguardando envio";
         stage = "distribuicao";

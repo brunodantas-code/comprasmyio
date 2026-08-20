@@ -31,7 +31,7 @@ export const MYIO_PRODUCTS = [
   "Sensor Sirius ACB Mensolarb",
 ] as const;
 
-type MyioStatus = "pendente" | "produzindo" | "pronto_entrega" | "em_transito" | "entregue_cliente";
+type MyioStatus = "pendente" | "produzindo" | "pronto_entrega" | "em_transito" | "entregue_cliente" | "perdido";
 
 const STATUS_LABELS: Record<MyioStatus, string> = {
   pendente: "Pendente",
@@ -39,6 +39,7 @@ const STATUS_LABELS: Record<MyioStatus, string> = {
   pronto_entrega: "Pronto para entrega",
   em_transito: "Em trânsito",
   entregue_cliente: "Entregue para o cliente",
+  perdido: "Perdido",
 };
 
 const STATUS_CLASSES: Record<MyioStatus, string> = {
@@ -47,6 +48,7 @@ const STATUS_CLASSES: Record<MyioStatus, string> = {
   pronto_entrega: "bg-green-100 text-green-800 border-green-300",
   em_transito: "bg-amber-100 text-amber-800 border-amber-300",
   entregue_cliente: "bg-blue-100 text-blue-800 border-blue-300",
+  perdido: "bg-red-100 text-red-800 border-red-300",
 };
 
 const STATUS_KEYS = Object.keys(STATUS_LABELS) as MyioStatus[];

@@ -18,7 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ItemDeliveriesDialog } from "@/components/myio-delivery-qr";
-import { CheckCircle2, FileText, Loader2, Send, Truck, Undo2, Upload } from "lucide-react";
+import { AlertTriangle, CheckCircle2, FileText, Loader2, Send, Truck, Undo2, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 const PROOF_BUCKET = "assembly-photos";
@@ -423,6 +423,68 @@ function ReturnToDistributionDialog({ orderId, notes }: { orderId: string; notes
   );
 }
 
+function LostMerchandiseDialog({ orderId, notes }: { orderId: string; notes: string | null }) {
+  const queryClient = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState("");
+
+  const lost = useMutation({
+    mutationFn: async () => {
+      const stamp = new Date().toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+      const entry = `[Mercadoria perdida em ${stamp}] ${reason.trim()}`;
+      const { error } = await supabase
+        .from("myio_orders")
+        .update({ status: "perdido" as never, notes: notes ? `${notes}\n${entry}` : entry })
+        .eq("id", orderId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Pedido marcado como perdido.");
+      setOpen(false);
+      setReason("");
+      queryClient.invalidateQueries({ queryKey: ["myio-transit"] });
+      queryClient.invalidateQueries({ queryKey: ["myio-lost"] });
+      queryClient.invalidateQueries({ queryKey: ["myio-orders"] });
+    },
+    onError: (e: any) => toast.error(e.message ?? "Erro ao marcar como perdido"),
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <Button size="sm" variant="outline" onClick={() => setOpen(true)}>
+        <AlertTriangle className="mr-2 h-4 w-4" /> Mercadoria perdida
+      </Button>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Mercadoria perdida</DialogTitle>
+          <DialogDescription>
+            Informe o que aconteceu. O pedido será movido imediatamente para a sub-aba Perdidos.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-2">
+          <Label htmlFor={`lost-reason-${orderId}`}>Observação (obrigatório)</Label>
+          <Textarea
+            id={`lost-reason-${orderId}`}
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder="Ex.: extraviado pela transportadora, roubo, dano irreparável..."
+            rows={4}
+          />
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>
+            Cancelar
+          </Button>
+          <Button disabled={!reason.trim() || lost.isPending} onClick={() => lost.mutate()}>
+            {lost.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Confirmar
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function TransitCard() {
   const queryClient = useQueryClient();
 
@@ -497,7 +559,118 @@ export function TransitCard() {
                     Entregue ao cliente
                   </Button>
                   <ReturnToDistributionDialog orderId={o.id} notes={o.notes} />
+                  <LostMerchandiseDialog orderId={o.id} notes={o.notes} />
                 </div>
+                {s && (
+                  <div className="grid gap-1 rounded-md border p-3 text-xs text-muted-foreground sm:grid-cols-2">
+                    <span>
+                      <strong className="text-foreground">Endereço:</strong> {s.address}
+                    </span>
+                    <span>
+                      <strong className="text-foreground">Envio:</strong> {s.shipping_method}
+                    </span>
+                    <span>
+                      <strong className="text-foreground">Responsável:</strong> {s.responsible}
+                    </span>
+                    <span>
+                      <strong className="text-foreground">Rastreio:</strong> {s.tracking_code}
+                    </span>
+                    {s.notes && (
+                      <span className="sm:col-span-2">
+                        <strong className="text-foreground">Obs.:</strong> {s.notes}
+                      </span>
+                    )}
+                    <span className="sm:col-span-2">
+                      <ProofLink path={s.proof_url} />
+                    </span>
+                  </div>
+                )}
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Produto</TableHead>
+                      <TableHead className="w-28">Quantidade</TableHead>
+                      <TableHead className="w-40">Baixa</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {o.myio_order_items.map((i) => (
+                      <TableRow key={i.id}>
+                        <TableCell>{i.product}</TableCell>
+                        <TableCell className="font-medium">{i.quantity}</TableCell>
+                        <TableCell>
+                          <ItemDeliveriesDialog
+                            orderItemId={i.id}
+                            product={i.product}
+                            trigger={
+                              <Badge
+                                variant="outline"
+                                className="cursor-pointer border-emerald-300 bg-emerald-100 text-emerald-800 hover:bg-emerald-200"
+                              >
+                                Ver baixa
+                              </Badge>
+                            }
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            );
+          })
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+export function LostCard() {
+  const { data: orders, isLoading } = useQuery({
+    queryKey: ["myio-lost"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("myio_orders")
+        .select(
+          "id, title, client_name, delivery_date, status, notes, is_replacement, projects(name), myio_order_items(id, product, quantity), myio_shipments(id, address, shipping_method, responsible, tracking_code, proof_url, notes, created_at)",
+        )
+        .eq("status", "perdido" as never)
+        .order("delivery_date", { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as unknown as TransitOrder[];
+    },
+  });
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <AlertTriangle className="h-5 w-5" />
+          Mercadoria perdida
+        </CardTitle>
+        <CardDescription>Pedidos com mercadoria extraviada ou perdida em trânsito.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">Carregando...</p>
+        ) : !orders?.length ? (
+          <p className="text-sm text-muted-foreground">Nenhuma mercadoria perdida.</p>
+        ) : (
+          orders.map((o) => {
+            const s = o.myio_shipments?.[o.myio_shipments.length - 1];
+            return (
+              <div key={o.id} className="space-y-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-medium">{o.projects?.name || o.title}</span>
+                  <Badge variant="outline">{o.client_name}</Badge>
+                  <Badge variant="outline">Entrega {formatDate(o.delivery_date)}</Badge>
+                  <Badge variant="outline" className="border-red-300 bg-red-100 text-red-800">
+                    Perdido
+                  </Badge>
+                </div>
+                {o.notes && (
+                  <p className="whitespace-pre-line text-xs text-muted-foreground">{o.notes}</p>
+                )}
                 {s && (
                   <div className="grid gap-1 rounded-md border p-3 text-xs text-muted-foreground sm:grid-cols-2">
                     <span>
