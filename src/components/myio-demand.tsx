@@ -15,10 +15,109 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ClipboardList, Factory, Loader2, ShoppingCart, Wand2 } from "lucide-react";
+import { Camera, ClipboardList, Factory, Loader2, ShoppingCart, Upload, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 
+const PHOTO_BUCKET = "assembly-photos";
+
 type DemandItem = { id: string; product: string; quantity: number };
+
+type DeliverState = { order: DemandOrder; item: DemandItem; available: number };
+
+function DeliverItemDialog({
+  state,
+  onClose,
+  onConfirm,
+  pending,
+}: {
+  state: DeliverState | null;
+  onClose: () => void;
+  onConfirm: (quantity: number, file: File) => void;
+  pending: boolean;
+}) {
+  const [qty, setQty] = useState(1);
+  const [file, setFile] = useState<File | null>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const galleryRef = useRef<HTMLInputElement>(null);
+
+  return (
+    <Dialog
+      open={!!state}
+      onOpenChange={(o) => {
+        if (!o) onClose();
+      }}
+    >
+      <DialogContent
+        onOpenAutoFocus={() => {
+          if (state) setQty(Math.min(state.item.quantity, state.available));
+          setFile(null);
+        }}
+      >
+        <DialogHeader>
+          <DialogTitle>Dar baixa no material</DialogTitle>
+          <DialogDescription>
+            {state?.item.product} — disponível {state?.available} em estoque.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="deliver-qty">Quantidade</Label>
+            <Input
+              id="deliver-qty"
+              type="number"
+              min={1}
+              value={qty}
+              onChange={(e) => setQty(Math.max(1, Number(e.target.value) || 1))}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Foto do material (obrigatória)</Label>
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" onClick={() => cameraRef.current?.click()}>
+                <Camera className="mr-2 h-4 w-4" />
+                Câmera
+              </Button>
+              <Button type="button" variant="outline" onClick={() => galleryRef.current?.click()}>
+                <Upload className="mr-2 h-4 w-4" />
+                Galeria
+              </Button>
+            </div>
+            <input
+              ref={cameraRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            />
+            <input
+              ref={galleryRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            />
+            {file && <p className="text-xs text-muted-foreground">{file.name}</p>}
+          </div>
+        </div>
+        <DialogFooter className="gap-2 sm:justify-between">
+          <Button variant="ghost" onClick={onClose} disabled={pending}>
+            Cancelar
+          </Button>
+          <Button
+            disabled={pending || !file}
+            onClick={() => {
+              if (file) onConfirm(qty, file);
+            }}
+          >
+            {pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Dar baixa
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 type ItemDialogState = {
   order: DemandOrder;
@@ -116,6 +215,7 @@ function formatDate(d: string | null) {
 export function MyioDemandCard({ balances }: { balances: Record<string, number> }) {
   const queryClient = useQueryClient();
   const [itemDialog, setItemDialog] = useState<ItemDialogState | null>(null);
+  const [deliverDialog, setDeliverDialog] = useState<DeliverState | null>(null);
   const { data: orders, isLoading } = useQuery({
     queryKey: ["myio-demand"],
     queryFn: async () => {
@@ -260,6 +360,73 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
     onError: (e: any) => toast.error(e.message ?? "Erro ao resolver demanda"),
   });
 
+  const { data: deliveredItemIds } = useQuery({
+    queryKey: ["myio-item-deliveries"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("myio_item_deliveries").select("order_item_id");
+      if (error) throw error;
+      return new Set((data ?? []).map((r) => r.order_item_id));
+    },
+  });
+
+  const deliverMutation = useMutation({
+    mutationFn: async (vars: { state: DeliverState; quantity: number; file: File }) => {
+      const { state, quantity, file } = vars;
+      const { data: userData } = await supabase.auth.getUser();
+      const userId = userData.user?.id ?? null;
+      if (!userId) throw new Error("Sessão expirada.");
+
+      const ext = file.name.split(".").pop() ?? "jpg";
+      const path = `myio-delivery/${crypto.randomUUID()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from(PHOTO_BUCKET).upload(path, file);
+      if (upErr) throw upErr;
+
+      const mat = materialByName.get(state.item.product.trim().toLowerCase());
+      if (mat) {
+        const { error: smErr } = await supabase.from("stock_movements").insert({
+          material_id: mat.id,
+          quantity,
+          type: "saida",
+          reason: `Baixa para pedido Myio (${state.order.projects?.name ?? "sem projeto"})`,
+          created_by: userId,
+        });
+        if (smErr) throw smErr;
+      }
+
+      const { error: delErr } = await supabase.from("myio_item_deliveries").insert({
+        order_id: state.order.id,
+        order_item_id: state.item.id,
+        product: state.item.product,
+        quantity,
+        photo_url: path,
+        created_by: userId,
+      });
+      if (delErr) throw delErr;
+
+      const doneIds = new Set([...(deliveredItemIds ?? []), state.item.id]);
+      const allDone = state.order.myio_order_items.every((i) => doneIds.has(i.id));
+      const nextStatus = allDone ? "pronto_entrega" : "produzindo";
+      if (state.order.status !== nextStatus && state.order.status !== "entregue_cliente") {
+        const { error: stErr } = await supabase
+          .from("myio_orders")
+          .update({ status: nextStatus })
+          .eq("id", state.order.id);
+        if (stErr) throw stErr;
+      }
+      return { allDone };
+    },
+    onSuccess: (r) => {
+      toast.success(r.allDone ? "Baixa registrada. Pedido pronto para entrega." : "Baixa registrada.");
+      queryClient.invalidateQueries({ queryKey: ["myio-item-deliveries"] });
+      queryClient.invalidateQueries({ queryKey: ["myio-demand"] });
+      queryClient.invalidateQueries({ queryKey: ["myio-orders"] });
+      queryClient.invalidateQueries({ queryKey: ["stock-movements"] });
+      queryClient.invalidateQueries({ queryKey: ["stock"] });
+    },
+    onError: (e: any) => toast.error(e.message ?? "Erro ao dar baixa"),
+    onSettled: () => setDeliverDialog(null),
+  });
+
   return (
     <Card>
       <CardHeader>
@@ -316,14 +483,30 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
                     const ok = bal >= i.quantity;
                     const isManufactured = manufacturedNames.has(i.product.trim().toLowerCase());
                     const sent = resolvedItemIds?.has(i.id) ?? false;
+                    const delivered = deliveredItemIds?.has(i.id) ?? false;
                     return (
                       <TableRow key={i.id}>
                         <TableCell>{i.product}</TableCell>
                         <TableCell className="font-medium">{i.quantity}</TableCell>
                         <TableCell>{bal}</TableCell>
                         <TableCell>
-                          {ok ? (
-                            <Badge variant="outline" className="border-green-300 bg-green-100 text-green-800">Disponível</Badge>
+                          {delivered ? (
+                            <Badge variant="outline" className="border-emerald-300 bg-emerald-100 text-emerald-800">
+                              Baixa registrada
+                            </Badge>
+                          ) : ok ? (
+                            <button
+                              type="button"
+                              className="cursor-pointer"
+                              onClick={() => setDeliverDialog({ order: o, item: i, available: bal })}
+                            >
+                              <Badge
+                                variant="outline"
+                                className="border-green-300 bg-green-100 text-green-800 hover:bg-green-200"
+                              >
+                                Disponível
+                              </Badge>
+                            </button>
                           ) : sent ? (
                             <Badge variant="outline" className="border-slate-300 bg-slate-100 text-slate-700">
                               {isManufactured ? "Enviado à fábrica" : "Na fila de compras"}
@@ -366,6 +549,15 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
             { order: itemDialog.order, items: [itemDialog.item], mode, quantity },
             { onSettled: () => setItemDialog(null) },
           );
+        }}
+      />
+      <DeliverItemDialog
+        state={deliverDialog}
+        onClose={() => setDeliverDialog(null)}
+        pending={deliverMutation.isPending}
+        onConfirm={(quantity, file) => {
+          if (!deliverDialog) return;
+          deliverMutation.mutate({ state: deliverDialog, quantity, file });
         }}
       />
     </Card>

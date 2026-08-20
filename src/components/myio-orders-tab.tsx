@@ -13,7 +13,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { ProductImageUploader, ProductPhotoPreview, useProductImages } from "@/components/myio-product-image";
 import { toast } from "sonner";
-import { Plus, Trash2, Factory, Pencil } from "lucide-react";
+import { Plus, Trash2, Factory, Pencil, Check } from "lucide-react";
 
 export const MYIO_PRODUCTS = [
   "Myio 3F",
@@ -406,6 +406,14 @@ export function MyioOrdersTab({ userId, canManage = true }: { userId: string; ca
   const [statusFilter, setStatusFilter] = useState<Set<MyioStatus>>(
     new Set(Object.keys(STATUS_LABELS) as MyioStatus[])
   );
+  const { data: deliveredItemIds } = useQuery({
+    queryKey: ["myio-item-deliveries"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("myio_item_deliveries").select("order_item_id");
+      if (error) throw error;
+      return new Set((data ?? []).map((r) => r.order_item_id));
+    },
+  });
   const { data: orders, isLoading } = useQuery({
     queryKey: ["myio-orders"],
     queryFn: async () => {
@@ -500,6 +508,9 @@ export function MyioOrdersTab({ userId, canManage = true }: { userId: string; ca
                           <ProductPhotoPreview product={i.product} url={images?.[i.product]} size={28}>
                             <span><span className="font-medium">{i.quantity}x</span> {i.product}</span>
                           </ProductPhotoPreview>
+                          {deliveredItemIds?.has(i.id) && (
+                            <Check className="h-4 w-4 shrink-0 text-green-600" aria-label="Baixa registrada" />
+                          )}
                         </div>
                       ))}
                     </div>
