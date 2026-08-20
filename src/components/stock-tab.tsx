@@ -223,6 +223,8 @@ function MovementDialog({
     if (isExit && !responsible.trim()) return toast.error("Informe o técnico/responsável");
     if (needsQr && qrs.length === 0) return toast.error("Vincule ao menos um QR code");
     if (needsQr && !file) return toast.error("Foto obrigatória para produtos Myio");
+    if (isExit && qrs.length === 0 && !file)
+      return toast.error("Todo produto entregue ao técnico precisa de QR code ou foto");
     save.mutate({ quantity, reason: reason || null });
   }
 
@@ -276,7 +278,9 @@ function MovementDialog({
           {needsQr && <QrLinkPicker value={qrs} onChange={setQrs} required />}
           {isExit && (
             <div className="space-y-2">
-              <Label>Foto do material {isManufactured ? "(obrigatória)" : "(opcional)"}</Label>
+              <Label>
+                Foto do material {isManufactured ? "(obrigatória)" : qrs.length ? "(opcional)" : "(obrigatória se não houver QR code)"}
+              </Label>
               <div className="flex gap-2">
                 <Button type="button" variant="outline" onClick={() => cameraRef.current?.click()}>
                   <Camera className="mr-2 h-4 w-4" /> Câmera
