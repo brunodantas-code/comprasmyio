@@ -600,8 +600,6 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
 }
 
 export function ProductionQueueCard({ balances }: { balances?: Record<string, number> }) {
-  const queryClient = useQueryClient();
-  const syncingRef = useRef(false);
   const { data: rows, isLoading } = useQuery({
     queryKey: ["production-demands"],
     queryFn: async () => {
