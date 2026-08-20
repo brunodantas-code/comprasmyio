@@ -92,11 +92,13 @@ function MoveUnitProductDialog({
     mutationFn: async () => {
       if (!destination) throw new Error("Selecione o destino.");
       if (destination === "tecnico" && !technician.trim()) throw new Error("Informe o nome do técnico.");
-      if (!file) throw new Error("Anexe uma foto do produto.");
 
-      const path = `unit-moves/${product.id}/${crypto.randomUUID()}-${file.name}`;
-      const { error: upErr } = await supabase.storage.from("assembly-photos").upload(path, file);
-      if (upErr) throw upErr;
+      let path: string | null = null;
+      if (file) {
+        path = `unit-moves/${product.id}/${crypto.randomUUID()}-${file.name}`;
+        const { error: upErr } = await supabase.storage.from("assembly-photos").upload(path, file);
+        if (upErr) throw upErr;
+      }
 
       const { error } = await supabase
         .from("unit_products")
@@ -157,7 +159,7 @@ function MoveUnitProductDialog({
       <DialogContent className="max-h-[88vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Mover produto — {productName}</DialogTitle>
-          <DialogDescription>Registre a foto e o destino do produto que sai da unidade.</DialogDescription>
+          <DialogDescription>Registre o destino do produto que sai da unidade. A foto é opcional.</DialogDescription>
         </DialogHeader>
 
         <form
@@ -168,7 +170,7 @@ function MoveUnitProductDialog({
           }}
         >
           <div className="space-y-2">
-            <Label>Foto (obrigatória)</Label>
+            <Label>Foto (opcional)</Label>
             <div className="flex gap-2">
               <Button type="button" variant="outline" size="sm" onClick={() => cameraRef.current?.click()}>
                 <Camera className="mr-1 h-4 w-4" /> Câmera
