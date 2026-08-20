@@ -446,6 +446,38 @@ export function ReleaseAssembledDialog({ userId }: { userId: string }) {
         .insert(items.map((i) => ({ ...i, release_id: release.id })));
       if (itemsErr) throw itemsErr;
 
+      // Abate a fila de produção conforme o que foi liberado (FIFO por produto)
+      for (const it of items) {
+        const name = (materials ?? []).find((m) => m.id === it.material_id)?.name;
+        if (!name) continue;
+        const { data: demands, error: dErr } = await supabase
+          .from("production_demands")
+          .select("id, product, quantity")
+          .eq("status", "pendente")
+          .ilike("product", name.trim())
+          .order("created_at", { ascending: true });
+        if (dErr) throw dErr;
+        let remaining = it.quantity;
+        for (const d of demands ?? []) {
+          if (remaining <= 0) break;
+          if (d.quantity <= remaining) {
+            remaining -= d.quantity;
+            const { error } = await supabase
+              .from("production_demands")
+              .update({ status: "concluido" })
+              .eq("id", d.id);
+            if (error) throw error;
+          } else {
+            const { error } = await supabase
+              .from("production_demands")
+              .update({ quantity: d.quantity - remaining })
+              .eq("id", d.id);
+            if (error) throw error;
+            remaining = 0;
+          }
+        }
+      }
+
       // Baixa automática dos componentes conforme a ficha técnica (BOM)
       const { data: boms, error: bomErr } = await supabase
         .from("product_boms")
