@@ -20,6 +20,23 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { ArrowRightLeft, HardHat, History } from "lucide-react";
 
+function DispatchPhoto({ path }: { path: string }) {
+  const { data } = useQuery({
+    queryKey: ["assembly-photo", path],
+    queryFn: async () => {
+      if (path.startsWith("http")) return path;
+      const { data } = await supabase.storage.from("assembly-photos").createSignedUrl(path, 3600);
+      return data?.signedUrl ?? null;
+    },
+  });
+  if (!data) return null;
+  return (
+    <a href={data} target="_blank" rel="noreferrer">
+      <img src={data} alt="Foto do material com o técnico" className="h-12 w-12 rounded border object-cover" />
+    </a>
+  );
+}
+
 type Destination = "unidade" | "perdido" | "almoxarifado";
 
 const DEST_LABELS: Record<Destination, string> = {
@@ -41,6 +58,7 @@ type Dispatch = {
   responsible: string | null;
   reason: string | null;
   created_at: string;
+  photo_url: string | null;
 };
 
 type Move = {
@@ -65,11 +83,28 @@ function useDispatches() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("stock_movements")
-        .select("id, material_id, quantity, responsible, reason, created_at")
+        .select("id, material_id, quantity, responsible, reason, created_at, photo_url")
         .eq("type", "saida")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return ((data ?? []) as Dispatch[]).filter((d) => !!d.responsible?.trim());
+    },
+  });
+}
+
+function useDispatchQrs() {
+  return useQuery({
+    queryKey: ["technician-dispatch-qrs"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("stock_movement_qrs")
+        .select("movement_id, qr_value, box_qr");
+      if (error) throw error;
+      const map: Record<string, string[]> = {};
+      ((data ?? []) as { movement_id: string; qr_value: string; box_qr: string | null }[]).forEach((q) => {
+        (map[q.movement_id] ??= []).push(q.box_qr ? `${q.box_qr} / ${q.qr_value}` : q.qr_value);
+      });
+      return map;
     },
   });
 }
@@ -306,6 +341,7 @@ export function TechnicianItemsCard({
 }) {
   const { data: dispatches, isLoading } = useDispatches();
   const { data: moves } = useTechnicianMoves();
+  const { data: qrsByMovement } = useDispatchQrs();
   const { data: projects } = useProjectOptions();
   const projectNames = Object.fromEntries((projects ?? []).map((p) => [p.id, p.name]));
 
@@ -357,6 +393,7 @@ export function TechnicianItemsCard({
                     <TableRow>
                       <TableHead>Produto</TableHead>
                       <TableHead>Quantidade</TableHead>
+                      <TableHead>QR code / Foto</TableHead>
                       <TableHead>Saída</TableHead>
                       <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
@@ -372,6 +409,23 @@ export function TechnicianItemsCard({
                             {d.reason && <p className="text-xs text-muted-foreground">{d.reason}</p>}
                           </TableCell>
                           <TableCell>{remaining}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              {(qrsByMovement?.[d.id] ?? []).length > 0 && (
+                                <div className="space-y-0.5">
+                                  {(qrsByMovement?.[d.id] ?? []).map((q) => (
+                                    <Badge key={q} variant="outline" className="font-mono text-[11px]">{q}</Badge>
+                                  ))}
+                                </div>
+                              )}
+                              {d.photo_url && <DispatchPhoto path={d.photo_url} />}
+                              {!(qrsByMovement?.[d.id] ?? []).length && !d.photo_url && (
+                                <Badge variant="outline" className="border-amber-300 bg-amber-100 text-amber-800">
+                                  Sem QR/foto
+                                </Badge>
+                              )}
+                            </div>
+                          </TableCell>
                           <TableCell className="text-sm text-muted-foreground">{fmt(d.created_at)}</TableCell>
                           <TableCell className="text-right">
                             <MoveDialog dispatch={d} materialName={name} remaining={remaining} userId={userId} />
