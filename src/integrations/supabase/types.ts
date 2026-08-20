@@ -317,6 +317,61 @@ export type Database = {
         }
         Relationships: []
       }
+      myio_delivery_qrs: {
+        Row: {
+          box_qr: string | null
+          created_at: string
+          created_by: string | null
+          delivery_id: string
+          homologation_unit_id: string | null
+          id: string
+          order_item_id: string | null
+          qr_value: string
+        }
+        Insert: {
+          box_qr?: string | null
+          created_at?: string
+          created_by?: string | null
+          delivery_id: string
+          homologation_unit_id?: string | null
+          id?: string
+          order_item_id?: string | null
+          qr_value: string
+        }
+        Update: {
+          box_qr?: string | null
+          created_at?: string
+          created_by?: string | null
+          delivery_id?: string
+          homologation_unit_id?: string | null
+          id?: string
+          order_item_id?: string | null
+          qr_value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "myio_delivery_qrs_delivery_id_fkey"
+            columns: ["delivery_id"]
+            isOneToOne: false
+            referencedRelation: "myio_item_deliveries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "myio_delivery_qrs_homologation_unit_id_fkey"
+            columns: ["homologation_unit_id"]
+            isOneToOne: false
+            referencedRelation: "homologation_units"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "myio_delivery_qrs_order_item_id_fkey"
+            columns: ["order_item_id"]
+            isOneToOne: false
+            referencedRelation: "myio_order_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       myio_item_deliveries: {
         Row: {
           created_at: string
