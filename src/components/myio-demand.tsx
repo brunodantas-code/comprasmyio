@@ -23,7 +23,12 @@ const PHOTO_BUCKET = "assembly-photos";
 
 type DemandItem = { id: string; product: string; quantity: number };
 
-type DeliverState = { order: DemandOrder; item: DemandItem; available: number };
+type DeliverState = {
+  order: DemandOrder;
+  item: DemandItem;
+  available: number;
+  isManufactured: boolean;
+};
 
 function DeliverItemDialog({
   state,
@@ -80,7 +85,9 @@ function DeliverItemDialog({
               </p>
             )}
           </div>
-          <QrLinkPicker value={qrs} onChange={setQrs} />
+          {state?.isManufactured && (
+            <QrLinkPicker value={qrs} onChange={setQrs} required />
+          )}
           <div className="space-y-2">
             <Label>Foto do material (obrigatória)</Label>
             <div className="flex gap-2">
@@ -116,7 +123,7 @@ function DeliverItemDialog({
             Cancelar
           </Button>
           <Button
-            disabled={pending || !file}
+            disabled={pending || !file || (!!state?.isManufactured && qrs.length === 0)}
             onClick={() => {
               if (file) onConfirm(qrs.length ? qrs.length : qty, file, qrs);
             }}
@@ -524,7 +531,9 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
                             <button
                               type="button"
                               className="cursor-pointer"
-                              onClick={() => setDeliverDialog({ order: o, item: i, available: bal })}
+                              onClick={() =>
+                                setDeliverDialog({ order: o, item: i, available: bal, isManufactured })
+                              }
                             >
                               <Badge
                                 variant="outline"
