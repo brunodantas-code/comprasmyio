@@ -598,11 +598,22 @@ function ResetStockDialog({
         const { error } = await supabase.from("stock_movements").delete().in("material_id", ids.slice(i, i + 100));
         if (error) throw error;
       }
+      // Limpa também os QR Codes (homologações/caixas e etiquetas de unidades) destes materiais
+      for (let i = 0; i < ids.length; i += 100) {
+        const chunk = ids.slice(i, i + 100);
+        const { error: homErr } = await supabase.from("homologations").delete().in("material_id", chunk);
+        if (homErr) throw homErr;
+        const { error: unitErr } = await supabase.from("unit_products").delete().in("material_id", chunk);
+        if (unitErr) throw unitErr;
+      }
     },
     onSuccess: () => {
-      toast.success("Estoque zerado");
+      toast.success("Estoque e QR Codes zerados");
       qc.invalidateQueries({ queryKey: ["material-stock"] });
       qc.invalidateQueries({ queryKey: ["stock-movements"] });
+      qc.invalidateQueries({ queryKey: ["homologations"] });
+      qc.invalidateQueries({ queryKey: ["boxes"] });
+      qc.invalidateQueries({ queryKey: ["unit-products"] });
       setConfirm("");
       setOpen(false);
     },
@@ -626,8 +637,9 @@ function ResetStockDialog({
         <DialogHeader>
           <DialogTitle>Zerar estoque — {LOCATION_LABELS[location]}</DialogTitle>
           <DialogDescription>
-            Todos os saldos deste local serão zerados e todas as movimentações dos {ids.length} item(ns) serão
-            apagadas do histórico. Esta ação não pode ser desfeita. Digite <strong>zerar</strong> para confirmar.
+            Todos os saldos deste local serão zerados, as movimentações dos {ids.length} item(ns) serão apagadas e
+            todos os QR Codes (caixas, unidades homologadas e etiquetas) destes itens serão removidos. Esta ação não
+            pode ser desfeita. Digite <strong>zerar</strong> para confirmar.
           </DialogDescription>
         </DialogHeader>
         <Input value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="zerar" />
