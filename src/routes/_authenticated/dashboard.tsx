@@ -182,12 +182,12 @@ function StatusMultiFilter({ selected, setSelected }: { selected: Order["status"
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button type="button" variant="outline" size="sm" className="w-[200px] justify-start">
+        <Button type="button" variant="outline" size="sm" className="w-full justify-start sm:w-[200px]">
           <Filter className="mr-2 h-4 w-4" />
           <span className="truncate">{label}</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-[240px] p-2">
+      <PopoverContent align="end" className="w-[min(15rem,calc(100vw-2rem))] p-2">
         <div className="flex items-center justify-between px-2 py-1 text-xs text-muted-foreground">
           <span>Filtrar status</span>
           <button type="button" className="hover:underline" onClick={() => setSelected(allOn ? [] : [...STATUS_KEYS])}>
@@ -267,7 +267,7 @@ function DeliveredFilter({
   return (
     <div className="flex flex-wrap items-center gap-2">
       <Select value={mode} onValueChange={(v) => setMode(v as DeliveredMode)}>
-        <SelectTrigger className="w-[240px]"><SelectValue /></SelectTrigger>
+        <SelectTrigger className="w-full sm:w-[240px]"><SelectValue /></SelectTrigger>
         <SelectContent>
           {Object.entries(DELIVERED_LABELS).map(([v, l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}
         </SelectContent>
@@ -277,7 +277,7 @@ function DeliveredFilter({
           type="date"
           value={fromDate}
           onChange={(e) => setFromDate(e.target.value)}
-          className="w-[160px]"
+          className="w-full sm:w-[160px]"
         />
       )}
     </div>
@@ -306,30 +306,30 @@ function Dashboard() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <Link to="/" className="flex items-center gap-2 font-semibold">
-            <Package className="h-5 w-5 text-primary" />
-            ComprAqui
+        <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 sm:flex sm:justify-between sm:px-6 sm:py-4">
+          <Link to="/" className="flex min-w-0 items-center gap-2 font-semibold">
+            <Package className="h-5 w-5 shrink-0 text-primary" />
+            <span className="truncate">ComprAqui</span>
           </Link>
-          <div className="flex items-center gap-3">
-            <div className="text-right">
-              <div className="text-sm font-medium">{me.full_name || me.email}</div>
-              <div className="flex justify-end gap-1">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+            <div className="min-w-0 text-right">
+              <div className="truncate text-xs font-medium sm:text-sm">{me.full_name || me.email}</div>
+              <div className="flex flex-wrap justify-end gap-1">
                 {me.roles.map((r) => (
                   <Badge key={r} variant="outline" className="text-[10px] uppercase">{r}</Badge>
                 ))}
               </div>
             </div>
-            <Button variant="ghost" size="icon" onClick={handleSignOut} title="Sair">
+            <Button variant="ghost" size="icon" className="shrink-0" onClick={handleSignOut} title="Sair">
               <LogOut className="h-4 w-4" />
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <main className="mx-auto max-w-7xl px-3 py-5 sm:px-6 sm:py-8">
         <Tabs defaultValue={defaultTab}>
-          <TabsList className="mb-6 flex-wrap">
+          <TabsList className="mb-6">
             <TabsTrigger value="pedidos"><ClipboardList className="mr-2 h-4 w-4" />Pedidos</TabsTrigger>
             {(me.isComprador || me.isAdmin) && (
               <TabsTrigger value="queue"><ShoppingCart className="mr-2 h-4 w-4" />Fila de compras</TabsTrigger>
@@ -436,7 +436,7 @@ function MaterialPicker({ onPick }: { onPick: (m: Material) => void }) {
           <Library className="mr-1 h-4 w-4" /> Biblioteca
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[320px] p-0" align="end">
+      <PopoverContent className="w-[min(20rem,calc(100vw-2rem))] p-0" align="end">
         <Command>
           <CommandInput placeholder="Buscar material..." />
           <CommandList>
@@ -735,7 +735,7 @@ function BuyerQueue() {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Select value={projectFilter} onValueChange={setProjectFilter}>
-            <SelectTrigger className="w-[200px]"><SelectValue placeholder="Projeto" /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-[200px]"><SelectValue placeholder="Projeto" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos os projetos</SelectItem>
               {projects?.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}

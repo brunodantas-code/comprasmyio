@@ -680,7 +680,7 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
                     <Library className="mr-1 h-4 w-4" /> Biblioteca
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[320px] p-0" align="end">
+                <PopoverContent className="w-[min(20rem,calc(100vw-2rem))] p-0" align="end">
                   <Command>
                     <CommandInput placeholder="Buscar material..." />
                     <CommandList>
@@ -996,11 +996,11 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Buscar material"
-          className="w-[200px] pl-8"
+          className="w-full pl-8 sm:w-[200px]"
         />
       </div>
       <Select value={view} onValueChange={(v) => setView(v as "all" | "with" | "zero")}>
-        <SelectTrigger className="w-[170px]"><SelectValue /></SelectTrigger>
+        <SelectTrigger className="w-full sm:w-[170px]"><SelectValue /></SelectTrigger>
         <SelectContent>
           <SelectItem value="all">Todos</SelectItem>
           <SelectItem value="with">Com saldo</SelectItem>
