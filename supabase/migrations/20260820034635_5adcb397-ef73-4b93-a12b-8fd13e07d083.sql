@@ -1,0 +1,2 @@
+CREATE UNIQUE INDEX IF NOT EXISTS homologation_units_qr_value_key ON public.homologation_units (qr_value);
+CREATE UNIQUE INDEX IF NOT EXISTS homologations_box_qr_key ON public.homologations (box_qr) WHERE box_qr IS NOT NULL;
