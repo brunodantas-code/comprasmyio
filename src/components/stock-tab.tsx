@@ -31,7 +31,7 @@ import { StockQrDialog } from "@/components/homologation";
 import { BomSettingsDialog } from "@/components/bom-settings";
 import { UnitProductsCard } from "@/components/unit-products";
 import { QrCheckSection } from "@/components/qr-check";
-import { MyioDemandCard } from "@/components/myio-demand";
+import { MyioDemandCard, ProductionQueueCard } from "@/components/myio-demand";
 
 type StockRow = {
   material_id: string;
@@ -669,6 +669,8 @@ function StockSection({ userId, location, canDelete }: { userId: string; locatio
         <MyioDemandCard
           balances={Object.fromEntries(scoped.map((r) => [r.name.trim().toLowerCase(), r.balance]))}
         />
+      ) : location === "fabrica" ? (
+        <ProductionQueueCard />
       ) : (
       <div className="grid gap-4 sm:grid-cols-3">
         <Card>

@@ -514,6 +514,47 @@ export type Database = {
           },
         ]
       }
+      production_demands: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          order_id: string | null
+          order_item_id: string | null
+          product: string
+          quantity: number
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          order_id?: string | null
+          order_item_id?: string | null
+          product: string
+          quantity: number
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          order_id?: string | null
+          order_item_id?: string | null
+          product?: string
+          quantity?: number
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_demands_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "myio_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -572,6 +613,54 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      purchase_demands: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          order_id: string | null
+          order_item_id: string | null
+          product: string
+          purchase_order_id: string | null
+          quantity: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          order_id?: string | null
+          order_item_id?: string | null
+          product: string
+          purchase_order_id?: string | null
+          quantity: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          order_id?: string | null
+          order_item_id?: string | null
+          product?: string
+          purchase_order_id?: string | null
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_demands_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "myio_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_demands_purchase_order_id_fkey"
+            columns: ["purchase_order_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
             referencedColumns: ["id"]
           },
         ]
