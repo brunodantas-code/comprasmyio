@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ReleaseAssembledDialog, AssemblyReleasesCard } from "@/components/assembly-release";
 import { StockSimulatorDialog, ProductionCapacityCard } from "@/components/stock-simulator";
-import { StockQrDialog } from "@/components/homologation";
+import { StockQrDialog, BoxesCard } from "@/components/homologation";
 import { BomSettingsDialog } from "@/components/bom-settings";
 import { UnitProductsCard } from "@/components/unit-products";
 import { QrCheckSection } from "@/components/qr-check";
@@ -652,7 +652,9 @@ function StockSection({ userId, location, canDelete }: { userId: string; locatio
   const [search, setSearch] = useState("");
   const [view, setView] = useState<"all" | "with" | "zero">("all");
 
-  const scoped = (stock ?? []).filter((r) => (r.location ?? "fabrica") === location);
+  const scoped = (stock ?? [])
+    .filter((r) => (r.location ?? "fabrica") === location)
+    .filter((r) => !/ — Caixa de \d+$/.test(r.name));
   const scopedIds = new Set(scoped.map((r) => r.material_id));
   const scopedMovements = (movements ?? []).filter((m) => scopedIds.has(m.material_id));
 
