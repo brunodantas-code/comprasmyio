@@ -810,6 +810,14 @@ export function AssemblyReleasesCard({
     return p?.full_name || p?.email || "Usuário";
   };
 
+  // Na aba de homologação, omite liberações já totalmente homologadas para manter a lista limpa
+  const visibleReleases = (releases ?? []).filter((r) => {
+    if (!homologable) return true;
+    const items = r.assembly_release_items ?? [];
+    if (!items.length) return true;
+    return items.some((i) => Math.max(i.quantity - homologatedFor(r.id, i.material_id), 0) > 0);
+  });
+
   return (
     <Card>
       <CardHeader>
@@ -817,7 +825,7 @@ export function AssemblyReleasesCard({
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
-        {!releases?.length ? (
+        {!visibleReleases.length ? (
           <p className="text-sm text-muted-foreground">Nenhum produto liberado até o momento.</p>
         ) : (
           <Table>
@@ -832,7 +840,7 @@ export function AssemblyReleasesCard({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {releases.map((r) => {
+              {visibleReleases.map((r) => {
                 const relIssues = issuesFor(r.id);
                 const openIssues = relIssues.filter((i) => i.status === "aberta");
                 return (
