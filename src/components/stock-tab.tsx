@@ -676,6 +676,7 @@ function StockSection({ userId, location, canDelete }: { userId: string; locatio
 }
 
 function StockTableCard({
+  const _unused = 0;
   title,
   description,
   rows,
