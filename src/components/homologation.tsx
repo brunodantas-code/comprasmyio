@@ -306,9 +306,10 @@ export function HomologateDialog({
   }, [sizes.join(",")]);
 
   function reset() {
+    setBoxSize(1);
+    setUnits([""]);
     setBoxQr("");
     setNotes("");
-    setUnits(Array.from({ length: boxSize }, () => ""));
   }
 
   const save = useMutation({
