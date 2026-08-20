@@ -903,6 +903,51 @@ export type Database = {
           },
         ]
       }
+      stock_movement_qrs: {
+        Row: {
+          box_qr: string | null
+          created_at: string
+          created_by: string | null
+          homologation_unit_id: string | null
+          id: string
+          movement_id: string
+          qr_value: string
+        }
+        Insert: {
+          box_qr?: string | null
+          created_at?: string
+          created_by?: string | null
+          homologation_unit_id?: string | null
+          id?: string
+          movement_id: string
+          qr_value: string
+        }
+        Update: {
+          box_qr?: string | null
+          created_at?: string
+          created_by?: string | null
+          homologation_unit_id?: string | null
+          id?: string
+          movement_id?: string
+          qr_value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_movement_qrs_homologation_unit_id_fkey"
+            columns: ["homologation_unit_id"]
+            isOneToOne: false
+            referencedRelation: "homologation_units"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movement_qrs_movement_id_fkey"
+            columns: ["movement_id"]
+            isOneToOne: false
+            referencedRelation: "stock_movements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stock_movements: {
         Row: {
           created_at: string
@@ -910,8 +955,10 @@ export type Database = {
           id: string
           material_id: string
           order_id: string | null
+          photo_url: string | null
           quantity: number
           reason: string | null
+          responsible: string | null
           type: Database["public"]["Enums"]["stock_movement_type"]
         }
         Insert: {
@@ -920,8 +967,10 @@ export type Database = {
           id?: string
           material_id: string
           order_id?: string | null
+          photo_url?: string | null
           quantity: number
           reason?: string | null
+          responsible?: string | null
           type: Database["public"]["Enums"]["stock_movement_type"]
         }
         Update: {
@@ -930,8 +979,10 @@ export type Database = {
           id?: string
           material_id?: string
           order_id?: string | null
+          photo_url?: string | null
           quantity?: number
           reason?: string | null
+          responsible?: string | null
           type?: Database["public"]["Enums"]["stock_movement_type"]
         }
         Relationships: [
