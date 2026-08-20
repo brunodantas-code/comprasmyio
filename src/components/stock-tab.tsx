@@ -13,7 +13,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 import { toast } from "sonner";
-import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Plus, Library, Trash2, Eraser } from "lucide-react";
+import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Plus, Library, Trash2, Eraser, ArrowLeftRight } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -683,6 +683,7 @@ function StockTableCard({
   userId,
   canDelete,
   actions,
+  moveTo,
 }: {
   title: string;
   description: string;
@@ -691,6 +692,7 @@ function StockTableCard({
   userId: string;
   canDelete?: boolean;
   actions?: React.ReactNode;
+  moveTo?: "myio" | "terceiros";
 }) {
   return (
     <Card>
@@ -774,6 +776,7 @@ function StockTableCard({
                         }
                       />
                       <HistoryDialog row={r} />
+                      {moveTo && <MoveOriginButton row={r} target={moveTo} />}
                       {canDelete && <DeleteMaterialDialog row={r} />}
                     </div>
                   </TableCell>
