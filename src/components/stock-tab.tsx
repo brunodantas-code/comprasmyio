@@ -275,7 +275,7 @@ function MovementDialog({
               </datalist>
             </div>
           )}
-          {needsQr && <QrLinkPicker value={qrs} onChange={setQrs} required />}
+          {isExit && <QrLinkPicker value={qrs} onChange={setQrs} required={needsQr} />}
           {isExit && (
             <div className="space-y-2">
               <Label>
