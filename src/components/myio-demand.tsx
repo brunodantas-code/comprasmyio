@@ -689,19 +689,6 @@ export function ProductionQueueCard({ balances }: { balances?: Record<string, nu
   });
   const list = [...grouped.values()].sort((a, b) => b.total - a.total);
 
-  const done = useMutation({
-    mutationFn: async (ids: string[]) => {
-      const { error } = await supabase.from("production_demands").update({ status: "concluido" }).in("id", ids);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast.success("Demanda de produção concluída.");
-      queryClient.invalidateQueries({ queryKey: ["production-demands"] });
-      queryClient.invalidateQueries({ queryKey: ["demand-resolved-items"] });
-    },
-    onError: (e: any) => toast.error(e.message ?? "Erro"),
-  });
-
   return (
     <Card>
       <CardHeader>
@@ -710,8 +697,8 @@ export function ProductionQueueCard({ balances }: { balances?: Record<string, nu
           Fila de produção
         </CardTitle>
         <CardDescription>
-          Produtos que precisam ser fabricados, somados conforme a demanda dos pedidos Myio chega. Quando o
-          estoque do almoxarifado atinge a quantidade exigida, a demanda é concluída automaticamente.
+          Produtos que precisam ser fabricados, somados conforme a demanda dos pedidos Myio chega. A fila só é
+          reduzida quando o produto montado é liberado pela fábrica.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -726,7 +713,6 @@ export function ProductionQueueCard({ balances }: { balances?: Record<string, nu
                 <TableHead>Produto</TableHead>
                 <TableHead className="w-32">A produzir</TableHead>
                 <TableHead>Projetos</TableHead>
-                <TableHead className="w-32">Ação</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -744,11 +730,6 @@ export function ProductionQueueCard({ balances }: { balances?: Record<string, nu
                       )}
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">{g.projects.join(", ") || "—"}</TableCell>
-                    <TableCell>
-                      <Button size="sm" variant="outline" disabled={done.isPending} onClick={() => done.mutate(g.ids)}>
-                        Concluir
-                      </Button>
-                    </TableCell>
                   </TableRow>
                 );
               })}
