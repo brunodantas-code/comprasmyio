@@ -341,6 +341,7 @@ export function TechnicianItemsCard({
 }) {
   const { data: dispatches, isLoading } = useDispatches();
   const { data: moves } = useTechnicianMoves();
+  const { data: qrsByMovement } = useDispatchQrs();
   const { data: projects } = useProjectOptions();
   const projectNames = Object.fromEntries((projects ?? []).map((p) => [p.id, p.name]));
 
@@ -392,6 +393,7 @@ export function TechnicianItemsCard({
                     <TableRow>
                       <TableHead>Produto</TableHead>
                       <TableHead>Quantidade</TableHead>
+                      <TableHead>QR code / Foto</TableHead>
                       <TableHead>Saída</TableHead>
                       <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
@@ -407,6 +409,23 @@ export function TechnicianItemsCard({
                             {d.reason && <p className="text-xs text-muted-foreground">{d.reason}</p>}
                           </TableCell>
                           <TableCell>{remaining}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              {(qrsByMovement?.[d.id] ?? []).length > 0 && (
+                                <div className="space-y-0.5">
+                                  {(qrsByMovement?.[d.id] ?? []).map((q) => (
+                                    <Badge key={q} variant="outline" className="font-mono text-[11px]">{q}</Badge>
+                                  ))}
+                                </div>
+                              )}
+                              {d.photo_url && <DispatchPhoto path={d.photo_url} />}
+                              {!(qrsByMovement?.[d.id] ?? []).length && !d.photo_url && (
+                                <Badge variant="outline" className="border-amber-300 bg-amber-100 text-amber-800">
+                                  Sem QR/foto
+                                </Badge>
+                              )}
+                            </div>
+                          </TableCell>
                           <TableCell className="text-sm text-muted-foreground">{fmt(d.created_at)}</TableCell>
                           <TableCell className="text-right">
                             <MoveDialog dispatch={d} materialName={name} remaining={remaining} userId={userId} />
