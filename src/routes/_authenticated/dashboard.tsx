@@ -306,30 +306,30 @@ function Dashboard() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <Link to="/" className="flex items-center gap-2 font-semibold">
-            <Package className="h-5 w-5 text-primary" />
-            ComprAqui
+        <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 sm:flex sm:justify-between sm:px-6 sm:py-4">
+          <Link to="/" className="flex min-w-0 items-center gap-2 font-semibold">
+            <Package className="h-5 w-5 shrink-0 text-primary" />
+            <span className="truncate">ComprAqui</span>
           </Link>
-          <div className="flex items-center gap-3">
-            <div className="text-right">
-              <div className="text-sm font-medium">{me.full_name || me.email}</div>
-              <div className="flex justify-end gap-1">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+            <div className="min-w-0 text-right">
+              <div className="truncate text-xs font-medium sm:text-sm">{me.full_name || me.email}</div>
+              <div className="flex flex-wrap justify-end gap-1">
                 {me.roles.map((r) => (
                   <Badge key={r} variant="outline" className="text-[10px] uppercase">{r}</Badge>
                 ))}
               </div>
             </div>
-            <Button variant="ghost" size="icon" onClick={handleSignOut} title="Sair">
+            <Button variant="ghost" size="icon" className="shrink-0" onClick={handleSignOut} title="Sair">
               <LogOut className="h-4 w-4" />
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <main className="mx-auto max-w-7xl px-3 py-5 sm:px-6 sm:py-8">
         <Tabs defaultValue={defaultTab}>
-          <TabsList className="mb-6 flex-wrap">
+          <TabsList className="mb-6">
             <TabsTrigger value="pedidos"><ClipboardList className="mr-2 h-4 w-4" />Pedidos</TabsTrigger>
             {(me.isComprador || me.isAdmin) && (
               <TabsTrigger value="queue"><ShoppingCart className="mr-2 h-4 w-4" />Fila de compras</TabsTrigger>
