@@ -702,31 +702,7 @@ function FoundMerchandiseDialog({ orderId, notes }: { orderId: string; notes: st
       if (error) throw error;
 
       if (sector === "unidade") {
-        const [{ data: items }, { data: mats }, { data: auth }] = await Promise.all([
-          supabase.from("myio_order_items").select("product, quantity").eq("order_id", orderId),
-          supabase.from("materials").select("id, name"),
-          supabase.auth.getUser(),
-        ]);
-        const byName = new Map((mats ?? []).map((m) => [m.name.trim().toLowerCase(), m.id]));
-        const rows: Record<string, unknown>[] = [];
-        for (const it of items ?? []) {
-          const materialId = byName.get(it.product.trim().toLowerCase()) ?? null;
-          for (let i = 0; i < Math.max(it.quantity ?? 1, 1); i++) {
-            rows.push({
-              material_id: materialId,
-              product: it.product,
-              order_id: orderId,
-              project_id: projectId,
-              status: "parado",
-              notes: entry,
-              created_by: auth?.user?.id ?? null,
-            });
-          }
-        }
-        if (rows.length) {
-          const { error: upErr } = await supabase.from("unit_products").insert(rows as never);
-          if (upErr) throw upErr;
-        }
+        await createUnitProductsForOrder(orderId, projectId, entry);
       }
     },
     onSuccess: () => {
