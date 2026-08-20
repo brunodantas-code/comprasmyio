@@ -1075,7 +1075,7 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
             moveTo="myio"
           />
         </>
-      ) : (
+      ) : location === "unidade" ? null : (
         <StockTableCard
           title={`Estoque — ${LOCATION_LABELS[location]}`}
           description='A entrada é automática quando o solicitante confirma "Recebido corretamente" em um pedido feito pela biblioteca.'
