@@ -92,11 +92,13 @@ function MoveUnitProductDialog({
     mutationFn: async () => {
       if (!destination) throw new Error("Selecione o destino.");
       if (destination === "tecnico" && !technician.trim()) throw new Error("Informe o nome do técnico.");
-      if (!file) throw new Error("Anexe uma foto do produto.");
 
-      const path = `unit-moves/${product.id}/${crypto.randomUUID()}-${file.name}`;
-      const { error: upErr } = await supabase.storage.from("assembly-photos").upload(path, file);
-      if (upErr) throw upErr;
+      let path: string | null = null;
+      if (file) {
+        path = `unit-moves/${product.id}/${crypto.randomUUID()}-${file.name}`;
+        const { error: upErr } = await supabase.storage.from("assembly-photos").upload(path, file);
+        if (upErr) throw upErr;
+      }
 
       const { error } = await supabase
         .from("unit_products")
