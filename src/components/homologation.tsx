@@ -279,7 +279,7 @@ export function HomologateDialog({
   const alreadyHomologated = done.reduce((a, h) => a + (h.homologation_units?.length ?? 0), 0);
   const remaining = Math.max(quantity - alreadyHomologated, 0);
   const sizes = useMemo(() => BOX_SIZES.filter((s) => s <= Math.max(remaining, 1)), [remaining]);
-  const [boxSize, setBoxSize] = useState<number>(sizes[sizes.length - 1] ?? 1);
+  const [boxSize, setBoxSize] = useState<number>(1);
   const [boxQr, setBoxQr] = useState("");
   const [units, setUnits] = useState<string[]>([""]);
   const [notes, setNotes] = useState("");
