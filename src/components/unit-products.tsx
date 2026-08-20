@@ -550,6 +550,7 @@ export function UnitProductsCard({
                 <ProductsTable
                   rows={installed}
                   names={names}
+                  userId={userId}
                   installed
                   canDelete={canDelete}
                   onToggle={(p) => toggle.mutate(p)}
@@ -565,6 +566,7 @@ export function UnitProductsCard({
                 <ProductsTable
                   rows={stopped}
                   names={names}
+                  userId={userId}
                   installed={false}
                   canDelete={canDelete}
                   onToggle={(p) => toggle.mutate(p)}
