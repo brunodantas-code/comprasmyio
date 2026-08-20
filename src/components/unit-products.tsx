@@ -24,6 +24,9 @@ import { CheckCircle2, PauseCircle, Plus, Trash2 } from "lucide-react";
 type UnitProduct = {
   id: string;
   material_id: string;
+  product: string | null;
+  project_id: string | null;
+  projects?: { name: string } | null;
   label: string | null;
   status: "parado" | "instalado";
   installed_at: string | null;
@@ -43,10 +46,10 @@ function useUnitProducts() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("unit_products")
-        .select("id, material_id, label, status, installed_at, notes, created_at")
+        .select("id, material_id, product, project_id, label, status, installed_at, notes, created_at, projects(name)")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return (data ?? []) as UnitProduct[];
+      return (data ?? []) as unknown as UnitProduct[];
     },
   });
 }
