@@ -18,7 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ItemDeliveriesDialog } from "@/components/myio-delivery-qr";
-import { AlertTriangle, CheckCircle2, FileText, Loader2, Send, Truck, Undo2, Upload } from "lucide-react";
+import { AlertTriangle, CheckCircle2, FileText, Loader2, PackageSearch, Send, Truck, Undo2, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 const PROOF_BUCKET = "assembly-photos";
