@@ -97,6 +97,7 @@ function useMyioProductOptions() {
   (data ?? []).forEach((n) => {
     const key = n.trim().toLowerCase();
     if (!key || seen.has(key)) return;
+    if (/ — Caixa de \d+$/.test(n)) return;
     seen.add(key);
     list.push(n);
   });
