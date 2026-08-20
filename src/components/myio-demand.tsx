@@ -222,6 +222,7 @@ const STATUS_LABELS: Record<string, string> = {
   produzindo: "Produzindo",
   pronto_entrega: "Pronto para entrega",
   entregue_cliente: "Entregue para o cliente",
+  perdido: "Perdido",
 };
 
 function formatDate(d: string | null) {
