@@ -68,7 +68,7 @@ export function ClientsTab({ userId }: { userId: string }) {
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_1.5fr]">
+    <div className="grid gap-6 [&>*]:min-w-0 lg:grid-cols-[1fr_1.5fr]">
       <Card>
         <CardHeader><CardTitle>Novo cliente</CardTitle></CardHeader>
         <CardContent>

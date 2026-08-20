@@ -1019,7 +1019,7 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
       ) : location === "fabrica" ? (
         <ProductionQueueCard balances={almoxarifadoBalances} />
       ) : location === "unidade" || location === "transito" ? null : (
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-3">
         <Card>
           <CardHeader className="pb-2"><CardDescription>Itens cadastrados</CardDescription></CardHeader>
           <CardContent className="text-2xl font-semibold">{scoped.length}</CardContent>

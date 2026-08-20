@@ -166,7 +166,7 @@ function NewMyioOrderDialog({ userId }: { userId: string }) {
           <DialogDescription>Selecione o projeto, a data de entrega e as quantidades por produto.</DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
           <div className="space-y-2">
             <Label>Projeto</Label>
             <Select value={projectId} onValueChange={setProjectId}>
@@ -192,7 +192,7 @@ function NewMyioOrderDialog({ userId }: { userId: string }) {
         <div className="space-y-2">
           <Label>Produtos</Label>
           <p className="text-xs text-muted-foreground">Clique na miniatura para adicionar ou trocar a foto do produto.</p>
-          <div className="grid gap-2 sm:grid-cols-2">
+          <div className="grid gap-2 [&>*]:min-w-0 sm:grid-cols-2">
             {products.map((p) => (
               <div key={p} className="flex items-center justify-between gap-3 rounded-md border p-2">
                 <div className="flex min-w-0 items-center gap-2">
@@ -297,7 +297,7 @@ function EditMyioOrderDialog({ order, userId }: { order: MyioOrder; userId: stri
           <DialogDescription>Atualize os dados e as quantidades por produto.</DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
           <div className="space-y-2">
             <Label>Projeto</Label>
             <Select value={projectId} onValueChange={setProjectId}>
@@ -326,7 +326,7 @@ function EditMyioOrderDialog({ order, userId }: { order: MyioOrder; userId: stri
 
         <div className="space-y-2">
           <Label>Produtos</Label>
-          <div className="grid gap-2 sm:grid-cols-2">
+          <div className="grid gap-2 [&>*]:min-w-0 sm:grid-cols-2">
             {products.map((p) => (
               <div key={p} className="flex items-center justify-between gap-3 rounded-md border p-2">
                 <div className="flex min-w-0 items-center gap-2">
