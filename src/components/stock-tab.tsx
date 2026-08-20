@@ -612,7 +612,8 @@ function ResetStockDialog({
       qc.invalidateQueries({ queryKey: ["material-stock"] });
       qc.invalidateQueries({ queryKey: ["stock-movements"] });
       qc.invalidateQueries({ queryKey: ["homologations"] });
-      qc.invalidateQueries({ queryKey: ["boxes"] });
+      qc.invalidateQueries({ queryKey: ["boxes-list"] });
+      qc.invalidateQueries({ queryKey: ["homologated-labels"] });
       qc.invalidateQueries({ queryKey: ["unit-products"] });
       setConfirm("");
       setOpen(false);
