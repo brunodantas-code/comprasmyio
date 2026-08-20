@@ -434,7 +434,7 @@ export function MyioOrdersTab({ userId, canManage = true }: { userId: string; ca
 
   const statusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: MyioStatus }) => {
-      const { error } = await supabase.from("myio_orders").update({ status }).eq("id", id);
+      const { error } = await supabase.from("myio_orders").update({ status: status as never }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
