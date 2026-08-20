@@ -13,7 +13,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 import { toast } from "sonner";
-import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Plus, Library, Trash2, Eraser } from "lucide-react";
+import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Plus, Library, Trash2, Eraser, ArrowLeftRight } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -675,6 +675,36 @@ function StockSection({ userId, location, canDelete }: { userId: string; locatio
   return <StockSectionInner userId={userId} location={location} canDelete={canDelete} />;
 }
 
+function MoveOriginButton({ row, target }: { row: StockRow; target: "myio" | "terceiros" }) {
+  const qc = useQueryClient();
+  const move = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("materials")
+        .update({ is_manufactured: target === "myio" })
+        .eq("id", row.material_id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success(target === "myio" ? "Movido para Almoxarifado Myio" : "Movido para Almoxarifado Terceiros");
+      qc.invalidateQueries({ queryKey: ["materials-manufactured-map"] });
+      qc.invalidateQueries({ queryKey: ["materials"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  return (
+    <Button
+      size="sm"
+      variant="ghost"
+      disabled={move.isPending}
+      onClick={() => move.mutate()}
+      title={target === "myio" ? "Mover para Almoxarifado Myio (fabricado)" : "Mover para Almoxarifado Terceiros (comprado)"}
+    >
+      <ArrowLeftRight className="h-4 w-4" />
+    </Button>
+  );
+}
+
 function StockTableCard({
   title,
   description,
@@ -683,6 +713,7 @@ function StockTableCard({
   userId,
   canDelete,
   actions,
+  moveTo,
 }: {
   title: string;
   description: string;
@@ -691,6 +722,7 @@ function StockTableCard({
   userId: string;
   canDelete?: boolean;
   actions?: React.ReactNode;
+  moveTo?: "myio" | "terceiros";
 }) {
   return (
     <Card>
@@ -774,6 +806,7 @@ function StockTableCard({
                         }
                       />
                       <HistoryDialog row={r} />
+                      {moveTo && <MoveOriginButton row={r} target={moveTo} />}
                       {canDelete && <DeleteMaterialDialog row={r} />}
                     </div>
                   </TableCell>
@@ -884,20 +917,22 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
         <>
           <StockTableCard
             title="Estoque — Almoxarifado Myio"
-            description="Produtos produzidos pela Myio."
+            description='Produtos produzidos pela Myio. Use o botão de troca para mover um item para "Terceiros".'
             rows={rows.filter((r) => manufactured?.[r.material_id])}
             isLoading={isLoading}
             userId={userId}
             canDelete={canDelete}
             actions={toolbar}
+            moveTo="terceiros"
           />
           <StockTableCard
             title="Estoque — Almoxarifado Terceiros"
-            description="Itens comprados de terceiros."
+            description='Itens comprados de terceiros. Use o botão de troca para mover um item para "Myio".'
             rows={rows.filter((r) => !manufactured?.[r.material_id])}
             isLoading={isLoading}
             userId={userId}
             canDelete={canDelete}
+            moveTo="myio"
           />
         </>
       ) : (
