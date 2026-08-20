@@ -355,7 +355,14 @@ export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; 
       </TabsList>
       {locations.map((loc) => (
         <TabsContent key={loc} value={loc}>
-          <StockSection userId={userId} location={loc} canDelete={canDelete} />
+          {loc === "transito" ? (
+            <div className="space-y-4">
+              <TransitCard />
+              <StockSection userId={userId} location={loc} canDelete={canDelete} />
+            </div>
+          ) : (
+            <StockSection userId={userId} location={loc} canDelete={canDelete} />
+          )}
         </TabsContent>
       ))}
       {locations.includes("almoxarifado") && (
