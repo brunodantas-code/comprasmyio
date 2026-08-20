@@ -317,6 +317,54 @@ export type Database = {
         }
         Relationships: []
       }
+      myio_item_deliveries: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          order_id: string
+          order_item_id: string
+          photo_url: string
+          product: string
+          quantity: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          order_id: string
+          order_item_id: string
+          photo_url: string
+          product: string
+          quantity?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          order_id?: string
+          order_item_id?: string
+          photo_url?: string
+          product?: string
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "myio_item_deliveries_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "myio_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "myio_item_deliveries_order_item_id_fkey"
+            columns: ["order_item_id"]
+            isOneToOne: false
+            referencedRelation: "myio_order_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       myio_order_items: {
         Row: {
           created_at: string
