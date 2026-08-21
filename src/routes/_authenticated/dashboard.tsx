@@ -330,7 +330,7 @@ function Dashboard() {
       <main className="mx-auto max-w-7xl px-3 py-5 sm:px-6 sm:py-8">
         <Tabs defaultValue={defaultTab}>
           <TabsList className="mb-6">
-            <TabsTrigger value="pedidos"><ClipboardList className="mr-2 h-4 w-4" />Pedidos</TabsTrigger>
+            <TabsTrigger value="pedidos"><ClipboardList className="mr-2 h-4 w-4" />Solicitações de Compras</TabsTrigger>
             {(me.isComprador || me.isAdmin) && (
               <TabsTrigger value="queue"><ShoppingCart className="mr-2 h-4 w-4" />Fila de compras</TabsTrigger>
             )}
@@ -344,8 +344,8 @@ function Dashboard() {
           <TabsContent value="pedidos">
             <Tabs defaultValue="mine">
               <TabsList className="mb-4">
-                <TabsTrigger value="mine"><ClipboardList className="mr-2 h-4 w-4" />Meus pedidos</TabsTrigger>
-                <TabsTrigger value="new"><Plus className="mr-2 h-4 w-4" />Novo pedido</TabsTrigger>
+                <TabsTrigger value="mine"><ClipboardList className="mr-2 h-4 w-4" />Minhas compras</TabsTrigger>
+                <TabsTrigger value="new"><Plus className="mr-2 h-4 w-4" />Nova Solicitação de compra</TabsTrigger>
               </TabsList>
               <TabsContent value="mine"><MyOrders userId={me.id} /></TabsContent>
               <TabsContent value="new"><NewOrder userId={me.id} /></TabsContent>
