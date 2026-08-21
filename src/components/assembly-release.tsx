@@ -342,7 +342,7 @@ function CorrectReleaseDialog({
 
         {openIssues.length > 0 && (
           <div className="space-y-2 rounded border border-amber-300 bg-amber-50 p-3 text-sm">
-            <p className="font-medium text-amber-800">Divergências sinalizadas pelo almoxarifado</p>
+            <p className="font-medium text-amber-800">Divergências sinalizadas pelo estoque</p>
             {openIssues.map((i) => (
               <p key={i.id} className="text-amber-900">
                 {i.material_id ? `${materialNames[i.material_id] ?? "Produto"}: ` : ""}
@@ -561,13 +561,13 @@ export function ReleaseAssembledDialog({ userId }: { userId: string }) {
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Buscar produto do almoxarifado"
+                placeholder="Buscar produto do estoque"
                 className="pl-8"
               />
             </div>
             <div className="max-h-64 space-y-1 overflow-y-auto rounded border p-2">
               {!filtered.length ? (
-                <p className="p-2 text-sm text-muted-foreground">Nenhum produto encontrado no almoxarifado.</p>
+                <p className="p-2 text-sm text-muted-foreground">Nenhum produto encontrado no estoque.</p>
               ) : (
                 filtered.map((m) => (
                   <div key={m.id} className="flex items-center justify-between gap-3 rounded px-2 py-1 hover:bg-muted/50">

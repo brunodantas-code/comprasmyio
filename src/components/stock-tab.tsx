@@ -824,7 +824,7 @@ function MoveOriginButton({ row, target }: { row: StockRow; target: "myio" | "te
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success(target === "myio" ? "Movido para Almoxarifado Myio" : "Movido para Almoxarifado Terceiros");
+      toast.success(target === "myio" ? "Movido para Estoque Myio" : "Movido para Estoque Terceiros");
       qc.invalidateQueries({ queryKey: ["materials-manufactured-map"] });
       qc.invalidateQueries({ queryKey: ["materials"] });
     },
@@ -836,7 +836,7 @@ function MoveOriginButton({ row, target }: { row: StockRow; target: "myio" | "te
       variant="ghost"
       disabled={move.isPending}
       onClick={() => move.mutate()}
-      title={target === "myio" ? "Mover para Almoxarifado Myio (fabricado)" : "Mover para Almoxarifado Terceiros (comprado)"}
+      title={target === "myio" ? "Mover para Estoque Myio (fabricado)" : "Mover para Estoque Terceiros (comprado)"}
     >
       <ArrowLeftRight className="h-4 w-4" />
     </Button>
