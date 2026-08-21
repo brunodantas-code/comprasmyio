@@ -16,9 +16,9 @@ const STAGE_LABELS: Record<string, string> = {
   fabrica: "Fábrica",
   almoxarifado: "Estoque",
   homologacao: "Homologação",
-  distribuicao: "Distribuição",
-  transito: "Trânsito",
-  unidade: "Unidade",
+  distribuicao: "Expedição",
+  transito: "Transporte",
+  unidade: "Cliente",
   tecnico: "Técnico",
   perdido: "Perdido",
   escritorio: "Escritório",
@@ -224,7 +224,7 @@ function useQrTrace(code: string) {
         });
         events.push({
           at: hom["created_at"] as string,
-          title: "Entrada no Estoque — Almoxarifado",
+          title: "Entrada no Estoque",
           detail: boxSize === 1 ? materialName ?? "" : `${materialName ?? ""} — Caixa de ${boxSize}`,
           stage: "almoxarifado",
         });
@@ -273,7 +273,7 @@ function useQrTrace(code: string) {
       if (unitProd) {
         events.push({
           at: unitProd.created_at,
-          title: "Enviado para a Unidade (cliente)",
+          title: "Enviado para o Cliente",
           detail: [unitProd.projects?.name ? `Projeto: ${unitProd.projects.name}` : "", "Situação inicial: parado"]
             .filter(Boolean)
             .join(" · "),
@@ -299,19 +299,19 @@ function useQrTrace(code: string) {
       if (delivery && order) {
         events.push({
           at: delivery.created_at,
-          title: "Baixa no Almoxarifado (separado para pedido)",
+          title: "Baixa no Estoque (separado para pedido)",
           detail: `${order.title} · ${order.client_name} · ${delivery.product}`,
           photo: delivery.photo_url,
           stage: "distribuicao",
         });
         if (order.status === "pronto_entrega") {
-          events.push({ at: delivery.created_at, title: "Aguardando em Distribuição", detail: order.title, stage: "distribuicao" });
+          events.push({ at: delivery.created_at, title: "Aguardando em Expedição", detail: order.title, stage: "distribuicao" });
         }
       }
       if (shipment) {
         events.push({
           at: shipment.created_at,
-          title: "Enviado — Em trânsito",
+          title: "Enviado — Transporte",
           detail: `${shipment.shipping_method} · Resp.: ${shipment.responsible} · Rastreio: ${shipment.tracking_code}`,
           photo: shipment.proof_url,
           stage: "transito",
@@ -327,9 +327,9 @@ function useQrTrace(code: string) {
 
       const STOCK_LABELS: Record<string, string> = {
         fabrica: "Estoque — Fábrica",
-        almoxarifado: "Estoque — Almoxarifado",
-        transito: "Em Trânsito",
-        unidade: "Unidade (cliente)",
+        almoxarifado: "Estoque",
+        transito: "Transporte",
+        unidade: "Cliente",
         tecnico: "Técnico",
         perdido: "Perdido",
         escritorio: "Escritório",
@@ -338,25 +338,25 @@ function useQrTrace(code: string) {
       let location = "Não encontrado";
       let stage: string | null = null;
       if (unitProd && !unitProd.moved_to) {
-        location = unitProd.status === "instalado" ? "Unidade (cliente) — instalado" : "Unidade (cliente) — parado";
+        location = unitProd.status === "instalado" ? "Cliente — instalado" : "Cliente — parado";
         stage = "unidade";
       } else if (order?.status === "entregue_cliente") {
-        location = "Unidade (cliente) — entregue";
+        location = "Cliente — entregue";
         stage = "unidade";
       } else if (order?.status === "em_transito") {
-        location = "Em Trânsito";
+        location = "Transporte";
         stage = "transito";
       } else if (order?.status === "perdido") {
         location = "Perdido";
         stage = "perdido";
       } else if (order?.status === "pronto_entrega") {
-        location = "Distribuição — aguardando envio";
+        location = "Expedição — aguardando envio";
         stage = "distribuicao";
       } else if (delivery) {
-        location = "Distribuição — separado para pedido";
+        location = "Expedição — separado para pedido";
         stage = "distribuicao";
       } else if (hom) {
-        location = STOCK_LABELS[materialLocation ?? "almoxarifado"] ?? "Estoque — Almoxarifado";
+        location = STOCK_LABELS[materialLocation ?? "almoxarifado"] ?? "Estoque";
         stage = materialLocation ?? "almoxarifado";
       }
 

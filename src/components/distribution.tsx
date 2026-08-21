@@ -90,7 +90,7 @@ function DistributeDialog({
     >
       <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Distribuir pedido</DialogTitle>
+          <DialogTitle>Expedir pedido</DialogTitle>
           <DialogDescription>
             {order ? `${order.projects?.name || order.title} — ${order.client_name}` : ""}
           </DialogDescription>
@@ -253,7 +253,7 @@ export function DistributionCard() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Truck className="h-5 w-5" />
-          Distribuição
+          Expedição
         </CardTitle>
         <CardDescription>
           Pedidos com todos os produtos separados e prontos para entrega. Confirme a saída para o cliente.
@@ -263,7 +263,7 @@ export function DistributionCard() {
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando...</p>
         ) : !orders?.length ? (
-          <p className="text-sm text-muted-foreground">Nenhum pedido pronto para distribuição.</p>
+          <p className="text-sm text-muted-foreground">Nenhum pedido pronto para expedição.</p>
         ) : (
           orders.map((o) => (
             <div key={o.id} className="space-y-2">
@@ -281,7 +281,7 @@ export function DistributionCard() {
                 )}
                 <Button size="sm" className="ml-auto" onClick={() => setTarget(o)}>
                   <Send className="mr-2 h-4 w-4" />
-                  Distribuir
+                  Expedir
                 </Button>
               </div>
               {o.notes && <p className="text-xs text-muted-foreground">{o.notes}</p>}
@@ -368,7 +368,7 @@ function ReturnToDistributionDialog({ orderId, notes }: { orderId: string; notes
   const back = useMutation({
     mutationFn: async () => {
       const stamp = new Date().toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
-      const entry = `[Retornado para Distribuição em ${stamp}] ${reason.trim()}`;
+      const entry = `[Retornado para Expedição em ${stamp}] ${reason.trim()}`;
       const { error } = await supabase
         .from("myio_orders")
         .update({ status: "pronto_entrega", notes: notes ? `${notes}\n${entry}` : entry })
@@ -376,7 +376,7 @@ function ReturnToDistributionDialog({ orderId, notes }: { orderId: string; notes
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Pedido retornado para Distribuição.");
+      toast.success("Pedido retornado para Expedição.");
       setOpen(false);
       setReason("");
       queryClient.invalidateQueries({ queryKey: ["myio-transit"] });
@@ -390,13 +390,13 @@ function ReturnToDistributionDialog({ orderId, notes }: { orderId: string; notes
     <Dialog open={open} onOpenChange={setOpen}>
       <Button size="sm" variant="outline" onClick={() => setOpen(true)}>
         <Undo2 className="mr-2 h-4 w-4" />
-        Retornar para distribuição
+        Retornar para expedição
       </Button>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Retornar para Distribuição</DialogTitle>
+          <DialogTitle>Retornar para Expedição</DialogTitle>
           <DialogDescription>
-            Explique o motivo do retorno. O pedido volta para a sub-aba Distribuição.
+            Explique o motivo do retorno. O pedido volta para a sub-aba Expedição.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-2">
@@ -576,7 +576,7 @@ export function TransitCard() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Truck className="h-5 w-5" />
-          Pedidos em trânsito
+          Pedidos em transporte
         </CardTitle>
         <CardDescription>Pedidos distribuídos, aguardando confirmação de entrega ao cliente.</CardDescription>
       </CardHeader>
@@ -584,7 +584,7 @@ export function TransitCard() {
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando...</p>
         ) : !orders?.length ? (
-          <p className="text-sm text-muted-foreground">Nenhum pedido em trânsito.</p>
+          <p className="text-sm text-muted-foreground">Nenhum pedido em transporte.</p>
         ) : (
           orders.map((o) => {
             const s = o.myio_shipments?.[o.myio_shipments.length - 1];
@@ -595,7 +595,7 @@ export function TransitCard() {
                   <Badge variant="outline">{o.client_name}</Badge>
                   <Badge variant="outline">Entrega {formatDate(o.delivery_date)}</Badge>
                   <Badge variant="outline" className="border-amber-300 bg-amber-100 text-amber-800">
-                    Em trânsito
+                    Transporte
                   </Badge>
                   <Button
                     size="sm"
@@ -678,11 +678,11 @@ export function TransitCard() {
 }
 
 const FOUND_SECTORS = [
-  { value: "unidade", label: "Unidade (cliente)", status: "entregue_cliente" },
-  { value: "distribuicao", label: "Distribuição", status: "pronto_entrega" },
+  { value: "unidade", label: "Cliente", status: "entregue_cliente" },
+  { value: "distribuicao", label: "Expedição", status: "pronto_entrega" },
   { value: "tecnico", label: "Técnico", status: "entregue_cliente" },
-  { value: "transito", label: "Trânsito", status: "em_transito" },
-  { value: "almoxarifado", label: "Almoxarifado", status: "produzindo" },
+  { value: "transito", label: "Transporte", status: "em_transito" },
+  { value: "almoxarifado", label: "Estoque", status: "produzindo" },
 ] as const;
 
 function FoundMerchandiseDialog({ orderId, notes }: { orderId: string; notes: string | null }) {
@@ -823,7 +823,7 @@ export function LostCard() {
           <AlertTriangle className="h-5 w-5" />
           Mercadoria perdida
         </CardTitle>
-        <CardDescription>Pedidos com mercadoria extraviada ou perdida em trânsito.</CardDescription>
+        <CardDescription>Pedidos com mercadoria extraviada ou perdida em transporte.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {isLoading ? (

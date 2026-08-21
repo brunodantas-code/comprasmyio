@@ -51,9 +51,9 @@ type StockLocation = "almoxarifado" | "fabrica" | "unidade" | "tecnico" | "trans
 
 const LOCATION_LABELS: Record<StockLocation, string> = {
   fabrica: "Fábrica",
-  almoxarifado: "Almoxarifado",
-  transito: "Em Trânsito",
-  unidade: "Unidade (cliente)",
+  almoxarifado: "Estoque",
+  transito: "Transporte",
+  unidade: "Cliente",
   tecnico: "Técnico",
   perdido: "Perdido",
 };
@@ -458,7 +458,7 @@ export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; 
             {t === "homologacao"
               ? "Homologação"
               : t === "distribuicao"
-                ? "Distribuição"
+                ? "Expedição"
                 : t === "qr-check"
                   ? "Checar QR Code"
                   : LOCATION_LABELS[t as StockLocation]}
@@ -517,7 +517,7 @@ function HomologationSection({ userId, canDelete }: { userId: string; canDelete?
       canDelete={canDelete}
       canReportIssue
       title="Produtos para homologar"
-      description="Etiquetagem e homologação dos produtos montados. Após homologados em caixas, seguem para o estoque do almoxarifado."
+      description="Etiquetagem e homologação dos produtos montados. Após homologados em caixas, seguem para o estoque."
     />
   );
 }
@@ -824,7 +824,7 @@ function MoveOriginButton({ row, target }: { row: StockRow; target: "myio" | "te
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success(target === "myio" ? "Movido para Almoxarifado Myio" : "Movido para Almoxarifado Terceiros");
+      toast.success(target === "myio" ? "Movido para Estoque Myio" : "Movido para Estoque Terceiros");
       qc.invalidateQueries({ queryKey: ["materials-manufactured-map"] });
       qc.invalidateQueries({ queryKey: ["materials"] });
     },
@@ -836,7 +836,7 @@ function MoveOriginButton({ row, target }: { row: StockRow; target: "myio" | "te
       variant="ghost"
       disabled={move.isPending}
       onClick={() => move.mutate()}
-      title={target === "myio" ? "Mover para Almoxarifado Myio (fabricado)" : "Mover para Almoxarifado Terceiros (comprado)"}
+      title={target === "myio" ? "Mover para Estoque Myio (fabricado)" : "Mover para Estoque Terceiros (comprado)"}
     >
       <ArrowLeftRight className="h-4 w-4" />
     </Button>
@@ -1054,7 +1054,7 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
       {location === "almoxarifado" ? (
         <>
           <StockTableCard
-            title="Estoque — Almoxarifado Myio"
+            title="Estoque Myio"
             description='Produtos produzidos pela Myio. Use o botão de troca para mover um item para "Terceiros".'
             rows={rows.filter((r) => manufactured?.[r.material_id])}
             isLoading={isLoading}
@@ -1064,7 +1064,7 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
             moveTo="terceiros"
           />
           <StockTableCard
-            title="Estoque — Almoxarifado Terceiros"
+            title="Estoque Terceiros"
             description='Itens comprados de terceiros. Use o botão de troca para mover um item para "Myio".'
             rows={rows.filter((r) => !manufactured?.[r.material_id])}
             isLoading={isLoading}

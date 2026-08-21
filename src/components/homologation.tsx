@@ -359,7 +359,7 @@ export function HomologateDialog({
         .insert(filled.map((qr_value, i) => ({ homologation_id: hom.id, position: i + 1, qr_value })));
       if (unitsErr) throw unitsErr;
 
-      // Entrada no Estoque — Almoxarifado (sempre no produto, mesmo quando embalado em caixa)
+      // Entrada no Estoque (sempre no produto, mesmo quando embalado em caixa)
       const stockName = materialName;
       const { data: found } = await supabase
         .from("materials")
@@ -374,7 +374,7 @@ export function HomologateDialog({
           .insert({ name: stockName, location: "almoxarifado", created_by: userId })
           .select("id")
           .single();
-        if (matErr) throw new Error("Não foi possível criar o item no estoque do almoxarifado: " + matErr.message);
+        if (matErr) throw new Error("Não foi possível criar o item no estoque: " + matErr.message);
         stockMaterialId = created.id;
       }
       const { error: stockErr } = await supabase.from("stock_movements").insert({
@@ -387,7 +387,7 @@ export function HomologateDialog({
       if (stockErr) throw stockErr;
     },
     onSuccess: () => {
-      toast.success("Produtos homologados e adicionados ao estoque do almoxarifado");
+      toast.success("Produtos homologados e adicionados ao estoque");
       qc.invalidateQueries({ queryKey: ["homologations"] });
       qc.invalidateQueries({ queryKey: ["material-stock"] });
       qc.invalidateQueries({ queryKey: ["stock-movements"] });
