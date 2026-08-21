@@ -551,7 +551,7 @@ function NewOrder({ userId }: { userId: string }) {
   return (
     <Card className="max-w-2xl">
       <CardHeader>
-        <CardTitle>Novo pedido de compra</CardTitle>
+        <CardTitle>Nova Solicitação de Compra</CardTitle>
         <CardDescription>Preencha os dados do material que você precisa.</CardDescription>
       </CardHeader>
       <CardContent>
@@ -664,7 +664,7 @@ function MyOrders({ userId }: { userId: string }) {
     <Card>
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <CardTitle>Meus pedidos</CardTitle>
+          <CardTitle>Minhas Solicitações de Compra</CardTitle>
           <CardDescription>Acompanhe o status dos seus pedidos de compra.</CardDescription>
         </div>
         <div className="flex flex-wrap items-center gap-2">
