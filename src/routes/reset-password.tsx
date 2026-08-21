@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { MyioLogo } from "@/components/myio-logo";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,10 +14,10 @@ export const Route = createFileRoute("/reset-password")({
   component: ResetPasswordPage,
   head: () => ({
     meta: [
-      { title: "Redefinir senha | ComprAqui" },
-      { name: "description", content: "Defina uma nova senha para sua conta ComprAqui." },
-      { property: "og:title", content: "Redefinir senha | ComprAqui" },
-      { property: "og:description", content: "Defina uma nova senha para sua conta ComprAqui." },
+      { title: "Redefinir senha | Myio Compras" },
+      { name: "description", content: "Defina uma nova senha para sua conta Myio Compras." },
+      { property: "og:title", content: "Redefinir senha | Myio Compras" },
+      { property: "og:description", content: "Defina uma nova senha para sua conta Myio Compras." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -57,7 +58,7 @@ function ResetPasswordPage() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
       <div className="w-full max-w-md">
         <Link to="/" className="mb-6 flex items-center justify-center gap-2 text-sm text-muted-foreground">
-          <Package className="h-4 w-4 text-primary" /> ComprAqui
+          <MyioLogo className="text-xl" /> <span className="text-muted-foreground">Compras</span>
         </Link>
         <Card>
           <CardHeader>

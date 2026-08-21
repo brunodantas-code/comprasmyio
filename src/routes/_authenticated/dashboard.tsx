@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { MyioLogo } from "@/components/myio-logo";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser, type AppRole } from "@/hooks/use-current-user";
 import { Button } from "@/components/ui/button";
@@ -309,7 +310,7 @@ function Dashboard() {
         <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 sm:flex sm:justify-between sm:px-6 sm:py-4">
           <Link to="/" className="flex min-w-0 items-center gap-2 font-semibold">
             <Package className="h-5 w-5 shrink-0 text-primary" />
-            <span className="truncate">ComprAqui</span>
+            <MyioLogo className="truncate text-xl" />
           </Link>
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             <div className="min-w-0 text-right">
