@@ -280,7 +280,7 @@ export function BomSettingsDialog() {
               variant="outline"
               disabled={setManufactured.isPending}
               onClick={() => setManufactured.mutate({ id: selected, value: false })}
-              title="Remover das listas da Fábrica (continua no Almoxarifado)"
+              title="Remover das listas da Fábrica (continua no Estoque)"
             >
               <FactoryIcon className="mr-1 h-4 w-4" /> Não é produzido aqui
             </Button>
@@ -305,7 +305,7 @@ export function BomSettingsDialog() {
               ))}
             </div>
             <p className="text-xs text-muted-foreground">
-              Eles continuam disponíveis no Almoxarifado, mas não aparecem em "Liberar produto montado", regras de
+              Eles continuam disponíveis no Estoque, mas não aparecem em "Liberar produto montado", regras de
               componentes nem na capacidade de produção. Clique para reativar.
             </p>
           </div>

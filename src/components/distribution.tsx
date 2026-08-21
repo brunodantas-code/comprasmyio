@@ -90,7 +90,7 @@ function DistributeDialog({
     >
       <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Distribuir pedido</DialogTitle>
+          <DialogTitle>Expedir pedido</DialogTitle>
           <DialogDescription>
             {order ? `${order.projects?.name || order.title} — ${order.client_name}` : ""}
           </DialogDescription>
@@ -281,7 +281,7 @@ export function DistributionCard() {
                 )}
                 <Button size="sm" className="ml-auto" onClick={() => setTarget(o)}>
                   <Send className="mr-2 h-4 w-4" />
-                  Distribuir
+                  Expedir
                 </Button>
               </div>
               {o.notes && <p className="text-xs text-muted-foreground">{o.notes}</p>}

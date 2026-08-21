@@ -359,7 +359,7 @@ export function HomologateDialog({
         .insert(filled.map((qr_value, i) => ({ homologation_id: hom.id, position: i + 1, qr_value })));
       if (unitsErr) throw unitsErr;
 
-      // Entrada no Estoque — Almoxarifado (sempre no produto, mesmo quando embalado em caixa)
+      // Entrada no Estoque (sempre no produto, mesmo quando embalado em caixa)
       const stockName = materialName;
       const { data: found } = await supabase
         .from("materials")

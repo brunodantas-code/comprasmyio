@@ -1054,7 +1054,7 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
       {location === "almoxarifado" ? (
         <>
           <StockTableCard
-            title="Estoque — Almoxarifado Myio"
+            title="Estoque Myio"
             description='Produtos produzidos pela Myio. Use o botão de troca para mover um item para "Terceiros".'
             rows={rows.filter((r) => manufactured?.[r.material_id])}
             isLoading={isLoading}
@@ -1064,7 +1064,7 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
             moveTo="terceiros"
           />
           <StockTableCard
-            title="Estoque — Almoxarifado Terceiros"
+            title="Estoque Terceiros"
             description='Itens comprados de terceiros. Use o botão de troca para mover um item para "Myio".'
             rows={rows.filter((r) => !manufactured?.[r.material_id])}
             isLoading={isLoading}
