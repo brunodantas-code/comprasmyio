@@ -38,7 +38,7 @@ type MoveDestination = "tecnico" | "almoxarifado" | "perdido";
 
 const MOVE_LABELS: Record<MoveDestination, string> = {
   tecnico: "Técnico",
-  almoxarifado: "Almoxarifado",
+  almoxarifado: "Estoque",
   perdido: "Perdido",
 };
 
@@ -117,7 +117,7 @@ function MoveUnitProductDialog({
           destination === "tecnico"
             ? `Saída da unidade para o técnico ${technician.trim()}`
             : destination === "almoxarifado"
-              ? "Retorno da unidade para o almoxarifado"
+              ? "Retorno do cliente para o estoque"
               : "Produto da unidade marcado como perdido";
         const { error: mvErr } = await supabase.from("stock_movements").insert({
           material_id: product.material_id,

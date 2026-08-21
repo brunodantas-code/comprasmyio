@@ -40,9 +40,9 @@ function DispatchPhoto({ path }: { path: string }) {
 type Destination = "unidade" | "perdido" | "almoxarifado";
 
 const DEST_LABELS: Record<Destination, string> = {
-  unidade: "Unidade (cliente)",
+  unidade: "Cliente",
   perdido: "Perdido",
-  almoxarifado: "Almoxarifado",
+  almoxarifado: "Estoque",
 };
 
 const DEST_CLASSES: Record<Destination, string> = {
@@ -367,7 +367,7 @@ export function TechnicianItemsCard({
       <CardHeader>
         <CardTitle className="flex items-center gap-2"><HardHat className="h-5 w-5" />Produtos com os técnicos</CardTitle>
         <CardDescription>
-          Materiais separados por técnico. Cada produto pode ser movido para a unidade do cliente (projeto), para perdido ou devolvido ao almoxarifado.
+          Materiais separados por técnico. Cada produto pode ser movido para o cliente (projeto), para perdido ou devolvido ao estoque.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">

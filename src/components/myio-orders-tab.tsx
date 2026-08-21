@@ -37,7 +37,7 @@ const STATUS_LABELS: Record<MyioStatus, string> = {
   pendente: "Pendente",
   produzindo: "Produzindo",
   pronto_entrega: "Pronto para entrega",
-  em_transito: "Em trânsito",
+  em_transito: "Transporte",
   entregue_cliente: "Entregue para o cliente",
   perdido: "Perdido",
 };

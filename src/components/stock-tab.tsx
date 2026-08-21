@@ -51,9 +51,9 @@ type StockLocation = "almoxarifado" | "fabrica" | "unidade" | "tecnico" | "trans
 
 const LOCATION_LABELS: Record<StockLocation, string> = {
   fabrica: "Fábrica",
-  almoxarifado: "Almoxarifado",
-  transito: "Em Trânsito",
-  unidade: "Unidade (cliente)",
+  almoxarifado: "Estoque",
+  transito: "Transporte",
+  unidade: "Cliente",
   tecnico: "Técnico",
   perdido: "Perdido",
 };
@@ -458,7 +458,7 @@ export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; 
             {t === "homologacao"
               ? "Homologação"
               : t === "distribuicao"
-                ? "Distribuição"
+                ? "Expedição"
                 : t === "qr-check"
                   ? "Checar QR Code"
                   : LOCATION_LABELS[t as StockLocation]}
@@ -517,7 +517,7 @@ function HomologationSection({ userId, canDelete }: { userId: string; canDelete?
       canDelete={canDelete}
       canReportIssue
       title="Produtos para homologar"
-      description="Etiquetagem e homologação dos produtos montados. Após homologados em caixas, seguem para o estoque do almoxarifado."
+      description="Etiquetagem e homologação dos produtos montados. Após homologados em caixas, seguem para o estoque."
     />
   );
 }
