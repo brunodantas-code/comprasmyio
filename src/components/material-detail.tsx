@@ -72,13 +72,15 @@ export function MaterialDetailDialog({
   const [uploading, setUploading] = useState(false);
 
   const m = data?.material;
+  const [name, setName] = useState("");
   const [link, setLink] = useState("");
   const [lot, setLot] = useState("");
   const [type, setType] = useState<string>("");
   const [description, setDescription] = useState("");
   const [synced, setSynced] = useState<string | null>(null);
-  if (m && synced !== m.id + JSON.stringify([m.link, m.lot_quantity, m.purchase_type, m.description])) {
-    setSynced(m.id + JSON.stringify([m.link, m.lot_quantity, m.purchase_type, m.description]));
+  if (m && synced !== m.id + JSON.stringify([m.name, m.link, m.lot_quantity, m.purchase_type, m.description])) {
+    setSynced(m.id + JSON.stringify([m.name, m.link, m.lot_quantity, m.purchase_type, m.description]));
+    setName(m.name ?? "");
     setLink(m.link ?? "");
     setLot(m.lot_quantity != null ? String(m.lot_quantity) : "");
     setType(m.purchase_type ?? "");
@@ -95,9 +97,11 @@ export function MaterialDetailDialog({
     mutationFn: async () => {
       const qty = lot.trim() === "" ? null : Number(lot);
       if (qty !== null && (!Number.isFinite(qty) || qty <= 0)) throw new Error("Quantidade por lote inválida");
+      if (!name.trim()) throw new Error("Nome obrigatório");
       const { error } = await supabase
         .from("materials")
         .update({
+          name: name.trim(),
           link: link.trim() || null,
           lot_quantity: qty,
           purchase_type: type || null,
@@ -106,6 +110,7 @@ export function MaterialDetailDialog({
         .eq("id", materialId);
       if (error) throw error;
     },
+
     onSuccess: () => {
       toast.success("Parâmetros atualizados");
       setEditing(false);
