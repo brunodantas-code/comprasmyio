@@ -466,7 +466,7 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <ClipboardList className="h-5 w-5" />
-          Demanda dos pedidos Myio
+          Ordens de Expedição
         </CardTitle>
         <CardDescription>
           Materiais exigidos por projeto, em ordem de data de entrega. Dê baixa no estoque conforme separar.
