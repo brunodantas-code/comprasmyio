@@ -524,7 +524,9 @@ function HomologationSection({ userId, canDelete }: { userId: string; canDelete?
 
 function AddMaterialDialog({ location, userId }: { location: StockLocation; userId: string }) {
   const qc = useQueryClient();
+  const isFabrica = location === "fabrica";
   const [open, setOpen] = useState(false);
+
   const [mode, setMode] = useState<"new" | "import">("new");
   const [importId, setImportId] = useState("");
   const [importSearch, setImportSearch] = useState("");
@@ -554,8 +556,11 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
 
   const save = useMutation({
     mutationFn: async (v: { name: string; link: string | null }) => {
-      const { error } = await supabase.from("materials").insert({ ...v, location, created_by: userId });
+      const { error } = await supabase
+        .from("materials")
+        .insert({ ...v, location, created_by: userId, ...(isFabrica ? { is_product: false } : {}) });
       if (error) throw error;
+
     },
     onSuccess: () => {
       toast.success("Item adicionado");
@@ -564,7 +569,16 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
       setOpen(false);
       setImportId("");
     },
+    onError: (e: Error) =>
+      toast.error(
+        e.message.includes("materials_fabrica_unique_name")
+          ? "Já existe um componente com esse nome na Fábrica"
+          : e.message.includes("materials_fabrica_only_components")
+            ? "O Estoque — Fábrica aceita apenas componentes"
+            : e.message,
+      ),
   });
+
 
   const importMany = useMutation({
     mutationFn: async (ids: string[]) => {
@@ -605,6 +619,7 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
           <DialogTitle>Novo item — {LOCATION_LABELS[location]}</DialogTitle>
           <DialogDescription>O item fica disponível para entradas e baixas neste local.</DialogDescription>
         </DialogHeader>
+        {!isFabrica && (
         <div className="flex gap-2">
           <Button type="button" size="sm" variant={mode === "new" ? "default" : "outline"} onClick={() => setMode("new")}>
             Criar novo
@@ -613,6 +628,14 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
             Importar da biblioteca
           </Button>
         </div>
+        )}
+        {isFabrica && (
+          <p className="text-xs text-muted-foreground">
+            O Estoque — Fábrica aceita apenas componentes criados aqui. Produtos Myio (industrializados) não entram
+            nesta lista e não podem ser importados de outros estoques.
+          </p>
+        )}
+
         {mode === "import" ? (
           <div className="space-y-4">
             <div className="space-y-2">
@@ -674,6 +697,7 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-2">
               <Label htmlFor={`name-${location}`}>Nome</Label>
+              {!isFabrica && (
               <Popover>
                 <PopoverTrigger asChild>
                   <Button type="button" variant="outline" size="sm">
@@ -703,6 +727,8 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
                   </Command>
                 </PopoverContent>
               </Popover>
+              )}
+
             </div>
             <Input
               id={`name-${location}`}
