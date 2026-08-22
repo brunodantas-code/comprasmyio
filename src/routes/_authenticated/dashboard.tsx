@@ -346,9 +346,11 @@ function Dashboard() {
               <TabsList className="mb-4">
                 <TabsTrigger value="mine"><ClipboardList className="mr-2 h-4 w-4" />Minhas compras</TabsTrigger>
                 <TabsTrigger value="new"><Plus className="mr-2 h-4 w-4" />Nova Solicitação de compra</TabsTrigger>
+                <TabsTrigger value="import"><Plane className="mr-2 h-4 w-4" />Importação</TabsTrigger>
               </TabsList>
               <TabsContent value="mine"><MyOrders userId={me.id} /></TabsContent>
               <TabsContent value="new"><NewOrder userId={me.id} /></TabsContent>
+              <TabsContent value="import"><ImportOrders userId={me.id} /></TabsContent>
             </Tabs>
           </TabsContent>
           {(me.isComprador || me.isAdmin) && <TabsContent value="queue"><BuyerQueue /></TabsContent>}
