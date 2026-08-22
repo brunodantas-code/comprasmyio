@@ -35,6 +35,8 @@ import { UnitProductsCard } from "@/components/unit-products";
 import { QrCheckSection } from "@/components/qr-check";
 import { MyioDemandCard, ProductionQueueCard } from "@/components/myio-demand";
 import { TechnicianItemsCard } from "@/components/technician-items";
+import { MaterialDetailDialog } from "@/components/material-detail";
+
 
 type StockRow = {
   material_id: string;
@@ -878,6 +880,7 @@ function StockTableCard({
   canDelete,
   actions,
   moveTo,
+  detail,
 }: {
   title: string;
   description: string;
@@ -887,7 +890,9 @@ function StockTableCard({
   canDelete?: boolean;
   actions?: React.ReactNode;
   moveTo?: "myio" | "terceiros";
+  detail?: boolean;
 }) {
+
   return (
     <Card>
       <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -919,14 +924,27 @@ function StockTableCard({
                 <TableRow key={r.material_id}>
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-2">
-                      <StockQrDialog
-                        stockName={r.name}
-                        trigger={
-                          <button type="button" className="text-left hover:underline">
-                            {r.name}
-                          </button>
-                        }
-                      />
+                      {detail ? (
+                        <MaterialDetailDialog
+                          materialId={r.material_id}
+                          name={r.name}
+                          trigger={
+                            <button type="button" className="text-left hover:underline">
+                              {r.name}
+                            </button>
+                          }
+                        />
+                      ) : (
+                        <StockQrDialog
+                          stockName={r.name}
+                          trigger={
+                            <button type="button" className="text-left hover:underline">
+                              {r.name}
+                            </button>
+                          }
+                        />
+                      )}
+
                       {r.link && (
                         <a href={r.link} target="_blank" rel="noreferrer" className="text-primary hover:underline">
                           <ExternalLink className="h-3 w-3" />
@@ -1108,7 +1126,9 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
           userId={userId}
           canDelete={canDelete}
           actions={toolbar}
+          detail={location === "fabrica"}
         />
+
       )}
 
       {location === "almoxarifado" && <BoxesCard />}

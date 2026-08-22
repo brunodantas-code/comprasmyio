@@ -288,7 +288,10 @@ export type Database = {
           link: string | null
           location: string
           loss_percent: number
+          lot_quantity: number | null
           name: string
+          photo_url: string | null
+          purchase_type: string | null
           updated_at: string
         }
         Insert: {
@@ -300,7 +303,10 @@ export type Database = {
           link?: string | null
           location?: string
           loss_percent?: number
+          lot_quantity?: number | null
           name: string
+          photo_url?: string | null
+          purchase_type?: string | null
           updated_at?: string
         }
         Update: {
@@ -312,7 +318,10 @@ export type Database = {
           link?: string | null
           location?: string
           loss_percent?: number
+          lot_quantity?: number | null
           name?: string
+          photo_url?: string | null
+          purchase_type?: string | null
           updated_at?: string
         }
         Relationships: []
