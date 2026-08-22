@@ -524,7 +524,9 @@ function HomologationSection({ userId, canDelete }: { userId: string; canDelete?
 
 function AddMaterialDialog({ location, userId }: { location: StockLocation; userId: string }) {
   const qc = useQueryClient();
+  const isFabrica = location === "fabrica";
   const [open, setOpen] = useState(false);
+
   const [mode, setMode] = useState<"new" | "import">("new");
   const [importId, setImportId] = useState("");
   const [importSearch, setImportSearch] = useState("");
