@@ -619,7 +619,11 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Novo item — {LOCATION_LABELS[location]}</DialogTitle>
-          <DialogDescription>O item fica disponível para entradas e baixas neste local.</DialogDescription>
+          <DialogDescription>
+            {isFabrica
+              ? "O item é criado do zero e pertence somente ao Estoque — Fábrica."
+              : "O item fica disponível para entradas e baixas neste local."}
+          </DialogDescription>
         </DialogHeader>
         {!isFabrica && (
         <div className="flex gap-2">
@@ -633,8 +637,8 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
         )}
         {isFabrica && (
           <p className="text-xs text-muted-foreground">
-            O Estoque — Fábrica aceita apenas componentes criados aqui. Produtos Myio (industrializados) não entram
-            nesta lista e não podem ser importados de outros estoques.
+            Banco de dados único e independente: nenhum item vem de biblioteca ou de outros estoques. Produtos Myio
+            (industrializados) não entram nesta lista.
           </p>
         )}
 
@@ -736,7 +740,7 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
               id={`name-${location}`}
               name="name"
               required
-              placeholder="Digite ou selecione da biblioteca"
+              placeholder={isFabrica ? "Nome do componente" : "Digite ou selecione da biblioteca"}
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
             />
