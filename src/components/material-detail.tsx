@@ -200,6 +200,16 @@ export function MaterialDetailDialog({
                     </SelectContent>
                   </Select>
                 </div>
+                <div className="space-y-1">
+                  <Label htmlFor="detail-description">Descrição</Label>
+                  <Textarea
+                    id="detail-description"
+                    rows={3}
+                    placeholder="Detalhes do componente"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                  />
+                </div>
                 <div className="flex gap-2">
                   <Button size="sm" disabled={save.isPending} onClick={() => save.mutate()}>Salvar</Button>
                   <Button size="sm" variant="ghost" onClick={() => setEditing(false)}>Cancelar</Button>
