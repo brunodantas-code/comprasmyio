@@ -637,8 +637,8 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
         )}
         {isFabrica && (
           <p className="text-xs text-muted-foreground">
-            O Estoque — Fábrica aceita apenas componentes criados aqui. Produtos Myio (industrializados) não entram
-            nesta lista e não podem ser importados de outros estoques.
+            Banco de dados único e independente: nenhum item vem de biblioteca ou de outros estoques. Produtos Myio
+            (industrializados) não entram nesta lista.
           </p>
         )}
 
