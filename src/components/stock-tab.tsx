@@ -569,7 +569,16 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
       setOpen(false);
       setImportId("");
     },
+    onError: (e: Error) =>
+      toast.error(
+        e.message.includes("materials_fabrica_unique_name")
+          ? "Já existe um componente com esse nome na Fábrica"
+          : e.message.includes("materials_fabrica_only_components")
+            ? "O Estoque — Fábrica aceita apenas componentes"
+            : e.message,
+      ),
   });
+
 
   const importMany = useMutation({
     mutationFn: async (ids: string[]) => {
