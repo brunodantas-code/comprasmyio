@@ -100,6 +100,7 @@ export function MaterialDetailDialog({
           link: link.trim() || null,
           lot_quantity: qty,
           purchase_type: type || null,
+          description: description.trim() || null,
         })
         .eq("id", materialId);
       if (error) throw error;
