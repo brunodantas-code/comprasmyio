@@ -607,6 +607,7 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
           description: v.description,
           photo_url,
           ...(isFabrica ? { is_product: false } : {}),
+          ...(location === "almoxarifado" ? { is_manufactured: false } : {}),
         });
       if (error) throw error;
 
@@ -1277,7 +1278,6 @@ function EstoqueMyioSection({ userId, canDelete }: { userId: string; canDelete?:
 
   const toolbar = (
     <>
-      <AddMaterialDialog location="almoxarifado" userId={userId} />
       <ResetStockDialog rows={scoped} userId={userId} location="almoxarifado" />
       <div className="relative">
         <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -1330,6 +1330,7 @@ function EstoqueMyioSection({ userId, canDelete }: { userId: string; canDelete?:
           isLoading={isLoading}
           userId={userId}
           canDelete={canDelete}
+          actions={<AddMaterialDialog location="almoxarifado" userId={userId} />}
           moveTo="myio"
         />
         <BoxesCard />
