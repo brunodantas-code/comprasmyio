@@ -18,7 +18,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Checkbox } from "@/components/ui/checkbox";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { toast } from "sonner";
-import { LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Library, Boxes, Factory, Building2 } from "lucide-react";
+import { LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Library, Boxes, Factory, Building2, Plane } from "lucide-react";
 import { Trash2, Paperclip, X, Download } from "lucide-react";
 import { z } from "zod";
 import { StockTab } from "@/components/stock-tab";
@@ -346,9 +346,11 @@ function Dashboard() {
               <TabsList className="mb-4">
                 <TabsTrigger value="mine"><ClipboardList className="mr-2 h-4 w-4" />Minhas compras</TabsTrigger>
                 <TabsTrigger value="new"><Plus className="mr-2 h-4 w-4" />Nova Solicitação de compra</TabsTrigger>
+                <TabsTrigger value="import"><Plane className="mr-2 h-4 w-4" />Importação</TabsTrigger>
               </TabsList>
               <TabsContent value="mine"><MyOrders userId={me.id} /></TabsContent>
               <TabsContent value="new"><NewOrder userId={me.id} /></TabsContent>
+              <TabsContent value="import"><ImportOrders userId={me.id} /></TabsContent>
             </Tabs>
           </TabsContent>
           {(me.isComprador || me.isAdmin) && <TabsContent value="queue"><BuyerQueue /></TabsContent>}
@@ -675,6 +677,70 @@ function MyOrders({ userId }: { userId: string }) {
       <CardContent>
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
           !orders?.length ? <p className="text-sm text-muted-foreground">Nenhum pedido ainda.</p> :
+          !visible.length ? <p className="text-sm text-muted-foreground">Nenhum pedido para exibir com o filtro atual.</p> :
+          <OrdersTable orders={visible} projectName={projectName} showRequester={false} canEditRequester />
+        }
+      </CardContent>
+    </Card>
+  );
+}
+
+/* ---------- Import orders ---------- */
+
+function useImportMaterialIds() {
+  return useQuery({
+    queryKey: ["materials", "import-ids"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("materials")
+        .select("id, purchase_type")
+        .eq("purchase_type", "importacao");
+      if (error) throw error;
+      return new Set((data ?? []).map((m) => m.id));
+    },
+  });
+}
+
+function ImportOrders({ userId }: { userId: string }) {
+  const { data: projects } = useProjects();
+  const importIds = useImportMaterialIds();
+  const [deliveredMode, setDeliveredMode] = useState<DeliveredMode>("all");
+  const [deliveredFrom, setDeliveredFrom] = useState("");
+  const [statusSelected, setStatusSelected] = useState<Order["status"][]>([...STATUS_KEYS]);
+
+  const { data: orders, isLoading } = useQuery({
+    queryKey: ["orders", "mine", userId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("purchase_orders")
+        .select("*")
+        .eq("requester_id", userId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data as Order[];
+    },
+  });
+
+  const projectName = (id: string) => projects?.find((p) => p.id === id)?.name ?? "—";
+  const importOrders = (orders ?? []).filter((o) => o.material_id && importIds.data?.has(o.material_id));
+  const statusFiltered = importOrders.filter((o) => statusSelected.includes(o.status));
+  const visible = filterDelivered(statusFiltered, deliveredMode, deliveredFrom);
+
+  return (
+    <Card>
+      <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <CardTitle>Pedidos de Importação</CardTitle>
+          <CardDescription>Acompanhe os pedidos cujo material é importado (prazos mais longos).</CardDescription>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <StatusMultiFilter selected={statusSelected} setSelected={setStatusSelected} />
+          <DeliveredFilter mode={deliveredMode} setMode={setDeliveredMode} fromDate={deliveredFrom} setFromDate={setDeliveredFrom} />
+        </div>
+      </CardHeader>
+      <CardContent>
+        {isLoading || importIds.isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
+          !importOrders.length ? <p className="text-sm text-muted-foreground">Nenhum pedido de importação.</p> :
           !visible.length ? <p className="text-sm text-muted-foreground">Nenhum pedido para exibir com o filtro atual.</p> :
           <OrdersTable orders={visible} projectName={projectName} showRequester={false} canEditRequester />
         }
