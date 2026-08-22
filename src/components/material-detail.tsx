@@ -74,12 +74,14 @@ export function MaterialDetailDialog({
   const [link, setLink] = useState("");
   const [lot, setLot] = useState("");
   const [type, setType] = useState<string>("");
+  const [description, setDescription] = useState("");
   const [synced, setSynced] = useState<string | null>(null);
-  if (m && synced !== m.id + JSON.stringify([m.link, m.lot_quantity, m.purchase_type])) {
-    setSynced(m.id + JSON.stringify([m.link, m.lot_quantity, m.purchase_type]));
+  if (m && synced !== m.id + JSON.stringify([m.link, m.lot_quantity, m.purchase_type, m.description])) {
+    setSynced(m.id + JSON.stringify([m.link, m.lot_quantity, m.purchase_type, m.description]));
     setLink(m.link ?? "");
     setLot(m.lot_quantity != null ? String(m.lot_quantity) : "");
     setType(m.purchase_type ?? "");
+    setDescription(m.description ?? "");
   }
 
   const invalidate = () => {
