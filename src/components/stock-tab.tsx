@@ -674,6 +674,7 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-2">
               <Label htmlFor={`name-${location}`}>Nome</Label>
+              {!isFabrica && (
               <Popover>
                 <PopoverTrigger asChild>
                   <Button type="button" variant="outline" size="sm">
@@ -703,6 +704,8 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
                   </Command>
                 </PopoverContent>
               </Popover>
+              )}
+
             </div>
             <Input
               id={`name-${location}`}
