@@ -655,24 +655,35 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
     const name = newName.trim();
     const link = newLink.trim();
     if (!name) return toast.error("Informe o nome do item");
-    save.mutate({ name, link: link || null });
+    const lot = newLot.trim() === "" ? null : Number(newLot);
+    if (lot !== null && (!Number.isFinite(lot) || lot <= 0)) return toast.error("Quantidade por lote inválida");
+    save.mutate({
+      name,
+      link: link || null,
+      lot,
+      type: newType || null,
+      description: newDescription.trim() || null,
+      photo: photoFile,
+    });
   }
 
   return (
-    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) { setMode("new"); setImportId(""); setImportIds([]); setImportSearch(""); setNewName(""); setNewLink(""); } }}>
+    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) resetForm(); }}>
       <DialogTrigger asChild>
         <Button size="sm"><Plus className="mr-1 h-4 w-4" /> Adicionar item</Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className={independent ? "max-h-[85vh] overflow-y-auto" : undefined}>
         <DialogHeader>
           <DialogTitle>Novo item — {LOCATION_LABELS[location]}</DialogTitle>
           <DialogDescription>
             {isFabrica
               ? "O item é criado do zero e pertence somente ao Estoque — Fábrica."
-              : "O item fica disponível para entradas e baixas neste local."}
+              : independent
+                ? "O item é criado do zero e pertence somente a este estoque."
+                : "O item fica disponível para entradas e baixas neste local."}
           </DialogDescription>
         </DialogHeader>
-        {!isFabrica && (
+        {!independent && (
         <div className="flex gap-2">
           <Button type="button" size="sm" variant={mode === "new" ? "default" : "outline"} onClick={() => setMode("new")}>
             Criar novo
@@ -686,6 +697,11 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
           <p className="text-xs text-muted-foreground">
             Banco de dados único e independente: nenhum item vem de biblioteca ou de outros estoques. Produtos Myio
             (industrializados) não entram nesta lista.
+          </p>
+        )}
+        {!isFabrica && independent && (
+          <p className="text-xs text-muted-foreground">
+            Banco de dados único e independente: nenhum item vem de biblioteca ou de outros estoques.
           </p>
         )}
 
