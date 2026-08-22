@@ -13,8 +13,9 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { DistributionCard, TransitCard, LostCard } from "@/components/distribution";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Plus, Library, Trash2, Eraser, ArrowLeftRight, Camera, Upload } from "lucide-react";
+import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Plus, Library, Trash2, Eraser, ArrowLeftRight, Camera, Upload, ImagePlus } from "lucide-react";
 import { QrLinkPicker, type LinkedQr } from "@/components/myio-delivery-qr";
 import {
   AlertDialog,
@@ -527,6 +528,7 @@ function HomologationSection({ userId, canDelete }: { userId: string; canDelete?
 function AddMaterialDialog({ location, userId }: { location: StockLocation; userId: string }) {
   const qc = useQueryClient();
   const isFabrica = location === "fabrica";
+  const independent = isFabrica || location === "almoxarifado";
   const [open, setOpen] = useState(false);
 
   const [mode, setMode] = useState<"new" | "import">("new");
@@ -535,6 +537,12 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
   const [importIds, setImportIds] = useState<string[]>([]);
   const [newName, setNewName] = useState("");
   const [newLink, setNewLink] = useState("");
+  const [newLot, setNewLot] = useState("");
+  const [newType, setNewType] = useState("");
+  const [newDescription, setNewDescription] = useState("");
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
 
   const { data: allMaterials } = useQuery({
     queryKey: ["materials", "library"],
@@ -546,7 +554,7 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
       if (error) throw error;
       return (data ?? []) as { id: string; name: string; link: string | null; location: string }[];
     },
-    enabled: open,
+    enabled: open && !independent,
   });
 
   const here = new Set(
@@ -556,11 +564,50 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
     (m) => m.location !== location && !here.has(m.name.trim().toLowerCase()),
   );
 
+  const resetForm = () => {
+    setMode("new");
+    setImportId("");
+    setImportIds([]);
+    setImportSearch("");
+    setNewName("");
+    setNewLink("");
+    setNewLot("");
+    setNewType("");
+    setNewDescription("");
+    setPhotoFile(null);
+    setPhotoPreview(null);
+  };
+
   const save = useMutation({
-    mutationFn: async (v: { name: string; link: string | null }) => {
+    mutationFn: async (v: {
+      name: string;
+      link: string | null;
+      lot: number | null;
+      type: string | null;
+      description: string | null;
+      photo: File | null;
+    }) => {
+      let photo_url: string | null = null;
+      if (v.photo) {
+        const ext = v.photo.name.split(".").pop() ?? "jpg";
+        const path = `materials/${crypto.randomUUID()}.${ext}`;
+        const { error: upErr } = await supabase.storage.from("product-images").upload(path, v.photo);
+        if (upErr) throw upErr;
+        photo_url = path;
+      }
       const { error } = await supabase
         .from("materials")
-        .insert({ ...v, location, created_by: userId, ...(isFabrica ? { is_product: false } : {}) });
+        .insert({
+          name: v.name,
+          link: v.link,
+          location,
+          created_by: userId,
+          lot_quantity: v.lot,
+          purchase_type: v.type,
+          description: v.description,
+          photo_url,
+          ...(isFabrica ? { is_product: false } : {}),
+        });
       if (error) throw error;
 
     },
@@ -569,7 +616,7 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
       qc.invalidateQueries({ queryKey: ["material-stock"] });
       qc.invalidateQueries({ queryKey: ["materials"] });
       setOpen(false);
-      setImportId("");
+      resetForm();
     },
     onError: (e: Error) =>
       toast.error(
@@ -608,24 +655,35 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
     const name = newName.trim();
     const link = newLink.trim();
     if (!name) return toast.error("Informe o nome do item");
-    save.mutate({ name, link: link || null });
+    const lot = newLot.trim() === "" ? null : Number(newLot);
+    if (lot !== null && (!Number.isFinite(lot) || lot <= 0)) return toast.error("Quantidade por lote inválida");
+    save.mutate({
+      name,
+      link: link || null,
+      lot,
+      type: newType || null,
+      description: newDescription.trim() || null,
+      photo: photoFile,
+    });
   }
 
   return (
-    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) { setMode("new"); setImportId(""); setImportIds([]); setImportSearch(""); setNewName(""); setNewLink(""); } }}>
+    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) resetForm(); }}>
       <DialogTrigger asChild>
         <Button size="sm"><Plus className="mr-1 h-4 w-4" /> Adicionar item</Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className={independent ? "max-h-[85vh] overflow-y-auto" : undefined}>
         <DialogHeader>
           <DialogTitle>Novo item — {LOCATION_LABELS[location]}</DialogTitle>
           <DialogDescription>
             {isFabrica
               ? "O item é criado do zero e pertence somente ao Estoque — Fábrica."
-              : "O item fica disponível para entradas e baixas neste local."}
+              : independent
+                ? "O item é criado do zero e pertence somente a este estoque."
+                : "O item fica disponível para entradas e baixas neste local."}
           </DialogDescription>
         </DialogHeader>
-        {!isFabrica && (
+        {!independent && (
         <div className="flex gap-2">
           <Button type="button" size="sm" variant={mode === "new" ? "default" : "outline"} onClick={() => setMode("new")}>
             Criar novo
@@ -639,6 +697,11 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
           <p className="text-xs text-muted-foreground">
             Banco de dados único e independente: nenhum item vem de biblioteca ou de outros estoques. Produtos Myio
             (industrializados) não entram nesta lista.
+          </p>
+        )}
+        {!isFabrica && independent && (
+          <p className="text-xs text-muted-foreground">
+            Banco de dados único e independente: nenhum item vem de biblioteca ou de outros estoques.
           </p>
         )}
 
@@ -700,10 +763,40 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
           </div>
         ) : (
         <form onSubmit={onSubmit} className="space-y-4">
+          {independent && (
+            <>
+              <button
+                type="button"
+                onClick={() => photoInputRef.current?.click()}
+                className="flex h-36 w-full items-center justify-center overflow-hidden rounded-md border bg-muted/40 transition hover:opacity-90"
+                title={photoPreview ? "Trocar foto" : "Adicionar foto"}
+              >
+                {photoPreview ? (
+                  <img src={photoPreview} alt="Foto do item" className="h-full w-full object-contain" />
+                ) : (
+                  <span className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <ImagePlus className="h-4 w-4" /> Adicionar foto do item <span className="text-xs">(opcional)</span>
+                  </span>
+                )}
+              </button>
+              <input
+                ref={photoInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0] ?? null;
+                  e.target.value = "";
+                  setPhotoFile(f);
+                  setPhotoPreview(f ? URL.createObjectURL(f) : null);
+                }}
+              />
+            </>
+          )}
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-2">
               <Label htmlFor={`name-${location}`}>Nome</Label>
-              {!isFabrica && (
+              {!independent && (
               <Popover>
                 <PopoverTrigger asChild>
                   <Button type="button" variant="outline" size="sm">
@@ -740,17 +833,52 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
               id={`name-${location}`}
               name="name"
               required
-              placeholder={isFabrica ? "Nome do componente" : "Digite ou selecione da biblioteca"}
+              placeholder={independent ? "Nome do item" : "Digite ou selecione da biblioteca"}
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor={`link-${location}`}>Link <span className="text-muted-foreground">(opcional)</span></Label>
+            <Label htmlFor={`link-${location}`}>{independent ? "Link de Referência" : "Link"} <span className="text-muted-foreground">(opcional)</span></Label>
             <Input id={`link-${location}`} name="link" type="url" placeholder="https://" value={newLink} onChange={(e) => setNewLink(e.target.value)} />
           </div>
+          {independent && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor={`lot-${location}`}>Quantidade por lote <span className="text-muted-foreground">(opcional)</span></Label>
+                <Input
+                  id={`lot-${location}`}
+                  type="number"
+                  min="1"
+                  placeholder="Ex.: 100"
+                  value={newLot}
+                  onChange={(e) => setNewLot(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Tipo de compra <span className="text-muted-foreground">(opcional)</span></Label>
+                <Select value={newType} onValueChange={setNewType}>
+                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="nacional">Nacional</SelectItem>
+                    <SelectItem value="importacao">Importação</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor={`desc-${location}`}>Descrição <span className="text-muted-foreground">(opcional)</span></Label>
+                <Textarea
+                  id={`desc-${location}`}
+                  rows={3}
+                  placeholder="Detalhes do item"
+                  value={newDescription}
+                  onChange={(e) => setNewDescription(e.target.value)}
+                />
+              </div>
+            </>
+          )}
           <DialogFooter>
-            <Button type="submit" disabled={save.isPending}>Salvar</Button>
+            <Button type="submit" disabled={save.isPending}>{save.isPending ? "Salvando..." : "Salvar"}</Button>
           </DialogFooter>
         </form>
         )}
