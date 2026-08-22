@@ -27,6 +27,7 @@ type MaterialDetail = {
   photo_url: string | null;
   lot_quantity: number | null;
   purchase_type: string | null;
+  description: string | null;
 };
 
 const TYPE_LABEL: Record<string, string> = { nacional: "Nacional", importacao: "Importação" };
