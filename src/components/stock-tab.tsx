@@ -736,7 +736,7 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
               id={`name-${location}`}
               name="name"
               required
-              placeholder="Digite ou selecione da biblioteca"
+              placeholder={isFabrica ? "Nome do componente" : "Digite ou selecione da biblioteca"}
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
             />
