@@ -685,6 +685,70 @@ function MyOrders({ userId }: { userId: string }) {
   );
 }
 
+/* ---------- Import orders ---------- */
+
+function useImportMaterialIds() {
+  return useQuery({
+    queryKey: ["materials", "import-ids"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("materials")
+        .select("id, purchase_type")
+        .eq("purchase_type", "importacao");
+      if (error) throw error;
+      return new Set((data ?? []).map((m) => m.id));
+    },
+  });
+}
+
+function ImportOrders({ userId }: { userId: string }) {
+  const { data: projects } = useProjects();
+  const importIds = useImportMaterialIds();
+  const [deliveredMode, setDeliveredMode] = useState<DeliveredMode>("all");
+  const [deliveredFrom, setDeliveredFrom] = useState("");
+  const [statusSelected, setStatusSelected] = useState<Order["status"][]>([...STATUS_KEYS]);
+
+  const { data: orders, isLoading } = useQuery({
+    queryKey: ["orders", "mine", userId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("purchase_orders")
+        .select("*")
+        .eq("requester_id", userId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data as Order[];
+    },
+  });
+
+  const projectName = (id: string) => projects?.find((p) => p.id === id)?.name ?? "—";
+  const importOrders = (orders ?? []).filter((o) => o.material_id && importIds.data?.has(o.material_id));
+  const statusFiltered = importOrders.filter((o) => statusSelected.includes(o.status));
+  const visible = filterDelivered(statusFiltered, deliveredMode, deliveredFrom);
+
+  return (
+    <Card>
+      <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <CardTitle>Pedidos de Importação</CardTitle>
+          <CardDescription>Acompanhe os pedidos cujo material é importado (prazos mais longos).</CardDescription>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <StatusMultiFilter selected={statusSelected} setSelected={setStatusSelected} />
+          <DeliveredFilter mode={deliveredMode} setMode={setDeliveredMode} fromDate={deliveredFrom} setFromDate={setDeliveredFrom} />
+        </div>
+      </CardHeader>
+      <CardContent>
+        {isLoading || importIds.isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
+          !importOrders.length ? <p className="text-sm text-muted-foreground">Nenhum pedido de importação.</p> :
+          !visible.length ? <p className="text-sm text-muted-foreground">Nenhum pedido para exibir com o filtro atual.</p> :
+          <OrdersTable orders={visible} projectName={projectName} showRequester={false} canEditRequester />
+        }
+      </CardContent>
+    </Card>
+  );
+}
+
 /* ---------- Buyer queue ---------- */
 
 function BuyerQueue() {
