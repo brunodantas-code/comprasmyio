@@ -1305,11 +1305,7 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
 
   return (
     <div className="space-y-6">
-      {location === "almoxarifado" ? (
-        <MyioDemandCard
-          balances={Object.fromEntries(scoped.map((r) => [r.name.trim().toLowerCase(), r.balance]))}
-        />
-      ) : location === "unidade" || location === "transito" ? null : (
+      {location === "unidade" || location === "transito" ? null : (
       <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-3">
         <Card>
           <CardHeader className="pb-2"><CardDescription>Itens cadastrados</CardDescription></CardHeader>
@@ -1336,29 +1332,7 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
         />
       )}
 
-      {location === "almoxarifado" ? (
-        <>
-          <StockTableCard
-            title="Estoque Myio"
-            description='Produtos produzidos pela Myio. Use o botão de troca para mover um item para "Terceiros".'
-            rows={rows.filter((r) => manufactured?.[r.material_id])}
-            isLoading={isLoading}
-            userId={userId}
-            canDelete={canDelete}
-            actions={toolbar}
-            moveTo="terceiros"
-          />
-          <StockTableCard
-            title="Estoque Terceiros"
-            description='Itens comprados de terceiros. Use o botão de troca para mover um item para "Myio".'
-            rows={rows.filter((r) => !manufactured?.[r.material_id])}
-            isLoading={isLoading}
-            userId={userId}
-            canDelete={canDelete}
-            moveTo="myio"
-          />
-        </>
-      ) : location === "unidade" || location === "transito" ? null : (
+      {location === "unidade" || location === "transito" ? null : (
         <StockTableCard
           title={`Estoque — ${LOCATION_LABELS[location]}`}
           description='A entrada é automática quando o solicitante confirma "Recebido corretamente" em um pedido feito pela biblioteca.'
@@ -1371,7 +1345,6 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
 
       )}
 
-      {location === "almoxarifado" && <BoxesCard />}
 
       <Card>
         <CardHeader>
