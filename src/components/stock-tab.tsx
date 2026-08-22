@@ -35,6 +35,8 @@ import { UnitProductsCard } from "@/components/unit-products";
 import { QrCheckSection } from "@/components/qr-check";
 import { MyioDemandCard, ProductionQueueCard } from "@/components/myio-demand";
 import { TechnicianItemsCard } from "@/components/technician-items";
+import { MaterialDetailDialog } from "@/components/material-detail";
+
 
 type StockRow = {
   material_id: string;
