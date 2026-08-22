@@ -179,7 +179,7 @@ export function MaterialDetailDialog({
             {editing ? (
               <div className="space-y-3 rounded-md border p-3">
                 <div className="space-y-1">
-                  <Label htmlFor="detail-link">Link de compra</Label>
+                  <Label htmlFor="detail-link">Link de Referência</Label>
                   <Input id="detail-link" type="url" placeholder="https://" value={link} onChange={(e) => setLink(e.target.value)} />
                 </div>
                 <div className="space-y-1">
@@ -206,7 +206,7 @@ export function MaterialDetailDialog({
                 <Table>
                   <TableBody>
                     <TableRow>
-                      <TableCell className="w-48 font-medium">Link de compra</TableCell>
+                      <TableCell className="w-48 font-medium">Link de Referência</TableCell>
                       <TableCell>
                         {m?.link ? (
                           <a href={m.link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-primary hover:underline">
