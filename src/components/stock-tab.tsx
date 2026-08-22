@@ -1161,9 +1161,6 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
   const toolbar = (
     <>
       <AddMaterialDialog location={location} userId={userId} />
-      {location === "fabrica" && <ReleaseAssembledDialog userId={userId} />}
-      {location === "fabrica" && <BomSettingsDialog />}
-      {location === "fabrica" && <StockSimulatorDialog userId={userId} />}
       <ResetStockDialog rows={scoped} userId={userId} location={location} />
       <div className="relative">
         <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
