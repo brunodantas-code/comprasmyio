@@ -1273,11 +1273,6 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
     .filter((r) => (view === "with" ? r.balance > 0 : view === "zero" ? r.balance <= 0 : true));
 
   const totalItems = scoped.reduce((acc, r) => acc + Math.max(r.balance, 0), 0);
-  const materialNames = Object.fromEntries((stock ?? []).map((r) => [r.material_id, r.name]));
-
-  const almoxarifadoBalances = Object.fromEntries(
-    (stock ?? []).filter((r) => (r.location ?? "fabrica") === "almoxarifado").map((r) => [r.name.trim().toLowerCase(), r.balance]),
-  );
 
   const toolbar = (
     <>
