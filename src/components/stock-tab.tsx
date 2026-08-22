@@ -13,8 +13,9 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { DistributionCard, TransitCard, LostCard } from "@/components/distribution";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Plus, Library, Trash2, Eraser, ArrowLeftRight, Camera, Upload } from "lucide-react";
+import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Plus, Library, Trash2, Eraser, ArrowLeftRight, Camera, Upload, ImagePlus } from "lucide-react";
 import { QrLinkPicker, type LinkedQr } from "@/components/myio-delivery-qr";
 import {
   AlertDialog,
@@ -527,6 +528,7 @@ function HomologationSection({ userId, canDelete }: { userId: string; canDelete?
 function AddMaterialDialog({ location, userId }: { location: StockLocation; userId: string }) {
   const qc = useQueryClient();
   const isFabrica = location === "fabrica";
+  const independent = isFabrica || location === "almoxarifado";
   const [open, setOpen] = useState(false);
 
   const [mode, setMode] = useState<"new" | "import">("new");
@@ -535,6 +537,12 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
   const [importIds, setImportIds] = useState<string[]>([]);
   const [newName, setNewName] = useState("");
   const [newLink, setNewLink] = useState("");
+  const [newLot, setNewLot] = useState("");
+  const [newType, setNewType] = useState("");
+  const [newDescription, setNewDescription] = useState("");
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
 
   const { data: allMaterials } = useQuery({
     queryKey: ["materials", "library"],
@@ -546,7 +554,7 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
       if (error) throw error;
       return (data ?? []) as { id: string; name: string; link: string | null; location: string }[];
     },
-    enabled: open,
+    enabled: open && !independent,
   });
 
   const here = new Set(
@@ -556,11 +564,50 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
     (m) => m.location !== location && !here.has(m.name.trim().toLowerCase()),
   );
 
+  const resetForm = () => {
+    setMode("new");
+    setImportId("");
+    setImportIds([]);
+    setImportSearch("");
+    setNewName("");
+    setNewLink("");
+    setNewLot("");
+    setNewType("");
+    setNewDescription("");
+    setPhotoFile(null);
+    setPhotoPreview(null);
+  };
+
   const save = useMutation({
-    mutationFn: async (v: { name: string; link: string | null }) => {
+    mutationFn: async (v: {
+      name: string;
+      link: string | null;
+      lot: number | null;
+      type: string | null;
+      description: string | null;
+      photo: File | null;
+    }) => {
+      let photo_url: string | null = null;
+      if (v.photo) {
+        const ext = v.photo.name.split(".").pop() ?? "jpg";
+        const path = `materials/${crypto.randomUUID()}.${ext}`;
+        const { error: upErr } = await supabase.storage.from("product-images").upload(path, v.photo);
+        if (upErr) throw upErr;
+        photo_url = path;
+      }
       const { error } = await supabase
         .from("materials")
-        .insert({ ...v, location, created_by: userId, ...(isFabrica ? { is_product: false } : {}) });
+        .insert({
+          name: v.name,
+          link: v.link,
+          location,
+          created_by: userId,
+          lot_quantity: v.lot,
+          purchase_type: v.type,
+          description: v.description,
+          photo_url,
+          ...(isFabrica ? { is_product: false } : {}),
+        });
       if (error) throw error;
 
     },
@@ -569,7 +616,7 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
       qc.invalidateQueries({ queryKey: ["material-stock"] });
       qc.invalidateQueries({ queryKey: ["materials"] });
       setOpen(false);
-      setImportId("");
+      resetForm();
     },
     onError: (e: Error) =>
       toast.error(
