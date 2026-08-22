@@ -39,7 +39,7 @@ function useMaterialDetail(materialId: string, enabled: boolean) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("materials")
-        .select("id, name, link, photo_url, lot_quantity, purchase_type")
+        .select("id, name, link, photo_url, lot_quantity, purchase_type, description")
         .eq("id", materialId)
         .single();
       if (error) throw error;
