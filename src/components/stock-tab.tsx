@@ -607,6 +607,7 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
           description: v.description,
           photo_url,
           ...(isFabrica ? { is_product: false } : {}),
+          ...(location === "almoxarifado" ? { is_manufactured: false } : {}),
         });
       if (error) throw error;
 
