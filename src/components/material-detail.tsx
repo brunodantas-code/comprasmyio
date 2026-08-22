@@ -248,6 +248,12 @@ export function MaterialDetailDialog({
                         )}
                       </TableCell>
                     </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium align-top">Descrição</TableCell>
+                      <TableCell className="whitespace-pre-wrap">
+                        {m?.description ? m.description : <span className="text-muted-foreground">—</span>}
+                      </TableCell>
+                    </TableRow>
                   </TableBody>
                 </Table>
               </div>
