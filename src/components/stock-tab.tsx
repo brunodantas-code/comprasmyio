@@ -1207,12 +1207,6 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
       </div>
       )}
 
-      {location === "fabrica" && (
-        <AssemblyReleasesCard materialNames={materialNames} userId={userId} canCorrect canDelete={canDelete} />
-      )}
-
-      {location === "fabrica" && <ProductionCapacityCard />}
-
       {location === "unidade" && (
         <UnitProductsCard
           materials={scoped.map((r) => ({ material_id: r.material_id, name: r.name }))}
