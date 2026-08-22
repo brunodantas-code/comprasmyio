@@ -206,7 +206,7 @@ export function MaterialDetailDialog({
                 <Table>
                   <TableBody>
                     <TableRow>
-                      <TableCell className="w-48 font-medium">Link de compra</TableCell>
+                      <TableCell className="w-48 font-medium">Link de Referência</TableCell>
                       <TableCell>
                         {m?.link ? (
                           <a href={m.link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-primary hover:underline">
