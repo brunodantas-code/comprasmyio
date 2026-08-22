@@ -878,6 +878,7 @@ function StockTableCard({
   canDelete,
   actions,
   moveTo,
+  detail,
 }: {
   title: string;
   description: string;
@@ -887,7 +888,9 @@ function StockTableCard({
   canDelete?: boolean;
   actions?: React.ReactNode;
   moveTo?: "myio" | "terceiros";
+  detail?: boolean;
 }) {
+
   return (
     <Card>
       <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
