@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -27,6 +28,7 @@ type MaterialDetail = {
   photo_url: string | null;
   lot_quantity: number | null;
   purchase_type: string | null;
+  description: string | null;
 };
 
 const TYPE_LABEL: Record<string, string> = { nacional: "Nacional", importacao: "Importação" };
@@ -38,7 +40,7 @@ function useMaterialDetail(materialId: string, enabled: boolean) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("materials")
-        .select("id, name, link, photo_url, lot_quantity, purchase_type")
+        .select("id, name, link, photo_url, lot_quantity, purchase_type, description")
         .eq("id", materialId)
         .single();
       if (error) throw error;
@@ -73,12 +75,14 @@ export function MaterialDetailDialog({
   const [link, setLink] = useState("");
   const [lot, setLot] = useState("");
   const [type, setType] = useState<string>("");
+  const [description, setDescription] = useState("");
   const [synced, setSynced] = useState<string | null>(null);
-  if (m && synced !== m.id + JSON.stringify([m.link, m.lot_quantity, m.purchase_type])) {
-    setSynced(m.id + JSON.stringify([m.link, m.lot_quantity, m.purchase_type]));
+  if (m && synced !== m.id + JSON.stringify([m.link, m.lot_quantity, m.purchase_type, m.description])) {
+    setSynced(m.id + JSON.stringify([m.link, m.lot_quantity, m.purchase_type, m.description]));
     setLink(m.link ?? "");
     setLot(m.lot_quantity != null ? String(m.lot_quantity) : "");
     setType(m.purchase_type ?? "");
+    setDescription(m.description ?? "");
   }
 
   const invalidate = () => {
@@ -97,6 +101,7 @@ export function MaterialDetailDialog({
           link: link.trim() || null,
           lot_quantity: qty,
           purchase_type: type || null,
+          description: description.trim() || null,
         })
         .eq("id", materialId);
       if (error) throw error;
@@ -196,6 +201,16 @@ export function MaterialDetailDialog({
                     </SelectContent>
                   </Select>
                 </div>
+                <div className="space-y-1">
+                  <Label htmlFor="detail-description">Descrição</Label>
+                  <Textarea
+                    id="detail-description"
+                    rows={3}
+                    placeholder="Detalhes do componente"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                  />
+                </div>
                 <div className="flex gap-2">
                   <Button size="sm" disabled={save.isPending} onClick={() => save.mutate()}>Salvar</Button>
                   <Button size="sm" variant="ghost" onClick={() => setEditing(false)}>Cancelar</Button>
@@ -231,6 +246,12 @@ export function MaterialDetailDialog({
                         ) : (
                           <span className="text-muted-foreground">—</span>
                         )}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium align-top">Descrição</TableCell>
+                      <TableCell className="whitespace-pre-wrap">
+                        {m?.description ? m.description : <span className="text-muted-foreground">—</span>}
                       </TableCell>
                     </TableRow>
                   </TableBody>
