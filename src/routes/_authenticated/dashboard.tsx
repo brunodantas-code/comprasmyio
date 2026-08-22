@@ -599,7 +599,7 @@ function NewOrder({ userId }: { userId: string }) {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="item_link">Link de compra <span className="text-muted-foreground">(opcional)</span></Label>
+              <Label htmlFor="item_link">Link de Referência <span className="text-muted-foreground">(opcional)</span></Label>
               <Input id="item_link" type="url" placeholder="https://..." value={itemLink} onChange={(e) => setItemLink(e.target.value)} />
             </div>
             <div className="space-y-2">
@@ -1149,7 +1149,7 @@ function EditRequesterDialog({ order }: { order: Order }) {
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor={`e-link-${order.id}`}>Link de compra <span className="text-muted-foreground">(opcional)</span></Label>
+            <Label htmlFor={`e-link-${order.id}`}>Link de Referência <span className="text-muted-foreground">(opcional)</span></Label>
             <Input id={`e-link-${order.id}`} type="url" value={itemLink} onChange={(e) => setItemLink(e.target.value)} placeholder="https://..." />
           </div>
           <div className="space-y-2">
