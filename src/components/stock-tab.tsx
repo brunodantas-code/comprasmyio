@@ -556,8 +556,11 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
 
   const save = useMutation({
     mutationFn: async (v: { name: string; link: string | null }) => {
-      const { error } = await supabase.from("materials").insert({ ...v, location, created_by: userId });
+      const { error } = await supabase
+        .from("materials")
+        .insert({ ...v, location, created_by: userId, ...(isFabrica ? { is_product: false } : {}) });
       if (error) throw error;
+
     },
     onSuccess: () => {
       toast.success("Item adicionado");
