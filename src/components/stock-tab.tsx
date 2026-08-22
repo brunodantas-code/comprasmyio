@@ -53,7 +53,7 @@ type StockLocation = "almoxarifado" | "fabrica" | "unidade" | "tecnico" | "trans
 
 const LOCATION_LABELS: Record<StockLocation, string> = {
   fabrica: "Fábrica",
-  almoxarifado: "Estoque",
+  almoxarifado: "Estoque Myio",
   transito: "Transporte",
   unidade: "Cliente",
   tecnico: "Técnico",
