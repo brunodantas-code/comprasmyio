@@ -1188,8 +1188,6 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
         <MyioDemandCard
           balances={Object.fromEntries(scoped.map((r) => [r.name.trim().toLowerCase(), r.balance]))}
         />
-      ) : location === "fabrica" ? (
-        <ProductionQueueCard balances={almoxarifadoBalances} />
       ) : location === "unidade" || location === "transito" ? null : (
       <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-3">
         <Card>
