@@ -72,7 +72,7 @@ export function MaterialDetailDialog({
   const [uploading, setUploading] = useState(false);
 
   const m = data?.material;
-  const [name, setName] = useState("");
+  const [nameValue, setNameValue] = useState("");
   const [link, setLink] = useState("");
   const [lot, setLot] = useState("");
   const [type, setType] = useState<string>("");
@@ -80,7 +80,7 @@ export function MaterialDetailDialog({
   const [synced, setSynced] = useState<string | null>(null);
   if (m && synced !== m.id + JSON.stringify([m.name, m.link, m.lot_quantity, m.purchase_type, m.description])) {
     setSynced(m.id + JSON.stringify([m.name, m.link, m.lot_quantity, m.purchase_type, m.description]));
-    setName(m.name ?? "");
+    setNameValue(m.name ?? "");
     setLink(m.link ?? "");
     setLot(m.lot_quantity != null ? String(m.lot_quantity) : "");
     setType(m.purchase_type ?? "");
@@ -97,11 +97,11 @@ export function MaterialDetailDialog({
     mutationFn: async () => {
       const qty = lot.trim() === "" ? null : Number(lot);
       if (qty !== null && (!Number.isFinite(qty) || qty <= 0)) throw new Error("Quantidade por lote inválida");
-      if (!name.trim()) throw new Error("Nome obrigatório");
+      if (!nameValue.trim()) throw new Error("Nome obrigatório");
       const { error } = await supabase
         .from("materials")
         .update({
-          name: name.trim(),
+          name: nameValue.trim(),
           link: link.trim() || null,
           lot_quantity: qty,
           purchase_type: type || null,
@@ -188,6 +188,10 @@ export function MaterialDetailDialog({
 
             {editing ? (
               <div className="space-y-3 rounded-md border p-3">
+                <div className="space-y-1">
+                  <Label htmlFor="detail-name">Nome</Label>
+                  <Input id="detail-name" value={nameValue} onChange={(e) => setNameValue(e.target.value)} />
+                </div>
                 <div className="space-y-1">
                   <Label htmlFor="detail-link">Link de Referência</Label>
                   <Input id="detail-link" type="url" placeholder="https://" value={link} onChange={(e) => setLink(e.target.value)} />
