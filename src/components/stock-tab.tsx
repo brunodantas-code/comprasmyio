@@ -1246,7 +1246,6 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
           userId={userId}
           canDelete={canDelete}
           actions={toolbar}
-          detail={location === "fabrica"}
         />
 
       )}
