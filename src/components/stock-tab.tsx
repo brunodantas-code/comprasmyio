@@ -619,7 +619,11 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Novo item — {LOCATION_LABELS[location]}</DialogTitle>
-          <DialogDescription>O item fica disponível para entradas e baixas neste local.</DialogDescription>
+          <DialogDescription>
+            {isFabrica
+              ? "O item é criado do zero e pertence somente ao Estoque — Fábrica."
+              : "O item fica disponível para entradas e baixas neste local."}
+          </DialogDescription>
         </DialogHeader>
         {!isFabrica && (
         <div className="flex gap-2">
