@@ -1130,7 +1130,7 @@ function FabricaSection({ userId, canDelete }: { userId: string; canDelete?: boo
   );
 }
 
-function StockSectionInner({ userId, location, canDelete }: { userId: string; location: StockLocation; canDelete?: boolean }) {
+function EstoqueMyioSection({ userId, canDelete }: { userId: string; canDelete?: boolean }) {
   const { data: stock, isLoading } = useStock();
   const { data: movements } = useMovements();
   const { data: profiles } = useStockProfiles();
@@ -1138,7 +1138,128 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
   const [search, setSearch] = useState("");
   const [view, setView] = useState<"all" | "with" | "zero">("all");
 
+  const scoped = (stock ?? [])
+    .filter((r) => (r.location ?? "fabrica") === "almoxarifado")
+    .filter((r) => !/ — Caixa de \d+$/.test(r.name));
+  const scopedIds = new Set(scoped.map((r) => r.material_id));
+  const scopedMovements = (movements ?? []).filter((m) => scopedIds.has(m.material_id));
+  const rows = scoped
+    .filter((r) => r.name.toLowerCase().includes(search.trim().toLowerCase()))
+    .filter((r) => (view === "with" ? r.balance > 0 : view === "zero" ? r.balance <= 0 : true));
+
+  const toolbar = (
+    <>
+      <AddMaterialDialog location="almoxarifado" userId={userId} />
+      <ResetStockDialog rows={scoped} userId={userId} location="almoxarifado" />
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Buscar material"
+          className="w-full pl-8 sm:w-[200px]"
+        />
+      </div>
+      <Select value={view} onValueChange={(v) => setView(v as "all" | "with" | "zero")}>
+        <SelectTrigger className="w-full sm:w-[170px]"><SelectValue /></SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">Todos</SelectItem>
+          <SelectItem value="with">Com saldo</SelectItem>
+          <SelectItem value="zero">Sem saldo</SelectItem>
+        </SelectContent>
+      </Select>
+    </>
+  );
+
+  return (
+    <Tabs defaultValue="ordens" className="space-y-4">
+      <TabsList className="flex-wrap">
+        <TabsTrigger value="ordens">Ordem de Expedição</TabsTrigger>
+        <TabsTrigger value="estoque">Estoque — Myio</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="ordens" className="space-y-6">
+        <MyioDemandCard
+          balances={Object.fromEntries(scoped.map((r) => [r.name.trim().toLowerCase(), r.balance]))}
+        />
+      </TabsContent>
+
+      <TabsContent value="estoque" className="space-y-6">
+        <StockTableCard
+          title="Estoque Myio"
+          description='Produtos produzidos pela Myio. Use o botão de troca para mover um item para "Terceiros".'
+          rows={rows.filter((r) => manufactured?.[r.material_id])}
+          isLoading={isLoading}
+          userId={userId}
+          canDelete={canDelete}
+          actions={toolbar}
+          moveTo="terceiros"
+        />
+        <StockTableCard
+          title="Estoque Terceiros"
+          description='Itens comprados de terceiros. Use o botão de troca para mover um item para "Myio".'
+          rows={rows.filter((r) => !manufactured?.[r.material_id])}
+          isLoading={isLoading}
+          userId={userId}
+          canDelete={canDelete}
+          moveTo="myio"
+        />
+        <BoxesCard />
+        <Card>
+          <CardHeader>
+            <CardTitle>Movimentações recentes</CardTitle>
+            <CardDescription>Histórico completo de entradas e saídas.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {!scopedMovements.length ? (
+              <p className="text-sm text-muted-foreground">Nenhuma movimentação registrada.</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Data</TableHead>
+                    <TableHead>Material</TableHead>
+                    <TableHead>Tipo</TableHead>
+                    <TableHead className="text-right">Qtd.</TableHead>
+                    <TableHead>Motivo</TableHead>
+                    <TableHead>Responsável</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {scopedMovements.slice(0, 50).map((m) => (
+                    <TableRow key={m.id}>
+                      <TableCell className="whitespace-nowrap text-sm text-muted-foreground">{fmt(m.created_at)}</TableCell>
+                      <TableCell className="font-medium">
+                        {(stock ?? []).find((s) => s.material_id === m.material_id)?.name ?? "—"}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={MOVEMENT_CLASSES[m.type]}>{MOVEMENT_LABELS[m.type]}</Badge>
+                      </TableCell>
+                      <TableCell className="text-right">{m.type === "saida" ? "-" : "+"}{m.quantity}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{m.reason ?? "—"}</TableCell>
+                      <TableCell className="text-sm">{m.created_by ? (profiles?.[m.created_by] ?? "Usuário") : "Sistema"}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      </TabsContent>
+    </Tabs>
+  );
+}
+
+function StockSectionInner({ userId, location, canDelete }: { userId: string; location: StockLocation; canDelete?: boolean }) {
+  const { data: stock, isLoading } = useStock();
+  const { data: movements } = useMovements();
+  const { data: profiles } = useStockProfiles();
+  const [search, setSearch] = useState("");
+  const [view, setView] = useState<"all" | "with" | "zero">("all");
+
   if (location === "fabrica") return <FabricaSection userId={userId} canDelete={canDelete} />;
+  if (location === "almoxarifado") return <EstoqueMyioSection userId={userId} canDelete={canDelete} />;
+
 
 
   const scoped = (stock ?? [])
