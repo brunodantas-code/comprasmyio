@@ -922,14 +922,27 @@ function StockTableCard({
                 <TableRow key={r.material_id}>
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-2">
-                      <StockQrDialog
-                        stockName={r.name}
-                        trigger={
-                          <button type="button" className="text-left hover:underline">
-                            {r.name}
-                          </button>
-                        }
-                      />
+                      {detail ? (
+                        <MaterialDetailDialog
+                          materialId={r.material_id}
+                          name={r.name}
+                          trigger={
+                            <button type="button" className="text-left hover:underline">
+                              {r.name}
+                            </button>
+                          }
+                        />
+                      ) : (
+                        <StockQrDialog
+                          stockName={r.name}
+                          trigger={
+                            <button type="button" className="text-left hover:underline">
+                              {r.name}
+                            </button>
+                          }
+                        />
+                      )}
+
                       {r.link && (
                         <a href={r.link} target="_blank" rel="noreferrer" className="text-primary hover:underline">
                           <ExternalLink className="h-3 w-3" />
