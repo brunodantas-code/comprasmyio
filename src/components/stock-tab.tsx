@@ -763,10 +763,40 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
           </div>
         ) : (
         <form onSubmit={onSubmit} className="space-y-4">
+          {independent && (
+            <>
+              <button
+                type="button"
+                onClick={() => photoInputRef.current?.click()}
+                className="flex h-36 w-full items-center justify-center overflow-hidden rounded-md border bg-muted/40 transition hover:opacity-90"
+                title={photoPreview ? "Trocar foto" : "Adicionar foto"}
+              >
+                {photoPreview ? (
+                  <img src={photoPreview} alt="Foto do item" className="h-full w-full object-contain" />
+                ) : (
+                  <span className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <ImagePlus className="h-4 w-4" /> Adicionar foto do item <span className="text-xs">(opcional)</span>
+                  </span>
+                )}
+              </button>
+              <input
+                ref={photoInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0] ?? null;
+                  e.target.value = "";
+                  setPhotoFile(f);
+                  setPhotoPreview(f ? URL.createObjectURL(f) : null);
+                }}
+              />
+            </>
+          )}
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-2">
               <Label htmlFor={`name-${location}`}>Nome</Label>
-              {!isFabrica && (
+              {!independent && (
               <Popover>
                 <PopoverTrigger asChild>
                   <Button type="button" variant="outline" size="sm">
@@ -803,17 +833,52 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
               id={`name-${location}`}
               name="name"
               required
-              placeholder={isFabrica ? "Nome do componente" : "Digite ou selecione da biblioteca"}
+              placeholder={independent ? "Nome do item" : "Digite ou selecione da biblioteca"}
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor={`link-${location}`}>Link <span className="text-muted-foreground">(opcional)</span></Label>
+            <Label htmlFor={`link-${location}`}>{independent ? "Link de Referência" : "Link"} <span className="text-muted-foreground">(opcional)</span></Label>
             <Input id={`link-${location}`} name="link" type="url" placeholder="https://" value={newLink} onChange={(e) => setNewLink(e.target.value)} />
           </div>
+          {independent && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor={`lot-${location}`}>Quantidade por lote <span className="text-muted-foreground">(opcional)</span></Label>
+                <Input
+                  id={`lot-${location}`}
+                  type="number"
+                  min="1"
+                  placeholder="Ex.: 100"
+                  value={newLot}
+                  onChange={(e) => setNewLot(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Tipo de compra <span className="text-muted-foreground">(opcional)</span></Label>
+                <Select value={newType} onValueChange={setNewType}>
+                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="nacional">Nacional</SelectItem>
+                    <SelectItem value="importacao">Importação</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor={`desc-${location}`}>Descrição <span className="text-muted-foreground">(opcional)</span></Label>
+                <Textarea
+                  id={`desc-${location}`}
+                  rows={3}
+                  placeholder="Detalhes do item"
+                  value={newDescription}
+                  onChange={(e) => setNewDescription(e.target.value)}
+                />
+              </div>
+            </>
+          )}
           <DialogFooter>
-            <Button type="submit" disabled={save.isPending}>Salvar</Button>
+            <Button type="submit" disabled={save.isPending}>{save.isPending ? "Salvando..." : "Salvar"}</Button>
           </DialogFooter>
         </form>
         )}
