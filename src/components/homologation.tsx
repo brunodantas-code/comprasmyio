@@ -284,6 +284,28 @@ export function HomologateDialog({
   const [units, setUnits] = useState<string[]>([""]);
   const [notes, setNotes] = useState("");
 
+  // QR da caixa é gerado automaticamente: link do site / modelo da caixa / código incremental (a partir de 1)
+  const { data: existingBoxQrs } = useQuery({
+    queryKey: ["box-qr-codes"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("homologations").select("box_qr").not("box_qr", "is", null);
+      if (error) throw error;
+      return (data ?? []).map((d) => d.box_qr as string);
+    },
+  });
+
+  function genBoxQr(size: number) {
+    const prefix = `https://comprasmyio.lovable.app/caixa-${size}/`;
+    let max = 0;
+    for (const qr of existingBoxQrs ?? []) {
+      if (qr.startsWith(prefix)) {
+        const n = parseInt(qr.slice(prefix.length), 10);
+        if (!Number.isNaN(n) && n > max) max = n;
+      }
+    }
+    return `${prefix}${max + 1}`;
+  }
+
   const { data: profiles } = useQuery({
     queryKey: ["profiles-list"],
     queryFn: async () => {
@@ -297,7 +319,16 @@ export function HomologateDialog({
   function changeSize(n: number) {
     setBoxSize(n);
     setUnits(Array.from({ length: n }, (_, i) => units[i] ?? ""));
+    setBoxQr(n > 1 ? genBoxQr(n) : "");
   }
+
+  // Quando a lista de QRs de caixa carrega, recalcula o código gerado (sem sobrescrever edição manual)
+  useEffect(() => {
+    if (boxSize > 1 && (!boxQr.trim() || boxQr.startsWith("https://comprasmyio.lovable.app/caixa-"))) {
+      setBoxQr(genBoxQr(boxSize));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [existingBoxQrs]);
 
   useEffect(() => {
     const max = sizes[sizes.length - 1] ?? 1;
@@ -389,6 +420,7 @@ export function HomologateDialog({
     onSuccess: () => {
       toast.success("Produtos homologados e adicionados ao estoque");
       qc.invalidateQueries({ queryKey: ["homologations"] });
+      qc.invalidateQueries({ queryKey: ["box-qr-codes"] });
       qc.invalidateQueries({ queryKey: ["material-stock"] });
       qc.invalidateQueries({ queryKey: ["stock-movements"] });
       qc.invalidateQueries({ queryKey: ["materials"] });
@@ -441,8 +473,11 @@ export function HomologateDialog({
           </div>
 
           {boxSize > 1 && (
-            <div className="rounded border p-3">
+            <div className="space-y-1 rounded border p-3">
               <QrField label={`QR Code da Caixa de ${boxSize}:`} value={boxQr} onChange={setBoxQr} />
+              <p className="text-xs text-muted-foreground">
+                Gerado automaticamente (site / modelo da caixa / código sequencial) — edite manualmente se necessário.
+              </p>
             </div>
           )}
 
