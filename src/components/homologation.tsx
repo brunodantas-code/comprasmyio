@@ -322,9 +322,11 @@ export function HomologateDialog({
     setBoxQr(n > 1 ? genBoxQr(n) : "");
   }
 
-  // Se a lista de QRs de caixa carregar depois e o campo estiver vazio, preenche com o código gerado
+  // Quando a lista de QRs de caixa carrega, recalcula o código gerado (sem sobrescrever edição manual)
   useEffect(() => {
-    if (boxSize > 1 && !boxQr.trim()) setBoxQr(genBoxQr(boxSize));
+    if (boxSize > 1 && (!boxQr.trim() || boxQr.startsWith("https://comprasmyio.lovable.app/caixa-"))) {
+      setBoxQr(genBoxQr(boxSize));
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [existingBoxQrs]);
 
