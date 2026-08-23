@@ -319,7 +319,14 @@ export function HomologateDialog({
   function changeSize(n: number) {
     setBoxSize(n);
     setUnits(Array.from({ length: n }, (_, i) => units[i] ?? ""));
+    setBoxQr(n > 1 ? genBoxQr(n) : "");
   }
+
+  // Se a lista de QRs de caixa carregar depois e o campo estiver vazio, preenche com o código gerado
+  useEffect(() => {
+    if (boxSize > 1 && !boxQr.trim()) setBoxQr(genBoxQr(boxSize));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [existingBoxQrs]);
 
   useEffect(() => {
     const max = sizes[sizes.length - 1] ?? 1;
