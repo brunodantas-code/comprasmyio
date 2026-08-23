@@ -418,6 +418,7 @@ export function HomologateDialog({
     onSuccess: () => {
       toast.success("Produtos homologados e adicionados ao estoque");
       qc.invalidateQueries({ queryKey: ["homologations"] });
+      qc.invalidateQueries({ queryKey: ["box-qr-codes"] });
       qc.invalidateQueries({ queryKey: ["material-stock"] });
       qc.invalidateQueries({ queryKey: ["stock-movements"] });
       qc.invalidateQueries({ queryKey: ["materials"] });
@@ -470,8 +471,11 @@ export function HomologateDialog({
           </div>
 
           {boxSize > 1 && (
-            <div className="rounded border p-3">
+            <div className="space-y-1 rounded border p-3">
               <QrField label={`QR Code da Caixa de ${boxSize}:`} value={boxQr} onChange={setBoxQr} />
+              <p className="text-xs text-muted-foreground">
+                Gerado automaticamente (site / modelo da caixa / código sequencial) — edite manualmente se necessário.
+              </p>
             </div>
           )}
 
