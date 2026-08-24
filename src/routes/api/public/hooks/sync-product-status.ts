@@ -44,11 +44,6 @@ function extractCodeFromQr(qr: string): string | null {
   return m?.[1] ?? null;
 }
 
-/** Escapa curingas de LIKE/ILIKE (o código contém underscores). */
-function escapeLike(s: string) {
-  return s.replace(/[\\%_]/g, (c) => `\\${c}`);
-}
-
 /** Nome do cliente informado pela plataforma externa (campo da API ou parâmetro `nome_cliente` do QR). */
 function extractClientName(p: ExternalProduct): string | null {
   for (const v of [p.nome_cliente, p.client_name, p.cliente, p.client]) {
@@ -157,6 +152,30 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
     if (statesErr) throw statesErr;
     const stateByCode = new Map((existing ?? []).map((s) => [s.code, s]));
 
+    // Registros da sub-aba Cliente (unit_products), para localizar pelo código do QR
+    // mesmo quando o rótulo salvo difere (com/sem parâmetros de query na URL).
+    type UnitRow = {
+      id: string;
+      label: string | null;
+      installed_at: string | null;
+      project_id: string | null;
+      moved_to: string | null;
+    };
+    const { data: unitRows, error: unitRowsErr } = await supabaseAdmin
+      .from("unit_products")
+      .select("id, label, installed_at, project_id, moved_to");
+    if (unitRowsErr) throw unitRowsErr;
+    const allUnitRows = (unitRows ?? []) as UnitRow[];
+    const findUnitRow = (code: string, label: string, onlyActive: boolean): UnitRow | null => {
+      const cands = onlyActive ? allUnitRows.filter((r) => !r.moved_to) : allUnitRows;
+      return (
+        cands.find((r) => r.label === label) ??
+        cands.find((r) => (r.label ? extractCodeFromQr(r.label) === code : false)) ??
+        cands.find((r) => !!(r.label && (r.label.includes(`/${code}?`) || r.label.endsWith(`/${code}`)))) ??
+        null
+      );
+    };
+
     // Cache de projeto por nome de cliente (evita consultas repetidas na mesma execução).
     const projectByClient = new Map<string, string | null>();
     const findProjectForClient = async (clientName: string): Promise<string | null> => {
@@ -234,27 +253,38 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
         problems.push(`${code}: ${upStateErr.message}`);
         continue;
       }
-      if (!hasChanged) continue;
+      // Produto fora do cliente não pode permanecer ativo na sub-aba Cliente:
+      // marca a saída mesmo quando o estado externo não mudou nesta execução
+      // (corrige registros que ficaram inconsistentes em sincronizações anteriores).
+      const reconcileExitFromClient = async () => {
+        const movedTo = LOCATION_TO_MOVED_TO[location];
+        if (!movedTo) return;
+        const target = findUnitRow(code, label, true);
+        if (!target) return;
+        await supabaseAdmin
+          .from("unit_products")
+          .update({
+            moved_to: movedTo,
+            moved_technician: location === "tecnico" ? technician : null,
+            moved_at: now,
+            move_notes: "Atualizado pela plataforma externa",
+            client_name: null,
+          })
+          .eq("id", target.id);
+        target.moved_to = movedTo;
+      };
+
+      if (!hasChanged) {
+        if (location !== "cliente") await reconcileExitFromClient();
+        continue;
+      }
       changed++;
 
       // Cliente: reflete na aba Cliente (unit_products) se está instalado ou parado,
       // vinculando o nome do cliente e o projeto correspondente, quando existir.
       if (location === "cliente") {
         const projectId = clientName ? await findProjectForClient(clientName) : null;
-        let { data: target } = await supabaseAdmin
-          .from("unit_products")
-          .select("id, installed_at, project_id")
-          .eq("label", label)
-          .maybeSingle();
-        if (!target) {
-          const { data: fuzzy } = await supabaseAdmin
-            .from("unit_products")
-            .select("id, installed_at, project_id")
-            .ilike("label", `%/${escapeLike(code)}?%`)
-            .limit(1)
-            .maybeSingle();
-          target = fuzzy;
-        }
+        const target = findUnitRow(code, label, false);
         if (target) {
           await supabaseAdmin
             .from("unit_products")
@@ -270,6 +300,7 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
               project_id: target.project_id ?? projectId,
             })
             .eq("id", target.id);
+          target.moved_to = null;
         } else {
           await supabaseAdmin.from("unit_products").insert({
             label,
@@ -282,26 +313,9 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
             notes: "Sincronizado da plataforma externa",
           });
         }
-      } else if (prev?.location === "cliente") {
-        // Saiu do cliente: marca a saída para o novo local.
-        const { data: target } = await supabaseAdmin
-          .from("unit_products")
-          .select("id")
-          .eq("label", label)
-          .is("moved_to", null)
-          .maybeSingle();
-        if (target) {
-          await supabaseAdmin
-            .from("unit_products")
-            .update({
-              moved_to: LOCATION_TO_MOVED_TO[location] ?? null,
-              moved_technician: location === "tecnico" ? technician : null,
-              moved_at: now,
-              move_notes: "Atualizado pela plataforma externa",
-              client_name: null,
-            })
-            .eq("id", target.id);
-        }
+      } else {
+        // Saiu do cliente: marca a saída para o novo local (técnico, estoque, perdido, avariado).
+        await reconcileExitFromClient();
       }
 
       // Avariado: registra na aba Itens Avariados (uma vez por ocorrência aberta).
