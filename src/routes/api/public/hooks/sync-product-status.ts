@@ -5,6 +5,10 @@ import { createFileRoute } from "@tanstack/react-router";
  * Chamada automaticamente a cada 5 minutos via pg_cron, ou manualmente pelo botão
  * "Sincronizar agora" na aba Checar QR Code.
  *
+ * Caixas: quando a plataforma reporta o QR da CAIXA, o novo local/status é
+ * propagado automaticamente para todos os produtos dentro dela (inclui o nome
+ * do cliente/projeto quando a caixa chega ao cliente).
+ *
  * Segurança: exige o header `apikey` com a chave pública do projeto (mesmo padrão
  * dos demais hooks de cron). A escrita no banco é feita com service role, mas os
  * dados gravados vêm exclusivamente da API externa autenticada por MYIO_PRODUCTS_API_KEY.
