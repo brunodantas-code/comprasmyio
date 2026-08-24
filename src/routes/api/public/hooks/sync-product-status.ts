@@ -5,6 +5,10 @@ import { createFileRoute } from "@tanstack/react-router";
  * Chamada automaticamente a cada 5 minutos via pg_cron, ou manualmente pelo botão
  * "Sincronizar agora" na aba Checar QR Code.
  *
+ * Caixas: quando a plataforma reporta o QR da CAIXA, o novo local/status é
+ * propagado automaticamente para todos os produtos dentro dela (inclui o nome
+ * do cliente/projeto quando a caixa chega ao cliente).
+ *
  * Segurança: exige o header `apikey` com a chave pública do projeto (mesmo padrão
  * dos demais hooks de cron). A escrita no banco é feita com service role, mas os
  * dados gravados vêm exclusivamente da API externa autenticada por MYIO_PRODUCTS_API_KEY.
@@ -44,6 +48,22 @@ function extractCodeFromQr(qr: string): string | null {
   if (m?.[1]) return m[1];
   const t = qr.trim();
   return /^\d+(?:_\d+)+$/.test(t) ? t : null;
+}
+
+/** Normaliza um QR para comparação: remove query string e âncora. */
+function normalizeQrKey(v: string): string {
+  let s = v.trim();
+  const h = s.indexOf("#");
+  if (h >= 0) s = s.slice(0, h);
+  const q = s.indexOf("?");
+  if (q >= 0) s = s.slice(0, q);
+  return s.trim();
+}
+
+/** Cauda do link da caixa (ex.: caixa-10/3) — a API externa pode reportar só o trecho final do link. */
+function boxQrTail(v: string): string | null {
+  const m = /(?:^|\/)(caixa-[^/\s]+\/[^/\s]+)$/i.exec(normalizeQrKey(v));
+  return m?.[1] ?? null;
 }
 
 /** Nome do cliente informado pela plataforma externa (campo da API ou parâmetro `nome_cliente` do QR). */
@@ -154,8 +174,65 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
     // (presentes em homologation_units). Qualquer código que exista apenas na
     // plataforma externa é ignorado — não entra no banco nem dispara correções.
     const knownCodes = new Set(unitByCode.keys());
-    const products = externalProducts.filter((p) => knownCodes.has(p.code!));
-    const ignored = externalProducts.length - products.length;
+
+    // CAIXAS: a caixa é a mestra do rastreio. Se a plataforma externa reportar
+    // o QR da CAIXA (ex.: a caixa chegou ao cliente), todos os produtos dentro
+    // dela herdam o mesmo local/status/técnico/cliente. Mapeia cada forma do
+    // QR da caixa (link completo ou só a cauda caixa-N/seq) para os códigos
+    // unitários do conteúdo.
+    const { data: boxRows, error: boxErr } = await supabaseAdmin
+      .from("homologations")
+      .select("box_qr, homologation_units(qr_value)")
+      .not("box_qr", "is", null);
+    if (boxErr) throw boxErr;
+    const unitCodesByBoxKey = new Map<string, string[]>();
+    for (const b of boxRows ?? []) {
+      if (!b.box_qr) continue;
+      const codes = ((b.homologation_units ?? []) as { qr_value: string }[])
+        .map((u) => extractCodeFromQr(u.qr_value))
+        .filter((c): c is string => !!c);
+      if (!codes.length) continue;
+      unitCodesByBoxKey.set(normalizeQrKey(b.box_qr), codes);
+      const tail = boxQrTail(b.box_qr);
+      if (tail) unitCodesByBoxKey.set(tail, codes);
+    }
+
+    // Expande caixas em produtos unitários. Dois passes para garantir que o
+    // estado da CAIXA sempre vence o reporte individual de uma unidade.
+    const productByCode = new Map<string, ExternalProduct>();
+    const direct: ExternalProduct[] = [];
+    let ignored = 0;
+    for (const p of externalProducts) {
+      const raw = (p.code ?? "").trim();
+      const keys = new Set<string>();
+      if (raw) {
+        keys.add(normalizeQrKey(raw));
+        const t = boxQrTail(raw);
+        if (t) keys.add(t);
+      }
+      for (const v of [p.qr, p.qr_value, p.url, p.link]) {
+        if (typeof v !== "string" || !v.trim()) continue;
+        keys.add(normalizeQrKey(v));
+        const tv = boxQrTail(v);
+        if (tv) keys.add(tv);
+      }
+      let boxCodes: string[] | undefined;
+      for (const k of keys) {
+        boxCodes = unitCodesByBoxKey.get(k);
+        if (boxCodes) break;
+      }
+      if (boxCodes) {
+        for (const c of boxCodes) productByCode.set(c, { ...p, code: c });
+      } else if (knownCodes.has(raw)) {
+        direct.push(p);
+      } else {
+        ignored++;
+      }
+    }
+    for (const p of direct) {
+      if (!productByCode.has(p.code!)) productByCode.set(p.code!, p);
+    }
+    const products = [...productByCode.values()];
 
     const { data: existing, error: statesErr } = await supabaseAdmin.from("external_product_states").select("*");
     if (statesErr) throw statesErr;
@@ -297,10 +374,14 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
     // com o QR já na aba Cliente.
     const { data: transitOrders, error: toErr } = await supabaseAdmin
       .from("myio_orders")
-      .select("id")
+      .select("id, client_name")
       .eq("status", "em_transito");
     if (toErr) throw toErr;
     const transitOrderIds = (transitOrders ?? []).map((o) => o.id);
+    // Nome do cliente (projeto) por pedido — fallback quando a API externa não
+    // informa o nome_cliente ao reportar a chegada da caixa/produto no cliente.
+    const clientNameByOrder = new Map((transitOrders ?? []).map((o) => [o.id, o.client_name as string]));
+    const clientNameByCode = new Map<string, string>();
     const qrsByTransitOrder = new Map<string, { code: string }[]>();
     if (transitOrderIds.length) {
       const { data: tDels, error: tdErr } = await supabaseAdmin
@@ -323,6 +404,10 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
           const list = qrsByTransitOrder.get(orderId) ?? [];
           list.push({ code });
           qrsByTransitOrder.set(orderId, list);
+          if (!clientNameByCode.has(code)) {
+            const cn = clientNameByOrder.get(orderId);
+            if (cn) clientNameByCode.set(code, cn);
+          }
         }
       }
     }
@@ -449,7 +534,7 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
       locByCode.set(code, location);
       const status = p.status?.trim().toLowerCase() || null;
       const technician = p.technician?.trim() || null;
-      const clientName = location === "cliente" ? extractClientName(p) : null;
+      const clientName = location === "cliente" ? (extractClientName(p) ?? clientNameByCode.get(code) ?? null) : null;
       const unit = unitByCode.get(code);
       const prev = stateByCode.get(code);
       const hasChanged =
