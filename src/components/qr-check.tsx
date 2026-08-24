@@ -69,7 +69,7 @@ function useQrTrace(code: string) {
         supabase
           .from("unit_products")
           .select(
-            "id, status, installed_at, notes, created_at, material_id, product, moved_to, moved_technician, moved_at, move_notes, move_photo_url, project_id, materials(name), projects(name)",
+            "id, status, installed_at, notes, created_at, material_id, product, moved_to, moved_technician, moved_at, move_notes, move_photo_url, project_id, client_name, materials(name), projects(name)",
           )
           .eq("label", code)
           .maybeSingle(),
@@ -93,7 +93,7 @@ function useQrTrace(code: string) {
         extCode
           ? supabase
               .from("external_product_states")
-              .select("code, product_type, location, status, technician, last_change_at")
+              .select("code, product_type, location, status, technician, client_name, last_change_at")
               .eq("code", extCode)
               .maybeSingle()
           : Promise.resolve({ data: null }),
@@ -130,6 +130,7 @@ function useQrTrace(code: string) {
             moved_at: string | null;
             move_notes: string | null;
             move_photo_url: string | null;
+            client_name: string | null;
             materials: { name: string } | null;
             projects: { name: string } | null;
           }
@@ -368,6 +369,7 @@ function useQrTrace(code: string) {
             ext.product_type ? `Tipo: ${ext.product_type}` : "",
             ext.status ? `Status: ${EXTERNAL_STATUS_LABELS[ext.status] ?? ext.status}` : "",
             ext.technician ? `Técnico: ${ext.technician}` : "",
+            ext.client_name ? `Cliente: ${ext.client_name}` : "",
           ]
             .filter(Boolean)
             .join(" · "),
@@ -391,7 +393,9 @@ function useQrTrace(code: string) {
       let location = "Não encontrado";
       let stage: string | null = null;
       if (unitProd && !unitProd.moved_to) {
-        location = unitProd.status === "instalado" ? "Cliente — instalado" : "Cliente — parado";
+        location = `Cliente${unitProd.client_name ? ` (${unitProd.client_name})` : ""} — ${
+          unitProd.status === "instalado" ? "instalado" : "parado"
+        }`;
         stage = "unidade";
       } else if (order?.status === "entregue_cliente") {
         location = "Cliente — entregue";
@@ -416,8 +420,8 @@ function useQrTrace(code: string) {
       if (location === "Não encontrado" && ext) {
         stage = EXT_STAGE[ext.location] ?? null;
         location =
-          ext.location === "cliente" && ext.status
-            ? `Cliente — ${EXTERNAL_STATUS_LABELS[ext.status] ?? ext.status}`
+          ext.location === "cliente"
+            ? `Cliente${ext.client_name ? ` (${ext.client_name})` : ""}${ext.status ? ` — ${EXTERNAL_STATUS_LABELS[ext.status] ?? ext.status}` : ""}`
             : (EXTERNAL_LOCATION_LABELS[ext.location] ?? ext.location);
       }
 

@@ -20,6 +20,14 @@ type ExternalProduct = {
   location?: string;
   status?: string;
   technician?: string;
+  nome_cliente?: string;
+  client_name?: string;
+  cliente?: string;
+  client?: string;
+  qr?: string;
+  qr_value?: string;
+  url?: string;
+  link?: string;
   updated_at?: string;
 };
 
@@ -39,6 +47,23 @@ function extractCodeFromQr(qr: string): string | null {
 /** Escapa curingas de LIKE/ILIKE (o código contém underscores). */
 function escapeLike(s: string) {
   return s.replace(/[\\%_]/g, (c) => `\\${c}`);
+}
+
+/** Nome do cliente informado pela plataforma externa (campo da API ou parâmetro `nome_cliente` do QR). */
+function extractClientName(p: ExternalProduct): string | null {
+  for (const v of [p.nome_cliente, p.client_name, p.cliente, p.client]) {
+    if (typeof v === "string" && v.trim()) return v.trim();
+  }
+  for (const v of [p.qr, p.qr_value, p.url, p.link]) {
+    if (typeof v !== "string" || !v.includes("nome_cliente=")) continue;
+    try {
+      const n = new URL(v).searchParams.get("nome_cliente");
+      if (n?.trim()) return n.trim();
+    } catch {
+      // URL inválida: ignora
+    }
+  }
+  return null;
 }
 
 /** Destino unit_products.moved_to equivalente ao local externo, quando o produto sai do cliente. */
@@ -132,6 +157,42 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
     if (statesErr) throw statesErr;
     const stateByCode = new Map((existing ?? []).map((s) => [s.code, s]));
 
+    // Cache de projeto por nome de cliente (evita consultas repetidas na mesma execução).
+    const projectByClient = new Map<string, string | null>();
+    const findProjectForClient = async (clientName: string): Promise<string | null> => {
+      const key = clientName.trim().toLowerCase();
+      if (projectByClient.has(key)) return projectByClient.get(key) ?? null;
+      let projectId: string | null = null;
+      const { data: proj } = await supabaseAdmin
+        .from("projects")
+        .select("id")
+        .ilike("client_name", clientName.trim())
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      projectId = proj?.id ?? null;
+      if (!projectId) {
+        const { data: client } = await supabaseAdmin
+          .from("clients")
+          .select("id")
+          .ilike("name", clientName.trim())
+          .limit(1)
+          .maybeSingle();
+        if (client) {
+          const { data: proj2 } = await supabaseAdmin
+            .from("projects")
+            .select("id")
+            .eq("client_id", client.id)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          projectId = proj2?.id ?? null;
+        }
+      }
+      projectByClient.set(key, projectId);
+      return projectId;
+    };
+
     const now = new Date().toISOString();
     let changed = 0;
     const problems: string[] = [];
@@ -141,13 +202,15 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
       const location = (p.location || "estoque").trim().toLowerCase();
       const status = p.status?.trim().toLowerCase() || null;
       const technician = p.technician?.trim() || null;
+      const clientName = location === "cliente" ? extractClientName(p) : null;
       const unit = unitByCode.get(code);
       const prev = stateByCode.get(code);
       const hasChanged =
         !prev ||
         prev.location !== location ||
         (prev.status ?? null) !== status ||
-        (prev.technician ?? null) !== technician;
+        (prev.technician ?? null) !== technician ||
+        (prev.client_name ?? null) !== clientName;
 
       const label = unit?.qr_value ?? prev?.qr_value ?? `https://produto.myio.com.br/${code}`;
 
@@ -158,6 +221,7 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
           location,
           status,
           technician,
+          client_name: clientName,
           qr_value: label,
           material_id: unit?.material_id ?? prev?.material_id ?? null,
           homologation_unit_id: unit?.id ?? prev?.homologation_unit_id ?? null,
@@ -173,17 +237,19 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
       if (!hasChanged) continue;
       changed++;
 
-      // Cliente: reflete na aba Cliente (unit_products) se está instalado ou parado.
+      // Cliente: reflete na aba Cliente (unit_products) se está instalado ou parado,
+      // vinculando o nome do cliente e o projeto correspondente, quando existir.
       if (location === "cliente") {
+        const projectId = clientName ? await findProjectForClient(clientName) : null;
         let { data: target } = await supabaseAdmin
           .from("unit_products")
-          .select("id, installed_at")
+          .select("id, installed_at, project_id")
           .eq("label", label)
           .maybeSingle();
         if (!target) {
           const { data: fuzzy } = await supabaseAdmin
             .from("unit_products")
-            .select("id, installed_at")
+            .select("id, installed_at, project_id")
             .ilike("label", `%/${escapeLike(code)}?%`)
             .limit(1)
             .maybeSingle();
@@ -200,6 +266,8 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
               moved_technician: null,
               move_notes: null,
               move_photo_url: null,
+              client_name: clientName,
+              project_id: target.project_id ?? projectId,
             })
             .eq("id", target.id);
         } else {
@@ -209,6 +277,8 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
             material_id: unit?.material_id ?? null,
             status: status === "instalado" ? "instalado" : "parado",
             installed_at: status === "instalado" ? now : null,
+            client_name: clientName,
+            project_id: projectId,
             notes: "Sincronizado da plataforma externa",
           });
         }
@@ -228,6 +298,7 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
               moved_technician: location === "tecnico" ? technician : null,
               moved_at: now,
               move_notes: "Atualizado pela plataforma externa",
+              client_name: null,
             })
             .eq("id", target.id);
         }

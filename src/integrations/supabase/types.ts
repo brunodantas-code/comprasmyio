@@ -259,6 +259,7 @@ export type Database = {
       }
       external_product_states: {
         Row: {
+          client_name: string | null
           code: string
           created_at: string
           homologation_unit_id: string | null
@@ -274,6 +275,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          client_name?: string | null
           code: string
           created_at?: string
           homologation_unit_id?: string | null
@@ -289,6 +291,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          client_name?: string | null
           code?: string
           created_at?: string
           homologation_unit_id?: string | null
@@ -1263,6 +1266,7 @@ export type Database = {
       }
       unit_products: {
         Row: {
+          client_name: string | null
           created_at: string
           created_by: string | null
           id: string
@@ -1282,6 +1286,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          client_name?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
@@ -1301,6 +1306,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          client_name?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
