@@ -81,3 +81,20 @@ export function pushOrderToExternal(orderId: string, opts: PushExternalOptions):
     /* falha silenciosa: a sincronização periódica corrige */
   });
 }
+
+/** Pedidos já reconciliados nesta sessão (chave: orderId:local) — evita pushes repetidos. */
+const reconciled = new Set<string>();
+
+/**
+ * Reenvia o local correto de pedidos inteiros (1x por sessão por pedido/local).
+ * Corrige QR codes que ficaram sem atualização na plataforma externa
+ * (ex.: baixas feitas antes da integração ou pushes que falharam).
+ */
+export function reconcileOrdersExternal(orderIds: string[], opts: PushExternalOptions): void {
+  const fresh = orderIds.filter((id) => !reconciled.has(`${id}:${opts.location}`));
+  if (!fresh.length) return;
+  for (const id of fresh) {
+    reconciled.add(`${id}:${opts.location}`);
+    pushOrderToExternal(id, opts);
+  }
+}
