@@ -37,6 +37,7 @@ import { QrCheckSection } from "@/components/qr-check";
 import { MyioDemandCard, ProductionQueueCard } from "@/components/myio-demand";
 import { TechnicianItemsCard } from "@/components/technician-items";
 import { MaterialDetailDialog } from "@/components/material-detail";
+import { DamageItemDialog, DamagedItemsCard } from "@/components/damaged-items";
 
 
 type StockRow = {
@@ -50,7 +51,7 @@ type StockRow = {
   last_movement_at: string | null;
 };
 
-type StockLocation = "almoxarifado" | "fabrica" | "unidade" | "tecnico" | "transito" | "perdido";
+type StockLocation = "almoxarifado" | "fabrica" | "unidade" | "tecnico" | "transito" | "perdido" | "almoxarifado_geral";
 
 const LOCATION_LABELS: Record<StockLocation, string> = {
   fabrica: "Fábrica",
@@ -59,6 +60,7 @@ const LOCATION_LABELS: Record<StockLocation, string> = {
   unidade: "Cliente",
   tecnico: "Técnico",
   perdido: "Perdido",
+  almoxarifado_geral: "Almoxarifado",
 };
 
 type MovementType = "entrada" | "saida" | "ajuste";
@@ -448,23 +450,38 @@ export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; 
   const showHomologacao = !onlyLocation;
   const tabs: string[] = [];
   locations.forEach((loc) => {
+    if (loc === "almoxarifado_geral") return; // renderizada ao final, separada
     tabs.push(loc);
     if (loc === "almoxarifado") tabs.push("distribuicao");
     if (loc === "fabrica" && showHomologacao) tabs.push("homologacao");
+    if (loc === "perdido") tabs.push("avariados");
   });
   if (!onlyLocation) tabs.push("qr-check");
+  if (locations.includes("almoxarifado_geral")) tabs.push("almoxarifado_geral");
   return (
     <Tabs defaultValue={tabs[0]} className="space-y-4">
-      <TabsList>
+      <TabsList className="h-auto flex-wrap justify-start gap-y-1">
         {tabs.map((t) => (
-          <TabsTrigger key={t} value={t} className={t === "qr-check" ? "ml-2" : undefined}>
+          <TabsTrigger
+            key={t}
+            value={t}
+            className={
+              t === "tecnico" || t === "almoxarifado_geral"
+                ? "ml-4"
+                : t === "qr-check"
+                  ? "ml-2"
+                  : undefined
+            }
+          >
             {t === "homologacao"
               ? "Homologação"
               : t === "distribuicao"
                 ? "Expedição"
                 : t === "qr-check"
                   ? "Checar QR Code"
-                  : LOCATION_LABELS[t as StockLocation]}
+                  : t === "avariados"
+                    ? "Itens Avariados"
+                    : LOCATION_LABELS[t as StockLocation]}
           </TabsTrigger>
         ))}
       </TabsList>
@@ -492,6 +509,11 @@ export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; 
       {showHomologacao && (
         <TabsContent value="homologacao">
           <HomologationSection userId={userId} canDelete={canDelete} />
+        </TabsContent>
+      )}
+      {!onlyLocation && (
+        <TabsContent value="avariados">
+          <DamagedItemsCard userId={userId} />
         </TabsContent>
       )}
       {!onlyLocation && (
@@ -528,7 +550,7 @@ function HomologationSection({ userId, canDelete }: { userId: string; canDelete?
 function AddMaterialDialog({ location, userId }: { location: StockLocation; userId: string }) {
   const qc = useQueryClient();
   const isFabrica = location === "fabrica";
-  const independent = isFabrica || location === "almoxarifado";
+  const independent = isFabrica || location === "almoxarifado" || location === "almoxarifado_geral";
   const [open, setOpen] = useState(false);
 
   const [mode, setMode] = useState<"new" | "import">("new");
@@ -1014,6 +1036,7 @@ function StockTableCard({
   actions,
   moveTo,
   detail,
+  damageSource,
 }: {
   title: string;
   description: string;
@@ -1024,6 +1047,7 @@ function StockTableCard({
   actions?: React.ReactNode;
   moveTo?: "myio" | "terceiros";
   detail?: boolean;
+  damageSource?: string;
 }) {
 
   return (
@@ -1121,6 +1145,15 @@ function StockTableCard({
                         }
                       />
                       <HistoryDialog row={r} />
+                      {damageSource && r.balance > 0 && (
+                        <DamageItemDialog
+                          materialId={r.material_id}
+                          materialName={r.name}
+                          source={damageSource}
+                          max={r.balance}
+                          userId={userId}
+                        />
+                      )}
                       {moveTo && <MoveOriginButton row={r} target={moveTo} />}
                       {canDelete && <DeleteMaterialDialog row={r} />}
                     </div>
@@ -1213,6 +1246,7 @@ function FabricaSection({ userId, canDelete }: { userId: string; canDelete?: boo
           canDelete={canDelete}
           actions={toolbar}
           detail
+          damageSource="Estoque — Fábrica"
         />
         <Card>
           <CardHeader>
@@ -1322,6 +1356,7 @@ function EstoqueMyioSection({ userId, canDelete }: { userId: string; canDelete?:
           canDelete={canDelete}
           actions={toolbar}
           moveTo="terceiros"
+          damageSource="Estoque Myio"
         />
         <StockTableCard
           title="Estoque Terceiros"
@@ -1332,6 +1367,7 @@ function EstoqueMyioSection({ userId, canDelete }: { userId: string; canDelete?:
           canDelete={canDelete}
           actions={<AddMaterialDialog location="almoxarifado" userId={userId} />}
           moveTo="myio"
+          damageSource="Estoque Terceiros"
         />
         <BoxesCard />
         <Card>
@@ -1459,12 +1495,17 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
       {location === "unidade" || location === "transito" ? null : (
         <StockTableCard
           title={`Estoque — ${LOCATION_LABELS[location]}`}
-          description='A entrada é automática quando o solicitante confirma "Recebido corretamente" em um pedido feito pela biblioteca.'
+          description={
+            location === "almoxarifado_geral"
+              ? "Estoque geral independente. Crie itens do zero com foto, link de referência e parâmetros de compra."
+              : 'A entrada é automática quando o solicitante confirma "Recebido corretamente" em um pedido feito pela biblioteca.'
+          }
           rows={rows}
           isLoading={isLoading}
           userId={userId}
           canDelete={canDelete}
           actions={toolbar}
+          damageSource={`Estoque — ${LOCATION_LABELS[location]}`}
         />
 
       )}
