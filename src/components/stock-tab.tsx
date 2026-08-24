@@ -1036,6 +1036,7 @@ function StockTableCard({
   actions,
   moveTo,
   detail,
+  damageSource,
 }: {
   title: string;
   description: string;
@@ -1046,6 +1047,7 @@ function StockTableCard({
   actions?: React.ReactNode;
   moveTo?: "myio" | "terceiros";
   detail?: boolean;
+  damageSource?: string;
 }) {
 
   return (
@@ -1143,6 +1145,15 @@ function StockTableCard({
                         }
                       />
                       <HistoryDialog row={r} />
+                      {damageSource && r.balance > 0 && (
+                        <DamageItemDialog
+                          materialId={r.material_id}
+                          materialName={r.name}
+                          source={damageSource}
+                          max={r.balance}
+                          userId={userId}
+                        />
+                      )}
                       {moveTo && <MoveOriginButton row={r} target={moveTo} />}
                       {canDelete && <DeleteMaterialDialog row={r} />}
                     </div>
