@@ -979,13 +979,25 @@ export function StockQrDialog({ stockName, trigger }: { stockName: string; trigg
                       <p className="text-sm font-medium">Vista explodida</p>
                       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-5">
                         {units.map((u) => (
-                          <div key={u.position} className="flex flex-col items-center gap-1 rounded border p-2">
-                            <QrImage value={u.qr_value} size={96} />
-                            <span className="text-xs font-medium">#{u.position}</span>
-                            <span className="w-full break-all text-center text-[10px] text-muted-foreground">
-                              {u.qr_value}
-                            </span>
-                          </div>
+                          <UnitQrCard
+                            key={u.id}
+                            unit={{ id: u.id, position: u.position, qr_value: u.qr_value }}
+                            box={
+                              h.box_size > 1
+                                ? { id: h.id, release_id: h.release_id, material_id: h.material_id }
+                                : undefined
+                            }
+                            extraAction={
+                              h.box_size === 1 ? (
+                                <AddUnitToBoxDialog
+                                  unit={{ id: u.id, position: u.position, qr_value: u.qr_value }}
+                                  source={{ id: h.id, release_id: h.release_id, material_id: h.material_id }}
+                                  materialId={h.material_id}
+                                  materialName={baseName}
+                                />
+                              ) : undefined
+                            }
+                          />
                         ))}
                       </div>
                       {h.notes && <p className="text-sm text-muted-foreground">{h.notes}</p>}
@@ -994,6 +1006,7 @@ export function StockQrDialog({ stockName, trigger }: { stockName: string; trigg
                 </div>
               );
             })}
+            <UnitaryDropZone />
           </div>
         )}
       </DialogContent>
