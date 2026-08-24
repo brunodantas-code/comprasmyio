@@ -1018,12 +1018,14 @@ export function StockQrDialog({ stockName, trigger }: { stockName: string; trigg
 
 type BoxRow = {
   id: string;
+  release_id: string;
+  material_id: string;
   box_size: number;
   box_qr: string | null;
   notes: string | null;
   created_at: string;
   materials: { name: string } | null;
-  homologation_units: { position: number; qr_value: string }[];
+  homologation_units: { id: string; position: number; qr_value: string }[];
 };
 
 export function BoxesCard() {
@@ -1033,7 +1035,7 @@ export function BoxesCard() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("homologations")
-        .select("id, box_size, box_qr, notes, created_at, materials(name), homologation_units(position, qr_value)")
+        .select("id, release_id, material_id, box_size, box_qr, notes, created_at, materials(name), homologation_units(id, position, qr_value)")
         .gt("box_size", 1)
         .order("created_at", { ascending: false });
       if (error) throw error;
