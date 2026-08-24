@@ -157,6 +157,30 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
     if (statesErr) throw statesErr;
     const stateByCode = new Map((existing ?? []).map((s) => [s.code, s]));
 
+    // Registros da sub-aba Cliente (unit_products), para localizar pelo código do QR
+    // mesmo quando o rótulo salvo difere (com/sem parâmetros de query na URL).
+    type UnitRow = {
+      id: string;
+      label: string | null;
+      installed_at: string | null;
+      project_id: string | null;
+      moved_to: string | null;
+    };
+    const { data: unitRows, error: unitRowsErr } = await supabaseAdmin
+      .from("unit_products")
+      .select("id, label, installed_at, project_id, moved_to");
+    if (unitRowsErr) throw unitRowsErr;
+    const allUnitRows = (unitRows ?? []) as UnitRow[];
+    const findUnitRow = (code: string, label: string, onlyActive: boolean): UnitRow | null => {
+      const cands = onlyActive ? allUnitRows.filter((r) => !r.moved_to) : allUnitRows;
+      return (
+        cands.find((r) => r.label === label) ??
+        cands.find((r) => (r.label ? extractCodeFromQr(r.label) === code : false)) ??
+        cands.find((r) => !!(r.label && (r.label.includes(`/${code}?`) || r.label.endsWith(`/${code}`)))) ??
+        null
+      );
+    };
+
     // Cache de projeto por nome de cliente (evita consultas repetidas na mesma execução).
     const projectByClient = new Map<string, string | null>();
     const findProjectForClient = async (clientName: string): Promise<string | null> => {
