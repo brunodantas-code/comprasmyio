@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { recordDamagedItem } from "./damaged-items";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,17 +38,19 @@ function DispatchPhoto({ path }: { path: string }) {
   );
 }
 
-type Destination = "unidade" | "perdido" | "almoxarifado";
+type Destination = "unidade" | "perdido" | "almoxarifado" | "avariado";
 
 const DEST_LABELS: Record<Destination, string> = {
   unidade: "Cliente",
   perdido: "Perdido",
   almoxarifado: "Estoque",
+  avariado: "Itens Avariados",
 };
 
 const DEST_CLASSES: Record<Destination, string> = {
   unidade: "border-blue-300 bg-blue-100 text-blue-800",
   perdido: "border-red-300 bg-red-100 text-red-800",
+  avariado: "border-amber-300 bg-amber-100 text-amber-800",
   almoxarifado: "border-green-300 bg-green-100 text-green-800",
 };
 
@@ -167,6 +170,7 @@ function MoveDialog({
       if (!Number.isInteger(qty) || qty <= 0) throw new Error("Quantidade inválida.");
       if (qty > remaining) throw new Error("Quantidade maior que o disponível com o técnico.");
       if (destination === "unidade" && !projectId) throw new Error("Selecione o projeto da unidade.");
+      if (destination === "avariado" && !notes.trim()) throw new Error("Informe o motivo da avaria na observação.");
 
       const { error } = await supabase.from("technician_moves").insert({
         movement_id: dispatch.id,
@@ -203,6 +207,18 @@ function MoveDialog({
         } as never);
         if (mvErr) throw mvErr;
       }
+
+      if (destination === "avariado") {
+        await recordDamagedItem({
+          material_id: dispatch.material_id,
+          product: materialName,
+          quantity: qty,
+          source: "Técnico",
+          source_detail: dispatch.responsible!.trim(),
+          reason: notes.trim(),
+          created_by: userId,
+        });
+      }
     },
     onSuccess: () => {
       toast.success("Movimentação registrada.");
@@ -211,6 +227,7 @@ function MoveDialog({
       qc.invalidateQueries({ queryKey: ["unit-products"] });
       qc.invalidateQueries({ queryKey: ["material-stock"] });
       qc.invalidateQueries({ queryKey: ["stock-movements"] });
+      qc.invalidateQueries({ queryKey: ["damaged-items"] });
       setOpen(false);
       reset();
     },
