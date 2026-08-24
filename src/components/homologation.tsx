@@ -860,10 +860,10 @@ export function HomologateDialog({
             </div>
           </div>
 
-          {!!done.length && (
+          {!!done.filter((h) => (h.homologation_units?.length ?? 0) > 0).length && (
             <div className="space-y-1 rounded border p-3 text-sm">
               <p className="font-medium">Homologações anteriores deste produto</p>
-              {done.map((h) => (
+              {done.filter((h) => (h.homologation_units?.length ?? 0) > 0).map((h) => (
                 <div key={h.id} className="flex items-center gap-2 text-muted-foreground">
                   <CheckCircle2 className="h-4 w-4 text-green-600" />
                   {new Date(h.created_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })} ·
