@@ -512,6 +512,11 @@ export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; 
         </TabsContent>
       )}
       {!onlyLocation && (
+        <TabsContent value="avariados">
+          <DamagedItemsCard userId={userId} />
+        </TabsContent>
+      )}
+      {!onlyLocation && (
         <TabsContent value="qr-check">
           <QrCheckSection />
         </TabsContent>
@@ -545,7 +550,7 @@ function HomologationSection({ userId, canDelete }: { userId: string; canDelete?
 function AddMaterialDialog({ location, userId }: { location: StockLocation; userId: string }) {
   const qc = useQueryClient();
   const isFabrica = location === "fabrica";
-  const independent = isFabrica || location === "almoxarifado";
+  const independent = isFabrica || location === "almoxarifado" || location === "almoxarifado_geral";
   const [open, setOpen] = useState(false);
 
   const [mode, setMode] = useState<"new" | "import">("new");
