@@ -370,10 +370,14 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
     // com o QR já na aba Cliente.
     const { data: transitOrders, error: toErr } = await supabaseAdmin
       .from("myio_orders")
-      .select("id")
+      .select("id, client_name")
       .eq("status", "em_transito");
     if (toErr) throw toErr;
     const transitOrderIds = (transitOrders ?? []).map((o) => o.id);
+    // Nome do cliente (projeto) por pedido — fallback quando a API externa não
+    // informa o nome_cliente ao reportar a chegada da caixa/produto no cliente.
+    const clientNameByOrder = new Map((transitOrders ?? []).map((o) => [o.id, o.client_name as string]));
+    const clientNameByCode = new Map<string, string>();
     const qrsByTransitOrder = new Map<string, { code: string }[]>();
     if (transitOrderIds.length) {
       const { data: tDels, error: tdErr } = await supabaseAdmin
