@@ -202,13 +202,15 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
       const location = (p.location || "estoque").trim().toLowerCase();
       const status = p.status?.trim().toLowerCase() || null;
       const technician = p.technician?.trim() || null;
+      const clientName = location === "cliente" ? extractClientName(p) : null;
       const unit = unitByCode.get(code);
       const prev = stateByCode.get(code);
       const hasChanged =
         !prev ||
         prev.location !== location ||
         (prev.status ?? null) !== status ||
-        (prev.technician ?? null) !== technician;
+        (prev.technician ?? null) !== technician ||
+        (prev.client_name ?? null) !== clientName;
 
       const label = unit?.qr_value ?? prev?.qr_value ?? `https://produto.myio.com.br/${code}`;
 
