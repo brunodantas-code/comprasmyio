@@ -921,10 +921,14 @@ export function StockQrDialog({ stockName, trigger }: { stockName: string; trigg
     queryFn: async () => {
       const { data, error } = await supabase
         .from("homologations")
-        .select("id, box_size, box_qr, notes, created_at, materials(name), homologation_units(position, qr_value)")
+        .select("id, release_id, material_id, box_size, box_qr, notes, created_at, materials(name), homologation_units(id, position, qr_value)")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return (data ?? []).filter((h) => (h.materials as { name: string } | null)?.name === baseName);
+      return (data ?? []).filter(
+        (h) =>
+          (h.materials as { name: string } | null)?.name === baseName &&
+          (h.homologation_units?.length ?? 0) > 0,
+      );
     },
   });
 
