@@ -130,6 +130,7 @@ function useQrTrace(code: string) {
             moved_at: string | null;
             move_notes: string | null;
             move_photo_url: string | null;
+            client_name: string | null;
             materials: { name: string } | null;
             projects: { name: string } | null;
           }
