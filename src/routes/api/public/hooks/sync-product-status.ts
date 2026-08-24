@@ -221,6 +221,7 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
           location,
           status,
           technician,
+          client_name: clientName,
           qr_value: label,
           material_id: unit?.material_id ?? prev?.material_id ?? null,
           homologation_unit_id: unit?.id ?? prev?.homologation_unit_id ?? null,
