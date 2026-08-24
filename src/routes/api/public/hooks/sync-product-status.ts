@@ -298,6 +298,7 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
               moved_technician: location === "tecnico" ? technician : null,
               moved_at: now,
               move_notes: "Atualizado pela plataforma externa",
+              client_name: null,
             })
             .eq("id", target.id);
         }
