@@ -170,8 +170,65 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
     // (presentes em homologation_units). Qualquer código que exista apenas na
     // plataforma externa é ignorado — não entra no banco nem dispara correções.
     const knownCodes = new Set(unitByCode.keys());
-    const products = externalProducts.filter((p) => knownCodes.has(p.code!));
-    const ignored = externalProducts.length - products.length;
+
+    // CAIXAS: a caixa é a mestra do rastreio. Se a plataforma externa reportar
+    // o QR da CAIXA (ex.: a caixa chegou ao cliente), todos os produtos dentro
+    // dela herdam o mesmo local/status/técnico/cliente. Mapeia cada forma do
+    // QR da caixa (link completo ou só a cauda caixa-N/seq) para os códigos
+    // unitários do conteúdo.
+    const { data: boxRows, error: boxErr } = await supabaseAdmin
+      .from("homologations")
+      .select("box_qr, homologation_units(qr_value)")
+      .not("box_qr", "is", null);
+    if (boxErr) throw boxErr;
+    const unitCodesByBoxKey = new Map<string, string[]>();
+    for (const b of boxRows ?? []) {
+      if (!b.box_qr) continue;
+      const codes = ((b.homologation_units ?? []) as { qr_value: string }[])
+        .map((u) => extractCodeFromQr(u.qr_value))
+        .filter((c): c is string => !!c);
+      if (!codes.length) continue;
+      unitCodesByBoxKey.set(normalizeQrKey(b.box_qr), codes);
+      const tail = boxQrTail(b.box_qr);
+      if (tail) unitCodesByBoxKey.set(tail, codes);
+    }
+
+    // Expande caixas em produtos unitários. Dois passes para garantir que o
+    // estado da CAIXA sempre vence o reporte individual de uma unidade.
+    const productByCode = new Map<string, ExternalProduct>();
+    const direct: ExternalProduct[] = [];
+    let ignored = 0;
+    for (const p of externalProducts) {
+      const raw = (p.code ?? "").trim();
+      const keys = new Set<string>();
+      if (raw) {
+        keys.add(normalizeQrKey(raw));
+        const t = boxQrTail(raw);
+        if (t) keys.add(t);
+      }
+      for (const v of [p.qr, p.qr_value, p.url, p.link]) {
+        if (typeof v !== "string" || !v.trim()) continue;
+        keys.add(normalizeQrKey(v));
+        const tv = boxQrTail(v);
+        if (tv) keys.add(tv);
+      }
+      let boxCodes: string[] | undefined;
+      for (const k of keys) {
+        boxCodes = unitCodesByBoxKey.get(k);
+        if (boxCodes) break;
+      }
+      if (boxCodes) {
+        for (const c of boxCodes) productByCode.set(c, { ...p, code: c });
+      } else if (knownCodes.has(raw)) {
+        direct.push(p);
+      } else {
+        ignored++;
+      }
+    }
+    for (const p of direct) {
+      if (!productByCode.has(p.code!)) productByCode.set(p.code!, p);
+    }
+    const products = [...productByCode.values()];
 
     const { data: existing, error: statesErr } = await supabaseAdmin.from("external_product_states").select("*");
     if (statesErr) throw statesErr;
