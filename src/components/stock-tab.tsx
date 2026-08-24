@@ -284,7 +284,15 @@ function MovementDialog({
               </datalist>
             </div>
           )}
-          {isExit && <QrLinkPicker value={qrs} onChange={setQrs} required={needsQr} />}
+          {isExit && (
+            <QrLinkPicker
+              value={qrs}
+              onChange={setQrs}
+              required={needsQr}
+              materialId={row.material_id}
+              stockOnly
+            />
+          )}
           {isExit && (
             <div className="space-y-2">
               <Label>
