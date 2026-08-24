@@ -528,6 +528,23 @@ async function createUnitProductsForOrder(orderId: string, projectId: string | n
   if (already?.length) return allLabels;
 
   const byName = new Map((mats ?? []).map((m) => [m.name.trim().toLowerCase(), m.id]));
+  const effProjectId = projectId ?? (order as { project_id: string | null } | null)?.project_id ?? null;
+  // Projeto = Cliente: a coluna Cliente da unidade recebe o nome do projeto.
+  let unitClientName: string | null = null;
+  if (effProjectId) {
+    if (!projectId || projectId === (order as { project_id: string | null } | null)?.project_id) {
+      unitClientName = (order as { projects?: { name: string } | null } | null)?.projects?.name ?? null;
+    }
+    if (!unitClientName) {
+      const { data: proj } = await supabase
+        .from("projects")
+        .select("name, client_name")
+        .eq("id", effProjectId)
+        .maybeSingle();
+      unitClientName = proj?.name ?? proj?.client_name ?? null;
+    }
+  }
+  unitClientName ??= (order as { client_name?: string } | null)?.client_name ?? null;
   const rows: Record<string, unknown>[] = [];
   for (const it of items ?? []) {
     const materialId = byName.get(it.product.trim().toLowerCase()) ?? null;
@@ -538,7 +555,8 @@ async function createUnitProductsForOrder(orderId: string, projectId: string | n
         product: it.product,
         label: labels[i] ?? null,
         order_id: orderId,
-        project_id: projectId ?? (order as { project_id: string | null } | null)?.project_id ?? null,
+        project_id: effProjectId,
+        client_name: unitClientName,
         status: "parado",
         notes: note,
         created_by: auth?.user?.id ?? null,
