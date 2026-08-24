@@ -65,14 +65,106 @@ async function alreadyUsed(values: string[]) {
   return new Set((data ?? []).map((r) => r.qr_value));
 }
 
+type AvailableBox = {
+  id: string;
+  box_qr: string;
+  box_size: number;
+  total: number;
+  free: { id: string; qr_value: string }[];
+};
+
+function BoxPickerDialog({
+  materialId,
+  onSelect,
+}: {
+  materialId: string;
+  onSelect: (box: AvailableBox) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const { data: boxes, isLoading } = useQuery({
+    queryKey: ["available-boxes", materialId],
+    enabled: open,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("homologations")
+        .select("id, box_qr, box_size, homologation_units(id, qr_value, position)")
+        .eq("material_id", materialId)
+        .not("box_qr", "is", null)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      const allQrs = (data ?? []).flatMap((b) =>
+        ((b.homologation_units ?? []) as { qr_value: string }[]).map((u) => u.qr_value),
+      );
+      const used = allQrs.length ? await alreadyUsed(allQrs) : new Set<string>();
+      return (data ?? []).map((b) => {
+        const units = ((b.homologation_units ?? []) as { id: string; qr_value: string; position: number }[]).sort(
+          (a, b2) => a.position - b2.position,
+        );
+        const free = units.filter((u) => !used.has(u.qr_value));
+        return { id: b.id, box_qr: b.box_qr as string, box_size: b.box_size as number, total: units.length, free };
+      });
+    },
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <Button type="button" variant="outline" size="icon" title="Selecionar caixa existente" onClick={() => setOpen(true)}>
+        <Boxes className="h-4 w-4" />
+      </Button>
+      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Selecionar caixa</DialogTitle>
+          <DialogDescription>
+            Caixas homologadas deste produto. Ao selecionar, todos os QR codes da caixa são vinculados
+            automaticamente.
+          </DialogDescription>
+        </DialogHeader>
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">Carregando...</p>
+        ) : !boxes?.length ? (
+          <p className="text-sm text-muted-foreground">Nenhuma caixa homologada para este produto.</p>
+        ) : (
+          <ul className="space-y-2">
+            {boxes.map((b) => (
+              <li
+                key={b.id}
+                className="flex items-center gap-3 rounded-md border p-3"
+              >
+                <Boxes className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <div className="min-w-0 flex-1">
+                  <p className="break-all text-sm font-medium">{b.box_qr}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {b.free.length} de {b.total} produto(s) disponíveis
+                  </p>
+                </div>
+                {b.free.length === 0 ? (
+                  <Badge variant="outline" className="border-amber-300 bg-amber-100 text-amber-800">
+                    Indisponível
+                  </Badge>
+                ) : (
+                  <Button type="button" size="sm" onClick={() => onSelect(b)}>
+                    Selecionar
+                  </Button>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function QrLinkPicker({
   value,
   onChange,
   required,
+  materialId,
 }: {
   value: LinkedQr[];
   onChange: (v: LinkedQr[]) => void;
   required?: boolean;
+  materialId?: string | null;
 }) {
   const add = async (code: string) => {
     try {
@@ -94,6 +186,19 @@ export function QrLinkPicker({
     }
   };
 
+  const addBox = (box: AvailableBox) => {
+    const existing = new Set(value.map((v) => v.qr_value));
+    const fresh = box.free
+      .filter((u) => !existing.has(u.qr_value))
+      .map((u) => ({ qr_value: u.qr_value, box_qr: box.box_qr, homologation_unit_id: u.id }));
+    if (!fresh.length) {
+      toast.error("Esta caixa já foi vinculada a uma baixa.");
+      return;
+    }
+    onChange([...value, ...fresh]);
+    toast.success(`Caixa vinculada: ${fresh.length} QR codes unitários.`);
+  };
+
   const boxes = [...new Set(value.map((v) => v.box_qr).filter(Boolean))] as string[];
 
   return (
@@ -103,6 +208,7 @@ export function QrLinkPicker({
         <ManualQrDialog label="Digitar código" value="" onResult={add} />
         <GalleryQrButton label="Galeria" onResult={add} />
         <QrScannerDialog label="Câmera" onResult={add} />
+        {materialId && <BoxPickerDialog materialId={materialId} onSelect={addBox} />}
       </div>
       {value.length > 0 && (
         <div className="space-y-2 rounded-md border p-2">
