@@ -35,32 +35,49 @@ function externalQrs(qrs: (string | null | undefined)[]): string[] {
 /**
  * Envia a mudança de local para a plataforma externa (fire-and-forget).
  * Nunca bloqueia nem quebra o fluxo interno: falhas viram apenas um aviso.
+ *
+ * CAIXAS: o QR da caixa (link do nosso app) não existe na plataforma externa.
+ * Se um QR de caixa for passado, ele é expandido para os QR codes unitários de
+ * TODOS os produtos dentro dela — a caixa é a mestra do rastreio e todo o
+ * conteúdo acompanha o local/status dela (incluindo o nome do cliente).
  */
 export function pushQrsToExternal(qrs: (string | null | undefined)[], opts: PushExternalOptions): void {
-  const list = externalQrs(qrs);
-  if (!list.length) return;
-  void pushExternalQrLocations({
-    data: {
-      qrs: list,
-      location: opts.location,
-      status: opts.status ?? null,
-      technician: opts.technician ?? null,
-      clientName: opts.clientName ?? null,
-    },
-  })
-    .then((r) => {
-      const failed = r.results.filter((x) => !x.ok);
-      if (failed.length) {
-        toast.warning(`Plataforma externa: ${failed.length} QR code(s) não atualizados.`, {
-          description: failed[0]?.error,
-        });
-      }
-    })
-    .catch((e) => {
-      toast.warning("Não foi possível atualizar o local na plataforma externa.", {
-        description: e instanceof Error ? e.message : undefined,
-      });
+  void (async () => {
+    const raw = Array.from(new Set(qrs.map((q) => q?.trim()).filter((q): q is string => !!q)));
+    const direct = externalQrs(raw);
+    const boxCandidates = raw.filter((q) => !QR_LINK_RE.test(q) && !RAW_CODE_RE.test(q));
+    let fromBoxes: string[] = [];
+    if (boxCandidates.length) {
+      const { data: boxes } = await supabase
+        .from("homologations")
+        .select("box_qr, homologation_units(qr_value)")
+        .in("box_qr", boxCandidates);
+      fromBoxes = (boxes ?? []).flatMap((b) =>
+        ((b.homologation_units ?? []) as { qr_value: string }[]).map((u) => u.qr_value),
+      );
+    }
+    const list = externalQrs([...direct, ...fromBoxes]);
+    if (!list.length) return;
+    const r = await pushExternalQrLocations({
+      data: {
+        qrs: list,
+        location: opts.location,
+        status: opts.status ?? null,
+        technician: opts.technician ?? null,
+        clientName: opts.clientName ?? null,
+      },
     });
+    const failed = r.results.filter((x) => !x.ok);
+    if (failed.length) {
+      toast.warning(`Plataforma externa: ${failed.length} QR code(s) não atualizados.`, {
+        description: failed[0]?.error,
+      });
+    }
+  })().catch((e) => {
+    toast.warning("Não foi possível atualizar o local na plataforma externa.", {
+      description: e instanceof Error ? e.message : undefined,
+    });
+  });
 }
 
 /**
