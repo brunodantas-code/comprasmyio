@@ -548,7 +548,7 @@ export function UnitProductsCard({
       pushQrsToExternal([p.label], {
         location: "cliente",
         status: next,
-        clientName: p.client_name ?? p.projects?.name ?? null,
+        clientName: p.projects?.name ?? p.client_name ?? null,
       });
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["unit-products"] }),
