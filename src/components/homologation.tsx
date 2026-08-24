@@ -477,6 +477,142 @@ function UnitaryDropZone() {
   );
 }
 
+/** Diálogo para colocar um produto unitário dentro de uma caixa incompleta ou de uma caixa nova. */
+function AddUnitToBoxDialog({
+  unit,
+  source,
+  materialId,
+  materialName,
+}: {
+  unit: UnitRow;
+  source: HomologationRef;
+  materialId: string;
+  materialName: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [target, setTarget] = useState<string>("new");
+  const [newSize, setNewSize] = useState<number>(10);
+  const [newQr, setNewQr] = useState("");
+  const { data: existingBoxQrs } = useBoxQrCodes();
+  const add = useAddUnitToBox();
+
+  const { data: boxes, isLoading } = useQuery({
+    queryKey: ["incomplete-boxes", materialId],
+    enabled: open,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("homologations")
+        .select("id, box_size, box_qr, created_at, homologation_units(id)")
+        .eq("material_id", materialId)
+        .gt("box_size", 1)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []).filter((b) => (b.homologation_units?.length ?? 0) < b.box_size);
+    },
+  });
+
+  // Preenche o QR da nova caixa automaticamente (sem sobrescrever edição manual)
+  useEffect(() => {
+    if (open && (!newQr.trim() || newQr.startsWith("https://comprasmyio.lovable.app/caixa-"))) {
+      setNewQr(genBoxQr(newSize, existingBoxQrs));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, newSize, existingBoxQrs]);
+
+  function submit() {
+    if (target === "new") {
+      add.mutate(
+        { unit, source, newBox: { size: newSize, qr: newQr.trim() } },
+        { onSuccess: () => setOpen(false) },
+      );
+    } else {
+      add.mutate({ unit, source, targetHomologationId: target }, { onSuccess: () => setOpen(false) });
+    }
+  }
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        setOpen(o);
+        if (o) {
+          setTarget("new");
+          setNewSize(10);
+          setNewQr("");
+        }
+      }}
+    >
+      <DialogTrigger asChild>
+        <Button type="button" size="sm" variant="outline">
+          <PackagePlus className="mr-1 h-3 w-3" /> Adicionar à caixa
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[88vh] max-w-lg overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Adicionar à caixa — {materialName}</DialogTitle>
+          <DialogDescription>
+            Escolha uma caixa incompleta deste produto ou crie uma caixa nova (de qualquer tipo) para este produto
+            unitário.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label>Caixa de destino</Label>
+            <Select value={target} onValueChange={setTarget}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="new">Criar nova caixa</SelectItem>
+                {(boxes ?? []).map((b) => (
+                  <SelectItem key={b.id} value={b.id}>
+                    Caixa de {b.box_size} — {b.homologation_units?.length ?? 0}/{b.box_size} produtos
+                    {b.box_qr ? ` · ${b.box_qr}` : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {isLoading && <p className="text-xs text-muted-foreground">Buscando caixas incompletas...</p>}
+            {!isLoading && !(boxes ?? []).length && (
+              <p className="text-xs text-muted-foreground">Nenhuma caixa incompleta deste produto — crie uma nova.</p>
+            )}
+          </div>
+
+          {target === "new" && (
+            <>
+              <div className="space-y-2">
+                <Label>Tipo da nova caixa</Label>
+                <Select value={String(newSize)} onValueChange={(v) => setNewSize(Number(v))}>
+                  <SelectTrigger className="w-full sm:w-[220px]"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {BOX_SIZES.filter((s) => s > 1).map((s) => (
+                      <SelectItem key={s} value={String(s)}>Caixa de {s}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1 rounded border p-3">
+                <QrField label={`QR Code da Caixa de ${newSize}:`} value={newQr} onChange={setNewQr} />
+                <p className="text-xs text-muted-foreground">
+                  Gerado automaticamente (site / modelo da caixa / código sequencial) — edite manualmente se necessário.
+                </p>
+              </div>
+            </>
+          )}
+        </div>
+
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            Cancelar
+          </Button>
+          <Button type="button" disabled={add.isPending} onClick={submit}>
+            {add.isPending ? "Adicionando..." : "Confirmar"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 /* ---------------- Homologate dialog ---------------- */
 
 export function HomologateDialog({
