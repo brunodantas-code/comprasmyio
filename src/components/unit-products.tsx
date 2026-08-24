@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { recordDamagedItem } from "./damaged-items";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,12 +35,13 @@ type UnitProduct = {
   created_at: string;
 };
 
-type MoveDestination = "tecnico" | "almoxarifado" | "perdido";
+type MoveDestination = "tecnico" | "almoxarifado" | "perdido" | "avariado";
 
 const MOVE_LABELS: Record<MoveDestination, string> = {
   tecnico: "Técnico",
   almoxarifado: "Estoque",
   perdido: "Perdido",
+  avariado: "Itens Avariados",
 };
 
 type MaterialOption = { material_id: string; name: string };
@@ -92,6 +94,7 @@ function MoveUnitProductDialog({
     mutationFn: async () => {
       if (!destination) throw new Error("Selecione o destino.");
       if (destination === "tecnico" && !technician.trim()) throw new Error("Informe o nome do técnico.");
+      if (destination === "avariado" && !notes.trim()) throw new Error("Informe o motivo da avaria nas observações.");
 
       let path: string | null = null;
       if (file) {
@@ -118,7 +121,9 @@ function MoveUnitProductDialog({
             ? `Saída da unidade para o técnico ${technician.trim()}`
             : destination === "almoxarifado"
               ? "Retorno do cliente para o estoque"
-              : "Produto da unidade marcado como perdido";
+              : destination === "avariado"
+                ? "Produto da unidade marcado como avariado"
+                : "Produto da unidade marcado como perdido";
         const { error: mvErr } = await supabase.from("stock_movements").insert({
           material_id: product.material_id,
           quantity: 1,
@@ -129,6 +134,19 @@ function MoveUnitProductDialog({
           created_by: userId,
         } as never);
         if (mvErr) throw mvErr;
+
+        if (destination === "avariado") {
+          await recordDamagedItem({
+            material_id: product.material_id,
+            product: productName,
+            quantity: 1,
+            source: "Cliente",
+            source_detail: product.projects?.name ?? null,
+            reason: notes.trim(),
+            photo_url: path,
+            created_by: userId,
+          });
+        }
       }
     },
     onSuccess: () => {
@@ -137,6 +155,7 @@ function MoveUnitProductDialog({
       qc.invalidateQueries({ queryKey: ["material-stock"] });
       qc.invalidateQueries({ queryKey: ["stock-movements"] });
       qc.invalidateQueries({ queryKey: ["technician-dispatches"] });
+      qc.invalidateQueries({ queryKey: ["damaged-items"] });
       setOpen(false);
       reset();
     },
