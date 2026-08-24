@@ -501,7 +501,7 @@ function LostMerchandiseDialog({ orderId, notes }: { orderId: string; notes: str
 
 async function createUnitProductsForOrder(orderId: string, projectId: string | null, note: string): Promise<string[]> {
   const [{ data: order }, { data: items }, { data: mats }, { data: auth }, { data: deliveries }] = await Promise.all([
-    supabase.from("myio_orders").select("project_id").eq("id", orderId).maybeSingle(),
+    supabase.from("myio_orders").select("project_id, client_name, projects(name)").eq("id", orderId).maybeSingle(),
     supabase.from("myio_order_items").select("id, product, quantity").eq("order_id", orderId),
     supabase.from("materials").select("id, name"),
     supabase.auth.getUser(),
