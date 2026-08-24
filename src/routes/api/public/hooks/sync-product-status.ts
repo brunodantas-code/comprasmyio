@@ -520,21 +520,34 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
       corrections++;
     };
 
-    // Cache de projeto por nome de cliente (evita consultas repetidas na mesma execução).
-    const projectByClient = new Map<string, string | null>();
-    const findProjectForClient = async (clientName: string): Promise<string | null> => {
+    // Cache de projeto por nome recebido (evita consultas repetidas na mesma execução).
+    // REGRA: Projeto = Cliente. A plataforma externa envia o NOME DO PROJETO no
+    // campo nome_cliente — então o nome recebido é comparado primeiro com
+    // projects.name, e o nome do projeto encontrado vira também o client_name.
+    const projectByClient = new Map<string, { id: string; name: string } | null>();
+    const findProjectForClient = async (clientName: string): Promise<{ id: string; name: string } | null> => {
       const key = clientName.trim().toLowerCase();
       if (projectByClient.has(key)) return projectByClient.get(key) ?? null;
-      let projectId: string | null = null;
-      const { data: proj } = await supabaseAdmin
+      let project: { id: string; name: string } | null = null;
+      const { data: byName } = await supabaseAdmin
         .from("projects")
-        .select("id")
-        .ilike("client_name", clientName.trim())
+        .select("id, name")
+        .ilike("name", clientName.trim())
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
-      projectId = proj?.id ?? null;
-      if (!projectId) {
+      project = byName ?? null;
+      if (!project) {
+        const { data: byClientName } = await supabaseAdmin
+          .from("projects")
+          .select("id, name")
+          .ilike("client_name", clientName.trim())
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        project = byClientName ?? null;
+      }
+      if (!project) {
         const { data: client } = await supabaseAdmin
           .from("clients")
           .select("id")
@@ -544,16 +557,16 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
         if (client) {
           const { data: proj2 } = await supabaseAdmin
             .from("projects")
-            .select("id")
+            .select("id, name")
             .eq("client_id", client.id)
             .order("created_at", { ascending: false })
             .limit(1)
             .maybeSingle();
-          projectId = proj2?.id ?? null;
+          project = proj2 ?? null;
         }
       }
-      projectByClient.set(key, projectId);
-      return projectId;
+      projectByClient.set(key, project);
+      return project;
     };
 
     const now = new Date().toISOString();
