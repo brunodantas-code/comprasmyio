@@ -599,6 +599,47 @@ function AddUnitToBoxDialog({
         </DialogHeader>
 
         <div className="space-y-4">
+          <div className="space-y-2 rounded border p-3">
+            <Label>Procurar caixa pelo QR Code</Label>
+            <div className="flex flex-wrap items-center gap-2">
+              <Input
+                className="min-w-40 flex-1"
+                value={scanValue}
+                onChange={(e) => setScanValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    findBoxByQr(scanValue);
+                  }
+                }}
+                placeholder="https://.../caixa-10/1"
+              />
+              <ManualQrDialog label="QR Code da caixa" value={scanValue} onResult={findBoxByQr} />
+              <GalleryQrButton label="QR Code da caixa" onResult={findBoxByQr} />
+              <QrScannerDialog label="QR Code da caixa" onResult={findBoxByQr} />
+              <Button type="button" variant="secondary" disabled={scanning || !scanValue.trim()} onClick={() => findBoxByQr(scanValue)}>
+                {scanning ? "Buscando..." : "Buscar"}
+              </Button>
+            </div>
+            {scanStatus && (
+              <p
+                className={`text-xs ${
+                  scanStatus.type === "selected"
+                    ? "text-green-600"
+                    : scanStatus.type === "full"
+                      ? "text-amber-600"
+                      : "text-destructive"
+                }`}
+              >
+                {scanStatus.msg}
+              </p>
+            )}
+            <p className="text-xs text-muted-foreground">
+              Leia o QR Code pela câmera, galeria ou digite manualmente. Caixa cheia é avisada; caixa incompleta é
+              selecionada automaticamente.
+            </p>
+          </div>
+
           <div className="space-y-2">
             <Label>Caixa de destino</Label>
             <Select value={target} onValueChange={setTarget}>
