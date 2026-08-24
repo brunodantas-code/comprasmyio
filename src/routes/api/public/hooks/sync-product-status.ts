@@ -550,7 +550,7 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
       problems.length ? `${message} Erros: ${problems.slice(0, 3).join(" | ")}` : message,
       products.length,
     );
-    return { status: 200, body: { ok: true, total: products.length, changed, problems: problems.slice(0, 10) } };
+    return { status: 200, body: { ok: true, total: products.length, changed, corrections, problems: problems.slice(0, 10) } };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     await finish("erro", msg.slice(0, 500));
