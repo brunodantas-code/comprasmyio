@@ -20,7 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
-import { Camera, CheckCircle2, QrCode, Image as ImageIcon, Keyboard } from "lucide-react";
+import { Camera, CheckCircle2, QrCode, Image as ImageIcon, Keyboard, PackageMinus, PackagePlus } from "lucide-react";
 
 export const BOX_SIZES = [1, 10, 50, 100, 224] as const;
 
@@ -253,6 +253,123 @@ export function useHomologations(releaseId?: string) {
       return data ?? [];
     },
   });
+}
+
+/* ---------------- Movimentação de produtos entre caixas ---------------- */
+
+type UnitRow = { id: string; position: number; qr_value: string };
+type HomologationRef = { id: string; release_id: string; material_id: string };
+
+function useInvalidateHomologationData() {
+  const qc = useQueryClient();
+  return () => {
+    qc.invalidateQueries({ queryKey: ["homologations"] });
+    qc.invalidateQueries({ queryKey: ["homologations-qr"] });
+    qc.invalidateQueries({ queryKey: ["boxes-list"] });
+    qc.invalidateQueries({ queryKey: ["box-qr-codes"] });
+  };
+}
+
+async function moveUnitTo(unitId: string, homologationId: string, position: number) {
+  const { error } = await supabase
+    .from("homologation_units")
+    .update({ homologation_id: homologationId, position })
+    .eq("id", unitId);
+  if (error) throw error;
+}
+
+/** Tira um produto de uma caixa: ele vira unitário (nova homologação unitária) e a caixa mantém os demais. */
+function useRemoveUnitFromBox() {
+  const invalidate = useInvalidateHomologationData();
+  return useMutation({
+    mutationFn: async ({ unit, box }: { unit: UnitRow; box: HomologationRef }) => {
+      const { data: auth } = await supabase.auth.getUser();
+      const { data: hom, error } = await supabase
+        .from("homologations")
+        .insert({
+          release_id: box.release_id,
+          material_id: box.material_id,
+          box_size: 1,
+          box_qr: null,
+          created_by: auth.user?.id ?? null,
+        })
+        .select("id")
+        .single();
+      if (error) throw error;
+      await moveUnitTo(unit.id, hom.id, 1);
+    },
+    onSuccess: () => {
+      toast.success("Produto retirado da caixa — agora ele é unitário.");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+/** Card de um produto homologado; quando está numa caixa, pode ser arrastado para fora ou removido pelo botão. */
+function UnitQrCard({ unit, box }: { unit: UnitRow; box?: HomologationRef }) {
+  const remove = useRemoveUnitFromBox();
+  return (
+    <div
+      className="flex flex-col items-center gap-1 rounded border p-2"
+      draggable={!!box}
+      onDragStart={(e) => {
+        if (!box) return;
+        e.dataTransfer.setData("text/myio-unit", JSON.stringify({ unit, box }));
+        e.dataTransfer.effectAllowed = "move";
+      }}
+    >
+      <QrImage value={unit.qr_value} size={96} />
+      <span className="text-xs font-medium">#{unit.position}</span>
+      <span className="w-full break-all text-center text-[10px] text-muted-foreground">{unit.qr_value}</span>
+      {box && (
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          disabled={remove.isPending}
+          onClick={() => remove.mutate({ unit, box })}
+        >
+          <PackageMinus className="mr-1 h-3 w-3" /> Tirar da caixa
+        </Button>
+      )}
+    </div>
+  );
+}
+
+/** Área de destino para arrastar produtos para fora da caixa (viram unitários). */
+function UnitaryDropZone() {
+  const remove = useRemoveUnitFromBox();
+  const [over, setOver] = useState(false);
+  return (
+    <div
+      onDragOver={(e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        setOver(true);
+      }}
+      onDragLeave={() => setOver(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        setOver(false);
+        try {
+          const payload = JSON.parse(e.dataTransfer.getData("text/myio-unit")) as {
+            unit?: UnitRow;
+            box?: HomologationRef;
+          };
+          if (payload.unit && payload.box) remove.mutate({ unit: payload.unit, box: payload.box });
+        } catch {
+          /* arrasto inválido — ignora */
+        }
+      }}
+      className={`flex items-center justify-center gap-2 rounded-lg border-2 border-dashed p-4 text-center text-sm transition-colors ${
+        over ? "border-primary bg-primary/5 text-primary" : "border-muted-foreground/30 text-muted-foreground"
+      }`}
+    >
+      <PackageMinus className="h-4 w-4 shrink-0" />
+      Arraste um produto aqui para tirá-lo da caixa (ele vira unitário)
+    </div>
+  );
 }
 
 /* ---------------- Homologate dialog ---------------- */
