@@ -21,7 +21,9 @@ const STAGE_LABELS: Record<string, string> = {
   unidade: "Cliente",
   tecnico: "Técnico",
   perdido: "Perdido",
+  avariado: "Avariado",
   escritorio: "Escritório",
+  almoxarifado_geral: "Almoxarifado",
 };
 
 type Event = { at: string; title: string; detail?: string; stage?: string; photo?: string | null };
@@ -261,7 +263,15 @@ function useQrTrace(code: string) {
 
       for (const t of techMoves) {
         const destStage =
-          t.destination === "unidade" ? "unidade" : t.destination === "perdido" ? "perdido" : t.destination === "almoxarifado" ? "almoxarifado" : "tecnico";
+          t.destination === "unidade"
+            ? "unidade"
+            : t.destination === "perdido"
+              ? "perdido"
+              : t.destination === "almoxarifado"
+                ? "almoxarifado"
+                : t.destination === "avariado"
+                  ? "avariado"
+                  : "tecnico";
         events.push({
           at: t.created_at,
           title: `Movido pelo técnico → ${STAGE_LABELS[destStage] ?? t.destination}`,
@@ -284,7 +294,13 @@ function useQrTrace(code: string) {
         }
         if (unitProd.moved_to && unitProd.moved_at) {
           const destStage =
-            unitProd.moved_to === "tecnico" ? "tecnico" : unitProd.moved_to === "perdido" ? "perdido" : "almoxarifado";
+            unitProd.moved_to === "tecnico"
+              ? "tecnico"
+              : unitProd.moved_to === "perdido"
+                ? "perdido"
+                : unitProd.moved_to === "avariado"
+                  ? "avariado"
+                  : "almoxarifado";
           events.push({
             at: unitProd.moved_at,
             title: `Saiu da unidade → ${STAGE_LABELS[destStage] ?? unitProd.moved_to}`,
@@ -332,7 +348,9 @@ function useQrTrace(code: string) {
         unidade: "Cliente",
         tecnico: "Técnico",
         perdido: "Perdido",
+        avariado: "Itens Avariados",
         escritorio: "Escritório",
+        almoxarifado_geral: "Almoxarifado",
       };
 
       let location = "Não encontrado";
