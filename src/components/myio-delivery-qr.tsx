@@ -202,6 +202,7 @@ export function QrLinkPicker({
   required,
   materialId,
   requiredCount,
+  stockOnly,
 }: {
   value: LinkedQr[];
   onChange: (v: LinkedQr[]) => void;
@@ -209,6 +210,12 @@ export function QrLinkPicker({
   materialId?: string | null;
   /** Quantidade exata de QR codes que devem ser vinculados (1 por produto). */
   requiredCount?: number;
+  /**
+   * Quando true, só aceita QR codes que façam parte do estoque:
+   * precisam estar homologados (cadastrados) e ainda não terem saído em
+   * nenhuma baixa/movimentação. Códigos "inventados" são rejeitados.
+   */
+  stockOnly?: boolean;
 }) {
   const remaining = requiredCount != null ? requiredCount - value.length : null;
   const complete = remaining === 0;
@@ -224,11 +231,31 @@ export function QrLinkPicker({
       }
       const resolved = await resolveQrCode(code);
       if (!resolved.length) return;
+      if (stockOnly) {
+        const notInStock = resolved.filter((r) => !r.homologation_unit_id);
+        if (notInStock.length) {
+          toast.error(
+            "QR code não encontrado no estoque. Só é permitido vincular QR codes homologados que constem no estoque.",
+          );
+          return;
+        }
+        if (materialId) {
+          const wrongMaterial = resolved.filter((r) => r.material_id && r.material_id !== materialId);
+          if (wrongMaterial.length) {
+            toast.error("Este QR code pertence a outro produto — vincule apenas QR codes deste material.");
+            return;
+          }
+        }
+      }
       const used = await alreadyUsed(resolved.map((r) => r.qr_value));
       const existing = new Set(value.map((v) => v.qr_value));
       const fresh = resolved.filter((r) => !existing.has(r.qr_value) && !used.has(r.qr_value));
       if (!fresh.length) {
-        toast.error("Este QR code já foi vinculado a uma baixa.");
+        toast.error(
+          stockOnly
+            ? "Este QR code já saiu do estoque (vinculado a outra baixa/movimentação)."
+            : "Este QR code já foi vinculado a uma baixa.",
+        );
         return;
       }
       if (remaining != null && fresh.length > remaining) {
