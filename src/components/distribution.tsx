@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,7 +20,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ItemDeliveriesDialog } from "@/components/myio-delivery-qr";
 import { AlertTriangle, CheckCircle2, FileText, Loader2, PackageSearch, Send, Truck, Undo2, Upload } from "lucide-react";
 import { toast } from "sonner";
-import { pushOrderToExternal, pushQrsToExternal } from "@/lib/push-external";
+import { pushOrderToExternal, pushQrsToExternal, reconcileOrdersExternal } from "@/lib/push-external";
 
 const PROOF_BUCKET = "assembly-photos";
 
@@ -206,6 +206,11 @@ export function DistributionCard() {
       return (data ?? []) as unknown as DistOrder[];
     },
   });
+
+  // Reconciliação: garante que os QR codes destes pedidos constem como "expedicao" na plataforma externa
+  useEffect(() => {
+    if (orders?.length) reconcileOrdersExternal(orders.map((o) => o.id), { location: "expedicao" });
+  }, [orders]);
 
   const distribute = useMutation({
     mutationFn: async (vars: { order: DistOrder; form: ShipmentForm }) => {
@@ -562,6 +567,11 @@ export function TransitCard() {
       return (data ?? []) as unknown as TransitOrder[];
     },
   });
+
+  // Reconciliação: garante que os QR codes destes pedidos constem como "transporte" na plataforma externa
+  useEffect(() => {
+    if (orders?.length) reconcileOrdersExternal(orders.map((o) => o.id), { location: "transporte" });
+  }, [orders]);
 
   const deliver = useMutation({
     mutationFn: async (vars: { orderId: string; clientName: string }) => {
