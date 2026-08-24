@@ -46,6 +46,22 @@ function extractCodeFromQr(qr: string): string | null {
   return /^\d+(?:_\d+)+$/.test(t) ? t : null;
 }
 
+/** Normaliza um QR para comparação: remove query string e âncora. */
+function normalizeQrKey(v: string): string {
+  let s = v.trim();
+  const h = s.indexOf("#");
+  if (h >= 0) s = s.slice(0, h);
+  const q = s.indexOf("?");
+  if (q >= 0) s = s.slice(0, q);
+  return s.trim();
+}
+
+/** Cauda do link da caixa (ex.: caixa-10/3) — a API externa pode reportar só o trecho final do link. */
+function boxQrTail(v: string): string | null {
+  const m = /(?:^|\/)(caixa-[^/\s]+\/[^/\s]+)$/i.exec(normalizeQrKey(v));
+  return m?.[1] ?? null;
+}
+
 /** Nome do cliente informado pela plataforma externa (campo da API ou parâmetro `nome_cliente` do QR). */
 function extractClientName(p: ExternalProduct): string | null {
   for (const v of [p.nome_cliente, p.client_name, p.cliente, p.client]) {
