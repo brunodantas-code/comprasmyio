@@ -257,6 +257,109 @@ export type Database = {
           },
         ]
       }
+      external_product_states: {
+        Row: {
+          code: string
+          created_at: string
+          homologation_unit_id: string | null
+          id: string
+          last_change_at: string
+          location: string
+          material_id: string | null
+          payload: Json | null
+          product_type: string | null
+          qr_value: string | null
+          status: string | null
+          technician: string | null
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          homologation_unit_id?: string | null
+          id?: string
+          last_change_at?: string
+          location?: string
+          material_id?: string | null
+          payload?: Json | null
+          product_type?: string | null
+          qr_value?: string | null
+          status?: string | null
+          technician?: string | null
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          homologation_unit_id?: string | null
+          id?: string
+          last_change_at?: string
+          location?: string
+          material_id?: string | null
+          payload?: Json | null
+          product_type?: string | null
+          qr_value?: string | null
+          status?: string | null
+          technician?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_product_states_homologation_unit_id_fkey"
+            columns: ["homologation_unit_id"]
+            isOneToOne: false
+            referencedRelation: "homologation_units"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "external_product_states_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "material_stock"
+            referencedColumns: ["material_id"]
+          },
+          {
+            foreignKeyName: "external_product_states_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      external_sync_state: {
+        Row: {
+          created_at: string
+          id: boolean
+          last_message: string | null
+          last_run_at: string | null
+          last_status: string | null
+          lease_until: string | null
+          total_items: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: boolean
+          last_message?: string | null
+          last_run_at?: string | null
+          last_status?: string | null
+          lease_until?: string | null
+          total_items?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: boolean
+          last_message?: string | null
+          last_run_at?: string | null
+          last_status?: string | null
+          lease_until?: string | null
+          total_items?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       homologation_units: {
         Row: {
           created_at: string
