@@ -17,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ItemDeliveriesDialog } from "@/components/myio-delivery-qr";
+import { ItemDeliveriesDialog, extractQrCode } from "@/components/myio-delivery-qr";
 import { AlertTriangle, CheckCircle2, FileText, Loader2, PackageSearch, Send, Truck, Undo2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { pushOrderToExternal, pushQrsToExternal, reconcileOrdersExternal } from "@/lib/push-external";
@@ -390,6 +390,7 @@ function ReturnToDistributionDialog({ orderId, notes }: { orderId: string; notes
       setOpen(false);
       setReason("");
       queryClient.invalidateQueries({ queryKey: ["myio-transit"] });
+      queryClient.invalidateQueries({ queryKey: ["myio-transit-progress"] });
       queryClient.invalidateQueries({ queryKey: ["myio-distribution"] });
       queryClient.invalidateQueries({ queryKey: ["myio-orders"] });
     },
@@ -455,6 +456,7 @@ function LostMerchandiseDialog({ orderId, notes }: { orderId: string; notes: str
       setOpen(false);
       setReason("");
       queryClient.invalidateQueries({ queryKey: ["myio-transit"] });
+      queryClient.invalidateQueries({ queryKey: ["myio-transit-progress"] });
       queryClient.invalidateQueries({ queryKey: ["myio-lost"] });
       queryClient.invalidateQueries({ queryKey: ["myio-orders"] });
     },
@@ -550,6 +552,49 @@ async function createUnitProductsForOrder(orderId: string, projectId: string | n
   return allLabels;
 }
 
+/** Progresso da entrega: quantos QR codes do pedido já constam no cliente (plataforma externa). */
+function TransitQrProgress({ orderId }: { orderId: string }) {
+  const { data } = useQuery({
+    queryKey: ["myio-transit-progress", orderId],
+    refetchInterval: 60_000,
+    queryFn: async () => {
+      const { data: dels, error } = await supabase
+        .from("myio_item_deliveries")
+        .select("id")
+        .eq("order_id", orderId);
+      if (error) throw error;
+      const ids = (dels ?? []).map((d) => d.id);
+      if (!ids.length) return null;
+      const { data: qrs, error: qErr } = await supabase
+        .from("myio_delivery_qrs")
+        .select("qr_value")
+        .in("delivery_id", ids);
+      if (qErr) throw qErr;
+      const codes = (qrs ?? []).map((q) => extractQrCode(q.qr_value)).filter((c): c is string => !!c);
+      if (!codes.length) return null;
+      const { data: states, error: sErr } = await supabase
+        .from("external_product_states")
+        .select("code, location")
+        .in("code", codes);
+      if (sErr) throw sErr;
+      const atClient = (states ?? []).filter((s) => s.location === "cliente").length;
+      return { total: codes.length, atClient };
+    },
+  });
+  if (!data) return null;
+  const all = data.atClient >= data.total;
+  return (
+    <Badge
+      variant="outline"
+      className={
+        all ? "border-emerald-300 bg-emerald-100 text-emerald-800" : "border-amber-300 bg-amber-100 text-amber-800"
+      }
+    >
+      {data.atClient} de {data.total} no cliente
+    </Badge>
+  );
+}
+
 export function TransitCard() {
   const queryClient = useQueryClient();
 
@@ -588,6 +633,7 @@ export function TransitCard() {
       pushQrsToExternal(r.labels, { location: "cliente", clientName: vars.clientName });
       toast.success("Pedido entregue ao cliente.");
       queryClient.invalidateQueries({ queryKey: ["myio-transit"] });
+      queryClient.invalidateQueries({ queryKey: ["myio-transit-progress"] });
       queryClient.invalidateQueries({ queryKey: ["myio-orders"] });
       queryClient.invalidateQueries({ queryKey: ["unit-products"] });
     },
@@ -620,6 +666,7 @@ export function TransitCard() {
                   <Badge variant="outline" className="border-amber-300 bg-amber-100 text-amber-800">
                     Transporte
                   </Badge>
+                  <TransitQrProgress orderId={o.id} />
                   <Button
                     size="sm"
                     className="ml-auto"
@@ -767,7 +814,7 @@ function FoundMerchandiseDialog({ orderId, notes }: { orderId: string; notes: st
       setReason("");
       setSector("");
       setProjectId("");
-      ["myio-lost", "myio-transit", "myio-distribution", "myio-orders", "myio-demand", "unit-products"].forEach((k) =>
+      ["myio-lost", "myio-transit", "myio-transit-progress", "myio-distribution", "myio-orders", "myio-demand", "unit-products"].forEach((k) =>
         queryClient.invalidateQueries({ queryKey: [k] }),
       );
     },
