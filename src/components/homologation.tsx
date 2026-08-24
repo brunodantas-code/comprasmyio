@@ -658,13 +658,13 @@ export function HomologateDialog({
   function changeSize(n: number) {
     setBoxSize(n);
     setUnits(Array.from({ length: n }, (_, i) => units[i] ?? ""));
-    setBoxQr(n > 1 ? genBoxQr(n) : "");
+    setBoxQr(n > 1 ? genBoxQr(n, existingBoxQrs) : "");
   }
 
   // Quando a lista de QRs de caixa carrega, recalcula o código gerado (sem sobrescrever edição manual)
   useEffect(() => {
     if (boxSize > 1 && (!boxQr.trim() || boxQr.startsWith("https://comprasmyio.lovable.app/caixa-"))) {
-      setBoxQr(genBoxQr(boxSize));
+      setBoxQr(genBoxQr(boxSize, existingBoxQrs));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [existingBoxQrs]);
@@ -772,7 +772,7 @@ export function HomologateDialog({
       if (remainingAfter > 0) {
         // Mantém a tela aberta para liberar mais produtos sem reabrir o diálogo
         setUnits(Array.from({ length: boxSize }, () => ""));
-        setBoxQr(boxSize > 1 ? genBoxQr(boxSize) : "");
+        setBoxQr(boxSize > 1 ? genBoxQr(boxSize, existingBoxQrs) : "");
       } else {
         setOpen(false);
         reset();
