@@ -568,6 +568,11 @@ export function TransitCard() {
     },
   });
 
+  // Reconciliação: garante que os QR codes destes pedidos constem como "transporte" na plataforma externa
+  useEffect(() => {
+    if (orders?.length) reconcileOrdersExternal(orders.map((o) => o.id), { location: "transporte" });
+  }, [orders]);
+
   const deliver = useMutation({
     mutationFn: async (vars: { orderId: string; clientName: string }) => {
       const { error } = await supabase
