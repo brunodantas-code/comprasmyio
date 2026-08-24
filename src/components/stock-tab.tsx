@@ -15,7 +15,7 @@ import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Plus, Library, Trash2, Eraser, ArrowLeftRight, Camera, Upload, ImagePlus } from "lucide-react";
+import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Plus, Library, Trash2, Eraser, ArrowLeftRight, Camera, Upload, ImagePlus, QrCode } from "lucide-react";
 import { QrLinkPicker, type LinkedQr } from "@/components/myio-delivery-qr";
 import {
   AlertDialog,
@@ -1105,15 +1105,29 @@ function StockTableCard({
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-2">
                       {detail ? (
-                        <MaterialDetailDialog
-                          materialId={r.material_id}
-                          name={r.name}
-                          trigger={
-                            <button type="button" className="text-left hover:underline">
-                              {r.name}
-                            </button>
-                          }
-                        />
+                        <>
+                          <MaterialDetailDialog
+                            materialId={r.material_id}
+                            name={r.name}
+                            trigger={
+                              <button type="button" className="text-left hover:underline">
+                                {r.name}
+                              </button>
+                            }
+                          />
+                          <StockQrDialog
+                            stockName={r.name}
+                            trigger={
+                              <button
+                                type="button"
+                                className="text-muted-foreground transition hover:text-foreground"
+                                title="Ver QR Codes homologados"
+                              >
+                                <QrCode className="h-4 w-4" />
+                              </button>
+                            }
+                          />
+                        </>
                       ) : (
                         <StockQrDialog
                           stockName={r.name}
