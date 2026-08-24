@@ -75,9 +75,11 @@ type AvailableBox = {
 
 function BoxPickerDialog({
   materialId,
+  maxSelectable,
   onSelect,
 }: {
   materialId: string;
+  maxSelectable?: number | null;
   onSelect: (box: AvailableBox) => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -141,8 +143,19 @@ function BoxPickerDialog({
                   <Badge variant="outline" className="border-amber-300 bg-amber-100 text-amber-800">
                     Indisponível
                   </Badge>
+                ) : maxSelectable != null && maxSelectable >= 0 && b.free.length > maxSelectable ? (
+                  <Badge variant="outline" className="border-amber-300 bg-amber-100 text-amber-800">
+                    Excede o necessário ({maxSelectable})
+                  </Badge>
                 ) : (
-                  <Button type="button" size="sm" onClick={() => onSelect(b)}>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => {
+                      onSelect(b);
+                      setOpen(false);
+                    }}
+                  >
                     Selecionar
                   </Button>
                 )}
@@ -160,14 +173,27 @@ export function QrLinkPicker({
   onChange,
   required,
   materialId,
+  requiredCount,
 }: {
   value: LinkedQr[];
   onChange: (v: LinkedQr[]) => void;
   required?: boolean;
   materialId?: string | null;
+  /** Quantidade exata de QR codes que devem ser vinculados (1 por produto). */
+  requiredCount?: number;
 }) {
+  const remaining = requiredCount != null ? requiredCount - value.length : null;
+  const complete = remaining === 0;
+
+  const limitMsg = () =>
+    `Quantidade máxima atingida (${requiredCount}). Remova um QR code para trocar.`;
+
   const add = async (code: string) => {
     try {
+      if (complete) {
+        toast.error(limitMsg());
+        return;
+      }
       const resolved = await resolveQrCode(code);
       if (!resolved.length) return;
       const used = await alreadyUsed(resolved.map((r) => r.qr_value));
@@ -175,6 +201,14 @@ export function QrLinkPicker({
       const fresh = resolved.filter((r) => !existing.has(r.qr_value) && !used.has(r.qr_value));
       if (!fresh.length) {
         toast.error("Este QR code já foi vinculado a uma baixa.");
+        return;
+      }
+      if (remaining != null && fresh.length > remaining) {
+        toast.error(
+          fresh.length > 1
+            ? `Esta caixa tem ${fresh.length} produto(s), mas faltam apenas ${remaining}. Vincule QR codes unitários ou ajuste a quantidade.`
+            : limitMsg(),
+        );
         return;
       }
       onChange([...value, ...fresh]);
@@ -187,12 +221,22 @@ export function QrLinkPicker({
   };
 
   const addBox = (box: AvailableBox) => {
+    if (complete) {
+      toast.error(limitMsg());
+      return;
+    }
     const existing = new Set(value.map((v) => v.qr_value));
     const fresh = box.free
       .filter((u) => !existing.has(u.qr_value))
       .map((u) => ({ qr_value: u.qr_value, box_qr: box.box_qr, homologation_unit_id: u.id }));
     if (!fresh.length) {
       toast.error("Esta caixa já foi vinculada a uma baixa.");
+      return;
+    }
+    if (remaining != null && fresh.length > remaining) {
+      toast.error(
+        `Esta caixa tem ${fresh.length} produto(s) disponíveis, mas faltam apenas ${remaining}. Ajuste a quantidade ou vincule unitários.`,
+      );
       return;
     }
     onChange([...value, ...fresh]);
@@ -204,16 +248,50 @@ export function QrLinkPicker({
   return (
     <div className="space-y-2">
       <Label>QR codes vinculados {required ? "(obrigatório)" : "(opcional)"}</Label>
-      <div className="flex flex-wrap gap-2">
-        <ManualQrDialog label="Digitar código" value="" onResult={add} />
-        <GalleryQrButton label="Galeria" onResult={add} />
-        <QrScannerDialog label="Câmera" onResult={add} />
-        {materialId && <BoxPickerDialog materialId={materialId} onSelect={addBox} />}
-      </div>
+      {requiredCount != null && (
+        <p
+          className={`text-xs font-medium ${
+            complete
+              ? "text-emerald-700"
+              : remaining != null && remaining < 0
+                ? "text-red-700"
+                : "text-muted-foreground"
+          }`}
+        >
+          {complete
+            ? "Todos os QR codes vinculados."
+            : remaining != null && remaining < 0
+              ? `Remova ${-remaining} QR code(s) — a quantidade é ${requiredCount}.`
+              : `Vinculados ${value.length} de ${requiredCount} — um QR code por produto.`}
+        </p>
+      )}
+      {!complete && (
+        <div className="flex flex-wrap gap-2">
+          <ManualQrDialog label="Digitar código" value="" onResult={add} />
+          <GalleryQrButton label="Galeria" onResult={add} />
+          <QrScannerDialog label="Câmera" onResult={add} />
+          {materialId && (
+            <BoxPickerDialog materialId={materialId} maxSelectable={remaining} onSelect={addBox} />
+          )}
+        </div>
+      )}
       {value.length > 0 && (
         <div className="space-y-2 rounded-md border p-2">
           <div className="flex flex-wrap items-center gap-2 text-xs">
-            <Badge variant="outline">{value.length} unidade(s)</Badge>
+            <Badge
+              variant="outline"
+              className={
+                requiredCount == null
+                  ? undefined
+                  : complete
+                    ? "border-emerald-300 bg-emerald-100 text-emerald-800"
+                    : remaining != null && remaining < 0
+                      ? "border-red-300 bg-red-100 text-red-800"
+                      : "border-amber-300 bg-amber-100 text-amber-800"
+              }
+            >
+              {requiredCount != null ? `${value.length} de ${requiredCount}` : `${value.length} unidade(s)`}
+            </Badge>
             {boxes.map((b) => (
               <Badge key={b} variant="outline" className="max-w-[220px] gap-1 truncate border-blue-300 bg-blue-100 text-blue-800">
                 <Boxes className="h-3 w-3" /> caixa
