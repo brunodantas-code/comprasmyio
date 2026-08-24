@@ -517,9 +517,12 @@ export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; 
         </TabsContent>
       )}
       {!onlyLocation && (
-        <TabsContent value="qr-check">
-          <QrCheckSection />
-        </TabsContent>
+          <TabsContent value="qr-check">
+            <div className="space-y-4">
+              <ExternalSyncCard />
+              <QrCheckSection />
+            </div>
+          </TabsContent>
       )}
     </Tabs>
   );
