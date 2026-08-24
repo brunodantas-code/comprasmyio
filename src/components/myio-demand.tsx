@@ -76,18 +76,31 @@ function DeliverItemDialog({
               id="deliver-qty"
               type="number"
               min={1}
-              value={qrs.length ? qrs.length : qty}
-              disabled={qrs.length > 0}
-              onChange={(e) => setQty(Math.max(1, Number(e.target.value) || 1))}
+              max={state?.available ?? undefined}
+              value={qty}
+              onChange={(e) =>
+                setQty(
+                  Math.max(
+                    1,
+                    Math.min(Number(e.target.value) || 1, state?.available ?? Number.MAX_SAFE_INTEGER),
+                  ),
+                )
+              }
             />
-            {qrs.length > 0 && (
+            {state?.isManufactured && (
               <p className="text-xs text-muted-foreground">
-                Quantidade definida pelos QR codes vinculados.
+                Vincule exatamente {qty} QR code(s) — um por produto (unitários ou uma caixa).
               </p>
             )}
           </div>
           {state?.isManufactured && (
-            <QrLinkPicker value={qrs} onChange={setQrs} required materialId={state.materialId} />
+            <QrLinkPicker
+              value={qrs}
+              onChange={setQrs}
+              required
+              materialId={state.materialId}
+              requiredCount={qty}
+            />
           )}
           <div className="space-y-2">
             <Label>Foto do material (obrigatória)</Label>
@@ -124,9 +137,9 @@ function DeliverItemDialog({
             Cancelar
           </Button>
           <Button
-            disabled={pending || !file || (!!state?.isManufactured && qrs.length === 0)}
+            disabled={pending || !file || (!!state?.isManufactured && qrs.length !== qty)}
             onClick={() => {
-              if (file) onConfirm(qrs.length ? qrs.length : qty, file, qrs);
+              if (file) onConfirm(qty, file, qrs);
             }}
           >
             {pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
