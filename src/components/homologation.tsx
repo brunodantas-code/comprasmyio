@@ -20,7 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
-import { Camera, CheckCircle2, QrCode, Image as ImageIcon, Keyboard } from "lucide-react";
+import { Camera, CheckCircle2, QrCode, Image as ImageIcon, Keyboard, PackageMinus, PackagePlus } from "lucide-react";
 
 export const BOX_SIZES = [1, 10, 50, 100, 224] as const;
 
