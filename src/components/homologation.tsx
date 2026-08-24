@@ -494,6 +494,9 @@ function AddUnitToBoxDialog({
   const [target, setTarget] = useState<string>("new");
   const [newSize, setNewSize] = useState<number>(10);
   const [newQr, setNewQr] = useState("");
+  const [scanValue, setScanValue] = useState("");
+  const [scanStatus, setScanStatus] = useState<{ type: "full" | "selected" | "notfound" | "other"; msg: string } | null>(null);
+  const [scanning, setScanning] = useState(false);
   const { data: existingBoxQrs } = useBoxQrCodes();
   const add = useAddUnitToBox();
 
