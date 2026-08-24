@@ -233,6 +233,37 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
       }
     }
 
+    // QRs já baixados em pedidos Myio contam como "fora do estoque": a baixa do
+    // pedido já descontou o estoque, então o sync NUNCA deve gerar uma segunda
+    // saída para o mesmo QR (foi o que causou estoque negativo). Cada QR
+    // homologado é descontado uma única vez.
+    const { data: delQrs, error: dqErr } = await supabaseAdmin.from("myio_delivery_qrs").select("qr_value");
+    if (dqErr) throw dqErr;
+    for (const q of delQrs ?? []) {
+      const c = q.qr_value ? extractCodeFromQr(q.qr_value) : null;
+      if (!c || ledgerByCode.has(c)) continue;
+      ledgerByCode.set(c, {
+        type: "saida",
+        movementId: "",
+        responsible: null,
+        materialId: unitByCode.get(c)?.material_id ?? null,
+        at: "",
+      });
+    }
+
+    // Saldo atual por material: trava para o sync nunca criar saída automática
+    // que deixe o estoque negativo.
+    const { data: allMoves, error: amErr } = await supabaseAdmin
+      .from("stock_movements")
+      .select("material_id, quantity, type");
+    if (amErr) throw amErr;
+    const saldoByMaterial = new Map<string, number>();
+    for (const m of allMoves ?? []) {
+      if (!m.material_id) continue;
+      const cur = saldoByMaterial.get(m.material_id) ?? 0;
+      saldoByMaterial.set(m.material_id, m.type === "saida" ? cur - Number(m.quantity) : cur + Number(m.quantity));
+    }
+
     // Saídas com técnico responsável ainda não totalmente movimentadas.
     const { data: dispatchRows, error: dispErr } = await supabaseAdmin
       .from("stock_movements")
@@ -300,6 +331,13 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
 
     /** Baixa automática de 1 unidade que saiu do estoque sem registro. */
     const registerExit = async (code: string, label: string, materialId: string, technician: string | null, reason: string) => {
+      // Trava anti-negativo: se o saldo já está zerado, a divergência é de
+      // rastreio (não de estoque) — registra o problema em vez de descontar.
+      const saldo = saldoByMaterial.get(materialId) ?? 0;
+      if (saldo <= 0) {
+        problems.push(`${code}: saída automática ignorada (estoque já zerado)`);
+        return;
+      }
       const { data: mv, error } = await supabaseAdmin
         .from("stock_movements")
         .insert({ material_id: materialId, quantity: 1, type: "saida", responsible: technician, reason })
@@ -309,6 +347,7 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
         problems.push(`${code}: falha ao dar baixa automática (${error?.message ?? "erro"})`);
         return;
       }
+      saldoByMaterial.set(materialId, saldo - 1);
       await supabaseAdmin.from("stock_movement_qrs").insert({
         movement_id: mv.id,
         qr_value: label,
@@ -330,6 +369,7 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
         problems.push(`${code}: falha ao estornar para o estoque (${error?.message ?? "erro"})`);
         return;
       }
+      saldoByMaterial.set(materialId, (saldoByMaterial.get(materialId) ?? 0) + 1);
       await supabaseAdmin.from("stock_movement_qrs").insert({
         movement_id: mv.id,
         qr_value: label,
@@ -508,7 +548,7 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
             await supabaseAdmin.from("stock_movements").update({ responsible: technician }).eq("id", disp.id);
             disp.technician = technician;
             corrections++;
-          } else if (!disp && ledgerEntry && !ledgerEntry.responsible) {
+          } else if (!disp && ledgerEntry && ledgerEntry.movementId && !ledgerEntry.responsible) {
             await supabaseAdmin.from("stock_movements").update({ responsible: technician }).eq("id", ledgerEntry.movementId);
             ledgerEntry.responsible = technician;
             openDispatchByCode.set(code, { id: ledgerEntry.movementId, materialId, technician, remaining: 1 });

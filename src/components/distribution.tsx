@@ -552,46 +552,92 @@ async function createUnitProductsForOrder(orderId: string, projectId: string | n
   return allLabels;
 }
 
-/** Progresso da entrega: quantos QR codes do pedido já constam no cliente (plataforma externa). */
-function TransitQrProgress({ orderId }: { orderId: string }) {
-  const { data } = useQuery({
+/**
+ * Localização em tempo real dos QR codes do pedido (plataforma externa).
+ * inTransit = QRs que ainda constam como "transporte" (ou sem estado
+ * sincronizado). Conforme os produtos chegam ao cliente, vão para um técnico
+ * ou se perdem, o número em transporte diminui automaticamente.
+ */
+type TransitLocations = {
+  byItem: Record<string, { total: number; inTransit: number }>;
+  total: number;
+  inTransit: number;
+};
+
+function useTransitLocations(orderId: string) {
+  return useQuery({
     queryKey: ["myio-transit-progress", orderId],
     refetchInterval: 60_000,
-    queryFn: async () => {
+    queryFn: async (): Promise<TransitLocations | null> => {
       const { data: dels, error } = await supabase
         .from("myio_item_deliveries")
-        .select("id")
+        .select("id, order_item_id")
         .eq("order_id", orderId);
       if (error) throw error;
-      const ids = (dels ?? []).map((d) => d.id);
-      if (!ids.length) return null;
+      const delList = (dels ?? []) as { id: string; order_item_id: string | null }[];
+      if (!delList.length) return null;
       const { data: qrs, error: qErr } = await supabase
         .from("myio_delivery_qrs")
-        .select("qr_value")
-        .in("delivery_id", ids);
+        .select("delivery_id, qr_value")
+        .in("delivery_id", delList.map((d) => d.id));
       if (qErr) throw qErr;
-      const codes = (qrs ?? []).map((q) => extractQrCode(q.qr_value)).filter((c): c is string => !!c);
-      if (!codes.length) return null;
-      const { data: states, error: sErr } = await supabase
-        .from("external_product_states")
-        .select("code, location")
-        .in("code", codes);
-      if (sErr) throw sErr;
-      const atClient = (states ?? []).filter((s) => s.location === "cliente").length;
-      return { total: codes.length, atClient };
+      if (!qrs?.length) return null;
+      const codes = qrs.map((q) => extractQrCode(q.qr_value)).filter((c): c is string => !!c);
+      const locByCode = new Map<string, string>();
+      if (codes.length) {
+        const { data: states, error: sErr } = await supabase
+          .from("external_product_states")
+          .select("code, location")
+          .in("code", codes);
+        if (sErr) throw sErr;
+        for (const s of states ?? []) locByCode.set(s.code, s.location);
+      }
+      const itemByDelivery = new Map(delList.map((d) => [d.id, d.order_item_id ?? ""]));
+      const byItem: TransitLocations["byItem"] = {};
+      let total = 0;
+      let inTransit = 0;
+      for (const q of qrs) {
+        const itemId = itemByDelivery.get(q.delivery_id) ?? "";
+        const loc = locByCode.get(extractQrCode(q.qr_value) ?? "");
+        const still = !loc || loc === "transporte";
+        (byItem[itemId] ??= { total: 0, inTransit: 0 });
+        byItem[itemId].total++;
+        if (still) byItem[itemId].inTransit++;
+        total++;
+        if (still) inTransit++;
+      }
+      return { byItem, total, inTransit };
     },
   });
-  if (!data) return null;
-  const all = data.atClient >= data.total;
+}
+
+/** Badge do pedido: quantos QR codes ainda estão em transporte. */
+function TransitQrProgress({ orderId }: { orderId: string }) {
+  const { data } = useTransitLocations(orderId);
+  if (!data || !data.total) return null;
+  const noneLeft = data.inTransit === 0;
   return (
     <Badge
       variant="outline"
       className={
-        all ? "border-emerald-300 bg-emerald-100 text-emerald-800" : "border-amber-300 bg-amber-100 text-amber-800"
+        noneLeft ? "border-emerald-300 bg-emerald-100 text-emerald-800" : "border-amber-300 bg-amber-100 text-amber-800"
       }
     >
-      {data.atClient} de {data.total} no cliente
+      {data.inTransit} de {data.total} em transporte
     </Badge>
+  );
+}
+
+/** Quantidade viva do item: diminui conforme os QRs saem do transporte. */
+function TransitQuantityCell({ orderId, itemId, quantity }: { orderId: string; itemId: string; quantity: number }) {
+  const { data } = useTransitLocations(orderId);
+  const item = data?.byItem[itemId];
+  if (!item) return <span className="font-medium">{quantity}</span>;
+  return (
+    <span className="font-medium">
+      {item.inTransit}{" "}
+      <span className="text-xs font-normal text-muted-foreground">de {item.total} em transporte</span>
+    </span>
   );
 }
 
@@ -719,7 +765,9 @@ export function TransitCard() {
                     {o.myio_order_items.map((i) => (
                       <TableRow key={i.id}>
                         <TableCell>{i.product}</TableCell>
-                        <TableCell className="font-medium">{i.quantity}</TableCell>
+                        <TableCell>
+                          <TransitQuantityCell orderId={o.id} itemId={i.id} quantity={i.quantity} />
+                        </TableCell>
                         <TableCell>
                           <ItemDeliveriesDialog
                             orderItemId={i.id}
