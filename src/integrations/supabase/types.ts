@@ -188,6 +188,75 @@ export type Database = {
         }
         Relationships: []
       }
+      damaged_items: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          material_id: string | null
+          photo_url: string | null
+          product: string
+          quantity: number
+          reason: string
+          recovered_at: string | null
+          recovered_by: string | null
+          recovered_to: string | null
+          recovery_notes: string | null
+          source: string
+          source_detail: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          material_id?: string | null
+          photo_url?: string | null
+          product: string
+          quantity?: number
+          reason: string
+          recovered_at?: string | null
+          recovered_by?: string | null
+          recovered_to?: string | null
+          recovery_notes?: string | null
+          source: string
+          source_detail?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          material_id?: string | null
+          photo_url?: string | null
+          product?: string
+          quantity?: number
+          reason?: string
+          recovered_at?: string | null
+          recovered_by?: string | null
+          recovered_to?: string | null
+          recovery_notes?: string | null
+          source?: string
+          source_detail?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "damaged_items_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "material_stock"
+            referencedColumns: ["material_id"]
+          },
+          {
+            foreignKeyName: "damaged_items_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       homologation_units: {
         Row: {
           created_at: string
