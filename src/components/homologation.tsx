@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { Camera, CheckCircle2, Loader2, QrCode, Image as ImageIcon, Keyboard, PackageMinus, PackagePlus, Sparkles } from "lucide-react";
 import { generateExternalQr } from "@/lib/external-products.functions";
 import { pushQrsToExternal } from "@/lib/push-external";
+import { normalizeQrValue } from "@/components/myio-delivery-qr";
 
 export const BOX_SIZES = [1, 10, 50, 100, 224] as const;
 
@@ -527,7 +528,7 @@ function AddUnitToBoxDialog({
 
   /** Procura uma caixa existente pelo QR Code (câmera, galeria ou manual). */
   async function findBoxByQr(qr: string) {
-    const v = qr.trim();
+    const v = normalizeQrValue(qr);
     if (!v || scanning) return;
     setScanValue(v);
     setScanning(true);
@@ -792,7 +793,7 @@ export function HomologateDialog({
 
   const save = useMutation({
     mutationFn: async () => {
-      const filled = units.map((u) => u.trim());
+      const filled = units.map((u) => normalizeQrValue(u));
       if (remaining <= 0) throw new Error("Todos os produtos deste item já foram homologados");
       if (boxSize > remaining) throw new Error(`Restam apenas ${remaining} produto(s) para homologar`);
       if (boxSize > 1 && !boxQr.trim()) throw new Error("Leia o QR Code da caixa");
