@@ -358,8 +358,8 @@ function useAddUnitToBox() {
         if (!newBoxQr) throw new Error("Informe o QR Code da nova caixa");
         // QR da caixa não pode ser repetido no banco
         const [{ data: dupBoxes, error: e1 }, { data: dupUnits, error: e2 }] = await Promise.all([
-          supabase.from("homologations").select("box_qr").eq("box_qr", newBox.qr),
-          supabase.from("homologation_units").select("qr_value").eq("qr_value", newBox.qr),
+          supabase.from("homologations").select("box_qr").eq("box_qr", newBoxQr),
+          supabase.from("homologation_units").select("qr_value").eq("qr_value", newBoxQr),
         ]);
         if (e1) throw e1;
         if (e2) throw e2;
@@ -373,7 +373,7 @@ function useAddUnitToBox() {
             release_id: source.release_id,
             material_id: source.material_id,
             box_size: newBox.size,
-            box_qr: newBox.qr,
+            box_qr: newBoxQr,
             created_by: auth.user?.id ?? null,
           })
           .select("id")

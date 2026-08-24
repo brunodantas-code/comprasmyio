@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { QrScannerDialog, GalleryQrButton, ManualQrDialog } from "@/components/homologation";
 import { EXTERNAL_LOCATION_LABELS, EXTERNAL_STATUS_LABELS } from "@/components/external-sync";
+import { normalizeQrValue } from "@/components/myio-delivery-qr";
 import { MapPin, QrCode, Search, X } from "lucide-react";
 
 const EXT_STAGE: Record<string, string> = {
