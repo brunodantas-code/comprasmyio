@@ -418,15 +418,26 @@ export function HomologateDialog({
       if (stockErr) throw stockErr;
     },
     onSuccess: () => {
-      toast.success("Produtos homologados e adicionados ao estoque");
+      const remainingAfter = remaining - boxSize;
+      toast.success(
+        remainingAfter > 0
+          ? `Liberado! Restam ${remainingAfter} produto(s) — continue homologando nesta tela.`
+          : "Produtos homologados e adicionados ao estoque",
+      );
       qc.invalidateQueries({ queryKey: ["homologations"] });
       qc.invalidateQueries({ queryKey: ["box-qr-codes"] });
       qc.invalidateQueries({ queryKey: ["material-stock"] });
       qc.invalidateQueries({ queryKey: ["stock-movements"] });
       qc.invalidateQueries({ queryKey: ["materials"] });
       qc.invalidateQueries({ queryKey: ["boxes-list"] });
-      setOpen(false);
-      reset();
+      if (remainingAfter > 0) {
+        // Mantém a tela aberta para liberar mais produtos sem reabrir o diálogo
+        setUnits(Array.from({ length: boxSize }, () => ""));
+        setBoxQr(boxSize > 1 ? genBoxQr(boxSize) : "");
+      } else {
+        setOpen(false);
+        reset();
+      }
     },
     onError: (e: Error) => toast.error(e.message),
   });
