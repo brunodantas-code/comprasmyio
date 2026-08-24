@@ -697,8 +697,8 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
           };
           const dest = DEST[location];
           if (dest) {
-            const projectId = location === "cliente" && clientName ? await findProjectForClient(clientName) : null;
-            await clearTechnician(code, dest, projectId);
+            const project = location === "cliente" && clientName ? await findProjectForClient(clientName) : null;
+            await clearTechnician(code, dest, project?.id ?? null);
           }
         }
       };
@@ -751,8 +751,11 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
 
       // Cliente: reflete na aba Cliente (unit_products) se está instalado ou parado,
       // vinculando o nome do cliente e o projeto correspondente, quando existir.
+      // Projeto = Cliente: o nome do projeto encontrado vira também o client_name.
       if (location === "cliente") {
-        const projectId = clientName ? await findProjectForClient(clientName) : null;
+        const project = clientName ? await findProjectForClient(clientName) : null;
+        const projectId = project?.id ?? null;
+        const effectiveClientName = project?.name ?? clientName;
         const target = findUnitRow(code, label, false);
         if (target) {
           await supabaseAdmin
@@ -765,7 +768,7 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
               moved_technician: null,
               move_notes: null,
               move_photo_url: null,
-              client_name: clientName,
+              client_name: effectiveClientName,
               project_id: target.project_id ?? projectId,
             })
             .eq("id", target.id);
@@ -777,7 +780,7 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
             material_id: unit?.material_id ?? null,
             status: status === "instalado" ? "instalado" : "parado",
             installed_at: status === "instalado" ? now : null,
-            client_name: clientName,
+            client_name: effectiveClientName,
             project_id: projectId,
             notes: "Sincronizado da plataforma externa",
           });
