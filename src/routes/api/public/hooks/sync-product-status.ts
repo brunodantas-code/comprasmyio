@@ -40,6 +40,11 @@ type UnitMatch = {
   qr_value: string;
   material_id: string | null;
   material_name: string | null;
+  homologation_id: string | null;
+  release_id: string | null;
+  /** QR da caixa à qual a unidade pertence (null = unitário, fora de caixa). */
+  box_qr: string | null;
+  box_size: number | null;
 };
 
 /** Extrai o código sequencial (ex.: 1_1_1_15) de um QR no formato https://produto.myio.com.br/<codigo>?... — também aceita o código puro. */
@@ -155,18 +160,29 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
     // Unidades homologadas internas, indexadas pelo código extraído do QR.
     const { data: units, error: unitsErr } = await supabaseAdmin
       .from("homologation_units")
-      .select("id, qr_value, homologations(material_id, materials(name))");
+      .select("id, qr_value, homologations(id, release_id, material_id, box_qr, box_size, materials(name))");
     if (unitsErr) throw unitsErr;
     const unitByCode = new Map<string, UnitMatch>();
     for (const u of units ?? []) {
       const code = extractCodeFromQr(u.qr_value);
       if (!code || unitByCode.has(code)) continue;
-      const hom = u.homologations as { material_id: string | null; materials: { name: string } | null } | null;
+      const hom = u.homologations as {
+        id: string;
+        release_id: string | null;
+        material_id: string | null;
+        box_qr: string | null;
+        box_size: number | null;
+        materials: { name: string } | null;
+      } | null;
       unitByCode.set(code, {
         id: u.id,
         qr_value: u.qr_value,
         material_id: hom?.material_id ?? null,
         material_name: hom?.materials?.name ?? null,
+        homologation_id: hom?.id ?? null,
+        release_id: hom?.release_id ?? null,
+        box_qr: hom?.box_qr ?? null,
+        box_size: hom?.box_size ?? null,
       });
     }
 
@@ -197,8 +213,23 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
       if (tail) unitCodesByBoxKey.set(tail, codes);
     }
 
+    // Unidades reportadas DIRETAMENTE como instaladas no cliente saem da caixa:
+    // a caixa deixa de comandar o estado delas nesta execução.
+    const installedDirect = new Set<string>();
+    for (const p of externalProducts) {
+      const raw = (p.code ?? "").trim();
+      if (
+        knownCodes.has(raw) &&
+        (p.location || "").trim().toLowerCase() === "cliente" &&
+        p.status?.trim().toLowerCase() === "instalado"
+      ) {
+        installedDirect.add(raw);
+      }
+    }
+
     // Expande caixas em produtos unitários. Dois passes para garantir que o
-    // estado da CAIXA sempre vence o reporte individual de uma unidade.
+    // estado da CAIXA sempre vence o reporte individual de uma unidade —
+    // exceto unidades instaladas no cliente, que já saíram da caixa.
     const productByCode = new Map<string, ExternalProduct>();
     const direct: ExternalProduct[] = [];
     let ignored = 0;
@@ -222,7 +253,10 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
         if (boxCodes) break;
       }
       if (boxCodes) {
-        for (const c of boxCodes) productByCode.set(c, { ...p, code: c });
+        for (const c of boxCodes) {
+          if (installedDirect.has(c)) continue;
+          productByCode.set(c, { ...p, code: c });
+        }
       } else if (knownCodes.has(raw)) {
         direct.push(p);
       } else {
@@ -656,6 +690,45 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
         }
       };
       await reconcilePosition();
+
+      // Produto INSTALADO no cliente sai da caixa: vira unitário (nova
+      // homologação avulsa) e a caixa fica com um item a menos. Idempotente —
+      // roda em toda sincronização enquanto a unidade constar numa caixa.
+      if (location === "cliente" && status === "instalado" && unit?.box_qr && unit.release_id && unit.material_id) {
+        const { data: newHom, error: homErr } = await supabaseAdmin
+          .from("homologations")
+          .insert({ release_id: unit.release_id, material_id: unit.material_id, box_size: 1, box_qr: null })
+          .select("id")
+          .single();
+        if (homErr) {
+          problems.push(`${code}: falha ao retirar da caixa — ${homErr.message}`);
+        } else {
+          const { error: mvErr } = await supabaseAdmin
+            .from("homologation_units")
+            .update({ homologation_id: newHom.id, position: 1 })
+            .eq("id", unit.id);
+          if (mvErr) {
+            problems.push(`${code}: falha ao retirar da caixa — ${mvErr.message}`);
+          } else {
+            // Caixa que ficou vazia é removida (mesmo comportamento da UI de homologação).
+            const oldHomId = unit.homologation_id;
+            unit.homologation_id = newHom.id;
+            unit.box_qr = null;
+            unit.box_size = 1;
+            corrections++;
+            if (oldHomId) {
+              const { data: left } = await supabaseAdmin
+                .from("homologation_units")
+                .select("id")
+                .eq("homologation_id", oldHomId)
+                .limit(1);
+              if (!left?.length) {
+                await supabaseAdmin.from("homologations").delete().eq("id", oldHomId);
+              }
+            }
+          }
+        }
+      }
 
       if (!hasChanged) {
         if (location !== "cliente") await reconcileExitFromClient();
