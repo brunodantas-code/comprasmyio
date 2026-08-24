@@ -38,6 +38,7 @@ import { MyioDemandCard, ProductionQueueCard } from "@/components/myio-demand";
 import { TechnicianItemsCard } from "@/components/technician-items";
 import { MaterialDetailDialog } from "@/components/material-detail";
 import { DamageItemDialog, DamagedItemsCard } from "@/components/damaged-items";
+import { ExternalSyncCard, ExternalTechnicianCard, ExternalLostCard } from "@/components/external-sync";
 
 
 type StockRow = {
@@ -493,7 +494,10 @@ export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; 
               <StockSection userId={userId} location={loc} canDelete={canDelete} />
             </div>
           ) : loc === "perdido" ? (
-            <LostCard />
+            <div className="space-y-4">
+              <LostCard />
+              <ExternalLostCard />
+            </div>
           ) : loc === "tecnico" ? (
             <TechnicianSection userId={userId} />
           ) : (
@@ -531,7 +535,12 @@ export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; 
 function TechnicianSection({ userId }: { userId: string }) {
   const { data: stock } = useStock();
   const materialNames = Object.fromEntries((stock ?? []).map((r) => [r.material_id, r.name]));
-  return <TechnicianItemsCard userId={userId} materialNames={materialNames} />;
+  return (
+    <div className="space-y-4">
+      <TechnicianItemsCard userId={userId} materialNames={materialNames} />
+      <ExternalTechnicianCard />
+    </div>
+  );
 }
 
 function HomologationSection({ userId, canDelete }: { userId: string; canDelete?: boolean }) {
