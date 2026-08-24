@@ -6,7 +6,16 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { QrScannerDialog, GalleryQrButton, ManualQrDialog } from "@/components/homologation";
+import { EXTERNAL_LOCATION_LABELS, EXTERNAL_STATUS_LABELS } from "@/components/external-sync";
 import { MapPin, QrCode, Search, X } from "lucide-react";
+
+const EXT_STAGE: Record<string, string> = {
+  estoque: "almoxarifado",
+  cliente: "unidade",
+  tecnico: "tecnico",
+  perdido: "perdido",
+  avariado: "avariado",
+};
 
 function fmt(d: string) {
   return new Date(d).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
@@ -41,7 +50,10 @@ function useQrTrace(code: string) {
     queryKey: ["qr-trace", code],
     enabled: !!code,
     queryFn: async () => {
-      const [unitRes, boxRes, unitProdRes, profilesRes, deliveryQrRes, movQrRes] = await Promise.all([
+      const extCode =
+        /produto\.myio\.com\.br\/([^?\s#]+)/i.exec(code)?.[1] ??
+        (!code.includes("/") && code.trim() ? code.trim() : null);
+      const [unitRes, boxRes, unitProdRes, profilesRes, deliveryQrRes, movQrRes, extRes] = await Promise.all([
         supabase
           .from("homologation_units")
           .select(
@@ -78,6 +90,13 @@ function useQrTrace(code: string) {
           )
           .or(`qr_value.eq.${code},box_qr.eq.${code}`)
           .order("created_at", { ascending: true }),
+        extCode
+          ? supabase
+              .from("external_product_states")
+              .select("code, product_type, location, status, technician, last_change_at")
+              .eq("code", extCode)
+              .maybeSingle()
+          : Promise.resolve({ data: null }),
       ]);
 
       const names: Record<string, string> = {};
@@ -339,6 +358,21 @@ function useQrTrace(code: string) {
           events.push({ at: shipment.created_at, title: "Mercadoria perdida", detail: shipment.address, stage: "perdido" });
         }
       }
+      const ext = extRes.data;
+      if (ext) {
+        events.push({
+          at: ext.last_change_at,
+          title: `Plataforma externa — ${EXTERNAL_LOCATION_LABELS[ext.location] ?? ext.location}`,
+          detail: [
+            ext.product_type ? `Tipo: ${ext.product_type}` : "",
+            ext.status ? `Status: ${EXTERNAL_STATUS_LABELS[ext.status] ?? ext.status}` : "",
+            ext.technician ? `Técnico: ${ext.technician}` : "",
+          ]
+            .filter(Boolean)
+            .join(" · "),
+          stage: EXT_STAGE[ext.location],
+        });
+      }
       events.sort((a, b) => +new Date(a.at) - +new Date(b.at));
 
       const STOCK_LABELS: Record<string, string> = {
@@ -378,6 +412,14 @@ function useQrTrace(code: string) {
         stage = materialLocation ?? "almoxarifado";
       }
 
+      if (location === "Não encontrado" && ext) {
+        stage = EXT_STAGE[ext.location] ?? null;
+        location =
+          ext.location === "cliente" && ext.status
+            ? `Cliente — ${EXTERNAL_STATUS_LABELS[ext.status] ?? ext.status}`
+            : (EXTERNAL_LOCATION_LABELS[ext.location] ?? ext.location);
+      }
+
       const lastStaged = [...events].reverse().find((e) => !!e.stage && e.stage !== "homologacao");
       if (lastStaged?.stage && (unitProd?.moved_to || movements.length || techMoves.length)) {
         stage = lastStaged.stage;
@@ -385,7 +427,7 @@ function useQrTrace(code: string) {
       }
 
       return {
-        found: !!hom || !!unitProd || !!delivery || movements.length > 0,
+        found: !!hom || !!unitProd || !!delivery || movements.length > 0 || !!ext,
         isBox: !!boxRes.data,
         materialName,
         stage,
