@@ -49,6 +49,23 @@ function escapeLike(s: string) {
   return s.replace(/[\\%_]/g, (c) => `\\${c}`);
 }
 
+/** Nome do cliente informado pela plataforma externa (campo da API ou parâmetro `nome_cliente` do QR). */
+function extractClientName(p: ExternalProduct): string | null {
+  for (const v of [p.nome_cliente, p.client_name, p.cliente, p.client]) {
+    if (typeof v === "string" && v.trim()) return v.trim();
+  }
+  for (const v of [p.qr, p.qr_value, p.url, p.link]) {
+    if (typeof v !== "string" || !v.includes("nome_cliente=")) continue;
+    try {
+      const n = new URL(v).searchParams.get("nome_cliente");
+      if (n?.trim()) return n.trim();
+    } catch {
+      // URL inválida: ignora
+    }
+  }
+  return null;
+}
+
 /** Destino unit_products.moved_to equivalente ao local externo, quando o produto sai do cliente. */
 const LOCATION_TO_MOVED_TO: Record<string, string> = {
   estoque: "almoxarifado",

@@ -69,7 +69,7 @@ function useQrTrace(code: string) {
         supabase
           .from("unit_products")
           .select(
-            "id, status, installed_at, notes, created_at, material_id, product, moved_to, moved_technician, moved_at, move_notes, move_photo_url, project_id, materials(name), projects(name)",
+            "id, status, installed_at, notes, created_at, material_id, product, moved_to, moved_technician, moved_at, move_notes, move_photo_url, project_id, client_name, materials(name), projects(name)",
           )
           .eq("label", code)
           .maybeSingle(),
@@ -392,7 +392,9 @@ function useQrTrace(code: string) {
       let location = "Não encontrado";
       let stage: string | null = null;
       if (unitProd && !unitProd.moved_to) {
-        location = unitProd.status === "instalado" ? "Cliente — instalado" : "Cliente — parado";
+        location = `Cliente${unitProd.client_name ? ` (${unitProd.client_name})` : ""} — ${
+          unitProd.status === "instalado" ? "instalado" : "parado"
+        }`;
         stage = "unidade";
       } else if (order?.status === "entregue_cliente") {
         location = "Cliente — entregue";
