@@ -544,7 +544,7 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
       // e aparecem nas sub-abas Técnico, Perdido e no Checar QR Code.
     }
 
-    const message = `${products.length} produto(s) consultados, ${changed} com mudança de estado.`;
+    const message = `${products.length} produto(s) consultados, ${changed} com mudança de estado, ${corrections} correção(ões) de posição.`;
     await finish(
       problems.length ? "parcial" : "ok",
       problems.length ? `${message} Erros: ${problems.slice(0, 3).join(" | ")}` : message,
