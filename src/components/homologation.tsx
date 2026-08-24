@@ -332,8 +332,86 @@ function useRemoveUnitFromBox() {
   });
 }
 
+/** Adiciona um produto unitário a uma caixa incompleta ou a uma caixa nova. */
+function useAddUnitToBox() {
+  const invalidate = useInvalidateHomologationData();
+  return useMutation({
+    mutationFn: async ({
+      unit,
+      source,
+      targetHomologationId,
+      newBox,
+    }: {
+      unit: UnitRow;
+      source: HomologationRef;
+      targetHomologationId?: string;
+      newBox?: { size: number; qr: string };
+    }) => {
+      let homologationId = targetHomologationId;
+      if (!homologationId) {
+        if (!newBox) throw new Error("Selecione a caixa de destino");
+        if (!newBox.qr) throw new Error("Informe o QR Code da nova caixa");
+        // QR da caixa não pode ser repetido no banco
+        const [{ data: dupBoxes, error: e1 }, { data: dupUnits, error: e2 }] = await Promise.all([
+          supabase.from("homologations").select("box_qr").eq("box_qr", newBox.qr),
+          supabase.from("homologation_units").select("qr_value").eq("qr_value", newBox.qr),
+        ]);
+        if (e1) throw e1;
+        if (e2) throw e2;
+        if ((dupBoxes?.length ?? 0) > 0 || (dupUnits?.length ?? 0) > 0) {
+          throw new Error("QR Code da caixa já cadastrado no banco");
+        }
+        const { data: auth } = await supabase.auth.getUser();
+        const { data: hom, error } = await supabase
+          .from("homologations")
+          .insert({
+            release_id: source.release_id,
+            material_id: source.material_id,
+            box_size: newBox.size,
+            box_qr: newBox.qr,
+            created_by: auth.user?.id ?? null,
+          })
+          .select("id")
+          .single();
+        if (error) throw error;
+        homologationId = hom.id;
+      }
+      const { data: last, error: posErr } = await supabase
+        .from("homologation_units")
+        .select("position")
+        .eq("homologation_id", homologationId)
+        .order("position", { ascending: false })
+        .limit(1);
+      if (posErr) throw posErr;
+      await moveUnitTo(unit.id, homologationId, (last?.[0]?.position ?? 0) + 1);
+      // Se a homologação de origem ficou vazia, tenta removê-la (sem falhar caso não permitido)
+      const { data: left } = await supabase
+        .from("homologation_units")
+        .select("id")
+        .eq("homologation_id", source.id)
+        .limit(1);
+      if (!left?.length) {
+        await supabase.from("homologations").delete().eq("id", source.id);
+      }
+    },
+    onSuccess: () => {
+      toast.success("Produto adicionado à caixa.");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
 /** Card de um produto homologado; quando está numa caixa, pode ser arrastado para fora ou removido pelo botão. */
-function UnitQrCard({ unit, box }: { unit: UnitRow; box?: HomologationRef }) {
+function UnitQrCard({
+  unit,
+  box,
+  extraAction,
+}: {
+  unit: UnitRow;
+  box?: HomologationRef;
+  extraAction?: React.ReactNode;
+}) {
   const remove = useRemoveUnitFromBox();
   return (
     <div
@@ -359,6 +437,7 @@ function UnitQrCard({ unit, box }: { unit: UnitRow; box?: HomologationRef }) {
           <PackageMinus className="mr-1 h-3 w-3" /> Tirar da caixa
         </Button>
       )}
+      {extraAction}
     </div>
   );
 }
