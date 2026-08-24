@@ -45,11 +45,13 @@ type Release = {
   notes: string | null;
 };
 
-function useQrTrace(code: string) {
+function useQrTrace(rawCode: string) {
   return useQuery({
-    queryKey: ["qr-trace", code],
-    enabled: !!code,
+    queryKey: ["qr-trace", rawCode],
+    enabled: !!rawCode,
     queryFn: async () => {
+      // Links podem vir com parâmetros (?...) ou âncoras (#...) — só o código importa
+      const code = normalizeQrValue(rawCode);
       const extCode =
         /produto\.myio\.com\.br\/([^?\s#]+)/i.exec(code)?.[1] ??
         (!code.includes("/") && code.trim() ? code.trim() : null);

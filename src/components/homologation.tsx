@@ -354,7 +354,8 @@ function useAddUnitToBox() {
       let homologationId = targetHomologationId;
       if (!homologationId) {
         if (!newBox) throw new Error("Selecione a caixa de destino");
-        if (!newBox.qr) throw new Error("Informe o QR Code da nova caixa");
+        const newBoxQr = newBox.qr ? normalizeQrValue(newBox.qr) : "";
+        if (!newBoxQr) throw new Error("Informe o QR Code da nova caixa");
         // QR da caixa não pode ser repetido no banco
         const [{ data: dupBoxes, error: e1 }, { data: dupUnits, error: e2 }] = await Promise.all([
           supabase.from("homologations").select("box_qr").eq("box_qr", newBox.qr),
