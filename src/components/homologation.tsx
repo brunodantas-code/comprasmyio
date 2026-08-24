@@ -534,9 +534,12 @@ export function HomologateDialog({
             </div>
           )}
 
-          <DialogFooter>
+          <DialogFooter className="gap-2">
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+              Concluir
+            </Button>
             <Button type="submit" disabled={save.isPending || remaining <= 0} className="bg-blue-600 text-white hover:bg-blue-700">
-              <QrCode className="mr-1 h-4 w-4" /> {save.isPending ? "Liberando..." : "Liberar"}
+              <QrCode className="mr-1 h-4 w-4" /> {save.isPending ? "Liberando..." : remaining - boxSize > 0 ? "Liberar e continuar" : "Liberar"}
             </Button>
           </DialogFooter>
         </form>
