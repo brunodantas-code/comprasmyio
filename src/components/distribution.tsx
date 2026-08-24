@@ -717,7 +717,7 @@ export function TransitCard() {
                     size="sm"
                     className="ml-auto"
                     disabled={deliver.isPending}
-                    onClick={() => deliver.mutate({ orderId: o.id, clientName: o.client_name })}
+                    onClick={() => deliver.mutate({ orderId: o.id, clientName: o.projects?.name ?? o.client_name })}
                   >
                     {deliver.isPending ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -853,8 +853,9 @@ function FoundMerchandiseDialog({ orderId, notes }: { orderId: string; notes: st
       };
       const loc = EXTERNAL_LOC[sector];
       if (loc) {
-        const clientName =
-          sector === "unidade" ? (projects?.find((p) => p.id === projectId)?.client_name ?? null) : null;
+        // Projeto = Cliente: a plataforma externa recebe o NOME DO PROJETO.
+        const proj = projects?.find((p) => p.id === projectId);
+        const clientName = sector === "unidade" ? (proj?.name ?? proj?.client_name ?? null) : null;
         pushOrderToExternal(orderId, { location: loc, clientName });
       }
       toast.success("Mercadoria encontrada e movida de setor.");

@@ -230,12 +230,13 @@ function MoveDialog({
       };
       let clientName: string | null = null;
       if (destination === "unidade") {
+        // Projeto = Cliente: a plataforma externa recebe o NOME DO PROJETO.
         const { data: proj } = await supabase
           .from("projects")
-          .select("client_name")
+          .select("name, client_name")
           .eq("id", projectId)
           .maybeSingle();
-        clientName = proj?.client_name ?? null;
+        clientName = proj?.name ?? proj?.client_name ?? null;
       }
       const { data: qrRows } = await supabase
         .from("stock_movement_qrs")
