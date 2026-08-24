@@ -450,23 +450,38 @@ export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; 
   const showHomologacao = !onlyLocation;
   const tabs: string[] = [];
   locations.forEach((loc) => {
+    if (loc === "almoxarifado_geral") return; // renderizada ao final, separada
     tabs.push(loc);
     if (loc === "almoxarifado") tabs.push("distribuicao");
     if (loc === "fabrica" && showHomologacao) tabs.push("homologacao");
+    if (loc === "perdido") tabs.push("avariados");
   });
   if (!onlyLocation) tabs.push("qr-check");
+  if (locations.includes("almoxarifado_geral")) tabs.push("almoxarifado_geral");
   return (
     <Tabs defaultValue={tabs[0]} className="space-y-4">
-      <TabsList>
+      <TabsList className="h-auto flex-wrap justify-start gap-y-1">
         {tabs.map((t) => (
-          <TabsTrigger key={t} value={t} className={t === "qr-check" ? "ml-2" : undefined}>
+          <TabsTrigger
+            key={t}
+            value={t}
+            className={
+              t === "tecnico" || t === "almoxarifado_geral"
+                ? "ml-4"
+                : t === "qr-check"
+                  ? "ml-2"
+                  : undefined
+            }
+          >
             {t === "homologacao"
               ? "Homologação"
               : t === "distribuicao"
                 ? "Expedição"
                 : t === "qr-check"
                   ? "Checar QR Code"
-                  : LOCATION_LABELS[t as StockLocation]}
+                  : t === "avariados"
+                    ? "Itens Avariados"
+                    : LOCATION_LABELS[t as StockLocation]}
           </TabsTrigger>
         ))}
       </TabsList>
