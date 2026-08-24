@@ -405,6 +405,76 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
         target.moved_to = movedTo;
       };
 
+      // Reconciliação de posição: a plataforma externa manda no local real do
+      // produto. Desfalca de onde ele constava (estoque/técnico) sempre que a
+      // posição interna divergir — mesmo que a saída nunca tenha sido dada.
+      const materialId = unit?.material_id ?? prev?.material_id ?? null;
+      const reconcilePosition = async () => {
+        if (!materialId) return;
+        const ledgerEntry = ledgerByCode.get(code);
+        const inStockNow = !ledgerEntry || ledgerEntry.type !== "saida";
+        const LOCATION_PT: Record<string, string> = {
+          cliente: "cliente",
+          tecnico: "técnico",
+          perdido: "perdido",
+          avariado: "avariado",
+        };
+
+        if (location === "estoque") {
+          // Voltou ao estoque sem registro: estorna a saída e limpa o técnico.
+          if (!inStockNow) {
+            await registerReturn(code, label, materialId, "Retorno ao estoque detectado pela plataforma externa");
+          }
+          await clearTechnician(code, "almoxarifado", null);
+          return;
+        }
+
+        // Produto em campo: não pode constar em estoque.
+        if (inStockNow) {
+          const where =
+            location === "cliente"
+              ? `no cliente ${clientName ?? ""}`.trim()
+              : location === "tecnico"
+                ? `com o técnico ${technician ?? ""}`.trim()
+                : `como ${LOCATION_PT[location] ?? location}`;
+          await registerExit(
+            code,
+            label,
+            materialId,
+            location === "tecnico" ? technician : null,
+            `Saída automática — plataforma externa detectou o produto ${where}`,
+          );
+        } else if (location === "tecnico" && technician) {
+          // Já estava baixado: garante que a saída aponta para o técnico certo.
+          const disp = openDispatchByCode.get(code);
+          if (disp && disp.technician.toLowerCase() !== technician.toLowerCase()) {
+            await supabaseAdmin.from("stock_movements").update({ responsible: technician }).eq("id", disp.id);
+            disp.technician = technician;
+            corrections++;
+          } else if (!disp && ledgerEntry && !ledgerEntry.responsible) {
+            await supabaseAdmin.from("stock_movements").update({ responsible: technician }).eq("id", ledgerEntry.movementId);
+            ledgerEntry.responsible = technician;
+            openDispatchByCode.set(code, { id: ledgerEntry.movementId, materialId, technician, remaining: 1 });
+            corrections++;
+          }
+        }
+
+        // Saiu da mão do técnico para outro destino: zera a lista dele.
+        if (location !== "tecnico") {
+          const DEST: Record<string, "unidade" | "perdido" | "avariado"> = {
+            cliente: "unidade",
+            perdido: "perdido",
+            avariado: "avariado",
+          };
+          const dest = DEST[location];
+          if (dest) {
+            const projectId = location === "cliente" && clientName ? await findProjectForClient(clientName) : null;
+            await clearTechnician(code, dest, projectId);
+          }
+        }
+      };
+      await reconcilePosition();
+
       if (!hasChanged) {
         if (location !== "cliente") await reconcileExitFromClient();
         continue;
