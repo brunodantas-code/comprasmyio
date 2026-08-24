@@ -19,16 +19,31 @@ export type LinkedQr = {
   qr_value: string;
   box_qr: string | null;
   homologation_unit_id: string | null;
+  /** Material dono do QR (quando homologado). */
+  material_id?: string | null;
 };
+
+/**
+ * Normaliza um QR code lido: links podem vir acompanhados de parâmetros
+ * (?query) ou âncoras (#hash) — apenas o código em si é relevante.
+ */
+export function normalizeQrValue(code: string): string {
+  let v = code.trim();
+  const hashIdx = v.indexOf("#");
+  if (hashIdx >= 0) v = v.slice(0, hashIdx);
+  const queryIdx = v.indexOf("?");
+  if (queryIdx >= 0) v = v.slice(0, queryIdx);
+  return v.trim();
+}
 
 /** Resolve um código lido: se for QR de caixa, retorna todos os QR unitários dentro dela. */
 export async function resolveQrCode(code: string): Promise<LinkedQr[]> {
-  const value = code.trim();
+  const value = normalizeQrValue(code);
   if (!value) return [];
 
   const { data: box } = await supabase
     .from("homologations")
-    .select("id, box_qr, homologation_units(id, qr_value, position)")
+    .select("id, box_qr, material_id, homologation_units(id, qr_value, position)")
     .eq("box_qr", value)
     .maybeSingle();
 
@@ -37,32 +52,45 @@ export async function resolveQrCode(code: string): Promise<LinkedQr[]> {
       (a, b) => a.position - b.position,
     );
     if (units.length === 0) throw new Error("Esta caixa não possui produtos vinculados.");
-    return units.map((u) => ({ qr_value: u.qr_value, box_qr: value, homologation_unit_id: u.id }));
+    return units.map((u) => ({
+      qr_value: u.qr_value,
+      box_qr: value,
+      homologation_unit_id: u.id,
+      material_id: box.material_id as string,
+    }));
   }
 
   const { data: unit } = await supabase
     .from("homologation_units")
-    .select("id, qr_value, homologations(box_qr, box_size)")
+    .select("id, qr_value, homologations(box_qr, box_size, material_id)")
     .eq("qr_value", value)
     .maybeSingle();
 
   if (unit) {
-    const hom = unit.homologations as { box_qr: string | null; box_size: number } | null;
+    const hom = unit.homologations as { box_qr: string | null; box_size: number; material_id: string } | null;
     return [
       {
         qr_value: unit.qr_value,
         box_qr: hom && hom.box_size > 1 ? hom.box_qr : null,
         homologation_unit_id: unit.id,
+        material_id: hom?.material_id ?? null,
       },
     ];
   }
 
-  return [{ qr_value: value, box_qr: null, homologation_unit_id: null }];
+  return [{ qr_value: value, box_qr: null, homologation_unit_id: null, material_id: null }];
 }
 
+/** QR codes que já saíram do estoque (baixa de pedido ou movimentação de estoque). */
 async function alreadyUsed(values: string[]) {
-  const { data } = await supabase.from("myio_delivery_qrs").select("qr_value").in("qr_value", values);
-  return new Set((data ?? []).map((r) => r.qr_value));
+  const [{ data: deliveries }, { data: movements }] = await Promise.all([
+    supabase.from("myio_delivery_qrs").select("qr_value").in("qr_value", values),
+    supabase.from("stock_movement_qrs").select("qr_value").in("qr_value", values),
+  ]);
+  return new Set([
+    ...(deliveries ?? []).map((r) => r.qr_value),
+    ...(movements ?? []).map((r) => r.qr_value),
+  ]);
 }
 
 type AvailableBox = {
@@ -174,6 +202,7 @@ export function QrLinkPicker({
   required,
   materialId,
   requiredCount,
+  stockOnly,
 }: {
   value: LinkedQr[];
   onChange: (v: LinkedQr[]) => void;
@@ -181,6 +210,12 @@ export function QrLinkPicker({
   materialId?: string | null;
   /** Quantidade exata de QR codes que devem ser vinculados (1 por produto). */
   requiredCount?: number;
+  /**
+   * Quando true, só aceita QR codes que façam parte do estoque:
+   * precisam estar homologados (cadastrados) e ainda não terem saído em
+   * nenhuma baixa/movimentação. Códigos "inventados" são rejeitados.
+   */
+  stockOnly?: boolean;
 }) {
   const remaining = requiredCount != null ? requiredCount - value.length : null;
   const complete = remaining === 0;
@@ -196,11 +231,31 @@ export function QrLinkPicker({
       }
       const resolved = await resolveQrCode(code);
       if (!resolved.length) return;
+      if (stockOnly) {
+        const notInStock = resolved.filter((r) => !r.homologation_unit_id);
+        if (notInStock.length) {
+          toast.error(
+            "QR code não encontrado no estoque. Só é permitido vincular QR codes homologados que constem no estoque.",
+          );
+          return;
+        }
+        if (materialId) {
+          const wrongMaterial = resolved.filter((r) => r.material_id && r.material_id !== materialId);
+          if (wrongMaterial.length) {
+            toast.error("Este QR code pertence a outro produto — vincule apenas QR codes deste material.");
+            return;
+          }
+        }
+      }
       const used = await alreadyUsed(resolved.map((r) => r.qr_value));
       const existing = new Set(value.map((v) => v.qr_value));
       const fresh = resolved.filter((r) => !existing.has(r.qr_value) && !used.has(r.qr_value));
       if (!fresh.length) {
-        toast.error("Este QR code já foi vinculado a uma baixa.");
+        toast.error(
+          stockOnly
+            ? "Este QR code já saiu do estoque (vinculado a outra baixa/movimentação)."
+            : "Este QR code já foi vinculado a uma baixa.",
+        );
         return;
       }
       if (remaining != null && fresh.length > remaining) {

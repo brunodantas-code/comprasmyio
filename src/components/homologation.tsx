@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { Camera, CheckCircle2, Loader2, QrCode, Image as ImageIcon, Keyboard, PackageMinus, PackagePlus, Sparkles } from "lucide-react";
 import { generateExternalQr } from "@/lib/external-products.functions";
 import { pushQrsToExternal } from "@/lib/push-external";
+import { normalizeQrValue } from "@/components/myio-delivery-qr";
 
 export const BOX_SIZES = [1, 10, 50, 100, 224] as const;
 
@@ -353,11 +354,12 @@ function useAddUnitToBox() {
       let homologationId = targetHomologationId;
       if (!homologationId) {
         if (!newBox) throw new Error("Selecione a caixa de destino");
-        if (!newBox.qr) throw new Error("Informe o QR Code da nova caixa");
+        const newBoxQr = newBox.qr ? normalizeQrValue(newBox.qr) : "";
+        if (!newBoxQr) throw new Error("Informe o QR Code da nova caixa");
         // QR da caixa não pode ser repetido no banco
         const [{ data: dupBoxes, error: e1 }, { data: dupUnits, error: e2 }] = await Promise.all([
-          supabase.from("homologations").select("box_qr").eq("box_qr", newBox.qr),
-          supabase.from("homologation_units").select("qr_value").eq("qr_value", newBox.qr),
+          supabase.from("homologations").select("box_qr").eq("box_qr", newBoxQr),
+          supabase.from("homologation_units").select("qr_value").eq("qr_value", newBoxQr),
         ]);
         if (e1) throw e1;
         if (e2) throw e2;
@@ -371,7 +373,7 @@ function useAddUnitToBox() {
             release_id: source.release_id,
             material_id: source.material_id,
             box_size: newBox.size,
-            box_qr: newBox.qr,
+            box_qr: newBoxQr,
             created_by: auth.user?.id ?? null,
           })
           .select("id")
@@ -527,7 +529,7 @@ function AddUnitToBoxDialog({
 
   /** Procura uma caixa existente pelo QR Code (câmera, galeria ou manual). */
   async function findBoxByQr(qr: string) {
-    const v = qr.trim();
+    const v = normalizeQrValue(qr);
     if (!v || scanning) return;
     setScanValue(v);
     setScanning(true);
@@ -792,17 +794,17 @@ export function HomologateDialog({
 
   const save = useMutation({
     mutationFn: async () => {
-      const filled = units.map((u) => u.trim());
+      const filled = units.map((u) => normalizeQrValue(u));
       if (remaining <= 0) throw new Error("Todos os produtos deste item já foram homologados");
       if (boxSize > remaining) throw new Error(`Restam apenas ${remaining} produto(s) para homologar`);
-      if (boxSize > 1 && !boxQr.trim()) throw new Error("Leia o QR Code da caixa");
+      if (boxSize > 1 && !normalizeQrValue(boxQr)) throw new Error("Leia o QR Code da caixa");
       if (filled.some((u) => !u)) throw new Error("Preencha o QR Code de todos os produtos unitários");
       const uniq = new Set(filled);
       if (uniq.size !== filled.length) throw new Error("Existem QR Codes repetidos");
       if (!responsible) throw new Error("Selecione o responsável");
 
       // Não pode existir QR Code repetido no banco (caixas ou unidades já homologadas)
-      const allQrs = boxSize > 1 ? [boxQr.trim(), ...filled] : filled;
+      const allQrs = boxSize > 1 ? [normalizeQrValue(boxQr), ...filled] : filled;
       const [{ data: dupUnits, error: dupUnitsErr }, { data: dupBoxes, error: dupBoxesErr }] = await Promise.all([
         supabase.from("homologation_units").select("qr_value").in("qr_value", allQrs),
         supabase.from("homologations").select("box_qr").in("box_qr", allQrs),
@@ -823,7 +825,7 @@ export function HomologateDialog({
           release_id: releaseId,
           material_id: materialId,
           box_size: boxSize,
-          box_qr: boxSize > 1 ? boxQr.trim() : null,
+          box_qr: boxSize > 1 ? normalizeQrValue(boxQr) : null,
           responsible_id: responsible,
           notes: notes.trim() || null,
           created_by: userId,

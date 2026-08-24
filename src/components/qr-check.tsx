@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { QrScannerDialog, GalleryQrButton, ManualQrDialog } from "@/components/homologation";
 import { EXTERNAL_LOCATION_LABELS, EXTERNAL_STATUS_LABELS } from "@/components/external-sync";
+import { normalizeQrValue } from "@/components/myio-delivery-qr";
 import { MapPin, QrCode, Search, X } from "lucide-react";
 
 const EXT_STAGE: Record<string, string> = {
@@ -45,11 +46,13 @@ type Release = {
   notes: string | null;
 };
 
-function useQrTrace(code: string) {
+function useQrTrace(rawCode: string) {
   return useQuery({
-    queryKey: ["qr-trace", code],
-    enabled: !!code,
+    queryKey: ["qr-trace", rawCode],
+    enabled: !!rawCode,
     queryFn: async () => {
+      // Links podem vir com parâmetros (?...) ou âncoras (#...) — só o código importa
+      const code = normalizeQrValue(rawCode);
       const extCode =
         /produto\.myio\.com\.br\/([^?\s#]+)/i.exec(code)?.[1] ??
         (!code.includes("/") && code.trim() ? code.trim() : null);
