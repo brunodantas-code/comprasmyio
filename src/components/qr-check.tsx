@@ -217,6 +217,7 @@ function useQrTrace(code: string) {
         unitProd?.product ??
         movements[0]?.materials?.name ??
         delivery?.product ??
+        extRes.data?.product_type ??
         null;
       const materialLocation =
         ((hom?.["materials"] as { location?: string } | null)?.location as string | undefined) ??
