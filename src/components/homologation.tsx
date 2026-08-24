@@ -255,6 +255,32 @@ export function useHomologations(releaseId?: string) {
   });
 }
 
+/* ---------------- QR de caixa (geração automática) ---------------- */
+
+export function useBoxQrCodes() {
+  return useQuery({
+    queryKey: ["box-qr-codes"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("homologations").select("box_qr").not("box_qr", "is", null);
+      if (error) throw error;
+      return (data ?? []).map((d) => d.box_qr as string);
+    },
+  });
+}
+
+/** QR padrão da caixa: link do site / modelo da caixa / código incremental a partir de 1. */
+export function genBoxQr(size: number, existingBoxQrs: string[] | undefined) {
+  const prefix = `https://comprasmyio.lovable.app/caixa-${size}/`;
+  let max = 0;
+  for (const qr of existingBoxQrs ?? []) {
+    if (qr.startsWith(prefix)) {
+      const n = parseInt(qr.slice(prefix.length), 10);
+      if (!Number.isNaN(n) && n > max) max = n;
+    }
+  }
+  return `${prefix}${max + 1}`;
+}
+
 /* ---------------- Movimentação de produtos entre caixas ---------------- */
 
 type UnitRow = { id: string; position: number; qr_value: string };
@@ -306,8 +332,86 @@ function useRemoveUnitFromBox() {
   });
 }
 
+/** Adiciona um produto unitário a uma caixa incompleta ou a uma caixa nova. */
+function useAddUnitToBox() {
+  const invalidate = useInvalidateHomologationData();
+  return useMutation({
+    mutationFn: async ({
+      unit,
+      source,
+      targetHomologationId,
+      newBox,
+    }: {
+      unit: UnitRow;
+      source: HomologationRef;
+      targetHomologationId?: string;
+      newBox?: { size: number; qr: string };
+    }) => {
+      let homologationId = targetHomologationId;
+      if (!homologationId) {
+        if (!newBox) throw new Error("Selecione a caixa de destino");
+        if (!newBox.qr) throw new Error("Informe o QR Code da nova caixa");
+        // QR da caixa não pode ser repetido no banco
+        const [{ data: dupBoxes, error: e1 }, { data: dupUnits, error: e2 }] = await Promise.all([
+          supabase.from("homologations").select("box_qr").eq("box_qr", newBox.qr),
+          supabase.from("homologation_units").select("qr_value").eq("qr_value", newBox.qr),
+        ]);
+        if (e1) throw e1;
+        if (e2) throw e2;
+        if ((dupBoxes?.length ?? 0) > 0 || (dupUnits?.length ?? 0) > 0) {
+          throw new Error("QR Code da caixa já cadastrado no banco");
+        }
+        const { data: auth } = await supabase.auth.getUser();
+        const { data: hom, error } = await supabase
+          .from("homologations")
+          .insert({
+            release_id: source.release_id,
+            material_id: source.material_id,
+            box_size: newBox.size,
+            box_qr: newBox.qr,
+            created_by: auth.user?.id ?? null,
+          })
+          .select("id")
+          .single();
+        if (error) throw error;
+        homologationId = hom.id;
+      }
+      const { data: last, error: posErr } = await supabase
+        .from("homologation_units")
+        .select("position")
+        .eq("homologation_id", homologationId)
+        .order("position", { ascending: false })
+        .limit(1);
+      if (posErr) throw posErr;
+      await moveUnitTo(unit.id, homologationId, (last?.[0]?.position ?? 0) + 1);
+      // Se a homologação de origem ficou vazia, tenta removê-la (sem falhar caso não permitido)
+      const { data: left } = await supabase
+        .from("homologation_units")
+        .select("id")
+        .eq("homologation_id", source.id)
+        .limit(1);
+      if (!left?.length) {
+        await supabase.from("homologations").delete().eq("id", source.id);
+      }
+    },
+    onSuccess: () => {
+      toast.success("Produto adicionado à caixa.");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
 /** Card de um produto homologado; quando está numa caixa, pode ser arrastado para fora ou removido pelo botão. */
-function UnitQrCard({ unit, box }: { unit: UnitRow; box?: HomologationRef }) {
+function UnitQrCard({
+  unit,
+  box,
+  extraAction,
+}: {
+  unit: UnitRow;
+  box?: HomologationRef;
+  extraAction?: React.ReactNode;
+}) {
   const remove = useRemoveUnitFromBox();
   return (
     <div
@@ -333,6 +437,7 @@ function UnitQrCard({ unit, box }: { unit: UnitRow; box?: HomologationRef }) {
           <PackageMinus className="mr-1 h-3 w-3" /> Tirar da caixa
         </Button>
       )}
+      {extraAction}
     </div>
   );
 }
@@ -372,6 +477,142 @@ function UnitaryDropZone() {
   );
 }
 
+/** Diálogo para colocar um produto unitário dentro de uma caixa incompleta ou de uma caixa nova. */
+function AddUnitToBoxDialog({
+  unit,
+  source,
+  materialId,
+  materialName,
+}: {
+  unit: UnitRow;
+  source: HomologationRef;
+  materialId: string;
+  materialName: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [target, setTarget] = useState<string>("new");
+  const [newSize, setNewSize] = useState<number>(10);
+  const [newQr, setNewQr] = useState("");
+  const { data: existingBoxQrs } = useBoxQrCodes();
+  const add = useAddUnitToBox();
+
+  const { data: boxes, isLoading } = useQuery({
+    queryKey: ["incomplete-boxes", materialId],
+    enabled: open,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("homologations")
+        .select("id, box_size, box_qr, created_at, homologation_units(id)")
+        .eq("material_id", materialId)
+        .gt("box_size", 1)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []).filter((b) => (b.homologation_units?.length ?? 0) < b.box_size);
+    },
+  });
+
+  // Preenche o QR da nova caixa automaticamente (sem sobrescrever edição manual)
+  useEffect(() => {
+    if (open && (!newQr.trim() || newQr.startsWith("https://comprasmyio.lovable.app/caixa-"))) {
+      setNewQr(genBoxQr(newSize, existingBoxQrs));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, newSize, existingBoxQrs]);
+
+  function submit() {
+    if (target === "new") {
+      add.mutate(
+        { unit, source, newBox: { size: newSize, qr: newQr.trim() } },
+        { onSuccess: () => setOpen(false) },
+      );
+    } else {
+      add.mutate({ unit, source, targetHomologationId: target }, { onSuccess: () => setOpen(false) });
+    }
+  }
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        setOpen(o);
+        if (o) {
+          setTarget("new");
+          setNewSize(10);
+          setNewQr("");
+        }
+      }}
+    >
+      <DialogTrigger asChild>
+        <Button type="button" size="sm" variant="outline">
+          <PackagePlus className="mr-1 h-3 w-3" /> Adicionar à caixa
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[88vh] max-w-lg overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Adicionar à caixa — {materialName}</DialogTitle>
+          <DialogDescription>
+            Escolha uma caixa incompleta deste produto ou crie uma caixa nova (de qualquer tipo) para este produto
+            unitário.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label>Caixa de destino</Label>
+            <Select value={target} onValueChange={setTarget}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="new">Criar nova caixa</SelectItem>
+                {(boxes ?? []).map((b) => (
+                  <SelectItem key={b.id} value={b.id}>
+                    Caixa de {b.box_size} — {b.homologation_units?.length ?? 0}/{b.box_size} produtos
+                    {b.box_qr ? ` · ${b.box_qr}` : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {isLoading && <p className="text-xs text-muted-foreground">Buscando caixas incompletas...</p>}
+            {!isLoading && !(boxes ?? []).length && (
+              <p className="text-xs text-muted-foreground">Nenhuma caixa incompleta deste produto — crie uma nova.</p>
+            )}
+          </div>
+
+          {target === "new" && (
+            <>
+              <div className="space-y-2">
+                <Label>Tipo da nova caixa</Label>
+                <Select value={String(newSize)} onValueChange={(v) => setNewSize(Number(v))}>
+                  <SelectTrigger className="w-full sm:w-[220px]"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {BOX_SIZES.filter((s) => s > 1).map((s) => (
+                      <SelectItem key={s} value={String(s)}>Caixa de {s}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1 rounded border p-3">
+                <QrField label={`QR Code da Caixa de ${newSize}:`} value={newQr} onChange={setNewQr} />
+                <p className="text-xs text-muted-foreground">
+                  Gerado automaticamente (site / modelo da caixa / código sequencial) — edite manualmente se necessário.
+                </p>
+              </div>
+            </>
+          )}
+        </div>
+
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            Cancelar
+          </Button>
+          <Button type="button" disabled={add.isPending} onClick={submit}>
+            {add.isPending ? "Adicionando..." : "Confirmar"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 /* ---------------- Homologate dialog ---------------- */
 
 export function HomologateDialog({
@@ -402,26 +643,7 @@ export function HomologateDialog({
   const [notes, setNotes] = useState("");
 
   // QR da caixa é gerado automaticamente: link do site / modelo da caixa / código incremental (a partir de 1)
-  const { data: existingBoxQrs } = useQuery({
-    queryKey: ["box-qr-codes"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("homologations").select("box_qr").not("box_qr", "is", null);
-      if (error) throw error;
-      return (data ?? []).map((d) => d.box_qr as string);
-    },
-  });
-
-  function genBoxQr(size: number) {
-    const prefix = `https://comprasmyio.lovable.app/caixa-${size}/`;
-    let max = 0;
-    for (const qr of existingBoxQrs ?? []) {
-      if (qr.startsWith(prefix)) {
-        const n = parseInt(qr.slice(prefix.length), 10);
-        if (!Number.isNaN(n) && n > max) max = n;
-      }
-    }
-    return `${prefix}${max + 1}`;
-  }
+  const { data: existingBoxQrs } = useBoxQrCodes();
 
   const { data: profiles } = useQuery({
     queryKey: ["profiles-list"],
@@ -436,13 +658,13 @@ export function HomologateDialog({
   function changeSize(n: number) {
     setBoxSize(n);
     setUnits(Array.from({ length: n }, (_, i) => units[i] ?? ""));
-    setBoxQr(n > 1 ? genBoxQr(n) : "");
+    setBoxQr(n > 1 ? genBoxQr(n, existingBoxQrs) : "");
   }
 
   // Quando a lista de QRs de caixa carrega, recalcula o código gerado (sem sobrescrever edição manual)
   useEffect(() => {
     if (boxSize > 1 && (!boxQr.trim() || boxQr.startsWith("https://comprasmyio.lovable.app/caixa-"))) {
-      setBoxQr(genBoxQr(boxSize));
+      setBoxQr(genBoxQr(boxSize, existingBoxQrs));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [existingBoxQrs]);
@@ -550,7 +772,7 @@ export function HomologateDialog({
       if (remainingAfter > 0) {
         // Mantém a tela aberta para liberar mais produtos sem reabrir o diálogo
         setUnits(Array.from({ length: boxSize }, () => ""));
-        setBoxQr(boxSize > 1 ? genBoxQr(boxSize) : "");
+        setBoxQr(boxSize > 1 ? genBoxQr(boxSize, existingBoxQrs) : "");
       } else {
         setOpen(false);
         reset();
@@ -638,10 +860,10 @@ export function HomologateDialog({
             </div>
           </div>
 
-          {!!done.length && (
+          {!!done.filter((h) => (h.homologation_units?.length ?? 0) > 0).length && (
             <div className="space-y-1 rounded border p-3 text-sm">
               <p className="font-medium">Homologações anteriores deste produto</p>
-              {done.map((h) => (
+              {done.filter((h) => (h.homologation_units?.length ?? 0) > 0).map((h) => (
                 <div key={h.id} className="flex items-center gap-2 text-muted-foreground">
                   <CheckCircle2 className="h-4 w-4 text-green-600" />
                   {new Date(h.created_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })} ·
@@ -699,10 +921,14 @@ export function StockQrDialog({ stockName, trigger }: { stockName: string; trigg
     queryFn: async () => {
       const { data, error } = await supabase
         .from("homologations")
-        .select("id, box_size, box_qr, notes, created_at, materials(name), homologation_units(position, qr_value)")
+        .select("id, release_id, material_id, box_size, box_qr, notes, created_at, materials(name), homologation_units(id, position, qr_value)")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return (data ?? []).filter((h) => (h.materials as { name: string } | null)?.name === baseName);
+      return (data ?? []).filter(
+        (h) =>
+          (h.materials as { name: string } | null)?.name === baseName &&
+          (h.homologation_units?.length ?? 0) > 0,
+      );
     },
   });
 
@@ -753,13 +979,25 @@ export function StockQrDialog({ stockName, trigger }: { stockName: string; trigg
                       <p className="text-sm font-medium">Vista explodida</p>
                       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-5">
                         {units.map((u) => (
-                          <div key={u.position} className="flex flex-col items-center gap-1 rounded border p-2">
-                            <QrImage value={u.qr_value} size={96} />
-                            <span className="text-xs font-medium">#{u.position}</span>
-                            <span className="w-full break-all text-center text-[10px] text-muted-foreground">
-                              {u.qr_value}
-                            </span>
-                          </div>
+                          <UnitQrCard
+                            key={u.id}
+                            unit={{ id: u.id, position: u.position, qr_value: u.qr_value }}
+                            box={
+                              h.box_size > 1
+                                ? { id: h.id, release_id: h.release_id, material_id: h.material_id }
+                                : undefined
+                            }
+                            extraAction={
+                              h.box_size === 1 ? (
+                                <AddUnitToBoxDialog
+                                  unit={{ id: u.id, position: u.position, qr_value: u.qr_value }}
+                                  source={{ id: h.id, release_id: h.release_id, material_id: h.material_id }}
+                                  materialId={h.material_id}
+                                  materialName={baseName}
+                                />
+                              ) : undefined
+                            }
+                          />
                         ))}
                       </div>
                       {h.notes && <p className="text-sm text-muted-foreground">{h.notes}</p>}
@@ -768,6 +1006,7 @@ export function StockQrDialog({ stockName, trigger }: { stockName: string; trigg
                 </div>
               );
             })}
+            <UnitaryDropZone />
           </div>
         )}
       </DialogContent>
@@ -779,12 +1018,14 @@ export function StockQrDialog({ stockName, trigger }: { stockName: string; trigg
 
 type BoxRow = {
   id: string;
+  release_id: string;
+  material_id: string;
   box_size: number;
   box_qr: string | null;
   notes: string | null;
   created_at: string;
   materials: { name: string } | null;
-  homologation_units: { position: number; qr_value: string }[];
+  homologation_units: { id: string; position: number; qr_value: string }[];
 };
 
 export function BoxesCard() {
@@ -794,7 +1035,7 @@ export function BoxesCard() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("homologations")
-        .select("id, box_size, box_qr, notes, created_at, materials(name), homologation_units(position, qr_value)")
+        .select("id, release_id, material_id, box_size, box_qr, notes, created_at, materials(name), homologation_units(id, position, qr_value)")
         .gt("box_size", 1)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -905,13 +1146,14 @@ function BoxDetailsDialog({ box, trigger }: { box: BoxRow; trigger: React.ReactN
             <p className="text-sm font-medium">Produtos na caixa ({units.length})</p>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-5">
               {units.map((u) => (
-                <div key={u.position} className="flex flex-col items-center gap-1 rounded border p-2">
-                  <QrImage value={u.qr_value} size={96} />
-                  <span className="text-xs font-medium">#{u.position}</span>
-                  <span className="w-full break-all text-center text-[10px] text-muted-foreground">{u.qr_value}</span>
-                </div>
+                <UnitQrCard
+                  key={u.id}
+                  unit={{ id: u.id, position: u.position, qr_value: u.qr_value }}
+                  box={{ id: box.id, release_id: box.release_id, material_id: box.material_id }}
+                />
               ))}
             </div>
+            <UnitaryDropZone />
             {box.notes && <p className="text-sm text-muted-foreground">{box.notes}</p>}
           </div>
         </div>
