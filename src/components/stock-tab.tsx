@@ -37,6 +37,7 @@ import { QrCheckSection } from "@/components/qr-check";
 import { MyioDemandCard, ProductionQueueCard } from "@/components/myio-demand";
 import { TechnicianItemsCard } from "@/components/technician-items";
 import { MaterialDetailDialog } from "@/components/material-detail";
+import { DamageItemDialog, DamagedItemsCard } from "@/components/damaged-items";
 
 
 type StockRow = {
@@ -50,7 +51,7 @@ type StockRow = {
   last_movement_at: string | null;
 };
 
-type StockLocation = "almoxarifado" | "fabrica" | "unidade" | "tecnico" | "transito" | "perdido";
+type StockLocation = "almoxarifado" | "fabrica" | "unidade" | "tecnico" | "transito" | "perdido" | "almoxarifado_geral";
 
 const LOCATION_LABELS: Record<StockLocation, string> = {
   fabrica: "Fábrica",
@@ -59,6 +60,7 @@ const LOCATION_LABELS: Record<StockLocation, string> = {
   unidade: "Cliente",
   tecnico: "Técnico",
   perdido: "Perdido",
+  almoxarifado_geral: "Almoxarifado",
 };
 
 type MovementType = "entrada" | "saida" | "ajuste";
