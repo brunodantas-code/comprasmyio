@@ -18,6 +18,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Camera, ClipboardList, Factory, Loader2, ShoppingCart, Upload, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import { QrLinkPicker, type LinkedQr } from "@/components/myio-delivery-qr";
+import { pushQrsToExternal } from "@/lib/push-external";
 
 const PHOTO_BUCKET = "assembly-photos";
 
@@ -460,6 +461,9 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
           .eq("id", state.order.id);
         if (stErr) throw stErr;
       }
+
+      // Estoque → Expedição: reflete o novo local na plataforma externa
+      pushQrsToExternal(qrs.map((q) => q.qr_value), { location: "expedicao" });
       return { allDone };
     },
     onSuccess: (r) => {

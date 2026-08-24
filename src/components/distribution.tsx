@@ -20,6 +20,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ItemDeliveriesDialog } from "@/components/myio-delivery-qr";
 import { AlertTriangle, CheckCircle2, FileText, Loader2, PackageSearch, Send, Truck, Undo2, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { pushOrderToExternal, pushQrsToExternal } from "@/lib/push-external";
 
 const PROOF_BUCKET = "assembly-photos";
 
@@ -237,7 +238,9 @@ export function DistributionCard() {
         .eq("id", order.id);
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_d, vars) => {
+      // Expedição → Transporte: reflete o novo local na plataforma externa
+      pushOrderToExternal(vars.order.id, { location: "transporte" });
       toast.success("Pedido enviado para Trânsito.");
       setTarget(null);
       queryClient.invalidateQueries({ queryKey: ["myio-distribution"] });
@@ -485,7 +488,7 @@ function LostMerchandiseDialog({ orderId, notes }: { orderId: string; notes: str
   );
 }
 
-async function createUnitProductsForOrder(orderId: string, projectId: string | null, note: string) {
+async function createUnitProductsForOrder(orderId: string, projectId: string | null, note: string): Promise<string[]> {
   const [{ data: order }, { data: items }, { data: mats }, { data: auth }, { data: deliveries }] = await Promise.all([
     supabase.from("myio_orders").select("project_id").eq("id", orderId).maybeSingle(),
     supabase.from("myio_order_items").select("id, product, quantity").eq("order_id", orderId),
@@ -497,12 +500,13 @@ async function createUnitProductsForOrder(orderId: string, projectId: string | n
       .eq("order_id", orderId),
   ]);
   const { data: already } = await supabase.from("unit_products").select("id").eq("order_id", orderId).limit(1);
-  if (already?.length) return;
 
   // Etiquetas (QR) registradas na baixa dos produtos Myio, agrupadas por item do pedido
   const qrsByItem = new Map<string, string[]>();
+  const allLabels: string[] = [];
   for (const d of (deliveries ?? []) as { order_item_id: string | null; myio_delivery_qrs: { qr_value: string; box_qr: string | null; order_item_id: string | null }[] | null }[]) {
     for (const q of d.myio_delivery_qrs ?? []) {
+      allLabels.push(q.qr_value);
       const key = q.order_item_id ?? d.order_item_id ?? "";
       if (!key) continue;
       const list = qrsByItem.get(key) ?? [];
@@ -510,6 +514,7 @@ async function createUnitProductsForOrder(orderId: string, projectId: string | n
       qrsByItem.set(key, list);
     }
   }
+  if (already?.length) return allLabels;
 
   const byName = new Map((mats ?? []).map((m) => [m.name.trim().toLowerCase(), m.id]));
   const rows: Record<string, unknown>[] = [];
@@ -533,6 +538,7 @@ async function createUnitProductsForOrder(orderId: string, projectId: string | n
     const { error } = await supabase.from("unit_products").insert(rows as never);
     if (error) throw error;
   }
+  return allLabels;
 }
 
 export function TransitCard() {
@@ -554,15 +560,18 @@ export function TransitCard() {
   });
 
   const deliver = useMutation({
-    mutationFn: async (orderId: string) => {
+    mutationFn: async (vars: { orderId: string; clientName: string }) => {
       const { error } = await supabase
         .from("myio_orders")
         .update({ status: "entregue_cliente" })
-        .eq("id", orderId);
+        .eq("id", vars.orderId);
       if (error) throw error;
-      await createUnitProductsForOrder(orderId, null, "Entrega ao cliente");
+      const labels = await createUnitProductsForOrder(vars.orderId, null, "Entrega ao cliente");
+      return { labels };
     },
-    onSuccess: () => {
+    onSuccess: (r, vars) => {
+      // Transporte → Cliente: reflete o novo local (e o nome do cliente) na plataforma externa
+      pushQrsToExternal(r.labels, { location: "cliente", clientName: vars.clientName });
       toast.success("Pedido entregue ao cliente.");
       queryClient.invalidateQueries({ queryKey: ["myio-transit"] });
       queryClient.invalidateQueries({ queryKey: ["myio-orders"] });
@@ -601,7 +610,7 @@ export function TransitCard() {
                     size="sm"
                     className="ml-auto"
                     disabled={deliver.isPending}
-                    onClick={() => deliver.mutate(o.id)}
+                    onClick={() => deliver.mutate({ orderId: o.id, clientName: o.client_name })}
                   >
                     {deliver.isPending ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
