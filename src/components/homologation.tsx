@@ -796,14 +796,14 @@ export function HomologateDialog({
       const filled = units.map((u) => normalizeQrValue(u));
       if (remaining <= 0) throw new Error("Todos os produtos deste item já foram homologados");
       if (boxSize > remaining) throw new Error(`Restam apenas ${remaining} produto(s) para homologar`);
-      if (boxSize > 1 && !boxQr.trim()) throw new Error("Leia o QR Code da caixa");
+      if (boxSize > 1 && !normalizeQrValue(boxQr)) throw new Error("Leia o QR Code da caixa");
       if (filled.some((u) => !u)) throw new Error("Preencha o QR Code de todos os produtos unitários");
       const uniq = new Set(filled);
       if (uniq.size !== filled.length) throw new Error("Existem QR Codes repetidos");
       if (!responsible) throw new Error("Selecione o responsável");
 
       // Não pode existir QR Code repetido no banco (caixas ou unidades já homologadas)
-      const allQrs = boxSize > 1 ? [boxQr.trim(), ...filled] : filled;
+      const allQrs = boxSize > 1 ? [normalizeQrValue(boxQr), ...filled] : filled;
       const [{ data: dupUnits, error: dupUnitsErr }, { data: dupBoxes, error: dupBoxesErr }] = await Promise.all([
         supabase.from("homologation_units").select("qr_value").in("qr_value", allQrs),
         supabase.from("homologations").select("box_qr").in("box_qr", allQrs),
@@ -824,7 +824,7 @@ export function HomologateDialog({
           release_id: releaseId,
           material_id: materialId,
           box_size: boxSize,
-          box_qr: boxSize > 1 ? boxQr.trim() : null,
+          box_qr: boxSize > 1 ? normalizeQrValue(boxQr) : null,
           responsible_id: responsible,
           notes: notes.trim() || null,
           created_by: userId,
