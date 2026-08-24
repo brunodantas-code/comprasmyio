@@ -217,6 +217,7 @@ function useQrTrace(code: string) {
         unitProd?.product ??
         movements[0]?.materials?.name ??
         delivery?.product ??
+        extRes.data?.product_type ??
         null;
       const materialLocation =
         ((hom?.["materials"] as { location?: string } | null)?.location as string | undefined) ??
@@ -545,13 +546,15 @@ export function QrCheckSection() {
                 <div className="flex flex-wrap items-center gap-2">
                   {data.materialName && <Badge variant="outline">{data.materialName}</Badge>}
                   {data.stage && <Badge>{STAGE_LABELS[data.stage] ?? data.stage}</Badge>}
-                  <Badge variant="outline">
-                    {data.isBox
-                      ? `QR da caixa de ${data.boxSize}`
-                      : data.boxSize === 1
-                        ? "Produto unitário"
-                        : `Produto ${data.position ?? "?"} de ${data.boxSize} (caixa)`}
-                  </Badge>
+                  {(data.isBox || data.boxSize != null) && (
+                    <Badge variant="outline">
+                      {data.isBox
+                        ? `QR da caixa de ${data.boxSize}`
+                        : data.boxSize === 1
+                          ? "Produto unitário"
+                          : `Produto ${data.position ?? "?"} de ${data.boxSize} (caixa)`}
+                    </Badge>
+                  )}
                   {!data.isBox && data.boxQr && (
                     <Badge variant="outline" className="max-w-[320px] break-all">
                       Caixa: {data.boxQr}
