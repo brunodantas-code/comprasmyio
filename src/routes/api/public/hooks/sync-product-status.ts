@@ -530,7 +530,7 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
       locByCode.set(code, location);
       const status = p.status?.trim().toLowerCase() || null;
       const technician = p.technician?.trim() || null;
-      const clientName = location === "cliente" ? extractClientName(p) : null;
+      const clientName = location === "cliente" ? (extractClientName(p) ?? clientNameByCode.get(code) ?? null) : null;
       const unit = unitByCode.get(code);
       const prev = stateByCode.get(code);
       const hasChanged =
