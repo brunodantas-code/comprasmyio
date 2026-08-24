@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,7 +20,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ItemDeliveriesDialog } from "@/components/myio-delivery-qr";
 import { AlertTriangle, CheckCircle2, FileText, Loader2, PackageSearch, Send, Truck, Undo2, Upload } from "lucide-react";
 import { toast } from "sonner";
-import { pushOrderToExternal, pushQrsToExternal } from "@/lib/push-external";
+import { pushOrderToExternal, pushQrsToExternal, reconcileOrdersExternal } from "@/lib/push-external";
 
 const PROOF_BUCKET = "assembly-photos";
 
