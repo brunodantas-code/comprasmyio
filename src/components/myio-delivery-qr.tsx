@@ -75,9 +75,11 @@ type AvailableBox = {
 
 function BoxPickerDialog({
   materialId,
+  maxSelectable,
   onSelect,
 }: {
   materialId: string;
+  maxSelectable?: number | null;
   onSelect: (box: AvailableBox) => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -141,8 +143,19 @@ function BoxPickerDialog({
                   <Badge variant="outline" className="border-amber-300 bg-amber-100 text-amber-800">
                     Indisponível
                   </Badge>
+                ) : maxSelectable != null && maxSelectable >= 0 && b.free.length > maxSelectable ? (
+                  <Badge variant="outline" className="border-amber-300 bg-amber-100 text-amber-800">
+                    Excede o necessário ({maxSelectable})
+                  </Badge>
                 ) : (
-                  <Button type="button" size="sm" onClick={() => onSelect(b)}>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => {
+                      onSelect(b);
+                      setOpen(false);
+                    }}
+                  >
                     Selecionar
                   </Button>
                 )}
