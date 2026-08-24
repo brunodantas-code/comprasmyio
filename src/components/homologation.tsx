@@ -1146,13 +1146,14 @@ function BoxDetailsDialog({ box, trigger }: { box: BoxRow; trigger: React.ReactN
             <p className="text-sm font-medium">Produtos na caixa ({units.length})</p>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-5">
               {units.map((u) => (
-                <div key={u.position} className="flex flex-col items-center gap-1 rounded border p-2">
-                  <QrImage value={u.qr_value} size={96} />
-                  <span className="text-xs font-medium">#{u.position}</span>
-                  <span className="w-full break-all text-center text-[10px] text-muted-foreground">{u.qr_value}</span>
-                </div>
+                <UnitQrCard
+                  key={u.id}
+                  unit={{ id: u.id, position: u.position, qr_value: u.qr_value }}
+                  box={{ id: box.id, release_id: box.release_id, material_id: box.material_id }}
+                />
               ))}
             </div>
+            <UnitaryDropZone />
             {box.notes && <p className="text-sm text-muted-foreground">{box.notes}</p>}
           </div>
         </div>
