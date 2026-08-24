@@ -418,15 +418,26 @@ export function HomologateDialog({
       if (stockErr) throw stockErr;
     },
     onSuccess: () => {
-      toast.success("Produtos homologados e adicionados ao estoque");
+      const remainingAfter = remaining - boxSize;
+      toast.success(
+        remainingAfter > 0
+          ? `Liberado! Restam ${remainingAfter} produto(s) — continue homologando nesta tela.`
+          : "Produtos homologados e adicionados ao estoque",
+      );
       qc.invalidateQueries({ queryKey: ["homologations"] });
       qc.invalidateQueries({ queryKey: ["box-qr-codes"] });
       qc.invalidateQueries({ queryKey: ["material-stock"] });
       qc.invalidateQueries({ queryKey: ["stock-movements"] });
       qc.invalidateQueries({ queryKey: ["materials"] });
       qc.invalidateQueries({ queryKey: ["boxes-list"] });
-      setOpen(false);
-      reset();
+      if (remainingAfter > 0) {
+        // Mantém a tela aberta para liberar mais produtos sem reabrir o diálogo
+        setUnits(Array.from({ length: boxSize }, () => ""));
+        setBoxQr(boxSize > 1 ? genBoxQr(boxSize) : "");
+      } else {
+        setOpen(false);
+        reset();
+      }
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -523,9 +534,12 @@ export function HomologateDialog({
             </div>
           )}
 
-          <DialogFooter>
+          <DialogFooter className="gap-2">
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+              Concluir
+            </Button>
             <Button type="submit" disabled={save.isPending || remaining <= 0} className="bg-blue-600 text-white hover:bg-blue-700">
-              <QrCode className="mr-1 h-4 w-4" /> {save.isPending ? "Liberando..." : "Liberar"}
+              <QrCode className="mr-1 h-4 w-4" /> {save.isPending ? "Liberando..." : remaining - boxSize > 0 ? "Liberar e continuar" : "Liberar"}
             </Button>
           </DialogFooter>
         </form>
