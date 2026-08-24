@@ -230,10 +230,10 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
     for (const m of techMoveRows ?? []) {
       movedByDispatch.set(m.movement_id, (movedByDispatch.get(m.movement_id) ?? 0) + (m.quantity ?? 0));
     }
-    type DispatchInfo = { id: string; materialId: string | null; technician: string; remaining: number };
+    type DispatchInfo = { id: string; materialId: string; technician: string; remaining: number };
     const openDispatchByCode = new Map<string, DispatchInfo>();
     for (const d of dispatchRows ?? []) {
-      if (!d.responsible?.trim()) continue;
+      if (!d.responsible?.trim() || !d.material_id) continue;
       const remaining = d.quantity - (movedByDispatch.get(d.id) ?? 0);
       if (remaining <= 0) continue;
       const info: DispatchInfo = { id: d.id, materialId: d.material_id, technician: d.responsible.trim(), remaining };
