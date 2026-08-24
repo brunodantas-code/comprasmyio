@@ -44,11 +44,6 @@ function extractCodeFromQr(qr: string): string | null {
   return m?.[1] ?? null;
 }
 
-/** Escapa curingas de LIKE/ILIKE (o código contém underscores). */
-function escapeLike(s: string) {
-  return s.replace(/[\\%_]/g, (c) => `\\${c}`);
-}
-
 /** Nome do cliente informado pela plataforma externa (campo da API ou parâmetro `nome_cliente` do QR). */
 function extractClientName(p: ExternalProduct): string | null {
   for (const v of [p.nome_cliente, p.client_name, p.cliente, p.client]) {
