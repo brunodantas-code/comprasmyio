@@ -400,6 +400,10 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
           const list = qrsByTransitOrder.get(orderId) ?? [];
           list.push({ code });
           qrsByTransitOrder.set(orderId, list);
+          if (!clientNameByCode.has(code)) {
+            const cn = clientNameByOrder.get(orderId);
+            if (cn) clientNameByCode.set(code, cn);
+          }
         }
       }
     }
