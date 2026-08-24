@@ -15,7 +15,7 @@ import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Plus, Library, Trash2, Eraser, ArrowLeftRight, Camera, Upload, ImagePlus } from "lucide-react";
+import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Plus, Library, Trash2, Eraser, ArrowLeftRight, Camera, Upload, ImagePlus, QrCode } from "lucide-react";
 import { QrLinkPicker, type LinkedQr } from "@/components/myio-delivery-qr";
 import {
   AlertDialog,
@@ -1105,15 +1105,29 @@ function StockTableCard({
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-2">
                       {detail ? (
-                        <MaterialDetailDialog
-                          materialId={r.material_id}
-                          name={r.name}
-                          trigger={
-                            <button type="button" className="text-left hover:underline">
-                              {r.name}
-                            </button>
-                          }
-                        />
+                        <>
+                          <MaterialDetailDialog
+                            materialId={r.material_id}
+                            name={r.name}
+                            trigger={
+                              <button type="button" className="text-left hover:underline">
+                                {r.name}
+                              </button>
+                            }
+                          />
+                          <StockQrDialog
+                            stockName={r.name}
+                            trigger={
+                              <button
+                                type="button"
+                                className="text-muted-foreground transition hover:text-foreground"
+                                title="Ver QR Codes homologados"
+                              >
+                                <QrCode className="h-4 w-4" />
+                              </button>
+                            }
+                          />
+                        </>
                       ) : (
                         <StockQrDialog
                           stockName={r.name}
@@ -1383,13 +1397,14 @@ function EstoqueMyioSection({ userId, canDelete }: { userId: string; canDelete?:
         />
         <StockTableCard
           title="Estoque Terceiros"
-          description='Itens comprados de terceiros. Use o botão de troca para mover um item para "Myio".'
+          description='Itens comprados de terceiros. Toque no nome para ver foto, link de referência e parâmetros de compra. Use o botão de troca para mover um item para "Myio".'
           rows={rows.filter((r) => !manufactured?.[r.material_id])}
           isLoading={isLoading}
           userId={userId}
           canDelete={canDelete}
           actions={<AddMaterialDialog location="almoxarifado" userId={userId} />}
           moveTo="myio"
+          detail
           damageSource="Estoque Terceiros"
         />
         <BoxesCard />
@@ -1520,7 +1535,7 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
           title={`Estoque — ${LOCATION_LABELS[location]}`}
           description={
             location === "almoxarifado_geral"
-              ? "Estoque geral independente. Crie itens do zero com foto, link de referência e parâmetros de compra."
+              ? "Estoque geral independente. Toque no nome para ver foto, link de referência e parâmetros de compra."
               : 'A entrada é automática quando o solicitante confirma "Recebido corretamente" em um pedido feito pela biblioteca.'
           }
           rows={rows}
@@ -1528,6 +1543,7 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
           userId={userId}
           canDelete={canDelete}
           actions={toolbar}
+          detail
           damageSource={`Estoque — ${LOCATION_LABELS[location]}`}
         />
 
