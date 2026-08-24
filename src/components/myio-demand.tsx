@@ -101,6 +101,7 @@ function DeliverItemDialog({
               required
               materialId={state.materialId}
               requiredCount={qty}
+              stockOnly
             />
           )}
           <div className="space-y-2">
