@@ -127,13 +127,14 @@ export function ExternalSyncCard() {
         skipped?: boolean;
         total?: number;
         changed?: number;
+        corrections?: number;
         error?: string;
       };
       if (!res.ok || body.ok === false) throw new Error(body.error ?? `Falha (${res.status})`);
       toast.success(
         body.skipped
           ? "Já existe uma sincronização em andamento."
-          : `Sincronizado: ${body.total ?? 0} produto(s), ${body.changed ?? 0} mudança(s).`,
+          : `Sincronizado: ${body.total ?? 0} produto(s), ${body.changed ?? 0} mudança(s), ${body.corrections ?? 0} correção(ões) de posição.`,
       );
       qc.invalidateQueries({ queryKey: ["external-product-states"] });
       qc.invalidateQueries({ queryKey: ["external-sync-state"] });
