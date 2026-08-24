@@ -379,6 +379,8 @@ function ReturnToDistributionDialog({ orderId, notes }: { orderId: string; notes
       if (error) throw error;
     },
     onSuccess: () => {
+      // Transporte → Expedição: reflete o novo local na plataforma externa
+      pushOrderToExternal(orderId, { location: "expedicao" });
       toast.success("Pedido retornado para Expedição.");
       setOpen(false);
       setReason("");
@@ -442,6 +444,8 @@ function LostMerchandiseDialog({ orderId, notes }: { orderId: string; notes: str
       if (error) throw error;
     },
     onSuccess: () => {
+      // Transporte → Perdido: reflete o novo local na plataforma externa
+      pushOrderToExternal(orderId, { location: "perdido" });
       toast.success("Pedido marcado como perdido.");
       setOpen(false);
       setReason("");
@@ -703,9 +707,9 @@ function FoundMerchandiseDialog({ orderId, notes }: { orderId: string; notes: st
   const { data: projects } = useQuery({
     queryKey: ["projects-for-found"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("projects").select("id, name").order("name");
+      const { data, error } = await supabase.from("projects").select("id, name, client_name").order("name");
       if (error) throw error;
-      return (data ?? []) as { id: string; name: string }[];
+      return (data ?? []) as { id: string; name: string; client_name: string | null }[];
     },
   });
 
@@ -734,6 +738,20 @@ function FoundMerchandiseDialog({ orderId, notes }: { orderId: string; notes: st
       }
     },
     onSuccess: () => {
+      // Reflete o novo setor na plataforma externa
+      const EXTERNAL_LOC: Record<string, "cliente" | "expedicao" | "tecnico" | "transporte" | "estoque"> = {
+        unidade: "cliente",
+        distribuicao: "expedicao",
+        tecnico: "tecnico",
+        transito: "transporte",
+        almoxarifado: "estoque",
+      };
+      const loc = EXTERNAL_LOC[sector];
+      if (loc) {
+        const clientName =
+          sector === "unidade" ? (projects?.find((p) => p.id === projectId)?.client_name ?? null) : null;
+        pushOrderToExternal(orderId, { location: loc, clientName });
+      }
       toast.success("Mercadoria encontrada e movida de setor.");
       setOpen(false);
       setReason("");

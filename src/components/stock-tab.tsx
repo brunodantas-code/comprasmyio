@@ -39,6 +39,7 @@ import { TechnicianItemsCard } from "@/components/technician-items";
 import { MaterialDetailDialog } from "@/components/material-detail";
 import { DamageItemDialog, DamagedItemsCard } from "@/components/damaged-items";
 import { ExternalSyncCard, ExternalTechnicianCard, ExternalLostCard } from "@/components/external-sync";
+import { pushQrsToExternal } from "@/lib/push-external";
 
 
 type StockRow = {
@@ -205,6 +206,8 @@ function MovementDialog({
           })) as never,
         );
         if (qrErr) throw qrErr;
+        // Estoque → Técnico: reflete o novo local na plataforma externa
+        pushQrsToExternal(qrs.map((q) => q.qr_value), { location: "tecnico", technician: responsible.trim() });
       }
     },
     onSuccess: () => {

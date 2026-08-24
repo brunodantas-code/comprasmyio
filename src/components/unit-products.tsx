@@ -21,6 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { ArrowRightLeft, Camera, CheckCircle2, ImageUp, PauseCircle, Plus, Trash2 } from "lucide-react";
+import { pushQrsToExternal } from "@/lib/push-external";
 
 type UnitProduct = {
   id: string;
@@ -151,6 +152,18 @@ function MoveUnitProductDialog({
           });
         }
       }
+
+      // Cliente → outro setor: reflete o novo local na plataforma externa
+      const EXTERNAL_LOC: Record<MoveDestination, "tecnico" | "estoque" | "perdido" | "avariado"> = {
+        tecnico: "tecnico",
+        almoxarifado: "estoque",
+        perdido: "perdido",
+        avariado: "avariado",
+      };
+      pushQrsToExternal([product.label], {
+        location: EXTERNAL_LOC[destination],
+        technician: destination === "tecnico" ? technician.trim() : null,
+      });
     },
     onSuccess: () => {
       toast.success("Produto movido.");
@@ -522,6 +535,12 @@ export function UnitProductsCard({
         .update({ status: next, installed_at: next === "instalado" ? new Date().toISOString() : null })
         .eq("id", p.id);
       if (error) throw error;
+      // Reflete o status (instalado/parado) na plataforma externa
+      pushQrsToExternal([p.label], {
+        location: "cliente",
+        status: next,
+        clientName: p.client_name ?? p.projects?.name ?? null,
+      });
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["unit-products"] }),
     onError: (e: Error) => toast.error(e.message),
