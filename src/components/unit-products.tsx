@@ -120,24 +120,33 @@ function MoveUnitProductDialog({
       if (error) throw error;
 
       if (product.material_id) {
-        const reason =
-          destination === "tecnico"
-            ? `Saída da unidade para o técnico ${technician.trim()}`
-            : destination === "almoxarifado"
-              ? "Retorno do cliente para o estoque"
-              : destination === "avariado"
-                ? "Produto da unidade marcado como avariado"
-                : "Produto da unidade marcado como perdido";
-        const { error: mvErr } = await supabase.from("stock_movements").insert({
-          material_id: product.material_id,
-          quantity: 1,
-          type: destination === "almoxarifado" ? "entrada" : "saida",
-          reason: notes.trim() ? `${reason} — ${notes.trim()}` : reason,
-          responsible: destination === "tecnico" ? technician.trim() : null,
-          photo_url: path,
-          created_by: userId,
-        } as never);
-        if (mvErr) throw mvErr;
+        // A unidade já foi descontada do estoque quando saiu (baixa do pedido,
+        // saída para técnico ou baixa automática do sync). Movê-la entre
+        // cliente/técnico/perdido/avariado é apenas RASTREIO — gerar nova saída
+        // aqui descontaria o mesmo produto duas vezes e deixaria o estoque
+        // negativo. Apenas o retorno ao estoque gera movimentação (entrada).
+        if (destination === "almoxarifado") {
+          const reason = "Retorno do cliente para o estoque";
+          const { data: mv, error: mvErr } = await supabase
+            .from("stock_movements")
+            .insert({
+              material_id: product.material_id,
+              quantity: 1,
+              type: "entrada",
+              reason: notes.trim() ? `${reason} — ${notes.trim()}` : reason,
+              photo_url: path,
+              created_by: userId,
+            } as never)
+            .select("id")
+            .single();
+          if (mvErr) throw mvErr;
+          // Vincula o QR à entrada para o sync reconhecer o retorno e não estornar de novo.
+          if (mv && product.label) {
+            await supabase
+              .from("stock_movement_qrs")
+              .insert({ movement_id: (mv as { id: string }).id, qr_value: product.label } as never);
+          }
+        }
 
         if (destination === "avariado") {
           await recordDamagedItem({
