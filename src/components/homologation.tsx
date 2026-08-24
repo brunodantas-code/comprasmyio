@@ -643,26 +643,7 @@ export function HomologateDialog({
   const [notes, setNotes] = useState("");
 
   // QR da caixa é gerado automaticamente: link do site / modelo da caixa / código incremental (a partir de 1)
-  const { data: existingBoxQrs } = useQuery({
-    queryKey: ["box-qr-codes"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("homologations").select("box_qr").not("box_qr", "is", null);
-      if (error) throw error;
-      return (data ?? []).map((d) => d.box_qr as string);
-    },
-  });
-
-  function genBoxQr(size: number) {
-    const prefix = `https://comprasmyio.lovable.app/caixa-${size}/`;
-    let max = 0;
-    for (const qr of existingBoxQrs ?? []) {
-      if (qr.startsWith(prefix)) {
-        const n = parseInt(qr.slice(prefix.length), 10);
-        if (!Number.isNaN(n) && n > max) max = n;
-      }
-    }
-    return `${prefix}${max + 1}`;
-  }
+  const { data: existingBoxQrs } = useBoxQrCodes();
 
   const { data: profiles } = useQuery({
     queryKey: ["profiles-list"],
