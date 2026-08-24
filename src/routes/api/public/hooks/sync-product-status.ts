@@ -176,6 +176,137 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
       );
     };
 
+    // --- Livro-razão por QR code -------------------------------------------
+    // A plataforma externa é a FONTE DA VERDADE sobre onde cada produto está.
+    // Se alguém retirar um produto do estoque sem dar baixa e instalar em
+    // algum lugar, a API detecta e nós desfalcamos de onde ele constava:
+    // estoque (movimentação de saída), técnico (baixa na lista do técnico) ou
+    // cliente (saída da sub-aba Cliente).
+    type QrLedger = {
+      type: string;
+      movementId: string;
+      responsible: string | null;
+      materialId: string | null;
+      at: string;
+    };
+    const { data: qrMoves, error: qrMovesErr } = await supabaseAdmin
+      .from("stock_movement_qrs")
+      .select("qr_value, movement_id, stock_movements(id, type, material_id, responsible, created_at)");
+    if (qrMovesErr) throw qrMovesErr;
+    const ledgerByCode = new Map<string, QrLedger>();
+    const codesByMovement = new Map<string, string[]>();
+    for (const row of qrMoves ?? []) {
+      const mv = row.stock_movements as {
+        id: string;
+        type: string;
+        material_id: string | null;
+        responsible: string | null;
+        created_at: string;
+      } | null;
+      if (!mv || !row.qr_value) continue;
+      const c = extractCodeFromQr(row.qr_value);
+      if (!c) continue;
+      const list = codesByMovement.get(mv.id) ?? [];
+      list.push(c);
+      codesByMovement.set(mv.id, list);
+      const cur = ledgerByCode.get(c);
+      if (!cur || mv.created_at > cur.at) {
+        ledgerByCode.set(c, { type: mv.type, movementId: mv.id, responsible: mv.responsible, materialId: mv.material_id, at: mv.created_at });
+      }
+    }
+
+    // Saídas com técnico responsável ainda não totalmente movimentadas.
+    const { data: dispatchRows, error: dispErr } = await supabaseAdmin
+      .from("stock_movements")
+      .select("id, material_id, quantity, responsible")
+      .eq("type", "saida")
+      .not("responsible", "is", null);
+    if (dispErr) throw dispErr;
+    const { data: techMoveRows, error: tmErr } = await supabaseAdmin
+      .from("technician_moves")
+      .select("movement_id, quantity");
+    if (tmErr) throw tmErr;
+    const movedByDispatch = new Map<string, number>();
+    for (const m of techMoveRows ?? []) {
+      movedByDispatch.set(m.movement_id, (movedByDispatch.get(m.movement_id) ?? 0) + (m.quantity ?? 0));
+    }
+    type DispatchInfo = { id: string; materialId: string | null; technician: string; remaining: number };
+    const openDispatchByCode = new Map<string, DispatchInfo>();
+    for (const d of dispatchRows ?? []) {
+      if (!d.responsible?.trim()) continue;
+      const remaining = d.quantity - (movedByDispatch.get(d.id) ?? 0);
+      if (remaining <= 0) continue;
+      const info: DispatchInfo = { id: d.id, materialId: d.material_id, technician: d.responsible.trim(), remaining };
+      for (const c of codesByMovement.get(d.id) ?? []) {
+        if (!openDispatchByCode.has(c)) openDispatchByCode.set(c, info);
+      }
+    }
+
+    let corrections = 0;
+
+    /** Baixa automática de 1 unidade que saiu do estoque sem registro. */
+    const registerExit = async (code: string, label: string, materialId: string, technician: string | null, reason: string) => {
+      const { data: mv, error } = await supabaseAdmin
+        .from("stock_movements")
+        .insert({ material_id: materialId, quantity: 1, type: "saida", responsible: technician, reason })
+        .select("id")
+        .single();
+      if (error || !mv) {
+        problems.push(`${code}: falha ao dar baixa automática (${error?.message ?? "erro"})`);
+        return;
+      }
+      await supabaseAdmin.from("stock_movement_qrs").insert({
+        movement_id: mv.id,
+        qr_value: label,
+        homologation_unit_id: unitByCode.get(code)?.id ?? null,
+      });
+      ledgerByCode.set(code, { type: "saida", movementId: mv.id, responsible: technician, materialId, at: now });
+      if (technician) openDispatchByCode.set(code, { id: mv.id, materialId, technician, remaining: 1 });
+      corrections++;
+    };
+
+    /** Estorno automático de 1 unidade que voltou ao estoque sem registro. */
+    const registerReturn = async (code: string, label: string, materialId: string, reason: string) => {
+      const { data: mv, error } = await supabaseAdmin
+        .from("stock_movements")
+        .insert({ material_id: materialId, quantity: 1, type: "entrada", reason })
+        .select("id")
+        .single();
+      if (error || !mv) {
+        problems.push(`${code}: falha ao estornar para o estoque (${error?.message ?? "erro"})`);
+        return;
+      }
+      await supabaseAdmin.from("stock_movement_qrs").insert({
+        movement_id: mv.id,
+        qr_value: label,
+        homologation_unit_id: unitByCode.get(code)?.id ?? null,
+      });
+      ledgerByCode.set(code, { type: "entrada", movementId: mv.id, responsible: null, materialId, at: now });
+      corrections++;
+    };
+
+    /** Zera 1 unidade da lista do técnico quando o produto foi para outro destino. */
+    const clearTechnician = async (code: string, destination: "unidade" | "perdido" | "almoxarifado" | "avariado", projectId: string | null) => {
+      const disp = openDispatchByCode.get(code);
+      if (!disp || disp.remaining <= 0) return;
+      const { error } = await supabaseAdmin.from("technician_moves").insert({
+        movement_id: disp.id,
+        material_id: disp.materialId,
+        technician: disp.technician,
+        destination,
+        project_id: projectId,
+        quantity: 1,
+        notes: "Atualizado pela plataforma externa",
+      });
+      if (error) {
+        problems.push(`${code}: falha ao baixar da lista do técnico (${error.message})`);
+        return;
+      }
+      disp.remaining -= 1;
+      if (disp.remaining <= 0) openDispatchByCode.delete(code);
+      corrections++;
+    };
+
     // Cache de projeto por nome de cliente (evita consultas repetidas na mesma execução).
     const projectByClient = new Map<string, string | null>();
     const findProjectForClient = async (clientName: string): Promise<string | null> => {
