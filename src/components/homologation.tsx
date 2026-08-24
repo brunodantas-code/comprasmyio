@@ -726,6 +726,7 @@ export function HomologateDialog({
   const [boxQr, setBoxQr] = useState("");
   const [units, setUnits] = useState<string[]>([""]);
   const [notes, setNotes] = useState("");
+  const [generating, setGenerating] = useState(false);
 
   // QR da caixa é gerado automaticamente: link do site / modelo da caixa / código incremental (a partir de 1)
   const { data: existingBoxQrs } = useBoxQrCodes();
@@ -765,6 +766,28 @@ export function HomologateDialog({
     setUnits([""]);
     setBoxQr("");
     setNotes("");
+  }
+
+  /** Gera QR codes novos na plataforma externa para os campos vazios (nascem no Estoque Myio). */
+  async function generateViaApi() {
+    const emptyIdx = units.map((u, i) => (u.trim() ? -1 : i)).filter((i) => i >= 0);
+    if (!emptyIdx.length) return toast.error("Todos os campos de QR já estão preenchidos.");
+    setGenerating(true);
+    try {
+      const next = [...units];
+      for (const i of emptyIdx) {
+        const r = await generateExternalQr({ data: { productType: materialName } });
+        next[i] = r.qrUrl;
+        setUnits([...next]);
+      }
+      toast.success(
+        `${emptyIdx.length} QR code(s) gerado(s) na plataforma externa — já nascem no Estoque Myio.`,
+      );
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Falha ao gerar QR code via API");
+    } finally {
+      setGenerating(false);
+    }
   }
 
   const save = useMutation({
@@ -840,6 +863,9 @@ export function HomologateDialog({
         created_by: userId,
       });
       if (stockErr) throw stockErr;
+
+      // Produto homologado entra no Estoque Myio: reflete o local na plataforma externa.
+      pushQrsToExternal(filled, { location: "estoque" });
     },
     onSuccess: () => {
       const remainingAfter = remaining - boxSize;
@@ -917,6 +943,19 @@ export function HomologateDialog({
           )}
 
           <div className="max-h-[45vh] space-y-2 overflow-y-auto rounded border p-3">
+            <div className="flex flex-wrap items-center justify-between gap-2 pb-1">
+              <p className="text-xs text-muted-foreground">
+                Preencha pela câmera, galeria ou manualmente — ou gere QR codes novos pela API.
+              </p>
+              <Button type="button" variant="outline" size="sm" disabled={generating} onClick={generateViaApi}>
+                {generating ? (
+                  <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                ) : (
+                  <Sparkles className="mr-1 h-4 w-4" />
+                )}
+                Gerar via API
+              </Button>
+            </div>
             {units.map((u, i) => (
               <QrField
                 key={i}
