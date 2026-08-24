@@ -1495,12 +1495,17 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
       {location === "unidade" || location === "transito" ? null : (
         <StockTableCard
           title={`Estoque — ${LOCATION_LABELS[location]}`}
-          description='A entrada é automática quando o solicitante confirma "Recebido corretamente" em um pedido feito pela biblioteca.'
+          description={
+            location === "almoxarifado_geral"
+              ? "Estoque geral independente. Crie itens do zero com foto, link de referência e parâmetros de compra."
+              : 'A entrada é automática quando o solicitante confirma "Recebido corretamente" em um pedido feito pela biblioteca.'
+          }
           rows={rows}
           isLoading={isLoading}
           userId={userId}
           canDelete={canDelete}
           actions={toolbar}
+          damageSource={`Estoque — ${LOCATION_LABELS[location]}`}
         />
 
       )}
