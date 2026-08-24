@@ -28,6 +28,7 @@ type DeliverState = {
   item: DemandItem;
   available: number;
   isManufactured: boolean;
+  materialId: string | null;
 };
 
 function DeliverItemDialog({
@@ -86,7 +87,7 @@ function DeliverItemDialog({
             )}
           </div>
           {state?.isManufactured && (
-            <QrLinkPicker value={qrs} onChange={setQrs} required />
+            <QrLinkPicker value={qrs} onChange={setQrs} required materialId={state.materialId} />
           )}
           <div className="space-y-2">
             <Label>Foto do material (obrigatória)</Label>
@@ -533,7 +534,13 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
                               type="button"
                               className="cursor-pointer"
                               onClick={() =>
-                                setDeliverDialog({ order: o, item: i, available: bal, isManufactured })
+                                setDeliverDialog({
+                                  order: o,
+                                  item: i,
+                                  available: bal,
+                                  isManufactured,
+                                  materialId: materialByName.get(i.product.trim().toLowerCase())?.id ?? null,
+                                })
                               }
                             >
                               <Badge
