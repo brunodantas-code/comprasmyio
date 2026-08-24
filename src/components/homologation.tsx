@@ -293,6 +293,7 @@ function useInvalidateHomologationData() {
     qc.invalidateQueries({ queryKey: ["homologations-qr"] });
     qc.invalidateQueries({ queryKey: ["boxes-list"] });
     qc.invalidateQueries({ queryKey: ["box-qr-codes"] });
+    qc.invalidateQueries({ queryKey: ["incomplete-boxes"] });
   };
 }
 
