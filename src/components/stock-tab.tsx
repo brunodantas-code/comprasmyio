@@ -1246,6 +1246,7 @@ function FabricaSection({ userId, canDelete }: { userId: string; canDelete?: boo
           canDelete={canDelete}
           actions={toolbar}
           detail
+          damageSource="Estoque — Fábrica"
         />
         <Card>
           <CardHeader>
@@ -1355,6 +1356,7 @@ function EstoqueMyioSection({ userId, canDelete }: { userId: string; canDelete?:
           canDelete={canDelete}
           actions={toolbar}
           moveTo="terceiros"
+          damageSource="Estoque Myio"
         />
         <StockTableCard
           title="Estoque Terceiros"
@@ -1365,6 +1367,7 @@ function EstoqueMyioSection({ userId, canDelete }: { userId: string; canDelete?:
           canDelete={canDelete}
           actions={<AddMaterialDialog location="almoxarifado" userId={userId} />}
           moveTo="myio"
+          damageSource="Estoque Terceiros"
         />
         <BoxesCard />
         <Card>
