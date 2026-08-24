@@ -691,6 +691,33 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
       };
       await reconcilePosition();
 
+      // Produto INSTALADO no cliente sai da caixa: vira unitário (nova
+      // homologação avulsa) e a caixa fica com um item a menos. Idempotente —
+      // roda em toda sincronização enquanto a unidade constar numa caixa.
+      if (location === "cliente" && status === "instalado" && unit?.box_qr && unit.release_id && unit.material_id) {
+        const { data: newHom, error: homErr } = await supabaseAdmin
+          .from("homologations")
+          .insert({ release_id: unit.release_id, material_id: unit.material_id, box_size: 1, box_qr: null })
+          .select("id")
+          .single();
+        if (homErr) {
+          problems.push(`${code}: falha ao retirar da caixa — ${homErr.message}`);
+        } else {
+          const { error: mvErr } = await supabaseAdmin
+            .from("homologation_units")
+            .update({ homologation_id: newHom.id, position: 1 })
+            .eq("id", unit.id);
+          if (mvErr) {
+            problems.push(`${code}: falha ao retirar da caixa — ${mvErr.message}`);
+          } else {
+            unit.homologation_id = newHom.id;
+            unit.box_qr = null;
+            unit.box_size = 1;
+            corrections++;
+          }
+        }
+      }
+
       if (!hasChanged) {
         if (location !== "cliente") await reconcileExitFromClient();
         continue;
