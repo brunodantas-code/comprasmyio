@@ -20,6 +20,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { ArrowRightLeft, HardHat, History } from "lucide-react";
+import { pushQrsToExternal } from "@/lib/push-external";
 
 function DispatchPhoto({ path }: { path: string }) {
   const { data } = useQuery({
@@ -219,6 +220,31 @@ function MoveDialog({
           created_by: userId,
         });
       }
+
+      // Reflete o novo local dos QR codes na plataforma externa
+      const EXTERNAL_LOC: Record<Destination, "cliente" | "perdido" | "estoque" | "avariado"> = {
+        unidade: "cliente",
+        perdido: "perdido",
+        almoxarifado: "estoque",
+        avariado: "avariado",
+      };
+      let clientName: string | null = null;
+      if (destination === "unidade") {
+        const { data: proj } = await supabase
+          .from("projects")
+          .select("client_name")
+          .eq("id", projectId)
+          .maybeSingle();
+        clientName = proj?.client_name ?? null;
+      }
+      const { data: qrRows } = await supabase
+        .from("stock_movement_qrs")
+        .select("qr_value")
+        .eq("movement_id", dispatch.id);
+      pushQrsToExternal((qrRows ?? []).map((r) => r.qr_value), {
+        location: EXTERNAL_LOC[destination],
+        clientName,
+      });
     },
     onSuccess: () => {
       toast.success("Movimentação registrada.");
