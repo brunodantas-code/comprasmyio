@@ -36,6 +36,35 @@ export function normalizeQrValue(code: string): string {
   return v.trim();
 }
 
+/** Extrai o código sequencial (ex.: 1_1_4_15) de um QR no formato https://produto.myio.com.br/<codigo>?... */
+export function extractQrCode(value: string): string | null {
+  const m = /produto\.myio\.com\.br\/([^?\s#]+)/i.exec(value);
+  if (m?.[1]) return m[1];
+  const t = value.trim();
+  return /^\d+(?:_\d+)+$/.test(t) ? t : null;
+}
+
+/** Rótulos/cores do local do QR na plataforma externa (inclui transporte/expedição). */
+export const QR_LOCATION_LABELS: Record<string, string> = {
+  estoque: "Estoque",
+  expedicao: "Expedição",
+  transporte: "Transporte",
+  cliente: "Cliente",
+  tecnico: "Técnico",
+  perdido: "Perdido",
+  avariado: "Itens Avariados",
+};
+
+export const QR_LOCATION_CLASSES: Record<string, string> = {
+  estoque: "border-green-300 bg-green-100 text-green-800",
+  expedicao: "border-blue-300 bg-blue-100 text-blue-800",
+  transporte: "border-amber-300 bg-amber-100 text-amber-800",
+  cliente: "border-emerald-300 bg-emerald-100 text-emerald-800",
+  tecnico: "border-purple-300 bg-purple-100 text-purple-800",
+  perdido: "border-red-300 bg-red-100 text-red-800",
+  avariado: "border-orange-300 bg-orange-100 text-orange-800",
+};
+
 /** Resolve um código lido: se for QR de caixa, retorna todos os QR unitários dentro dela. */
 export async function resolveQrCode(code: string): Promise<LinkedQr[]> {
   const value = normalizeQrValue(code);
@@ -422,7 +451,25 @@ export function ItemDeliveriesDialog({
           .in("delivery_id", ids);
         qrs = q ?? [];
       }
-      return (deliveries ?? []).map((d) => ({ ...d, qrs: qrs.filter((q) => q.delivery_id === d.id) }));
+      // Local atual de cada QR na plataforma externa (sincronização de 5 min).
+      const codes = qrs.map((q) => extractQrCode(q.qr_value)).filter((c): c is string => !!c);
+      let states: { code: string; location: string; status: string | null }[] = [];
+      if (codes.length) {
+        const { data: st } = await supabase
+          .from("external_product_states")
+          .select("code, location, status")
+          .in("code", codes);
+        states = st ?? [];
+      }
+      return (deliveries ?? []).map((d) => ({
+        ...d,
+        qrs: qrs
+          .filter((q) => q.delivery_id === d.id)
+          .map((q) => ({
+            ...q,
+            state: states.find((s) => s.code === extractQrCode(q.qr_value)) ?? null,
+          })),
+      }));
     },
   });
 
@@ -464,8 +511,16 @@ export function ItemDeliveriesDialog({
                       <p className="text-xs font-medium">QR codes ({d.qrs.length})</p>
                       <ul className="space-y-1">
                         {d.qrs.map((q) => (
-                          <li key={q.qr_value} className="break-all text-xs text-muted-foreground">
-                            {q.qr_value}
+                          <li key={q.qr_value} className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                            <span className="min-w-0 flex-1 break-all">{q.qr_value}</span>
+                            {q.state && (
+                              <Badge variant="outline" className={QR_LOCATION_CLASSES[q.state.location] ?? ""}>
+                                {QR_LOCATION_LABELS[q.state.location] ?? q.state.location}
+                                {q.state.location === "cliente" && q.state.status
+                                  ? ` · ${q.state.status === "instalado" ? "Instalado" : "Parado"}`
+                                  : ""}
+                              </Badge>
+                            )}
                           </li>
                         ))}
                       </ul>

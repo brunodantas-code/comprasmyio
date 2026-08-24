@@ -160,10 +160,11 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
       installed_at: string | null;
       project_id: string | null;
       moved_to: string | null;
+      order_id: string | null;
     };
     const { data: unitRows, error: unitRowsErr } = await supabaseAdmin
       .from("unit_products")
-      .select("id, label, installed_at, project_id, moved_to");
+      .select("id, label, installed_at, project_id, moved_to, order_id");
     if (unitRowsErr) throw unitRowsErr;
     const allUnitRows = (unitRows ?? []) as UnitRow[];
     const findUnitRow = (code: string, label: string, onlyActive: boolean): UnitRow | null => {
@@ -239,6 +240,42 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
       const info: DispatchInfo = { id: d.id, materialId: d.material_id, technician: d.responsible.trim(), remaining };
       for (const c of codesByMovement.get(d.id) ?? []) {
         if (!openDispatchByCode.has(c)) openDispatchByCode.set(c, info);
+      }
+    }
+
+    // QR codes vinculados a pedidos em transporte (baixas Myio). Usados para dar
+    // baixa automática no transporte quando a plataforma externa confirma que o
+    // produto chegou ao cliente — hoje o pedido continuaria "em_transito" mesmo
+    // com o QR já na aba Cliente.
+    const { data: transitOrders, error: toErr } = await supabaseAdmin
+      .from("myio_orders")
+      .select("id")
+      .eq("status", "em_transito");
+    if (toErr) throw toErr;
+    const transitOrderIds = (transitOrders ?? []).map((o) => o.id);
+    const qrsByTransitOrder = new Map<string, { code: string }[]>();
+    if (transitOrderIds.length) {
+      const { data: tDels, error: tdErr } = await supabaseAdmin
+        .from("myio_item_deliveries")
+        .select("id, order_id")
+        .in("order_id", transitOrderIds);
+      if (tdErr) throw tdErr;
+      const delOrder = new Map((tDels ?? []).map((d) => [d.id, d.order_id]));
+      const delIds = (tDels ?? []).map((d) => d.id);
+      if (delIds.length) {
+        const { data: tQrs, error: tqErr } = await supabaseAdmin
+          .from("myio_delivery_qrs")
+          .select("qr_value, delivery_id")
+          .in("delivery_id", delIds);
+        if (tqErr) throw tqErr;
+        for (const q of tQrs ?? []) {
+          const orderId = delOrder.get(q.delivery_id);
+          const code = q.qr_value ? extractCodeFromQr(q.qr_value) : null;
+          if (!orderId || !code) continue;
+          const list = qrsByTransitOrder.get(orderId) ?? [];
+          list.push({ code });
+          qrsByTransitOrder.set(orderId, list);
+        }
       }
     }
 
@@ -346,10 +383,13 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
     const now = new Date().toISOString();
     let changed = 0;
     const problems: string[] = [];
+    // Local real de cada código nesta execução (a plataforma externa é a fonte da verdade).
+    const locByCode = new Map<string, string>();
 
     for (const p of products) {
       const code = p.code!;
       const location = (p.location || "estoque").trim().toLowerCase();
+      locByCode.set(code, location);
       const status = p.status?.trim().toLowerCase() || null;
       const technician = p.technician?.trim() || null;
       const clientName = location === "cliente" ? extractClientName(p) : null;
@@ -542,6 +582,31 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
       }
       // Técnico / Perdido / Estoque: ficam registrados em external_product_states
       // e aparecem nas sub-abas Técnico, Perdido e no Checar QR Code.
+    }
+
+    // Baixa automática no transporte: quando TODOS os QR codes vinculados a um
+    // pedido em transporte constam como "cliente" na plataforma externa, o pedido
+    // é marcado como entregue e sai da sub-aba Transporte.
+    for (const [orderId, qrList] of qrsByTransitOrder) {
+      if (!qrList.length) continue;
+      if (!qrList.every((q) => locByCode.get(q.code) === "cliente")) continue;
+      const { error: orderErr } = await supabaseAdmin
+        .from("myio_orders")
+        .update({ status: "entregue_cliente" })
+        .eq("id", orderId);
+      if (orderErr) {
+        problems.push(`pedido ${orderId}: falha ao concluir entrega (${orderErr.message})`);
+        continue;
+      }
+      // Vincula ao pedido as unidades que o sync já criou na aba Cliente.
+      const codes = new Set(qrList.map((q) => q.code));
+      const linkIds = allUnitRows
+        .filter((r) => !r.order_id && !r.moved_to && !!r.label && codes.has(extractCodeFromQr(r.label!) ?? ""))
+        .map((r) => r.id);
+      if (linkIds.length) {
+        await supabaseAdmin.from("unit_products").update({ order_id: orderId }).in("id", linkIds);
+      }
+      corrections++;
     }
 
     const message = `${products.length} produto(s) consultados, ${changed} com mudança de estado, ${corrections} correção(ões) de posição.`;
