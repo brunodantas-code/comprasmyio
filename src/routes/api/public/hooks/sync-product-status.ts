@@ -38,10 +38,12 @@ type UnitMatch = {
   material_name: string | null;
 };
 
-/** Extrai o código sequencial (ex.: 1_1_1_15) de um QR no formato https://produto.myio.com.br/<codigo>?... */
+/** Extrai o código sequencial (ex.: 1_1_1_15) de um QR no formato https://produto.myio.com.br/<codigo>?... — também aceita o código puro. */
 function extractCodeFromQr(qr: string): string | null {
   const m = /produto\.myio\.com\.br\/([^?\s#]+)/i.exec(qr);
-  return m?.[1] ?? null;
+  if (m?.[1]) return m[1];
+  const t = qr.trim();
+  return /^\d+(?:_\d+)+$/.test(t) ? t : null;
 }
 
 /** Nome do cliente informado pela plataforma externa (campo da API ou parâmetro `nome_cliente` do QR). */
@@ -126,7 +128,7 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
       };
     }
     const json = (await res.json()) as { products?: ExternalProduct[] };
-    const products = (Array.isArray(json.products) ? json.products : [])
+    const externalProducts = (Array.isArray(json.products) ? json.products : [])
       .filter((p) => !!p.code)
       .slice(0, MAX_ITEMS_PER_RUN);
 
@@ -148,9 +150,24 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
       });
     }
 
+    // REGRA DE OURO: só sincronizamos QR codes gerados pelo fluxo de homologação
+    // (presentes em homologation_units). Qualquer código que exista apenas na
+    // plataforma externa é ignorado — não entra no banco nem dispara correções.
+    const knownCodes = new Set(unitByCode.keys());
+    const products = externalProducts.filter((p) => knownCodes.has(p.code!));
+    const ignored = externalProducts.length - products.length;
+
     const { data: existing, error: statesErr } = await supabaseAdmin.from("external_product_states").select("*");
     if (statesErr) throw statesErr;
     const stateByCode = new Map((existing ?? []).map((s) => [s.code, s]));
+
+    // Limpeza: remove do banco estados de QR codes que não pertencem à
+    // homologação (sincronizados antes desta regra ou removidos do estoque).
+    const staleCodes = (existing ?? []).map((s) => s.code).filter((c) => !knownCodes.has(c));
+    if (staleCodes.length) {
+      await supabaseAdmin.from("external_product_states").delete().in("code", staleCodes);
+      for (const c of staleCodes) stateByCode.delete(c);
+    }
 
     // Registros da sub-aba Cliente (unit_products), para localizar pelo código do QR
     // mesmo quando o rótulo salvo difere (com/sem parâmetros de query na URL).
@@ -609,13 +626,16 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
       corrections++;
     }
 
-    const message = `${products.length} produto(s) consultados, ${changed} com mudança de estado, ${corrections} correção(ões) de posição.`;
+    const message = `${products.length} produto(s) consultados, ${changed} com mudança de estado, ${corrections} correção(ões) de posição.${ignored ? ` ${ignored} QR(s) externo(s) ignorado(s) (não gerados na homologação).` : ""}`;
     await finish(
       problems.length ? "parcial" : "ok",
       problems.length ? `${message} Erros: ${problems.slice(0, 3).join(" | ")}` : message,
       products.length,
     );
-    return { status: 200, body: { ok: true, total: products.length, changed, corrections, problems: problems.slice(0, 10) } };
+    return {
+      status: 200,
+      body: { ok: true, total: products.length, ignored, changed, corrections, problems: problems.slice(0, 10) },
+    };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     await finish("erro", msg.slice(0, 500));
