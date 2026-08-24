@@ -710,10 +710,22 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
           if (mvErr) {
             problems.push(`${code}: falha ao retirar da caixa — ${mvErr.message}`);
           } else {
+            // Caixa que ficou vazia é removida (mesmo comportamento da UI de homologação).
+            const oldHomId = unit.homologation_id;
             unit.homologation_id = newHom.id;
             unit.box_qr = null;
             unit.box_size = 1;
             corrections++;
+            if (oldHomId) {
+              const { data: left } = await supabaseAdmin
+                .from("homologation_units")
+                .select("id")
+                .eq("homologation_id", oldHomId)
+                .limit(1);
+              if (!left?.length) {
+                await supabaseAdmin.from("homologations").delete().eq("id", oldHomId);
+              }
+            }
           }
         }
       }
