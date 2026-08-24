@@ -157,6 +157,42 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
     if (statesErr) throw statesErr;
     const stateByCode = new Map((existing ?? []).map((s) => [s.code, s]));
 
+    // Cache de projeto por nome de cliente (evita consultas repetidas na mesma execução).
+    const projectByClient = new Map<string, string | null>();
+    const findProjectForClient = async (clientName: string): Promise<string | null> => {
+      const key = clientName.trim().toLowerCase();
+      if (projectByClient.has(key)) return projectByClient.get(key) ?? null;
+      let projectId: string | null = null;
+      const { data: proj } = await supabaseAdmin
+        .from("projects")
+        .select("id")
+        .ilike("client_name", clientName.trim())
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      projectId = proj?.id ?? null;
+      if (!projectId) {
+        const { data: client } = await supabaseAdmin
+          .from("clients")
+          .select("id")
+          .ilike("name", clientName.trim())
+          .limit(1)
+          .maybeSingle();
+        if (client) {
+          const { data: proj2 } = await supabaseAdmin
+            .from("projects")
+            .select("id")
+            .eq("client_id", client.id)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          projectId = proj2?.id ?? null;
+        }
+      }
+      projectByClient.set(key, projectId);
+      return projectId;
+    };
+
     const now = new Date().toISOString();
     let changed = 0;
     const problems: string[] = [];
