@@ -207,6 +207,11 @@ export function DistributionCard() {
     },
   });
 
+  // Reconciliação: garante que os QR codes destes pedidos constem como "expedicao" na plataforma externa
+  useEffect(() => {
+    if (orders?.length) reconcileOrdersExternal(orders.map((o) => o.id), { location: "expedicao" });
+  }, [orders]);
+
   const distribute = useMutation({
     mutationFn: async (vars: { order: DistOrder; form: ShipmentForm }) => {
       const { order, form } = vars;
