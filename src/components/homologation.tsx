@@ -579,6 +579,8 @@ function AddUnitToBoxDialog({
           setTarget("new");
           setNewSize(10);
           setNewQr("");
+          setScanValue("");
+          setScanStatus(null);
         }
       }}
     >
