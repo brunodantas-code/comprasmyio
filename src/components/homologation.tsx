@@ -523,6 +523,42 @@ function AddUnitToBoxDialog({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, newSize, existingBoxQrs]);
 
+  /** Procura uma caixa existente pelo QR Code (câmera, galeria ou manual). */
+  async function findBoxByQr(qr: string) {
+    const v = qr.trim();
+    if (!v || scanning) return;
+    setScanValue(v);
+    setScanning(true);
+    setScanStatus(null);
+    try {
+      const { data, error } = await supabase
+        .from("homologations")
+        .select("id, box_size, box_qr, material_id, homologation_units(id)")
+        .eq("box_qr", v)
+        .maybeSingle();
+      if (error) throw error;
+      if (!data || data.box_size <= 1) {
+        setScanStatus({ type: "notfound", msg: "Nenhuma caixa encontrada com este QR Code." });
+        return;
+      }
+      if (data.material_id !== materialId) {
+        setScanStatus({ type: "other", msg: "Esta caixa é de outro produto — escolha uma caixa deste material." });
+        return;
+      }
+      const count = data.homologation_units?.length ?? 0;
+      if (count >= data.box_size) {
+        setScanStatus({ type: "full", msg: `Esta caixa está cheia (${count}/${data.box_size}). Escolha outra caixa.` });
+        return;
+      }
+      setTarget(data.id);
+      setScanStatus({ type: "selected", msg: `Caixa selecionada — ${count}/${data.box_size} produtos.` });
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setScanning(false);
+    }
+  }
+
   function submit() {
     if (target === "new") {
       add.mutate(
