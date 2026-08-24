@@ -237,17 +237,19 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
       if (!hasChanged) continue;
       changed++;
 
-      // Cliente: reflete na aba Cliente (unit_products) se está instalado ou parado.
+      // Cliente: reflete na aba Cliente (unit_products) se está instalado ou parado,
+      // vinculando o nome do cliente e o projeto correspondente, quando existir.
       if (location === "cliente") {
+        const projectId = clientName ? await findProjectForClient(clientName) : null;
         let { data: target } = await supabaseAdmin
           .from("unit_products")
-          .select("id, installed_at")
+          .select("id, installed_at, project_id")
           .eq("label", label)
           .maybeSingle();
         if (!target) {
           const { data: fuzzy } = await supabaseAdmin
             .from("unit_products")
-            .select("id, installed_at")
+            .select("id, installed_at, project_id")
             .ilike("label", `%/${escapeLike(code)}?%`)
             .limit(1)
             .maybeSingle();
@@ -264,6 +266,8 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
               moved_technician: null,
               move_notes: null,
               move_photo_url: null,
+              client_name: clientName,
+              project_id: target.project_id ?? projectId,
             })
             .eq("id", target.id);
         } else {
@@ -273,6 +277,8 @@ async function runSync(): Promise<{ status: number; body: Record<string, unknown
             material_id: unit?.material_id ?? null,
             status: status === "instalado" ? "instalado" : "parado",
             installed_at: status === "instalado" ? now : null,
+            client_name: clientName,
+            project_id: projectId,
             notes: "Sincronizado da plataforma externa",
           });
         }
