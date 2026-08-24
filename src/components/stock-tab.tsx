@@ -1397,13 +1397,14 @@ function EstoqueMyioSection({ userId, canDelete }: { userId: string; canDelete?:
         />
         <StockTableCard
           title="Estoque Terceiros"
-          description='Itens comprados de terceiros. Use o botão de troca para mover um item para "Myio".'
+          description='Itens comprados de terceiros. Toque no nome para ver foto, link de referência e parâmetros de compra. Use o botão de troca para mover um item para "Myio".'
           rows={rows.filter((r) => !manufactured?.[r.material_id])}
           isLoading={isLoading}
           userId={userId}
           canDelete={canDelete}
           actions={<AddMaterialDialog location="almoxarifado" userId={userId} />}
           moveTo="myio"
+          detail
           damageSource="Estoque Terceiros"
         />
         <BoxesCard />
@@ -1534,7 +1535,7 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
           title={`Estoque — ${LOCATION_LABELS[location]}`}
           description={
             location === "almoxarifado_geral"
-              ? "Estoque geral independente. Crie itens do zero com foto, link de referência e parâmetros de compra."
+              ? "Estoque geral independente. Toque no nome para ver foto, link de referência e parâmetros de compra."
               : 'A entrada é automática quando o solicitante confirma "Recebido corretamente" em um pedido feito pela biblioteca.'
           }
           rows={rows}
@@ -1542,6 +1543,7 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
           userId={userId}
           canDelete={canDelete}
           actions={toolbar}
+          detail
           damageSource={`Estoque — ${LOCATION_LABELS[location]}`}
         />
 
