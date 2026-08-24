@@ -293,6 +293,7 @@ function useInvalidateHomologationData() {
     qc.invalidateQueries({ queryKey: ["homologations-qr"] });
     qc.invalidateQueries({ queryKey: ["boxes-list"] });
     qc.invalidateQueries({ queryKey: ["box-qr-codes"] });
+    qc.invalidateQueries({ queryKey: ["incomplete-boxes"] });
   };
 }
 
@@ -493,6 +494,9 @@ function AddUnitToBoxDialog({
   const [target, setTarget] = useState<string>("new");
   const [newSize, setNewSize] = useState<number>(10);
   const [newQr, setNewQr] = useState("");
+  const [scanValue, setScanValue] = useState("");
+  const [scanStatus, setScanStatus] = useState<{ type: "full" | "selected" | "notfound" | "other"; msg: string } | null>(null);
+  const [scanning, setScanning] = useState(false);
   const { data: existingBoxQrs } = useBoxQrCodes();
   const add = useAddUnitToBox();
 
@@ -519,6 +523,42 @@ function AddUnitToBoxDialog({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, newSize, existingBoxQrs]);
 
+  /** Procura uma caixa existente pelo QR Code (câmera, galeria ou manual). */
+  async function findBoxByQr(qr: string) {
+    const v = qr.trim();
+    if (!v || scanning) return;
+    setScanValue(v);
+    setScanning(true);
+    setScanStatus(null);
+    try {
+      const { data, error } = await supabase
+        .from("homologations")
+        .select("id, box_size, box_qr, material_id, homologation_units(id)")
+        .eq("box_qr", v)
+        .maybeSingle();
+      if (error) throw error;
+      if (!data || data.box_size <= 1) {
+        setScanStatus({ type: "notfound", msg: "Nenhuma caixa encontrada com este QR Code." });
+        return;
+      }
+      if (data.material_id !== materialId) {
+        setScanStatus({ type: "other", msg: "Esta caixa é de outro produto — escolha uma caixa deste material." });
+        return;
+      }
+      const count = data.homologation_units?.length ?? 0;
+      if (count >= data.box_size) {
+        setScanStatus({ type: "full", msg: `Esta caixa está cheia (${count}/${data.box_size}). Escolha outra caixa.` });
+        return;
+      }
+      setTarget(data.id);
+      setScanStatus({ type: "selected", msg: `Caixa selecionada — ${count}/${data.box_size} produtos.` });
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setScanning(false);
+    }
+  }
+
   function submit() {
     if (target === "new") {
       add.mutate(
@@ -539,6 +579,8 @@ function AddUnitToBoxDialog({
           setTarget("new");
           setNewSize(10);
           setNewQr("");
+          setScanValue("");
+          setScanStatus(null);
         }
       }}
     >
@@ -557,6 +599,47 @@ function AddUnitToBoxDialog({
         </DialogHeader>
 
         <div className="space-y-4">
+          <div className="space-y-2 rounded border p-3">
+            <Label>Procurar caixa pelo QR Code</Label>
+            <div className="flex flex-wrap items-center gap-2">
+              <Input
+                className="min-w-40 flex-1"
+                value={scanValue}
+                onChange={(e) => setScanValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    findBoxByQr(scanValue);
+                  }
+                }}
+                placeholder="https://.../caixa-10/1"
+              />
+              <ManualQrDialog label="QR Code da caixa" value={scanValue} onResult={findBoxByQr} />
+              <GalleryQrButton label="QR Code da caixa" onResult={findBoxByQr} />
+              <QrScannerDialog label="QR Code da caixa" onResult={findBoxByQr} />
+              <Button type="button" variant="secondary" disabled={scanning || !scanValue.trim()} onClick={() => findBoxByQr(scanValue)}>
+                {scanning ? "Buscando..." : "Buscar"}
+              </Button>
+            </div>
+            {scanStatus && (
+              <p
+                className={`text-xs ${
+                  scanStatus.type === "selected"
+                    ? "text-green-600"
+                    : scanStatus.type === "full"
+                      ? "text-amber-600"
+                      : "text-destructive"
+                }`}
+              >
+                {scanStatus.msg}
+              </p>
+            )}
+            <p className="text-xs text-muted-foreground">
+              Leia o QR Code pela câmera, galeria ou digite manualmente. Caixa cheia é avisada; caixa incompleta é
+              selecionada automaticamente.
+            </p>
+          </div>
+
           <div className="space-y-2">
             <Label>Caixa de destino</Label>
             <Select value={target} onValueChange={setTarget}>
