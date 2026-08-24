@@ -20,6 +20,14 @@ type ExternalProduct = {
   location?: string;
   status?: string;
   technician?: string;
+  nome_cliente?: string;
+  client_name?: string;
+  cliente?: string;
+  client?: string;
+  qr?: string;
+  qr_value?: string;
+  url?: string;
+  link?: string;
   updated_at?: string;
 };
 

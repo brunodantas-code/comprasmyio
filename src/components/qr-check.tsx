@@ -93,7 +93,7 @@ function useQrTrace(code: string) {
         extCode
           ? supabase
               .from("external_product_states")
-              .select("code, product_type, location, status, technician, last_change_at")
+              .select("code, product_type, location, status, technician, client_name, last_change_at")
               .eq("code", extCode)
               .maybeSingle()
           : Promise.resolve({ data: null }),
@@ -368,6 +368,7 @@ function useQrTrace(code: string) {
             ext.product_type ? `Tipo: ${ext.product_type}` : "",
             ext.status ? `Status: ${EXTERNAL_STATUS_LABELS[ext.status] ?? ext.status}` : "",
             ext.technician ? `Técnico: ${ext.technician}` : "",
+            ext.client_name ? `Cliente: ${ext.client_name}` : "",
           ]
             .filter(Boolean)
             .join(" · "),
@@ -416,8 +417,8 @@ function useQrTrace(code: string) {
       if (location === "Não encontrado" && ext) {
         stage = EXT_STAGE[ext.location] ?? null;
         location =
-          ext.location === "cliente" && ext.status
-            ? `Cliente — ${EXTERNAL_STATUS_LABELS[ext.status] ?? ext.status}`
+          ext.location === "cliente"
+            ? `Cliente${ext.client_name ? ` (${ext.client_name})` : ""}${ext.status ? ` — ${EXTERNAL_STATUS_LABELS[ext.status] ?? ext.status}` : ""}`
             : (EXTERNAL_LOCATION_LABELS[ext.location] ?? ext.location);
       }
 

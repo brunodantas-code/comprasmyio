@@ -27,6 +27,7 @@ type UnitProduct = {
   material_id: string;
   product: string | null;
   project_id: string | null;
+  client_name: string | null;
   projects?: { name: string } | null;
   label: string | null;
   status: "parado" | "instalado";
@@ -56,7 +57,9 @@ function useUnitProducts() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("unit_products")
-        .select("id, material_id, product, project_id, label, status, installed_at, notes, created_at, projects(name)")
+        .select(
+          "id, material_id, product, project_id, client_name, label, status, installed_at, notes, created_at, projects(name)",
+        )
         .is("moved_to", null)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -444,6 +447,7 @@ function ProductsTable({
       <TableHeader>
         <TableRow>
           <TableHead>Produto</TableHead>
+          <TableHead>Cliente</TableHead>
           <TableHead>Projeto</TableHead>
           <TableHead>Etiqueta (QR)</TableHead>
           <TableHead>{installed ? "Instalado em" : "Na unidade desde"}</TableHead>
@@ -454,6 +458,7 @@ function ProductsTable({
         {rows.map((p) => (
           <TableRow key={p.id}>
             <TableCell className="font-medium">{p.product ?? names[p.material_id] ?? "—"}</TableCell>
+            <TableCell className="text-sm text-muted-foreground">{p.client_name ?? "—"}</TableCell>
             <TableCell className="text-sm text-muted-foreground">{p.projects?.name ?? "—"}</TableCell>
             <TableCell className="max-w-[280px] break-all text-sm text-muted-foreground">
               {p.label ?? <span className="italic">sem etiqueta</span>}

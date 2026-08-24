@@ -15,6 +15,7 @@ export type ExternalState = {
   location: string;
   status: string | null;
   technician: string | null;
+  client_name: string | null;
   qr_value: string | null;
   last_change_at: string;
 };
@@ -50,7 +51,7 @@ export function useExternalStates(location?: string) {
     queryFn: async () => {
       let q = supabase
         .from("external_product_states")
-        .select("id, code, product_type, location, status, technician, qr_value, last_change_at")
+        .select("id, code, product_type, location, status, technician, client_name, qr_value, last_change_at")
         .order("last_change_at", { ascending: false });
       if (location) q = q.eq("location", location);
       const { data, error } = await q;
