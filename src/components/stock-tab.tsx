@@ -38,7 +38,7 @@ import { MyioDemandCard, ProductionQueueCard } from "@/components/myio-demand";
 import { TechnicianItemsCard } from "@/components/technician-items";
 import { MaterialDetailDialog } from "@/components/material-detail";
 import { DamageItemDialog, DamagedItemsCard } from "@/components/damaged-items";
-import { ExternalSyncCard, ExternalTechnicianCard, ExternalLostCard } from "@/components/external-sync";
+import { ExternalSyncCard, ExternalLostCard } from "@/components/external-sync";
 import { pushQrsToExternal } from "@/lib/push-external";
 
 
