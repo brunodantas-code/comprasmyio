@@ -39,6 +39,7 @@ type Order = {
   item_link: string | null;
   material_id: string | null;
   terceiros_material_id: string | null;
+  tool_asset_id?: string | null;
   quantity: number;
   recipient: string;
   requester_notes: string | null;
