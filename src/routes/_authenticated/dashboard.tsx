@@ -1104,9 +1104,12 @@ function EditRequesterDialog({ order }: { order: Order }) {
   const [files, setFiles] = useState<File[]>([]);
   const [deadlineType, setDeadlineType] = useState<Order["deadline_type"]>(order.deadline_type);
   const [deadlineDate, setDeadlineDate] = useState(order.deadline_date ?? "");
-  const [itemName, setItemName] = useState(order.item_name);
+  const { data: purchasableItems } = usePurchasableItems();
+  const [itemKey, setItemKey] = useState<string | null>(
+    order.material_id ? `mat:${order.material_id}` : order.terceiros_material_id ? `ter:${order.terceiros_material_id}` : null
+  );
   const [itemLink, setItemLink] = useState(order.item_link ?? "");
-  const [materialId, setMaterialId] = useState<string | null>(order.material_id ?? null);
+  const selectedItem = (purchasableItems ?? []).find((i) => i.key === itemKey) ?? null;
 
   const save = useMutation({
     mutationFn: async (v: z.infer<typeof newOrderSchema>) => {
@@ -1119,7 +1122,8 @@ function EditRequesterDialog({ order }: { order: Order }) {
         project_id: v.project_id,
         item_name: v.item_name,
         item_link: v.item_link ?? null,
-        material_id: materialId,
+        material_id: selectedItem?.material_id ?? null,
+        terceiros_material_id: selectedItem?.terceiros_material_id ?? null,
         quantity: v.quantity,
         recipient: v.recipient,
         requester_notes: v.requester_notes ?? null,
@@ -1141,10 +1145,13 @@ function EditRequesterDialog({ order }: { order: Order }) {
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!selectedItem) {
+      return toast.error("Selecione um item cadastrado no Estoque — Fábrica, Estoque Myio Terceiros ou Almoxarifado.");
+    }
     const fd = new FormData(e.currentTarget);
     const parsed = newOrderSchema.safeParse({
       project_id: projectId,
-      item_name: itemName,
+      item_name: selectedItem.name,
       item_link: itemLink || undefined,
       quantity: fd.get("quantity"),
       recipient: fd.get("recipient"),
@@ -1176,11 +1183,13 @@ function EditRequesterDialog({ order }: { order: Order }) {
             </Select>
           </div>
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor={`e-name-${order.id}`}>Nome do item</Label>
-              <MaterialPicker onPick={(m) => { setItemName(m.name); setMaterialId(m.id); if (m.link) setItemLink(m.link); }} />
-            </div>
-            <Input id={`e-name-${order.id}`} value={itemName} onChange={(e) => { setItemName(e.target.value); setMaterialId(null); }} required />
+            <Label>Item</Label>
+            <PurchasableItemPicker value={selectedItem} onPick={(i) => { setItemKey(i.key); if (i.link) setItemLink(i.link); }} />
+            {!selectedItem && (
+              <p className="text-xs text-muted-foreground">
+                Item atual: {order.item_name} — selecione um item cadastrado para salvar.
+              </p>
+            )}
           </div>
           <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
             <div className="space-y-2">
