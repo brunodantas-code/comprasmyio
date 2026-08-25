@@ -566,6 +566,7 @@ function NewOrder({ userId }: { userId: string }) {
         item_link: values.item_link ?? null,
         material_id: item?.material_id ?? null,
         terceiros_material_id: item?.terceiros_material_id ?? null,
+        tool_asset_id: item?.tool_asset_id ?? null,
         quantity: values.quantity,
         recipient: values.recipient,
         requester_notes: values.requester_notes ?? null,
