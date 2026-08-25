@@ -1,8 +1,10 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { MyioLogo } from "@/components/myio-logo";
 import { supabase } from "@/integrations/supabase/client";
+import { exportDatabaseBackup } from "@/lib/backup.functions";
 import { useCurrentUser, type AppRole } from "@/hooks/use-current-user";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +21,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { toast } from "sonner";
 import { LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Library, Boxes, Factory, Building2, Plane } from "lucide-react";
-import { Trash2, Paperclip, X, Download } from "lucide-react";
+import { Trash2, Paperclip, X, Download, Loader2, DatabaseBackup } from "lucide-react";
 import { z } from "zod";
 import { StockTab } from "@/components/stock-tab";
 import { MyioOrdersTab } from "@/components/myio-orders-tab";
@@ -374,10 +376,13 @@ function Dashboard() {
           {me.isAdmin && (
             <TabsContent value="admin">
               <Tabs defaultValue="usuarios">
-                <TabsList className="mb-4">
-                  <TabsTrigger value="usuarios"><Users className="mr-2 h-4 w-4" />Usuários</TabsTrigger>
-                  <TabsTrigger value="logs"><ScrollText className="mr-2 h-4 w-4" />Logs</TabsTrigger>
-                </TabsList>
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+                  <TabsList>
+                    <TabsTrigger value="usuarios"><Users className="mr-2 h-4 w-4" />Usuários</TabsTrigger>
+                    <TabsTrigger value="logs"><ScrollText className="mr-2 h-4 w-4" />Logs</TabsTrigger>
+                  </TabsList>
+                  <BackupButton />
+                </div>
                 <TabsContent value="usuarios"><UsersAdmin /></TabsContent>
                 <TabsContent value="logs"><LogsAdmin /></TabsContent>
               </Tabs>
@@ -1618,6 +1623,39 @@ function StatusHistoryDialog({ order }: { order: Order }) {
         )}
       </DialogContent>
     </Dialog>
+  );
+}
+
+function BackupButton() {
+  const runBackup = useServerFn(exportDatabaseBackup);
+  const [loading, setLoading] = useState(false);
+
+  const handleBackup = async () => {
+    setLoading(true);
+    try {
+      const backup = await runBackup();
+      const stamp = backup.generatedAt.slice(0, 19).replace(/[:T]/g, "-");
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `backup-myio-${stamp}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      const total = Object.values(backup.tables).reduce((acc, rows) => acc + rows.length, 0);
+      toast.success(`Backup baixado: ${total} registros em ${Object.keys(backup.tables).length} tabelas.`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Falha ao gerar o backup");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Button variant="outline" size="sm" onClick={handleBackup} disabled={loading}>
+      {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <DatabaseBackup className="mr-2 h-4 w-4" />}
+      Backup
+    </Button>
   );
 }
 
