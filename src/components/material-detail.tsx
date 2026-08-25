@@ -118,7 +118,9 @@ export function MaterialDetailDialog({
       const { error } =
         table === "terceiros_materials"
           ? await supabase.from("terceiros_materials").update(payload).eq("id", materialId)
-          : await supabase.from("materials").update(payload).eq("id", materialId);
+          : table === "tool_assets"
+            ? await supabase.from("tool_assets").update(payload).eq("id", materialId)
+            : await supabase.from("materials").update(payload).eq("id", materialId);
       if (error) throw error;
     },
 
