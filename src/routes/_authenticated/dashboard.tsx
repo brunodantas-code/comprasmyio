@@ -38,6 +38,7 @@ type Order = {
   item_name: string;
   item_link: string | null;
   material_id: string | null;
+  terceiros_material_id: string | null;
   quantity: number;
   recipient: string;
   requester_notes: string | null;
@@ -420,48 +421,93 @@ function useProfilesMap() {
 
 /* ---------- Materials library ---------- */
 
-type Material = { id: string; name: string; link: string | null };
+type PurchasableItem = {
+  key: string;
+  name: string;
+  link: string | null;
+  origin: string;
+  material_id: string | null;
+  terceiros_material_id: string | null;
+};
 
-function useMaterials() {
+function usePurchasableItems() {
   return useQuery({
-    queryKey: ["materials"],
+    queryKey: ["purchasable-items"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("materials").select("id, name, link").order("name");
-      if (error) throw error;
-      return (data ?? []) as Material[];
+      const [{ data: mats, error: me }, { data: ters, error: te }] = await Promise.all([
+        supabase.from("materials").select("id, name, link, location").in("location", ["fabrica", "almoxarifado"]).order("name"),
+        supabase.from("terceiros_materials").select("id, name, link").order("name"),
+      ]);
+      if (me) throw me;
+      if (te) throw te;
+      const items: PurchasableItem[] = [];
+      (mats ?? []).forEach((m) =>
+        items.push({
+          key: `mat:${m.id}`,
+          name: m.name,
+          link: m.link,
+          origin: m.location === "fabrica" ? "Estoque — Fábrica" : "Almoxarifado",
+          material_id: m.id,
+          terceiros_material_id: null,
+        })
+      );
+      (ters ?? []).forEach((t) =>
+        items.push({
+          key: `ter:${t.id}`,
+          name: t.name,
+          link: t.link,
+          origin: "Estoque Myio Terceiros",
+          material_id: null,
+          terceiros_material_id: t.id,
+        })
+      );
+      return items;
     },
   });
 }
 
-function MaterialPicker({ onPick }: { onPick: (m: Material) => void }) {
-  const { data: materials, isLoading } = useMaterials();
+function PurchasableItemPicker({ value, onPick }: { value: PurchasableItem | null; onPick: (i: PurchasableItem) => void }) {
+  const { data: items, isLoading } = usePurchasableItems();
   const [open, setOpen] = useState(false);
+  const origins = ["Estoque — Fábrica", "Estoque Myio Terceiros", "Almoxarifado"];
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button type="button" variant="outline" size="sm">
-          <Library className="mr-1 h-4 w-4" /> Biblioteca
+        <Button type="button" variant="outline" className="w-full justify-start font-normal">
+          {value ? (
+            <span className="truncate">
+              {value.name} <span className="text-xs text-muted-foreground">· {value.origin}</span>
+            </span>
+          ) : (
+            <span className="text-muted-foreground">Selecione um item cadastrado...</span>
+          )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[min(20rem,calc(100vw-2rem))] p-0" align="end">
+      <PopoverContent className="w-[min(24rem,calc(100vw-2rem))] p-0" align="start">
         <Command>
-          <CommandInput placeholder="Buscar material..." />
+          <CommandInput placeholder="Buscar item cadastrado..." />
           <CommandList>
-            <CommandEmpty>{isLoading ? "Carregando..." : "Nenhum material cadastrado."}</CommandEmpty>
-            <CommandGroup>
-              {(materials ?? []).map((m) => (
-                <CommandItem
-                  key={m.id}
-                  value={m.name}
-                  onSelect={() => { onPick(m); setOpen(false); }}
-                >
-                  <div className="flex min-w-0 flex-col">
-                    <span className="truncate">{m.name}</span>
-                    {m.link && <span className="truncate text-xs text-muted-foreground">{m.link}</span>}
-                  </div>
-                </CommandItem>
-              ))}
-            </CommandGroup>
+            <CommandEmpty>{isLoading ? "Carregando..." : "Nenhum item cadastrado nos estoques."}</CommandEmpty>
+            {origins.map((origin) => {
+              const list = (items ?? []).filter((i) => i.origin === origin);
+              if (!list.length) return null;
+              return (
+                <CommandGroup key={origin} heading={origin}>
+                  {list.map((i) => (
+                    <CommandItem
+                      key={i.key}
+                      value={`${i.name} (${i.origin})`}
+                      onSelect={() => { onPick(i); setOpen(false); }}
+                    >
+                      <div className="flex min-w-0 flex-col">
+                        <span className="truncate">{i.name}</span>
+                        {i.link && <span className="truncate text-xs text-muted-foreground">{i.link}</span>}
+                      </div>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              );
+            })}
           </CommandList>
         </Command>
       </PopoverContent>
