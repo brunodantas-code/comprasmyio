@@ -19,6 +19,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { AlertTriangle, Camera, Eye, ImageUp, Recycle } from "lucide-react";
+import { pushQrsToExternal } from "@/lib/push-external";
 
 export type DamagedItem = {
   id: string;
