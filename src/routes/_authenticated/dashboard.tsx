@@ -1189,6 +1189,7 @@ function EditRequesterDialog({ order }: { order: Order }) {
         item_link: v.item_link ?? null,
         material_id: selectedItem?.material_id ?? null,
         terceiros_material_id: selectedItem?.terceiros_material_id ?? null,
+        tool_asset_id: selectedItem?.tool_asset_id ?? null,
         quantity: v.quantity,
         recipient: v.recipient,
         requester_notes: v.requester_notes ?? null,
