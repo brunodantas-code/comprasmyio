@@ -1022,6 +1022,7 @@ export type Database = {
           requester_id: string
           requester_notes: string | null
           status: Database["public"]["Enums"]["order_status"]
+          terceiros_material_id: string | null
           updated_at: string
         }
         Insert: {
@@ -1043,6 +1044,7 @@ export type Database = {
           requester_id: string
           requester_notes?: string | null
           status?: Database["public"]["Enums"]["order_status"]
+          terceiros_material_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -1064,6 +1066,7 @@ export type Database = {
           requester_id?: string
           requester_notes?: string | null
           status?: Database["public"]["Enums"]["order_status"]
+          terceiros_material_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -1086,6 +1089,20 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_terceiros_material_id_fkey"
+            columns: ["terceiros_material_id"]
+            isOneToOne: false
+            referencedRelation: "terceiros_material_stock"
+            referencedColumns: ["material_id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_terceiros_material_id_fkey"
+            columns: ["terceiros_material_id"]
+            isOneToOne: false
+            referencedRelation: "terceiros_materials"
             referencedColumns: ["id"]
           },
         ]
@@ -1309,6 +1326,7 @@ export type Database = {
           created_by: string | null
           id: string
           material_id: string
+          order_id: string | null
           photo_url: string | null
           quantity: number
           reason: string | null
@@ -1320,6 +1338,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           material_id: string
+          order_id?: string | null
           photo_url?: string | null
           quantity: number
           reason?: string | null
@@ -1331,6 +1350,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           material_id?: string
+          order_id?: string | null
           photo_url?: string | null
           quantity?: number
           reason?: string | null
@@ -1350,6 +1370,13 @@ export type Database = {
             columns: ["material_id"]
             isOneToOne: false
             referencedRelation: "terceiros_materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "terceiros_movements_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
             referencedColumns: ["id"]
           },
         ]
