@@ -867,7 +867,9 @@ function BuyerQueue() {
       ? `mat:${o.material_id}`
       : o.terceiros_material_id
         ? `ter:${o.terceiros_material_id}`
-        : null;
+        : o.tool_asset_id
+          ? `fer:${o.tool_asset_id}`
+          : null;
     return key ? purchaseTypes?.get(key) === "importacao" : false;
   };
   const nacionais = filtered.filter((o) => !isImportado(o));
