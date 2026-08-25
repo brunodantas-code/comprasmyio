@@ -37,6 +37,7 @@ import { QrCheckSection } from "@/components/qr-check";
 import { MyioDemandCard, ProductionQueueCard } from "@/components/myio-demand";
 import { TechnicianItemsCard } from "@/components/technician-items";
 import { MaterialDetailDialog } from "@/components/material-detail";
+import { ToolAssetsSection } from "@/components/tools-assets";
 import { DamageItemDialog, DamagedItemsCard } from "@/components/damaged-items";
 import { ExternalSyncCard, ExternalLostCard } from "@/components/external-sync";
 import { pushQrsToExternal } from "@/lib/push-external";
