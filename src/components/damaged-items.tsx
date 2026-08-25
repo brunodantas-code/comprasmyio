@@ -405,9 +405,13 @@ function RecoverDamagedDialog({ item, userId }: { item: DamagedItem; userId: str
 
       // Avisa a plataforma externa que o QR saiu de "avariado" — sem isso o
       // sync a cada 5 min desfaz a recuperação (o produto continuaria avariado lá).
+      // O novo local sempre acompanha o status: item recuperado volta "parado"
+      // (não está instalado em lugar nenhum) — em unidade, o toggle de
+      // instalado/parado na aba Cliente continua sendo o caminho para instalar.
       if (qrLabel) {
         pushQrsToExternal([qrLabel], {
           location: destination === "tecnico" ? "tecnico" : destination === "unidade" ? "cliente" : "estoque",
+          status: "parado",
           technician: destination === "tecnico" ? technician.trim() : null,
           clientName: destination === "unidade" ? projectName : null,
         });
