@@ -419,6 +419,8 @@ function RecoverDamagedDialog({ item, userId }: { item: DamagedItem; userId: str
       qc.invalidateQueries({ queryKey: ["material-stock"] });
       qc.invalidateQueries({ queryKey: ["stock-movements"] });
       qc.invalidateQueries({ queryKey: ["technician-dispatches"] });
+      qc.invalidateQueries({ queryKey: ["technician-dispatch-qrs"] });
+      qc.invalidateQueries({ queryKey: ["external-product-states"] });
       qc.invalidateQueries({ queryKey: ["unit-products"] });
       setOpen(false);
       reset();
