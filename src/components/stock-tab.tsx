@@ -1276,13 +1276,12 @@ function FabricaSection({ userId, canDelete }: { userId: string; canDelete?: boo
         <ProductionCapacityCard />
         <StockTableCard
           title="Estoque — Fábrica"
-          description="Componentes da fábrica. Toque no nome para ver foto, link de referência e parâmetros de compra."
+          description="Componentes exclusivos da operação da fábrica, separados dos produtos comprados de terceiros."
           rows={rows}
           isLoading={isLoading}
           userId={userId}
           canDelete={canDelete}
           actions={toolbar}
-          detail
           damageSource="Estoque — Fábrica"
         />
         <Card>
@@ -1396,8 +1395,8 @@ function EstoqueMyioSection({ userId, canDelete }: { userId: string; canDelete?:
           damageSource="Estoque Myio"
         />
         <StockTableCard
-          title="Estoque Terceiros"
-          description='Itens comprados de terceiros. Toque no nome para ver foto, link de referência e parâmetros de compra. Use o botão de troca para mover um item para "Myio".'
+          title="Estoque Myio Terceiros"
+          description='Produtos comprados de terceiros, separados do Estoque Fábrica. Toque no nome para ver foto, link de referência e configurações de compra.'
           rows={rows.filter((r) => !manufactured?.[r.material_id])}
           isLoading={isLoading}
           userId={userId}
@@ -1405,7 +1404,7 @@ function EstoqueMyioSection({ userId, canDelete }: { userId: string; canDelete?:
           actions={<AddMaterialDialog location="almoxarifado" userId={userId} />}
           moveTo="myio"
           detail
-          damageSource="Estoque Terceiros"
+          damageSource="Estoque Myio Terceiros"
         />
         <BoxesCard />
         <Card>
@@ -1543,7 +1542,7 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
           userId={userId}
           canDelete={canDelete}
           actions={toolbar}
-          detail
+          detail={location === "almoxarifado_geral"}
           damageSource={`Estoque — ${LOCATION_LABELS[location]}`}
         />
 
