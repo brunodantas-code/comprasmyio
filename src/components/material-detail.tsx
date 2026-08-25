@@ -99,6 +99,8 @@ export function MaterialDetailDialog({
     qc.invalidateQueries({ queryKey: ["stock"] });
     qc.invalidateQueries({ queryKey: ["material-stock"] });
     qc.invalidateQueries({ queryKey: ["terceiros-stock"] });
+    qc.invalidateQueries({ queryKey: ["tool-stock"] });
+    qc.invalidateQueries({ queryKey: ["purchasable-items"] });
   };
 
   const save = useMutation({
