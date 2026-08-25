@@ -485,7 +485,7 @@ function usePurchasableItems() {
 function PurchasableItemPicker({ value, onPick }: { value: PurchasableItem | null; onPick: (i: PurchasableItem) => void }) {
   const { data: items, isLoading } = usePurchasableItems();
   const [open, setOpen] = useState(false);
-  const origins = ["Estoque — Fábrica", "Estoque Myio Terceiros", "Almoxarifado"];
+  const origins = ["Estoque — Fábrica", "Estoque Myio Terceiros", "Almoxarifado", "Ferramentas/Ativos"];
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
