@@ -20,7 +20,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Checkbox } from "@/components/ui/checkbox";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { toast } from "sonner";
-import { LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Library, Boxes, Factory, Building2, Plane } from "lucide-react";
+import { LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Boxes, Factory, Building2, Plane } from "lucide-react";
 import { Trash2, Paperclip, X, Download, Loader2, DatabaseBackup } from "lucide-react";
 import { z } from "zod";
 import { StockTab } from "@/components/stock-tab";
