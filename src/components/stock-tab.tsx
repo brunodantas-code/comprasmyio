@@ -570,6 +570,11 @@ export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; 
           )}
         </TabsContent>
       ))}
+      {locations.includes("almoxarifado_geral") && (
+        <TabsContent value="ferramentas">
+          <ToolAssetsSection userId={userId} canDelete={canDelete} />
+        </TabsContent>
+      )}
       {locations.includes("almoxarifado") && (
         <TabsContent value="distribuicao">
           <DistributionCard />
