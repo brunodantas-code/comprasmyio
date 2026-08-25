@@ -38,7 +38,7 @@ import { MyioDemandCard, ProductionQueueCard } from "@/components/myio-demand";
 import { TechnicianItemsCard } from "@/components/technician-items";
 import { MaterialDetailDialog } from "@/components/material-detail";
 import { DamageItemDialog, DamagedItemsCard } from "@/components/damaged-items";
-import { ExternalSyncCard, ExternalTechnicianCard, ExternalLostCard } from "@/components/external-sync";
+import { ExternalSyncCard, ExternalLostCard } from "@/components/external-sync";
 import { pushQrsToExternal } from "@/lib/push-external";
 
 
@@ -596,10 +596,7 @@ function TechnicianSection({ userId }: { userId: string }) {
   const { data: stock } = useStock();
   const materialNames = Object.fromEntries((stock ?? []).map((r) => [r.material_id, r.name]));
   return (
-    <div className="space-y-4">
-      <TechnicianItemsCard userId={userId} materialNames={materialNames} />
-      <ExternalTechnicianCard />
-    </div>
+    <TechnicianItemsCard userId={userId} materialNames={materialNames} />
   );
 }
 
