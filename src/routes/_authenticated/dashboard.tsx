@@ -376,10 +376,13 @@ function Dashboard() {
           {me.isAdmin && (
             <TabsContent value="admin">
               <Tabs defaultValue="usuarios">
-                <TabsList className="mb-4">
-                  <TabsTrigger value="usuarios"><Users className="mr-2 h-4 w-4" />Usuários</TabsTrigger>
-                  <TabsTrigger value="logs"><ScrollText className="mr-2 h-4 w-4" />Logs</TabsTrigger>
-                </TabsList>
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+                  <TabsList>
+                    <TabsTrigger value="usuarios"><Users className="mr-2 h-4 w-4" />Usuários</TabsTrigger>
+                    <TabsTrigger value="logs"><ScrollText className="mr-2 h-4 w-4" />Logs</TabsTrigger>
+                  </TabsList>
+                  <BackupButton />
+                </div>
                 <TabsContent value="usuarios"><UsersAdmin /></TabsContent>
                 <TabsContent value="logs"><LogsAdmin /></TabsContent>
               </Tabs>
