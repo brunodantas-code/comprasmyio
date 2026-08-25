@@ -33,7 +33,7 @@ type MaterialDetail = {
 
 const TYPE_LABEL: Record<string, string> = { nacional: "Nacional", importacao: "Importação" };
 
-type DetailTable = "materials" | "terceiros_materials";
+type DetailTable = "materials" | "terceiros_materials" | "tool_assets";
 
 function useMaterialDetail(materialId: string, enabled: boolean, table: DetailTable) {
   return useQuery({
@@ -44,7 +44,9 @@ function useMaterialDetail(materialId: string, enabled: boolean, table: DetailTa
       const { data, error } =
         table === "terceiros_materials"
           ? await supabase.from("terceiros_materials").select(cols).eq("id", materialId).single()
-          : await supabase.from("materials").select(cols).eq("id", materialId).single();
+          : table === "tool_assets"
+            ? await supabase.from("tool_assets").select(cols).eq("id", materialId).single()
+            : await supabase.from("materials").select(cols).eq("id", materialId).single();
       if (error) throw error;
       const m = data as MaterialDetail;
       let signed: string | null = null;
