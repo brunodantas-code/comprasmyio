@@ -545,7 +545,9 @@ export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; 
                   ? "Checar QR Code"
                   : t === "avariados"
                     ? "Itens Avariados"
-                    : LOCATION_LABELS[t as StockLocation]}
+                    : t === "ferramentas"
+                      ? "Ferramentas/Ativos"
+                      : LOCATION_LABELS[t as StockLocation]}
           </TabsTrigger>
         ))}
       </TabsList>
