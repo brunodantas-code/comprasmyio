@@ -838,15 +838,18 @@ function BuyerQueue() {
   const { data: purchaseTypes } = useQuery({
     queryKey: ["purchase-types"],
     queryFn: async () => {
-      const [{ data: mats, error: me2 }, { data: ters, error: te }] = await Promise.all([
+      const [{ data: mats, error: me2 }, { data: ters, error: te }, { data: tools, error: fe }] = await Promise.all([
         supabase.from("materials").select("id, purchase_type"),
         supabase.from("terceiros_materials").select("id, purchase_type"),
+        supabase.from("tool_assets").select("id, purchase_type"),
       ]);
       if (me2) throw me2;
       if (te) throw te;
+      if (fe) throw fe;
       const map = new Map<string, string | null>();
       (mats ?? []).forEach((m) => map.set(`mat:${m.id}`, m.purchase_type));
       (ters ?? []).forEach((t) => map.set(`ter:${t.id}`, t.purchase_type));
+      (tools ?? []).forEach((t) => map.set(`fer:${t.id}`, t.purchase_type));
       return map;
     },
   });
