@@ -518,7 +518,10 @@ export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; 
     if (loc === "perdido") tabs.push("avariados");
   });
   if (!onlyLocation) tabs.push("qr-check");
-  if (locations.includes("almoxarifado_geral")) tabs.push("almoxarifado_geral");
+  if (locations.includes("almoxarifado_geral")) {
+    tabs.push("almoxarifado_geral");
+    tabs.push("ferramentas");
+  }
   return (
     <Tabs defaultValue={tabs[0]} className="space-y-4">
       <TabsList className="h-auto flex-wrap justify-start gap-y-1">
