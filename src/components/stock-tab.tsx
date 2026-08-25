@@ -700,7 +700,7 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
           purchase_type: v.type,
           description: v.description,
           photo_url,
-          ...(isFabrica ? { is_product: false } : {}),
+          ...(isFabrica ? { is_product: false, is_manufactured: false } : {}),
         });
       if (error) throw error;
 
@@ -716,7 +716,8 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
       toast.error(
         e.message.includes("materials_fabrica_unique_name")
           ? "Já existe um componente com esse nome na Fábrica"
-          : e.message.includes("materials_fabrica_only_components")
+          : e.message.includes("materials_fabrica_only_components") ||
+              e.message.includes("materials_fabrica_not_manufactured")
             ? "O Estoque — Fábrica aceita apenas componentes"
             : e.message,
       ),
@@ -1225,11 +1226,14 @@ function FabricaSection({ userId, canDelete }: { userId: string; canDelete?: boo
   const { data: stock, isLoading } = useStock();
   const { data: movements } = useMovements();
   const { data: profiles } = useStockProfiles();
+  const { data: manufactured } = useManufacturedMap();
   const [search, setSearch] = useState("");
   const [view, setView] = useState<"all" | "with" | "zero">("all");
 
+  // Fábrica = somente componentes. Produtos fabricados pela Myio nunca aparecem aqui.
   const scoped = (stock ?? [])
     .filter((r) => (r.location ?? "fabrica") === "fabrica")
+    .filter((r) => !manufactured?.[r.material_id])
     .filter((r) => !/ — Caixa de \d+$/.test(r.name));
   const scopedIds = new Set(scoped.map((r) => r.material_id));
   const scopedMovements = (movements ?? []).filter((m) => scopedIds.has(m.material_id));
