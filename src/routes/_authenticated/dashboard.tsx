@@ -435,7 +435,7 @@ function usePurchasableItems() {
     queryKey: ["purchasable-items"],
     queryFn: async () => {
       const [{ data: mats, error: me }, { data: ters, error: te }] = await Promise.all([
-        supabase.from("materials").select("id, name, link, location").in("location", ["fabrica", "almoxarifado"]).order("name"),
+        supabase.from("materials").select("id, name, link, location").in("location", ["fabrica", "almoxarifado"]).eq("is_manufactured", false).order("name"),
         supabase.from("terceiros_materials").select("id, name, link").order("name"),
       ]);
       if (me) throw me;
