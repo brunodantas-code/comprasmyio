@@ -1345,6 +1345,657 @@ function FabricaSection({ userId, canDelete }: { userId: string; canDelete?: boo
   );
 }
 
+function TerceirosMovementDialog({
+  row,
+  userId,
+  type,
+  trigger,
+}: {
+  row: TerceirosRow;
+  userId: string;
+  type: MovementType;
+  trigger: React.ReactNode;
+}) {
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const { data: profiles } = useStockProfiles();
+  const [responsible, setResponsible] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const galleryRef = useRef<HTMLInputElement>(null);
+  const isExit = type === "saida";
+
+  const save = useMutation({
+    mutationFn: async (v: { quantity: number; reason: string | null }) => {
+      let photo_url: string | null = null;
+      if (isExit && file) {
+        const path = `stock-exits/terceiros-${row.material_id}/${crypto.randomUUID()}-${file.name}`;
+        const { error: upErr } = await supabase.storage.from("assembly-photos").upload(path, file);
+        if (upErr) throw upErr;
+        photo_url = path;
+      }
+      const { error } = await supabase.from("terceiros_movements").insert({
+        material_id: row.material_id,
+        quantity: v.quantity,
+        type,
+        reason: v.reason,
+        created_by: userId,
+        ...(isExit ? { responsible: responsible.trim(), photo_url } : {}),
+      } as never);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success(type === "saida" ? "Baixa registrada" : "Movimentação registrada");
+      qc.invalidateQueries({ queryKey: ["terceiros-stock"] });
+      qc.invalidateQueries({ queryKey: ["terceiros-movements"] });
+      setResponsible("");
+      setFile(null);
+      setOpen(false);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const quantity = Number(fd.get("quantity"));
+    const reason = String(fd.get("reason") || "").trim();
+    if (!Number.isInteger(quantity) || quantity <= 0) return toast.error("Quantidade inválida");
+    if (isExit && quantity > row.balance) return toast.error("Saldo insuficiente em estoque");
+    if (isExit && !responsible.trim()) return toast.error("Informe o técnico/responsável");
+    if (isExit && !file) return toast.error("Foto obrigatória para dar baixa em produto de terceiros");
+    save.mutate({ quantity, reason: reason || null });
+  }
+
+  const profileNames = Object.values(profiles ?? {}).sort((a, b) => a.localeCompare(b));
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogContent className="max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>
+            {type === "saida" ? "Dar baixa" : type === "entrada" ? "Entrada manual" : "Ajuste"} — {row.name}
+          </DialogTitle>
+          <DialogDescription>Saldo atual: {row.balance} (Estoque Myio Terceiros)</DialogDescription>
+        </DialogHeader>
+        <form onSubmit={onSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor={`tqty-${type}-${row.material_id}`}>Quantidade</Label>
+            <Input id={`tqty-${type}-${row.material_id}`} name="quantity" type="number" min={1} defaultValue={1} required />
+          </div>
+          {isExit && (
+            <div className="space-y-2">
+              <Label htmlFor={`tresp-${row.material_id}`}>Técnico / responsável (obrigatório)</Label>
+              <Input
+                id={`tresp-${row.material_id}`}
+                list={`tresp-list-${row.material_id}`}
+                value={responsible}
+                onChange={(e) => setResponsible(e.target.value)}
+                placeholder="Nome do técnico ou responsável"
+              />
+              <datalist id={`tresp-list-${row.material_id}`}>
+                {profileNames.map((n) => (
+                  <option key={n} value={n} />
+                ))}
+              </datalist>
+            </div>
+          )}
+          {isExit && (
+            <div className="space-y-2">
+              <Label>Foto do material (obrigatória)</Label>
+              <div className="flex gap-2">
+                <Button type="button" variant="outline" onClick={() => cameraRef.current?.click()}>
+                  <Camera className="mr-2 h-4 w-4" /> Câmera
+                </Button>
+                <Button type="button" variant="outline" onClick={() => galleryRef.current?.click()}>
+                  <Upload className="mr-2 h-4 w-4" /> Galeria
+                </Button>
+              </div>
+              <input
+                ref={cameraRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              />
+              <input
+                ref={galleryRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              />
+              {file && <p className="text-xs text-muted-foreground">{file.name}</p>}
+            </div>
+          )}
+          <div className="space-y-2">
+            <Label htmlFor={`treason-${type}-${row.material_id}`}>
+              Motivo <span className="text-muted-foreground">(opcional)</span>
+            </Label>
+            <Input
+              id={`treason-${type}-${row.material_id}`}
+              name="reason"
+              placeholder={type === "saida" ? "Ex.: usado na obra do projeto X" : "Ex.: compra fora do sistema"}
+            />
+          </div>
+          <DialogFooter>
+            <Button type="submit" disabled={save.isPending}>Confirmar</Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function TerceirosHistoryDialog({ row }: { row: TerceirosRow }) {
+  const [open, setOpen] = useState(false);
+  const { data: movements } = useTerceirosMovements();
+  const { data: profiles } = useStockProfiles();
+  const list = (movements ?? []).filter((m) => m.material_id === row.material_id);
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="ghost" title="Histórico">
+          <History className="h-4 w-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Histórico — {row.name}</DialogTitle>
+          <DialogDescription>Entradas e saídas registradas no Estoque Myio Terceiros.</DialogDescription>
+        </DialogHeader>
+        {!list.length ? (
+          <p className="text-sm text-muted-foreground">Nenhuma movimentação ainda.</p>
+        ) : (
+          <ul className="space-y-3">
+            {list.map((m) => (
+              <li key={m.id} className="flex items-start gap-3 border-l-2 border-border pl-3">
+                <Badge variant="outline" className={MOVEMENT_CLASSES[m.type]}>
+                  {MOVEMENT_LABELS[m.type]} {m.type === "saida" ? "-" : "+"}
+                  {m.quantity}
+                </Badge>
+                <div className="min-w-0 text-sm">
+                  <div className="text-muted-foreground">{fmt(m.created_at)}</div>
+                  <div>{m.created_by ? (profiles?.[m.created_by] ?? "Usuário") : "Sistema"}</div>
+                  {m.responsible && <div className="text-muted-foreground">Destinado a: {m.responsible}</div>}
+                  {m.reason && <div className="text-muted-foreground">{m.reason}</div>}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function TerceirosDeleteDialog({ row }: { row: TerceirosRow }) {
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [confirmText, setConfirmText] = useState("");
+  const del = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from("terceiros_materials").delete().eq("id", row.material_id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Item excluído");
+      qc.invalidateQueries({ queryKey: ["terceiros-stock"] });
+      qc.invalidateQueries({ queryKey: ["terceiros-movements"] });
+      setOpen(false);
+      setConfirmText("");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const canConfirm = confirmText.trim().toLowerCase() === "excluir";
+
+  return (
+    <AlertDialog
+      open={open}
+      onOpenChange={(v) => {
+        setOpen(v);
+        if (!v) setConfirmText("");
+      }}
+    >
+      <AlertDialogTrigger asChild>
+        <Button size="sm" variant="ghost" title="Excluir item">
+          <Trash2 className="h-4 w-4 text-destructive" />
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Excluir "{row.name}"?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Esta ação remove o item e todo o seu histórico de movimentações do Estoque Myio Terceiros. Não é possível
+            desfazer.
+            <br />
+            Para confirmar, digite <strong>excluir</strong> no campo abaixo.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <Input
+          value={confirmText}
+          onChange={(e) => setConfirmText(e.target.value)}
+          placeholder="Digite: excluir"
+          autoFocus
+          className="mt-2"
+        />
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogAction
+            disabled={del.isPending || !canConfirm}
+            onClick={() => del.mutate()}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            Excluir
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
+function AddTerceirosDialog({ userId }: { userId: string }) {
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newLink, setNewLink] = useState("");
+  const [newLot, setNewLot] = useState("");
+  const [newType, setNewType] = useState("");
+  const [newDescription, setNewDescription] = useState("");
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+
+  const resetForm = () => {
+    setNewName("");
+    setNewLink("");
+    setNewLot("");
+    setNewType("");
+    setNewDescription("");
+    setPhotoFile(null);
+    setPhotoPreview(null);
+  };
+
+  const save = useMutation({
+    mutationFn: async () => {
+      const name = newName.trim();
+      if (!name) throw new Error("Informe o nome do item");
+      const lot = newLot.trim() === "" ? null : Number(newLot);
+      if (lot !== null && (!Number.isFinite(lot) || lot <= 0)) throw new Error("Quantidade por lote inválida");
+      let photo_url: string | null = null;
+      if (photoFile) {
+        const ext = photoFile.name.split(".").pop() ?? "jpg";
+        const path = `materials/${crypto.randomUUID()}.${ext}`;
+        const { error: upErr } = await supabase.storage.from("product-images").upload(path, photoFile);
+        if (upErr) throw upErr;
+        photo_url = path;
+      }
+      const { error } = await supabase.from("terceiros_materials").insert({
+        name,
+        link: newLink.trim() || null,
+        lot_quantity: lot,
+        purchase_type: newType || null,
+        description: newDescription.trim() || null,
+        photo_url,
+        created_by: userId,
+      } as never);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Item adicionado ao Estoque Myio Terceiros");
+      qc.invalidateQueries({ queryKey: ["terceiros-stock"] });
+      setOpen(false);
+      resetForm();
+    },
+    onError: (e: Error) =>
+      toast.error(
+        e.message.includes("terceiros_materials_unique_name")
+          ? "Já existe um item com esse nome no Estoque Myio Terceiros"
+          : e.message,
+      ),
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) resetForm(); }}>
+      <DialogTrigger asChild>
+        <Button size="sm"><Plus className="mr-1 h-4 w-4" /> Adicionar item</Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Novo item — Estoque Myio Terceiros</DialogTitle>
+          <DialogDescription>
+            Banco de dados próprio e independente: o item é criado do zero e pertence somente ao Estoque Myio
+            Terceiros.
+          </DialogDescription>
+        </DialogHeader>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            save.mutate();
+          }}
+          className="space-y-4"
+        >
+          <button
+            type="button"
+            onClick={() => photoInputRef.current?.click()}
+            className="flex h-36 w-full items-center justify-center overflow-hidden rounded-md border bg-muted/40 transition hover:opacity-90"
+            title={photoPreview ? "Trocar foto" : "Adicionar foto"}
+          >
+            {photoPreview ? (
+              <img src={photoPreview} alt="Foto do item" className="h-full w-full object-contain" />
+            ) : (
+              <span className="flex items-center gap-2 text-sm text-muted-foreground">
+                <ImagePlus className="h-4 w-4" /> Adicionar foto do item <span className="text-xs">(opcional)</span>
+              </span>
+            )}
+          </button>
+          <input
+            ref={photoInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0] ?? null;
+              e.target.value = "";
+              setPhotoFile(f);
+              setPhotoPreview(f ? URL.createObjectURL(f) : null);
+            }}
+          />
+          <div className="space-y-2">
+            <Label htmlFor="terceiros-name">Nome</Label>
+            <Input
+              id="terceiros-name"
+              required
+              placeholder="Nome do item"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="terceiros-link">Link de Referência <span className="text-muted-foreground">(opcional)</span></Label>
+            <Input id="terceiros-link" type="url" placeholder="https://" value={newLink} onChange={(e) => setNewLink(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="terceiros-lot">Quantidade por lote <span className="text-muted-foreground">(opcional)</span></Label>
+            <Input
+              id="terceiros-lot"
+              type="number"
+              min="1"
+              placeholder="Ex.: 100"
+              value={newLot}
+              onChange={(e) => setNewLot(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Tipo de compra <span className="text-muted-foreground">(opcional)</span></Label>
+            <Select value={newType} onValueChange={setNewType}>
+              <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="nacional">Nacional</SelectItem>
+                <SelectItem value="importacao">Importação</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="terceiros-desc">Descrição <span className="text-muted-foreground">(opcional)</span></Label>
+            <Textarea
+              id="terceiros-desc"
+              rows={3}
+              placeholder="Detalhes do item"
+              value={newDescription}
+              onChange={(e) => setNewDescription(e.target.value)}
+            />
+          </div>
+          <DialogFooter>
+            <Button type="submit" disabled={save.isPending}>{save.isPending ? "Salvando..." : "Salvar"}</Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function TerceirosResetDialog({ rows }: { rows: TerceirosRow[] }) {
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [confirm, setConfirm] = useState("");
+
+  const ids = rows.map((r) => r.material_id);
+
+  const reset = useMutation({
+    mutationFn: async () => {
+      if (!ids.length) return;
+      for (let i = 0; i < ids.length; i += 100) {
+        const { error } = await supabase.from("terceiros_movements").delete().in("material_id", ids.slice(i, i + 100));
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      toast.success("Estoque Myio Terceiros zerado");
+      qc.invalidateQueries({ queryKey: ["terceiros-stock"] });
+      qc.invalidateQueries({ queryKey: ["terceiros-movements"] });
+      setConfirm("");
+      setOpen(false);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        setOpen(v);
+        if (!v) setConfirm("");
+      }}
+    >
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm" className="text-destructive">
+          <Eraser className="mr-2 h-4 w-4" /> Zerar estoque
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Zerar estoque — Estoque Myio Terceiros</DialogTitle>
+          <DialogDescription>
+            Todos os saldos serão zerados e as movimentações dos {ids.length} item(ns) serão apagadas. Esta ação não
+            pode ser desfeita. Digite <strong>zerar</strong> para confirmar.
+          </DialogDescription>
+        </DialogHeader>
+        <Input value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="zerar" />
+        <DialogFooter>
+          <Button
+            variant="destructive"
+            disabled={confirm.trim().toLowerCase() !== "zerar" || !ids.length || reset.isPending}
+            onClick={() => reset.mutate()}
+          >
+            Zerar estoque
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: boolean }) {
+  const { data: rows, isLoading } = useTerceirosStock();
+  const { data: movements } = useTerceirosMovements();
+  const { data: profiles } = useStockProfiles();
+  const [search, setSearch] = useState("");
+  const [view, setView] = useState<"all" | "with" | "zero">("all");
+
+  const filtered = (rows ?? [])
+    .filter((r) => r.name.toLowerCase().includes(search.trim().toLowerCase()))
+    .filter((r) => (view === "with" ? r.balance > 0 : view === "zero" ? r.balance <= 0 : true));
+  const nameById = Object.fromEntries((rows ?? []).map((r) => [r.material_id, r.name]));
+
+  const toolbar = (
+    <>
+      <AddTerceirosDialog userId={userId} />
+      <TerceirosResetDialog rows={rows ?? []} />
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Buscar material"
+          className="w-full pl-8 sm:w-[200px]"
+        />
+      </div>
+      <Select value={view} onValueChange={(v) => setView(v as "all" | "with" | "zero")}>
+        <SelectTrigger className="w-full sm:w-[170px]"><SelectValue /></SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">Todos</SelectItem>
+          <SelectItem value="with">Com saldo</SelectItem>
+          <SelectItem value="zero">Sem saldo</SelectItem>
+        </SelectContent>
+      </Select>
+    </>
+  );
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <CardTitle>Estoque Myio Terceiros</CardTitle>
+            <CardDescription>
+              Produtos comprados de terceiros, com banco de dados próprio — separado do Estoque Fábrica e do Estoque
+              Myio. Toque no nome para ver foto, link de referência e configurações de compra.
+            </CardDescription>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">{toolbar}</div>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <p className="text-sm text-muted-foreground">Carregando...</p>
+          ) : !filtered.length ? (
+            <p className="text-sm text-muted-foreground">Nenhum item encontrado.</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Material</TableHead>
+                  <TableHead className="text-right">Saldo</TableHead>
+                  <TableHead className="text-right">Entradas</TableHead>
+                  <TableHead className="text-right">Saídas</TableHead>
+                  <TableHead>Última movimentação</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filtered.map((r) => (
+                  <TableRow key={r.material_id}>
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-2">
+                        <MaterialDetailDialog
+                          materialId={r.material_id}
+                          name={r.name}
+                          table="terceiros_materials"
+                          trigger={
+                            <button type="button" className="text-left hover:underline">
+                              {r.name}
+                            </button>
+                          }
+                        />
+                        {r.link && (
+                          <a href={r.link} target="_blank" rel="noreferrer" className="text-primary hover:underline">
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Badge
+                        variant="outline"
+                        className={r.balance > 0 ? "bg-green-100 text-green-800 border-green-300" : "bg-muted text-muted-foreground"}
+                      >
+                        {r.balance}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right text-sm text-muted-foreground">{r.total_in}</TableCell>
+                    <TableCell className="text-right text-sm text-muted-foreground">{r.total_out}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {r.last_movement_at ? fmt(r.last_movement_at) : "—"}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex justify-end gap-1">
+                        <TerceirosMovementDialog
+                          row={r}
+                          userId={userId}
+                          type="entrada"
+                          trigger={
+                            <Button size="sm" variant="outline">
+                              <ArrowDownCircle className="mr-1 h-4 w-4" /> Entrada
+                            </Button>
+                          }
+                        />
+                        <TerceirosMovementDialog
+                          row={r}
+                          userId={userId}
+                          type="saida"
+                          trigger={
+                            <Button size="sm" variant="outline" disabled={r.balance <= 0}>
+                              <ArrowUpCircle className="mr-1 h-4 w-4" /> Dar baixa
+                            </Button>
+                          }
+                        />
+                        <TerceirosHistoryDialog row={r} />
+                        {canDelete && <TerceirosDeleteDialog row={r} />}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Movimentações recentes — Terceiros</CardTitle>
+          <CardDescription>Histórico próprio de entradas e saídas do Estoque Myio Terceiros.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {!(movements ?? []).length ? (
+            <p className="text-sm text-muted-foreground">Nenhuma movimentação registrada.</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Data</TableHead>
+                  <TableHead>Material</TableHead>
+                  <TableHead>Tipo</TableHead>
+                  <TableHead className="text-right">Qtd.</TableHead>
+                  <TableHead>Motivo</TableHead>
+                  <TableHead>Responsável</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {(movements ?? []).slice(0, 50).map((m) => (
+                  <TableRow key={m.id}>
+                    <TableCell className="whitespace-nowrap text-sm text-muted-foreground">{fmt(m.created_at)}</TableCell>
+                    <TableCell className="font-medium">{nameById[m.material_id] ?? "—"}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className={MOVEMENT_CLASSES[m.type]}>{MOVEMENT_LABELS[m.type]}</Badge>
+                    </TableCell>
+                    <TableCell className="text-right">{m.type === "saida" ? "-" : "+"}{m.quantity}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{m.reason ?? "—"}</TableCell>
+                    <TableCell className="text-sm">{m.created_by ? (profiles?.[m.created_by] ?? "Usuário") : "Sistema"}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 function EstoqueMyioSection({ userId, canDelete }: { userId: string; canDelete?: boolean }) {
   const { data: stock, isLoading } = useStock();
   const { data: movements } = useMovements();
@@ -1401,27 +2052,15 @@ function EstoqueMyioSection({ userId, canDelete }: { userId: string; canDelete?:
       <TabsContent value="estoque" className="space-y-6">
         <StockTableCard
           title="Estoque Myio"
-          description='Produtos produzidos pela Myio. Use o botão de troca para mover um item para "Terceiros".'
+          description="Produtos produzidos pela Myio (fabricados). Banco de dados próprio, separado do Estoque Fábrica e do Estoque Myio Terceiros."
           rows={rows.filter((r) => manufactured?.[r.material_id])}
           isLoading={isLoading}
           userId={userId}
           canDelete={canDelete}
           actions={toolbar}
-          moveTo="terceiros"
           damageSource="Estoque Myio"
         />
-        <StockTableCard
-          title="Estoque Myio Terceiros"
-          description='Produtos comprados de terceiros, separados do Estoque Fábrica. Toque no nome para ver foto, link de referência e configurações de compra.'
-          rows={rows.filter((r) => !manufactured?.[r.material_id])}
-          isLoading={isLoading}
-          userId={userId}
-          canDelete={canDelete}
-          actions={<AddMaterialDialog location="almoxarifado" userId={userId} />}
-          moveTo="myio"
-          detail
-          damageSource="Estoque Myio Terceiros"
-        />
+        <TerceirosSection userId={userId} canDelete={canDelete} />
         <BoxesCard />
         <Card>
           <CardHeader>
