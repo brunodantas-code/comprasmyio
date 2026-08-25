@@ -19,6 +19,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { AlertTriangle, Camera, Eye, ImageUp, Recycle } from "lucide-react";
+import { pushQrsToExternal } from "@/lib/push-external";
 
 export type DamagedItem = {
   id: string;
@@ -293,49 +294,95 @@ function RecoverDamagedDialog({ item, userId }: { item: DamagedItem; userId: str
       const projectName = projects?.find((p) => p.id === projectId)?.name ?? "";
       const obs = notes.trim();
 
+      // Identidade do QR: itens reportados pela plataforma externa guardam o
+      // código em source_detail. A recuperação precisa CARREGAR esse QR para o
+      // destino — sem isso a unidade vira "Sem QR" na lista do técnico e a
+      // plataforma externa continua marcando o produto como avariado (o sync
+      // então desfaz a recuperação).
+      let qrLabel: string | null = null;
+      let qrUnitId: string | null = null;
+      const extCode = item.source === "Plataforma externa" ? item.source_detail?.trim() : null;
+      if (extCode && /^\d+(?:_\d+)+$/.test(extCode)) {
+        const { data: ext } = await supabase
+          .from("external_product_states")
+          .select("qr_value, homologation_unit_id")
+          .eq("code", extCode)
+          .maybeSingle();
+        qrLabel = ext?.qr_value ?? `https://produto.myio.com.br/${extCode}`;
+        qrUnitId = ext?.homologation_unit_id ?? null;
+      }
+      const attachQr = async (movementId: string) => {
+        if (!qrLabel) return;
+        const { error } = await supabase.from("stock_movement_qrs").insert({
+          movement_id: movementId,
+          qr_value: qrLabel,
+          homologation_unit_id: qrUnitId,
+          created_by: userId,
+        } as never);
+        if (error) throw error;
+      };
+
       // Retorna ao estoque
-      const { error: inErr } = await supabase.from("stock_movements").insert({
-        material_id: item.material_id,
-        quantity: item.quantity,
-        type: "entrada",
-        reason: `Recuperação de item avariado${obs ? ` — ${obs}` : ""}`,
-        created_by: userId,
-      } as never);
+      const { data: inMv, error: inErr } = await supabase
+        .from("stock_movements")
+        .insert({
+          material_id: item.material_id,
+          quantity: item.quantity,
+          type: "entrada",
+          reason: `Recuperação de item avariado${obs ? ` — ${obs}` : ""}`,
+          created_by: userId,
+        } as never)
+        .select("id")
+        .single();
       if (inErr) throw inErr;
 
       let recoveredTo = RECOVER_LABELS[destination];
 
+      if (destination === "estoque" && inMv) {
+        await attachQr((inMv as { id: string }).id);
+      }
+
       if (destination === "tecnico") {
         const tech = technician.trim();
         recoveredTo = `Técnico — ${tech}`;
-        const { error: outErr } = await supabase.from("stock_movements").insert({
-          material_id: item.material_id,
-          quantity: item.quantity,
-          type: "saida",
-          reason: `Item recuperado enviado ao técnico ${tech}${obs ? ` — ${obs}` : ""}`,
-          responsible: tech,
-          created_by: userId,
-        } as never);
+        const { data: outMv, error: outErr } = await supabase
+          .from("stock_movements")
+          .insert({
+            material_id: item.material_id,
+            quantity: item.quantity,
+            type: "saida",
+            reason: `Item recuperado enviado ao técnico ${tech}${obs ? ` — ${obs}` : ""}`,
+            responsible: tech,
+            created_by: userId,
+          } as never)
+          .select("id")
+          .single();
         if (outErr) throw outErr;
+        if (outMv) await attachQr((outMv as { id: string }).id);
       }
 
       if (destination === "unidade") {
         recoveredTo = `Cliente — ${projectName}`;
-        const { error: outErr } = await supabase.from("stock_movements").insert({
-          material_id: item.material_id,
-          quantity: item.quantity,
-          type: "saida",
-          reason: `Item recuperado entregue ao cliente${obs ? ` — ${obs}` : ""}`,
-          responsible: null,
-          created_by: userId,
-        } as never);
+        const { data: outMv, error: outErr } = await supabase
+          .from("stock_movements")
+          .insert({
+            material_id: item.material_id,
+            quantity: item.quantity,
+            type: "saida",
+            reason: `Item recuperado entregue ao cliente${obs ? ` — ${obs}` : ""}`,
+            responsible: null,
+            created_by: userId,
+          } as never)
+          .select("id")
+          .single();
         if (outErr) throw outErr;
+        if (outMv) await attachQr((outMv as { id: string }).id);
 
         const { error: upErr } = await supabase.from("unit_products").insert(
-          Array.from({ length: item.quantity }, () => ({
+          Array.from({ length: item.quantity }, (_, i) => ({
             material_id: item.material_id,
             product: item.product,
-            label: null,
+            label: i === 0 ? qrLabel : null,
             project_id: projectId,
             notes: obs || "Recuperado de avaria",
             created_by: userId,
@@ -355,6 +402,16 @@ function RecoverDamagedDialog({ item, userId }: { item: DamagedItem; userId: str
         })
         .eq("id", item.id);
       if (upDamaged) throw upDamaged;
+
+      // Avisa a plataforma externa que o QR saiu de "avariado" — sem isso o
+      // sync a cada 5 min desfaz a recuperação (o produto continuaria avariado lá).
+      if (qrLabel) {
+        pushQrsToExternal([qrLabel], {
+          location: destination === "tecnico" ? "tecnico" : destination === "unidade" ? "cliente" : "estoque",
+          technician: destination === "tecnico" ? technician.trim() : null,
+          clientName: destination === "unidade" ? projectName : null,
+        });
+      }
     },
     onSuccess: () => {
       toast.success("Item recuperado e movido para o destino.");
@@ -362,6 +419,8 @@ function RecoverDamagedDialog({ item, userId }: { item: DamagedItem; userId: str
       qc.invalidateQueries({ queryKey: ["material-stock"] });
       qc.invalidateQueries({ queryKey: ["stock-movements"] });
       qc.invalidateQueries({ queryKey: ["technician-dispatches"] });
+      qc.invalidateQueries({ queryKey: ["technician-dispatch-qrs"] });
+      qc.invalidateQueries({ queryKey: ["external-product-states"] });
       qc.invalidateQueries({ queryKey: ["unit-products"] });
       setOpen(false);
       reset();
