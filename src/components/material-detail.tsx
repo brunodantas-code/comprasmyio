@@ -142,7 +142,9 @@ export function MaterialDetailDialog({
       const { error } =
         table === "terceiros_materials"
           ? await supabase.from("terceiros_materials").update({ photo_url: path }).eq("id", materialId)
-          : await supabase.from("materials").update({ photo_url: path }).eq("id", materialId);
+          : table === "tool_assets"
+            ? await supabase.from("tool_assets").update({ photo_url: path }).eq("id", materialId)
+            : await supabase.from("materials").update({ photo_url: path }).eq("id", materialId);
       if (error) throw error;
       toast.success("Foto atualizada");
       invalidate();
