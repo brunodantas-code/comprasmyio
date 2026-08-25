@@ -1303,6 +1303,7 @@ function FabricaSection({ userId, canDelete }: { userId: string; canDelete?: boo
           canDelete={canDelete}
           actions={toolbar}
           damageSource="Estoque — Fábrica"
+          detail
         />
         <Card>
           <CardHeader>
