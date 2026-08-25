@@ -539,9 +539,8 @@ function NewOrder({ userId }: { userId: string }) {
   const [files, setFiles] = useState<File[]>([]);
   const [deadlineType, setDeadlineType] = useState<Order["deadline_type"]>("esta_semana");
   const [deadlineDate, setDeadlineDate] = useState("");
-  const [itemName, setItemName] = useState("");
+  const [item, setItem] = useState<PurchasableItem | null>(null);
   const [itemLink, setItemLink] = useState("");
-  const [materialId, setMaterialId] = useState<string | null>(null);
 
   const submit = useMutation({
     mutationFn: async (values: z.infer<typeof newOrderSchema>) => {
@@ -549,7 +548,8 @@ function NewOrder({ userId }: { userId: string }) {
         project_id: values.project_id,
         item_name: values.item_name,
         item_link: values.item_link ?? null,
-        material_id: materialId,
+        material_id: item?.material_id ?? null,
+        terceiros_material_id: item?.terceiros_material_id ?? null,
         quantity: values.quantity,
         recipient: values.recipient,
         requester_notes: values.requester_notes ?? null,
@@ -574,10 +574,13 @@ function NewOrder({ userId }: { userId: string }) {
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!item) {
+      return toast.error("Selecione um item cadastrado no Estoque — Fábrica, Estoque Myio Terceiros ou Almoxarifado.");
+    }
     const fd = new FormData(e.currentTarget);
     const parsed = newOrderSchema.safeParse({
       project_id: projectId,
-      item_name: itemName,
+      item_name: item.name,
       item_link: itemLink || undefined,
       quantity: fd.get("quantity"),
       recipient: fd.get("recipient"),
@@ -594,9 +597,8 @@ function NewOrder({ userId }: { userId: string }) {
         setFiles([]);
         setDeadlineType("esta_semana");
         setDeadlineDate("");
-        setItemName("");
+        setItem(null);
         setItemLink("");
-        setMaterialId(null);
       },
     });
   }
@@ -624,20 +626,11 @@ function NewOrder({ userId }: { userId: string }) {
               </Select>
             </div>
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="item_name">Nome do item</Label>
-                <MaterialPicker onPick={(m) => { setItemName(m.name); setMaterialId(m.id); if (m.link) setItemLink(m.link); }} />
-              </div>
-              <Input
-                id="item_name"
-                value={itemName}
-                onChange={(e) => { setItemName(e.target.value); setMaterialId(null); }}
-                placeholder="Digite ou selecione da biblioteca"
-                required
-              />
-              {materialId && (
-                <p className="text-xs text-muted-foreground">Vinculado à biblioteca — ao receber, entra automaticamente no estoque.</p>
-              )}
+              <Label>Item</Label>
+              <PurchasableItemPicker value={item} onPick={(i) => { setItem(i); if (i.link) setItemLink(i.link); }} />
+              <p className="text-xs text-muted-foreground">
+                Somente itens cadastrados no Estoque — Fábrica, Estoque Myio Terceiros ou Almoxarifado. Ao receber, entra automaticamente no estoque de origem.
+              </p>
             </div>
             <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
               <div className="space-y-2">
