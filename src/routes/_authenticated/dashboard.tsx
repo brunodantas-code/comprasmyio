@@ -20,7 +20,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Checkbox } from "@/components/ui/checkbox";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { toast } from "sonner";
-import { LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Library, Boxes, Factory, Building2, Plane } from "lucide-react";
+import { LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Boxes, Factory, Building2, Plane } from "lucide-react";
 import { Trash2, Paperclip, X, Download, Loader2, DatabaseBackup } from "lucide-react";
 import { z } from "zod";
 import { StockTab } from "@/components/stock-tab";
@@ -38,6 +38,7 @@ type Order = {
   item_name: string;
   item_link: string | null;
   material_id: string | null;
+  terceiros_material_id: string | null;
   quantity: number;
   recipient: string;
   requester_notes: string | null;
@@ -420,48 +421,93 @@ function useProfilesMap() {
 
 /* ---------- Materials library ---------- */
 
-type Material = { id: string; name: string; link: string | null };
+type PurchasableItem = {
+  key: string;
+  name: string;
+  link: string | null;
+  origin: string;
+  material_id: string | null;
+  terceiros_material_id: string | null;
+};
 
-function useMaterials() {
+function usePurchasableItems() {
   return useQuery({
-    queryKey: ["materials"],
+    queryKey: ["purchasable-items"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("materials").select("id, name, link").order("name");
-      if (error) throw error;
-      return (data ?? []) as Material[];
+      const [{ data: mats, error: me }, { data: ters, error: te }] = await Promise.all([
+        supabase.from("materials").select("id, name, link, location").in("location", ["fabrica", "almoxarifado"]).order("name"),
+        supabase.from("terceiros_materials").select("id, name, link").order("name"),
+      ]);
+      if (me) throw me;
+      if (te) throw te;
+      const items: PurchasableItem[] = [];
+      (mats ?? []).forEach((m) =>
+        items.push({
+          key: `mat:${m.id}`,
+          name: m.name,
+          link: m.link,
+          origin: m.location === "fabrica" ? "Estoque — Fábrica" : "Almoxarifado",
+          material_id: m.id,
+          terceiros_material_id: null,
+        })
+      );
+      (ters ?? []).forEach((t) =>
+        items.push({
+          key: `ter:${t.id}`,
+          name: t.name,
+          link: t.link,
+          origin: "Estoque Myio Terceiros",
+          material_id: null,
+          terceiros_material_id: t.id,
+        })
+      );
+      return items;
     },
   });
 }
 
-function MaterialPicker({ onPick }: { onPick: (m: Material) => void }) {
-  const { data: materials, isLoading } = useMaterials();
+function PurchasableItemPicker({ value, onPick }: { value: PurchasableItem | null; onPick: (i: PurchasableItem) => void }) {
+  const { data: items, isLoading } = usePurchasableItems();
   const [open, setOpen] = useState(false);
+  const origins = ["Estoque — Fábrica", "Estoque Myio Terceiros", "Almoxarifado"];
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button type="button" variant="outline" size="sm">
-          <Library className="mr-1 h-4 w-4" /> Biblioteca
+        <Button type="button" variant="outline" className="w-full justify-start font-normal">
+          {value ? (
+            <span className="truncate">
+              {value.name} <span className="text-xs text-muted-foreground">· {value.origin}</span>
+            </span>
+          ) : (
+            <span className="text-muted-foreground">Selecione um item cadastrado...</span>
+          )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[min(20rem,calc(100vw-2rem))] p-0" align="end">
+      <PopoverContent className="w-[min(24rem,calc(100vw-2rem))] p-0" align="start">
         <Command>
-          <CommandInput placeholder="Buscar material..." />
+          <CommandInput placeholder="Buscar item cadastrado..." />
           <CommandList>
-            <CommandEmpty>{isLoading ? "Carregando..." : "Nenhum material cadastrado."}</CommandEmpty>
-            <CommandGroup>
-              {(materials ?? []).map((m) => (
-                <CommandItem
-                  key={m.id}
-                  value={m.name}
-                  onSelect={() => { onPick(m); setOpen(false); }}
-                >
-                  <div className="flex min-w-0 flex-col">
-                    <span className="truncate">{m.name}</span>
-                    {m.link && <span className="truncate text-xs text-muted-foreground">{m.link}</span>}
-                  </div>
-                </CommandItem>
-              ))}
-            </CommandGroup>
+            <CommandEmpty>{isLoading ? "Carregando..." : "Nenhum item cadastrado nos estoques."}</CommandEmpty>
+            {origins.map((origin) => {
+              const list = (items ?? []).filter((i) => i.origin === origin);
+              if (!list.length) return null;
+              return (
+                <CommandGroup key={origin} heading={origin}>
+                  {list.map((i) => (
+                    <CommandItem
+                      key={i.key}
+                      value={`${i.name} (${i.origin})`}
+                      onSelect={() => { onPick(i); setOpen(false); }}
+                    >
+                      <div className="flex min-w-0 flex-col">
+                        <span className="truncate">{i.name}</span>
+                        {i.link && <span className="truncate text-xs text-muted-foreground">{i.link}</span>}
+                      </div>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              );
+            })}
           </CommandList>
         </Command>
       </PopoverContent>
@@ -493,9 +539,8 @@ function NewOrder({ userId }: { userId: string }) {
   const [files, setFiles] = useState<File[]>([]);
   const [deadlineType, setDeadlineType] = useState<Order["deadline_type"]>("esta_semana");
   const [deadlineDate, setDeadlineDate] = useState("");
-  const [itemName, setItemName] = useState("");
+  const [item, setItem] = useState<PurchasableItem | null>(null);
   const [itemLink, setItemLink] = useState("");
-  const [materialId, setMaterialId] = useState<string | null>(null);
 
   const submit = useMutation({
     mutationFn: async (values: z.infer<typeof newOrderSchema>) => {
@@ -503,7 +548,8 @@ function NewOrder({ userId }: { userId: string }) {
         project_id: values.project_id,
         item_name: values.item_name,
         item_link: values.item_link ?? null,
-        material_id: materialId,
+        material_id: item?.material_id ?? null,
+        terceiros_material_id: item?.terceiros_material_id ?? null,
         quantity: values.quantity,
         recipient: values.recipient,
         requester_notes: values.requester_notes ?? null,
@@ -528,10 +574,13 @@ function NewOrder({ userId }: { userId: string }) {
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!item) {
+      return toast.error("Selecione um item cadastrado no Estoque — Fábrica, Estoque Myio Terceiros ou Almoxarifado.");
+    }
     const fd = new FormData(e.currentTarget);
     const parsed = newOrderSchema.safeParse({
       project_id: projectId,
-      item_name: itemName,
+      item_name: item.name,
       item_link: itemLink || undefined,
       quantity: fd.get("quantity"),
       recipient: fd.get("recipient"),
@@ -548,9 +597,8 @@ function NewOrder({ userId }: { userId: string }) {
         setFiles([]);
         setDeadlineType("esta_semana");
         setDeadlineDate("");
-        setItemName("");
+        setItem(null);
         setItemLink("");
-        setMaterialId(null);
       },
     });
   }
@@ -578,20 +626,11 @@ function NewOrder({ userId }: { userId: string }) {
               </Select>
             </div>
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="item_name">Nome do item</Label>
-                <MaterialPicker onPick={(m) => { setItemName(m.name); setMaterialId(m.id); if (m.link) setItemLink(m.link); }} />
-              </div>
-              <Input
-                id="item_name"
-                value={itemName}
-                onChange={(e) => { setItemName(e.target.value); setMaterialId(null); }}
-                placeholder="Digite ou selecione da biblioteca"
-                required
-              />
-              {materialId && (
-                <p className="text-xs text-muted-foreground">Vinculado à biblioteca — ao receber, entra automaticamente no estoque.</p>
-              )}
+              <Label>Item</Label>
+              <PurchasableItemPicker value={item} onPick={(i) => { setItem(i); if (i.link) setItemLink(i.link); }} />
+              <p className="text-xs text-muted-foreground">
+                Somente itens cadastrados no Estoque — Fábrica, Estoque Myio Terceiros ou Almoxarifado. Ao receber, entra automaticamente no estoque de origem.
+              </p>
             </div>
             <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
               <div className="space-y-2">
@@ -1065,9 +1104,12 @@ function EditRequesterDialog({ order }: { order: Order }) {
   const [files, setFiles] = useState<File[]>([]);
   const [deadlineType, setDeadlineType] = useState<Order["deadline_type"]>(order.deadline_type);
   const [deadlineDate, setDeadlineDate] = useState(order.deadline_date ?? "");
-  const [itemName, setItemName] = useState(order.item_name);
+  const { data: purchasableItems } = usePurchasableItems();
+  const [itemKey, setItemKey] = useState<string | null>(
+    order.material_id ? `mat:${order.material_id}` : order.terceiros_material_id ? `ter:${order.terceiros_material_id}` : null
+  );
   const [itemLink, setItemLink] = useState(order.item_link ?? "");
-  const [materialId, setMaterialId] = useState<string | null>(order.material_id ?? null);
+  const selectedItem = (purchasableItems ?? []).find((i) => i.key === itemKey) ?? null;
 
   const save = useMutation({
     mutationFn: async (v: z.infer<typeof newOrderSchema>) => {
@@ -1080,7 +1122,8 @@ function EditRequesterDialog({ order }: { order: Order }) {
         project_id: v.project_id,
         item_name: v.item_name,
         item_link: v.item_link ?? null,
-        material_id: materialId,
+        material_id: selectedItem?.material_id ?? null,
+        terceiros_material_id: selectedItem?.terceiros_material_id ?? null,
         quantity: v.quantity,
         recipient: v.recipient,
         requester_notes: v.requester_notes ?? null,
@@ -1102,10 +1145,13 @@ function EditRequesterDialog({ order }: { order: Order }) {
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!selectedItem) {
+      return toast.error("Selecione um item cadastrado no Estoque — Fábrica, Estoque Myio Terceiros ou Almoxarifado.");
+    }
     const fd = new FormData(e.currentTarget);
     const parsed = newOrderSchema.safeParse({
       project_id: projectId,
-      item_name: itemName,
+      item_name: selectedItem.name,
       item_link: itemLink || undefined,
       quantity: fd.get("quantity"),
       recipient: fd.get("recipient"),
@@ -1137,11 +1183,13 @@ function EditRequesterDialog({ order }: { order: Order }) {
             </Select>
           </div>
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor={`e-name-${order.id}`}>Nome do item</Label>
-              <MaterialPicker onPick={(m) => { setItemName(m.name); setMaterialId(m.id); if (m.link) setItemLink(m.link); }} />
-            </div>
-            <Input id={`e-name-${order.id}`} value={itemName} onChange={(e) => { setItemName(e.target.value); setMaterialId(null); }} required />
+            <Label>Item</Label>
+            <PurchasableItemPicker value={selectedItem} onPick={(i) => { setItemKey(i.key); if (i.link) setItemLink(i.link); }} />
+            {!selectedItem && (
+              <p className="text-xs text-muted-foreground">
+                Item atual: {order.item_name} — selecione um item cadastrado para salvar.
+              </p>
+            )}
           </div>
           <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
             <div className="space-y-2">
