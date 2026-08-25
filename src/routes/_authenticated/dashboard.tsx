@@ -875,11 +875,6 @@ function BuyerQueue() {
     return <OrdersTable orders={list} projectName={projectName} requesterName={requesterName} showRequester canEdit canDelete={me?.isAdmin} />;
   };
 
-  const sections: { title: string; list: Order[] }[] = [
-    { title: "Itens Nacionais", list: nacionais },
-    { title: "Itens Importados", list: importados },
-  ];
-
   return (
     <Card>
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -907,25 +902,32 @@ function BuyerQueue() {
           <DeliveredFilter mode={deliveredMode} setMode={setDeliveredMode} fromDate={deliveredFrom} setFromDate={setDeliveredFrom} />
         </div>
       </CardHeader>
-      <CardContent className="space-y-8">
+      <CardContent>
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando...</p>
         ) : !filtered.length ? (
           <p className="text-sm text-muted-foreground">Nada por aqui.</p>
         ) : (
-          sections.map((s) => (
-            <div key={s.title} className="space-y-3">
-              <div className="flex items-center justify-between border-b-2 pb-2">
-                <h3 className="text-base font-semibold">{s.title}</h3>
-                <span className="text-xs text-muted-foreground">{s.list.length} pedido(s)</span>
-              </div>
-              {s.list.length ? (
-                renderOrders(s.list)
+          <Tabs defaultValue="nacional">
+            <TabsList className="mb-4">
+              <TabsTrigger value="nacional">Nacional ({nacionais.length})</TabsTrigger>
+              <TabsTrigger value="importacao">Importação ({importados.length})</TabsTrigger>
+            </TabsList>
+            <TabsContent value="nacional">
+              {nacionais.length ? (
+                renderOrders(nacionais)
               ) : (
                 <p className="text-sm text-muted-foreground">Nenhum pedido nesta fila.</p>
               )}
-            </div>
-          ))
+            </TabsContent>
+            <TabsContent value="importacao">
+              {importados.length ? (
+                renderOrders(importados)
+              ) : (
+                <p className="text-sm text-muted-foreground">Nenhum pedido nesta fila.</p>
+              )}
+            </TabsContent>
+          </Tabs>
         )}
       </CardContent>
     </Card>
