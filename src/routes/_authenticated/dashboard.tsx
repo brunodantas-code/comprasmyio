@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { MyioLogo } from "@/components/myio-logo";
 import { supabase } from "@/integrations/supabase/client";
 import { exportDatabaseBackup } from "@/lib/backup.functions";
+import { useCurrentUser, type AppRole } from "@/hooks/use-current-user";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

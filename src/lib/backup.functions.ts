@@ -51,9 +51,11 @@ export const exportDatabaseBackup = createServerFn({ method: "POST" })
     ] as const;
 
     const PAGE = 1000;
-    const tables: Record<string, unknown[]> = {};
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const tables: Record<string, any[]> = {};
     for (const table of TABLES) {
-      const rows: unknown[] = [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const rows: any[] = [];
       for (let from = 0; ; from += PAGE) {
         const { data, error } = await supabaseAdmin
           .from(table)
