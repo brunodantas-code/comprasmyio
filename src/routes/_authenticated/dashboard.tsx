@@ -428,18 +428,21 @@ type PurchasableItem = {
   origin: string;
   material_id: string | null;
   terceiros_material_id: string | null;
+  tool_asset_id: string | null;
 };
 
 function usePurchasableItems() {
   return useQuery({
     queryKey: ["purchasable-items"],
     queryFn: async () => {
-      const [{ data: mats, error: me }, { data: ters, error: te }] = await Promise.all([
+      const [{ data: mats, error: me }, { data: ters, error: te }, { data: tools, error: fe }] = await Promise.all([
         supabase.from("materials").select("id, name, link, location").in("location", ["fabrica", "almoxarifado"]).eq("is_manufactured", false).order("name"),
         supabase.from("terceiros_materials").select("id, name, link").order("name"),
+        supabase.from("tool_assets").select("id, name, link").order("name"),
       ]);
       if (me) throw me;
       if (te) throw te;
+      if (fe) throw fe;
       const items: PurchasableItem[] = [];
       (mats ?? []).forEach((m) =>
         items.push({
@@ -449,6 +452,7 @@ function usePurchasableItems() {
           origin: m.location === "fabrica" ? "Estoque — Fábrica" : "Almoxarifado",
           material_id: m.id,
           terceiros_material_id: null,
+          tool_asset_id: null,
         })
       );
       (ters ?? []).forEach((t) =>
@@ -459,6 +463,18 @@ function usePurchasableItems() {
           origin: "Estoque Myio Terceiros",
           material_id: null,
           terceiros_material_id: t.id,
+          tool_asset_id: null,
+        })
+      );
+      (tools ?? []).forEach((t) =>
+        items.push({
+          key: `fer:${t.id}`,
+          name: t.name,
+          link: t.link,
+          origin: "Ferramentas/Ativos",
+          material_id: null,
+          terceiros_material_id: null,
+          tool_asset_id: t.id,
         })
       );
       return items;
