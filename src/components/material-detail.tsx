@@ -33,16 +33,18 @@ type MaterialDetail = {
 
 const TYPE_LABEL: Record<string, string> = { nacional: "Nacional", importacao: "Importação" };
 
-function useMaterialDetail(materialId: string, enabled: boolean) {
+type DetailTable = "materials" | "terceiros_materials";
+
+function useMaterialDetail(materialId: string, enabled: boolean, table: DetailTable) {
   return useQuery({
-    queryKey: ["material-detail", materialId],
+    queryKey: ["material-detail", table, materialId],
     enabled,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("materials")
-        .select("id, name, link, photo_url, lot_quantity, purchase_type, description")
-        .eq("id", materialId)
-        .single();
+      const cols = "id, name, link, photo_url, lot_quantity, purchase_type, description";
+      const { data, error } =
+        table === "terceiros_materials"
+          ? await supabase.from("terceiros_materials").select(cols).eq("id", materialId).single()
+          : await supabase.from("materials").select(cols).eq("id", materialId).single();
       if (error) throw error;
       const m = data as MaterialDetail;
       let signed: string | null = null;
@@ -59,15 +61,17 @@ export function MaterialDetailDialog({
   materialId,
   name,
   trigger,
+  table = "materials",
 }: {
   materialId: string;
   name: string;
   trigger: React.ReactNode;
+  table?: DetailTable;
 }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(false);
-  const { data, isLoading } = useMaterialDetail(materialId, open);
+  const { data, isLoading } = useMaterialDetail(materialId, open, table);
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -88,9 +92,11 @@ export function MaterialDetailDialog({
   }
 
   const invalidate = () => {
-    qc.invalidateQueries({ queryKey: ["material-detail", materialId] });
+    qc.invalidateQueries({ queryKey: ["material-detail"] });
     qc.invalidateQueries({ queryKey: ["materials"] });
     qc.invalidateQueries({ queryKey: ["stock"] });
+    qc.invalidateQueries({ queryKey: ["material-stock"] });
+    qc.invalidateQueries({ queryKey: ["terceiros-stock"] });
   };
 
   const save = useMutation({
@@ -98,16 +104,17 @@ export function MaterialDetailDialog({
       const qty = lot.trim() === "" ? null : Number(lot);
       if (qty !== null && (!Number.isFinite(qty) || qty <= 0)) throw new Error("Quantidade por lote inválida");
       if (!nameValue.trim()) throw new Error("Nome obrigatório");
-      const { error } = await supabase
-        .from("materials")
-        .update({
-          name: nameValue.trim(),
-          link: link.trim() || null,
-          lot_quantity: qty,
-          purchase_type: type || null,
-          description: description.trim() || null,
-        })
-        .eq("id", materialId);
+      const payload = {
+        name: nameValue.trim(),
+        link: link.trim() || null,
+        lot_quantity: qty,
+        purchase_type: type || null,
+        description: description.trim() || null,
+      };
+      const { error } =
+        table === "terceiros_materials"
+          ? await supabase.from("terceiros_materials").update(payload).eq("id", materialId)
+          : await supabase.from("materials").update(payload).eq("id", materialId);
       if (error) throw error;
     },
 
@@ -126,7 +133,10 @@ export function MaterialDetailDialog({
       const path = `materials/${crypto.randomUUID()}.${ext}`;
       const { error: upErr } = await supabase.storage.from(BUCKET).upload(path, file);
       if (upErr) throw upErr;
-      const { error } = await supabase.from("materials").update({ photo_url: path }).eq("id", materialId);
+      const { error } =
+        table === "terceiros_materials"
+          ? await supabase.from("terceiros_materials").update({ photo_url: path }).eq("id", materialId)
+          : await supabase.from("materials").update({ photo_url: path }).eq("id", materialId);
       if (error) throw error;
       toast.success("Foto atualizada");
       invalidate();

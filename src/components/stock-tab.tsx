@@ -15,7 +15,7 @@ import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Plus, Library, Trash2, Eraser, ArrowLeftRight, Camera, Upload, ImagePlus, QrCode } from "lucide-react";
+import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Plus, Library, Trash2, Eraser, Camera, Upload, ImagePlus, QrCode } from "lucide-react";
 import { QrLinkPicker, type LinkedQr } from "@/components/myio-delivery-qr";
 import {
   AlertDialog,
@@ -143,6 +143,55 @@ function useManufacturedMap() {
       const map: Record<string, boolean> = {};
       for (const m of data ?? []) map[m.id] = !!m.is_manufactured;
       return map;
+    },
+  });
+}
+
+// ======== Estoque Myio Terceiros — banco de dados próprio, sem vínculo com materials/stock_movements ========
+
+type TerceirosRow = {
+  material_id: string;
+  name: string;
+  link: string | null;
+  balance: number;
+  total_in: number;
+  total_out: number;
+  last_movement_at: string | null;
+};
+
+type TerceirosMovement = {
+  id: string;
+  material_id: string;
+  quantity: number;
+  type: MovementType;
+  reason: string | null;
+  responsible: string | null;
+  created_by: string | null;
+  created_at: string;
+};
+
+function useTerceirosStock() {
+  return useQuery({
+    queryKey: ["terceiros-stock"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("terceiros_material_stock").select("*").order("name");
+      if (error) throw error;
+      return (data ?? []) as TerceirosRow[];
+    },
+  });
+}
+
+function useTerceirosMovements() {
+  return useQuery({
+    queryKey: ["terceiros-movements"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("terceiros_movements")
+        .select("id, material_id, quantity, type, reason, responsible, created_by, created_at")
+        .order("created_at", { ascending: false })
+        .limit(300);
+      if (error) throw error;
+      return (data ?? []) as TerceirosMovement[];
     },
   });
 }
@@ -573,7 +622,7 @@ function HomologationSection({ userId, canDelete }: { userId: string; canDelete?
 function AddMaterialDialog({ location, userId }: { location: StockLocation; userId: string }) {
   const qc = useQueryClient();
   const isFabrica = location === "fabrica";
-  const independent = isFabrica || location === "almoxarifado" || location === "almoxarifado_geral";
+  const independent = isFabrica || location === "almoxarifado_geral";
   const [open, setOpen] = useState(false);
 
   const [mode, setMode] = useState<"new" | "import">("new");
@@ -652,7 +701,6 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
           description: v.description,
           photo_url,
           ...(isFabrica ? { is_product: false } : {}),
-          ...(location === "almoxarifado" ? { is_manufactured: false } : {}),
         });
       if (error) throw error;
 
@@ -1019,36 +1067,6 @@ function StockSection({ userId, location, canDelete }: { userId: string; locatio
   return <StockSectionInner userId={userId} location={location} canDelete={canDelete} />;
 }
 
-function MoveOriginButton({ row, target }: { row: StockRow; target: "myio" | "terceiros" }) {
-  const qc = useQueryClient();
-  const move = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase
-        .from("materials")
-        .update({ is_manufactured: target === "myio" })
-        .eq("id", row.material_id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast.success(target === "myio" ? "Movido para Estoque Myio" : "Movido para Estoque Terceiros");
-      qc.invalidateQueries({ queryKey: ["materials-manufactured-map"] });
-      qc.invalidateQueries({ queryKey: ["materials"] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-  return (
-    <Button
-      size="sm"
-      variant="ghost"
-      disabled={move.isPending}
-      onClick={() => move.mutate()}
-      title={target === "myio" ? "Mover para Estoque Myio (fabricado)" : "Mover para Estoque Terceiros (comprado)"}
-    >
-      <ArrowLeftRight className="h-4 w-4" />
-    </Button>
-  );
-}
-
 function StockTableCard({
   title,
   description,
@@ -1057,7 +1075,6 @@ function StockTableCard({
   userId,
   canDelete,
   actions,
-  moveTo,
   detail,
   damageSource,
 }: {
@@ -1068,7 +1085,6 @@ function StockTableCard({
   userId: string;
   canDelete?: boolean;
   actions?: React.ReactNode;
-  moveTo?: "myio" | "terceiros";
   detail?: boolean;
   damageSource?: string;
 }) {
@@ -1191,7 +1207,7 @@ function StockTableCard({
                           userId={userId}
                         />
                       )}
-                      {moveTo && <MoveOriginButton row={r} target={moveTo} />}
+                      
                       {canDelete && <DeleteMaterialDialog row={r} />}
                     </div>
                   </TableCell>
