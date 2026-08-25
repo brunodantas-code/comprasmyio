@@ -1177,7 +1177,13 @@ function EditRequesterDialog({ order }: { order: Order }) {
   const [deadlineDate, setDeadlineDate] = useState(order.deadline_date ?? "");
   const { data: purchasableItems } = usePurchasableItems();
   const [itemKey, setItemKey] = useState<string | null>(
-    order.material_id ? `mat:${order.material_id}` : order.terceiros_material_id ? `ter:${order.terceiros_material_id}` : null
+    order.material_id
+      ? `mat:${order.material_id}`
+      : order.terceiros_material_id
+        ? `ter:${order.terceiros_material_id}`
+        : order.tool_asset_id
+          ? `fer:${order.tool_asset_id}`
+          : null
   );
   const [itemLink, setItemLink] = useState(order.item_link ?? "");
   const selectedItem = (purchasableItems ?? []).find((i) => i.key === itemKey) ?? null;
