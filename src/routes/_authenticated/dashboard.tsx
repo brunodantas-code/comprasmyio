@@ -817,6 +817,22 @@ function BuyerQueue() {
     },
   });
 
+  const { data: purchaseTypes } = useQuery({
+    queryKey: ["purchase-types"],
+    queryFn: async () => {
+      const [{ data: mats, error: me2 }, { data: ters, error: te }] = await Promise.all([
+        supabase.from("materials").select("id, purchase_type"),
+        supabase.from("terceiros_materials").select("id, purchase_type"),
+      ]);
+      if (me2) throw me2;
+      if (te) throw te;
+      const map = new Map<string, string | null>();
+      (mats ?? []).forEach((m) => map.set(`mat:${m.id}`, m.purchase_type));
+      (ters ?? []).forEach((t) => map.set(`ter:${t.id}`, t.purchase_type));
+      return map;
+    },
+  });
+
   const baseFiltered = orders?.filter((o) =>
     statusSelected.includes(o.status) &&
     (projectFilter === "all" || o.project_id === projectFilter)
@@ -825,23 +841,51 @@ function BuyerQueue() {
   const projectName = (id: string) => projects?.find((p) => p.id === id)?.name ?? "—";
   const requesterName = (id: string) => profiles?.get(id)?.full_name || profiles?.get(id)?.email || "—";
 
-  const grouped = groupByProject
-    ? Array.from(
-        filtered.reduce((map, o) => {
+  const isImportado = (o: Order) => {
+    const key = o.material_id
+      ? `mat:${o.material_id}`
+      : o.terceiros_material_id
+        ? `ter:${o.terceiros_material_id}`
+        : null;
+    return key ? purchaseTypes?.get(key) === "importacao" : false;
+  };
+  const nacionais = filtered.filter((o) => !isImportado(o));
+  const importados = filtered.filter(isImportado);
+
+  const renderOrders = (list: Order[]) => {
+    if (groupByProject) {
+      const grouped = Array.from(
+        list.reduce((map, o) => {
           const arr = map.get(o.project_id) ?? [];
           arr.push(o);
           map.set(o.project_id, arr);
           return map;
         }, new Map<string, Order[]>()).entries()
-      ).sort((a, b) => projectName(a[0]).localeCompare(projectName(b[0])))
-    : null;
+      ).sort((a, b) => projectName(a[0]).localeCompare(projectName(b[0])));
+      return grouped.map(([pid, plist]) => (
+        <div key={pid} className="space-y-2">
+          <div className="flex items-center justify-between border-b pb-1">
+            <h4 className="text-sm font-semibold">{projectName(pid)}</h4>
+            <span className="text-xs text-muted-foreground">{plist.length} pedido(s)</span>
+          </div>
+          <OrdersTable orders={plist} projectName={projectName} requesterName={requesterName} showRequester canEdit canDelete={me?.isAdmin} />
+        </div>
+      ));
+    }
+    return <OrdersTable orders={list} projectName={projectName} requesterName={requesterName} showRequester canEdit canDelete={me?.isAdmin} />;
+  };
+
+  const sections: { title: string; list: Order[] }[] = [
+    { title: "Itens Nacionais", list: nacionais },
+    { title: "Itens Importados", list: importados },
+  ];
 
   return (
     <Card>
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <CardTitle>Fila de compras</CardTitle>
-          <CardDescription>Todos os pedidos. Atualize status e adicione observações.</CardDescription>
+          <CardDescription>Todos os pedidos, separados entre itens nacionais e importados. Atualize status e adicione observações.</CardDescription>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Select value={projectFilter} onValueChange={setProjectFilter}>
@@ -863,23 +907,25 @@ function BuyerQueue() {
           <DeliveredFilter mode={deliveredMode} setMode={setDeliveredMode} fromDate={deliveredFrom} setFromDate={setDeliveredFrom} />
         </div>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-8">
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando...</p>
         ) : !filtered.length ? (
           <p className="text-sm text-muted-foreground">Nada por aqui.</p>
-        ) : grouped ? (
-          grouped.map(([pid, list]) => (
-            <div key={pid} className="space-y-2">
-              <div className="flex items-center justify-between border-b pb-1">
-                <h3 className="text-sm font-semibold">{projectName(pid)}</h3>
-                <span className="text-xs text-muted-foreground">{list.length} pedido(s)</span>
+        ) : (
+          sections.map((s) => (
+            <div key={s.title} className="space-y-3">
+              <div className="flex items-center justify-between border-b-2 pb-2">
+                <h3 className="text-base font-semibold">{s.title}</h3>
+                <span className="text-xs text-muted-foreground">{s.list.length} pedido(s)</span>
               </div>
-              <OrdersTable orders={list} projectName={projectName} requesterName={requesterName} showRequester canEdit canDelete={me?.isAdmin} />
+              {s.list.length ? (
+                renderOrders(s.list)
+              ) : (
+                <p className="text-sm text-muted-foreground">Nenhum pedido nesta fila.</p>
+              )}
             </div>
           ))
-        ) : (
-          <OrdersTable orders={filtered} projectName={projectName} requesterName={requesterName} showRequester canEdit canDelete={me?.isAdmin} />
         )}
       </CardContent>
     </Card>
