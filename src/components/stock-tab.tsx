@@ -596,10 +596,7 @@ function TechnicianSection({ userId }: { userId: string }) {
   const { data: stock } = useStock();
   const materialNames = Object.fromEntries((stock ?? []).map((r) => [r.material_id, r.name]));
   return (
-    <div className="space-y-4">
-      <TechnicianItemsCard userId={userId} materialNames={materialNames} />
-      <ExternalTechnicianCard />
-    </div>
+    <TechnicianItemsCard userId={userId} materialNames={materialNames} />
   );
 }
 
