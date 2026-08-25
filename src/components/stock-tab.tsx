@@ -37,6 +37,7 @@ import { QrCheckSection } from "@/components/qr-check";
 import { MyioDemandCard, ProductionQueueCard } from "@/components/myio-demand";
 import { TechnicianItemsCard } from "@/components/technician-items";
 import { MaterialDetailDialog } from "@/components/material-detail";
+import { ToolAssetsSection } from "@/components/tools-assets";
 import { DamageItemDialog, DamagedItemsCard } from "@/components/damaged-items";
 import { ExternalSyncCard, ExternalLostCard } from "@/components/external-sync";
 import { pushQrsToExternal } from "@/lib/push-external";
@@ -518,7 +519,10 @@ export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; 
     if (loc === "perdido") tabs.push("avariados");
   });
   if (!onlyLocation) tabs.push("qr-check");
-  if (locations.includes("almoxarifado_geral")) tabs.push("almoxarifado_geral");
+  if (locations.includes("almoxarifado_geral")) {
+    tabs.push("almoxarifado_geral");
+    tabs.push("ferramentas");
+  }
   return (
     <Tabs defaultValue={tabs[0]} className="space-y-4">
       <TabsList className="h-auto flex-wrap justify-start gap-y-1">
@@ -542,7 +546,9 @@ export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; 
                   ? "Checar QR Code"
                   : t === "avariados"
                     ? "Itens Avariados"
-                    : LOCATION_LABELS[t as StockLocation]}
+                    : t === "ferramentas"
+                      ? "Ferramentas/Ativos"
+                      : LOCATION_LABELS[t as StockLocation]}
           </TabsTrigger>
         ))}
       </TabsList>
@@ -565,6 +571,11 @@ export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; 
           )}
         </TabsContent>
       ))}
+      {locations.includes("almoxarifado_geral") && (
+        <TabsContent value="ferramentas">
+          <ToolAssetsSection userId={userId} canDelete={canDelete} />
+        </TabsContent>
+      )}
       {locations.includes("almoxarifado") && (
         <TabsContent value="distribuicao">
           <DistributionCard />

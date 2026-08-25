@@ -33,7 +33,7 @@ type MaterialDetail = {
 
 const TYPE_LABEL: Record<string, string> = { nacional: "Nacional", importacao: "Importação" };
 
-type DetailTable = "materials" | "terceiros_materials";
+type DetailTable = "materials" | "terceiros_materials" | "tool_assets";
 
 function useMaterialDetail(materialId: string, enabled: boolean, table: DetailTable) {
   return useQuery({
@@ -44,7 +44,9 @@ function useMaterialDetail(materialId: string, enabled: boolean, table: DetailTa
       const { data, error } =
         table === "terceiros_materials"
           ? await supabase.from("terceiros_materials").select(cols).eq("id", materialId).single()
-          : await supabase.from("materials").select(cols).eq("id", materialId).single();
+          : table === "tool_assets"
+            ? await supabase.from("tool_assets").select(cols).eq("id", materialId).single()
+            : await supabase.from("materials").select(cols).eq("id", materialId).single();
       if (error) throw error;
       const m = data as MaterialDetail;
       let signed: string | null = null;
@@ -97,6 +99,8 @@ export function MaterialDetailDialog({
     qc.invalidateQueries({ queryKey: ["stock"] });
     qc.invalidateQueries({ queryKey: ["material-stock"] });
     qc.invalidateQueries({ queryKey: ["terceiros-stock"] });
+    qc.invalidateQueries({ queryKey: ["tool-stock"] });
+    qc.invalidateQueries({ queryKey: ["purchasable-items"] });
   };
 
   const save = useMutation({
@@ -114,7 +118,9 @@ export function MaterialDetailDialog({
       const { error } =
         table === "terceiros_materials"
           ? await supabase.from("terceiros_materials").update(payload).eq("id", materialId)
-          : await supabase.from("materials").update(payload).eq("id", materialId);
+          : table === "tool_assets"
+            ? await supabase.from("tool_assets").update(payload).eq("id", materialId)
+            : await supabase.from("materials").update(payload).eq("id", materialId);
       if (error) throw error;
     },
 
@@ -136,7 +142,9 @@ export function MaterialDetailDialog({
       const { error } =
         table === "terceiros_materials"
           ? await supabase.from("terceiros_materials").update({ photo_url: path }).eq("id", materialId)
-          : await supabase.from("materials").update({ photo_url: path }).eq("id", materialId);
+          : table === "tool_assets"
+            ? await supabase.from("tool_assets").update({ photo_url: path }).eq("id", materialId)
+            : await supabase.from("materials").update({ photo_url: path }).eq("id", materialId);
       if (error) throw error;
       toast.success("Foto atualizada");
       invalidate();

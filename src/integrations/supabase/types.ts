@@ -1023,6 +1023,7 @@ export type Database = {
           requester_notes: string | null
           status: Database["public"]["Enums"]["order_status"]
           terceiros_material_id: string | null
+          tool_asset_id: string | null
           updated_at: string
         }
         Insert: {
@@ -1045,6 +1046,7 @@ export type Database = {
           requester_notes?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           terceiros_material_id?: string | null
+          tool_asset_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -1067,6 +1069,7 @@ export type Database = {
           requester_notes?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           terceiros_material_id?: string | null
+          tool_asset_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -1103,6 +1106,20 @@ export type Database = {
             columns: ["terceiros_material_id"]
             isOneToOne: false
             referencedRelation: "terceiros_materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_tool_asset_id_fkey"
+            columns: ["tool_asset_id"]
+            isOneToOne: false
+            referencedRelation: "tool_asset_stock"
+            referencedColumns: ["material_id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_tool_asset_id_fkey"
+            columns: ["tool_asset_id"]
+            isOneToOne: false
+            referencedRelation: "tool_assets"
             referencedColumns: ["id"]
           },
         ]
@@ -1381,6 +1398,109 @@ export type Database = {
           },
         ]
       }
+      tool_assets: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          link: string | null
+          lot_quantity: number | null
+          name: string
+          photo_url: string | null
+          purchase_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          link?: string | null
+          lot_quantity?: number | null
+          name: string
+          photo_url?: string | null
+          purchase_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          link?: string | null
+          lot_quantity?: number | null
+          name?: string
+          photo_url?: string | null
+          purchase_type?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      tool_movements: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          destination: string | null
+          id: string
+          material_id: string
+          order_id: string | null
+          photo_url: string | null
+          quantity: number
+          reason: string | null
+          responsible: string | null
+          type: Database["public"]["Enums"]["stock_movement_type"]
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          destination?: string | null
+          id?: string
+          material_id: string
+          order_id?: string | null
+          photo_url?: string | null
+          quantity: number
+          reason?: string | null
+          responsible?: string | null
+          type: Database["public"]["Enums"]["stock_movement_type"]
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          destination?: string | null
+          id?: string
+          material_id?: string
+          order_id?: string | null
+          photo_url?: string | null
+          quantity?: number
+          reason?: string | null
+          responsible?: string | null
+          type?: Database["public"]["Enums"]["stock_movement_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tool_movements_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "tool_asset_stock"
+            referencedColumns: ["material_id"]
+          },
+          {
+            foreignKeyName: "tool_movements_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "tool_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tool_movements_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       unit_products: {
         Row: {
           client_name: string | null
@@ -1510,6 +1630,18 @@ export type Database = {
         Relationships: []
       }
       terceiros_material_stock: {
+        Row: {
+          balance: number | null
+          last_movement_at: string | null
+          link: string | null
+          material_id: string | null
+          name: string | null
+          total_in: number | null
+          total_out: number | null
+        }
+        Relationships: []
+      }
+      tool_asset_stock: {
         Row: {
           balance: number | null
           last_movement_at: string | null

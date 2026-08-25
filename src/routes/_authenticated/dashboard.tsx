@@ -39,6 +39,7 @@ type Order = {
   item_link: string | null;
   material_id: string | null;
   terceiros_material_id: string | null;
+  tool_asset_id?: string | null;
   quantity: number;
   recipient: string;
   requester_notes: string | null;
@@ -428,18 +429,21 @@ type PurchasableItem = {
   origin: string;
   material_id: string | null;
   terceiros_material_id: string | null;
+  tool_asset_id: string | null;
 };
 
 function usePurchasableItems() {
   return useQuery({
     queryKey: ["purchasable-items"],
     queryFn: async () => {
-      const [{ data: mats, error: me }, { data: ters, error: te }] = await Promise.all([
+      const [{ data: mats, error: me }, { data: ters, error: te }, { data: tools, error: fe }] = await Promise.all([
         supabase.from("materials").select("id, name, link, location").in("location", ["fabrica", "almoxarifado"]).eq("is_manufactured", false).order("name"),
         supabase.from("terceiros_materials").select("id, name, link").order("name"),
+        supabase.from("tool_assets").select("id, name, link").order("name"),
       ]);
       if (me) throw me;
       if (te) throw te;
+      if (fe) throw fe;
       const items: PurchasableItem[] = [];
       (mats ?? []).forEach((m) =>
         items.push({
@@ -449,6 +453,7 @@ function usePurchasableItems() {
           origin: m.location === "fabrica" ? "Estoque — Fábrica" : "Almoxarifado",
           material_id: m.id,
           terceiros_material_id: null,
+          tool_asset_id: null,
         })
       );
       (ters ?? []).forEach((t) =>
@@ -459,6 +464,18 @@ function usePurchasableItems() {
           origin: "Estoque Myio Terceiros",
           material_id: null,
           terceiros_material_id: t.id,
+          tool_asset_id: null,
+        })
+      );
+      (tools ?? []).forEach((t) =>
+        items.push({
+          key: `fer:${t.id}`,
+          name: t.name,
+          link: t.link,
+          origin: "Ferramentas/Ativos",
+          material_id: null,
+          terceiros_material_id: null,
+          tool_asset_id: t.id,
         })
       );
       return items;
@@ -469,7 +486,7 @@ function usePurchasableItems() {
 function PurchasableItemPicker({ value, onPick }: { value: PurchasableItem | null; onPick: (i: PurchasableItem) => void }) {
   const { data: items, isLoading } = usePurchasableItems();
   const [open, setOpen] = useState(false);
-  const origins = ["Estoque — Fábrica", "Estoque Myio Terceiros", "Almoxarifado"];
+  const origins = ["Estoque — Fábrica", "Estoque Myio Terceiros", "Almoxarifado", "Ferramentas/Ativos"];
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -550,6 +567,7 @@ function NewOrder({ userId }: { userId: string }) {
         item_link: values.item_link ?? null,
         material_id: item?.material_id ?? null,
         terceiros_material_id: item?.terceiros_material_id ?? null,
+        tool_asset_id: item?.tool_asset_id ?? null,
         quantity: values.quantity,
         recipient: values.recipient,
         requester_notes: values.requester_notes ?? null,
@@ -820,15 +838,18 @@ function BuyerQueue() {
   const { data: purchaseTypes } = useQuery({
     queryKey: ["purchase-types"],
     queryFn: async () => {
-      const [{ data: mats, error: me2 }, { data: ters, error: te }] = await Promise.all([
+      const [{ data: mats, error: me2 }, { data: ters, error: te }, { data: tools, error: fe }] = await Promise.all([
         supabase.from("materials").select("id, purchase_type"),
         supabase.from("terceiros_materials").select("id, purchase_type"),
+        supabase.from("tool_assets").select("id, purchase_type"),
       ]);
       if (me2) throw me2;
       if (te) throw te;
+      if (fe) throw fe;
       const map = new Map<string, string | null>();
       (mats ?? []).forEach((m) => map.set(`mat:${m.id}`, m.purchase_type));
       (ters ?? []).forEach((t) => map.set(`ter:${t.id}`, t.purchase_type));
+      (tools ?? []).forEach((t) => map.set(`fer:${t.id}`, t.purchase_type));
       return map;
     },
   });
@@ -846,7 +867,9 @@ function BuyerQueue() {
       ? `mat:${o.material_id}`
       : o.terceiros_material_id
         ? `ter:${o.terceiros_material_id}`
-        : null;
+        : o.tool_asset_id
+          ? `fer:${o.tool_asset_id}`
+          : null;
     return key ? purchaseTypes?.get(key) === "importacao" : false;
   };
   const nacionais = filtered.filter((o) => !isImportado(o));
@@ -1154,7 +1177,13 @@ function EditRequesterDialog({ order }: { order: Order }) {
   const [deadlineDate, setDeadlineDate] = useState(order.deadline_date ?? "");
   const { data: purchasableItems } = usePurchasableItems();
   const [itemKey, setItemKey] = useState<string | null>(
-    order.material_id ? `mat:${order.material_id}` : order.terceiros_material_id ? `ter:${order.terceiros_material_id}` : null
+    order.material_id
+      ? `mat:${order.material_id}`
+      : order.terceiros_material_id
+        ? `ter:${order.terceiros_material_id}`
+        : order.tool_asset_id
+          ? `fer:${order.tool_asset_id}`
+          : null
   );
   const [itemLink, setItemLink] = useState(order.item_link ?? "");
   const selectedItem = (purchasableItems ?? []).find((i) => i.key === itemKey) ?? null;
@@ -1172,6 +1201,7 @@ function EditRequesterDialog({ order }: { order: Order }) {
         item_link: v.item_link ?? null,
         material_id: selectedItem?.material_id ?? null,
         terceiros_material_id: selectedItem?.terceiros_material_id ?? null,
+        tool_asset_id: selectedItem?.tool_asset_id ?? null,
         quantity: v.quantity,
         recipient: v.recipient,
         requester_notes: v.requester_notes ?? null,
