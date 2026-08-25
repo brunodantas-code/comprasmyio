@@ -1626,6 +1626,39 @@ function StatusHistoryDialog({ order }: { order: Order }) {
   );
 }
 
+function BackupButton() {
+  const runBackup = useServerFn(exportDatabaseBackup);
+  const [loading, setLoading] = useState(false);
+
+  const handleBackup = async () => {
+    setLoading(true);
+    try {
+      const backup = await runBackup();
+      const stamp = backup.generatedAt.slice(0, 19).replace(/[:T]/g, "-");
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `backup-myio-${stamp}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      const total = Object.values(backup.tables).reduce((acc, rows) => acc + rows.length, 0);
+      toast.success(`Backup baixado: ${total} registros em ${Object.keys(backup.tables).length} tabelas.`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Falha ao gerar o backup");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Button variant="outline" size="sm" onClick={handleBackup} disabled={loading}>
+      {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <DatabaseBackup className="mr-2 h-4 w-4" />}
+      Backup
+    </Button>
+  );
+}
+
 function LogsAdmin() {
   const { data: profiles } = useProfilesMap();
   const { data: logs, isLoading } = useQuery({
