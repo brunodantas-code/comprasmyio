@@ -716,7 +716,8 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
       toast.error(
         e.message.includes("materials_fabrica_unique_name")
           ? "Já existe um componente com esse nome na Fábrica"
-          : e.message.includes("materials_fabrica_only_components")
+          : e.message.includes("materials_fabrica_only_components") ||
+              e.message.includes("materials_fabrica_not_manufactured")
             ? "O Estoque — Fábrica aceita apenas componentes"
             : e.message,
       ),
