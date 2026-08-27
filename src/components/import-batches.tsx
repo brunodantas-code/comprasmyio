@@ -144,6 +144,39 @@ function NewImportDialog({ userId }: { userId: string }) {
 
   const visible = (items ?? []).filter((i) => !removed.has(i.key));
 
+  const ciInputRef = useRef<HTMLInputElement>(null);
+  const ciMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const wb = XLSX.read(await file.arrayBuffer(), { type: "array" });
+      const rows: string[][] = [];
+      for (const sheetName of wb.SheetNames) {
+        const sheet = wb.Sheets[sheetName];
+        if (!sheet) continue;
+        const json = XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1, blankrows: false, defval: "" });
+        for (const r of json) rows.push((r as unknown[]).map((c) => String(c ?? "").trim()));
+      }
+      if (rows.length === 0) throw new Error("Planilha vazia.");
+      const catalog = (items ?? []).map((i) => ({ key: i.key, name: i.name, lotQuantity: i.lotQuantity }));
+      const matches = await matchCiSpreadsheet({ data: { rows, items: catalog } });
+      if (matches.length === 0) throw new Error("Nenhum item da lista de importação foi reconhecido na planilha.");
+      const byKey = new Map((items ?? []).map((i) => [i.key, i]));
+      const next: Record<string, string> = {};
+      for (const m of matches) {
+        const item = byKey.get(m.key);
+        if (!item) continue;
+        next[m.key] = String(Math.max(1, Math.round(m.quantity / item.lotQuantity)));
+      }
+      return { next, count: Object.keys(next).length };
+    },
+    onSuccess: ({ next, count }) => {
+      setQty((p) => ({ ...p, ...next }));
+      setRemoved(new Set());
+      toast.success(`${count} item(ns) preenchido(s) a partir da planilha.`);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+
   const mutation = useMutation({
     mutationFn: async () => {
       if (!name.trim()) throw new Error("Informe o nome da importação.");
