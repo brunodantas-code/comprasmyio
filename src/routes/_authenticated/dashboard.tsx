@@ -789,7 +789,10 @@ function ImportOrders({ userId }: { userId: string }) {
   const visible = filterDelivered(statusFiltered, deliveredMode, deliveredFrom);
 
   return (
+    <div className="space-y-6">
+    <ImportBatchesSection userId={userId} />
     <Card>
+
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <CardTitle>Pedidos de Importação</CardTitle>
