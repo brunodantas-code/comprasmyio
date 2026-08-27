@@ -453,6 +453,125 @@ export type Database = {
           },
         ]
       }
+      import_batch_items: {
+        Row: {
+          batch_id: string
+          created_at: string
+          id: string
+          item_name: string
+          material_id: string | null
+          quantity: number
+          source: string
+          terceiros_material_id: string | null
+          tool_asset_id: string | null
+        }
+        Insert: {
+          batch_id: string
+          created_at?: string
+          id?: string
+          item_name: string
+          material_id?: string | null
+          quantity?: number
+          source: string
+          terceiros_material_id?: string | null
+          tool_asset_id?: string | null
+        }
+        Update: {
+          batch_id?: string
+          created_at?: string
+          id?: string
+          item_name?: string
+          material_id?: string | null
+          quantity?: number
+          source?: string
+          terceiros_material_id?: string | null
+          tool_asset_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_batch_items_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "import_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "import_batch_items_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "material_stock"
+            referencedColumns: ["material_id"]
+          },
+          {
+            foreignKeyName: "import_batch_items_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "import_batch_items_terceiros_material_id_fkey"
+            columns: ["terceiros_material_id"]
+            isOneToOne: false
+            referencedRelation: "terceiros_material_stock"
+            referencedColumns: ["material_id"]
+          },
+          {
+            foreignKeyName: "import_batch_items_terceiros_material_id_fkey"
+            columns: ["terceiros_material_id"]
+            isOneToOne: false
+            referencedRelation: "terceiros_materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "import_batch_items_tool_asset_id_fkey"
+            columns: ["tool_asset_id"]
+            isOneToOne: false
+            referencedRelation: "tool_asset_stock"
+            referencedColumns: ["material_id"]
+          },
+          {
+            foreignKeyName: "import_batch_items_tool_asset_id_fkey"
+            columns: ["tool_asset_id"]
+            isOneToOne: false
+            referencedRelation: "tool_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      import_batches: {
+        Row: {
+          attachments: Json
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          notes: string | null
+          status: Database["public"]["Enums"]["order_status"]
+          updated_at: string
+        }
+        Insert: {
+          attachments?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          status?: Database["public"]["Enums"]["order_status"]
+          updated_at?: string
+        }
+        Update: {
+          attachments?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          status?: Database["public"]["Enums"]["order_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       materials: {
         Row: {
           created_at: string
