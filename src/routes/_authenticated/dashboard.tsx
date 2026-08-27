@@ -811,8 +811,10 @@ function ImportOrders({ userId }: { userId: string }) {
         }
       </CardContent>
     </Card>
+    </div>
   );
 }
+
 
 /* ---------- Buyer queue ---------- */
 
