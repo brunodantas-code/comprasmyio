@@ -26,6 +26,8 @@ import { z } from "zod";
 import { StockTab } from "@/components/stock-tab";
 import { MyioOrdersTab } from "@/components/myio-orders-tab";
 import { ClientsTab, useClients } from "@/components/clients-tab";
+import { ImportBatchesSection } from "@/components/import-batches";
+
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   component: Dashboard,
