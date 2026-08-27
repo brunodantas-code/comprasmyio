@@ -86,15 +86,15 @@ function useProjects() {
 
 function useMyioProductOptions() {
   const { data } = useQuery({
-    queryKey: ["almoxarifado-materials-for-myio"],
+    queryKey: ["myio-product-options"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("materials")
-        .select("name, location")
-        .eq("location", "almoxarifado")
-        .order("name");
-      if (error) throw error;
-      return (data ?? []).map((m) => m.name);
+      const [myio, terceiros] = await Promise.all([
+        supabase.from("materials").select("name").eq("location", "almoxarifado").order("name"),
+        supabase.from("terceiros_materials").select("name").order("name"),
+      ]);
+      if (myio.error) throw myio.error;
+      if (terceiros.error) throw terceiros.error;
+      return [...(myio.data ?? []), ...(terceiros.data ?? [])].map((m) => m.name);
     },
   });
   const seen = new Set<string>();
@@ -108,6 +108,7 @@ function useMyioProductOptions() {
   });
   return list;
 }
+
 
 function NewMyioOrderDialog({ userId }: { userId: string }) {
   const qc = useQueryClient();
