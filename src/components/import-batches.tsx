@@ -12,7 +12,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Paperclip, X, Trash2, Plane, ExternalLink } from "lucide-react";
+import { Plus, Paperclip, X, Trash2, Plane, ExternalLink, FileSpreadsheet } from "lucide-react";
+import * as XLSX from "xlsx";
+import { matchCiSpreadsheet } from "@/lib/import-ci.functions";
 
 const BUCKET = "order-attachments";
 const MAX_FILES = 10;
