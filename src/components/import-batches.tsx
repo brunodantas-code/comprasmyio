@@ -332,12 +332,11 @@ function NewImportDialog({ userId }: { userId: string }) {
                         />
                         <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">Lotes</span>
                       </div>
-                      <p className="mt-1 text-[11px] text-muted-foreground">
-                        {(() => {
-                          const l = parseInt(qty[i.key] ?? "", 10);
-                          return Number.isFinite(l) && l > 0 ? `${l * i.lotQuantity} un` : "unidades";
-                        })()}
-                      </p>
+                      {(() => {
+                        const l = parseInt(qty[i.key] ?? "", 10);
+                        if (!Number.isFinite(l) || l <= 0) return null;
+                        return <p className="mt-1.5 pr-1 text-[11px] text-muted-foreground">{`${l * i.lotQuantity} unid.`}</p>;
+                      })()}
                     </div>
                     <Button type="button" variant="ghost" size="icon" onClick={() => setRemoved((p) => new Set(p).add(i.key))}>
                       <X className="h-4 w-4" />
