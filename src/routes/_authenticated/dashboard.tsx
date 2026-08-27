@@ -26,6 +26,8 @@ import { z } from "zod";
 import { StockTab } from "@/components/stock-tab";
 import { MyioOrdersTab } from "@/components/myio-orders-tab";
 import { ClientsTab, useClients } from "@/components/clients-tab";
+import { ImportBatchesSection } from "@/components/import-batches";
+
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   component: Dashboard,
@@ -789,7 +791,10 @@ function ImportOrders({ userId }: { userId: string }) {
   const visible = filterDelivered(statusFiltered, deliveredMode, deliveredFrom);
 
   return (
+    <div className="space-y-6">
+    <ImportBatchesSection userId={userId} />
     <Card>
+
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <CardTitle>Pedidos de Importação</CardTitle>
@@ -808,8 +813,10 @@ function ImportOrders({ userId }: { userId: string }) {
         }
       </CardContent>
     </Card>
+    </div>
   );
 }
+
 
 /* ---------- Buyer queue ---------- */
 
