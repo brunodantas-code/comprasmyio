@@ -320,19 +320,22 @@ function NewImportDialog({ userId }: { userId: string }) {
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
                     <div className="text-right">
-                      <Input
-                        type="number"
-                        min={0}
-                        className="w-24"
-                        placeholder="0"
-                        aria-label={`Lotes de ${i.name}`}
-                        value={qty[i.key] ?? ""}
-                        onChange={(e) => setQty((p) => ({ ...p, [i.key]: e.target.value }))}
-                      />
+                      <div className="flex items-center justify-end gap-1">
+                        <Input
+                          type="number"
+                          min={0}
+                          className="w-24"
+                          placeholder="0"
+                          aria-label={`Lotes de ${i.name}`}
+                          value={qty[i.key] ?? ""}
+                          onChange={(e) => setQty((p) => ({ ...p, [i.key]: e.target.value }))}
+                        />
+                        <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">Lotes</span>
+                      </div>
                       <p className="mt-1 text-[11px] text-muted-foreground">
                         {(() => {
                           const l = parseInt(qty[i.key] ?? "", 10);
-                          return Number.isFinite(l) && l > 0 ? `${l * i.lotQuantity} un` : "lotes";
+                          return Number.isFinite(l) && l > 0 ? `${l * i.lotQuantity} un` : "unidades";
                         })()}
                       </p>
                     </div>
