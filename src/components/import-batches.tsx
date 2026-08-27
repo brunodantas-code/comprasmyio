@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -12,7 +12,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Paperclip, X, Trash2, Plane, ExternalLink } from "lucide-react";
+import { Plus, Paperclip, X, Trash2, Plane, ExternalLink, FileSpreadsheet } from "lucide-react";
+import * as XLSX from "xlsx";
+import { matchCiSpreadsheet } from "@/lib/import-ci.functions";
 
 const BUCKET = "order-attachments";
 const MAX_FILES = 10;
@@ -142,6 +144,39 @@ function NewImportDialog({ userId }: { userId: string }) {
 
   const visible = (items ?? []).filter((i) => !removed.has(i.key));
 
+  const ciInputRef = useRef<HTMLInputElement>(null);
+  const ciMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const wb = XLSX.read(await file.arrayBuffer(), { type: "array" });
+      const rows: string[][] = [];
+      for (const sheetName of wb.SheetNames) {
+        const sheet = wb.Sheets[sheetName];
+        if (!sheet) continue;
+        const json = XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1, blankrows: false, defval: "" });
+        for (const r of json) rows.push((r as unknown[]).map((c) => String(c ?? "").trim()));
+      }
+      if (rows.length === 0) throw new Error("Planilha vazia.");
+      const catalog = (items ?? []).map((i) => ({ key: i.key, name: i.name, lotQuantity: i.lotQuantity }));
+      const matches = await matchCiSpreadsheet({ data: { rows, items: catalog } });
+      if (matches.length === 0) throw new Error("Nenhum item da lista de importação foi reconhecido na planilha.");
+      const byKey = new Map((items ?? []).map((i) => [i.key, i]));
+      const next: Record<string, string> = {};
+      for (const m of matches) {
+        const item = byKey.get(m.key);
+        if (!item) continue;
+        next[m.key] = String(Math.max(1, Math.round(m.quantity / item.lotQuantity)));
+      }
+      return { next, count: Object.keys(next).length };
+    },
+    onSuccess: ({ next, count }) => {
+      setQty((p) => ({ ...p, ...next }));
+      setRemoved(new Set());
+      toast.success(`${count} item(ns) preenchido(s) a partir da planilha.`);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+
   const mutation = useMutation({
     mutationFn: async () => {
       if (!name.trim()) throw new Error("Informe o nome da importação.");
@@ -246,11 +281,28 @@ function NewImportDialog({ userId }: { userId: string }) {
         </div>
 
         <div className="space-y-2">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <Label>Itens importados (quantidade em lotes)</Label>
-            {removed.size > 0 && (
-              <Button type="button" variant="ghost" size="sm" onClick={() => setRemoved(new Set())}>Restaurar removidos</Button>
-            )}
+            <div className="flex items-center gap-2">
+              <input
+                ref={ciInputRef}
+                type="file"
+                accept=".xlsx,.xls,.csv"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  e.target.value = "";
+                  if (f) ciMutation.mutate(f);
+                }}
+              />
+              <Button type="button" variant="outline" size="sm" disabled={ciMutation.isPending || !items?.length} onClick={() => ciInputRef.current?.click()}>
+                <FileSpreadsheet className="mr-2 h-4 w-4" />
+                {ciMutation.isPending ? "Lendo planilha..." : "Importar Excel (CI)"}
+              </Button>
+              {removed.size > 0 && (
+                <Button type="button" variant="ghost" size="sm" onClick={() => setRemoved(new Set())}>Restaurar removidos</Button>
+              )}
+            </div>
           </div>
           {isLoading ? (
             <p className="text-sm text-muted-foreground">Carregando itens...</p>
