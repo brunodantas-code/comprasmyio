@@ -68,6 +68,7 @@ type ImportableItem = {
   name: string;
   source: "fabrica" | "terceiros" | "ferramenta";
   originLabel: string;
+  lotQuantity: number;
 };
 
 const SOURCE_LABELS: Record<ImportItem["source"], string> = {
@@ -91,22 +92,22 @@ function useImportableItems() {
     queryKey: ["importable-items"],
     queryFn: async (): Promise<ImportableItem[]> => {
       const [mats, ters, tools] = await Promise.all([
-        supabase.from("materials").select("id, name, is_manufactured").eq("purchase_type", "importacao").order("name"),
-        supabase.from("terceiros_materials").select("id, name").eq("purchase_type", "importacao").order("name"),
-        supabase.from("tool_assets").select("id, name").eq("purchase_type", "importacao").order("name"),
+        supabase.from("materials").select("id, name, is_manufactured, lot_quantity").eq("purchase_type", "importacao").order("name"),
+        supabase.from("terceiros_materials").select("id, name, lot_quantity").eq("purchase_type", "importacao").order("name"),
+        supabase.from("tool_assets").select("id, name, lot_quantity").eq("purchase_type", "importacao").order("name"),
       ]);
       if (mats.error) throw mats.error;
       if (ters.error) throw ters.error;
       if (tools.error) throw tools.error;
       return [
         ...(mats.data ?? []).filter((m) => !m.is_manufactured).map((m) => ({
-          key: `fabrica:${m.id}`, id: m.id, name: m.name, source: "fabrica" as const, originLabel: SOURCE_LABELS.fabrica,
+          key: `fabrica:${m.id}`, id: m.id, name: m.name, source: "fabrica" as const, originLabel: SOURCE_LABELS.fabrica, lotQuantity: Math.max(1, m.lot_quantity ?? 1),
         })),
         ...(ters.data ?? []).map((m) => ({
-          key: `terceiros:${m.id}`, id: m.id, name: m.name, source: "terceiros" as const, originLabel: SOURCE_LABELS.terceiros,
+          key: `terceiros:${m.id}`, id: m.id, name: m.name, source: "terceiros" as const, originLabel: SOURCE_LABELS.terceiros, lotQuantity: Math.max(1, m.lot_quantity ?? 1),
         })),
         ...(tools.data ?? []).map((m) => ({
-          key: `ferramenta:${m.id}`, id: m.id, name: m.name, source: "ferramenta" as const, originLabel: SOURCE_LABELS.ferramenta,
+          key: `ferramenta:${m.id}`, id: m.id, name: m.name, source: "ferramenta" as const, originLabel: SOURCE_LABELS.ferramenta, lotQuantity: Math.max(1, m.lot_quantity ?? 1),
         })),
       ];
     },
@@ -145,9 +146,10 @@ function NewImportDialog({ userId }: { userId: string }) {
     mutationFn: async () => {
       if (!name.trim()) throw new Error("Informe o nome da importação.");
       const chosen = visible
-        .map((i) => ({ item: i, quantity: parseInt(qty[i.key] ?? "", 10) }))
-        .filter((r) => Number.isFinite(r.quantity) && r.quantity > 0);
-      if (chosen.length === 0) throw new Error("Informe a quantidade de pelo menos um item.");
+        .map((i) => ({ item: i, lots: parseInt(qty[i.key] ?? "", 10) }))
+        .filter((r) => Number.isFinite(r.lots) && r.lots > 0)
+        .map((r) => ({ ...r, quantity: r.lots * r.item.lotQuantity }));
+      if (chosen.length === 0) throw new Error("Informe a quantidade de lotes de pelo menos um item.");
       if (files.length > MAX_FILES) throw new Error(`Máximo de ${MAX_FILES} documentos.`);
 
       const { data: batch, error } = await supabase
@@ -245,7 +247,7 @@ function NewImportDialog({ userId }: { userId: string }) {
 
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label>Itens importados</Label>
+            <Label>Itens importados (quantidade em lotes)</Label>
             {removed.size > 0 && (
               <Button type="button" variant="ghost" size="sm" onClick={() => setRemoved(new Set())}>Restaurar removidos</Button>
             )}
@@ -260,17 +262,28 @@ function NewImportDialog({ userId }: { userId: string }) {
                 <div key={i.key} className="flex items-center justify-between gap-3 rounded-md border p-2">
                   <div className="min-w-0">
                     <p className="truncate text-sm">{i.name}</p>
-                    <p className="text-xs text-muted-foreground">{i.originLabel}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {i.originLabel} · {i.lotQuantity} un/lote
+                    </p>
                   </div>
-                  <div className="flex shrink-0 items-center gap-1">
-                    <Input
-                      type="number"
-                      min={0}
-                      className="w-20"
-                      placeholder="0"
-                      value={qty[i.key] ?? ""}
-                      onChange={(e) => setQty((p) => ({ ...p, [i.key]: e.target.value }))}
-                    />
+                  <div className="flex shrink-0 items-center gap-2">
+                    <div className="text-right">
+                      <Input
+                        type="number"
+                        min={0}
+                        className="w-24"
+                        placeholder="0"
+                        aria-label={`Lotes de ${i.name}`}
+                        value={qty[i.key] ?? ""}
+                        onChange={(e) => setQty((p) => ({ ...p, [i.key]: e.target.value }))}
+                      />
+                      <p className="mt-1 text-[11px] text-muted-foreground">
+                        {(() => {
+                          const l = parseInt(qty[i.key] ?? "", 10);
+                          return Number.isFinite(l) && l > 0 ? `${l * i.lotQuantity} un` : "lotes";
+                        })()}
+                      </p>
+                    </div>
                     <Button type="button" variant="ghost" size="icon" onClick={() => setRemoved((p) => new Set(p).add(i.key))}>
                       <X className="h-4 w-4" />
                     </Button>
