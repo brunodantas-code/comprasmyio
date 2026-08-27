@@ -246,11 +246,28 @@ function NewImportDialog({ userId }: { userId: string }) {
         </div>
 
         <div className="space-y-2">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <Label>Itens importados (quantidade em lotes)</Label>
-            {removed.size > 0 && (
-              <Button type="button" variant="ghost" size="sm" onClick={() => setRemoved(new Set())}>Restaurar removidos</Button>
-            )}
+            <div className="flex items-center gap-2">
+              <input
+                ref={ciInputRef}
+                type="file"
+                accept=".xlsx,.xls,.csv"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  e.target.value = "";
+                  if (f) ciMutation.mutate(f);
+                }}
+              />
+              <Button type="button" variant="outline" size="sm" disabled={ciMutation.isPending || !items?.length} onClick={() => ciInputRef.current?.click()}>
+                <FileSpreadsheet className="mr-2 h-4 w-4" />
+                {ciMutation.isPending ? "Lendo planilha..." : "Importar Excel (CI)"}
+              </Button>
+              {removed.size > 0 && (
+                <Button type="button" variant="ghost" size="sm" onClick={() => setRemoved(new Set())}>Restaurar removidos</Button>
+              )}
+            </div>
           </div>
           {isLoading ? (
             <p className="text-sm text-muted-foreground">Carregando itens...</p>
