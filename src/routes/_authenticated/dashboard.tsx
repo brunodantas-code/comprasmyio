@@ -423,6 +423,17 @@ function useProfilesMap() {
   });
 }
 
+function useProfilesList() {
+  return useQuery({
+    queryKey: ["profiles-list"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("profiles").select("id, full_name, email").order("full_name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
 /* ---------- Materials library ---------- */
 
 type PurchasableItem = {
@@ -486,14 +497,14 @@ function usePurchasableItems() {
   });
 }
 
-function PurchasableItemPicker({ value, onPick }: { value: PurchasableItem | null; onPick: (i: PurchasableItem) => void }) {
+function PurchasableItemPicker({ value, onPick, disabled }: { value: PurchasableItem | null; onPick: (i: PurchasableItem) => void; disabled?: boolean }) {
   const { data: items, isLoading } = usePurchasableItems();
   const [open, setOpen] = useState(false);
   const origins = ["Estoque — Fábrica", "Insumos de Instalação", "Almoxarifado", "Ferramentas/Ativos"];
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button type="button" variant="outline" className="w-full justify-start font-normal">
+        <Button type="button" variant="outline" className="w-full justify-start font-normal" disabled={disabled}>
           {value ? (
             <span className="truncate">
               {value.name} <span className="text-xs text-muted-foreground">· {value.origin}</span>
@@ -562,6 +573,10 @@ function NewOrder({ userId }: { userId: string }) {
   const [deadlineDate, setDeadlineDate] = useState("");
   const [item, setItem] = useState<PurchasableItem | null>(null);
   const [itemLink, setItemLink] = useState("");
+  const [isNewItem, setIsNewItem] = useState(false);
+  const [newItemName, setNewItemName] = useState("");
+  const [recipient, setRecipient] = useState("");
+  const { data: profiles } = useProfilesList();
 
   const submit = useMutation({
     mutationFn: async (values: z.infer<typeof newOrderSchema>) => {
@@ -570,9 +585,9 @@ function NewOrder({ userId }: { userId: string }) {
         for_stock: forStock,
         item_name: values.item_name,
         item_link: values.item_link ?? null,
-        material_id: item?.material_id ?? null,
-        terceiros_material_id: item?.terceiros_material_id ?? null,
-        tool_asset_id: item?.tool_asset_id ?? null,
+        material_id: isNewItem ? null : (item?.material_id ?? null),
+        terceiros_material_id: isNewItem ? null : (item?.terceiros_material_id ?? null),
+        tool_asset_id: isNewItem ? null : (item?.tool_asset_id ?? null),
         quantity: values.quantity,
         recipient: values.recipient,
         requester_notes: values.requester_notes ?? null,
@@ -597,7 +612,10 @@ function NewOrder({ userId }: { userId: string }) {
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!item) {
+    if (isNewItem) {
+      if (newItemName.trim().length < 2) return toast.error("Descreva o item novo.");
+      if (!itemLink.trim()) return toast.error("Informe o link de referência do item novo.");
+    } else if (!item) {
       return toast.error("Selecione um item cadastrado no Estoque — Fábrica, Insumos de Instalação ou Almoxarifado.");
     }
     if (!forStock && !projectId) {
@@ -606,10 +624,10 @@ function NewOrder({ userId }: { userId: string }) {
     const fd = new FormData(e.currentTarget);
     const parsed = newOrderSchema.safeParse({
       project_id: forStock ? undefined : projectId,
-      item_name: item.name,
+      item_name: isNewItem ? newItemName : item!.name,
       item_link: itemLink || undefined,
       quantity: fd.get("quantity"),
-      recipient: fd.get("recipient"),
+      recipient: recipient,
       requester_notes: fd.get("requester_notes") || undefined,
       delivery_point: fd.get("delivery_point"),
       deadline_type: deadlineType,
@@ -626,6 +644,9 @@ function NewOrder({ userId }: { userId: string }) {
         setDeadlineDate("");
         setItem(null);
         setItemLink("");
+        setIsNewItem(false);
+        setNewItemName("");
+        setRecipient("");
       },
     });
   }
@@ -667,10 +688,27 @@ function NewOrder({ userId }: { userId: string }) {
             </div>
             <div className="space-y-2">
               <Label>Item</Label>
-              <PurchasableItemPicker value={item} onPick={(i) => { setItem(i); if (i.link) setItemLink(i.link); }} />
-              <p className="text-xs text-muted-foreground">
-                Somente itens cadastrados no Estoque — Fábrica, Insumos de Instalação ou Almoxarifado. Ao receber, entra automaticamente no estoque de origem.
-              </p>
+              <PurchasableItemPicker value={isNewItem ? null : item} onPick={(i) => { setItem(i); if (i.link) setItemLink(i.link); }} disabled={isNewItem} />
+              <div className="flex items-center gap-6 pt-1">
+                <label className="flex cursor-pointer items-center gap-2 text-sm">
+                  <Checkbox checked={!isNewItem} onCheckedChange={() => { setIsNewItem(false); setNewItemName(""); }} />
+                  Cadastrado
+                </label>
+                <label className="flex cursor-pointer items-center gap-2 text-sm">
+                  <Checkbox checked={isNewItem} onCheckedChange={() => { setIsNewItem(true); setItem(null); setItemLink(""); }} />
+                  Novo
+                </label>
+              </div>
+              {isNewItem ? (
+                <div className="space-y-2 pt-1">
+                  <Label htmlFor="new_item_name">Descrição do item</Label>
+                  <Input id="new_item_name" value={newItemName} onChange={(e) => setNewItemName(e.target.value)} placeholder="Descreva o item que precisa ser comprado" />
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  Somente itens cadastrados no Estoque — Fábrica, Insumos de Instalação ou Almoxarifado. Ao receber, entra automaticamente no estoque de origem.
+                </p>
+              )}
             </div>
             <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
               <div className="space-y-2">
@@ -678,13 +716,24 @@ function NewOrder({ userId }: { userId: string }) {
                 <Input id="quantity" name="quantity" type="number" min={1} defaultValue={1} required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="recipient">Destinatário</Label>
-                <Input id="recipient" name="recipient" placeholder="Nome de quem recebe" required />
+                <Label>Destinatário</Label>
+                <Select value={recipient} onValueChange={setRecipient}>
+                  <SelectTrigger><SelectValue placeholder="Selecione o usuário" /></SelectTrigger>
+                  <SelectContent>
+                    {(profiles ?? []).map((p) => (
+                      <SelectItem key={p.id} value={p.full_name || p.email || p.id}>
+                        {p.full_name || p.email || p.id}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="item_link">Link de Referência <span className="text-muted-foreground">(opcional)</span></Label>
-              <Input id="item_link" type="url" placeholder="https://..." value={itemLink} onChange={(e) => setItemLink(e.target.value)} />
+              <Label htmlFor="item_link">
+                Link de Referência {isNewItem ? null : <span className="text-muted-foreground">(opcional)</span>}
+              </Label>
+              <Input id="item_link" type="url" placeholder="https://..." value={itemLink} onChange={(e) => setItemLink(e.target.value)} required={isNewItem} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="delivery_point">Ponto de entrega</Label>
