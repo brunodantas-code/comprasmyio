@@ -738,6 +738,21 @@ function NewOrder({ userId }: { userId: string }) {
   const [newItemName, setNewItemName] = useState("");
   const [recipient, setRecipient] = useState("");
   const { data: profiles } = useProfilesList();
+  const { data: purchasables } = usePurchasableItems();
+  const [dupOpen, setDupOpen] = useState(false);
+  const [dupCandidates, setDupCandidates] = useState<PurchasableItem[]>([]);
+  const [dismissedText, setDismissedText] = useState("");
+
+  const checkDuplicates = (text: string) => {
+    if (!isNewItem) return false;
+    if (normalizeText(text) === normalizeText(dismissedText)) return false;
+    const found = findSimilarItems(text, purchasables ?? []).map((r) => r.item);
+    if (!found.length) return false;
+    setDupCandidates(found);
+    setDupOpen(true);
+    return true;
+  };
+
 
   const submit = useMutation({
     mutationFn: async (values: z.infer<typeof newOrderSchema>) => {
