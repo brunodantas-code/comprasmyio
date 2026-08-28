@@ -561,11 +561,11 @@ function PurchasableItemPicker({ value, onPick, disabled }: { value: Purchasable
                   {list.map((i) => (
                     <CommandItem
                       key={i.key}
-                      value={`${i.name} (${i.origin})`}
+                      value={`${i.description || i.name} (${i.origin})`}
                       onSelect={() => { onPick(i); setOpen(false); }}
                     >
                       <div className="flex min-w-0 flex-col">
-                        <span className="truncate font-medium">{i.name}</span>
+                        <span className="truncate font-medium">{i.description || i.name}</span>
                         <span className="truncate text-xs text-muted-foreground">
                           {i.manufacturer_code ? `Cód. Fabricante: ${i.manufacturer_code}` : "Cód. Fabricante: —"}
                         </span>
