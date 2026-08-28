@@ -527,7 +527,7 @@ function PurchasableItemPicker({ value, onPick, disabled }: { value: Purchasable
         <Button type="button" variant="outline" className="w-full justify-start font-normal" disabled={disabled}>
           {value ? (
             <span className="truncate">
-              {value.name} <span className="text-xs text-muted-foreground">· {value.origin}</span>
+              {value.description || value.name} <span className="text-xs text-muted-foreground">· {value.origin}</span>
             </span>
           ) : (
             <span className="text-muted-foreground">Selecione um item cadastrado...</span>
