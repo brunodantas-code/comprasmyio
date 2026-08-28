@@ -1055,13 +1055,45 @@ function NewOrder({ userId }: { userId: string }) {
               <Textarea id="requester_notes" name="requester_notes" placeholder="Detalhes adicionais para o comprador" />
             </div>
             <FilePicker files={files} setFiles={setFiles} />
-            <Button type="submit" disabled={submit.isPending}>
-              {submit.isPending ? "Enviando..." : "Criar pedido"}
+            <Button type="submit" disabled={submit.isPending || checking}>
+              {checking ? "Verificando estoque..." : submit.isPending ? "Enviando..." : "Criar pedido"}
             </Button>
           </form>
         )}
+        <Dialog open={!!split} onOpenChange={(o) => { if (!o) setSplit(null); }}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Item disponível em estoque</DialogTitle>
+              <DialogDescription>
+                Encontramos {split?.available} unid. em estoque de “{split?.values.item_name}”.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2 text-sm">
+              <p>Solicitado: <strong>{split?.values.quantity}</strong> unid.</p>
+              <p>Ordem de expedição (estoque): <strong>{split?.shipQty}</strong> unid.</p>
+              <p>Ordem de compra (diferença): <strong>{split?.buyQty}</strong> unid.</p>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setSplit(null)}>Cancelar</Button>
+              <Button
+                type="button"
+                disabled={submit.isPending}
+                onClick={() => {
+                  if (!split) return;
+                  submit.mutate(
+                    { values: split.values, buyQty: split.buyQty, shipQty: split.shipQty },
+                    { onSuccess: () => { setSplit(null); resetForm(); } }
+                  );
+                }}
+              >
+                Confirmar
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
+
   );
 }
 
