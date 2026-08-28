@@ -76,7 +76,7 @@ function Landing() {
     supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
   }, []);
 
-  const cta = signedIn ? "Abrir painel" : "Entrar";
+  const cta = "Entrar";
 
   return (
     <main className="min-h-screen bg-background text-foreground">
