@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ProductImageUploader, ProductPhotoPreview, useProductImages } from "@/components/myio-product-image";
@@ -158,9 +159,16 @@ function NewMyioOrderDialog({ userId }: { userId: string }) {
 
   return (
     <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) reset(); }}>
-      <DialogTrigger asChild>
-        <Button><Plus className="mr-2 h-4 w-4" />Novo pedido Myio</Button>
-      </DialogTrigger>
+      <TooltipProvider delayDuration={300}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DialogTrigger asChild>
+              <Button><Plus className="h-4 w-4" /></Button>
+            </DialogTrigger>
+          </TooltipTrigger>
+          <TooltipContent>Nova solicitação de Projetos</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
       <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Novo pedido de produtos Myio</DialogTitle>
