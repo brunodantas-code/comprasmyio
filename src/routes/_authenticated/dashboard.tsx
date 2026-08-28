@@ -463,7 +463,7 @@ function usePurchasableItems() {
           key: `ter:${t.id}`,
           name: t.name,
           link: t.link,
-          origin: "Estoque Myio Terceiros",
+          origin: "Insumos de Instalação",
           material_id: null,
           terceiros_material_id: t.id,
           tool_asset_id: null,
@@ -488,7 +488,7 @@ function usePurchasableItems() {
 function PurchasableItemPicker({ value, onPick }: { value: PurchasableItem | null; onPick: (i: PurchasableItem) => void }) {
   const { data: items, isLoading } = usePurchasableItems();
   const [open, setOpen] = useState(false);
-  const origins = ["Estoque — Fábrica", "Estoque Myio Terceiros", "Almoxarifado", "Ferramentas/Ativos"];
+  const origins = ["Estoque — Fábrica", "Insumos de Instalação", "Almoxarifado", "Ferramentas/Ativos"];
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -595,7 +595,7 @@ function NewOrder({ userId }: { userId: string }) {
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!item) {
-      return toast.error("Selecione um item cadastrado no Estoque — Fábrica, Estoque Myio Terceiros ou Almoxarifado.");
+      return toast.error("Selecione um item cadastrado no Estoque — Fábrica, Insumos de Instalação ou Almoxarifado.");
     }
     const fd = new FormData(e.currentTarget);
     const parsed = newOrderSchema.safeParse({
@@ -649,7 +649,7 @@ function NewOrder({ userId }: { userId: string }) {
               <Label>Item</Label>
               <PurchasableItemPicker value={item} onPick={(i) => { setItem(i); if (i.link) setItemLink(i.link); }} />
               <p className="text-xs text-muted-foreground">
-                Somente itens cadastrados no Estoque — Fábrica, Estoque Myio Terceiros ou Almoxarifado. Ao receber, entra automaticamente no estoque de origem.
+                Somente itens cadastrados no Estoque — Fábrica, Insumos de Instalação ou Almoxarifado. Ao receber, entra automaticamente no estoque de origem.
               </p>
             </div>
             <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
@@ -1231,7 +1231,7 @@ function EditRequesterDialog({ order }: { order: Order }) {
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!selectedItem) {
-      return toast.error("Selecione um item cadastrado no Estoque — Fábrica, Estoque Myio Terceiros ou Almoxarifado.");
+      return toast.error("Selecione um item cadastrado no Estoque — Fábrica, Insumos de Instalação ou Almoxarifado.");
     }
     const fd = new FormData(e.currentTarget);
     const parsed = newOrderSchema.safeParse({

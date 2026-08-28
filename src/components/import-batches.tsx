@@ -75,7 +75,7 @@ type ImportableItem = {
 
 const SOURCE_LABELS: Record<ImportItem["source"], string> = {
   fabrica: "Fábrica/Almoxarifado",
-  terceiros: "Myio Terceiros",
+  terceiros: "Insumos de Instalação",
   ferramenta: "Ferramentas/Ativos",
 };
 
