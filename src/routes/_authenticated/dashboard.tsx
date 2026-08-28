@@ -35,7 +35,8 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 
 type Order = {
   id: string;
-  project_id: string;
+  project_id: string | null;
+  for_stock: boolean;
   requester_id: string;
   item_name: string;
   item_link: string | null;
@@ -537,7 +538,7 @@ function PurchasableItemPicker({ value, onPick }: { value: PurchasableItem | nul
 /* ---------- New order ---------- */
 
 const newOrderSchema = z.object({
-  project_id: z.string().uuid("Selecione um projeto"),
+  project_id: z.string().optional(),
   item_name: z.string().trim().min(2).max(200),
   item_link: z.string().trim().max(2000).url("Link inválido").optional().or(z.literal("").transform(() => undefined)),
   quantity: z.coerce.number().int().positive("Quantidade inválida").max(100000),
@@ -555,6 +556,7 @@ function NewOrder({ userId }: { userId: string }) {
   const { data: projects, isLoading } = useProjects();
   const qc = useQueryClient();
   const [projectId, setProjectId] = useState("");
+  const [forStock, setForStock] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [deadlineType, setDeadlineType] = useState<Order["deadline_type"]>("esta_semana");
   const [deadlineDate, setDeadlineDate] = useState("");
@@ -564,7 +566,8 @@ function NewOrder({ userId }: { userId: string }) {
   const submit = useMutation({
     mutationFn: async (values: z.infer<typeof newOrderSchema>) => {
       const { data, error } = await supabase.from("purchase_orders").insert({
-        project_id: values.project_id,
+        project_id: forStock ? null : (values.project_id ?? null),
+        for_stock: forStock,
         item_name: values.item_name,
         item_link: values.item_link ?? null,
         material_id: item?.material_id ?? null,
@@ -597,9 +600,12 @@ function NewOrder({ userId }: { userId: string }) {
     if (!item) {
       return toast.error("Selecione um item cadastrado no Estoque — Fábrica, Insumos de Instalação ou Almoxarifado.");
     }
+    if (!forStock && !projectId) {
+      return toast.error("Selecione um projeto");
+    }
     const fd = new FormData(e.currentTarget);
     const parsed = newOrderSchema.safeParse({
-      project_id: projectId,
+      project_id: forStock ? undefined : projectId,
       item_name: item.name,
       item_link: itemLink || undefined,
       quantity: fd.get("quantity"),
@@ -614,6 +620,7 @@ function NewOrder({ userId }: { userId: string }) {
       onSuccess: () => {
         (e.target as HTMLFormElement).reset();
         setProjectId("");
+        setForStock(false);
         setFiles([]);
         setDeadlineType("esta_semana");
         setDeadlineDate("");
@@ -637,9 +644,22 @@ function NewOrder({ userId }: { userId: string }) {
         ) : (
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="space-y-2">
+              <Label>Alocação</Label>
+              <div className="flex items-center gap-6">
+                <label className="flex cursor-pointer items-center gap-2 text-sm">
+                  <Checkbox checked={!forStock} onCheckedChange={() => setForStock(false)} />
+                  Projeto
+                </label>
+                <label className="flex cursor-pointer items-center gap-2 text-sm">
+                  <Checkbox checked={forStock} onCheckedChange={() => setForStock(true)} />
+                  Estoque
+                </label>
+              </div>
+            </div>
+            <div className="space-y-2">
               <Label>Projeto</Label>
-              <Select value={projectId} onValueChange={setProjectId}>
-                <SelectTrigger><SelectValue placeholder="Selecione o projeto" /></SelectTrigger>
+              <Select value={forStock ? "" : projectId} onValueChange={setProjectId} disabled={forStock}>
+                <SelectTrigger><SelectValue placeholder={forStock ? "Compra para estoque" : "Selecione o projeto"} /></SelectTrigger>
                 <SelectContent>
                   {projects.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
                 </SelectContent>
@@ -884,18 +904,21 @@ function BuyerQueue() {
 
   const renderOrders = (list: Order[]) => {
     if (groupByProject) {
+      const groupKey = (o: Order) => (o.for_stock ? "__estoque" : (o.project_id ?? "__sem_projeto"));
+      const groupLabel = (key: string) => (key === "__estoque" ? "Estoque" : key === "__sem_projeto" ? "—" : projectName(key));
       const grouped = Array.from(
         list.reduce((map, o) => {
-          const arr = map.get(o.project_id) ?? [];
+          const key = groupKey(o);
+          const arr = map.get(key) ?? [];
           arr.push(o);
-          map.set(o.project_id, arr);
+          map.set(key, arr);
           return map;
         }, new Map<string, Order[]>()).entries()
-      ).sort((a, b) => projectName(a[0]).localeCompare(projectName(b[0])));
+      ).sort((a, b) => groupLabel(a[0]).localeCompare(groupLabel(b[0])));
       return grouped.map(([pid, plist]) => (
         <div key={pid} className="space-y-2">
           <div className="flex items-center justify-between border-b pb-1">
-            <h4 className="text-sm font-semibold">{projectName(pid)}</h4>
+            <h4 className="text-sm font-semibold">{groupLabel(pid)}</h4>
             <span className="text-xs text-muted-foreground">{plist.length} pedido(s)</span>
           </div>
           <OrdersTable orders={plist} projectName={projectName} requesterName={requesterName} showRequester canEdit canDelete={me?.isAdmin} />
@@ -984,7 +1007,7 @@ function OrdersTable({
           <TableRow>
             <TableHead>Item</TableHead>
             <TableHead>Qtd</TableHead>
-            <TableHead>Projeto</TableHead>
+            <TableHead>Alocação</TableHead>
             {showRequester && <TableHead>Solicitante</TableHead>}
             <TableHead>Destinatário</TableHead>
             <TableHead>Entrega</TableHead>
@@ -1014,7 +1037,7 @@ function OrdersTable({
                 )}
               </TableCell>
               <TableCell>{o.quantity}</TableCell>
-              <TableCell>{projectName(o.project_id)}</TableCell>
+              <TableCell>{o.for_stock ? "Estoque" : o.project_id ? projectName(o.project_id) : "—"}</TableCell>
               {showRequester && <TableCell>{requesterName?.(o.requester_id)}</TableCell>}
               <TableCell className="text-sm">{o.recipient || "—"}</TableCell>
               <TableCell className="max-w-[200px] text-sm text-muted-foreground">{o.delivery_point}</TableCell>
@@ -1178,7 +1201,8 @@ function EditRequesterDialog({ order }: { order: Order }) {
   const qc = useQueryClient();
   const { data: projects } = useProjects();
   const [open, setOpen] = useState(false);
-  const [projectId, setProjectId] = useState(order.project_id);
+  const [projectId, setProjectId] = useState(order.project_id ?? "");
+  const [forStock, setForStock] = useState(order.for_stock ?? false);
   const [files, setFiles] = useState<File[]>([]);
   const [deadlineType, setDeadlineType] = useState<Order["deadline_type"]>(order.deadline_type);
   const [deadlineDate, setDeadlineDate] = useState(order.deadline_date ?? "");
@@ -1203,7 +1227,8 @@ function EditRequesterDialog({ order }: { order: Order }) {
         attachments = [...attachments, ...uploaded];
       }
       const { error } = await supabase.from("purchase_orders").update({
-        project_id: v.project_id,
+        project_id: forStock ? null : (v.project_id ?? null),
+        for_stock: forStock,
         item_name: v.item_name,
         item_link: v.item_link ?? null,
         material_id: selectedItem?.material_id ?? null,
@@ -1233,9 +1258,12 @@ function EditRequesterDialog({ order }: { order: Order }) {
     if (!selectedItem) {
       return toast.error("Selecione um item cadastrado no Estoque — Fábrica, Insumos de Instalação ou Almoxarifado.");
     }
+    if (!forStock && !projectId) {
+      return toast.error("Selecione um projeto");
+    }
     const fd = new FormData(e.currentTarget);
     const parsed = newOrderSchema.safeParse({
-      project_id: projectId,
+      project_id: forStock ? undefined : projectId,
       item_name: selectedItem.name,
       item_link: itemLink || undefined,
       quantity: fd.get("quantity"),
@@ -1259,9 +1287,22 @@ function EditRequesterDialog({ order }: { order: Order }) {
         </DialogHeader>
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-2">
+            <Label>Alocação</Label>
+            <div className="flex items-center gap-6">
+              <label className="flex cursor-pointer items-center gap-2 text-sm">
+                <Checkbox checked={!forStock} onCheckedChange={() => setForStock(false)} />
+                Projeto
+              </label>
+              <label className="flex cursor-pointer items-center gap-2 text-sm">
+                <Checkbox checked={forStock} onCheckedChange={() => setForStock(true)} />
+                Estoque
+              </label>
+            </div>
+          </div>
+          <div className="space-y-2">
             <Label>Projeto</Label>
-            <Select value={projectId} onValueChange={setProjectId}>
-              <SelectTrigger><SelectValue placeholder="Selecione o projeto" /></SelectTrigger>
+            <Select value={forStock ? "" : projectId} onValueChange={setProjectId} disabled={forStock}>
+              <SelectTrigger><SelectValue placeholder={forStock ? "Compra para estoque" : "Selecione o projeto"} /></SelectTrigger>
               <SelectContent>
                 {(projects ?? []).map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
               </SelectContent>
