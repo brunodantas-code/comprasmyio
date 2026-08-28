@@ -556,7 +556,7 @@ export function ToolAssetsSection({ userId, canDelete }: { userId: string; canDe
                   <TableHead>Ferramenta / Ativo</TableHead>
                   <TableHead>Código Myio</TableHead>
                   <TableHead>Código Fabricante</TableHead>
-                  <TableHead className="text-right">Saldo</TableHead>
+                  <TableHead className="text-right">Saldo Estoque</TableHead>
                   <TableHead>Imagem</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>

@@ -1120,10 +1120,10 @@ function StockTableCard({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Material</TableHead>
+                <TableHead>Descrição</TableHead>
                 <TableHead>Código Myio</TableHead>
                 <TableHead>Código Fabricante</TableHead>
-                <TableHead className="text-right">Saldo</TableHead>
+                <TableHead className="text-right">Saldo Estoque</TableHead>
                 <TableHead>Imagem</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
@@ -1334,7 +1334,7 @@ function FabricaSection({ userId, canDelete }: { userId: string; canDelete?: boo
                 <TableHeader>
                   <TableRow>
                     <TableHead>Data</TableHead>
-                    <TableHead>Material</TableHead>
+                    <TableHead>Descrição</TableHead>
                     <TableHead>Tipo</TableHead>
                     <TableHead className="text-right">Qtd.</TableHead>
                     <TableHead>Motivo</TableHead>
@@ -1901,10 +1901,10 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Material</TableHead>
+                  <TableHead>Descrição</TableHead>
                   <TableHead>Código Myio</TableHead>
                   <TableHead>Código Fabricante</TableHead>
-                  <TableHead className="text-right">Saldo</TableHead>
+                  <TableHead className="text-right">Saldo Estoque</TableHead>
                   <TableHead>Imagem</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
@@ -1994,7 +1994,7 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
               <TableHeader>
                 <TableRow>
                   <TableHead>Data</TableHead>
-                  <TableHead>Material</TableHead>
+                  <TableHead>Descrição</TableHead>
                   <TableHead>Tipo</TableHead>
                   <TableHead className="text-right">Qtd.</TableHead>
                   <TableHead>Motivo</TableHead>
@@ -2102,7 +2102,7 @@ function EstoqueMyioSection({ userId, canDelete }: { userId: string; canDelete?:
                 <TableHeader>
                   <TableRow>
                     <TableHead>Data</TableHead>
-                    <TableHead>Material</TableHead>
+                    <TableHead>Descrição</TableHead>
                     <TableHead>Tipo</TableHead>
                     <TableHead className="text-right">Qtd.</TableHead>
                     <TableHead>Motivo</TableHead>
@@ -2244,7 +2244,7 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
               <TableHeader>
                 <TableRow>
                   <TableHead>Data</TableHead>
-                  <TableHead>Material</TableHead>
+                  <TableHead>Descrição</TableHead>
                   <TableHead>Tipo</TableHead>
                   <TableHead className="text-right">Qtd.</TableHead>
                   <TableHead>Motivo</TableHead>
