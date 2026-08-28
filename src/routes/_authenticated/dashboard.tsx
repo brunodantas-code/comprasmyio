@@ -644,9 +644,22 @@ function NewOrder({ userId }: { userId: string }) {
         ) : (
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="space-y-2">
+              <Label>Alocação</Label>
+              <div className="flex items-center gap-6">
+                <label className="flex cursor-pointer items-center gap-2 text-sm">
+                  <Checkbox checked={!forStock} onCheckedChange={() => setForStock(false)} />
+                  Projeto
+                </label>
+                <label className="flex cursor-pointer items-center gap-2 text-sm">
+                  <Checkbox checked={forStock} onCheckedChange={() => setForStock(true)} />
+                  Estoque
+                </label>
+              </div>
+            </div>
+            <div className="space-y-2">
               <Label>Projeto</Label>
-              <Select value={projectId} onValueChange={setProjectId}>
-                <SelectTrigger><SelectValue placeholder="Selecione o projeto" /></SelectTrigger>
+              <Select value={forStock ? "" : projectId} onValueChange={setProjectId} disabled={forStock}>
+                <SelectTrigger><SelectValue placeholder={forStock ? "Compra para estoque" : "Selecione o projeto"} /></SelectTrigger>
                 <SelectContent>
                   {projects.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
                 </SelectContent>
