@@ -310,8 +310,14 @@ function Dashboard() {
     return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Carregando...</div>;
   }
 
-  const fabricaOnly = me.isFabrica && !me.isAdmin && !me.isComprador;
-  const defaultTab = me.isComprador ? "queue" : me.isAdmin ? "queue" : "pedidos";
+  const isAdmin = me.isAdmin;
+  const fabricaOnly = me.isFabrica && !isAdmin;
+  const estoquistaOnly = me.isEstoquista && !isAdmin && !me.isFabrica;
+  const canSeeStock = isAdmin || me.isFabrica || me.isEstoquista;
+  const canSeeQueue = me.isComprador || isAdmin;
+  const canImport = me.isComprador || isAdmin;
+  const defaultTab = canSeeQueue ? "queue" : "pedidos";
+
 
   return (
     <div className="min-h-screen bg-background">
