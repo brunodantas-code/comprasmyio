@@ -553,12 +553,12 @@ export function ToolAssetsSection({ userId, canDelete }: { userId: string; canDe
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Ferramenta / Ativo</TableHead>
-                  <TableHead>Código Myio</TableHead>
-                  <TableHead>Código Fabricante</TableHead>
-                  <TableHead className="text-right">Saldo Estoque</TableHead>
-                  <TableHead>Imagem</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
+                  <TableHead className="w-[45%]">Ferramenta / Ativo</TableHead>
+                  <TableHead className="w-[12%]">Código Myio</TableHead>
+                  <TableHead className="w-[12%]">Código Fabricante</TableHead>
+                  <TableHead className="w-[10%] text-right">Saldo Estoque</TableHead>
+                  <TableHead className="w-[10%]">Imagem</TableHead>
+                  <TableHead className="w-[11%] text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -566,14 +566,14 @@ export function ToolAssetsSection({ userId, canDelete }: { userId: string; canDe
                   const meta = metaMap?.[r.material_id];
                   return (
                   <TableRow key={r.material_id}>
-                    <TableCell className="font-medium">
-                      <div className="flex items-center gap-2">
+                    <TableCell className="max-w-[50%] font-medium align-top">
+                      <div className="flex flex-col gap-1">
                         <MaterialDetailDialog
                           materialId={r.material_id}
                           name={r.name}
                           table="tool_assets"
                           trigger={
-                            <button type="button" className="text-left hover:underline">
+                            <button type="button" className="text-left hover:underline break-words whitespace-normal">
                               {meta?.description?.trim() || r.name}
                             </button>
                           }
