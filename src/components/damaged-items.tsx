@@ -271,7 +271,7 @@ function RecoverDamagedDialog({ item, userId }: { item: DamagedItem; userId: str
     queryKey: ["projects-for-recovery"],
     enabled: open,
     queryFn: async () => {
-      const { data, error } = await supabase.from("projects").select("id, name").order("name");
+      const { data, error } = await supabase.from("projects").select("id, name").neq("name", "Estoque").order("name");
       if (error) throw error;
       return (data ?? []) as { id: string; name: string }[];
     },

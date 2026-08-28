@@ -401,13 +401,16 @@ function Dashboard() {
   );
 }
 
+const ESTOQUE_PROJECT_ID = "1ff7418a-5542-4ae7-b8af-3f5c9423197e";
+
 function useProjects() {
   return useQuery({
     queryKey: ["projects"],
     queryFn: async () => {
       const { data, error } = await supabase.from("projects").select("*").order("name");
       if (error) throw error;
-      return data ?? [];
+      // O projeto "Estoque" é interno (vinculado ao checkbox Estoque) e não aparece nas listas.
+      return (data ?? []).filter((p) => p.id !== ESTOQUE_PROJECT_ID);
     },
   });
 }
@@ -992,7 +995,7 @@ function MyOrders({ userId }: { userId: string }) {
     },
   });
 
-  const projectName = (id: string) => projects?.find((p) => p.id === id)?.name ?? "—";
+  const projectName = (id: string) => (id === ESTOQUE_PROJECT_ID ? "Estoque" : projects?.find((p) => p.id === id)?.name ?? "—");
   const statusFiltered = (orders ?? []).filter((o) => statusSelected.includes(o.status));
   const visible = filterDelivered(statusFiltered, deliveredMode, deliveredFrom);
 
@@ -1055,7 +1058,7 @@ function ImportOrders({ userId }: { userId: string }) {
     },
   });
 
-  const projectName = (id: string) => projects?.find((p) => p.id === id)?.name ?? "—";
+  const projectName = (id: string) => (id === ESTOQUE_PROJECT_ID ? "Estoque" : projects?.find((p) => p.id === id)?.name ?? "—");
   const importOrders = (orders ?? []).filter((o) => o.material_id && importIds.data?.has(o.material_id));
   const statusFiltered = importOrders.filter((o) => statusSelected.includes(o.status));
   const visible = filterDelivered(statusFiltered, deliveredMode, deliveredFrom);
@@ -1136,7 +1139,7 @@ function BuyerQueue() {
     (projectFilter === "all" || o.project_id === projectFilter)
   ) ?? [];
   const filtered = filterDelivered(baseFiltered, deliveredMode, deliveredFrom);
-  const projectName = (id: string) => projects?.find((p) => p.id === id)?.name ?? "—";
+  const projectName = (id: string) => (id === ESTOQUE_PROJECT_ID ? "Estoque" : projects?.find((p) => p.id === id)?.name ?? "—");
   const requesterName = (id: string) => profiles?.get(id)?.full_name || profiles?.get(id)?.email || "—";
 
   const isImportado = (o: Order) => {
