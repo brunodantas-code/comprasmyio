@@ -1253,6 +1253,7 @@ function OrdersTable({
   canDelete?: boolean;
   canEditRequester?: boolean;
 }) {
+  const { data: me } = useCurrentUser();
   return (
     <div className="overflow-x-auto">
       <Table>
