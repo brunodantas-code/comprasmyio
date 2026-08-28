@@ -1017,7 +1017,7 @@ function MyOrders({ userId }: { userId: string }) {
     <Card>
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <CardTitle>Minhas Solicitações de Compra</CardTitle>
+          <CardTitle>Minhas Solicitações</CardTitle>
           <CardDescription>Acompanhe o status dos seus pedidos de compra.</CardDescription>
         </div>
         <div className="flex flex-wrap items-center gap-2">
