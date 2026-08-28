@@ -2100,6 +2100,7 @@ function EstoqueMyioSection({ userId, canDelete }: { userId: string; canDelete?:
   const { data: movements } = useMovements();
   const { data: profiles } = useStockProfiles();
   const { data: manufactured } = useManufacturedMap();
+  const { data: terceirosStock } = useTerceirosStock();
   const [search, setSearch] = useState("");
   const [view, setView] = useState<"all" | "with" | "zero">("all");
 
