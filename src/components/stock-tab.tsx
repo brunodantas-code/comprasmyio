@@ -15,7 +15,7 @@ import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Plus, Library, Trash2, Eraser, Camera, Upload, ImagePlus, QrCode } from "lucide-react";
+import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Plus, Library, Trash2, Eraser, Camera, Upload, ImagePlus, QrCode, AlertTriangle } from "lucide-react";
 import { QrLinkPicker, type LinkedQr } from "@/components/myio-delivery-qr";
 import {
   AlertDialog,
@@ -1214,7 +1214,7 @@ function StockTableCard({
                         }
                       />
                       <HistoryDialog row={r} />
-                      {damageSource && r.balance > 0 && (
+                      {damageSource && r.balance > 0 ? (
                         <DamageItemDialog
                           materialId={r.material_id}
                           materialName={r.name}
@@ -1222,6 +1222,10 @@ function StockTableCard({
                           max={r.balance}
                           userId={userId}
                         />
+                      ) : (
+                        <Button size="sm" variant="ghost" disabled title="Sem avaria para registrar">
+                          <AlertTriangle className="h-4 w-4 text-muted-foreground/40" />
+                        </Button>
                       )}
                       
                       {canDelete && <DeleteMaterialDialog row={r} />}
