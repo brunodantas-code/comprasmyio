@@ -27,6 +27,8 @@ import { StockTab } from "@/components/stock-tab";
 import { MyioOrdersTab } from "@/components/myio-orders-tab";
 import { ClientsTab, useClients } from "@/components/clients-tab";
 import { ImportBatchesSection } from "@/components/import-batches";
+import { AddressAutocomplete } from "@/components/address-autocomplete";
+
 
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
@@ -1378,10 +1380,8 @@ function EditRequesterDialog({ order }: { order: Order }) {
             <Label htmlFor={`e-link-${order.id}`}>Link de Referência <span className="text-muted-foreground">(opcional)</span></Label>
             <Input id={`e-link-${order.id}`} type="url" value={itemLink} onChange={(e) => setItemLink(e.target.value)} placeholder="https://..." />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor={`e-deliv-${order.id}`}>Ponto de entrega</Label>
-            <Textarea id={`e-deliv-${order.id}`} name="delivery_point" defaultValue={order.delivery_point} required />
-          </div>
+          <AddressAutocomplete name="delivery_point" defaultValue={order.delivery_point} required />
+
           <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
             <div className="space-y-2">
               <Label>Prazo de recebimento</Label>
