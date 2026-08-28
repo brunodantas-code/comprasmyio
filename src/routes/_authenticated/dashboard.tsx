@@ -1015,7 +1015,7 @@ function MyOrders({ userId }: { userId: string }) {
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
           !orders?.length ? <p className="text-sm text-muted-foreground">Nenhum pedido ainda.</p> :
           !visible.length ? <p className="text-sm text-muted-foreground">Nenhum pedido para exibir com o filtro atual.</p> :
-          <OrdersTable orders={visible} projectName={projectName} showRequester={false} canEditRequester />
+          <OrdersTable orders={visible} projectName={projectName} showRequester={false} canEditRequester canDelete />
         }
       </CardContent>
     </Card>
@@ -1082,7 +1082,7 @@ function ImportOrders({ userId }: { userId: string }) {
         {isLoading || importIds.isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
           !importOrders.length ? <p className="text-sm text-muted-foreground">Nenhum pedido de importação.</p> :
           !visible.length ? <p className="text-sm text-muted-foreground">Nenhum pedido para exibir com o filtro atual.</p> :
-          <OrdersTable orders={visible} projectName={projectName} showRequester={false} canEditRequester />
+          <OrdersTable orders={visible} projectName={projectName} showRequester={false} canEditRequester canDelete />
         }
       </CardContent>
     </Card>
@@ -1174,11 +1174,11 @@ function BuyerQueue() {
             <h4 className="text-sm font-semibold">{groupLabel(pid)}</h4>
             <span className="text-xs text-muted-foreground">{plist.length} pedido(s)</span>
           </div>
-          <OrdersTable orders={plist} projectName={projectName} requesterName={requesterName} showRequester canEdit canDelete={me?.isAdmin} />
+          <OrdersTable orders={plist} projectName={projectName} requesterName={requesterName} showRequester canEdit canDelete />
         </div>
       ));
     }
-    return <OrdersTable orders={list} projectName={projectName} requesterName={requesterName} showRequester canEdit canDelete={me?.isAdmin} />;
+    return <OrdersTable orders={list} projectName={projectName} requesterName={requesterName} showRequester canEdit canDelete />;
   };
 
   return (
@@ -1253,6 +1253,7 @@ function OrdersTable({
   canDelete?: boolean;
   canEditRequester?: boolean;
 }) {
+  const { data: me } = useCurrentUser();
   return (
     <div className="overflow-x-auto">
       <Table>
@@ -1327,7 +1328,7 @@ function OrdersTable({
               <TableCell className="text-right space-x-2 whitespace-nowrap">
                 {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
                 {canEditRequester && o.status === "entregue" && <ConfirmReceiptActions order={o} />}
-                {canDelete && <DeleteOrderDialog order={o} />}
+                {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
               </TableCell>
 
             </TableRow>
