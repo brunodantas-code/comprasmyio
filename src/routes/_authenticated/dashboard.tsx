@@ -526,13 +526,27 @@ function PurchasableItemPicker({ value, onPick, disabled }: { value: Purchasable
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[min(24rem,calc(100vw-2rem))] p-0" align="start">
+      <PopoverContent className="w-[min(28rem,calc(100vw-2rem))] p-0" align="start">
+        <div className="flex flex-wrap gap-1 border-b p-2">
+          {CATEGORIES.map((c) => (
+            <Button
+              key={c.value}
+              type="button"
+              size="sm"
+              variant={category === c.value ? "default" : "outline"}
+              className="h-7 px-2 text-xs"
+              onClick={() => setCategory(c.value)}
+            >
+              {c.label}
+            </Button>
+          ))}
+        </div>
         <Command>
           <CommandInput placeholder="Buscar item cadastrado..." />
           <CommandList>
-            <CommandEmpty>{isLoading ? "Carregando..." : "Nenhum item cadastrado nos estoques."}</CommandEmpty>
+            <CommandEmpty>{isLoading ? "Carregando..." : "Nenhum item cadastrado nesta categoria."}</CommandEmpty>
             {origins.map((origin) => {
-              const list = (items ?? []).filter((i) => i.origin === origin);
+              const list = filtered.filter((i) => i.origin === origin);
               if (!list.length) return null;
               return (
                 <CommandGroup key={origin} heading={origin}>
