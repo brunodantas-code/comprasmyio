@@ -41,6 +41,8 @@ import { ToolAssetsSection } from "@/components/tools-assets";
 import { DamageItemDialog, DamagedItemsCard } from "@/components/damaged-items";
 import { ExternalSyncCard, ExternalLostCard } from "@/components/external-sync";
 import { pushQrsToExternal } from "@/lib/push-external";
+import { StockPhotoCell, useStockMeta } from "@/components/stock-meta";
+
 
 
 type StockRow = {
