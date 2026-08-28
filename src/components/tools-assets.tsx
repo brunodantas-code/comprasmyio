@@ -37,6 +37,7 @@ import {
   ArrowDownCircle,
   ArrowUpCircle,
   Camera,
+  AlertTriangle,
   ExternalLink,
   History,
   ImagePlus,
@@ -621,6 +622,9 @@ export function ToolAssetsSection({ userId, canDelete }: { userId: string; canDe
                           }
                         />
                         <ToolHistoryDialog row={r} />
+                        <Button size="sm" variant="ghost" disabled title="Sem avaria para registrar">
+                          <AlertTriangle className="h-4 w-4 text-muted-foreground/40" />
+                        </Button>
                         {canDelete && <ToolDeleteDialog row={r} />}
                       </div>
                     </TableCell>
