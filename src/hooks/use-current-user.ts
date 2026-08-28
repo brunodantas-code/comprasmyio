@@ -33,10 +33,11 @@ export function useCurrentUser() {
         email: user.email ?? "",
         full_name: profile?.full_name ?? "",
         roles,
-        isAdmin: roles.includes("admin"),
+        isAdmin: roles.some((r) => ADMIN_ROLES.includes(r)),
         isComprador: roles.includes("comprador"),
         isSolicitante: roles.includes("solicitante"),
         isFabrica: roles.includes("fabrica"),
+        isEstoquista: roles.includes("estoquista"),
       };
     },
   });
