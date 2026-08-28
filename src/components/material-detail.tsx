@@ -29,6 +29,8 @@ type MaterialDetail = {
   lot_quantity: number | null;
   purchase_type: string | null;
   description: string | null;
+  manufacturer_code: string | null;
+  myio_code: string | null;
 };
 
 const TYPE_LABEL: Record<string, string> = { nacional: "Nacional", importacao: "Importação" };
@@ -40,7 +42,8 @@ function useMaterialDetail(materialId: string, enabled: boolean, table: DetailTa
     queryKey: ["material-detail", table, materialId],
     enabled,
     queryFn: async () => {
-      const cols = "id, name, link, photo_url, lot_quantity, purchase_type, description";
+      const cols =
+        "id, name, link, photo_url, lot_quantity, purchase_type, description, manufacturer_code, myio_code";
       const { data, error } =
         table === "terceiros_materials"
           ? await supabase.from("terceiros_materials").select(cols).eq("id", materialId).single()
@@ -83,14 +86,18 @@ export function MaterialDetailDialog({
   const [lot, setLot] = useState("");
   const [type, setType] = useState<string>("");
   const [description, setDescription] = useState("");
+  const [manufacturerCode, setManufacturerCode] = useState("");
+  const [myioCode, setMyioCode] = useState("");
   const [synced, setSynced] = useState<string | null>(null);
-  if (m && synced !== m.id + JSON.stringify([m.name, m.link, m.lot_quantity, m.purchase_type, m.description])) {
-    setSynced(m.id + JSON.stringify([m.name, m.link, m.lot_quantity, m.purchase_type, m.description]));
+  if (m && synced !== m.id + JSON.stringify([m.name, m.link, m.lot_quantity, m.purchase_type, m.description, m.manufacturer_code, m.myio_code])) {
+    setSynced(m.id + JSON.stringify([m.name, m.link, m.lot_quantity, m.purchase_type, m.description, m.manufacturer_code, m.myio_code]));
     setNameValue(m.name ?? "");
     setLink(m.link ?? "");
     setLot(m.lot_quantity != null ? String(m.lot_quantity) : "");
     setType(m.purchase_type ?? "");
     setDescription(m.description ?? "");
+    setManufacturerCode(m.manufacturer_code ?? "");
+    setMyioCode(m.myio_code ?? "");
   }
 
   const invalidate = () => {
@@ -114,6 +121,8 @@ export function MaterialDetailDialog({
         lot_quantity: qty,
         purchase_type: type || null,
         description: description.trim() || null,
+        manufacturer_code: manufacturerCode.trim() || null,
+        myio_code: myioCode.trim() || null,
       };
       const { error } =
         table === "terceiros_materials"
@@ -215,6 +224,24 @@ export function MaterialDetailDialog({
                   <Input id="detail-link" type="url" placeholder="https://" value={link} onChange={(e) => setLink(e.target.value)} />
                 </div>
                 <div className="space-y-1">
+                  <Label htmlFor="detail-manuf-code">Código do Fabricante</Label>
+                  <Input
+                    id="detail-manuf-code"
+                    placeholder="Ex.: 2EDGK-5.08-10P"
+                    value={manufacturerCode}
+                    onChange={(e) => setManufacturerCode(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="detail-myio-code">Código Myio</Label>
+                  <Input
+                    id="detail-myio-code"
+                    placeholder="Ex.: MY-00123"
+                    value={myioCode}
+                    onChange={(e) => setMyioCode(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1">
                   <Label htmlFor="detail-lot">Quantidade por lote</Label>
                   <Input id="detail-lot" type="number" min="1" placeholder="Ex.: 100" value={lot} onChange={(e) => setLot(e.target.value)} />
                 </div>
@@ -257,6 +284,18 @@ export function MaterialDetailDialog({
                         ) : (
                           <span className="text-muted-foreground">—</span>
                         )}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium">Código do Fabricante</TableCell>
+                      <TableCell>
+                        {m?.manufacturer_code ? m.manufacturer_code : <span className="text-muted-foreground">—</span>}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium">Código Myio</TableCell>
+                      <TableCell>
+                        {m?.myio_code ? m.myio_code : <span className="text-muted-foreground">—</span>}
                       </TableCell>
                     </TableRow>
                     <TableRow>
