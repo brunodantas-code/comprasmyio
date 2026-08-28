@@ -374,7 +374,7 @@ function Dashboard() {
               <StockTab
                 userId={me.id}
                 canDelete={isAdmin}
-                onlyLocation={fabricaOnly ? "fabrica" : estoquistaOnly ? "myio" : undefined}
+                onlyLocation={fabricaOnly ? "fabrica" : estoquistaOnly ? "almoxarifado" : undefined}
               />
             </TabsContent>
           )}
