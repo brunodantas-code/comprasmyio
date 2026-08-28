@@ -894,7 +894,7 @@ export function AssemblyReleasesCard({
                 <TableHead>Responsáveis</TableHead>
                 <TableHead>Foto</TableHead>
                 <TableHead>Observações</TableHead>
-                {(canDelete || canReportIssue || canCorrect) && <TableHead className="w-28">Ações</TableHead>}
+                {(canDelete || canReportIssue || canCorrect) && <TableHead className="w-28" />}
               </TableRow>
             </TableHeader>
             <TableBody>
