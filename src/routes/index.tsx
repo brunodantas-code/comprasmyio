@@ -87,7 +87,7 @@ function Landing() {
 
         <header className="relative z-10">
           <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-5 sm:px-6">
-            <MyioLogo tone="light" className="text-3xl" />
+            <MyioLogo tone="light" className="text-[3.375rem]" />
             <nav className="hidden items-center gap-7 text-sm font-semibold text-white/80 md:flex">
               <a href="#recursos" className="transition-colors hover:text-white">
                 Recursos
