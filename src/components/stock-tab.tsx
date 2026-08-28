@@ -693,6 +693,8 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
       lot: number | null;
       type: string | null;
       description: string | null;
+      manufacturer_code: string | null;
+      myio_code: string | null;
       photo: File | null;
     }) => {
       let photo_url: string | null = null;
@@ -713,6 +715,8 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
           lot_quantity: v.lot,
           purchase_type: v.type,
           description: v.description,
+          manufacturer_code: v.manufacturer_code,
+          myio_code: v.myio_code,
           photo_url,
           ...(isFabrica ? { is_product: false, is_manufactured: false } : {}),
         });
@@ -772,6 +776,8 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
       lot,
       type: newType || null,
       description: newDescription.trim() || null,
+      manufacturer_code: newManufCode.trim() || null,
+      myio_code: newMyioCode.trim() || null,
       photo: photoFile,
     });
   }
