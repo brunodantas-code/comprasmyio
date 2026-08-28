@@ -504,7 +504,7 @@ function PurchasableItemPicker({ value, onPick, disabled }: { value: Purchasable
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button type="button" variant="outline" className="w-full justify-start font-normal">
+        <Button type="button" variant="outline" className="w-full justify-start font-normal" disabled={disabled}>
           {value ? (
             <span className="truncate">
               {value.name} <span className="text-xs text-muted-foreground">· {value.origin}</span>
