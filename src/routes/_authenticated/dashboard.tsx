@@ -790,7 +790,9 @@ function NewOrder({ userId }: { userId: string }) {
     e.preventDefault();
     if (isNewItem) {
       if (newItemName.trim().length < 2) return toast.error("Descreva o item novo.");
+      if (checkDuplicates(newItemName)) return;
       if (!itemLink.trim()) return toast.error("Informe o link de referência do item novo.");
+
     } else if (!item) {
       return toast.error("Selecione um item cadastrado: Insumos de Fabricação, Insumos de Instalação, Material de Almoxarifado ou Máquinas e Ferramentas.");
     }
