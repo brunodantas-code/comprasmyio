@@ -1198,7 +1198,8 @@ function EditRequesterDialog({ order }: { order: Order }) {
   const qc = useQueryClient();
   const { data: projects } = useProjects();
   const [open, setOpen] = useState(false);
-  const [projectId, setProjectId] = useState(order.project_id);
+  const [projectId, setProjectId] = useState(order.project_id ?? "");
+  const [forStock, setForStock] = useState(order.for_stock ?? false);
   const [files, setFiles] = useState<File[]>([]);
   const [deadlineType, setDeadlineType] = useState<Order["deadline_type"]>(order.deadline_type);
   const [deadlineDate, setDeadlineDate] = useState(order.deadline_date ?? "");
@@ -1223,7 +1224,8 @@ function EditRequesterDialog({ order }: { order: Order }) {
         attachments = [...attachments, ...uploaded];
       }
       const { error } = await supabase.from("purchase_orders").update({
-        project_id: v.project_id,
+        project_id: forStock ? null : (v.project_id ?? null),
+        for_stock: forStock,
         item_name: v.item_name,
         item_link: v.item_link ?? null,
         material_id: selectedItem?.material_id ?? null,
@@ -1253,9 +1255,12 @@ function EditRequesterDialog({ order }: { order: Order }) {
     if (!selectedItem) {
       return toast.error("Selecione um item cadastrado no Estoque — Fábrica, Insumos de Instalação ou Almoxarifado.");
     }
+    if (!forStock && !projectId) {
+      return toast.error("Selecione um projeto");
+    }
     const fd = new FormData(e.currentTarget);
     const parsed = newOrderSchema.safeParse({
-      project_id: projectId,
+      project_id: forStock ? undefined : projectId,
       item_name: selectedItem.name,
       item_link: itemLink || undefined,
       quantity: fd.get("quantity"),
@@ -1279,9 +1284,22 @@ function EditRequesterDialog({ order }: { order: Order }) {
         </DialogHeader>
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-2">
+            <Label>Alocação</Label>
+            <div className="flex items-center gap-6">
+              <label className="flex cursor-pointer items-center gap-2 text-sm">
+                <Checkbox checked={!forStock} onCheckedChange={() => setForStock(false)} />
+                Projeto
+              </label>
+              <label className="flex cursor-pointer items-center gap-2 text-sm">
+                <Checkbox checked={forStock} onCheckedChange={() => setForStock(true)} />
+                Estoque
+              </label>
+            </div>
+          </div>
+          <div className="space-y-2">
             <Label>Projeto</Label>
-            <Select value={projectId} onValueChange={setProjectId}>
-              <SelectTrigger><SelectValue placeholder="Selecione o projeto" /></SelectTrigger>
+            <Select value={forStock ? "" : projectId} onValueChange={setProjectId} disabled={forStock}>
+              <SelectTrigger><SelectValue placeholder={forStock ? "Compra para estoque" : "Selecione o projeto"} /></SelectTrigger>
               <SelectContent>
                 {(projects ?? []).map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
               </SelectContent>
