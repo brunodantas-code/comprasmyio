@@ -1896,9 +1896,27 @@ function StatusHistoryDialog({ order, canEdit }: { order: Order; canEdit?: boole
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Histórico de status</DialogTitle>
+          <DialogTitle>{canEdit ? "Status do pedido" : "Histórico de status"}</DialogTitle>
           <DialogDescription>{order.item_name}</DialogDescription>
         </DialogHeader>
+        {canEdit && (
+          <div className="space-y-2">
+            <Label>Alterar status</Label>
+            <Select
+              value={order.status}
+              onValueChange={(v) => updateStatus.mutate(v as Order["status"])}
+              disabled={updateStatus.isPending}
+            >
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {(BUYER_STATUS_KEYS.includes(order.status) ? BUYER_STATUS_KEYS : [...BUYER_STATUS_KEYS, order.status]).map((v) => (
+                  <SelectItem key={v} value={v}>{STATUS_LABELS[v]}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando...</p>
         ) : !logs?.length ? (
