@@ -584,6 +584,8 @@ export type Database = {
           location: string
           loss_percent: number
           lot_quantity: number | null
+          manufacturer_code: string | null
+          myio_code: string | null
           name: string
           photo_url: string | null
           purchase_type: string | null
@@ -600,6 +602,8 @@ export type Database = {
           location?: string
           loss_percent?: number
           lot_quantity?: number | null
+          manufacturer_code?: string | null
+          myio_code?: string | null
           name: string
           photo_url?: string | null
           purchase_type?: string | null
@@ -616,6 +620,8 @@ export type Database = {
           location?: string
           loss_percent?: number
           lot_quantity?: number | null
+          manufacturer_code?: string | null
+          myio_code?: string | null
           name?: string
           photo_url?: string | null
           purchase_type?: string | null
@@ -1425,6 +1431,8 @@ export type Database = {
           id: string
           link: string | null
           lot_quantity: number | null
+          manufacturer_code: string | null
+          myio_code: string | null
           name: string
           photo_url: string | null
           purchase_type: string | null
@@ -1437,6 +1445,8 @@ export type Database = {
           id?: string
           link?: string | null
           lot_quantity?: number | null
+          manufacturer_code?: string | null
+          myio_code?: string | null
           name: string
           photo_url?: string | null
           purchase_type?: string | null
@@ -1449,6 +1459,8 @@ export type Database = {
           id?: string
           link?: string | null
           lot_quantity?: number | null
+          manufacturer_code?: string | null
+          myio_code?: string | null
           name?: string
           photo_url?: string | null
           purchase_type?: string | null
@@ -1525,6 +1537,8 @@ export type Database = {
           id: string
           link: string | null
           lot_quantity: number | null
+          manufacturer_code: string | null
+          myio_code: string | null
           name: string
           photo_url: string | null
           purchase_type: string | null
@@ -1537,6 +1551,8 @@ export type Database = {
           id?: string
           link?: string | null
           lot_quantity?: number | null
+          manufacturer_code?: string | null
+          myio_code?: string | null
           name: string
           photo_url?: string | null
           purchase_type?: string | null
@@ -1549,6 +1565,8 @@ export type Database = {
           id?: string
           link?: string | null
           lot_quantity?: number | null
+          manufacturer_code?: string | null
+          myio_code?: string | null
           name?: string
           photo_url?: string | null
           purchase_type?: string | null
