@@ -359,8 +359,8 @@ function Dashboard() {
           <TabsContent value="pedidos">
             <Tabs defaultValue="mine">
               <TabsList className="mb-4">
-                <TabsTrigger value="mine"><ClipboardList className="mr-2 h-4 w-4" />Minhas compras</TabsTrigger>
-                <TabsTrigger value="new"><Plus className="mr-2 h-4 w-4" />Nova Solicitação de compra</TabsTrigger>
+                <TabsTrigger value="mine"><ClipboardList className="mr-2 h-4 w-4" />Minhas Solicitações</TabsTrigger>
+                <TabsTrigger value="new"><Plus className="mr-2 h-4 w-4" />Novas Solicitações</TabsTrigger>
                 {canImport && <TabsTrigger value="import"><Plane className="mr-2 h-4 w-4" />Importação</TabsTrigger>}
               </TabsList>
               <TabsContent value="mine"><MyOrders userId={me.id} /></TabsContent>
