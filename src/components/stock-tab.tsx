@@ -1117,6 +1117,7 @@ function StockTableCard({
   actions,
   detail,
   damageSource,
+  simple,
 }: {
   title: string;
   description: string;
@@ -1127,6 +1128,8 @@ function StockTableCard({
   actions?: React.ReactNode;
   detail?: boolean;
   damageSource?: string;
+  /** Estoque Myio: só saldo em estoque e baixa por avaria. */
+  simple?: boolean;
 }) {
   const { data: metaMap } = useStockMeta("materials");
 
@@ -1149,12 +1152,12 @@ function StockTableCard({
           <Table>
             <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[45%]">Descrição</TableHead>
-                  <TableHead className="w-[12%]">Cód. Myio</TableHead>
-                  <TableHead className="w-[12%]">Cód. Fabricante</TableHead>
-                  <TableHead className="w-[10%] text-right">Saldo Estoque</TableHead>
-                  <TableHead className="w-[10%]">Imagem</TableHead>
-                  <TableHead className="w-[11%] text-right"></TableHead>
+                  <TableHead className={simple ? "w-[70%]" : "w-[45%]"}>Descrição</TableHead>
+                  {!simple && <TableHead className="w-[12%]">Cód. Myio</TableHead>}
+                  {!simple && <TableHead className="w-[12%]">Cód. Fabricante</TableHead>}
+                  <TableHead className={simple ? "w-[15%] text-right" : "w-[10%] text-right"}>Saldo Estoque</TableHead>
+                  {!simple && <TableHead className="w-[10%]">Imagem</TableHead>}
+                  <TableHead className={simple ? "w-[15%] text-right" : "w-[11%] text-right"}></TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -1207,8 +1210,8 @@ function StockTableCard({
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell><CopyCodeCell value={meta?.myio_code} /></TableCell>
-                  <TableCell><CopyCodeCell value={meta?.manufacturer_code} /></TableCell>
+                  {!simple && <TableCell><CopyCodeCell value={meta?.myio_code} /></TableCell>}
+                  {!simple && <TableCell><CopyCodeCell value={meta?.manufacturer_code} /></TableCell>}
                   <TableCell className="text-right">
                     <Badge
                       variant="outline"
@@ -1217,32 +1220,38 @@ function StockTableCard({
                       {r.balance}
                     </Badge>
                   </TableCell>
-                  <TableCell>
-                    <StockPhotoCell url={meta?.photo} name={r.name} />
-                  </TableCell>
+                  {!simple && (
+                    <TableCell>
+                      <StockPhotoCell url={meta?.photo} name={r.name} />
+                    </TableCell>
+                  )}
                   <TableCell>
                     <div className="flex justify-end gap-1">
-                      <MovementDialog
-                        row={r}
-                        userId={userId}
-                        type="entrada"
-                        trigger={
-                          <Button size="icon" variant="outline" title="Entrada" aria-label="Entrada">
-                            <ArrowDownCircle className="h-4 w-4" />
-                          </Button>
-                        }
-                      />
-                      <MovementDialog
-                        row={r}
-                        userId={userId}
-                        type="saida"
-                        trigger={
-                          <Button size="icon" variant="outline" disabled={r.balance <= 0} title="Saída" aria-label="Saída">
-                            <ArrowUpCircle className="h-4 w-4" />
-                          </Button>
-                        }
-                      />
-                      <HistoryDialog row={r} />
+                      {!simple && (
+                        <>
+                          <MovementDialog
+                            row={r}
+                            userId={userId}
+                            type="entrada"
+                            trigger={
+                              <Button size="icon" variant="outline" title="Entrada" aria-label="Entrada">
+                                <ArrowDownCircle className="h-4 w-4" />
+                              </Button>
+                            }
+                          />
+                          <MovementDialog
+                            row={r}
+                            userId={userId}
+                            type="saida"
+                            trigger={
+                              <Button size="icon" variant="outline" disabled={r.balance <= 0} title="Saída" aria-label="Saída">
+                                <ArrowUpCircle className="h-4 w-4" />
+                              </Button>
+                            }
+                          />
+                          <HistoryDialog row={r} />
+                        </>
+                      )}
                       {damageSource && r.balance > 0 ? (
                         <DamageItemDialog
                           materialId={r.material_id}
@@ -1256,8 +1265,8 @@ function StockTableCard({
                           <AlertTriangle className="h-4 w-4 text-muted-foreground/40" />
                         </Button>
                       )}
-                      
-                      {canDelete && <DeleteMaterialDialog row={r} />}
+
+                      {!simple && canDelete && <DeleteMaterialDialog row={r} />}
                     </div>
                   </TableCell>
                 </TableRow>
@@ -2149,6 +2158,7 @@ function EstoqueMyioSection({ userId, canDelete }: { userId: string; canDelete?:
           canDelete={canDelete}
           actions={toolbar}
           damageSource="Estoque Myio"
+          simple
         />
         <TerceirosSection userId={userId} canDelete={canDelete} />
         <BoxesCard />
