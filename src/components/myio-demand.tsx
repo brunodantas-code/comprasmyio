@@ -357,14 +357,16 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
         const created: { id: string; item: typeof toBuy[number] }[] = [];
         for (const i of toBuy) {
           const mat = materialByName.get(i.product.trim().toLowerCase());
+          const terc = mat ? null : terceirosByName.get(i.product.trim().toLowerCase());
           const { data, error } = await supabase
             .from("purchase_orders")
             .insert({
               project_id: order.project_id,
               requester_id: userId,
               item_name: i.product,
-              item_link: mat?.link ?? null,
+              item_link: mat?.link ?? terc?.link ?? null,
               material_id: mat?.id ?? null,
+              terceiros_material_id: terc?.id ?? null,
               quantity: missing(i),
               recipient: "Estoque",
               delivery_point: "Estoque",
