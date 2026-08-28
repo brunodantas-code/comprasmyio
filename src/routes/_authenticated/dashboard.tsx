@@ -849,7 +849,7 @@ function NewOrder({ userId }: { userId: string }) {
   return (
     <Card className="max-w-2xl">
       <CardHeader>
-        <CardTitle>Nova Solicitação de Compra</CardTitle>
+        <CardTitle>Novas Solicitações</CardTitle>
         <CardDescription>Preencha os dados do material que você precisa.</CardDescription>
       </CardHeader>
       <CardContent>
