@@ -499,10 +499,20 @@ function usePurchasableItems() {
   });
 }
 
+const CATEGORIES = [
+  { value: "todas", label: "Todas" },
+  { value: "Insumos de Instalação", label: "Insumos de Instalação" },
+  { value: "Insumos de Fabricação", label: "Insumos de Fabricação" },
+  { value: "Material de Almoxarifado", label: "Material de Almoxarifado" },
+  { value: "Máquinas e Ferramentas", label: "Máquinas e Ferramentas" },
+] as const;
+
 function PurchasableItemPicker({ value, onPick, disabled }: { value: PurchasableItem | null; onPick: (i: PurchasableItem) => void; disabled?: boolean }) {
   const { data: items, isLoading } = usePurchasableItems();
   const [open, setOpen] = useState(false);
-  const origins = ["Estoque — Fábrica", "Insumos de Instalação", "Almoxarifado", "Ferramentas/Ativos"];
+  const [category, setCategory] = useState<string>("todas");
+  const origins = ["Insumos de Fabricação", "Insumos de Instalação", "Material de Almoxarifado", "Máquinas e Ferramentas"];
+  const filtered = (items ?? []).filter((i) => category === "todas" || i.origin === category);
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
