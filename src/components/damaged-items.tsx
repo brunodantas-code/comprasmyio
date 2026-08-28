@@ -205,22 +205,23 @@ export function DamageItemDialog({
 
           <div className="space-y-2">
             <Label htmlFor={`dmg-reason-${materialId}`}>Motivo da avaria *</Label>
-            <Input
-              id={`dmg-reason-${materialId}`}
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              placeholder="Ex.: chegou quebrado, defeito de fabricação..."
-            />
+            <Select value={reason} onValueChange={setReason}>
+              <SelectTrigger id={`dmg-reason-${materialId}`}>
+                <SelectValue placeholder="Selecione o motivo" />
+              </SelectTrigger>
+              <SelectContent>
+                {DAMAGE_REASONS.map((r) => (
+                  <SelectItem key={r} value={r}>{r}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
-            <Label>Foto (opcional)</Label>
-            <div className="flex gap-2">
+            <Label>Foto da avaria *</Label>
+            <div>
               <Button type="button" variant="outline" size="sm" onClick={() => cameraRef.current?.click()}>
                 <Camera className="mr-1 h-4 w-4" /> Câmera
-              </Button>
-              <Button type="button" variant="outline" size="sm" onClick={() => galleryRef.current?.click()}>
-                <ImageUp className="mr-1 h-4 w-4" /> Galeria
               </Button>
             </div>
             <input
@@ -228,13 +229,6 @@ export function DamageItemDialog({
               type="file"
               accept="image/*"
               capture="environment"
-              className="hidden"
-              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            />
-            <input
-              ref={galleryRef}
-              type="file"
-              accept="image/*"
               className="hidden"
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
             />
