@@ -1117,6 +1117,7 @@ function StockTableCard({
   actions,
   detail,
   damageSource,
+  simple,
 }: {
   title: string;
   description: string;
@@ -1127,6 +1128,8 @@ function StockTableCard({
   actions?: React.ReactNode;
   detail?: boolean;
   damageSource?: string;
+  /** Estoque Myio: só saldo em estoque e baixa por avaria. */
+  simple?: boolean;
 }) {
   const { data: metaMap } = useStockMeta("materials");
 
