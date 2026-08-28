@@ -349,11 +349,11 @@ function Dashboard() {
             {(me.isComprador || me.isAdmin) && (
               <TabsTrigger value="queue"><ShoppingCart className="mr-2 h-4 w-4" />Fila de compras</TabsTrigger>
             )}
-            <TabsTrigger value="stock"><Boxes className="mr-2 h-4 w-4" />Armazém</TabsTrigger>
-            {me.isAdmin && <TabsTrigger value="projects"><FolderKanban className="mr-2 h-4 w-4" />Projetos e clientes</TabsTrigger>}
+            {canSeeStock && <TabsTrigger value="stock"><Boxes className="mr-2 h-4 w-4" />Armazém</TabsTrigger>}
+            {isAdmin && <TabsTrigger value="projects"><FolderKanban className="mr-2 h-4 w-4" />Projetos e clientes</TabsTrigger>}
             
-            {(me.isAdmin || fabricaOnly) && <TabsTrigger value="myio"><Factory className="mr-2 h-4 w-4" />Ordem de Expedição</TabsTrigger>}
-            {me.isAdmin && <TabsTrigger value="admin"><Users className="mr-2 h-4 w-4" />Usuários e logs</TabsTrigger>}
+            {isAdmin && <TabsTrigger value="myio"><Factory className="mr-2 h-4 w-4" />Ordem de Expedição</TabsTrigger>}
+            {isAdmin && <TabsTrigger value="admin"><Users className="mr-2 h-4 w-4" />Usuários e logs</TabsTrigger>}
           </TabsList>
 
           <TabsContent value="pedidos">
@@ -361,16 +361,24 @@ function Dashboard() {
               <TabsList className="mb-4">
                 <TabsTrigger value="mine"><ClipboardList className="mr-2 h-4 w-4" />Minhas compras</TabsTrigger>
                 <TabsTrigger value="new"><Plus className="mr-2 h-4 w-4" />Nova Solicitação de compra</TabsTrigger>
-                <TabsTrigger value="import"><Plane className="mr-2 h-4 w-4" />Importação</TabsTrigger>
+                {canImport && <TabsTrigger value="import"><Plane className="mr-2 h-4 w-4" />Importação</TabsTrigger>}
               </TabsList>
               <TabsContent value="mine"><MyOrders userId={me.id} /></TabsContent>
               <TabsContent value="new"><NewOrder userId={me.id} /></TabsContent>
-              <TabsContent value="import"><ImportOrders userId={me.id} /></TabsContent>
+              {canImport && <TabsContent value="import"><ImportOrders userId={me.id} /></TabsContent>}
             </Tabs>
           </TabsContent>
-          {(me.isComprador || me.isAdmin) && <TabsContent value="queue"><BuyerQueue /></TabsContent>}
-          <TabsContent value="stock"><StockTab userId={me.id} canDelete={me.isAdmin} onlyLocation={fabricaOnly ? "fabrica" : undefined} /></TabsContent>
-          {me.isAdmin && (
+          {canSeeQueue && <TabsContent value="queue"><BuyerQueue /></TabsContent>}
+          {canSeeStock && (
+            <TabsContent value="stock">
+              <StockTab
+                userId={me.id}
+                canDelete={isAdmin}
+                onlyLocation={fabricaOnly ? "fabrica" : estoquistaOnly ? "myio" : undefined}
+              />
+            </TabsContent>
+          )}
+          {isAdmin && (
             <TabsContent value="projects">
               <Tabs defaultValue="projetos">
                 <TabsList className="mb-4">
@@ -383,10 +391,11 @@ function Dashboard() {
             </TabsContent>
           )}
           
-            {(me.isAdmin || fabricaOnly) && (
-              <TabsContent value="myio"><MyioOrdersTab userId={me.id} canManage={me.isAdmin} /></TabsContent>
+            {isAdmin && (
+              <TabsContent value="myio"><MyioOrdersTab userId={me.id} canManage={isAdmin} /></TabsContent>
             )}
-          {me.isAdmin && (
+          {isAdmin && (
+
             <TabsContent value="admin">
               <Tabs defaultValue="usuarios">
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
