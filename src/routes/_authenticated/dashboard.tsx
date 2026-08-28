@@ -1381,12 +1381,18 @@ function InlineField({
 
   const save = useMutation({
     mutationFn: async (next: string) => {
+      const v = next || null;
+      const patch =
+        field === "delivery_forecast" ? { delivery_forecast: v }
+        : field === "passphrase" ? { passphrase: v }
+        : { buyer_notes: v };
       const { error } = await supabase
         .from("purchase_orders")
-        .update({ [field]: next || null } as Record<string, string | null>)
+        .update(patch)
         .eq("id", order.id);
       if (error) throw error;
     },
+
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["orders"] });
       qc.invalidateQueries({ queryKey: ["logs"] });
