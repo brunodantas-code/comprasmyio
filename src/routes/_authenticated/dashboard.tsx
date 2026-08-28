@@ -1270,7 +1270,8 @@ function OrdersTable({
             <TableHead>Palavra passe</TableHead>
             <TableHead>Obs.</TableHead>
             <TableHead className="w-[110px]">Anexos</TableHead>
-            <TableHead className="text-right">Ações</TableHead>
+            <TableHead className="text-right"><span className="sr-only">Ações</span></TableHead>
+
           </TableRow>
         </TableHeader>
         <TableBody>
