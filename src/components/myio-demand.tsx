@@ -284,6 +284,16 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
   );
   const materialByName = new Map((materials ?? []).map((m) => [m.name.trim().toLowerCase(), m]));
 
+  const { data: terceiros } = useQuery({
+    queryKey: ["terceiros-material-names"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("terceiros_materials").select("id, name, link");
+      if (error) throw error;
+      return (data ?? []) as { id: string; name: string; link: string | null }[];
+    },
+  });
+  const terceirosByName = new Map((terceiros ?? []).map((m) => [m.name.trim().toLowerCase(), m]));
+
   const { data: resolvedItemIds } = useQuery({
     queryKey: ["demand-resolved-items"],
     queryFn: async () => {
