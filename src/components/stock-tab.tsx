@@ -1097,6 +1097,8 @@ function StockTableCard({
   detail?: boolean;
   damageSource?: string;
 }) {
+  const { data: metaMap } = useStockMeta("materials");
+
 
   return (
     <Card>
