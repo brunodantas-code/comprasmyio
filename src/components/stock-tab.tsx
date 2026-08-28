@@ -1845,6 +1845,8 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
   const { data: rows, isLoading } = useTerceirosStock();
   const { data: movements } = useTerceirosMovements();
   const { data: profiles } = useStockProfiles();
+  const { data: metaMap } = useStockMeta("terceiros_materials");
+
   const [search, setSearch] = useState("");
   const [view, setView] = useState<"all" | "with" | "zero">("all");
 
