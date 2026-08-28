@@ -131,7 +131,7 @@ function useProjectOptions() {
   return useQuery({
     queryKey: ["projects-for-technician"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("projects").select("id, name").order("name");
+      const { data, error } = await supabase.from("projects").select("id, name").neq("name", "Estoque").order("name");
       if (error) throw error;
       return (data ?? []) as { id: string; name: string }[];
     },

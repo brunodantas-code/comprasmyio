@@ -830,7 +830,7 @@ function FoundMerchandiseDialog({ orderId, notes }: { orderId: string; notes: st
   const { data: projects } = useQuery({
     queryKey: ["projects-for-found"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("projects").select("id, name, client_name").order("name");
+      const { data, error } = await supabase.from("projects").select("id, name, client_name").neq("name", "Estoque").order("name");
       if (error) throw error;
       return (data ?? []) as { id: string; name: string; client_name: string | null }[];
     },

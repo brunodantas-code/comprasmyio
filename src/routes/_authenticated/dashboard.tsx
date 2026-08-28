@@ -401,13 +401,16 @@ function Dashboard() {
   );
 }
 
+const ESTOQUE_PROJECT_ID = "1ff7418a-5542-4ae7-b8af-3f5c9423197e";
+
 function useProjects() {
   return useQuery({
     queryKey: ["projects"],
     queryFn: async () => {
       const { data, error } = await supabase.from("projects").select("*").order("name");
       if (error) throw error;
-      return data ?? [];
+      // O projeto "Estoque" é interno (vinculado ao checkbox Estoque) e não aparece nas listas.
+      return (data ?? []).filter((p) => p.id !== ESTOQUE_PROJECT_ID);
     },
   });
 }
