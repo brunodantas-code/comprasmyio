@@ -1366,91 +1366,91 @@ function ConfirmReceiptActions({ order }: { order: Order }) {
   );
 }
 
-function EditOrderDialog({ order }: { order: Order }) {
+function InlineField({
+  order, field, type, canEdit, display,
+}: {
+  order: Order;
+  field: "delivery_forecast" | "passphrase" | "buyer_notes";
+  type: "date" | "text" | "textarea";
+  canEdit?: boolean;
+  display: string;
+}) {
   const qc = useQueryClient();
-  const [open, setOpen] = useState(false);
-  const [status, setStatus] = useState<Order["status"]>(order.status);
-  const [notes, setNotes] = useState(order.buyer_notes ?? "");
-  const [passphrase, setPassphrase] = useState(order.passphrase ?? "");
-  const [forecast, setForecast] = useState(order.delivery_forecast ?? "");
-  const [files, setFiles] = useState<File[]>([]);
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState<string>((order[field] as string | null) ?? "");
 
   const save = useMutation({
-    mutationFn: async () => {
-      let attachments = order.attachments ?? [];
-      if (files.length) {
-        const uploaded = await uploadOrderAttachments(order.id, files);
-        attachments = [...attachments, ...uploaded];
-      }
+    mutationFn: async (next: string) => {
       const { error } = await supabase
         .from("purchase_orders")
-        .update({
-          status,
-          buyer_notes: notes || null,
-          passphrase: passphrase || null,
-          delivery_forecast: forecast || null,
-          attachments,
-        })
+        .update({ [field]: next || null })
         .eq("id", order.id);
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Pedido atualizado");
       qc.invalidateQueries({ queryKey: ["orders"] });
       qc.invalidateQueries({ queryKey: ["logs"] });
-      setFiles([]);
-      setOpen(false);
+      setEditing(false);
+      toast.success("Atualizado");
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => {
+      toast.error(e.message);
+      setValue((order[field] as string | null) ?? "");
+      setEditing(false);
+    },
   });
 
+  const commit = () => {
+    const current = (order[field] as string | null) ?? "";
+    if (value === current) { setEditing(false); return; }
+    save.mutate(value);
+  };
+
+  if (!canEdit) return <span className="whitespace-pre-wrap">{display}</span>;
+
+  if (!editing) {
+    return (
+      <button
+        type="button"
+        onClick={() => { setValue((order[field] as string | null) ?? ""); setEditing(true); }}
+        className="w-full rounded px-1 py-0.5 text-left whitespace-pre-wrap hover:bg-muted"
+        title="Clique para editar"
+      >
+        {display}
+      </button>
+    );
+  }
+
+  if (type === "textarea") {
+    return (
+      <Textarea
+        autoFocus
+        rows={3}
+        value={value}
+        disabled={save.isPending}
+        onChange={(e) => setValue(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => { if (e.key === "Escape") setEditing(false); }}
+      />
+    );
+  }
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild><Button size="sm" variant="outline">Editar</Button></DialogTrigger>
-      <DialogContent className="max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{order.item_name}</DialogTitle>
-          <DialogDescription>Atualize o status e adicione observações (ex.: palavra-passe do entregador).</DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label>Status</Label>
-            <Select value={status} onValueChange={(v) => setStatus(v as Order["status"])}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {(BUYER_STATUS_KEYS.includes(status) ? BUYER_STATUS_KEYS : [...BUYER_STATUS_KEYS, status]).map((v) => (
-                  <SelectItem key={v} value={v}>{STATUS_LABELS[v]}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label>Palavra passe</Label>
-            <Input value={passphrase} onChange={(e) => setPassphrase(e.target.value)} placeholder="Ex.: laranja" />
-          </div>
-          <div className="space-y-2">
-            <Label>Previsão de entrega</Label>
-            <Input type="date" value={forecast} onChange={(e) => setForecast(e.target.value)} />
-          </div>
-          <div className="space-y-2">
-            <Label>Observações</Label>
-            <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={4} placeholder="Ex.: palavra-passe = laranja" />
-          </div>
-          <div className="space-y-2">
-            <Label>Anexos existentes</Label>
-            <ExistingAttachments orderId={order.id} attachments={order.attachments ?? []} canRemove />
-          </div>
-          <FilePicker files={files} setFiles={setFiles} label="Adicionar novos anexos" />
-        </div>
-        <DialogFooter>
-          <Button onClick={() => save.mutate()} disabled={save.isPending}>
-            {save.isPending ? "Salvando..." : "Salvar"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <Input
+      autoFocus
+      type={type}
+      value={value}
+      disabled={save.isPending}
+      onChange={(e) => setValue(e.target.value)}
+      onBlur={commit}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") commit();
+        if (e.key === "Escape") setEditing(false);
+      }}
+    />
   );
 }
+
 
 /* ---------- Projects admin ---------- */
 
