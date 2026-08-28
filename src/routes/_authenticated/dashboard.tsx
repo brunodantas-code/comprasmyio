@@ -642,7 +642,7 @@ function NewOrder({ userId }: { userId: string }) {
       if (newItemName.trim().length < 2) return toast.error("Descreva o item novo.");
       if (!itemLink.trim()) return toast.error("Informe o link de referência do item novo.");
     } else if (!item) {
-      return toast.error("Selecione um item cadastrado no Estoque — Fábrica, Insumos de Instalação ou Almoxarifado.");
+      return toast.error("Selecione um item cadastrado: Insumos de Fabricação, Insumos de Instalação, Material de Almoxarifado ou Máquinas e Ferramentas.");
     }
     if (!forStock && !projectId) {
       return toast.error("Selecione um projeto");
@@ -732,7 +732,7 @@ function NewOrder({ userId }: { userId: string }) {
                 </div>
               ) : (
                 <p className="text-xs text-muted-foreground">
-                  Somente itens cadastrados no Estoque — Fábrica, Insumos de Instalação ou Almoxarifado. Ao receber, entra automaticamente no estoque de origem.
+                  Somente itens cadastrados em Insumos de Fabricação, Insumos de Instalação, Material de Almoxarifado ou Máquinas e Ferramentas. Ao receber, entra automaticamente no estoque de origem.
                 </p>
               )}
             </div>
@@ -1329,7 +1329,7 @@ function EditRequesterDialog({ order }: { order: Order }) {
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!selectedItem) {
-      return toast.error("Selecione um item cadastrado no Estoque — Fábrica, Insumos de Instalação ou Almoxarifado.");
+      return toast.error("Selecione um item cadastrado: Insumos de Fabricação, Insumos de Instalação, Material de Almoxarifado ou Máquinas e Ferramentas.");
     }
     if (!forStock && !projectId) {
       return toast.error("Selecione um projeto");
