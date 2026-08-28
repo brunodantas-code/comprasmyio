@@ -345,7 +345,7 @@ function Dashboard() {
       <main className="mx-auto max-w-7xl px-3 py-5 sm:px-6 sm:py-8">
         <Tabs defaultValue={defaultTab}>
           <TabsList className="mb-6">
-            <TabsTrigger value="pedidos"><ClipboardList className="mr-2 h-4 w-4" />Solicitações de Compras</TabsTrigger>
+            <TabsTrigger value="pedidos"><ClipboardList className="mr-2 h-4 w-4" />Solicitações</TabsTrigger>
             {canSeeQueue && (
               <TabsTrigger value="queue"><ShoppingCart className="mr-2 h-4 w-4" />Fila de compras</TabsTrigger>
             )}
