@@ -1210,8 +1210,8 @@ function StockTableCard({
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell><CopyCodeCell value={meta?.myio_code} /></TableCell>
-                  <TableCell><CopyCodeCell value={meta?.manufacturer_code} /></TableCell>
+                  {!simple && <TableCell><CopyCodeCell value={meta?.myio_code} /></TableCell>}
+                  {!simple && <TableCell><CopyCodeCell value={meta?.manufacturer_code} /></TableCell>}
                   <TableCell className="text-right">
                     <Badge
                       variant="outline"
@@ -1220,32 +1220,38 @@ function StockTableCard({
                       {r.balance}
                     </Badge>
                   </TableCell>
-                  <TableCell>
-                    <StockPhotoCell url={meta?.photo} name={r.name} />
-                  </TableCell>
+                  {!simple && (
+                    <TableCell>
+                      <StockPhotoCell url={meta?.photo} name={r.name} />
+                    </TableCell>
+                  )}
                   <TableCell>
                     <div className="flex justify-end gap-1">
-                      <MovementDialog
-                        row={r}
-                        userId={userId}
-                        type="entrada"
-                        trigger={
-                          <Button size="icon" variant="outline" title="Entrada" aria-label="Entrada">
-                            <ArrowDownCircle className="h-4 w-4" />
-                          </Button>
-                        }
-                      />
-                      <MovementDialog
-                        row={r}
-                        userId={userId}
-                        type="saida"
-                        trigger={
-                          <Button size="icon" variant="outline" disabled={r.balance <= 0} title="Saída" aria-label="Saída">
-                            <ArrowUpCircle className="h-4 w-4" />
-                          </Button>
-                        }
-                      />
-                      <HistoryDialog row={r} />
+                      {!simple && (
+                        <>
+                          <MovementDialog
+                            row={r}
+                            userId={userId}
+                            type="entrada"
+                            trigger={
+                              <Button size="icon" variant="outline" title="Entrada" aria-label="Entrada">
+                                <ArrowDownCircle className="h-4 w-4" />
+                              </Button>
+                            }
+                          />
+                          <MovementDialog
+                            row={r}
+                            userId={userId}
+                            type="saida"
+                            trigger={
+                              <Button size="icon" variant="outline" disabled={r.balance <= 0} title="Saída" aria-label="Saída">
+                                <ArrowUpCircle className="h-4 w-4" />
+                              </Button>
+                            }
+                          />
+                          <HistoryDialog row={r} />
+                        </>
+                      )}
                       {damageSource && r.balance > 0 ? (
                         <DamageItemDialog
                           materialId={r.material_id}
@@ -1259,8 +1265,8 @@ function StockTableCard({
                           <AlertTriangle className="h-4 w-4 text-muted-foreground/40" />
                         </Button>
                       )}
-                      
-                      {canDelete && <DeleteMaterialDialog row={r} />}
+
+                      {!simple && canDelete && <DeleteMaterialDialog row={r} />}
                     </div>
                   </TableCell>
                 </TableRow>
