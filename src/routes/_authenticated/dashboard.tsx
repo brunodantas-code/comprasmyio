@@ -995,7 +995,7 @@ function MyOrders({ userId }: { userId: string }) {
     },
   });
 
-  const projectName = (id: string) => projects?.find((p) => p.id === id)?.name ?? "—";
+  const projectName = (id: string) => (id === ESTOQUE_PROJECT_ID ? "Estoque" : projects?.find((p) => p.id === id)?.name ?? "—");
   const statusFiltered = (orders ?? []).filter((o) => statusSelected.includes(o.status));
   const visible = filterDelivered(statusFiltered, deliveredMode, deliveredFrom);
 
@@ -1058,7 +1058,7 @@ function ImportOrders({ userId }: { userId: string }) {
     },
   });
 
-  const projectName = (id: string) => projects?.find((p) => p.id === id)?.name ?? "—";
+  const projectName = (id: string) => (id === ESTOQUE_PROJECT_ID ? "Estoque" : projects?.find((p) => p.id === id)?.name ?? "—");
   const importOrders = (orders ?? []).filter((o) => o.material_id && importIds.data?.has(o.material_id));
   const statusFiltered = importOrders.filter((o) => statusSelected.includes(o.status));
   const visible = filterDelivered(statusFiltered, deliveredMode, deliveredFrom);
@@ -1139,7 +1139,7 @@ function BuyerQueue() {
     (projectFilter === "all" || o.project_id === projectFilter)
   ) ?? [];
   const filtered = filterDelivered(baseFiltered, deliveredMode, deliveredFrom);
-  const projectName = (id: string) => projects?.find((p) => p.id === id)?.name ?? "—";
+  const projectName = (id: string) => (id === ESTOQUE_PROJECT_ID ? "Estoque" : projects?.find((p) => p.id === id)?.name ?? "—");
   const requesterName = (id: string) => profiles?.get(id)?.full_name || profiles?.get(id)?.email || "—";
 
   const isImportado = (o: Order) => {
