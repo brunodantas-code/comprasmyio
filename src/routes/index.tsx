@@ -88,17 +88,6 @@ function Landing() {
         <header className="relative z-10">
           <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-5 sm:px-6">
             <MyioLogo tone="light" className="text-[2.8125rem]" />
-            <nav className="hidden items-center gap-7 text-sm font-semibold text-white/80 md:flex">
-              <a href="#recursos" className="transition-colors hover:text-white">
-                Recursos
-              </a>
-              <a href="#fluxo" className="transition-colors hover:text-white">
-                Fluxo
-              </a>
-              <a href="#perfis" className="transition-colors hover:text-white">
-                Perfis
-              </a>
-            </nav>
             <Link to={signedIn ? "/dashboard" : "/auth"}>
               <Button
                 size="sm"
