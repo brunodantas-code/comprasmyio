@@ -385,6 +385,8 @@ function AddToolDialog({ userId }: { userId: string }) {
     setNewLot("");
     setNewType("");
     setNewDescription("");
+    setNewManufCode("");
+    setNewMyioCode("");
     setPhotoFile(null);
     setPhotoPreview(null);
   };

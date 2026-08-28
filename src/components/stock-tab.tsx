@@ -680,6 +680,8 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
     setNewLot("");
     setNewType("");
     setNewDescription("");
+    setNewManufCode("");
+    setNewMyioCode("");
     setPhotoFile(null);
     setPhotoPreview(null);
   };
@@ -1646,6 +1648,8 @@ function AddTerceirosDialog({ userId }: { userId: string }) {
     setNewLot("");
     setNewType("");
     setNewDescription("");
+    setNewManufCode("");
+    setNewMyioCode("");
     setPhotoFile(null);
     setPhotoPreview(null);
   };
