@@ -2100,6 +2100,7 @@ function EstoqueMyioSection({ userId, canDelete }: { userId: string; canDelete?:
   const { data: movements } = useMovements();
   const { data: profiles } = useStockProfiles();
   const { data: manufactured } = useManufacturedMap();
+  const { data: terceirosStock } = useTerceirosStock();
   const [search, setSearch] = useState("");
   const [view, setView] = useState<"all" | "with" | "zero">("all");
 
@@ -2144,7 +2145,11 @@ function EstoqueMyioSection({ userId, canDelete }: { userId: string; canDelete?:
 
       <TabsContent value="ordens" className="space-y-6">
         <MyioDemandCard
-          balances={Object.fromEntries(scoped.map((r) => [r.name.trim().toLowerCase(), r.balance]))}
+          balances={[...scoped, ...(terceirosStock ?? [])].reduce<Record<string, number>>((acc, r) => {
+            const key = r.name.trim().toLowerCase();
+            acc[key] = (acc[key] ?? 0) + Number(r.balance ?? 0);
+            return acc;
+          }, {})}
         />
       </TabsContent>
 

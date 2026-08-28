@@ -284,6 +284,16 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
   );
   const materialByName = new Map((materials ?? []).map((m) => [m.name.trim().toLowerCase(), m]));
 
+  const { data: terceiros } = useQuery({
+    queryKey: ["terceiros-material-names"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("terceiros_materials").select("id, name, link");
+      if (error) throw error;
+      return (data ?? []) as { id: string; name: string; link: string | null }[];
+    },
+  });
+  const terceirosByName = new Map((terceiros ?? []).map((m) => [m.name.trim().toLowerCase(), m]));
+
   const { data: resolvedItemIds } = useQuery({
     queryKey: ["demand-resolved-items"],
     queryFn: async () => {
@@ -347,14 +357,16 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
         const created: { id: string; item: typeof toBuy[number] }[] = [];
         for (const i of toBuy) {
           const mat = materialByName.get(i.product.trim().toLowerCase());
+          const terc = mat ? null : terceirosByName.get(i.product.trim().toLowerCase());
           const { data, error } = await supabase
             .from("purchase_orders")
             .insert({
               project_id: order.project_id,
               requester_id: userId,
               item_name: i.product,
-              item_link: mat?.link ?? null,
+              item_link: mat?.link ?? terc?.link ?? null,
               material_id: mat?.id ?? null,
+              terceiros_material_id: terc?.id ?? null,
               quantity: missing(i),
               recipient: "Estoque",
               delivery_point: "Estoque",
@@ -417,15 +429,26 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
       if (upErr) throw upErr;
 
       const mat = materialByName.get(state.item.product.trim().toLowerCase());
+      const terc = mat ? null : terceirosByName.get(state.item.product.trim().toLowerCase());
+      const reason = `Baixa para pedido Myio (${state.order.projects?.name ?? "sem projeto"})`;
       if (mat) {
         const { error: smErr } = await supabase.from("stock_movements").insert({
           material_id: mat.id,
           quantity,
           type: "saida",
-          reason: `Baixa para pedido Myio (${state.order.projects?.name ?? "sem projeto"})`,
+          reason,
           created_by: userId,
         });
         if (smErr) throw smErr;
+      } else if (terc) {
+        const { error: tmErr } = await supabase.from("terceiros_movements").insert({
+          material_id: terc.id,
+          quantity,
+          type: "saida",
+          reason,
+          created_by: userId,
+        });
+        if (tmErr) throw tmErr;
       }
 
       const { data: delivery, error: delErr } = await supabase.from("myio_item_deliveries").insert({
@@ -475,6 +498,9 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
       queryClient.invalidateQueries({ queryKey: ["myio-orders"] });
       queryClient.invalidateQueries({ queryKey: ["stock-movements"] });
       queryClient.invalidateQueries({ queryKey: ["stock"] });
+      queryClient.invalidateQueries({ queryKey: ["material-stock"] });
+      queryClient.invalidateQueries({ queryKey: ["terceiros-stock"] });
+      queryClient.invalidateQueries({ queryKey: ["terceiros-movements"] });
     },
     onError: (e: any) => toast.error(e.message ?? "Erro ao dar baixa"),
     onSettled: () => setDeliverDialog(null),
