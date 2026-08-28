@@ -516,7 +516,7 @@ export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; 
   locations.forEach((loc) => {
     if (loc === "almoxarifado_geral") return; // renderizada ao final, separada
     tabs.push(loc);
-    if (loc === "almoxarifado") tabs.push("distribuicao");
+    if (loc === "almoxarifado" && !onlyLocation) tabs.push("distribuicao");
     if (loc === "fabrica" && showHomologacao) tabs.push("homologacao");
     if (loc === "perdido") tabs.push("avariados");
   });
