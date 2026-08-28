@@ -612,7 +612,10 @@ function NewOrder({ userId }: { userId: string }) {
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!item) {
+    if (isNewItem) {
+      if (newItemName.trim().length < 2) return toast.error("Descreva o item novo.");
+      if (!itemLink.trim()) return toast.error("Informe o link de referência do item novo.");
+    } else if (!item) {
       return toast.error("Selecione um item cadastrado no Estoque — Fábrica, Insumos de Instalação ou Almoxarifado.");
     }
     if (!forStock && !projectId) {
