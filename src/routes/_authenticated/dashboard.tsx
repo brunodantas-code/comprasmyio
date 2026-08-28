@@ -880,9 +880,34 @@ function NewOrder({ userId }: { userId: string }) {
               {isNewItem ? (
                 <div className="space-y-2 pt-1">
                   <Label htmlFor="new_item_name">Descrição do item</Label>
-                  <Input id="new_item_name" value={newItemName} onChange={(e) => setNewItemName(e.target.value)} placeholder="Descreva o item que precisa ser comprado" />
+                  <Input
+                    id="new_item_name"
+                    value={newItemName}
+                    onChange={(e) => setNewItemName(e.target.value)}
+                    onBlur={(e) => checkDuplicates(e.target.value)}
+                    placeholder="Descreva o item que precisa ser comprado"
+                  />
+                  <DuplicateItemDialog
+                    open={dupOpen}
+                    onOpenChange={setDupOpen}
+                    text={newItemName}
+                    candidates={dupCandidates}
+                    onConfirm={(i) => {
+                      setIsNewItem(false);
+                      setNewItemName("");
+                      setItem(i);
+                      if (i.link) setItemLink(i.link);
+                      setDupOpen(false);
+                      toast.success("Item cadastrado selecionado.");
+                    }}
+                    onReject={() => {
+                      setDismissedText(newItemName);
+                      setDupOpen(false);
+                    }}
+                  />
                 </div>
               ) : (
+
                 <p className="text-xs text-muted-foreground">
                   Somente itens cadastrados em Insumos de Fabricação, Insumos de Instalação, Material de Almoxarifado ou Máquinas e Ferramentas. Ao receber, entra automaticamente no estoque de origem.
                 </p>
