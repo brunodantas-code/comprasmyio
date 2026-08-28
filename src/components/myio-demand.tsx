@@ -429,15 +429,26 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
       if (upErr) throw upErr;
 
       const mat = materialByName.get(state.item.product.trim().toLowerCase());
+      const terc = mat ? null : terceirosByName.get(state.item.product.trim().toLowerCase());
+      const reason = `Baixa para pedido Myio (${state.order.projects?.name ?? "sem projeto"})`;
       if (mat) {
         const { error: smErr } = await supabase.from("stock_movements").insert({
           material_id: mat.id,
           quantity,
           type: "saida",
-          reason: `Baixa para pedido Myio (${state.order.projects?.name ?? "sem projeto"})`,
+          reason,
           created_by: userId,
         });
         if (smErr) throw smErr;
+      } else if (terc) {
+        const { error: tmErr } = await supabase.from("terceiros_movements").insert({
+          material_id: terc.id,
+          quantity,
+          type: "saida",
+          reason,
+          created_by: userId,
+        });
+        if (tmErr) throw tmErr;
       }
 
       const { data: delivery, error: delErr } = await supabase.from("myio_item_deliveries").insert({
