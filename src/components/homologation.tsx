@@ -1050,11 +1050,37 @@ export function StockQrDialog({ stockName, trigger }: { stockName: string; trigg
         .select("id, release_id, material_id, box_size, box_qr, notes, created_at, materials(name), homologation_units(id, position, qr_value)")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return (data ?? []).filter(
+      const filtered = (data ?? []).filter(
         (h) =>
           (h.materials as { name: string } | null)?.name === baseName &&
           (h.homologation_units?.length ?? 0) > 0,
       );
+
+      // Só mostra QR codes que ainda estão no estoque: um QR que já saiu
+      // (entregue ao cliente via myio_delivery_qrs ou movimentado via
+      // stock_movement_qrs) deixa de constar no estoque.
+      const allQrs = filtered.flatMap((h) =>
+        ((h.homologation_units ?? []) as { qr_value: string }[]).map((u) => u.qr_value),
+      );
+      const used = new Set<string>();
+      if (allQrs.length) {
+        const [del, mov] = await Promise.all([
+          supabase.from("myio_delivery_qrs").select("qr_value").in("qr_value", allQrs),
+          supabase.from("stock_movement_qrs").select("qr_value").in("qr_value", allQrs),
+        ]);
+        for (const r of del.data ?? []) used.add(r.qr_value);
+        for (const r of mov.data ?? []) used.add(r.qr_value);
+      }
+
+      // Mantém somente as unidades em estoque; caixas sem nenhuma unidade em
+      // estoque são omitidas inteiramente.
+      return filtered
+        .map((h) => {
+          const units = ((h.homologation_units ?? []) as { id: string; position: number; qr_value: string }[])
+            .filter((u) => !used.has(u.qr_value));
+          return { ...h, homologation_units: units };
+        })
+        .filter((h) => (h.homologation_units?.length ?? 0) > 0);
     },
   });
 
