@@ -1,8 +1,26 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ImageIcon } from "lucide-react";
+import { ImageIcon, Copy } from "lucide-react";
+import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+
+export function CopyCodeCell({ value }: { value?: string | null }) {
+  if (!value) return <span className="text-sm text-muted-foreground">—</span>;
+  return (
+    <button
+      type="button"
+      title="Clique para copiar"
+      className="group inline-flex items-center gap-1 rounded px-1 py-0.5 text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground"
+      onClick={() => {
+        void navigator.clipboard.writeText(value).then(() => toast.success(`Copiado: ${value}`));
+      }}
+    >
+      <span className="max-w-[140px] truncate">{value}</span>
+      <Copy className="h-3 w-3 shrink-0 opacity-0 transition group-hover:opacity-100" />
+    </button>
+  );
+}
 
 const BUCKET = "product-images";
 
