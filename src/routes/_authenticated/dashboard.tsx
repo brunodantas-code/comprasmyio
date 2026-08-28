@@ -1270,7 +1270,8 @@ function OrdersTable({
             <TableHead>Palavra passe</TableHead>
             <TableHead>Obs.</TableHead>
             <TableHead className="w-[110px]">Anexos</TableHead>
-            <TableHead className="text-right">Ações</TableHead>
+            <TableHead className="text-right"><span className="sr-only">Ações</span></TableHead>
+
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -1300,27 +1301,35 @@ function OrdersTable({
                   <div className="text-muted-foreground">{new Date(o.deadline_date + "T00:00:00").toLocaleDateString("pt-BR")}</div>
                 )}
               </TableCell>
-              <TableCell><StatusHistoryDialog order={o} /></TableCell>
+              <TableCell><StatusHistoryDialog order={o} canEdit={canEdit} /></TableCell>
               <TableCell className="text-sm font-semibold text-foreground whitespace-nowrap">
-                {o.delivery_forecast
-                  ? new Date(o.delivery_forecast + "T00:00:00").toLocaleDateString("pt-BR")
-                  : "—"}
+                <InlineField
+                  order={o}
+                  field="delivery_forecast"
+                  type="date"
+                  canEdit={canEdit}
+                  display={
+                    o.delivery_forecast
+                      ? new Date(o.delivery_forecast + "T00:00:00").toLocaleDateString("pt-BR")
+                      : "—"
+                  }
+                />
               </TableCell>
               <TableCell className="max-w-[180px] text-sm font-semibold text-foreground whitespace-pre-wrap">
-                {o.passphrase || "—"}
+                <InlineField order={o} field="passphrase" type="text" canEdit={canEdit} display={o.passphrase || "—"} />
               </TableCell>
               <TableCell className="max-w-[220px] text-xs text-muted-foreground">
-                <div className="whitespace-pre-wrap">{o.buyer_notes || "—"}</div>
+                <InlineField order={o} field="buyer_notes" type="textarea" canEdit={canEdit} display={o.buyer_notes || "—"} />
               </TableCell>
               <TableCell className="w-[110px] max-w-[110px] text-xs">
-                <ExistingAttachments orderId={o.id} attachments={o.attachments ?? []} />
+                <ExistingAttachments orderId={o.id} attachments={o.attachments ?? []} canRemove={canEdit} />
               </TableCell>
               <TableCell className="text-right space-x-2 whitespace-nowrap">
                 {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
                 {canEditRequester && o.status === "entregue" && <ConfirmReceiptActions order={o} />}
-                {canEdit && <EditOrderDialog order={o} />}
                 {canDelete && <DeleteOrderDialog order={o} />}
               </TableCell>
+
             </TableRow>
           ))}
         </TableBody>
@@ -1357,91 +1366,97 @@ function ConfirmReceiptActions({ order }: { order: Order }) {
   );
 }
 
-function EditOrderDialog({ order }: { order: Order }) {
+function InlineField({
+  order, field, type, canEdit, display,
+}: {
+  order: Order;
+  field: "delivery_forecast" | "passphrase" | "buyer_notes";
+  type: "date" | "text" | "textarea";
+  canEdit?: boolean;
+  display: string;
+}) {
   const qc = useQueryClient();
-  const [open, setOpen] = useState(false);
-  const [status, setStatus] = useState<Order["status"]>(order.status);
-  const [notes, setNotes] = useState(order.buyer_notes ?? "");
-  const [passphrase, setPassphrase] = useState(order.passphrase ?? "");
-  const [forecast, setForecast] = useState(order.delivery_forecast ?? "");
-  const [files, setFiles] = useState<File[]>([]);
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState<string>((order[field] as string | null) ?? "");
 
   const save = useMutation({
-    mutationFn: async () => {
-      let attachments = order.attachments ?? [];
-      if (files.length) {
-        const uploaded = await uploadOrderAttachments(order.id, files);
-        attachments = [...attachments, ...uploaded];
-      }
+    mutationFn: async (next: string) => {
+      const v = next || null;
+      const patch =
+        field === "delivery_forecast" ? { delivery_forecast: v }
+        : field === "passphrase" ? { passphrase: v }
+        : { buyer_notes: v };
       const { error } = await supabase
         .from("purchase_orders")
-        .update({
-          status,
-          buyer_notes: notes || null,
-          passphrase: passphrase || null,
-          delivery_forecast: forecast || null,
-          attachments,
-        })
+        .update(patch)
         .eq("id", order.id);
       if (error) throw error;
     },
+
     onSuccess: () => {
-      toast.success("Pedido atualizado");
       qc.invalidateQueries({ queryKey: ["orders"] });
       qc.invalidateQueries({ queryKey: ["logs"] });
-      setFiles([]);
-      setOpen(false);
+      setEditing(false);
+      toast.success("Atualizado");
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => {
+      toast.error(e.message);
+      setValue((order[field] as string | null) ?? "");
+      setEditing(false);
+    },
   });
 
+  const commit = () => {
+    const current = (order[field] as string | null) ?? "";
+    if (value === current) { setEditing(false); return; }
+    save.mutate(value);
+  };
+
+  if (!canEdit) return <span className="whitespace-pre-wrap">{display}</span>;
+
+  if (!editing) {
+    return (
+      <button
+        type="button"
+        onClick={() => { setValue((order[field] as string | null) ?? ""); setEditing(true); }}
+        className="w-full rounded px-1 py-0.5 text-left whitespace-pre-wrap hover:bg-muted"
+        title="Clique para editar"
+      >
+        {display}
+      </button>
+    );
+  }
+
+  if (type === "textarea") {
+    return (
+      <Textarea
+        autoFocus
+        rows={3}
+        value={value}
+        disabled={save.isPending}
+        onChange={(e) => setValue(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => { if (e.key === "Escape") setEditing(false); }}
+      />
+    );
+  }
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild><Button size="sm" variant="outline">Editar</Button></DialogTrigger>
-      <DialogContent className="max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{order.item_name}</DialogTitle>
-          <DialogDescription>Atualize o status e adicione observações (ex.: palavra-passe do entregador).</DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label>Status</Label>
-            <Select value={status} onValueChange={(v) => setStatus(v as Order["status"])}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {(BUYER_STATUS_KEYS.includes(status) ? BUYER_STATUS_KEYS : [...BUYER_STATUS_KEYS, status]).map((v) => (
-                  <SelectItem key={v} value={v}>{STATUS_LABELS[v]}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label>Palavra passe</Label>
-            <Input value={passphrase} onChange={(e) => setPassphrase(e.target.value)} placeholder="Ex.: laranja" />
-          </div>
-          <div className="space-y-2">
-            <Label>Previsão de entrega</Label>
-            <Input type="date" value={forecast} onChange={(e) => setForecast(e.target.value)} />
-          </div>
-          <div className="space-y-2">
-            <Label>Observações</Label>
-            <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={4} placeholder="Ex.: palavra-passe = laranja" />
-          </div>
-          <div className="space-y-2">
-            <Label>Anexos existentes</Label>
-            <ExistingAttachments orderId={order.id} attachments={order.attachments ?? []} canRemove />
-          </div>
-          <FilePicker files={files} setFiles={setFiles} label="Adicionar novos anexos" />
-        </div>
-        <DialogFooter>
-          <Button onClick={() => save.mutate()} disabled={save.isPending}>
-            {save.isPending ? "Salvando..." : "Salvar"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <Input
+      autoFocus
+      type={type}
+      value={value}
+      disabled={save.isPending}
+      onChange={(e) => setValue(e.target.value)}
+      onBlur={commit}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") commit();
+        if (e.key === "Escape") setEditing(false);
+      }}
+    />
   );
 }
+
 
 /* ---------- Projects admin ---------- */
 
@@ -1839,7 +1854,22 @@ function UsersAdmin() {
 
 /* ---------- Logs ---------- */
 
-function StatusHistoryDialog({ order }: { order: Order }) {
+function StatusHistoryDialog({ order, canEdit }: { order: Order; canEdit?: boolean }) {
+  const qc = useQueryClient();
+  const updateStatus = useMutation({
+    mutationFn: async (next: Order["status"]) => {
+      const { error } = await supabase.from("purchase_orders").update({ status: next }).eq("id", order.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["orders"] });
+      qc.invalidateQueries({ queryKey: ["logs"] });
+      qc.invalidateQueries({ queryKey: ["order-logs", order.id] });
+      toast.success("Status atualizado");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const [open, setOpen] = useState(false);
   const { data: profiles } = useProfilesMap();
   const { data: logs, isLoading } = useQuery({
@@ -1872,9 +1902,27 @@ function StatusHistoryDialog({ order }: { order: Order }) {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Histórico de status</DialogTitle>
+          <DialogTitle>{canEdit ? "Status do pedido" : "Histórico de status"}</DialogTitle>
           <DialogDescription>{order.item_name}</DialogDescription>
         </DialogHeader>
+        {canEdit && (
+          <div className="space-y-2">
+            <Label>Alterar status</Label>
+            <Select
+              value={order.status}
+              onValueChange={(v) => updateStatus.mutate(v as Order["status"])}
+              disabled={updateStatus.isPending}
+            >
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {(BUYER_STATUS_KEYS.includes(order.status) ? BUYER_STATUS_KEYS : [...BUYER_STATUS_KEYS, order.status]).map((v) => (
+                  <SelectItem key={v} value={v}>{STATUS_LABELS[v]}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando...</p>
         ) : !logs?.length ? (
