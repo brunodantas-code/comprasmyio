@@ -86,16 +86,8 @@ function Landing() {
         <div className="pointer-events-none absolute -left-40 bottom-[-12rem] h-[24rem] w-[24rem] rounded-full bg-[oklch(0.26_0.13_300)]" />
 
         <header className="relative z-10">
-          <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-5 sm:px-6">
+          <div className="mx-auto flex max-w-6xl items-center gap-4 px-5 py-5 sm:px-6">
             <MyioLogo tone="light" className="text-[2.8125rem]" />
-            <Link to={signedIn ? "/dashboard" : "/auth"}>
-              <Button
-                size="sm"
-                className="rounded-full bg-[var(--myio-purple)] px-6 font-bold text-white hover:opacity-90"
-              >
-                {signedIn ? "Painel" : "Login"}
-              </Button>
-            </Link>
           </div>
         </header>
 
