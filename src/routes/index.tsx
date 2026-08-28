@@ -39,7 +39,7 @@ export const Route = createFileRoute("/")({
 const FEATURES = [
   {
     icon: ClipboardList,
-    title: "Solicitações de compra",
+    title: "Solicitações",
     body: "Peça material por projeto, com quantidade, prazo, anexos e destinatário.",
   },
   {

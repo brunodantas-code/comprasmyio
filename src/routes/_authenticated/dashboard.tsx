@@ -345,7 +345,7 @@ function Dashboard() {
       <main className="mx-auto max-w-7xl px-3 py-5 sm:px-6 sm:py-8">
         <Tabs defaultValue={defaultTab}>
           <TabsList className="mb-6">
-            <TabsTrigger value="pedidos"><ClipboardList className="mr-2 h-4 w-4" />Solicitações de Compras</TabsTrigger>
+            <TabsTrigger value="pedidos"><ClipboardList className="mr-2 h-4 w-4" />Solicitações</TabsTrigger>
             {canSeeQueue && (
               <TabsTrigger value="queue"><ShoppingCart className="mr-2 h-4 w-4" />Fila de compras</TabsTrigger>
             )}
@@ -359,8 +359,8 @@ function Dashboard() {
           <TabsContent value="pedidos">
             <Tabs defaultValue="mine">
               <TabsList className="mb-4">
-                <TabsTrigger value="mine"><ClipboardList className="mr-2 h-4 w-4" />Minhas compras</TabsTrigger>
-                <TabsTrigger value="new"><Plus className="mr-2 h-4 w-4" />Nova Solicitação de compra</TabsTrigger>
+                <TabsTrigger value="mine"><ClipboardList className="mr-2 h-4 w-4" />Minhas Solicitações</TabsTrigger>
+                <TabsTrigger value="new"><Plus className="mr-2 h-4 w-4" />Novas Solicitações</TabsTrigger>
                 {canImport && <TabsTrigger value="import"><Plane className="mr-2 h-4 w-4" />Importação</TabsTrigger>}
               </TabsList>
               <TabsContent value="mine"><MyOrders userId={me.id} /></TabsContent>
@@ -849,7 +849,7 @@ function NewOrder({ userId }: { userId: string }) {
   return (
     <Card className="max-w-2xl">
       <CardHeader>
-        <CardTitle>Nova Solicitação de Compra</CardTitle>
+        <CardTitle>Novas Solicitações</CardTitle>
         <CardDescription>Preencha os dados do material que você precisa.</CardDescription>
       </CardHeader>
       <CardContent>
@@ -1017,7 +1017,7 @@ function MyOrders({ userId }: { userId: string }) {
     <Card>
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <CardTitle>Minhas Solicitações de Compra</CardTitle>
+          <CardTitle>Minhas Solicitações</CardTitle>
           <CardDescription>Acompanhe o status dos seus pedidos de compra.</CardDescription>
         </div>
         <div className="flex flex-wrap items-center gap-2">
