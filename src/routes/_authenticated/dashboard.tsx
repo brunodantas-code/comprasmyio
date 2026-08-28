@@ -1848,7 +1848,22 @@ function UsersAdmin() {
 
 /* ---------- Logs ---------- */
 
-function StatusHistoryDialog({ order }: { order: Order }) {
+function StatusHistoryDialog({ order, canEdit }: { order: Order; canEdit?: boolean }) {
+  const qc = useQueryClient();
+  const updateStatus = useMutation({
+    mutationFn: async (next: Order["status"]) => {
+      const { error } = await supabase.from("purchase_orders").update({ status: next }).eq("id", order.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["orders"] });
+      qc.invalidateQueries({ queryKey: ["logs"] });
+      qc.invalidateQueries({ queryKey: ["order-logs", order.id] });
+      toast.success("Status atualizado");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const [open, setOpen] = useState(false);
   const { data: profiles } = useProfilesMap();
   const { data: logs, isLoading } = useQuery({
