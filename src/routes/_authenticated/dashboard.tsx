@@ -441,6 +441,7 @@ function useProfilesList() {
 type PurchasableItem = {
   key: string;
   name: string;
+  description: string | null;
   link: string | null;
   manufacturer_code: string | null;
   origin: string;
@@ -454,9 +455,9 @@ function usePurchasableItems() {
     queryKey: ["purchasable-items"],
     queryFn: async () => {
       const [{ data: mats, error: me }, { data: ters, error: te }, { data: tools, error: fe }] = await Promise.all([
-        supabase.from("materials").select("id, name, link, manufacturer_code, location").in("location", ["fabrica", "almoxarifado"]).eq("is_manufactured", false).order("name"),
-        supabase.from("terceiros_materials").select("id, name, link, manufacturer_code").order("name"),
-        supabase.from("tool_assets").select("id, name, link, manufacturer_code").order("name"),
+        supabase.from("materials").select("id, name, description, link, manufacturer_code, location").in("location", ["fabrica", "almoxarifado"]).eq("is_manufactured", false).order("name"),
+        supabase.from("terceiros_materials").select("id, name, description, link, manufacturer_code").order("name"),
+        supabase.from("tool_assets").select("id, name, description, link, manufacturer_code").order("name"),
       ]);
       if (me) throw me;
       if (te) throw te;
@@ -466,6 +467,7 @@ function usePurchasableItems() {
         items.push({
           key: `mat:${m.id}`,
           name: m.name,
+          description: m.description ?? null,
           link: m.link,
           manufacturer_code: m.manufacturer_code ?? null,
           origin: m.location === "fabrica" ? "Insumos de Fabricação" : "Material de Almoxarifado",
@@ -478,6 +480,7 @@ function usePurchasableItems() {
         items.push({
           key: `ter:${t.id}`,
           name: t.name,
+          description: t.description ?? null,
           link: t.link,
           manufacturer_code: t.manufacturer_code ?? null,
           origin: "Insumos de Instalação",
@@ -490,6 +493,7 @@ function usePurchasableItems() {
         items.push({
           key: `fer:${t.id}`,
           name: t.name,
+          description: t.description ?? null,
           link: t.link,
           manufacturer_code: t.manufacturer_code ?? null,
           origin: "Máquinas e Ferramentas",
@@ -523,7 +527,7 @@ function PurchasableItemPicker({ value, onPick, disabled }: { value: Purchasable
         <Button type="button" variant="outline" className="w-full justify-start font-normal" disabled={disabled}>
           {value ? (
             <span className="truncate">
-              {value.name} <span className="text-xs text-muted-foreground">· {value.origin}</span>
+              {value.description || value.name} <span className="text-xs text-muted-foreground">· {value.origin}</span>
             </span>
           ) : (
             <span className="text-muted-foreground">Selecione um item cadastrado...</span>
@@ -557,11 +561,11 @@ function PurchasableItemPicker({ value, onPick, disabled }: { value: Purchasable
                   {list.map((i) => (
                     <CommandItem
                       key={i.key}
-                      value={`${i.name} (${i.origin})`}
+                      value={`${i.description || i.name} (${i.origin})`}
                       onSelect={() => { onPick(i); setOpen(false); }}
                     >
                       <div className="flex min-w-0 flex-col">
-                        <span className="truncate font-medium">{i.name}</span>
+                        <span className="truncate font-medium">{i.description || i.name}</span>
                         <span className="truncate text-xs text-muted-foreground">
                           {i.manufacturer_code ? `Cód. Fabricante: ${i.manufacturer_code}` : "Cód. Fabricante: —"}
                         </span>
