@@ -907,38 +907,40 @@ export function AssemblyReleasesCard({
                     {new Date(r.created_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-wrap gap-1">
+                    <div className="space-y-1">
                       {(r.assembly_release_items ?? []).map((i) => {
                         const remaining = Math.max(i.quantity - homologatedFor(r.id, i.material_id), 0);
-                        const label = homologable
-                          ? `${materialNames[i.material_id] ?? "Produto"} × ${remaining}`
-                          : `${materialNames[i.material_id] ?? "Produto"} × ${i.quantity}`;
+                        const name = materialNames[i.material_id] ?? "Produto";
+                        const done = homologable && remaining <= 0;
                         if (!homologable || !userId || remaining <= 0) {
                           return (
-                            <Badge key={i.id} variant="outline" className={homologable && remaining <= 0 ? "opacity-50 line-through" : undefined}>
-                              {homologable && remaining <= 0 ? `${materialNames[i.material_id] ?? "Produto"} · homologado` : label}
-                            </Badge>
+                            <div key={i.id} className="flex h-7 items-center">
+                              <Badge variant="outline" className={done ? "opacity-50 line-through" : undefined}>
+                                {done ? `${name} · homologado` : name}
+                              </Badge>
+                            </div>
                           );
                         }
                         return (
-                          <HomologateDialog
-                            key={i.id}
-                            releaseId={r.id}
-                            materialId={i.material_id}
-                            materialName={materialNames[i.material_id] ?? "Produto"}
-                            quantity={i.quantity}
-                            userId={userId}
-                            trigger={
-                              <button type="button" title="Homologar produto">
-                                <Badge
-                                  variant="outline"
-                                  className="cursor-pointer hover:bg-blue-50 hover:border-blue-300"
-                                >
-                                  {label}
-                                </Badge>
-                              </button>
-                            }
-                          />
+                          <div key={i.id} className="flex h-7 items-center">
+                            <HomologateDialog
+                              releaseId={r.id}
+                              materialId={i.material_id}
+                              materialName={name}
+                              quantity={i.quantity}
+                              userId={userId}
+                              trigger={
+                                <button type="button" title="Homologar produto">
+                                  <Badge
+                                    variant="outline"
+                                    className="cursor-pointer hover:bg-blue-50 hover:border-blue-300"
+                                  >
+                                    {name}
+                                  </Badge>
+                                </button>
+                              }
+                            />
+                          </div>
                         );
                       })}
                     </div>
@@ -955,6 +957,22 @@ export function AssemblyReleasesCard({
                         ))}
                       </div>
                     )}
+                  </TableCell>
+                  <TableCell>
+                    <div className="space-y-1">
+                      {(r.assembly_release_items ?? []).map((i) => {
+                        const remaining = Math.max(i.quantity - homologatedFor(r.id, i.material_id), 0);
+                        const done = homologable && remaining <= 0;
+                        return (
+                          <div
+                            key={i.id}
+                            className={`flex h-7 items-center text-sm tabular-nums ${done ? "text-muted-foreground line-through" : ""}`}
+                          >
+                            {homologable ? remaining : i.quantity}
+                          </div>
+                        );
+                      })}
+                    </div>
                   </TableCell>
                   <TableCell className="text-sm">{(r.responsibles ?? []).map(nameOf).join(", ")}</TableCell>
                   <TableCell><PhotoCell path={r.photo_url} /></TableCell>
