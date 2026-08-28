@@ -600,9 +600,12 @@ function NewOrder({ userId }: { userId: string }) {
     if (!item) {
       return toast.error("Selecione um item cadastrado no Estoque — Fábrica, Insumos de Instalação ou Almoxarifado.");
     }
+    if (!forStock && !projectId) {
+      return toast.error("Selecione um projeto");
+    }
     const fd = new FormData(e.currentTarget);
     const parsed = newOrderSchema.safeParse({
-      project_id: projectId,
+      project_id: forStock ? undefined : projectId,
       item_name: item.name,
       item_link: itemLink || undefined,
       quantity: fd.get("quantity"),
