@@ -373,6 +373,8 @@ function AddToolDialog({ userId }: { userId: string }) {
   const [newLot, setNewLot] = useState("");
   const [newType, setNewType] = useState("");
   const [newDescription, setNewDescription] = useState("");
+  const [newManufCode, setNewManufCode] = useState("");
+  const [newMyioCode, setNewMyioCode] = useState("");
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
@@ -383,6 +385,8 @@ function AddToolDialog({ userId }: { userId: string }) {
     setNewLot("");
     setNewType("");
     setNewDescription("");
+    setNewManufCode("");
+    setNewMyioCode("");
     setPhotoFile(null);
     setPhotoPreview(null);
   };
@@ -407,6 +411,8 @@ function AddToolDialog({ userId }: { userId: string }) {
         lot_quantity: lot,
         purchase_type: newType || null,
         description: newDescription.trim() || null,
+        manufacturer_code: newManufCode.trim() || null,
+        myio_code: newMyioCode.trim() || null,
         photo_url,
         created_by: userId,
       } as never);
@@ -471,6 +477,26 @@ function AddToolDialog({ userId }: { userId: string }) {
           <div className="space-y-2">
             <Label htmlFor="tool-link">Link de Referência <span className="text-muted-foreground">(opcional)</span></Label>
             <Input id="tool-link" type="url" placeholder="https://" value={newLink} onChange={(e) => setNewLink(e.target.value)} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label htmlFor="tool-manuf">Cód. Fabricante <span className="text-muted-foreground">(opcional)</span></Label>
+              <Input
+                id="tool-manuf"
+                placeholder="Ex.: 2EDGK-5.08-10P"
+                value={newManufCode}
+                onChange={(e) => setNewManufCode(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="tool-myio">Cód. Myio <span className="text-muted-foreground">(opcional)</span></Label>
+              <Input
+                id="tool-myio"
+                placeholder="Ex.: MY-00123"
+                value={newMyioCode}
+                onChange={(e) => setNewMyioCode(e.target.value)}
+              />
+            </div>
           </div>
           <div className="space-y-2">
             <Label htmlFor="tool-lot">Quantidade por lote <span className="text-muted-foreground">(opcional)</span></Label>

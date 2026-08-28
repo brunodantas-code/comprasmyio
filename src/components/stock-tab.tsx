@@ -644,6 +644,8 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
   const [newLot, setNewLot] = useState("");
   const [newType, setNewType] = useState("");
   const [newDescription, setNewDescription] = useState("");
+  const [newManufCode, setNewManufCode] = useState("");
+  const [newMyioCode, setNewMyioCode] = useState("");
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
@@ -678,6 +680,8 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
     setNewLot("");
     setNewType("");
     setNewDescription("");
+    setNewManufCode("");
+    setNewMyioCode("");
     setPhotoFile(null);
     setPhotoPreview(null);
   };
@@ -689,6 +693,8 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
       lot: number | null;
       type: string | null;
       description: string | null;
+      manufacturer_code: string | null;
+      myio_code: string | null;
       photo: File | null;
     }) => {
       let photo_url: string | null = null;
@@ -709,6 +715,8 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
           lot_quantity: v.lot,
           purchase_type: v.type,
           description: v.description,
+          manufacturer_code: v.manufacturer_code,
+          myio_code: v.myio_code,
           photo_url,
           ...(isFabrica ? { is_product: false, is_manufactured: false } : {}),
         });
@@ -768,6 +776,8 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
       lot,
       type: newType || null,
       description: newDescription.trim() || null,
+      manufacturer_code: newManufCode.trim() || null,
+      myio_code: newMyioCode.trim() || null,
       photo: photoFile,
     });
   }
@@ -946,6 +956,26 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
           <div className="space-y-2">
             <Label htmlFor={`link-${location}`}>{independent ? "Link de Referência" : "Link"} <span className="text-muted-foreground">(opcional)</span></Label>
             <Input id={`link-${location}`} name="link" type="url" placeholder="https://" value={newLink} onChange={(e) => setNewLink(e.target.value)} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label htmlFor={`manuf-${location}`}>Cód. Fabricante <span className="text-muted-foreground">(opcional)</span></Label>
+              <Input
+                id={`manuf-${location}`}
+                placeholder="Ex.: 2EDGK-5.08-10P"
+                value={newManufCode}
+                onChange={(e) => setNewManufCode(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor={`myio-${location}`}>Cód. Myio <span className="text-muted-foreground">(opcional)</span></Label>
+              <Input
+                id={`myio-${location}`}
+                placeholder="Ex.: MY-00123"
+                value={newMyioCode}
+                onChange={(e) => setNewMyioCode(e.target.value)}
+              />
+            </div>
           </div>
           {independent && (
             <>
@@ -1632,6 +1662,8 @@ function AddTerceirosDialog({ userId }: { userId: string }) {
   const [newLot, setNewLot] = useState("");
   const [newType, setNewType] = useState("");
   const [newDescription, setNewDescription] = useState("");
+  const [newManufCode, setNewManufCode] = useState("");
+  const [newMyioCode, setNewMyioCode] = useState("");
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
@@ -1642,6 +1674,8 @@ function AddTerceirosDialog({ userId }: { userId: string }) {
     setNewLot("");
     setNewType("");
     setNewDescription("");
+    setNewManufCode("");
+    setNewMyioCode("");
     setPhotoFile(null);
     setPhotoPreview(null);
   };
@@ -1666,6 +1700,8 @@ function AddTerceirosDialog({ userId }: { userId: string }) {
         lot_quantity: lot,
         purchase_type: newType || null,
         description: newDescription.trim() || null,
+        manufacturer_code: newManufCode.trim() || null,
+        myio_code: newMyioCode.trim() || null,
         photo_url,
         created_by: userId,
       } as never);
@@ -1744,6 +1780,26 @@ function AddTerceirosDialog({ userId }: { userId: string }) {
           <div className="space-y-2">
             <Label htmlFor="terceiros-link">Link de Referência <span className="text-muted-foreground">(opcional)</span></Label>
             <Input id="terceiros-link" type="url" placeholder="https://" value={newLink} onChange={(e) => setNewLink(e.target.value)} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label htmlFor="terceiros-manuf">Cód. Fabricante <span className="text-muted-foreground">(opcional)</span></Label>
+              <Input
+                id="terceiros-manuf"
+                placeholder="Ex.: 2EDGK-5.08-10P"
+                value={newManufCode}
+                onChange={(e) => setNewManufCode(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="terceiros-myio">Cód. Myio <span className="text-muted-foreground">(opcional)</span></Label>
+              <Input
+                id="terceiros-myio"
+                placeholder="Ex.: MY-00123"
+                value={newMyioCode}
+                onChange={(e) => setNewMyioCode(e.target.value)}
+              />
+            </div>
           </div>
           <div className="space-y-2">
             <Label htmlFor="terceiros-lot">Quantidade por lote <span className="text-muted-foreground">(opcional)</span></Label>
