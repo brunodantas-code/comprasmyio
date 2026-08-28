@@ -2158,6 +2158,7 @@ function EstoqueMyioSection({ userId, canDelete }: { userId: string; canDelete?:
           canDelete={canDelete}
           actions={toolbar}
           damageSource="Estoque Myio"
+          simple
         />
         <TerceirosSection userId={userId} canDelete={canDelete} />
         <BoxesCard />
