@@ -585,7 +585,7 @@ export function ToolAssetsSection({ userId, canDelete }: { userId: string; canDe
                   <TableHead className="w-[12%]">Cód. Fabricante</TableHead>
                   <TableHead className="w-[10%] text-right">Saldo Estoque</TableHead>
                   <TableHead className="w-[10%]">Imagem</TableHead>
-                  <TableHead className="w-[11%] text-right">Ações</TableHead>
+                  <TableHead className="w-[11%] text-right"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
