@@ -17,17 +17,17 @@ import {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Myio Compras — Solicitações, Estoque e Expedição" },
+      { title: "Myio Supply — Solicitações, Estoque e Expedição" },
       {
         name: "description",
         content:
-          "Plataforma Myio para solicitações de compra, controle de estoque, homologação por QR code e expedição de produtos.",
+          "Plataforma Myio Supply para solicitações de compra, controle de estoque, homologação por QR code e expedição de produtos.",
       },
-      { property: "og:title", content: "Myio Compras — Solicitações, Estoque e Expedição" },
+      { property: "og:title", content: "Myio Supply — Solicitações, Estoque e Expedição" },
       {
         property: "og:description",
         content:
-          "Plataforma Myio para solicitações de compra, controle de estoque, homologação por QR code e expedição de produtos.",
+          "Plataforma Myio Supply para solicitações de compra, controle de estoque, homologação por QR code e expedição de produtos.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
