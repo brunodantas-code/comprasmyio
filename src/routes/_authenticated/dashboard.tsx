@@ -35,7 +35,8 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 
 type Order = {
   id: string;
-  project_id: string;
+  project_id: string | null;
+  for_stock: boolean;
   requester_id: string;
   item_name: string;
   item_link: string | null;
@@ -537,7 +538,7 @@ function PurchasableItemPicker({ value, onPick }: { value: PurchasableItem | nul
 /* ---------- New order ---------- */
 
 const newOrderSchema = z.object({
-  project_id: z.string().uuid("Selecione um projeto"),
+  project_id: z.string().optional(),
   item_name: z.string().trim().min(2).max(200),
   item_link: z.string().trim().max(2000).url("Link inválido").optional().or(z.literal("").transform(() => undefined)),
   quantity: z.coerce.number().int().positive("Quantidade inválida").max(100000),
