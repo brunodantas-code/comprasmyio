@@ -41,6 +41,8 @@ import { ToolAssetsSection } from "@/components/tools-assets";
 import { DamageItemDialog, DamagedItemsCard } from "@/components/damaged-items";
 import { ExternalSyncCard, ExternalLostCard } from "@/components/external-sync";
 import { pushQrsToExternal } from "@/lib/push-external";
+import { StockPhotoCell, useStockMeta } from "@/components/stock-meta";
+
 
 
 type StockRow = {
@@ -1097,6 +1099,8 @@ function StockTableCard({
   detail?: boolean;
   damageSource?: string;
 }) {
+  const { data: metaMap } = useStockMeta("materials");
+
 
   return (
     <Card>
@@ -1117,15 +1121,17 @@ function StockTableCard({
             <TableHeader>
               <TableRow>
                 <TableHead>Material</TableHead>
+                <TableHead>Código Myio</TableHead>
+                <TableHead>Código Fabricante</TableHead>
                 <TableHead className="text-right">Saldo</TableHead>
-                <TableHead className="text-right">Entradas</TableHead>
-                <TableHead className="text-right">Saídas</TableHead>
-                <TableHead>Última movimentação</TableHead>
+                <TableHead>Imagem</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {rows.map((r) => (
+              {rows.map((r) => {
+                const meta = metaMap?.[r.material_id];
+                return (
                 <TableRow key={r.material_id}>
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-2">
@@ -1136,7 +1142,7 @@ function StockTableCard({
                             name={r.name}
                             trigger={
                               <button type="button" className="text-left hover:underline">
-                                {r.name}
+                                {meta?.description?.trim() || r.name}
                               </button>
                             }
                           />
@@ -1158,7 +1164,7 @@ function StockTableCard({
                           stockName={r.name}
                           trigger={
                             <button type="button" className="text-left hover:underline">
-                              {r.name}
+                              {meta?.description?.trim() || r.name}
                             </button>
                           }
                         />
@@ -1171,6 +1177,8 @@ function StockTableCard({
                       )}
                     </div>
                   </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{meta?.myio_code || "—"}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{meta?.manufacturer_code || "—"}</TableCell>
                   <TableCell className="text-right">
                     <Badge
                       variant="outline"
@@ -1179,10 +1187,8 @@ function StockTableCard({
                       {r.balance}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right text-sm text-muted-foreground">{r.total_in}</TableCell>
-                  <TableCell className="text-right text-sm text-muted-foreground">{r.total_out}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {r.last_movement_at ? fmt(r.last_movement_at) : "—"}
+                  <TableCell>
+                    <StockPhotoCell url={meta?.photo} name={r.name} />
                   </TableCell>
                   <TableCell>
                     <div className="flex justify-end gap-1">
@@ -1191,8 +1197,8 @@ function StockTableCard({
                         userId={userId}
                         type="entrada"
                         trigger={
-                          <Button size="sm" variant="outline">
-                            <ArrowDownCircle className="mr-1 h-4 w-4" /> Entrada
+                          <Button size="icon" variant="outline" title="Entrada" aria-label="Entrada">
+                            <ArrowDownCircle className="h-4 w-4" />
                           </Button>
                         }
                       />
@@ -1201,8 +1207,8 @@ function StockTableCard({
                         userId={userId}
                         type="saida"
                         trigger={
-                          <Button size="sm" variant="outline" disabled={r.balance <= 0}>
-                            <ArrowUpCircle className="mr-1 h-4 w-4" /> Dar baixa
+                          <Button size="icon" variant="outline" disabled={r.balance <= 0} title="Saída" aria-label="Saída">
+                            <ArrowUpCircle className="h-4 w-4" />
                           </Button>
                         }
                       />
@@ -1221,9 +1227,11 @@ function StockTableCard({
                     </div>
                   </TableCell>
                 </TableRow>
-              ))}
+                );
+              })}
             </TableBody>
           </Table>
+
         )}
       </CardContent>
     </Card>
@@ -1837,6 +1845,8 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
   const { data: rows, isLoading } = useTerceirosStock();
   const { data: movements } = useTerceirosMovements();
   const { data: profiles } = useStockProfiles();
+  const { data: metaMap } = useStockMeta("terceiros_materials");
+
   const [search, setSearch] = useState("");
   const [view, setView] = useState<"all" | "with" | "zero">("all");
 
@@ -1892,15 +1902,17 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
               <TableHeader>
                 <TableRow>
                   <TableHead>Material</TableHead>
+                  <TableHead>Código Myio</TableHead>
+                  <TableHead>Código Fabricante</TableHead>
                   <TableHead className="text-right">Saldo</TableHead>
-                  <TableHead className="text-right">Entradas</TableHead>
-                  <TableHead className="text-right">Saídas</TableHead>
-                  <TableHead>Última movimentação</TableHead>
+                  <TableHead>Imagem</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filtered.map((r) => (
+                {filtered.map((r) => {
+                  const meta = metaMap?.[r.material_id];
+                  return (
                   <TableRow key={r.material_id}>
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-2">
@@ -1910,7 +1922,7 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
                           table="terceiros_materials"
                           trigger={
                             <button type="button" className="text-left hover:underline">
-                              {r.name}
+                              {meta?.description?.trim() || r.name}
                             </button>
                           }
                         />
@@ -1921,6 +1933,8 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
                         )}
                       </div>
                     </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{meta?.myio_code || "—"}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{meta?.manufacturer_code || "—"}</TableCell>
                     <TableCell className="text-right">
                       <Badge
                         variant="outline"
@@ -1929,10 +1943,8 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
                         {r.balance}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right text-sm text-muted-foreground">{r.total_in}</TableCell>
-                    <TableCell className="text-right text-sm text-muted-foreground">{r.total_out}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {r.last_movement_at ? fmt(r.last_movement_at) : "—"}
+                    <TableCell>
+                      <StockPhotoCell url={meta?.photo} name={r.name} />
                     </TableCell>
                     <TableCell>
                       <div className="flex justify-end gap-1">
@@ -1941,8 +1953,8 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
                           userId={userId}
                           type="entrada"
                           trigger={
-                            <Button size="sm" variant="outline">
-                              <ArrowDownCircle className="mr-1 h-4 w-4" /> Entrada
+                            <Button size="icon" variant="outline" title="Entrada" aria-label="Entrada">
+                              <ArrowDownCircle className="h-4 w-4" />
                             </Button>
                           }
                         />
@@ -1951,8 +1963,8 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
                           userId={userId}
                           type="saida"
                           trigger={
-                            <Button size="sm" variant="outline" disabled={r.balance <= 0}>
-                              <ArrowUpCircle className="mr-1 h-4 w-4" /> Dar baixa
+                            <Button size="icon" variant="outline" disabled={r.balance <= 0} title="Saída" aria-label="Saída">
+                              <ArrowUpCircle className="h-4 w-4" />
                             </Button>
                           }
                         />
@@ -1961,9 +1973,11 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
               </TableBody>
             </Table>
+
           )}
         </CardContent>
       </Card>

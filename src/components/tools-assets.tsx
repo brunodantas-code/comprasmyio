@@ -30,6 +30,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { MaterialDetailDialog } from "@/components/material-detail";
+import { StockPhotoCell, useStockMeta } from "@/components/stock-meta";
+
 import { toast } from "sonner";
 import {
   ArrowDownCircle,
@@ -500,6 +502,8 @@ export function ToolAssetsSection({ userId, canDelete }: { userId: string; canDe
   const { data: rows, isLoading } = useToolStock();
   const { data: movements } = useToolMovements();
   const { data: profiles } = useToolProfiles();
+  const { data: metaMap } = useStockMeta("tool_assets");
+
   const [search, setSearch] = useState("");
   const [view, setView] = useState<"all" | "with" | "zero">("all");
 
@@ -550,15 +554,17 @@ export function ToolAssetsSection({ userId, canDelete }: { userId: string; canDe
               <TableHeader>
                 <TableRow>
                   <TableHead>Ferramenta / Ativo</TableHead>
+                  <TableHead>Código Myio</TableHead>
+                  <TableHead>Código Fabricante</TableHead>
                   <TableHead className="text-right">Saldo</TableHead>
-                  <TableHead className="text-right">Entradas</TableHead>
-                  <TableHead className="text-right">Baixas</TableHead>
-                  <TableHead>Última movimentação</TableHead>
+                  <TableHead>Imagem</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filtered.map((r) => (
+                {filtered.map((r) => {
+                  const meta = metaMap?.[r.material_id];
+                  return (
                   <TableRow key={r.material_id}>
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-2">
@@ -567,7 +573,9 @@ export function ToolAssetsSection({ userId, canDelete }: { userId: string; canDe
                           name={r.name}
                           table="tool_assets"
                           trigger={
-                            <button type="button" className="text-left hover:underline">{r.name}</button>
+                            <button type="button" className="text-left hover:underline">
+                              {meta?.description?.trim() || r.name}
+                            </button>
                           }
                         />
                         {r.link && (
@@ -577,6 +585,8 @@ export function ToolAssetsSection({ userId, canDelete }: { userId: string; canDe
                         )}
                       </div>
                     </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{meta?.myio_code || "—"}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{meta?.manufacturer_code || "—"}</TableCell>
                     <TableCell className="text-right">
                       <Badge
                         variant="outline"
@@ -585,10 +595,8 @@ export function ToolAssetsSection({ userId, canDelete }: { userId: string; canDe
                         {r.balance}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right text-sm text-muted-foreground">{r.total_in}</TableCell>
-                    <TableCell className="text-right text-sm text-muted-foreground">{r.total_out}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {r.last_movement_at ? fmt(r.last_movement_at) : "—"}
+                    <TableCell>
+                      <StockPhotoCell url={meta?.photo} name={r.name} />
                     </TableCell>
                     <TableCell>
                       <div className="flex justify-end gap-1">
@@ -597,8 +605,8 @@ export function ToolAssetsSection({ userId, canDelete }: { userId: string; canDe
                           userId={userId}
                           type="entrada"
                           trigger={
-                            <Button size="sm" variant="outline">
-                              <ArrowDownCircle className="mr-1 h-4 w-4" /> Entrada
+                            <Button size="icon" variant="outline" title="Entrada" aria-label="Entrada">
+                              <ArrowDownCircle className="h-4 w-4" />
                             </Button>
                           }
                         />
@@ -607,8 +615,8 @@ export function ToolAssetsSection({ userId, canDelete }: { userId: string; canDe
                           userId={userId}
                           type="saida"
                           trigger={
-                            <Button size="sm" variant="outline" disabled={r.balance <= 0}>
-                              <ArrowUpCircle className="mr-1 h-4 w-4" /> Dar baixa
+                            <Button size="icon" variant="outline" disabled={r.balance <= 0} title="Saída" aria-label="Saída">
+                              <ArrowUpCircle className="h-4 w-4" />
                             </Button>
                           }
                         />
@@ -617,9 +625,11 @@ export function ToolAssetsSection({ userId, canDelete }: { userId: string; canDe
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
               </TableBody>
             </Table>
+
           )}
         </CardContent>
       </Card>
