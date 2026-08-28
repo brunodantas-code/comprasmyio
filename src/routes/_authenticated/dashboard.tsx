@@ -561,8 +561,10 @@ function PurchasableItemPicker({ value, onPick, disabled }: { value: Purchasable
                       onSelect={() => { onPick(i); setOpen(false); }}
                     >
                       <div className="flex min-w-0 flex-col">
-                        <span className="truncate">{i.name}</span>
-                        {i.link && <span className="truncate text-xs text-muted-foreground">{i.link}</span>}
+                        <span className="truncate font-medium">{i.name}</span>
+                        <span className="truncate text-xs text-muted-foreground">
+                          {i.manufacturer_code ? `Cód. Fabricante: ${i.manufacturer_code}` : "Cód. Fabricante: —"}
+                        </span>
                       </div>
                     </CommandItem>
                   ))}
