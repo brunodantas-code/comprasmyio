@@ -475,11 +475,7 @@ export function ReleaseAssembledDialog({ userId }: { userId: string }) {
               .filter((c) => c.have < c.need);
 
             if (missing.length) {
-              throw new Error(
-                `Estoque insuficiente para liberar esta quantidade: ${missing
-                  .map((c) => `${c.name} (necessário ${c.need}, disponível ${c.have})`)
-                  .join("; ")}`,
-              );
+              throw new Error("Estoque insuficiente para Retirada.");
             }
           }
         }
