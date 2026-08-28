@@ -904,18 +904,21 @@ function BuyerQueue() {
 
   const renderOrders = (list: Order[]) => {
     if (groupByProject) {
+      const groupKey = (o: Order) => (o.for_stock ? "__estoque" : (o.project_id ?? "__sem_projeto"));
+      const groupLabel = (key: string) => (key === "__estoque" ? "Estoque" : key === "__sem_projeto" ? "—" : projectName(key));
       const grouped = Array.from(
         list.reduce((map, o) => {
-          const arr = map.get(o.project_id) ?? [];
+          const key = groupKey(o);
+          const arr = map.get(key) ?? [];
           arr.push(o);
-          map.set(o.project_id, arr);
+          map.set(key, arr);
           return map;
         }, new Map<string, Order[]>()).entries()
-      ).sort((a, b) => projectName(a[0]).localeCompare(projectName(b[0])));
+      ).sort((a, b) => groupLabel(a[0]).localeCompare(groupLabel(b[0])));
       return grouped.map(([pid, plist]) => (
         <div key={pid} className="space-y-2">
           <div className="flex items-center justify-between border-b pb-1">
-            <h4 className="text-sm font-semibold">{projectName(pid)}</h4>
+            <h4 className="text-sm font-semibold">{groupLabel(pid)}</h4>
             <span className="text-xs text-muted-foreground">{plist.length} pedido(s)</span>
           </div>
           <OrdersTable orders={plist} projectName={projectName} requesterName={requesterName} showRequester canEdit canDelete={me?.isAdmin} />
@@ -1004,7 +1007,7 @@ function OrdersTable({
           <TableRow>
             <TableHead>Item</TableHead>
             <TableHead>Qtd</TableHead>
-            <TableHead>Projeto</TableHead>
+            <TableHead>Alocação</TableHead>
             {showRequester && <TableHead>Solicitante</TableHead>}
             <TableHead>Destinatário</TableHead>
             <TableHead>Entrega</TableHead>
@@ -1034,7 +1037,7 @@ function OrdersTable({
                 )}
               </TableCell>
               <TableCell>{o.quantity}</TableCell>
-              <TableCell>{projectName(o.project_id)}</TableCell>
+              <TableCell>{o.for_stock ? "Estoque" : o.project_id ? projectName(o.project_id) : "—"}</TableCell>
               {showRequester && <TableCell>{requesterName?.(o.requester_id)}</TableCell>}
               <TableCell className="text-sm">{o.recipient || "—"}</TableCell>
               <TableCell className="max-w-[200px] text-sm text-muted-foreground">{o.delivery_point}</TableCell>
