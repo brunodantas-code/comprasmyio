@@ -1,7 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export type AppRole = "admin" | "comprador" | "solicitante" | "fabrica";
+export type AppRole =
+  | "admin"
+  | "comprador"
+  | "solicitante"
+  | "fabrica"
+  | "estoquista"
+  | "coo"
+  | "ceo"
+  | "cfo"
+  | "cto";
+
+export const ADMIN_ROLES: AppRole[] = ["admin", "coo", "ceo", "cfo", "cto"];
 
 export function useCurrentUser() {
   return useQuery({
