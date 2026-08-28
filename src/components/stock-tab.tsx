@@ -1119,14 +1119,14 @@ function StockTableCard({
         ) : (
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Descrição</TableHead>
-                <TableHead>Código Myio</TableHead>
-                <TableHead>Código Fabricante</TableHead>
-                <TableHead className="text-right">Saldo Estoque</TableHead>
-                <TableHead>Imagem</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
-              </TableRow>
+                <TableRow>
+                  <TableHead className="w-[45%]">Descrição</TableHead>
+                  <TableHead className="w-[12%]">Código Myio</TableHead>
+                  <TableHead className="w-[12%]">Código Fabricante</TableHead>
+                  <TableHead className="w-[10%] text-right">Saldo Estoque</TableHead>
+                  <TableHead className="w-[10%]">Imagem</TableHead>
+                  <TableHead className="w-[11%] text-right">Ações</TableHead>
+                </TableRow>
             </TableHeader>
             <TableBody>
               {rows.map((r) => {
