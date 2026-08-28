@@ -500,6 +500,8 @@ export function ToolAssetsSection({ userId, canDelete }: { userId: string; canDe
   const { data: rows, isLoading } = useToolStock();
   const { data: movements } = useToolMovements();
   const { data: profiles } = useToolProfiles();
+  const { data: metaMap } = useStockMeta("tool_assets");
+
   const [search, setSearch] = useState("");
   const [view, setView] = useState<"all" | "with" | "zero">("all");
 
