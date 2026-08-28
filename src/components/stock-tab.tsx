@@ -41,7 +41,7 @@ import { ToolAssetsSection } from "@/components/tools-assets";
 import { DamageItemDialog, DamagedItemsCard } from "@/components/damaged-items";
 import { ExternalSyncCard, ExternalLostCard } from "@/components/external-sync";
 import { pushQrsToExternal } from "@/lib/push-external";
-import { StockPhotoCell, useStockMeta } from "@/components/stock-meta";
+import { StockPhotoCell, useStockMeta, CopyCodeCell } from "@/components/stock-meta";
 
 
 
@@ -1121,8 +1121,8 @@ function StockTableCard({
             <TableHeader>
                 <TableRow>
                   <TableHead className="w-[45%]">Descrição</TableHead>
-                  <TableHead className="w-[12%]">Código Myio</TableHead>
-                  <TableHead className="w-[12%]">Código Fabricante</TableHead>
+                  <TableHead className="w-[12%]">Cód. Myio</TableHead>
+                  <TableHead className="w-[12%]">Cód. Fabricante</TableHead>
                   <TableHead className="w-[10%] text-right">Saldo Estoque</TableHead>
                   <TableHead className="w-[10%]">Imagem</TableHead>
                   <TableHead className="w-[11%] text-right">Ações</TableHead>
@@ -1178,8 +1178,8 @@ function StockTableCard({
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{meta?.myio_code || "—"}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{meta?.manufacturer_code || "—"}</TableCell>
+                  <TableCell><CopyCodeCell value={meta?.myio_code} /></TableCell>
+                  <TableCell><CopyCodeCell value={meta?.manufacturer_code} /></TableCell>
                   <TableCell className="text-right">
                     <Badge
                       variant="outline"
@@ -1907,8 +1907,8 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[45%]">Descrição</TableHead>
-                  <TableHead className="w-[12%]">Código Myio</TableHead>
-                  <TableHead className="w-[12%]">Código Fabricante</TableHead>
+                  <TableHead className="w-[12%]">Cód. Myio</TableHead>
+                  <TableHead className="w-[12%]">Cód. Fabricante</TableHead>
                   <TableHead className="w-[10%] text-right">Saldo Estoque</TableHead>
                   <TableHead className="w-[10%]">Imagem</TableHead>
                   <TableHead className="w-[11%] text-right">Ações</TableHead>
@@ -1938,8 +1938,8 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
                         )}
                       </div>
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{meta?.myio_code || "—"}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{meta?.manufacturer_code || "—"}</TableCell>
+                    <TableCell><CopyCodeCell value={meta?.myio_code} /></TableCell>
+                    <TableCell><CopyCodeCell value={meta?.manufacturer_code} /></TableCell>
                     <TableCell className="text-right">
                       <Badge
                         variant="outline"
