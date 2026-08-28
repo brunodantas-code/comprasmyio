@@ -126,10 +126,11 @@ export function DamageItemDialog({
       const qty = parseInt(quantity, 10);
       if (!Number.isInteger(qty) || qty <= 0) throw new Error("Quantidade inválida.");
       if (qty > limit) throw new Error("Quantidade maior que o saldo em estoque.");
-      if (!reason.trim()) throw new Error("Informe o motivo da avaria.");
+      if (!reason) throw new Error("Selecione o motivo da avaria.");
+      if (!file) throw new Error("A foto da avaria é obrigatória.");
 
       let path: string | null = null;
-      if (file) {
+      {
         path = `damaged/${materialId}/${crypto.randomUUID()}-${file.name}`;
         const { error: upErr } = await supabase.storage.from("assembly-photos").upload(path, file);
         if (upErr) throw upErr;
