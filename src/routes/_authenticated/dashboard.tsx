@@ -442,6 +442,7 @@ type PurchasableItem = {
   key: string;
   name: string;
   link: string | null;
+  manufacturer_code: string | null;
   origin: string;
   material_id: string | null;
   terceiros_material_id: string | null;
@@ -453,9 +454,9 @@ function usePurchasableItems() {
     queryKey: ["purchasable-items"],
     queryFn: async () => {
       const [{ data: mats, error: me }, { data: ters, error: te }, { data: tools, error: fe }] = await Promise.all([
-        supabase.from("materials").select("id, name, link, location").in("location", ["fabrica", "almoxarifado"]).eq("is_manufactured", false).order("name"),
-        supabase.from("terceiros_materials").select("id, name, link").order("name"),
-        supabase.from("tool_assets").select("id, name, link").order("name"),
+        supabase.from("materials").select("id, name, link, manufacturer_code, location").in("location", ["fabrica", "almoxarifado"]).eq("is_manufactured", false).order("name"),
+        supabase.from("terceiros_materials").select("id, name, link, manufacturer_code").order("name"),
+        supabase.from("tool_assets").select("id, name, link, manufacturer_code").order("name"),
       ]);
       if (me) throw me;
       if (te) throw te;
@@ -466,6 +467,7 @@ function usePurchasableItems() {
           key: `mat:${m.id}`,
           name: m.name,
           link: m.link,
+          manufacturer_code: m.manufacturer_code ?? null,
           origin: m.location === "fabrica" ? "Insumos de Fabricação" : "Material de Almoxarifado",
           material_id: m.id,
           terceiros_material_id: null,
@@ -477,6 +479,7 @@ function usePurchasableItems() {
           key: `ter:${t.id}`,
           name: t.name,
           link: t.link,
+          manufacturer_code: t.manufacturer_code ?? null,
           origin: "Insumos de Instalação",
           material_id: null,
           terceiros_material_id: t.id,
@@ -488,6 +491,7 @@ function usePurchasableItems() {
           key: `fer:${t.id}`,
           name: t.name,
           link: t.link,
+          manufacturer_code: t.manufacturer_code ?? null,
           origin: "Máquinas e Ferramentas",
           material_id: null,
           terceiros_material_id: null,
@@ -557,8 +561,10 @@ function PurchasableItemPicker({ value, onPick, disabled }: { value: Purchasable
                       onSelect={() => { onPick(i); setOpen(false); }}
                     >
                       <div className="flex min-w-0 flex-col">
-                        <span className="truncate">{i.name}</span>
-                        {i.link && <span className="truncate text-xs text-muted-foreground">{i.link}</span>}
+                        <span className="truncate font-medium">{i.name}</span>
+                        <span className="truncate text-xs text-muted-foreground">
+                          {i.manufacturer_code ? `Cód. Fabricante: ${i.manufacturer_code}` : "Cód. Fabricante: —"}
+                        </span>
                       </div>
                     </CommandItem>
                   ))}
