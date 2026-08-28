@@ -478,6 +478,26 @@ function AddToolDialog({ userId }: { userId: string }) {
             <Label htmlFor="tool-link">Link de Referência <span className="text-muted-foreground">(opcional)</span></Label>
             <Input id="tool-link" type="url" placeholder="https://" value={newLink} onChange={(e) => setNewLink(e.target.value)} />
           </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label htmlFor="tool-manuf">Cód. Fabricante <span className="text-muted-foreground">(opcional)</span></Label>
+              <Input
+                id="tool-manuf"
+                placeholder="Ex.: 2EDGK-5.08-10P"
+                value={newManufCode}
+                onChange={(e) => setNewManufCode(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="tool-myio">Cód. Myio <span className="text-muted-foreground">(opcional)</span></Label>
+              <Input
+                id="tool-myio"
+                placeholder="Ex.: MY-00123"
+                value={newMyioCode}
+                onChange={(e) => setNewMyioCode(e.target.value)}
+              />
+            </div>
+          </div>
           <div className="space-y-2">
             <Label htmlFor="tool-lot">Quantidade por lote <span className="text-muted-foreground">(opcional)</span></Label>
             <Input id="tool-lot" type="number" min="1" placeholder="Ex.: 10" value={newLot} onChange={(e) => setNewLot(e.target.value)} />

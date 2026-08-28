@@ -1781,6 +1781,26 @@ function AddTerceirosDialog({ userId }: { userId: string }) {
             <Label htmlFor="terceiros-link">Link de Referência <span className="text-muted-foreground">(opcional)</span></Label>
             <Input id="terceiros-link" type="url" placeholder="https://" value={newLink} onChange={(e) => setNewLink(e.target.value)} />
           </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label htmlFor="terceiros-manuf">Cód. Fabricante <span className="text-muted-foreground">(opcional)</span></Label>
+              <Input
+                id="terceiros-manuf"
+                placeholder="Ex.: 2EDGK-5.08-10P"
+                value={newManufCode}
+                onChange={(e) => setNewManufCode(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="terceiros-myio">Cód. Myio <span className="text-muted-foreground">(opcional)</span></Label>
+              <Input
+                id="terceiros-myio"
+                placeholder="Ex.: MY-00123"
+                value={newMyioCode}
+                onChange={(e) => setNewMyioCode(e.target.value)}
+              />
+            </div>
+          </div>
           <div className="space-y-2">
             <Label htmlFor="terceiros-lot">Quantidade por lote <span className="text-muted-foreground">(opcional)</span></Label>
             <Input
