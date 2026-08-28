@@ -555,8 +555,8 @@ export function ToolAssetsSection({ userId, canDelete }: { userId: string; canDe
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[45%]">Ferramenta / Ativo</TableHead>
-                  <TableHead className="w-[12%]">Código Myio</TableHead>
-                  <TableHead className="w-[12%]">Código Fabricante</TableHead>
+                  <TableHead className="w-[12%]">Cód. Myio</TableHead>
+                  <TableHead className="w-[12%]">Cód. Fabricante</TableHead>
                   <TableHead className="w-[10%] text-right">Saldo Estoque</TableHead>
                   <TableHead className="w-[10%]">Imagem</TableHead>
                   <TableHead className="w-[11%] text-right">Ações</TableHead>
@@ -586,8 +586,8 @@ export function ToolAssetsSection({ userId, canDelete }: { userId: string; canDe
                         )}
                       </div>
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{meta?.myio_code || "—"}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{meta?.manufacturer_code || "—"}</TableCell>
+                    <TableCell><CopyCodeCell value={meta?.myio_code} /></TableCell>
+                    <TableCell><CopyCodeCell value={meta?.manufacturer_code} /></TableCell>
                     <TableCell className="text-right">
                       <Badge
                         variant="outline"
