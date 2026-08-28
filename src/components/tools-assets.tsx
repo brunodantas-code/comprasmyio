@@ -373,6 +373,8 @@ function AddToolDialog({ userId }: { userId: string }) {
   const [newLot, setNewLot] = useState("");
   const [newType, setNewType] = useState("");
   const [newDescription, setNewDescription] = useState("");
+  const [newManufCode, setNewManufCode] = useState("");
+  const [newMyioCode, setNewMyioCode] = useState("");
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
