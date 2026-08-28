@@ -57,7 +57,7 @@ function ResetPasswordPage() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
       <div className="w-full max-w-md">
         <Link to="/" className="mb-6 flex items-center justify-center gap-2 text-sm text-muted-foreground">
-          <MyioLogo className="text-2xl" /> <span className="text-muted-foreground">Supply</span>
+          <MyioLogo className="text-2xl" />
         </Link>
         <Card>
           <CardHeader>

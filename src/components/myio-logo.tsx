@@ -18,7 +18,10 @@ export function MyioLogo({ className, tone = "dark" }: Props) {
         className,
       )}
     >
-      my<span className="text-[var(--myio-green)]">io</span>
+      my<span className="text-[var(--myio-green)]">io</span>{" "}
+      <span className={tone === "light" ? "text-white" : "text-foreground"}>
+        Supply
+      </span>
     </span>
   );
 }
