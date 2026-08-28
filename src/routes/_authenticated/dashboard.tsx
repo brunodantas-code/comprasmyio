@@ -644,6 +644,9 @@ function NewOrder({ userId }: { userId: string }) {
         setDeadlineDate("");
         setItem(null);
         setItemLink("");
+        setIsNewItem(false);
+        setNewItemName("");
+        setRecipient("");
       },
     });
   }
