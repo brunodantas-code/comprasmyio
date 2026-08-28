@@ -1301,27 +1301,35 @@ function OrdersTable({
                   <div className="text-muted-foreground">{new Date(o.deadline_date + "T00:00:00").toLocaleDateString("pt-BR")}</div>
                 )}
               </TableCell>
-              <TableCell><StatusHistoryDialog order={o} /></TableCell>
+              <TableCell><StatusHistoryDialog order={o} canEdit={canEdit} /></TableCell>
               <TableCell className="text-sm font-semibold text-foreground whitespace-nowrap">
-                {o.delivery_forecast
-                  ? new Date(o.delivery_forecast + "T00:00:00").toLocaleDateString("pt-BR")
-                  : "—"}
+                <InlineField
+                  order={o}
+                  field="delivery_forecast"
+                  type="date"
+                  canEdit={canEdit}
+                  display={
+                    o.delivery_forecast
+                      ? new Date(o.delivery_forecast + "T00:00:00").toLocaleDateString("pt-BR")
+                      : "—"
+                  }
+                />
               </TableCell>
               <TableCell className="max-w-[180px] text-sm font-semibold text-foreground whitespace-pre-wrap">
-                {o.passphrase || "—"}
+                <InlineField order={o} field="passphrase" type="text" canEdit={canEdit} display={o.passphrase || "—"} />
               </TableCell>
               <TableCell className="max-w-[220px] text-xs text-muted-foreground">
-                <div className="whitespace-pre-wrap">{o.buyer_notes || "—"}</div>
+                <InlineField order={o} field="buyer_notes" type="textarea" canEdit={canEdit} display={o.buyer_notes || "—"} />
               </TableCell>
               <TableCell className="w-[110px] max-w-[110px] text-xs">
-                <ExistingAttachments orderId={o.id} attachments={o.attachments ?? []} />
+                <ExistingAttachments orderId={o.id} attachments={o.attachments ?? []} canRemove={canEdit} />
               </TableCell>
               <TableCell className="text-right space-x-2 whitespace-nowrap">
                 {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
                 {canEditRequester && o.status === "entregue" && <ConfirmReceiptActions order={o} />}
-                {canEdit && <EditOrderDialog order={o} />}
                 {canDelete && <DeleteOrderDialog order={o} />}
               </TableCell>
+
             </TableRow>
           ))}
         </TableBody>
