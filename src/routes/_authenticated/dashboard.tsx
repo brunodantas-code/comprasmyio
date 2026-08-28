@@ -573,6 +573,10 @@ function NewOrder({ userId }: { userId: string }) {
   const [deadlineDate, setDeadlineDate] = useState("");
   const [item, setItem] = useState<PurchasableItem | null>(null);
   const [itemLink, setItemLink] = useState("");
+  const [isNewItem, setIsNewItem] = useState(false);
+  const [newItemName, setNewItemName] = useState("");
+  const [recipient, setRecipient] = useState("");
+  const { data: profiles } = useProfilesList();
 
   const submit = useMutation({
     mutationFn: async (values: z.infer<typeof newOrderSchema>) => {
