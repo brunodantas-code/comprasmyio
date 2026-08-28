@@ -735,10 +735,8 @@ function NewOrder({ userId }: { userId: string }) {
               </Label>
               <Input id="item_link" type="url" placeholder="https://..." value={itemLink} onChange={(e) => setItemLink(e.target.value)} required={isNewItem} />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="delivery_point">Ponto de entrega</Label>
-              <Textarea id="delivery_point" name="delivery_point" placeholder="Ex.: Rua X, 123, com João no portão" required />
-            </div>
+            <AddressAutocomplete name="delivery_point" required />
+
             <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>Prazo de recebimento</Label>
