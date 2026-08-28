@@ -1152,12 +1152,12 @@ function StockTableCard({
           <Table>
             <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[45%]">Descrição</TableHead>
-                  <TableHead className="w-[12%]">Cód. Myio</TableHead>
-                  <TableHead className="w-[12%]">Cód. Fabricante</TableHead>
-                  <TableHead className="w-[10%] text-right">Saldo Estoque</TableHead>
-                  <TableHead className="w-[10%]">Imagem</TableHead>
-                  <TableHead className="w-[11%] text-right"></TableHead>
+                  <TableHead className={simple ? "w-[70%]" : "w-[45%]"}>Descrição</TableHead>
+                  {!simple && <TableHead className="w-[12%]">Cód. Myio</TableHead>}
+                  {!simple && <TableHead className="w-[12%]">Cód. Fabricante</TableHead>}
+                  <TableHead className={simple ? "w-[15%] text-right" : "w-[10%] text-right"}>Saldo Estoque</TableHead>
+                  {!simple && <TableHead className="w-[10%]">Imagem</TableHead>}
+                  <TableHead className={simple ? "w-[15%] text-right" : "w-[11%] text-right"}></TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
