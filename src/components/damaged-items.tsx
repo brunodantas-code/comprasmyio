@@ -18,7 +18,9 @@ import {
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { AlertTriangle, Camera, Eye, ImageUp, Recycle } from "lucide-react";
+import { AlertTriangle, Camera, Eye, Recycle } from "lucide-react";
+
+const DAMAGE_REASONS = ["Água ou Líquidos", "Falha", "Quebra Física"] as const;
 import { pushQrsToExternal } from "@/lib/push-external";
 
 export type DamagedItem = {
@@ -112,7 +114,6 @@ export function DamageItemDialog({
   const [reason, setReason] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
-  const galleryRef = useRef<HTMLInputElement>(null);
   const limit = Math.max(1, Math.floor(max));
 
   function reset() {
