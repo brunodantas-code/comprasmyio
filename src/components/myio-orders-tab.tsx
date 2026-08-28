@@ -451,7 +451,7 @@ export function MyioOrdersTab({ userId, canManage = true }: { userId: string; ca
     <Card>
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <CardTitle className="flex items-center gap-2"><Factory className="h-5 w-5 shrink-0" />Ordem de Expedição</CardTitle>
+          <CardTitle className="flex items-center gap-2"><Factory className="h-5 w-5 shrink-0" />Solicitações de Projetos</CardTitle>
           <CardDescription>Controle de produção e entrega dos produtos Myio.</CardDescription>
         </div>
         <div className="flex flex-wrap items-center gap-2">
