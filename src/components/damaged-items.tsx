@@ -18,7 +18,9 @@ import {
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { AlertTriangle, Camera, Eye, ImageUp, Recycle } from "lucide-react";
+import { AlertTriangle, Camera, Eye, Recycle } from "lucide-react";
+
+const DAMAGE_REASONS = ["Água ou Líquidos", "Falha", "Quebra Física"] as const;
 import { pushQrsToExternal } from "@/lib/push-external";
 
 export type DamagedItem = {
@@ -112,7 +114,6 @@ export function DamageItemDialog({
   const [reason, setReason] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
-  const galleryRef = useRef<HTMLInputElement>(null);
   const limit = Math.max(1, Math.floor(max));
 
   function reset() {
@@ -126,10 +127,11 @@ export function DamageItemDialog({
       const qty = parseInt(quantity, 10);
       if (!Number.isInteger(qty) || qty <= 0) throw new Error("Quantidade inválida.");
       if (qty > limit) throw new Error("Quantidade maior que o saldo em estoque.");
-      if (!reason.trim()) throw new Error("Informe o motivo da avaria.");
+      if (!reason) throw new Error("Selecione o motivo da avaria.");
+      if (!file) throw new Error("A foto da avaria é obrigatória.");
 
       let path: string | null = null;
-      if (file) {
+      {
         path = `damaged/${materialId}/${crypto.randomUUID()}-${file.name}`;
         const { error: upErr } = await supabase.storage.from("assembly-photos").upload(path, file);
         if (upErr) throw upErr;
@@ -204,22 +206,23 @@ export function DamageItemDialog({
 
           <div className="space-y-2">
             <Label htmlFor={`dmg-reason-${materialId}`}>Motivo da avaria *</Label>
-            <Input
-              id={`dmg-reason-${materialId}`}
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              placeholder="Ex.: chegou quebrado, defeito de fabricação..."
-            />
+            <Select value={reason} onValueChange={setReason}>
+              <SelectTrigger id={`dmg-reason-${materialId}`}>
+                <SelectValue placeholder="Selecione o motivo" />
+              </SelectTrigger>
+              <SelectContent>
+                {DAMAGE_REASONS.map((r) => (
+                  <SelectItem key={r} value={r}>{r}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
-            <Label>Foto (opcional)</Label>
-            <div className="flex gap-2">
+            <Label>Foto da avaria *</Label>
+            <div>
               <Button type="button" variant="outline" size="sm" onClick={() => cameraRef.current?.click()}>
                 <Camera className="mr-1 h-4 w-4" /> Câmera
-              </Button>
-              <Button type="button" variant="outline" size="sm" onClick={() => galleryRef.current?.click()}>
-                <ImageUp className="mr-1 h-4 w-4" /> Galeria
               </Button>
             </div>
             <input
@@ -227,13 +230,6 @@ export function DamageItemDialog({
               type="file"
               accept="image/*"
               capture="environment"
-              className="hidden"
-              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            />
-            <input
-              ref={galleryRef}
-              type="file"
-              accept="image/*"
               className="hidden"
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
             />
