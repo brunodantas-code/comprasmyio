@@ -620,6 +620,7 @@ function NewOrder({ userId }: { userId: string }) {
       onSuccess: () => {
         (e.target as HTMLFormElement).reset();
         setProjectId("");
+        setForStock(false);
         setFiles([]);
         setDeadlineType("esta_semana");
         setDeadlineDate("");
