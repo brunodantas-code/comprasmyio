@@ -624,10 +624,10 @@ function NewOrder({ userId }: { userId: string }) {
     const fd = new FormData(e.currentTarget);
     const parsed = newOrderSchema.safeParse({
       project_id: forStock ? undefined : projectId,
-      item_name: item.name,
+      item_name: isNewItem ? newItemName : item!.name,
       item_link: itemLink || undefined,
       quantity: fd.get("quantity"),
-      recipient: fd.get("recipient"),
+      recipient: recipient,
       requester_notes: fd.get("requester_notes") || undefined,
       delivery_point: fd.get("delivery_point"),
       deadline_type: deadlineType,
