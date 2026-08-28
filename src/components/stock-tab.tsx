@@ -957,6 +957,26 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
             <Label htmlFor={`link-${location}`}>{independent ? "Link de Referência" : "Link"} <span className="text-muted-foreground">(opcional)</span></Label>
             <Input id={`link-${location}`} name="link" type="url" placeholder="https://" value={newLink} onChange={(e) => setNewLink(e.target.value)} />
           </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label htmlFor={`manuf-${location}`}>Cód. Fabricante <span className="text-muted-foreground">(opcional)</span></Label>
+              <Input
+                id={`manuf-${location}`}
+                placeholder="Ex.: 2EDGK-5.08-10P"
+                value={newManufCode}
+                onChange={(e) => setNewManufCode(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor={`myio-${location}`}>Cód. Myio <span className="text-muted-foreground">(opcional)</span></Label>
+              <Input
+                id={`myio-${location}`}
+                placeholder="Ex.: MY-00123"
+                value={newMyioCode}
+                onChange={(e) => setNewMyioCode(e.target.value)}
+              />
+            </div>
+          </div>
           {independent && (
             <>
               <div className="space-y-2">
@@ -1680,6 +1700,8 @@ function AddTerceirosDialog({ userId }: { userId: string }) {
         lot_quantity: lot,
         purchase_type: newType || null,
         description: newDescription.trim() || null,
+        manufacturer_code: newManufCode.trim() || null,
+        myio_code: newMyioCode.trim() || null,
         photo_url,
         created_by: userId,
       } as never);

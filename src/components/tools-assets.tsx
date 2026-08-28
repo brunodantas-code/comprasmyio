@@ -411,6 +411,8 @@ function AddToolDialog({ userId }: { userId: string }) {
         lot_quantity: lot,
         purchase_type: newType || null,
         description: newDescription.trim() || null,
+        manufacturer_code: newManufCode.trim() || null,
+        myio_code: newMyioCode.trim() || null,
         photo_url,
         created_by: userId,
       } as never);
