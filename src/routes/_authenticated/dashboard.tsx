@@ -442,6 +442,7 @@ type PurchasableItem = {
   key: string;
   name: string;
   link: string | null;
+  manufacturer_code: string | null;
   origin: string;
   material_id: string | null;
   terceiros_material_id: string | null;
