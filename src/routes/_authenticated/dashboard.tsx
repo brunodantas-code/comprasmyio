@@ -466,7 +466,7 @@ function usePurchasableItems() {
           key: `mat:${m.id}`,
           name: m.name,
           link: m.link,
-          origin: m.location === "fabrica" ? "Estoque — Fábrica" : "Almoxarifado",
+          origin: m.location === "fabrica" ? "Insumos de Fabricação" : "Material de Almoxarifado",
           material_id: m.id,
           terceiros_material_id: null,
           tool_asset_id: null,
@@ -488,7 +488,7 @@ function usePurchasableItems() {
           key: `fer:${t.id}`,
           name: t.name,
           link: t.link,
-          origin: "Ferramentas/Ativos",
+          origin: "Máquinas e Ferramentas",
           material_id: null,
           terceiros_material_id: null,
           tool_asset_id: t.id,
@@ -499,10 +499,20 @@ function usePurchasableItems() {
   });
 }
 
+const CATEGORIES = [
+  { value: "todas", label: "Todas" },
+  { value: "Insumos de Instalação", label: "Insumos de Instalação" },
+  { value: "Insumos de Fabricação", label: "Insumos de Fabricação" },
+  { value: "Material de Almoxarifado", label: "Material de Almoxarifado" },
+  { value: "Máquinas e Ferramentas", label: "Máquinas e Ferramentas" },
+] as const;
+
 function PurchasableItemPicker({ value, onPick, disabled }: { value: PurchasableItem | null; onPick: (i: PurchasableItem) => void; disabled?: boolean }) {
   const { data: items, isLoading } = usePurchasableItems();
   const [open, setOpen] = useState(false);
-  const origins = ["Estoque — Fábrica", "Insumos de Instalação", "Almoxarifado", "Ferramentas/Ativos"];
+  const [category, setCategory] = useState<string>("todas");
+  const origins = ["Insumos de Fabricação", "Insumos de Instalação", "Material de Almoxarifado", "Máquinas e Ferramentas"];
+  const filtered = (items ?? []).filter((i) => category === "todas" || i.origin === category);
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -516,13 +526,27 @@ function PurchasableItemPicker({ value, onPick, disabled }: { value: Purchasable
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[min(24rem,calc(100vw-2rem))] p-0" align="start">
+      <PopoverContent className="w-[min(28rem,calc(100vw-2rem))] p-0" align="start">
+        <div className="flex flex-wrap gap-1 border-b p-2">
+          {CATEGORIES.map((c) => (
+            <Button
+              key={c.value}
+              type="button"
+              size="sm"
+              variant={category === c.value ? "default" : "outline"}
+              className="h-7 px-2 text-xs"
+              onClick={() => setCategory(c.value)}
+            >
+              {c.label}
+            </Button>
+          ))}
+        </div>
         <Command>
           <CommandInput placeholder="Buscar item cadastrado..." />
           <CommandList>
-            <CommandEmpty>{isLoading ? "Carregando..." : "Nenhum item cadastrado nos estoques."}</CommandEmpty>
+            <CommandEmpty>{isLoading ? "Carregando..." : "Nenhum item cadastrado nesta categoria."}</CommandEmpty>
             {origins.map((origin) => {
-              const list = (items ?? []).filter((i) => i.origin === origin);
+              const list = filtered.filter((i) => i.origin === origin);
               if (!list.length) return null;
               return (
                 <CommandGroup key={origin} heading={origin}>
@@ -618,7 +642,7 @@ function NewOrder({ userId }: { userId: string }) {
       if (newItemName.trim().length < 2) return toast.error("Descreva o item novo.");
       if (!itemLink.trim()) return toast.error("Informe o link de referência do item novo.");
     } else if (!item) {
-      return toast.error("Selecione um item cadastrado no Estoque — Fábrica, Insumos de Instalação ou Almoxarifado.");
+      return toast.error("Selecione um item cadastrado: Insumos de Fabricação, Insumos de Instalação, Material de Almoxarifado ou Máquinas e Ferramentas.");
     }
     if (!forStock && !projectId) {
       return toast.error("Selecione um projeto");
@@ -708,7 +732,7 @@ function NewOrder({ userId }: { userId: string }) {
                 </div>
               ) : (
                 <p className="text-xs text-muted-foreground">
-                  Somente itens cadastrados no Estoque — Fábrica, Insumos de Instalação ou Almoxarifado. Ao receber, entra automaticamente no estoque de origem.
+                  Somente itens cadastrados em Insumos de Fabricação, Insumos de Instalação, Material de Almoxarifado ou Máquinas e Ferramentas. Ao receber, entra automaticamente no estoque de origem.
                 </p>
               )}
             </div>
@@ -1305,7 +1329,7 @@ function EditRequesterDialog({ order }: { order: Order }) {
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!selectedItem) {
-      return toast.error("Selecione um item cadastrado no Estoque — Fábrica, Insumos de Instalação ou Almoxarifado.");
+      return toast.error("Selecione um item cadastrado: Insumos de Fabricação, Insumos de Instalação, Material de Almoxarifado ou Máquinas e Ferramentas.");
     }
     if (!forStock && !projectId) {
       return toast.error("Selecione um projeto");
