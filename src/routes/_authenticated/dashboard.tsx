@@ -423,6 +423,17 @@ function useProfilesMap() {
   });
 }
 
+function useProfilesList() {
+  return useQuery({
+    queryKey: ["profiles-list"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("profiles").select("id, full_name, email").order("full_name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
 /* ---------- Materials library ---------- */
 
 type PurchasableItem = {
