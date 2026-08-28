@@ -741,6 +741,27 @@ const newOrderSchema = z.object({
   path: ["deadline_date"],
 });
 
+async function fetchAvailableStock(item: PurchasableItem): Promise<number> {
+  const sum = (rows: { quantity: number; type: string }[] | null) =>
+    (rows ?? []).reduce((acc, r) => acc + (r.type === "saida" ? -Number(r.quantity) : Number(r.quantity)), 0);
+  if (item.material_id) {
+    const { data, error } = await supabase.from("stock_movements").select("quantity, type").eq("material_id", item.material_id);
+    if (error) throw error;
+    return sum(data);
+  }
+  if (item.terceiros_material_id) {
+    const { data, error } = await supabase.from("terceiros_movements").select("quantity, type").eq("material_id", item.terceiros_material_id);
+    if (error) throw error;
+    return sum(data);
+  }
+  if (item.tool_asset_id) {
+    const { data, error } = await supabase.from("tool_movements").select("quantity, type").eq("material_id", item.tool_asset_id);
+    if (error) throw error;
+    return sum(data);
+  }
+  return 0;
+}
+
 function NewOrder({ userId }: { userId: string }) {
   const { data: projects, isLoading } = useProjects();
   const qc = useQueryClient();
@@ -759,6 +780,14 @@ function NewOrder({ userId }: { userId: string }) {
   const [dupOpen, setDupOpen] = useState(false);
   const [dupCandidates, setDupCandidates] = useState<PurchasableItem[]>([]);
   const [dismissedText, setDismissedText] = useState("");
+  const formRef = useRef<HTMLFormElement | null>(null);
+  const [checking, setChecking] = useState(false);
+  const [split, setSplit] = useState<{
+    values: z.infer<typeof newOrderSchema>;
+    available: number;
+    shipQty: number;
+    buyQty: number;
+  } | null>(null);
 
   const checkDuplicates = (text: string) => {
     if (!isNewItem) return false;
@@ -770,40 +799,81 @@ function NewOrder({ userId }: { userId: string }) {
     return true;
   };
 
+  const resetForm = () => {
+    formRef.current?.reset();
+    setProjectId("");
+    setForStock(false);
+    setFiles([]);
+    setDeadlineType("esta_semana");
+    setDeadlineDate("");
+    setItem(null);
+    setItemLink("");
+    setIsNewItem(false);
+    setNewItemName("");
+    setRecipient("");
+  };
 
   const submit = useMutation({
-    mutationFn: async (values: z.infer<typeof newOrderSchema>) => {
-      const { data, error } = await supabase.from("purchase_orders").insert({
-        project_id: forStock ? null : (values.project_id ?? null),
-        for_stock: forStock,
-        item_name: values.item_name,
-        item_link: values.item_link ?? null,
-        material_id: isNewItem ? null : (item?.material_id ?? null),
-        terceiros_material_id: isNewItem ? null : (item?.terceiros_material_id ?? null),
-        tool_asset_id: isNewItem ? null : (item?.tool_asset_id ?? null),
-        quantity: values.quantity,
-        recipient: values.recipient,
-        requester_notes: values.requester_notes ?? null,
-        delivery_point: values.delivery_point,
-        deadline_type: values.deadline_type,
-        deadline_date: values.deadline_type === "customizado" ? (values.deadline_date ?? null) : null,
-        requester_id: userId,
-      }).select("id").single();
-      if (error) throw error;
-      if (files.length && data?.id) {
-        const uploaded = await uploadOrderAttachments(data.id, files);
-        const { error: ue } = await supabase.from("purchase_orders").update({ attachments: uploaded }).eq("id", data.id);
-        if (ue) throw ue;
+    mutationFn: async ({ values, buyQty, shipQty }: { values: z.infer<typeof newOrderSchema>; buyQty: number; shipQty: number }) => {
+      if (shipQty > 0) {
+        const { data: exp, error: expError } = await supabase
+          .from("myio_orders")
+          .insert({
+            title: values.item_name,
+            client_name: forStock ? "Estoque" : (projects?.find((p) => p.id === values.project_id)?.name ?? ""),
+            project_id: forStock ? null : (values.project_id ?? null),
+            delivery_date: values.deadline_type === "customizado" && values.deadline_date
+              ? values.deadline_date
+              : new Date().toISOString().slice(0, 10),
+            notes: `Gerado a partir de solicitação (${shipQty} em estoque). Destinatário: ${values.recipient}. Entrega: ${values.delivery_point}.`,
+            created_by: userId,
+          })
+          .select("id")
+          .single();
+        if (expError) throw expError;
+        const { error: itemsError } = await supabase
+          .from("myio_order_items")
+          .insert({ order_id: exp.id, product: values.item_name, quantity: shipQty });
+        if (itemsError) throw itemsError;
       }
+
+      if (buyQty > 0) {
+        const { data, error } = await supabase.from("purchase_orders").insert({
+          project_id: forStock ? null : (values.project_id ?? null),
+          for_stock: forStock,
+          item_name: values.item_name,
+          item_link: values.item_link ?? null,
+          material_id: isNewItem ? null : (item?.material_id ?? null),
+          terceiros_material_id: isNewItem ? null : (item?.terceiros_material_id ?? null),
+          tool_asset_id: isNewItem ? null : (item?.tool_asset_id ?? null),
+          quantity: buyQty,
+          recipient: values.recipient,
+          requester_notes: values.requester_notes ?? null,
+          delivery_point: values.delivery_point,
+          deadline_type: values.deadline_type,
+          deadline_date: values.deadline_type === "customizado" ? (values.deadline_date ?? null) : null,
+          requester_id: userId,
+        }).select("id").single();
+        if (error) throw error;
+        if (files.length && data?.id) {
+          const uploaded = await uploadOrderAttachments(data.id, files);
+          const { error: ue } = await supabase.from("purchase_orders").update({ attachments: uploaded }).eq("id", data.id);
+          if (ue) throw ue;
+        }
+      }
+      return { buyQty, shipQty };
     },
-    onSuccess: () => {
-      toast.success("Pedido criado!");
+    onSuccess: (r) => {
+      if (r.shipQty > 0 && r.buyQty > 0) toast.success(`Ordem de expedição (${r.shipQty}) e ordem de compra (${r.buyQty}) criadas.`);
+      else if (r.shipQty > 0) toast.success(`Atendido pelo estoque: ordem de expedição de ${r.shipQty} criada.`);
+      else toast.success("Pedido criado!");
       qc.invalidateQueries({ queryKey: ["orders"] });
+      qc.invalidateQueries({ queryKey: ["myio-orders"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
-  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (isNewItem) {
       if (newItemName.trim().length < 2) return toast.error("Descreva o item novo.");
@@ -829,22 +899,27 @@ function NewOrder({ userId }: { userId: string }) {
       deadline_date: deadlineDate || undefined,
     });
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
-    submit.mutate(parsed.data, {
-      onSuccess: () => {
-        (e.target as HTMLFormElement).reset();
-        setProjectId("");
-        setForStock(false);
-        setFiles([]);
-        setDeadlineType("esta_semana");
-        setDeadlineDate("");
-        setItem(null);
-        setItemLink("");
-        setIsNewItem(false);
-        setNewItemName("");
-        setRecipient("");
-      },
-    });
+
+    if (!isNewItem && item) {
+      setChecking(true);
+      try {
+        const available = Math.max(0, Math.floor(await fetchAvailableStock(item)));
+        if (available > 0) {
+          const shipQty = Math.min(available, parsed.data.quantity);
+          setSplit({ values: parsed.data, available, shipQty, buyQty: parsed.data.quantity - shipQty });
+          return;
+        }
+      } catch (err) {
+        toast.error((err as Error).message);
+        return;
+      } finally {
+        setChecking(false);
+      }
+    }
+
+    submit.mutate({ values: parsed.data, buyQty: parsed.data.quantity, shipQty: 0 }, { onSuccess: resetForm });
   }
+
 
   return (
     <Card className="max-w-2xl">
