@@ -1328,7 +1328,7 @@ function OrdersTable({
               <TableCell className="text-right space-x-2 whitespace-nowrap">
                 {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
                 {canEditRequester && o.status === "entregue" && <ConfirmReceiptActions order={o} />}
-                {canDelete && <DeleteOrderDialog order={o} />}
+                {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
               </TableCell>
 
             </TableRow>
