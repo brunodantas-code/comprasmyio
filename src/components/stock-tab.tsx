@@ -1974,6 +1974,9 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
                           }
                         />
                         <TerceirosHistoryDialog row={r} />
+                        <Button size="sm" variant="ghost" disabled title="Sem avaria para registrar">
+                          <AlertTriangle className="h-4 w-4 text-muted-foreground/40" />
+                        </Button>
                         {canDelete && <TerceirosDeleteDialog row={r} />}
                       </div>
                     </TableCell>
