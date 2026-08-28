@@ -441,6 +441,7 @@ function useProfilesList() {
 type PurchasableItem = {
   key: string;
   name: string;
+  description: string | null;
   link: string | null;
   manufacturer_code: string | null;
   origin: string;
