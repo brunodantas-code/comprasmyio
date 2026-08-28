@@ -13,10 +13,10 @@ export const Route = createFileRoute("/reset-password")({
   component: ResetPasswordPage,
   head: () => ({
     meta: [
-      { title: "Redefinir senha | Myio Compras" },
-      { name: "description", content: "Defina uma nova senha para sua conta Myio Compras." },
-      { property: "og:title", content: "Redefinir senha | Myio Compras" },
-      { property: "og:description", content: "Defina uma nova senha para sua conta Myio Compras." },
+      { title: "Redefinir senha | Myio Supply" },
+      { name: "description", content: "Defina uma nova senha para sua conta Myio Supply." },
+      { property: "og:title", content: "Redefinir senha | Myio Supply" },
+      { property: "og:description", content: "Defina uma nova senha para sua conta Myio Supply." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
