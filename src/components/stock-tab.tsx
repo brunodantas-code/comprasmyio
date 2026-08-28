@@ -2138,7 +2138,7 @@ function EstoqueMyioSection({ userId, canDelete }: { userId: string; canDelete?:
   return (
     <Tabs defaultValue="ordens" className="space-y-4">
       <TabsList className="flex-wrap">
-        <TabsTrigger value="ordens">Ordem de Expedição</TabsTrigger>
+        <TabsTrigger value="ordens">Solicitações de Projetos</TabsTrigger>
         <TabsTrigger value="estoque">Estoque — Myio</TabsTrigger>
       </TabsList>
 
