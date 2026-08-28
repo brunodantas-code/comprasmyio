@@ -1383,7 +1383,7 @@ function InlineField({
     mutationFn: async (next: string) => {
       const { error } = await supabase
         .from("purchase_orders")
-        .update({ [field]: next || null })
+        .update({ [field]: next || null } as Record<string, string | null>)
         .eq("id", order.id);
       if (error) throw error;
     },
