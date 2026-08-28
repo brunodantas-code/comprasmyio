@@ -933,7 +933,8 @@ function NewOrder({ userId }: { userId: string }) {
         ) : !projects?.length ? (
           <p className="text-sm text-muted-foreground">Nenhum projeto disponível. Peça a um admin para criar um.</p>
         ) : (
-          <form onSubmit={onSubmit} className="space-y-4">
+          <form ref={formRef} onSubmit={onSubmit} className="space-y-4">
+
             <div className="space-y-2">
               <Label>Alocação</Label>
               <div className="flex items-center gap-6">
