@@ -497,7 +497,7 @@ function usePurchasableItems() {
   });
 }
 
-function PurchasableItemPicker({ value, onPick }: { value: PurchasableItem | null; onPick: (i: PurchasableItem) => void }) {
+function PurchasableItemPicker({ value, onPick, disabled }: { value: PurchasableItem | null; onPick: (i: PurchasableItem) => void; disabled?: boolean }) {
   const { data: items, isLoading } = usePurchasableItems();
   const [open, setOpen] = useState(false);
   const origins = ["Estoque — Fábrica", "Insumos de Instalação", "Almoxarifado", "Ferramentas/Ativos"];
