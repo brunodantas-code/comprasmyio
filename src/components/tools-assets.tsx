@@ -30,6 +30,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { MaterialDetailDialog } from "@/components/material-detail";
+import { StockPhotoCell, useStockMeta } from "@/components/stock-meta";
+
 import { toast } from "sonner";
 import {
   ArrowDownCircle,
