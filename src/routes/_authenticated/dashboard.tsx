@@ -687,9 +687,8 @@ function NewOrder({ userId }: { userId: string }) {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Item</Label>
-              <PurchasableItemPicker value={isNewItem ? null : item} onPick={(i) => { setItem(i); if (i.link) setItemLink(i.link); }} disabled={isNewItem} />
-              <div className="flex items-center gap-6 pt-1">
+              <div className="flex items-center gap-6">
+                <Label>Item</Label>
                 <label className="flex cursor-pointer items-center gap-2 text-sm">
                   <Checkbox checked={!isNewItem} onCheckedChange={() => { setIsNewItem(false); setNewItemName(""); }} />
                   Cadastrado
@@ -699,6 +698,7 @@ function NewOrder({ userId }: { userId: string }) {
                   Novo
                 </label>
               </div>
+              <PurchasableItemPicker value={isNewItem ? null : item} onPick={(i) => { setItem(i); if (i.link) setItemLink(i.link); }} disabled={isNewItem} />
               {isNewItem ? (
                 <div className="space-y-2 pt-1">
                   <Label htmlFor="new_item_name">Descrição do item</Label>
