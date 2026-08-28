@@ -150,7 +150,7 @@ function useManufacturedMap() {
   });
 }
 
-// ======== Estoque Myio Terceiros — banco de dados próprio, sem vínculo com materials/stock_movements ========
+// ======== Insumos de Instalação — banco de dados próprio, sem vínculo com materials/stock_movements ========
 
 type TerceirosRow = {
   material_id: string;
@@ -1473,7 +1473,7 @@ function TerceirosMovementDialog({
           <DialogTitle>
             {type === "saida" ? "Dar baixa" : type === "entrada" ? "Entrada manual" : "Ajuste"} — {row.name}
           </DialogTitle>
-          <DialogDescription>Saldo atual: {row.balance} (Estoque Myio Terceiros)</DialogDescription>
+          <DialogDescription>Saldo atual: {row.balance} (Insumos de Instalação)</DialogDescription>
         </DialogHeader>
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -1561,7 +1561,7 @@ function TerceirosHistoryDialog({ row }: { row: TerceirosRow }) {
       <DialogContent className="max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Histórico — {row.name}</DialogTitle>
-          <DialogDescription>Entradas e saídas registradas no Estoque Myio Terceiros.</DialogDescription>
+          <DialogDescription>Entradas e saídas registradas no Insumos de Instalação.</DialogDescription>
         </DialogHeader>
         {!list.length ? (
           <p className="text-sm text-muted-foreground">Nenhuma movimentação ainda.</p>
@@ -1626,7 +1626,7 @@ function TerceirosDeleteDialog({ row }: { row: TerceirosRow }) {
         <AlertDialogHeader>
           <AlertDialogTitle>Excluir "{row.name}"?</AlertDialogTitle>
           <AlertDialogDescription>
-            Esta ação remove o item e todo o seu histórico de movimentações do Estoque Myio Terceiros. Não é possível
+            Esta ação remove o item e todo o seu histórico de movimentações do Insumos de Instalação. Não é possível
             desfazer.
             <br />
             Para confirmar, digite <strong>excluir</strong> no campo abaixo.
@@ -1708,7 +1708,7 @@ function AddTerceirosDialog({ userId }: { userId: string }) {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Item adicionado ao Estoque Myio Terceiros");
+      toast.success("Item adicionado ao Insumos de Instalação");
       qc.invalidateQueries({ queryKey: ["terceiros-stock"] });
       setOpen(false);
       resetForm();
@@ -1716,7 +1716,7 @@ function AddTerceirosDialog({ userId }: { userId: string }) {
     onError: (e: Error) =>
       toast.error(
         e.message.includes("terceiros_materials_unique_name")
-          ? "Já existe um item com esse nome no Estoque Myio Terceiros"
+          ? "Já existe um item com esse nome no Insumos de Instalação"
           : e.message,
       ),
   });
@@ -1728,7 +1728,7 @@ function AddTerceirosDialog({ userId }: { userId: string }) {
       </DialogTrigger>
       <DialogContent className="max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Novo item — Estoque Myio Terceiros</DialogTitle>
+          <DialogTitle>Novo item — Insumos de Instalação</DialogTitle>
           <DialogDescription>
             Banco de dados próprio e independente: o item é criado do zero e pertence somente ao Estoque Myio
             Terceiros.
@@ -1857,7 +1857,7 @@ function TerceirosResetDialog({ rows }: { rows: TerceirosRow[] }) {
       }
     },
     onSuccess: () => {
-      toast.success("Estoque Myio Terceiros zerado");
+      toast.success("Insumos de Instalação zerado");
       qc.invalidateQueries({ queryKey: ["terceiros-stock"] });
       qc.invalidateQueries({ queryKey: ["terceiros-movements"] });
       setConfirm("");
@@ -1881,7 +1881,7 @@ function TerceirosResetDialog({ rows }: { rows: TerceirosRow[] }) {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Zerar estoque — Estoque Myio Terceiros</DialogTitle>
+          <DialogTitle>Zerar estoque — Insumos de Instalação</DialogTitle>
           <DialogDescription>
             Todos os saldos serão zerados e as movimentações dos {ids.length} item(ns) serão apagadas. Esta ação não
             pode ser desfeita. Digite <strong>zerar</strong> para confirmar.
@@ -1945,7 +1945,7 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
       <Card>
         <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <CardTitle>Estoque Myio Terceiros</CardTitle>
+            <CardTitle>Insumos de Instalação</CardTitle>
             <CardDescription>
               Produtos comprados de terceiros, com banco de dados próprio — separado do Estoque Fábrica e do Estoque
               Myio. Toque no nome para ver foto, link de referência e configurações de compra.
@@ -2048,7 +2048,7 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
       <Card>
         <CardHeader>
           <CardTitle>Movimentações recentes — Terceiros</CardTitle>
-          <CardDescription>Histórico próprio de entradas e saídas do Estoque Myio Terceiros.</CardDescription>
+          <CardDescription>Histórico próprio de entradas e saídas do Insumos de Instalação.</CardDescription>
         </CardHeader>
         <CardContent>
           {!(movements ?? []).length ? (
@@ -2143,7 +2143,7 @@ function EstoqueMyioSection({ userId, canDelete }: { userId: string; canDelete?:
       <TabsContent value="estoque" className="space-y-6">
         <StockTableCard
           title="Estoque Myio"
-          description="Produtos produzidos pela Myio (fabricados). Banco de dados próprio, separado do Estoque Fábrica e do Estoque Myio Terceiros."
+          description="Produtos produzidos pela Myio (fabricados). Banco de dados próprio, separado do Estoque Fábrica e do Insumos de Instalação."
           rows={rows.filter((r) => manufactured?.[r.material_id])}
           isLoading={isLoading}
           userId={userId}
