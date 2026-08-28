@@ -890,6 +890,7 @@ export function AssemblyReleasesCard({
               <TableRow>
                 <TableHead>Data</TableHead>
                 <TableHead>Produtos</TableHead>
+                <TableHead className="w-28">Quantidade</TableHead>
                 <TableHead>Responsáveis</TableHead>
                 <TableHead>Foto</TableHead>
                 <TableHead>Observações</TableHead>
