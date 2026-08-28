@@ -17,17 +17,17 @@ import {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Myio Compras — Solicitações, Estoque e Expedição" },
+      { title: "Myio Supply — Solicitações, Estoque e Expedição" },
       {
         name: "description",
         content:
-          "Plataforma Myio para solicitações de compra, controle de estoque, homologação por QR code e expedição de produtos.",
+          "Plataforma Myio Supply para solicitações de compra, controle de estoque, homologação por QR code e expedição de produtos.",
       },
-      { property: "og:title", content: "Myio Compras — Solicitações, Estoque e Expedição" },
+      { property: "og:title", content: "Myio Supply — Solicitações, Estoque e Expedição" },
       {
         property: "og:description",
         content:
-          "Plataforma Myio para solicitações de compra, controle de estoque, homologação por QR code e expedição de produtos.",
+          "Plataforma Myio Supply para solicitações de compra, controle de estoque, homologação por QR code e expedição de produtos.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -87,7 +87,7 @@ function Landing() {
 
         <header className="relative z-10">
           <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-5 sm:px-6">
-            <MyioLogo tone="light" className="text-3xl" />
+            <MyioLogo tone="light" className="text-[2.8125rem]" />
             <nav className="hidden items-center gap-7 text-sm font-semibold text-white/80 md:flex">
               <a href="#recursos" className="transition-colors hover:text-white">
                 Recursos
@@ -232,7 +232,7 @@ function Landing() {
       <footer className="border-t border-border py-8">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 text-sm text-muted-foreground sm:flex-row sm:px-6">
           <MyioLogo className="text-xl" />
-          <span>© {new Date().getFullYear()} Myio — Gestão de Compras e Materiais</span>
+          <span>© {new Date().getFullYear()} Myio Supply — Gestão de Compras e Materiais</span>
         </div>
       </footer>
     </main>

@@ -315,7 +315,7 @@ function Dashboard() {
       <header className="border-b border-border bg-card">
         <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 sm:flex sm:justify-between sm:px-6 sm:py-4">
           <Link to="/" className="flex min-w-0 items-center font-semibold">
-            <MyioLogo className="truncate text-2xl sm:text-3xl" />
+            <MyioLogo className="truncate text-3xl sm:text-[2.8125rem]" />
           </Link>
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             <div className="min-w-0 text-right">
