@@ -621,7 +621,6 @@ function HomologationSection({ userId, canDelete }: { userId: string; canDelete?
       materialNames={materialNames}
       userId={userId}
       homologable
-      canDelete={canDelete}
       canReportIssue
       title="Produtos para homologar"
       description="Etiquetagem e homologação dos produtos montados. Após homologados em caixas, seguem para o estoque."
