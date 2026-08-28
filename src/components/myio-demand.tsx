@@ -498,6 +498,9 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
       queryClient.invalidateQueries({ queryKey: ["myio-orders"] });
       queryClient.invalidateQueries({ queryKey: ["stock-movements"] });
       queryClient.invalidateQueries({ queryKey: ["stock"] });
+      queryClient.invalidateQueries({ queryKey: ["material-stock"] });
+      queryClient.invalidateQueries({ queryKey: ["terceiros-stock"] });
+      queryClient.invalidateQueries({ queryKey: ["terceiros-movements"] });
     },
     onError: (e: any) => toast.error(e.message ?? "Erro ao dar baixa"),
     onSettled: () => setDeliverDialog(null),
