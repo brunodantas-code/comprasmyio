@@ -578,7 +578,7 @@ export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; 
           <ToolAssetsSection userId={userId} canDelete={canDelete} />
         </TabsContent>
       )}
-      {locations.includes("almoxarifado") && (
+      {locations.includes("almoxarifado") && !onlyLocation && (
         <TabsContent value="distribuicao">
           <DistributionCard />
         </TabsContent>
