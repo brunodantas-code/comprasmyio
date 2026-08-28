@@ -444,6 +444,7 @@ type PurchasableItem = {
   description: string | null;
   link: string | null;
   manufacturer_code: string | null;
+  photo_url: string | null;
   origin: string;
   material_id: string | null;
   terceiros_material_id: string | null;
@@ -455,9 +456,9 @@ function usePurchasableItems() {
     queryKey: ["purchasable-items"],
     queryFn: async () => {
       const [{ data: mats, error: me }, { data: ters, error: te }, { data: tools, error: fe }] = await Promise.all([
-        supabase.from("materials").select("id, name, description, link, manufacturer_code, location").in("location", ["fabrica", "almoxarifado"]).eq("is_manufactured", false).order("name"),
-        supabase.from("terceiros_materials").select("id, name, description, link, manufacturer_code").order("name"),
-        supabase.from("tool_assets").select("id, name, description, link, manufacturer_code").order("name"),
+        supabase.from("materials").select("id, name, description, link, manufacturer_code, photo_url, location").in("location", ["fabrica", "almoxarifado"]).eq("is_manufactured", false).order("name"),
+        supabase.from("terceiros_materials").select("id, name, description, link, manufacturer_code, photo_url").order("name"),
+        supabase.from("tool_assets").select("id, name, description, link, manufacturer_code, photo_url").order("name"),
       ]);
       if (me) throw me;
       if (te) throw te;
@@ -470,6 +471,7 @@ function usePurchasableItems() {
           description: m.description ?? null,
           link: m.link,
           manufacturer_code: m.manufacturer_code ?? null,
+          photo_url: m.photo_url ?? null,
           origin: m.location === "fabrica" ? "Insumos de Fabricação" : "Material de Almoxarifado",
           material_id: m.id,
           terceiros_material_id: null,
@@ -483,6 +485,7 @@ function usePurchasableItems() {
           description: t.description ?? null,
           link: t.link,
           manufacturer_code: t.manufacturer_code ?? null,
+          photo_url: t.photo_url ?? null,
           origin: "Insumos de Instalação",
           material_id: null,
           terceiros_material_id: t.id,
@@ -496,6 +499,7 @@ function usePurchasableItems() {
           description: t.description ?? null,
           link: t.link,
           manufacturer_code: t.manufacturer_code ?? null,
+          photo_url: t.photo_url ?? null,
           origin: "Máquinas e Ferramentas",
           material_id: null,
           terceiros_material_id: null,
@@ -506,6 +510,127 @@ function usePurchasableItems() {
     },
   });
 }
+
+/* ---------- Duplicate item detection ---------- */
+
+function normalizeText(s: string) {
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+const STOPWORDS = new Set(["de", "da", "do", "para", "com", "e", "em", "un", "und", "unid", "pc", "pcs"]);
+
+function tokens(s: string) {
+  return normalizeText(s).split(" ").filter((t) => t.length > 1 && !STOPWORDS.has(t));
+}
+
+function similarity(a: string, b: string) {
+  const na = normalizeText(a);
+  const nb = normalizeText(b);
+  if (!na || !nb) return 0;
+  if (na === nb) return 1;
+  const ta = tokens(a);
+  const tb = tokens(b);
+  if (!ta.length || !tb.length) return 0;
+  const setB = new Set(tb);
+  let hits = 0;
+  ta.forEach((t) => {
+    if (setB.has(t) || tb.some((x) => x.startsWith(t) || t.startsWith(x))) hits += 1;
+  });
+  const overlap = hits / Math.max(ta.length, tb.length);
+  const contains = na.includes(nb) || nb.includes(na) ? 0.85 : 0;
+  return Math.max(overlap, contains);
+}
+
+function findSimilarItems(text: string, items: PurchasableItem[]) {
+  if (normalizeText(text).length < 3) return [];
+  return items
+    .map((i) => ({ item: i, score: Math.max(similarity(text, i.description || ""), similarity(text, i.name)) }))
+    .filter((r) => r.score >= 0.5)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3);
+}
+
+function useItemPhotos(paths: string[]) {
+  return useQuery({
+    queryKey: ["purchasable-item-photos", paths.slice().sort().join("|")],
+    enabled: paths.length > 0,
+    queryFn: async () => {
+      const { data } = await supabase.storage.from("product-images").createSignedUrls(paths, 60 * 60);
+      const map: Record<string, string> = {};
+      (data ?? []).forEach((s) => {
+        if (s.path && s.signedUrl) map[s.path] = s.signedUrl;
+      });
+      return map;
+    },
+  });
+}
+
+function DuplicateItemDialog({
+  open,
+  onOpenChange,
+  text,
+  candidates,
+  onConfirm,
+  onReject,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  text: string;
+  candidates: PurchasableItem[];
+  onConfirm: (i: PurchasableItem) => void;
+  onReject: () => void;
+}) {
+  const paths = candidates.map((c) => c.photo_url).filter((p): p is string => !!p);
+  const { data: photos } = useItemPhotos(paths);
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[85vh] max-w-lg overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Item parecido já cadastrado</DialogTitle>
+          <DialogDescription>
+            Encontramos {candidates.length === 1 ? "um item já cadastrado" : "itens já cadastrados"} parecido(s) com “{text}”.
+            Use o item existente para evitar duplicidade no banco de dados.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          {candidates.map((c) => (
+            <div key={c.key} className="flex gap-3 rounded-md border p-3">
+              <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded border bg-muted/40">
+                {c.photo_url && photos?.[c.photo_url] ? (
+                  <img src={photos[c.photo_url]} alt={c.description || c.name} className="h-full w-full object-contain" />
+                ) : (
+                  <span className="text-[10px] text-muted-foreground">Sem foto</span>
+                )}
+              </div>
+              <div className="min-w-0 flex-1 space-y-1">
+                <p className="text-sm font-medium">{c.description || c.name}</p>
+                <p className="text-xs text-muted-foreground">{c.origin}</p>
+                <p className="text-xs text-muted-foreground">
+                  {c.manufacturer_code ? `Cód. Fabricante: ${c.manufacturer_code}` : "Cód. Fabricante: —"}
+                </p>
+                <Button type="button" size="sm" className="mt-1" onClick={() => onConfirm(c)}>
+                  Sim, é este item
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={onReject}>
+            Não, continuar com item novo
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 
 const CATEGORIES = [
   { value: "todas", label: "Todas" },
@@ -613,6 +738,21 @@ function NewOrder({ userId }: { userId: string }) {
   const [newItemName, setNewItemName] = useState("");
   const [recipient, setRecipient] = useState("");
   const { data: profiles } = useProfilesList();
+  const { data: purchasables } = usePurchasableItems();
+  const [dupOpen, setDupOpen] = useState(false);
+  const [dupCandidates, setDupCandidates] = useState<PurchasableItem[]>([]);
+  const [dismissedText, setDismissedText] = useState("");
+
+  const checkDuplicates = (text: string) => {
+    if (!isNewItem) return false;
+    if (normalizeText(text) === normalizeText(dismissedText)) return false;
+    const found = findSimilarItems(text, purchasables ?? []).map((r) => r.item);
+    if (!found.length) return false;
+    setDupCandidates(found);
+    setDupOpen(true);
+    return true;
+  };
+
 
   const submit = useMutation({
     mutationFn: async (values: z.infer<typeof newOrderSchema>) => {
@@ -650,7 +790,9 @@ function NewOrder({ userId }: { userId: string }) {
     e.preventDefault();
     if (isNewItem) {
       if (newItemName.trim().length < 2) return toast.error("Descreva o item novo.");
+      if (checkDuplicates(newItemName)) return;
       if (!itemLink.trim()) return toast.error("Informe o link de referência do item novo.");
+
     } else if (!item) {
       return toast.error("Selecione um item cadastrado: Insumos de Fabricação, Insumos de Instalação, Material de Almoxarifado ou Máquinas e Ferramentas.");
     }
@@ -738,9 +880,34 @@ function NewOrder({ userId }: { userId: string }) {
               {isNewItem ? (
                 <div className="space-y-2 pt-1">
                   <Label htmlFor="new_item_name">Descrição do item</Label>
-                  <Input id="new_item_name" value={newItemName} onChange={(e) => setNewItemName(e.target.value)} placeholder="Descreva o item que precisa ser comprado" />
+                  <Input
+                    id="new_item_name"
+                    value={newItemName}
+                    onChange={(e) => setNewItemName(e.target.value)}
+                    onBlur={(e) => checkDuplicates(e.target.value)}
+                    placeholder="Descreva o item que precisa ser comprado"
+                  />
+                  <DuplicateItemDialog
+                    open={dupOpen}
+                    onOpenChange={setDupOpen}
+                    text={newItemName}
+                    candidates={dupCandidates}
+                    onConfirm={(i) => {
+                      setIsNewItem(false);
+                      setNewItemName("");
+                      setItem(i);
+                      if (i.link) setItemLink(i.link);
+                      setDupOpen(false);
+                      toast.success("Item cadastrado selecionado.");
+                    }}
+                    onReject={() => {
+                      setDismissedText(newItemName);
+                      setDupOpen(false);
+                    }}
+                  />
                 </div>
               ) : (
+
                 <p className="text-xs text-muted-foreground">
                   Somente itens cadastrados em Insumos de Fabricação, Insumos de Instalação, Material de Almoxarifado ou Máquinas e Ferramentas. Ao receber, entra automaticamente no estoque de origem.
                 </p>
