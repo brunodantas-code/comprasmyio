@@ -1,7 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export type AppRole = "admin" | "comprador" | "solicitante" | "fabrica";
+export type AppRole =
+  | "admin"
+  | "comprador"
+  | "solicitante"
+  | "fabrica"
+  | "estoquista"
+  | "coo"
+  | "ceo"
+  | "cfo"
+  | "cto";
+
+export const ADMIN_ROLES: AppRole[] = ["admin", "coo", "ceo", "cfo", "cto"];
 
 export function useCurrentUser() {
   return useQuery({
@@ -22,10 +33,11 @@ export function useCurrentUser() {
         email: user.email ?? "",
         full_name: profile?.full_name ?? "",
         roles,
-        isAdmin: roles.includes("admin"),
+        isAdmin: roles.some((r) => ADMIN_ROLES.includes(r)),
         isComprador: roles.includes("comprador"),
         isSolicitante: roles.includes("solicitante"),
         isFabrica: roles.includes("fabrica"),
+        isEstoquista: roles.includes("estoquista"),
       };
     },
   });

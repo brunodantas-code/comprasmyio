@@ -310,8 +310,14 @@ function Dashboard() {
     return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Carregando...</div>;
   }
 
-  const fabricaOnly = me.isFabrica && !me.isAdmin && !me.isComprador;
-  const defaultTab = me.isComprador ? "queue" : me.isAdmin ? "queue" : "pedidos";
+  const isAdmin = me.isAdmin;
+  const fabricaOnly = me.isFabrica && !isAdmin;
+  const estoquistaOnly = me.isEstoquista && !isAdmin && !me.isFabrica;
+  const canSeeStock = isAdmin || me.isFabrica || me.isEstoquista;
+  const canSeeQueue = me.isComprador || isAdmin;
+  const canImport = me.isComprador || isAdmin;
+  const defaultTab = canSeeQueue ? "queue" : "pedidos";
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -340,14 +346,14 @@ function Dashboard() {
         <Tabs defaultValue={defaultTab}>
           <TabsList className="mb-6">
             <TabsTrigger value="pedidos"><ClipboardList className="mr-2 h-4 w-4" />Solicitações de Compras</TabsTrigger>
-            {(me.isComprador || me.isAdmin) && (
+            {canSeeQueue && (
               <TabsTrigger value="queue"><ShoppingCart className="mr-2 h-4 w-4" />Fila de compras</TabsTrigger>
             )}
-            <TabsTrigger value="stock"><Boxes className="mr-2 h-4 w-4" />Armazém</TabsTrigger>
-            {me.isAdmin && <TabsTrigger value="projects"><FolderKanban className="mr-2 h-4 w-4" />Projetos e clientes</TabsTrigger>}
+            {canSeeStock && <TabsTrigger value="stock"><Boxes className="mr-2 h-4 w-4" />Armazém</TabsTrigger>}
+            {isAdmin && <TabsTrigger value="projects"><FolderKanban className="mr-2 h-4 w-4" />Projetos e clientes</TabsTrigger>}
             
-            {(me.isAdmin || fabricaOnly) && <TabsTrigger value="myio"><Factory className="mr-2 h-4 w-4" />Ordem de Expedição</TabsTrigger>}
-            {me.isAdmin && <TabsTrigger value="admin"><Users className="mr-2 h-4 w-4" />Usuários e logs</TabsTrigger>}
+            {isAdmin && <TabsTrigger value="myio"><Factory className="mr-2 h-4 w-4" />Ordem de Expedição</TabsTrigger>}
+            {isAdmin && <TabsTrigger value="admin"><Users className="mr-2 h-4 w-4" />Usuários e logs</TabsTrigger>}
           </TabsList>
 
           <TabsContent value="pedidos">
@@ -355,16 +361,24 @@ function Dashboard() {
               <TabsList className="mb-4">
                 <TabsTrigger value="mine"><ClipboardList className="mr-2 h-4 w-4" />Minhas compras</TabsTrigger>
                 <TabsTrigger value="new"><Plus className="mr-2 h-4 w-4" />Nova Solicitação de compra</TabsTrigger>
-                <TabsTrigger value="import"><Plane className="mr-2 h-4 w-4" />Importação</TabsTrigger>
+                {canImport && <TabsTrigger value="import"><Plane className="mr-2 h-4 w-4" />Importação</TabsTrigger>}
               </TabsList>
               <TabsContent value="mine"><MyOrders userId={me.id} /></TabsContent>
               <TabsContent value="new"><NewOrder userId={me.id} /></TabsContent>
-              <TabsContent value="import"><ImportOrders userId={me.id} /></TabsContent>
+              {canImport && <TabsContent value="import"><ImportOrders userId={me.id} /></TabsContent>}
             </Tabs>
           </TabsContent>
-          {(me.isComprador || me.isAdmin) && <TabsContent value="queue"><BuyerQueue /></TabsContent>}
-          <TabsContent value="stock"><StockTab userId={me.id} canDelete={me.isAdmin} onlyLocation={fabricaOnly ? "fabrica" : undefined} /></TabsContent>
-          {me.isAdmin && (
+          {canSeeQueue && <TabsContent value="queue"><BuyerQueue /></TabsContent>}
+          {canSeeStock && (
+            <TabsContent value="stock">
+              <StockTab
+                userId={me.id}
+                canDelete={isAdmin}
+                onlyLocation={fabricaOnly ? "fabrica" : estoquistaOnly ? "almoxarifado" : undefined}
+              />
+            </TabsContent>
+          )}
+          {isAdmin && (
             <TabsContent value="projects">
               <Tabs defaultValue="projetos">
                 <TabsList className="mb-4">
@@ -377,10 +391,10 @@ function Dashboard() {
             </TabsContent>
           )}
           
-            {(me.isAdmin || fabricaOnly) && (
-              <TabsContent value="myio"><MyioOrdersTab userId={me.id} canManage={me.isAdmin} /></TabsContent>
+            {isAdmin && (
+              <TabsContent value="myio"><MyioOrdersTab userId={me.id} canManage={isAdmin} /></TabsContent>
             )}
-          {me.isAdmin && (
+          {isAdmin && (
             <TabsContent value="admin">
               <Tabs defaultValue="usuarios">
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
@@ -1809,7 +1823,17 @@ function UsersAdmin() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const allRoles: AppRole[] = ["admin", "comprador", "solicitante", "fabrica"];
+  const allRoles: AppRole[] = [
+    "admin",
+    "comprador",
+    "fabrica",
+    "estoquista",
+    "solicitante",
+    "coo",
+    "ceo",
+    "cfo",
+    "cto",
+  ];
 
   return (
     <Card>
