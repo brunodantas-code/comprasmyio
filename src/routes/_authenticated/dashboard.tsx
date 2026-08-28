@@ -556,6 +556,7 @@ function NewOrder({ userId }: { userId: string }) {
   const { data: projects, isLoading } = useProjects();
   const qc = useQueryClient();
   const [projectId, setProjectId] = useState("");
+  const [forStock, setForStock] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [deadlineType, setDeadlineType] = useState<Order["deadline_type"]>("esta_semana");
   const [deadlineDate, setDeadlineDate] = useState("");
@@ -565,7 +566,8 @@ function NewOrder({ userId }: { userId: string }) {
   const submit = useMutation({
     mutationFn: async (values: z.infer<typeof newOrderSchema>) => {
       const { data, error } = await supabase.from("purchase_orders").insert({
-        project_id: values.project_id,
+        project_id: forStock ? null : (values.project_id ?? null),
+        for_stock: forStock,
         item_name: values.item_name,
         item_link: values.item_link ?? null,
         material_id: item?.material_id ?? null,
