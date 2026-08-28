@@ -429,6 +429,63 @@ export function ReleaseAssembledDialog({ userId }: { userId: string }) {
       if (!people.length) throw new Error("Selecione ao menos um responsável pela montagem");
       if (!file) throw new Error("Anexe a foto dos produtos montados");
 
+      // Bloqueia a liberação quando não há componentes suficientes em estoque
+      {
+        const productIds = items.map((i) => i.material_id);
+        const { data: bomsCheck, error: bomCheckErr } = await supabase
+          .from("product_boms")
+          .select("product_material_id, component_material_id, quantity")
+          .in("product_material_id", productIds);
+        if (bomCheckErr) throw bomCheckErr;
+
+        if ((bomsCheck ?? []).length) {
+          const { data: lossCheck } = await supabase
+            .from("materials")
+            .select("id, loss_percent")
+            .in("id", productIds);
+          const lossPct = (id: string) => Number(lossCheck?.find((l) => l.id === id)?.loss_percent ?? 0);
+
+          const needed = new Map<string, number>();
+          for (const b of bomsCheck ?? []) {
+            const produced = items.find((i) => i.material_id === b.product_material_id)?.quantity ?? 0;
+            const total = Number(b.quantity) * produced * (1 + lossPct(b.product_material_id) / 100);
+            if (total > 0) needed.set(b.component_material_id, (needed.get(b.component_material_id) ?? 0) + total);
+          }
+
+          const componentIds = [...needed.keys()];
+          if (componentIds.length) {
+            const [{ data: movs, error: movErr }, { data: names }] = await Promise.all([
+              supabase.from("stock_movements").select("material_id, quantity, type").in("material_id", componentIds),
+              supabase.from("materials").select("id, name").in("id", componentIds),
+            ]);
+            if (movErr) throw movErr;
+
+            const balance = new Map<string, number>();
+            for (const m of movs ?? []) {
+              const q = Number(m.quantity) * (m.type === "saida" ? -1 : 1);
+              balance.set(m.material_id, (balance.get(m.material_id) ?? 0) + q);
+            }
+
+            const missing = componentIds
+              .map((id) => ({
+                name: names?.find((n) => n.id === id)?.name ?? "Componente",
+                need: Math.round((needed.get(id) ?? 0) * 1000) / 1000,
+                have: Math.round((balance.get(id) ?? 0) * 1000) / 1000,
+              }))
+              .filter((c) => c.have < c.need);
+
+            if (missing.length) {
+              throw new Error(
+                `Estoque insuficiente para liberar esta quantidade: ${missing
+                  .map((c) => `${c.name} (necessário ${c.need}, disponível ${c.have})`)
+                  .join("; ")}`,
+              );
+            }
+          }
+        }
+      }
+
+
       const ext = file.name.split(".").pop() ?? "jpg";
       const path = `${crypto.randomUUID()}.${ext}`;
       const { error: upErr } = await supabase.storage.from(BUCKET).upload(path, file);
