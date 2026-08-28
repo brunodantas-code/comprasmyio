@@ -688,10 +688,27 @@ function NewOrder({ userId }: { userId: string }) {
             </div>
             <div className="space-y-2">
               <Label>Item</Label>
-              <PurchasableItemPicker value={item} onPick={(i) => { setItem(i); if (i.link) setItemLink(i.link); }} />
-              <p className="text-xs text-muted-foreground">
-                Somente itens cadastrados no Estoque — Fábrica, Insumos de Instalação ou Almoxarifado. Ao receber, entra automaticamente no estoque de origem.
-              </p>
+              <PurchasableItemPicker value={isNewItem ? null : item} onPick={(i) => { setItem(i); if (i.link) setItemLink(i.link); }} disabled={isNewItem} />
+              <div className="flex items-center gap-6 pt-1">
+                <label className="flex cursor-pointer items-center gap-2 text-sm">
+                  <Checkbox checked={!isNewItem} onCheckedChange={() => { setIsNewItem(false); setNewItemName(""); }} />
+                  Cadastrado
+                </label>
+                <label className="flex cursor-pointer items-center gap-2 text-sm">
+                  <Checkbox checked={isNewItem} onCheckedChange={() => { setIsNewItem(true); setItem(null); setItemLink(""); }} />
+                  Novo
+                </label>
+              </div>
+              {isNewItem ? (
+                <div className="space-y-2 pt-1">
+                  <Label htmlFor="new_item_name">Descrição do item</Label>
+                  <Input id="new_item_name" value={newItemName} onChange={(e) => setNewItemName(e.target.value)} placeholder="Descreva o item que precisa ser comprado" />
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  Somente itens cadastrados no Estoque — Fábrica, Insumos de Instalação ou Almoxarifado. Ao receber, entra automaticamente no estoque de origem.
+                </p>
+              )}
             </div>
             <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
               <div className="space-y-2">
@@ -699,13 +716,24 @@ function NewOrder({ userId }: { userId: string }) {
                 <Input id="quantity" name="quantity" type="number" min={1} defaultValue={1} required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="recipient">Destinatário</Label>
-                <Input id="recipient" name="recipient" placeholder="Nome de quem recebe" required />
+                <Label>Destinatário</Label>
+                <Select value={recipient} onValueChange={setRecipient}>
+                  <SelectTrigger><SelectValue placeholder="Selecione o usuário" /></SelectTrigger>
+                  <SelectContent>
+                    {(profiles ?? []).map((p) => (
+                      <SelectItem key={p.id} value={p.full_name || p.email || p.id}>
+                        {p.full_name || p.email || p.id}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="item_link">Link de Referência <span className="text-muted-foreground">(opcional)</span></Label>
-              <Input id="item_link" type="url" placeholder="https://..." value={itemLink} onChange={(e) => setItemLink(e.target.value)} />
+              <Label htmlFor="item_link">
+                Link de Referência {isNewItem ? null : <span className="text-muted-foreground">(opcional)</span>}
+              </Label>
+              <Input id="item_link" type="url" placeholder="https://..." value={itemLink} onChange={(e) => setItemLink(e.target.value)} required={isNewItem} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="delivery_point">Ponto de entrega</Label>
