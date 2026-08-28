@@ -1133,19 +1133,30 @@ function StockTableCard({
                 const meta = metaMap?.[r.material_id];
                 return (
                 <TableRow key={r.material_id}>
-                  <TableCell className="font-medium">
-                    <div className="flex items-center gap-2">
+                  <TableCell className="max-w-[50%] font-medium align-top">
+                    <div className="flex flex-col gap-1">
                       {detail ? (
-                        <>
-                          <MaterialDetailDialog
-                            materialId={r.material_id}
-                            name={r.name}
-                            trigger={
-                              <button type="button" className="text-left hover:underline">
-                                {meta?.description?.trim() || r.name}
-                              </button>
-                            }
-                          />
+                        <MaterialDetailDialog
+                          materialId={r.material_id}
+                          name={r.name}
+                          trigger={
+                            <button type="button" className="text-left hover:underline break-words whitespace-normal">
+                              {meta?.description?.trim() || r.name}
+                            </button>
+                          }
+                        />
+                      ) : (
+                        <StockQrDialog
+                          stockName={r.name}
+                          trigger={
+                            <button type="button" className="text-left hover:underline break-words whitespace-normal">
+                              {meta?.description?.trim() || r.name}
+                            </button>
+                          }
+                        />
+                      )}
+                      <div className="flex items-center gap-2">
+                        {detail && (
                           <StockQrDialog
                             stockName={r.name}
                             trigger={
@@ -1158,23 +1169,13 @@ function StockTableCard({
                               </button>
                             }
                           />
-                        </>
-                      ) : (
-                        <StockQrDialog
-                          stockName={r.name}
-                          trigger={
-                            <button type="button" className="text-left hover:underline">
-                              {meta?.description?.trim() || r.name}
-                            </button>
-                          }
-                        />
-                      )}
-
-                      {r.link && (
-                        <a href={r.link} target="_blank" rel="noreferrer" className="text-primary hover:underline">
-                          <ExternalLink className="h-3 w-3" />
-                        </a>
-                      )}
+                        )}
+                        {r.link && (
+                          <a href={r.link} target="_blank" rel="noreferrer" className="text-primary hover:underline">
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
+                        )}
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">{meta?.myio_code || "—"}</TableCell>
