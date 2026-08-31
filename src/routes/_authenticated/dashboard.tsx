@@ -1857,7 +1857,6 @@ function ProjectsAdmin({ userId }: { userId: string }) {
       <Card>
         <CardHeader>
           <CardTitle>Novo projeto</CardTitle>
-          <CardDescription>Somente CEO, COO e CFO podem cadastrar projetos.</CardDescription>
         </CardHeader>
         <CardContent>
           {!canCreate ? (
@@ -1870,7 +1869,6 @@ function ProjectsAdmin({ userId }: { userId: string }) {
             <div className="space-y-2">
               <Label htmlFor="p-budget">Orçamento aprovado (R$)</Label>
               <Input id="p-budget" name="budget" type="number" min="0.01" step="0.01" required placeholder="0,00" />
-              <p className="text-xs text-muted-foreground">Valor aprovado pela Administração da Companhia.</p>
             </div>
             <div className="space-y-2">
               <Label>Cliente</Label>
