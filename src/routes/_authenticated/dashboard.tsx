@@ -1985,17 +1985,23 @@ function UsersAdmin() {
     <Card>
       <CardHeader>
         <CardTitle>Usuários</CardTitle>
-        <CardDescription>Clique nos papéis para atribuir ou remover.</CardDescription>
+        <CardDescription>Clique nos papéis para atribuir ou remover. Defina a alçada de solicitação de cada usuário.</CardDescription>
       </CardHeader>
       <CardContent>
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
           <Table>
-            <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>E-mail</TableHead><TableHead>Papéis</TableHead></TableRow></TableHeader>
+            <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>E-mail</TableHead><TableHead>Alçada (R$)</TableHead><TableHead>Papéis</TableHead></TableRow></TableHeader>
             <TableBody>
               {(data ?? []).map((u) => (
                 <TableRow key={u.id}>
                   <TableCell className="font-medium">{u.full_name || "—"}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">{u.email}</TableCell>
+                  <TableCell>
+                    <ApprovalLimitInput
+                      value={Number((u as unknown as { approval_limit?: number }).approval_limit ?? 0)}
+                      onSave={(limit) => setLimit.mutate({ userId: u.id, limit })}
+                    />
+                  </TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-2">
                       {allRoles.map((r) => {
