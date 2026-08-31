@@ -14,6 +14,89 @@ export type Database = {
   }
   public: {
     Tables: {
+      approval_rules: {
+        Row: {
+          active: boolean
+          approver_id: string | null
+          category: string | null
+          created_at: string
+          id: string
+          name: string
+          position: number
+          step_type: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          approver_id?: string | null
+          category?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          position?: number
+          step_type?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          approver_id?: string | null
+          category?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          position?: number
+          step_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      approval_steps: {
+        Row: {
+          approver_id: string | null
+          comment: string | null
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          id: string
+          order_id: string
+          role_label: string
+          status: string
+          step_index: number
+        }
+        Insert: {
+          approver_id?: string | null
+          comment?: string | null
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          order_id: string
+          role_label: string
+          status?: string
+          step_index: number
+        }
+        Update: {
+          approver_id?: string | null
+          comment?: string | null
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          order_id?: string
+          role_label?: string
+          status?: string
+          step_index?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approval_steps_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assembly_release_issues: {
         Row: {
           created_at: string
@@ -1024,6 +1107,9 @@ export type Database = {
           email: string | null
           full_name: string
           id: string
+          manager_id: string | null
+          tier2_limit: number
+          tier3_limit: number
         }
         Insert: {
           approval_limit?: number
@@ -1031,6 +1117,9 @@ export type Database = {
           email?: string | null
           full_name?: string
           id: string
+          manager_id?: string | null
+          tier2_limit?: number
+          tier3_limit?: number
         }
         Update: {
           approval_limit?: number
@@ -1038,6 +1127,9 @@ export type Database = {
           email?: string | null
           full_name?: string
           id?: string
+          manager_id?: string | null
+          tier2_limit?: number
+          tier3_limit?: number
         }
         Relationships: []
       }
@@ -1814,6 +1906,10 @@ export type Database = {
     }
     Functions: {
       can_manage_limits: { Args: { _user_id: string }; Returns: boolean }
+      decide_approval_step: {
+        Args: { _comment?: string; _decision: string; _step_id: string }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
