@@ -1264,6 +1264,7 @@ function BuyerQueue() {
   });
 
   const baseFiltered = orders?.filter((o) =>
+    (o as unknown as { approval_status?: string }).approval_status !== "aguardando_aprovacao" &&
     statusSelected.includes(o.status) &&
     (projectFilter === "all" || o.project_id === projectFilter)
   ) ?? [];
