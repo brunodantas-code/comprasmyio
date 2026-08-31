@@ -1841,9 +1841,11 @@ function ProjectsAdmin({ userId }: { userId: string }) {
     const fd = new FormData(e.currentTarget);
     const name = String(fd.get("name") || "").trim();
     const description = String(fd.get("description") || "").trim();
+    const budget = Number(String(fd.get("budget") || "").replace(",", "."));
     if (name.length < 2) return toast.error("Nome muito curto");
+    if (!Number.isFinite(budget) || budget <= 0) return toast.error("Informe o orçamento aprovado do projeto.");
     create.mutate(
-      { name, description, client_id: clientId === "none" ? null : clientId },
+      { name, description, client_id: clientId === "none" ? null : clientId, budget },
       { onSuccess: () => { (e.target as HTMLFormElement).reset(); setClientId("none"); } },
     );
   }
