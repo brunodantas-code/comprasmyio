@@ -1040,6 +1040,7 @@ export type Database = {
       }
       projects: {
         Row: {
+          budget: number
           client_cnpj: string | null
           client_id: string | null
           client_name: string
@@ -1050,6 +1051,7 @@ export type Database = {
           name: string
         }
         Insert: {
+          budget?: number
           client_cnpj?: string | null
           client_id?: string | null
           client_name?: string
@@ -1060,6 +1062,7 @@ export type Database = {
           name: string
         }
         Update: {
+          budget?: number
           client_cnpj?: string | null
           client_id?: string | null
           client_name?: string

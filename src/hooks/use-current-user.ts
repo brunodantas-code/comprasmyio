@@ -14,6 +14,9 @@ export type AppRole =
 
 export const ADMIN_ROLES: AppRole[] = ["admin", "coo", "ceo", "cfo", "cto"];
 
+/** Somente CEO, COO e CFO (além do admin técnico) podem cadastrar projetos. */
+export const PROJECT_CREATOR_ROLES: AppRole[] = ["admin", "ceo", "coo", "cfo"];
+
 export function useCurrentUser() {
   return useQuery({
     queryKey: ["current-user"],
@@ -38,6 +41,7 @@ export function useCurrentUser() {
         isSolicitante: roles.includes("solicitante"),
         isFabrica: roles.includes("fabrica"),
         isEstoquista: roles.includes("estoquista"),
+        canCreateProjects: roles.some((r) => PROJECT_CREATOR_ROLES.includes(r)),
       };
     },
   });

@@ -1806,14 +1806,20 @@ function InternalDeleteOrderDialog({ order }: { order: Order }) {
   );
 }
 
+function formatBRL(v: number | null | undefined) {
+  return (Number(v) || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
 function ProjectsAdmin({ userId }: { userId: string }) {
   const qc = useQueryClient();
   const { data: projects, isLoading } = useProjects();
   const { data: clients } = useClients();
+  const { data: me } = useCurrentUser();
+  const canCreate = !!me?.canCreateProjects;
   const [clientId, setClientId] = useState<string>("none");
 
   const create = useMutation({
-    mutationFn: async (v: { name: string; description: string; client_id: string | null }) => {
+    mutationFn: async (v: { name: string; description: string; client_id: string | null; budget: number }) => {
       const { error } = await supabase.from("projects").insert({ ...v, created_by: userId });
       if (error) throw error;
     },
@@ -1835,9 +1841,11 @@ function ProjectsAdmin({ userId }: { userId: string }) {
     const fd = new FormData(e.currentTarget);
     const name = String(fd.get("name") || "").trim();
     const description = String(fd.get("description") || "").trim();
+    const budget = Number(String(fd.get("budget") || "").replace(",", "."));
     if (name.length < 2) return toast.error("Nome muito curto");
+    if (!Number.isFinite(budget) || budget <= 0) return toast.error("Informe o orçamento aprovado do projeto.");
     create.mutate(
-      { name, description, client_id: clientId === "none" ? null : clientId },
+      { name, description, client_id: clientId === "none" ? null : clientId, budget },
       { onSuccess: () => { (e.target as HTMLFormElement).reset(); setClientId("none"); } },
     );
   }
@@ -1847,10 +1855,23 @@ function ProjectsAdmin({ userId }: { userId: string }) {
   return (
     <div className="grid gap-6 [&>*]:min-w-0 lg:grid-cols-[1fr_1.5fr]">
       <Card>
-        <CardHeader><CardTitle>Novo projeto</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle>Novo projeto</CardTitle>
+          <CardDescription>Somente CEO, COO e CFO podem cadastrar projetos.</CardDescription>
+        </CardHeader>
         <CardContent>
+          {!canCreate ? (
+            <p className="text-sm text-muted-foreground">
+              Você não tem permissão para cadastrar projetos. Solicite ao CEO, COO ou CFO.
+            </p>
+          ) : (
           <form onSubmit={onCreate} className="space-y-4">
             <div className="space-y-2"><Label htmlFor="p-name">Nome do projeto</Label><Input id="p-name" name="name" required /></div>
+            <div className="space-y-2">
+              <Label htmlFor="p-budget">Orçamento aprovado (R$)</Label>
+              <Input id="p-budget" name="budget" type="number" min="0.01" step="0.01" required placeholder="0,00" />
+              <p className="text-xs text-muted-foreground">Valor aprovado pela Administração da Companhia.</p>
+            </div>
             <div className="space-y-2">
               <Label>Cliente</Label>
               <Select value={clientId} onValueChange={setClientId}>
@@ -1864,6 +1885,7 @@ function ProjectsAdmin({ userId }: { userId: string }) {
             <div className="space-y-2"><Label htmlFor="p-desc">Descrição</Label><Textarea id="p-desc" name="description" /></div>
             <Button type="submit" disabled={create.isPending}>Criar</Button>
           </form>
+          )}
         </CardContent>
       </Card>
       <Card>
@@ -1872,11 +1894,12 @@ function ProjectsAdmin({ userId }: { userId: string }) {
           {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
             !projects?.length ? <p className="text-sm text-muted-foreground">Sem projetos.</p> :
             <Table>
-              <TableHeader><TableRow><TableHead>Nome do projeto</TableHead><TableHead>Cliente</TableHead><TableHead>CNPJ</TableHead><TableHead>Descrição</TableHead><TableHead /></TableRow></TableHeader>
+              <TableHeader><TableRow><TableHead>Nome do projeto</TableHead><TableHead>Orçamento</TableHead><TableHead>Cliente</TableHead><TableHead>CNPJ</TableHead><TableHead>Descrição</TableHead><TableHead /></TableRow></TableHeader>
               <TableBody>
                 {projects.map((p) => (
                   <TableRow key={p.id}>
                     <TableCell className="font-medium">{p.name}</TableCell>
+                    <TableCell className="text-sm">{formatBRL((p as { budget?: number }).budget)}</TableCell>
                     <TableCell className="text-sm">{clientOf(p)?.name || p.client_name || "—"}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">{clientOf(p)?.cnpj || p.client_cnpj || "—"}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">{p.description || "—"}</TableCell>
