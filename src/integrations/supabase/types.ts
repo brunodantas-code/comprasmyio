@@ -50,6 +50,30 @@ export type Database = {
         }
         Relationships: []
       }
+      approval_settings: {
+        Row: {
+          created_at: string
+          dual_approval_enabled: boolean
+          dual_approval_threshold: number
+          id: boolean
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          dual_approval_enabled?: boolean
+          dual_approval_threshold?: number
+          id?: boolean
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          dual_approval_enabled?: boolean
+          dual_approval_threshold?: number
+          id?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       approval_steps: {
         Row: {
           approver_id: string | null
