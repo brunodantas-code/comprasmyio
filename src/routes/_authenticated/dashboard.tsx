@@ -848,6 +848,7 @@ function NewOrder({ userId }: { userId: string }) {
           terceiros_material_id: isNewItem ? null : (item?.terceiros_material_id ?? null),
           tool_asset_id: isNewItem ? null : (item?.tool_asset_id ?? null),
           quantity: buyQty,
+          estimated_value: values.estimated_value,
           recipient: values.recipient,
           requester_notes: values.requester_notes ?? null,
           delivery_point: values.delivery_point,
