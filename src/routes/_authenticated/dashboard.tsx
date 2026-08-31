@@ -1806,14 +1806,20 @@ function InternalDeleteOrderDialog({ order }: { order: Order }) {
   );
 }
 
+function formatBRL(v: number | null | undefined) {
+  return (Number(v) || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
 function ProjectsAdmin({ userId }: { userId: string }) {
   const qc = useQueryClient();
   const { data: projects, isLoading } = useProjects();
   const { data: clients } = useClients();
+  const { data: me } = useCurrentUser();
+  const canCreate = !!me?.canCreateProjects;
   const [clientId, setClientId] = useState<string>("none");
 
   const create = useMutation({
-    mutationFn: async (v: { name: string; description: string; client_id: string | null }) => {
+    mutationFn: async (v: { name: string; description: string; client_id: string | null; budget: number }) => {
       const { error } = await supabase.from("projects").insert({ ...v, created_by: userId });
       if (error) throw error;
     },
