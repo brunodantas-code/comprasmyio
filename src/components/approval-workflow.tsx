@@ -411,6 +411,80 @@ function FlowsOverview() {
   );
 }
 
+function DualApprovalSettings() {
+  const qc = useQueryClient();
+  const { data: cfg, isLoading } = useQuery({
+    queryKey: ["approval-settings"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("approval_settings")
+        .select("id, dual_approval_enabled, dual_approval_threshold")
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const [value, setValue] = useState<string>("");
+  const current = cfg?.dual_approval_threshold ?? 100000;
+
+  const save = useMutation({
+    mutationFn: async (patch: { dual_approval_enabled?: boolean; dual_approval_threshold?: number }) => {
+      const { error } = await supabase.from("approval_settings").update(patch).eq("id", true);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Configuração salva");
+      qc.invalidateQueries({ queryKey: ["approval-settings"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Dupla aprovação (CFO + CEO)</CardTitle>
+        <CardDescription>
+          Solicitações acima do valor definido exigem aprovação conjunta do CFO e do CEO, em qualquer ordem.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">Carregando...</p>
+        ) : (
+          <div className="flex flex-wrap items-end gap-4">
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={Boolean(cfg?.dual_approval_enabled)}
+                onCheckedChange={(v) => save.mutate({ dual_approval_enabled: v })}
+              />
+              <Label>Ativa</Label>
+            </div>
+            <div className="space-y-2">
+              <Label>Valor a partir de (R$)</Label>
+              <Input
+                type="number"
+                min={0}
+                step="0.01"
+                className="w-48"
+                value={value === "" ? String(current) : value}
+                onChange={(e) => setValue(e.target.value)}
+              />
+            </div>
+            <Button
+              onClick={() => save.mutate({ dual_approval_threshold: Number(value === "" ? current : value) || 0 })}
+              disabled={save.isPending}
+            >
+              Salvar
+            </Button>
+            <p className="text-xs text-muted-foreground">Atual: {BRL(Number(current))}</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 function RulesAdmin() {
   const qc = useQueryClient();
   const { data: profiles } = useProfiles();
