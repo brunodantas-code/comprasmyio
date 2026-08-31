@@ -2071,7 +2071,8 @@ function UsersAdmin() {
                     </div>
                   </TableCell>
                 </TableRow>
-              ))}
+                );
+              })}
             </TableBody>
           </Table>
         }
