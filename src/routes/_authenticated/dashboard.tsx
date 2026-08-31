@@ -1960,6 +1960,15 @@ function UsersAdmin() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const setLimit = useMutation({
+    mutationFn: async ({ userId, limit }: { userId: string; limit: number }) => {
+      const { error } = await supabase.from("profiles").update({ approval_limit: limit }).eq("id", userId);
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success("Alçada atualizada"); qc.invalidateQueries({ queryKey: ["admin-users"] }); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const allRoles: AppRole[] = [
     "admin",
     "comprador",
