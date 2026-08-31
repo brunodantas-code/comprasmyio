@@ -41,6 +41,7 @@ export function useCurrentUser() {
         isSolicitante: roles.includes("solicitante"),
         isFabrica: roles.includes("fabrica"),
         isEstoquista: roles.includes("estoquista"),
+        canCreateProjects: roles.some((r) => PROJECT_CREATOR_ROLES.includes(r)),
       };
     },
   });
