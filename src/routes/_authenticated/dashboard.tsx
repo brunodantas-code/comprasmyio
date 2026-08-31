@@ -1899,6 +1899,7 @@ function ProjectsAdmin({ userId }: { userId: string }) {
                 {projects.map((p) => (
                   <TableRow key={p.id}>
                     <TableCell className="font-medium">{p.name}</TableCell>
+                    <TableCell className="text-sm">{formatBRL((p as { budget?: number }).budget)}</TableCell>
                     <TableCell className="text-sm">{clientOf(p)?.name || p.client_name || "—"}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">{clientOf(p)?.cnpj || p.client_cnpj || "—"}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">{p.description || "—"}</TableCell>
