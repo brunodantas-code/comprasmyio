@@ -1015,6 +1015,10 @@ function NewOrder({ userId }: { userId: string }) {
                 <Input id="quantity" name="quantity" type="number" min={1} defaultValue={1} required />
               </div>
               <div className="space-y-2">
+                <Label htmlFor="estimated_value">Valor estimado (R$)</Label>
+                <Input id="estimated_value" name="estimated_value" type="number" min={0} step="0.01" defaultValue={0} required />
+              </div>
+              <div className="space-y-2">
                 <Label>Destinatário</Label>
                 <Select value={recipient} onValueChange={setRecipient}>
                   <SelectTrigger><SelectValue placeholder="Selecione o usuário" /></SelectTrigger>
