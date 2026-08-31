@@ -1894,7 +1894,7 @@ function ProjectsAdmin({ userId }: { userId: string }) {
           {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
             !projects?.length ? <p className="text-sm text-muted-foreground">Sem projetos.</p> :
             <Table>
-              <TableHeader><TableRow><TableHead>Nome do projeto</TableHead><TableHead>Cliente</TableHead><TableHead>CNPJ</TableHead><TableHead>Descrição</TableHead><TableHead /></TableRow></TableHeader>
+              <TableHeader><TableRow><TableHead>Nome do projeto</TableHead><TableHead>Orçamento</TableHead><TableHead>Cliente</TableHead><TableHead>CNPJ</TableHead><TableHead>Descrição</TableHead><TableHead /></TableRow></TableHeader>
               <TableBody>
                 {projects.map((p) => (
                   <TableRow key={p.id}>
