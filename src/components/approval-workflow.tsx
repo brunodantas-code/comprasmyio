@@ -111,7 +111,7 @@ function DecisionDialog({
       const { error } = await supabase.rpc("decide_approval_step", {
         _step_id: step.id,
         _decision: decision,
-        _comment: comment.trim() || null,
+        _comment: comment.trim() || undefined,
       });
       if (error) throw error;
     },

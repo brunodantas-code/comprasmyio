@@ -1984,7 +1984,7 @@ function UsersAdmin() {
   });
 
   const setProfileField = useMutation({
-    mutationFn: async ({ userId, patch }: { userId: string; patch: Record<string, unknown> }) => {
+    mutationFn: async ({ userId, patch }: { userId: string; patch: Partial<{ approval_limit: number; manager_id: string | null; tier2_limit: number; tier3_limit: number }> }) => {
       const { error } = await supabase.from("profiles").update(patch).eq("id", userId);
       if (error) throw error;
     },
