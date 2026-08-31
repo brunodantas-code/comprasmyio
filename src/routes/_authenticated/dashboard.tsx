@@ -400,11 +400,13 @@ function Dashboard() {
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
                   <TabsList>
                     <TabsTrigger value="usuarios"><Users className="mr-2 h-4 w-4" />Usuários</TabsTrigger>
+                    <TabsTrigger value="workflow"><CheckCircle2 className="mr-2 h-4 w-4" />Approval Workflow</TabsTrigger>
                     <TabsTrigger value="logs"><ScrollText className="mr-2 h-4 w-4" />Logs</TabsTrigger>
                   </TabsList>
                   <BackupButton />
                 </div>
                 <TabsContent value="usuarios"><UsersAdmin /></TabsContent>
+                <TabsContent value="workflow"><ApprovalWorkflow /></TabsContent>
                 <TabsContent value="logs"><LogsAdmin /></TabsContent>
               </Tabs>
             </TabsContent>
