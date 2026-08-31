@@ -21,7 +21,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { toast } from "sonner";
 import { LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Boxes, Factory, Building2, Plane } from "lucide-react";
-import { Trash2, Paperclip, X, Download, Loader2, DatabaseBackup } from "lucide-react";
+import { Trash2, Paperclip, X, Download, Loader2, DatabaseBackup, CheckCircle2 } from "lucide-react";
+import { ApprovalWorkflow } from "@/components/approval-workflow";
 import { z } from "zod";
 import { StockTab } from "@/components/stock-tab";
 import { MyioOrdersTab } from "@/components/myio-orders-tab";
@@ -400,11 +401,13 @@ function Dashboard() {
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
                   <TabsList>
                     <TabsTrigger value="usuarios"><Users className="mr-2 h-4 w-4" />Usuários</TabsTrigger>
+                    <TabsTrigger value="workflow"><CheckCircle2 className="mr-2 h-4 w-4" />Approval Workflow</TabsTrigger>
                     <TabsTrigger value="logs"><ScrollText className="mr-2 h-4 w-4" />Logs</TabsTrigger>
                   </TabsList>
                   <BackupButton />
                 </div>
                 <TabsContent value="usuarios"><UsersAdmin /></TabsContent>
+                <TabsContent value="workflow"><ApprovalWorkflow /></TabsContent>
                 <TabsContent value="logs"><LogsAdmin /></TabsContent>
               </Tabs>
             </TabsContent>
@@ -1264,7 +1267,7 @@ function BuyerQueue() {
   });
 
   const baseFiltered = orders?.filter((o) =>
-    (o as unknown as { approval_status?: string }).approval_status !== "aguardando_aprovacao" &&
+    ((o as unknown as { approval_status?: string }).approval_status ?? "aprovado") === "aprovado" &&
     statusSelected.includes(o.status) &&
     (projectFilter === "all" || o.project_id === projectFilter)
   ) ?? [];
@@ -1980,12 +1983,12 @@ function UsersAdmin() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const setLimit = useMutation({
-    mutationFn: async ({ userId, limit }: { userId: string; limit: number }) => {
-      const { error } = await supabase.from("profiles").update({ approval_limit: limit }).eq("id", userId);
+  const setProfileField = useMutation({
+    mutationFn: async ({ userId, patch }: { userId: string; patch: Partial<{ approval_limit: number; manager_id: string | null; tier2_limit: number; tier3_limit: number }> }) => {
+      const { error } = await supabase.from("profiles").update(patch).eq("id", userId);
       if (error) throw error;
     },
-    onSuccess: () => { toast.success("Alçada atualizada"); qc.invalidateQueries({ queryKey: ["admin-users"] }); },
+    onSuccess: () => { toast.success("Usuário atualizado"); qc.invalidateQueries({ queryKey: ["admin-users"] }); },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -2005,21 +2008,49 @@ function UsersAdmin() {
     <Card>
       <CardHeader>
         <CardTitle>Usuários</CardTitle>
-        <CardDescription>Clique nos papéis para atribuir ou remover. Defina a alçada de solicitação de cada usuário.</CardDescription>
+        <CardDescription>Clique nos papéis para atribuir ou remover. Defina o gestor direto e as faixas de alçada de cada usuário.</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="overflow-x-auto">
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
           <Table>
-            <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>E-mail</TableHead><TableHead>Alçada (R$)</TableHead><TableHead>Papéis</TableHead></TableRow></TableHeader>
+            <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>E-mail</TableHead><TableHead>Gestor direto</TableHead><TableHead>Aprovação automática até (R$)</TableHead><TableHead>Faixa 2 até (R$)</TableHead><TableHead>Faixa 3 até (R$)</TableHead><TableHead>Papéis</TableHead></TableRow></TableHeader>
             <TableBody>
-              {(data ?? []).map((u) => (
+              {(data ?? []).map((u) => {
+                const p = u as unknown as { approval_limit?: number; tier2_limit?: number; tier3_limit?: number; manager_id?: string | null };
+                return (
                 <TableRow key={u.id}>
                   <TableCell className="font-medium">{u.full_name || "—"}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">{u.email}</TableCell>
                   <TableCell>
+                    <Select
+                      value={p.manager_id ?? "none"}
+                      onValueChange={(v) => setProfileField.mutate({ userId: u.id, patch: { manager_id: v === "none" ? null : v } })}
+                    >
+                      <SelectTrigger className="h-8 w-44"><SelectValue placeholder="Sem gestor" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Sem gestor</SelectItem>
+                        {(data ?? []).filter((o) => o.id !== u.id).map((o) => (
+                          <SelectItem key={o.id} value={o.id}>{o.full_name || o.email}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
+                  <TableCell>
                     <ApprovalLimitInput
-                      value={Number((u as unknown as { approval_limit?: number }).approval_limit ?? 0)}
-                      onSave={(limit) => setLimit.mutate({ userId: u.id, limit })}
+                      value={Number(p.approval_limit ?? 0)}
+                      onSave={(limit) => setProfileField.mutate({ userId: u.id, patch: { approval_limit: limit } })}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <ApprovalLimitInput
+                      value={Number(p.tier2_limit ?? 50000)}
+                      onSave={(limit) => setProfileField.mutate({ userId: u.id, patch: { tier2_limit: limit } })}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <ApprovalLimitInput
+                      value={Number(p.tier3_limit ?? 250000)}
+                      onSave={(limit) => setProfileField.mutate({ userId: u.id, patch: { tier3_limit: limit } })}
                     />
                   </TableCell>
                   <TableCell>
@@ -2040,7 +2071,8 @@ function UsersAdmin() {
                     </div>
                   </TableCell>
                 </TableRow>
-              ))}
+                );
+              })}
             </TableBody>
           </Table>
         }
