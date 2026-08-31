@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.build_approval_chain() FROM public, anon, authenticated;
