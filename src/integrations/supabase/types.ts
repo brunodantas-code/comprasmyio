@@ -1019,18 +1019,21 @@ export type Database = {
       }
       profiles: {
         Row: {
+          approval_limit: number
           created_at: string
           email: string | null
           full_name: string
           id: string
         }
         Insert: {
+          approval_limit?: number
           created_at?: string
           email?: string | null
           full_name?: string
           id: string
         }
         Update: {
+          approval_limit?: number
           created_at?: string
           email?: string | null
           full_name?: string
@@ -1132,6 +1135,9 @@ export type Database = {
       }
       purchase_orders: {
         Row: {
+          approval_status: string
+          approved_at: string | null
+          approved_by: string | null
           attachments: Json
           buyer_notes: string | null
           created_at: string
@@ -1139,6 +1145,7 @@ export type Database = {
           deadline_type: Database["public"]["Enums"]["deadline_type"]
           delivery_forecast: string | null
           delivery_point: string
+          estimated_value: number
           for_stock: boolean
           id: string
           item_link: string | null
@@ -1156,6 +1163,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
           attachments?: Json
           buyer_notes?: string | null
           created_at?: string
@@ -1163,6 +1173,7 @@ export type Database = {
           deadline_type?: Database["public"]["Enums"]["deadline_type"]
           delivery_forecast?: string | null
           delivery_point: string
+          estimated_value?: number
           for_stock?: boolean
           id?: string
           item_link?: string | null
@@ -1180,6 +1191,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
           attachments?: Json
           buyer_notes?: string | null
           created_at?: string
@@ -1187,6 +1201,7 @@ export type Database = {
           deadline_type?: Database["public"]["Enums"]["deadline_type"]
           delivery_forecast?: string | null
           delivery_point?: string
+          estimated_value?: number
           for_stock?: boolean
           id?: string
           item_link?: string | null
@@ -1798,6 +1813,7 @@ export type Database = {
       }
     }
     Functions: {
+      can_manage_limits: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

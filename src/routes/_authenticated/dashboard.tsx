@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { MyioLogo } from "@/components/myio-logo";
 import { supabase } from "@/integrations/supabase/client";
@@ -731,6 +731,7 @@ const newOrderSchema = z.object({
   item_name: z.string().trim().min(2).max(200),
   item_link: z.string().trim().max(2000).url("Link inválido").optional().or(z.literal("").transform(() => undefined)),
   quantity: z.coerce.number().int().positive("Quantidade inválida").max(100000),
+  estimated_value: z.coerce.number().min(0, "Valor inválido").max(1000000000),
   recipient: z.string().trim().min(2, "Informe o destinatário").max(200),
   requester_notes: z.string().trim().max(2000).optional().or(z.literal("").transform(() => undefined)),
   delivery_point: z.string().trim().min(3).max(300),
@@ -847,6 +848,7 @@ function NewOrder({ userId }: { userId: string }) {
           terceiros_material_id: isNewItem ? null : (item?.terceiros_material_id ?? null),
           tool_asset_id: isNewItem ? null : (item?.tool_asset_id ?? null),
           quantity: buyQty,
+          estimated_value: values.estimated_value,
           recipient: values.recipient,
           requester_notes: values.requester_notes ?? null,
           delivery_point: values.delivery_point,
@@ -892,6 +894,7 @@ function NewOrder({ userId }: { userId: string }) {
       item_name: isNewItem ? newItemName : item!.name,
       item_link: itemLink || undefined,
       quantity: fd.get("quantity"),
+      estimated_value: fd.get("estimated_value") ?? 0,
       recipient: recipient,
       requester_notes: fd.get("requester_notes") || undefined,
       delivery_point: fd.get("delivery_point"),
@@ -1010,6 +1013,10 @@ function NewOrder({ userId }: { userId: string }) {
               <div className="space-y-2">
                 <Label htmlFor="quantity">Quantidade</Label>
                 <Input id="quantity" name="quantity" type="number" min={1} defaultValue={1} required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="estimated_value">Valor estimado (R$)</Label>
+                <Input id="estimated_value" name="estimated_value" type="number" min={0} step="0.01" defaultValue={0} required />
               </div>
               <div className="space-y-2">
                 <Label>Destinatário</Label>
@@ -1257,6 +1264,7 @@ function BuyerQueue() {
   });
 
   const baseFiltered = orders?.filter((o) =>
+    (o as unknown as { approval_status?: string }).approval_status !== "aguardando_aprovacao" &&
     statusSelected.includes(o.status) &&
     (projectFilter === "all" || o.project_id === projectFilter)
   ) ?? [];
@@ -1917,6 +1925,26 @@ function ProjectsAdmin({ userId }: { userId: string }) {
 
 /* ---------- Users admin ---------- */
 
+function ApprovalLimitInput({ value, onSave }: { value: number; onSave: (v: number) => void }) {
+  const [draft, setDraft] = useState(String(value ?? 0));
+  useEffect(() => { setDraft(String(value ?? 0)); }, [value]);
+  return (
+    <Input
+      className="h-8 w-32"
+      type="number"
+      min={0}
+      step="0.01"
+      value={draft}
+      onChange={(e) => setDraft(e.target.value)}
+      onBlur={() => {
+        const n = Number(draft);
+        if (!Number.isFinite(n) || n < 0) { setDraft(String(value ?? 0)); return; }
+        if (n !== Number(value ?? 0)) onSave(n);
+      }}
+    />
+  );
+}
+
 function UsersAdmin() {
   const qc = useQueryClient();
   const { data, isLoading } = useQuery({
@@ -1952,6 +1980,15 @@ function UsersAdmin() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const setLimit = useMutation({
+    mutationFn: async ({ userId, limit }: { userId: string; limit: number }) => {
+      const { error } = await supabase.from("profiles").update({ approval_limit: limit }).eq("id", userId);
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success("Alçada atualizada"); qc.invalidateQueries({ queryKey: ["admin-users"] }); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const allRoles: AppRole[] = [
     "admin",
     "comprador",
@@ -1968,17 +2005,23 @@ function UsersAdmin() {
     <Card>
       <CardHeader>
         <CardTitle>Usuários</CardTitle>
-        <CardDescription>Clique nos papéis para atribuir ou remover.</CardDescription>
+        <CardDescription>Clique nos papéis para atribuir ou remover. Defina a alçada de solicitação de cada usuário.</CardDescription>
       </CardHeader>
       <CardContent>
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
           <Table>
-            <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>E-mail</TableHead><TableHead>Papéis</TableHead></TableRow></TableHeader>
+            <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>E-mail</TableHead><TableHead>Alçada (R$)</TableHead><TableHead>Papéis</TableHead></TableRow></TableHeader>
             <TableBody>
               {(data ?? []).map((u) => (
                 <TableRow key={u.id}>
                   <TableCell className="font-medium">{u.full_name || "—"}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">{u.email}</TableCell>
+                  <TableCell>
+                    <ApprovalLimitInput
+                      value={Number((u as unknown as { approval_limit?: number }).approval_limit ?? 0)}
+                      onSave={(limit) => setLimit.mutate({ userId: u.id, limit })}
+                    />
+                  </TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-2">
                       {allRoles.map((r) => {
