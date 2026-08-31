@@ -1925,6 +1925,26 @@ function ProjectsAdmin({ userId }: { userId: string }) {
 
 /* ---------- Users admin ---------- */
 
+function ApprovalLimitInput({ value, onSave }: { value: number; onSave: (v: number) => void }) {
+  const [draft, setDraft] = useState(String(value ?? 0));
+  useEffect(() => { setDraft(String(value ?? 0)); }, [value]);
+  return (
+    <Input
+      className="h-8 w-32"
+      type="number"
+      min={0}
+      step="0.01"
+      value={draft}
+      onChange={(e) => setDraft(e.target.value)}
+      onBlur={() => {
+        const n = Number(draft);
+        if (!Number.isFinite(n) || n < 0) { setDraft(String(value ?? 0)); return; }
+        if (n !== Number(value ?? 0)) onSave(n);
+      }}
+    />
+  );
+}
+
 function UsersAdmin() {
   const qc = useQueryClient();
   const { data, isLoading } = useQuery({
