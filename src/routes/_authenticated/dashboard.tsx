@@ -1855,10 +1855,23 @@ function ProjectsAdmin({ userId }: { userId: string }) {
   return (
     <div className="grid gap-6 [&>*]:min-w-0 lg:grid-cols-[1fr_1.5fr]">
       <Card>
-        <CardHeader><CardTitle>Novo projeto</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle>Novo projeto</CardTitle>
+          <CardDescription>Somente CEO, COO e CFO podem cadastrar projetos.</CardDescription>
+        </CardHeader>
         <CardContent>
+          {!canCreate ? (
+            <p className="text-sm text-muted-foreground">
+              Você não tem permissão para cadastrar projetos. Solicite ao CEO, COO ou CFO.
+            </p>
+          ) : (
           <form onSubmit={onCreate} className="space-y-4">
             <div className="space-y-2"><Label htmlFor="p-name">Nome do projeto</Label><Input id="p-name" name="name" required /></div>
+            <div className="space-y-2">
+              <Label htmlFor="p-budget">Orçamento aprovado (R$)</Label>
+              <Input id="p-budget" name="budget" type="number" min="0.01" step="0.01" required placeholder="0,00" />
+              <p className="text-xs text-muted-foreground">Valor aprovado pela Administração da Companhia.</p>
+            </div>
             <div className="space-y-2">
               <Label>Cliente</Label>
               <Select value={clientId} onValueChange={setClientId}>
@@ -1872,6 +1885,7 @@ function ProjectsAdmin({ userId }: { userId: string }) {
             <div className="space-y-2"><Label htmlFor="p-desc">Descrição</Label><Textarea id="p-desc" name="description" /></div>
             <Button type="submit" disabled={create.isPending}>Criar</Button>
           </form>
+          )}
         </CardContent>
       </Card>
       <Card>
