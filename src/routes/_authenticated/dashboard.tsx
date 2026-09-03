@@ -904,9 +904,10 @@ function NewOrder({ userId }: { userId: string }) {
           for_stock: forStock,
           item_name: values.item_name,
           item_link: values.item_link ?? null,
-          material_id: isNewItem ? null : (item?.material_id ?? null),
-          terceiros_material_id: isNewItem ? null : (item?.terceiros_material_id ?? null),
-          tool_asset_id: isNewItem ? null : (item?.tool_asset_id ?? null),
+          material_id: ids.material_id,
+          terceiros_material_id: ids.terceiros_material_id,
+          tool_asset_id: ids.tool_asset_id,
+
           quantity: buyQty,
           estimated_value: values.estimated_value,
           recipient: values.recipient,
