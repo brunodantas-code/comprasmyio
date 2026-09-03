@@ -1052,6 +1052,21 @@ function NewOrder({ userId }: { userId: string }) {
                     onBlur={(e) => checkDuplicates(e.target.value)}
                     placeholder="Descreva o item que precisa ser comprado"
                   />
+                  <div className="space-y-2 pt-1">
+                    <Label>Cadastrar em qual estoque?</Label>
+                    <Select value={newItemDest} onValueChange={(v) => setNewItemDest(v as NewItemDest)}>
+                      <SelectTrigger><SelectValue placeholder="Selecione o estoque de destino" /></SelectTrigger>
+                      <SelectContent>
+                        {(Object.keys(NEW_ITEM_DEST_LABELS) as NewItemDest[]).map((d) => (
+                          <SelectItem key={d} value={d}>{NEW_ITEM_DEST_LABELS[d]}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      O item será cadastrado nesse banco e a entrada acontece automaticamente ao receber.
+                    </p>
+                  </div>
+
                   <DuplicateItemDialog
                     open={dupOpen}
                     onOpenChange={setDupOpen}
