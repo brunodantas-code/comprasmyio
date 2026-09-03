@@ -859,7 +859,9 @@ function NewOrder({ userId }: { userId: string }) {
     setItemLink("");
     setIsNewItem(false);
     setNewItemName("");
+    setNewItemDest("");
     setRecipient("");
+
   };
 
   const submit = useMutation({
