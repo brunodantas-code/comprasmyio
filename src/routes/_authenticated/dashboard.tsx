@@ -932,6 +932,11 @@ function NewOrder({ userId }: { userId: string }) {
       else toast.success("Pedido criado!");
       qc.invalidateQueries({ queryKey: ["orders"] });
       qc.invalidateQueries({ queryKey: ["myio-orders"] });
+      qc.invalidateQueries({ queryKey: ["purchasable-items"] });
+      qc.invalidateQueries({ queryKey: ["stock"] });
+      qc.invalidateQueries({ queryKey: ["stock-meta"] });
+      qc.invalidateQueries({ queryKey: ["terceiros-stock"] });
+      qc.invalidateQueries({ queryKey: ["tool-stock"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -940,8 +945,11 @@ function NewOrder({ userId }: { userId: string }) {
     e.preventDefault();
     if (isNewItem) {
       if (newItemName.trim().length < 2) return toast.error("Descreva o item novo.");
+      if (!newItemDest) return toast.error("Selecione para qual estoque esse item novo será cadastrado.");
       if (checkDuplicates(newItemName)) return;
       if (!itemLink.trim()) return toast.error("Informe o link de referência do item novo.");
+
+
 
     } else if (!item) {
       return toast.error("Selecione um item cadastrado: Insumos de Fabricação, Insumos de Instalação, Material de Almoxarifado ou Máquinas e Ferramentas.");
