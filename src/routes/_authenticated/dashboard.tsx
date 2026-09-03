@@ -458,6 +458,49 @@ function useProfilesList() {
 
 /* ---------- Materials library ---------- */
 
+type NewItemDest = "fabrica" | "almoxarifado" | "terceiros" | "ferramentas";
+
+const NEW_ITEM_DEST_LABELS: Record<NewItemDest, string> = {
+  fabrica: "Estoque Fábrica (Insumos de Fabricação)",
+  terceiros: "Estoque Myio (Insumos de Instalação)",
+  almoxarifado: "Estoque Almoxarifado",
+  ferramentas: "Ferramentas e Ativos",
+};
+
+async function createNewItemRecord(
+  dest: NewItemDest,
+  name: string,
+  link: string | null,
+  userId: string,
+): Promise<Pick<PurchasableItem, "material_id" | "terceiros_material_id" | "tool_asset_id">> {
+  if (dest === "fabrica" || dest === "almoxarifado") {
+    const { data, error } = await supabase
+      .from("materials")
+      .insert({ name, link, location: dest, is_manufactured: false, created_by: userId })
+      .select("id")
+      .single();
+    if (error) throw error;
+    return { material_id: data.id, terceiros_material_id: null, tool_asset_id: null };
+  }
+  if (dest === "terceiros") {
+    const { data, error } = await supabase
+      .from("terceiros_materials")
+      .insert({ name, link, created_by: userId })
+      .select("id")
+      .single();
+    if (error) throw error;
+    return { material_id: null, terceiros_material_id: data.id, tool_asset_id: null };
+  }
+  const { data, error } = await supabase
+    .from("tool_assets")
+    .insert({ name, link, created_by: userId })
+    .select("id")
+    .single();
+  if (error) throw error;
+  return { material_id: null, terceiros_material_id: null, tool_asset_id: data.id };
+}
+
+
 type PurchasableItem = {
   key: string;
   name: string;
