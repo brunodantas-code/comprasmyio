@@ -866,7 +866,17 @@ function NewOrder({ userId }: { userId: string }) {
 
   const submit = useMutation({
     mutationFn: async ({ values, buyQty, shipQty }: { values: z.infer<typeof newOrderSchema>; buyQty: number; shipQty: number }) => {
+      let ids = {
+        material_id: isNewItem ? null : (item?.material_id ?? null),
+        terceiros_material_id: isNewItem ? null : (item?.terceiros_material_id ?? null),
+        tool_asset_id: isNewItem ? null : (item?.tool_asset_id ?? null),
+      };
+      if (isNewItem) {
+        if (!newItemDest) throw new Error("Selecione o estoque de destino do item novo.");
+        ids = await createNewItemRecord(newItemDest, values.item_name, values.item_link ?? null, userId);
+      }
       if (shipQty > 0) {
+
         const { data: exp, error: expError } = await supabase
           .from("myio_orders")
           .insert({
