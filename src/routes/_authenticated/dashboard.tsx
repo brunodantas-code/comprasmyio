@@ -778,6 +778,8 @@ function NewOrder({ userId }: { userId: string }) {
   const [itemLink, setItemLink] = useState("");
   const [isNewItem, setIsNewItem] = useState(false);
   const [newItemName, setNewItemName] = useState("");
+  const [newItemDest, setNewItemDest] = useState<NewItemDest | "">("");
+
   const [recipient, setRecipient] = useState("");
   const { data: profiles } = useProfilesList();
   const { data: purchasables } = usePurchasableItems();
