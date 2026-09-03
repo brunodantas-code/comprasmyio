@@ -458,6 +458,49 @@ function useProfilesList() {
 
 /* ---------- Materials library ---------- */
 
+type NewItemDest = "fabrica" | "almoxarifado" | "terceiros" | "ferramentas";
+
+const NEW_ITEM_DEST_LABELS: Record<NewItemDest, string> = {
+  fabrica: "Estoque Fábrica (Insumos de Fabricação)",
+  terceiros: "Estoque Myio (Insumos de Instalação)",
+  almoxarifado: "Estoque Almoxarifado",
+  ferramentas: "Ferramentas e Ativos",
+};
+
+async function createNewItemRecord(
+  dest: NewItemDest,
+  name: string,
+  link: string | null,
+  userId: string,
+): Promise<Pick<PurchasableItem, "material_id" | "terceiros_material_id" | "tool_asset_id">> {
+  if (dest === "fabrica" || dest === "almoxarifado") {
+    const { data, error } = await supabase
+      .from("materials")
+      .insert({ name, link, location: dest, is_manufactured: false, created_by: userId })
+      .select("id")
+      .single();
+    if (error) throw error;
+    return { material_id: data.id, terceiros_material_id: null, tool_asset_id: null };
+  }
+  if (dest === "terceiros") {
+    const { data, error } = await supabase
+      .from("terceiros_materials")
+      .insert({ name, link, created_by: userId })
+      .select("id")
+      .single();
+    if (error) throw error;
+    return { material_id: null, terceiros_material_id: data.id, tool_asset_id: null };
+  }
+  const { data, error } = await supabase
+    .from("tool_assets")
+    .insert({ name, link, created_by: userId })
+    .select("id")
+    .single();
+  if (error) throw error;
+  return { material_id: null, terceiros_material_id: null, tool_asset_id: data.id };
+}
+
+
 type PurchasableItem = {
   key: string;
   name: string;
@@ -778,6 +821,8 @@ function NewOrder({ userId }: { userId: string }) {
   const [itemLink, setItemLink] = useState("");
   const [isNewItem, setIsNewItem] = useState(false);
   const [newItemName, setNewItemName] = useState("");
+  const [newItemDest, setNewItemDest] = useState<NewItemDest | "">("");
+
   const [recipient, setRecipient] = useState("");
   const { data: profiles } = useProfilesList();
   const { data: purchasables } = usePurchasableItems();
@@ -814,12 +859,24 @@ function NewOrder({ userId }: { userId: string }) {
     setItemLink("");
     setIsNewItem(false);
     setNewItemName("");
+    setNewItemDest("");
     setRecipient("");
+
   };
 
   const submit = useMutation({
     mutationFn: async ({ values, buyQty, shipQty }: { values: z.infer<typeof newOrderSchema>; buyQty: number; shipQty: number }) => {
+      let ids = {
+        material_id: isNewItem ? null : (item?.material_id ?? null),
+        terceiros_material_id: isNewItem ? null : (item?.terceiros_material_id ?? null),
+        tool_asset_id: isNewItem ? null : (item?.tool_asset_id ?? null),
+      };
+      if (isNewItem) {
+        if (!newItemDest) throw new Error("Selecione o estoque de destino do item novo.");
+        ids = await createNewItemRecord(newItemDest, values.item_name, values.item_link ?? null, userId);
+      }
       if (shipQty > 0) {
+
         const { data: exp, error: expError } = await supabase
           .from("myio_orders")
           .insert({
@@ -847,9 +904,10 @@ function NewOrder({ userId }: { userId: string }) {
           for_stock: forStock,
           item_name: values.item_name,
           item_link: values.item_link ?? null,
-          material_id: isNewItem ? null : (item?.material_id ?? null),
-          terceiros_material_id: isNewItem ? null : (item?.terceiros_material_id ?? null),
-          tool_asset_id: isNewItem ? null : (item?.tool_asset_id ?? null),
+          material_id: ids.material_id,
+          terceiros_material_id: ids.terceiros_material_id,
+          tool_asset_id: ids.tool_asset_id,
+
           quantity: buyQty,
           estimated_value: values.estimated_value,
           recipient: values.recipient,
@@ -874,6 +932,11 @@ function NewOrder({ userId }: { userId: string }) {
       else toast.success("Pedido criado!");
       qc.invalidateQueries({ queryKey: ["orders"] });
       qc.invalidateQueries({ queryKey: ["myio-orders"] });
+      qc.invalidateQueries({ queryKey: ["purchasable-items"] });
+      qc.invalidateQueries({ queryKey: ["stock"] });
+      qc.invalidateQueries({ queryKey: ["stock-meta"] });
+      qc.invalidateQueries({ queryKey: ["terceiros-stock"] });
+      qc.invalidateQueries({ queryKey: ["tool-stock"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -882,8 +945,11 @@ function NewOrder({ userId }: { userId: string }) {
     e.preventDefault();
     if (isNewItem) {
       if (newItemName.trim().length < 2) return toast.error("Descreva o item novo.");
+      if (!newItemDest) return toast.error("Selecione para qual estoque esse item novo será cadastrado.");
       if (checkDuplicates(newItemName)) return;
       if (!itemLink.trim()) return toast.error("Informe o link de referência do item novo.");
+
+
 
     } else if (!item) {
       return toast.error("Selecione um item cadastrado: Insumos de Fabricação, Insumos de Instalação, Material de Almoxarifado ou Máquinas e Ferramentas.");
@@ -986,6 +1052,21 @@ function NewOrder({ userId }: { userId: string }) {
                     onBlur={(e) => checkDuplicates(e.target.value)}
                     placeholder="Descreva o item que precisa ser comprado"
                   />
+                  <div className="space-y-2 pt-1">
+                    <Label>Cadastrar em qual estoque?</Label>
+                    <Select value={newItemDest} onValueChange={(v) => setNewItemDest(v as NewItemDest)}>
+                      <SelectTrigger><SelectValue placeholder="Selecione o estoque de destino" /></SelectTrigger>
+                      <SelectContent>
+                        {(Object.keys(NEW_ITEM_DEST_LABELS) as NewItemDest[]).map((d) => (
+                          <SelectItem key={d} value={d}>{NEW_ITEM_DEST_LABELS[d]}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      O item será cadastrado nesse banco e a entrada acontece automaticamente ao receber.
+                    </p>
+                  </div>
+
                   <DuplicateItemDialog
                     open={dupOpen}
                     onOpenChange={setDupOpen}
