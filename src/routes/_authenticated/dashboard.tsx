@@ -819,6 +819,25 @@ function NewOrder({ userId }: { userId: string }) {
   const [forStock, setForStock] = useState(false);
   const [costCenterId, setCostCenterId] = useState<string>("");
   const { data: costCenters } = useCostCenters();
+  const { data: me } = useCurrentUser();
+  const restrictedCc = !!me && !me.isAdmin && me.roles.some((r) => ["estoquista", "fabrica", "solicitante"].includes(r));
+
+  async function resolveOperacaoCostCenterId(): Promise<string> {
+    const existing = (costCenters ?? []).find((c) => c.name.trim().toLowerCase() === "operação");
+    if (existing) return existing.id;
+    const { data, error } = await supabase
+      .from("cost_centers")
+      .insert({ name: "Operação", code: "OP", description: "Centro de custo padrão de operação", created_by: userId })
+      .select("id")
+      .single();
+    if (error) {
+      const { data: retry } = await supabase.from("cost_centers").select("id").ilike("name", "Operação").maybeSingle();
+      if (retry) return retry.id;
+      throw error;
+    }
+    qc.invalidateQueries({ queryKey: ["cost_centers"] });
+    return data.id;
+  }
   const [files, setFiles] = useState<File[]>([]);
   const [deadlineType, setDeadlineType] = useState<Order["deadline_type"]>("esta_semana");
   const [deadlineDate, setDeadlineDate] = useState("");
@@ -908,7 +927,7 @@ function NewOrder({ userId }: { userId: string }) {
         const { data, error } = await supabase.from("purchase_orders").insert({
           project_id: forStock ? null : (values.project_id ?? null),
           for_stock: forStock,
-          cost_center_id: costCenterId || null,
+          cost_center_id: restrictedCc ? await resolveOperacaoCostCenterId() : (costCenterId || null),
           item_name: values.item_name,
           item_link: values.item_link ?? null,
           material_id: ids.material_id,
@@ -1026,17 +1045,19 @@ function NewOrder({ userId }: { userId: string }) {
                   Estoque
                 </label>
                </div>
-              <div className="pt-2">
-                <Label>Centro de Custo</Label>
-                <Select value={costCenterId} onValueChange={setCostCenterId}>
-                  <SelectTrigger className="mt-2"><SelectValue placeholder="Selecione o centro de custo" /></SelectTrigger>
-                  <SelectContent>
-                    {(costCenters ?? []).filter((c) => c.active).map((c) => (
-                      <SelectItem key={c.id} value={c.id}>{c.code ? `${c.code} — ${c.name}` : c.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+               {!restrictedCc && (
+                 <div className="pt-2">
+                   <Label>Centro de Custo</Label>
+                   <Select value={costCenterId} onValueChange={setCostCenterId}>
+                     <SelectTrigger className="mt-2"><SelectValue placeholder="Selecione o centro de custo" /></SelectTrigger>
+                     <SelectContent>
+                       {(costCenters ?? []).filter((c) => c.active).map((c) => (
+                         <SelectItem key={c.id} value={c.id}>{c.code ? `${c.code} — ${c.name}` : c.name}</SelectItem>
+                       ))}
+                     </SelectContent>
+                   </Select>
+                 </div>
+               )}
              </div>
              <div className="space-y-2">
                <Label>Projeto</Label>
