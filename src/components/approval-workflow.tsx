@@ -1021,8 +1021,8 @@ function OrgChartAdmin() {
         <CardHeader>
           <CardTitle>Organograma de Aprovação</CardTitle>
           <CardDescription>
-            Defina o gestor de cada usuário. O fluxo sobe pelo organograma e, quando não houver Gerente da Área ou
-            Diretor cadastrado, segue direto para o C-Level definido como gestor.
+            Defina o nível de aprovação (C-Level, Gerente da Área ou Gestor Direto) e o gestor de cada usuário. O fluxo
+            sobe pelo organograma e, quando não houver Gerente da Área cadastrado, segue direto para o C-Level.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -1034,6 +1034,7 @@ function OrgChartAdmin() {
                 <TableRow>
                   <TableHead>Usuário</TableHead>
                   <TableHead>Cargo</TableHead>
+                  <TableHead>Nível de aprovação</TableHead>
                   <TableHead>Aprovado por (gestor)</TableHead>
                 </TableRow>
               </TableHeader>
@@ -1043,6 +1044,23 @@ function OrgChartAdmin() {
                     <TableCell className="font-medium">{p.full_name || p.email}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {roleTitle(profiles?.get(p.id)?.roles ?? [])}
+                    </TableCell>
+                    <TableCell>
+                      <Select
+                        value={p.approval_level ?? "none"}
+                        disabled={!isAdmin}
+                        onValueChange={(v) =>
+                          saveLevel.mutate({ userId: p.id, level: v === "none" ? null : v })
+                        }
+                      >
+                        <SelectTrigger className="h-8 w-48"><SelectValue placeholder="Não definido" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Não definido</SelectItem>
+                          <SelectItem value="gestor">Gestor Direto</SelectItem>
+                          <SelectItem value="gerente">Gerente da Área</SelectItem>
+                          <SelectItem value="c_level">C-Level</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                     <TableCell>
                       <Select
@@ -1065,6 +1083,7 @@ function OrgChartAdmin() {
                     </TableCell>
                   </TableRow>
                 ))}
+
               </TableBody>
             </Table>
           )}
