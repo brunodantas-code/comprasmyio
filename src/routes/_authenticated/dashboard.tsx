@@ -866,6 +866,7 @@ function NewOrder({ userId }: { userId: string }) {
     setNewItemName("");
     setNewItemDest("");
     setRecipient("");
+    setCostCenterId("");
 
   };
 
