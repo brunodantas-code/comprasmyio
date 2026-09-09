@@ -1213,9 +1213,16 @@ function NewOrder({ userId }: { userId: string }) {
                   <Input id="estimated_value" name="estimated_value" type="number" min={0} step="0.01" value={estimatedValue} onChange={(e) => setEstimatedValue(e.target.value)} required />
                   {lookingUpPrice && <Loader2 className="absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />}
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Total estimado: R$ {(Number(estimatedValue || 0) * Number(qty || 1)).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </p>
+                <div className="space-y-2">
+                  <Label htmlFor="estimated_total">Valor Total Estimado (R$)</Label>
+                  <Input
+                    id="estimated_total"
+                    readOnly
+                    tabIndex={-1}
+                    className="bg-muted"
+                    value={`R$ ${(Number(estimatedValue || 0) * Number(qty || 1)).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                  />
+                </div>
               </div>
               {!isNewItem && item && (
                 <div className="space-y-2">
