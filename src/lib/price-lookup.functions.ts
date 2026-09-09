@@ -19,41 +19,60 @@ function clean(n: number | null): number | null {
   return Math.round(n * 100) / 100;
 }
 
+/** Parses a numeric string in either BR (1.234,56) or US (1,234.56 / 838.5) notation. */
+function parseAmount(raw: string): number | null {
+  // keep digits and separators only, then drop leading/trailing separators
+  let s = raw.replace(/[^\d.,]/g, "").replace(/^[.,]+/, "").replace(/[.,]+$/, "");
+  if (!s) return null;
+
+  const lastComma = s.lastIndexOf(",");
+  const lastDot = s.lastIndexOf(".");
+  const decSep = lastComma > lastDot ? "," : lastDot > lastComma ? "." : "";
+
+  if (decSep) {
+    const decimals = s.length - s.lastIndexOf(decSep) - 1;
+    if (decimals >= 1 && decimals <= 2) {
+      // real decimal separator
+      const intPart = s.slice(0, s.lastIndexOf(decSep)).replace(/[.,]/g, "");
+      const decPart = s.slice(s.lastIndexOf(decSep) + 1);
+      s = `${intPart}.${decPart}`;
+    } else {
+      // grouping only (e.g. 1.234 or 1,234)
+      s = s.replace(/[.,]/g, "");
+    }
+  }
+  return clean(Number(s));
+}
+
 function parseBrl(raw: string): number | null {
-  const cleaned = raw.replace(/[^\d.,]/g, "");
-  if (!cleaned) return null;
-  // Brazilian format: 1.234,56
-  const normalized = cleaned.includes(",")
-    ? cleaned.replace(/\./g, "").replace(",", ".")
-    : cleaned.replace(/\.(?=\d{3}\b)/g, "");
-  return clean(Number(normalized));
+  return parseAmount(raw);
 }
 
 function extractPrice(html: string): number | null {
   const head = html.slice(0, 400000);
 
-  // 1) Meta tags: product:price:amount, og:price:amount, itemprop price
+  // 1) Meta tags: product:price:amount, og:price:amount, itemprop price, store platforms
   const metaRegexes = [
-    /<meta[^>]+property=["'](?:product:price:amount|og:price:amount)["'][^>]+content=["']([^"']+)["']/i,
-    /<meta[^>]+content=["']([^"']+)["'][^>]+property=["'](?:product:price:amount|og:price:amount)["']/i,
+    /<meta[^>]+property=["'](?:product:price:amount|og:price:amount|nuvemshop:price)["'][^>]+content=["']([^"']+)["']/i,
+    /<meta[^>]+content=["']([^"']+)["'][^>]+property=["'](?:product:price:amount|og:price:amount|nuvemshop:price)["']/i,
     /<meta[^>]+itemprop=["']price["'][^>]+content=["']([^"']+)["']/i,
     /<meta[^>]+content=["']([^"']+)["'][^>]+itemprop=["']price["']/i,
   ];
   for (const re of metaRegexes) {
     const m = head.match(re);
     if (m?.[1]) {
-      const n = clean(Number(m[1].replace(/\.(?=\d{3}\b)/g, "").replace(",", ".")));
+      const n = parseAmount(m[1]);
       if (n) return n;
     }
   }
 
   // 2) JSON-LD / embedded state: "price": 123.45
-  const jsonPrice = head.match(/"price"\s*:\s*"?([\d.,]+)"?/);
+  const jsonPrice = head.match(/"price"\s*:\s*"?(\d[\d.,]*?)"?\s*[,}\]]/);
   if (jsonPrice?.[1]) {
-    const raw = jsonPrice[1];
-    const n = clean(Number(raw.includes(",") ? raw.replace(/\./g, "").replace(",", ".") : raw));
+    const n = parseAmount(jsonPrice[1]);
     if (n) return n;
   }
+
 
   // 3) Mercado Livre style markup: fraction + cents
   const frac = head.match(/andes-money-amount__fraction["'][^>]*>([\d.]+)</i);
