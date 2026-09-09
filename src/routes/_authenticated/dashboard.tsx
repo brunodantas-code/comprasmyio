@@ -2407,7 +2407,8 @@ function UsersAdmin() {
 function StatusHistoryDialog({ order, canEdit }: { order: Order; canEdit?: boolean }) {
   const approvalStatus = (order as unknown as { approval_status?: string }).approval_status ?? "aprovado";
   const awaitingApproval = approvalStatus === "aguardando_aprovacao";
-  if (awaitingApproval) canEdit = false;
+  const rejected = approvalStatus === "rejeitado";
+  if (awaitingApproval || rejected) canEdit = false;
   const qc = useQueryClient();
   const updateStatus = useMutation({
     mutationFn: async (next: Order["status"]) => {
@@ -2452,6 +2453,8 @@ function StatusHistoryDialog({ order, canEdit }: { order: Order; canEdit?: boole
         <button type="button" className="cursor-pointer">
           {awaitingApproval ? (
             <Badge className="bg-orange-500 hover:bg-orange-500 text-white border-transparent">Aguardando aprovação</Badge>
+          ) : rejected ? (
+            <Badge className="bg-red-600 hover:bg-red-600 text-white border-transparent">Rejeitado</Badge>
           ) : (
             <Badge className={STATUS_CLASSES[order.status]}>{STATUS_LABELS[order.status]}</Badge>
           )}

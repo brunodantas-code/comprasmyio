@@ -108,6 +108,9 @@ function DecisionDialog({
   const [comment, setComment] = useState("");
   const decide = useMutation({
     mutationFn: async () => {
+      if (decision === "rejeitado" && !comment.trim()) {
+        throw new Error("Informe o motivo da rejeição");
+      }
       const { error } = await supabase.rpc("decide_approval_step", {
         _step_id: step.id,
         _decision: decision,
@@ -140,17 +143,28 @@ function DecisionDialog({
         <DialogHeader>
           <DialogTitle>{decision === "aprovado" ? "Aprovar etapa" : "Rejeitar solicitação"}</DialogTitle>
           <DialogDescription>
-            {step.role_label} — registre uma justificativa para a auditoria.
+            {decision === "rejeitado"
+              ? `${step.role_label} — descreva o motivo da rejeição. Ele será enviado ao solicitante.`
+              : `${step.role_label} — registre uma justificativa para a auditoria.`}
           </DialogDescription>
         </DialogHeader>
-        <Textarea
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-          placeholder="Justificativa / comentário"
-          rows={4}
-        />
+        <div className="space-y-2">
+          <Label>
+            Observações {decision === "rejeitado" && <span className="text-destructive">*</span>}
+          </Label>
+          <Textarea
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            placeholder={decision === "rejeitado" ? "Motivo da rejeição" : "Justificativa / comentário"}
+            rows={4}
+          />
+        </div>
         <DialogFooter>
-          <Button onClick={() => decide.mutate()} disabled={decide.isPending}>
+          <Button
+            onClick={() => decide.mutate()}
+            disabled={decide.isPending || (decision === "rejeitado" && !comment.trim())}
+            variant={decision === "rejeitado" ? "destructive" : "default"}
+          >
             Confirmar
           </Button>
         </DialogFooter>
