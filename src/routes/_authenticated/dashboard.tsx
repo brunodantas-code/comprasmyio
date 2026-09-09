@@ -59,6 +59,7 @@ type Order = {
   passphrase: string | null;
   delivery_forecast: string | null;
   attachments: Attachment[] | null;
+  request_group_id?: string | null;
   created_at: string;
   updated_at: string;
 };
