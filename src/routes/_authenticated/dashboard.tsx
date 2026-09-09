@@ -850,8 +850,13 @@ function NewOrder({ userId }: { userId: string }) {
   const qc = useQueryClient();
   const [projectId, setProjectId] = useState("");
   const [forStock, setForStock] = useState(false);
+  const [requestType, setRequestType] = useState<"materiais" | "servicos" | "viagens">("materiais");
+  const [allocTarget, setAllocTarget] = useState<"projeto" | "cliente">("projeto");
+  const [clientId, setClientId] = useState("");
+  const { data: clientsList } = useClients();
   const [costCenterId, setCostCenterId] = useState<string>("");
   const { data: costCenters } = useCostCenters();
+
   const { data: me } = useCurrentUser();
   const restrictedCc = !!me && !me.isAdmin && me.roles.some((r) => ["estoquista", "fabrica", "solicitante"].includes(r));
 
