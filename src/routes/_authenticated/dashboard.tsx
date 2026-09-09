@@ -1381,7 +1381,7 @@ function NewOrder({ userId }: { userId: string }) {
               <Label htmlFor="item_link">
                 Link de Referência {isNewItem ? null : <span className="text-muted-foreground">(opcional)</span>}
               </Label>
-              <Input id="item_link" type="url" placeholder="https://..." value={itemLink} onChange={(e) => { setItemLink(e.target.value); scheduleAutoFillPrice(e.target.value); }} onPaste={(e) => { const t = e.clipboardData.getData("text"); if (t) setTimeout(() => void tryAutoFillPrice(t), 0); }} onBlur={() => void tryAutoFillPrice(itemLink)} required={isNewItem} />
+              <Input id="item_link" type="url" placeholder="https://..." value={itemLink} onChange={(e) => { setItemLink(e.target.value); scheduleAutoFillPrice(e.target.value); }} onPaste={(e) => { const t = e.clipboardData.getData("text"); if (t) setTimeout(() => void tryAutoFillPrice(t), 0); }} onBlur={() => void tryAutoFillPrice(itemLink)} required={isNewItem && requestType === "materiais"} />
             </div>
             <AddressAutocomplete name="delivery_point" required />
 
