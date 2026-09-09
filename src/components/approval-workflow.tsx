@@ -722,16 +722,208 @@ function RulesAdmin() {
   );
 }
 
+const LEVEL_LABELS = ["Gestor Direto", "Gerente da Área", "Diretor do Departamento", "C-Level"];
+
+function MoneyInput({
+  value,
+  disabled,
+  onSave,
+}: {
+  value: number;
+  disabled?: boolean;
+  onSave: (v: number) => void;
+}) {
+  const [draft, setDraft] = useState<string | null>(null);
+  return (
+    <Input
+      type="number"
+      min={0}
+      step="0.01"
+      className="h-8 w-32"
+      disabled={disabled}
+      value={draft ?? String(value ?? 0)}
+      onChange={(e) => setDraft(e.target.value)}
+      onBlur={() => {
+        if (draft === null) return;
+        const n = Number(draft);
+        setDraft(null);
+        if (!Number.isNaN(n) && n !== value) onSave(n);
+      }}
+    />
+  );
+}
+
+function DefaultChainAdmin() {
+  const qc = useQueryClient();
+  const { data: me } = useCurrentUser();
+  const isAdmin = Boolean(me?.isAdmin);
+
+  const { data: rows, isLoading } = useQuery({
+    queryKey: ["aw-default-chain"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, full_name, email, approval_limit, tier2_limit, tier3_limit, manager_id")
+        .order("full_name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const save = useMutation({
+    mutationFn: async ({
+      userId,
+      patch,
+    }: {
+      userId: string;
+      patch: Partial<{ approval_limit: number; tier2_limit: number; tier3_limit: number; manager_id: string | null }>;
+    }) => {
+      const { error } = await supabase.from("profiles").update(patch).eq("id", userId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Padrão de aprovação atualizado");
+      qc.invalidateQueries({ queryKey: ["aw-default-chain"] });
+      qc.invalidateQueries({ queryKey: ["aw-profiles"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const byId = useMemo(() => {
+    const m = new Map<string, NonNullable<typeof rows>[number]>();
+    (rows ?? []).forEach((r) => m.set(r.id, r));
+    return m;
+  }, [rows]);
+
+  const chainFor = (userId: string, levels: number) => {
+    const names: string[] = [];
+    let cur = userId;
+    for (let i = 0; i < levels; i++) {
+      const mgrId = byId.get(cur)?.manager_id;
+      if (!mgrId) break;
+      const mgr = byId.get(mgrId);
+      names.push(`${LEVEL_LABELS[i]}: ${mgr?.full_name || mgr?.email || "—"}`);
+      cur = mgrId;
+    }
+    return names;
+  };
+
+  return (
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>Padrão de aprovação por alçada</CardTitle>
+          <CardDescription>
+            Sequência aplicada automaticamente a cada nova solicitação, conforme o valor total e o organograma.
+            {isAdmin ? " Edite os valores e o gestor direto de cada usuário." : " Somente administradores podem editar."}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-2 text-sm text-muted-foreground">
+          <p>• Até a alçada automática do solicitante: aprovação automática, sem etapas.</p>
+          <p>• Acima da alçada até a Faixa 2: Gestor Direto → Gerente da Área.</p>
+          <p>• Acima da Faixa 2 até a Faixa 3: Gestor Direto → Gerente da Área → Diretor do Departamento.</p>
+          <p>• Acima da Faixa 3: Gestor Direto → Gerente da Área → Diretor do Departamento → C-Level.</p>
+          <p>• Depois dessas etapas entram as “Etapas adicionais” ativas e, se aplicável, a dupla aprovação.</p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="pt-6">
+          {isLoading ? (
+            <p className="text-sm text-muted-foreground">Carregando...</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Usuário</TableHead>
+                  <TableHead>Gestor direto</TableHead>
+                  <TableHead>Automática até</TableHead>
+                  <TableHead>Faixa 2 até</TableHead>
+                  <TableHead>Faixa 3 até</TableHead>
+                  <TableHead>Sequência atual</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {(rows ?? []).map((p) => {
+                  const seq = chainFor(p.id, 4);
+                  return (
+                    <TableRow key={p.id}>
+                      <TableCell className="font-medium">{p.full_name || p.email}</TableCell>
+                      <TableCell>
+                        <Select
+                          value={p.manager_id ?? "none"}
+                          disabled={!isAdmin}
+                          onValueChange={(v) =>
+                            save.mutate({ userId: p.id, patch: { manager_id: v === "none" ? null : v } })
+                          }
+                        >
+                          <SelectTrigger className="h-8 w-52"><SelectValue placeholder="Sem gestor" /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">Sem gestor</SelectItem>
+                            {(rows ?? [])
+                              .filter((o) => o.id !== p.id)
+                              .map((o) => (
+                                <SelectItem key={o.id} value={o.id}>{o.full_name || o.email}</SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell>
+                        <MoneyInput
+                          value={Number(p.approval_limit ?? 0)}
+                          disabled={!isAdmin}
+                          onSave={(v) => save.mutate({ userId: p.id, patch: { approval_limit: v } })}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <MoneyInput
+                          value={Number(p.tier2_limit ?? 50000)}
+                          disabled={!isAdmin}
+                          onSave={(v) => save.mutate({ userId: p.id, patch: { tier2_limit: v } })}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <MoneyInput
+                          value={Number(p.tier3_limit ?? 250000)}
+                          disabled={!isAdmin}
+                          onSave={(v) => save.mutate({ userId: p.id, patch: { tier3_limit: v } })}
+                        />
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {seq.length === 0 ? (
+                          <span className="text-amber-600">Sem gestor definido — sem etapas de aprovação</span>
+                        ) : (
+                          <div className="flex flex-col gap-0.5">
+                            {seq.map((s) => (
+                              <span key={s}>{s}</span>
+                            ))}
+                          </div>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 export function ApprovalWorkflow() {
   return (
     <Tabs defaultValue="pendentes">
       <TabsList className="mb-4">
         <TabsTrigger value="pendentes">Pendentes comigo</TabsTrigger>
         <TabsTrigger value="fluxos">Solicitações em fluxo</TabsTrigger>
+        <TabsTrigger value="padrao">Padrão de aprovação</TabsTrigger>
         <TabsTrigger value="regras">Etapas adicionais</TabsTrigger>
       </TabsList>
       <TabsContent value="pendentes"><PendingForMe /></TabsContent>
       <TabsContent value="fluxos"><FlowsOverview /></TabsContent>
+      <TabsContent value="padrao"><DefaultChainAdmin /></TabsContent>
       <TabsContent value="regras"><RulesAdmin /></TabsContent>
     </Tabs>
   );
