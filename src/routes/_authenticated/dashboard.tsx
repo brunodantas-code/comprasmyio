@@ -784,9 +784,9 @@ const newOrderSchema = z.object({
   item_link: z.string().trim().max(2000).url("Link inválido").optional().or(z.literal("").transform(() => undefined)),
   quantity: z.coerce.number().int().positive("Quantidade inválida").max(100000),
   estimated_value: z.coerce.number().min(0, "Valor inválido").max(1000000000),
-  recipient: z.string().trim().min(2, "Informe o destinatário").max(200),
+  recipient: z.string().trim().min(2, "Informe o destinatário").max(200).optional().or(z.literal("").transform(() => undefined)),
   requester_notes: z.string().trim().max(2000).optional().or(z.literal("").transform(() => undefined)),
-  delivery_point: z.string().trim().min(3).max(300),
+  delivery_point: z.string().trim().min(3).max(300).optional().or(z.literal("").transform(() => undefined)),
   deadline_type: z.enum(["urgente", "esta_semana", "este_mes", "customizado"]),
   deadline_date: z.string().trim().optional().or(z.literal("").transform(() => undefined)),
 }).refine((v) => v.deadline_type !== "customizado" || !!v.deadline_date, {
