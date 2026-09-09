@@ -945,6 +945,7 @@ function NewOrder({ userId }: { userId: string }) {
     setItem(null);
     setItemLink("");
     setEstimatedValue("0");
+    setQty("1");
     setIsNewItem(false);
     setNewItemName("");
     setNewItemDest("");
