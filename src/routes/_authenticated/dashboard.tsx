@@ -1022,7 +1022,7 @@ function NewOrder({ userId }: { userId: string }) {
           estimated_value: Number((values.estimated_value * buyQty).toFixed(2)),
           recipient: values.recipient,
           requester_notes: values.requester_notes ?? null,
-          delivery_point: values.delivery_point,
+          delivery_point: values.delivery_point ?? null,
           deadline_type: values.deadline_type,
           deadline_date: values.deadline_type === "customizado" ? (values.deadline_date ?? null) : null,
           requester_id: userId,
