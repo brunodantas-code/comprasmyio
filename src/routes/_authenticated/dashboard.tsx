@@ -956,6 +956,10 @@ function NewOrder({ userId }: { userId: string }) {
     setFiles([]);
     setDeadlineType("esta_semana");
     setDeadlineDate("");
+    setTravelType("");
+    setTravelDestination("");
+    setTravelDeparture("");
+    setTravelReturn("");
     setItem(null);
     setItemLink("");
     setEstimatedValue("0");
@@ -1029,6 +1033,10 @@ function NewOrder({ userId }: { userId: string }) {
           delivery_point: values.delivery_point ?? null,
           deadline_type: values.deadline_type,
           deadline_date: values.deadline_type === "customizado" ? (values.deadline_date ?? null) : null,
+          travel_type: requestType === "viagens" ? travelType : null,
+          travel_destination: requestType === "viagens" ? travelDestination.trim() : null,
+          travel_departure: requestType === "viagens" ? travelDeparture : null,
+          travel_return: requestType === "viagens" ? travelReturn : null,
           requester_id: userId,
         }).select("id").single();
         if (error) throw error;
@@ -1062,6 +1070,13 @@ function NewOrder({ userId }: { userId: string }) {
       if (newItemName.trim().length < 2) return toast.error("Descreva o serviço ou a viagem solicitada.");
       if (allocTarget === "projeto" && !projectId) return toast.error("Selecione o projeto");
       if (allocTarget === "cliente" && !clientId) return toast.error("Selecione o cliente");
+      if (requestType === "viagens") {
+        if (!travelType) return toast.error("Selecione o tipo de viagem");
+        if (travelDestination.trim().length < 2) return toast.error("Informe a cidade e o estado de destino");
+        if (!travelDeparture) return toast.error("Informe a data de ida");
+        if (!travelReturn) return toast.error("Informe a data de retorno");
+        if (travelReturn < travelDeparture) return toast.error("A data de retorno não pode ser anterior à data de ida");
+      }
     } else if (isNewItem) {
       if (newItemName.trim().length < 2) return toast.error("Descreva o item novo.");
       if (!newItemDest) return toast.error("Selecione para qual estoque esse item novo será cadastrado.");
@@ -1161,6 +1176,37 @@ function NewOrder({ userId }: { userId: string }) {
               {requestType === "viagens" && (
                 <p className="text-xs text-muted-foreground">Passagens, Hospedagens, Aluguel de Veículos.</p>
               )}
+            </div>
+
+            {requestType === "viagens" && (
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Tipo de viagem</Label>
+                  <Select value={travelType} onValueChange={setTravelType}>
+                    <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="passagens">Passagens</SelectItem>
+                      <SelectItem value="hospedagens">Hospedagens</SelectItem>
+                      <SelectItem value="aluguel_veiculos">Aluguel de Veículos</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="travel_destination">Cidade e Estado de destino</Label>
+                  <Input id="travel_destination" value={travelDestination} onChange={(e) => setTravelDestination(e.target.value)} placeholder="Ex.: São Paulo - SP" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="travel_departure">Data de ida</Label>
+                  <Input id="travel_departure" type="date" value={travelDeparture} onChange={(e) => setTravelDeparture(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="travel_return">Data de retorno</Label>
+                  <Input id="travel_return" type="date" value={travelReturn} onChange={(e) => setTravelReturn(e.target.value)} min={travelDeparture || undefined} />
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-2">
             </div>
 
             {requestType === "materiais" ? (
