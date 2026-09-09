@@ -914,6 +914,7 @@ export type Database = {
           is_replacement: boolean
           notes: string | null
           project_id: string | null
+          request_group_id: string | null
           status: Database["public"]["Enums"]["myio_order_status"]
           title: string
           updated_at: string
@@ -927,6 +928,7 @@ export type Database = {
           is_replacement?: boolean
           notes?: string | null
           project_id?: string | null
+          request_group_id?: string | null
           status?: Database["public"]["Enums"]["myio_order_status"]
           title?: string
           updated_at?: string
@@ -940,6 +942,7 @@ export type Database = {
           is_replacement?: boolean
           notes?: string | null
           project_id?: string | null
+          request_group_id?: string | null
           status?: Database["public"]["Enums"]["myio_order_status"]
           title?: string
           updated_at?: string
@@ -1305,6 +1308,7 @@ export type Database = {
           project_id: string | null
           quantity: number
           recipient: string
+          request_group_id: string | null
           requester_id: string
           requester_notes: string | null
           status: Database["public"]["Enums"]["order_status"]
@@ -1334,6 +1338,7 @@ export type Database = {
           project_id?: string | null
           quantity?: number
           recipient?: string
+          request_group_id?: string | null
           requester_id: string
           requester_notes?: string | null
           status?: Database["public"]["Enums"]["order_status"]
@@ -1363,6 +1368,7 @@ export type Database = {
           project_id?: string | null
           quantity?: number
           recipient?: string
+          request_group_id?: string | null
           requester_id?: string
           requester_notes?: string | null
           status?: Database["public"]["Enums"]["order_status"]
