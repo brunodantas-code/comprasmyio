@@ -912,17 +912,198 @@ function DefaultChainAdmin() {
   );
 }
 
+const ROLE_TITLES: Record<string, string> = {
+  ceo: "CEO",
+  coo: "COO",
+  cfo: "CFO",
+  cto: "CTO",
+  admin: "Admin",
+  comprador: "Comprador",
+  estoquista: "Estoquista",
+  fabrica: "Fábrica",
+  solicitante: "Solicitante",
+};
+
+const ROLE_PRIORITY = ["ceo", "coo", "cfo", "cto", "comprador", "estoquista", "fabrica", "solicitante", "admin"];
+
+function roleTitle(roles: AppRole[]) {
+  const found = ROLE_PRIORITY.find((r) => roles.includes(r as AppRole));
+  return found ? ROLE_TITLES[found]! : "Sem perfil";
+}
+
+type OrgNode = {
+  id: string;
+  name: string;
+  title: string;
+  children: OrgNode[];
+};
+
+function OrgBox({ node }: { node: OrgNode }) {
+  return (
+    <div className="flex flex-col items-center">
+      <div className="min-w-[150px] rounded-lg border bg-card px-4 py-2 text-center shadow-sm">
+        <p className="text-sm font-bold leading-tight">{node.title}</p>
+        <p className="text-xs leading-tight text-muted-foreground">{node.name}</p>
+      </div>
+      {node.children.length > 0 && (
+        <>
+          <div className="h-5 w-px bg-border" />
+          <div className="flex items-start gap-6 border-t border-border pt-5">
+            {node.children.map((c) => (
+              <div key={c.id} className="relative flex flex-col items-center">
+                <div className="absolute -top-5 h-5 w-px bg-border" />
+                <OrgBox node={c} />
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function OrgChartAdmin() {
+  const qc = useQueryClient();
+  const { data: me } = useCurrentUser();
+  const { data: profiles } = useProfiles();
+  const isAdmin = Boolean(me?.isAdmin);
+
+  const { data: rows, isLoading } = useQuery({
+    queryKey: ["aw-org-chart"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, full_name, email, manager_id")
+        .order("full_name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const save = useMutation({
+    mutationFn: async ({ userId, managerId }: { userId: string; managerId: string | null }) => {
+      const { error } = await supabase.from("profiles").update({ manager_id: managerId }).eq("id", userId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Organograma atualizado");
+      qc.invalidateQueries({ queryKey: ["aw-org-chart"] });
+      qc.invalidateQueries({ queryKey: ["aw-default-chain"] });
+      qc.invalidateQueries({ queryKey: ["aw-profiles"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const roots = useMemo(() => {
+    const list = rows ?? [];
+    const nodes = new Map<string, OrgNode>();
+    list.forEach((p) =>
+      nodes.set(p.id, {
+        id: p.id,
+        name: p.full_name || p.email || "—",
+        title: roleTitle(profiles?.get(p.id)?.roles ?? []),
+        children: [],
+      })
+    );
+    const top: OrgNode[] = [];
+    list.forEach((p) => {
+      const node = nodes.get(p.id)!;
+      const parent = p.manager_id ? nodes.get(p.manager_id) : undefined;
+      if (parent && parent.id !== node.id) parent.children.push(node);
+      else top.push(node);
+    });
+    return top;
+  }, [rows, profiles]);
+
+  return (
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>Organograma de Aprovação</CardTitle>
+          <CardDescription>
+            Defina o gestor de cada usuário. O fluxo sobe pelo organograma e, quando não houver Gerente da Área ou
+            Diretor cadastrado, segue direto para o C-Level definido como gestor.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <p className="text-sm text-muted-foreground">Carregando...</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Usuário</TableHead>
+                  <TableHead>Cargo</TableHead>
+                  <TableHead>Aprovado por (gestor)</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {(rows ?? []).map((p) => (
+                  <TableRow key={p.id}>
+                    <TableCell className="font-medium">{p.full_name || p.email}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {roleTitle(profiles?.get(p.id)?.roles ?? [])}
+                    </TableCell>
+                    <TableCell>
+                      <Select
+                        value={p.manager_id ?? "none"}
+                        disabled={!isAdmin}
+                        onValueChange={(v) => save.mutate({ userId: p.id, managerId: v === "none" ? null : v })}
+                      >
+                        <SelectTrigger className="h-8 w-56"><SelectValue placeholder="Sem gestor" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Sem gestor</SelectItem>
+                          {(rows ?? [])
+                            .filter((o) => o.id !== p.id)
+                            .map((o) => (
+                              <SelectItem key={o.id} value={o.id}>
+                                {o.full_name || o.email}
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Visualização</CardTitle>
+          <CardDescription>Hierarquia atual de aprovação.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto pb-2">
+            <div className="flex min-w-max items-start gap-10 p-4">
+              {roots.map((r) => (
+                <OrgBox key={r.id} node={r} />
+              ))}
+              {roots.length === 0 && <p className="text-sm text-muted-foreground">Nenhum usuário cadastrado.</p>}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 export function ApprovalWorkflow() {
   return (
     <Tabs defaultValue="pendentes">
       <TabsList className="mb-4">
         <TabsTrigger value="pendentes">Pendentes comigo</TabsTrigger>
         <TabsTrigger value="fluxos">Solicitações em fluxo</TabsTrigger>
+        <TabsTrigger value="organograma">Organograma de Aprovação</TabsTrigger>
         <TabsTrigger value="padrao">Padrão de aprovação</TabsTrigger>
         <TabsTrigger value="regras">Etapas adicionais</TabsTrigger>
       </TabsList>
       <TabsContent value="pendentes"><PendingForMe /></TabsContent>
       <TabsContent value="fluxos"><FlowsOverview /></TabsContent>
+      <TabsContent value="organograma"><OrgChartAdmin /></TabsContent>
       <TabsContent value="padrao"><DefaultChainAdmin /></TabsContent>
       <TabsContent value="regras"><RulesAdmin /></TabsContent>
     </Tabs>
