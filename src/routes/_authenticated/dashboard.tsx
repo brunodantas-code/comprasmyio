@@ -784,9 +784,9 @@ const newOrderSchema = z.object({
   item_link: z.string().trim().max(2000).url("Link inválido").optional().or(z.literal("").transform(() => undefined)),
   quantity: z.coerce.number().int().positive("Quantidade inválida").max(100000),
   estimated_value: z.coerce.number().min(0, "Valor inválido").max(1000000000),
-  recipient: z.string().trim().min(2, "Informe o destinatário").max(200),
+  recipient: z.string().trim().min(2, "Informe o destinatário").max(200).optional().or(z.literal("").transform(() => undefined)),
   requester_notes: z.string().trim().max(2000).optional().or(z.literal("").transform(() => undefined)),
-  delivery_point: z.string().trim().min(3).max(300),
+  delivery_point: z.string().trim().min(3).max(300).optional().or(z.literal("").transform(() => undefined)),
   deadline_type: z.enum(["urgente", "esta_semana", "este_mes", "customizado"]),
   deadline_date: z.string().trim().optional().or(z.literal("").transform(() => undefined)),
 }).refine((v) => v.deadline_type !== "customizado" || !!v.deadline_date, {
@@ -1022,7 +1022,7 @@ function NewOrder({ userId }: { userId: string }) {
           estimated_value: Number((values.estimated_value * buyQty).toFixed(2)),
           recipient: values.recipient,
           requester_notes: values.requester_notes ?? null,
-          delivery_point: values.delivery_point,
+          delivery_point: values.delivery_point ?? null,
           deadline_type: values.deadline_type,
           deadline_date: values.deadline_type === "customizado" ? (values.deadline_date ?? null) : null,
           requester_id: userId,
@@ -1068,6 +1068,9 @@ function NewOrder({ userId }: { userId: string }) {
     }
     if (isMateriais && !forStock && !projectId) {
       return toast.error("Selecione um projeto");
+    }
+    if (isMateriais && !recipient.trim()) {
+      return toast.error("Selecione o destinatário");
     }
 
     const fd = new FormData(e.currentTarget);
@@ -1150,6 +1153,9 @@ function NewOrder({ userId }: { userId: string }) {
               </div>
               {requestType === "materiais" && (
                 <p className="text-xs text-muted-foreground">Solicitações de Materiais são cadastradas no Armazém.</p>
+              )}
+              {requestType === "viagens" && (
+                <p className="text-xs text-muted-foreground">Passagens, Hospedagens, Aluguel de Veículos.</p>
               )}
             </div>
 
@@ -1363,19 +1369,21 @@ function NewOrder({ userId }: { userId: string }) {
                   )}
                 </div>
               )}
-              <div className="space-y-2">
-                <Label>Destinatário</Label>
-                <Select value={recipient} onValueChange={setRecipient}>
-                  <SelectTrigger><SelectValue placeholder="Selecione o usuário" /></SelectTrigger>
-                  <SelectContent>
-                    {(profiles ?? []).map((p) => (
-                      <SelectItem key={p.id} value={p.full_name || p.email || p.id}>
-                        {p.full_name || p.email || p.id}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {requestType === "materiais" && (
+                <div className="space-y-2">
+                  <Label>Destinatário</Label>
+                  <Select value={recipient} onValueChange={setRecipient}>
+                    <SelectTrigger><SelectValue placeholder="Selecione o usuário" /></SelectTrigger>
+                    <SelectContent>
+                      {(profiles ?? []).map((p) => (
+                        <SelectItem key={p.id} value={p.full_name || p.email || p.id}>
+                          {p.full_name || p.email || p.id}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="item_link">
@@ -1383,7 +1391,7 @@ function NewOrder({ userId }: { userId: string }) {
               </Label>
               <Input id="item_link" type="url" placeholder="https://..." value={itemLink} onChange={(e) => { setItemLink(e.target.value); scheduleAutoFillPrice(e.target.value); }} onPaste={(e) => { const t = e.clipboardData.getData("text"); if (t) setTimeout(() => void tryAutoFillPrice(t), 0); }} onBlur={() => void tryAutoFillPrice(itemLink)} required={isNewItem && requestType === "materiais"} />
             </div>
-            <AddressAutocomplete name="delivery_point" required />
+            {requestType === "materiais" && <AddressAutocomplete name="delivery_point" required />}
 
             <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
               <div className="space-y-2">
