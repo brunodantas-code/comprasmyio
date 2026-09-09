@@ -2089,12 +2089,12 @@ function UsersAdmin() {
     <Card>
       <CardHeader>
         <CardTitle>Usuários</CardTitle>
-        <CardDescription>Clique nos papéis para atribuir ou remover. Defina o gestor direto e as faixas de alçada de cada usuário.</CardDescription>
+        <CardDescription>Marque os perfis para atribuir ou remover. Defina o gestor direto e as faixas de alçada de cada usuário.</CardDescription>
       </CardHeader>
       <CardContent className="overflow-x-auto">
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
           <Table>
-            <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>E-mail</TableHead><TableHead>Gestor direto</TableHead><TableHead>Aprovação automática até (R$)</TableHead><TableHead>Faixa 2 até (R$)</TableHead><TableHead>Faixa 3 até (R$)</TableHead><TableHead>Papéis</TableHead></TableRow></TableHeader>
+            <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>E-mail</TableHead><TableHead>Gestor direto</TableHead><TableHead>Aprovação automática até (R$)</TableHead><TableHead>Faixa 2 até (R$)</TableHead><TableHead>Faixa 3 até (R$)</TableHead><TableHead>Perfis</TableHead></TableRow></TableHeader>
             <TableBody>
               {(data ?? []).map((u) => {
                 const p = u as unknown as { approval_limit?: number; tier2_limit?: number; tier3_limit?: number; manager_id?: string | null };
