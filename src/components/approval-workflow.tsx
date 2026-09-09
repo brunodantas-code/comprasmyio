@@ -334,8 +334,8 @@ function PendingForMe() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <DecisionDialog step={s} decision="aprovado" onDone={refresh} />
-                        <DecisionDialog step={s} decision="rejeitado" onDone={refresh} />
+                        <ApproveButton step={s} onDone={refresh} />
+                        <RejectDialog step={s} onDone={refresh} />
                       </div>
                     </TableCell>
                   </TableRow>
