@@ -899,6 +899,7 @@ function NewOrder({ userId }: { userId: string }) {
     setDeadlineDate("");
     setItem(null);
     setItemLink("");
+    setEstimatedValue("0");
     setIsNewItem(false);
     setNewItemName("");
     setNewItemDest("");
