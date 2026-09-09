@@ -850,20 +850,33 @@ function NewOrder({ userId }: { userId: string }) {
   const [newItemName, setNewItemName] = useState("");
   const [newItemDest, setNewItemDest] = useState<NewItemDest | "">("");
 
+  const lastLookupRef = useRef<string>("");
+  const lookupTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const tryAutoFillPrice = async (url: string) => {
     const trimmed = url.trim();
     if (!/^https?:\/\/.+\..+/.test(trimmed)) return;
+    if (lastLookupRef.current === trimmed) return;
+    lastLookupRef.current = trimmed;
     setLookingUpPrice(true);
     try {
       const { price } = await lookupLinkPrice({ data: { url: trimmed } });
       if (price) {
         setEstimatedValue(String(price));
         toast.success(`Valor estimado preenchido automaticamente: R$ ${price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`);
+      } else {
+        toast.info("Não consegui ler o preço nesse site. Informe o valor estimado manualmente.");
       }
     } finally {
       setLookingUpPrice(false);
     }
   };
+
+  const scheduleAutoFillPrice = (url: string) => {
+    if (lookupTimerRef.current) clearTimeout(lookupTimerRef.current);
+    lookupTimerRef.current = setTimeout(() => void tryAutoFillPrice(url), 700);
+  };
+
 
   const [recipient, setRecipient] = useState("");
   const { data: profiles } = useProfilesList();
@@ -1181,7 +1194,7 @@ function NewOrder({ userId }: { userId: string }) {
               <Label htmlFor="item_link">
                 Link de Referência {isNewItem ? null : <span className="text-muted-foreground">(opcional)</span>}
               </Label>
-              <Input id="item_link" type="url" placeholder="https://..." value={itemLink} onChange={(e) => setItemLink(e.target.value)} onPaste={(e) => { const t = e.clipboardData.getData("text"); if (t) setTimeout(() => tryAutoFillPrice(t), 0); }} onBlur={() => tryAutoFillPrice(itemLink)} required={isNewItem} />
+              <Input id="item_link" type="url" placeholder="https://..." value={itemLink} onChange={(e) => { setItemLink(e.target.value); scheduleAutoFillPrice(e.target.value); }} onPaste={(e) => { const t = e.clipboardData.getData("text"); if (t) setTimeout(() => void tryAutoFillPrice(t), 0); }} onBlur={() => void tryAutoFillPrice(itemLink)} required={isNewItem} />
             </div>
             <AddressAutocomplete name="delivery_point" required />
 
