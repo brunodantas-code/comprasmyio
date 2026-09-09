@@ -60,6 +60,7 @@ type Order = {
   delivery_forecast: string | null;
   attachments: Attachment[] | null;
   request_group_id?: string | null;
+  approval_number?: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -1669,6 +1670,7 @@ function OrdersTable({
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead>Approval</TableHead>
             <TableHead>Item</TableHead>
             <TableHead>Qtd</TableHead>
             <TableHead>Alocação</TableHead>
@@ -1688,6 +1690,7 @@ function OrdersTable({
         <TableBody>
           {orders.map((o) => (
             <TableRow key={o.id}>
+              <TableCell className="whitespace-nowrap font-mono text-xs">{o.approval_number ?? "—"}</TableCell>
               <TableCell>
                 <div className="font-medium">{o.item_name}</div>
                 {o.item_link ? (
