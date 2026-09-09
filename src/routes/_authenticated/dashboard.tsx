@@ -2405,6 +2405,9 @@ function UsersAdmin() {
 /* ---------- Logs ---------- */
 
 function StatusHistoryDialog({ order, canEdit }: { order: Order; canEdit?: boolean }) {
+  const approvalStatus = (order as unknown as { approval_status?: string }).approval_status ?? "aprovado";
+  const awaitingApproval = approvalStatus === "aguardando_aprovacao";
+  if (awaitingApproval) canEdit = false;
   const qc = useQueryClient();
   const updateStatus = useMutation({
     mutationFn: async (next: Order["status"]) => {
