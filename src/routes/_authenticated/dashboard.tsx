@@ -1071,8 +1071,8 @@ function NewOrder({ userId }: { userId: string }) {
 
     const fd = new FormData(e.currentTarget);
     const parsed = newOrderSchema.safeParse({
-      project_id: forStock ? undefined : projectId,
-      item_name: isNewItem ? newItemName : item!.name,
+      project_id: !isMateriais ? (allocTarget === "projeto" ? projectId : undefined) : (forStock ? undefined : projectId),
+      item_name: !isMateriais || isNewItem ? newItemName : item!.name,
       item_link: itemLink || undefined,
       quantity: fd.get("quantity"),
       estimated_value: fd.get("estimated_value") ?? 0,
@@ -1084,7 +1084,8 @@ function NewOrder({ userId }: { userId: string }) {
     });
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
 
-    if (!isNewItem && item) {
+    if (isMateriais && !isNewItem && item) {
+
       setChecking(true);
       try {
         const available = Math.max(0, Math.floor(await fetchAvailableStock(item)));
