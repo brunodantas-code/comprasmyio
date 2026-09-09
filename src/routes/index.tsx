@@ -44,7 +44,7 @@ const FEATURES = [
   },
   {
     icon: Package,
-    title: "Fila de compras",
+    title: "Approvals Pendentes",
     body: "O comprador acompanha status, palavra passe, previsão de entrega e observações.",
   },
   {

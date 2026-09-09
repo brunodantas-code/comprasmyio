@@ -352,7 +352,7 @@ function Dashboard() {
           <TabsList className="mb-6">
             <TabsTrigger value="pedidos"><ClipboardList className="mr-2 h-4 w-4" />Solicitações</TabsTrigger>
             {canSeeQueue && (
-              <TabsTrigger value="queue"><ShoppingCart className="mr-2 h-4 w-4" />Fila de compras</TabsTrigger>
+              <TabsTrigger value="queue"><ShoppingCart className="mr-2 h-4 w-4" />Approvals Pendentes</TabsTrigger>
             )}
             {canSeeStock && <TabsTrigger value="stock"><Boxes className="mr-2 h-4 w-4" />Armazém</TabsTrigger>}
             {isAdmin && <TabsTrigger value="projects"><FolderKanban className="mr-2 h-4 w-4" />Projetos, Clientes e Centros de Custo</TabsTrigger>}
@@ -1729,7 +1729,7 @@ function BuyerQueue() {
     <Card>
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <CardTitle>Fila de compras</CardTitle>
+          <CardTitle>Approvals Pendentes</CardTitle>
           <CardDescription>Todos os pedidos, separados entre itens nacionais e importados. Atualize status e adicione observações.</CardDescription>
         </div>
         <div className="flex flex-wrap items-center gap-2">
