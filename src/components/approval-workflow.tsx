@@ -722,7 +722,11 @@ function RulesAdmin() {
   );
 }
 
-const LEVEL_LABELS = ["Gestor Direto", "Gerente da Área", "Diretor do Departamento", "C-Level"];
+const LEVEL_LABELS: Record<string, string> = {
+  gestor: "Gestor Direto",
+  gerente: "Gerente da Área",
+  c_level: "C-Level",
+};
 
 function MoneyInput({
   value,
@@ -763,7 +767,7 @@ function DefaultChainAdmin() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, full_name, email, approval_limit, tier2_limit, tier3_limit, manager_id")
+        .select("id, full_name, email, approval_limit, tier2_limit, tier3_limit, manager_id, approval_level")
         .order("full_name");
       if (error) throw error;
       return data ?? [];
@@ -802,7 +806,9 @@ function DefaultChainAdmin() {
       const mgrId = byId.get(cur)?.manager_id;
       if (!mgrId) break;
       const mgr = byId.get(mgrId);
-      names.push(`${LEVEL_LABELS[i]}: ${mgr?.full_name || mgr?.email || "—"}`);
+      const lbl = LEVEL_LABELS[mgr?.approval_level ?? ""] ?? "Gestor Direto";
+      names.push(`${lbl}: ${mgr?.full_name || mgr?.email || "—"}`);
+      if (mgr?.approval_level === "c_level") break;
       cur = mgrId;
     }
     return names;
@@ -821,8 +827,8 @@ function DefaultChainAdmin() {
         <CardContent className="space-y-2 text-sm text-muted-foreground">
           <p>• Até a alçada automática do solicitante: aprovação automática, sem etapas.</p>
           <p>• Acima da alçada até a Faixa 2: Gestor Direto → Gerente da Área.</p>
-          <p>• Acima da Faixa 2 até a Faixa 3: Gestor Direto → Gerente da Área → Diretor do Departamento.</p>
-          <p>• Acima da Faixa 3: Gestor Direto → Gerente da Área → Diretor do Departamento → C-Level.</p>
+          <p>• Acima da Faixa 2 até a Faixa 3: Gestor Direto → Gerente da Área → C-Level.</p>
+          <p>• Acima da Faixa 3: sobe pelo organograma até o C-Level.</p>
           <p>• Depois dessas etapas entram as “Etapas adicionais” ativas e, se aplicável, a dupla aprovação.</p>
         </CardContent>
       </Card>
@@ -845,7 +851,7 @@ function DefaultChainAdmin() {
               </TableHeader>
               <TableBody>
                 {(rows ?? []).map((p) => {
-                  const seq = chainFor(p.id, 4);
+                  const seq = chainFor(p.id, 5);
                   return (
                     <TableRow key={p.id}>
                       <TableCell className="font-medium">{p.full_name || p.email}</TableCell>
