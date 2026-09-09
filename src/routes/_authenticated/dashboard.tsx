@@ -27,6 +27,7 @@ import { z } from "zod";
 import { StockTab } from "@/components/stock-tab";
 import { MyioOrdersTab } from "@/components/myio-orders-tab";
 import { ClientsTab, useClients } from "@/components/clients-tab";
+import { CostCentersTab, useCostCenters } from "@/components/cost-centers-tab";
 import { ImportBatchesSection } from "@/components/import-batches";
 import { AddressAutocomplete } from "@/components/address-autocomplete";
 
