@@ -932,6 +932,7 @@ function NewOrder({ userId }: { userId: string }) {
         if (!newItemDest) throw new Error("Selecione o estoque de destino do item novo.");
         ids = await createNewItemRecord(newItemDest, values.item_name, values.item_link ?? null, userId);
       }
+      const requestGroupId = crypto.randomUUID();
       if (shipQty > 0) {
 
         const { data: exp, error: expError } = await supabase
