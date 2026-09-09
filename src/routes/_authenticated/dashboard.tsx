@@ -907,6 +907,7 @@ function NewOrder({ userId }: { userId: string }) {
         const { data, error } = await supabase.from("purchase_orders").insert({
           project_id: forStock ? null : (values.project_id ?? null),
           for_stock: forStock,
+          cost_center_id: costCenterId || null,
           item_name: values.item_name,
           item_link: values.item_link ?? null,
           material_id: ids.material_id,
