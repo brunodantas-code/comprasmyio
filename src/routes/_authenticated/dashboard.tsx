@@ -385,9 +385,11 @@ function Dashboard() {
                 <TabsList className="mb-4">
                   <TabsTrigger value="projetos"><FolderKanban className="mr-2 h-4 w-4" />Projetos</TabsTrigger>
                   <TabsTrigger value="clientes"><Building2 className="mr-2 h-4 w-4" />Clientes</TabsTrigger>
+                  <TabsTrigger value="centros"><Landmark className="mr-2 h-4 w-4" />Centro de Custo</TabsTrigger>
                 </TabsList>
                 <TabsContent value="projetos"><ProjectsAdmin userId={me.id} /></TabsContent>
                 <TabsContent value="clientes"><ClientsTab userId={me.id} /></TabsContent>
+                <TabsContent value="centros"><CostCentersTab userId={me.id} /></TabsContent>
               </Tabs>
             </TabsContent>
           )}
