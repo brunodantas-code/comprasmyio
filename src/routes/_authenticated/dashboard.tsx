@@ -876,6 +876,7 @@ function NewOrder({ userId }: { userId: string }) {
   const [item, setItem] = useState<PurchasableItem | null>(null);
   const [itemLink, setItemLink] = useState("");
   const [estimatedValue, setEstimatedValue] = useState("0");
+  const [qty, setQty] = useState("1");
   const [lookingUpPrice, setLookingUpPrice] = useState(false);
   const [isNewItem, setIsNewItem] = useState(false);
   const [newItemName, setNewItemName] = useState("");
@@ -944,6 +945,7 @@ function NewOrder({ userId }: { userId: string }) {
     setItem(null);
     setItemLink("");
     setEstimatedValue("0");
+    setQty("1");
     setIsNewItem(false);
     setNewItemName("");
     setNewItemDest("");
@@ -1003,7 +1005,7 @@ function NewOrder({ userId }: { userId: string }) {
           tool_asset_id: ids.tool_asset_id,
 
           quantity: buyQty,
-          estimated_value: values.estimated_value,
+          estimated_value: Number((values.estimated_value * buyQty).toFixed(2)),
           recipient: values.recipient,
           requester_notes: values.requester_notes ?? null,
           delivery_point: values.delivery_point,
@@ -1203,14 +1205,17 @@ function NewOrder({ userId }: { userId: string }) {
             <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="quantity">Quantidade</Label>
-                <Input id="quantity" name="quantity" type="number" min={1} defaultValue={1} required />
+                <Input id="quantity" name="quantity" type="number" min={1} value={qty} onChange={(e) => setQty(e.target.value)} required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="estimated_value">Valor estimado (R$)</Label>
+                <Label htmlFor="estimated_value">Valor unitário estimado (R$)</Label>
                 <div className="relative">
                   <Input id="estimated_value" name="estimated_value" type="number" min={0} step="0.01" value={estimatedValue} onChange={(e) => setEstimatedValue(e.target.value)} required />
                   {lookingUpPrice && <Loader2 className="absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />}
                 </div>
+                <p className="text-xs text-muted-foreground">
+                  Total estimado: R$ {(Number(estimatedValue || 0) * Number(qty || 1)).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </p>
               </div>
               {!isNewItem && item && (
                 <div className="space-y-2">
