@@ -850,8 +850,13 @@ function NewOrder({ userId }: { userId: string }) {
   const qc = useQueryClient();
   const [projectId, setProjectId] = useState("");
   const [forStock, setForStock] = useState(false);
+  const [requestType, setRequestType] = useState<"materiais" | "servicos" | "viagens">("materiais");
+  const [allocTarget, setAllocTarget] = useState<"projeto" | "cliente">("projeto");
+  const [clientId, setClientId] = useState("");
+  const { data: clientsList } = useClients();
   const [costCenterId, setCostCenterId] = useState<string>("");
   const { data: costCenters } = useCostCenters();
+
   const { data: me } = useCurrentUser();
   const restrictedCc = !!me && !me.isAdmin && me.roles.some((r) => ["estoquista", "fabrica", "solicitante"].includes(r));
 
@@ -940,6 +945,10 @@ function NewOrder({ userId }: { userId: string }) {
     formRef.current?.reset();
     setProjectId("");
     setForStock(false);
+    setRequestType("materiais");
+    setAllocTarget("projeto");
+    setClientId("");
+
     setFiles([]);
     setDeadlineType("esta_semana");
     setDeadlineDate("");
@@ -964,10 +973,11 @@ function NewOrder({ userId }: { userId: string }) {
         terceiros_material_id: isNewItem ? null : (item?.terceiros_material_id ?? null),
         tool_asset_id: isNewItem ? null : (item?.tool_asset_id ?? null),
       };
-      if (isNewItem) {
+      if (isNewItem && requestType === "materiais") {
         if (!newItemDest) throw new Error("Selecione o estoque de destino do item novo.");
         ids = await createNewItemRecord(newItemDest, values.item_name, values.item_link ?? null, userId);
       }
+
       const requestGroupId = crypto.randomUUID();
       if (shipQty > 0) {
 
@@ -997,7 +1007,10 @@ function NewOrder({ userId }: { userId: string }) {
         const { data, error } = await supabase.from("purchase_orders").insert({
           project_id: forStock ? null : (values.project_id ?? null),
           for_stock: forStock,
+          request_type: requestType,
+          client_id: requestType !== "materiais" && allocTarget === "cliente" ? (clientId || null) : null,
           cost_center_id: restrictedCc ? await resolveOperacaoCostCenterId() : (costCenterId || null),
+
           item_name: values.item_name,
           item_link: values.item_link ?? null,
           request_group_id: requestGroupId,
@@ -1040,24 +1053,27 @@ function NewOrder({ userId }: { userId: string }) {
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (isNewItem) {
+    const isMateriais = requestType === "materiais";
+    if (!isMateriais) {
+      if (newItemName.trim().length < 2) return toast.error("Descreva o serviço ou a viagem solicitada.");
+      if (allocTarget === "projeto" && !projectId) return toast.error("Selecione o projeto");
+      if (allocTarget === "cliente" && !clientId) return toast.error("Selecione o cliente");
+    } else if (isNewItem) {
       if (newItemName.trim().length < 2) return toast.error("Descreva o item novo.");
       if (!newItemDest) return toast.error("Selecione para qual estoque esse item novo será cadastrado.");
       if (checkDuplicates(newItemName)) return;
       if (!itemLink.trim()) return toast.error("Informe o link de referência do item novo.");
-
-
-
     } else if (!item) {
       return toast.error("Selecione um item cadastrado: Insumos de Fabricação, Insumos de Instalação, Material de Almoxarifado ou Máquinas e Ferramentas.");
     }
-    if (!forStock && !projectId) {
+    if (isMateriais && !forStock && !projectId) {
       return toast.error("Selecione um projeto");
     }
+
     const fd = new FormData(e.currentTarget);
     const parsed = newOrderSchema.safeParse({
-      project_id: forStock ? undefined : projectId,
-      item_name: isNewItem ? newItemName : item!.name,
+      project_id: !isMateriais ? (allocTarget === "projeto" ? projectId : undefined) : (forStock ? undefined : projectId),
+      item_name: !isMateriais || isNewItem ? newItemName : item!.name,
       item_link: itemLink || undefined,
       quantity: fd.get("quantity"),
       estimated_value: fd.get("estimated_value") ?? 0,
@@ -1069,7 +1085,8 @@ function NewOrder({ userId }: { userId: string }) {
     });
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
 
-    if (!isNewItem && item) {
+    if (isMateriais && !isNewItem && item) {
+
       setChecking(true);
       try {
         const available = Math.max(0, Math.floor(await fetchAvailableStock(item)));
@@ -1105,63 +1122,160 @@ function NewOrder({ userId }: { userId: string }) {
           <form ref={formRef} onSubmit={onSubmit} className="space-y-4">
 
             <div className="space-y-2">
-              <Label>Alocação</Label>
+              <Label>Tipo de solicitação</Label>
               <div className="flex items-center gap-6">
-                <label className="flex cursor-pointer items-center gap-2 text-sm">
-                  <Checkbox checked={!forStock} onCheckedChange={() => setForStock(false)} />
-                  Projeto
-                </label>
-                <label className="flex cursor-pointer items-center gap-2 text-sm">
-                  <Checkbox checked={forStock} onCheckedChange={() => setForStock(true)} />
-                  Estoque
-                </label>
-               </div>
-               {!restrictedCc && (
-                 <div className="pt-2">
-                   <Label>Centro de Custo</Label>
-                   <Select value={costCenterId} onValueChange={setCostCenterId}>
-                     <SelectTrigger className="mt-2"><SelectValue placeholder="Selecione o centro de custo" /></SelectTrigger>
-                     <SelectContent>
-                       {(costCenters ?? []).filter((c) => c.active).map((c) => (
-                         <SelectItem key={c.id} value={c.id}>{c.code ? `${c.code} — ${c.name}` : c.name}</SelectItem>
-                       ))}
-                     </SelectContent>
-                   </Select>
-                 </div>
-               )}
-             </div>
-             <div className="space-y-2">
-               <Label>Projeto</Label>
-              <Select value={forStock ? "" : projectId} onValueChange={setProjectId} disabled={forStock}>
-                <SelectTrigger><SelectValue placeholder={forStock ? "Compra para estoque" : "Selecione o projeto"} /></SelectTrigger>
-                <SelectContent>
-                  {projects.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center gap-6">
-                <Label>Item</Label>
-                <label className="flex cursor-pointer items-center gap-2 text-sm">
-                  <Checkbox checked={!isNewItem} onCheckedChange={() => { setIsNewItem(false); setNewItemName(""); }} />
-                  Cadastrado
-                </label>
-                <label className="flex cursor-pointer items-center gap-2 text-sm">
-                  <Checkbox checked={isNewItem} onCheckedChange={() => { setIsNewItem(true); setItem(null); setItemLink(""); }} />
-                  Novo
-                </label>
+                {([
+                  ["materiais", "Materiais"],
+                  ["servicos", "Serviços"],
+                  ["viagens", "Viagens"],
+                ] as const).map(([v, l]) => (
+                  <label key={v} className="flex cursor-pointer items-center gap-2 text-sm">
+                    <Checkbox
+                      checked={requestType === v}
+                      onCheckedChange={() => {
+                        setRequestType(v);
+                        if (v === "materiais") {
+                          setClientId("");
+                        } else {
+                          setForStock(false);
+                          setIsNewItem(true);
+                          setItem(null);
+                          setNewItemDest("");
+                        }
+                      }}
+                    />
+                    {l}
+                  </label>
+                ))}
               </div>
-              <PurchasableItemPicker value={isNewItem ? null : item} onPick={(i) => { setItem(i); if (i.link) setItemLink(i.link); }} disabled={isNewItem} />
+              {requestType === "materiais" && (
+                <p className="text-xs text-muted-foreground">Solicitações de Materiais são cadastradas no Armazém.</p>
+              )}
+            </div>
+
+            {requestType === "materiais" ? (
+              <>
+                <div className="space-y-2">
+                  <Label>Alocação</Label>
+                  <div className="flex items-center gap-6">
+                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                      <Checkbox checked={!forStock} onCheckedChange={() => setForStock(false)} />
+                      Projeto
+                    </label>
+                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                      <Checkbox checked={forStock} onCheckedChange={() => setForStock(true)} />
+                      Estoque
+                    </label>
+                  </div>
+                  {!restrictedCc && (
+                    <div className="pt-2">
+                      <Label>Centro de Custo</Label>
+                      <Select value={costCenterId} onValueChange={setCostCenterId}>
+                        <SelectTrigger className="mt-2"><SelectValue placeholder="Selecione o centro de custo" /></SelectTrigger>
+                        <SelectContent>
+                          {(costCenters ?? []).filter((c) => c.active).map((c) => (
+                            <SelectItem key={c.id} value={c.id}>{c.code ? `${c.code} — ${c.name}` : c.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label>Projeto</Label>
+                  <Select value={forStock ? "" : projectId} onValueChange={setProjectId} disabled={forStock}>
+                    <SelectTrigger><SelectValue placeholder={forStock ? "Compra para estoque" : "Selecione o projeto"} /></SelectTrigger>
+                    <SelectContent>
+                      {projects.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="space-y-2">
+                  <Label>Alocação</Label>
+                  <div className="flex items-center gap-6">
+                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                      <Checkbox checked={allocTarget === "projeto"} onCheckedChange={() => { setAllocTarget("projeto"); setClientId(""); }} />
+                      Projeto
+                    </label>
+                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                      <Checkbox checked={allocTarget === "cliente"} onCheckedChange={() => { setAllocTarget("cliente"); setProjectId(""); }} />
+                      Cliente
+                    </label>
+                  </div>
+                  {!restrictedCc && (
+                    <div className="pt-2">
+                      <Label>Centro de Custo</Label>
+                      <Select value={costCenterId} onValueChange={setCostCenterId}>
+                        <SelectTrigger className="mt-2"><SelectValue placeholder="Selecione o centro de custo" /></SelectTrigger>
+                        <SelectContent>
+                          {(costCenters ?? []).filter((c) => c.active).map((c) => (
+                            <SelectItem key={c.id} value={c.id}>{c.code ? `${c.code} — ${c.name}` : c.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </div>
+                {allocTarget === "projeto" ? (
+                  <div className="space-y-2">
+                    <Label>Projeto</Label>
+                    <Select value={projectId} onValueChange={setProjectId}>
+                      <SelectTrigger><SelectValue placeholder="Selecione o projeto" /></SelectTrigger>
+                      <SelectContent>
+                        {projects.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Label>Cliente</Label>
+                    <Select value={clientId} onValueChange={setClientId}>
+                      <SelectTrigger><SelectValue placeholder="Selecione o cliente" /></SelectTrigger>
+                      <SelectContent>
+                        {(clientsList ?? []).map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </>
+            )}
+
+            <div className="space-y-2">
+              {requestType === "materiais" ? (
+                <>
+                  <div className="flex items-center gap-6">
+                    <Label>Item</Label>
+                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                      <Checkbox checked={!isNewItem} onCheckedChange={() => { setIsNewItem(false); setNewItemName(""); }} />
+                      Cadastrado
+                    </label>
+                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                      <Checkbox checked={isNewItem} onCheckedChange={() => { setIsNewItem(true); setItem(null); setItemLink(""); }} />
+                      Novo
+                    </label>
+                  </div>
+                  <PurchasableItemPicker value={isNewItem ? null : item} onPick={(i) => { setItem(i); if (i.link) setItemLink(i.link); }} disabled={isNewItem} />
+                </>
+              ) : (
+                <Label>{requestType === "servicos" ? "Serviço" : "Viagem"}</Label>
+              )}
               {isNewItem ? (
+
                 <div className="space-y-2 pt-1">
-                  <Label htmlFor="new_item_name">Descrição do item</Label>
+                  <Label htmlFor="new_item_name">
+                    {requestType === "materiais" ? "Descrição do item" : requestType === "servicos" ? "Descrição do serviço" : "Descrição da viagem"}
+                  </Label>
                   <Input
                     id="new_item_name"
                     value={newItemName}
                     onChange={(e) => setNewItemName(e.target.value)}
-                    onBlur={(e) => checkDuplicates(e.target.value)}
-                    placeholder="Descreva o item que precisa ser comprado"
+                    onBlur={(e) => { if (requestType === "materiais") checkDuplicates(e.target.value); }}
+                    placeholder={requestType === "materiais" ? "Descreva o item que precisa ser comprado" : requestType === "servicos" ? "Descreva o serviço contratado" : "Descreva a viagem (destino, período, motivo)"}
                   />
+                  {requestType === "materiais" && (
                   <div className="space-y-2 pt-1">
                     <Label>Cadastrar em qual estoque?</Label>
                     <Select value={newItemDest} onValueChange={(v) => setNewItemDest(v as NewItemDest)}>
@@ -1176,6 +1290,8 @@ function NewOrder({ userId }: { userId: string }) {
                       O item será cadastrado nesse banco e a entrada acontece automaticamente ao receber.
                     </p>
                   </div>
+                  )}
+
 
                   <DuplicateItemDialog
                     open={dupOpen}
@@ -1265,7 +1381,7 @@ function NewOrder({ userId }: { userId: string }) {
               <Label htmlFor="item_link">
                 Link de Referência {isNewItem ? null : <span className="text-muted-foreground">(opcional)</span>}
               </Label>
-              <Input id="item_link" type="url" placeholder="https://..." value={itemLink} onChange={(e) => { setItemLink(e.target.value); scheduleAutoFillPrice(e.target.value); }} onPaste={(e) => { const t = e.clipboardData.getData("text"); if (t) setTimeout(() => void tryAutoFillPrice(t), 0); }} onBlur={() => void tryAutoFillPrice(itemLink)} required={isNewItem} />
+              <Input id="item_link" type="url" placeholder="https://..." value={itemLink} onChange={(e) => { setItemLink(e.target.value); scheduleAutoFillPrice(e.target.value); }} onPaste={(e) => { const t = e.clipboardData.getData("text"); if (t) setTimeout(() => void tryAutoFillPrice(t), 0); }} onBlur={() => void tryAutoFillPrice(itemLink)} required={isNewItem && requestType === "materiais"} />
             </div>
             <AddressAutocomplete name="delivery_point" required />
 
