@@ -1021,10 +1021,21 @@ function NewOrder({ userId }: { userId: string }) {
                   <Checkbox checked={forStock} onCheckedChange={() => setForStock(true)} />
                   Estoque
                 </label>
+               </div>
+              <div className="pt-2">
+                <Label>Centro de Custo</Label>
+                <Select value={costCenterId} onValueChange={setCostCenterId}>
+                  <SelectTrigger className="mt-2"><SelectValue placeholder="Selecione o centro de custo" /></SelectTrigger>
+                  <SelectContent>
+                    {(costCenters ?? []).filter((c) => c.active).map((c) => (
+                      <SelectItem key={c.id} value={c.id}>{c.code ? `${c.code} — ${c.name}` : c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Projeto</Label>
+             </div>
+             <div className="space-y-2">
+               <Label>Projeto</Label>
               <Select value={forStock ? "" : projectId} onValueChange={setProjectId} disabled={forStock}>
                 <SelectTrigger><SelectValue placeholder={forStock ? "Compra para estoque" : "Selecione o projeto"} /></SelectTrigger>
                 <SelectContent>
