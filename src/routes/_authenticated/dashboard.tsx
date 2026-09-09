@@ -819,6 +819,25 @@ function NewOrder({ userId }: { userId: string }) {
   const [forStock, setForStock] = useState(false);
   const [costCenterId, setCostCenterId] = useState<string>("");
   const { data: costCenters } = useCostCenters();
+  const { data: me } = useCurrentUser();
+  const restrictedCc = !!me && !me.isAdmin && me.roles.some((r) => ["estoquista", "fabrica", "solicitante"].includes(r));
+
+  async function resolveOperacaoCostCenterId(): Promise<string> {
+    const existing = (costCenters ?? []).find((c) => c.name.trim().toLowerCase() === "operação");
+    if (existing) return existing.id;
+    const { data, error } = await supabase
+      .from("cost_centers")
+      .insert({ name: "Operação", code: "OP", description: "Centro de custo padrão de operação", created_by: userId })
+      .select("id")
+      .single();
+    if (error) {
+      const { data: retry } = await supabase.from("cost_centers").select("id").ilike("name", "Operação").maybeSingle();
+      if (retry) return retry.id;
+      throw error;
+    }
+    qc.invalidateQueries({ queryKey: ["cost_centers"] });
+    return data.id;
+  }
   const [files, setFiles] = useState<File[]>([]);
   const [deadlineType, setDeadlineType] = useState<Order["deadline_type"]>("esta_semana");
   const [deadlineDate, setDeadlineDate] = useState("");
