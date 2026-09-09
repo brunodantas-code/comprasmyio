@@ -20,13 +20,14 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Checkbox } from "@/components/ui/checkbox";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { toast } from "sonner";
-import { LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Boxes, Factory, Building2, Plane } from "lucide-react";
+import { LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Boxes, Factory, Building2, Plane, Landmark } from "lucide-react";
 import { Trash2, Paperclip, X, Download, Loader2, DatabaseBackup, CheckCircle2 } from "lucide-react";
 import { ApprovalWorkflow } from "@/components/approval-workflow";
 import { z } from "zod";
 import { StockTab } from "@/components/stock-tab";
 import { MyioOrdersTab } from "@/components/myio-orders-tab";
 import { ClientsTab, useClients } from "@/components/clients-tab";
+import { CostCentersTab, useCostCenters } from "@/components/cost-centers-tab";
 import { ImportBatchesSection } from "@/components/import-batches";
 import { AddressAutocomplete } from "@/components/address-autocomplete";
 
@@ -351,7 +352,7 @@ function Dashboard() {
               <TabsTrigger value="queue"><ShoppingCart className="mr-2 h-4 w-4" />Fila de compras</TabsTrigger>
             )}
             {canSeeStock && <TabsTrigger value="stock"><Boxes className="mr-2 h-4 w-4" />Armazém</TabsTrigger>}
-            {isAdmin && <TabsTrigger value="projects"><FolderKanban className="mr-2 h-4 w-4" />Projetos e clientes</TabsTrigger>}
+            {isAdmin && <TabsTrigger value="projects"><FolderKanban className="mr-2 h-4 w-4" />Projetos, Clientes e Centros de Custo</TabsTrigger>}
             
             {isAdmin && <TabsTrigger value="myio"><Factory className="mr-2 h-4 w-4" />Solicitações de Projetos</TabsTrigger>}
             {isAdmin && <TabsTrigger value="admin"><Users className="mr-2 h-4 w-4" />Usuários e logs</TabsTrigger>}
@@ -385,9 +386,11 @@ function Dashboard() {
                 <TabsList className="mb-4">
                   <TabsTrigger value="projetos"><FolderKanban className="mr-2 h-4 w-4" />Projetos</TabsTrigger>
                   <TabsTrigger value="clientes"><Building2 className="mr-2 h-4 w-4" />Clientes</TabsTrigger>
+                  <TabsTrigger value="centros"><Landmark className="mr-2 h-4 w-4" />Centro de Custo</TabsTrigger>
                 </TabsList>
                 <TabsContent value="projetos"><ProjectsAdmin userId={me.id} /></TabsContent>
                 <TabsContent value="clientes"><ClientsTab userId={me.id} /></TabsContent>
+                <TabsContent value="centros"><CostCentersTab userId={me.id} /></TabsContent>
               </Tabs>
             </TabsContent>
           )}
@@ -814,6 +817,8 @@ function NewOrder({ userId }: { userId: string }) {
   const qc = useQueryClient();
   const [projectId, setProjectId] = useState("");
   const [forStock, setForStock] = useState(false);
+  const [costCenterId, setCostCenterId] = useState<string>("");
+  const { data: costCenters } = useCostCenters();
   const [files, setFiles] = useState<File[]>([]);
   const [deadlineType, setDeadlineType] = useState<Order["deadline_type"]>("esta_semana");
   const [deadlineDate, setDeadlineDate] = useState("");
@@ -861,6 +866,7 @@ function NewOrder({ userId }: { userId: string }) {
     setNewItemName("");
     setNewItemDest("");
     setRecipient("");
+    setCostCenterId("");
 
   };
 
@@ -902,6 +908,7 @@ function NewOrder({ userId }: { userId: string }) {
         const { data, error } = await supabase.from("purchase_orders").insert({
           project_id: forStock ? null : (values.project_id ?? null),
           for_stock: forStock,
+          cost_center_id: costCenterId || null,
           item_name: values.item_name,
           item_link: values.item_link ?? null,
           material_id: ids.material_id,
@@ -1018,10 +1025,21 @@ function NewOrder({ userId }: { userId: string }) {
                   <Checkbox checked={forStock} onCheckedChange={() => setForStock(true)} />
                   Estoque
                 </label>
+               </div>
+              <div className="pt-2">
+                <Label>Centro de Custo</Label>
+                <Select value={costCenterId} onValueChange={setCostCenterId}>
+                  <SelectTrigger className="mt-2"><SelectValue placeholder="Selecione o centro de custo" /></SelectTrigger>
+                  <SelectContent>
+                    {(costCenters ?? []).filter((c) => c.active).map((c) => (
+                      <SelectItem key={c.id} value={c.id}>{c.code ? `${c.code} — ${c.name}` : c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Projeto</Label>
+             </div>
+             <div className="space-y-2">
+               <Label>Projeto</Label>
               <Select value={forStock ? "" : projectId} onValueChange={setProjectId} disabled={forStock}>
                 <SelectTrigger><SelectValue placeholder={forStock ? "Compra para estoque" : "Selecione o projeto"} /></SelectTrigger>
                 <SelectContent>
