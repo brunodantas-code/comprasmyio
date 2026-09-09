@@ -295,6 +295,39 @@ export type Database = {
         }
         Relationships: []
       }
+      cost_centers: {
+        Row: {
+          active: boolean
+          code: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          code?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          code?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       damaged_items: {
         Row: {
           created_at: string
@@ -1256,6 +1289,7 @@ export type Database = {
           approved_by: string | null
           attachments: Json
           buyer_notes: string | null
+          cost_center_id: string | null
           created_at: string
           deadline_date: string | null
           deadline_type: Database["public"]["Enums"]["deadline_type"]
@@ -1284,6 +1318,7 @@ export type Database = {
           approved_by?: string | null
           attachments?: Json
           buyer_notes?: string | null
+          cost_center_id?: string | null
           created_at?: string
           deadline_date?: string | null
           deadline_type?: Database["public"]["Enums"]["deadline_type"]
@@ -1312,6 +1347,7 @@ export type Database = {
           approved_by?: string | null
           attachments?: Json
           buyer_notes?: string | null
+          cost_center_id?: string | null
           created_at?: string
           deadline_date?: string | null
           deadline_type?: Database["public"]["Enums"]["deadline_type"]
@@ -1335,6 +1371,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "purchase_orders_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "purchase_orders_material_id_fkey"
             columns: ["material_id"]
