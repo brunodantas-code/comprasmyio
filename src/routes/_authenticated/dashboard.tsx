@@ -1586,7 +1586,7 @@ function BuyerQueue() {
 /* ---------- Orders table ---------- */
 
 function OrdersTable({
-  orders, projectName, requesterName, showRequester, canEdit, canDelete, canEditRequester,
+  orders, projectName, requesterName, showRequester, canEdit, canDelete, canEditRequester, stockParts,
 }: {
   orders: Order[];
   projectName: (id: string) => string;
@@ -1595,6 +1595,7 @@ function OrdersTable({
   canEdit?: boolean;
   canDelete?: boolean;
   canEditRequester?: boolean;
+  stockParts?: Map<string, StockPart>;
 }) {
   const { data: me } = useCurrentUser();
   return (
