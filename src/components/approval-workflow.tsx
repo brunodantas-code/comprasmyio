@@ -77,7 +77,7 @@ function useSteps() {
       const { data, error } = await supabase
         .from("approval_steps")
         .select(
-          "id, order_id, step_index, role_label, approver_id, status, comment, decided_at, decided_by, created_at, purchase_orders(id, item_name, quantity, estimated_value, approval_status, requester_id, created_at)"
+          "id, order_id, step_index, role_label, approver_id, status, comment, decided_at, decided_by, created_at, purchase_orders(id, item_name, quantity, estimated_value, approval_status, requester_id, created_at, approval_number)"
         )
         .order("step_index", { ascending: true });
       if (error) throw error;
@@ -271,6 +271,7 @@ function PendingForMe() {
   const { data: me } = useCurrentUser();
   const { data: steps, isLoading } = useSteps();
   const { data: profiles } = useProfiles();
+  const [search, setSearch] = useState("");
 
   const mine = useMemo(() => {
     if (!steps || !me) return [] as StepRow[];
@@ -286,9 +287,11 @@ function PendingForMe() {
       const earlier = (byOrder.get(s.order_id) ?? []).filter(
         (o) => o.step_index < s.step_index && o.status === "pendente"
       );
-      return earlier.length === 0;
+      if (earlier.length !== 0) return false;
+      const term = search.trim();
+      return !term || (s.purchase_orders?.approval_number ?? "").includes(term);
     });
-  }, [steps, me]);
+  }, [steps, me, search]);
 
   const refresh = () => {
     qc.invalidateQueries({ queryKey: ["approval-steps"] });
@@ -298,8 +301,18 @@ function PendingForMe() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Pendentes comigo</CardTitle>
-        <CardDescription>Etapas aguardando sua decisão na sequência de aprovação.</CardDescription>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <CardTitle>Pendentes comigo</CardTitle>
+            <CardDescription>Etapas aguardando sua decisão na sequência de aprovação.</CardDescription>
+          </div>
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar nº do approval"
+            className="w-full sm:w-[200px]"
+          />
+        </div>
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -310,6 +323,7 @@ function PendingForMe() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Approval</TableHead>
                 <TableHead>Item</TableHead>
                 <TableHead>Solicitante</TableHead>
                 <TableHead>Valor</TableHead>
@@ -323,6 +337,7 @@ function PendingForMe() {
                 const req = o?.requester_id ? profiles?.get(o.requester_id) : undefined;
                 return (
                   <TableRow key={s.id}>
+                    <TableCell className="whitespace-nowrap font-mono text-xs">{o?.approval_number ?? "—"}</TableCell>
                     <TableCell className="font-medium">
                       {o?.item_name ?? "—"}
                       <span className="ml-1 text-xs text-muted-foreground">x{o?.quantity ?? 1}</span>
@@ -352,6 +367,7 @@ function PendingForMe() {
 function FlowsOverview() {
   const { data: steps, isLoading } = useSteps();
   const { data: profiles } = useProfiles();
+  const [search, setSearch] = useState("");
 
   const orders = useMemo(() => {
     const byOrder = new Map<string, StepRow[]>();
@@ -360,18 +376,31 @@ function FlowsOverview() {
       arr.push(s);
       byOrder.set(s.order_id, arr);
     });
-    return [...byOrder.entries()].sort((a, b) => {
+    const term = search.trim();
+    return [...byOrder.entries()]
+      .filter(([, list]) => !term || (list[0]?.purchase_orders?.approval_number ?? "").includes(term))
+      .sort((a, b) => {
       const da = a[1][0]?.purchase_orders?.created_at ?? "";
       const db = b[1][0]?.purchase_orders?.created_at ?? "";
       return db.localeCompare(da);
     });
-  }, [steps]);
+  }, [steps, search]);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Solicitações em fluxo</CardTitle>
-        <CardDescription>Sequência de aprovação de cada solicitação e trilha de auditoria.</CardDescription>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <CardTitle>Solicitações em fluxo</CardTitle>
+            <CardDescription>Sequência de aprovação de cada solicitação e trilha de auditoria.</CardDescription>
+          </div>
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar nº do approval"
+            className="w-full sm:w-[200px]"
+          />
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {isLoading ? (
@@ -386,6 +415,7 @@ function FlowsOverview() {
               <div key={orderId} className="rounded-lg border p-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
+                    <p className="font-mono text-xs text-muted-foreground">{o?.approval_number ?? "—"}</p>
                     <p className="font-medium">
                       {o?.item_name ?? "—"}{" "}
                       <span className="text-xs text-muted-foreground">x{o?.quantity ?? 1}</span>

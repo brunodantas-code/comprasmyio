@@ -1287,6 +1287,7 @@ export type Database = {
       }
       purchase_orders: {
         Row: {
+          approval_number: string | null
           approval_status: string
           approved_at: string | null
           approved_by: string | null
@@ -1317,6 +1318,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          approval_number?: string | null
           approval_status?: string
           approved_at?: string | null
           approved_by?: string | null
@@ -1347,6 +1349,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          approval_number?: string | null
           approval_status?: string
           approved_at?: string | null
           approved_by?: string | null
