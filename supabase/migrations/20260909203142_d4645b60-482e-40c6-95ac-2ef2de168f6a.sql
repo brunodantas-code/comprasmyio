@@ -1,0 +1,1 @@
+ALTER TABLE public.purchase_orders ALTER COLUMN delivery_point DROP NOT NULL;
