@@ -973,7 +973,7 @@ function OrgChartAdmin() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, full_name, email, manager_id")
+        .select("id, full_name, email, manager_id, approval_level")
         .order("full_name");
       if (error) throw error;
       return data ?? [];
@@ -993,6 +993,20 @@ function OrgChartAdmin() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  const saveLevel = useMutation({
+    mutationFn: async ({ userId, level }: { userId: string; level: string | null }) => {
+      const { error } = await supabase.from("profiles").update({ approval_level: level }).eq("id", userId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Nível de aprovação atualizado");
+      qc.invalidateQueries({ queryKey: ["aw-org-chart"] });
+      qc.invalidateQueries({ queryKey: ["aw-default-chain"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
 
   const roots = useMemo(() => {
     const list = rows ?? [];
