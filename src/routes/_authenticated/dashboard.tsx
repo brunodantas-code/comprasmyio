@@ -2450,7 +2450,11 @@ function StatusHistoryDialog({ order, canEdit }: { order: Order; canEdit?: boole
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <button type="button" className="cursor-pointer">
-          <Badge className={STATUS_CLASSES[order.status]}>{STATUS_LABELS[order.status]}</Badge>
+          {awaitingApproval ? (
+            <Badge className="bg-orange-500 hover:bg-orange-500 text-white border-transparent">Aguardando aprovação</Badge>
+          ) : (
+            <Badge className={STATUS_CLASSES[order.status]}>{STATUS_LABELS[order.status]}</Badge>
+          )}
         </button>
       </DialogTrigger>
       <DialogContent>
