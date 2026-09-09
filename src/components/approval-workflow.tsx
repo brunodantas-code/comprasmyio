@@ -1025,15 +1025,35 @@ function OrgChartAdmin() {
         children: [],
       })
     );
+    const managerOf = new Map<string, string | null>(list.map((p) => [p.id, p.manager_id ?? null]));
+    // raiz = sem gestor, gestor inexistente, ou o próprio usuário faz parte de um ciclo
+    const isRoot = (id: string) => {
+      const first = managerOf.get(id) ?? null;
+      if (!first || !nodes.has(first) || first === id) return true;
+      const seen = new Set<string>();
+      let cur: string | null = first;
+      while (cur && nodes.has(cur)) {
+        if (cur === id) return true; // ciclo que volta ao próprio usuário
+        if (seen.has(cur)) return false; // ciclo que não inclui este usuário
+        seen.add(cur);
+        cur = managerOf.get(cur) ?? null;
+      }
+      return false;
+    };
+
     const top: OrgNode[] = [];
     list.forEach((p) => {
       const node = nodes.get(p.id)!;
-      const parent = p.manager_id ? nodes.get(p.manager_id) : undefined;
-      if (parent && parent.id !== node.id) parent.children.push(node);
-      else top.push(node);
+      if (isRoot(p.id)) {
+        top.push(node);
+        return;
+      }
+      const parent = nodes.get(p.manager_id!)!;
+      parent.children.push(node);
     });
     return top;
   }, [rows, profiles]);
+
 
   return (
     <div className="space-y-4">
