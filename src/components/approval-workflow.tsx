@@ -95,31 +95,47 @@ function StatusBadge({ status }: { status: string }) {
   return <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100">Pendente</Badge>;
 }
 
-function DecisionDialog({
-  step,
-  decision,
-  onDone,
-}: {
-  step: StepRow;
-  decision: "aprovado" | "rejeitado";
-  onDone: () => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const [comment, setComment] = useState("");
-  const decide = useMutation({
+function ApproveButton({ step, onDone }: { step: StepRow; onDone: () => void }) {
+  const approve = useMutation({
     mutationFn: async () => {
-      if (decision === "rejeitado" && !comment.trim()) {
-        throw new Error("Informe o motivo da rejeição");
-      }
       const { error } = await supabase.rpc("decide_approval_step", {
         _step_id: step.id,
-        _decision: decision,
-        _comment: comment.trim() || undefined,
+        _decision: "aprovado",
       });
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success(decision === "aprovado" ? "Etapa aprovada" : "Solicitação rejeitada");
+      toast.success("Etapa aprovada");
+      onDone();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <Button size="sm" onClick={() => approve.mutate()} disabled={approve.isPending}>
+      <CheckCircle2 className="mr-2 h-4 w-4" />
+      Aprovar
+    </Button>
+  );
+}
+
+function RejectDialog({ step, onDone }: { step: StepRow; onDone: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [comment, setComment] = useState("");
+  const decide = useMutation({
+    mutationFn: async () => {
+      if (!comment.trim()) {
+        throw new Error("Informe o motivo da rejeição");
+      }
+      const { error } = await supabase.rpc("decide_approval_step", {
+        _step_id: step.id,
+        _decision: "rejeitado",
+        _comment: comment.trim(),
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Solicitação rejeitada");
       setOpen(false);
       setComment("");
       onDone();
@@ -130,40 +146,34 @@ function DecisionDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant={decision === "aprovado" ? "default" : "outline"}>
-          {decision === "aprovado" ? (
-            <CheckCircle2 className="mr-2 h-4 w-4" />
-          ) : (
-            <XCircle className="mr-2 h-4 w-4" />
-          )}
-          {decision === "aprovado" ? "Aprovar" : "Rejeitar"}
+        <Button size="sm" variant="outline">
+          <XCircle className="mr-2 h-4 w-4" />
+          Rejeitar
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{decision === "aprovado" ? "Aprovar etapa" : "Rejeitar solicitação"}</DialogTitle>
+          <DialogTitle>Rejeitar solicitação</DialogTitle>
           <DialogDescription>
-            {decision === "rejeitado"
-              ? `${step.role_label} — descreva o motivo da rejeição. Ele será enviado ao solicitante.`
-              : `${step.role_label} — registre uma justificativa para a auditoria.`}
+            {step.role_label} — descreva o motivo da rejeição. Ele será enviado ao solicitante.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-2">
           <Label>
-            Observações {decision === "rejeitado" && <span className="text-destructive">*</span>}
+            Observações <span className="text-destructive">*</span>
           </Label>
           <Textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            placeholder={decision === "rejeitado" ? "Motivo da rejeição" : "Justificativa / comentário"}
+            placeholder="Motivo da rejeição"
             rows={4}
           />
         </div>
         <DialogFooter>
           <Button
             onClick={() => decide.mutate()}
-            disabled={decide.isPending || (decision === "rejeitado" && !comment.trim())}
-            variant={decision === "rejeitado" ? "destructive" : "default"}
+            disabled={decide.isPending || !comment.trim()}
+            variant="destructive"
           >
             Confirmar
           </Button>
@@ -324,8 +334,8 @@ function PendingForMe() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <DecisionDialog step={s} decision="aprovado" onDone={refresh} />
-                        <DecisionDialog step={s} decision="rejeitado" onDone={refresh} />
+                        <ApproveButton step={s} onDone={refresh} />
+                        <RejectDialog step={s} onDone={refresh} />
                       </div>
                     </TableCell>
                   </TableRow>
