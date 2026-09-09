@@ -1069,6 +1069,9 @@ function NewOrder({ userId }: { userId: string }) {
     if (isMateriais && !forStock && !projectId) {
       return toast.error("Selecione um projeto");
     }
+    if (isMateriais && !recipient.trim()) {
+      return toast.error("Selecione o destinatário");
+    }
 
     const fd = new FormData(e.currentTarget);
     const parsed = newOrderSchema.safeParse({
