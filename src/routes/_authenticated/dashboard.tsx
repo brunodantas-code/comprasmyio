@@ -2135,18 +2135,18 @@ function UsersAdmin() {
                     />
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-x-3 gap-y-1">
                       {allRoles.map((r) => {
                         const has = u.roles.includes(r);
                         return (
-                          <Button
-                            key={r}
-                            size="sm"
-                            variant={has ? "default" : "outline"}
-                            onClick={() => toggleRole.mutate({ userId: u.id, role: r, has })}
-                          >
-                            {r}
-                          </Button>
+                          <label key={r} className="flex items-center gap-1 text-xs cursor-pointer select-none">
+                            <Checkbox
+                              checked={has}
+                              onCheckedChange={() => toggleRole.mutate({ userId: u.id, role: r, has })}
+                              className="h-3.5 w-3.5"
+                            />
+                            <span className={has ? "font-medium" : "text-muted-foreground"}>{r}</span>
+                          </label>
                         );
                       })}
                     </div>
