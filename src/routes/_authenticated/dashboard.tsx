@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { MyioLogo } from "@/components/myio-logo";
 import { supabase } from "@/integrations/supabase/client";
 import { exportDatabaseBackup } from "@/lib/backup.functions";
+import { lookupLinkPrice } from "@/lib/price-lookup.functions";
 import { useCurrentUser, type AppRole } from "@/hooks/use-current-user";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -843,9 +844,26 @@ function NewOrder({ userId }: { userId: string }) {
   const [deadlineDate, setDeadlineDate] = useState("");
   const [item, setItem] = useState<PurchasableItem | null>(null);
   const [itemLink, setItemLink] = useState("");
+  const [estimatedValue, setEstimatedValue] = useState("0");
+  const [lookingUpPrice, setLookingUpPrice] = useState(false);
   const [isNewItem, setIsNewItem] = useState(false);
   const [newItemName, setNewItemName] = useState("");
   const [newItemDest, setNewItemDest] = useState<NewItemDest | "">("");
+
+  const tryAutoFillPrice = async (url: string) => {
+    const trimmed = url.trim();
+    if (!/^https?:\/\/.+\..+/.test(trimmed)) return;
+    setLookingUpPrice(true);
+    try {
+      const { price } = await lookupLinkPrice({ data: { url: trimmed } });
+      if (price) {
+        setEstimatedValue(String(price));
+        toast.success(`Valor estimado preenchido automaticamente: R$ ${price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`);
+      }
+    } finally {
+      setLookingUpPrice(false);
+    }
+  };
 
   const [recipient, setRecipient] = useState("");
   const { data: profiles } = useProfilesList();
@@ -881,6 +899,7 @@ function NewOrder({ userId }: { userId: string }) {
     setDeadlineDate("");
     setItem(null);
     setItemLink("");
+    setEstimatedValue("0");
     setIsNewItem(false);
     setNewItemName("");
     setNewItemDest("");
@@ -1139,7 +1158,10 @@ function NewOrder({ userId }: { userId: string }) {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="estimated_value">Valor estimado (R$)</Label>
-                <Input id="estimated_value" name="estimated_value" type="number" min={0} step="0.01" defaultValue={0} required />
+                <div className="relative">
+                  <Input id="estimated_value" name="estimated_value" type="number" min={0} step="0.01" value={estimatedValue} onChange={(e) => setEstimatedValue(e.target.value)} required />
+                  {lookingUpPrice && <Loader2 className="absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />}
+                </div>
               </div>
               <div className="space-y-2">
                 <Label>Destinatário</Label>
@@ -1159,7 +1181,7 @@ function NewOrder({ userId }: { userId: string }) {
               <Label htmlFor="item_link">
                 Link de Referência {isNewItem ? null : <span className="text-muted-foreground">(opcional)</span>}
               </Label>
-              <Input id="item_link" type="url" placeholder="https://..." value={itemLink} onChange={(e) => setItemLink(e.target.value)} required={isNewItem} />
+              <Input id="item_link" type="url" placeholder="https://..." value={itemLink} onChange={(e) => setItemLink(e.target.value)} onPaste={(e) => { const t = e.clipboardData.getData("text"); if (t) setTimeout(() => tryAutoFillPrice(t), 0); }} onBlur={() => tryAutoFillPrice(itemLink)} required={isNewItem} />
             </div>
             <AddressAutocomplete name="delivery_point" required />
 
