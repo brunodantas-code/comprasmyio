@@ -964,6 +964,7 @@ function NewOrder({ userId }: { userId: string }) {
           cost_center_id: restrictedCc ? await resolveOperacaoCostCenterId() : (costCenterId || null),
           item_name: values.item_name,
           item_link: values.item_link ?? null,
+          request_group_id: requestGroupId,
           material_id: ids.material_id,
           terceiros_material_id: ids.terceiros_material_id,
           tool_asset_id: ids.tool_asset_id,
