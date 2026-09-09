@@ -952,6 +952,8 @@ function NewOrder({ userId }: { userId: string }) {
 
   };
 
+  const avgPrice = useAvgUnitPrice(isNewItem ? null : item);
+
   const submit = useMutation({
     mutationFn: async ({ values, buyQty, shipQty }: { values: z.infer<typeof newOrderSchema>; buyQty: number; shipQty: number }) => {
       let ids = {
