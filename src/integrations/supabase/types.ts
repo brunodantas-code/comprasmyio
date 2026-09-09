@@ -1162,6 +1162,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          approval_level: string | null
           approval_limit: number
           created_at: string
           email: string | null
@@ -1172,6 +1173,7 @@ export type Database = {
           tier3_limit: number
         }
         Insert: {
+          approval_level?: string | null
           approval_limit?: number
           created_at?: string
           email?: string | null
@@ -1182,6 +1184,7 @@ export type Database = {
           tier3_limit?: number
         }
         Update: {
+          approval_level?: string | null
           approval_limit?: number
           created_at?: string
           email?: string | null
