@@ -879,6 +879,10 @@ function NewOrder({ userId }: { userId: string }) {
   const [files, setFiles] = useState<File[]>([]);
   const [deadlineType, setDeadlineType] = useState<Order["deadline_type"]>("esta_semana");
   const [deadlineDate, setDeadlineDate] = useState("");
+  const [travelType, setTravelType] = useState("");
+  const [travelDestination, setTravelDestination] = useState("");
+  const [travelDeparture, setTravelDeparture] = useState("");
+  const [travelReturn, setTravelReturn] = useState("");
   const [item, setItem] = useState<PurchasableItem | null>(null);
   const [itemLink, setItemLink] = useState("");
   const [estimatedValue, setEstimatedValue] = useState("0");
