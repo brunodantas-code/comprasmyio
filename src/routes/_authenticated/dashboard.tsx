@@ -2704,16 +2704,73 @@ function LogsAdmin() {
     },
   });
 
+  const [fAction, setFAction] = useState("all");
+  const [fActor, setFActor] = useState("all");
+  const [fFrom, setFFrom] = useState("");
+  const [fTo, setFTo] = useState("");
+
+  const actions = Array.from(new Set((logs ?? []).map((l) => l.action))).sort();
+  const actors = Array.from(new Set((logs ?? []).map((l) => l.actor_id).filter(Boolean) as string[]))
+    .map((id) => ({ id, name: profiles?.get(id)?.full_name || profiles?.get(id)?.email || id }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  const filtered = (logs ?? []).filter((l) => {
+    if (fAction !== "all" && l.action !== fAction) return false;
+    if (fActor !== "all" && l.actor_id !== fActor) return false;
+    const when = new Date(l.created_at);
+    if (fFrom && when < new Date(fFrom + "T00:00:00")) return false;
+    if (fTo && when > new Date(fTo + "T23:59:59")) return false;
+    return true;
+  });
+
+  const hasFilters = fAction !== "all" || fActor !== "all" || fFrom || fTo;
+
   return (
     <Card>
       <CardHeader><CardTitle>Logs de pedidos</CardTitle><CardDescription>Últimas 200 ações.</CardDescription></CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="space-y-1">
+            <Label className="text-xs">Ação</Label>
+            <Select value={fAction} onValueChange={setFAction}>
+              <SelectTrigger className="h-9 w-48"><SelectValue placeholder="Todas" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas</SelectItem>
+                {actions.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">Quem</Label>
+            <Select value={fActor} onValueChange={setFActor}>
+              <SelectTrigger className="h-9 w-56"><SelectValue placeholder="Todos" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                {actors.map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">De</Label>
+            <Input type="date" className="h-9 w-40" value={fFrom} onChange={(e) => setFFrom(e.target.value)} />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">Até</Label>
+            <Input type="date" className="h-9 w-40" value={fTo} onChange={(e) => setFTo(e.target.value)} />
+          </div>
+          {hasFilters && (
+            <Button variant="ghost" size="sm" onClick={() => { setFAction("all"); setFActor("all"); setFFrom(""); setFTo(""); }}>
+              Limpar filtros
+            </Button>
+          )}
+        </div>
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
           !logs?.length ? <p className="text-sm text-muted-foreground">Nada registrado ainda.</p> :
+          !filtered.length ? <p className="text-sm text-muted-foreground">Nenhum registro para os filtros selecionados.</p> :
           <Table>
             <TableHeader><TableRow><TableHead>Quando</TableHead><TableHead>Ação</TableHead><TableHead>Pedido</TableHead><TableHead>Quem</TableHead><TableHead>Detalhes</TableHead></TableRow></TableHeader>
             <TableBody>
-              {logs.map((l) => {
+              {filtered.map((l) => {
                 const item = (l as unknown as { purchase_orders?: { item_name: string } }).purchase_orders?.item_name ?? "—";
                 const actor = l.actor_id ? (profiles?.get(l.actor_id)?.full_name || profiles?.get(l.actor_id)?.email || "—") : "—";
                 return (
