@@ -2060,7 +2060,7 @@ function UsersAdmin() {
         if (error) throw error;
       }
     },
-    onSuccess: () => { toast.success("Papéis atualizados"); qc.invalidateQueries({ queryKey: ["admin-users"] }); },
+    onSuccess: () => { toast.success("Perfis atualizados"); qc.invalidateQueries({ queryKey: ["admin-users"] }); },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -2089,12 +2089,12 @@ function UsersAdmin() {
     <Card>
       <CardHeader>
         <CardTitle>Usuários</CardTitle>
-        <CardDescription>Clique nos papéis para atribuir ou remover. Defina o gestor direto e as faixas de alçada de cada usuário.</CardDescription>
+        <CardDescription>Marque os perfis para atribuir ou remover. Defina o gestor direto e as faixas de alçada de cada usuário.</CardDescription>
       </CardHeader>
       <CardContent className="overflow-x-auto">
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
           <Table>
-            <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>E-mail</TableHead><TableHead>Gestor direto</TableHead><TableHead>Aprovação automática até (R$)</TableHead><TableHead>Faixa 2 até (R$)</TableHead><TableHead>Faixa 3 até (R$)</TableHead><TableHead>Papéis</TableHead></TableRow></TableHeader>
+            <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>E-mail</TableHead><TableHead>Gestor direto</TableHead><TableHead>Aprovação automática até (R$)</TableHead><TableHead>Faixa 2 até (R$)</TableHead><TableHead>Faixa 3 até (R$)</TableHead><TableHead>Perfis</TableHead></TableRow></TableHeader>
             <TableBody>
               {(data ?? []).map((u) => {
                 const p = u as unknown as { approval_limit?: number; tier2_limit?: number; tier3_limit?: number; manager_id?: string | null };
@@ -2135,18 +2135,18 @@ function UsersAdmin() {
                     />
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-x-3 gap-y-1">
                       {allRoles.map((r) => {
                         const has = u.roles.includes(r);
                         return (
-                          <Button
-                            key={r}
-                            size="sm"
-                            variant={has ? "default" : "outline"}
-                            onClick={() => toggleRole.mutate({ userId: u.id, role: r, has })}
-                          >
-                            {r}
-                          </Button>
+                          <label key={r} className="flex items-center gap-1 text-xs cursor-pointer select-none">
+                            <Checkbox
+                              checked={has}
+                              onCheckedChange={() => toggleRole.mutate({ userId: u.id, role: r, has })}
+                              className="h-3.5 w-3.5"
+                            />
+                            <span className={has ? "font-medium" : "text-muted-foreground"}>{r}</span>
+                          </label>
                         );
                       })}
                     </div>
