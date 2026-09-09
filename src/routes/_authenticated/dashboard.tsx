@@ -946,6 +946,7 @@ function NewOrder({ userId }: { userId: string }) {
               : new Date().toISOString().slice(0, 10),
             notes: `Gerado a partir de solicitação (${shipQty} em estoque). Destinatário: ${values.recipient}. Entrega: ${values.delivery_point}.`,
             created_by: userId,
+            request_group_id: requestGroupId,
           })
           .select("id")
           .single();
