@@ -1366,19 +1366,21 @@ function NewOrder({ userId }: { userId: string }) {
                   )}
                 </div>
               )}
-              <div className="space-y-2">
-                <Label>Destinatário</Label>
-                <Select value={recipient} onValueChange={setRecipient}>
-                  <SelectTrigger><SelectValue placeholder="Selecione o usuário" /></SelectTrigger>
-                  <SelectContent>
-                    {(profiles ?? []).map((p) => (
-                      <SelectItem key={p.id} value={p.full_name || p.email || p.id}>
-                        {p.full_name || p.email || p.id}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {requestType === "materiais" && (
+                <div className="space-y-2">
+                  <Label>Destinatário</Label>
+                  <Select value={recipient} onValueChange={setRecipient}>
+                    <SelectTrigger><SelectValue placeholder="Selecione o usuário" /></SelectTrigger>
+                    <SelectContent>
+                      {(profiles ?? []).map((p) => (
+                        <SelectItem key={p.id} value={p.full_name || p.email || p.id}>
+                          {p.full_name || p.email || p.id}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="item_link">
@@ -1386,7 +1388,7 @@ function NewOrder({ userId }: { userId: string }) {
               </Label>
               <Input id="item_link" type="url" placeholder="https://..." value={itemLink} onChange={(e) => { setItemLink(e.target.value); scheduleAutoFillPrice(e.target.value); }} onPaste={(e) => { const t = e.clipboardData.getData("text"); if (t) setTimeout(() => void tryAutoFillPrice(t), 0); }} onBlur={() => void tryAutoFillPrice(itemLink)} required={isNewItem && requestType === "materiais"} />
             </div>
-            <AddressAutocomplete name="delivery_point" required />
+            {requestType === "materiais" && <AddressAutocomplete name="delivery_point" required />}
 
             <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
               <div className="space-y-2">
