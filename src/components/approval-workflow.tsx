@@ -1025,15 +1025,34 @@ function OrgChartAdmin() {
         children: [],
       })
     );
+    const managerOf = new Map<string, string | null>(list.map((p) => [p.id, p.manager_id ?? null]));
+    // um usuário é raiz quando não tem gestor, o gestor não existe, ou a cadeia forma um ciclo
+    const isRoot = (id: string) => {
+      const seen = new Set<string>([id]);
+      let cur = managerOf.get(id) ?? null;
+      if (!cur || !nodes.has(cur) || cur === id) return true;
+      while (cur) {
+        if (seen.has(cur)) return true; // ciclo
+        seen.add(cur);
+        const next = managerOf.get(cur) ?? null;
+        if (next && !nodes.has(next)) return false;
+        cur = next;
+      }
+      return false;
+    };
     const top: OrgNode[] = [];
     list.forEach((p) => {
       const node = nodes.get(p.id)!;
-      const parent = p.manager_id ? nodes.get(p.manager_id) : undefined;
-      if (parent && parent.id !== node.id) parent.children.push(node);
-      else top.push(node);
+      if (isRoot(p.id)) {
+        top.push(node);
+        return;
+      }
+      const parent = nodes.get(p.manager_id!)!;
+      parent.children.push(node);
     });
     return top;
   }, [rows, profiles]);
+
 
   return (
     <div className="space-y-4">
