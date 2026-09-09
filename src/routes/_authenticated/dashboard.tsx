@@ -2060,7 +2060,7 @@ function UsersAdmin() {
         if (error) throw error;
       }
     },
-    onSuccess: () => { toast.success("Papéis atualizados"); qc.invalidateQueries({ queryKey: ["admin-users"] }); },
+    onSuccess: () => { toast.success("Perfis atualizados"); qc.invalidateQueries({ queryKey: ["admin-users"] }); },
     onError: (e: Error) => toast.error(e.message),
   });
 
