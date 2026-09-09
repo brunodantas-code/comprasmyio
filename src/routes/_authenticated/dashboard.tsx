@@ -2073,6 +2073,17 @@ function UsersAdmin() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const roleLabels: Record<AppRole, string> = {
+    admin: "Admin",
+    comprador: "Comprador",
+    fabrica: "Fábrica",
+    estoquista: "Estoquista",
+    solicitante: "Solicitante",
+    coo: "COO",
+    ceo: "CEO",
+    cfo: "CFO",
+    cto: "CTO",
+  };
   const allRoles: AppRole[] = [
     "admin",
     "comprador",
@@ -2084,6 +2095,8 @@ function UsersAdmin() {
     "cfo",
     "cto",
   ];
+  const rolesCol1 = allRoles.slice(0, 5);
+  const rolesCol2 = allRoles.slice(5);
 
   return (
     <Card>
