@@ -1151,6 +1151,9 @@ function NewOrder({ userId }: { userId: string }) {
               {requestType === "materiais" && (
                 <p className="text-xs text-muted-foreground">Solicitações de Materiais são cadastradas no Armazém.</p>
               )}
+              {requestType === "viagens" && (
+                <p className="text-xs text-muted-foreground">Passagens, Hospedagens, Aluguel de Veículos.</p>
+              )}
             </div>
 
             {requestType === "materiais" ? (
