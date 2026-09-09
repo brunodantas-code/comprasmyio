@@ -1212,6 +1212,28 @@ function NewOrder({ userId }: { userId: string }) {
                   {lookingUpPrice && <Loader2 className="absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />}
                 </div>
               </div>
+              {!isNewItem && item && (
+                <div className="space-y-2">
+                  <Label>Valor médio (últimos 6 meses)</Label>
+                  <Input
+                    readOnly
+                    tabIndex={-1}
+                    className="bg-muted"
+                    value={
+                      avgPrice.isLoading
+                        ? "Calculando..."
+                        : avgPrice.data
+                          ? `R$ ${avgPrice.data.avg.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} / unid.`
+                          : "Sem compras nos últimos 6 meses"
+                    }
+                  />
+                  {avgPrice.data && (
+                    <p className="text-xs text-muted-foreground">
+                      Média de {avgPrice.data.count} compra{avgPrice.data.count > 1 ? "s" : ""} deste item.
+                    </p>
+                  )}
+                </div>
+              )}
               <div className="space-y-2">
                 <Label>Destinatário</Label>
                 <Select value={recipient} onValueChange={setRecipient}>
