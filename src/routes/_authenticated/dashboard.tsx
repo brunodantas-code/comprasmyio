@@ -817,6 +817,8 @@ function NewOrder({ userId }: { userId: string }) {
   const qc = useQueryClient();
   const [projectId, setProjectId] = useState("");
   const [forStock, setForStock] = useState(false);
+  const [costCenterId, setCostCenterId] = useState<string>("");
+  const { data: costCenters } = useCostCenters();
   const [files, setFiles] = useState<File[]>([]);
   const [deadlineType, setDeadlineType] = useState<Order["deadline_type"]>("esta_semana");
   const [deadlineDate, setDeadlineDate] = useState("");
