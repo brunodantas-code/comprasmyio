@@ -59,6 +59,7 @@ type Order = {
   passphrase: string | null;
   delivery_forecast: string | null;
   attachments: Attachment[] | null;
+  request_group_id?: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -813,6 +814,36 @@ async function fetchAvailableStock(item: PurchasableItem): Promise<number> {
   return 0;
 }
 
+function useAvgUnitPrice(item: PurchasableItem | null) {
+  const idField = item?.material_id
+    ? (["material_id", item.material_id] as const)
+    : item?.terceiros_material_id
+      ? (["terceiros_material_id", item.terceiros_material_id] as const)
+      : item?.tool_asset_id
+        ? (["tool_asset_id", item.tool_asset_id] as const)
+        : null;
+
+  return useQuery({
+    queryKey: ["avg-unit-price", idField?.[0], idField?.[1]],
+    enabled: !!idField,
+    queryFn: async () => {
+      const since = new Date();
+      since.setMonth(since.getMonth() - 6);
+      const { data, error } = await supabase
+        .from("purchase_orders")
+        .select("estimated_value, quantity, status, created_at")
+        .eq(idField![0], idField![1])
+        .gte("created_at", since.toISOString());
+      if (error) throw error;
+      const units = (data ?? [])
+        .filter((o) => o.status !== "cancelado" && (o.quantity ?? 0) > 0 && Number(o.estimated_value) > 0)
+        .map((o) => Number(o.estimated_value) / Number(o.quantity));
+      if (!units.length) return null;
+      return { avg: units.reduce((a, b) => a + b, 0) / units.length, count: units.length };
+    },
+  });
+}
+
 function NewOrder({ userId }: { userId: string }) {
   const { data: projects, isLoading } = useProjects();
   const qc = useQueryClient();
@@ -921,6 +952,8 @@ function NewOrder({ userId }: { userId: string }) {
 
   };
 
+  const avgPrice = useAvgUnitPrice(isNewItem ? null : item);
+
   const submit = useMutation({
     mutationFn: async ({ values, buyQty, shipQty }: { values: z.infer<typeof newOrderSchema>; buyQty: number; shipQty: number }) => {
       let ids = {
@@ -932,6 +965,7 @@ function NewOrder({ userId }: { userId: string }) {
         if (!newItemDest) throw new Error("Selecione o estoque de destino do item novo.");
         ids = await createNewItemRecord(newItemDest, values.item_name, values.item_link ?? null, userId);
       }
+      const requestGroupId = crypto.randomUUID();
       if (shipQty > 0) {
 
         const { data: exp, error: expError } = await supabase
@@ -945,6 +979,7 @@ function NewOrder({ userId }: { userId: string }) {
               : new Date().toISOString().slice(0, 10),
             notes: `Gerado a partir de solicitação (${shipQty} em estoque). Destinatário: ${values.recipient}. Entrega: ${values.delivery_point}.`,
             created_by: userId,
+            request_group_id: requestGroupId,
           })
           .select("id")
           .single();
@@ -962,6 +997,7 @@ function NewOrder({ userId }: { userId: string }) {
           cost_center_id: restrictedCc ? await resolveOperacaoCostCenterId() : (costCenterId || null),
           item_name: values.item_name,
           item_link: values.item_link ?? null,
+          request_group_id: requestGroupId,
           material_id: ids.material_id,
           terceiros_material_id: ids.terceiros_material_id,
           tool_asset_id: ids.tool_asset_id,
@@ -1176,6 +1212,28 @@ function NewOrder({ userId }: { userId: string }) {
                   {lookingUpPrice && <Loader2 className="absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />}
                 </div>
               </div>
+              {!isNewItem && item && (
+                <div className="space-y-2">
+                  <Label>Valor médio (últimos 6 meses)</Label>
+                  <Input
+                    readOnly
+                    tabIndex={-1}
+                    className="bg-muted"
+                    value={
+                      avgPrice.isLoading
+                        ? "Calculando..."
+                        : avgPrice.data
+                          ? `R$ ${avgPrice.data.avg.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} / unid.`
+                          : "Sem compras nos últimos 6 meses"
+                    }
+                  />
+                  {avgPrice.data && (
+                    <p className="text-xs text-muted-foreground">
+                      Média de {avgPrice.data.count} compra{avgPrice.data.count > 1 ? "s" : ""} deste item.
+                    </p>
+                  )}
+                </div>
+              )}
               <div className="space-y-2">
                 <Label>Destinatário</Label>
                 <Select value={recipient} onValueChange={setRecipient}>
@@ -1264,8 +1322,41 @@ function NewOrder({ userId }: { userId: string }) {
 
 /* ---------- My orders ---------- */
 
+type StockPart = { qty: number; status: string; title: string; group: string };
+
+function useMyStockParts(userId: string) {
+  return useQuery({
+    queryKey: ["orders", "mine-stock-parts", userId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("myio_orders")
+        .select("id, title, status, request_group_id, myio_order_items(quantity)")
+        .eq("created_by", userId)
+        .not("request_group_id", "is", null);
+      if (error) throw error;
+      const map = new Map<string, StockPart>();
+      for (const o of data ?? []) {
+        const qty = (o.myio_order_items ?? []).reduce((s: number, i: { quantity: number }) => s + (i.quantity ?? 0), 0);
+        if (!o.request_group_id) continue;
+        map.set(o.request_group_id, { qty, status: o.status as string, title: o.title, group: o.request_group_id });
+      }
+      return map;
+    },
+  });
+}
+
+const MYIO_STATUS_LABELS: Record<string, string> = {
+  pendente: "Aguardando separação",
+  produzindo: "Em produção",
+  pronto_entrega: "Pronto para retirada",
+  entregue_cliente: "Entregue",
+  em_transito: "Em trânsito",
+  perdido: "Perdido",
+};
+
 function MyOrders({ userId }: { userId: string }) {
   const { data: projects } = useProjects();
+  const { data: stockParts } = useMyStockParts(userId);
   const [deliveredMode, setDeliveredMode] = useState<DeliveredMode>("this_month");
   const [deliveredFrom, setDeliveredFrom] = useState("");
   const [statusSelected, setStatusSelected] = useState<Order["status"][]>([...STATUS_KEYS]);
@@ -1286,6 +1377,9 @@ function MyOrders({ userId }: { userId: string }) {
   const statusFiltered = (orders ?? []).filter((o) => statusSelected.includes(o.status));
   const visible = filterDelivered(statusFiltered, deliveredMode, deliveredFrom);
 
+  const usedGroups = new Set((orders ?? []).map((o) => o.request_group_id).filter(Boolean) as string[]);
+  const stockOnly = [...(stockParts?.values() ?? [])].filter((p) => !usedGroups.has(p.group));
+
   return (
     <Card>
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -1298,12 +1392,27 @@ function MyOrders({ userId }: { userId: string }) {
           <DeliveredFilter mode={deliveredMode} setMode={setDeliveredMode} fromDate={deliveredFrom} setFromDate={setDeliveredFrom} />
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-6">
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
           !orders?.length ? <p className="text-sm text-muted-foreground">Nenhum pedido ainda.</p> :
           !visible.length ? <p className="text-sm text-muted-foreground">Nenhum pedido para exibir com o filtro atual.</p> :
-          <OrdersTable orders={visible} projectName={projectName} showRequester={false} canEditRequester canDelete />
+          <OrdersTable orders={visible} projectName={projectName} showRequester={false} canEditRequester canDelete stockParts={stockParts} />
         }
+        {stockOnly.length > 0 && (
+          <div className="rounded-md border p-4">
+            <p className="text-sm font-medium">Separação do estoque</p>
+            <p className="mb-2 text-xs text-muted-foreground">Solicitações atendidas integralmente pelo estoque — retire com o estoquista.</p>
+            <ul className="space-y-1 text-sm">
+              {stockOnly.map((p) => (
+                <li key={p.group} className="flex flex-wrap items-center gap-2">
+                  <span className="font-medium">{p.title}</span>
+                  <span className="text-muted-foreground">{p.qty} unid.</span>
+                  <Badge variant="secondary">{MYIO_STATUS_LABELS[p.status] ?? p.status}</Badge>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -1531,7 +1640,7 @@ function BuyerQueue() {
 /* ---------- Orders table ---------- */
 
 function OrdersTable({
-  orders, projectName, requesterName, showRequester, canEdit, canDelete, canEditRequester,
+  orders, projectName, requesterName, showRequester, canEdit, canDelete, canEditRequester, stockParts,
 }: {
   orders: Order[];
   projectName: (id: string) => string;
@@ -1540,6 +1649,7 @@ function OrdersTable({
   canEdit?: boolean;
   canDelete?: boolean;
   canEditRequester?: boolean;
+  stockParts?: Map<string, StockPart>;
 }) {
   const { data: me } = useCurrentUser();
   return (
@@ -1579,7 +1689,21 @@ function OrdersTable({
                   <div className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap">{o.requester_notes}</div>
                 )}
               </TableCell>
-              <TableCell>{o.quantity}</TableCell>
+              <TableCell className="whitespace-nowrap">
+                {(() => {
+                  const part = o.request_group_id ? stockParts?.get(o.request_group_id) : undefined;
+                  if (!part || part.qty <= 0) return o.quantity;
+                  return (
+                    <div className="space-y-1">
+                      <div className="font-medium">Total {o.quantity + part.qty}</div>
+                      <div className="text-xs text-muted-foreground">{o.quantity} em compra</div>
+                      <div className="text-xs text-emerald-700">
+                        {part.qty} do estoque · {MYIO_STATUS_LABELS[part.status] ?? part.status}
+                      </div>
+                    </div>
+                  );
+                })()}
+              </TableCell>
               <TableCell>{o.for_stock ? "Estoque" : o.project_id ? projectName(o.project_id) : "—"}</TableCell>
               {showRequester && <TableCell>{requesterName?.(o.requester_id)}</TableCell>}
               <TableCell className="text-sm">{o.recipient || "—"}</TableCell>
