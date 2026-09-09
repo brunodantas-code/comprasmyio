@@ -2073,6 +2073,17 @@ function UsersAdmin() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const roleLabels: Record<AppRole, string> = {
+    admin: "Admin",
+    comprador: "Comprador",
+    fabrica: "Fábrica",
+    estoquista: "Estoquista",
+    solicitante: "Solicitante",
+    coo: "COO",
+    ceo: "CEO",
+    cfo: "CFO",
+    cto: "CTO",
+  };
   const allRoles: AppRole[] = [
     "admin",
     "comprador",
@@ -2084,6 +2095,8 @@ function UsersAdmin() {
     "cfo",
     "cto",
   ];
+  const rolesCol1 = allRoles.slice(0, 5);
+  const rolesCol2 = allRoles.slice(5);
 
   return (
     <Card>
@@ -2135,20 +2148,37 @@ function UsersAdmin() {
                     />
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-wrap gap-x-3 gap-y-1">
-                      {allRoles.map((r) => {
-                        const has = u.roles.includes(r);
-                        return (
-                          <label key={r} className="flex items-center gap-1 text-xs cursor-pointer select-none">
-                            <Checkbox
-                              checked={has}
-                              onCheckedChange={() => toggleRole.mutate({ userId: u.id, role: r, has })}
-                              className="h-3.5 w-3.5"
-                            />
-                            <span className={has ? "font-medium" : "text-muted-foreground"}>{r}</span>
-                          </label>
-                        );
-                      })}
+                    <div className="flex gap-4">
+                      <div className="flex flex-col gap-1">
+                        {rolesCol1.map((r) => {
+                          const has = u.roles.includes(r);
+                          return (
+                            <label key={r} className="flex items-center gap-1 text-xs cursor-pointer select-none">
+                              <Checkbox
+                                checked={has}
+                                onCheckedChange={() => toggleRole.mutate({ userId: u.id, role: r, has })}
+                                className="h-3.5 w-3.5"
+                              />
+                              <span className={has ? "font-medium" : "text-muted-foreground"}>{roleLabels[r]}</span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        {rolesCol2.map((r) => {
+                          const has = u.roles.includes(r);
+                          return (
+                            <label key={r} className="flex items-center gap-1 text-xs cursor-pointer select-none">
+                              <Checkbox
+                                checked={has}
+                                onCheckedChange={() => toggleRole.mutate({ userId: u.id, role: r, has })}
+                                className="h-3.5 w-3.5"
+                              />
+                              <span className={has ? "font-medium" : "text-muted-foreground"}>{roleLabels[r]}</span>
+                            </label>
+                          );
+                        })}
+                      </div>
                     </div>
                   </TableCell>
                 </TableRow>
