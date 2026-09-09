@@ -945,6 +945,10 @@ function NewOrder({ userId }: { userId: string }) {
     formRef.current?.reset();
     setProjectId("");
     setForStock(false);
+    setRequestType("materiais");
+    setAllocTarget("projeto");
+    setClientId("");
+
     setFiles([]);
     setDeadlineType("esta_semana");
     setDeadlineDate("");
