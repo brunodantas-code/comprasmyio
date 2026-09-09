@@ -1244,19 +1244,26 @@ function NewOrder({ userId }: { userId: string }) {
             )}
 
             <div className="space-y-2">
-              <div className="flex items-center gap-6">
-                <Label>Item</Label>
-                <label className="flex cursor-pointer items-center gap-2 text-sm">
-                  <Checkbox checked={!isNewItem} onCheckedChange={() => { setIsNewItem(false); setNewItemName(""); }} />
-                  Cadastrado
-                </label>
-                <label className="flex cursor-pointer items-center gap-2 text-sm">
-                  <Checkbox checked={isNewItem} onCheckedChange={() => { setIsNewItem(true); setItem(null); setItemLink(""); }} />
-                  Novo
-                </label>
-              </div>
-              <PurchasableItemPicker value={isNewItem ? null : item} onPick={(i) => { setItem(i); if (i.link) setItemLink(i.link); }} disabled={isNewItem} />
+              {requestType === "materiais" ? (
+                <>
+                  <div className="flex items-center gap-6">
+                    <Label>Item</Label>
+                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                      <Checkbox checked={!isNewItem} onCheckedChange={() => { setIsNewItem(false); setNewItemName(""); }} />
+                      Cadastrado
+                    </label>
+                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                      <Checkbox checked={isNewItem} onCheckedChange={() => { setIsNewItem(true); setItem(null); setItemLink(""); }} />
+                      Novo
+                    </label>
+                  </div>
+                  <PurchasableItemPicker value={isNewItem ? null : item} onPick={(i) => { setItem(i); if (i.link) setItemLink(i.link); }} disabled={isNewItem} />
+                </>
+              ) : (
+                <Label>{requestType === "servicos" ? "Serviço" : "Viagem"}</Label>
+              )}
               {isNewItem ? (
+
                 <div className="space-y-2 pt-1">
                   <Label htmlFor="new_item_name">Descrição do item</Label>
                   <Input
