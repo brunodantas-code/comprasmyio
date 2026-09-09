@@ -1006,7 +1006,10 @@ function NewOrder({ userId }: { userId: string }) {
         const { data, error } = await supabase.from("purchase_orders").insert({
           project_id: forStock ? null : (values.project_id ?? null),
           for_stock: forStock,
+          request_type: requestType,
+          client_id: requestType !== "materiais" && allocTarget === "cliente" ? (clientId || null) : null,
           cost_center_id: restrictedCc ? await resolveOperacaoCostCenterId() : (costCenterId || null),
+
           item_name: values.item_name,
           item_link: values.item_link ?? null,
           request_group_id: requestGroupId,
