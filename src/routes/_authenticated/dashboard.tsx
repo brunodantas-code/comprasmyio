@@ -876,6 +876,7 @@ function NewOrder({ userId }: { userId: string }) {
   const [item, setItem] = useState<PurchasableItem | null>(null);
   const [itemLink, setItemLink] = useState("");
   const [estimatedValue, setEstimatedValue] = useState("0");
+  const [qty, setQty] = useState("1");
   const [lookingUpPrice, setLookingUpPrice] = useState(false);
   const [isNewItem, setIsNewItem] = useState(false);
   const [newItemName, setNewItemName] = useState("");
@@ -1203,7 +1204,7 @@ function NewOrder({ userId }: { userId: string }) {
             <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="quantity">Quantidade</Label>
-                <Input id="quantity" name="quantity" type="number" min={1} defaultValue={1} required />
+                <Input id="quantity" name="quantity" type="number" min={1} value={qty} onChange={(e) => setQty(e.target.value)} required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="estimated_value">Valor unitário estimado (R$)</Label>
