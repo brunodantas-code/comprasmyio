@@ -415,13 +415,17 @@ function FlowsOverview() {
                             <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
                           ) : s.status === "rejeitado" ? (
                             <XCircle className="h-3.5 w-3.5 text-red-600" />
+                          ) : s.status === "cancelado" ? (
+                            <XCircle className="h-3.5 w-3.5 text-muted-foreground" />
                           ) : (
                             <Clock className="h-3.5 w-3.5 text-amber-600" />
                           )}
                           <span className="font-medium">{s.role_label}</span>
                           <span className="text-muted-foreground">
                             {ap?.full_name || ap?.email || "sem responsável"}
+                            {s.status === "cancelado" ? " · cancelada" : ""}
                           </span>
+
                         </div>
                       );
                     })}
