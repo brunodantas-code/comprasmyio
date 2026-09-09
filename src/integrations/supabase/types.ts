@@ -1320,6 +1320,10 @@ export type Database = {
           status: Database["public"]["Enums"]["order_status"]
           terceiros_material_id: string | null
           tool_asset_id: string | null
+          travel_departure: string | null
+          travel_destination: string | null
+          travel_return: string | null
+          travel_type: string | null
           updated_at: string
         }
         Insert: {
@@ -1353,6 +1357,10 @@ export type Database = {
           status?: Database["public"]["Enums"]["order_status"]
           terceiros_material_id?: string | null
           tool_asset_id?: string | null
+          travel_departure?: string | null
+          travel_destination?: string | null
+          travel_return?: string | null
+          travel_type?: string | null
           updated_at?: string
         }
         Update: {
@@ -1386,6 +1394,10 @@ export type Database = {
           status?: Database["public"]["Enums"]["order_status"]
           terceiros_material_id?: string | null
           tool_asset_id?: string | null
+          travel_departure?: string | null
+          travel_destination?: string | null
+          travel_return?: string | null
+          travel_type?: string | null
           updated_at?: string
         }
         Relationships: [
