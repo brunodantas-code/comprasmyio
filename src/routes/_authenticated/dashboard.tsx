@@ -2148,20 +2148,37 @@ function UsersAdmin() {
                     />
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-wrap gap-x-3 gap-y-1">
-                      {allRoles.map((r) => {
-                        const has = u.roles.includes(r);
-                        return (
-                          <label key={r} className="flex items-center gap-1 text-xs cursor-pointer select-none">
-                            <Checkbox
-                              checked={has}
-                              onCheckedChange={() => toggleRole.mutate({ userId: u.id, role: r, has })}
-                              className="h-3.5 w-3.5"
-                            />
-                            <span className={has ? "font-medium" : "text-muted-foreground"}>{r}</span>
-                          </label>
-                        );
-                      })}
+                    <div className="flex gap-4">
+                      <div className="flex flex-col gap-1">
+                        {rolesCol1.map((r) => {
+                          const has = u.roles.includes(r);
+                          return (
+                            <label key={r} className="flex items-center gap-1 text-xs cursor-pointer select-none">
+                              <Checkbox
+                                checked={has}
+                                onCheckedChange={() => toggleRole.mutate({ userId: u.id, role: r, has })}
+                                className="h-3.5 w-3.5"
+                              />
+                              <span className={has ? "font-medium" : "text-muted-foreground"}>{roleLabels[r]}</span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        {rolesCol2.map((r) => {
+                          const has = u.roles.includes(r);
+                          return (
+                            <label key={r} className="flex items-center gap-1 text-xs cursor-pointer select-none">
+                              <Checkbox
+                                checked={has}
+                                onCheckedChange={() => toggleRole.mutate({ userId: u.id, role: r, has })}
+                                className="h-3.5 w-3.5"
+                              />
+                              <span className={has ? "font-medium" : "text-muted-foreground"}>{roleLabels[r]}</span>
+                            </label>
+                          );
+                        })}
+                      </div>
                     </div>
                   </TableCell>
                 </TableRow>
