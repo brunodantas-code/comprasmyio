@@ -1268,8 +1268,41 @@ function NewOrder({ userId }: { userId: string }) {
 
 /* ---------- My orders ---------- */
 
+type StockPart = { qty: number; status: string; title: string; group: string };
+
+function useMyStockParts(userId: string) {
+  return useQuery({
+    queryKey: ["orders", "mine-stock-parts", userId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("myio_orders")
+        .select("id, title, status, request_group_id, myio_order_items(quantity)")
+        .eq("created_by", userId)
+        .not("request_group_id", "is", null);
+      if (error) throw error;
+      const map = new Map<string, StockPart>();
+      for (const o of data ?? []) {
+        const qty = (o.myio_order_items ?? []).reduce((s: number, i: { quantity: number }) => s + (i.quantity ?? 0), 0);
+        if (!o.request_group_id) continue;
+        map.set(o.request_group_id, { qty, status: o.status as string, title: o.title, group: o.request_group_id });
+      }
+      return map;
+    },
+  });
+}
+
+const MYIO_STATUS_LABELS: Record<string, string> = {
+  pendente: "Aguardando separação",
+  produzindo: "Em produção",
+  pronto_entrega: "Pronto para retirada",
+  entregue_cliente: "Entregue",
+  em_transito: "Em trânsito",
+  perdido: "Perdido",
+};
+
 function MyOrders({ userId }: { userId: string }) {
   const { data: projects } = useProjects();
+  const { data: stockParts } = useMyStockParts(userId);
   const [deliveredMode, setDeliveredMode] = useState<DeliveredMode>("this_month");
   const [deliveredFrom, setDeliveredFrom] = useState("");
   const [statusSelected, setStatusSelected] = useState<Order["status"][]>([...STATUS_KEYS]);
@@ -1290,6 +1323,9 @@ function MyOrders({ userId }: { userId: string }) {
   const statusFiltered = (orders ?? []).filter((o) => statusSelected.includes(o.status));
   const visible = filterDelivered(statusFiltered, deliveredMode, deliveredFrom);
 
+  const usedGroups = new Set((orders ?? []).map((o) => o.request_group_id).filter(Boolean) as string[]);
+  const stockOnly = [...(stockParts?.values() ?? [])].filter((p) => !usedGroups.has(p.group));
+
   return (
     <Card>
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -1302,12 +1338,27 @@ function MyOrders({ userId }: { userId: string }) {
           <DeliveredFilter mode={deliveredMode} setMode={setDeliveredMode} fromDate={deliveredFrom} setFromDate={setDeliveredFrom} />
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-6">
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
           !orders?.length ? <p className="text-sm text-muted-foreground">Nenhum pedido ainda.</p> :
           !visible.length ? <p className="text-sm text-muted-foreground">Nenhum pedido para exibir com o filtro atual.</p> :
-          <OrdersTable orders={visible} projectName={projectName} showRequester={false} canEditRequester canDelete />
+          <OrdersTable orders={visible} projectName={projectName} showRequester={false} canEditRequester canDelete stockParts={stockParts} />
         }
+        {stockOnly.length > 0 && (
+          <div className="rounded-md border p-4">
+            <p className="text-sm font-medium">Separação do estoque</p>
+            <p className="mb-2 text-xs text-muted-foreground">Solicitações atendidas integralmente pelo estoque — retire com o estoquista.</p>
+            <ul className="space-y-1 text-sm">
+              {stockOnly.map((p) => (
+                <li key={p.group} className="flex flex-wrap items-center gap-2">
+                  <span className="font-medium">{p.title}</span>
+                  <span className="text-muted-foreground">{p.qty} unid.</span>
+                  <Badge variant="secondary">{MYIO_STATUS_LABELS[p.status] ?? p.status}</Badge>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
