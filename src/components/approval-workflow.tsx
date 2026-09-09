@@ -1026,20 +1026,21 @@ function OrgChartAdmin() {
       })
     );
     const managerOf = new Map<string, string | null>(list.map((p) => [p.id, p.manager_id ?? null]));
-    // um usuário é raiz quando não tem gestor, o gestor não existe, ou a cadeia forma um ciclo
+    // raiz = sem gestor, gestor inexistente, ou o próprio usuário faz parte de um ciclo
     const isRoot = (id: string) => {
-      const seen = new Set<string>([id]);
-      let cur = managerOf.get(id) ?? null;
-      if (!cur || !nodes.has(cur) || cur === id) return true;
-      while (cur) {
-        if (seen.has(cur)) return true; // ciclo
+      const first = managerOf.get(id) ?? null;
+      if (!first || !nodes.has(first) || first === id) return true;
+      const seen = new Set<string>();
+      let cur: string | null = first;
+      while (cur && nodes.has(cur)) {
+        if (cur === id) return true; // ciclo que volta ao próprio usuário
+        if (seen.has(cur)) return false; // ciclo que não inclui este usuário
         seen.add(cur);
-        const next = managerOf.get(cur) ?? null;
-        if (next && !nodes.has(next)) return false;
-        cur = next;
+        cur = managerOf.get(cur) ?? null;
       }
       return false;
     };
+
     const top: OrgNode[] = [];
     list.forEach((p) => {
       const node = nodes.get(p.id)!;
