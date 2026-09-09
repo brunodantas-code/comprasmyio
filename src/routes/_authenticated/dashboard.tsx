@@ -814,6 +814,36 @@ async function fetchAvailableStock(item: PurchasableItem): Promise<number> {
   return 0;
 }
 
+function useAvgUnitPrice(item: PurchasableItem | null) {
+  const idField = item?.material_id
+    ? (["material_id", item.material_id] as const)
+    : item?.terceiros_material_id
+      ? (["terceiros_material_id", item.terceiros_material_id] as const)
+      : item?.tool_asset_id
+        ? (["tool_asset_id", item.tool_asset_id] as const)
+        : null;
+
+  return useQuery({
+    queryKey: ["avg-unit-price", idField?.[0], idField?.[1]],
+    enabled: !!idField,
+    queryFn: async () => {
+      const since = new Date();
+      since.setMonth(since.getMonth() - 6);
+      const { data, error } = await supabase
+        .from("purchase_orders")
+        .select("estimated_value, quantity, status, created_at")
+        .eq(idField![0], idField![1])
+        .gte("created_at", since.toISOString());
+      if (error) throw error;
+      const units = (data ?? [])
+        .filter((o) => o.status !== "cancelado" && (o.quantity ?? 0) > 0 && Number(o.estimated_value) > 0)
+        .map((o) => Number(o.estimated_value) / Number(o.quantity));
+      if (!units.length) return null;
+      return { avg: units.reduce((a, b) => a + b, 0) / units.length, count: units.length };
+    },
+  });
+}
+
 function NewOrder({ userId }: { userId: string }) {
   const { data: projects, isLoading } = useProjects();
   const qc = useQueryClient();
