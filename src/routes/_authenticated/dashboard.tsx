@@ -1265,14 +1265,17 @@ function NewOrder({ userId }: { userId: string }) {
               {isNewItem ? (
 
                 <div className="space-y-2 pt-1">
-                  <Label htmlFor="new_item_name">Descrição do item</Label>
+                  <Label htmlFor="new_item_name">
+                    {requestType === "materiais" ? "Descrição do item" : requestType === "servicos" ? "Descrição do serviço" : "Descrição da viagem"}
+                  </Label>
                   <Input
                     id="new_item_name"
                     value={newItemName}
                     onChange={(e) => setNewItemName(e.target.value)}
-                    onBlur={(e) => checkDuplicates(e.target.value)}
-                    placeholder="Descreva o item que precisa ser comprado"
+                    onBlur={(e) => { if (requestType === "materiais") checkDuplicates(e.target.value); }}
+                    placeholder={requestType === "materiais" ? "Descreva o item que precisa ser comprado" : requestType === "servicos" ? "Descreva o serviço contratado" : "Descreva a viagem (destino, período, motivo)"}
                   />
+                  {requestType === "materiais" && (
                   <div className="space-y-2 pt-1">
                     <Label>Cadastrar em qual estoque?</Label>
                     <Select value={newItemDest} onValueChange={(v) => setNewItemDest(v as NewItemDest)}>
@@ -1287,6 +1290,8 @@ function NewOrder({ userId }: { userId: string }) {
                       O item será cadastrado nesse banco e a entrada acontece automaticamente ao receber.
                     </p>
                   </div>
+                  )}
+
 
                   <DuplicateItemDialog
                     open={dupOpen}
