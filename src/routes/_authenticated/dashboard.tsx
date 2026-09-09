@@ -1052,20 +1052,23 @@ function NewOrder({ userId }: { userId: string }) {
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (isNewItem) {
+    const isMateriais = requestType === "materiais";
+    if (!isMateriais) {
+      if (newItemName.trim().length < 2) return toast.error("Descreva o serviço ou a viagem solicitada.");
+      if (allocTarget === "projeto" && !projectId) return toast.error("Selecione o projeto");
+      if (allocTarget === "cliente" && !clientId) return toast.error("Selecione o cliente");
+    } else if (isNewItem) {
       if (newItemName.trim().length < 2) return toast.error("Descreva o item novo.");
       if (!newItemDest) return toast.error("Selecione para qual estoque esse item novo será cadastrado.");
       if (checkDuplicates(newItemName)) return;
       if (!itemLink.trim()) return toast.error("Informe o link de referência do item novo.");
-
-
-
     } else if (!item) {
       return toast.error("Selecione um item cadastrado: Insumos de Fabricação, Insumos de Instalação, Material de Almoxarifado ou Máquinas e Ferramentas.");
     }
-    if (!forStock && !projectId) {
+    if (isMateriais && !forStock && !projectId) {
       return toast.error("Selecione um projeto");
     }
+
     const fd = new FormData(e.currentTarget);
     const parsed = newOrderSchema.safeParse({
       project_id: forStock ? undefined : projectId,
