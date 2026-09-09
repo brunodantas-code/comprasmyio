@@ -1635,7 +1635,21 @@ function OrdersTable({
                   <div className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap">{o.requester_notes}</div>
                 )}
               </TableCell>
-              <TableCell>{o.quantity}</TableCell>
+              <TableCell className="whitespace-nowrap">
+                {(() => {
+                  const part = o.request_group_id ? stockParts?.get(o.request_group_id) : undefined;
+                  if (!part || part.qty <= 0) return o.quantity;
+                  return (
+                    <div className="space-y-1">
+                      <div className="font-medium">Total {o.quantity + part.qty}</div>
+                      <div className="text-xs text-muted-foreground">{o.quantity} em compra</div>
+                      <div className="text-xs text-emerald-700">
+                        {part.qty} do estoque · {MYIO_STATUS_LABELS[part.status] ?? part.status}
+                      </div>
+                    </div>
+                  );
+                })()}
+              </TableCell>
               <TableCell>{o.for_stock ? "Estoque" : o.project_id ? projectName(o.project_id) : "—"}</TableCell>
               {showRequester && <TableCell>{requesterName?.(o.requester_id)}</TableCell>}
               <TableCell className="text-sm">{o.recipient || "—"}</TableCell>
