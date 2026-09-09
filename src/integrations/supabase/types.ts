@@ -1296,6 +1296,7 @@ export type Database = {
           approved_by: string | null
           attachments: Json
           buyer_notes: string | null
+          client_id: string | null
           cost_center_id: string | null
           created_at: string
           deadline_date: string | null
@@ -1313,6 +1314,7 @@ export type Database = {
           quantity: number
           recipient: string
           request_group_id: string | null
+          request_type: string
           requester_id: string
           requester_notes: string | null
           status: Database["public"]["Enums"]["order_status"]
@@ -1327,6 +1329,7 @@ export type Database = {
           approved_by?: string | null
           attachments?: Json
           buyer_notes?: string | null
+          client_id?: string | null
           cost_center_id?: string | null
           created_at?: string
           deadline_date?: string | null
@@ -1344,6 +1347,7 @@ export type Database = {
           quantity?: number
           recipient?: string
           request_group_id?: string | null
+          request_type?: string
           requester_id: string
           requester_notes?: string | null
           status?: Database["public"]["Enums"]["order_status"]
@@ -1358,6 +1362,7 @@ export type Database = {
           approved_by?: string | null
           attachments?: Json
           buyer_notes?: string | null
+          client_id?: string | null
           cost_center_id?: string | null
           created_at?: string
           deadline_date?: string | null
@@ -1375,6 +1380,7 @@ export type Database = {
           quantity?: number
           recipient?: string
           request_group_id?: string | null
+          request_type?: string
           requester_id?: string
           requester_notes?: string | null
           status?: Database["public"]["Enums"]["order_status"]
@@ -1383,6 +1389,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "purchase_orders_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "purchase_orders_cost_center_id_fkey"
             columns: ["cost_center_id"]
