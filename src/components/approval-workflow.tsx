@@ -722,7 +722,11 @@ function RulesAdmin() {
   );
 }
 
-const LEVEL_LABELS = ["Gestor Direto", "Gerente da Área", "Diretor do Departamento", "C-Level"];
+const LEVEL_LABELS: Record<string, string> = {
+  gestor: "Gestor Direto",
+  gerente: "Gerente da Área",
+  c_level: "C-Level",
+};
 
 function MoneyInput({
   value,
@@ -763,7 +767,7 @@ function DefaultChainAdmin() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, full_name, email, approval_limit, tier2_limit, tier3_limit, manager_id")
+        .select("id, full_name, email, approval_limit, tier2_limit, tier3_limit, manager_id, approval_level")
         .order("full_name");
       if (error) throw error;
       return data ?? [];
@@ -802,7 +806,9 @@ function DefaultChainAdmin() {
       const mgrId = byId.get(cur)?.manager_id;
       if (!mgrId) break;
       const mgr = byId.get(mgrId);
-      names.push(`${LEVEL_LABELS[i]}: ${mgr?.full_name || mgr?.email || "—"}`);
+      const lbl = LEVEL_LABELS[mgr?.approval_level ?? ""] ?? "Gestor Direto";
+      names.push(`${lbl}: ${mgr?.full_name || mgr?.email || "—"}`);
+      if (mgr?.approval_level === "c_level") break;
       cur = mgrId;
     }
     return names;
@@ -821,8 +827,8 @@ function DefaultChainAdmin() {
         <CardContent className="space-y-2 text-sm text-muted-foreground">
           <p>• Até a alçada automática do solicitante: aprovação automática, sem etapas.</p>
           <p>• Acima da alçada até a Faixa 2: Gestor Direto → Gerente da Área.</p>
-          <p>• Acima da Faixa 2 até a Faixa 3: Gestor Direto → Gerente da Área → Diretor do Departamento.</p>
-          <p>• Acima da Faixa 3: Gestor Direto → Gerente da Área → Diretor do Departamento → C-Level.</p>
+          <p>• Acima da Faixa 2 até a Faixa 3: Gestor Direto → Gerente da Área → C-Level.</p>
+          <p>• Acima da Faixa 3: sobe pelo organograma até o C-Level.</p>
           <p>• Depois dessas etapas entram as “Etapas adicionais” ativas e, se aplicável, a dupla aprovação.</p>
         </CardContent>
       </Card>
@@ -845,7 +851,7 @@ function DefaultChainAdmin() {
               </TableHeader>
               <TableBody>
                 {(rows ?? []).map((p) => {
-                  const seq = chainFor(p.id, 4);
+                  const seq = chainFor(p.id, 5);
                   return (
                     <TableRow key={p.id}>
                       <TableCell className="font-medium">{p.full_name || p.email}</TableCell>
@@ -973,7 +979,7 @@ function OrgChartAdmin() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, full_name, email, manager_id")
+        .select("id, full_name, email, manager_id, approval_level")
         .order("full_name");
       if (error) throw error;
       return data ?? [];
@@ -993,6 +999,20 @@ function OrgChartAdmin() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  const saveLevel = useMutation({
+    mutationFn: async ({ userId, level }: { userId: string; level: string | null }) => {
+      const { error } = await supabase.from("profiles").update({ approval_level: level }).eq("id", userId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Nível de aprovação atualizado");
+      qc.invalidateQueries({ queryKey: ["aw-org-chart"] });
+      qc.invalidateQueries({ queryKey: ["aw-default-chain"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
 
   const roots = useMemo(() => {
     const list = rows ?? [];
@@ -1021,8 +1041,8 @@ function OrgChartAdmin() {
         <CardHeader>
           <CardTitle>Organograma de Aprovação</CardTitle>
           <CardDescription>
-            Defina o gestor de cada usuário. O fluxo sobe pelo organograma e, quando não houver Gerente da Área ou
-            Diretor cadastrado, segue direto para o C-Level definido como gestor.
+            Defina o nível de aprovação (C-Level, Gerente da Área ou Gestor Direto) e o gestor de cada usuário. O fluxo
+            sobe pelo organograma e, quando não houver Gerente da Área cadastrado, segue direto para o C-Level.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -1034,6 +1054,7 @@ function OrgChartAdmin() {
                 <TableRow>
                   <TableHead>Usuário</TableHead>
                   <TableHead>Cargo</TableHead>
+                  <TableHead>Nível de aprovação</TableHead>
                   <TableHead>Aprovado por (gestor)</TableHead>
                 </TableRow>
               </TableHeader>
@@ -1043,6 +1064,23 @@ function OrgChartAdmin() {
                     <TableCell className="font-medium">{p.full_name || p.email}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {roleTitle(profiles?.get(p.id)?.roles ?? [])}
+                    </TableCell>
+                    <TableCell>
+                      <Select
+                        value={p.approval_level ?? "none"}
+                        disabled={!isAdmin}
+                        onValueChange={(v) =>
+                          saveLevel.mutate({ userId: p.id, level: v === "none" ? null : v })
+                        }
+                      >
+                        <SelectTrigger className="h-8 w-48"><SelectValue placeholder="Não definido" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Não definido</SelectItem>
+                          <SelectItem value="gestor">Gestor Direto</SelectItem>
+                          <SelectItem value="gerente">Gerente da Área</SelectItem>
+                          <SelectItem value="c_level">C-Level</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                     <TableCell>
                       <Select
@@ -1065,6 +1103,7 @@ function OrgChartAdmin() {
                     </TableCell>
                   </TableRow>
                 ))}
+
               </TableBody>
             </Table>
           )}
