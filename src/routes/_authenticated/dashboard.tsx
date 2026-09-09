@@ -843,9 +843,26 @@ function NewOrder({ userId }: { userId: string }) {
   const [deadlineDate, setDeadlineDate] = useState("");
   const [item, setItem] = useState<PurchasableItem | null>(null);
   const [itemLink, setItemLink] = useState("");
+  const [estimatedValue, setEstimatedValue] = useState("0");
+  const [lookingUpPrice, setLookingUpPrice] = useState(false);
   const [isNewItem, setIsNewItem] = useState(false);
   const [newItemName, setNewItemName] = useState("");
   const [newItemDest, setNewItemDest] = useState<NewItemDest | "">("");
+
+  const tryAutoFillPrice = async (url: string) => {
+    const trimmed = url.trim();
+    if (!/^https?:\/\/.+\..+/.test(trimmed)) return;
+    setLookingUpPrice(true);
+    try {
+      const { price } = await lookupLinkPrice({ data: { url: trimmed } });
+      if (price) {
+        setEstimatedValue(String(price));
+        toast.success(`Valor estimado preenchido automaticamente: R$ ${price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`);
+      }
+    } finally {
+      setLookingUpPrice(false);
+    }
+  };
 
   const [recipient, setRecipient] = useState("");
   const { data: profiles } = useProfilesList();
