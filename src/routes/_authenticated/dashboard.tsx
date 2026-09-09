@@ -1122,40 +1122,127 @@ function NewOrder({ userId }: { userId: string }) {
           <form ref={formRef} onSubmit={onSubmit} className="space-y-4">
 
             <div className="space-y-2">
-              <Label>Alocação</Label>
+              <Label>Tipo de solicitação</Label>
               <div className="flex items-center gap-6">
-                <label className="flex cursor-pointer items-center gap-2 text-sm">
-                  <Checkbox checked={!forStock} onCheckedChange={() => setForStock(false)} />
-                  Projeto
-                </label>
-                <label className="flex cursor-pointer items-center gap-2 text-sm">
-                  <Checkbox checked={forStock} onCheckedChange={() => setForStock(true)} />
-                  Estoque
-                </label>
-               </div>
-               {!restrictedCc && (
-                 <div className="pt-2">
-                   <Label>Centro de Custo</Label>
-                   <Select value={costCenterId} onValueChange={setCostCenterId}>
-                     <SelectTrigger className="mt-2"><SelectValue placeholder="Selecione o centro de custo" /></SelectTrigger>
-                     <SelectContent>
-                       {(costCenters ?? []).filter((c) => c.active).map((c) => (
-                         <SelectItem key={c.id} value={c.id}>{c.code ? `${c.code} — ${c.name}` : c.name}</SelectItem>
-                       ))}
-                     </SelectContent>
-                   </Select>
-                 </div>
-               )}
-             </div>
-             <div className="space-y-2">
-               <Label>Projeto</Label>
-              <Select value={forStock ? "" : projectId} onValueChange={setProjectId} disabled={forStock}>
-                <SelectTrigger><SelectValue placeholder={forStock ? "Compra para estoque" : "Selecione o projeto"} /></SelectTrigger>
-                <SelectContent>
-                  {projects.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
+                {([
+                  ["materiais", "Materiais"],
+                  ["servicos", "Serviços"],
+                  ["viagens", "Viagens"],
+                ] as const).map(([v, l]) => (
+                  <label key={v} className="flex cursor-pointer items-center gap-2 text-sm">
+                    <Checkbox
+                      checked={requestType === v}
+                      onCheckedChange={() => {
+                        setRequestType(v);
+                        if (v === "materiais") {
+                          setClientId("");
+                        } else {
+                          setForStock(false);
+                          setIsNewItem(true);
+                          setItem(null);
+                          setNewItemDest("");
+                        }
+                      }}
+                    />
+                    {l}
+                  </label>
+                ))}
+              </div>
+              {requestType === "materiais" && (
+                <p className="text-xs text-muted-foreground">Solicitações de Materiais são cadastradas no Armazém.</p>
+              )}
             </div>
+
+            {requestType === "materiais" ? (
+              <>
+                <div className="space-y-2">
+                  <Label>Alocação</Label>
+                  <div className="flex items-center gap-6">
+                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                      <Checkbox checked={!forStock} onCheckedChange={() => setForStock(false)} />
+                      Projeto
+                    </label>
+                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                      <Checkbox checked={forStock} onCheckedChange={() => setForStock(true)} />
+                      Estoque
+                    </label>
+                  </div>
+                  {!restrictedCc && (
+                    <div className="pt-2">
+                      <Label>Centro de Custo</Label>
+                      <Select value={costCenterId} onValueChange={setCostCenterId}>
+                        <SelectTrigger className="mt-2"><SelectValue placeholder="Selecione o centro de custo" /></SelectTrigger>
+                        <SelectContent>
+                          {(costCenters ?? []).filter((c) => c.active).map((c) => (
+                            <SelectItem key={c.id} value={c.id}>{c.code ? `${c.code} — ${c.name}` : c.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label>Projeto</Label>
+                  <Select value={forStock ? "" : projectId} onValueChange={setProjectId} disabled={forStock}>
+                    <SelectTrigger><SelectValue placeholder={forStock ? "Compra para estoque" : "Selecione o projeto"} /></SelectTrigger>
+                    <SelectContent>
+                      {projects.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="space-y-2">
+                  <Label>Alocação</Label>
+                  <div className="flex items-center gap-6">
+                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                      <Checkbox checked={allocTarget === "projeto"} onCheckedChange={() => { setAllocTarget("projeto"); setClientId(""); }} />
+                      Projeto
+                    </label>
+                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                      <Checkbox checked={allocTarget === "cliente"} onCheckedChange={() => { setAllocTarget("cliente"); setProjectId(""); }} />
+                      Cliente
+                    </label>
+                  </div>
+                  {!restrictedCc && (
+                    <div className="pt-2">
+                      <Label>Centro de Custo</Label>
+                      <Select value={costCenterId} onValueChange={setCostCenterId}>
+                        <SelectTrigger className="mt-2"><SelectValue placeholder="Selecione o centro de custo" /></SelectTrigger>
+                        <SelectContent>
+                          {(costCenters ?? []).filter((c) => c.active).map((c) => (
+                            <SelectItem key={c.id} value={c.id}>{c.code ? `${c.code} — ${c.name}` : c.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </div>
+                {allocTarget === "projeto" ? (
+                  <div className="space-y-2">
+                    <Label>Projeto</Label>
+                    <Select value={projectId} onValueChange={setProjectId}>
+                      <SelectTrigger><SelectValue placeholder="Selecione o projeto" /></SelectTrigger>
+                      <SelectContent>
+                        {projects.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Label>Cliente</Label>
+                    <Select value={clientId} onValueChange={setClientId}>
+                      <SelectTrigger><SelectValue placeholder="Selecione o cliente" /></SelectTrigger>
+                      <SelectContent>
+                        {(clientsList ?? []).map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </>
+            )}
+
             <div className="space-y-2">
               <div className="flex items-center gap-6">
                 <Label>Item</Label>
