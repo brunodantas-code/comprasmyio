@@ -1511,7 +1511,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
               </>
             )}
 
-            {requestType !== "reembolso" && (
+            {requestType !== "reembolso" && requestType !== "rh" && (
             <div className="space-y-2">
               {requestType === "materiais" ? (
                 <>
@@ -1589,7 +1589,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
               )}
             </div>
             )}
-            {requestType !== "reembolso" && (
+            {requestType !== "reembolso" && requestType !== "rh" && (
             <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="quantity">{requestType === "viagens" ? (travelType === "aluguel_veiculos" ? "Quantidade de veículos" : "Quantidade de Pessoas") : "Quantidade"}</Label>
@@ -1651,7 +1651,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
               )}
             </div>
             )}
-            {requestType !== "reembolso" && (
+            {requestType !== "reembolso" && requestType !== "rh" && (
             <div className="space-y-2">
               <Label htmlFor="item_link">
                 Link de Referência {isNewItem ? null : <span className="text-muted-foreground">(opcional)</span>}
@@ -1661,7 +1661,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
             )}
             {requestType === "materiais" && <AddressAutocomplete name="delivery_point" required />}
 
-            {requestType !== "reembolso" && (
+            {requestType !== "reembolso" && requestType !== "rh" && (
             <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>Prazo de recebimento</Label>
