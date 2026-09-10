@@ -23,7 +23,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Checkbox } from "@/components/ui/checkbox";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { toast } from "sonner";
-import { LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Boxes, Building2, Plane, Landmark } from "lucide-react";
+import { LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Boxes, Building2, Plane, Landmark, Briefcase } from "lucide-react";
 import { Trash2, Paperclip, X, Loader2, DatabaseBackup, CheckCircle2, XCircle, RotateCcw, Pencil, Bell } from "lucide-react";
 import { ApprovalWorkflow } from "@/components/approval-workflow";
 import { z } from "zod";
@@ -31,6 +31,7 @@ import { StockTab } from "@/components/stock-tab";
 import { MyioOrdersTab } from "@/components/myio-orders-tab";
 import { ClientsTab, useClients } from "@/components/clients-tab";
 import { CostCentersTab, useCostCenters } from "@/components/cost-centers-tab";
+import { JobTitlesTab, useJobTitles } from "@/components/job-titles-tab";
 import { RemindersTab } from "@/components/reminders-tab";
 import { ImportBatchesSection } from "@/components/import-batches";
 import { AddressAutocomplete } from "@/components/address-autocomplete";
@@ -413,11 +414,13 @@ function Dashboard() {
                   <TabsTrigger value="projetos"><FolderKanban className="mr-2 h-4 w-4" />Projetos</TabsTrigger>
                   <TabsTrigger value="clientes"><Building2 className="mr-2 h-4 w-4" />Clientes</TabsTrigger>
                   <TabsTrigger value="centros"><Landmark className="mr-2 h-4 w-4" />Centro de Custo</TabsTrigger>
+                  <TabsTrigger value="cargos"><Briefcase className="mr-2 h-4 w-4" />Cargos</TabsTrigger>
                   <TabsTrigger value="lembretes"><Bell className="mr-2 h-4 w-4" />Lembretes</TabsTrigger>
                 </TabsList>
                 <TabsContent value="projetos"><ProjectsAdmin userId={me.id} /></TabsContent>
                 <TabsContent value="clientes"><ClientsTab userId={me.id} /></TabsContent>
                 <TabsContent value="centros"><CostCentersTab userId={me.id} /></TabsContent>
+                <TabsContent value="cargos"><JobTitlesTab userId={me.id} /></TabsContent>
                 <TabsContent value="lembretes"><RemindersTab /></TabsContent>
               </Tabs>
             </TabsContent>
@@ -799,18 +802,6 @@ function PurchasableItemPicker({ value, onPick, disabled }: { value: Purchasable
 
 /* ---------- New order ---------- */
 
-const RH_CARGOS = [
-  "Analista",
-  "Assistente",
-  "Estagiário",
-  "Técnico de Campo",
-  "Engenheiro",
-  "Desenvolvedor",
-  "Coordenador",
-  "Gerente",
-  "Diretor",
-] as const;
-
 const newOrderSchema = z.object({
   project_id: z.string().optional(),
   item_name: z.string().trim().min(2).max(200),
@@ -970,6 +961,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
 
   const [recipient, setRecipient] = useState("");
   const { data: profiles } = useProfilesList();
+  const { data: jobTitles } = useJobTitles();
   const { data: purchasables } = usePurchasableItems();
   const [dupOpen, setDupOpen] = useState(false);
   const [dupCandidates, setDupCandidates] = useState<PurchasableItem[]>([]);
@@ -1438,7 +1430,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
                     <Select value={rhCargo} onValueChange={setRhCargo}>
                       <SelectTrigger><SelectValue placeholder="Selecione o cargo" /></SelectTrigger>
                       <SelectContent>
-                        {RH_CARGOS.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                        {(jobTitles ?? []).map((t) => <SelectItem key={t.id} value={t.name}>{t.name}</SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
