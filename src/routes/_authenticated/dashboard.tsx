@@ -2348,7 +2348,7 @@ function OrderReportDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button type="button" className="font-bold text-primary hover:underline" title="Ver relatório completo">
+        <button type="button" className="font-bold text-black transition-colors hover:text-myio-green data-[state=open]:text-myio-green hover:underline" title="Ver relatório completo">
           {order.approval_number ?? "—"}
         </button>
       </DialogTrigger>
