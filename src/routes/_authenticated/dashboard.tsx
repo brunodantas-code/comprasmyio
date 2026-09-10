@@ -1004,6 +1004,11 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
     setNewItemDest("");
     setRecipient("");
     setCostCenterId("");
+    setRhCargo("");
+    setRhGestor("");
+    setRhMotivo("");
+    setRhTipo("");
+    setRhRemuneracao("0");
 
   };
 
