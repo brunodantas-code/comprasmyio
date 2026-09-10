@@ -1863,7 +1863,6 @@ function BuyerQueue() {
   const { data: projects } = useProjects();
   const { data: profiles } = useProfilesMap();
   const { data: me } = useCurrentUser();
-  const [projectFilter, setProjectFilter] = useState<string>("all");
   const [groupByProject, setGroupByProject] = useState(false);
   const [deliveredMode, setDeliveredMode] = useState<DeliveredMode>("this_month");
   const [deliveredFrom, setDeliveredFrom] = useState("");
@@ -1881,8 +1880,7 @@ function BuyerQueue() {
   });
 
   const baseFiltered = orders?.filter((o) =>
-    ((o as unknown as { approval_status?: string }).approval_status ?? "aprovado") === "aprovado" &&
-    (projectFilter === "all" || o.project_id === projectFilter)
+    ((o as unknown as { approval_status?: string }).approval_status ?? "aprovado") === "aprovado"
   ) ?? [];
   const filtered = filterDelivered(baseFiltered, deliveredMode, deliveredFrom);
   const projectName = (id: string) => (id === ESTOQUE_PROJECT_ID ? "Estoque" : projects?.find((p) => p.id === id)?.name ?? "—");
@@ -1923,13 +1921,6 @@ function BuyerQueue() {
           <CardDescription>Atualize status, adicione anexos e observações.</CardDescription>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Select value={projectFilter} onValueChange={setProjectFilter}>
-            <SelectTrigger className="w-full sm:w-[200px]"><SelectValue placeholder="Projeto" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os projetos</SelectItem>
-              {projects?.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
-            </SelectContent>
-          </Select>
           <DeliveredFilter mode={deliveredMode} setMode={setDeliveredMode} fromDate={deliveredFrom} setFromDate={setDeliveredFrom} />
         </div>
       </CardHeader>
@@ -1978,6 +1969,7 @@ function OrdersTable({
   const [fItem, setFItem] = useState("");
   const [fAloc, setFAloc] = useState("");
   const [fReq, setFReq] = useState("");
+  const [fDate, setFDate] = useState("");
   const [fStatus, setFStatus] = useState<string>("all");
 
   const norm = (s: string) => s.toLowerCase().trim();
@@ -1989,6 +1981,7 @@ function OrdersTable({
         (!fItem || norm(`${o.item_name ?? ""} ${o.requester_notes ?? ""}`).includes(norm(fItem))) &&
         (!fAloc || norm(allocationOf(o)).includes(norm(fAloc))) &&
         (!fReq || norm(requesterName?.(o.requester_id) ?? "").includes(norm(fReq))) &&
+        (!fDate || o.deadline_date === fDate || o.delivery_forecast === fDate) &&
         (fStatus === "all" || o.status === fStatus)
       );
 
@@ -2018,6 +2011,7 @@ function OrdersTable({
             {filterInput(fItem, setFItem, "Item")}
             {filterInput(fAloc, setFAloc, "Alocação")}
             {showRequester && filterInput(fReq, setFReq, "Solicitante")}
+            <Input type="date" value={fDate} onChange={(e) => setFDate(e.target.value)} className="h-7 px-1 text-xs" />
             <Select value={fStatus} onValueChange={setFStatus}>
               <SelectTrigger className="h-7 text-xs"><SelectValue placeholder="Status" /></SelectTrigger>
               <SelectContent>
@@ -2127,7 +2121,9 @@ function OrdersTable({
               <TableHead className="py-1" />
               <TableHead className="py-1" />
               <TableHead className="py-1" />
-              <TableHead className="py-1" />
+              <TableHead className="py-1">
+                <Input type="date" value={fDate} onChange={(e) => setFDate(e.target.value)} className="h-7 px-1 text-xs" />
+              </TableHead>
               <TableHead className="py-1">
                 <Select value={fStatus} onValueChange={setFStatus}>
                   <SelectTrigger className="h-7 text-xs"><SelectValue placeholder="Status" /></SelectTrigger>
