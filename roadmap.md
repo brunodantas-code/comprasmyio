@@ -17,6 +17,6 @@
 - [x] Restaurar organograma hierárquico mantendo agrupamento por perfil (approval-workflow)
 - [x] Botão "Excluir" de projetos (Cadastro) virou ícone de lixeira vermelha
 - [x] Projeto: checkbox "Implantado" (conclui projeto, impede novas solicitações) + campo data de implantação/cancelamento
-- [ ] Coluna "Item" mostrar Tipo de Solicitação (com subtipo de viagem) em vez da descrição
-- [ ] Evitar auto-aprovação: solicitações criadas pelo usuário não devem aparecer para ele mesmo aprovar
-- [ ] "Pendentes comigo": totalizador de approvals pendentes e total em R$ ao lado do título
+- [x] Coluna "Item" mostrar Tipo de Solicitação (com subtipo de viagem) em vez da descrição
+- [x] Evitar auto-aprovação: solicitações criadas pelo usuário não devem aparecer para ele mesmo aprovar
+- [x] "Pendentes comigo": totalizador de approvals pendentes e total em R$ ao lado do título
