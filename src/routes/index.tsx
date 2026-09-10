@@ -179,7 +179,7 @@ function Landing() {
         <div className="mt-10 grid gap-5 sm:grid-cols-3">
           {[
             { icon: ClipboardList, title: "Solicitante", body: "Cria e edita solicitações, acompanha status e confirma recebimento." },
-            { icon: Package, title: "Supply", body: "Gerencia a fila de compras, observações e prazos de entrega." },
+            { icon: Package, title: "Supply", body: "Gerencia a fila de solicitações e prazos de entrega." },
             { icon: ShieldCheck, title: "Admin", body: "Clientes, projetos, ordens de expedição, estoque e logs completos." },
           ].map(({ icon: Icon, title, body }) => (
             <div key={title} className="rounded-2xl border border-border p-6">
