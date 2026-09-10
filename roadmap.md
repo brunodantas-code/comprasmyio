@@ -1,4 +1,7 @@
 # Roadmap
 
-- [x] Minhas Solicitações: mostrar total pedido (parte comprada + parte separada do estoque)
-- [x] Novas Solicitações: campo "Valor médio" — média do valor unitário das compras do mesmo item nos últimos 6 meses
+## Done
+- [x] Reembolso de Despesas: checkbox, Centro de Custo/Projeto, múltiplas despesas, sem Serviço/Link/Prazo
+
+## In progress
+- [ ] Logo myio: usar Manual da Marca (myio.Manual_da_Marca_2019.pdf) como referência para alinhar o wordmark
