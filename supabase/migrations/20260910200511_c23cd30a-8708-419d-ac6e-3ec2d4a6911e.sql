@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.primary_role(uuid) FROM PUBLIC, anon, authenticated;

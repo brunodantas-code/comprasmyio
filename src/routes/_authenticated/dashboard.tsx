@@ -2979,27 +2979,39 @@ function UsersAdmin() {
   };
   const selectableRoles: AppRole[] = ["comprador", "fabrica", "estoquista", "solicitante", "coo", "ceo", "cfo", "cto"];
 
+  const { data: roleHierarchy } = useQuery({
+    queryKey: ["role-hierarchy"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("role_hierarchy").select("role, approver_role");
+      if (error) throw error;
+      const map = new Map<string, string | null>();
+      (data ?? []).forEach((r) => map.set(r.role as string, (r.approver_role as string | null) ?? null));
+      return map;
+    },
+  });
+
+  const approverLabelOf = (roles: AppRole[]) => {
+    const primary = roles.find((r) => r !== "admin");
+    const next = primary ? roleHierarchy?.get(primary) ?? null : null;
+    return next ? roleLabels[next as AppRole] ?? next : "";
+  };
+
   const [fName, setFName] = useState("");
   const [fEmail, setFEmail] = useState("");
   const [fManager, setFManager] = useState("");
   const [fRole, setFRole] = useState("all");
 
   const norm = (s: string) => s.toLowerCase().trim();
-  const nameOf = (id?: string | null) => {
-    if (!id) return "";
-    const u = (data ?? []).find((x) => x.id === id);
-    return u?.full_name || u?.email || "";
-  };
   const rows = (data ?? []).filter((u) => {
-    const p = u as unknown as { manager_id?: string | null };
     const primary = u.roles.find((r) => r !== "admin");
     return (
       (!fName || norm(u.full_name ?? "").includes(norm(fName))) &&
       (!fEmail || norm(u.email ?? "").includes(norm(fEmail))) &&
-      (!fManager || norm(nameOf(p.manager_id)).includes(norm(fManager))) &&
+      (!fManager || norm(approverLabelOf(u.roles)).includes(norm(fManager))) &&
       (fRole === "all" || (fRole === "admin" ? u.roles.includes("admin") : primary === fRole))
     );
   });
+
 
   const filterInput = (value: string, onChange: (v: string) => void, placeholder: string) => (
     <Input value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="h-7 px-1 text-xs" />
@@ -3009,7 +3021,7 @@ function UsersAdmin() {
     <Card>
       <CardHeader>
         <CardTitle>Usuários</CardTitle>
-        <CardDescription>Selecione o perfil de cada usuário. Defina o gestor direto e as faixas de alçada.</CardDescription>
+        <CardDescription>Selecione o perfil de cada usuário e as faixas de alçada. A aprovação segue o cargo definido no organograma.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
@@ -3017,7 +3029,8 @@ function UsersAdmin() {
           <div className="grid grid-cols-2 gap-2 rounded-lg bg-primary/10 p-2 sm:grid-cols-4">
             {filterInput(fName, setFName, "Nome")}
             {filterInput(fEmail, setFEmail, "E-mail")}
-            {filterInput(fManager, setFManager, "Gestor")}
+            {filterInput(fManager, setFManager, "Cargo aprovador")}
+
             <Select value={fRole} onValueChange={setFRole}>
               <SelectTrigger className="h-7 text-xs"><SelectValue placeholder="Perfil" /></SelectTrigger>
               <SelectContent>
@@ -3069,20 +3082,12 @@ function UsersAdmin() {
                         </div>
                         <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-3 lg:grid-cols-5">
                           <div className="flex flex-col gap-1">
-                            <span className="text-[10px] font-medium text-muted-foreground">Gestor direto</span>
-                            <Select
-                              value={p.manager_id ?? "none"}
-                              onValueChange={(v) => setProfileField.mutate({ userId: u.id, patch: { manager_id: v === "none" ? null : v } })}
-                            >
-                              <SelectTrigger className="h-8 w-full text-xs"><SelectValue placeholder="Sem gestor" /></SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="none">Sem gestor</SelectItem>
-                                {(data ?? []).filter((o) => o.id !== u.id).map((o) => (
-                                  <SelectItem key={o.id} value={o.id}>{o.full_name || o.email}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                            <span className="text-[10px] font-medium text-muted-foreground">Aprovado por (cargo)</span>
+                            <div className="flex h-8 items-center rounded-md border border-input bg-muted/40 px-2 text-xs text-muted-foreground">
+                              {approverLabelOf(u.roles) || "—"}
+                            </div>
                           </div>
+
                           <div className="flex flex-col gap-1">
                             <span className="text-[10px] font-medium text-muted-foreground">Perfil</span>
                             <Select
