@@ -2099,7 +2099,7 @@ function OrdersTable({
                 </div>
               </TableCell>
               <TableCell className="text-center"><StatusHistoryDialog order={o} canEdit={canEdit} /></TableCell>
-              <TableCell className="text-sm break-words">
+              <TableCell className="text-sm break-words text-center">
                 <InlineField order={o} field="passphrase" type="text" canEdit={canEdit} display={o.passphrase || "—"} />
               </TableCell>
               <TableCell className="text-xs text-muted-foreground">
