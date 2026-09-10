@@ -1254,6 +1254,23 @@ function OrgChartAdmin() {
       <Card>
         <CardHeader>
           <CardTitle>Visualização</CardTitle>
+          <CardDescription>Hierarquia atual de aprovação.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto pb-2">
+            <div className="flex min-w-max items-start gap-10 p-4">
+              {roots.map((r) => (
+                <OrgBox key={r.id} node={r} />
+              ))}
+              {roots.length === 0 && <p className="text-sm text-muted-foreground">Nenhum usuário cadastrado.</p>}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Agrupamento por perfil</CardTitle>
           <CardDescription>Equipes agrupadas por perfil de aprovação.</CardDescription>
         </CardHeader>
         <CardContent>
