@@ -23,7 +23,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { toast } from "sonner";
 import { LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Boxes, Building2, Plane, Landmark } from "lucide-react";
-import { Trash2, Paperclip, X, Download, Loader2, DatabaseBackup, CheckCircle2 } from "lucide-react";
+import { Trash2, Paperclip, X, Loader2, DatabaseBackup, CheckCircle2 } from "lucide-react";
 import { ApprovalWorkflow } from "@/components/approval-workflow";
 import { z } from "zod";
 import { StockTab } from "@/components/stock-tab";
@@ -134,18 +134,18 @@ function ExistingAttachments({ orderId, attachments, canRemove }: { orderId: str
     onSuccess: () => qc.invalidateQueries({ queryKey: ["orders"] }),
     onError: (e: Error) => toast.error(e.message),
   });
-  if (!attachments.length) return <p className="text-xs text-muted-foreground">Nenhum anexo.</p>;
+  if (!attachments.length) return null;
   return (
-    <ul className="space-y-1 text-xs">
+    <ul className="space-y-0.5 text-xs">
       {attachments.map((a) => (
-        <li key={a.path} className="flex items-center justify-between rounded border px-2 py-1">
-          <button type="button" onClick={() => openAttachment(a.path)} className="inline-flex items-center gap-1 truncate text-primary hover:underline">
-            <Download className="h-3 w-3" />{a.name}
+        <li key={a.path} className="flex items-center gap-1">
+          <button type="button" onClick={() => openAttachment(a.path)} className="truncate text-primary hover:underline" title={a.name}>
+            {a.name}
           </button>
           {canRemove && (
-            <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => remove.mutate(a)} disabled={remove.isPending}>
+            <button type="button" className="text-muted-foreground hover:text-destructive" onClick={() => remove.mutate(a)} disabled={remove.isPending}>
               <X className="h-3 w-3" />
-            </Button>
+            </button>
           )}
         </li>
       ))}
@@ -162,14 +162,15 @@ const STATUS_LABELS: Record<Order["status"], string> = {
   recebido_problema: "Recebido com problemas",
 };
 
+const STATUS_BADGE_BASE = "bg-slate-200 hover:bg-slate-200 text-slate-700 border-transparent";
+
 const STATUS_CLASSES: Record<Order["status"], string> = {
-  pendente: "bg-yellow-500 hover:bg-yellow-500 text-black border-transparent",
-  comprado_aguardando: "bg-green-600 hover:bg-green-600 text-white border-transparent",
-  entregue: "bg-blue-600 hover:bg-blue-600 text-white border-transparent",
-  cancelado: "bg-red-600 hover:bg-red-600 text-white border-transparent",
-  recebido_ok: "bg-slate-200 hover:bg-slate-200 text-slate-700 border-transparent",
-  recebido_problema:
-    "bg-amber-100 hover:bg-amber-100 text-amber-900 border-transparent animate-soft-amber-pulse",
+  pendente: STATUS_BADGE_BASE,
+  comprado_aguardando: STATUS_BADGE_BASE,
+  entregue: STATUS_BADGE_BASE,
+  cancelado: STATUS_BADGE_BASE,
+  recebido_ok: STATUS_BADGE_BASE,
+  recebido_problema: STATUS_BADGE_BASE,
 };
 
 const BUYER_STATUS_KEYS: Order["status"][] = ["pendente", "comprado_aguardando", "entregue", "cancelado"];
@@ -1984,7 +1985,7 @@ function OrdersTable({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="h-7 text-xs"
+      className="h-7 px-1 text-xs"
     />
   );
 
@@ -1993,25 +1994,25 @@ function OrdersTable({
       <Table className="w-full table-fixed">
         <TableHeader className="[&_tr]:border-b">
           <TableRow className="border-t bg-primary/15 hover:bg-primary/15">
-            <TableHead className="w-[110px]">Approval</TableHead>
-            <TableHead className="w-[210px]">Item</TableHead>
-            <TableHead className="w-[60px]">Qtd</TableHead>
-            <TableHead className="w-[100px]">Alocação</TableHead>
-            {showRequester && <TableHead className="w-[100px]">Solicitante</TableHead>}
-            <TableHead className="w-[100px]">Destinatário</TableHead>
-            <TableHead className="w-[130px]">Entrega</TableHead>
-            <TableHead className="w-[100px]">Prazo e Previsão</TableHead>
-            <TableHead className="w-[100px]">Status</TableHead>
-            <TableHead className="w-[90px]">Palavra passe</TableHead>
-            <TableHead className="w-[130px]">Obs.</TableHead>
+            <TableHead className="w-[110px] text-center font-bold">Approval</TableHead>
+            <TableHead className="w-[210px] text-center font-bold">Item</TableHead>
+            <TableHead className="w-[100px] text-center font-bold">Alocação</TableHead>
+            {showRequester && <TableHead className="w-[120px] text-center font-bold">Solicitante</TableHead>}
+            <TableHead className="w-[60px] text-center font-bold">Qtd</TableHead>
+            <TableHead className="w-[100px] text-center font-bold">Destinatário</TableHead>
+            <TableHead className="w-[120px] text-center font-bold">Entrega</TableHead>
+            <TableHead className="w-[100px] text-center font-bold">Prazo e Previsão</TableHead>
+            <TableHead className="w-[100px] text-center font-bold">Status</TableHead>
+            <TableHead className="w-[90px] text-center font-bold">Palavra passe</TableHead>
+            <TableHead className="w-[150px] text-center font-bold">Obs.</TableHead>
           </TableRow>
           {headerFilters && (
             <TableRow className="bg-primary/5 hover:bg-primary/5">
               <TableHead className="py-1">{filterInput(fApproval, setFApproval, "Nº")}</TableHead>
               <TableHead className="py-1">{filterInput(fItem, setFItem, "Item")}</TableHead>
-              <TableHead className="py-1" />
               <TableHead className="py-1">{filterInput(fAloc, setFAloc, "Alocação")}</TableHead>
               {showRequester && <TableHead className="py-1">{filterInput(fReq, setFReq, "Solicitante")}</TableHead>}
+              <TableHead className="py-1" />
               <TableHead className="py-1" />
               <TableHead className="py-1" />
               <TableHead className="py-1" />
@@ -2045,11 +2046,8 @@ function OrdersTable({
               </TableCell>
               <TableCell>
                 <div className="line-clamp-4 font-medium break-words">{o.item_name}</div>
-                {o.requester_notes && (
-                  <div className="line-clamp-4 mt-1 text-xs text-muted-foreground break-words">{o.requester_notes}</div>
-                )}
                 <div className="mt-1 flex flex-wrap items-center gap-2">
-                  <FullTextPopover text={[o.item_name, o.requester_notes].filter(Boolean).join("\n\n")} />
+                  <FullTextPopover text={o.item_name ?? ""} />
                   {o.item_link ? (
                     <a href={o.item_link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
                       ver link <ExternalLink className="h-3 w-3" />
@@ -2059,6 +2057,8 @@ function OrdersTable({
                   )}
                 </div>
               </TableCell>
+              <TableCell className="text-sm break-words">{o.for_stock ? "Estoque" : o.project_id ? projectName(o.project_id) : "—"}</TableCell>
+              {showRequester && <TableCell className="text-sm break-words">{requesterName?.(o.requester_id)}</TableCell>}
               <TableCell>
                 {(() => {
                   const part = o.request_group_id ? stockParts?.get(o.request_group_id) : undefined;
@@ -2074,8 +2074,6 @@ function OrdersTable({
                   );
                 })()}
               </TableCell>
-              <TableCell className="text-sm break-words">{o.for_stock ? "Estoque" : o.project_id ? projectName(o.project_id) : "—"}</TableCell>
-              {showRequester && <TableCell className="text-sm break-words">{requesterName?.(o.requester_id)}</TableCell>}
               <TableCell className="text-sm break-words">{o.recipient || "—"}</TableCell>
               <TableCell className="text-sm text-muted-foreground">
                 <div className="line-clamp-4 break-words">{o.delivery_point}</div>
@@ -2105,10 +2103,13 @@ function OrdersTable({
                 <InlineField order={o} field="passphrase" type="text" canEdit={canEdit} display={o.passphrase || "—"} />
               </TableCell>
               <TableCell className="text-xs text-muted-foreground">
+                {o.requester_notes && (
+                  <div className="line-clamp-4 break-words">{o.requester_notes}</div>
+                )}
                 <div className="line-clamp-4 break-words">
                   <InlineField order={o} field="buyer_notes" type="textarea" canEdit={canEdit} display={o.buyer_notes || "—"} />
                 </div>
-                <FullTextPopover text={o.buyer_notes ?? ""} />
+                <FullTextPopover text={[o.requester_notes, o.buyer_notes].filter(Boolean).join("\n\n")} />
               </TableCell>
             </TableRow>
           ))}
@@ -2469,7 +2470,9 @@ function InternalDeleteOrderDialog({ order }: { order: Order }) {
   return (
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setConfirm(""); }}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="destructive"><Trash2 className="h-4 w-4" /></Button>
+        <button type="button" aria-label="Excluir pedido" title="Excluir pedido" className="text-destructive hover:text-destructive/80">
+          <Trash2 className="h-4 w-4" />
+        </button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -2832,9 +2835,9 @@ function StatusHistoryDialog({ order, canEdit }: { order: Order; canEdit?: boole
       <DialogTrigger asChild>
         <button type="button" className="cursor-pointer">
           {awaitingApproval ? (
-            <Badge className="bg-orange-500 hover:bg-orange-500 text-white border-transparent">Aguardando aprovação</Badge>
+            <Badge className={STATUS_BADGE_BASE}>Aguardando aprovação</Badge>
           ) : rejected ? (
-            <Badge className="bg-red-600 hover:bg-red-600 text-white border-transparent">Rejeitado</Badge>
+            <Badge className={STATUS_BADGE_BASE}>Rejeitado</Badge>
           ) : (
             <Badge className={STATUS_CLASSES[order.status]}>{STATUS_LABELS[order.status]}</Badge>
           )}
