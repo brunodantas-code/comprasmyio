@@ -1114,10 +1114,18 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
     e.preventDefault();
     const isMateriais = requestType === "materiais";
     const isReembolso = requestType === "reembolso";
+    const isRh = requestType === "rh";
     if (!isMateriais) {
-      if (!isReembolso && newItemName.trim().length < 2) return toast.error("Descreva o serviço ou a viagem solicitada.");
+      if (!isReembolso && !isRh && newItemName.trim().length < 2) return toast.error("Descreva o serviço ou a viagem solicitada.");
       if (allocTarget === "projeto" && !projectId) return toast.error("Selecione o projeto");
       if (allocTarget === "cliente" && !clientId) return toast.error("Selecione o cliente");
+      if (isRh) {
+        if (!rhCargo) return toast.error("Selecione o cargo");
+        if (!rhGestor) return toast.error("Selecione o gestor");
+        if (!rhTipo) return toast.error("Selecione o tipo de contratação");
+        if (rhMotivo.trim().length < 3) return toast.error("Informe o motivo da contratação");
+        if (!(Number(rhRemuneracao) > 0)) return toast.error("Informe a remuneração");
+      }
       if (requestType === "viagens") {
         if (!travelType) return toast.error("Selecione o tipo de viagem");
         for (let i = 0; i < travelLegs.length; i++) {
