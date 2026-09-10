@@ -157,7 +157,7 @@ function Landing() {
           </h2>
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              ["01", "Solicitação", "O time pede material por projeto, com prazo e anexos."],
+              ["01", "Solicitação", "O time pede materiais, serviços, viagens ou reembolsos por projeto, com prazo e anexos."],
               ["02", "Compra", "Comprador atualiza status, palavra passe e previsão."],
               ["03", "Armazém", "Entrada, homologação por QR code e controle por setor."],
               ["04", "Expedição", "Ordem de expedição, transporte e entrega ao cliente."],
@@ -213,7 +213,7 @@ function Landing() {
       <footer className="border-t border-border py-8">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 text-sm text-muted-foreground sm:flex-row sm:px-6">
           <MyioLogo className="text-xl" />
-          <span>© {new Date().getFullYear()} Myio Supply — Gestão de Compras e Materiais</span>
+          <span>© {new Date().getFullYear()} Myio Supply — Gestão de Compras e Serviços</span>
         </div>
       </footer>
     </main>
