@@ -2001,7 +2001,7 @@ function BuyerQueue() {
 /* ---------- Orders table ---------- */
 
 function OrdersTable({
-  orders, projectName, requesterName, showRequester, canEdit, canDelete, canEditRequester, stockParts,
+  orders, projectName, requesterName, showRequester, canEdit, canDelete, canEditRequester, stockParts, headerFilters,
 }: {
   orders: Order[];
   projectName: (id: string) => string;
@@ -2011,26 +2011,76 @@ function OrdersTable({
   canDelete?: boolean;
   canEditRequester?: boolean;
   stockParts?: Map<string, StockPart>;
+  headerFilters?: boolean;
 }) {
   const { data: me } = useCurrentUser();
+  const [fApproval, setFApproval] = useState("");
+  const [fItem, setFItem] = useState("");
+  const [fAloc, setFAloc] = useState("");
+  const [fReq, setFReq] = useState("");
+  const [fStatus, setFStatus] = useState<string>("all");
+
+  const norm = (s: string) => s.toLowerCase().trim();
+  const allocationOf = (o: Order) => (o.for_stock ? "Estoque" : o.project_id ? projectName(o.project_id) : "—");
+  const visibleOrders = !headerFilters
+    ? orders
+    : orders.filter((o) =>
+        (!fApproval || norm(o.approval_number ?? "").includes(norm(fApproval))) &&
+        (!fItem || norm(`${o.item_name ?? ""} ${o.requester_notes ?? ""}`).includes(norm(fItem))) &&
+        (!fAloc || norm(allocationOf(o)).includes(norm(fAloc))) &&
+        (!fReq || norm(requesterName?.(o.requester_id) ?? "").includes(norm(fReq))) &&
+        (fStatus === "all" || o.status === fStatus)
+      );
+
+  const filterInput = (value: string, onChange: (v: string) => void, placeholder: string) => (
+    <Input
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      className="h-7 text-xs"
+    />
+  );
+
   return (
     <div className="overflow-x-auto">
       <Table className="w-full table-fixed">
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[120px]">Approval</TableHead>
-            <TableHead className="w-[200px]">Item</TableHead>
-            <TableHead className="w-[70px]">Qtd</TableHead>
-            <TableHead className="w-[110px]">Alocação</TableHead>
+        <TableHeader className="[&_tr]:border-b">
+          <TableRow className="border-t bg-primary/15 hover:bg-primary/15">
+            <TableHead className="w-[110px]">Approval</TableHead>
+            <TableHead className="w-[210px]">Item</TableHead>
+            <TableHead className="w-[60px]">Qtd</TableHead>
+            <TableHead className="w-[100px]">Alocação</TableHead>
             {showRequester && <TableHead className="w-[100px]">Solicitante</TableHead>}
             <TableHead className="w-[100px]">Destinatário</TableHead>
-            <TableHead className="w-[150px]">Entrega</TableHead>
-            <TableHead className="w-[90px]">Prazo</TableHead>
-            <TableHead className="w-[130px]">Status</TableHead>
-            <TableHead className="w-[110px]">Previsão de entrega</TableHead>
-            <TableHead className="w-[110px]">Palavra passe</TableHead>
-            <TableHead className="w-[150px]">Obs.</TableHead>
+            <TableHead className="w-[130px]">Entrega</TableHead>
+            <TableHead className="w-[100px]">Prazo e Previsão</TableHead>
+            <TableHead className="w-[100px]">Status</TableHead>
+            <TableHead className="w-[90px]">Palavra passe</TableHead>
+            <TableHead className="w-[130px]">Obs.</TableHead>
           </TableRow>
+          {headerFilters && (
+            <TableRow className="bg-primary/5 hover:bg-primary/5">
+              <TableHead className="py-1">{filterInput(fApproval, setFApproval, "Nº")}</TableHead>
+              <TableHead className="py-1">{filterInput(fItem, setFItem, "Item")}</TableHead>
+              <TableHead className="py-1" />
+              <TableHead className="py-1">{filterInput(fAloc, setFAloc, "Alocação")}</TableHead>
+              {showRequester && <TableHead className="py-1">{filterInput(fReq, setFReq, "Solicitante")}</TableHead>}
+              <TableHead className="py-1" />
+              <TableHead className="py-1" />
+              <TableHead className="py-1" />
+              <TableHead className="py-1">
+                <Select value={fStatus} onValueChange={setFStatus}>
+                  <SelectTrigger className="h-7 text-xs"><SelectValue placeholder="Status" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos</SelectItem>
+                    {STATUS_KEYS.map((k) => <SelectItem key={k} value={k}>{STATUS_LABELS[k]}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </TableHead>
+              <TableHead className="py-1" />
+              <TableHead className="py-1" />
+            </TableRow>
+          )}
         </TableHeader>
         <TableBody>
           {orders.map((o) => (
