@@ -1271,13 +1271,13 @@ function OrgChartAdmin() {
       <Card>
         <CardHeader>
           <CardTitle>Visualização</CardTitle>
-          <CardDescription>Hierarquia atual de aprovação.</CardDescription>
+          <CardDescription>Hierarquia atual de aprovação, com os nomes agrupados por perfil sob cada gestor.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto pb-2">
             <div className="flex min-w-max items-start gap-10 p-4">
-              {roots.map((r) => (
-                <OrgBox key={r.id} node={r} />
+              {groupByTitle(roots).map((g) => (
+                <OrgBox key={g.title} group={g} />
               ))}
               {roots.length === 0 && <p className="text-sm text-muted-foreground">Nenhum usuário cadastrado.</p>}
             </div>
@@ -1285,43 +1285,6 @@ function OrgChartAdmin() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Agrupamento por perfil</CardTitle>
-          <CardDescription>Equipes agrupadas por perfil de aprovação.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto pb-2">
-            <div className="flex min-w-max items-start gap-4 p-4">
-              {(() => {
-                const list = rows ?? [];
-                const groups = new Map<string, { title: string; names: string[] }>();
-                list.forEach((p) => {
-                  const title = roleTitle(profiles?.get(p.id)?.roles ?? []);
-                  if (!groups.has(title)) groups.set(title, { title, names: [] });
-                  groups.get(title)!.names.push(p.full_name || p.email || "—");
-                });
-                const items = Array.from(groups.values());
-                if (items.length === 0)
-                  return <p className="text-sm text-muted-foreground">Nenhum usuário cadastrado.</p>;
-                return items.map((g) => (
-                  <div
-                    key={g.title}
-                    className="min-w-[180px] rounded-lg border bg-card px-4 py-3 text-center shadow-sm"
-                  >
-                    <p className="text-sm font-bold leading-tight">{g.title}</p>
-                    <div className="mt-1.5 space-y-1">
-                      {g.names.map((n, i) => (
-                        <p key={`${n}-${i}`} className="text-xs leading-tight text-muted-foreground">{n}</p>
-                      ))}
-                    </div>
-                  </div>
-                ));
-              })()}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
