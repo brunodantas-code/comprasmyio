@@ -1065,21 +1065,37 @@ type OrgNode = {
   children: OrgNode[];
 };
 
-function OrgBox({ node }: { node: OrgNode }) {
+function groupByTitle(nodes: OrgNode[]) {
+  const groups = new Map<string, { title: string; names: string[]; children: OrgNode[] }>();
+  nodes.forEach((n) => {
+    if (!groups.has(n.title)) groups.set(n.title, { title: n.title, names: [], children: [] });
+    const g = groups.get(n.title)!;
+    g.names.push(n.name);
+    g.children.push(...n.children);
+  });
+  return Array.from(groups.values());
+}
+
+function OrgBox({ group }: { group: { title: string; names: string[]; children: OrgNode[] } }) {
+  const childGroups = groupByTitle(group.children);
   return (
     <div className="flex flex-col items-center">
-      <div className="min-w-[150px] rounded-lg border bg-card px-4 py-2 text-center shadow-sm">
-        <p className="text-sm font-bold leading-tight">{node.title}</p>
-        <p className="text-xs leading-tight text-muted-foreground">{node.name}</p>
+      <div className="min-w-[160px] rounded-lg border bg-card px-4 py-2 text-center shadow-sm">
+        <p className="text-sm font-bold leading-tight">{group.title}</p>
+        <div className="mt-1 space-y-0.5">
+          {group.names.map((n, i) => (
+            <p key={`${n}-${i}`} className="text-xs leading-tight text-muted-foreground">{n}</p>
+          ))}
+        </div>
       </div>
-      {node.children.length > 0 && (
+      {childGroups.length > 0 && (
         <>
           <div className="h-5 w-px bg-border" />
           <div className="flex items-start gap-6 border-t border-border pt-5">
-            {node.children.map((c) => (
-              <div key={c.id} className="relative flex flex-col items-center">
+            {childGroups.map((c) => (
+              <div key={c.title} className="relative flex flex-col items-center">
                 <div className="absolute -top-5 h-5 w-px bg-border" />
-                <OrgBox node={c} />
+                <OrgBox group={c} />
               </div>
             ))}
           </div>
@@ -1088,6 +1104,7 @@ function OrgBox({ node }: { node: OrgNode }) {
     </div>
   );
 }
+
 
 function OrgChartAdmin() {
   const qc = useQueryClient();
@@ -1254,13 +1271,13 @@ function OrgChartAdmin() {
       <Card>
         <CardHeader>
           <CardTitle>Visualização</CardTitle>
-          <CardDescription>Hierarquia atual de aprovação.</CardDescription>
+          <CardDescription>Hierarquia atual de aprovação, com os nomes agrupados por perfil sob cada gestor.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto pb-2">
             <div className="flex min-w-max items-start gap-10 p-4">
-              {roots.map((r) => (
-                <OrgBox key={r.id} node={r} />
+              {groupByTitle(roots).map((g) => (
+                <OrgBox key={g.title} group={g} />
               ))}
               {roots.length === 0 && <p className="text-sm text-muted-foreground">Nenhum usuário cadastrado.</p>}
             </div>
@@ -1268,43 +1285,6 @@ function OrgChartAdmin() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Agrupamento por perfil</CardTitle>
-          <CardDescription>Equipes agrupadas por perfil de aprovação.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto pb-2">
-            <div className="flex min-w-max items-start gap-4 p-4">
-              {(() => {
-                const list = rows ?? [];
-                const groups = new Map<string, { title: string; names: string[] }>();
-                list.forEach((p) => {
-                  const title = roleTitle(profiles?.get(p.id)?.roles ?? []);
-                  if (!groups.has(title)) groups.set(title, { title, names: [] });
-                  groups.get(title)!.names.push(p.full_name || p.email || "—");
-                });
-                const items = Array.from(groups.values());
-                if (items.length === 0)
-                  return <p className="text-sm text-muted-foreground">Nenhum usuário cadastrado.</p>;
-                return items.map((g) => (
-                  <div
-                    key={g.title}
-                    className="min-w-[180px] rounded-lg border bg-card px-4 py-3 text-center shadow-sm"
-                  >
-                    <p className="text-sm font-bold leading-tight">{g.title}</p>
-                    <div className="mt-1.5 space-y-1">
-                      {g.names.map((n, i) => (
-                        <p key={`${n}-${i}`} className="text-xs leading-tight text-muted-foreground">{n}</p>
-                      ))}
-                    </div>
-                  </div>
-                ));
-              })()}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
