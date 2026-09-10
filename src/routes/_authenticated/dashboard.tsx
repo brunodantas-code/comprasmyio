@@ -2098,7 +2098,7 @@ function OrdersTable({
                   />
                 </div>
               </TableCell>
-              <TableCell><StatusHistoryDialog order={o} canEdit={canEdit} /></TableCell>
+              <TableCell className="text-center"><StatusHistoryDialog order={o} canEdit={canEdit} /></TableCell>
               <TableCell className="text-sm break-words">
                 <InlineField order={o} field="passphrase" type="text" canEdit={canEdit} display={o.passphrase || "—"} />
               </TableCell>
