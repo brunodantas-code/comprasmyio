@@ -1936,7 +1936,7 @@ function BuyerQueue() {
         </div>
       ));
     }
-    return <OrdersTable orders={list} projectName={projectName} requesterName={requesterName} showRequester canEdit canDelete />;
+    return <OrdersTable orders={list} projectName={projectName} requesterName={requesterName} showRequester canEdit canDelete headerFilters />;
   };
 
   return (
@@ -1944,7 +1944,7 @@ function BuyerQueue() {
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <CardTitle>Approvals Pendentes</CardTitle>
-          <CardDescription>Todos os pedidos, separados entre itens nacionais e importados. Atualize status, adicione anexos e observações.</CardDescription>
+          <CardDescription>Atualize status, adicione anexos e observações.</CardDescription>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Select value={projectFilter} onValueChange={setProjectFilter}>
@@ -1954,7 +1954,6 @@ function BuyerQueue() {
               {projects?.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
             </SelectContent>
           </Select>
-          <StatusMultiFilter selected={statusSelected} setSelected={setStatusSelected} />
           <Button
             type="button"
             variant={groupByProject ? "default" : "outline"}
@@ -1972,26 +1971,7 @@ function BuyerQueue() {
         ) : !filtered.length ? (
           <p className="text-sm text-muted-foreground">Nada por aqui.</p>
         ) : (
-          <Tabs defaultValue="nacional">
-            <TabsList className="mb-4">
-              <TabsTrigger value="nacional">Nacional ({nacionais.length})</TabsTrigger>
-              <TabsTrigger value="importacao">Importação ({importados.length})</TabsTrigger>
-            </TabsList>
-            <TabsContent value="nacional">
-              {nacionais.length ? (
-                renderOrders(nacionais)
-              ) : (
-                <p className="text-sm text-muted-foreground">Nenhum pedido nesta fila.</p>
-              )}
-            </TabsContent>
-            <TabsContent value="importacao">
-              {importados.length ? (
-                renderOrders(importados)
-              ) : (
-                <p className="text-sm text-muted-foreground">Nenhum pedido nesta fila.</p>
-              )}
-            </TabsContent>
-          </Tabs>
+          <div className="space-y-4">{renderOrders(filtered)}</div>
         )}
       </CardContent>
     </Card>
