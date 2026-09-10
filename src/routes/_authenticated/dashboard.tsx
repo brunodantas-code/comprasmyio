@@ -3082,20 +3082,12 @@ function UsersAdmin() {
                         </div>
                         <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-3 lg:grid-cols-5">
                           <div className="flex flex-col gap-1">
-                            <span className="text-[10px] font-medium text-muted-foreground">Gestor direto</span>
-                            <Select
-                              value={p.manager_id ?? "none"}
-                              onValueChange={(v) => setProfileField.mutate({ userId: u.id, patch: { manager_id: v === "none" ? null : v } })}
-                            >
-                              <SelectTrigger className="h-8 w-full text-xs"><SelectValue placeholder="Sem gestor" /></SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="none">Sem gestor</SelectItem>
-                                {(data ?? []).filter((o) => o.id !== u.id).map((o) => (
-                                  <SelectItem key={o.id} value={o.id}>{o.full_name || o.email}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                            <span className="text-[10px] font-medium text-muted-foreground">Aprovado por (cargo)</span>
+                            <div className="flex h-8 items-center rounded-md border border-input bg-muted/40 px-2 text-xs text-muted-foreground">
+                              {approverLabelOf(u.roles) || "—"}
+                            </div>
                           </div>
+
                           <div className="flex flex-col gap-1">
                             <span className="text-[10px] font-medium text-muted-foreground">Perfil</span>
                             <Select
