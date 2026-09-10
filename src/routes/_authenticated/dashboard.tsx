@@ -1080,10 +1080,10 @@ function NewOrder({ userId }: { userId: string }) {
         for (let i = 0; i < travelLegs.length; i++) {
           const leg = travelLegs[i];
           const n = i + 1;
-          if (leg.destination.trim().length < 2) return toast.error(`Trecho ${n}: informe a cidade e o estado de destino`);
-          if (!leg.departure) return toast.error(`Trecho ${n}: informe a data de ida`);
-          if (!leg.return) return toast.error(`Trecho ${n}: informe a data de retorno`);
-          if (leg.return < leg.departure) return toast.error(`Trecho ${n}: a data de retorno não pode ser anterior à data de ida`);
+          if (leg.destination.trim().length < 2) return toast.error(`Solicitação ${n}: informe a cidade e o estado de destino`);
+          if (!leg.departure) return toast.error(`Solicitação ${n}: informe a data de ida`);
+          if (!leg.return) return toast.error(`Solicitação ${n}: informe a data de retorno`);
+          if (leg.return < leg.departure) return toast.error(`Solicitação ${n}: a data de retorno não pode ser anterior à data de ida`);
         }
       }
     } else if (isNewItem) {
@@ -1208,7 +1208,7 @@ function NewOrder({ userId }: { userId: string }) {
                 {travelLegs.map((leg, i) => (
                   <div key={i} className="rounded-md border p-3 space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-semibold">Trecho {i + 1}</span>
+                      <span className="text-sm font-semibold">Solicitação {i + 1}</span>
                       {travelLegs.length > 1 && (
                         <Button
                           type="button"
@@ -1220,9 +1220,9 @@ function NewOrder({ userId }: { userId: string }) {
                         </Button>
                       )}
                     </div>
-                    <div className="grid gap-4 md:grid-cols-3">
+                    <div className="grid gap-4 md:grid-cols-3 items-end">
                       <div className="space-y-2">
-                        <Label htmlFor={`travel_destination_${i}`}>Cidade e Estado (UF) de destino</Label>
+                        <Label htmlFor={`travel_destination_${i}`}>Cidade e UF de destino</Label>
                         <Input id={`travel_destination_${i}`} value={leg.destination} onChange={(e) => updateLeg(i, { destination: e.target.value })} placeholder="Ex.: São Paulo - SP" />
                       </div>
                       <div className="space-y-2">
@@ -1245,7 +1245,7 @@ function NewOrder({ userId }: { userId: string }) {
                   >
                     <Plus className="h-4 w-4" />
                   </Button>
-                  <span className="text-sm text-muted-foreground">Deseja adicionar outro trecho para esta viagem?</span>
+                  <span className="text-sm text-muted-foreground">Deseja adicionar outra solicitação para esta viagem?</span>
                 </div>
               </div>
             )}
@@ -1359,9 +1359,9 @@ function NewOrder({ userId }: { userId: string }) {
                   </div>
                   <PurchasableItemPicker value={isNewItem ? null : item} onPick={(i) => { setItem(i); if (i.link) setItemLink(i.link); }} disabled={isNewItem} />
                 </>
-              ) : (
-                <Label>{requestType === "servicos" ? "Serviço" : "Viagem"}</Label>
-              )}
+              ) : requestType === "servicos" ? (
+                <Label>Serviço</Label>
+              ) : null}
               {isNewItem ? (
 
                 <div className="space-y-2 pt-1">
@@ -1421,7 +1421,7 @@ function NewOrder({ userId }: { userId: string }) {
             </div>
             <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="quantity">Quantidade</Label>
+                <Label htmlFor="quantity">{requestType === "viagens" ? "Quantidade de Pessoas" : "Quantidade"}</Label>
                 <Input id="quantity" name="quantity" type="number" min={1} value={qty} onChange={(e) => setQty(e.target.value)} required />
               </div>
               <div className="space-y-2">
