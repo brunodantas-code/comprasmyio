@@ -2175,13 +2175,14 @@ function ConfirmReceiptActions({ order }: { order: Order }) {
 }
 
 function InlineField({
-  order, field, type, canEdit, display,
+  order, field, type, canEdit, display, align = "left",
 }: {
   order: Order;
   field: "delivery_forecast" | "passphrase" | "buyer_notes";
   type: "date" | "text" | "textarea";
   canEdit?: boolean;
   display: string;
+  align?: "left" | "center";
 }) {
   const qc = useQueryClient();
   const [editing, setEditing] = useState(false);
@@ -2220,7 +2221,8 @@ function InlineField({
     save.mutate(value);
   };
 
-  if (!canEdit) return <span className="whitespace-pre-wrap">{display}</span>;
+  const alignClass = align === "center" ? "text-center" : "text-left";
+  if (!canEdit) return <span className={`whitespace-pre-wrap ${alignClass}`}>{display}</span>;
 
   if (!editing) {
     return (
