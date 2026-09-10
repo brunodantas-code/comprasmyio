@@ -970,10 +970,10 @@ function DefaultChainAdmin() {
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle>Padrão de aprovação por alçada</CardTitle>
+          <CardTitle>Alçadas de Aprovação</CardTitle>
           <CardDescription>
             Sequência aplicada automaticamente a cada nova solicitação, conforme o valor total e o organograma.
-            {isAdmin ? " Edite os valores e o gestor direto de cada usuário." : " Somente administradores podem editar."}
+            {isAdmin ? " Edite somente os valores das alçadas. A definição de gestores é feita no menu “Organograma de Aprovação”." : " Somente administradores podem editar."}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">
@@ -1327,7 +1327,7 @@ export function ApprovalWorkflow() {
         <TabsTrigger value="pendentes">Pendentes comigo</TabsTrigger>
         <TabsTrigger value="fluxos">Solicitações em fluxo</TabsTrigger>
         <TabsTrigger value="organograma">Organograma de Aprovação</TabsTrigger>
-        <TabsTrigger value="padrao">Padrão de aprovação</TabsTrigger>
+        <TabsTrigger value="padrao">Alçadas de Aprovação</TabsTrigger>
         <TabsTrigger value="regras">Etapas adicionais</TabsTrigger>
       </TabsList>
       <TabsContent value="pendentes"><PendingForMe /></TabsContent>
