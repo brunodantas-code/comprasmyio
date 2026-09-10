@@ -1191,13 +1191,13 @@ function OrgChartAdmin() {
   });
 
   const namesByRole = useMemo(() => {
-    const map = new Map<string, string[]>();
+    const map = new Map<string, { name: string; limit: number }[]>();
     (rows ?? []).forEach((p) => {
       const roles = profiles?.get(p.id)?.roles ?? [];
       const main = ROLE_PRIORITY.find((r) => roles.includes(r as AppRole));
       if (!main || main === "admin") return;
       if (!map.has(main)) map.set(main, []);
-      map.get(main)!.push(p.full_name || p.email || "—");
+      map.get(main)!.push({ name: shortName(p.full_name), limit: Number(p.approval_limit ?? 0) });
     });
     return map;
   }, [rows, profiles]);
