@@ -1087,21 +1087,28 @@ function roleTitle(roles: AppRole[]) {
 type RoleNode = {
   role: string;
   title: string;
-  names: string[];
+  names: { name: string; limit: number }[];
   children: RoleNode[];
 };
 
 function OrgBox({ node }: { node: RoleNode }) {
   return (
     <div className="flex flex-col items-center">
-      <div className="min-w-[170px] rounded-lg border bg-card px-4 py-2 text-center shadow-sm">
+      <div className="w-[220px] rounded-lg border bg-card px-4 py-2 text-center shadow-sm">
         <p className="text-sm font-bold leading-tight">{node.title}</p>
         <div className="mt-1 space-y-0.5">
           {node.names.length === 0 ? (
             <p className="text-xs italic leading-tight text-muted-foreground">Sem usuário no cargo</p>
           ) : (
             node.names.map((n, i) => (
-              <p key={`${n}-${i}`} className="text-xs leading-tight text-muted-foreground">{n}</p>
+              <div
+                key={`${n.name}-${i}`}
+                className="flex items-center justify-center gap-1.5 text-xs leading-tight text-muted-foreground"
+              >
+                <span>{n.name}</span>
+                <span className="text-border">|</span>
+                <span className="font-medium text-foreground/80">{formatInt(n.limit)}</span>
+              </div>
             ))
           )}
         </div>
