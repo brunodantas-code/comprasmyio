@@ -1732,8 +1732,6 @@ function MyOrders({ userId }: { userId: string }) {
   const { data: stockParts } = useMyStockParts(userId);
   const [deliveredMode, setDeliveredMode] = useState<DeliveredMode>("this_month");
   const [deliveredFrom, setDeliveredFrom] = useState("");
-  const [statusSelected, setStatusSelected] = useState<Order["status"][]>([...STATUS_KEYS]);
-  const [approvalSearch, setApprovalSearch] = useState("");
   const { data: orders, isLoading } = useQuery({
     queryKey: ["orders", "mine", userId],
     queryFn: async () => {
@@ -1748,11 +1746,7 @@ function MyOrders({ userId }: { userId: string }) {
   });
 
   const projectName = (id: string) => (id === ESTOQUE_PROJECT_ID ? "Estoque" : projects?.find((p) => p.id === id)?.name ?? "—");
-  const statusFiltered = (orders ?? []).filter((o) => statusSelected.includes(o.status));
-  const term = approvalSearch.trim();
-  const visible = filterDelivered(statusFiltered, deliveredMode, deliveredFrom).filter(
-    (o) => !term || (o.approval_number ?? "").includes(term)
-  );
+  const visible = filterDelivered(orders ?? [], deliveredMode, deliveredFrom);
 
   const usedGroups = new Set((orders ?? []).map((o) => o.request_group_id).filter(Boolean) as string[]);
   const stockOnly = [...(stockParts?.values() ?? [])].filter((p) => !usedGroups.has(p.group));
@@ -1765,13 +1759,6 @@ function MyOrders({ userId }: { userId: string }) {
           <CardDescription>Acompanhe o status dos seus pedidos de compra.</CardDescription>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Input
-            value={approvalSearch}
-            onChange={(e) => setApprovalSearch(e.target.value)}
-            placeholder="Buscar nº do approval"
-            className="w-full sm:w-[200px]"
-          />
-          <StatusMultiFilter selected={statusSelected} setSelected={setStatusSelected} />
           <DeliveredFilter mode={deliveredMode} setMode={setDeliveredMode} fromDate={deliveredFrom} setFromDate={setDeliveredFrom} />
         </div>
       </CardHeader>
@@ -1779,7 +1766,7 @@ function MyOrders({ userId }: { userId: string }) {
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
           !orders?.length ? <p className="text-sm text-muted-foreground">Nenhum pedido ainda.</p> :
           !visible.length ? <p className="text-sm text-muted-foreground">Nenhum pedido para exibir com o filtro atual.</p> :
-          <OrdersTable orders={visible} projectName={projectName} showRequester={false} canEditRequester canDelete stockParts={stockParts} />
+          <OrdersTable orders={visible} projectName={projectName} showRequester={false} canEditRequester canDelete stockParts={stockParts} headerFilters />
         }
         {stockOnly.length > 0 && (
           <div className="rounded-md border p-4">
