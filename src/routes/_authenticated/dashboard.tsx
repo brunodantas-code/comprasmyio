@@ -2100,7 +2100,7 @@ function OrdersTable({
               </TableCell>
               <TableCell className="text-center"><StatusHistoryDialog order={o} canEdit={canEdit} /></TableCell>
               <TableCell className="text-sm break-words text-center">
-                <InlineField order={o} field="passphrase" type="text" canEdit={canEdit} display={o.passphrase || "—"} />
+                <InlineField order={o} field="passphrase" type="text" canEdit={canEdit} display={o.passphrase || "—"} align="center" />
               </TableCell>
               <TableCell className="text-xs text-muted-foreground">
                 {o.requester_notes && (
