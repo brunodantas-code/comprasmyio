@@ -2000,7 +2000,7 @@ function OrdersTable({
             {showRequester && <TableHead className="w-[120px] text-center font-bold">Solicitante</TableHead>}
             <TableHead className="w-[60px] text-center font-bold">Qtd</TableHead>
             <TableHead className="w-[100px] text-center font-bold">Destinatário</TableHead>
-            <TableHead className="w-[120px] text-center font-bold">Entrega</TableHead>
+            <TableHead className="w-[120px] text-center font-bold">Endereço de Entrega</TableHead>
             <TableHead className="w-[100px] text-center font-bold">Prazo e Previsão</TableHead>
             <TableHead className="w-[100px] text-center font-bold">Status</TableHead>
             <TableHead className="w-[90px] text-center font-bold">Palavra passe</TableHead>
