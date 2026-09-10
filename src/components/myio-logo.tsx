@@ -8,15 +8,26 @@ type Props = {
   tone?: "light" | "dark";
 };
 
-/** Logotipo oficial myio (Manual da Marca). */
+/** Logotipo oficial myio (Manual da Marca) + wordmark "supply". */
 export function MyioLogo({ className, tone = "dark" }: Props) {
   return (
-    <img
-      src={tone === "light" ? logoDark.url : logoLightSrc}
-      alt="myio"
-      className={cn("h-auto w-auto select-none", className)}
-      style={{ height: "1em" }}
-      draggable={false}
-    />
+    <span className={cn("inline-flex items-center gap-[0.35em]", className)}>
+      <img
+        src={tone === "light" ? logoDark.url : logoLightSrc}
+        alt="myio"
+        className="h-auto w-auto select-none"
+        style={{ height: "1.5em" }}
+        draggable={false}
+      />
+      <span
+        className={cn(
+          "select-none font-light leading-none tracking-tight",
+          tone === "light" ? "text-white" : "text-[var(--myio-dark)]",
+        )}
+        style={{ fontSize: "1.5em" }}
+      >
+        supply
+      </span>
+    </span>
   );
 }
