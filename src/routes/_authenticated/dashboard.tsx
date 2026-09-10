@@ -1160,6 +1160,65 @@ function NewOrder({ userId }: { userId: string }) {
   }
 
 
+  const typeSelector = (
+    <div className="space-y-2">
+      <Label>Tipo de solicitação</Label>
+      <div className="flex flex-wrap items-center gap-6">
+        {([
+          ["materiais", "Materiais"],
+          ["servicos", "Serviços"],
+          ["viagens", "Viagens"],
+          ["reembolso", "Reembolso de Despesas"],
+          ...(canImport ? [["importacao", "Importação"] as const] : []),
+        ] as const).map(([v, l]) => (
+          <label key={v} className="flex cursor-pointer items-center gap-2 text-sm">
+            <Checkbox
+              checked={requestType === v}
+              onCheckedChange={() => {
+                setRequestType(v);
+                if (v === "materiais") {
+                  setClientId("");
+                } else {
+                  setForStock(false);
+                  setIsNewItem(true);
+                  setItem(null);
+                  setNewItemDest("");
+                }
+              }}
+            />
+            {l}
+          </label>
+        ))}
+      </div>
+      {requestType === "materiais" && (
+        <p className="text-xs text-muted-foreground">Solicitações de Materiais são cadastradas no Armazém.</p>
+      )}
+      {requestType === "viagens" && (
+        <p className="text-xs text-muted-foreground">Passagens, Hospedagens, Aluguel de Veículos.</p>
+      )}
+      {requestType === "reembolso" && (
+        <p className="text-xs text-muted-foreground">Reembolso de despesas incorridas pelo solicitante.</p>
+      )}
+      {requestType === "importacao" && (
+        <p className="text-xs text-muted-foreground">Pedidos de importação e acompanhamento de embarques.</p>
+      )}
+    </div>
+  );
+
+  if (requestType === "importacao") {
+    return (
+      <div className="space-y-4">
+        <Card className="max-w-2xl">
+          <CardHeader>
+            <CardTitle>Novas Solicitações</CardTitle>
+          </CardHeader>
+          <CardContent>{typeSelector}</CardContent>
+        </Card>
+        <ImportOrders userId={userId} />
+      </div>
+    );
+  }
+
   return (
     <Card className="max-w-2xl">
       <CardHeader>
@@ -1174,44 +1233,9 @@ function NewOrder({ userId }: { userId: string }) {
         ) : (
           <form ref={formRef} onSubmit={onSubmit} className="space-y-4">
 
-            <div className="space-y-2">
-              <Label>Tipo de solicitação</Label>
-              <div className="flex items-center gap-6">
-                {([
-                  ["materiais", "Materiais"],
-                  ["servicos", "Serviços"],
-                  ["viagens", "Viagens"],
-                  ["reembolso", "Reembolso de Despesas"],
-                ] as const).map(([v, l]) => (
-                  <label key={v} className="flex cursor-pointer items-center gap-2 text-sm">
-                    <Checkbox
-                      checked={requestType === v}
-                      onCheckedChange={() => {
-                        setRequestType(v);
-                        if (v === "materiais") {
-                          setClientId("");
-                        } else {
-                          setForStock(false);
-                          setIsNewItem(true);
-                          setItem(null);
-                          setNewItemDest("");
-                        }
-                      }}
-                    />
-                    {l}
-                  </label>
-                ))}
-              </div>
-              {requestType === "materiais" && (
-                <p className="text-xs text-muted-foreground">Solicitações de Materiais são cadastradas no Armazém.</p>
-              )}
-              {requestType === "viagens" && (
-                <p className="text-xs text-muted-foreground">Passagens, Hospedagens, Aluguel de Veículos.</p>
-              )}
-              {requestType === "reembolso" && (
-                <p className="text-xs text-muted-foreground">Reembolso de despesas incorridas pelo solicitante.</p>
-              )}
-            </div>
+            {typeSelector}
+
+
 
             {requestType === "viagens" && (
               <div className="grid gap-4 md:grid-cols-2">
