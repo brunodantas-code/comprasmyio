@@ -3,13 +3,48 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
-  ({ className, ...props }, ref) => (
-    <div className="relative w-full overflow-auto">
-      <table ref={ref} className={cn("w-full caption-bottom text-sm", className)} {...props} />
-    </div>
-  ),
+  ({ className, ...props }, ref) => {
+    const innerRef = React.useRef<HTMLTableElement | null>(null);
+
+    // Rotula cada célula com o texto do cabeçalho, para o modo empilhado no celular.
+    React.useEffect(() => {
+      const el = innerRef.current;
+      if (!el) return;
+      const apply = () => {
+        const headRow = el.querySelector("thead tr");
+        if (!headRow) return;
+        const labels = Array.from(headRow.children).map((th) => (th.textContent || "").trim());
+        el.querySelectorAll("tbody tr").forEach((tr) => {
+          Array.from(tr.children).forEach((td, i) => {
+            const label = labels[i] ?? "";
+            if (td.getAttribute("data-label") !== label) td.setAttribute("data-label", label);
+          });
+        });
+      };
+      apply();
+      const obs = new MutationObserver(apply);
+      obs.observe(el, { childList: true, subtree: true });
+      return () => obs.disconnect();
+    });
+
+    return (
+      <div className="relative w-full md:overflow-auto">
+        <table
+          ref={(node) => {
+            innerRef.current = node;
+            if (typeof ref === "function") ref(node);
+            else if (ref) (ref as React.MutableRefObject<HTMLTableElement | null>).current = node;
+          }}
+          data-responsive="true"
+          className={cn("w-full caption-bottom text-sm", className)}
+          {...props}
+        />
+      </div>
+    );
+  },
 );
 Table.displayName = "Table";
+
 
 const TableHeader = React.forwardRef<
   HTMLTableSectionElement,
