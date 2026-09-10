@@ -883,15 +883,28 @@ function DefaultChainAdmin() {
   const { data: me } = useCurrentUser();
   const isAdmin = Boolean(me?.isAdmin);
 
+  const { data: profilesMap } = useProfiles();
+
   const { data: rows, isLoading } = useQuery({
     queryKey: ["aw-default-chain"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, full_name, email, approval_limit, tier2_limit, tier3_limit, manager_id, approval_level")
+        .select("id, full_name, email, approval_limit, tier2_limit, tier3_limit, approval_level")
         .order("full_name");
       if (error) throw error;
       return data ?? [];
+    },
+  });
+
+  const { data: hierarchy } = useQuery({
+    queryKey: ["aw-role-hierarchy"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("role_hierarchy").select("role, approver_role");
+      if (error) throw error;
+      const map = new Map<string, string | null>();
+      (data ?? []).forEach((r) => map.set(r.role as string, (r.approver_role as string | null) ?? null));
+      return map;
     },
   });
 
@@ -901,7 +914,7 @@ function DefaultChainAdmin() {
       patch,
     }: {
       userId: string;
-      patch: Partial<{ approval_limit: number; tier2_limit: number; tier3_limit: number; manager_id: string | null }>;
+      patch: Partial<{ approval_limit: number; tier2_limit: number; tier3_limit: number }>;
     }) => {
       const { error } = await supabase.from("profiles").update(patch).eq("id", userId);
       if (error) throw error;
@@ -914,26 +927,44 @@ function DefaultChainAdmin() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const byId = useMemo(() => {
-    const m = new Map<string, NonNullable<typeof rows>[number]>();
-    (rows ?? []).forEach((r) => m.set(r.id, r));
+  const namesByRole = useMemo(() => {
+    const m = new Map<string, string[]>();
+    (rows ?? []).forEach((p) => {
+      const roles = profilesMap?.get(p.id)?.roles ?? [];
+      const main = ROLE_PRIORITY.find((r) => roles.includes(r as AppRole));
+      if (!main || main === "admin") return;
+      if (!m.has(main)) m.set(main, []);
+      m.get(main)!.push(p.full_name || p.email || "—");
+    });
     return m;
-  }, [rows]);
+  }, [rows, profilesMap]);
+
+  const mainRoleOf = (userId: string) => {
+    const roles = profilesMap?.get(userId)?.roles ?? [];
+    return ROLE_PRIORITY.find((r) => r !== "admin" && roles.includes(r as AppRole)) ?? null;
+  };
+
+  const approverRoleOf = (userId: string) => {
+    const main = mainRoleOf(userId);
+    const next = main ? hierarchy?.get(main) ?? null : null;
+    return next ? ROLE_TITLES[next] ?? next : null;
+  };
 
   const chainFor = (userId: string, levels: number) => {
     const names: string[] = [];
-    let cur = userId;
-    for (let i = 0; i < levels; i++) {
-      const mgrId = byId.get(cur)?.manager_id;
-      if (!mgrId) break;
-      const mgr = byId.get(mgrId);
-      const lbl = LEVEL_LABELS[mgr?.approval_level ?? ""] ?? "Gestor Direto";
-      names.push(`${lbl}: ${mgr?.full_name || mgr?.email || "—"}`);
-      if (mgr?.approval_level === "c_level") break;
-      cur = mgrId;
+    let cur = mainRoleOf(userId);
+    const seen = new Set<string>();
+    for (let i = 0; i < levels && cur; i++) {
+      const next = hierarchy?.get(cur) ?? null;
+      if (!next || seen.has(next)) break;
+      seen.add(next);
+      const people = namesByRole.get(next) ?? [];
+      names.push(`${ROLE_TITLES[next] ?? next}: ${people.length ? people.join(", ") : "sem usuário no cargo"}`);
+      cur = next;
     }
     return names;
   };
+
 
   return (
     <div className="space-y-4">
