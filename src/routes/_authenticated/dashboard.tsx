@@ -2011,6 +2011,7 @@ function OrdersTable({
             {filterInput(fItem, setFItem, "Item")}
             {filterInput(fAloc, setFAloc, "Alocação")}
             {showRequester && filterInput(fReq, setFReq, "Solicitante")}
+            <Input type="date" value={fDate} onChange={(e) => setFDate(e.target.value)} className="h-7 px-1 text-xs" />
             <Select value={fStatus} onValueChange={setFStatus}>
               <SelectTrigger className="h-7 text-xs"><SelectValue placeholder="Status" /></SelectTrigger>
               <SelectContent>
@@ -2120,7 +2121,9 @@ function OrdersTable({
               <TableHead className="py-1" />
               <TableHead className="py-1" />
               <TableHead className="py-1" />
-              <TableHead className="py-1" />
+              <TableHead className="py-1">
+                <Input type="date" value={fDate} onChange={(e) => setFDate(e.target.value)} className="h-7 px-1 text-xs" />
+              </TableHead>
               <TableHead className="py-1">
                 <Select value={fStatus} onValueChange={setFStatus}>
                   <SelectTrigger className="h-7 text-xs"><SelectValue placeholder="Status" /></SelectTrigger>
