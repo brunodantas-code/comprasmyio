@@ -1824,8 +1824,6 @@ const MYIO_STATUS_LABELS: Record<string, string> = {
 function MyOrders({ userId }: { userId: string }) {
   const { data: projects } = useProjects();
   const { data: stockParts } = useMyStockParts(userId);
-  const [deliveredMode, setDeliveredMode] = useState<DeliveredMode>("this_month");
-  const [deliveredFrom, setDeliveredFrom] = useState("");
   const { data: orders, isLoading } = useQuery({
     queryKey: ["orders", "mine", userId],
     queryFn: async () => {
@@ -1840,7 +1838,7 @@ function MyOrders({ userId }: { userId: string }) {
   });
 
   const projectName = (id: string) => (id === ESTOQUE_PROJECT_ID ? "Estoque" : projects?.find((p) => p.id === id)?.name ?? "—");
-  const visible = filterDelivered(orders ?? [], deliveredMode, deliveredFrom);
+  const visible = orders ?? [];
 
   const usedGroups = new Set((orders ?? []).map((o) => o.request_group_id).filter(Boolean) as string[]);
   const stockOnly = [...(stockParts?.values() ?? [])].filter((p) => !usedGroups.has(p.group));
@@ -1851,9 +1849,6 @@ function MyOrders({ userId }: { userId: string }) {
         <div>
           <CardTitle>Minhas Solicitações</CardTitle>
           <CardDescription>Acompanhe o status dos seus pedidos de compra.</CardDescription>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <DeliveredFilter mode={deliveredMode} setMode={setDeliveredMode} fromDate={deliveredFrom} setFromDate={setDeliveredFrom} />
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
