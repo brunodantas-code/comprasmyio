@@ -17,7 +17,7 @@ import {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Myio Supply — Solicitações, Estoque e Expedição" },
+      { title: "Myio Supply — Compras e Serviços sob controle total" },
       {
         name: "description",
         content:
