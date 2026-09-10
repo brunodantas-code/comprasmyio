@@ -2361,11 +2361,6 @@ function OrderReportDialog({
                   <li key={l.id} className="space-y-1">
                     <div className="text-sm font-medium">{LOG_ACTION_LABELS[l.action] ?? l.action}</div>
                     <div className="text-xs text-muted-foreground">{fmtDateTime(l.created_at)} — {nameFor(l.actor_id)}</div>
-                    {l.details != null && (
-                      <pre className="overflow-x-auto rounded bg-muted p-2 text-xs whitespace-pre-wrap">
-                        {typeof l.details === "string" ? l.details : JSON.stringify(l.details, null, 2)}
-                      </pre>
-                    )}
                   </li>
                 ))}
               </ol>
