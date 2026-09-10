@@ -1200,17 +1200,52 @@ function NewOrder({ userId }: { userId: string }) {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="travel_destination">Cidade e Estado (UF) de destino</Label>
-                  <Input id="travel_destination" value={travelDestination} onChange={(e) => setTravelDestination(e.target.value)} placeholder="Ex.: São Paulo - SP" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="travel_departure">Data de ida</Label>
-                  <Input id="travel_departure" type="date" value={travelDeparture} onChange={(e) => setTravelDeparture(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="travel_return">Data de retorno</Label>
-                  <Input id="travel_return" type="date" value={travelReturn} onChange={(e) => setTravelReturn(e.target.value)} min={travelDeparture || undefined} />
+              </div>
+            )}
+
+            {requestType === "viagens" && (
+              <div className="space-y-3">
+                {travelLegs.map((leg, i) => (
+                  <div key={i} className="rounded-md border p-3 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-semibold">Trecho {i + 1}</span>
+                      {travelLegs.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setTravelLegs((prev) => prev.filter((_, idx) => idx !== i))}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                    <div className="grid gap-4 md:grid-cols-3">
+                      <div className="space-y-2">
+                        <Label htmlFor={`travel_destination_${i}`}>Cidade e Estado (UF) de destino</Label>
+                        <Input id={`travel_destination_${i}`} value={leg.destination} onChange={(e) => updateLeg(i, { destination: e.target.value })} placeholder="Ex.: São Paulo - SP" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor={`travel_departure_${i}`}>Data de ida</Label>
+                        <Input id={`travel_departure_${i}`} type="date" value={leg.departure} onChange={(e) => updateLeg(i, { departure: e.target.value })} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor={`travel_return_${i}`}>Data de retorno</Label>
+                        <Input id={`travel_return_${i}`} type="date" value={leg.return} min={leg.departure || undefined} onChange={(e) => updateLeg(i, { return: e.target.value })} />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setTravelLegs((prev) => [...prev, { destination: "", departure: "", return: "" }])}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                  <span className="text-sm text-muted-foreground">Deseja adicionar outro trecho para esta viagem?</span>
                 </div>
               </div>
             )}
