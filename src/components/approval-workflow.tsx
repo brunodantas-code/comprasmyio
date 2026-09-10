@@ -42,6 +42,31 @@ const shortName = (full: string | null | undefined): string => {
   return `${parts[0]} ${parts[parts.length - 1]}`;
 };
 
+const TRAVEL_TYPE_LABELS: Record<string, string> = {
+  passagens: "Passagens",
+  hospedagens: "Hospedagens",
+  aluguel_veiculos: "Aluguel de Veículos",
+};
+
+const REQUEST_TYPE_LABELS: Record<string, string> = {
+  materiais: "Materiais",
+  servicos: "Serviços",
+  viagens: "Viagens",
+  reembolso: "Reembolso de Despesas",
+  rh: "Contratação de RH",
+  importacao: "Importação",
+  dispositivos: "Dispositivos",
+};
+
+function requestTypeLabel(o: { request_type?: string | null; travel_type?: string | null } | null | undefined): string {
+  const rt = o?.request_type ?? "";
+  if (rt === "viagens") {
+    const sub = o?.travel_type ? TRAVEL_TYPE_LABELS[o.travel_type] : undefined;
+    return sub ?? "Viagens";
+  }
+  return REQUEST_TYPE_LABELS[rt] ?? rt ?? "—";
+}
+
 const ACTION_LABELS: Record<string, string> = {
   criado: "Criado",
   status_alterado: "Alterado",
@@ -88,7 +113,7 @@ function useSteps() {
       const { data, error } = await supabase
         .from("approval_steps")
         .select(
-          "id, order_id, step_index, role_label, approver_id, status, comment, decided_at, decided_by, created_at, purchase_orders(id, item_name, quantity, estimated_value, approval_status, requester_id, created_at, approval_number)"
+          "id, order_id, step_index, role_label, approver_id, status, comment, decided_at, decided_by, created_at, purchase_orders(id, item_name, quantity, estimated_value, approval_status, requester_id, created_at, approval_number, request_type, travel_type)"
         )
         .order("step_index", { ascending: true });
       if (error) throw error;
@@ -366,7 +391,7 @@ export function PendingForMe() {
                   <TableRow key={s.id}>
                     <TableCell className="whitespace-nowrap font-mono text-xs">{o?.approval_number ?? "—"}</TableCell>
                     <TableCell className="font-medium">
-                      {o?.item_name ?? "—"}
+                      {requestTypeLabel(o)}
                       <span className="ml-1 text-xs text-muted-foreground">x{o?.quantity ?? 1}</span>
                     </TableCell>
                     <TableCell className="text-sm">{req?.full_name || req?.email || "—"}</TableCell>
@@ -444,7 +469,7 @@ function FlowsOverview() {
                   <div>
                     <p className="font-mono text-xs text-muted-foreground">{o?.approval_number ?? "—"}</p>
                     <p className="font-medium">
-                      {o?.item_name ?? "—"}{" "}
+                      {requestTypeLabel(o)}{" "}
                       <span className="text-xs text-muted-foreground">x{o?.quantity ?? 1}</span>
                     </p>
                     <p className="text-xs text-muted-foreground">
