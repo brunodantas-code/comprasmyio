@@ -49,6 +49,8 @@ type Order = {
   requester_id: string;
   item_name: string;
   item_link: string | null;
+  request_type: string;
+  travel_type: string | null;
   material_id: string | null;
   terceiros_material_id: string | null;
   tool_asset_id?: string | null;
@@ -202,6 +204,31 @@ const DEADLINE_LABELS: Record<Order["deadline_type"], string> = {
   este_mes: "Este mês",
   customizado: "Data específica",
 };
+
+const TRAVEL_TYPE_LABELS: Record<string, string> = {
+  passagens: "Passagens",
+  hospedagens: "Hospedagens",
+  aluguel_veiculos: "Aluguel de Veículos",
+};
+
+const REQUEST_TYPE_LABELS: Record<string, string> = {
+  materiais: "Materiais",
+  servicos: "Serviços",
+  viagens: "Viagens",
+  reembolso: "Reembolso de Despesas",
+  rh: "Contratação de RH",
+  importacao: "Importação",
+  dispositivos: "Dispositivos",
+};
+
+function requestTypeLabel(o: { request_type?: string | null; travel_type?: string | null }): string {
+  const rt = o.request_type ?? "";
+  if (rt === "viagens") {
+    const sub = o.travel_type ? TRAVEL_TYPE_LABELS[o.travel_type] : undefined;
+    return sub ?? "Viagens";
+  }
+  return REQUEST_TYPE_LABELS[rt] ?? rt ?? "—";
+}
 
 const STATUS_KEYS = Object.keys(STATUS_LABELS) as Order["status"][];
 
@@ -2102,7 +2129,7 @@ function OrdersTable({
     ? orders
     : orders.filter((o) =>
         (!fApproval || norm(o.approval_number ?? "").includes(norm(fApproval))) &&
-        (!fItem || norm(`${o.item_name ?? ""} ${o.requester_notes ?? ""}`).includes(norm(fItem))) &&
+        (!fItem || norm(`${requestTypeLabel(o)} ${o.item_name ?? ""} ${o.requester_notes ?? ""}`).includes(norm(fItem))) &&
         (!fAloc || norm(allocationOf(o)).includes(norm(fAloc))) &&
         (!fReq || norm(requesterName?.(o.requester_id) ?? "").includes(norm(fReq))) &&
         (!fDate || o.deadline_date === fDate || o.delivery_forecast === fDate) &&
@@ -2163,8 +2190,9 @@ function OrdersTable({
                 </div>
               </Row>
               <Row label="Item">
-                <div className="font-medium">{o.item_name}</div>
+                <div className="font-medium">{requestTypeLabel(o)}</div>
                 <div className="mt-1 flex flex-wrap items-center gap-2">
+                  <FullTextPopover text={o.item_name ?? ""} />
                   {o.item_link ? (
                     <a href={o.item_link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
                       ver link <ExternalLink className="h-3 w-3" />
@@ -2278,7 +2306,7 @@ function OrdersTable({
                 </div>
               </TableCell>
               <TableCell>
-                <div className="line-clamp-4 font-medium break-words">{o.item_name}</div>
+                <div className="line-clamp-4 font-medium break-words">{requestTypeLabel(o)}</div>
                 <div className="mt-1 flex flex-wrap items-center gap-2">
                   <FullTextPopover text={o.item_name ?? ""} />
                   {o.item_link ? (
