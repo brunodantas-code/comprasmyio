@@ -1173,7 +1173,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
 
     const fd = new FormData(e.currentTarget);
     const parsed = newOrderSchema.safeParse({
-      project_id: !isMateriais ? (allocTarget === "projeto" ? projectId : undefined) : (forStock ? undefined : projectId),
+      project_id: isRh ? undefined : (!isMateriais ? (allocTarget === "projeto" ? projectId : undefined) : (forStock ? undefined : projectId)),
       item_name: isReembolso
         ? "Reembolso de Despesas"
         : isRh
