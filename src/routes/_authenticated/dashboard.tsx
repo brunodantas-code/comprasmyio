@@ -2012,8 +2012,109 @@ function OrdersTable({
     />
   );
 
+  const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
+    <div className="grid grid-cols-[minmax(0,96px)_minmax(0,1fr)] gap-2 border-t border-border/60 py-1.5 first:border-t-0">
+      <div className="text-xs font-semibold text-muted-foreground">{label}</div>
+      <div className="min-w-0 text-sm break-words">{children}</div>
+    </div>
+  );
+
   return (
-    <div className="overflow-x-auto">
+    <>
+      {/* Mobile: cartões com rótulo à esquerda e informação à direita */}
+      <div className="space-y-3 md:hidden">
+        {headerFilters && (
+          <div className="grid grid-cols-1 gap-2 rounded-lg bg-primary/10 p-2 sm:grid-cols-2">
+            {filterInput(fApproval, setFApproval, "Nº do Approval")}
+            {filterInput(fItem, setFItem, "Item")}
+            {filterInput(fAloc, setFAloc, "Alocação")}
+            {showRequester && filterInput(fReq, setFReq, "Solicitante")}
+            <Select value={fStatus} onValueChange={setFStatus}>
+              <SelectTrigger className="h-7 text-xs"><SelectValue placeholder="Status" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                {STATUS_KEYS.map((k) => <SelectItem key={k} value={k}>{STATUS_LABELS[k]}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+        {visibleOrders.map((o) => {
+          const part = o.request_group_id ? stockParts?.get(o.request_group_id) : undefined;
+          return (
+            <div key={o.id} className="rounded-lg border border-border bg-card p-3">
+              <Row label="Approval">
+                <div className="font-mono font-bold">
+                  <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} />
+                </div>
+                <div className="mt-1 space-y-1">
+                  <ExistingAttachments orderId={o.id} attachments={o.attachments ?? []} canRemove={canEdit} />
+                  <div className="flex flex-wrap items-center gap-1">
+                    {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
+                    {canEditRequester && o.status === "entregue" && <ConfirmReceiptActions order={o} />}
+                    {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
+                  </div>
+                </div>
+              </Row>
+              <Row label="Item">
+                <div className="font-medium">{o.item_name}</div>
+                <div className="mt-1 flex flex-wrap items-center gap-2">
+                  {o.item_link ? (
+                    <a href={o.item_link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+                      ver link <ExternalLink className="h-3 w-3" />
+                    </a>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">sem link</span>
+                  )}
+                </div>
+              </Row>
+              <Row label="Alocação">{o.for_stock ? "Estoque" : o.project_id ? projectName(o.project_id) : "—"}</Row>
+              {showRequester && <Row label="Solicitante">{requesterName?.(o.requester_id)}</Row>}
+              <Row label="Qtd">
+                {!part || part.qty <= 0 ? (
+                  o.quantity
+                ) : (
+                  <div className="space-y-1">
+                    <div className="font-medium">Total {o.quantity + part.qty}</div>
+                    <div className="text-xs text-muted-foreground">{o.quantity} em compra</div>
+                    <div className="text-xs text-emerald-700">
+                      {part.qty} do estoque · {MYIO_STATUS_LABELS[part.status] ?? part.status}
+                    </div>
+                  </div>
+                )}
+              </Row>
+              <Row label="Destinatário">{o.recipient || "—"}</Row>
+              <Row label="Endereço de Entrega">{o.delivery_point}</Row>
+              <Row label="Prazo e Previsão">
+                <div>{DEADLINE_LABELS[o.deadline_type]}</div>
+                {o.deadline_type === "customizado" && o.deadline_date && (
+                  <div className="text-muted-foreground">{new Date(o.deadline_date + "T00:00:00").toLocaleDateString("pt-BR")}</div>
+                )}
+                <InlineField
+                  order={o}
+                  field="delivery_forecast"
+                  type="date"
+                  canEdit={canEdit}
+                  display={
+                    o.delivery_forecast
+                      ? `Prev.: ${new Date(o.delivery_forecast + "T00:00:00").toLocaleDateString("pt-BR")}`
+                      : "Prev.: —"
+                  }
+                />
+              </Row>
+              <Row label="Status"><StatusHistoryDialog order={o} canEdit={canEdit} /></Row>
+              <Row label="Palavra passe">
+                <InlineField order={o} field="passphrase" type="text" canEdit={canEdit} display={o.passphrase || "—"} />
+              </Row>
+            </div>
+          );
+        })}
+        {visibleOrders.length === 0 && (
+          <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">Nenhum registro.</div>
+        )}
+      </div>
+
+      <div className="hidden md:block">
+
       <Table className="w-full table-fixed">
         <TableHeader className="[&_tr]:border-b">
           <TableRow className="border-t bg-primary/15 hover:bg-primary/15">
