@@ -1245,7 +1245,7 @@ function OrgChartAdmin() {
                 <TableRow key={r}>
                   <TableCell className="font-medium">{ROLE_TITLES[r] ?? r}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">
-                    {(namesByRole.get(r) ?? []).join(", ") || "—"}
+                    {(namesByRole.get(r) ?? []).map((n) => n.name).join(", ") || "—"}
                   </TableCell>
                   <TableCell>
                     <Select
