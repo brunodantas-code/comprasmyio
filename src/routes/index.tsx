@@ -82,8 +82,6 @@ function Landing() {
     <main className="min-h-screen bg-background text-foreground">
       {/* Hero escuro no estilo Myio */}
       <div className="relative overflow-hidden bg-[oklch(0.18_0.09_300)]">
-        <div className="pointer-events-none absolute -right-32 -top-40 h-[28rem] w-[28rem] rounded-full bg-[var(--myio-purple)] opacity-70 blur-[2px]" />
-        <div className="pointer-events-none absolute -left-40 bottom-[-12rem] h-[24rem] w-[24rem] rounded-full bg-[oklch(0.26_0.13_300)]" />
 
         <header className="relative z-10">
           <div className="mx-auto flex max-w-6xl items-center gap-4 px-5 py-5 sm:px-6">
