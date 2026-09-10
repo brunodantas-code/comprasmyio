@@ -32,6 +32,16 @@ const BRL = (v: number) =>
 const dt = (v: string | null) =>
   v ? new Date(v).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }) : "—";
 
+const formatInt = (v: number) =>
+  new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 }).format(Number(v ?? 0));
+
+const shortName = (full: string | null | undefined): string => {
+  if (!full) return "—";
+  const parts = full.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0];
+  return `${parts[0]} ${parts[parts.length - 1]}`;
+};
+
 const ACTION_LABELS: Record<string, string> = {
   criado: "Criado",
   status_alterado: "Alterado",
@@ -1077,21 +1087,28 @@ function roleTitle(roles: AppRole[]) {
 type RoleNode = {
   role: string;
   title: string;
-  names: string[];
+  names: { name: string; limit: number }[];
   children: RoleNode[];
 };
 
 function OrgBox({ node }: { node: RoleNode }) {
   return (
     <div className="flex flex-col items-center">
-      <div className="min-w-[170px] rounded-lg border bg-card px-4 py-2 text-center shadow-sm">
+      <div className="w-[220px] rounded-lg border bg-card px-4 py-2 text-center shadow-sm">
         <p className="text-sm font-bold leading-tight">{node.title}</p>
         <div className="mt-1 space-y-0.5">
           {node.names.length === 0 ? (
             <p className="text-xs italic leading-tight text-muted-foreground">Sem usuário no cargo</p>
           ) : (
             node.names.map((n, i) => (
-              <p key={`${n}-${i}`} className="text-xs leading-tight text-muted-foreground">{n}</p>
+              <div
+                key={`${n.name}-${i}`}
+                className="flex items-center justify-center gap-1.5 text-xs leading-tight text-muted-foreground"
+              >
+                <span>{n.name}</span>
+                <span className="text-border">|</span>
+                <span className="font-medium text-foreground/80">{formatInt(n.limit)}</span>
+              </div>
             ))
           )}
         </div>
@@ -1126,7 +1143,7 @@ function OrgChartAdmin() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, full_name, email, approval_level")
+        .select("id, full_name, email, approval_level, approval_limit")
         .order("full_name");
       if (error) throw error;
       return data ?? [];
@@ -1174,13 +1191,13 @@ function OrgChartAdmin() {
   });
 
   const namesByRole = useMemo(() => {
-    const map = new Map<string, string[]>();
+    const map = new Map<string, { name: string; limit: number }[]>();
     (rows ?? []).forEach((p) => {
       const roles = profiles?.get(p.id)?.roles ?? [];
       const main = ROLE_PRIORITY.find((r) => roles.includes(r as AppRole));
       if (!main || main === "admin") return;
       if (!map.has(main)) map.set(main, []);
-      map.get(main)!.push(p.full_name || p.email || "—");
+      map.get(main)!.push({ name: shortName(p.full_name), limit: Number(p.approval_limit ?? 0) });
     });
     return map;
   }, [rows, profiles]);
@@ -1228,7 +1245,7 @@ function OrgChartAdmin() {
                 <TableRow key={r}>
                   <TableCell className="font-medium">{ROLE_TITLES[r] ?? r}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">
-                    {(namesByRole.get(r) ?? []).join(", ") || "—"}
+                    {(namesByRole.get(r) ?? []).map((n) => n.name).join(", ") || "—"}
                   </TableCell>
                   <TableCell>
                     <Select
