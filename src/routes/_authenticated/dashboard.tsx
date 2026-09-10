@@ -2015,44 +2015,54 @@ function OrdersTable({
   const { data: me } = useCurrentUser();
   return (
     <div className="overflow-x-auto">
-      <Table>
+      <Table className="w-full table-fixed">
         <TableHeader>
           <TableRow>
-            <TableHead>Approval</TableHead>
-            <TableHead>Item</TableHead>
-            <TableHead>Qtd</TableHead>
-            <TableHead>Alocação</TableHead>
-            {showRequester && <TableHead>Solicitante</TableHead>}
-            <TableHead>Destinatário</TableHead>
-            <TableHead>Entrega</TableHead>
-            <TableHead>Prazo</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Previsão de entrega</TableHead>
-            <TableHead>Palavra passe</TableHead>
-            <TableHead>Obs.</TableHead>
-            <TableHead className="w-[110px]">Anexos</TableHead>
-            <TableHead className="text-right"><span className="sr-only">Ações</span></TableHead>
-
+            <TableHead className="w-[120px]">Approval</TableHead>
+            <TableHead className="w-[200px]">Item</TableHead>
+            <TableHead className="w-[70px]">Qtd</TableHead>
+            <TableHead className="w-[110px]">Alocação</TableHead>
+            {showRequester && <TableHead className="w-[100px]">Solicitante</TableHead>}
+            <TableHead className="w-[100px]">Destinatário</TableHead>
+            <TableHead className="w-[150px]">Entrega</TableHead>
+            <TableHead className="w-[90px]">Prazo</TableHead>
+            <TableHead className="w-[130px]">Status</TableHead>
+            <TableHead className="w-[110px]">Previsão de entrega</TableHead>
+            <TableHead className="w-[110px]">Palavra passe</TableHead>
+            <TableHead className="w-[150px]">Obs.</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {orders.map((o) => (
-            <TableRow key={o.id}>
-              <TableCell className="whitespace-nowrap font-mono text-xs">{o.approval_number ?? "—"}</TableCell>
-              <TableCell>
-                <div className="font-medium">{o.item_name}</div>
-                {o.item_link ? (
-                  <a href={o.item_link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
-                    ver link <ExternalLink className="h-3 w-3" />
-                  </a>
-                ) : (
-                  <span className="text-xs text-muted-foreground">sem link</span>
-                )}
-                {o.requester_notes && (
-                  <div className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap">{o.requester_notes}</div>
-                )}
+            <TableRow key={o.id} className="align-top">
+              <TableCell className="font-mono text-xs">
+                <div>{o.approval_number ?? "—"}</div>
+                <div className="mt-1 space-y-1 font-sans">
+                  <ExistingAttachments orderId={o.id} attachments={o.attachments ?? []} canRemove={canEdit} />
+                  <div className="flex flex-wrap items-center gap-1">
+                    {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
+                    {canEditRequester && o.status === "entregue" && <ConfirmReceiptActions order={o} />}
+                    {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
+                  </div>
+                </div>
               </TableCell>
-              <TableCell className="whitespace-nowrap">
+              <TableCell>
+                <div className="line-clamp-4 font-medium break-words">{o.item_name}</div>
+                {o.requester_notes && (
+                  <div className="line-clamp-4 mt-1 text-xs text-muted-foreground break-words">{o.requester_notes}</div>
+                )}
+                <div className="mt-1 flex flex-wrap items-center gap-2">
+                  <FullTextPopover text={[o.item_name, o.requester_notes].filter(Boolean).join("\n\n")} />
+                  {o.item_link ? (
+                    <a href={o.item_link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+                      ver link <ExternalLink className="h-3 w-3" />
+                    </a>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">sem link</span>
+                  )}
+                </div>
+              </TableCell>
+              <TableCell>
                 {(() => {
                   const part = o.request_group_id ? stockParts?.get(o.request_group_id) : undefined;
                   if (!part || part.qty <= 0) return o.quantity;
@@ -2067,10 +2077,13 @@ function OrdersTable({
                   );
                 })()}
               </TableCell>
-              <TableCell>{o.for_stock ? "Estoque" : o.project_id ? projectName(o.project_id) : "—"}</TableCell>
-              {showRequester && <TableCell>{requesterName?.(o.requester_id)}</TableCell>}
-              <TableCell className="text-sm">{o.recipient || "—"}</TableCell>
-              <TableCell className="max-w-[200px] text-sm text-muted-foreground">{o.delivery_point}</TableCell>
+              <TableCell className="text-sm break-words">{o.for_stock ? "Estoque" : o.project_id ? projectName(o.project_id) : "—"}</TableCell>
+              {showRequester && <TableCell className="text-sm break-words">{requesterName?.(o.requester_id)}</TableCell>}
+              <TableCell className="text-sm break-words">{o.recipient || "—"}</TableCell>
+              <TableCell className="text-sm text-muted-foreground">
+                <div className="line-clamp-4 break-words">{o.delivery_point}</div>
+                <FullTextPopover text={o.delivery_point ?? ""} />
+              </TableCell>
               <TableCell className="text-xs">
                 <div>{DEADLINE_LABELS[o.deadline_type]}</div>
                 {o.deadline_type === "customizado" && o.deadline_date && (
@@ -2078,7 +2091,7 @@ function OrdersTable({
                 )}
               </TableCell>
               <TableCell><StatusHistoryDialog order={o} canEdit={canEdit} /></TableCell>
-              <TableCell className="text-sm font-semibold text-foreground whitespace-nowrap">
+              <TableCell className="text-sm break-words">
                 <InlineField
                   order={o}
                   field="delivery_forecast"
@@ -2091,26 +2104,47 @@ function OrdersTable({
                   }
                 />
               </TableCell>
-              <TableCell className="max-w-[180px] text-sm font-semibold text-foreground whitespace-pre-wrap">
+              <TableCell className="text-sm break-words">
                 <InlineField order={o} field="passphrase" type="text" canEdit={canEdit} display={o.passphrase || "—"} />
               </TableCell>
-              <TableCell className="max-w-[220px] text-xs text-muted-foreground">
-                <InlineField order={o} field="buyer_notes" type="textarea" canEdit={canEdit} display={o.buyer_notes || "—"} />
+              <TableCell className="text-xs text-muted-foreground">
+                <div className="line-clamp-4 break-words">
+                  <InlineField order={o} field="buyer_notes" type="textarea" canEdit={canEdit} display={o.buyer_notes || "—"} />
+                </div>
+                <FullTextPopover text={o.buyer_notes ?? ""} />
               </TableCell>
-              <TableCell className="w-[110px] max-w-[110px] text-xs">
-                <ExistingAttachments orderId={o.id} attachments={o.attachments ?? []} canRemove={canEdit} />
-              </TableCell>
-              <TableCell className="text-right space-x-2 whitespace-nowrap">
-                {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
-                {canEditRequester && o.status === "entregue" && <ConfirmReceiptActions order={o} />}
-                {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
-              </TableCell>
-
             </TableRow>
           ))}
         </TableBody>
       </Table>
     </div>
+  );
+}
+
+function FullTextPopover({ text }: { text: string }) {
+  const [open, setOpen] = useState(false);
+  if (!text.trim()) return null;
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          onMouseEnter={() => setOpen(true)}
+          onMouseLeave={() => setOpen(false)}
+          className="text-xs text-primary hover:underline"
+        >
+          descrição completa
+        </button>
+      </PopoverTrigger>
+      <PopoverContent
+        align="start"
+        onMouseEnter={() => setOpen(true)}
+        onMouseLeave={() => setOpen(false)}
+        className="max-w-sm text-xs whitespace-pre-wrap break-words"
+      >
+        {text}
+      </PopoverContent>
+    </Popover>
   );
 }
 
