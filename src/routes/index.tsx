@@ -178,7 +178,7 @@ function Landing() {
         <div className="mt-10 grid gap-5 sm:grid-cols-3">
           {[
             { icon: ClipboardList, title: "Solicitante", body: "Cria e edita solicitações, acompanha status e confirma recebimento." },
-            { icon: Package, title: "Comprador", body: "Gerencia a fila de compras, observações e prazos de entrega." },
+            { icon: Package, title: "Supply", body: "Gerencia a fila de compras, observações e prazos de entrega." },
             { icon: ShieldCheck, title: "Admin", body: "Clientes, projetos, ordens de expedição, estoque e logs completos." },
           ].map(({ icon: Icon, title, body }) => (
             <div key={title} className="rounded-2xl border border-border p-6">
@@ -195,7 +195,7 @@ function Landing() {
         <div className="mx-auto flex max-w-6xl flex-col items-start gap-6 px-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <div>
             <h2 className="text-2xl font-extrabold text-white sm:text-3xl">
-              Pronto para organizar suas compras?
+              Pronto para iniciar suas solicitações?
             </h2>
             <p className="mt-2 text-white/70">Acesse o painel e comece agora.</p>
           </div>
