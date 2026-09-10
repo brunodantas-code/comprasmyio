@@ -2026,8 +2026,7 @@ function OrdersTable({
             <TableHead className="w-[120px] text-center font-bold">Endereço de Entrega</TableHead>
             <TableHead className="w-[100px] text-center font-bold">Prazo e Previsão</TableHead>
             <TableHead className="w-[100px] text-center font-bold">Status</TableHead>
-            <TableHead className="w-[90px] text-center font-bold">Palavra passe</TableHead>
-            <TableHead className="w-[150px] text-center font-bold">Obs.</TableHead>
+             <TableHead className="w-[90px] text-center font-bold">Palavra passe</TableHead>
           </TableRow>
           {headerFilters && (
             <TableRow className="bg-primary/5 hover:bg-primary/5">
@@ -2048,10 +2047,9 @@ function OrdersTable({
                   </SelectContent>
                 </Select>
               </TableHead>
-              <TableHead className="py-1" />
-              <TableHead className="py-1" />
-            </TableRow>
-          )}
+               <TableHead className="py-1" />
+             </TableRow>
+           )}
         </TableHeader>
         <TableBody>
           {visibleOrders.map((o) => (
@@ -2125,15 +2123,6 @@ function OrdersTable({
               <TableCell className="text-center"><StatusHistoryDialog order={o} canEdit={canEdit} /></TableCell>
               <TableCell className="text-sm break-words text-center">
                 <InlineField order={o} field="passphrase" type="text" canEdit={canEdit} display={o.passphrase || "—"} align="center" />
-              </TableCell>
-              <TableCell className="text-xs text-muted-foreground">
-                {o.requester_notes && (
-                  <div className="line-clamp-4 break-words">{o.requester_notes}</div>
-                )}
-                <div className="line-clamp-4 break-words">
-                  <InlineField order={o} field="buyer_notes" type="textarea" canEdit={canEdit} display={o.buyer_notes || "—"} />
-                </div>
-                <FullTextPopover text={[o.requester_notes, o.buyer_notes].filter(Boolean).join("\n\n")} />
               </TableCell>
             </TableRow>
           ))}
