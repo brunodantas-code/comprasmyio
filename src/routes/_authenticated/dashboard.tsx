@@ -1123,8 +1123,8 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
     const isRh = requestType === "rh";
     if (!isMateriais) {
       if (!isReembolso && !isRh && newItemName.trim().length < 2) return toast.error("Descreva o serviço ou a viagem solicitada.");
-      if (allocTarget === "projeto" && !projectId) return toast.error("Selecione o projeto");
-      if (allocTarget === "cliente" && !clientId) return toast.error("Selecione o cliente");
+      if (!isRh && allocTarget === "projeto" && !projectId) return toast.error("Selecione o projeto");
+      if (!isRh && allocTarget === "cliente" && !clientId) return toast.error("Selecione o cliente");
       if (isRh) {
         if (!rhCargo) return toast.error("Selecione o cargo");
         if (!rhGestor) return toast.error("Selecione o gestor");
