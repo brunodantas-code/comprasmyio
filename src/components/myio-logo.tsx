@@ -16,7 +16,7 @@ export function MyioLogo({ className, tone = "dark" }: Props) {
         src={tone === "light" ? logoDark.url : logoLightSrc}
         alt="myio"
         className="h-auto w-auto select-none"
-        style={{ height: "1.5em", marginBottom: tone === "dark" ? "0.18em" : "0.12em" }}
+        style={{ height: "1.5em", marginBottom: tone === "dark" ? "0.18em" : "0em" }}
         draggable={false}
       />
       <span
