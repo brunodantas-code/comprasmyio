@@ -2074,7 +2074,7 @@ function OrdersTable({
                   );
                 })()}
               </TableCell>
-              <TableCell className="text-sm break-words">{o.recipient || "—"}</TableCell>
+              <TableCell className="text-sm break-words text-center">{o.recipient || "—"}</TableCell>
               <TableCell className="text-sm text-muted-foreground">
                 <div className="line-clamp-4 break-words">{o.delivery_point}</div>
                 <FullTextPopover text={o.delivery_point ?? ""} />
