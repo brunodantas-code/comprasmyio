@@ -149,6 +149,20 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
   }
+
+  /* Títulos em tom lilás da marca */
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--myio-purple);
+  }
+
+  /* Variantes de botão alinhadas à marca: verde (primary) e preto (dark) */
+  .btn-brand-dark {
+    background-color: var(--myio-dark);
+    color: oklch(0.99 0 0);
+  }
+  .btn-brand-dark:hover {
+    background-color: color-mix(in oklab, var(--myio-dark) 85%, white);
+  }
 }
 
 /* Sinalização suave: pisca devagar em amarelo bem claro */
