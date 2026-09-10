@@ -45,7 +45,7 @@ const FEATURES = [
   {
     icon: Package,
     title: "Approvals Pendentes",
-    body: "Comprador e gestores acompanham status, observações, palavra passe e previsão de entrega.",
+    body: "Time de Supply e gestores acompanham status, observações, palavra passe e previsão de entrega.",
   },
   {
     icon: Factory,
@@ -60,7 +60,7 @@ const FEATURES = [
   {
     icon: Boxes,
     title: "Armazém",
-    body: "Estoque Myio e terceiros, técnicos, perdidos e movimentações auditadas.",
+    body: "Estoque de dispositivos myio e insumos de instalação, no armazém ou em poder de terceiros, com movimentações auditadas.",
   },
   {
     icon: Truck,
@@ -158,7 +158,7 @@ function Landing() {
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {[
               ["01", "Solicitação", "O time pede materiais, serviços, viagens ou reembolsos por projeto, com prazo e anexos."],
-              ["02", "Compra", "Comprador atualiza status, palavra passe e previsão."],
+              ["02", "Compra", "Time de Supply atualiza status, palavra passe e previsão."],
               ["03", "Armazém", "Entrada, homologação por QR code e controle por setor."],
               ["04", "Expedição", "Ordem de expedição, transporte e entrega ao cliente."],
             ].map(([n, title, body]) => (
