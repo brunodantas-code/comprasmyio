@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { Pencil, Trash2 } from "lucide-react";
 
 export type CostCenter = {
   id: string;
@@ -122,7 +123,11 @@ function EditCostCenterDialog({ center, onSave }: { center: CostCenter; onSave: 
   const [open, setOpen] = useState(false);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild><Button size="sm" variant="ghost">Editar</Button></DialogTrigger>
+      <DialogTrigger asChild>
+        <Button size="icon" variant="ghost" title="Editar" aria-label="Editar">
+          <Pencil className="h-4 w-4" />
+        </Button>
+      </DialogTrigger>
       <DialogContent>
         <DialogHeader><DialogTitle>Editar centro de custo</DialogTitle></DialogHeader>
         <form
@@ -153,7 +158,11 @@ function DeleteCostCenterDialog({ name, onConfirm }: { name: string; onConfirm: 
   const [text, setText] = useState("");
   return (
     <Dialog open={open} onOpenChange={(o) => { setOpen(o); setText(""); }}>
-      <DialogTrigger asChild><Button size="sm" variant="ghost">Excluir</Button></DialogTrigger>
+      <DialogTrigger asChild>
+        <Button size="icon" variant="ghost" title="Excluir" aria-label="Excluir" className="text-destructive hover:text-destructive">
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Excluir centro de custo</DialogTitle>
