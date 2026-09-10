@@ -24,7 +24,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { toast } from "sonner";
 import { LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Boxes, Building2, Plane, Landmark } from "lucide-react";
-import { Trash2, Paperclip, X, Loader2, DatabaseBackup, CheckCircle2 } from "lucide-react";
+import { Trash2, Paperclip, X, Loader2, DatabaseBackup, CheckCircle2, XCircle, RotateCcw } from "lucide-react";
 import { ApprovalWorkflow } from "@/components/approval-workflow";
 import { z } from "zod";
 import { StockTab } from "@/components/stock-tab";
