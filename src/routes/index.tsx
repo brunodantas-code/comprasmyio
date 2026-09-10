@@ -17,17 +17,17 @@ import {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Myio Supply — Solicitações, Estoque e Expedição" },
+      { title: "Myio Supply — Compras e Serviços sob controle total" },
       {
         name: "description",
         content:
-          "Plataforma Myio Supply para solicitações de compra, controle de estoque, homologação por QR code e expedição de produtos.",
+          "Plataforma Myio Supply para solicitações de materiais, serviços, viagens e reembolso de despesas, com controle de estoque, homologação por QR code e expedição.",
       },
-      { property: "og:title", content: "Myio Supply — Solicitações, Estoque e Expedição" },
+      { property: "og:title", content: "Myio Supply — Compras e Serviços sob controle total" },
       {
         property: "og:description",
         content:
-          "Plataforma Myio Supply para solicitações de compra, controle de estoque, homologação por QR code e expedição de produtos.",
+          "Plataforma Myio Supply para solicitações de materiais, serviços, viagens e reembolso de despesas, com controle de estoque, homologação por QR code e expedição.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -40,12 +40,12 @@ const FEATURES = [
   {
     icon: ClipboardList,
     title: "Solicitações",
-    body: "Peça material por projeto, com quantidade, prazo, anexos e destinatário.",
+    body: "Peça materiais, serviços, viagens e reembolso de despesas por projeto, com quantidade, prazo, anexos e destinatário.",
   },
   {
     icon: Package,
     title: "Approvals Pendentes",
-    body: "O comprador acompanha status, palavra passe, previsão de entrega e observações.",
+    body: "Comprador e gestores acompanham status, observações, palavra passe e previsão de entrega.",
   },
   {
     icon: Factory,
@@ -93,13 +93,13 @@ function Landing() {
 
         <section className="relative z-10 mx-auto max-w-6xl px-5 pb-24 pt-16 sm:px-6 sm:pb-28 sm:pt-24">
           <h1 className="max-w-3xl text-4xl font-light leading-tight text-white sm:text-6xl">
-            Compras e materiais
+            Compras e Serviços
             <br />
             <span className="font-extrabold">sob controle total</span>
           </h1>
           <p className="mt-6 max-w-xl text-lg text-white/75">
-            Do pedido ao cliente: solicitação, compra, produção, homologação e{" "}
-            <span className="font-bold text-white">expedição rastreada</span>.
+            Do pedido ao cliente: solicitação de materiais, serviços, viagens e{" "}
+            <span className="font-bold text-white">reembolsos rastreados</span>.
           </p>
           <div className="mt-9 flex flex-wrap gap-3">
             <Link to={signedIn ? "/dashboard" : "/auth"}>
@@ -157,7 +157,7 @@ function Landing() {
           </h2>
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              ["01", "Solicitação", "O time pede material por projeto, com prazo e anexos."],
+              ["01", "Solicitação", "O time pede materiais, serviços, viagens ou reembolsos por projeto, com prazo e anexos."],
               ["02", "Compra", "Comprador atualiza status, palavra passe e previsão."],
               ["03", "Armazém", "Entrada, homologação por QR code e controle por setor."],
               ["04", "Expedição", "Ordem de expedição, transporte e entrega ao cliente."],
@@ -213,7 +213,7 @@ function Landing() {
       <footer className="border-t border-border py-8">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 text-sm text-muted-foreground sm:flex-row sm:px-6">
           <MyioLogo className="text-xl" />
-          <span>© {new Date().getFullYear()} Myio Supply — Gestão de Compras e Materiais</span>
+          <span>© {new Date().getFullYear()} Myio Supply — Gestão de Compras e Serviços</span>
         </div>
       </footer>
     </main>
