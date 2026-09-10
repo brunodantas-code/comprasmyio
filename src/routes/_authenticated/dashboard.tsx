@@ -2229,7 +2229,7 @@ function InlineField({
       <button
         type="button"
         onClick={() => { setValue((order[field] as string | null) ?? ""); setEditing(true); }}
-        className="w-full rounded px-1 py-0.5 text-left whitespace-pre-wrap hover:bg-muted"
+        className={`w-full rounded px-1 py-0.5 ${alignClass} whitespace-pre-wrap hover:bg-muted`}
         title="Clique para editar"
       >
         {display}
