@@ -2,13 +2,11 @@
 
 ## Done
 - [x] Reembolso de Despesas: checkbox, Centro de Custo/Projeto, múltiplas despesas, sem Serviço/Link/Prazo
-
-## In progress
-- [ ] Logo myio: usar Manual da Marca (myio.Manual_da_Marca_2019.pdf) como referência para alinhar o wordmark
+- [x] Logo myio Supply: substituído pelas imagens oficiais (versão clara e escura) + favicon
+- [x] Identidade visual myio: Nunito, títulos lilás, botões verde/preto (#0fc482/#673ab6/#0b0023)
+- [x] Texto inicial "Compras e Serviços sob controle total" e Recursos redescritos
+- [x] Subtítulo do hero: apenas "rastreados" em negrito
+- [x] Importação movida para checkbox dentro de "Novas Solicitações"
 
 ## TODO
-- [ ] Identidade visual myio em todas as telas: Nunito, títulos/textos lilás, botões verde+preto (pantones #0fc482/#673ab6/#0b0023), padrão do botão Entrar
-
-## TODO (mensagens 13:14)
-- [ ] Texto inicial: "Compras e Serviços" sob controle total
-- [ ] Redescrever descrição dos Recursos para abranger Materiais, Serviços, Viagens, Reembolso de despesas
+- [ ] Revisar layout dos menus para otimizar navegação (após identidade visual)

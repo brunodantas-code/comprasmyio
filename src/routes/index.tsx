@@ -98,8 +98,9 @@ function Landing() {
             <span className="font-extrabold">sob controle total</span>
           </h1>
           <p className="mt-6 max-w-xl text-lg text-white/75">
-            Solicitação de materiais, serviços, viagens e{" "}
-            <span className="font-bold text-white">reembolsos rastreados</span>.
+            Solicitação de materiais, serviços, viagens e reembolsos{" "}
+            <span className="font-bold text-white">rastreados</span>.
+
           </p>
           <div className="mt-9 flex flex-wrap gap-3">
             <Link to={signedIn ? "/dashboard" : "/auth"}>
@@ -178,7 +179,7 @@ function Landing() {
         <div className="mt-10 grid gap-5 sm:grid-cols-3">
           {[
             { icon: ClipboardList, title: "Solicitante", body: "Cria e edita solicitações, acompanha status e confirma recebimento." },
-            { icon: Package, title: "Supply", body: "Gerencia a fila de compras, observações e prazos de entrega." },
+            { icon: Package, title: "Supply", body: "Gerencia a fila de solicitações e prazos de entrega." },
             { icon: ShieldCheck, title: "Admin", body: "Clientes, projetos, ordens de expedição, estoque e logs completos." },
           ].map(({ icon: Icon, title, body }) => (
             <div key={title} className="rounded-2xl border border-border p-6">
