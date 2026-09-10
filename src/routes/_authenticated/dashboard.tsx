@@ -2103,10 +2103,13 @@ function OrdersTable({
                 <InlineField order={o} field="passphrase" type="text" canEdit={canEdit} display={o.passphrase || "—"} />
               </TableCell>
               <TableCell className="text-xs text-muted-foreground">
+                {o.requester_notes && (
+                  <div className="line-clamp-4 break-words">{o.requester_notes}</div>
+                )}
                 <div className="line-clamp-4 break-words">
                   <InlineField order={o} field="buyer_notes" type="textarea" canEdit={canEdit} display={o.buyer_notes || "—"} />
                 </div>
-                <FullTextPopover text={o.buyer_notes ?? ""} />
+                <FullTextPopover text={[o.requester_notes, o.buyer_notes].filter(Boolean).join("\n\n")} />
               </TableCell>
             </TableRow>
           ))}
