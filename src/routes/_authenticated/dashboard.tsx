@@ -2057,8 +2057,8 @@ function OrdersTable({
                   )}
                 </div>
               </TableCell>
-              <TableCell className="text-sm break-words">{o.for_stock ? "Estoque" : o.project_id ? projectName(o.project_id) : "—"}</TableCell>
-              {showRequester && <TableCell className="text-sm break-words">{requesterName?.(o.requester_id)}</TableCell>}
+              <TableCell className="text-sm break-words text-center">{o.for_stock ? "Estoque" : o.project_id ? projectName(o.project_id) : "—"}</TableCell>
+              {showRequester && <TableCell className="text-sm break-words text-center">{requesterName?.(o.requester_id)}</TableCell>}
               <TableCell>
                 {(() => {
                   const part = o.request_group_id ? stockParts?.get(o.request_group_id) : undefined;
