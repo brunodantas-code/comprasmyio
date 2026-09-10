@@ -134,18 +134,18 @@ function ExistingAttachments({ orderId, attachments, canRemove }: { orderId: str
     onSuccess: () => qc.invalidateQueries({ queryKey: ["orders"] }),
     onError: (e: Error) => toast.error(e.message),
   });
-  if (!attachments.length) return <p className="text-xs text-muted-foreground">Nenhum anexo.</p>;
+  if (!attachments.length) return null;
   return (
-    <ul className="space-y-1 text-xs">
+    <ul className="space-y-0.5 text-xs">
       {attachments.map((a) => (
-        <li key={a.path} className="flex items-center justify-between rounded border px-2 py-1">
-          <button type="button" onClick={() => openAttachment(a.path)} className="inline-flex items-center gap-1 truncate text-primary hover:underline">
-            <Download className="h-3 w-3" />{a.name}
+        <li key={a.path} className="flex items-center gap-1">
+          <button type="button" onClick={() => openAttachment(a.path)} className="truncate text-primary hover:underline" title={a.name}>
+            {a.name}
           </button>
           {canRemove && (
-            <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => remove.mutate(a)} disabled={remove.isPending}>
+            <button type="button" className="text-muted-foreground hover:text-destructive" onClick={() => remove.mutate(a)} disabled={remove.isPending}>
               <X className="h-3 w-3" />
-            </Button>
+            </button>
           )}
         </li>
       ))}
