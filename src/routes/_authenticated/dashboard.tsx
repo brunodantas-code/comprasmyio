@@ -2809,6 +2809,15 @@ function ProjectsAdmin({ userId }: { userId: string }) {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const setStatus = useMutation({
+    mutationFn: async ({ id, status, concludedAt }: { id: string; status: "active" | "implantado" | "cancelado"; concludedAt: string | null }) => {
+      const { error } = await supabase.from("projects").update({ status, concluded_at: concludedAt }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success("Status do projeto atualizado"); qc.invalidateQueries({ queryKey: ["projects"] }); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   function onCreate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
