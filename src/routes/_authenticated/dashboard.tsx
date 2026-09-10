@@ -1039,6 +1039,9 @@ function NewOrder({ userId }: { userId: string }) {
           travel_destination: requestType === "viagens" ? travelDestination.trim() : null,
           travel_departure: requestType === "viagens" ? travelDeparture : null,
           travel_return: requestType === "viagens" ? travelReturn : null,
+          travel_legs: requestType === "viagens"
+            ? travelLegs.map((l) => ({ destination: l.destination.trim(), departure: l.departure, return: l.return }))
+            : [],
           requester_id: userId,
         }).select("id").single();
         if (error) throw error;
