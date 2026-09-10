@@ -1186,11 +1186,26 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
       requester_notes: isRh
         ? `${rhTipo === "reposicao" ? "Reposição" : "Nova Contratação"} — Motivo: ${rhMotivo.trim()}${fd.get("requester_notes") ? ` | ${fd.get("requester_notes")}` : ""}`
         : (fd.get("requester_notes") || undefined),
-      delivery_point: fd.get("delivery_point"),
+      delivery_point: (fd.get("delivery_point") as string | null) || undefined,
       deadline_type: deadlineType,
       deadline_date: deadlineDate || undefined,
     });
-    if (!parsed.success) return toast.error(parsed.error.issues[0].message);
+    if (!parsed.success) {
+      const iss = parsed.error.issues[0];
+      const labels: Record<string, string> = {
+        item_name: "Descrição",
+        item_link: "Link de referência",
+        quantity: "Quantidade",
+        estimated_value: "Valor unitário estimado",
+        recipient: "Destinatário",
+        requester_notes: "Observações",
+        delivery_point: "Endereço de entrega",
+        deadline_date: "Data limite",
+        project_id: "Projeto",
+      };
+      const field = labels[String(iss.path[0] ?? "")];
+      return toast.error(field ? `${field}: ${iss.message}` : iss.message);
+    }
 
     if (isMateriais && !isNewItem && item) {
 
