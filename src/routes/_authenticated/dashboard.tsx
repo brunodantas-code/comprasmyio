@@ -1222,15 +1222,15 @@ function NewOrder({ userId }: { userId: string }) {
                     </div>
                     <div className="grid gap-4 md:grid-cols-3 items-end">
                       <div className="space-y-2">
-                        <Label htmlFor={`travel_destination_${i}`}>Cidade e UF de destino</Label>
+                        <Label htmlFor={`travel_destination_${i}`}>{travelType === "aluguel_veiculos" ? "Cidade e UF de retirada" : "Cidade e UF de destino"}</Label>
                         <Input id={`travel_destination_${i}`} value={leg.destination} onChange={(e) => updateLeg(i, { destination: e.target.value })} placeholder="Ex.: São Paulo - SP" />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor={`travel_departure_${i}`}>Data de ida</Label>
+                        <Label htmlFor={`travel_departure_${i}`}>{travelType === "aluguel_veiculos" ? "Data de retirada" : "Data de ida"}</Label>
                         <Input id={`travel_departure_${i}`} type="date" value={leg.departure} onChange={(e) => updateLeg(i, { departure: e.target.value })} />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor={`travel_return_${i}`}>Data de retorno</Label>
+                        <Label htmlFor={`travel_return_${i}`}>{travelType === "aluguel_veiculos" ? "Data de devolução" : "Data de retorno"}</Label>
                         <Input id={`travel_return_${i}`} type="date" value={leg.return} min={leg.departure || undefined} onChange={(e) => updateLeg(i, { return: e.target.value })} />
                       </div>
                     </div>
@@ -1421,7 +1421,7 @@ function NewOrder({ userId }: { userId: string }) {
             </div>
             <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="quantity">{requestType === "viagens" ? "Quantidade de Pessoas" : "Quantidade"}</Label>
+                <Label htmlFor="quantity">{requestType === "viagens" ? (travelType === "aluguel_veiculos" ? "Quantidade de veículos" : "Quantidade de Pessoas") : "Quantidade"}</Label>
                 <Input id="quantity" name="quantity" type="number" min={1} value={qty} onChange={(e) => setQty(e.target.value)} required />
               </div>
               <div className="space-y-2">
