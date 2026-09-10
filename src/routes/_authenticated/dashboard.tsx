@@ -802,18 +802,6 @@ function PurchasableItemPicker({ value, onPick, disabled }: { value: Purchasable
 
 /* ---------- New order ---------- */
 
-const RH_CARGOS = [
-  "Analista",
-  "Assistente",
-  "Estagiário",
-  "Técnico de Campo",
-  "Engenheiro",
-  "Desenvolvedor",
-  "Coordenador",
-  "Gerente",
-  "Diretor",
-] as const;
-
 const newOrderSchema = z.object({
   project_id: z.string().optional(),
   item_name: z.string().trim().min(2).max(200),
@@ -973,6 +961,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
 
   const [recipient, setRecipient] = useState("");
   const { data: profiles } = useProfilesList();
+  const { data: jobTitles } = useJobTitles();
   const { data: purchasables } = usePurchasableItems();
   const [dupOpen, setDupOpen] = useState(false);
   const [dupCandidates, setDupCandidates] = useState<PurchasableItem[]>([]);
@@ -1441,7 +1430,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
                     <Select value={rhCargo} onValueChange={setRhCargo}>
                       <SelectTrigger><SelectValue placeholder="Selecione o cargo" /></SelectTrigger>
                       <SelectContent>
-                        {RH_CARGOS.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                        {(jobTitles ?? []).map((t) => <SelectItem key={t.id} value={t.name}>{t.name}</SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
