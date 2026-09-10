@@ -994,7 +994,7 @@ function DefaultChainAdmin() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Usuário</TableHead>
-                  <TableHead>Gestor direto</TableHead>
+                  <TableHead>Aprovado por (cargo)</TableHead>
                   <TableHead>Automática até</TableHead>
                   <TableHead>Faixa 2 até</TableHead>
                   <TableHead>Faixa 3 até</TableHead>
@@ -1007,25 +1007,10 @@ function DefaultChainAdmin() {
                   return (
                     <TableRow key={p.id}>
                       <TableCell className="font-medium">{p.full_name || p.email}</TableCell>
-                      <TableCell>
-                        <Select
-                          value={p.manager_id ?? "none"}
-                          disabled={!isAdmin}
-                          onValueChange={(v) =>
-                            save.mutate({ userId: p.id, patch: { manager_id: v === "none" ? null : v } })
-                          }
-                        >
-                          <SelectTrigger className="h-8 w-52"><SelectValue placeholder="Sem gestor" /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="none">Sem gestor</SelectItem>
-                            {(rows ?? [])
-                              .filter((o) => o.id !== p.id)
-                              .map((o) => (
-                                <SelectItem key={o.id} value={o.id}>{o.full_name || o.email}</SelectItem>
-                              ))}
-                          </SelectContent>
-                        </Select>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {approverRoleOf(p.id) ?? "—"}
                       </TableCell>
+
                       <TableCell>
                         <MoneyInput
                           value={Number(p.approval_limit ?? 0)}
