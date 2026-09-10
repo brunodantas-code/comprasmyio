@@ -355,7 +355,7 @@ function Dashboard() {
               <TabsTrigger value="queue"><ShoppingCart className="mr-2 h-4 w-4" />Approvals Pendentes</TabsTrigger>
             )}
             {canSeeStock && <TabsTrigger value="stock"><Boxes className="mr-2 h-4 w-4" />Armazém</TabsTrigger>}
-            {isAdmin && <TabsTrigger value="projects"><FolderKanban className="mr-2 h-4 w-4" />Projetos, Clientes e Centros de Custo</TabsTrigger>}
+            {isAdmin && <TabsTrigger value="projects"><FolderKanban className="mr-2 h-4 w-4" />Cadastro</TabsTrigger>}
             
             {isAdmin && <TabsTrigger value="myio"><Factory className="mr-2 h-4 w-4" />Solicitações de Projetos</TabsTrigger>}
             {isAdmin && <TabsTrigger value="admin"><Users className="mr-2 h-4 w-4" />Usuários e logs</TabsTrigger>}
@@ -1611,7 +1611,7 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
             )}
             <div className="space-y-2">
               <Label htmlFor="requester_notes">Observações <span className="text-muted-foreground">(opcional)</span></Label>
-              <Textarea id="requester_notes" name="requester_notes" placeholder="Detalhes adicionais para o comprador" />
+              <Textarea id="requester_notes" name="requester_notes" placeholder="Detalhes adicionais para o time de supply" />
             </div>
             <FilePicker files={files} setFiles={setFiles} />
             <Button type="submit" disabled={submit.isPending || checking}>
@@ -2621,7 +2621,7 @@ function UsersAdmin() {
 
   const roleLabels: Record<AppRole, string> = {
     admin: "Admin",
-    comprador: "Comprador",
+    comprador: "Time de Supply",
     fabrica: "Fábrica",
     estoquista: "Estoquista",
     solicitante: "Solicitante",

@@ -11,12 +11,12 @@ type Props = {
 /** Logotipo oficial myio (Manual da Marca) + wordmark "supply". */
 export function MyioLogo({ className, tone = "dark" }: Props) {
   return (
-    <span className={cn("inline-flex items-center gap-[0.35em]", className)}>
+    <span className={cn("inline-flex items-end gap-[0.35em]", className)}>
       <img
         src={tone === "light" ? logoDark.url : logoLightSrc}
         alt="myio"
         className="h-auto w-auto select-none"
-        style={{ height: "1.5em" }}
+        style={{ height: "1.5em", marginBottom: tone === "dark" ? "0.3em" : "0em" }}
         draggable={false}
       />
       <span
