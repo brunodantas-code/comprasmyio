@@ -799,6 +799,18 @@ function PurchasableItemPicker({ value, onPick, disabled }: { value: Purchasable
 
 /* ---------- New order ---------- */
 
+const RH_CARGOS = [
+  "Analista",
+  "Assistente",
+  "Estagiário",
+  "Técnico de Campo",
+  "Engenheiro",
+  "Desenvolvedor",
+  "Coordenador",
+  "Gerente",
+  "Diretor",
+] as const;
+
 const newOrderSchema = z.object({
   project_id: z.string().optional(),
   item_name: z.string().trim().min(2).max(200),
