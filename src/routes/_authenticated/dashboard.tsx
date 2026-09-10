@@ -871,7 +871,12 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
   const qc = useQueryClient();
   const [projectId, setProjectId] = useState("");
   const [forStock, setForStock] = useState(false);
-  const [requestType, setRequestType] = useState<"materiais" | "servicos" | "viagens" | "reembolso" | "importacao" | "dispositivos">("materiais");
+  const [requestType, setRequestType] = useState<"materiais" | "servicos" | "viagens" | "reembolso" | "importacao" | "dispositivos" | "rh">("materiais");
+  const [rhCargo, setRhCargo] = useState("");
+  const [rhGestor, setRhGestor] = useState("");
+  const [rhMotivo, setRhMotivo] = useState("");
+  const [rhTipo, setRhTipo] = useState("");
+  const [rhRemuneracao, setRhRemuneracao] = useState("0");
 
   const [allocTarget, setAllocTarget] = useState<"projeto" | "cliente">("projeto");
   const [clientId, setClientId] = useState("");
