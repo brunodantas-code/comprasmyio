@@ -32,6 +32,16 @@ const BRL = (v: number) =>
 const dt = (v: string | null) =>
   v ? new Date(v).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }) : "—";
 
+const formatInt = (v: number) =>
+  new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 }).format(Number(v ?? 0));
+
+const shortName = (full: string | null | undefined): string => {
+  if (!full) return "—";
+  const parts = full.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0];
+  return `${parts[0]} ${parts[parts.length - 1]}`;
+};
+
 const ACTION_LABELS: Record<string, string> = {
   criado: "Criado",
   status_alterado: "Alterado",
