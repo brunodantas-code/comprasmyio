@@ -98,7 +98,7 @@ function Landing() {
             <span className="font-extrabold">sob controle total</span>
           </h1>
           <p className="mt-6 max-w-xl text-lg text-white/75">
-            Do pedido ao cliente: solicitação de materiais, serviços, viagens e{" "}
+            Solicitação de materiais, serviços, viagens e{" "}
             <span className="font-bold text-white">reembolsos rastreados</span>.
           </p>
           <div className="mt-9 flex flex-wrap gap-3">
