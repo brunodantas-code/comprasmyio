@@ -347,7 +347,7 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
+      <header className="sticky top-0 z-50 border-b border-border bg-card">
         <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 sm:flex sm:justify-between sm:px-6 sm:py-4">
           <Link to="/" className="flex min-w-0 items-center font-semibold">
             <MyioLogo className="text-xl sm:text-2xl" />
@@ -370,7 +370,8 @@ function Dashboard() {
 
       <main className="mx-auto max-w-7xl px-3 py-5 sm:px-6 sm:py-8">
         <Tabs defaultValue={defaultTab}>
-          <TabsList className="mb-6">
+          <div className="sticky top-[60px] z-40 -mx-3 mb-6 bg-background px-3 py-2 sm:top-[73px] sm:-mx-6 sm:px-6">
+          <TabsList>
             <TabsTrigger value="pedidos"><ClipboardList className="mr-2 h-4 w-4" />Solicitações</TabsTrigger>
             {canSeeQueue && (
               <TabsTrigger value="queue"><ShoppingCart className="mr-2 h-4 w-4" />Approvals Pendentes</TabsTrigger>
@@ -381,6 +382,7 @@ function Dashboard() {
             
             {isAdmin && <TabsTrigger value="admin"><Users className="mr-2 h-4 w-4" />Usuários e logs</TabsTrigger>}
           </TabsList>
+          </div>
 
           <TabsContent value="pedidos">
             <Tabs defaultValue="mine">
