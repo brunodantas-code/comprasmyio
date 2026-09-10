@@ -2306,7 +2306,7 @@ function OrdersTable({
                 </div>
               </TableCell>
               <TableCell>
-                <div className="line-clamp-4 font-medium break-words">{o.item_name}</div>
+                <div className="line-clamp-4 font-medium break-words">{requestTypeLabel(o)}</div>
                 <div className="mt-1 flex flex-wrap items-center gap-2">
                   <FullTextPopover text={o.item_name ?? ""} />
                   {o.item_link ? (
