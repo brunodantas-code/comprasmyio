@@ -2000,7 +2000,7 @@ function OrdersTable({
             {showRequester && <TableHead className="w-[120px] text-center font-bold">Solicitante</TableHead>}
             <TableHead className="w-[60px] text-center font-bold">Qtd</TableHead>
             <TableHead className="w-[100px] text-center font-bold">Destinatário</TableHead>
-            <TableHead className="w-[120px] text-center font-bold">Entrega</TableHead>
+            <TableHead className="w-[120px] text-center font-bold">Endereço de Entrega</TableHead>
             <TableHead className="w-[100px] text-center font-bold">Prazo e Previsão</TableHead>
             <TableHead className="w-[100px] text-center font-bold">Status</TableHead>
             <TableHead className="w-[90px] text-center font-bold">Palavra passe</TableHead>
@@ -2033,8 +2033,8 @@ function OrdersTable({
         <TableBody>
           {visibleOrders.map((o) => (
             <TableRow key={o.id} className="align-top">
-              <TableCell className="font-mono text-xs">
-                <div>{o.approval_number ?? "—"}</div>
+              <TableCell className="font-mono text-xs text-center">
+                <div className="font-bold">{o.approval_number ?? "—"}</div>
                 <div className="mt-1 space-y-1 font-sans">
                   <ExistingAttachments orderId={o.id} attachments={o.attachments ?? []} canRemove={canEdit} />
                   <div className="flex flex-wrap items-center gap-1">
@@ -2057,9 +2057,9 @@ function OrdersTable({
                   )}
                 </div>
               </TableCell>
-              <TableCell className="text-sm break-words">{o.for_stock ? "Estoque" : o.project_id ? projectName(o.project_id) : "—"}</TableCell>
-              {showRequester && <TableCell className="text-sm break-words">{requesterName?.(o.requester_id)}</TableCell>}
-              <TableCell>
+              <TableCell className="text-sm break-words text-center">{o.for_stock ? "Estoque" : o.project_id ? projectName(o.project_id) : "—"}</TableCell>
+              {showRequester && <TableCell className="text-sm break-words text-center">{requesterName?.(o.requester_id)}</TableCell>}
+              <TableCell className="text-center">
                 {(() => {
                   const part = o.request_group_id ? stockParts?.get(o.request_group_id) : undefined;
                   if (!part || part.qty <= 0) return o.quantity;
@@ -2074,12 +2074,12 @@ function OrdersTable({
                   );
                 })()}
               </TableCell>
-              <TableCell className="text-sm break-words">{o.recipient || "—"}</TableCell>
+              <TableCell className="text-sm break-words text-center">{o.recipient || "—"}</TableCell>
               <TableCell className="text-sm text-muted-foreground">
                 <div className="line-clamp-4 break-words">{o.delivery_point}</div>
                 <FullTextPopover text={o.delivery_point ?? ""} />
               </TableCell>
-              <TableCell className="text-xs break-words">
+              <TableCell className="text-xs break-words text-center">
                 <div>{DEADLINE_LABELS[o.deadline_type]}</div>
                 {o.deadline_type === "customizado" && o.deadline_date && (
                   <div className="text-muted-foreground">{new Date(o.deadline_date + "T00:00:00").toLocaleDateString("pt-BR")}</div>
@@ -2098,8 +2098,8 @@ function OrdersTable({
                   />
                 </div>
               </TableCell>
-              <TableCell><StatusHistoryDialog order={o} canEdit={canEdit} /></TableCell>
-              <TableCell className="text-sm break-words">
+              <TableCell className="text-center"><StatusHistoryDialog order={o} canEdit={canEdit} /></TableCell>
+              <TableCell className="text-sm break-words text-center">
                 <InlineField order={o} field="passphrase" type="text" canEdit={canEdit} display={o.passphrase || "—"} />
               </TableCell>
               <TableCell className="text-xs text-muted-foreground">
