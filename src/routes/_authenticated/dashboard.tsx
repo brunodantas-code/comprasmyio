@@ -961,9 +961,7 @@ function NewOrder({ userId }: { userId: string }) {
     setDeadlineType("esta_semana");
     setDeadlineDate("");
     setTravelType("");
-    setTravelDestination("");
-    setTravelDeparture("");
-    setTravelReturn("");
+    setTravelLegs([{ destination: "", departure: "", return: "" }]);
     setItem(null);
     setItemLink("");
     setEstimatedValue("0");
