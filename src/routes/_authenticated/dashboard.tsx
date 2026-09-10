@@ -2032,15 +2032,15 @@ function OrdersTable({
           return (
             <div key={o.id} className="rounded-lg border border-border bg-card p-3">
               <Row label="Approval">
-                <div className="font-mono font-bold">
+                <div className="flex items-center gap-1 font-mono font-bold">
                   <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} />
+                  {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
                 </div>
                 <div className="mt-1 space-y-1">
                   <ExistingAttachments orderId={o.id} attachments={o.attachments ?? []} canRemove={canEdit} />
                   <div className="flex flex-wrap items-center gap-1">
                     {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
                     {canEditRequester && o.status === "entregue" && <ConfirmReceiptActions order={o} />}
-                    {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
                   </div>
                 </div>
               </Row>
@@ -2145,13 +2145,15 @@ function OrdersTable({
           {visibleOrders.map((o) => (
             <TableRow key={o.id} className="align-top">
               <TableCell className="font-mono text-xs text-center">
-                <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} />
+                <div className="flex items-center justify-center gap-1">
+                  <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} />
+                  {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
+                </div>
                 <div className="mt-1 space-y-1 font-sans">
                   <ExistingAttachments orderId={o.id} attachments={o.attachments ?? []} canRemove={canEdit} />
                   <div className="flex flex-wrap items-center gap-1">
                     {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
                     {canEditRequester && o.status === "entregue" && <ConfirmReceiptActions order={o} />}
-                    {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
                   </div>
                 </div>
               </TableCell>
