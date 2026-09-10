@@ -2930,6 +2930,42 @@ function ProjectsAdmin({ userId }: { userId: string }) {
           }
         </CardContent>
       </Card>
+      <AlertDialog open={!!statusDialog} onOpenChange={(o) => { if (!o) setStatusDialog(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {statusDialog?.action === "implantado" ? "Implantar projeto" : "Cancelar projeto"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {statusDialog?.action === "implantado"
+                ? `Confirmar a implantação do projeto "${statusDialog?.name}"? Após a implantação, o projeto não poderá receber novas solicitações.`
+                : `Confirmar o cancelamento do projeto "${statusDialog?.name}"? O projeto será marcado como fracassado e não poderá receber novas solicitações.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="status-date">
+              {statusDialog?.action === "implantado" ? "Data de implantação" : "Data de cancelamento"}
+            </Label>
+            <Input id="status-date" type="date" value={statusDate} onChange={(e) => setStatusDate(e.target.value)} />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={setStatus.isPending || !statusDate}
+              onClick={() => {
+                if (statusDialog) {
+                  setStatus.mutate(
+                    { id: statusDialog.id, status: statusDialog.action, concludedAt: statusDate },
+                    { onSuccess: () => setStatusDialog(null) },
+                  );
+                }
+              }}
+            >
+              Confirmar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
