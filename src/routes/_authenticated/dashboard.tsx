@@ -366,12 +366,11 @@ function Dashboard() {
               <TabsList className="mb-4">
                 <TabsTrigger value="mine"><ClipboardList className="mr-2 h-4 w-4" />Minhas Solicitações</TabsTrigger>
                 <TabsTrigger value="new"><Plus className="mr-2 h-4 w-4" />Novas Solicitações</TabsTrigger>
-                {canImport && <TabsTrigger value="import"><Plane className="mr-2 h-4 w-4" />Importação</TabsTrigger>}
               </TabsList>
               <TabsContent value="mine"><MyOrders userId={me.id} /></TabsContent>
-              <TabsContent value="new"><NewOrder userId={me.id} /></TabsContent>
-              {canImport && <TabsContent value="import"><ImportOrders userId={me.id} /></TabsContent>}
+              <TabsContent value="new"><NewOrder userId={me.id} canImport={canImport} /></TabsContent>
             </Tabs>
+
           </TabsContent>
           {canSeeQueue && <TabsContent value="queue"><BuyerQueue /></TabsContent>}
           {canSeeStock && (
