@@ -10,3 +10,7 @@
 - [ ] Encurtar "Reembolso de despesas" para "Reembolsos"
 - [x] Trocar "comprador" por "time de supply"
 - [x] Atualizar texto do Armazém
+- [x] Centralizar checkbox Admin na tabela de usuários
+- [x] Alinhar números dos boxes monetários à direita
+- [x] Trocar rótulo "Comprador" por "Supply" (approval-workflow + meta twitter)
+- [ ] Agrupar nomes de mesmo perfil no mesmo box (tabela de usuários)

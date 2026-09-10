@@ -919,7 +919,7 @@ const ROLE_TITLES: Record<string, string> = {
   cfo: "CFO",
   cto: "CTO",
   admin: "Admin",
-  comprador: "Comprador",
+  comprador: "Supply",
   estoquista: "Estoquista",
   fabrica: "Fábrica",
   solicitante: "Solicitante",
