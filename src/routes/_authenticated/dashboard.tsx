@@ -1181,7 +1181,7 @@ function NewOrder({ userId }: { userId: string }) {
             {requestType === "viagens" && (
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>Tipo de viagem</Label>
+                  <Label>O que você deseja solicitar?</Label>
                   <Select value={travelType} onValueChange={setTravelType}>
                     <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                     <SelectContent>
@@ -1192,7 +1192,7 @@ function NewOrder({ userId }: { userId: string }) {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="travel_destination">Cidade e Estado de destino</Label>
+                  <Label htmlFor="travel_destination">Cidade e Estado (UF) de destino</Label>
                   <Input id="travel_destination" value={travelDestination} onChange={(e) => setTravelDestination(e.target.value)} placeholder="Ex.: São Paulo - SP" />
                 </div>
                 <div className="space-y-2">
