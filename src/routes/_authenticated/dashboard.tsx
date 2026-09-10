@@ -2033,8 +2033,8 @@ function OrdersTable({
         <TableBody>
           {visibleOrders.map((o) => (
             <TableRow key={o.id} className="align-top">
-              <TableCell className="font-mono text-xs">
-                <div>{o.approval_number ?? "—"}</div>
+              <TableCell className="font-mono text-xs text-center">
+                <div className="font-bold">{o.approval_number ?? "—"}</div>
                 <div className="mt-1 space-y-1 font-sans">
                   <ExistingAttachments orderId={o.id} attachments={o.attachments ?? []} canRemove={canEdit} />
                   <div className="flex flex-wrap items-center gap-1">
