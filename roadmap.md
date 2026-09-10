@@ -14,3 +14,5 @@
 - [x] Alinhar números dos boxes monetários à direita
 - [x] Trocar rótulo "Comprador" por "Supply" (approval-workflow + meta twitter)
 - [x] Agrupar nomes de mesmo perfil no mesmo box (tabela de usuários)
+- [x] Restaurar organograma hierárquico mantendo agrupamento por perfil (approval-workflow)
+- [x] Botão "Excluir" de projetos (Cadastro) virou ícone de lixeira vermelha
