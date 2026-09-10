@@ -86,7 +86,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Myio Supply — Gestão de Materiais" },
-      { name: "twitter:description", content: "Sistema de pedidos de compra de material com fluxo solicitante, comprador e admin." },
+      { name: "twitter:description", content: "Sistema de solicitações de materiais, serviços, viagens e reembolsos com fluxo solicitante, supply e admin." },
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/89313d40-dc00-4a78-acc5-c6ab73936ae8/id-preview-2de70354--a171bcb5-b49c-49b5-9d4d-a891eb8e614f.lovable.app-1784000007084.png" },
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/89313d40-dc00-4a78-acc5-c6ab73936ae8/id-preview-2de70354--a171bcb5-b49c-49b5-9d4d-a891eb8e614f.lovable.app-1784000007084.png" },
     ],
