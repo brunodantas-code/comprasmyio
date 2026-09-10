@@ -2046,11 +2046,8 @@ function OrdersTable({
               </TableCell>
               <TableCell>
                 <div className="line-clamp-4 font-medium break-words">{o.item_name}</div>
-                {o.requester_notes && (
-                  <div className="line-clamp-4 mt-1 text-xs text-muted-foreground break-words">{o.requester_notes}</div>
-                )}
                 <div className="mt-1 flex flex-wrap items-center gap-2">
-                  <FullTextPopover text={[o.item_name, o.requester_notes].filter(Boolean).join("\n\n")} />
+                  <FullTextPopover text={o.item_name ?? ""} />
                   {o.item_link ? (
                     <a href={o.item_link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
                       ver link <ExternalLink className="h-3 w-3" />
@@ -2060,6 +2057,8 @@ function OrdersTable({
                   )}
                 </div>
               </TableCell>
+              <TableCell className="text-sm break-words">{o.for_stock ? "Estoque" : o.project_id ? projectName(o.project_id) : "—"}</TableCell>
+              {showRequester && <TableCell className="text-sm break-words">{requesterName?.(o.requester_id)}</TableCell>}
               <TableCell>
                 {(() => {
                   const part = o.request_group_id ? stockParts?.get(o.request_group_id) : undefined;
@@ -2075,8 +2074,6 @@ function OrdersTable({
                   );
                 })()}
               </TableCell>
-              <TableCell className="text-sm break-words">{o.for_stock ? "Estoque" : o.project_id ? projectName(o.project_id) : "—"}</TableCell>
-              {showRequester && <TableCell className="text-sm break-words">{requesterName?.(o.requester_id)}</TableCell>}
               <TableCell className="text-sm break-words">{o.recipient || "—"}</TableCell>
               <TableCell className="text-sm text-muted-foreground">
                 <div className="line-clamp-4 break-words">{o.delivery_point}</div>
