@@ -1058,44 +1058,36 @@ function roleTitle(roles: AppRole[]) {
   return found ? ROLE_TITLES[found]! : "Sem perfil";
 }
 
-type OrgNode = {
-  id: string;
-  name: string;
+type RoleNode = {
+  role: string;
   title: string;
-  children: OrgNode[];
+  names: string[];
+  children: RoleNode[];
 };
 
-function groupByTitle(nodes: OrgNode[]) {
-  const groups = new Map<string, { title: string; names: string[]; children: OrgNode[] }>();
-  nodes.forEach((n) => {
-    if (!groups.has(n.title)) groups.set(n.title, { title: n.title, names: [], children: [] });
-    const g = groups.get(n.title)!;
-    g.names.push(n.name);
-    g.children.push(...n.children);
-  });
-  return Array.from(groups.values());
-}
-
-function OrgBox({ group }: { group: { title: string; names: string[]; children: OrgNode[] } }) {
-  const childGroups = groupByTitle(group.children);
+function OrgBox({ node }: { node: RoleNode }) {
   return (
     <div className="flex flex-col items-center">
-      <div className="min-w-[160px] rounded-lg border bg-card px-4 py-2 text-center shadow-sm">
-        <p className="text-sm font-bold leading-tight">{group.title}</p>
+      <div className="min-w-[170px] rounded-lg border bg-card px-4 py-2 text-center shadow-sm">
+        <p className="text-sm font-bold leading-tight">{node.title}</p>
         <div className="mt-1 space-y-0.5">
-          {group.names.map((n, i) => (
-            <p key={`${n}-${i}`} className="text-xs leading-tight text-muted-foreground">{n}</p>
-          ))}
+          {node.names.length === 0 ? (
+            <p className="text-xs italic leading-tight text-muted-foreground">Sem usuário no cargo</p>
+          ) : (
+            node.names.map((n, i) => (
+              <p key={`${n}-${i}`} className="text-xs leading-tight text-muted-foreground">{n}</p>
+            ))
+          )}
         </div>
       </div>
-      {childGroups.length > 0 && (
+      {node.children.length > 0 && (
         <>
           <div className="h-5 w-px bg-border" />
           <div className="flex items-start gap-6 border-t border-border pt-5">
-            {childGroups.map((c) => (
-              <div key={c.title} className="relative flex flex-col items-center">
+            {node.children.map((c) => (
+              <div key={c.role} className="relative flex flex-col items-center">
                 <div className="absolute -top-5 h-5 w-px bg-border" />
-                <OrgBox group={c} />
+                <OrgBox node={c} />
               </div>
             ))}
           </div>
@@ -1105,6 +1097,7 @@ function OrgBox({ group }: { group: { title: string; names: string[]; children: 
   );
 }
 
+const ORG_ROLES = ["ceo", "cfo", "coo", "cto", "comprador", "estoquista", "fabrica", "solicitante"];
 
 function OrgChartAdmin() {
   const qc = useQueryClient();
@@ -1117,23 +1110,36 @@ function OrgChartAdmin() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, full_name, email, manager_id, approval_level")
+        .select("id, full_name, email, approval_level")
         .order("full_name");
       if (error) throw error;
       return data ?? [];
     },
   });
 
-  const save = useMutation({
-    mutationFn: async ({ userId, managerId }: { userId: string; managerId: string | null }) => {
-      const { error } = await supabase.from("profiles").update({ manager_id: managerId }).eq("id", userId);
+  const { data: hierarchy } = useQuery({
+    queryKey: ["aw-role-hierarchy"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("role_hierarchy").select("role, approver_role");
+      if (error) throw error;
+      const map = new Map<string, string | null>();
+      (data ?? []).forEach((r) => map.set(r.role as string, (r.approver_role as string | null) ?? null));
+      return map;
+    },
+  });
+
+  const saveApprover = useMutation({
+    mutationFn: async ({ role, approverRole }: { role: string; approverRole: string | null }) => {
+      const { error } = await supabase
+        .from("role_hierarchy")
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .upsert({ role, approver_role: approverRole } as any, { onConflict: "role" });
       if (error) throw error;
     },
     onSuccess: () => {
       toast.success("Organograma atualizado");
-      qc.invalidateQueries({ queryKey: ["aw-org-chart"] });
+      qc.invalidateQueries({ queryKey: ["aw-role-hierarchy"] });
       qc.invalidateQueries({ queryKey: ["aw-default-chain"] });
-      qc.invalidateQueries({ queryKey: ["aw-profiles"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -1151,47 +1157,36 @@ function OrgChartAdmin() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-
-  const roots = useMemo(() => {
-    const list = rows ?? [];
-    const nodes = new Map<string, OrgNode>();
-    list.forEach((p) =>
-      nodes.set(p.id, {
-        id: p.id,
-        name: p.full_name || p.email || "—",
-        title: roleTitle(profiles?.get(p.id)?.roles ?? []),
-        children: [],
-      })
-    );
-    const managerOf = new Map<string, string | null>(list.map((p) => [p.id, p.manager_id ?? null]));
-    // raiz = sem gestor, gestor inexistente, ou o próprio usuário faz parte de um ciclo
-    const isRoot = (id: string) => {
-      const first = managerOf.get(id) ?? null;
-      if (!first || !nodes.has(first) || first === id) return true;
-      const seen = new Set<string>();
-      let cur: string | null = first;
-      while (cur && nodes.has(cur)) {
-        if (cur === id) return true; // ciclo que volta ao próprio usuário
-        if (seen.has(cur)) return false; // ciclo que não inclui este usuário
-        seen.add(cur);
-        cur = managerOf.get(cur) ?? null;
-      }
-      return false;
-    };
-
-    const top: OrgNode[] = [];
-    list.forEach((p) => {
-      const node = nodes.get(p.id)!;
-      if (isRoot(p.id)) {
-        top.push(node);
-        return;
-      }
-      const parent = nodes.get(p.manager_id!)!;
-      parent.children.push(node);
+  const namesByRole = useMemo(() => {
+    const map = new Map<string, string[]>();
+    (rows ?? []).forEach((p) => {
+      const roles = profiles?.get(p.id)?.roles ?? [];
+      const main = ROLE_PRIORITY.find((r) => roles.includes(r as AppRole));
+      if (!main || main === "admin") return;
+      if (!map.has(main)) map.set(main, []);
+      map.get(main)!.push(p.full_name || p.email || "—");
     });
-    return top;
+    return map;
   }, [rows, profiles]);
 
+  const roots = useMemo(() => {
+    const h = hierarchy ?? new Map<string, string | null>();
+    const nodes = new Map<string, RoleNode>();
+    ORG_ROLES.forEach((r) =>
+      nodes.set(r, { role: r, title: ROLE_TITLES[r] ?? r, names: namesByRole.get(r) ?? [], children: [] })
+    );
+    const top: RoleNode[] = [];
+    ORG_ROLES.forEach((r) => {
+      const parentRole = h.get(r) ?? null;
+      const node = nodes.get(r)!;
+      if (parentRole && parentRole !== r && nodes.has(parentRole)) {
+        nodes.get(parentRole)!.children.push(node);
+      } else {
+        top.push(node);
+      }
+    });
+    return top;
+  }, [hierarchy, namesByRole]);
 
   return (
     <div className="space-y-4">
@@ -1199,9 +1194,52 @@ function OrgChartAdmin() {
         <CardHeader>
           <CardTitle>Organograma de Aprovação</CardTitle>
           <CardDescription>
-            Defina o nível de aprovação (C-Level, Gerente da Área ou Gestor Direto) e o gestor de cada usuário. O fluxo
-            sobe pelo organograma e, quando não houver Gerente da Área cadastrado, segue direto para o C-Level.
+            A hierarquia é definida por cargo, não por pessoa: defina qual cargo aprova cada cargo. Se o cargo aprovador
+            ficar sem nenhum usuário, a solicitação segue automaticamente para o cargo acima.
           </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Cargo</TableHead>
+                <TableHead>Usuários no cargo</TableHead>
+                <TableHead>Aprovado por (cargo)</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {ORG_ROLES.map((r) => (
+                <TableRow key={r}>
+                  <TableCell className="font-medium">{ROLE_TITLES[r] ?? r}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {(namesByRole.get(r) ?? []).join(", ") || "—"}
+                  </TableCell>
+                  <TableCell>
+                    <Select
+                      value={hierarchy?.get(r) ?? "none"}
+                      disabled={!isAdmin}
+                      onValueChange={(v) => saveApprover.mutate({ role: r, approverRole: v === "none" ? null : v })}
+                    >
+                      <SelectTrigger className="h-8 w-56"><SelectValue placeholder="Sem aprovador" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Sem aprovador</SelectItem>
+                        {ORG_ROLES.filter((o) => o !== r).map((o) => (
+                          <SelectItem key={o} value={o}>{ROLE_TITLES[o] ?? o}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Nível de aprovação por usuário</CardTitle>
+          <CardDescription>Classificação de cada usuário como Gestor Direto, Gerente da Área ou C-Level.</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -1213,7 +1251,6 @@ function OrgChartAdmin() {
                   <TableHead>Usuário</TableHead>
                   <TableHead>Cargo</TableHead>
                   <TableHead>Nível de aprovação</TableHead>
-                  <TableHead>Aprovado por (gestor)</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -1227,9 +1264,7 @@ function OrgChartAdmin() {
                       <Select
                         value={p.approval_level ?? "none"}
                         disabled={!isAdmin}
-                        onValueChange={(v) =>
-                          saveLevel.mutate({ userId: p.id, level: v === "none" ? null : v })
-                        }
+                        onValueChange={(v) => saveLevel.mutate({ userId: p.id, level: v === "none" ? null : v })}
                       >
                         <SelectTrigger className="h-8 w-48"><SelectValue placeholder="Não definido" /></SelectTrigger>
                         <SelectContent>
@@ -1240,28 +1275,8 @@ function OrgChartAdmin() {
                         </SelectContent>
                       </Select>
                     </TableCell>
-                    <TableCell>
-                      <Select
-                        value={p.manager_id ?? "none"}
-                        disabled={!isAdmin}
-                        onValueChange={(v) => save.mutate({ userId: p.id, managerId: v === "none" ? null : v })}
-                      >
-                        <SelectTrigger className="h-8 w-56"><SelectValue placeholder="Sem gestor" /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">Sem gestor</SelectItem>
-                          {(rows ?? [])
-                            .filter((o) => o.id !== p.id)
-                            .map((o) => (
-                              <SelectItem key={o.id} value={o.id}>
-                                {o.full_name || o.email}
-                              </SelectItem>
-                            ))}
-                        </SelectContent>
-                      </Select>
-                    </TableCell>
                   </TableRow>
                 ))}
-
               </TableBody>
             </Table>
           )}
@@ -1271,15 +1286,14 @@ function OrgChartAdmin() {
       <Card>
         <CardHeader>
           <CardTitle>Visualização</CardTitle>
-          <CardDescription>Hierarquia atual de aprovação, com os nomes agrupados por perfil sob cada gestor.</CardDescription>
+          <CardDescription>Hierarquia de aprovação por cargo, com os usuários de cada cargo agrupados.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto pb-2">
             <div className="flex min-w-max items-start gap-10 p-4">
-              {groupByTitle(roots).map((g) => (
-                <OrgBox key={g.title} group={g} />
+              {roots.map((r) => (
+                <OrgBox key={r.role} node={r} />
               ))}
-              {roots.length === 0 && <p className="text-sm text-muted-foreground">Nenhum usuário cadastrado.</p>}
             </div>
           </div>
         </CardContent>
@@ -1288,6 +1302,7 @@ function OrgChartAdmin() {
     </div>
   );
 }
+
 
 export function ApprovalWorkflow() {
   return (
