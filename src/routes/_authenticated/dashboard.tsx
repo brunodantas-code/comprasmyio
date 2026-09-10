@@ -1611,7 +1611,7 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
             )}
             <div className="space-y-2">
               <Label htmlFor="requester_notes">Observações <span className="text-muted-foreground">(opcional)</span></Label>
-              <Textarea id="requester_notes" name="requester_notes" placeholder="Detalhes adicionais para o comprador" />
+              <Textarea id="requester_notes" name="requester_notes" placeholder="Detalhes adicionais para o time de supply" />
             </div>
             <FilePicker files={files} setFiles={setFiles} />
             <Button type="submit" disabled={submit.isPending || checking}>
@@ -2621,7 +2621,7 @@ function UsersAdmin() {
 
   const roleLabels: Record<AppRole, string> = {
     admin: "Admin",
-    comprador: "Comprador",
+    comprador: "Time de Supply",
     fabrica: "Fábrica",
     estoquista: "Estoquista",
     solicitante: "Solicitante",
