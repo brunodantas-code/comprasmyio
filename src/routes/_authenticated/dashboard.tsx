@@ -24,13 +24,14 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { toast } from "sonner";
 import { LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Boxes, Building2, Plane, Landmark } from "lucide-react";
-import { Trash2, Paperclip, X, Loader2, DatabaseBackup, CheckCircle2, XCircle, RotateCcw, Pencil } from "lucide-react";
+import { Trash2, Paperclip, X, Loader2, DatabaseBackup, CheckCircle2, XCircle, RotateCcw, Pencil, Bell } from "lucide-react";
 import { ApprovalWorkflow } from "@/components/approval-workflow";
 import { z } from "zod";
 import { StockTab } from "@/components/stock-tab";
 import { MyioOrdersTab } from "@/components/myio-orders-tab";
 import { ClientsTab, useClients } from "@/components/clients-tab";
 import { CostCentersTab, useCostCenters } from "@/components/cost-centers-tab";
+import { RemindersTab } from "@/components/reminders-tab";
 import { ImportBatchesSection } from "@/components/import-batches";
 import { AddressAutocomplete } from "@/components/address-autocomplete";
 
@@ -412,10 +413,12 @@ function Dashboard() {
                   <TabsTrigger value="projetos"><FolderKanban className="mr-2 h-4 w-4" />Projetos</TabsTrigger>
                   <TabsTrigger value="clientes"><Building2 className="mr-2 h-4 w-4" />Clientes</TabsTrigger>
                   <TabsTrigger value="centros"><Landmark className="mr-2 h-4 w-4" />Centro de Custo</TabsTrigger>
+                  <TabsTrigger value="lembretes"><Bell className="mr-2 h-4 w-4" />Lembretes</TabsTrigger>
                 </TabsList>
                 <TabsContent value="projetos"><ProjectsAdmin userId={me.id} /></TabsContent>
                 <TabsContent value="clientes"><ClientsTab userId={me.id} /></TabsContent>
                 <TabsContent value="centros"><CostCentersTab userId={me.id} /></TabsContent>
+                <TabsContent value="lembretes"><RemindersTab /></TabsContent>
               </Tabs>
             </TabsContent>
           )}

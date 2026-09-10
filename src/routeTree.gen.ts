@@ -13,6 +13,7 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedPendentesRouteImport } from './routes/_authenticated/pendentes'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as ApiPublicHooksSyncProductStatusRouteImport } from './routes/api/public/hooks/sync-product-status'
 
@@ -35,6 +36,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedPendentesRoute = AuthenticatedPendentesRouteImport.update({
+  id: '/pendentes',
+  path: '/pendentes',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -52,6 +58,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/pendentes': typeof AuthenticatedPendentesRoute
   '/api/public/hooks/sync-product-status': typeof ApiPublicHooksSyncProductStatusRoute
 }
 export interface FileRoutesByTo {
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/pendentes': typeof AuthenticatedPendentesRoute
   '/api/public/hooks/sync-product-status': typeof ApiPublicHooksSyncProductStatusRoute
 }
 export interface FileRoutesById {
@@ -68,6 +76,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/pendentes': typeof AuthenticatedPendentesRoute
   '/api/public/hooks/sync-product-status': typeof ApiPublicHooksSyncProductStatusRoute
 }
 export interface FileRouteTypes {
@@ -77,6 +86,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/dashboard'
+    | '/pendentes'
     | '/api/public/hooks/sync-product-status'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -84,6 +94,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/dashboard'
+    | '/pendentes'
     | '/api/public/hooks/sync-product-status'
   id:
     | '__root__'
@@ -92,6 +103,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/_authenticated/dashboard'
+    | '/_authenticated/pendentes'
     | '/api/public/hooks/sync-product-status'
   fileRoutesById: FileRoutesById
 }
@@ -133,6 +145,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/pendentes': {
+      id: '/_authenticated/pendentes'
+      path: '/pendentes'
+      fullPath: '/pendentes'
+      preLoaderRoute: typeof AuthenticatedPendentesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -152,10 +171,12 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedPendentesRoute: typeof AuthenticatedPendentesRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedPendentesRoute: AuthenticatedPendentesRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

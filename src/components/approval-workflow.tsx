@@ -277,7 +277,7 @@ function AuditTrailDialog({ orderId, title }: { orderId: string; title: string }
   );
 }
 
-function PendingForMe() {
+export function PendingForMe() {
   const qc = useQueryClient();
   const { data: me } = useCurrentUser();
   const { data: steps, isLoading } = useSteps();
