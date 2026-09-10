@@ -1080,10 +1080,10 @@ function NewOrder({ userId }: { userId: string }) {
         for (let i = 0; i < travelLegs.length; i++) {
           const leg = travelLegs[i];
           const n = i + 1;
-          if (leg.destination.trim().length < 2) return toast.error(`Trecho ${n}: informe a cidade e o estado de destino`);
-          if (!leg.departure) return toast.error(`Trecho ${n}: informe a data de ida`);
-          if (!leg.return) return toast.error(`Trecho ${n}: informe a data de retorno`);
-          if (leg.return < leg.departure) return toast.error(`Trecho ${n}: a data de retorno não pode ser anterior à data de ida`);
+          if (leg.destination.trim().length < 2) return toast.error(`Solicitação ${n}: informe a cidade e o estado de destino`);
+          if (!leg.departure) return toast.error(`Solicitação ${n}: informe a data de ida`);
+          if (!leg.return) return toast.error(`Solicitação ${n}: informe a data de retorno`);
+          if (leg.return < leg.departure) return toast.error(`Solicitação ${n}: a data de retorno não pode ser anterior à data de ida`);
         }
       }
     } else if (isNewItem) {
