@@ -1160,7 +1160,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
       if (newItemName.trim().length < 2) return toast.error("Descreva o item novo.");
       if (!newItemDest) return toast.error("Selecione para qual estoque esse item novo será cadastrado.");
       if (checkDuplicates(newItemName)) return;
-      if (!itemLink.trim()) return toast.error("Informe o link de referência do item novo.");
+      
     } else if (!item) {
       return toast.error("Selecione um item cadastrado: Insumos de Fabricação, Insumos de Instalação, Material de Almoxarifado ou Máquinas e Ferramentas.");
     }
@@ -1180,8 +1180,8 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
         ? `Contratação de RH — ${rhCargo}`
         : (!isMateriais || isNewItem ? newItemName : item!.name),
       item_link: isReembolso || isRh ? undefined : (itemLink || undefined),
-      quantity: isReembolso || isRh ? 1 : fd.get("quantity"),
-      estimated_value: isReembolso ? reembolsoTotal : isRh ? Number(rhRemuneracao || 0) : (fd.get("estimated_value") ?? 0),
+      quantity: isReembolso || isRh ? 1 : (Number(qty) || 1),
+      estimated_value: isReembolso ? reembolsoTotal : isRh ? Number(rhRemuneracao || 0) : (Number(estimatedValue) || 0),
       recipient: isRh ? rhGestor : recipient,
       requester_notes: isRh
         ? `${rhTipo === "reposicao" ? "Reposição" : "Nova Contratação"} — Motivo: ${rhMotivo.trim()}${fd.get("requester_notes") ? ` | ${fd.get("requester_notes")}` : ""}`
@@ -1734,9 +1734,9 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
             {requestType !== "reembolso" && requestType !== "rh" && (
             <div className="space-y-2">
               <Label htmlFor="item_link">
-                Link de Referência {isNewItem ? null : <span className="text-muted-foreground">(opcional)</span>}
+                Link de Referência <span className="text-muted-foreground">(opcional)</span>
               </Label>
-              <Input id="item_link" type="url" placeholder="https://..." value={itemLink} onChange={(e) => { setItemLink(e.target.value); scheduleAutoFillPrice(e.target.value); }} onPaste={(e) => { const t = e.clipboardData.getData("text"); if (t) setTimeout(() => void tryAutoFillPrice(t), 0); }} onBlur={() => void tryAutoFillPrice(itemLink)} required={isNewItem && requestType === "materiais"} />
+              <Input id="item_link" type="url" placeholder="https://..." value={itemLink} onChange={(e) => { setItemLink(e.target.value); scheduleAutoFillPrice(e.target.value); }} onPaste={(e) => { const t = e.clipboardData.getData("text"); if (t) setTimeout(() => void tryAutoFillPrice(t), 0); }} onBlur={() => void tryAutoFillPrice(itemLink)} />
             </div>
             )}
             {requestType === "materiais" && <AddressAutocomplete name="delivery_point" required />}
