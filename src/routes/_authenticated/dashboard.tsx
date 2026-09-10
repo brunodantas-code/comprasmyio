@@ -1080,10 +1080,14 @@ function NewOrder({ userId }: { userId: string }) {
         for (let i = 0; i < travelLegs.length; i++) {
           const leg = travelLegs[i];
           const n = i + 1;
-          if (leg.destination.trim().length < 2) return toast.error(`Solicitação ${n}: informe a cidade e o estado de destino`);
-          if (!leg.departure) return toast.error(`Solicitação ${n}: informe a data de ida`);
-          if (!leg.return) return toast.error(`Solicitação ${n}: informe a data de retorno`);
-          if (leg.return < leg.departure) return toast.error(`Solicitação ${n}: a data de retorno não pode ser anterior à data de ida`);
+          const isRental = travelType === "aluguel_veiculos";
+          const destLabel = isRental ? "a cidade e a UF de retirada" : "a cidade e o estado de destino";
+          const depLabel = isRental ? "a data de retirada" : "a data de ida";
+          const retLabel = isRental ? "a data de devolução" : "a data de retorno";
+          if (leg.destination.trim().length < 2) return toast.error(`Solicitação ${n}: informe ${destLabel}`);
+          if (!leg.departure) return toast.error(`Solicitação ${n}: informe ${depLabel}`);
+          if (!leg.return) return toast.error(`Solicitação ${n}: informe ${retLabel}`);
+          if (leg.return < leg.departure) return toast.error(`Solicitação ${n}: ${retLabel} não pode ser anterior a ${depLabel}`);
         }
       }
     } else if (isNewItem) {
