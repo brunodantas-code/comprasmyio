@@ -3020,9 +3020,90 @@ function UsersAdmin() {
         <CardTitle>Usuários</CardTitle>
         <CardDescription>Selecione o perfil de cada usuário. Defina o gestor direto e as faixas de alçada.</CardDescription>
       </CardHeader>
-      <CardContent className="overflow-x-auto">
+      <CardContent className="md:overflow-x-auto">
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
-          <Table className="w-full table-fixed">
+        <>
+          <div className="space-y-3 md:hidden">
+            <div className="grid grid-cols-1 gap-2 rounded-lg bg-primary/10 p-2">
+              {filterInput(fName, setFName, "Nome")}
+              {filterInput(fEmail, setFEmail, "E-mail")}
+              {filterInput(fManager, setFManager, "Gestor")}
+              <Select value={fRole} onValueChange={setFRole}>
+                <SelectTrigger className="h-7 text-xs"><SelectValue placeholder="Perfil" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  {selectableRoles.map((r) => <SelectItem key={r} value={r}>{roleLabels[r]}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            {rows.map((u) => {
+              const p = u as unknown as { approval_limit?: number; tier2_limit?: number; tier3_limit?: number; manager_id?: string | null };
+              const primary = u.roles.find((r) => r !== "admin") ?? "none";
+              const isAdminUser = u.roles.includes("admin");
+              const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
+                <div className="grid grid-cols-[minmax(0,110px)_minmax(0,1fr)] items-center gap-2 border-t border-border/60 py-1.5 first:border-t-0">
+                  <div className="text-xs font-semibold text-muted-foreground">{label}</div>
+                  <div className="min-w-0 text-sm break-words">{children}</div>
+                </div>
+              );
+              return (
+                <div key={u.id} className="rounded-lg border border-border bg-card p-3">
+                  <Row label="Nome"><span className="font-medium">{u.full_name || "—"}</span></Row>
+                  <Row label="E-mail"><span className="text-muted-foreground">{u.email}</span></Row>
+                  <Row label="Gestor direto">
+                    <Select
+                      value={p.manager_id ?? "none"}
+                      onValueChange={(v) => setProfileField.mutate({ userId: u.id, patch: { manager_id: v === "none" ? null : v } })}
+                    >
+                      <SelectTrigger className="h-8 w-full text-xs"><SelectValue placeholder="Sem gestor" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Sem gestor</SelectItem>
+                        {(data ?? []).filter((o) => o.id !== u.id).map((o) => (
+                          <SelectItem key={o.id} value={o.id}>{o.full_name || o.email}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </Row>
+                  <Row label="Perfil">
+                    <Select value={primary} onValueChange={(v) => setPrimaryRole.mutate({ userId: u.id, role: v as AppRole | "none" })}>
+                      <SelectTrigger className="h-8 w-full text-xs"><SelectValue placeholder="Sem perfil" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Sem perfil</SelectItem>
+                        {selectableRoles.map((r) => <SelectItem key={r} value={r}>{roleLabels[r]}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </Row>
+                  <Row label="Admin">
+                    <Checkbox
+                      checked={isAdminUser}
+                      onCheckedChange={() => toggleRole.mutate({ userId: u.id, role: "admin", has: isAdminUser })}
+                    />
+                  </Row>
+                  <Row label="Aprovação automática até (R$)">
+                    <ApprovalLimitInput
+                      value={Number(p.approval_limit ?? 0)}
+                      onSave={(limit) => setProfileField.mutate({ userId: u.id, patch: { approval_limit: limit } })}
+                    />
+                  </Row>
+                  <Row label="Faixa 2 até (R$)">
+                    <ApprovalLimitInput
+                      value={Number(p.tier2_limit ?? 50000)}
+                      onSave={(limit) => setProfileField.mutate({ userId: u.id, patch: { tier2_limit: limit } })}
+                    />
+                  </Row>
+                  <Row label="Faixa 3 até (R$)">
+                    <ApprovalLimitInput
+                      value={Number(p.tier3_limit ?? 250000)}
+                      onSave={(limit) => setProfileField.mutate({ userId: u.id, patch: { tier3_limit: limit } })}
+                    />
+                  </Row>
+                </div>
+              );
+            })}
+          </div>
+          <Table className="hidden w-full table-fixed md:table">
+
             <TableHeader className="[&_tr]:border-b">
               <TableRow className="border-t bg-primary/15 hover:bg-primary/15">
                 <TableHead className="w-[150px] text-center font-bold">Nome</TableHead>
