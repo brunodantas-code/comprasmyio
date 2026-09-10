@@ -2895,7 +2895,7 @@ function ApprovalLimitInput({ value, onSave }: { value: number; onSave: (v: numb
   useEffect(() => { setDraft(String(value ?? 0)); }, [value]);
   return (
     <MoneyInput
-      className="h-8 w-32"
+      className="h-8 w-full min-w-0"
       value={draft}
       onChange={setDraft}
       onBlur={() => {
@@ -3108,9 +3108,9 @@ function UsersAdmin() {
                 <TableHead className="py-1">{filterInput(fName, setFName, "Nome")}</TableHead>
                 <TableHead className="py-1">{filterInput(fEmail, setFEmail, "E-mail")}</TableHead>
                 <TableHead className="py-1">{filterInput(fManager, setFManager, "Gestor")}</TableHead>
-                <TableHead className="py-1" colSpan={2}>
+                <TableHead className="py-1">
                   <Select value={fRole} onValueChange={setFRole}>
-                    <SelectTrigger className="h-7 text-xs"><SelectValue placeholder="Perfil" /></SelectTrigger>
+                    <SelectTrigger className="h-7 w-full text-xs"><SelectValue placeholder="Perfil" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Todos</SelectItem>
                       <SelectItem value="admin">Admin</SelectItem>
@@ -3118,6 +3118,7 @@ function UsersAdmin() {
                     </SelectContent>
                   </Select>
                 </TableHead>
+                <TableHead className="py-1" />
                 <TableHead className="py-1" />
                 <TableHead className="py-1" />
                 <TableHead className="py-1" />
