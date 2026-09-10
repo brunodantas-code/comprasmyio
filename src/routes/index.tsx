@@ -82,10 +82,12 @@ function Landing() {
     <main className="min-h-screen bg-background text-foreground">
       {/* Hero escuro no estilo Myio */}
       <div className="relative overflow-hidden bg-[oklch(0.18_0.09_300)]">
+        <div className="pointer-events-none absolute -left-40 bottom-[-12rem] h-[24rem] w-[24rem] rounded-full bg-[oklch(0.26_0.13_300)]" />
+
 
         <header className="relative z-10">
           <div className="mx-auto flex max-w-6xl items-center gap-4 px-5 py-5 sm:px-6">
-            <MyioLogo tone="light" className="text-[2.8125rem]" />
+            <MyioLogo tone="light" className="text-2xl" />
           </div>
         </header>
 
@@ -96,9 +98,8 @@ function Landing() {
             <span className="font-extrabold">sob controle total</span>
           </h1>
           <p className="mt-6 max-w-xl text-lg text-white/75">
-            Solicitação de materiais, serviços, viagens e reembolsos{" "}
-            <span className="font-bold text-white">rastreados</span>.
-
+            <span className="font-bold text-white">Solicitações rastreadas</span>{" "}
+            de materiais, serviços, viagens e reembolsos de despesas.
           </p>
           <div className="mt-9 flex flex-wrap gap-3">
             <Link to={signedIn ? "/dashboard" : "/auth"}>
