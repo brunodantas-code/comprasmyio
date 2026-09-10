@@ -2875,7 +2875,9 @@ function ProjectsAdmin({ userId }: { userId: string }) {
                     <TableCell className="text-sm text-muted-foreground">{clientOf(p)?.cnpj || p.client_cnpj || "—"}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">{p.description || "—"}</TableCell>
                     <TableCell className="text-right">
-                      <Button size="sm" variant="ghost" onClick={() => remove.mutate(p.id)}>Excluir</Button>
+                      <button type="button" aria-label="Excluir projeto" title="Excluir projeto" className="text-destructive hover:text-destructive/80" disabled={remove.isPending} onClick={() => remove.mutate(p.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </TableCell>
                   </TableRow>
                 ))}
