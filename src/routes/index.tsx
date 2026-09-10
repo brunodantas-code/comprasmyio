@@ -40,12 +40,12 @@ const FEATURES = [
   {
     icon: ClipboardList,
     title: "Solicitações",
-    body: "Peça material por projeto, com quantidade, prazo, anexos e destinatário.",
+    body: "Peça materiais, serviços, viagens e reembolso de despesas por projeto, com quantidade, prazo, anexos e destinatário.",
   },
   {
     icon: Package,
     title: "Approvals Pendentes",
-    body: "O comprador acompanha status, palavra passe, previsão de entrega e observações.",
+    body: "Comprador e gestores acompanham status, observações, palavra passe e previsão de entrega.",
   },
   {
     icon: Factory,
@@ -93,7 +93,7 @@ function Landing() {
 
         <section className="relative z-10 mx-auto max-w-6xl px-5 pb-24 pt-16 sm:px-6 sm:pb-28 sm:pt-24">
           <h1 className="max-w-3xl text-4xl font-light leading-tight text-white sm:text-6xl">
-            Compras e materiais
+            Compras e Serviços
             <br />
             <span className="font-extrabold">sob controle total</span>
           </h1>
