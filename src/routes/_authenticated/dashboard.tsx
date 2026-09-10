@@ -1168,12 +1168,18 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
     const fd = new FormData(e.currentTarget);
     const parsed = newOrderSchema.safeParse({
       project_id: !isMateriais ? (allocTarget === "projeto" ? projectId : undefined) : (forStock ? undefined : projectId),
-      item_name: isReembolso ? "Reembolso de Despesas" : (!isMateriais || isNewItem ? newItemName : item!.name),
-      item_link: isReembolso ? undefined : (itemLink || undefined),
-      quantity: isReembolso ? 1 : fd.get("quantity"),
-      estimated_value: isReembolso ? reembolsoTotal : (fd.get("estimated_value") ?? 0),
-      recipient: recipient,
-      requester_notes: fd.get("requester_notes") || undefined,
+      item_name: isReembolso
+        ? "Reembolso de Despesas"
+        : isRh
+        ? `Contratação de RH — ${rhCargo}`
+        : (!isMateriais || isNewItem ? newItemName : item!.name),
+      item_link: isReembolso || isRh ? undefined : (itemLink || undefined),
+      quantity: isReembolso || isRh ? 1 : fd.get("quantity"),
+      estimated_value: isReembolso ? reembolsoTotal : isRh ? Number(rhRemuneracao || 0) : (fd.get("estimated_value") ?? 0),
+      recipient: isRh ? rhGestor : recipient,
+      requester_notes: isRh
+        ? `${rhTipo === "reposicao" ? "Reposição" : "Nova Contratação"} — Motivo: ${rhMotivo.trim()}${fd.get("requester_notes") ? ` | ${fd.get("requester_notes")}` : ""}`
+        : (fd.get("requester_notes") || undefined),
       delivery_point: fd.get("delivery_point"),
       deadline_type: deadlineType,
       deadline_date: deadlineDate || undefined,
