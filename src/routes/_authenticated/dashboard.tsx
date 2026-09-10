@@ -2190,8 +2190,9 @@ function OrdersTable({
                 </div>
               </Row>
               <Row label="Item">
-                <div className="font-medium">{o.item_name}</div>
+                <div className="font-medium">{requestTypeLabel(o)}</div>
                 <div className="mt-1 flex flex-wrap items-center gap-2">
+                  <FullTextPopover text={o.item_name ?? ""} />
                   {o.item_link ? (
                     <a href={o.item_link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
                       ver link <ExternalLink className="h-3 w-3" />
