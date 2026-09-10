@@ -28,7 +28,7 @@ const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableE
     });
 
     return (
-      <div className="relative w-full md:overflow-auto">
+      <div className="relative w-full md:max-h-[calc(100vh-14rem)] md:overflow-auto">
         <table
           ref={(node) => {
             innerRef.current = node;
@@ -50,7 +50,14 @@ const TableHeader = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
-  <thead ref={ref} className={cn("[&_tr]:border-b", className)} {...props} />
+  <thead
+    ref={ref}
+    className={cn(
+      "[&_tr]:border-b md:sticky md:top-0 md:z-20 md:bg-background md:[&_th]:bg-inherit",
+      className,
+    )}
+    {...props}
+  />
 ));
 TableHeader.displayName = "TableHeader";
 
