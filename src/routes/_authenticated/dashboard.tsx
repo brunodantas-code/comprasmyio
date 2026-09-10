@@ -1872,46 +1872,14 @@ function BuyerQueue() {
     },
   });
 
-  const { data: purchaseTypes } = useQuery({
-    queryKey: ["purchase-types"],
-    queryFn: async () => {
-      const [{ data: mats, error: me2 }, { data: ters, error: te }, { data: tools, error: fe }] = await Promise.all([
-        supabase.from("materials").select("id, purchase_type"),
-        supabase.from("terceiros_materials").select("id, purchase_type"),
-        supabase.from("tool_assets").select("id, purchase_type"),
-      ]);
-      if (me2) throw me2;
-      if (te) throw te;
-      if (fe) throw fe;
-      const map = new Map<string, string | null>();
-      (mats ?? []).forEach((m) => map.set(`mat:${m.id}`, m.purchase_type));
-      (ters ?? []).forEach((t) => map.set(`ter:${t.id}`, t.purchase_type));
-      (tools ?? []).forEach((t) => map.set(`fer:${t.id}`, t.purchase_type));
-      return map;
-    },
-  });
-
   const baseFiltered = orders?.filter((o) =>
     ((o as unknown as { approval_status?: string }).approval_status ?? "aprovado") === "aprovado" &&
-    statusSelected.includes(o.status) &&
     (projectFilter === "all" || o.project_id === projectFilter)
   ) ?? [];
   const filtered = filterDelivered(baseFiltered, deliveredMode, deliveredFrom);
   const projectName = (id: string) => (id === ESTOQUE_PROJECT_ID ? "Estoque" : projects?.find((p) => p.id === id)?.name ?? "—");
   const requesterName = (id: string) => profiles?.get(id)?.full_name || profiles?.get(id)?.email || "—";
 
-  const isImportado = (o: Order) => {
-    const key = o.material_id
-      ? `mat:${o.material_id}`
-      : o.terceiros_material_id
-        ? `ter:${o.terceiros_material_id}`
-        : o.tool_asset_id
-          ? `fer:${o.tool_asset_id}`
-          : null;
-    return key ? purchaseTypes?.get(key) === "importacao" : false;
-  };
-  const nacionais = filtered.filter((o) => !isImportado(o));
-  const importados = filtered.filter(isImportado);
 
   const renderOrders = (list: Order[]) => {
     if (groupByProject) {
