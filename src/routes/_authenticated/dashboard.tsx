@@ -1211,34 +1211,36 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
   const typeSelector = (
     <div className="space-y-2">
       <Label>Tipo de solicitação</Label>
-      <div className="flex flex-wrap items-center gap-6">
-        {([
-          ["materiais", "Materiais"],
-          ["servicos", "Serviços"],
-          ["viagens", "Viagens"],
-          ["reembolso", "Reembolsos"],
-          ...(canImport ? [["importacao", "Importação"] as const] : []),
-          ...(isAdmin ? [["dispositivos", "Dispositivos"] as const] : []),
-        ] as const).map(([v, l]) => (
-          <label key={v} className="flex cursor-pointer items-center gap-2 text-sm">
-            <Checkbox
-              checked={requestType === v}
-              onCheckedChange={() => {
-                setRequestType(v);
-                if (v === "materiais") {
-                  setClientId("");
-                } else {
-                  setForStock(false);
-                  setIsNewItem(true);
-                  setItem(null);
-                  setNewItemDest("");
-                }
-              }}
-            />
-            {l}
-          </label>
-        ))}
-      </div>
+      <Select
+        value={requestType}
+        onValueChange={(v) => {
+          const t = v as typeof requestType;
+          setRequestType(t);
+          if (t === "materiais") {
+            setClientId("");
+          } else {
+            setForStock(false);
+            setIsNewItem(true);
+            setItem(null);
+            setNewItemDest("");
+          }
+        }}
+      >
+        <SelectTrigger className="w-full sm:w-72"><SelectValue placeholder="Selecione o tipo" /></SelectTrigger>
+        <SelectContent>
+          {([
+            ["materiais", "Materiais"],
+            ["servicos", "Serviços"],
+            ["viagens", "Viagens"],
+            ["reembolso", "Reembolsos"],
+            ["rh", "Contratação de RH"],
+            ...(canImport ? [["importacao", "Importação"] as const] : []),
+            ...(isAdmin ? [["dispositivos", "Dispositivos"] as const] : []),
+          ] as const).map(([v, l]) => (
+            <SelectItem key={v} value={v}>{l}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
       {requestType === "materiais" && (
         <p className="text-xs text-muted-foreground">Solicitações de Materiais são cadastradas no Armazém.</p>
       )}
