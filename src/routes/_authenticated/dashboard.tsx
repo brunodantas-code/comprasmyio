@@ -3021,7 +3021,7 @@ function UsersAdmin() {
     <Card>
       <CardHeader>
         <CardTitle>Usuários</CardTitle>
-        <CardDescription>Selecione o perfil de cada usuário. Defina o gestor direto e as faixas de alçada.</CardDescription>
+        <CardDescription>Selecione o perfil de cada usuário e as faixas de alçada. A aprovação segue o cargo definido no organograma.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
@@ -3029,7 +3029,8 @@ function UsersAdmin() {
           <div className="grid grid-cols-2 gap-2 rounded-lg bg-primary/10 p-2 sm:grid-cols-4">
             {filterInput(fName, setFName, "Nome")}
             {filterInput(fEmail, setFEmail, "E-mail")}
-            {filterInput(fManager, setFManager, "Gestor")}
+            {filterInput(fManager, setFManager, "Cargo aprovador")}
+
             <Select value={fRole} onValueChange={setFRole}>
               <SelectTrigger className="h-7 text-xs"><SelectValue placeholder="Perfil" /></SelectTrigger>
               <SelectContent>
