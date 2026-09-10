@@ -850,7 +850,7 @@ function NewOrder({ userId }: { userId: string }) {
   const qc = useQueryClient();
   const [projectId, setProjectId] = useState("");
   const [forStock, setForStock] = useState(false);
-  const [requestType, setRequestType] = useState<"materiais" | "servicos" | "viagens">("materiais");
+  const [requestType, setRequestType] = useState<"materiais" | "servicos" | "viagens" | "reembolso">("materiais");
   const [allocTarget, setAllocTarget] = useState<"projeto" | "cliente">("projeto");
   const [clientId, setClientId] = useState("");
   const { data: clientsList } = useClients();
@@ -887,6 +887,11 @@ function NewOrder({ userId }: { userId: string }) {
   const travelDestination = travelLegs[0]?.destination ?? "";
   const travelDeparture = travelLegs[0]?.departure ?? "";
   const travelReturn = travelLegs[0]?.return ?? "";
+  type ReembolsoLeg = { description: string; value: string; date: string };
+  const [reembolsoLegs, setReembolsoLegs] = useState<ReembolsoLeg[]>([{ description: "", value: "", date: "" }]);
+  const updateReembolsoLeg = (i: number, patch: Partial<ReembolsoLeg>) =>
+    setReembolsoLegs((prev) => prev.map((l, idx) => (idx === i ? { ...l, ...patch } : l)));
+  const reembolsoTotal = reembolsoLegs.reduce((acc, l) => acc + (Number(l.value) || 0), 0);
   const [item, setItem] = useState<PurchasableItem | null>(null);
   const [itemLink, setItemLink] = useState("");
   const [estimatedValue, setEstimatedValue] = useState("0");
@@ -962,6 +967,7 @@ function NewOrder({ userId }: { userId: string }) {
     setDeadlineDate("");
     setTravelType("");
     setTravelLegs([{ destination: "", departure: "", return: "" }]);
+    setReembolsoLegs([{ description: "", value: "", date: "" }]);
     setItem(null);
     setItemLink("");
     setEstimatedValue("0");
@@ -1041,6 +1047,8 @@ function NewOrder({ userId }: { userId: string }) {
           travel_return: requestType === "viagens" ? travelReturn : null,
           travel_legs: requestType === "viagens"
             ? travelLegs.map((l) => ({ destination: l.destination.trim(), departure: l.departure, return: l.return }))
+            : requestType === "reembolso"
+            ? reembolsoLegs.map((l) => ({ description: l.description.trim(), value: Number(l.value), date: l.date }))
             : [],
           requester_id: userId,
         }).select("id").single();
@@ -1071,8 +1079,9 @@ function NewOrder({ userId }: { userId: string }) {
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const isMateriais = requestType === "materiais";
+    const isReembolso = requestType === "reembolso";
     if (!isMateriais) {
-      if (newItemName.trim().length < 2) return toast.error("Descreva o serviço ou a viagem solicitada.");
+      if (!isReembolso && newItemName.trim().length < 2) return toast.error("Descreva o serviço ou a viagem solicitada.");
       if (allocTarget === "projeto" && !projectId) return toast.error("Selecione o projeto");
       if (allocTarget === "cliente" && !clientId) return toast.error("Selecione o cliente");
       if (requestType === "viagens") {
@@ -1088,6 +1097,15 @@ function NewOrder({ userId }: { userId: string }) {
           if (!leg.departure) return toast.error(`Solicitação ${n}: informe ${depLabel}`);
           if (!leg.return) return toast.error(`Solicitação ${n}: informe ${retLabel}`);
           if (leg.return < leg.departure) return toast.error(`Solicitação ${n}: ${retLabel} não pode ser anterior a ${depLabel}`);
+        }
+      }
+      if (isReembolso) {
+        for (let i = 0; i < reembolsoLegs.length; i++) {
+          const leg = reembolsoLegs[i];
+          const n = i + 1;
+          if (leg.description.trim().length < 2) return toast.error(`Reembolso ${n}: informe a descrição da despesa`);
+          if (!(Number(leg.value) > 0)) return toast.error(`Reembolso ${n}: informe um valor válido`);
+          if (!leg.date) return toast.error(`Reembolso ${n}: informe a data da despesa`);
         }
       }
     } else if (isNewItem) {
@@ -1108,10 +1126,10 @@ function NewOrder({ userId }: { userId: string }) {
     const fd = new FormData(e.currentTarget);
     const parsed = newOrderSchema.safeParse({
       project_id: !isMateriais ? (allocTarget === "projeto" ? projectId : undefined) : (forStock ? undefined : projectId),
-      item_name: !isMateriais || isNewItem ? newItemName : item!.name,
-      item_link: itemLink || undefined,
-      quantity: fd.get("quantity"),
-      estimated_value: fd.get("estimated_value") ?? 0,
+      item_name: isReembolso ? "Reembolso de Despesas" : (!isMateriais || isNewItem ? newItemName : item!.name),
+      item_link: isReembolso ? undefined : (itemLink || undefined),
+      quantity: isReembolso ? 1 : fd.get("quantity"),
+      estimated_value: isReembolso ? reembolsoTotal : (fd.get("estimated_value") ?? 0),
       recipient: recipient,
       requester_notes: fd.get("requester_notes") || undefined,
       delivery_point: fd.get("delivery_point"),
@@ -1163,6 +1181,7 @@ function NewOrder({ userId }: { userId: string }) {
                   ["materiais", "Materiais"],
                   ["servicos", "Serviços"],
                   ["viagens", "Viagens"],
+                  ["reembolso", "Reembolso de Despesas"],
                 ] as const).map(([v, l]) => (
                   <label key={v} className="flex cursor-pointer items-center gap-2 text-sm">
                     <Checkbox
@@ -1188,6 +1207,9 @@ function NewOrder({ userId }: { userId: string }) {
               )}
               {requestType === "viagens" && (
                 <p className="text-xs text-muted-foreground">Passagens, Hospedagens, Aluguel de Veículos.</p>
+              )}
+              {requestType === "reembolso" && (
+                <p className="text-xs text-muted-foreground">Reembolso de despesas incorridas pelo solicitante.</p>
               )}
             </div>
 
@@ -1250,6 +1272,53 @@ function NewOrder({ userId }: { userId: string }) {
                     <Plus className="h-4 w-4" />
                   </Button>
                   <span className="text-sm text-muted-foreground">Deseja adicionar outra solicitação para esta viagem?</span>
+                </div>
+              </div>
+            )}
+
+            {requestType === "reembolso" && (
+              <div className="space-y-3">
+                {reembolsoLegs.map((leg, i) => (
+                  <div key={i} className="rounded-md border p-3 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-semibold">Reembolso {i + 1}</span>
+                      {reembolsoLegs.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setReembolsoLegs((prev) => prev.filter((_, idx) => idx !== i))}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                    <div className="grid gap-4 md:grid-cols-3 items-end">
+                      <div className="space-y-2 md:col-span-1">
+                        <Label htmlFor={`reembolso_desc_${i}`}>Descrição da despesa</Label>
+                        <Input id={`reembolso_desc_${i}`} value={leg.description} onChange={(e) => updateReembolsoLeg(i, { description: e.target.value })} placeholder="Ex.: Taxi ao aeroporto" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor={`reembolso_value_${i}`}>Valor (R$)</Label>
+                        <Input id={`reembolso_value_${i}`} type="number" min={0} step="0.01" value={leg.value} onChange={(e) => updateReembolsoLeg(i, { value: e.target.value })} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor={`reembolso_date_${i}`}>Data da despesa</Label>
+                        <Input id={`reembolso_date_${i}`} type="date" value={leg.date} onChange={(e) => updateReembolsoLeg(i, { date: e.target.value })} />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setReembolsoLegs((prev) => [...prev, { description: "", value: "", date: "" }])}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                  <span className="text-sm text-muted-foreground">Deseja adicionar outro reembolso a esta Solicitação?</span>
                 </div>
               </div>
             )}
@@ -1347,6 +1416,7 @@ function NewOrder({ userId }: { userId: string }) {
               </>
             )}
 
+            {requestType !== "reembolso" && (
             <div className="space-y-2">
               {requestType === "materiais" ? (
                 <>
@@ -1423,6 +1493,8 @@ function NewOrder({ userId }: { userId: string }) {
                 </p>
               )}
             </div>
+            )}
+            {requestType !== "reembolso" && (
             <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="quantity">{requestType === "viagens" ? (travelType === "aluguel_veiculos" ? "Quantidade de veículos" : "Quantidade de Pessoas") : "Quantidade"}</Label>
@@ -1483,14 +1555,18 @@ function NewOrder({ userId }: { userId: string }) {
                 </div>
               )}
             </div>
+            )}
+            {requestType !== "reembolso" && (
             <div className="space-y-2">
               <Label htmlFor="item_link">
                 Link de Referência {isNewItem ? null : <span className="text-muted-foreground">(opcional)</span>}
               </Label>
               <Input id="item_link" type="url" placeholder="https://..." value={itemLink} onChange={(e) => { setItemLink(e.target.value); scheduleAutoFillPrice(e.target.value); }} onPaste={(e) => { const t = e.clipboardData.getData("text"); if (t) setTimeout(() => void tryAutoFillPrice(t), 0); }} onBlur={() => void tryAutoFillPrice(itemLink)} required={isNewItem && requestType === "materiais"} />
             </div>
+            )}
             {requestType === "materiais" && <AddressAutocomplete name="delivery_point" required />}
 
+            {requestType !== "reembolso" && (
             <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>Prazo de recebimento</Label>
@@ -1508,6 +1584,7 @@ function NewOrder({ userId }: { userId: string }) {
                 </div>
               )}
             </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="requester_notes">Observações <span className="text-muted-foreground">(opcional)</span></Label>
               <Textarea id="requester_notes" name="requester_notes" placeholder="Detalhes adicionais para o comprador" />
