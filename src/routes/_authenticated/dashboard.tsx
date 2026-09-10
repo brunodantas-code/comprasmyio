@@ -2047,10 +2047,9 @@ function OrdersTable({
                   </SelectContent>
                 </Select>
               </TableHead>
-              <TableHead className="py-1" />
-              <TableHead className="py-1" />
-            </TableRow>
-          )}
+               <TableHead className="py-1" />
+             </TableRow>
+           )}
         </TableHeader>
         <TableBody>
           {visibleOrders.map((o) => (
