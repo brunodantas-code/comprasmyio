@@ -2134,26 +2134,26 @@ function OrdersTable({
                 <div className="line-clamp-4 break-words">{o.delivery_point}</div>
                 <FullTextPopover text={o.delivery_point ?? ""} />
               </TableCell>
-              <TableCell className="text-xs">
+              <TableCell className="text-xs break-words">
                 <div>{DEADLINE_LABELS[o.deadline_type]}</div>
                 {o.deadline_type === "customizado" && o.deadline_date && (
                   <div className="text-muted-foreground">{new Date(o.deadline_date + "T00:00:00").toLocaleDateString("pt-BR")}</div>
                 )}
+                <div className="mt-1 border-t pt-1">
+                  <InlineField
+                    order={o}
+                    field="delivery_forecast"
+                    type="date"
+                    canEdit={canEdit}
+                    display={
+                      o.delivery_forecast
+                        ? `Prev.: ${new Date(o.delivery_forecast + "T00:00:00").toLocaleDateString("pt-BR")}`
+                        : "Prev.: —"
+                    }
+                  />
+                </div>
               </TableCell>
               <TableCell><StatusHistoryDialog order={o} canEdit={canEdit} /></TableCell>
-              <TableCell className="text-sm break-words">
-                <InlineField
-                  order={o}
-                  field="delivery_forecast"
-                  type="date"
-                  canEdit={canEdit}
-                  display={
-                    o.delivery_forecast
-                      ? new Date(o.delivery_forecast + "T00:00:00").toLocaleDateString("pt-BR")
-                      : "—"
-                  }
-                />
-              </TableCell>
               <TableCell className="text-sm break-words">
                 <InlineField order={o} field="passphrase" type="text" canEdit={canEdit} display={o.passphrase || "—"} />
               </TableCell>
