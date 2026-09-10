@@ -2876,22 +2876,55 @@ function ProjectsAdmin({ userId }: { userId: string }) {
           {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
             !projects?.length ? <p className="text-sm text-muted-foreground">Sem projetos.</p> :
             <Table>
-              <TableHeader><TableRow><TableHead>Nome do projeto</TableHead><TableHead>Orçamento</TableHead><TableHead>Cliente</TableHead><TableHead>CNPJ</TableHead><TableHead>Descrição</TableHead><TableHead /></TableRow></TableHeader>
+              <TableHeader><TableRow><TableHead>Nome do projeto</TableHead><TableHead>Orçamento</TableHead><TableHead>Cliente</TableHead><TableHead>CNPJ</TableHead><TableHead>Descrição</TableHead><TableHead className="text-center">Status</TableHead><TableHead className="text-center">Data</TableHead><TableHead /></TableRow></TableHeader>
               <TableBody>
-                {projects.map((p) => (
+                {projects.map((p) => {
+                  const st = (p as { status?: string }).status ?? "active";
+                  const ca = (p as { concluded_at?: string | null }).concluded_at;
+                  return (
                   <TableRow key={p.id}>
                     <TableCell className="font-medium">{p.name}</TableCell>
                     <TableCell className="text-sm">{formatBRL((p as { budget?: number }).budget)}</TableCell>
                     <TableCell className="text-sm">{clientOf(p)?.name || p.client_name || "—"}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">{clientOf(p)?.cnpj || p.client_cnpj || "—"}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">{p.description || "—"}</TableCell>
+                    <TableCell className="text-center">
+                      {st === "active" ? (
+                        <span className="inline-block rounded bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">Ativo</span>
+                      ) : st === "implantado" ? (
+                        <span className="inline-block rounded bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">Implantado</span>
+                      ) : (
+                        <span className="inline-block rounded bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800">Cancelado</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-center text-sm text-muted-foreground">
+                      {ca ? new Date(ca).toLocaleDateString("pt-BR") : "—"}
+                    </TableCell>
                     <TableCell className="text-right">
-                      <button type="button" aria-label="Excluir projeto" title="Excluir projeto" className="text-destructive hover:text-destructive/80" disabled={remove.isPending} onClick={() => remove.mutate(p.id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        {st === "active" && (
+                          <>
+                            <button type="button" aria-label="Marcar como implantado" title="Marcar como implantado" className="text-blue-600 hover:text-blue-800" onClick={() => { setStatusDialog({ id: p.id, name: p.name, action: "implantado" }); setStatusDate(new Date().toISOString().slice(0, 10)); }}>
+                              <CheckCircle2 className="h-4 w-4" />
+                            </button>
+                            <button type="button" aria-label="Cancelar projeto" title="Cancelar projeto" className="text-destructive hover:text-destructive/80" onClick={() => { setStatusDialog({ id: p.id, name: p.name, action: "cancelado" }); setStatusDate(new Date().toISOString().slice(0, 10)); }}>
+                              <XCircle className="h-4 w-4" />
+                            </button>
+                          </>
+                        )}
+                        {st !== "active" && (
+                          <button type="button" aria-label="Reativar projeto" title="Reativar projeto" className="text-muted-foreground hover:text-foreground" disabled={setStatus.isPending} onClick={() => setStatus.mutate({ id: p.id, status: "active", concludedAt: null })}>
+                            <RotateCcw className="h-4 w-4" />
+                          </button>
+                        )}
+                        <button type="button" aria-label="Excluir projeto" title="Excluir projeto" className="text-destructive hover:text-destructive/80" disabled={remove.isPending} onClick={() => remove.mutate(p.id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
               </TableBody>
             </Table>
           }
