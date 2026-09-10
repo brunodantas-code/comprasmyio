@@ -6,7 +6,6 @@ import { MyioLogo } from "@/components/myio-logo";
 import {
   Package,
   ClipboardList,
-  ShieldCheck,
   QrCode,
   Truck,
   Factory,
@@ -172,23 +171,7 @@ function Landing() {
         </div>
       </section>
 
-      {/* Perfis */}
-      <section id="perfis" className="mx-auto max-w-6xl px-5 py-20 sm:px-6">
-        <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Perfis de acesso</h2>
-        <div className="mt-10 grid gap-5 sm:grid-cols-3">
-          {[
-            { icon: ClipboardList, title: "Solicitante", body: "Cria e edita solicitações, acompanha status e confirma recebimento." },
-            { icon: Package, title: "Supply", body: "Gerencia a fila de solicitações e prazos de entrega." },
-            { icon: ShieldCheck, title: "Admin", body: "Clientes, projetos, ordens de expedição, estoque e logs completos." },
-          ].map(({ icon: Icon, title, body }) => (
-            <div key={title} className="rounded-2xl border border-border p-6">
-              <Icon className="h-5 w-5 text-[var(--myio-green)]" />
-              <h3 className="mt-4 font-extrabold">{title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{body}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+
 
       {/* CTA final */}
       <section className="bg-[oklch(0.18_0.09_300)] py-16">
