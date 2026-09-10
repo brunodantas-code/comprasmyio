@@ -3095,14 +3095,14 @@ function UsersAdmin() {
 
             <TableHeader className="[&_tr]:border-b">
               <TableRow className="border-t bg-primary/15 hover:bg-primary/15">
-                <TableHead className="w-[130px] text-center font-bold">Nome</TableHead>
-                <TableHead className="w-[150px] text-center font-bold">E-mail</TableHead>
-                <TableHead className="w-[120px] text-center font-bold">Gestor direto</TableHead>
+                <TableHead className="w-[120px] text-center font-bold">Nome</TableHead>
+                <TableHead className="w-[130px] text-center font-bold">E-mail</TableHead>
+                <TableHead className="w-[110px] text-center font-bold">Gestor direto</TableHead>
                 <TableHead className="w-[110px] text-center font-bold">Perfil</TableHead>
-                <TableHead className="w-[52px] text-center font-bold">Admin</TableHead>
-                <TableHead className="w-[90px] text-center font-bold">Aprovação automática até (R$)</TableHead>
-                <TableHead className="w-[80px] text-center font-bold">Faixa 2 até (R$)</TableHead>
-                <TableHead className="w-[80px] text-center font-bold">Faixa 3 até (R$)</TableHead>
+                <TableHead className="w-[48px] text-center font-bold">Admin</TableHead>
+                <TableHead className="w-[110px] text-center font-bold">Aprovação automática até (R$)</TableHead>
+                <TableHead className="w-[110px] text-center font-bold">Faixa 2 até (R$)</TableHead>
+                <TableHead className="w-[110px] text-center font-bold">Faixa 3 até (R$)</TableHead>
               </TableRow>
               <TableRow className="bg-primary/5 hover:bg-primary/5">
                 <TableHead className="py-1">{filterInput(fName, setFName, "Nome")}</TableHead>
