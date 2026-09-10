@@ -1256,6 +1256,9 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
       {requestType === "dispositivos" && (
         <p className="text-xs text-muted-foreground">Solicitações de dispositivos Myio para projetos.</p>
       )}
+      {requestType === "rh" && (
+        <p className="text-xs text-muted-foreground">Solicitação de contratação de pessoal (reposição ou nova vaga).</p>
+      )}
     </div>
   );
 
