@@ -1514,7 +1514,7 @@ function NewOrder({ userId }: { userId: string }) {
             </div>
             <FilePicker files={files} setFiles={setFiles} />
             <Button type="submit" disabled={submit.isPending || checking}>
-              {checking ? "Verificando estoque..." : submit.isPending ? "Enviando..." : "Criar pedido"}
+              {checking ? "Verificando estoque..." : submit.isPending ? "Enviando..." : "Salvar"}
             </Button>
           </form>
         )}
