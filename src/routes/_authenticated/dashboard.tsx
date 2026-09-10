@@ -2100,7 +2100,7 @@ function OrdersTable({
               </TableCell>
               <TableCell className="text-center"><StatusHistoryDialog order={o} canEdit={canEdit} /></TableCell>
               <TableCell className="text-sm break-words text-center">
-                <InlineField order={o} field="passphrase" type="text" canEdit={canEdit} display={o.passphrase || "—"} />
+                <InlineField order={o} field="passphrase" type="text" canEdit={canEdit} display={o.passphrase || "—"} align="center" />
               </TableCell>
               <TableCell className="text-xs text-muted-foreground">
                 {o.requester_notes && (
@@ -2175,13 +2175,14 @@ function ConfirmReceiptActions({ order }: { order: Order }) {
 }
 
 function InlineField({
-  order, field, type, canEdit, display,
+  order, field, type, canEdit, display, align = "left",
 }: {
   order: Order;
   field: "delivery_forecast" | "passphrase" | "buyer_notes";
   type: "date" | "text" | "textarea";
   canEdit?: boolean;
   display: string;
+  align?: "left" | "center";
 }) {
   const qc = useQueryClient();
   const [editing, setEditing] = useState(false);
@@ -2220,14 +2221,15 @@ function InlineField({
     save.mutate(value);
   };
 
-  if (!canEdit) return <span className="whitespace-pre-wrap">{display}</span>;
+  const alignClass = align === "center" ? "text-center" : "text-left";
+  if (!canEdit) return <span className={`whitespace-pre-wrap ${alignClass}`}>{display}</span>;
 
   if (!editing) {
     return (
       <button
         type="button"
         onClick={() => { setValue((order[field] as string | null) ?? ""); setEditing(true); }}
-        className="w-full rounded px-1 py-0.5 text-left whitespace-pre-wrap hover:bg-muted"
+        className={`w-full rounded px-1 py-0.5 ${alignClass} whitespace-pre-wrap hover:bg-muted`}
         title="Clique para editar"
       >
         {display}
