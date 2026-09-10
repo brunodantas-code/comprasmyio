@@ -3095,7 +3095,7 @@ function UsersAdmin() {
                             </Select>
                           </div>
                           <div className="flex flex-col gap-1">
-                            <span className="text-[10px] font-medium text-muted-foreground">Aprovação automática</span>
+                            <span className="text-[10px] font-medium text-muted-foreground">Faixa 1 - Aprovação automática</span>
                             <ApprovalLimitInput
                               value={Number(p.approval_limit ?? 0)}
                               onSave={(limit) => setProfileField.mutate({ userId: u.id, patch: { approval_limit: limit } })}
