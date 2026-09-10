@@ -311,12 +311,26 @@ export function PendingForMe() {
     qc.invalidateQueries({ queryKey: ["orders"] });
   };
 
+  const totalValue = mine.reduce(
+    (sum, s) => sum + Number(s.purchase_orders?.estimated_value ?? 0),
+    0,
+  );
+  const fmtBRL = (v: number) =>
+    v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2 });
+
   return (
     <Card>
       <CardHeader>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <CardTitle>Pendentes comigo</CardTitle>
+            <CardTitle className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <span>Pendentes comigo</span>
+              {mine.length > 0 && (
+                <span className="text-sm font-normal text-muted-foreground">
+                  {mine.length} {mine.length === 1 ? "approval" : "approvals"} · {fmtBRL(totalValue)}
+                </span>
+              )}
+            </CardTitle>
             <CardDescription>Etapas aguardando sua decisão na sequência de aprovação.</CardDescription>
           </div>
           <Input
