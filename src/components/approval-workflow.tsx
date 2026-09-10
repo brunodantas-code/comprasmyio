@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { CheckCircle2, Clock, History, Plus, Trash2, XCircle } from "lucide-react";
+import { CheckCircle2, Clock, History, Pencil, Plus, Trash2, XCircle } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser, type AppRole } from "@/hooks/use-current-user";
@@ -541,6 +541,125 @@ function DualApprovalSettings() {
   );
 }
 
+type RuleRow = {
+  id: string;
+  name: string;
+  step_type: string;
+  category: string | null;
+  approver_id: string | null;
+  position: number;
+  active: boolean;
+};
+
+function EditRuleDialog({
+  rule,
+  people,
+  onSaved,
+}: {
+  rule: RuleRow;
+  people: { id: string; full_name: string | null; email: string | null }[];
+  onSaved: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState(rule.name);
+  const [stepType, setStepType] = useState(rule.step_type);
+  const [category, setCategory] = useState(rule.category ?? "");
+  const [approver, setApprover] = useState(rule.approver_id ?? "none");
+  const [position, setPosition] = useState(String(rule.position));
+
+  const openChange = (v: boolean) => {
+    if (v) {
+      setName(rule.name);
+      setStepType(rule.step_type);
+      setCategory(rule.category ?? "");
+      setApprover(rule.approver_id ?? "none");
+      setPosition(String(rule.position));
+    }
+    setOpen(v);
+  };
+
+  const update = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("approval_rules")
+        .update({
+          name: name.trim(),
+          step_type: stepType,
+          category: category.trim() || null,
+          approver_id: approver === "none" ? null : approver,
+          position: Number(position) || 1,
+        })
+        .eq("id", rule.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Etapa atualizada");
+      setOpen(false);
+      onSaved();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={openChange}>
+      <DialogTrigger asChild>
+        <Button size="icon" variant="ghost" title="Editar etapa" aria-label="Editar etapa">
+          <Pencil className="h-4 w-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Editar etapa</DialogTitle>
+          <DialogDescription>Altere os dados da etapa sem precisar excluí-la.</DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-3">
+          <div className="space-y-2">
+            <Label>Nome da etapa</Label>
+            <Input value={name} onChange={(e) => setName(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label>Tipo</Label>
+            <Select value={stepType} onValueChange={setStepType}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {STEP_TYPES.map((t) => (
+                  <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Categoria (opcional)</Label>
+            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label>Responsável</Label>
+            <Select value={approver} onValueChange={setApprover}>
+              <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Sem responsável</SelectItem>
+                {people.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>{p.full_name || p.email}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Ordem</Label>
+            <Input type="number" min={1} value={position} onChange={(e) => setPosition(e.target.value)} />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+          <Button onClick={() => update.mutate()} disabled={!name.trim() || update.isPending}>
+            Salvar
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function RulesAdmin() {
   const qc = useQueryClient();
   const { data: profiles } = useProfiles();
@@ -696,8 +815,15 @@ function RulesAdmin() {
                           onCheckedChange={(v) => toggle.mutate({ id: r.id, active: v })}
                         />
                       </TableCell>
-                      <TableCell className="text-right">
-                        <Button size="icon" variant="ghost" onClick={() => remove.mutate(r.id)}>
+                      <TableCell className="text-right whitespace-nowrap">
+                        <EditRuleDialog rule={r} people={people} onSaved={invalidate} />
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          title="Excluir etapa"
+                          aria-label="Excluir etapa"
+                          onClick={() => remove.mutate(r.id)}
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </TableCell>
