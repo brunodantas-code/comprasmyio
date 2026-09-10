@@ -2057,7 +2057,7 @@ function OrdersTable({
           {visibleOrders.map((o) => (
             <TableRow key={o.id} className="align-top">
               <TableCell className="font-mono text-xs text-center">
-                <div className="font-bold">{o.approval_number ?? "—"}</div>
+                <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} />
                 <div className="mt-1 space-y-1 font-sans">
                   <ExistingAttachments orderId={o.id} attachments={o.attachments ?? []} canRemove={canEdit} />
                   <div className="flex flex-wrap items-center gap-1">
@@ -2197,6 +2197,190 @@ function ConfirmReceiptActions({ order }: { order: Order }) {
     </>
   );
 }
+
+const LOG_ACTION_LABELS: Record<string, string> = {
+  criado: "Solicitação criada",
+  status_alterado: "Status alterado",
+  aprovado: "Aprovado",
+  rejeitado: "Rejeitado",
+  editado: "Alteração de dados",
+  anexo_adicionado: "Anexo adicionado",
+  anexo_removido: "Anexo removido",
+};
+
+function fmtDateTime(v?: string | null) {
+  if (!v) return "—";
+  return new Date(v).toLocaleString("pt-BR");
+}
+
+function OrderReportDialog({
+  order, projectName, requesterName,
+}: {
+  order: Order;
+  projectName: (id: string) => string;
+  requesterName?: (id: string) => string;
+}) {
+  const [open, setOpen] = useState(false);
+  const { data: profiles } = useProfilesMap();
+  const nameFor = (id: string | null | undefined) => {
+    if (!id) return "—";
+    const p = profiles?.get(id);
+    return p?.full_name || p?.email || id;
+  };
+
+  const { data: logs, isLoading: loadingLogs } = useQuery({
+    queryKey: ["order-report-logs", order.id],
+    enabled: open,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("order_logs")
+        .select("id, actor_id, action, details, created_at")
+        .eq("order_id", order.id)
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const { data: steps } = useQuery({
+    queryKey: ["order-report-steps", order.id],
+    enabled: open,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("approval_steps")
+        .select("id, step_index, role_label, approver_id, status, comment, decided_at, decided_by")
+        .eq("order_id", order.id)
+        .order("step_index", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const allocation = order.for_stock ? "Estoque" : order.project_id ? projectName(order.project_id) : "—";
+  const Row = ({ label, value }: { label: string; value: React.ReactNode }) => (
+    <div className="space-y-0.5">
+      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className="text-sm break-words">{value ?? "—"}</div>
+    </div>
+  );
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <button type="button" className="font-bold text-primary hover:underline" title="Ver relatório completo">
+          {order.approval_number ?? "—"}
+        </button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Relatório da solicitação {order.approval_number ?? ""}</DialogTitle>
+          <DialogDescription>Histórico completo: dados, aprovações, alterações e observações.</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-6 font-sans">
+          <section className="grid grid-cols-2 gap-4 md:grid-cols-3">
+            <Row label="Item" value={order.item_name} />
+            <Row label="Quantidade" value={order.quantity} />
+            <Row label="Alocação" value={allocation} />
+            <Row label="Solicitante" value={requesterName ? requesterName(order.requester_id) : nameFor(order.requester_id)} />
+            <Row label="Destinatário" value={order.recipient} />
+            <Row label="Endereço de entrega" value={order.delivery_point} />
+            <Row label="Prazo" value={`${DEADLINE_LABELS[order.deadline_type]}${order.deadline_date ? ` — ${new Date(order.deadline_date + "T00:00:00").toLocaleDateString("pt-BR")}` : ""}`} />
+            <Row label="Previsão de entrega" value={order.delivery_forecast ? new Date(order.delivery_forecast + "T00:00:00").toLocaleDateString("pt-BR") : "—"} />
+            <Row label="Status" value={STATUS_LABELS[order.status]} />
+            <Row label="Palavra passe" value={order.passphrase || "—"} />
+            <Row label="Criado em" value={fmtDateTime(order.created_at)} />
+            <Row label="Última atualização" value={fmtDateTime(order.updated_at)} />
+            {order.item_link && (
+              <Row label="Link do item" value={<a href={order.item_link} target="_blank" rel="noreferrer" className="text-primary hover:underline">Abrir link</a>} />
+            )}
+          </section>
+
+          <section className="space-y-2">
+            <h3 className="text-sm font-semibold">Observações</h3>
+            <div className="grid gap-3 md:grid-cols-2">
+              <Row label="Do solicitante" value={order.requester_notes || "—"} />
+              <Row label="Do time de supply" value={order.buyer_notes || "—"} />
+            </div>
+          </section>
+
+          <section className="space-y-2">
+            <h3 className="text-sm font-semibold">Anexos</h3>
+            {(order.attachments ?? []).length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nenhum anexo.</p>
+            ) : (
+              <ul className="space-y-1 text-sm">
+                {(order.attachments ?? []).map((a) => (
+                  <li key={a.path}>
+                    <button type="button" className="text-primary hover:underline" onClick={() => openAttachment(a.path)}>{a.name}</button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <section className="space-y-2">
+            <h3 className="text-sm font-semibold">Aprovações</h3>
+            {!steps || steps.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Sem etapas de aprovação registradas.</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Etapa</TableHead>
+                    <TableHead>Aprovador</TableHead>
+                    <TableHead>Situação</TableHead>
+                    <TableHead>Decidido em</TableHead>
+                    <TableHead>Comentário</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {steps.map((s) => (
+                    <TableRow key={s.id}>
+                      <TableCell>{s.step_index + 1}. {s.role_label}</TableCell>
+                      <TableCell>{nameFor(s.decided_by ?? s.approver_id)}</TableCell>
+                      <TableCell>{s.status}</TableCell>
+                      <TableCell>{fmtDateTime(s.decided_at)}</TableCell>
+                      <TableCell className="whitespace-pre-wrap">{s.comment || "—"}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </section>
+
+          <section className="space-y-2">
+            <h3 className="text-sm font-semibold">Histórico completo</h3>
+            {loadingLogs ? (
+              <p className="text-sm text-muted-foreground">Carregando...</p>
+            ) : !logs || logs.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nenhum registro.</p>
+            ) : (
+              <ol className="space-y-3 border-l pl-4">
+                {logs.map((l) => (
+                  <li key={l.id} className="space-y-1">
+                    <div className="text-sm font-medium">{LOG_ACTION_LABELS[l.action] ?? l.action}</div>
+                    <div className="text-xs text-muted-foreground">{fmtDateTime(l.created_at)} — {nameFor(l.actor_id)}</div>
+                    {l.details != null && (
+                      <pre className="overflow-x-auto rounded bg-muted p-2 text-xs whitespace-pre-wrap">
+                        {typeof l.details === "string" ? l.details : JSON.stringify(l.details, null, 2)}
+                      </pre>
+                    )}
+                  </li>
+                ))}
+              </ol>
+            )}
+          </section>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>Fechar</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 
 function InlineField({
   order, field, type, canEdit, display, align = "left",
