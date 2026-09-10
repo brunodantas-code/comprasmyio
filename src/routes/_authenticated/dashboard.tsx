@@ -1459,7 +1459,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
                     <Select value={projectId} onValueChange={setProjectId}>
                       <SelectTrigger><SelectValue placeholder="Selecione o projeto" /></SelectTrigger>
                       <SelectContent>
-                        {projects.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                        {projects.filter((p) => !p.status || p.status === "active").map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
