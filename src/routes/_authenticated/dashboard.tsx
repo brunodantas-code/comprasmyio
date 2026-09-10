@@ -845,12 +845,13 @@ function useAvgUnitPrice(item: PurchasableItem | null) {
   });
 }
 
-function NewOrder({ userId }: { userId: string }) {
+function NewOrder({ userId, canImport = false }: { userId: string; canImport?: boolean }) {
   const { data: projects, isLoading } = useProjects();
   const qc = useQueryClient();
   const [projectId, setProjectId] = useState("");
   const [forStock, setForStock] = useState(false);
-  const [requestType, setRequestType] = useState<"materiais" | "servicos" | "viagens" | "reembolso">("materiais");
+  const [requestType, setRequestType] = useState<"materiais" | "servicos" | "viagens" | "reembolso" | "importacao">("materiais");
+
   const [allocTarget, setAllocTarget] = useState<"projeto" | "cliente">("projeto");
   const [clientId, setClientId] = useState("");
   const { data: clientsList } = useClients();
