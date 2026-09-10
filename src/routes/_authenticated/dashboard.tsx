@@ -2079,7 +2079,7 @@ function OrdersTable({
                 <div className="line-clamp-4 break-words">{o.delivery_point}</div>
                 <FullTextPopover text={o.delivery_point ?? ""} />
               </TableCell>
-              <TableCell className="text-xs break-words">
+              <TableCell className="text-xs break-words text-center">
                 <div>{DEADLINE_LABELS[o.deadline_type]}</div>
                 {o.deadline_type === "customizado" && o.deadline_date && (
                   <div className="text-muted-foreground">{new Date(o.deadline_date + "T00:00:00").toLocaleDateString("pt-BR")}</div>
