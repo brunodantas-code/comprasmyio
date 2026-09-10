@@ -1060,7 +1060,9 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
           project_id: forStock ? null : (values.project_id ?? null),
           for_stock: forStock,
           request_type: requestType,
-          client_id: requestType !== "materiais" && allocTarget === "cliente" ? (clientId || null) : null,
+          client_id: requestType === "rh"
+            ? (clientId && clientId !== "none" ? clientId : null)
+            : (requestType !== "materiais" && allocTarget === "cliente" ? (clientId || null) : null),
           cost_center_id: restrictedCc ? await resolveOperacaoCostCenterId() : (costCenterId || null),
 
           item_name: values.item_name,
@@ -1121,8 +1123,8 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
     const isRh = requestType === "rh";
     if (!isMateriais) {
       if (!isReembolso && !isRh && newItemName.trim().length < 2) return toast.error("Descreva o serviço ou a viagem solicitada.");
-      if (allocTarget === "projeto" && !projectId) return toast.error("Selecione o projeto");
-      if (allocTarget === "cliente" && !clientId) return toast.error("Selecione o cliente");
+      if (!isRh && allocTarget === "projeto" && !projectId) return toast.error("Selecione o projeto");
+      if (!isRh && allocTarget === "cliente" && !clientId) return toast.error("Selecione o cliente");
       if (isRh) {
         if (!rhCargo) return toast.error("Selecione o cargo");
         if (!rhGestor) return toast.error("Selecione o gestor");
@@ -1171,7 +1173,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
 
     const fd = new FormData(e.currentTarget);
     const parsed = newOrderSchema.safeParse({
-      project_id: !isMateriais ? (allocTarget === "projeto" ? projectId : undefined) : (forStock ? undefined : projectId),
+      project_id: isRh ? undefined : (!isMateriais ? (allocTarget === "projeto" ? projectId : undefined) : (forStock ? undefined : projectId)),
       item_name: isReembolso
         ? "Reembolso de Despesas"
         : isRh
@@ -1473,7 +1475,33 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
             <div className="space-y-2">
             </div>
 
-            {requestType === "materiais" ? (
+            {requestType === "rh" ? (
+              <>
+                {!restrictedCc && (
+                  <div className="space-y-2">
+                    <Label>Centro de Custo</Label>
+                    <Select value={costCenterId} onValueChange={setCostCenterId}>
+                      <SelectTrigger><SelectValue placeholder="Selecione o centro de custo" /></SelectTrigger>
+                      <SelectContent>
+                        {(costCenters ?? []).filter((c) => c.active).map((c) => (
+                          <SelectItem key={c.id} value={c.id}>{c.code ? `${c.code} — ${c.name}` : c.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+                <div className="space-y-2">
+                  <Label>Cliente <span className="text-muted-foreground">(opcional)</span></Label>
+                  <Select value={clientId || "none"} onValueChange={setClientId}>
+                    <SelectTrigger><SelectValue placeholder="Sem cliente definido" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Sem cliente definido</SelectItem>
+                      {(clientsList ?? []).map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            ) : requestType === "materiais" ? (
               <>
                 <div className="space-y-2">
                   <Label>Alocação</Label>
