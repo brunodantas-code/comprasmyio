@@ -6,7 +6,6 @@ import { MyioLogo } from "@/components/myio-logo";
 import {
   Package,
   ClipboardList,
-  ShieldCheck,
   QrCode,
   Truck,
   Factory,
