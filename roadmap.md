@@ -16,3 +16,4 @@
 - [x] Agrupar nomes de mesmo perfil no mesmo box (tabela de usuários)
 - [x] Restaurar organograma hierárquico mantendo agrupamento por perfil (approval-workflow)
 - [x] Botão "Excluir" de projetos (Cadastro) virou ícone de lixeira vermelha
+- [ ] Projeto: checkbox "Implantado" (conclui projeto, impede novas solicitações) + campo data de implantação/cancelamento
