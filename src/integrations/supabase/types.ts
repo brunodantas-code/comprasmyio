@@ -1322,6 +1322,7 @@ export type Database = {
           tool_asset_id: string | null
           travel_departure: string | null
           travel_destination: string | null
+          travel_legs: Json
           travel_return: string | null
           travel_type: string | null
           updated_at: string
@@ -1359,6 +1360,7 @@ export type Database = {
           tool_asset_id?: string | null
           travel_departure?: string | null
           travel_destination?: string | null
+          travel_legs?: Json
           travel_return?: string | null
           travel_type?: string | null
           updated_at?: string
@@ -1396,6 +1398,7 @@ export type Database = {
           tool_asset_id?: string | null
           travel_departure?: string | null
           travel_destination?: string | null
+          travel_legs?: Json
           travel_return?: string | null
           travel_type?: string | null
           updated_at?: string

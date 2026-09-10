@@ -880,9 +880,13 @@ function NewOrder({ userId }: { userId: string }) {
   const [deadlineType, setDeadlineType] = useState<Order["deadline_type"]>("esta_semana");
   const [deadlineDate, setDeadlineDate] = useState("");
   const [travelType, setTravelType] = useState("");
-  const [travelDestination, setTravelDestination] = useState("");
-  const [travelDeparture, setTravelDeparture] = useState("");
-  const [travelReturn, setTravelReturn] = useState("");
+  type TravelLeg = { destination: string; departure: string; return: string };
+  const [travelLegs, setTravelLegs] = useState<TravelLeg[]>([{ destination: "", departure: "", return: "" }]);
+  const updateLeg = (i: number, patch: Partial<TravelLeg>) =>
+    setTravelLegs((prev) => prev.map((l, idx) => (idx === i ? { ...l, ...patch } : l)));
+  const travelDestination = travelLegs[0]?.destination ?? "";
+  const travelDeparture = travelLegs[0]?.departure ?? "";
+  const travelReturn = travelLegs[0]?.return ?? "";
   const [item, setItem] = useState<PurchasableItem | null>(null);
   const [itemLink, setItemLink] = useState("");
   const [estimatedValue, setEstimatedValue] = useState("0");
@@ -957,9 +961,7 @@ function NewOrder({ userId }: { userId: string }) {
     setDeadlineType("esta_semana");
     setDeadlineDate("");
     setTravelType("");
-    setTravelDestination("");
-    setTravelDeparture("");
-    setTravelReturn("");
+    setTravelLegs([{ destination: "", departure: "", return: "" }]);
     setItem(null);
     setItemLink("");
     setEstimatedValue("0");
@@ -1037,6 +1039,9 @@ function NewOrder({ userId }: { userId: string }) {
           travel_destination: requestType === "viagens" ? travelDestination.trim() : null,
           travel_departure: requestType === "viagens" ? travelDeparture : null,
           travel_return: requestType === "viagens" ? travelReturn : null,
+          travel_legs: requestType === "viagens"
+            ? travelLegs.map((l) => ({ destination: l.destination.trim(), departure: l.departure, return: l.return }))
+            : [],
           requester_id: userId,
         }).select("id").single();
         if (error) throw error;
@@ -1072,10 +1077,14 @@ function NewOrder({ userId }: { userId: string }) {
       if (allocTarget === "cliente" && !clientId) return toast.error("Selecione o cliente");
       if (requestType === "viagens") {
         if (!travelType) return toast.error("Selecione o tipo de viagem");
-        if (travelDestination.trim().length < 2) return toast.error("Informe a cidade e o estado de destino");
-        if (!travelDeparture) return toast.error("Informe a data de ida");
-        if (!travelReturn) return toast.error("Informe a data de retorno");
-        if (travelReturn < travelDeparture) return toast.error("A data de retorno não pode ser anterior à data de ida");
+        for (let i = 0; i < travelLegs.length; i++) {
+          const leg = travelLegs[i];
+          const n = i + 1;
+          if (leg.destination.trim().length < 2) return toast.error(`Trecho ${n}: informe a cidade e o estado de destino`);
+          if (!leg.departure) return toast.error(`Trecho ${n}: informe a data de ida`);
+          if (!leg.return) return toast.error(`Trecho ${n}: informe a data de retorno`);
+          if (leg.return < leg.departure) return toast.error(`Trecho ${n}: a data de retorno não pode ser anterior à data de ida`);
+        }
       }
     } else if (isNewItem) {
       if (newItemName.trim().length < 2) return toast.error("Descreva o item novo.");
@@ -1133,7 +1142,7 @@ function NewOrder({ userId }: { userId: string }) {
     <Card className="max-w-2xl">
       <CardHeader>
         <CardTitle>Novas Solicitações</CardTitle>
-        <CardDescription>Preencha os dados do material que você precisa.</CardDescription>
+        
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -1191,17 +1200,52 @@ function NewOrder({ userId }: { userId: string }) {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="travel_destination">Cidade e Estado (UF) de destino</Label>
-                  <Input id="travel_destination" value={travelDestination} onChange={(e) => setTravelDestination(e.target.value)} placeholder="Ex.: São Paulo - SP" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="travel_departure">Data de ida</Label>
-                  <Input id="travel_departure" type="date" value={travelDeparture} onChange={(e) => setTravelDeparture(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="travel_return">Data de retorno</Label>
-                  <Input id="travel_return" type="date" value={travelReturn} onChange={(e) => setTravelReturn(e.target.value)} min={travelDeparture || undefined} />
+              </div>
+            )}
+
+            {requestType === "viagens" && (
+              <div className="space-y-3">
+                {travelLegs.map((leg, i) => (
+                  <div key={i} className="rounded-md border p-3 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-semibold">Trecho {i + 1}</span>
+                      {travelLegs.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setTravelLegs((prev) => prev.filter((_, idx) => idx !== i))}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                    <div className="grid gap-4 md:grid-cols-3">
+                      <div className="space-y-2">
+                        <Label htmlFor={`travel_destination_${i}`}>Cidade e Estado (UF) de destino</Label>
+                        <Input id={`travel_destination_${i}`} value={leg.destination} onChange={(e) => updateLeg(i, { destination: e.target.value })} placeholder="Ex.: São Paulo - SP" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor={`travel_departure_${i}`}>Data de ida</Label>
+                        <Input id={`travel_departure_${i}`} type="date" value={leg.departure} onChange={(e) => updateLeg(i, { departure: e.target.value })} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor={`travel_return_${i}`}>Data de retorno</Label>
+                        <Input id={`travel_return_${i}`} type="date" value={leg.return} min={leg.departure || undefined} onChange={(e) => updateLeg(i, { return: e.target.value })} />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setTravelLegs((prev) => [...prev, { destination: "", departure: "", return: "" }])}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                  <span className="text-sm text-muted-foreground">Deseja adicionar outro trecho para esta viagem?</span>
                 </div>
               </div>
             )}

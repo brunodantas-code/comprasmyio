@@ -1,0 +1,1 @@
+ALTER TABLE public.purchase_orders ADD COLUMN IF NOT EXISTS travel_legs jsonb NOT NULL DEFAULT '[]'::jsonb;
