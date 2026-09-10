@@ -144,9 +144,27 @@ function ExistingAttachments({ orderId, attachments, canRemove }: { orderId: str
             {a.name}
           </button>
           {canRemove && (
-            <button type="button" className="text-muted-foreground hover:text-destructive" onClick={() => remove.mutate(a)} disabled={remove.isPending}>
-              <X className="h-3 w-3" />
-            </button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <button type="button" className="text-muted-foreground hover:text-destructive" disabled={remove.isPending} aria-label="Excluir anexo" title="Excluir anexo">
+                  <X className="h-3 w-3" />
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Excluir anexo</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Deseja remover o anexo <strong>{a.name}</strong>? Esta ação não pode ser desfeita.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => remove.mutate(a)} disabled={remove.isPending}>
+                    {remove.isPending ? "Removendo..." : "Excluir"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           )}
         </li>
       ))}
