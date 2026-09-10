@@ -880,9 +880,13 @@ function NewOrder({ userId }: { userId: string }) {
   const [deadlineType, setDeadlineType] = useState<Order["deadline_type"]>("esta_semana");
   const [deadlineDate, setDeadlineDate] = useState("");
   const [travelType, setTravelType] = useState("");
-  const [travelDestination, setTravelDestination] = useState("");
-  const [travelDeparture, setTravelDeparture] = useState("");
-  const [travelReturn, setTravelReturn] = useState("");
+  type TravelLeg = { destination: string; departure: string; return: string };
+  const [travelLegs, setTravelLegs] = useState<TravelLeg[]>([{ destination: "", departure: "", return: "" }]);
+  const updateLeg = (i: number, patch: Partial<TravelLeg>) =>
+    setTravelLegs((prev) => prev.map((l, idx) => (idx === i ? { ...l, ...patch } : l)));
+  const travelDestination = travelLegs[0]?.destination ?? "";
+  const travelDeparture = travelLegs[0]?.departure ?? "";
+  const travelReturn = travelLegs[0]?.return ?? "";
   const [item, setItem] = useState<PurchasableItem | null>(null);
   const [itemLink, setItemLink] = useState("");
   const [estimatedValue, setEstimatedValue] = useState("0");
@@ -1133,7 +1137,7 @@ function NewOrder({ userId }: { userId: string }) {
     <Card className="max-w-2xl">
       <CardHeader>
         <CardTitle>Novas Solicitações</CardTitle>
-        <CardDescription>Preencha os dados do material que você precisa.</CardDescription>
+        
       </CardHeader>
       <CardContent>
         {isLoading ? (
