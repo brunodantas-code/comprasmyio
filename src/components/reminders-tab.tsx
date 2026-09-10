@@ -8,6 +8,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -39,9 +51,19 @@ const DEFAULT_BODY = "Você possui approvals pendentes de liberação. Acesse o 
 
 const hhmm = (v: string | null | undefined) => (v ? v.slice(0, 5) : "09:00");
 
+const frequencyLabel = (r: Reminder) => {
+  if (r.frequency === "diaria") return "Diária";
+  if (r.frequency === "duas_vezes") return "2x ao dia";
+  return `Semanal — ${WEEKDAYS.find((d) => Number(d.value) === r.weekday)?.label ?? ""}`;
+};
+
+const timeLabel = (r: Reminder) =>
+  r.frequency === "duas_vezes" ? `${r.time_1} e ${r.time_2}` : r.time_1;
+
 export function RemindersTab() {
   const qc = useQueryClient();
   const [newUserId, setNewUserId] = useState("");
+  const [editing, setEditing] = useState<Reminder | null>(null);
 
   const { data: profiles } = useQuery({
     queryKey: ["profiles", "reminders"],
@@ -97,6 +119,7 @@ export function RemindersTab() {
       if (error) throw error;
     },
     onSuccess: () => {
+      setEditing(null);
       toast.success("Lembrete atualizado");
       qc.invalidateQueries({ queryKey: ["user_reminders"] });
     },
@@ -109,6 +132,7 @@ export function RemindersTab() {
       if (error) throw error;
     },
     onSuccess: () => {
+      setEditing(null);
       toast.success("Lembrete excluído");
       qc.invalidateQueries({ queryKey: ["user_reminders"] });
     },
@@ -171,20 +195,48 @@ export function RemindersTab() {
           ) : !reminders?.length ? (
             <p className="text-sm text-muted-foreground">Nenhum lembrete cadastrado.</p>
           ) : (
-            reminders.map((r) => (
-              <ReminderCard
-                key={r.id}
-                reminder={r}
-                name={userLabel(r.user_id)}
-                link={link}
-                onSave={(v) => update.mutate(v)}
-                onDelete={() => remove.mutate(r.id)}
-                saving={update.isPending}
-              />
-            ))
+            <div className="overflow-hidden rounded-md border">
+              <div className="hidden grid-cols-[2fr_2fr_1.5fr_1fr] gap-2 border-b border-t-0 bg-myio-green/20 px-3 py-2 text-center text-sm font-bold sm:grid">
+                <span className="text-left">Usuário</span>
+                <span>Frequência</span>
+                <span>Horário</span>
+                <span>Status</span>
+              </div>
+              {reminders.map((r) => (
+                <button
+                  key={r.id}
+                  type="button"
+                  onClick={() => setEditing(r)}
+                  className="grid w-full grid-cols-2 gap-2 border-b border-border/60 px-3 py-2 text-left text-sm last:border-0 hover:bg-muted/50 sm:grid-cols-[2fr_2fr_1.5fr_1fr] sm:text-center"
+                >
+                  <span className="font-medium sm:text-left">{userLabel(r.user_id)}</span>
+                  <span>{frequencyLabel(r)}</span>
+                  <span>{timeLabel(r)}</span>
+                  <span className={r.enabled ? "text-myio-green" : "text-muted-foreground"}>
+                    {r.enabled ? "Ativo" : "Inativo"}
+                  </span>
+                </button>
+              ))}
+            </div>
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={!!editing} onOpenChange={(open) => !open && setEditing(null)}>
+        <DialogContent className="max-w-2xl">
+          {editing && (
+            <ReminderEditor
+              key={editing.id}
+              reminder={editing}
+              name={userLabel(editing.user_id)}
+              link={link}
+              onSave={(v) => update.mutate(v)}
+              onDelete={() => remove.mutate(editing.id)}
+              saving={update.isPending}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
 
       {logs && logs.length > 0 && (
         <Card>
@@ -208,7 +260,7 @@ export function RemindersTab() {
   );
 }
 
-function ReminderCard({
+function ReminderEditor({
   reminder, name, link, onSave, onDelete, saving,
 }: {
   reminder: Reminder;
@@ -221,82 +273,101 @@ function ReminderCard({
   const [form, setForm] = useState<Reminder>(reminder);
 
   return (
-    <div className="space-y-4 rounded-md border p-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <>
+      <DialogHeader>
+        <DialogTitle>Lembrete — {name}</DialogTitle>
+        <DialogDescription>Edite a frequência, os horários e o texto do e-mail deste lembrete.</DialogDescription>
+      </DialogHeader>
+
+      <div className="space-y-4">
         <div className="flex items-center gap-3">
-          <span className="font-medium">{name}</span>
           <Switch checked={form.enabled} onCheckedChange={(v) => setForm({ ...form, enabled: v })} />
           <span className="text-sm text-muted-foreground">Envio automático ativo</span>
         </div>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          className="text-destructive"
-          title="Excluir lembrete"
-          aria-label="Excluir lembrete"
-          onClick={onDelete}
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="space-y-1.5">
-          <Label>Frequência</Label>
-          <Select value={form.frequency} onValueChange={(v) => setForm({ ...form, frequency: v as Frequency })}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="diaria">Diária</SelectItem>
-              <SelectItem value="duas_vezes">2x ao dia</SelectItem>
-              <SelectItem value="semanal">Semanal</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        {form.frequency === "semanal" && (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-1.5">
-            <Label>Dia da semana</Label>
-            <Select value={String(form.weekday)} onValueChange={(v) => setForm({ ...form, weekday: Number(v) })}>
+            <Label>Frequência</Label>
+            <Select value={form.frequency} onValueChange={(v) => setForm({ ...form, frequency: v as Frequency })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                {WEEKDAYS.map((d) => (
-                  <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
-                ))}
+                <SelectItem value="diaria">Diária</SelectItem>
+                <SelectItem value="duas_vezes">2x ao dia</SelectItem>
+                <SelectItem value="semanal">Semanal</SelectItem>
               </SelectContent>
             </Select>
           </div>
-        )}
 
-        <div className="space-y-1.5">
-          <Label>{form.frequency === "duas_vezes" ? "1º horário" : "Horário"}</Label>
-          <Input type="time" className="w-32" value={form.time_1} onChange={(e) => setForm({ ...form, time_1: e.target.value })} />
+          {form.frequency === "semanal" && (
+            <div className="space-y-1.5">
+              <Label>Dia da semana</Label>
+              <Select value={String(form.weekday)} onValueChange={(v) => setForm({ ...form, weekday: Number(v) })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {WEEKDAYS.map((d) => (
+                    <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          <div className="space-y-1.5">
+            <Label>{form.frequency === "duas_vezes" ? "1º horário" : "Horário"}</Label>
+            <Input type="time" className="w-32" value={form.time_1} onChange={(e) => setForm({ ...form, time_1: e.target.value })} />
+          </div>
+
+          {form.frequency === "duas_vezes" && (
+            <div className="space-y-1.5">
+              <Label>2º horário</Label>
+              <Input type="time" className="w-32" value={form.time_2} onChange={(e) => setForm({ ...form, time_2: e.target.value })} />
+            </div>
+          )}
         </div>
 
-        {form.frequency === "duas_vezes" && (
-          <div className="space-y-1.5">
-            <Label>2º horário</Label>
-            <Input type="time" className="w-32" value={form.time_2} onChange={(e) => setForm({ ...form, time_2: e.target.value })} />
-          </div>
-        )}
-      </div>
+        <div className="space-y-1.5">
+          <Label>Texto do corpo do e-mail</Label>
+          <Textarea rows={4} value={form.body_text} onChange={(e) => setForm({ ...form, body_text: e.target.value })} />
+          <p className="text-xs text-muted-foreground">
+            O e-mail inclui automaticamente o botão “Pendentes comigo” apontando para: <span className="font-medium">{link}</span>
+          </p>
+        </div>
 
-      <div className="space-y-1.5">
-        <Label>Texto do corpo do e-mail</Label>
-        <Textarea rows={4} value={form.body_text} onChange={(e) => setForm({ ...form, body_text: e.target.value })} />
-        <p className="text-xs text-muted-foreground">
-          O e-mail inclui automaticamente o botão “Pendentes comigo” apontando para: <span className="font-medium">{link}</span>
-        </p>
+        <div className="flex items-center gap-3">
+          <Button onClick={() => onSave(form)} disabled={saving}>{saving ? "Salvando..." : "Salvar"}</Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="text-destructive"
+                title="Excluir lembrete"
+                aria-label="Excluir lembrete"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Excluir lembrete</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Deseja excluir o lembrete de {name}? Esta ação não pode ser desfeita.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={onDelete}>Excluir definitivamente</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+          {form.last_sent_at && (
+            <span className="text-xs text-muted-foreground">
+              Último envio: {new Date(form.last_sent_at).toLocaleString("pt-BR")}
+            </span>
+          )}
+        </div>
       </div>
-
-      <div className="flex items-center gap-3">
-        <Button onClick={() => onSave(form)} disabled={saving}>{saving ? "Salvando..." : "Salvar"}</Button>
-        {form.last_sent_at && (
-          <span className="text-xs text-muted-foreground">
-            Último envio: {new Date(form.last_sent_at).toLocaleString("pt-BR")}
-          </span>
-        )}
-      </div>
-    </div>
+    </>
   );
 }
