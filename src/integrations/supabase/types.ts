@@ -2043,6 +2043,54 @@ export type Database = {
           },
         ]
       }
+      user_reminders: {
+        Row: {
+          body_text: string
+          created_at: string
+          created_by: string | null
+          enabled: boolean
+          frequency: string
+          id: string
+          last_sent_at: string | null
+          last_slot: string | null
+          time_1: string
+          time_2: string
+          updated_at: string
+          user_id: string
+          weekday: number
+        }
+        Insert: {
+          body_text?: string
+          created_at?: string
+          created_by?: string | null
+          enabled?: boolean
+          frequency?: string
+          id?: string
+          last_sent_at?: string | null
+          last_slot?: string | null
+          time_1?: string
+          time_2?: string
+          updated_at?: string
+          user_id: string
+          weekday?: number
+        }
+        Update: {
+          body_text?: string
+          created_at?: string
+          created_by?: string | null
+          enabled?: boolean
+          frequency?: string
+          id?: string
+          last_sent_at?: string | null
+          last_slot?: string | null
+          time_1?: string
+          time_2?: string
+          updated_at?: string
+          user_id?: string
+          weekday?: number
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string

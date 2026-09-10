@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -8,11 +8,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 type Frequency = "diaria" | "duas_vezes" | "semanal";
 
-type Settings = {
+type Reminder = {
+  id: string;
+  user_id: string;
   enabled: boolean;
   frequency: Frequency;
   time_1: string;
@@ -32,49 +35,82 @@ const WEEKDAYS = [
   { value: "0", label: "Domingo" },
 ];
 
+const DEFAULT_BODY = "Você possui approvals pendentes de liberação. Acesse o sistema para analisá-los.";
+
 const hhmm = (v: string | null | undefined) => (v ? v.slice(0, 5) : "09:00");
 
 export function RemindersTab() {
   const qc = useQueryClient();
-  const [form, setForm] = useState<Settings | null>(null);
+  const [newUserId, setNewUserId] = useState("");
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["reminder_settings"],
+  const { data: profiles } = useQuery({
+    queryKey: ["profiles", "reminders"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("reminder_settings")
-        .select("enabled,frequency,time_1,time_2,weekday,body_text,last_sent_at")
-        .eq("id", true)
-        .maybeSingle();
+      const { data, error } = await supabase.from("profiles").select("id,full_name,email").order("full_name");
       if (error) throw error;
-      return data as Settings | null;
+      return data ?? [];
     },
   });
 
-  useEffect(() => {
-    if (data && !form) {
-      setForm({ ...data, time_1: hhmm(data.time_1), time_2: hhmm(data.time_2) });
-    }
-  }, [data, form]);
+  const { data: reminders, isLoading } = useQuery({
+    queryKey: ["user_reminders"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("user_reminders")
+        .select("id,user_id,enabled,frequency,time_1,time_2,weekday,body_text,last_sent_at")
+        .order("created_at");
+      if (error) throw error;
+      return (data ?? []).map((r) => ({
+        ...r,
+        time_1: hhmm(r.time_1),
+        time_2: hhmm(r.time_2),
+      })) as Reminder[];
+    },
+  });
 
-  const save = useMutation({
-    mutationFn: async (v: Settings) => {
-      const { error } = await supabase
-        .from("reminder_settings")
-        .update({
-          enabled: v.enabled,
-          frequency: v.frequency,
-          time_1: v.time_1,
-          time_2: v.time_2,
-          weekday: v.weekday,
-          body_text: v.body_text,
-        })
-        .eq("id", true);
+  const create = useMutation({
+    mutationFn: async (userId: string) => {
+      const { error } = await supabase.from("user_reminders").insert({ user_id: userId, body_text: DEFAULT_BODY });
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Lembretes atualizados");
-      qc.invalidateQueries({ queryKey: ["reminder_settings"] });
+      setNewUserId("");
+      toast.success("Lembrete criado");
+      qc.invalidateQueries({ queryKey: ["user_reminders"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const update = useMutation({
+    mutationFn: async (r: Reminder) => {
+      const { error } = await supabase
+        .from("user_reminders")
+        .update({
+          enabled: r.enabled,
+          frequency: r.frequency,
+          time_1: r.time_1,
+          time_2: r.time_2,
+          weekday: r.weekday,
+          body_text: r.body_text,
+        })
+        .eq("id", r.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Lembrete atualizado");
+      qc.invalidateQueries({ queryKey: ["user_reminders"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const remove = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("user_reminders").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Lembrete excluído");
+      qc.invalidateQueries({ queryKey: ["user_reminders"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -92,9 +128,13 @@ export function RemindersTab() {
     },
   });
 
-  if (isLoading || !form) return <p className="text-sm text-muted-foreground">Carregando...</p>;
-
   const link = typeof window !== "undefined" ? `${window.location.origin}/pendentes` : "/pendentes";
+  const userLabel = (id: string) => {
+    const p = profiles?.find((x) => x.id === id);
+    return p?.full_name || p?.email || "—";
+  };
+  const used = new Set((reminders ?? []).map((r) => r.user_id));
+  const available = (profiles ?? []).filter((p) => !used.has(p.id));
 
   return (
     <div className="space-y-6">
@@ -102,100 +142,47 @@ export function RemindersTab() {
         <CardHeader>
           <CardTitle>Lembretes de approvals pendentes</CardTitle>
           <CardDescription>
-            Envio automático de e-mail aos aprovadores com pendências. Se não houver approvals pendentes, nenhum e-mail é enviado.
+            Um lembrete por usuário. Se não houver approvals pendentes para a pessoa, nenhum e-mail é enviado.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-5">
-          <div className="flex items-center gap-3">
-            <Switch
-              id="rem-enabled"
-              checked={form.enabled}
-              onCheckedChange={(v) => setForm({ ...form, enabled: v })}
-            />
-            <Label htmlFor="rem-enabled">Envio automático ativo</Label>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <CardContent className="space-y-4">
+          <div className="flex flex-wrap items-end gap-3">
             <div className="space-y-1.5">
-              <Label>Frequência</Label>
-              <Select
-                value={form.frequency}
-                onValueChange={(v) => setForm({ ...form, frequency: v as Frequency })}
-              >
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Label>Usuário</Label>
+              <Select value={newUserId} onValueChange={setNewUserId}>
+                <SelectTrigger className="w-64"><SelectValue placeholder="Selecione o usuário" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="diaria">Diária</SelectItem>
-                  <SelectItem value="duas_vezes">2x ao dia</SelectItem>
-                  <SelectItem value="semanal">Semanal</SelectItem>
+                  {available.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>{p.full_name || p.email}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
-
-            {form.frequency === "semanal" && (
-              <div className="space-y-1.5">
-                <Label>Dia da semana</Label>
-                <Select
-                  value={String(form.weekday)}
-                  onValueChange={(v) => setForm({ ...form, weekday: Number(v) })}
-                >
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {WEEKDAYS.map((d) => (
-                      <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
-            <div className="space-y-1.5">
-              <Label htmlFor="rem-t1">{form.frequency === "duas_vezes" ? "1º horário" : "Horário"}</Label>
-              <Input
-                id="rem-t1"
-                type="time"
-                className="w-32"
-                value={form.time_1}
-                onChange={(e) => setForm({ ...form, time_1: e.target.value })}
-              />
-            </div>
-
-            {form.frequency === "duas_vezes" && (
-              <div className="space-y-1.5">
-                <Label htmlFor="rem-t2">2º horário</Label>
-                <Input
-                  id="rem-t2"
-                  type="time"
-                  className="w-32"
-                  value={form.time_2}
-                  onChange={(e) => setForm({ ...form, time_2: e.target.value })}
-                />
-              </div>
-            )}
-          </div>
-
-          <div className="space-y-1.5">
-            <Label htmlFor="rem-body">Texto do corpo do e-mail</Label>
-            <Textarea
-              id="rem-body"
-              rows={5}
-              value={form.body_text}
-              onChange={(e) => setForm({ ...form, body_text: e.target.value })}
-            />
-            <p className="text-xs text-muted-foreground">
-              O e-mail inclui automaticamente o botão “Pendentes comigo” apontando para: <span className="font-medium">{link}</span>
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Button onClick={() => save.mutate(form)} disabled={save.isPending}>
-              {save.isPending ? "Salvando..." : "Salvar"}
+            <Button
+              onClick={() => newUserId ? create.mutate(newUserId) : toast.error("Selecione o usuário")}
+              disabled={create.isPending}
+            >
+              {create.isPending ? "Criando..." : "Criar lembrete"}
             </Button>
-            {form.last_sent_at && (
-              <span className="text-xs text-muted-foreground">
-                Último envio: {new Date(form.last_sent_at).toLocaleString("pt-BR")}
-              </span>
-            )}
           </div>
+
+          {isLoading ? (
+            <p className="text-sm text-muted-foreground">Carregando...</p>
+          ) : !reminders?.length ? (
+            <p className="text-sm text-muted-foreground">Nenhum lembrete cadastrado.</p>
+          ) : (
+            reminders.map((r) => (
+              <ReminderCard
+                key={r.id}
+                reminder={r}
+                name={userLabel(r.user_id)}
+                link={link}
+                onSave={(v) => update.mutate(v)}
+                onDelete={() => remove.mutate(r.id)}
+                saving={update.isPending}
+              />
+            ))
+          )}
         </CardContent>
       </Card>
 
@@ -217,6 +204,99 @@ export function RemindersTab() {
           </CardContent>
         </Card>
       )}
+    </div>
+  );
+}
+
+function ReminderCard({
+  reminder, name, link, onSave, onDelete, saving,
+}: {
+  reminder: Reminder;
+  name: string;
+  link: string;
+  onSave: (r: Reminder) => void;
+  onDelete: () => void;
+  saving: boolean;
+}) {
+  const [form, setForm] = useState<Reminder>(reminder);
+
+  return (
+    <div className="space-y-4 rounded-md border p-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <span className="font-medium">{name}</span>
+          <Switch checked={form.enabled} onCheckedChange={(v) => setForm({ ...form, enabled: v })} />
+          <span className="text-sm text-muted-foreground">Envio automático ativo</span>
+        </div>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="text-destructive"
+          title="Excluir lembrete"
+          aria-label="Excluir lembrete"
+          onClick={onDelete}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="space-y-1.5">
+          <Label>Frequência</Label>
+          <Select value={form.frequency} onValueChange={(v) => setForm({ ...form, frequency: v as Frequency })}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="diaria">Diária</SelectItem>
+              <SelectItem value="duas_vezes">2x ao dia</SelectItem>
+              <SelectItem value="semanal">Semanal</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {form.frequency === "semanal" && (
+          <div className="space-y-1.5">
+            <Label>Dia da semana</Label>
+            <Select value={String(form.weekday)} onValueChange={(v) => setForm({ ...form, weekday: Number(v) })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {WEEKDAYS.map((d) => (
+                  <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
+        <div className="space-y-1.5">
+          <Label>{form.frequency === "duas_vezes" ? "1º horário" : "Horário"}</Label>
+          <Input type="time" className="w-32" value={form.time_1} onChange={(e) => setForm({ ...form, time_1: e.target.value })} />
+        </div>
+
+        {form.frequency === "duas_vezes" && (
+          <div className="space-y-1.5">
+            <Label>2º horário</Label>
+            <Input type="time" className="w-32" value={form.time_2} onChange={(e) => setForm({ ...form, time_2: e.target.value })} />
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-1.5">
+        <Label>Texto do corpo do e-mail</Label>
+        <Textarea rows={4} value={form.body_text} onChange={(e) => setForm({ ...form, body_text: e.target.value })} />
+        <p className="text-xs text-muted-foreground">
+          O e-mail inclui automaticamente o botão “Pendentes comigo” apontando para: <span className="font-medium">{link}</span>
+        </p>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <Button onClick={() => onSave(form)} disabled={saving}>{saving ? "Salvando..." : "Salvar"}</Button>
+        {form.last_sent_at && (
+          <span className="text-xs text-muted-foreground">
+            Último envio: {new Date(form.last_sent_at).toLocaleString("pt-BR")}
+          </span>
+        )}
+      </div>
     </div>
   );
 }
