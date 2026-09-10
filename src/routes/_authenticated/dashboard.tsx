@@ -1854,7 +1854,6 @@ function BuyerQueue() {
   const { data: projects } = useProjects();
   const { data: profiles } = useProfilesMap();
   const { data: me } = useCurrentUser();
-  const [statusSelected, setStatusSelected] = useState<Order["status"][]>([...STATUS_KEYS]);
   const [projectFilter, setProjectFilter] = useState<string>("all");
   const [groupByProject, setGroupByProject] = useState(false);
   const [deliveredMode, setDeliveredMode] = useState<DeliveredMode>("this_month");
