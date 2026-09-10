@@ -1081,6 +1081,8 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
             ? travelLegs.map((l) => ({ destination: l.destination.trim(), departure: l.departure, return: l.return }))
             : requestType === "reembolso"
             ? reembolsoLegs.map((l) => ({ description: l.description.trim(), value: Number(l.value), date: l.date }))
+            : requestType === "rh"
+            ? [{ cargo: rhCargo, gestor: rhGestor, motivo: rhMotivo.trim(), tipo: rhTipo, remuneracao: Number(rhRemuneracao) }]
             : [],
           requester_id: userId,
         }).select("id").single();
