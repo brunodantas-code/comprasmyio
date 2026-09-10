@@ -3159,7 +3159,7 @@ function UsersAdmin() {
                       </SelectContent>
                     </Select>
                   </TableCell>
-                  <TableCell className="text-center">
+                  <TableCell className="flex items-center justify-center">
                     <Checkbox
                       checked={isAdminUser}
                       onCheckedChange={() => toggleRole.mutate({ userId: u.id, role: "admin", has: isAdminUser })}
