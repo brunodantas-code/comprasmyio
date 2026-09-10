@@ -205,6 +205,31 @@ const DEADLINE_LABELS: Record<Order["deadline_type"], string> = {
   customizado: "Data específica",
 };
 
+const TRAVEL_TYPE_LABELS: Record<string, string> = {
+  passagens: "Passagens",
+  hospedagens: "Hospedagens",
+  aluguel_veiculos: "Aluguel de Veículos",
+};
+
+const REQUEST_TYPE_LABELS: Record<string, string> = {
+  materiais: "Materiais",
+  servicos: "Serviços",
+  viagens: "Viagens",
+  reembolso: "Reembolso de Despesas",
+  rh: "Contratação de RH",
+  importacao: "Importação",
+  dispositivos: "Dispositivos",
+};
+
+function requestTypeLabel(o: { request_type?: string | null; travel_type?: string | null }): string {
+  const rt = o.request_type ?? "";
+  if (rt === "viagens") {
+    const sub = o.travel_type ? TRAVEL_TYPE_LABELS[o.travel_type] : undefined;
+    return sub ?? "Viagens";
+  }
+  return REQUEST_TYPE_LABELS[rt] ?? rt ?? "—";
+}
+
 const STATUS_KEYS = Object.keys(STATUS_LABELS) as Order["status"][];
 
 function StatusMultiFilter({ selected, setSelected }: { selected: Order["status"][]; setSelected: (s: Order["status"][]) => void }) {
