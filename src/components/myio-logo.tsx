@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
-import logoLight from "@/assets/myio-logo-light.svg.asset.json";
 import logoDark from "@/assets/myio-logo-dark.png.asset.json";
+import logoLightSrc from "@/assets/myio-logo-light.svg";
 
 type Props = {
   className?: string;
@@ -12,7 +12,7 @@ type Props = {
 export function MyioLogo({ className, tone = "dark" }: Props) {
   return (
     <img
-      src={tone === "light" ? logoDark.url : logoLight.url}
+      src={tone === "light" ? logoDark.url : logoLightSrc}
       alt="myio"
       className={cn("h-auto w-auto select-none", className)}
       style={{ height: "1em" }}
