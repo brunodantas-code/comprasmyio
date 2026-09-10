@@ -1922,14 +1922,6 @@ function BuyerQueue() {
               {projects?.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
             </SelectContent>
           </Select>
-          <Button
-            type="button"
-            variant={groupByProject ? "default" : "outline"}
-            size="sm"
-            onClick={() => setGroupByProject((v) => !v)}
-          >
-            Agrupar por projeto
-          </Button>
           <DeliveredFilter mode={deliveredMode} setMode={setDeliveredMode} fromDate={deliveredFrom} setFromDate={setDeliveredFrom} />
         </div>
       </CardHeader>
