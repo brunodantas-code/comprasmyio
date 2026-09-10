@@ -2790,6 +2790,8 @@ function ProjectsAdmin({ userId }: { userId: string }) {
   const canCreate = !!me?.canCreateProjects;
   const [clientId, setClientId] = useState<string>("none");
   const [budgetVal, setBudgetVal] = useState("0");
+  const [statusDialog, setStatusDialog] = useState<{ id: string; name: string; action: "implantado" | "cancelado" } | null>(null);
+  const [statusDate, setStatusDate] = useState<string>(new Date().toISOString().slice(0, 10));
 
   const create = useMutation({
     mutationFn: async (v: { name: string; description: string; client_id: string | null; budget: number }) => {
