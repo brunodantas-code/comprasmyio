@@ -294,6 +294,8 @@ export function PendingForMe() {
     });
     return steps.filter((s) => {
       if (s.status !== "pendente") return false;
+      // Nunca aprovar a própria solicitação — sempre sobe para o superior
+      if (s.purchase_orders?.requester_id === me.id) return false;
       if (s.approver_id !== me.id && !me.isAdmin) return false;
       const earlier = (byOrder.get(s.order_id) ?? []).filter(
         (o) => o.step_index < s.step_index && o.status === "pendente"
