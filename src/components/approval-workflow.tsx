@@ -391,7 +391,7 @@ export function PendingForMe() {
                   <TableRow key={s.id}>
                     <TableCell className="whitespace-nowrap font-mono text-xs">{o?.approval_number ?? "—"}</TableCell>
                     <TableCell className="font-medium">
-                      {o?.item_name ?? "—"}
+                      {requestTypeLabel(o)}
                       <span className="ml-1 text-xs text-muted-foreground">x{o?.quantity ?? 1}</span>
                     </TableCell>
                     <TableCell className="text-sm">{req?.full_name || req?.email || "—"}</TableCell>
@@ -469,7 +469,7 @@ function FlowsOverview() {
                   <div>
                     <p className="font-mono text-xs text-muted-foreground">{o?.approval_number ?? "—"}</p>
                     <p className="font-medium">
-                      {o?.item_name ?? "—"}{" "}
+                      {requestTypeLabel(o)}{" "}
                       <span className="text-xs text-muted-foreground">x{o?.quantity ?? 1}</span>
                     </p>
                     <p className="text-xs text-muted-foreground">
