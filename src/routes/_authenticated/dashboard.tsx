@@ -2835,9 +2835,9 @@ function StatusHistoryDialog({ order, canEdit }: { order: Order; canEdit?: boole
       <DialogTrigger asChild>
         <button type="button" className="cursor-pointer">
           {awaitingApproval ? (
-            <Badge className="bg-orange-500 hover:bg-orange-500 text-white border-transparent">Aguardando aprovação</Badge>
+            <Badge className={STATUS_BADGE_BASE}>Aguardando aprovação</Badge>
           ) : rejected ? (
-            <Badge className="bg-red-600 hover:bg-red-600 text-white border-transparent">Rejeitado</Badge>
+            <Badge className={STATUS_BADGE_BASE}>Rejeitado</Badge>
           ) : (
             <Badge className={STATUS_CLASSES[order.status]}>{STATUS_LABELS[order.status]}</Badge>
           )}
