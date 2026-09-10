@@ -13,4 +13,4 @@
 - [x] Centralizar checkbox Admin na tabela de usuários
 - [x] Alinhar números dos boxes monetários à direita
 - [x] Trocar rótulo "Comprador" por "Supply" (approval-workflow + meta twitter)
-- [ ] Agrupar nomes de mesmo perfil no mesmo box (tabela de usuários)
+- [x] Agrupar nomes de mesmo perfil no mesmo box (tabela de usuários)
