@@ -1475,6 +1475,72 @@ export type Database = {
           },
         ]
       }
+      reminder_send_log: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          pending_count: number
+          recipient: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          pending_count?: number
+          recipient: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          pending_count?: number
+          recipient?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      reminder_settings: {
+        Row: {
+          body_text: string
+          enabled: boolean
+          frequency: string
+          id: boolean
+          last_sent_at: string | null
+          last_slot: string | null
+          time_1: string
+          time_2: string
+          updated_at: string
+          weekday: number
+        }
+        Insert: {
+          body_text?: string
+          enabled?: boolean
+          frequency?: string
+          id?: boolean
+          last_sent_at?: string | null
+          last_slot?: string | null
+          time_1?: string
+          time_2?: string
+          updated_at?: string
+          weekday?: number
+        }
+        Update: {
+          body_text?: string
+          enabled?: boolean
+          frequency?: string
+          id?: boolean
+          last_sent_at?: string | null
+          last_slot?: string | null
+          time_1?: string
+          time_2?: string
+          updated_at?: string
+          weekday?: number
+        }
+        Relationships: []
+      }
       role_hierarchy: {
         Row: {
           approver_role: Database["public"]["Enums"]["app_role"] | null
