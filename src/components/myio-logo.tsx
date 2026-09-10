@@ -16,7 +16,7 @@ export function MyioLogo({ className, tone = "dark" }: Props) {
         src={tone === "light" ? logoDark.url : logoLightSrc}
         alt="myio"
         className="h-auto w-auto select-none"
-        style={{ height: "1.5em", marginBottom: tone === "dark" ? "0.3em" : "0em" }}
+        style={{ height: "1.5em" }}
         draggable={false}
       />
       <span
@@ -24,7 +24,7 @@ export function MyioLogo({ className, tone = "dark" }: Props) {
           "select-none font-light leading-none tracking-tight",
           tone === "light" ? "text-white" : "text-[var(--myio-dark)]",
         )}
-        style={{ fontSize: "1.5em" }}
+        style={{ fontSize: "1.5em", transform: "translateY(-0.155em)" }}
       >
         supply
       </span>

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -26,6 +26,7 @@ function AuthPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [forgot, setForgot] = useState(false);
+  const [tab, setTab] = useState<"signin" | "signup">("signin");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -98,12 +99,7 @@ function AuthPage() {
             <CardDescription>Entre ou crie uma conta para começar.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="signin">
-              <TabsList className="!grid w-full grid-cols-2">
-                <TabsTrigger value="signin" className="flex-1 data-[state=inactive]:bg-background data-[state=inactive]:border data-[state=inactive]:border-border data-[state=inactive]:text-foreground">Entrar</TabsTrigger>
-                <TabsTrigger value="signup" className="flex-1 data-[state=inactive]:bg-background data-[state=inactive]:border data-[state=inactive]:border-border data-[state=inactive]:text-foreground">Criar conta</TabsTrigger>
-              </TabsList>
-
+            <Tabs value={tab} onValueChange={(v) => setTab(v as "signin" | "signup")}>
               <TabsContent value="signin">
                 {forgot ? (
                   <form onSubmit={handleForgot} className="space-y-4">
@@ -138,6 +134,16 @@ function AuthPage() {
                   >
                     Esqueceu a senha?
                   </button>
+                  <div className="flex justify-center">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setTab("signup")}
+                    >
+                      Criar conta
+                    </Button>
+                  </div>
                 </form>
                 )}
               </TabsContent>
@@ -159,6 +165,16 @@ function AuthPage() {
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading ? "Criando..." : "Criar conta"}
                   </Button>
+                  <div className="flex justify-center">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setTab("signin")}
+                    >
+                      Entrar
+                    </Button>
+                  </div>
                   <p className="text-xs text-muted-foreground">
                     Novos usuários entram como <strong>solicitante</strong>. Um admin pode promover o papel depois.
                   </p>

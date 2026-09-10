@@ -9,6 +9,7 @@ import { lookupLinkPrice } from "@/lib/price-lookup.functions";
 import { useCurrentUser, type AppRole } from "@/hooks/use-current-user";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { MoneyInput } from "@/components/ui/money-input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -21,7 +22,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Checkbox } from "@/components/ui/checkbox";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { toast } from "sonner";
-import { LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Boxes, Factory, Building2, Plane, Landmark } from "lucide-react";
+import { LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Boxes, Building2, Plane, Landmark } from "lucide-react";
 import { Trash2, Paperclip, X, Download, Loader2, DatabaseBackup, CheckCircle2 } from "lucide-react";
 import { ApprovalWorkflow } from "@/components/approval-workflow";
 import { z } from "zod";
@@ -357,7 +358,7 @@ function Dashboard() {
             {canSeeStock && <TabsTrigger value="stock"><Boxes className="mr-2 h-4 w-4" />Armazém</TabsTrigger>}
             {isAdmin && <TabsTrigger value="projects"><FolderKanban className="mr-2 h-4 w-4" />Cadastro</TabsTrigger>}
             
-            {isAdmin && <TabsTrigger value="myio"><Factory className="mr-2 h-4 w-4" />Solicitações de Projetos</TabsTrigger>}
+            
             {isAdmin && <TabsTrigger value="admin"><Users className="mr-2 h-4 w-4" />Usuários e logs</TabsTrigger>}
           </TabsList>
 
@@ -368,7 +369,7 @@ function Dashboard() {
                 <TabsTrigger value="new"><Plus className="mr-2 h-4 w-4" />Novas Solicitações</TabsTrigger>
               </TabsList>
               <TabsContent value="mine"><MyOrders userId={me.id} /></TabsContent>
-              <TabsContent value="new"><NewOrder userId={me.id} canImport={canImport} /></TabsContent>
+              <TabsContent value="new"><NewOrder userId={me.id} canImport={canImport} isAdmin={isAdmin} /></TabsContent>
             </Tabs>
 
           </TabsContent>
@@ -396,10 +397,6 @@ function Dashboard() {
               </Tabs>
             </TabsContent>
           )}
-          
-            {isAdmin && (
-              <TabsContent value="myio"><MyioOrdersTab userId={me.id} canManage={isAdmin} /></TabsContent>
-            )}
           {isAdmin && (
             <TabsContent value="admin">
               <Tabs defaultValue="usuarios">
@@ -844,12 +841,12 @@ function useAvgUnitPrice(item: PurchasableItem | null) {
   });
 }
 
-function NewOrder({ userId, canImport = false }: { userId: string; canImport?: boolean }) {
+function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: string; canImport?: boolean; isAdmin?: boolean }) {
   const { data: projects, isLoading } = useProjects();
   const qc = useQueryClient();
   const [projectId, setProjectId] = useState("");
   const [forStock, setForStock] = useState(false);
-  const [requestType, setRequestType] = useState<"materiais" | "servicos" | "viagens" | "reembolso" | "importacao">("materiais");
+  const [requestType, setRequestType] = useState<"materiais" | "servicos" | "viagens" | "reembolso" | "importacao" | "dispositivos">("materiais");
 
   const [allocTarget, setAllocTarget] = useState<"projeto" | "cliente">("projeto");
   const [clientId, setClientId] = useState("");
@@ -1168,8 +1165,9 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
           ["materiais", "Materiais"],
           ["servicos", "Serviços"],
           ["viagens", "Viagens"],
-          ["reembolso", "Reembolso de Despesas"],
+          ["reembolso", "Reembolsos"],
           ...(canImport ? [["importacao", "Importação"] as const] : []),
+          ...(isAdmin ? [["dispositivos", "Dispositivos"] as const] : []),
         ] as const).map(([v, l]) => (
           <label key={v} className="flex cursor-pointer items-center gap-2 text-sm">
             <Checkbox
@@ -1202,6 +1200,9 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
       {requestType === "importacao" && (
         <p className="text-xs text-muted-foreground">Pedidos de importação e acompanhamento de embarques.</p>
       )}
+      {requestType === "dispositivos" && (
+        <p className="text-xs text-muted-foreground">Solicitações de dispositivos Myio para projetos.</p>
+      )}
     </div>
   );
 
@@ -1215,6 +1216,20 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
           <CardContent>{typeSelector}</CardContent>
         </Card>
         <ImportOrders userId={userId} />
+      </div>
+    );
+  }
+
+  if (requestType === "dispositivos") {
+    return (
+      <div className="space-y-4">
+        <Card className="max-w-2xl">
+          <CardHeader>
+            <CardTitle>Novas Solicitações</CardTitle>
+          </CardHeader>
+          <CardContent>{typeSelector}</CardContent>
+        </Card>
+        <MyioOrdersTab userId={userId} canManage={isAdmin} />
       </div>
     );
   }
@@ -1324,7 +1339,7 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor={`reembolso_value_${i}`}>Valor (R$)</Label>
-                        <Input id={`reembolso_value_${i}`} type="number" min={0} step="0.01" value={leg.value} onChange={(e) => updateReembolsoLeg(i, { value: e.target.value })} />
+                        <MoneyInput id={`reembolso_value_${i}`} className="w-32" value={leg.value} onChange={(v) => updateReembolsoLeg(i, { value: v })} />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor={`reembolso_date_${i}`}>Data da despesa</Label>
@@ -1522,12 +1537,12 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
             <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="quantity">{requestType === "viagens" ? (travelType === "aluguel_veiculos" ? "Quantidade de veículos" : "Quantidade de Pessoas") : "Quantidade"}</Label>
-                <Input id="quantity" name="quantity" type="number" min={1} value={qty} onChange={(e) => setQty(e.target.value)} required />
+                <Input id="quantity" name="quantity" type="number" min={1} max={99999} className="w-20" value={qty} onChange={(e) => setQty(e.target.value)} required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="estimated_value">Valor unitário estimado (R$)</Label>
                 <div className="relative">
-                  <Input id="estimated_value" name="estimated_value" type="number" min={0} step="0.01" value={estimatedValue} onChange={(e) => setEstimatedValue(e.target.value)} required />
+                  <MoneyInput id="estimated_value" name="estimated_value" className="w-32 pr-8" value={estimatedValue} onChange={setEstimatedValue} required />
                   {lookingUpPrice && <Loader2 className="absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />}
                 </div>
                 <div className="space-y-2">
@@ -1929,7 +1944,7 @@ function BuyerQueue() {
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <CardTitle>Approvals Pendentes</CardTitle>
-          <CardDescription>Todos os pedidos, separados entre itens nacionais e importados. Atualize status e adicione observações.</CardDescription>
+          <CardDescription>Todos os pedidos, separados entre itens nacionais e importados. Atualize status, adicione anexos e observações.</CardDescription>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Select value={projectFilter} onValueChange={setProjectFilter}>
@@ -2349,7 +2364,7 @@ function EditRequesterDialog({ order }: { order: Order }) {
           <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor={`e-qty-${order.id}`}>Quantidade</Label>
-              <Input id={`e-qty-${order.id}`} name="quantity" type="number" min={1} defaultValue={order.quantity} required />
+              <Input id={`e-qty-${order.id}`} name="quantity" type="number" min={1} max={99999} className="w-20" defaultValue={order.quantity} required />
             </div>
             <div className="space-y-2">
               <Label htmlFor={`e-rec-${order.id}`}>Destinatário</Label>
@@ -2455,6 +2470,7 @@ function ProjectsAdmin({ userId }: { userId: string }) {
   const { data: me } = useCurrentUser();
   const canCreate = !!me?.canCreateProjects;
   const [clientId, setClientId] = useState<string>("none");
+  const [budgetVal, setBudgetVal] = useState("0");
 
   const create = useMutation({
     mutationFn: async (v: { name: string; description: string; client_id: string | null; budget: number }) => {
@@ -2479,7 +2495,7 @@ function ProjectsAdmin({ userId }: { userId: string }) {
     const fd = new FormData(e.currentTarget);
     const name = String(fd.get("name") || "").trim();
     const description = String(fd.get("description") || "").trim();
-    const budget = Number(String(fd.get("budget") || "").replace(",", "."));
+    const budget = Number(budgetVal || "0");
     if (name.length < 2) return toast.error("Nome muito curto");
     if (!Number.isFinite(budget) || budget <= 0) return toast.error("Informe o orçamento aprovado do projeto.");
     create.mutate(
@@ -2506,7 +2522,7 @@ function ProjectsAdmin({ userId }: { userId: string }) {
             <div className="space-y-2"><Label htmlFor="p-name">Nome do projeto</Label><Input id="p-name" name="name" required /></div>
             <div className="space-y-2">
               <Label htmlFor="p-budget">Orçamento aprovado (R$)</Label>
-              <Input id="p-budget" name="budget" type="number" min="0.01" step="0.01" required placeholder="0,00" />
+              <MoneyInput id="p-budget" className="w-32" value={budgetVal} onChange={setBudgetVal} required placeholder="0,00" />
             </div>
             <div className="space-y-2">
               <Label>Cliente</Label>
@@ -2559,13 +2575,10 @@ function ApprovalLimitInput({ value, onSave }: { value: number; onSave: (v: numb
   const [draft, setDraft] = useState(String(value ?? 0));
   useEffect(() => { setDraft(String(value ?? 0)); }, [value]);
   return (
-    <Input
+    <MoneyInput
       className="h-8 w-32"
-      type="number"
-      min={0}
-      step="0.01"
       value={draft}
-      onChange={(e) => setDraft(e.target.value)}
+      onChange={setDraft}
       onBlur={() => {
         const n = Number(draft);
         if (!Number.isFinite(n) || n < 0) { setDraft(String(value ?? 0)); return; }

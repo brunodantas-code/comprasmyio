@@ -18,6 +18,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { MoneyInput as UIMoneyInput } from "@/components/ui/money-input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
@@ -520,13 +521,10 @@ function DualApprovalSettings() {
             </div>
             <div className="space-y-2">
               <Label>Valor a partir de (R$)</Label>
-              <Input
-                type="number"
-                min={0}
-                step="0.01"
-                className="w-48"
+              <UIMoneyInput
+                className="w-32"
                 value={value === "" ? String(current) : value}
-                onChange={(e) => setValue(e.target.value)}
+                onChange={setValue}
               />
             </div>
             <Button
@@ -739,14 +737,11 @@ function MoneyInput({
 }) {
   const [draft, setDraft] = useState<string | null>(null);
   return (
-    <Input
-      type="number"
-      min={0}
-      step="0.01"
+    <UIMoneyInput
       className="h-8 w-32"
       disabled={disabled}
       value={draft ?? String(value ?? 0)}
-      onChange={(e) => setDraft(e.target.value)}
+      onChange={setDraft}
       onBlur={() => {
         if (draft === null) return;
         const n = Number(draft);
