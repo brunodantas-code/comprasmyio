@@ -3198,7 +3198,8 @@ function UsersAdmin() {
               })}
             </TableBody>
           </Table>
-        }
+        </>
+
       </CardContent>
     </Card>
   );
