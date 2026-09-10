@@ -2880,7 +2880,7 @@ function ProjectsAdmin({ userId }: { userId: string }) {
           {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
             !projects?.length ? <p className="text-sm text-muted-foreground">Sem projetos.</p> :
             <Table>
-              <TableHeader><TableRow><TableHead>Nome do projeto</TableHead><TableHead>Orçamento</TableHead><TableHead>Cliente</TableHead><TableHead>CNPJ</TableHead><TableHead>Descrição</TableHead><TableHead className="text-center">Status</TableHead><TableHead className="text-center">Data</TableHead><TableHead /></TableRow></TableHeader>
+              <TableHeader><TableRow><TableHead>Nome do projeto</TableHead><TableHead>Orçamento</TableHead><TableHead>Cliente</TableHead><TableHead>Descrição</TableHead><TableHead className="text-center">Status</TableHead><TableHead className="text-center">Data</TableHead><TableHead /></TableRow></TableHeader>
               <TableBody>
                 {projects.map((p) => {
                   const st = (p as { status?: string }).status ?? "active";
@@ -2890,7 +2890,6 @@ function ProjectsAdmin({ userId }: { userId: string }) {
                     <TableCell className="font-medium">{p.name}</TableCell>
                     <TableCell className="text-sm">{formatBRL((p as { budget?: number }).budget)}</TableCell>
                     <TableCell className="text-sm">{clientOf(p)?.name || p.client_name || "—"}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{clientOf(p)?.cnpj || p.client_cnpj || "—"}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">{p.description || "—"}</TableCell>
                     <TableCell className="text-center">
                       {st === "active" ? (
