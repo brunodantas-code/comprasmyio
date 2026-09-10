@@ -2467,7 +2467,9 @@ function InternalDeleteOrderDialog({ order }: { order: Order }) {
   return (
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setConfirm(""); }}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="destructive"><Trash2 className="h-4 w-4" /></Button>
+        <button type="button" aria-label="Excluir pedido" title="Excluir pedido" className="text-destructive hover:text-destructive/80">
+          <Trash2 className="h-4 w-4" />
+        </button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
