@@ -1994,25 +1994,25 @@ function OrdersTable({
       <Table className="w-full table-fixed">
         <TableHeader className="[&_tr]:border-b">
           <TableRow className="border-t bg-primary/15 hover:bg-primary/15">
-            <TableHead className="w-[110px]">Approval</TableHead>
-            <TableHead className="w-[210px]">Item</TableHead>
-            <TableHead className="w-[60px]">Qtd</TableHead>
-            <TableHead className="w-[100px]">Alocação</TableHead>
-            {showRequester && <TableHead className="w-[100px]">Solicitante</TableHead>}
-            <TableHead className="w-[100px]">Destinatário</TableHead>
-            <TableHead className="w-[130px]">Entrega</TableHead>
-            <TableHead className="w-[100px]">Prazo e Previsão</TableHead>
-            <TableHead className="w-[100px]">Status</TableHead>
-            <TableHead className="w-[90px]">Palavra passe</TableHead>
-            <TableHead className="w-[130px]">Obs.</TableHead>
+            <TableHead className="w-[110px] text-center font-bold">Approval</TableHead>
+            <TableHead className="w-[210px] text-center font-bold">Item</TableHead>
+            <TableHead className="w-[100px] text-center font-bold">Alocação</TableHead>
+            {showRequester && <TableHead className="w-[120px] text-center font-bold">Solicitante</TableHead>}
+            <TableHead className="w-[60px] text-center font-bold">Qtd</TableHead>
+            <TableHead className="w-[100px] text-center font-bold">Destinatário</TableHead>
+            <TableHead className="w-[120px] text-center font-bold">Entrega</TableHead>
+            <TableHead className="w-[100px] text-center font-bold">Prazo e Previsão</TableHead>
+            <TableHead className="w-[100px] text-center font-bold">Status</TableHead>
+            <TableHead className="w-[90px] text-center font-bold">Palavra passe</TableHead>
+            <TableHead className="w-[150px] text-center font-bold">Obs.</TableHead>
           </TableRow>
           {headerFilters && (
             <TableRow className="bg-primary/5 hover:bg-primary/5">
               <TableHead className="py-1">{filterInput(fApproval, setFApproval, "Nº")}</TableHead>
               <TableHead className="py-1">{filterInput(fItem, setFItem, "Item")}</TableHead>
-              <TableHead className="py-1" />
               <TableHead className="py-1">{filterInput(fAloc, setFAloc, "Alocação")}</TableHead>
               {showRequester && <TableHead className="py-1">{filterInput(fReq, setFReq, "Solicitante")}</TableHead>}
+              <TableHead className="py-1" />
               <TableHead className="py-1" />
               <TableHead className="py-1" />
               <TableHead className="py-1" />
