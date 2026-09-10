@@ -696,8 +696,15 @@ function RulesAdmin() {
                           onCheckedChange={(v) => toggle.mutate({ id: r.id, active: v })}
                         />
                       </TableCell>
-                      <TableCell className="text-right">
-                        <Button size="icon" variant="ghost" onClick={() => remove.mutate(r.id)}>
+                      <TableCell className="text-right whitespace-nowrap">
+                        <EditRuleDialog rule={r} people={people} onSaved={invalidate} />
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          title="Excluir etapa"
+                          aria-label="Excluir etapa"
+                          onClick={() => remove.mutate(r.id)}
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </TableCell>
