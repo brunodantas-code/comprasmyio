@@ -1143,7 +1143,7 @@ function OrgChartAdmin() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, full_name, email, approval_level")
+        .select("id, full_name, email, approval_level, approval_limit")
         .order("full_name");
       if (error) throw error;
       return data ?? [];
