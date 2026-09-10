@@ -3065,47 +3065,56 @@ function UsersAdmin() {
                             <span className="text-xs text-muted-foreground">Admin</span>
                           </label>
                         </div>
-                        <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
-                          <Select
-                            value={p.manager_id ?? "none"}
-                            onValueChange={(v) => setProfileField.mutate({ userId: u.id, patch: { manager_id: v === "none" ? null : v } })}
-                          >
-                            <SelectTrigger className="h-8 w-full text-xs"><SelectValue placeholder="Sem gestor" /></SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="none">Sem gestor</SelectItem>
-                              {(data ?? []).filter((o) => o.id !== u.id).map((o) => (
-                                <SelectItem key={o.id} value={o.id}>{o.full_name || o.email}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <Select
-                            value={primary}
-                            onValueChange={(v) => setPrimaryRole.mutate({ userId: u.id, role: v as AppRole | "none" })}
-                          >
-                            <SelectTrigger className="h-8 w-full text-xs"><SelectValue placeholder="Sem perfil" /></SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="none">Sem perfil</SelectItem>
-                              {selectableRoles.map((r) => <SelectItem key={r} value={r}>{roleLabels[r]}</SelectItem>)}
-                            </SelectContent>
-                          </Select>
-                          <ApprovalLimitInput
-                            value={Number(p.approval_limit ?? 0)}
-                            onSave={(limit) => setProfileField.mutate({ userId: u.id, patch: { approval_limit: limit } })}
-                          />
-                          <ApprovalLimitInput
-                            value={Number(p.tier2_limit ?? 50000)}
-                            onSave={(limit) => setProfileField.mutate({ userId: u.id, patch: { tier2_limit: limit } })}
-                          />
-                          <ApprovalLimitInput
-                            value={Number(p.tier3_limit ?? 250000)}
-                            onSave={(limit) => setProfileField.mutate({ userId: u.id, patch: { tier3_limit: limit } })}
-                          />
-                        </div>
-                        <div className="mt-1 hidden text-[10px] text-muted-foreground sm:grid sm:grid-cols-2 lg:grid-cols-4">
-                          <span>Gestor direto</span>
-                          <span>Perfil</span>
-                          <span>Aprovação automática</span>
-                          <span>Faixa 2 / Faixa 3</span>
+                        <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-3 lg:grid-cols-5">
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[10px] font-medium text-muted-foreground">Gestor direto</span>
+                            <Select
+                              value={p.manager_id ?? "none"}
+                              onValueChange={(v) => setProfileField.mutate({ userId: u.id, patch: { manager_id: v === "none" ? null : v } })}
+                            >
+                              <SelectTrigger className="h-8 w-full text-xs"><SelectValue placeholder="Sem gestor" /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="none">Sem gestor</SelectItem>
+                                {(data ?? []).filter((o) => o.id !== u.id).map((o) => (
+                                  <SelectItem key={o.id} value={o.id}>{o.full_name || o.email}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[10px] font-medium text-muted-foreground">Perfil</span>
+                            <Select
+                              value={primary}
+                              onValueChange={(v) => setPrimaryRole.mutate({ userId: u.id, role: v as AppRole | "none" })}
+                            >
+                              <SelectTrigger className="h-8 w-full text-xs"><SelectValue placeholder="Sem perfil" /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="none">Sem perfil</SelectItem>
+                                {selectableRoles.map((r) => <SelectItem key={r} value={r}>{roleLabels[r]}</SelectItem>)}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[10px] font-medium text-muted-foreground">Aprovação automática</span>
+                            <ApprovalLimitInput
+                              value={Number(p.approval_limit ?? 0)}
+                              onSave={(limit) => setProfileField.mutate({ userId: u.id, patch: { approval_limit: limit } })}
+                            />
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[10px] font-medium text-muted-foreground">Faixa 2</span>
+                            <ApprovalLimitInput
+                              value={Number(p.tier2_limit ?? 50000)}
+                              onSave={(limit) => setProfileField.mutate({ userId: u.id, patch: { tier2_limit: limit } })}
+                            />
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[10px] font-medium text-muted-foreground">Faixa 3</span>
+                            <ApprovalLimitInput
+                              value={Number(p.tier3_limit ?? 250000)}
+                              onSave={(limit) => setProfileField.mutate({ userId: u.id, patch: { tier3_limit: limit } })}
+                            />
+                          </div>
                         </div>
                       </div>
                     );
