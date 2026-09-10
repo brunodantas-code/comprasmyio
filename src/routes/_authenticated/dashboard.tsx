@@ -1475,7 +1475,33 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
             <div className="space-y-2">
             </div>
 
-            {requestType === "materiais" ? (
+            {requestType === "rh" ? (
+              <>
+                {!restrictedCc && (
+                  <div className="space-y-2">
+                    <Label>Centro de Custo</Label>
+                    <Select value={costCenterId} onValueChange={setCostCenterId}>
+                      <SelectTrigger><SelectValue placeholder="Selecione o centro de custo" /></SelectTrigger>
+                      <SelectContent>
+                        {(costCenters ?? []).filter((c) => c.active).map((c) => (
+                          <SelectItem key={c.id} value={c.id}>{c.code ? `${c.code} — ${c.name}` : c.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+                <div className="space-y-2">
+                  <Label>Cliente <span className="text-muted-foreground">(opcional)</span></Label>
+                  <Select value={clientId || "none"} onValueChange={setClientId}>
+                    <SelectTrigger><SelectValue placeholder="Sem cliente definido" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Sem cliente definido</SelectItem>
+                      {(clientsList ?? []).map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            ) : requestType === "materiais" ? (
               <>
                 <div className="space-y-2">
                   <Label>Alocação</Label>
