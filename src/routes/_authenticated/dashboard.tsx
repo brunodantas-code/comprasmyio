@@ -1180,8 +1180,8 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
         ? `Contratação de RH — ${rhCargo}`
         : (!isMateriais || isNewItem ? newItemName : item!.name),
       item_link: isReembolso || isRh ? undefined : (itemLink || undefined),
-      quantity: isReembolso || isRh ? 1 : fd.get("quantity"),
-      estimated_value: isReembolso ? reembolsoTotal : isRh ? Number(rhRemuneracao || 0) : (fd.get("estimated_value") ?? 0),
+      quantity: isReembolso || isRh ? 1 : (Number(qty) || 1),
+      estimated_value: isReembolso ? reembolsoTotal : isRh ? Number(rhRemuneracao || 0) : (Number(estimatedValue) || 0),
       recipient: isRh ? rhGestor : recipient,
       requester_notes: isRh
         ? `${rhTipo === "reposicao" ? "Reposição" : "Nova Contratação"} — Motivo: ${rhMotivo.trim()}${fd.get("requester_notes") ? ` | ${fd.get("requester_notes")}` : ""}`
