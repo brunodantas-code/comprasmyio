@@ -162,14 +162,15 @@ const STATUS_LABELS: Record<Order["status"], string> = {
   recebido_problema: "Recebido com problemas",
 };
 
+const STATUS_BADGE_BASE = "bg-slate-200 hover:bg-slate-200 text-slate-700 border-transparent";
+
 const STATUS_CLASSES: Record<Order["status"], string> = {
-  pendente: "bg-yellow-500 hover:bg-yellow-500 text-black border-transparent",
-  comprado_aguardando: "bg-green-600 hover:bg-green-600 text-white border-transparent",
-  entregue: "bg-blue-600 hover:bg-blue-600 text-white border-transparent",
-  cancelado: "bg-red-600 hover:bg-red-600 text-white border-transparent",
-  recebido_ok: "bg-slate-200 hover:bg-slate-200 text-slate-700 border-transparent",
-  recebido_problema:
-    "bg-amber-100 hover:bg-amber-100 text-amber-900 border-transparent animate-soft-amber-pulse",
+  pendente: STATUS_BADGE_BASE,
+  comprado_aguardando: STATUS_BADGE_BASE,
+  entregue: STATUS_BADGE_BASE,
+  cancelado: STATUS_BADGE_BASE,
+  recebido_ok: STATUS_BADGE_BASE,
+  recebido_problema: STATUS_BADGE_BASE,
 };
 
 const BUYER_STATUS_KEYS: Order["status"][] = ["pendente", "comprado_aguardando", "entregue", "cancelado"];
