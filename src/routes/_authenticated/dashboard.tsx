@@ -1160,7 +1160,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
       if (newItemName.trim().length < 2) return toast.error("Descreva o item novo.");
       if (!newItemDest) return toast.error("Selecione para qual estoque esse item novo será cadastrado.");
       if (checkDuplicates(newItemName)) return;
-      if (!itemLink.trim()) return toast.error("Informe o link de referência do item novo.");
+      
     } else if (!item) {
       return toast.error("Selecione um item cadastrado: Insumos de Fabricação, Insumos de Instalação, Material de Almoxarifado ou Máquinas e Ferramentas.");
     }
