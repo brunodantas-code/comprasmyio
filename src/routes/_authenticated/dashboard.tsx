@@ -2895,7 +2895,7 @@ function ApprovalLimitInput({ value, onSave }: { value: number; onSave: (v: numb
   useEffect(() => { setDraft(String(value ?? 0)); }, [value]);
   return (
     <MoneyInput
-      className="h-8 w-32"
+      className="h-8 w-full min-w-0 px-1 text-xs md:text-xs"
       value={draft}
       onChange={setDraft}
       onBlur={() => {
@@ -3095,12 +3095,12 @@ function UsersAdmin() {
 
             <TableHeader className="[&_tr]:border-b">
               <TableRow className="border-t bg-primary/15 hover:bg-primary/15">
-                <TableHead className="w-[150px] text-center font-bold">Nome</TableHead>
-                <TableHead className="w-[180px] text-center font-bold">E-mail</TableHead>
-                <TableHead className="w-[150px] text-center font-bold">Gestor direto</TableHead>
-                <TableHead className="w-[150px] text-center font-bold">Perfil</TableHead>
-                <TableHead className="w-[70px] text-center font-bold">Admin</TableHead>
-                <TableHead className="w-[120px] text-center font-bold">Aprovação automática até (R$)</TableHead>
+                <TableHead className="w-[120px] text-center font-bold">Nome</TableHead>
+                <TableHead className="w-[130px] text-center font-bold">E-mail</TableHead>
+                <TableHead className="w-[110px] text-center font-bold">Gestor direto</TableHead>
+                <TableHead className="w-[110px] text-center font-bold">Perfil</TableHead>
+                <TableHead className="w-[48px] text-center font-bold">Admin</TableHead>
+                <TableHead className="w-[110px] text-center font-bold">Aprovação automática até (R$)</TableHead>
                 <TableHead className="w-[110px] text-center font-bold">Faixa 2 até (R$)</TableHead>
                 <TableHead className="w-[110px] text-center font-bold">Faixa 3 até (R$)</TableHead>
               </TableRow>
@@ -3108,9 +3108,9 @@ function UsersAdmin() {
                 <TableHead className="py-1">{filterInput(fName, setFName, "Nome")}</TableHead>
                 <TableHead className="py-1">{filterInput(fEmail, setFEmail, "E-mail")}</TableHead>
                 <TableHead className="py-1">{filterInput(fManager, setFManager, "Gestor")}</TableHead>
-                <TableHead className="py-1" colSpan={2}>
+                <TableHead className="py-1">
                   <Select value={fRole} onValueChange={setFRole}>
-                    <SelectTrigger className="h-7 text-xs"><SelectValue placeholder="Perfil" /></SelectTrigger>
+                    <SelectTrigger className="h-7 w-full text-xs"><SelectValue placeholder="Perfil" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Todos</SelectItem>
                       <SelectItem value="admin">Admin</SelectItem>
@@ -3118,6 +3118,7 @@ function UsersAdmin() {
                     </SelectContent>
                   </Select>
                 </TableHead>
+                <TableHead className="py-1" />
                 <TableHead className="py-1" />
                 <TableHead className="py-1" />
                 <TableHead className="py-1" />
