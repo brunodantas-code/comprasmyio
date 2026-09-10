@@ -49,6 +49,8 @@ type Order = {
   requester_id: string;
   item_name: string;
   item_link: string | null;
+  request_type: string;
+  travel_type: string | null;
   material_id: string | null;
   terceiros_material_id: string | null;
   tool_asset_id?: string | null;
