@@ -21,13 +21,13 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Plataforma Myio Supply para solicitações de compra, controle de estoque, homologação por QR code e expedição de produtos.",
+          "Plataforma Myio Supply para solicitações de materiais, serviços, viagens e reembolso de despesas, com controle de estoque, homologação por QR code e expedição.",
       },
-      { property: "og:title", content: "Myio Supply — Solicitações, Estoque e Expedição" },
+      { property: "og:title", content: "Myio Supply — Compras e Serviços sob controle total" },
       {
         property: "og:description",
         content:
-          "Plataforma Myio Supply para solicitações de compra, controle de estoque, homologação por QR code e expedição de produtos.",
+          "Plataforma Myio Supply para solicitações de materiais, serviços, viagens e reembolso de despesas, com controle de estoque, homologação por QR code e expedição.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
