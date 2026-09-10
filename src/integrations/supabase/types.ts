@@ -1469,6 +1469,27 @@ export type Database = {
           },
         ]
       }
+      role_hierarchy: {
+        Row: {
+          approver_role: Database["public"]["Enums"]["app_role"] | null
+          created_at: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string
+        }
+        Insert: {
+          approver_role?: Database["public"]["Enums"]["app_role"] | null
+          created_at?: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+        }
+        Update: {
+          approver_role?: Database["public"]["Enums"]["app_role"] | null
+          created_at?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       stock_movement_qrs: {
         Row: {
           box_qr: string | null
@@ -2023,6 +2044,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      primary_role: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"]
       }
     }
     Enums: {
