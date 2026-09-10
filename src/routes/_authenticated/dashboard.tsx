@@ -2059,7 +2059,7 @@ function OrdersTable({
               </TableCell>
               <TableCell className="text-sm break-words text-center">{o.for_stock ? "Estoque" : o.project_id ? projectName(o.project_id) : "—"}</TableCell>
               {showRequester && <TableCell className="text-sm break-words text-center">{requesterName?.(o.requester_id)}</TableCell>}
-              <TableCell>
+              <TableCell className="text-center">
                 {(() => {
                   const part = o.request_group_id ? stockParts?.get(o.request_group_id) : undefined;
                   if (!part || part.qty <= 0) return o.quantity;
