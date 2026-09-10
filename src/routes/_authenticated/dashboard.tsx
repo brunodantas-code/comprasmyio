@@ -2657,6 +2657,19 @@ function UsersAdmin() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const setPrimaryRole = useMutation({
+    mutationFn: async ({ userId, role }: { userId: string; role: AppRole | "none" }) => {
+      const { error: de } = await supabase.from("user_roles").delete().eq("user_id", userId).neq("role", "admin");
+      if (de) throw de;
+      if (role !== "none") {
+        const { error } = await supabase.from("user_roles").insert({ user_id: userId, role });
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => { toast.success("Perfil atualizado"); qc.invalidateQueries({ queryKey: ["admin-users"] }); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const setProfileField = useMutation({
     mutationFn: async ({ userId, patch }: { userId: string; patch: Partial<{ approval_limit: number; manager_id: string | null; tier2_limit: number; tier3_limit: number }> }) => {
       const { error } = await supabase.from("profiles").update(patch).eq("id", userId);
@@ -2677,43 +2690,88 @@ function UsersAdmin() {
     cfo: "CFO",
     cto: "CTO",
   };
-  const allRoles: AppRole[] = [
-    "admin",
-    "comprador",
-    "fabrica",
-    "estoquista",
-    "solicitante",
-    "coo",
-    "ceo",
-    "cfo",
-    "cto",
-  ];
-  const rolesCol1 = allRoles.slice(0, 5);
-  const rolesCol2 = allRoles.slice(5);
+  const selectableRoles: AppRole[] = ["comprador", "fabrica", "estoquista", "solicitante", "coo", "ceo", "cfo", "cto"];
+
+  const [fName, setFName] = useState("");
+  const [fEmail, setFEmail] = useState("");
+  const [fManager, setFManager] = useState("");
+  const [fRole, setFRole] = useState("all");
+
+  const norm = (s: string) => s.toLowerCase().trim();
+  const nameOf = (id?: string | null) => {
+    if (!id) return "";
+    const u = (data ?? []).find((x) => x.id === id);
+    return u?.full_name || u?.email || "";
+  };
+  const rows = (data ?? []).filter((u) => {
+    const p = u as unknown as { manager_id?: string | null };
+    const primary = u.roles.find((r) => r !== "admin");
+    return (
+      (!fName || norm(u.full_name ?? "").includes(norm(fName))) &&
+      (!fEmail || norm(u.email ?? "").includes(norm(fEmail))) &&
+      (!fManager || norm(nameOf(p.manager_id)).includes(norm(fManager))) &&
+      (fRole === "all" || (fRole === "admin" ? u.roles.includes("admin") : primary === fRole))
+    );
+  });
+
+  const filterInput = (value: string, onChange: (v: string) => void, placeholder: string) => (
+    <Input value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="h-7 px-1 text-xs" />
+  );
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Usuários</CardTitle>
-        <CardDescription>Marque os perfis para atribuir ou remover. Defina o gestor direto e as faixas de alçada de cada usuário.</CardDescription>
+        <CardDescription>Selecione o perfil de cada usuário. Defina o gestor direto e as faixas de alçada.</CardDescription>
       </CardHeader>
       <CardContent className="overflow-x-auto">
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
-          <Table>
-            <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>E-mail</TableHead><TableHead>Gestor direto</TableHead><TableHead>Aprovação automática até (R$)</TableHead><TableHead>Faixa 2 até (R$)</TableHead><TableHead>Faixa 3 até (R$)</TableHead><TableHead>Perfis</TableHead></TableRow></TableHeader>
+          <Table className="w-full table-fixed">
+            <TableHeader className="[&_tr]:border-b">
+              <TableRow className="border-t bg-primary/15 hover:bg-primary/15">
+                <TableHead className="w-[150px] text-center font-bold">Nome</TableHead>
+                <TableHead className="w-[180px] text-center font-bold">E-mail</TableHead>
+                <TableHead className="w-[150px] text-center font-bold">Gestor direto</TableHead>
+                <TableHead className="w-[150px] text-center font-bold">Perfil</TableHead>
+                <TableHead className="w-[70px] text-center font-bold">Admin</TableHead>
+                <TableHead className="w-[120px] text-center font-bold">Aprovação automática até (R$)</TableHead>
+                <TableHead className="w-[110px] text-center font-bold">Faixa 2 até (R$)</TableHead>
+                <TableHead className="w-[110px] text-center font-bold">Faixa 3 até (R$)</TableHead>
+              </TableRow>
+              <TableRow className="bg-primary/5 hover:bg-primary/5">
+                <TableHead className="py-1">{filterInput(fName, setFName, "Nome")}</TableHead>
+                <TableHead className="py-1">{filterInput(fEmail, setFEmail, "E-mail")}</TableHead>
+                <TableHead className="py-1">{filterInput(fManager, setFManager, "Gestor")}</TableHead>
+                <TableHead className="py-1" colSpan={2}>
+                  <Select value={fRole} onValueChange={setFRole}>
+                    <SelectTrigger className="h-7 text-xs"><SelectValue placeholder="Perfil" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                      {selectableRoles.map((r) => <SelectItem key={r} value={r}>{roleLabels[r]}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </TableHead>
+                <TableHead className="py-1" />
+                <TableHead className="py-1" />
+                <TableHead className="py-1" />
+              </TableRow>
+            </TableHeader>
             <TableBody>
-              {(data ?? []).map((u) => {
+              {rows.map((u) => {
                 const p = u as unknown as { approval_limit?: number; tier2_limit?: number; tier3_limit?: number; manager_id?: string | null };
+                const primary = u.roles.find((r) => r !== "admin") ?? "none";
+                const isAdminUser = u.roles.includes("admin");
                 return (
                 <TableRow key={u.id}>
-                  <TableCell className="font-medium">{u.full_name || "—"}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{u.email}</TableCell>
+                  <TableCell className="font-medium break-words">{u.full_name || "—"}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground break-words">{u.email}</TableCell>
                   <TableCell>
                     <Select
                       value={p.manager_id ?? "none"}
                       onValueChange={(v) => setProfileField.mutate({ userId: u.id, patch: { manager_id: v === "none" ? null : v } })}
                     >
-                      <SelectTrigger className="h-8 w-44"><SelectValue placeholder="Sem gestor" /></SelectTrigger>
+                      <SelectTrigger className="h-8 w-full text-xs"><SelectValue placeholder="Sem gestor" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">Sem gestor</SelectItem>
                         {(data ?? []).filter((o) => o.id !== u.id).map((o) => (
@@ -2721,6 +2779,24 @@ function UsersAdmin() {
                         ))}
                       </SelectContent>
                     </Select>
+                  </TableCell>
+                  <TableCell>
+                    <Select
+                      value={primary}
+                      onValueChange={(v) => setPrimaryRole.mutate({ userId: u.id, role: v as AppRole | "none" })}
+                    >
+                      <SelectTrigger className="h-8 w-full text-xs"><SelectValue placeholder="Sem perfil" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Sem perfil</SelectItem>
+                        {selectableRoles.map((r) => <SelectItem key={r} value={r}>{roleLabels[r]}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <Checkbox
+                      checked={isAdminUser}
+                      onCheckedChange={() => toggleRole.mutate({ userId: u.id, role: "admin", has: isAdminUser })}
+                    />
                   </TableCell>
                   <TableCell>
                     <ApprovalLimitInput
@@ -2739,40 +2815,6 @@ function UsersAdmin() {
                       value={Number(p.tier3_limit ?? 250000)}
                       onSave={(limit) => setProfileField.mutate({ userId: u.id, patch: { tier3_limit: limit } })}
                     />
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-4">
-                      <div className="flex flex-col gap-1">
-                        {rolesCol1.map((r) => {
-                          const has = u.roles.includes(r);
-                          return (
-                            <label key={r} className="flex items-center gap-1 text-xs cursor-pointer select-none">
-                              <Checkbox
-                                checked={has}
-                                onCheckedChange={() => toggleRole.mutate({ userId: u.id, role: r, has })}
-                                className="h-3.5 w-3.5"
-                              />
-                              <span className={has ? "font-medium" : "text-muted-foreground"}>{roleLabels[r]}</span>
-                            </label>
-                          );
-                        })}
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        {rolesCol2.map((r) => {
-                          const has = u.roles.includes(r);
-                          return (
-                            <label key={r} className="flex items-center gap-1 text-xs cursor-pointer select-none">
-                              <Checkbox
-                                checked={has}
-                                onCheckedChange={() => toggleRole.mutate({ userId: u.id, role: r, has })}
-                                className="h-3.5 w-3.5"
-                              />
-                              <span className={has ? "font-medium" : "text-muted-foreground"}>{roleLabels[r]}</span>
-                            </label>
-                          );
-                        })}
-                      </div>
-                    </div>
                   </TableCell>
                 </TableRow>
                 );
