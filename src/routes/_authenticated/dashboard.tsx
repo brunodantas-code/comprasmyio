@@ -2666,7 +2666,7 @@ function EditRequesterDialog({ order }: { order: Order }) {
             <Select value={forStock ? "" : projectId} onValueChange={setProjectId} disabled={forStock}>
               <SelectTrigger><SelectValue placeholder={forStock ? "Compra para estoque" : "Selecione o projeto"} /></SelectTrigger>
               <SelectContent>
-                {(projects ?? []).map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                {(projects ?? []).filter((p) => !p.status || p.status === "active").map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
