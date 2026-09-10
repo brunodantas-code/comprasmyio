@@ -1077,10 +1077,14 @@ function NewOrder({ userId }: { userId: string }) {
       if (allocTarget === "cliente" && !clientId) return toast.error("Selecione o cliente");
       if (requestType === "viagens") {
         if (!travelType) return toast.error("Selecione o tipo de viagem");
-        if (travelDestination.trim().length < 2) return toast.error("Informe a cidade e o estado de destino");
-        if (!travelDeparture) return toast.error("Informe a data de ida");
-        if (!travelReturn) return toast.error("Informe a data de retorno");
-        if (travelReturn < travelDeparture) return toast.error("A data de retorno não pode ser anterior à data de ida");
+        for (let i = 0; i < travelLegs.length; i++) {
+          const leg = travelLegs[i];
+          const n = i + 1;
+          if (leg.destination.trim().length < 2) return toast.error(`Trecho ${n}: informe a cidade e o estado de destino`);
+          if (!leg.departure) return toast.error(`Trecho ${n}: informe a data de ida`);
+          if (!leg.return) return toast.error(`Trecho ${n}: informe a data de retorno`);
+          if (leg.return < leg.departure) return toast.error(`Trecho ${n}: a data de retorno não pode ser anterior à data de ida`);
+        }
       }
     } else if (isNewItem) {
       if (newItemName.trim().length < 2) return toast.error("Descreva o item novo.");
