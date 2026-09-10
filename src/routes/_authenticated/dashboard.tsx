@@ -2474,7 +2474,6 @@ function EditRequesterDialog({ order }: { order: Order }) {
 function InternalDeleteOrderDialog({ order }: { order: Order }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [confirm, setConfirm] = useState("");
 
   const del = useMutation({
     mutationFn: async () => {
@@ -2486,36 +2485,36 @@ function InternalDeleteOrderDialog({ order }: { order: Order }) {
       qc.invalidateQueries({ queryKey: ["orders"] });
       qc.invalidateQueries({ queryKey: ["logs"] });
       setOpen(false);
-      setConfirm("");
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const canConfirm = confirm.trim().toLowerCase() === "excluir";
-
   return (
-    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setConfirm(""); }}>
-      <DialogTrigger asChild>
+    <AlertDialog open={open} onOpenChange={setOpen}>
+      <AlertDialogTrigger asChild>
         <button type="button" aria-label="Excluir pedido" title="Excluir pedido" className="text-destructive hover:text-destructive/80">
           <Trash2 className="h-4 w-4" />
         </button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Excluir pedido</DialogTitle>
-          <DialogDescription>
-            Esta ação apaga <strong>{order.item_name}</strong> e todo o seu histórico. Digite <strong>excluir</strong> para confirmar.
-          </DialogDescription>
-        </DialogHeader>
-        <Input value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder='digite "excluir"' />
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-          <Button variant="destructive" disabled={!canConfirm || del.isPending} onClick={() => del.mutate()}>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Excluir pedido</AlertDialogTitle>
+          <AlertDialogDescription>
+            Esta ação apaga <strong>{order.item_name}</strong> e todo o seu histórico. Deseja continuar?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogAction
+            className="bg-destructive text-white hover:bg-destructive/90"
+            disabled={del.isPending}
+            onClick={() => del.mutate()}
+          >
             {del.isPending ? "Excluindo..." : "Excluir definitivamente"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
 
