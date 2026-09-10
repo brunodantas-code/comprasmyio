@@ -1418,6 +1418,54 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
               </div>
             )}
 
+            {requestType === "rh" && (
+              <div className="rounded-md border p-3 space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label>Cargo</Label>
+                    <Select value={rhCargo} onValueChange={setRhCargo}>
+                      <SelectTrigger><SelectValue placeholder="Selecione o cargo" /></SelectTrigger>
+                      <SelectContent>
+                        {RH_CARGOS.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Gestor</Label>
+                    <Select value={rhGestor} onValueChange={setRhGestor}>
+                      <SelectTrigger><SelectValue placeholder="Selecione o gestor" /></SelectTrigger>
+                      <SelectContent>
+                        {(profiles ?? []).map((p) => (
+                          <SelectItem key={p.id} value={p.full_name || p.email || p.id}>
+                            {p.full_name || p.email || p.id}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Tipo</Label>
+                    <Select value={rhTipo} onValueChange={setRhTipo}>
+                      <SelectTrigger><SelectValue placeholder="Selecione o tipo" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="reposicao">Reposição</SelectItem>
+                        <SelectItem value="nova">Nova Contratação</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="rh_remuneracao">Remuneração (R$)</Label>
+                    <MoneyInput id="rh_remuneracao" className="w-32" value={rhRemuneracao} onChange={setRhRemuneracao} />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="rh_motivo">Motivo da contratação</Label>
+                  <Textarea id="rh_motivo" value={rhMotivo} onChange={(e) => setRhMotivo(e.target.value)} placeholder="Explique o motivo da contratação" />
+                </div>
+                <p className="text-xs text-muted-foreground">Anexe o arquivo de Job Description no campo de anexos abaixo.</p>
+              </div>
+            )}
+
             <div className="space-y-2">
             </div>
 
