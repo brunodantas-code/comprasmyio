@@ -799,6 +799,18 @@ function PurchasableItemPicker({ value, onPick, disabled }: { value: Purchasable
 
 /* ---------- New order ---------- */
 
+const RH_CARGOS = [
+  "Analista",
+  "Assistente",
+  "Estagiário",
+  "Técnico de Campo",
+  "Engenheiro",
+  "Desenvolvedor",
+  "Coordenador",
+  "Gerente",
+  "Diretor",
+] as const;
+
 const newOrderSchema = z.object({
   project_id: z.string().optional(),
   item_name: z.string().trim().min(2).max(200),
@@ -871,7 +883,12 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
   const qc = useQueryClient();
   const [projectId, setProjectId] = useState("");
   const [forStock, setForStock] = useState(false);
-  const [requestType, setRequestType] = useState<"materiais" | "servicos" | "viagens" | "reembolso" | "importacao" | "dispositivos">("materiais");
+  const [requestType, setRequestType] = useState<"materiais" | "servicos" | "viagens" | "reembolso" | "importacao" | "dispositivos" | "rh">("materiais");
+  const [rhCargo, setRhCargo] = useState("");
+  const [rhGestor, setRhGestor] = useState("");
+  const [rhMotivo, setRhMotivo] = useState("");
+  const [rhTipo, setRhTipo] = useState("");
+  const [rhRemuneracao, setRhRemuneracao] = useState("0");
 
   const [allocTarget, setAllocTarget] = useState<"projeto" | "cliente">("projeto");
   const [clientId, setClientId] = useState("");
@@ -999,6 +1016,11 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
     setNewItemDest("");
     setRecipient("");
     setCostCenterId("");
+    setRhCargo("");
+    setRhGestor("");
+    setRhMotivo("");
+    setRhTipo("");
+    setRhRemuneracao("0");
 
   };
 
@@ -1071,6 +1093,8 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
             ? travelLegs.map((l) => ({ destination: l.destination.trim(), departure: l.departure, return: l.return }))
             : requestType === "reembolso"
             ? reembolsoLegs.map((l) => ({ description: l.description.trim(), value: Number(l.value), date: l.date }))
+            : requestType === "rh"
+            ? [{ cargo: rhCargo, gestor: rhGestor, motivo: rhMotivo.trim(), tipo: rhTipo, remuneracao: Number(rhRemuneracao) }]
             : [],
           requester_id: userId,
         }).select("id").single();
@@ -1102,10 +1126,18 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
     e.preventDefault();
     const isMateriais = requestType === "materiais";
     const isReembolso = requestType === "reembolso";
+    const isRh = requestType === "rh";
     if (!isMateriais) {
-      if (!isReembolso && newItemName.trim().length < 2) return toast.error("Descreva o serviço ou a viagem solicitada.");
+      if (!isReembolso && !isRh && newItemName.trim().length < 2) return toast.error("Descreva o serviço ou a viagem solicitada.");
       if (allocTarget === "projeto" && !projectId) return toast.error("Selecione o projeto");
       if (allocTarget === "cliente" && !clientId) return toast.error("Selecione o cliente");
+      if (isRh) {
+        if (!rhCargo) return toast.error("Selecione o cargo");
+        if (!rhGestor) return toast.error("Selecione o gestor");
+        if (!rhTipo) return toast.error("Selecione o tipo de contratação");
+        if (rhMotivo.trim().length < 3) return toast.error("Informe o motivo da contratação");
+        if (!(Number(rhRemuneracao) > 0)) return toast.error("Informe a remuneração");
+      }
       if (requestType === "viagens") {
         if (!travelType) return toast.error("Selecione o tipo de viagem");
         for (let i = 0; i < travelLegs.length; i++) {
@@ -1148,12 +1180,18 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
     const fd = new FormData(e.currentTarget);
     const parsed = newOrderSchema.safeParse({
       project_id: !isMateriais ? (allocTarget === "projeto" ? projectId : undefined) : (forStock ? undefined : projectId),
-      item_name: isReembolso ? "Reembolso de Despesas" : (!isMateriais || isNewItem ? newItemName : item!.name),
-      item_link: isReembolso ? undefined : (itemLink || undefined),
-      quantity: isReembolso ? 1 : fd.get("quantity"),
-      estimated_value: isReembolso ? reembolsoTotal : (fd.get("estimated_value") ?? 0),
-      recipient: recipient,
-      requester_notes: fd.get("requester_notes") || undefined,
+      item_name: isReembolso
+        ? "Reembolso de Despesas"
+        : isRh
+        ? `Contratação de RH — ${rhCargo}`
+        : (!isMateriais || isNewItem ? newItemName : item!.name),
+      item_link: isReembolso || isRh ? undefined : (itemLink || undefined),
+      quantity: isReembolso || isRh ? 1 : fd.get("quantity"),
+      estimated_value: isReembolso ? reembolsoTotal : isRh ? Number(rhRemuneracao || 0) : (fd.get("estimated_value") ?? 0),
+      recipient: isRh ? rhGestor : recipient,
+      requester_notes: isRh
+        ? `${rhTipo === "reposicao" ? "Reposição" : "Nova Contratação"} — Motivo: ${rhMotivo.trim()}${fd.get("requester_notes") ? ` | ${fd.get("requester_notes")}` : ""}`
+        : (fd.get("requester_notes") || undefined),
       delivery_point: fd.get("delivery_point"),
       deadline_type: deadlineType,
       deadline_date: deadlineDate || undefined,
@@ -1185,34 +1223,36 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
   const typeSelector = (
     <div className="space-y-2">
       <Label>Tipo de solicitação</Label>
-      <div className="flex flex-wrap items-center gap-6">
-        {([
-          ["materiais", "Materiais"],
-          ["servicos", "Serviços"],
-          ["viagens", "Viagens"],
-          ["reembolso", "Reembolsos"],
-          ...(canImport ? [["importacao", "Importação"] as const] : []),
-          ...(isAdmin ? [["dispositivos", "Dispositivos"] as const] : []),
-        ] as const).map(([v, l]) => (
-          <label key={v} className="flex cursor-pointer items-center gap-2 text-sm">
-            <Checkbox
-              checked={requestType === v}
-              onCheckedChange={() => {
-                setRequestType(v);
-                if (v === "materiais") {
-                  setClientId("");
-                } else {
-                  setForStock(false);
-                  setIsNewItem(true);
-                  setItem(null);
-                  setNewItemDest("");
-                }
-              }}
-            />
-            {l}
-          </label>
-        ))}
-      </div>
+      <Select
+        value={requestType}
+        onValueChange={(v) => {
+          const t = v as typeof requestType;
+          setRequestType(t);
+          if (t === "materiais") {
+            setClientId("");
+          } else {
+            setForStock(false);
+            setIsNewItem(true);
+            setItem(null);
+            setNewItemDest("");
+          }
+        }}
+      >
+        <SelectTrigger className="w-full sm:w-72"><SelectValue placeholder="Selecione o tipo" /></SelectTrigger>
+        <SelectContent>
+          {([
+            ["materiais", "Materiais"],
+            ["servicos", "Serviços"],
+            ["viagens", "Viagens"],
+            ["reembolso", "Reembolsos"],
+            ["rh", "Contratação de RH"],
+            ...(canImport ? [["importacao", "Importação"] as const] : []),
+            ...(isAdmin ? [["dispositivos", "Dispositivos"] as const] : []),
+          ] as const).map(([v, l]) => (
+            <SelectItem key={v} value={v}>{l}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
       {requestType === "materiais" && (
         <p className="text-xs text-muted-foreground">Solicitações de Materiais são cadastradas no Armazém.</p>
       )}
@@ -1227,6 +1267,9 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
       )}
       {requestType === "dispositivos" && (
         <p className="text-xs text-muted-foreground">Solicitações de dispositivos Myio para projetos.</p>
+      )}
+      {requestType === "rh" && (
+        <p className="text-xs text-muted-foreground">Solicitação de contratação de pessoal (reposição ou nova vaga).</p>
       )}
     </div>
   );
@@ -1387,6 +1430,54 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
               </div>
             )}
 
+            {requestType === "rh" && (
+              <div className="rounded-md border p-3 space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label>Cargo</Label>
+                    <Select value={rhCargo} onValueChange={setRhCargo}>
+                      <SelectTrigger><SelectValue placeholder="Selecione o cargo" /></SelectTrigger>
+                      <SelectContent>
+                        {RH_CARGOS.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Gestor</Label>
+                    <Select value={rhGestor} onValueChange={setRhGestor}>
+                      <SelectTrigger><SelectValue placeholder="Selecione o gestor" /></SelectTrigger>
+                      <SelectContent>
+                        {(profiles ?? []).map((p) => (
+                          <SelectItem key={p.id} value={p.full_name || p.email || p.id}>
+                            {p.full_name || p.email || p.id}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Tipo</Label>
+                    <Select value={rhTipo} onValueChange={setRhTipo}>
+                      <SelectTrigger><SelectValue placeholder="Selecione o tipo" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="reposicao">Reposição</SelectItem>
+                        <SelectItem value="nova">Nova Contratação</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="rh_remuneracao">Remuneração (R$)</Label>
+                    <MoneyInput id="rh_remuneracao" className="w-32" value={rhRemuneracao} onChange={setRhRemuneracao} />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="rh_motivo">Motivo da contratação</Label>
+                  <Textarea id="rh_motivo" value={rhMotivo} onChange={(e) => setRhMotivo(e.target.value)} placeholder="Explique o motivo da contratação" />
+                </div>
+                <p className="text-xs text-muted-foreground">Anexe o arquivo de Job Description no campo de anexos abaixo.</p>
+              </div>
+            )}
+
             <div className="space-y-2">
             </div>
 
@@ -1480,7 +1571,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
               </>
             )}
 
-            {requestType !== "reembolso" && (
+            {requestType !== "reembolso" && requestType !== "rh" && (
             <div className="space-y-2">
               {requestType === "materiais" ? (
                 <>
@@ -1558,7 +1649,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
               )}
             </div>
             )}
-            {requestType !== "reembolso" && (
+            {requestType !== "reembolso" && requestType !== "rh" && (
             <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="quantity">{requestType === "viagens" ? (travelType === "aluguel_veiculos" ? "Quantidade de veículos" : "Quantidade de Pessoas") : "Quantidade"}</Label>
@@ -1620,7 +1711,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
               )}
             </div>
             )}
-            {requestType !== "reembolso" && (
+            {requestType !== "reembolso" && requestType !== "rh" && (
             <div className="space-y-2">
               <Label htmlFor="item_link">
                 Link de Referência {isNewItem ? null : <span className="text-muted-foreground">(opcional)</span>}
@@ -1630,7 +1721,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
             )}
             {requestType === "materiais" && <AddressAutocomplete name="delivery_point" required />}
 
-            {requestType !== "reembolso" && (
+            {requestType !== "reembolso" && requestType !== "rh" && (
             <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>Prazo de recebimento</Label>
@@ -1733,8 +1824,6 @@ const MYIO_STATUS_LABELS: Record<string, string> = {
 function MyOrders({ userId }: { userId: string }) {
   const { data: projects } = useProjects();
   const { data: stockParts } = useMyStockParts(userId);
-  const [deliveredMode, setDeliveredMode] = useState<DeliveredMode>("this_month");
-  const [deliveredFrom, setDeliveredFrom] = useState("");
   const { data: orders, isLoading } = useQuery({
     queryKey: ["orders", "mine", userId],
     queryFn: async () => {
@@ -1749,7 +1838,7 @@ function MyOrders({ userId }: { userId: string }) {
   });
 
   const projectName = (id: string) => (id === ESTOQUE_PROJECT_ID ? "Estoque" : projects?.find((p) => p.id === id)?.name ?? "—");
-  const visible = filterDelivered(orders ?? [], deliveredMode, deliveredFrom);
+  const visible = orders ?? [];
 
   const usedGroups = new Set((orders ?? []).map((o) => o.request_group_id).filter(Boolean) as string[]);
   const stockOnly = [...(stockParts?.values() ?? [])].filter((p) => !usedGroups.has(p.group));
@@ -1760,9 +1849,6 @@ function MyOrders({ userId }: { userId: string }) {
         <div>
           <CardTitle>Minhas Solicitações</CardTitle>
           <CardDescription>Acompanhe o status dos seus pedidos de compra.</CardDescription>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <DeliveredFilter mode={deliveredMode} setMode={setDeliveredMode} fromDate={deliveredFrom} setFromDate={setDeliveredFrom} />
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
