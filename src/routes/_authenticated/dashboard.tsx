@@ -355,7 +355,7 @@ function Dashboard() {
               <TabsTrigger value="queue"><ShoppingCart className="mr-2 h-4 w-4" />Approvals Pendentes</TabsTrigger>
             )}
             {canSeeStock && <TabsTrigger value="stock"><Boxes className="mr-2 h-4 w-4" />Armazém</TabsTrigger>}
-            {isAdmin && <TabsTrigger value="projects"><FolderKanban className="mr-2 h-4 w-4" />Projetos, Clientes e Centros de Custo</TabsTrigger>}
+            {isAdmin && <TabsTrigger value="projects"><FolderKanban className="mr-2 h-4 w-4" />Cadastro</TabsTrigger>}
             
             {isAdmin && <TabsTrigger value="myio"><Factory className="mr-2 h-4 w-4" />Solicitações de Projetos</TabsTrigger>}
             {isAdmin && <TabsTrigger value="admin"><Users className="mr-2 h-4 w-4" />Usuários e logs</TabsTrigger>}

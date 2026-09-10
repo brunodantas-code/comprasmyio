@@ -100,8 +100,8 @@ function AuthPage() {
           <CardContent>
             <Tabs defaultValue="signin">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="signin">Entrar</TabsTrigger>
-                <TabsTrigger value="signup">Criar conta</TabsTrigger>
+                <TabsTrigger value="signin" className="w-full data-[state=inactive]:bg-background data-[state=inactive]:border data-[state=inactive]:border-border data-[state=inactive]:text-foreground">Entrar</TabsTrigger>
+                <TabsTrigger value="signup" className="w-full data-[state=inactive]:bg-background data-[state=inactive]:border data-[state=inactive]:border-border data-[state=inactive]:text-foreground">Criar conta</TabsTrigger>
               </TabsList>
 
               <TabsContent value="signin">
