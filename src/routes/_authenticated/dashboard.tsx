@@ -2895,7 +2895,7 @@ function ApprovalLimitInput({ value, onSave }: { value: number; onSave: (v: numb
   useEffect(() => { setDraft(String(value ?? 0)); }, [value]);
   return (
     <MoneyInput
-      className="h-8 w-full min-w-0 px-1 text-xs md:text-xs"
+      className="h-8 w-full min-w-0 px-1 text-right text-xs md:text-xs"
       value={draft}
       onChange={setDraft}
       onBlur={() => {
