@@ -1985,7 +1985,7 @@ function OrdersTable({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="h-7 text-xs"
+      className="h-7 px-1 text-xs"
     />
   );
 
