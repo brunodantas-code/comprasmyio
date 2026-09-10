@@ -8,3 +8,5 @@
 - [x] Menus selecionados no padrão verde/preto do botão "Entrar"
 - [ ] Mover "Solicitações de Projetos" para dentro de "Novas Solicitações" como box "Dispositivos"
 - [ ] Encurtar "Reembolso de despesas" para "Reembolsos"
+- [ ] Trocar palavra "comprador" por "supply"
+- [ ] Atualizar texto do Armazém para "Estoque de dispositivos myio e insumos de instalação, no armazém ou em poder de terceiros, com movimentações auditadas."
