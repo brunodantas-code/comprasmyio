@@ -1202,33 +1202,39 @@ export type Database = {
           client_cnpj: string | null
           client_id: string | null
           client_name: string
+          concluded_at: string | null
           created_at: string
           created_by: string | null
           description: string | null
           id: string
           name: string
+          status: string
         }
         Insert: {
           budget?: number
           client_cnpj?: string | null
           client_id?: string | null
           client_name?: string
+          concluded_at?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
           id?: string
           name: string
+          status?: string
         }
         Update: {
           budget?: number
           client_cnpj?: string | null
           client_id?: string | null
           client_name?: string
+          concluded_at?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
           id?: string
           name?: string
+          status?: string
         }
         Relationships: [
           {
