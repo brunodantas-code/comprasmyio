@@ -2026,8 +2026,7 @@ function OrdersTable({
             <TableHead className="w-[120px] text-center font-bold">Endereço de Entrega</TableHead>
             <TableHead className="w-[100px] text-center font-bold">Prazo e Previsão</TableHead>
             <TableHead className="w-[100px] text-center font-bold">Status</TableHead>
-            <TableHead className="w-[90px] text-center font-bold">Palavra passe</TableHead>
-            <TableHead className="w-[150px] text-center font-bold">Obs.</TableHead>
+             <TableHead className="w-[90px] text-center font-bold">Palavra passe</TableHead>
           </TableRow>
           {headerFilters && (
             <TableRow className="bg-primary/5 hover:bg-primary/5">
