@@ -1931,7 +1931,19 @@ function BuyerQueue() {
         ) : !filtered.length ? (
           <p className="text-sm text-muted-foreground">Nada por aqui.</p>
         ) : (
-          <div className="space-y-4">{renderOrders(filtered)}</div>
+          <div className="space-y-2">
+            <div className="flex justify-start">
+              <Button
+                type="button"
+                variant={groupByProject ? "default" : "outline"}
+                size="sm"
+                onClick={() => setGroupByProject((v) => !v)}
+              >
+                Agrupar por projeto
+              </Button>
+            </div>
+            {renderOrders(filtered)}
+          </div>
         )}
       </CardContent>
     </Card>
@@ -2082,12 +2094,13 @@ function OrdersTable({
                     field="delivery_forecast"
                     type="date"
                     canEdit={canEdit}
-                    display={
-                      o.delivery_forecast
-                        ? `Prev.: ${new Date(o.delivery_forecast + "T00:00:00").toLocaleDateString("pt-BR")}`
-                        : "Prev.: —"
-                    }
-                  />
+                     display={
+                       o.delivery_forecast
+                         ? `Prev.: ${new Date(o.delivery_forecast + "T00:00:00").toLocaleDateString("pt-BR")}`
+                         : "Prev.: —"
+                     }
+                     align="center"
+                   />
                 </div>
               </TableCell>
               <TableCell className="text-center"><StatusHistoryDialog order={o} canEdit={canEdit} /></TableCell>
