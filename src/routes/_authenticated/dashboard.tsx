@@ -2083,7 +2083,7 @@ function OrdersTable({
           )}
         </TableHeader>
         <TableBody>
-          {orders.map((o) => (
+          {visibleOrders.map((o) => (
             <TableRow key={o.id} className="align-top">
               <TableCell className="font-mono text-xs">
                 <div>{o.approval_number ?? "—"}</div>
