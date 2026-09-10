@@ -1969,6 +1969,7 @@ function OrdersTable({
   const [fItem, setFItem] = useState("");
   const [fAloc, setFAloc] = useState("");
   const [fReq, setFReq] = useState("");
+  const [fDate, setFDate] = useState("");
   const [fStatus, setFStatus] = useState<string>("all");
 
   const norm = (s: string) => s.toLowerCase().trim();
@@ -1980,6 +1981,7 @@ function OrdersTable({
         (!fItem || norm(`${o.item_name ?? ""} ${o.requester_notes ?? ""}`).includes(norm(fItem))) &&
         (!fAloc || norm(allocationOf(o)).includes(norm(fAloc))) &&
         (!fReq || norm(requesterName?.(o.requester_id) ?? "").includes(norm(fReq))) &&
+        (!fDate || o.deadline_date === fDate || o.delivery_forecast === fDate) &&
         (fStatus === "all" || o.status === fStatus)
       );
 
