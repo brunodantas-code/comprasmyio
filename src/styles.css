@@ -196,6 +196,25 @@
   }
 }
 
+/* Organograma: cartões uniformes dimensionados pela largura disponível. */
+.org-chart {
+  container-type: inline-size;
+  --org-leaves: 1;
+  --org-card-width: min(4.5rem, calc(100cqw / var(--org-leaves) - 0.75rem));
+}
+
+.org-chart-card {
+  width: var(--org-card-width);
+  min-width: var(--org-card-width);
+  height: 5rem;
+}
+
+@media (max-width: 639px) {
+  .org-chart {
+    --org-card-width: 5rem;
+  }
+}
+
 /* Tabelas empilhadas no celular: rótulo à esquerda, informação à direita */
 @media (max-width: 767px) {
   table[data-responsive="true"] {

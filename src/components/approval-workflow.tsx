@@ -1109,16 +1109,16 @@ type RoleNode = {
 
 function OrgBox({ node }: { node: RoleNode }) {
   return (
-    <div className="mx-auto flex h-20 w-24 min-w-24 flex-col items-center justify-center overflow-hidden rounded border bg-card px-1.5 py-1 text-center shadow-sm sm:w-28 sm:min-w-28">
-      <p className="w-full break-words text-[11px] font-bold leading-tight sm:text-xs">{node.title}</p>
+    <div className="org-chart-card mx-auto flex flex-col items-center justify-center overflow-hidden rounded border bg-card px-1 py-1 text-center shadow-sm">
+      <p className="w-full break-words text-[9px] font-bold leading-tight sm:text-[10px]">{node.title}</p>
       <div className="mt-0.5 w-full space-y-0.5 overflow-hidden">
         {node.names.length === 0 ? (
-          <p className="text-[9px] italic leading-tight text-muted-foreground">Sem usuário no cargo</p>
+          <p className="text-[8px] italic leading-tight text-muted-foreground">Sem usuário</p>
         ) : (
           node.names.map((n, i) => (
             <div
               key={`${n.name}-${i}`}
-              className="min-w-0 text-[9px] leading-tight text-muted-foreground sm:text-[10px]"
+              className="min-w-0 text-[8px] leading-tight text-muted-foreground sm:text-[9px]"
             >
               <p className="truncate">{n.name}</p>
               <p className="font-medium text-foreground/80">{formatInt(n.limit)}</p>
@@ -1320,10 +1320,11 @@ function OrgChartAdmin() {
           <CardTitle>Visualização</CardTitle>
           <CardDescription>Hierarquia de aprovação por cargo, com os usuários de cada cargo agrupados.</CardDescription>
         </CardHeader>
-        <CardContent className="overflow-hidden px-2 sm:px-4">
+        <CardContent className="org-chart overflow-hidden px-2 sm:px-4">
           <div
             className="grid min-w-0 grid-cols-1 items-start gap-2 pb-2 sm:[grid-template-columns:var(--org-columns)]"
             style={{
+              "--org-leaves": Math.max(1, roots.reduce((total, root) => total + orgLeafCount(root), 0)),
               "--org-columns": roots.length
                 ? roots.map((root) => `minmax(0, ${orgLeafCount(root)}fr)`).join(" ")
                 : "minmax(0, 1fr)",
