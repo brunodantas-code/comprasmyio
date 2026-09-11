@@ -1116,11 +1116,10 @@ const ROLE_TITLES: Record<string, string> = {
   comprador: "Supply",
   estoquista: "Estoquista",
   fabrica: "Fábrica",
-  solicitante: "Solicitante",
   financeiro: "Financeiro",
 };
 
-const ROLE_PRIORITY = ["ceo", "coo", "cfo", "cto", "financeiro", "comprador", "estoquista", "fabrica", "solicitante", "admin"];
+const ROLE_PRIORITY = ["ceo", "coo", "cfo", "cto", "financeiro", "comprador", "estoquista", "fabrica", "admin"];
 
 function roleTitle(roles: AppRole[]) {
   const found = ROLE_PRIORITY.find((r) => roles.includes(r as AppRole));
@@ -1173,7 +1172,7 @@ function OrgBox({ node }: { node: RoleNode }) {
   );
 }
 
-const ORG_ROLES = ["ceo", "cfo", "coo", "cto", "financeiro", "comprador", "estoquista", "fabrica", "solicitante"];
+const ORG_ROLES = ["ceo", "cfo", "coo", "cto", "financeiro", "comprador", "estoquista", "fabrica"];
 
 function OrgChartAdmin() {
   const qc = useQueryClient();

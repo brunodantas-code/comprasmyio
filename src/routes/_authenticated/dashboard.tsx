@@ -381,7 +381,7 @@ function Dashboard() {
   const canSeeStock = me.canAccess("armazem");
   const canSeeQueue = me.canAccess("approvals");
   const canImport = me.isComprador || isAdmin;
-  const defaultTab = canSeeRequests ? "pedidos" : canSeeQueue ? "queue" : canSeeStock ? "stock" : canSeeRegistration ? "projects" : "admin";
+  const defaultTab = canSeeRequests ? "pedidos" : canSeeQueue ? "queue" : canSeeStock ? "stock" : canSeeRegistration ? "projects" : canSeeAdministration ? "admin" : "pending";
 
 
   return (
@@ -482,6 +482,14 @@ function Dashboard() {
               </Tabs>
             </TabsContent>
           )}
+          <TabsContent value="pending">
+            <Card>
+              <CardHeader>
+                <CardTitle>Configuração pendente</CardTitle>
+                <CardDescription>Seu cadastro foi concluído. Aguarde um Admin definir seu cargo e os menus disponíveis.</CardDescription>
+              </CardHeader>
+            </Card>
+          </TabsContent>
         </Tabs>
       </main>
     </div>
@@ -928,7 +936,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
   const { data: costCenters } = useCostCenters();
 
   const { data: me } = useCurrentUser();
-  const restrictedCc = !!me && !me.isAdmin && me.roles.some((r) => ["estoquista", "fabrica", "solicitante"].includes(r));
+  const restrictedCc = !!me && !me.isAdmin && (me.accessProfile === "restrito" || me.roles.some((r) => ["estoquista", "fabrica"].includes(r)));
 
   async function resolveOperacaoCostCenterId(): Promise<string> {
     const existing = (costCenters ?? []).find((c) => c.name.trim().toLowerCase() === "operação");
@@ -3285,14 +3293,16 @@ function UsersAdmin() {
   const { data, isLoading } = useQuery({
     queryKey: ["admin-users"],
     queryFn: async () => {
-      const [{ data: profiles, error: pe }, { data: roles, error: re }, { data: accessProfiles, error: ae }] = await Promise.all([
+      const [{ data: profiles, error: pe }, { data: roles, error: re }, { data: accessProfiles, error: ae }, { data: menuPermissions, error: me }] = await Promise.all([
         supabase.from("profiles").select("*").is("deleted_at", null).order("created_at", { ascending: false }),
         supabase.from("user_roles").select("*"),
         supabase.from("user_access_profiles").select("user_id, profile"),
+        supabase.from("user_menu_permissions").select("user_id, allowed").eq("allowed", true),
       ]);
       if (pe) throw pe;
       if (re) throw re;
       if (ae) throw ae;
+      if (me) throw me;
       const byUser = new Map<string, AppRole[]>();
       (roles ?? []).forEach((r) => {
         const arr = byUser.get(r.user_id) ?? [];
@@ -3300,7 +3310,13 @@ function UsersAdmin() {
         byUser.set(r.user_id, arr);
       });
       const accessByUser = new Map((accessProfiles ?? []).map((item) => [item.user_id, item.profile]));
-      return (profiles ?? []).map((p) => ({ ...p, roles: byUser.get(p.id) ?? [], accessProfile: accessByUser.get(p.id) ?? "padrao" }));
+      const configuredUsers = new Set((menuPermissions ?? []).map((item) => item.user_id));
+      return (profiles ?? []).map((p) => ({
+        ...p,
+        roles: byUser.get(p.id) ?? [],
+        accessProfile: accessByUser.get(p.id) ?? "restrito",
+        hasConfiguredAccess: configuredUsers.has(p.id),
+      }));
     },
   });
 
@@ -3376,14 +3392,13 @@ function UsersAdmin() {
     comprador: "Time de Supply",
     fabrica: "Fábrica",
     estoquista: "Estoquista",
-    solicitante: "Solicitante",
     coo: "COO",
     ceo: "CEO",
     cfo: "CFO",
     cto: "CTO",
     financeiro: "Financeiro",
   };
-  const selectableRoles: AppRole[] = ["comprador", "financeiro", "fabrica", "estoquista", "solicitante", "coo", "ceo", "cfo", "cto"];
+  const selectableRoles: AppRole[] = ["comprador", "financeiro", "fabrica", "estoquista", "coo", "ceo", "cfo", "cto"];
 
   const { data: roleHierarchy } = useQuery({
     queryKey: ["role-hierarchy"],
@@ -3515,6 +3530,7 @@ function UsersAdmin() {
                           <div className="flex flex-wrap justify-end gap-1">
                             <Badge variant="outline">Perfil: {u.accessProfile === "admin" ? "Admin" : u.accessProfile === "restrito" ? "Restrito" : "Padrão"}</Badge>
                             <Badge variant="outline">Cargo: {primary === "none" ? "Sem cargo" : roleLabels[primary]}</Badge>
+                            {u.accessProfile === "restrito" && !u.hasConfiguredAccess ? <Badge variant="outline">Configuração pendente</Badge> : null}
                             {u.id !== currentUser?.id ? (
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
