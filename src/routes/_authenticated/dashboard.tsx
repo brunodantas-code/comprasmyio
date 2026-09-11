@@ -3279,19 +3279,22 @@ function UsersAdmin() {
   const { data, isLoading } = useQuery({
     queryKey: ["admin-users"],
     queryFn: async () => {
-      const [{ data: profiles, error: pe }, { data: roles, error: re }] = await Promise.all([
+      const [{ data: profiles, error: pe }, { data: roles, error: re }, { data: accessProfiles, error: ae }] = await Promise.all([
         supabase.from("profiles").select("*").order("created_at", { ascending: false }),
         supabase.from("user_roles").select("*"),
+        supabase.from("user_access_profiles").select("user_id, profile"),
       ]);
       if (pe) throw pe;
       if (re) throw re;
+      if (ae) throw ae;
       const byUser = new Map<string, AppRole[]>();
       (roles ?? []).forEach((r) => {
         const arr = byUser.get(r.user_id) ?? [];
         arr.push(r.role as AppRole);
         byUser.set(r.user_id, arr);
       });
-      return (profiles ?? []).map((p) => ({ ...p, roles: byUser.get(p.id) ?? [] }));
+      const accessByUser = new Map((accessProfiles ?? []).map((item) => [item.user_id, item.profile]));
+      return (profiles ?? []).map((p) => ({ ...p, roles: byUser.get(p.id) ?? [], accessProfile: accessByUser.get(p.id) ?? "padrao" }));
     },
   });
 
@@ -3305,7 +3308,7 @@ function UsersAdmin() {
         if (error) throw error;
       }
     },
-    onSuccess: () => { toast.success("Perfis atualizados"); qc.invalidateQueries({ queryKey: ["admin-users"] }); },
+    onSuccess: () => { toast.success("Cargo atualizado"); qc.invalidateQueries({ queryKey: ["admin-users"] }); },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -3318,7 +3321,20 @@ function UsersAdmin() {
         if (error) throw error;
       }
     },
-    onSuccess: () => { toast.success("Perfil atualizado"); qc.invalidateQueries({ queryKey: ["admin-users"] }); },
+    onSuccess: () => { toast.success("Cargo atualizado"); qc.invalidateQueries({ queryKey: ["admin-users"] }); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const setAccessProfile = useMutation({
+    mutationFn: async ({ userId, profile }: { userId: string; profile: "admin" | "padrao" | "restrito" }) => {
+      const { error } = await supabase.from("user_access_profiles").upsert({ user_id: userId, profile }, { onConflict: "user_id" });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Perfil de acesso atualizado");
+      qc.invalidateQueries({ queryKey: ["admin-users"] });
+      qc.invalidateQueries({ queryKey: ["restricted-access-profiles"] });
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -3387,7 +3403,7 @@ function UsersAdmin() {
     <Card>
       <CardHeader>
         <CardTitle>Usuários</CardTitle>
-        <CardDescription>Selecione o perfil de cada usuário e as faixas de alçada. A aprovação segue o cargo definido no organograma.</CardDescription>
+        <CardDescription>Defina separadamente o cargo da cadeia de aprovação e o perfil de acesso às funcionalidades.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
@@ -3407,14 +3423,14 @@ function UsersAdmin() {
             </Select>
           </div>
           {(() => {
-            const groupOrder: (AppRole | "admin" | "none")[] = ["admin", ...selectableRoles, "none"];
-            const groupLabel: Record<string, string> = { ...roleLabels, none: "Sem perfil" };
+            const groupOrder: (AppRole | "none")[] = [...selectableRoles, "none"];
+            const groupLabel: Record<string, string> = { ...roleLabels, none: "Sem cargo" };
             const groups = groupOrder
               .map((g) => ({
                 key: g,
                 label: groupLabel[g] ?? g,
                 users: rows.filter((u) => {
-                  const primary = u.roles.find((r) => r !== "admin") ?? (u.roles.includes("admin") ? "admin" : "none");
+                  const primary = u.roles.find((r) => r !== "admin") ?? "none";
                   return primary === g;
                 }),
               }))
@@ -3438,13 +3454,7 @@ function UsersAdmin() {
                             <div className="truncate font-medium">{u.full_name || "—"}</div>
                             <div className="truncate text-xs text-muted-foreground">{u.email}</div>
                           </div>
-                          <label className="flex shrink-0 items-center gap-1.5">
-                            <Checkbox
-                              checked={isAdminUser}
-                              onCheckedChange={() => toggleRole.mutate({ userId: u.id, role: "admin", has: isAdminUser })}
-                            />
-                            <span className="text-xs text-muted-foreground">Admin</span>
-                          </label>
+                          <Badge variant="outline">{u.accessProfile === "admin" ? "Admin" : u.accessProfile === "restrito" ? "Restrito" : "Padrão"}</Badge>
                         </div>
                         <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-3 lg:grid-cols-5">
                           <div className="flex flex-col gap-1">
@@ -3455,15 +3465,26 @@ function UsersAdmin() {
                           </div>
 
                           <div className="flex flex-col gap-1">
-                            <span className="text-[10px] font-medium text-muted-foreground">Perfil</span>
+                            <span className="text-[10px] font-medium text-muted-foreground">Cargo</span>
                             <Select
                               value={primary}
                               onValueChange={(v) => setPrimaryRole.mutate({ userId: u.id, role: v as AppRole | "none" })}
                             >
-                              <SelectTrigger className="h-8 w-full text-xs"><SelectValue placeholder="Sem perfil" /></SelectTrigger>
+                              <SelectTrigger className="h-8 w-full text-xs"><SelectValue placeholder="Sem cargo" /></SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="none">Sem perfil</SelectItem>
+                                <SelectItem value="none">Sem cargo</SelectItem>
                                 {selectableRoles.map((r) => <SelectItem key={r} value={r}>{roleLabels[r]}</SelectItem>)}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[10px] font-medium text-muted-foreground">Perfil de acesso</span>
+                            <Select value={u.accessProfile} onValueChange={(value) => setAccessProfile.mutate({ userId: u.id, profile: value as "admin" | "padrao" | "restrito" })}>
+                              <SelectTrigger className="h-8 w-full text-xs"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="admin">Admin</SelectItem>
+                                <SelectItem value="padrao">Padrão</SelectItem>
+                                <SelectItem value="restrito">Restrito</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
