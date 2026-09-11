@@ -1152,7 +1152,9 @@ function OrgTreeBranch({ node }: { node: RoleNode }) {
               style={{ "--org-columns": childColumns } as CSSProperties}
             >
               {node.children.map((child) => (
-                <OrgTreeBranch key={child.role} node={child} />
+                <div key={child.role} className="org-chart-child min-w-0">
+                  <OrgTreeBranch node={child} />
+                </div>
               ))}
             </div>
           </div>
