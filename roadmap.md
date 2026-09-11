@@ -35,3 +35,4 @@
 - [x] Unificar a lista de cargos dos usuários e do organograma com os cargos ativos do Cadastro
 - [x] Separar usuários sem menus em "Usuários pendentes" até a liberação do acesso
 - [x] Mover "Perfis de Acesso" para "Usuários e Logs" como "Acesso Restrito"
+- [x] Manter usuários Restritos sem aprovador em "Usuários pendentes" até concluir o cadastro
