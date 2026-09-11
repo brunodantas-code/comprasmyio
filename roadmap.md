@@ -32,3 +32,4 @@
 - [x] Manter Cargo e Perfil de acesso separados no resumo do usuário
 - [x] Novos usuários iniciam com Perfil Restrito, sem cargo e com configuração pendente para Admin
 - [x] Remover o cargo legado Solicitante das opções e associações atuais
+- [x] Unificar a lista de cargos dos usuários e do organograma com os cargos ativos do Cadastro

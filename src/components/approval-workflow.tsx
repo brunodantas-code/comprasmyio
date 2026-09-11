@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { CheckCircle2, Clock, History, Pencil, Plus, Trash2, XCircle } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
-import { useCurrentUser, type AppRole } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/hooks/use-current-user";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -82,26 +82,22 @@ const STEP_TYPES: { value: string; label: string }[] = [
   { value: "financeiro", label: "Financeiro / Controller" },
 ];
 
-type ProfileRow = { id: string; full_name: string | null; email: string | null; approval_limit: number | null };
+type ProfileRow = { id: string; full_name: string | null; email: string | null; approval_limit: number | null; job_title_id: string | null };
+type ProfileWithTitle = ProfileRow & { jobTitle: { id: string; name: string } | null };
 
 function useProfiles() {
   return useQuery({
     queryKey: ["aw-profiles"],
     queryFn: async () => {
-      const [{ data: profiles, error: pe }, { data: roles, error: re }] = await Promise.all([
-        supabase.from("profiles").select("id, full_name, email, approval_limit").order("full_name"),
-        supabase.from("user_roles").select("user_id, role"),
+      const [{ data: profiles, error: pe }, { data: titles, error: te }] = await Promise.all([
+        supabase.from("profiles").select("id, full_name, email, approval_limit, job_title_id").order("full_name"),
+        supabase.from("job_titles").select("id,name").eq("active", true),
       ]);
       if (pe) throw pe;
-      if (re) throw re;
-      const rolesBy = new Map<string, AppRole[]>();
-      (roles ?? []).forEach((r) => {
-        const arr = rolesBy.get(r.user_id) ?? [];
-        arr.push(r.role as AppRole);
-        rolesBy.set(r.user_id, arr);
-      });
-      const map = new Map<string, ProfileRow & { roles: AppRole[] }>();
-      ((profiles ?? []) as ProfileRow[]).forEach((p) => map.set(p.id, { ...p, roles: rolesBy.get(p.id) ?? [] }));
+      if (te) throw te;
+      const titleById = new Map((titles ?? []).map((title) => [title.id, title]));
+      const map = new Map<string, ProfileWithTitle>();
+      ((profiles ?? []) as ProfileRow[]).forEach((p) => map.set(p.id, { ...p, jobTitle: p.job_title_id ? titleById.get(p.job_title_id) ?? null : null }));
       return map;
     },
   });
@@ -280,7 +276,7 @@ function AuditTrailDialog({ orderId, title }: { orderId: string; title: string }
                     <TableCell className="text-sm text-muted-foreground">{dt(l.created_at)}</TableCell>
                     <TableCell className="text-sm">{p?.full_name || p?.email || "—"}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {(p?.roles ?? []).join(", ") || "—"}
+                      {p?.jobTitle?.name ?? "—"}
                       {p?.approval_limit ? ` · ${BRL(Number(p.approval_limit))}` : ""}
                     </TableCell>
                     <TableCell className="font-semibold">{ACTION_LABELS[l.action] ?? l.action}</TableCell>
@@ -942,7 +938,7 @@ function DefaultChainAdmin() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, full_name, email, approval_limit, tier2_limit, tier3_limit, approval_level")
+        .select("id, full_name, email, approval_limit, tier2_limit, tier3_limit, approval_level, job_title_id")
         .order("full_name");
       if (error) throw error;
       return data ?? [];
@@ -952,10 +948,10 @@ function DefaultChainAdmin() {
   const { data: hierarchy } = useQuery({
     queryKey: ["aw-role-hierarchy"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("role_hierarchy").select("role, approver_role");
+      const { data, error } = await supabase.from("job_title_hierarchy").select("job_title_id, approver_job_title_id");
       if (error) throw error;
       const map = new Map<string, string | null>();
-      (data ?? []).forEach((r) => map.set(r.role as string, (r.approver_role as string | null) ?? null));
+      (data ?? []).forEach((r) => map.set(r.job_title_id, r.approver_job_title_id));
       return map;
     },
   });
@@ -982,9 +978,8 @@ function DefaultChainAdmin() {
   const namesByRole = useMemo(() => {
     const m = new Map<string, string[]>();
     (rows ?? []).forEach((p) => {
-      const roles = profilesMap?.get(p.id)?.roles ?? [];
-      const main = ROLE_PRIORITY.find((r) => roles.includes(r as AppRole));
-      if (!main || main === "admin") return;
+      const main = profilesMap?.get(p.id)?.jobTitle?.id;
+      if (!main) return;
       if (!m.has(main)) m.set(main, []);
       m.get(main)!.push(p.full_name || p.email || "—");
     });
@@ -992,14 +987,13 @@ function DefaultChainAdmin() {
   }, [rows, profilesMap]);
 
   const mainRoleOf = (userId: string) => {
-    const roles = profilesMap?.get(userId)?.roles ?? [];
-    return ROLE_PRIORITY.find((r) => r !== "admin" && roles.includes(r as AppRole)) ?? null;
+    return profilesMap?.get(userId)?.jobTitle?.id ?? null;
   };
 
   const approverRoleOf = (userId: string) => {
     const main = mainRoleOf(userId);
     const next = main ? hierarchy?.get(main) ?? null : null;
-    return next ? ROLE_TITLES[next] ?? next : null;
+    return next ? (profilesMap ? Array.from(profilesMap.values()).find((p) => p.jobTitle?.id === next)?.jobTitle?.name ?? null : null) : null;
   };
 
   const chainFor = (userId: string, levels: number) => {
@@ -1011,7 +1005,8 @@ function DefaultChainAdmin() {
       if (!next || seen.has(next)) break;
       seen.add(next);
       const people = namesByRole.get(next) ?? [];
-      names.push(`${ROLE_TITLES[next] ?? next}: ${people.length ? people.join(", ") : "sem usuário no cargo"}`);
+      const titleName = profilesMap && Array.from(profilesMap.values()).find((p) => p.jobTitle?.id === next)?.jobTitle?.name;
+      names.push(`${titleName ?? "Cargo"}: ${people.length ? people.join(", ") : "sem usuário no cargo"}`);
       cur = next;
     }
     return names;
@@ -1107,25 +1102,6 @@ function DefaultChainAdmin() {
   );
 }
 
-const ROLE_TITLES: Record<string, string> = {
-  ceo: "CEO",
-  coo: "COO",
-  cfo: "CFO",
-  cto: "CTO",
-  admin: "Admin",
-  comprador: "Supply",
-  estoquista: "Estoquista",
-  fabrica: "Fábrica",
-  financeiro: "Financeiro",
-};
-
-const ROLE_PRIORITY = ["ceo", "coo", "cfo", "cto", "financeiro", "comprador", "estoquista", "fabrica", "admin"];
-
-function roleTitle(roles: AppRole[]) {
-  const found = ROLE_PRIORITY.find((r) => roles.includes(r as AppRole));
-  return found ? ROLE_TITLES[found]! : "Sem perfil";
-}
-
 type RoleNode = {
   role: string;
   title: string;
@@ -1172,12 +1148,18 @@ function OrgBox({ node }: { node: RoleNode }) {
   );
 }
 
-const ORG_ROLES = ["ceo", "cfo", "coo", "cto", "financeiro", "comprador", "estoquista", "fabrica"];
-
 function OrgChartAdmin() {
   const qc = useQueryClient();
   const { data: me } = useCurrentUser();
   const { data: profiles } = useProfiles();
+  const { data: jobTitles } = useQuery({
+    queryKey: ["job_titles"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("job_titles").select("id,name").eq("active", true).order("name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
   const isAdmin = Boolean(me?.isAdmin);
 
   const { data: rows, isLoading } = useQuery({
@@ -1185,7 +1167,7 @@ function OrgChartAdmin() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, full_name, email, approval_level, approval_limit")
+        .select("id, full_name, email, approval_level, approval_limit, job_title_id")
         .order("full_name");
       if (error) throw error;
       return data ?? [];
@@ -1195,10 +1177,10 @@ function OrgChartAdmin() {
   const { data: hierarchy } = useQuery({
     queryKey: ["aw-role-hierarchy"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("role_hierarchy").select("role, approver_role");
+      const { data, error } = await supabase.from("job_title_hierarchy").select("job_title_id, approver_job_title_id");
       if (error) throw error;
       const map = new Map<string, string | null>();
-      (data ?? []).forEach((r) => map.set(r.role as string, (r.approver_role as string | null) ?? null));
+      (data ?? []).forEach((r) => map.set(r.job_title_id, r.approver_job_title_id));
       return map;
     },
   });
@@ -1206,9 +1188,8 @@ function OrgChartAdmin() {
   const saveApprover = useMutation({
     mutationFn: async ({ role, approverRole }: { role: string; approverRole: string | null }) => {
       const { error } = await supabase
-        .from("role_hierarchy")
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .upsert({ role, approver_role: approverRole } as any, { onConflict: "role" });
+        .from("job_title_hierarchy")
+        .upsert({ job_title_id: role, approver_job_title_id: approverRole }, { onConflict: "job_title_id" });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -1235,9 +1216,8 @@ function OrgChartAdmin() {
   const namesByRole = useMemo(() => {
     const map = new Map<string, { name: string; limit: number }[]>();
     (rows ?? []).forEach((p) => {
-      const roles = profiles?.get(p.id)?.roles ?? [];
-      const main = ROLE_PRIORITY.find((r) => roles.includes(r as AppRole));
-      if (!main || main === "admin") return;
+      const main = p.job_title_id;
+      if (!main) return;
       if (!map.has(main)) map.set(main, []);
       map.get(main)!.push({ name: shortName(p.full_name), limit: Number(p.approval_limit ?? 0) });
     });
@@ -1247,11 +1227,12 @@ function OrgChartAdmin() {
   const roots = useMemo(() => {
     const h = hierarchy ?? new Map<string, string | null>();
     const nodes = new Map<string, RoleNode>();
-    ORG_ROLES.forEach((r) =>
-      nodes.set(r, { role: r, title: ROLE_TITLES[r] ?? r, names: namesByRole.get(r) ?? [], children: [] })
+    (jobTitles ?? []).forEach((title) =>
+      nodes.set(title.id, { role: title.id, title: title.name, names: namesByRole.get(title.id) ?? [], children: [] })
     );
     const top: RoleNode[] = [];
-    ORG_ROLES.forEach((r) => {
+    (jobTitles ?? []).forEach((title) => {
+      const r = title.id;
       const parentRole = h.get(r) ?? null;
       const node = nodes.get(r)!;
       if (parentRole && parentRole !== r && nodes.has(parentRole)) {
@@ -1261,7 +1242,7 @@ function OrgChartAdmin() {
       }
     });
     return top;
-  }, [hierarchy, namesByRole]);
+  }, [hierarchy, namesByRole, jobTitles]);
 
   return (
     <div className="space-y-4">
@@ -1283,23 +1264,23 @@ function OrgChartAdmin() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {ORG_ROLES.map((r) => (
-                <TableRow key={r}>
-                  <TableCell className="font-medium">{ROLE_TITLES[r] ?? r}</TableCell>
+              {(jobTitles ?? []).map((title) => (
+                <TableRow key={title.id}>
+                  <TableCell className="font-medium">{title.name}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">
-                    {(namesByRole.get(r) ?? []).map((n) => n.name).join(", ") || "—"}
+                    {(namesByRole.get(title.id) ?? []).map((n) => n.name).join(", ") || "—"}
                   </TableCell>
                   <TableCell>
                     <Select
-                      value={hierarchy?.get(r) ?? "none"}
+                      value={hierarchy?.get(title.id) ?? "none"}
                       disabled={!isAdmin}
-                      onValueChange={(v) => saveApprover.mutate({ role: r, approverRole: v === "none" ? null : v })}
+                      onValueChange={(v) => saveApprover.mutate({ role: title.id, approverRole: v === "none" ? null : v })}
                     >
                       <SelectTrigger className="h-8 w-56"><SelectValue placeholder="Sem aprovador" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">Sem aprovador</SelectItem>
-                        {ORG_ROLES.filter((o) => o !== r).map((o) => (
-                          <SelectItem key={o} value={o}>{ROLE_TITLES[o] ?? o}</SelectItem>
+                        {(jobTitles ?? []).filter((option) => option.id !== title.id).map((option) => (
+                          <SelectItem key={option.id} value={option.id}>{option.name}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -1333,7 +1314,7 @@ function OrgChartAdmin() {
                   <TableRow key={p.id}>
                     <TableCell className="font-medium">{p.full_name || p.email}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {roleTitle(profiles?.get(p.id)?.roles ?? [])}
+                      {profiles?.get(p.id)?.jobTitle?.name ?? "Sem cargo"}
                     </TableCell>
                     <TableCell>
                       <Select

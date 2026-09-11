@@ -20,6 +20,9 @@ export const ADMIN_ROLES: AppRole[] = ["admin", "coo", "ceo", "cfo", "cto"];
 /** Somente CEO, COO e CFO (além do admin técnico) podem cadastrar projetos. */
 export const PROJECT_CREATOR_ROLES: AppRole[] = ["admin", "ceo", "coo", "cfo"];
 
+const normalizeTitle = (value: string | null | undefined) =>
+  (value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
 export function useCurrentUser() {
   return useQuery({
     queryKey: ["current-user"],
@@ -36,6 +39,16 @@ export function useCurrentUser() {
       ]);
 
       const roles = (rolesData ?? []).map((r) => r.role as AppRole);
+      let jobTitle: { id: string; name: string } | null = null;
+      if (profile?.job_title_id) {
+        const { data: title } = await supabase
+          .from("job_titles")
+          .select("id,name")
+          .eq("id", profile.job_title_id)
+          .maybeSingle();
+        jobTitle = title ?? null;
+      }
+      const titleKey = normalizeTitle(jobTitle?.name);
       const accessProfile = (accessData?.profile ?? "restrito") as AccessProfile;
       const restrictedMenus = new Set((menuData ?? []).filter((item) => item.allowed).map((item) => item.menu_key));
       const canAccess = (menu: MenuKey) => {
@@ -48,14 +61,15 @@ export function useCurrentUser() {
         email: user.email ?? "",
         full_name: profile?.full_name ?? "",
         roles,
+        jobTitle,
         accessProfile,
         canAccess,
         isAdmin: accessProfile === "admin",
-        isComprador: roles.includes("comprador"),
-        isFabrica: roles.includes("fabrica"),
-        isEstoquista: roles.includes("estoquista"),
-        isFinanceiro: roles.includes("financeiro"),
-        canCreateProjects: roles.some((r) => PROJECT_CREATOR_ROLES.includes(r)),
+        isComprador: titleKey === "supply" || titleKey === "time de supply",
+        isFabrica: titleKey === "fabrica",
+        isEstoquista: titleKey === "estoquista",
+        isFinanceiro: titleKey === "financeiro",
+        canCreateProjects: accessProfile === "admin" || ["ceo", "coo", "cfo"].includes(titleKey),
       };
     },
   });

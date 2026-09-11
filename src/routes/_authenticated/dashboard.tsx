@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { exportDatabaseBackup } from "@/lib/backup.functions";
 import { decideUserDeletion, requestUserDeletion, setUserAccessProfile } from "@/lib/user-admin.functions";
 import { lookupLinkPrice } from "@/lib/price-lookup.functions";
-import { useCurrentUser, type AppRole } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/hooks/use-current-user";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MoneyInput } from "@/components/ui/money-input";
@@ -396,9 +396,7 @@ function Dashboard() {
               <div className="truncate text-xs font-medium sm:text-sm">{me.full_name || me.email}</div>
               <div className="flex flex-wrap justify-end gap-1">
                 <Badge variant="outline" className="text-[10px] uppercase">{me.accessProfile === "padrao" ? "Padrão" : me.accessProfile}</Badge>
-                {me.roles.filter((r) => r !== "admin").map((r) => (
-                  <Badge key={r} variant="outline" className="text-[10px] uppercase">{r}</Badge>
-                ))}
+                {me.jobTitle ? <Badge variant="outline" className="text-[10px] uppercase">{me.jobTitle.name}</Badge> : null}
               </div>
             </div>
             <Button variant="ghost" size="icon" className="shrink-0" onClick={handleSignOut} title="Sair">
@@ -936,7 +934,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
   const { data: costCenters } = useCostCenters();
 
   const { data: me } = useCurrentUser();
-  const restrictedCc = !!me && !me.isAdmin && (me.accessProfile === "restrito" || me.roles.some((r) => ["estoquista", "fabrica"].includes(r)));
+  const restrictedCc = !!me && !me.isAdmin && (me.accessProfile === "restrito" || me.isEstoquista || me.isFabrica);
 
   async function resolveOperacaoCostCenterId(): Promise<string> {
     const existing = (costCenters ?? []).find((c) => c.name.trim().toLowerCase() === "operação");
@@ -3293,41 +3291,33 @@ function UsersAdmin() {
   const { data, isLoading } = useQuery({
     queryKey: ["admin-users"],
     queryFn: async () => {
-      const [{ data: profiles, error: pe }, { data: roles, error: re }, { data: accessProfiles, error: ae }, { data: menuPermissions, error: me }] = await Promise.all([
+      const [{ data: profiles, error: pe }, { data: accessProfiles, error: ae }, { data: menuPermissions, error: me }, { data: titles, error: te }] = await Promise.all([
         supabase.from("profiles").select("*").is("deleted_at", null).order("created_at", { ascending: false }),
-        supabase.from("user_roles").select("*"),
         supabase.from("user_access_profiles").select("user_id, profile"),
         supabase.from("user_menu_permissions").select("user_id, allowed").eq("allowed", true),
+        supabase.from("job_titles").select("id,name").eq("active", true).order("name"),
       ]);
       if (pe) throw pe;
-      if (re) throw re;
       if (ae) throw ae;
       if (me) throw me;
-      const byUser = new Map<string, AppRole[]>();
-      (roles ?? []).forEach((r) => {
-        const arr = byUser.get(r.user_id) ?? [];
-        arr.push(r.role as AppRole);
-        byUser.set(r.user_id, arr);
-      });
+      if (te) throw te;
+      const titleById = new Map((titles ?? []).map((title) => [title.id, title.name]));
       const accessByUser = new Map((accessProfiles ?? []).map((item) => [item.user_id, item.profile]));
       const configuredUsers = new Set((menuPermissions ?? []).map((item) => item.user_id));
       return (profiles ?? []).map((p) => ({
         ...p,
-        roles: byUser.get(p.id) ?? [],
+        jobTitleId: p.job_title_id,
+        jobTitleName: p.job_title_id ? titleById.get(p.job_title_id) ?? null : null,
         accessProfile: accessByUser.get(p.id) ?? "restrito",
         hasConfiguredAccess: configuredUsers.has(p.id),
       }));
     },
   });
 
-  const setPrimaryRole = useMutation({
-    mutationFn: async ({ userId, role }: { userId: string; role: AppRole | "none" }) => {
-      const { error: de } = await supabase.from("user_roles").delete().eq("user_id", userId).neq("role", "admin");
-      if (de) throw de;
-      if (role !== "none") {
-        const { error } = await supabase.from("user_roles").insert({ user_id: userId, role });
-        if (error) throw error;
-      }
+  const setJobTitle = useMutation({
+    mutationFn: async ({ userId, jobTitleId }: { userId: string; jobTitleId: string | null }) => {
+      const { error } = await supabase.from("profiles").update({ job_title_id: jobTitleId }).eq("id", userId);
+      if (error) throw error;
     },
     onSuccess: () => { toast.success("Cargo atualizado"); qc.invalidateQueries({ queryKey: ["admin-users"] }); },
     onError: (e: Error) => toast.error(e.message),
@@ -3387,34 +3377,22 @@ function UsersAdmin() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const roleLabels: Record<AppRole, string> = {
-    admin: "Admin",
-    comprador: "Time de Supply",
-    fabrica: "Fábrica",
-    estoquista: "Estoquista",
-    coo: "COO",
-    ceo: "CEO",
-    cfo: "CFO",
-    cto: "CTO",
-    financeiro: "Financeiro",
-  };
-  const selectableRoles: AppRole[] = ["comprador", "financeiro", "fabrica", "estoquista", "coo", "ceo", "cfo", "cto"];
+  const { data: jobTitles } = useJobTitles();
 
   const { data: roleHierarchy } = useQuery({
     queryKey: ["role-hierarchy"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("role_hierarchy").select("role, approver_role");
+      const { data, error } = await supabase.from("job_title_hierarchy").select("job_title_id, approver_job_title_id");
       if (error) throw error;
       const map = new Map<string, string | null>();
-      (data ?? []).forEach((r) => map.set(r.role as string, (r.approver_role as string | null) ?? null));
+      (data ?? []).forEach((r) => map.set(r.job_title_id, r.approver_job_title_id));
       return map;
     },
   });
 
-  const approverLabelOf = (roles: AppRole[]) => {
-    const primary = roles.find((r) => r !== "admin");
-    const next = primary ? roleHierarchy?.get(primary) ?? null : null;
-    return next ? roleLabels[next as AppRole] ?? next : "";
+  const approverLabelOf = (jobTitleId: string | null) => {
+    const next = jobTitleId ? roleHierarchy?.get(jobTitleId) ?? null : null;
+    return next ? jobTitles?.find((title) => title.id === next)?.name ?? "" : "";
   };
 
   const [fName, setFName] = useState("");
@@ -3425,12 +3403,11 @@ function UsersAdmin() {
 
   const norm = (s: string) => s.toLowerCase().trim();
   const rows = (data ?? []).filter((u) => {
-    const primary = u.roles.find((r) => r !== "admin");
     return (
       (!fName || norm(u.full_name ?? "").includes(norm(fName))) &&
       (!fEmail || norm(u.email ?? "").includes(norm(fEmail))) &&
-      (!fManager || norm(approverLabelOf(u.roles)).includes(norm(fManager))) &&
-      (fRole === "all" || (fRole === "admin" ? u.roles.includes("admin") : primary === fRole))
+      (!fManager || norm(approverLabelOf(u.jobTitleId)).includes(norm(fManager))) &&
+      (fRole === "all" || u.jobTitleId === fRole)
     );
   }).sort((a, b) => {
     if (sortBy === "profile") {
@@ -3463,8 +3440,7 @@ function UsersAdmin() {
               <SelectTrigger className="h-7 text-xs"><SelectValue placeholder="Perfil" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
-                {selectableRoles.map((r) => <SelectItem key={r} value={r}>{roleLabels[r]}</SelectItem>)}
+                {(jobTitles ?? []).map((title) => <SelectItem key={title.id} value={title.id}>{title.name}</SelectItem>)}
               </SelectContent>
             </Select>
             <Select value={sortBy} onValueChange={(value) => setSortBy(value as "name" | "profile")}>
@@ -3519,7 +3495,7 @@ function UsersAdmin() {
                 <div className="divide-y divide-border">
                   {g.users.map((u) => {
                     const p = u as unknown as { approval_limit?: number; tier2_limit?: number; tier3_limit?: number; manager_id?: string | null };
-                    const primary = u.roles.find((r) => r !== "admin") ?? "none";
+                    const primary = u.jobTitleId ?? "none";
                     return (
                       <div key={u.id} className="p-3">
                         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
@@ -3529,7 +3505,7 @@ function UsersAdmin() {
                           </div>
                           <div className="flex flex-wrap justify-end gap-1">
                             <Badge variant="outline">Perfil: {u.accessProfile === "admin" ? "Admin" : u.accessProfile === "restrito" ? "Restrito" : "Padrão"}</Badge>
-                            <Badge variant="outline">Cargo: {primary === "none" ? "Sem cargo" : roleLabels[primary]}</Badge>
+                            <Badge variant="outline">Cargo: {u.jobTitleName ?? "Sem cargo"}</Badge>
                             {u.accessProfile === "restrito" && !u.hasConfiguredAccess ? <Badge variant="outline">Configuração pendente</Badge> : null}
                             {u.id !== currentUser?.id ? (
                               <AlertDialog>
@@ -3556,7 +3532,7 @@ function UsersAdmin() {
                           <div className="flex flex-col gap-1">
                             <span className="text-[10px] font-medium text-muted-foreground">Aprovado por (cargo)</span>
                             <div className="flex h-8 items-center rounded-md border border-input bg-muted/40 px-2 text-xs text-muted-foreground">
-                              {approverLabelOf(u.roles) || "—"}
+                              {approverLabelOf(u.jobTitleId) || "—"}
                             </div>
                           </div>
 
@@ -3564,12 +3540,12 @@ function UsersAdmin() {
                             <span className="text-[10px] font-medium text-muted-foreground">Cargo</span>
                             <Select
                               value={primary}
-                              onValueChange={(v) => setPrimaryRole.mutate({ userId: u.id, role: v as AppRole | "none" })}
+                              onValueChange={(v) => setJobTitle.mutate({ userId: u.id, jobTitleId: v === "none" ? null : v })}
                             >
                               <SelectTrigger className="h-8 w-full text-xs"><SelectValue placeholder="Sem cargo" /></SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="none">Sem cargo</SelectItem>
-                                {selectableRoles.map((r) => <SelectItem key={r} value={r}>{roleLabels[r]}</SelectItem>)}
+                                {(jobTitles ?? []).map((title) => <SelectItem key={title.id} value={title.id}>{title.name}</SelectItem>)}
                               </SelectContent>
                             </Select>
                           </div>
