@@ -14,6 +14,7 @@ import { Pencil, Trash2 } from "lucide-react";
 export type JobTitle = {
   id: string;
   name: string;
+  short_name: string | null;
   description: string | null;
   active: boolean;
 };
@@ -24,7 +25,7 @@ export function useJobTitles() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("job_titles")
-        .select("id,name,description,active")
+        .select("id,name,short_name,description,active")
         .eq("active", true)
         .order("name");
       if (error) throw error;
@@ -33,7 +34,7 @@ export function useJobTitles() {
   });
 }
 
-type FormValues = { name: string; description: string | null };
+type FormValues = { name: string; short_name: string | null; description: string | null };
 
 const DUPLICATE_JOB_TITLE_MESSAGE = "Este cargo já está cadastrado";
 
@@ -68,7 +69,7 @@ export function JobTitlesTab({ userId }: { userId: string }) {
       if (existing?.some((item) => item.id !== v.id && item.name.trim().toLocaleLowerCase("pt-BR") === normalizedName)) {
         throw new Error(DUPLICATE_JOB_TITLE_MESSAGE);
       }
-      const { error } = await supabase.from("job_titles").update({ name: v.name, description: v.description }).eq("id", v.id);
+      const { error } = await supabase.from("job_titles").update({ name: v.name, short_name: v.short_name, description: v.description }).eq("id", v.id);
       if (error) throw new Error(isDuplicateNameError(error) ? DUPLICATE_JOB_TITLE_MESSAGE : error.message);
     },
     onSuccess: () => { toast.success("Cargo atualizado"); qc.invalidateQueries({ queryKey: ["job_titles"] }); },
@@ -89,9 +90,10 @@ export function JobTitlesTab({ userId }: { userId: string }) {
     const form = e.currentTarget;
     const fd = new FormData(form);
     const name = String(fd.get("name") || "").trim();
+    const shortName = String(fd.get("short_name") || "").trim();
     const description = String(fd.get("description") || "").trim();
     if (name.length < 2) return toast.error("Nome muito curto");
-    create.mutate({ name, description: description || null }, { onSuccess: () => form.reset() });
+    create.mutate({ name, short_name: shortName || null, description: description || null }, { onSuccess: () => form.reset() });
   }
 
   return (
@@ -101,6 +103,7 @@ export function JobTitlesTab({ userId }: { userId: string }) {
         <CardContent>
           <form onSubmit={onCreate} className="space-y-4">
             <div className="space-y-2"><Label htmlFor="jt-name">Nome</Label><Input id="jt-name" name="name" required /></div>
+            <div className="space-y-2"><Label htmlFor="jt-short-name">Nome abreviado</Label><Input id="jt-short-name" name="short_name" maxLength={30} placeholder="Usado no organograma" /></div>
             <div className="space-y-2"><Label htmlFor="jt-desc">Descrição</Label><Textarea id="jt-desc" name="description" rows={3} /></div>
             <Button type="submit" disabled={create.isPending}>Criar</Button>
           </form>
@@ -113,11 +116,12 @@ export function JobTitlesTab({ userId }: { userId: string }) {
           {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
             !titles?.length ? <p className="text-sm text-muted-foreground">Sem cargos cadastrados.</p> :
             <Table>
-              <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Descrição</TableHead><TableHead /></TableRow></TableHeader>
+              <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Nome abreviado</TableHead><TableHead>Descrição</TableHead><TableHead /></TableRow></TableHeader>
               <TableBody>
                 {titles.map((t) => (
                   <TableRow key={t.id}>
                     <TableCell className="font-medium">{t.name}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{t.short_name || "—"}</TableCell>
                     <TableCell className="max-w-[260px] whitespace-pre-wrap break-words text-sm text-muted-foreground">{t.description || "—"}</TableCell>
                     <TableCell className="space-x-1 text-right">
                       <EditJobTitleDialog title={t} onSave={(v) => update.mutate({ id: t.id, ...v })} />
@@ -151,13 +155,15 @@ function EditJobTitleDialog({ title, onSave }: { title: JobTitle; onSave: (v: Fo
             e.preventDefault();
             const fd = new FormData(e.currentTarget);
             const name = String(fd.get("name") || "").trim();
+            const shortName = String(fd.get("short_name") || "").trim();
             const description = String(fd.get("description") || "").trim();
             if (name.length < 2) return toast.error("Nome muito curto");
-            onSave({ name, description: description || null });
+            onSave({ name, short_name: shortName || null, description: description || null });
             setOpen(false);
           }}
         >
           <div className="space-y-2"><Label>Nome</Label><Input name="name" defaultValue={title.name} required /></div>
+          <div className="space-y-2"><Label>Nome abreviado</Label><Input name="short_name" maxLength={30} defaultValue={title.short_name ?? ""} placeholder="Usado no organograma" /></div>
           <div className="space-y-2"><Label>Descrição</Label><Textarea name="description" rows={3} defaultValue={title.description ?? ""} /></div>
           <DialogFooter><Button type="submit">Salvar</Button></DialogFooter>
         </form>
