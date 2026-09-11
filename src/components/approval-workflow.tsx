@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { CheckCircle2, Clock, History, Pencil, Plus, Trash2, XCircle } from "lucide-react";
@@ -1111,21 +1111,21 @@ type RoleNode = {
 
 function OrgBox({ node, parentTitle }: { node: RoleNode; parentTitle?: string }) {
   return (
-    <div className="flex min-w-0 flex-col items-center rounded-md border bg-card px-2 py-2 text-center shadow-sm">
+    <div className="mx-auto flex min-h-12 w-full max-w-40 min-w-0 flex-col items-center justify-center rounded border bg-card px-1.5 py-1 text-center shadow-sm">
       {parentTitle && (
-        <p className="mb-0.5 w-full truncate text-[10px] leading-tight text-muted-foreground" title={`N+1: ${parentTitle}`}>
+        <p className="w-full truncate text-[9px] leading-tight text-muted-foreground" title={`N+1: ${parentTitle}`}>
           N+1: {parentTitle}
         </p>
       )}
-      <p className="w-full text-xs font-bold leading-tight sm:text-sm">{node.title}</p>
-      <div className="mt-1 w-full space-y-0.5">
+      <p className="w-full break-words text-[11px] font-bold leading-tight sm:text-xs">{node.title}</p>
+      <div className="mt-0.5 w-full space-y-0.5">
         {node.names.length === 0 ? (
-          <p className="text-[11px] italic leading-tight text-muted-foreground">Sem usuário no cargo</p>
+          <p className="text-[9px] italic leading-tight text-muted-foreground">Sem usuário no cargo</p>
         ) : (
           node.names.map((n, i) => (
             <div
               key={`${n.name}-${i}`}
-              className="flex min-w-0 items-center justify-center gap-1 text-[11px] leading-tight text-muted-foreground sm:text-xs"
+              className="flex min-w-0 items-center justify-center gap-0.5 text-[9px] leading-tight text-muted-foreground sm:text-[10px]"
             >
               <span className="min-w-0 break-words">{n.name}</span>
               <span className="shrink-0 text-border">|</span>
@@ -1134,6 +1134,38 @@ function OrgBox({ node, parentTitle }: { node: RoleNode; parentTitle?: string })
           ))
         )}
       </div>
+    </div>
+  );
+}
+
+const orgLeafCount = (node: RoleNode): number =>
+  node.children.length === 0
+    ? 1
+    : node.children.reduce((total, child) => total + orgLeafCount(child), 0);
+
+function OrgTreeBranch({ node, parentTitle }: { node: RoleNode; parentTitle?: string }) {
+  const childColumns = node.children
+    .map((child) => `minmax(0, ${orgLeafCount(child)}fr)`)
+    .join(" ");
+
+  return (
+    <div className="flex min-w-0 flex-col items-stretch">
+      <OrgBox node={node} parentTitle={parentTitle} />
+      {node.children.length > 0 && (
+        <>
+          <div className="mx-auto h-2 w-px bg-border" />
+          <div className="border-t border-border pt-2">
+            <div
+              className="grid min-w-0 grid-cols-1 items-start gap-1.5 sm:[grid-template-columns:var(--org-columns)]"
+              style={{ "--org-columns": childColumns } as CSSProperties}
+            >
+              {node.children.map((child) => (
+                <OrgTreeBranch key={child.role} node={child} parentTitle={node.title} />
+              ))}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -1239,17 +1271,6 @@ function OrgChartAdmin() {
     return top;
   }, [hierarchy, namesByRole, jobTitles]);
 
-  const chartLevels = useMemo(() => {
-    const levels: { node: RoleNode; parentTitle?: string }[][] = [];
-    const visit = (node: RoleNode, depth: number, parentTitle?: string) => {
-      if (!levels[depth]) levels[depth] = [];
-      levels[depth].push({ node, parentTitle });
-      node.children.forEach((child) => visit(child, depth + 1, node.title));
-    };
-    roots.forEach((root) => visit(root, 0));
-    return levels;
-  }, [roots]);
-
   return (
     <div className="space-y-4">
       <Card>
@@ -1307,17 +1328,17 @@ function OrgChartAdmin() {
           <CardTitle>Visualização</CardTitle>
           <CardDescription>Hierarquia de aprovação por cargo, com os usuários de cada cargo agrupados.</CardDescription>
         </CardHeader>
-        <CardContent className="overflow-hidden px-3 sm:px-6">
-          <div className="space-y-3 pb-2">
-            {chartLevels.map((level, depth) => (
-              <div key={depth} className="relative">
-                {depth > 0 && <div className="mx-auto h-3 w-px bg-border" />}
-                <div className="grid grid-cols-1 gap-2 border-t border-border pt-3 min-[480px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                  {level.map(({ node, parentTitle }) => (
-                    <OrgBox key={node.role} node={node} parentTitle={parentTitle} />
-                  ))}
-                </div>
-              </div>
+        <CardContent className="overflow-hidden px-2 sm:px-4">
+          <div
+            className="grid min-w-0 grid-cols-1 items-start gap-2 pb-2 sm:[grid-template-columns:var(--org-columns)]"
+            style={{
+              "--org-columns": roots.length
+                ? roots.map((root) => `minmax(0, ${orgLeafCount(root)}fr)`).join(" ")
+                : "minmax(0, 1fr)",
+            } as CSSProperties}
+          >
+            {roots.map((root) => (
+              <OrgTreeBranch key={root.role} node={root} />
             ))}
           </div>
         </CardContent>
