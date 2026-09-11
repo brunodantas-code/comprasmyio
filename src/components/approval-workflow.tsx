@@ -1138,7 +1138,16 @@ function OrgBox({ node, parentTitle }: { node: RoleNode; parentTitle?: string })
   );
 }
 
+const orgLeafCount = (node: RoleNode): number =>
+  node.children.length === 0
+    ? 1
+    : node.children.reduce((total, child) => total + orgLeafCount(child), 0);
+
 function OrgTreeBranch({ node, parentTitle }: { node: RoleNode; parentTitle?: string }) {
+  const childColumns = node.children
+    .map((child) => `minmax(0, ${orgLeafCount(child)}fr)`)
+    .join(" ");
+
   return (
     <div className="flex min-w-0 flex-col items-stretch">
       <OrgBox node={node} parentTitle={parentTitle} />
@@ -1148,7 +1157,7 @@ function OrgTreeBranch({ node, parentTitle }: { node: RoleNode; parentTitle?: st
           <div className="border-t border-border pt-2">
             <div
               className="grid min-w-0 items-start gap-1.5"
-              style={{ gridTemplateColumns: `repeat(${node.children.length}, minmax(0, 1fr))` }}
+              style={{ gridTemplateColumns: childColumns }}
             >
               {node.children.map((child) => (
                 <OrgTreeBranch key={child.role} node={child} parentTitle={node.title} />
@@ -1322,7 +1331,11 @@ function OrgChartAdmin() {
         <CardContent className="overflow-hidden px-2 sm:px-4">
           <div
             className="grid min-w-0 items-start gap-2 pb-2"
-            style={{ gridTemplateColumns: `repeat(${Math.max(roots.length, 1)}, minmax(0, 1fr))` }}
+            style={{
+              gridTemplateColumns: roots.length
+                ? roots.map((root) => `minmax(0, ${orgLeafCount(root)}fr)`).join(" ")
+                : "minmax(0, 1fr)",
+            }}
           >
             {roots.map((root) => (
               <OrgTreeBranch key={root.role} node={root} />
