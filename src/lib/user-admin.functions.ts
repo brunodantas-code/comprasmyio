@@ -4,13 +4,6 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const accessProfileSchema = z.enum(["admin", "padrao", "restrito"]);
 
-async function requireAccessAdmin(
-  supabase: Parameters<Parameters<typeof requireSupabaseAuth>[0]>[0] extends never ? never : never,
-  _userId: string,
-) {
-  return supabase;
-}
-
 async function assertAdmin(context: { supabase: any; userId: string }) {
   const { data, error } = await context.supabase
     .from("user_roles")
