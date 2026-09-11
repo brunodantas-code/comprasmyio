@@ -1195,6 +1195,8 @@ export type Database = {
           approval_level: string | null
           approval_limit: number
           created_at: string
+          deleted_at: string | null
+          deleted_by: string | null
           email: string | null
           full_name: string
           id: string
@@ -1206,6 +1208,8 @@ export type Database = {
           approval_level?: string | null
           approval_limit?: number
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           email?: string | null
           full_name?: string
           id: string
@@ -1217,6 +1221,8 @@ export type Database = {
           approval_level?: string | null
           approval_limit?: number
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           email?: string | null
           full_name?: string
           id?: string
@@ -2115,6 +2121,67 @@ export type Database = {
           },
         ]
       }
+      user_deletion_requests: {
+        Row: {
+          completed_at: string | null
+          decided_at: string | null
+          decided_by: string | null
+          failure_reason: string | null
+          id: string
+          requested_at: string
+          requested_by: string
+          status: string
+          target_user_id: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          failure_reason?: string | null
+          id?: string
+          requested_at?: string
+          requested_by: string
+          status?: string
+          target_user_id: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          failure_reason?: string | null
+          id?: string
+          requested_at?: string
+          requested_by?: string
+          status?: string
+          target_user_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_deletion_requests_decided_by_fkey"
+            columns: ["decided_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_deletion_requests_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_deletion_requests_target_user_id_fkey"
+            columns: ["target_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_menu_permissions: {
         Row: {
           allowed: boolean
@@ -2265,6 +2332,13 @@ export type Database = {
         Args: { _comment?: string; _decision: string; _step_id: string }
         Returns: undefined
       }
+      decide_user_deletion: {
+        Args: { _approve: boolean; _request_id: string }
+        Returns: {
+          status: string
+          target_user_id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -2276,6 +2350,17 @@ export type Database = {
       primary_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
+      }
+      request_user_deletion: {
+        Args: { _target_user_id: string }
+        Returns: string
+      }
+      set_user_access_profile: {
+        Args: {
+          _profile: Database["public"]["Enums"]["access_profile"]
+          _target_user_id: string
+        }
+        Returns: undefined
       }
     }
     Enums: {

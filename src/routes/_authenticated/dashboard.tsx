@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { MyioLogo } from "@/components/myio-logo";
 import { supabase } from "@/integrations/supabase/client";
 import { exportDatabaseBackup } from "@/lib/backup.functions";
+import { decideUserDeletion, requestUserDeletion, setUserAccessProfile } from "@/lib/user-admin.functions";
 import { lookupLinkPrice } from "@/lib/price-lookup.functions";
 import { useCurrentUser, type AppRole } from "@/hooks/use-current-user";
 import { Button } from "@/components/ui/button";
@@ -3277,11 +3278,15 @@ function ApprovalLimitInput({ value, onSave }: { value: number; onSave: (v: numb
 
 function UsersAdmin() {
   const qc = useQueryClient();
+  const { data: currentUser } = useCurrentUser();
+  const setAccessProfileFn = useServerFn(setUserAccessProfile);
+  const requestDeletionFn = useServerFn(requestUserDeletion);
+  const decideDeletionFn = useServerFn(decideUserDeletion);
   const { data, isLoading } = useQuery({
     queryKey: ["admin-users"],
     queryFn: async () => {
       const [{ data: profiles, error: pe }, { data: roles, error: re }, { data: accessProfiles, error: ae }] = await Promise.all([
-        supabase.from("profiles").select("*").order("created_at", { ascending: false }),
+        supabase.from("profiles").select("*").is("deleted_at", null).order("created_at", { ascending: false }),
         supabase.from("user_roles").select("*"),
         supabase.from("user_access_profiles").select("user_id, profile"),
       ]);
@@ -3314,21 +3319,45 @@ function UsersAdmin() {
 
   const setAccessProfile = useMutation({
     mutationFn: async ({ userId, profile }: { userId: string; profile: "admin" | "padrao" | "restrito" }) => {
-      if (profile === "admin") {
-        const { error: roleError } = await supabase.from("user_roles").upsert({ user_id: userId, role: "admin" }, { onConflict: "user_id,role" });
-        if (roleError) throw roleError;
-      }
-      const { error } = await supabase.from("user_access_profiles").upsert({ user_id: userId, profile }, { onConflict: "user_id" });
-      if (error) throw error;
-      if (profile !== "admin") {
-        const { error: roleError } = await supabase.from("user_roles").delete().eq("user_id", userId).eq("role", "admin");
-        if (roleError) throw roleError;
-      }
+      await setAccessProfileFn({ data: { userId, profile } });
     },
     onSuccess: () => {
       toast.success("Perfil de acesso atualizado");
       qc.invalidateQueries({ queryKey: ["admin-users"] });
       qc.invalidateQueries({ queryKey: ["restricted-access-profiles"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const { data: deletionRequests } = useQuery({
+    queryKey: ["user-deletion-requests"],
+    queryFn: async () => {
+      const { data: requests, error } = await supabase
+        .from("user_deletion_requests")
+        .select("id, target_user_id, requested_by, decided_by, status, requested_at, decided_at")
+        .order("requested_at", { ascending: false });
+      if (error) throw error;
+      return requests ?? [];
+    },
+  });
+
+  const requestDeletion = useMutation({
+    mutationFn: async (userId: string) => requestDeletionFn({ data: { userId } }),
+    onSuccess: () => {
+      toast.success("Exclusão enviada para aprovação de outro Admin");
+      qc.invalidateQueries({ queryKey: ["user-deletion-requests"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const decideDeletion = useMutation({
+    mutationFn: async ({ requestId, approve }: { requestId: string; approve: boolean }) => decideDeletionFn({ data: { requestId, approve } }),
+    onSuccess: (_, variables) => {
+      toast.success(variables.approve ? "Exclusão aprovada" : "Exclusão rejeitada");
+      qc.invalidateQueries({ queryKey: ["admin-users"] });
+      qc.invalidateQueries({ queryKey: ["user-deletion-requests"] });
+      qc.invalidateQueries({ queryKey: ["profiles-list"] });
+      qc.invalidateQueries({ queryKey: ["profiles-map"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -3377,6 +3406,7 @@ function UsersAdmin() {
   const [fEmail, setFEmail] = useState("");
   const [fManager, setFManager] = useState("");
   const [fRole, setFRole] = useState("all");
+  const [sortBy, setSortBy] = useState<"name" | "profile">("profile");
 
   const norm = (s: string) => s.toLowerCase().trim();
   const rows = (data ?? []).filter((u) => {
@@ -3387,6 +3417,12 @@ function UsersAdmin() {
       (!fManager || norm(approverLabelOf(u.roles)).includes(norm(fManager))) &&
       (fRole === "all" || (fRole === "admin" ? u.roles.includes("admin") : primary === fRole))
     );
+  }).sort((a, b) => {
+    if (sortBy === "profile") {
+      const byProfile = String(a.accessProfile).localeCompare(String(b.accessProfile), "pt-BR");
+      if (byProfile !== 0) return byProfile;
+    }
+    return String(a.full_name ?? "").localeCompare(String(b.full_name ?? ""), "pt-BR");
   });
 
 
@@ -3403,7 +3439,7 @@ function UsersAdmin() {
       <CardContent className="space-y-4">
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
         <>
-          <div className="grid grid-cols-2 gap-2 rounded-lg bg-primary/10 p-2 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2 rounded-lg bg-primary/10 p-2 sm:grid-cols-5">
             {filterInput(fName, setFName, "Nome")}
             {filterInput(fEmail, setFEmail, "E-mail")}
             {filterInput(fManager, setFManager, "Cargo aprovador")}
@@ -3416,17 +3452,45 @@ function UsersAdmin() {
                 {selectableRoles.map((r) => <SelectItem key={r} value={r}>{roleLabels[r]}</SelectItem>)}
               </SelectContent>
             </Select>
+            <Select value={sortBy} onValueChange={(value) => setSortBy(value as "name" | "profile")}>
+              <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="name">Ordenar por nome</SelectItem>
+                <SelectItem value="profile">Ordenar por perfil</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
+          {(deletionRequests ?? []).some((request) => request.status === "pendente") ? (
+            <div className="space-y-2">
+              <h4 className="text-sm font-bold">Exclusões pendentes</h4>
+              {(deletionRequests ?? []).filter((request) => request.status === "pendente").map((request) => {
+                const target = data?.find((user) => user.id === request.target_user_id);
+                const requester = data?.find((user) => user.id === request.requested_by);
+                const canDecide = request.requested_by !== currentUser?.id;
+                return (
+                  <div key={request.id} className="flex flex-col gap-2 rounded-lg border border-border p-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-sm font-medium">{target?.full_name || target?.email || "Usuário"}</p>
+                      <p className="text-xs text-muted-foreground">Solicitado por {requester?.full_name || requester?.email || "Admin"}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="outline" disabled={!canDecide || decideDeletion.isPending} onClick={() => decideDeletion.mutate({ requestId: request.id, approve: false })}>Rejeitar</Button>
+                      <Button size="sm" disabled={!canDecide || decideDeletion.isPending} onClick={() => decideDeletion.mutate({ requestId: request.id, approve: true })}>Aprovar exclusão</Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : null}
           {(() => {
-            const groupOrder: (AppRole | "none")[] = [...selectableRoles, "none"];
-            const groupLabel: Record<string, string> = { ...roleLabels, none: "Sem cargo" };
+            const groupOrder = sortBy === "profile" ? ["admin", "padrao", "restrito"] : ["all"];
+            const groupLabel: Record<string, string> = { admin: "Perfil Admin", padrao: "Perfil Padrão", restrito: "Perfil Restrito", all: "Usuários" };
             const groups = groupOrder
               .map((g) => ({
                 key: g,
                 label: groupLabel[g] ?? g,
                 users: rows.filter((u) => {
-                  const primary = u.roles.find((r) => r !== "admin") ?? "none";
-                  return primary === g;
+                  return g === "all" || u.accessProfile === g;
                 }),
               }))
               .filter((g) => g.users.length > 0);
@@ -3448,7 +3512,29 @@ function UsersAdmin() {
                             <div className="truncate font-medium">{u.full_name || "—"}</div>
                             <div className="truncate text-xs text-muted-foreground">{u.email}</div>
                           </div>
-                          <Badge variant="outline">{u.accessProfile === "admin" ? "Admin" : u.accessProfile === "restrito" ? "Restrito" : "Padrão"}</Badge>
+                          <div className="flex flex-wrap justify-end gap-1">
+                            <Badge variant="outline">Perfil: {u.accessProfile === "admin" ? "Admin" : u.accessProfile === "restrito" ? "Restrito" : "Padrão"}</Badge>
+                            <Badge variant="outline">Cargo: {primary === "none" ? "Sem cargo" : roleLabels[primary]}</Badge>
+                            {u.id !== currentUser?.id ? (
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" title="Solicitar exclusão" aria-label={`Solicitar exclusão de ${u.full_name || u.email}`}>
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Solicitar exclusão do usuário?</AlertDialogTitle>
+                                    <AlertDialogDescription>A exclusão de {u.full_name || u.email} ficará pendente até outro Admin aprovar.</AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                    <AlertDialogAction disabled={requestDeletion.isPending} onClick={() => requestDeletion.mutate(u.id)}>Solicitar exclusão</AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            ) : null}
+                          </div>
                         </div>
                         <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-3 lg:grid-cols-6">
                           <div className="flex flex-col gap-1">
