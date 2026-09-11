@@ -900,12 +900,6 @@ function RulesAdmin() {
   );
 }
 
-const LEVEL_LABELS: Record<string, string> = {
-  gestor: "Gestor Direto",
-  gerente: "Gestor da Área",
-  c_level: "C-Level",
-};
-
 function MoneyInput({
   value,
   disabled,
@@ -1173,7 +1167,7 @@ function OrgChartAdmin() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, full_name, email, approval_level, approval_limit, job_title_id")
+        .select("id, full_name, email, approval_limit, job_title_id")
         .order("full_name");
       if (error) throw error;
       return data ?? [];
@@ -1206,19 +1200,6 @@ function OrgChartAdmin() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const saveLevel = useMutation({
-    mutationFn: async ({ userId, level }: { userId: string; level: string | null }) => {
-      const { error } = await supabase.from("profiles").update({ approval_level: level }).eq("id", userId);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast.success("Nível de aprovação atualizado");
-      qc.invalidateQueries({ queryKey: ["aw-org-chart"] });
-      qc.invalidateQueries({ queryKey: ["aw-default-chain"] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
   const namesByRole = useMemo(() => {
     const map = new Map<string, { name: string; limit: number }[]>();
     (rows ?? []).forEach((p) => {
@@ -1229,6 +1210,24 @@ function OrgChartAdmin() {
     });
     return map;
   }, [rows, profiles]);
+
+  const titleById = useMemo(
+    () => new Map((jobTitles ?? []).map((title) => [title.id, title.name])),
+    [jobTitles],
+  );
+
+  const directReportsByRole = useMemo(() => {
+    const map = new Map<string, string[]>();
+    (jobTitles ?? []).forEach((title) => map.set(title.id, []));
+    hierarchy?.forEach((approverId, titleId) => {
+      if (!approverId) return;
+      const titleName = titleById.get(titleId);
+      if (!titleName) return;
+      map.set(approverId, [...(map.get(approverId) ?? []), titleName]);
+    });
+    map.forEach((titles) => titles.sort((a, b) => a.localeCompare(b, "pt-BR")));
+    return map;
+  }, [hierarchy, jobTitles, titleById]);
 
   const roots = useMemo(() => {
     const h = hierarchy ?? new Map<string, string | null>();
@@ -1256,8 +1255,8 @@ function OrgChartAdmin() {
         <CardHeader>
           <CardTitle>Organograma de Aprovação</CardTitle>
           <CardDescription>
-            A hierarquia é definida por cargo, não por pessoa: defina qual cargo aprova cada cargo. Se o cargo aprovador
-            ficar sem nenhum usuário, a solicitação segue automaticamente para o cargo acima.
+            A hierarquia é definida por cargo. N-1 mostra os subordinados diretos e N+1 define o superior direto.
+            Se um cargo ficar sem usuário, a solicitação segue automaticamente para o nível acima.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -1265,8 +1264,9 @@ function OrgChartAdmin() {
             <TableHeader>
               <TableRow>
                 <TableHead>Cargo</TableHead>
-                <TableHead>Usuários no cargo</TableHead>
-                <TableHead>Aprovado por (cargo)</TableHead>
+                  <TableHead>N-1</TableHead>
+                  <TableHead>N+1</TableHead>
+                  <TableHead>Usuários no cargo</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -1274,7 +1274,7 @@ function OrgChartAdmin() {
                 <TableRow key={title.id}>
                   <TableCell className="font-medium">{title.name}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">
-                    {(namesByRole.get(title.id) ?? []).map((n) => n.name).join(", ") || "—"}
+                    {(directReportsByRole.get(title.id) ?? []).join(", ") || "Não definido"}
                   </TableCell>
                   <TableCell>
                     <Select
@@ -1282,66 +1282,22 @@ function OrgChartAdmin() {
                       disabled={!isAdmin}
                       onValueChange={(v) => saveApprover.mutate({ role: title.id, approverRole: v === "none" ? null : v })}
                     >
-                      <SelectTrigger className="h-8 w-56"><SelectValue placeholder="Sem aprovador" /></SelectTrigger>
+                      <SelectTrigger className="h-8 w-56"><SelectValue placeholder="Não definido" /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="none">Sem aprovador</SelectItem>
+                        <SelectItem value="none">Não definido</SelectItem>
                         {(jobTitles ?? []).filter((option) => option.id !== title.id).map((option) => (
                           <SelectItem key={option.id} value={option.id}>{option.name}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {(namesByRole.get(title.id) ?? []).map((n) => n.name).join(", ") || "—"}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Nível de aprovação por usuário</CardTitle>
-          <CardDescription>Classificação de cada usuário como Gestor Direto, Gestor da Área ou C-Level.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <p className="text-sm text-muted-foreground">Carregando...</p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Usuário</TableHead>
-                  <TableHead>Cargo</TableHead>
-                  <TableHead>Nível de aprovação</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {(rows ?? []).map((p) => (
-                  <TableRow key={p.id}>
-                    <TableCell className="font-medium">{p.full_name || p.email}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {profiles?.get(p.id)?.jobTitle?.name ?? "Sem cargo"}
-                    </TableCell>
-                    <TableCell>
-                      <Select
-                        value={p.approval_level ?? "none"}
-                        disabled={!isAdmin}
-                        onValueChange={(v) => saveLevel.mutate({ userId: p.id, level: v === "none" ? null : v })}
-                      >
-                        <SelectTrigger className="h-8 w-48"><SelectValue placeholder="Não definido" /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">Não definido</SelectItem>
-                          <SelectItem value="gestor">Gestor Direto</SelectItem>
-                          <SelectItem value="gerente">Gestor da Área</SelectItem>
-                          <SelectItem value="c_level">C-Level</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
         </CardContent>
       </Card>
 

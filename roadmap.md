@@ -42,3 +42,4 @@
 - [x] Mostrar “Meus em aprovação” apenas com solicitações do usuário ainda não concluídas
 - [x] Restringir “Todos” a usuários com cargo de aprovação e manter o acompanhamento pelo Status existente
 - [x] Corrigir registros duplicados no Histórico de auditoria dos Approvals
+- [x] Consolidar Organograma de Aprovação por cargo com N-1, N+1 e visualização gráfica
