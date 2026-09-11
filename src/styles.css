@@ -196,6 +196,18 @@
   }
 }
 
+/* Organograma: cartões uniformes dimensionados pela largura disponível. */
+.org-chart {
+  container-type: inline-size;
+  --org-card-width: clamp(3.5rem, 6cqw, 5rem);
+}
+
+.org-chart-card {
+  width: var(--org-card-width);
+  min-width: var(--org-card-width);
+  height: 5rem;
+}
+
 /* Tabelas empilhadas no celular: rótulo à esquerda, informação à direita */
 @media (max-width: 767px) {
   table[data-responsive="true"] {

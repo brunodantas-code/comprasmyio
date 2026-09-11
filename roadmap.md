@@ -49,3 +49,4 @@
 - [x] Adicionar nome abreviado opcional aos cargos e utilizá-lo nos boxes do organograma
 - [x] Simplificar os boxes do organograma para cargo, primeiro nome e alçada automática
 - [x] Padronizar todos os boxes do organograma com a mesma largura e altura
+- [x] Corrigir a sobreposição dos boxes do organograma sem criar rolagem lateral
