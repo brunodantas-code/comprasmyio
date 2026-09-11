@@ -712,6 +712,42 @@ export type Database = {
         }
         Relationships: []
       }
+      job_title_hierarchy: {
+        Row: {
+          approver_job_title_id: string | null
+          created_at: string
+          job_title_id: string
+          updated_at: string
+        }
+        Insert: {
+          approver_job_title_id?: string | null
+          created_at?: string
+          job_title_id: string
+          updated_at?: string
+        }
+        Update: {
+          approver_job_title_id?: string | null
+          created_at?: string
+          job_title_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_title_hierarchy_approver_job_title_id_fkey"
+            columns: ["approver_job_title_id"]
+            isOneToOne: false
+            referencedRelation: "job_titles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_title_hierarchy_job_title_id_fkey"
+            columns: ["job_title_id"]
+            isOneToOne: true
+            referencedRelation: "job_titles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_titles: {
         Row: {
           active: boolean
@@ -1200,6 +1236,7 @@ export type Database = {
           email: string | null
           full_name: string
           id: string
+          job_title_id: string | null
           manager_id: string | null
           tier2_limit: number
           tier3_limit: number
@@ -1213,6 +1250,7 @@ export type Database = {
           email?: string | null
           full_name?: string
           id: string
+          job_title_id?: string | null
           manager_id?: string | null
           tier2_limit?: number
           tier3_limit?: number
@@ -1226,11 +1264,20 @@ export type Database = {
           email?: string | null
           full_name?: string
           id?: string
+          job_title_id?: string | null
           manager_id?: string | null
           tier2_limit?: number
           tier3_limit?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_job_title_id_fkey"
+            columns: ["job_title_id"]
+            isOneToOne: false
+            referencedRelation: "job_titles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       projects: {
         Row: {
@@ -2338,6 +2385,10 @@ export type Database = {
           status: string
           target_user_id: string
         }[]
+      }
+      has_job_title_name: {
+        Args: { _name: string; _user_id: string }
+        Returns: boolean
       }
       has_role: {
         Args: {
