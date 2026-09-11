@@ -2159,7 +2159,7 @@ function OrdersTable({
         {headerFilters && (
           <div className="grid grid-cols-1 gap-2 rounded-lg bg-primary/10 p-2 sm:grid-cols-2">
             {filterInput(fApproval, setFApproval, "Nº do Approval")}
-            {filterInput(fItem, setFItem, "Item")}
+            {filterInput(fItem, setFItem, "Tipo")}
             {filterInput(fAloc, setFAloc, "Alocação")}
             {showRequester && filterInput(fReq, setFReq, "Solicitante")}
             <Input type="date" value={fDate} onChange={(e) => setFDate(e.target.value)} className="h-7 px-1 text-xs" />
@@ -2189,7 +2189,7 @@ function OrdersTable({
                   </div>
                 </div>
               </Row>
-              <Row label="Item">
+              <Row label="Tipo">
                 <div className="font-medium">{requestTypeLabel(o)}</div>
                 <div className="mt-1 flex flex-wrap items-center gap-2">
                   <FullTextPopover text={o.item_name ?? ""} />
@@ -2254,7 +2254,7 @@ function OrdersTable({
         <TableHeader className="[&_tr]:border-b">
           <TableRow className="border-t bg-primary/15 hover:bg-primary/15">
             <TableHead className="w-[110px] text-center font-bold">Approval</TableHead>
-            <TableHead className="w-[210px] text-center font-bold">Item</TableHead>
+            <TableHead className="w-[210px] text-center font-bold">Tipo</TableHead>
             <TableHead className="w-[100px] text-center font-bold">Alocação</TableHead>
             {showRequester && <TableHead className="w-[120px] text-center font-bold">Solicitante</TableHead>}
             <TableHead className="w-[60px] text-center font-bold">Qtd</TableHead>
@@ -2267,7 +2267,7 @@ function OrdersTable({
           {headerFilters && (
             <TableRow className="bg-primary/5 hover:bg-primary/5">
               <TableHead className="py-1">{filterInput(fApproval, setFApproval, "Nº")}</TableHead>
-              <TableHead className="py-1">{filterInput(fItem, setFItem, "Item")}</TableHead>
+              <TableHead className="py-1">{filterInput(fItem, setFItem, "Tipo")}</TableHead>
               <TableHead className="py-1">{filterInput(fAloc, setFAloc, "Alocação")}</TableHead>
               {showRequester && <TableHead className="py-1">{filterInput(fReq, setFReq, "Solicitante")}</TableHead>}
               <TableHead className="py-1" />
