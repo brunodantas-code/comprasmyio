@@ -276,7 +276,7 @@ function AuditTrailDialog({ orderId, title }: { orderId: string; title: string }
                     <TableCell className="text-sm text-muted-foreground">{dt(l.created_at)}</TableCell>
                     <TableCell className="text-sm">{p?.full_name || p?.email || "—"}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {(p?.roles ?? []).join(", ") || "—"}
+                      {p?.jobTitle?.name ?? "—"}
                       {p?.approval_limit ? ` · ${BRL(Number(p.approval_limit))}` : ""}
                     </TableCell>
                     <TableCell className="font-semibold">{ACTION_LABELS[l.action] ?? l.action}</TableCell>
@@ -993,7 +993,7 @@ function DefaultChainAdmin() {
   const approverRoleOf = (userId: string) => {
     const main = mainRoleOf(userId);
     const next = main ? hierarchy?.get(main) ?? null : null;
-    return next ? profilesMap && Array.from(profilesMap.values()).find((p) => p.jobTitle?.id === next)?.jobTitle?.name ?? null : null;
+    return next ? (profilesMap ? Array.from(profilesMap.values()).find((p) => p.jobTitle?.id === next)?.jobTitle?.name ?? null : null) : null;
   };
 
   const chainFor = (userId: string, levels: number) => {

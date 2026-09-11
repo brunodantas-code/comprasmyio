@@ -396,9 +396,7 @@ function Dashboard() {
               <div className="truncate text-xs font-medium sm:text-sm">{me.full_name || me.email}</div>
               <div className="flex flex-wrap justify-end gap-1">
                 <Badge variant="outline" className="text-[10px] uppercase">{me.accessProfile === "padrao" ? "Padrão" : me.accessProfile}</Badge>
-                {me.roles.filter((r) => r !== "admin").map((r) => (
-                  <Badge key={r} variant="outline" className="text-[10px] uppercase">{r}</Badge>
-                ))}
+                {me.jobTitle ? <Badge variant="outline" className="text-[10px] uppercase">{me.jobTitle.name}</Badge> : null}
               </div>
             </div>
             <Button variant="ghost" size="icon" className="shrink-0" onClick={handleSignOut} title="Sair">
@@ -936,7 +934,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
   const { data: costCenters } = useCostCenters();
 
   const { data: me } = useCurrentUser();
-  const restrictedCc = !!me && !me.isAdmin && (me.accessProfile === "restrito" || me.roles.some((r) => ["estoquista", "fabrica"].includes(r)));
+  const restrictedCc = !!me && !me.isAdmin && (me.accessProfile === "restrito" || me.isEstoquista || me.isFabrica);
 
   async function resolveOperacaoCostCenterId(): Promise<string> {
     const existing = (costCenters ?? []).find((c) => c.name.trim().toLowerCase() === "operação");
