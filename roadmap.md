@@ -29,3 +29,4 @@
 - [ ] Exclusão de usuários com dupla aprovação por outro Admin
 - [ ] Limitar a dois usuários com perfil Admin
 - [ ] Ordenar usuários por nome ou perfil
+- [ ] Manter Cargo e Perfil de acesso separados no resumo do usuário
