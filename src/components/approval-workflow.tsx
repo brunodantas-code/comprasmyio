@@ -1109,41 +1109,31 @@ type RoleNode = {
   children: RoleNode[];
 };
 
-function OrgBox({ node }: { node: RoleNode }) {
+function OrgBox({ node, parentTitle }: { node: RoleNode; parentTitle?: string }) {
   return (
-    <div className="flex flex-col items-center">
-      <div className="w-[220px] rounded-lg border bg-card px-4 py-2 text-center shadow-sm">
-        <p className="text-sm font-bold leading-tight">{node.title}</p>
-        <div className="mt-1 space-y-0.5">
-          {node.names.length === 0 ? (
-            <p className="text-xs italic leading-tight text-muted-foreground">Sem usuário no cargo</p>
-          ) : (
-            node.names.map((n, i) => (
-              <div
-                key={`${n.name}-${i}`}
-                className="flex items-center justify-center gap-1.5 text-xs leading-tight text-muted-foreground"
-              >
-                <span>{n.name}</span>
-                <span className="text-border">|</span>
-                <span className="font-medium text-foreground/80">{formatInt(n.limit)}</span>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-      {node.children.length > 0 && (
-        <>
-          <div className="h-5 w-px bg-border" />
-          <div className="flex items-start gap-6 border-t border-border pt-5">
-            {node.children.map((c) => (
-              <div key={c.role} className="relative flex flex-col items-center">
-                <div className="absolute -top-5 h-5 w-px bg-border" />
-                <OrgBox node={c} />
-              </div>
-            ))}
-          </div>
-        </>
+    <div className="flex min-w-0 flex-col items-center rounded-md border bg-card px-2 py-2 text-center shadow-sm">
+      {parentTitle && (
+        <p className="mb-0.5 w-full truncate text-[10px] leading-tight text-muted-foreground" title={`N+1: ${parentTitle}`}>
+          N+1: {parentTitle}
+        </p>
       )}
+      <p className="w-full text-xs font-bold leading-tight sm:text-sm">{node.title}</p>
+      <div className="mt-1 w-full space-y-0.5">
+        {node.names.length === 0 ? (
+          <p className="text-[11px] italic leading-tight text-muted-foreground">Sem usuário no cargo</p>
+        ) : (
+          node.names.map((n, i) => (
+            <div
+              key={`${n.name}-${i}`}
+              className="flex min-w-0 items-center justify-center gap-1 text-[11px] leading-tight text-muted-foreground sm:text-xs"
+            >
+              <span className="min-w-0 break-words">{n.name}</span>
+              <span className="shrink-0 text-border">|</span>
+              <span className="shrink-0 font-medium text-foreground/80">{formatInt(n.limit)}</span>
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 }
@@ -1249,6 +1239,17 @@ function OrgChartAdmin() {
     return top;
   }, [hierarchy, namesByRole, jobTitles]);
 
+  const chartLevels = useMemo(() => {
+    const levels: { node: RoleNode; parentTitle?: string }[][] = [];
+    const visit = (node: RoleNode, depth: number, parentTitle?: string) => {
+      if (!levels[depth]) levels[depth] = [];
+      levels[depth].push({ node, parentTitle });
+      node.children.forEach((child) => visit(child, depth + 1, node.title));
+    };
+    roots.forEach((root) => visit(root, 0));
+    return levels;
+  }, [roots]);
+
   return (
     <div className="space-y-4">
       <Card>
@@ -1306,13 +1307,18 @@ function OrgChartAdmin() {
           <CardTitle>Visualização</CardTitle>
           <CardDescription>Hierarquia de aprovação por cargo, com os usuários de cada cargo agrupados.</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto pb-2">
-            <div className="flex min-w-max items-start gap-10 p-4">
-              {roots.map((r) => (
-                <OrgBox key={r.role} node={r} />
-              ))}
-            </div>
+        <CardContent className="overflow-hidden px-3 sm:px-6">
+          <div className="space-y-3 pb-2">
+            {chartLevels.map((level, depth) => (
+              <div key={depth} className="relative">
+                {depth > 0 && <div className="mx-auto h-3 w-px bg-border" />}
+                <div className="grid grid-cols-1 gap-2 border-t border-border pt-3 min-[480px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                  {level.map(({ node, parentTitle }) => (
+                    <OrgBox key={node.role} node={node} parentTitle={parentTitle} />
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>
