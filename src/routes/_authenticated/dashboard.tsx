@@ -394,7 +394,8 @@ function Dashboard() {
             <div className="min-w-0 text-right">
               <div className="truncate text-xs font-medium sm:text-sm">{me.full_name || me.email}</div>
               <div className="flex flex-wrap justify-end gap-1">
-                {me.roles.map((r) => (
+                <Badge variant="outline" className="text-[10px] uppercase">{me.accessProfile === "padrao" ? "Padrão" : me.accessProfile}</Badge>
+                {me.roles.filter((r) => r !== "admin").map((r) => (
                   <Badge key={r} variant="outline" className="text-[10px] uppercase">{r}</Badge>
                 ))}
               </div>
@@ -3298,20 +3299,6 @@ function UsersAdmin() {
     },
   });
 
-  const toggleRole = useMutation({
-    mutationFn: async ({ userId, role, has }: { userId: string; role: AppRole; has: boolean }) => {
-      if (has) {
-        const { error } = await supabase.from("user_roles").delete().eq("user_id", userId).eq("role", role);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from("user_roles").insert({ user_id: userId, role });
-        if (error) throw error;
-      }
-    },
-    onSuccess: () => { toast.success("Cargo atualizado"); qc.invalidateQueries({ queryKey: ["admin-users"] }); },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
   const setPrimaryRole = useMutation({
     mutationFn: async ({ userId, role }: { userId: string; role: AppRole | "none" }) => {
       const { error: de } = await supabase.from("user_roles").delete().eq("user_id", userId).neq("role", "admin");
@@ -3327,8 +3314,16 @@ function UsersAdmin() {
 
   const setAccessProfile = useMutation({
     mutationFn: async ({ userId, profile }: { userId: string; profile: "admin" | "padrao" | "restrito" }) => {
+      if (profile === "admin") {
+        const { error: roleError } = await supabase.from("user_roles").upsert({ user_id: userId, role: "admin" }, { onConflict: "user_id,role" });
+        if (roleError) throw roleError;
+      }
       const { error } = await supabase.from("user_access_profiles").upsert({ user_id: userId, profile }, { onConflict: "user_id" });
       if (error) throw error;
+      if (profile !== "admin") {
+        const { error: roleError } = await supabase.from("user_roles").delete().eq("user_id", userId).eq("role", "admin");
+        if (roleError) throw roleError;
+      }
     },
     onSuccess: () => {
       toast.success("Perfil de acesso atualizado");
@@ -3446,7 +3441,6 @@ function UsersAdmin() {
                   {g.users.map((u) => {
                     const p = u as unknown as { approval_limit?: number; tier2_limit?: number; tier3_limit?: number; manager_id?: string | null };
                     const primary = u.roles.find((r) => r !== "admin") ?? "none";
-                    const isAdminUser = u.roles.includes("admin");
                     return (
                       <div key={u.id} className="p-3">
                         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
@@ -3456,7 +3450,7 @@ function UsersAdmin() {
                           </div>
                           <Badge variant="outline">{u.accessProfile === "admin" ? "Admin" : u.accessProfile === "restrito" ? "Restrito" : "Padrão"}</Badge>
                         </div>
-                        <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-3 lg:grid-cols-5">
+                        <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-3 lg:grid-cols-6">
                           <div className="flex flex-col gap-1">
                             <span className="text-[10px] font-medium text-muted-foreground">Aprovado por (cargo)</span>
                             <div className="flex h-8 items-center rounded-md border border-input bg-muted/40 px-2 text-xs text-muted-foreground">
