@@ -1177,7 +1177,7 @@ function OrgChartAdmin() {
   const { data: jobTitles } = useQuery({
     queryKey: ["job_titles"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("job_titles").select("id,name").eq("active", true).order("name");
+      const { data, error } = await supabase.from("job_titles").select("id,name,short_name").eq("active", true).order("name");
       if (error) throw error;
       return data ?? [];
     },
@@ -1255,7 +1255,7 @@ function OrgChartAdmin() {
     const h = hierarchy ?? new Map<string, string | null>();
     const nodes = new Map<string, RoleNode>();
     (jobTitles ?? []).forEach((title) =>
-      nodes.set(title.id, { role: title.id, title: title.name, names: namesByRole.get(title.id) ?? [], children: [] })
+      nodes.set(title.id, { role: title.id, title: title.short_name?.trim() || title.name, names: namesByRole.get(title.id) ?? [], children: [] })
     );
     const top: RoleNode[] = [];
     (jobTitles ?? []).forEach((title) => {
