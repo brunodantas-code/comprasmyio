@@ -26,3 +26,6 @@
 - [x] Separar Cargo (cadeia de aprovação) de Perfil (acesso às funcionalidades)
 - [x] Criar perfis Admin, Padrão e Restrito, com menus configuráveis por checkboxes
 - [x] Permitir atribuir um Cargo e um Perfil a cada usuário
+- [ ] Exclusão de usuários com dupla aprovação por outro Admin
+- [ ] Limitar a dois usuários com perfil Admin
+- [ ] Ordenar usuários por nome ou perfil
