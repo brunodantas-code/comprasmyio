@@ -36,3 +36,4 @@
 - [x] Separar usuários sem menus em "Usuários pendentes" até a liberação do acesso
 - [x] Mover "Perfis de Acesso" para "Usuários e Logs" como "Acesso Restrito"
 - [x] Manter usuários Restritos sem aprovador em "Usuários pendentes" até concluir o cadastro
+- [x] Corrigir permissão de Admin ao definir cargos aprovadores no Organograma de Aprovação
