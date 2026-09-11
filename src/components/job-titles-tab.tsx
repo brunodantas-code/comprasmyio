@@ -59,10 +59,10 @@ export function JobTitlesTab({ userId }: { userId: string }) {
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("job_titles").delete().eq("id", id);
+      const { error } = await supabase.from("job_titles").update({ active: false }).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => { toast.success("Cargo removido"); qc.invalidateQueries({ queryKey: ["job_titles"] }); },
+    onSuccess: () => { toast.success("Cargo desativado"); qc.invalidateQueries({ queryKey: ["job_titles"] }); },
     onError: (e: Error) => toast.error(e.message),
   });
 
