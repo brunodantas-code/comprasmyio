@@ -3402,8 +3402,10 @@ function UsersAdmin() {
   const [sortBy, setSortBy] = useState<"name" | "profile">("name");
 
   const norm = (s: string) => s.toLowerCase().trim();
-  const pendingUsers = (data ?? []).filter((u) => u.accessProfile === "restrito" && !u.hasConfiguredAccess);
-  const activeUsers = (data ?? []).filter((u) => u.accessProfile !== "restrito" || u.hasConfiguredAccess);
+  const isPendingRestrictedUser = (user: NonNullable<typeof data>[number]) =>
+    user.accessProfile === "restrito" && (!user.hasConfiguredAccess || !approverLabelOf(user.jobTitleId));
+  const pendingUsers = (data ?? []).filter(isPendingRestrictedUser);
+  const activeUsers = (data ?? []).filter((user) => !isPendingRestrictedUser(user));
   const rows = activeUsers.filter((u) => {
     return (
       (!fName || norm(u.full_name ?? "").includes(norm(fName))) &&
@@ -3457,12 +3459,28 @@ function UsersAdmin() {
             <div className="space-y-2">
               <h4 className="text-sm font-bold">Usuários pendentes</h4>
               {pendingUsers.map((user) => (
-                <div key={user.id} className="flex flex-col gap-2 rounded-lg border border-border p-3 sm:flex-row sm:items-center sm:justify-between">
+                <div key={user.id} className="grid gap-3 rounded-lg border border-border p-3 sm:grid-cols-[minmax(0,1fr)_minmax(180px,260px)_auto] sm:items-end">
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium">{user.full_name || user.email || "Usuário"}</p>
                     <p className="truncate text-xs text-muted-foreground">{user.email || "E-mail não informado"}</p>
                   </div>
-                  <Badge variant="outline" className="w-fit">Aguardando liberação de menus</Badge>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] font-medium text-muted-foreground">Cargo</span>
+                    <Select
+                      value={user.jobTitleId ?? "none"}
+                      onValueChange={(value) => setJobTitle.mutate({ userId: user.id, jobTitleId: value === "none" ? null : value })}
+                    >
+                      <SelectTrigger className="h-8 w-full text-xs"><SelectValue placeholder="Sem cargo" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Sem cargo</SelectItem>
+                        {(jobTitles ?? []).map((title) => <SelectItem key={title.id} value={title.id}>{title.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex flex-wrap gap-1 sm:justify-end">
+                    {!user.hasConfiguredAccess ? <Badge variant="outline">Aguardando liberação de menus</Badge> : null}
+                    {!approverLabelOf(user.jobTitleId) ? <Badge variant="outline">Aguardando definição do aprovador</Badge> : null}
+                  </div>
                 </div>
               ))}
             </div>
