@@ -2257,7 +2257,7 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
           description={
             location === "almoxarifado_geral"
               ? "Estoque geral independente. Toque no nome para ver foto, link de referência e parâmetros de compra."
-              : 'A entrada é automática quando o solicitante confirma "Recebido corretamente" em um pedido feito pela biblioteca.'
+              : 'A entrada é automática quando quem fez a solicitação confirma "Recebido corretamente" em um pedido feito pela biblioteca.'
           }
           rows={rows}
           isLoading={isLoading}

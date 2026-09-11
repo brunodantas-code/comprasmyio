@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 
 const MENU_OPTIONS = [
   { key: "solicitacoes", label: "Solicitações" },
@@ -59,7 +60,10 @@ export function AccessProfilesTab() {
         {data?.map((user) => (
           <div key={user.id} className="grid gap-3 rounded-lg border border-border p-3 md:grid-cols-[minmax(180px,1fr)_2fr] md:items-center">
             <div className="min-w-0">
-              <p className="truncate text-sm font-medium">{user.full_name || "—"}</p>
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="truncate text-sm font-medium">{user.full_name || "—"}</p>
+                {user.permissions.size === 0 ? <Badge variant="outline">Configuração pendente</Badge> : null}
+              </div>
               <p className="truncate text-xs text-muted-foreground">{user.email}</p>
             </div>
             <div className="flex flex-wrap gap-x-5 gap-y-2">

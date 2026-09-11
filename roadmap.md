@@ -30,3 +30,5 @@
 - [x] Limitar a dois usuários com perfil Admin
 - [x] Ordenar usuários por nome ou perfil
 - [x] Manter Cargo e Perfil de acesso separados no resumo do usuário
+- [x] Novos usuários iniciam com Perfil Restrito, sem cargo e com configuração pendente para Admin
+- [x] Remover o cargo legado Solicitante das opções e associações atuais

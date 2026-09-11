@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 export type AppRole =
   | "admin"
   | "comprador"
-  | "solicitante"
   | "fabrica"
   | "estoquista"
   | "coo"
@@ -37,7 +36,7 @@ export function useCurrentUser() {
       ]);
 
       const roles = (rolesData ?? []).map((r) => r.role as AppRole);
-      const accessProfile = (accessData?.profile ?? "padrao") as AccessProfile;
+      const accessProfile = (accessData?.profile ?? "restrito") as AccessProfile;
       const restrictedMenus = new Set((menuData ?? []).filter((item) => item.allowed).map((item) => item.menu_key));
       const canAccess = (menu: MenuKey) => {
         if (accessProfile === "admin") return true;
@@ -53,7 +52,6 @@ export function useCurrentUser() {
         canAccess,
         isAdmin: accessProfile === "admin",
         isComprador: roles.includes("comprador"),
-        isSolicitante: roles.includes("solicitante"),
         isFabrica: roles.includes("fabrica"),
         isEstoquista: roles.includes("estoquista"),
         isFinanceiro: roles.includes("financeiro"),

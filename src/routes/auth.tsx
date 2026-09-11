@@ -176,7 +176,7 @@ function AuthPage() {
                     </Button>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Novos usuários entram como <strong>solicitante</strong>. Um admin pode promover o papel depois.
+                    Novos usuários entram com acesso restrito até a configuração por um Admin.
                   </p>
                 </form>
               </TabsContent>
