@@ -1873,7 +1873,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
             )}
             {requestType === "materiais" && <AddressAutocomplete name="delivery_point" required />}
 
-            {requestType !== "reembolso" && requestType !== "rh" && (
+            {requestType !== "reembolso" && requestType !== "rh" && requestType !== "pagamento" && (
             <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>Prazo de recebimento</Label>
