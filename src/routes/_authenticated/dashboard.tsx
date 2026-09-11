@@ -3402,7 +3402,9 @@ function UsersAdmin() {
   const [sortBy, setSortBy] = useState<"name" | "profile">("name");
 
   const norm = (s: string) => s.toLowerCase().trim();
-  const rows = (data ?? []).filter((u) => {
+  const pendingUsers = (data ?? []).filter((u) => u.accessProfile === "restrito" && !u.hasConfiguredAccess);
+  const activeUsers = (data ?? []).filter((u) => u.accessProfile !== "restrito" || u.hasConfiguredAccess);
+  const rows = activeUsers.filter((u) => {
     return (
       (!fName || norm(u.full_name ?? "").includes(norm(fName))) &&
       (!fEmail || norm(u.email ?? "").includes(norm(fEmail))) &&
@@ -3451,6 +3453,20 @@ function UsersAdmin() {
               </SelectContent>
             </Select>
           </div>
+          {pendingUsers.length > 0 ? (
+            <div className="space-y-2">
+              <h4 className="text-sm font-bold">Usuários pendentes</h4>
+              {pendingUsers.map((user) => (
+                <div key={user.id} className="flex flex-col gap-2 rounded-lg border border-border p-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium">{user.full_name || user.email || "Usuário"}</p>
+                    <p className="truncate text-xs text-muted-foreground">{user.email || "E-mail não informado"}</p>
+                  </div>
+                  <Badge variant="outline" className="w-fit">Aguardando liberação de menus</Badge>
+                </div>
+              ))}
+            </div>
+          ) : null}
           {(deletionRequests ?? []).some((request) => request.status === "pendente") ? (
             <div className="space-y-2">
               <h4 className="text-sm font-bold">Exclusões pendentes</h4>
@@ -3506,7 +3522,6 @@ function UsersAdmin() {
                           <div className="flex flex-wrap justify-end gap-1">
                             <Badge variant="outline">Perfil: {u.accessProfile === "admin" ? "Admin" : u.accessProfile === "restrito" ? "Restrito" : "Padrão"}</Badge>
                             <Badge variant="outline">Cargo: {u.jobTitleName ?? "Sem cargo"}</Badge>
-                            {u.accessProfile === "restrito" && !u.hasConfiguredAccess ? <Badge variant="outline">Configuração pendente</Badge> : null}
                             {u.id !== currentUser?.id ? (
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
