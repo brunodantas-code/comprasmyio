@@ -2159,7 +2159,7 @@ function OrdersTable({
         {headerFilters && (
           <div className="grid grid-cols-1 gap-2 rounded-lg bg-primary/10 p-2 sm:grid-cols-2">
             {filterInput(fApproval, setFApproval, "Nº do Approval")}
-            {filterInput(fItem, setFItem, "Item")}
+            {filterInput(fItem, setFItem, "Tipo")}
             {filterInput(fAloc, setFAloc, "Alocação")}
             {showRequester && filterInput(fReq, setFReq, "Solicitante")}
             <Input type="date" value={fDate} onChange={(e) => setFDate(e.target.value)} className="h-7 px-1 text-xs" />
