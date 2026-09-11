@@ -33,6 +33,7 @@ import { ClientsTab, useClients } from "@/components/clients-tab";
 import { CostCentersTab, useCostCenters } from "@/components/cost-centers-tab";
 import { JobTitlesTab, useJobTitles } from "@/components/job-titles-tab";
 import { RemindersTab } from "@/components/reminders-tab";
+import { AccessProfilesTab } from "@/components/access-profiles-tab";
 import { ImportBatchesSection } from "@/components/import-batches";
 import { AddressAutocomplete } from "@/components/address-autocomplete";
 
@@ -371,12 +372,15 @@ function Dashboard() {
   }
 
   const isAdmin = me.isAdmin;
+  const canSeeRequests = me.canAccess("solicitacoes");
+  const canSeeRegistration = me.canAccess("cadastro");
+  const canSeeAdministration = me.canAccess("usuarios");
   const fabricaOnly = me.isFabrica && !isAdmin;
   const estoquistaOnly = me.isEstoquista && !isAdmin && !me.isFabrica;
-  const canSeeStock = isAdmin || me.isFabrica || me.isEstoquista;
-  const canSeeQueue = me.isComprador || isAdmin;
+  const canSeeStock = me.canAccess("armazem");
+  const canSeeQueue = me.canAccess("approvals");
   const canImport = me.isComprador || isAdmin;
-  const defaultTab = canSeeQueue ? "queue" : "pedidos";
+  const defaultTab = canSeeRequests ? "pedidos" : canSeeQueue ? "queue" : canSeeStock ? "stock" : canSeeRegistration ? "projects" : "admin";
 
 
   return (
@@ -406,19 +410,19 @@ function Dashboard() {
         <Tabs defaultValue={defaultTab}>
           <div className="sticky top-[60px] z-40 -mx-3 mb-6 bg-background px-3 py-2 sm:top-[73px] sm:-mx-6 sm:px-6">
           <TabsList>
-            <TabsTrigger value="pedidos"><ClipboardList className="mr-2 h-4 w-4" />Solicitações</TabsTrigger>
+            {canSeeRequests && <TabsTrigger value="pedidos"><ClipboardList className="mr-2 h-4 w-4" />Solicitações</TabsTrigger>}
             {canSeeQueue && (
               <TabsTrigger value="queue"><ShoppingCart className="mr-2 h-4 w-4" />Approvals Pendentes</TabsTrigger>
             )}
             {canSeeStock && <TabsTrigger value="stock"><Boxes className="mr-2 h-4 w-4" />Armazém</TabsTrigger>}
-            {isAdmin && <TabsTrigger value="projects"><FolderKanban className="mr-2 h-4 w-4" />Cadastro</TabsTrigger>}
+            {canSeeRegistration && <TabsTrigger value="projects"><FolderKanban className="mr-2 h-4 w-4" />Cadastro</TabsTrigger>}
             
             
-            {isAdmin && <TabsTrigger value="admin"><Users className="mr-2 h-4 w-4" />Usuários e logs</TabsTrigger>}
+            {canSeeAdministration && <TabsTrigger value="admin"><Users className="mr-2 h-4 w-4" />Usuários e logs</TabsTrigger>}
           </TabsList>
           </div>
 
-          <TabsContent value="pedidos">
+          {canSeeRequests && <TabsContent value="pedidos">
             <Tabs defaultValue="mine">
               <TabsList className="mb-4">
                 <TabsTrigger value="mine"><ClipboardList className="mr-2 h-4 w-4" />Minhas Solicitações</TabsTrigger>
@@ -428,7 +432,7 @@ function Dashboard() {
               <TabsContent value="new"><NewOrder userId={me.id} canImport={canImport} isAdmin={isAdmin} /></TabsContent>
             </Tabs>
 
-          </TabsContent>
+          </TabsContent>}
           {canSeeQueue && <TabsContent value="queue"><BuyerQueue /></TabsContent>}
           {canSeeStock && (
             <TabsContent value="stock">
@@ -439,7 +443,7 @@ function Dashboard() {
               />
             </TabsContent>
           )}
-          {isAdmin && (
+          {canSeeRegistration && (
             <TabsContent value="projects">
               <Tabs defaultValue="projetos">
                 <TabsList className="mb-4">
@@ -447,17 +451,19 @@ function Dashboard() {
                   <TabsTrigger value="clientes"><Building2 className="mr-2 h-4 w-4" />Clientes</TabsTrigger>
                   <TabsTrigger value="centros"><Landmark className="mr-2 h-4 w-4" />Centro de Custo</TabsTrigger>
                   <TabsTrigger value="cargos"><Briefcase className="mr-2 h-4 w-4" />Cargos</TabsTrigger>
+                  <TabsTrigger value="perfis"><Users className="mr-2 h-4 w-4" />Perfis de Acesso</TabsTrigger>
                   <TabsTrigger value="lembretes"><Bell className="mr-2 h-4 w-4" />Lembretes</TabsTrigger>
                 </TabsList>
                 <TabsContent value="projetos"><ProjectsAdmin userId={me.id} /></TabsContent>
                 <TabsContent value="clientes"><ClientsTab userId={me.id} /></TabsContent>
                 <TabsContent value="centros"><CostCentersTab userId={me.id} /></TabsContent>
                 <TabsContent value="cargos"><JobTitlesTab userId={me.id} /></TabsContent>
+                <TabsContent value="perfis"><AccessProfilesTab /></TabsContent>
                 <TabsContent value="lembretes"><RemindersTab /></TabsContent>
               </Tabs>
             </TabsContent>
           )}
-          {isAdmin && (
+          {canSeeAdministration && (
             <TabsContent value="admin">
               <Tabs defaultValue="usuarios">
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
