@@ -451,14 +451,12 @@ function Dashboard() {
                   <TabsTrigger value="clientes"><Building2 className="mr-2 h-4 w-4" />Clientes</TabsTrigger>
                   <TabsTrigger value="centros"><Landmark className="mr-2 h-4 w-4" />Centro de Custo</TabsTrigger>
                   <TabsTrigger value="cargos"><Briefcase className="mr-2 h-4 w-4" />Cargos</TabsTrigger>
-                  <TabsTrigger value="perfis"><Users className="mr-2 h-4 w-4" />Perfis de Acesso</TabsTrigger>
                   <TabsTrigger value="lembretes"><Bell className="mr-2 h-4 w-4" />Lembretes</TabsTrigger>
                 </TabsList>
                 <TabsContent value="projetos"><ProjectsAdmin userId={me.id} /></TabsContent>
                 <TabsContent value="clientes"><ClientsTab userId={me.id} /></TabsContent>
                 <TabsContent value="centros"><CostCentersTab userId={me.id} /></TabsContent>
                 <TabsContent value="cargos"><JobTitlesTab userId={me.id} /></TabsContent>
-                <TabsContent value="perfis"><AccessProfilesTab /></TabsContent>
                 <TabsContent value="lembretes"><RemindersTab /></TabsContent>
               </Tabs>
             </TabsContent>
@@ -469,12 +467,14 @@ function Dashboard() {
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
                   <TabsList>
                     <TabsTrigger value="usuarios"><Users className="mr-2 h-4 w-4" />Usuários</TabsTrigger>
+                    <TabsTrigger value="acesso-restrito"><ShieldCheck className="mr-2 h-4 w-4" />Acesso Restrito</TabsTrigger>
                     <TabsTrigger value="workflow"><CheckCircle2 className="mr-2 h-4 w-4" />Approval Workflow</TabsTrigger>
                     <TabsTrigger value="logs"><ScrollText className="mr-2 h-4 w-4" />Logs</TabsTrigger>
                   </TabsList>
                   <BackupButton />
                 </div>
                 <TabsContent value="usuarios"><UsersAdmin /></TabsContent>
+                <TabsContent value="acesso-restrito"><AccessProfilesTab /></TabsContent>
                 <TabsContent value="workflow"><ApprovalWorkflow /></TabsContent>
                 <TabsContent value="logs"><LogsAdmin /></TabsContent>
               </Tabs>
