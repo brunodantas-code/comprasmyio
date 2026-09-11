@@ -3406,7 +3406,7 @@ function UsersAdmin() {
   const [fEmail, setFEmail] = useState("");
   const [fManager, setFManager] = useState("");
   const [fRole, setFRole] = useState("all");
-  const [sortBy, setSortBy] = useState<"name" | "profile">("profile");
+  const [sortBy, setSortBy] = useState<"name" | "profile">("name");
 
   const norm = (s: string) => s.toLowerCase().trim();
   const rows = (data ?? []).filter((u) => {
