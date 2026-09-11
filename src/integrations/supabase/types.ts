@@ -1345,7 +1345,9 @@ export type Database = {
           item_link: string | null
           item_name: string
           material_id: string | null
+          parent_order_id: string | null
           passphrase: string | null
+          payment_date: string | null
           project_id: string | null
           quantity: number
           recipient: string
@@ -1383,7 +1385,9 @@ export type Database = {
           item_link?: string | null
           item_name: string
           material_id?: string | null
+          parent_order_id?: string | null
           passphrase?: string | null
+          payment_date?: string | null
           project_id?: string | null
           quantity?: number
           recipient?: string
@@ -1421,7 +1425,9 @@ export type Database = {
           item_link?: string | null
           item_name?: string
           material_id?: string | null
+          parent_order_id?: string | null
           passphrase?: string | null
+          payment_date?: string | null
           project_id?: string | null
           quantity?: number
           recipient?: string
@@ -1466,6 +1472,13 @@ export type Database = {
             columns: ["material_id"]
             isOneToOne: false
             referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_parent_order_id_fkey"
+            columns: ["parent_order_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
             referencedColumns: ["id"]
           },
           {
@@ -2211,6 +2224,7 @@ export type Database = {
         | "ceo"
         | "cfo"
         | "cto"
+        | "financeiro"
       deadline_type: "urgente" | "esta_semana" | "este_mes" | "customizado"
       myio_order_status:
         | "pendente"
@@ -2364,6 +2378,7 @@ export const Constants = {
         "ceo",
         "cfo",
         "cto",
+        "financeiro",
       ],
       deadline_type: ["urgente", "esta_semana", "este_mes", "customizado"],
       myio_order_status: [

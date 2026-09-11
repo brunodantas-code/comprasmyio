@@ -6,8 +6,8 @@
 - [x] Botão "Criar conta" do mesmo tamanho do botão "Entrar" (auth)
 - [x] Renomear menu "Projetos, Clientes e Centros de Custo" para "Cadastro"
 - [x] Menus selecionados no padrão verde/preto do botão "Entrar"
-- [ ] Mover "Solicitações de Projetos" para dentro de "Novas Solicitações" como box "Dispositivos"
-- [ ] Encurtar "Reembolso de despesas" para "Reembolsos"
+- [x] Mover "Solicitações de Projetos" para dentro de "Novas Solicitações" como box "Dispositivos"
+- [x] Encurtar "Reembolso de despesas" para "Reembolsos"
 - [x] Trocar "comprador" por "time de supply"
 - [x] Atualizar texto do Armazém
 - [x] Centralizar checkbox Admin na tabela de usuários
@@ -20,6 +20,9 @@
 - [x] Coluna "Item" mostrar Tipo de Solicitação (com subtipo de viagem) em vez da descrição
 - [x] Evitar auto-aprovação: solicitações criadas pelo usuário não devem aparecer para ele mesmo aprovar
 - [x] "Pendentes comigo": totalizador de approvals pendentes e total em R$ ao lado do título
-- [ ] Nova solicitação “Pagamento” com Centro de Custo obrigatório e Projeto/Cliente opcionais
-- [ ] Vincular Pagamento a Approval existente, mantendo número e histórico, com registro das duas datas/tipos
-- [ ] Encaminhar Pagamento criado por Financeiro direto ao CFO; demais cargos ao Financeiro
+- [x] Nova solicitação “Pagamento” com Centro de Custo obrigatório e Projeto/Cliente opcionais
+- [x] Vincular Pagamento a Approval existente, mantendo número e histórico, com registro das duas datas/tipos
+- [x] Encaminhar Pagamento criado por Financeiro direto ao CFO; demais cargos ao Financeiro
+- [ ] Separar Cargo (cadeia de aprovação) de Perfil (acesso às funcionalidades)
+- [ ] Criar perfis Admin, Padrão e Restrito, com menus configuráveis por checkboxes
+- [ ] Permitir atribuir um Cargo e um Perfil a cada usuário

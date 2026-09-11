@@ -10,7 +10,8 @@ export type AppRole =
   | "coo"
   | "ceo"
   | "cfo"
-  | "cto";
+  | "cto"
+  | "financeiro";
 
 export const ADMIN_ROLES: AppRole[] = ["admin", "coo", "ceo", "cfo", "cto"];
 
@@ -41,6 +42,7 @@ export function useCurrentUser() {
         isSolicitante: roles.includes("solicitante"),
         isFabrica: roles.includes("fabrica"),
         isEstoquista: roles.includes("estoquista"),
+        isFinanceiro: roles.includes("financeiro"),
         canCreateProjects: roles.some((r) => PROJECT_CREATOR_ROLES.includes(r)),
       };
     },
