@@ -896,7 +896,7 @@ function RulesAdmin() {
 
 const LEVEL_LABELS: Record<string, string> = {
   gestor: "Gestor Direto",
-  gerente: "Gerente da Área",
+  gerente: "Gestor da Área",
   c_level: "C-Level",
 };
 
@@ -1025,8 +1025,8 @@ function DefaultChainAdmin() {
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">
           <p>• Até a alçada automática do solicitante: aprovação automática, sem etapas.</p>
-          <p>• Acima da alçada até a Faixa 2: Gestor Direto → Gerente da Área.</p>
-          <p>• Acima da Faixa 2 até a Faixa 3: Gestor Direto → Gerente da Área → C-Level.</p>
+          <p>• Acima da alçada até a Faixa 2: Gestor Direto → Gestor da Área.</p>
+          <p>• Acima da Faixa 2 até a Faixa 3: Gestor Direto → Gestor da Área → C-Level.</p>
           <p>• Acima da Faixa 3: sobe pelo organograma até o C-Level.</p>
           <p>• Depois dessas etapas entram as “Etapas adicionais” ativas e, se aplicável, a dupla aprovação.</p>
         </CardContent>
@@ -1295,7 +1295,7 @@ function OrgChartAdmin() {
       <Card>
         <CardHeader>
           <CardTitle>Nível de aprovação por usuário</CardTitle>
-          <CardDescription>Classificação de cada usuário como Gestor Direto, Gerente da Área ou C-Level.</CardDescription>
+          <CardDescription>Classificação de cada usuário como Gestor Direto, Gestor da Área ou C-Level.</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -1326,7 +1326,7 @@ function OrgChartAdmin() {
                         <SelectContent>
                           <SelectItem value="none">Não definido</SelectItem>
                           <SelectItem value="gestor">Gestor Direto</SelectItem>
-                          <SelectItem value="gerente">Gerente da Área</SelectItem>
+                          <SelectItem value="gerente">Gestor da Área</SelectItem>
                           <SelectItem value="c_level">C-Level</SelectItem>
                         </SelectContent>
                       </Select>
