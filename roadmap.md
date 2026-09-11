@@ -40,4 +40,4 @@
 - [x] Renomear o menu principal “Approvals Pendentes” para “Approvals”
 - [x] Reunir em Approvals os submenus “Pendentes comigo”, “Em fluxo de Aprovação” e “Todos”
 - [x] Mostrar “Em fluxo de Aprovação” apenas com solicitações do usuário ainda não concluídas
-- [x] Restringir “Todos” a usuários com cargo de aprovação e consolidar status e aprovador final
+- [x] Restringir “Todos” a usuários com cargo de aprovação e manter o acompanhamento pelo Status existente
