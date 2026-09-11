@@ -37,9 +37,7 @@ const formatInt = (v: number) =>
 
 const shortName = (full: string | null | undefined): string => {
   if (!full) return "—";
-  const parts = full.trim().split(/\s+/);
-  if (parts.length === 1) return parts[0];
-  return `${parts[0]} ${parts[parts.length - 1]}`;
+  return full.trim().split(/\s+/)[0];
 };
 
 const TRAVEL_TYPE_LABELS: Record<string, string> = {
@@ -1109,14 +1107,9 @@ type RoleNode = {
   children: RoleNode[];
 };
 
-function OrgBox({ node, parentTitle }: { node: RoleNode; parentTitle?: string }) {
+function OrgBox({ node }: { node: RoleNode }) {
   return (
-    <div className="mx-auto flex min-h-12 w-full max-w-40 min-w-0 flex-col items-center justify-center rounded border bg-card px-1.5 py-1 text-center shadow-sm">
-      {parentTitle && (
-        <p className="w-full truncate text-[9px] leading-tight text-muted-foreground" title={`N+1: ${parentTitle}`}>
-          N+1: {parentTitle}
-        </p>
-      )}
+    <div className="mx-auto flex h-16 w-full max-w-36 min-w-0 flex-col items-center justify-center rounded border bg-card px-1.5 py-1 text-center shadow-sm">
       <p className="w-full break-words text-[11px] font-bold leading-tight sm:text-xs">{node.title}</p>
       <div className="mt-0.5 w-full space-y-0.5">
         {node.names.length === 0 ? (
@@ -1125,11 +1118,10 @@ function OrgBox({ node, parentTitle }: { node: RoleNode; parentTitle?: string })
           node.names.map((n, i) => (
             <div
               key={`${n.name}-${i}`}
-              className="flex min-w-0 items-center justify-center gap-0.5 text-[9px] leading-tight text-muted-foreground sm:text-[10px]"
+              className="min-w-0 text-[9px] leading-tight text-muted-foreground sm:text-[10px]"
             >
-              <span className="min-w-0 break-words">{n.name}</span>
-              <span className="shrink-0 text-border">|</span>
-              <span className="shrink-0 font-medium text-foreground/80">{formatInt(n.limit)}</span>
+              <p className="truncate">{n.name}</p>
+              <p className="font-medium text-foreground/80">{formatInt(n.limit)}</p>
             </div>
           ))
         )}
@@ -1143,14 +1135,14 @@ const orgLeafCount = (node: RoleNode): number =>
     ? 1
     : node.children.reduce((total, child) => total + orgLeafCount(child), 0);
 
-function OrgTreeBranch({ node, parentTitle }: { node: RoleNode; parentTitle?: string }) {
+function OrgTreeBranch({ node }: { node: RoleNode }) {
   const childColumns = node.children
     .map((child) => `minmax(0, ${orgLeafCount(child)}fr)`)
     .join(" ");
 
   return (
     <div className="flex min-w-0 flex-col items-stretch">
-      <OrgBox node={node} parentTitle={parentTitle} />
+      <OrgBox node={node} />
       {node.children.length > 0 && (
         <>
           <div className="mx-auto h-2 w-px bg-border" />
@@ -1160,7 +1152,7 @@ function OrgTreeBranch({ node, parentTitle }: { node: RoleNode; parentTitle?: st
               style={{ "--org-columns": childColumns } as CSSProperties}
             >
               {node.children.map((child) => (
-                <OrgTreeBranch key={child.role} node={child} parentTitle={node.title} />
+                <OrgTreeBranch key={child.role} node={child} />
               ))}
             </div>
           </div>
