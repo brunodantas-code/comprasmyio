@@ -37,3 +37,7 @@
 - [x] Mover "Perfis de Acesso" para "Usuários e Logs" como "Acesso Restrito"
 - [x] Manter usuários Restritos sem aprovador em "Usuários pendentes" até concluir o cadastro
 - [x] Corrigir permissão de Admin ao definir cargos aprovadores no Organograma de Aprovação
+- [ ] Renomear o menu principal “Approvals Pendentes” para “Approvals”
+- [ ] Reunir em Approvals os submenus “Pendentes comigo”, “Em fluxo de Aprovação” e “Todos”
+- [ ] Mostrar “Em fluxo de Aprovação” apenas com solicitações do usuário ainda não concluídas
+- [ ] Restringir “Todos” a usuários com cargo de aprovação e consolidar status e aprovador final
