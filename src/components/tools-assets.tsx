@@ -317,7 +317,6 @@ function ToolHistoryDialog({ row }: { row: ToolRow }) {
 function ToolDeleteDialog({ row }: { row: ToolRow }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [confirmText, setConfirmText] = useState("");
   const del = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.from("tool_assets").delete().eq("id", row.material_id);
@@ -329,15 +328,12 @@ function ToolDeleteDialog({ row }: { row: ToolRow }) {
       qc.invalidateQueries({ queryKey: ["tool-movements"] });
       qc.invalidateQueries({ queryKey: ["purchasable-items"] });
       setOpen(false);
-      setConfirmText("");
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const canConfirm = confirmText.trim().toLowerCase() === "excluir";
-
   return (
-    <AlertDialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setConfirmText(""); }}>
+    <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
         <Button size="sm" variant="ghost" className="text-destructive" title="Excluir">
           <Trash2 className="h-4 w-4" />
@@ -347,15 +343,14 @@ function ToolDeleteDialog({ row }: { row: ToolRow }) {
         <AlertDialogHeader>
           <AlertDialogTitle>Excluir {row.name}?</AlertDialogTitle>
           <AlertDialogDescription>
-            A ferramenta e todas as suas movimentações serão apagadas. Digite <strong>excluir</strong> para confirmar.
+            A ferramenta e todas as suas movimentações serão apagadas. Esta ação não pode ser desfeita.
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <Input value={confirmText} onChange={(e) => setConfirmText(e.target.value)} placeholder="excluir" />
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
           <AlertDialogAction
-            disabled={!canConfirm || del.isPending}
-            onClick={(e) => { e.preventDefault(); if (canConfirm) del.mutate(); }}
+            disabled={del.isPending}
+            onClick={(e) => { e.preventDefault(); del.mutate(); }}
           >
             Excluir
           </AlertDialogAction>

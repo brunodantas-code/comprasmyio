@@ -760,12 +760,10 @@ function PhotoCell({ path }: { path: string }) {
 function DeleteReleaseDialog({ release }: { release: { id: string; photo_url: string; created_at: string } }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [text, setText] = useState("");
   const [pending, setPending] = useState(false);
 
   const remove = useMutation({
     mutationFn: async () => {
-      if (text.trim().toLowerCase() !== "excluir") throw new Error('Digite "excluir" para confirmar');
       setPending(true);
       // Remove homologações associadas (a tabela tem ON DELETE CASCADE, mas garantimos)
       await supabase.from("homologations").delete().eq("release_id", release.id);
@@ -784,14 +782,13 @@ function DeleteReleaseDialog({ release }: { release: { id: string; photo_url: st
       qc.invalidateQueries({ queryKey: ["stock-movements"] });
       qc.invalidateQueries({ queryKey: ["homologations"] });
       setOpen(false);
-      setText("");
     },
     onError: (e: Error) => toast.error(e.message),
     onSettled: () => setPending(false),
   });
 
   return (
-    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setText(""); }}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button size="sm" variant="ghost" title="Excluir liberação" className="h-8 w-8 p-0">
           <Trash2 className="h-4 w-4 text-destructive" />
@@ -805,21 +802,11 @@ function DeleteReleaseDialog({ release }: { release: { id: string; photo_url: st
             {" "}será removida junto com seus itens e homologações associadas.
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-2">
-          <Label htmlFor="delete-confirm">Digite "excluir" para confirmar</Label>
-          <Input
-            id="delete-confirm"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="excluir"
-            autoFocus
-          />
-        </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
           <Button
             variant="destructive"
-            disabled={pending || text.trim().toLowerCase() !== "excluir"}
+            disabled={pending}
             onClick={() => remove.mutate()}
           >
             {pending ? "Excluindo..." : "Excluir"}
