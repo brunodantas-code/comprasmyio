@@ -2123,7 +2123,7 @@ function BuyerQueue() {
   const { data: profiles } = useProfilesMap();
   const { data: me } = useCurrentUser();
   const [groupByProject, setGroupByProject] = useState(false);
-  const [deliveredMode, setDeliveredMode] = useState<DeliveredMode>("this_month");
+  const [deliveredMode, setDeliveredMode] = useState<DeliveredMode>("all");
   const [deliveredFrom, setDeliveredFrom] = useState("");
 
   const { data: orders, isLoading } = useQuery({
@@ -2153,18 +2153,19 @@ function BuyerQueue() {
   const filtered = filterDelivered(orders ?? [], deliveredMode, deliveredFrom);
   const projectName = (id: string) => (id === ESTOQUE_PROJECT_ID ? "Estoque" : projects?.find((p) => p.id === id)?.name ?? "—");
   const requesterName = (id: string) => profiles?.get(id)?.full_name || profiles?.get(id)?.email || "—";
-  const approvalMeta = new Map<string, { status: string; finalApprover: string }>();
+  const approvalMetaWithIndex = new Map<string, { stepIndex: number; status: string; finalApprover: string }>();
   (approvalSteps ?? []).forEach((step) => {
-    const current = approvalMeta.get(step.order_id);
-    if (!current || step.step_index >= Number(current.status.split(":")[0] || -1)) {
-      approvalMeta.set(step.order_id, {
-        status: `${step.step_index}:${step.status}`,
+    const current = approvalMetaWithIndex.get(step.order_id);
+    if (!current || step.step_index >= current.stepIndex) {
+      approvalMetaWithIndex.set(step.order_id, {
+        stepIndex: step.step_index,
+        status: step.status,
         finalApprover: step.approver_id ? requesterName(step.approver_id) : step.role_label || "—",
       });
     }
   });
   const normalizedApprovalMeta = new Map(
-    [...approvalMeta.entries()].map(([id, value]) => [id, { ...value, status: value.status.split(":").slice(1).join(":") }]),
+    [...approvalMetaWithIndex.entries()].map(([id, { status, finalApprover }]) => [id, { status, finalApprover }]),
   );
 
 
