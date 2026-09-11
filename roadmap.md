@@ -45,3 +45,4 @@
 - [x] Consolidar Organograma de Aprovação por cargo com N-1, N+1 e visualização gráfica
 - [x] Impedir nomes duplicados em Cargos, Centros de Custo, Clientes e Projetos
 - [x] Compactar a visualização do organograma para eliminar a rolagem lateral
+- [x] Alinhar cada N-1 abaixo do respectivo N e reduzir ainda mais os boxes do organograma
