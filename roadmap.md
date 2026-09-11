@@ -20,3 +20,6 @@
 - [x] Coluna "Item" mostrar Tipo de Solicitação (com subtipo de viagem) em vez da descrição
 - [x] Evitar auto-aprovação: solicitações criadas pelo usuário não devem aparecer para ele mesmo aprovar
 - [x] "Pendentes comigo": totalizador de approvals pendentes e total em R$ ao lado do título
+- [ ] Nova solicitação “Pagamento” com Centro de Custo obrigatório e Projeto/Cliente opcionais
+- [ ] Vincular Pagamento a Approval existente, mantendo número e histórico, com registro das duas datas/tipos
+- [ ] Encaminhar Pagamento criado por Financeiro direto ao CFO; demais cargos ao Financeiro
