@@ -1,0 +1,4 @@
+ALTER TABLE public.profiles
+  ALTER COLUMN approval_limit SET DEFAULT 1000,
+  ALTER COLUMN tier2_limit SET DEFAULT 0,
+  ALTER COLUMN tier3_limit SET DEFAULT 0;
