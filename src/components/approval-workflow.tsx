@@ -1109,9 +1109,9 @@ type RoleNode = {
 
 function OrgBox({ node }: { node: RoleNode }) {
   return (
-    <div className="mx-auto flex h-16 w-full max-w-36 min-w-0 flex-col items-center justify-center rounded border bg-card px-1.5 py-1 text-center shadow-sm">
+    <div className="mx-auto flex h-20 w-24 min-w-24 flex-col items-center justify-center overflow-hidden rounded border bg-card px-1.5 py-1 text-center shadow-sm sm:w-28 sm:min-w-28">
       <p className="w-full break-words text-[11px] font-bold leading-tight sm:text-xs">{node.title}</p>
-      <div className="mt-0.5 w-full space-y-0.5">
+      <div className="mt-0.5 w-full space-y-0.5 overflow-hidden">
         {node.names.length === 0 ? (
           <p className="text-[9px] italic leading-tight text-muted-foreground">Sem usuário no cargo</p>
         ) : (

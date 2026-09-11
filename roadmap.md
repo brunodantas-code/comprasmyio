@@ -48,3 +48,4 @@
 - [x] Alinhar cada N-1 abaixo do respectivo N e reduzir ainda mais os boxes do organograma
 - [x] Adicionar nome abreviado opcional aos cargos e utilizá-lo nos boxes do organograma
 - [x] Simplificar os boxes do organograma para cargo, primeiro nome e alçada automática
+- [x] Padronizar todos os boxes do organograma com a mesma largura e altura
