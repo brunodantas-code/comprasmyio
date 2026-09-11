@@ -33,3 +33,4 @@
 - [x] Novos usuários iniciam com Perfil Restrito, sem cargo e com configuração pendente para Admin
 - [x] Remover o cargo legado Solicitante das opções e associações atuais
 - [x] Unificar a lista de cargos dos usuários e do organograma com os cargos ativos do Cadastro
+- [x] Separar usuários sem menus em "Usuários pendentes" até a liberação do acesso

@@ -43,6 +43,7 @@ export function AccessProfilesTab() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["restricted-access-profiles"] });
+      qc.invalidateQueries({ queryKey: ["admin-users"] });
       toast.success("Acesso atualizado");
     },
     onError: (error: Error) => toast.error(error.message),
