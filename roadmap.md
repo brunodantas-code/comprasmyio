@@ -41,3 +41,4 @@
 - [x] Reunir em Approvals os submenus “Pendentes comigo”, “Meus em aprovação” e “Todos”
 - [x] Mostrar “Meus em aprovação” apenas com solicitações do usuário ainda não concluídas
 - [x] Restringir “Todos” a usuários com cargo de aprovação e manter o acompanhamento pelo Status existente
+- [x] Corrigir registros duplicados no Histórico de auditoria dos Approvals
