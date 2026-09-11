@@ -23,3 +23,6 @@
 - [x] Nova solicitação “Pagamento” com Centro de Custo obrigatório e Projeto/Cliente opcionais
 - [x] Vincular Pagamento a Approval existente, mantendo número e histórico, com registro das duas datas/tipos
 - [x] Encaminhar Pagamento criado por Financeiro direto ao CFO; demais cargos ao Financeiro
+- [ ] Separar Cargo (cadeia de aprovação) de Perfil (acesso às funcionalidades)
+- [ ] Criar perfis Admin, Padrão e Restrito, com menus configuráveis por checkboxes
+- [ ] Permitir atribuir um Cargo e um Perfil a cada usuário
