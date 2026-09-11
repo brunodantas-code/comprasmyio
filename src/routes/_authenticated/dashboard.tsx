@@ -3429,7 +3429,7 @@ function UsersAdmin() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Usuários</CardTitle>
+        <CardTitle>Usuários cadastrados</CardTitle>
         <CardDescription>Defina separadamente o cargo da cadeia de aprovação e o perfil de acesso às funcionalidades.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
