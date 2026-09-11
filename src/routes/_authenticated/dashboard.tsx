@@ -33,6 +33,7 @@ import { ClientsTab, useClients } from "@/components/clients-tab";
 import { CostCentersTab, useCostCenters } from "@/components/cost-centers-tab";
 import { JobTitlesTab, useJobTitles } from "@/components/job-titles-tab";
 import { RemindersTab } from "@/components/reminders-tab";
+import { AccessProfilesTab } from "@/components/access-profiles-tab";
 import { ImportBatchesSection } from "@/components/import-batches";
 import { AddressAutocomplete } from "@/components/address-autocomplete";
 
@@ -371,12 +372,15 @@ function Dashboard() {
   }
 
   const isAdmin = me.isAdmin;
+  const canSeeRequests = me.canAccess("solicitacoes");
+  const canSeeRegistration = me.canAccess("cadastro");
+  const canSeeAdministration = me.canAccess("usuarios");
   const fabricaOnly = me.isFabrica && !isAdmin;
   const estoquistaOnly = me.isEstoquista && !isAdmin && !me.isFabrica;
-  const canSeeStock = isAdmin || me.isFabrica || me.isEstoquista;
-  const canSeeQueue = me.isComprador || isAdmin;
+  const canSeeStock = me.canAccess("armazem");
+  const canSeeQueue = me.canAccess("approvals");
   const canImport = me.isComprador || isAdmin;
-  const defaultTab = canSeeQueue ? "queue" : "pedidos";
+  const defaultTab = canSeeRequests ? "pedidos" : canSeeQueue ? "queue" : canSeeStock ? "stock" : canSeeRegistration ? "projects" : "admin";
 
 
   return (
@@ -390,7 +394,8 @@ function Dashboard() {
             <div className="min-w-0 text-right">
               <div className="truncate text-xs font-medium sm:text-sm">{me.full_name || me.email}</div>
               <div className="flex flex-wrap justify-end gap-1">
-                {me.roles.map((r) => (
+                <Badge variant="outline" className="text-[10px] uppercase">{me.accessProfile === "padrao" ? "Padrão" : me.accessProfile}</Badge>
+                {me.roles.filter((r) => r !== "admin").map((r) => (
                   <Badge key={r} variant="outline" className="text-[10px] uppercase">{r}</Badge>
                 ))}
               </div>
@@ -406,19 +411,19 @@ function Dashboard() {
         <Tabs defaultValue={defaultTab}>
           <div className="sticky top-[60px] z-40 -mx-3 mb-6 bg-background px-3 py-2 sm:top-[73px] sm:-mx-6 sm:px-6">
           <TabsList>
-            <TabsTrigger value="pedidos"><ClipboardList className="mr-2 h-4 w-4" />Solicitações</TabsTrigger>
+            {canSeeRequests && <TabsTrigger value="pedidos"><ClipboardList className="mr-2 h-4 w-4" />Solicitações</TabsTrigger>}
             {canSeeQueue && (
               <TabsTrigger value="queue"><ShoppingCart className="mr-2 h-4 w-4" />Approvals Pendentes</TabsTrigger>
             )}
             {canSeeStock && <TabsTrigger value="stock"><Boxes className="mr-2 h-4 w-4" />Armazém</TabsTrigger>}
-            {isAdmin && <TabsTrigger value="projects"><FolderKanban className="mr-2 h-4 w-4" />Cadastro</TabsTrigger>}
+            {canSeeRegistration && <TabsTrigger value="projects"><FolderKanban className="mr-2 h-4 w-4" />Cadastro</TabsTrigger>}
             
             
-            {isAdmin && <TabsTrigger value="admin"><Users className="mr-2 h-4 w-4" />Usuários e logs</TabsTrigger>}
+            {canSeeAdministration && <TabsTrigger value="admin"><Users className="mr-2 h-4 w-4" />Usuários e logs</TabsTrigger>}
           </TabsList>
           </div>
 
-          <TabsContent value="pedidos">
+          {canSeeRequests && <TabsContent value="pedidos">
             <Tabs defaultValue="mine">
               <TabsList className="mb-4">
                 <TabsTrigger value="mine"><ClipboardList className="mr-2 h-4 w-4" />Minhas Solicitações</TabsTrigger>
@@ -428,7 +433,7 @@ function Dashboard() {
               <TabsContent value="new"><NewOrder userId={me.id} canImport={canImport} isAdmin={isAdmin} /></TabsContent>
             </Tabs>
 
-          </TabsContent>
+          </TabsContent>}
           {canSeeQueue && <TabsContent value="queue"><BuyerQueue /></TabsContent>}
           {canSeeStock && (
             <TabsContent value="stock">
@@ -439,7 +444,7 @@ function Dashboard() {
               />
             </TabsContent>
           )}
-          {isAdmin && (
+          {canSeeRegistration && (
             <TabsContent value="projects">
               <Tabs defaultValue="projetos">
                 <TabsList className="mb-4">
@@ -447,17 +452,19 @@ function Dashboard() {
                   <TabsTrigger value="clientes"><Building2 className="mr-2 h-4 w-4" />Clientes</TabsTrigger>
                   <TabsTrigger value="centros"><Landmark className="mr-2 h-4 w-4" />Centro de Custo</TabsTrigger>
                   <TabsTrigger value="cargos"><Briefcase className="mr-2 h-4 w-4" />Cargos</TabsTrigger>
+                  <TabsTrigger value="perfis"><Users className="mr-2 h-4 w-4" />Perfis de Acesso</TabsTrigger>
                   <TabsTrigger value="lembretes"><Bell className="mr-2 h-4 w-4" />Lembretes</TabsTrigger>
                 </TabsList>
                 <TabsContent value="projetos"><ProjectsAdmin userId={me.id} /></TabsContent>
                 <TabsContent value="clientes"><ClientsTab userId={me.id} /></TabsContent>
                 <TabsContent value="centros"><CostCentersTab userId={me.id} /></TabsContent>
                 <TabsContent value="cargos"><JobTitlesTab userId={me.id} /></TabsContent>
+                <TabsContent value="perfis"><AccessProfilesTab /></TabsContent>
                 <TabsContent value="lembretes"><RemindersTab /></TabsContent>
               </Tabs>
             </TabsContent>
           )}
-          {isAdmin && (
+          {canSeeAdministration && (
             <TabsContent value="admin">
               <Tabs defaultValue="usuarios">
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
@@ -3273,34 +3280,23 @@ function UsersAdmin() {
   const { data, isLoading } = useQuery({
     queryKey: ["admin-users"],
     queryFn: async () => {
-      const [{ data: profiles, error: pe }, { data: roles, error: re }] = await Promise.all([
+      const [{ data: profiles, error: pe }, { data: roles, error: re }, { data: accessProfiles, error: ae }] = await Promise.all([
         supabase.from("profiles").select("*").order("created_at", { ascending: false }),
         supabase.from("user_roles").select("*"),
+        supabase.from("user_access_profiles").select("user_id, profile"),
       ]);
       if (pe) throw pe;
       if (re) throw re;
+      if (ae) throw ae;
       const byUser = new Map<string, AppRole[]>();
       (roles ?? []).forEach((r) => {
         const arr = byUser.get(r.user_id) ?? [];
         arr.push(r.role as AppRole);
         byUser.set(r.user_id, arr);
       });
-      return (profiles ?? []).map((p) => ({ ...p, roles: byUser.get(p.id) ?? [] }));
+      const accessByUser = new Map((accessProfiles ?? []).map((item) => [item.user_id, item.profile]));
+      return (profiles ?? []).map((p) => ({ ...p, roles: byUser.get(p.id) ?? [], accessProfile: accessByUser.get(p.id) ?? "padrao" }));
     },
-  });
-
-  const toggleRole = useMutation({
-    mutationFn: async ({ userId, role, has }: { userId: string; role: AppRole; has: boolean }) => {
-      if (has) {
-        const { error } = await supabase.from("user_roles").delete().eq("user_id", userId).eq("role", role);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from("user_roles").insert({ user_id: userId, role });
-        if (error) throw error;
-      }
-    },
-    onSuccess: () => { toast.success("Perfis atualizados"); qc.invalidateQueries({ queryKey: ["admin-users"] }); },
-    onError: (e: Error) => toast.error(e.message),
   });
 
   const setPrimaryRole = useMutation({
@@ -3312,7 +3308,28 @@ function UsersAdmin() {
         if (error) throw error;
       }
     },
-    onSuccess: () => { toast.success("Perfil atualizado"); qc.invalidateQueries({ queryKey: ["admin-users"] }); },
+    onSuccess: () => { toast.success("Cargo atualizado"); qc.invalidateQueries({ queryKey: ["admin-users"] }); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const setAccessProfile = useMutation({
+    mutationFn: async ({ userId, profile }: { userId: string; profile: "admin" | "padrao" | "restrito" }) => {
+      if (profile === "admin") {
+        const { error: roleError } = await supabase.from("user_roles").upsert({ user_id: userId, role: "admin" }, { onConflict: "user_id,role" });
+        if (roleError) throw roleError;
+      }
+      const { error } = await supabase.from("user_access_profiles").upsert({ user_id: userId, profile }, { onConflict: "user_id" });
+      if (error) throw error;
+      if (profile !== "admin") {
+        const { error: roleError } = await supabase.from("user_roles").delete().eq("user_id", userId).eq("role", "admin");
+        if (roleError) throw roleError;
+      }
+    },
+    onSuccess: () => {
+      toast.success("Perfil de acesso atualizado");
+      qc.invalidateQueries({ queryKey: ["admin-users"] });
+      qc.invalidateQueries({ queryKey: ["restricted-access-profiles"] });
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -3381,7 +3398,7 @@ function UsersAdmin() {
     <Card>
       <CardHeader>
         <CardTitle>Usuários</CardTitle>
-        <CardDescription>Selecione o perfil de cada usuário e as faixas de alçada. A aprovação segue o cargo definido no organograma.</CardDescription>
+        <CardDescription>Defina separadamente o cargo da cadeia de aprovação e o perfil de acesso às funcionalidades.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
@@ -3401,14 +3418,14 @@ function UsersAdmin() {
             </Select>
           </div>
           {(() => {
-            const groupOrder: (AppRole | "admin" | "none")[] = ["admin", ...selectableRoles, "none"];
-            const groupLabel: Record<string, string> = { ...roleLabels, none: "Sem perfil" };
+            const groupOrder: (AppRole | "none")[] = [...selectableRoles, "none"];
+            const groupLabel: Record<string, string> = { ...roleLabels, none: "Sem cargo" };
             const groups = groupOrder
               .map((g) => ({
                 key: g,
                 label: groupLabel[g] ?? g,
                 users: rows.filter((u) => {
-                  const primary = u.roles.find((r) => r !== "admin") ?? (u.roles.includes("admin") ? "admin" : "none");
+                  const primary = u.roles.find((r) => r !== "admin") ?? "none";
                   return primary === g;
                 }),
               }))
@@ -3424,7 +3441,6 @@ function UsersAdmin() {
                   {g.users.map((u) => {
                     const p = u as unknown as { approval_limit?: number; tier2_limit?: number; tier3_limit?: number; manager_id?: string | null };
                     const primary = u.roles.find((r) => r !== "admin") ?? "none";
-                    const isAdminUser = u.roles.includes("admin");
                     return (
                       <div key={u.id} className="p-3">
                         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
@@ -3432,15 +3448,9 @@ function UsersAdmin() {
                             <div className="truncate font-medium">{u.full_name || "—"}</div>
                             <div className="truncate text-xs text-muted-foreground">{u.email}</div>
                           </div>
-                          <label className="flex shrink-0 items-center gap-1.5">
-                            <Checkbox
-                              checked={isAdminUser}
-                              onCheckedChange={() => toggleRole.mutate({ userId: u.id, role: "admin", has: isAdminUser })}
-                            />
-                            <span className="text-xs text-muted-foreground">Admin</span>
-                          </label>
+                          <Badge variant="outline">{u.accessProfile === "admin" ? "Admin" : u.accessProfile === "restrito" ? "Restrito" : "Padrão"}</Badge>
                         </div>
-                        <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-3 lg:grid-cols-5">
+                        <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-3 lg:grid-cols-6">
                           <div className="flex flex-col gap-1">
                             <span className="text-[10px] font-medium text-muted-foreground">Aprovado por (cargo)</span>
                             <div className="flex h-8 items-center rounded-md border border-input bg-muted/40 px-2 text-xs text-muted-foreground">
@@ -3449,15 +3459,26 @@ function UsersAdmin() {
                           </div>
 
                           <div className="flex flex-col gap-1">
-                            <span className="text-[10px] font-medium text-muted-foreground">Perfil</span>
+                            <span className="text-[10px] font-medium text-muted-foreground">Cargo</span>
                             <Select
                               value={primary}
                               onValueChange={(v) => setPrimaryRole.mutate({ userId: u.id, role: v as AppRole | "none" })}
                             >
-                              <SelectTrigger className="h-8 w-full text-xs"><SelectValue placeholder="Sem perfil" /></SelectTrigger>
+                              <SelectTrigger className="h-8 w-full text-xs"><SelectValue placeholder="Sem cargo" /></SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="none">Sem perfil</SelectItem>
+                                <SelectItem value="none">Sem cargo</SelectItem>
                                 {selectableRoles.map((r) => <SelectItem key={r} value={r}>{roleLabels[r]}</SelectItem>)}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[10px] font-medium text-muted-foreground">Perfil de acesso</span>
+                            <Select value={u.accessProfile} onValueChange={(value) => setAccessProfile.mutate({ userId: u.id, profile: value as "admin" | "padrao" | "restrito" })}>
+                              <SelectTrigger className="h-8 w-full text-xs"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="admin">Admin</SelectItem>
+                                <SelectItem value="padrao">Padrão</SelectItem>
+                                <SelectItem value="restrito">Restrito</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>

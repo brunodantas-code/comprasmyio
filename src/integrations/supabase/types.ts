@@ -2086,6 +2086,70 @@ export type Database = {
           },
         ]
       }
+      user_access_profiles: {
+        Row: {
+          created_at: string
+          profile: Database["public"]["Enums"]["access_profile"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          profile?: Database["public"]["Enums"]["access_profile"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          profile?: Database["public"]["Enums"]["access_profile"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_access_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_menu_permissions: {
+        Row: {
+          allowed: boolean
+          created_at: string
+          id: string
+          menu_key: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          allowed?: boolean
+          created_at?: string
+          id?: string
+          menu_key: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          allowed?: boolean
+          created_at?: string
+          id?: string
+          menu_key?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_menu_permissions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_reminders: {
         Row: {
           body_text: string
@@ -2208,12 +2272,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_access_admin: { Args: { _user_id: string }; Returns: boolean }
       primary_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
       }
     }
     Enums: {
+      access_profile: "admin" | "padrao" | "restrito"
       app_role:
         | "admin"
         | "comprador"
@@ -2368,6 +2434,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      access_profile: ["admin", "padrao", "restrito"],
       app_role: [
         "admin",
         "comprador",
