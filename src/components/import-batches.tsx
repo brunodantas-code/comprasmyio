@@ -448,7 +448,6 @@ function ImportDetailDialog({ batch, canManage }: { batch: ImportBatch; canManag
 function DeleteImportDialog({ id }: { id: string }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [text, setText] = useState("");
   const mutation = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.from("import_batches").delete().eq("id", id);
@@ -458,7 +457,6 @@ function DeleteImportDialog({ id }: { id: string }) {
       toast.success("Importação excluída.");
       qc.invalidateQueries({ queryKey: ["import-batches"] });
       setOpen(false);
-      setText("");
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -470,11 +468,10 @@ function DeleteImportDialog({ id }: { id: string }) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Excluir importação</DialogTitle>
-          <DialogDescription>Digite "excluir" para confirmar. Esta ação é definitiva.</DialogDescription>
+          <DialogDescription>Confirma a exclusão? Esta ação é definitiva.</DialogDescription>
         </DialogHeader>
-        <Input value={text} onChange={(e) => setText(e.target.value)} placeholder='digite "excluir"' />
         <DialogFooter>
-          <Button variant="destructive" disabled={text.trim().toLowerCase() !== "excluir" || mutation.isPending} onClick={() => mutation.mutate()}>
+          <Button variant="destructive" disabled={mutation.isPending} onClick={() => mutation.mutate()}>
             Excluir
           </Button>
         </DialogFooter>

@@ -155,9 +155,8 @@ function EditCostCenterDialog({ center, onSave }: { center: CostCenter; onSave: 
 
 function DeleteCostCenterDialog({ name, onConfirm }: { name: string; onConfirm: () => void }) {
   const [open, setOpen] = useState(false);
-  const [text, setText] = useState("");
   return (
-    <Dialog open={open} onOpenChange={(o) => { setOpen(o); setText(""); }}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button size="icon" variant="ghost" title="Excluir" aria-label="Excluir" className="text-destructive hover:text-destructive">
           <Trash2 className="h-4 w-4" />
@@ -166,11 +165,10 @@ function DeleteCostCenterDialog({ name, onConfirm }: { name: string; onConfirm: 
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Excluir centro de custo</DialogTitle>
-          <DialogDescription>Digite "excluir" para remover {name}.</DialogDescription>
+          <DialogDescription>Confirma a exclusão de {name}?</DialogDescription>
         </DialogHeader>
-        <Input value={text} onChange={(e) => setText(e.target.value)} placeholder="excluir" />
         <DialogFooter>
-          <Button variant="destructive" disabled={text.trim().toLowerCase() !== "excluir"} onClick={() => { onConfirm(); setOpen(false); }}>Excluir</Button>
+          <Button variant="destructive" onClick={() => { onConfirm(); setOpen(false); }}>Excluir</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

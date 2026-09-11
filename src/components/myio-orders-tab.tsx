@@ -375,7 +375,6 @@ function EditMyioOrderDialog({ order, userId }: { order: MyioOrder; userId: stri
 function DeleteMyioOrderInner({ id }: { id: string }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [text, setText] = useState("");
   const mutation = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.from("myio_orders").delete().eq("id", id);
@@ -385,7 +384,6 @@ function DeleteMyioOrderInner({ id }: { id: string }) {
       toast.success("Pedido excluído.");
       qc.invalidateQueries({ queryKey: ["myio-orders"] });
       setOpen(false);
-      setText("");
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -398,13 +396,12 @@ function DeleteMyioOrderInner({ id }: { id: string }) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Excluir pedido</DialogTitle>
-          <DialogDescription>Digite "excluir" para confirmar. Esta ação é definitiva.</DialogDescription>
+          <DialogDescription>Confirma a exclusão? Esta ação é definitiva.</DialogDescription>
         </DialogHeader>
-        <Input value={text} onChange={(e) => setText(e.target.value)} placeholder='digite "excluir"' />
         <DialogFooter>
           <Button
             variant="destructive"
-            disabled={text.trim().toLowerCase() !== "excluir" || mutation.isPending}
+            disabled={mutation.isPending}
             onClick={() => mutation.mutate()}
           >
             Excluir
