@@ -1324,6 +1324,7 @@ function OrgChartAdmin() {
           <div
             className="grid min-w-0 grid-cols-1 items-start gap-2 pb-2 sm:[grid-template-columns:var(--org-columns)]"
             style={{
+              "--org-leaves": Math.max(1, roots.reduce((total, root) => total + orgLeafCount(root), 0)),
               "--org-columns": roots.length
                 ? roots.map((root) => `minmax(0, ${orgLeafCount(root)}fr)`).join(" ")
                 : "minmax(0, 1fr)",

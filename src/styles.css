@@ -199,13 +199,20 @@
 /* Organograma: cartões uniformes dimensionados pela largura disponível. */
 .org-chart {
   container-type: inline-size;
-  --org-card-width: clamp(3.5rem, 6cqw, 5rem);
+  --org-leaves: 1;
+  --org-card-width: min(5rem, calc(100cqw / var(--org-leaves) - 0.375rem));
 }
 
 .org-chart-card {
   width: var(--org-card-width);
   min-width: var(--org-card-width);
   height: 5rem;
+}
+
+@media (max-width: 639px) {
+  .org-chart {
+    --org-card-width: 5rem;
+  }
 }
 
 /* Tabelas empilhadas no celular: rótulo à esquerda, informação à direita */
