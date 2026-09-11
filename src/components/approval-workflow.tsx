@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { CheckCircle2, Clock, History, Pencil, Plus, Trash2, XCircle } from "lucide-react";
@@ -1156,8 +1156,8 @@ function OrgTreeBranch({ node, parentTitle }: { node: RoleNode; parentTitle?: st
           <div className="mx-auto h-2 w-px bg-border" />
           <div className="border-t border-border pt-2">
             <div
-              className="grid min-w-0 items-start gap-1.5"
-              style={{ gridTemplateColumns: childColumns }}
+              className="grid min-w-0 grid-cols-1 items-start gap-1.5 sm:[grid-template-columns:var(--org-columns)]"
+              style={{ "--org-columns": childColumns } as CSSProperties}
             >
               {node.children.map((child) => (
                 <OrgTreeBranch key={child.role} node={child} parentTitle={node.title} />
@@ -1330,12 +1330,12 @@ function OrgChartAdmin() {
         </CardHeader>
         <CardContent className="overflow-hidden px-2 sm:px-4">
           <div
-            className="grid min-w-0 items-start gap-2 pb-2"
+            className="grid min-w-0 grid-cols-1 items-start gap-2 pb-2 sm:[grid-template-columns:var(--org-columns)]"
             style={{
-              gridTemplateColumns: roots.length
+              "--org-columns": roots.length
                 ? roots.map((root) => `minmax(0, ${orgLeafCount(root)}fr)`).join(" ")
                 : "minmax(0, 1fr)",
-            }}
+            } as CSSProperties}
           >
             {roots.map((root) => (
               <OrgTreeBranch key={root.role} node={root} />
