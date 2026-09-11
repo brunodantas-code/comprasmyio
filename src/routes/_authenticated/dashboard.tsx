@@ -26,7 +26,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { toast } from "sonner";
 import { LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Boxes, Building2, Plane, Landmark, Briefcase } from "lucide-react";
 import { Trash2, Paperclip, X, Loader2, DatabaseBackup, CheckCircle2, XCircle, RotateCcw, Pencil, Bell, ShieldCheck } from "lucide-react";
-import { ApprovalWorkflow } from "@/components/approval-workflow";
+import { ApprovalWorkflow, MyApprovalFlows, PendingForMe } from "@/components/approval-workflow";
 import { z } from "zod";
 import { StockTab } from "@/components/stock-tab";
 import { MyioOrdersTab } from "@/components/myio-orders-tab";
@@ -412,7 +412,7 @@ function Dashboard() {
           <TabsList>
             {canSeeRequests && <TabsTrigger value="pedidos"><ClipboardList className="mr-2 h-4 w-4" />Solicitações</TabsTrigger>}
             {canSeeQueue && (
-              <TabsTrigger value="queue"><ShoppingCart className="mr-2 h-4 w-4" />Approvals Pendentes</TabsTrigger>
+              <TabsTrigger value="queue"><ShoppingCart className="mr-2 h-4 w-4" />Approvals</TabsTrigger>
             )}
             {canSeeStock && <TabsTrigger value="stock"><Boxes className="mr-2 h-4 w-4" />Armazém</TabsTrigger>}
             {canSeeRegistration && <TabsTrigger value="projects"><FolderKanban className="mr-2 h-4 w-4" />Cadastro</TabsTrigger>}
@@ -433,7 +433,11 @@ function Dashboard() {
             </Tabs>
 
           </TabsContent>}
-          {canSeeQueue && <TabsContent value="queue"><BuyerQueue /></TabsContent>}
+          {canSeeQueue && (
+            <TabsContent value="queue">
+              <ApprovalsCenter />
+            </TabsContent>
+          )}
           {canSeeStock && (
             <TabsContent value="stock">
               <StockTab
@@ -2134,12 +2138,34 @@ function BuyerQueue() {
     },
   });
 
-  const baseFiltered = orders?.filter((o) =>
-    ((o as unknown as { approval_status?: string }).approval_status ?? "aprovado") === "aprovado"
-  ) ?? [];
-  const filtered = filterDelivered(baseFiltered, deliveredMode, deliveredFrom);
+  const { data: approvalSteps } = useQuery({
+    queryKey: ["approval-steps", "all-summary"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("approval_steps")
+        .select("order_id, step_index, approver_id, role_label, status")
+        .order("step_index", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const filtered = filterDelivered(orders ?? [], deliveredMode, deliveredFrom);
   const projectName = (id: string) => (id === ESTOQUE_PROJECT_ID ? "Estoque" : projects?.find((p) => p.id === id)?.name ?? "—");
   const requesterName = (id: string) => profiles?.get(id)?.full_name || profiles?.get(id)?.email || "—";
+  const approvalMeta = new Map<string, { status: string; finalApprover: string }>();
+  (approvalSteps ?? []).forEach((step) => {
+    const current = approvalMeta.get(step.order_id);
+    if (!current || step.step_index >= Number(current.status.split(":")[0] || -1)) {
+      approvalMeta.set(step.order_id, {
+        status: `${step.step_index}:${step.status}`,
+        finalApprover: step.approver_id ? requesterName(step.approver_id) : step.role_label || "—",
+      });
+    }
+  });
+  const normalizedApprovalMeta = new Map(
+    [...approvalMeta.entries()].map(([id, value]) => [id, { ...value, status: value.status.split(":").slice(1).join(":") }]),
+  );
 
 
   const renderOrders = (list: Order[]) => {
@@ -2161,19 +2187,19 @@ function BuyerQueue() {
             <h4 className="text-sm font-semibold">{groupLabel(pid)}</h4>
             <span className="text-xs text-muted-foreground">{plist.length} pedido(s)</span>
           </div>
-          <OrdersTable orders={plist} projectName={projectName} requesterName={requesterName} showRequester canEdit canDelete />
+          <OrdersTable orders={plist} projectName={projectName} requesterName={requesterName} showRequester canEdit canDelete approvalMeta={normalizedApprovalMeta} />
         </div>
       ));
     }
-    return <OrdersTable orders={list} projectName={projectName} requesterName={requesterName} showRequester canEdit canDelete headerFilters />;
+    return <OrdersTable orders={list} projectName={projectName} requesterName={requesterName} showRequester canEdit canDelete headerFilters approvalMeta={normalizedApprovalMeta} />;
   };
 
   return (
     <Card>
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <CardTitle>Approvals Pendentes</CardTitle>
-          <CardDescription>Atualize status, adicione anexos e observações.</CardDescription>
+          <CardTitle>Todos os approvals</CardTitle>
+          <CardDescription>Acompanhe o status de aprovação, o aprovador final e o andamento de cada solicitação.</CardDescription>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <DeliveredFilter mode={deliveredMode} setMode={setDeliveredMode} fromDate={deliveredFrom} setFromDate={setDeliveredFrom} />
@@ -2204,10 +2230,42 @@ function BuyerQueue() {
   );
 }
 
+function ApprovalsCenter() {
+  const { data: me } = useCurrentUser();
+  const { data: canViewAll = false, isLoading } = useQuery({
+    queryKey: ["can-view-all-approvals", me?.jobTitle?.id, me?.isAdmin],
+    enabled: Boolean(me),
+    queryFn: async () => {
+      if (me?.isAdmin) return true;
+      if (!me?.jobTitle?.id) return false;
+      const { data, error } = await supabase
+        .from("job_title_hierarchy")
+        .select("job_title_id")
+        .eq("approver_job_title_id", me.jobTitle.id)
+        .limit(1);
+      if (error) throw error;
+      return (data?.length ?? 0) > 0;
+    },
+  });
+
+  return (
+    <Tabs defaultValue="mine">
+      <TabsList className="mb-4">
+        <TabsTrigger value="mine">Pendentes comigo</TabsTrigger>
+        <TabsTrigger value="flow">Em fluxo de Aprovação</TabsTrigger>
+        {!isLoading && canViewAll && <TabsTrigger value="all">Todos</TabsTrigger>}
+      </TabsList>
+      <TabsContent value="mine"><PendingForMe /></TabsContent>
+      <TabsContent value="flow"><MyApprovalFlows /></TabsContent>
+      {canViewAll && <TabsContent value="all"><BuyerQueue /></TabsContent>}
+    </Tabs>
+  );
+}
+
 /* ---------- Orders table ---------- */
 
 function OrdersTable({
-  orders, projectName, requesterName, showRequester, canEdit, canDelete, canEditRequester, stockParts, headerFilters,
+  orders, projectName, requesterName, showRequester, canEdit, canDelete, canEditRequester, stockParts, headerFilters, approvalMeta,
 }: {
   orders: Order[];
   projectName: (id: string) => string;
@@ -2218,6 +2276,7 @@ function OrdersTable({
   canEditRequester?: boolean;
   stockParts?: Map<string, StockPart>;
   headerFilters?: boolean;
+  approvalMeta?: Map<string, { status: string; finalApprover: string }>;
 }) {
   const { data: me } = useCurrentUser();
   const [fApproval, setFApproval] = useState("");
@@ -2341,6 +2400,8 @@ function OrdersTable({
                 />
               </Row>
               <Row label="Status"><StatusHistoryDialog order={o} canEdit={canEdit} /></Row>
+              {approvalMeta && <Row label="Aprovação"><ApprovalStatusBadge status={o.approval_status ?? approvalMeta.get(o.id)?.status ?? "aprovado"} /></Row>}
+              {approvalMeta && <Row label="Aprovador final">{approvalMeta.get(o.id)?.finalApprover ?? "—"}</Row>}
               <Row label="Palavra passe">
                 <InlineField order={o} field="passphrase" type="text" canEdit={canEdit} display={o.passphrase || "—"} />
               </Row>
@@ -2366,6 +2427,8 @@ function OrdersTable({
             <TableHead className="w-[120px] text-center font-bold">Endereço de Entrega</TableHead>
             <TableHead className="w-[100px] text-center font-bold">Prazo e Previsão</TableHead>
             <TableHead className="w-[100px] text-center font-bold">Status</TableHead>
+            {approvalMeta && <TableHead className="w-[90px] text-center font-bold">Aprovação</TableHead>}
+            {approvalMeta && <TableHead className="w-[110px] text-center font-bold">Aprovador final</TableHead>}
              <TableHead className="w-[90px] text-center font-bold">Palavra passe</TableHead>
           </TableRow>
           {headerFilters && (
@@ -2390,6 +2453,8 @@ function OrdersTable({
                 </Select>
               </TableHead>
                <TableHead className="py-1" />
+               {approvalMeta && <TableHead className="py-1" />}
+               {approvalMeta && <TableHead className="py-1" />}
              </TableRow>
            )}
         </TableHeader>
@@ -2465,6 +2530,8 @@ function OrdersTable({
                 </div>
               </TableCell>
               <TableCell className="text-center"><StatusHistoryDialog order={o} canEdit={canEdit} /></TableCell>
+              {approvalMeta && <TableCell className="text-center"><ApprovalStatusBadge status={o.approval_status ?? approvalMeta.get(o.id)?.status ?? "aprovado"} /></TableCell>}
+              {approvalMeta && <TableCell className="text-center text-xs break-words">{approvalMeta.get(o.id)?.finalApprover ?? "—"}</TableCell>}
               <TableCell className="text-sm break-words text-center">
                 <InlineField order={o} field="passphrase" type="text" canEdit={canEdit} display={o.passphrase || "—"} align="center" />
               </TableCell>
@@ -2476,6 +2543,12 @@ function OrdersTable({
     </>
 
   );
+}
+
+function ApprovalStatusBadge({ status }: { status: string }) {
+  if (status === "rejeitado") return <Badge variant="destructive">Rejeitado</Badge>;
+  if (status === "aprovado") return <Badge className="bg-primary/20 text-foreground hover:bg-primary/20">Aprovado</Badge>;
+  return <Badge variant="secondary">Pendente</Badge>;
 }
 
 function FullTextPopover({ text }: { text: string }) {
