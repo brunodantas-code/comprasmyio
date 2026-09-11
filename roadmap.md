@@ -50,3 +50,4 @@
 - [x] Simplificar os boxes do organograma para cargo, primeiro nome e alçada automática
 - [x] Padronizar todos os boxes do organograma com a mesma largura e altura
 - [x] Corrigir a sobreposição dos boxes do organograma sem criar rolagem lateral
+- [x] Conectar verticalmente cada cargo aos seus subordinados no organograma
