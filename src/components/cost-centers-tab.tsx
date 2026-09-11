@@ -35,14 +35,26 @@ export function useCostCenters() {
 
 type FormValues = { name: string; code: string | null; description: string | null };
 
+const DUPLICATE_COST_CENTER_MESSAGE = "Este centro de custo já está cadastrado";
+
+function isDuplicateNameError(error: { code?: string }) {
+  return error.code === "23505";
+}
+
 export function CostCentersTab({ userId }: { userId: string }) {
   const qc = useQueryClient();
   const { data: centers, isLoading } = useCostCenters();
 
   const create = useMutation({
     mutationFn: async (v: FormValues) => {
+      const { data: existing, error: lookupError } = await supabase.from("cost_centers").select("id,name");
+      if (lookupError) throw lookupError;
+      const normalizedName = v.name.trim().toLocaleLowerCase("pt-BR");
+      if (existing?.some((item) => item.name.trim().toLocaleLowerCase("pt-BR") === normalizedName)) {
+        throw new Error(DUPLICATE_COST_CENTER_MESSAGE);
+      }
       const { error } = await supabase.from("cost_centers").insert({ ...v, created_by: userId });
-      if (error) throw error;
+      if (error) throw new Error(isDuplicateNameError(error) ? DUPLICATE_COST_CENTER_MESSAGE : error.message);
     },
     onSuccess: () => { toast.success("Centro de custo criado"); qc.invalidateQueries({ queryKey: ["cost_centers"] }); },
     onError: (e: Error) => toast.error(e.message),
@@ -50,8 +62,14 @@ export function CostCentersTab({ userId }: { userId: string }) {
 
   const update = useMutation({
     mutationFn: async (v: FormValues & { id: string }) => {
+      const { data: existing, error: lookupError } = await supabase.from("cost_centers").select("id,name");
+      if (lookupError) throw lookupError;
+      const normalizedName = v.name.trim().toLocaleLowerCase("pt-BR");
+      if (existing?.some((item) => item.id !== v.id && item.name.trim().toLocaleLowerCase("pt-BR") === normalizedName)) {
+        throw new Error(DUPLICATE_COST_CENTER_MESSAGE);
+      }
       const { error } = await supabase.from("cost_centers").update({ name: v.name, code: v.code, description: v.description }).eq("id", v.id);
-      if (error) throw error;
+      if (error) throw new Error(isDuplicateNameError(error) ? DUPLICATE_COST_CENTER_MESSAGE : error.message);
     },
     onSuccess: () => { toast.success("Centro de custo atualizado"); qc.invalidateQueries({ queryKey: ["cost_centers"] }); },
     onError: (e: Error) => toast.error(e.message),

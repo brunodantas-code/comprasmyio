@@ -12,6 +12,12 @@ import { Pencil, Trash2 } from "lucide-react";
 
 export type Client = { id: string; name: string; cnpj: string | null };
 
+const DUPLICATE_CLIENT_MESSAGE = "Este cliente já está cadastrado";
+
+function isDuplicateNameError(error: { code?: string }) {
+  return error.code === "23505";
+}
+
 export function useClients() {
   return useQuery({
     queryKey: ["clients"],
@@ -29,8 +35,14 @@ export function ClientsTab({ userId }: { userId: string }) {
 
   const create = useMutation({
     mutationFn: async (v: { name: string; cnpj: string | null }) => {
+      const { data: existing, error: lookupError } = await supabase.from("clients").select("id,name");
+      if (lookupError) throw lookupError;
+      const normalizedName = v.name.trim().toLocaleLowerCase("pt-BR");
+      if (existing?.some((item) => item.name.trim().toLocaleLowerCase("pt-BR") === normalizedName)) {
+        throw new Error(DUPLICATE_CLIENT_MESSAGE);
+      }
       const { error } = await supabase.from("clients").insert({ ...v, created_by: userId });
-      if (error) throw error;
+      if (error) throw new Error(isDuplicateNameError(error) ? DUPLICATE_CLIENT_MESSAGE : error.message);
     },
     onSuccess: () => { toast.success("Cliente criado"); qc.invalidateQueries({ queryKey: ["clients"] }); },
     onError: (e: Error) => toast.error(e.message),
@@ -38,8 +50,14 @@ export function ClientsTab({ userId }: { userId: string }) {
 
   const update = useMutation({
     mutationFn: async (v: { id: string; name: string; cnpj: string | null }) => {
+      const { data: existing, error: lookupError } = await supabase.from("clients").select("id,name");
+      if (lookupError) throw lookupError;
+      const normalizedName = v.name.trim().toLocaleLowerCase("pt-BR");
+      if (existing?.some((item) => item.id !== v.id && item.name.trim().toLocaleLowerCase("pt-BR") === normalizedName)) {
+        throw new Error(DUPLICATE_CLIENT_MESSAGE);
+      }
       const { error } = await supabase.from("clients").update({ name: v.name, cnpj: v.cnpj }).eq("id", v.id);
-      if (error) throw error;
+      if (error) throw new Error(isDuplicateNameError(error) ? DUPLICATE_CLIENT_MESSAGE : error.message);
     },
     onSuccess: () => { toast.success("Cliente atualizado"); qc.invalidateQueries({ queryKey: ["clients"] }); },
     onError: (e: Error) => toast.error(e.message),
