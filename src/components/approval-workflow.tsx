@@ -376,7 +376,7 @@ export function PendingForMe() {
             <TableHeader>
               <TableRow>
                 <TableHead>Approval</TableHead>
-                <TableHead>Item</TableHead>
+                <TableHead>Tipo</TableHead>
                 <TableHead>Solicitante</TableHead>
                 <TableHead>Valor</TableHead>
                 <TableHead>Etapa</TableHead>
