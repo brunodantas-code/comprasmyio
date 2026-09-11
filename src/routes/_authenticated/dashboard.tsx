@@ -2227,7 +2227,7 @@ function ApprovalsCenter() {
     <Tabs defaultValue="mine">
       <TabsList className="mb-4">
         <TabsTrigger value="mine">Pendentes comigo</TabsTrigger>
-        <TabsTrigger value="flow">Em fluxo de Aprovação</TabsTrigger>
+        <TabsTrigger value="flow">Meus em aprovação</TabsTrigger>
         {!isLoading && canViewAll && <TabsTrigger value="all">Todos</TabsTrigger>}
       </TabsList>
       <TabsContent value="mine"><PendingForMe /></TabsContent>

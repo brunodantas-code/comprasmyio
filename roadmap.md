@@ -38,6 +38,6 @@
 - [x] Manter usuários Restritos sem aprovador em "Usuários pendentes" até concluir o cadastro
 - [x] Corrigir permissão de Admin ao definir cargos aprovadores no Organograma de Aprovação
 - [x] Renomear o menu principal “Approvals Pendentes” para “Approvals”
-- [x] Reunir em Approvals os submenus “Pendentes comigo”, “Em fluxo de Aprovação” e “Todos”
-- [x] Mostrar “Em fluxo de Aprovação” apenas com solicitações do usuário ainda não concluídas
+- [x] Reunir em Approvals os submenus “Pendentes comigo”, “Meus em aprovação” e “Todos”
+- [x] Mostrar “Meus em aprovação” apenas com solicitações do usuário ainda não concluídas
 - [x] Restringir “Todos” a usuários com cargo de aprovação e manter o acompanhamento pelo Status existente

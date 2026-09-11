@@ -446,7 +446,7 @@ export function MyApprovalFlows() {
       <CardHeader>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <CardTitle>Em fluxo de Aprovação</CardTitle>
+            <CardTitle>Meus em aprovação</CardTitle>
             <CardDescription>Approvals criados por você que ainda aguardam a conclusão da aprovação.</CardDescription>
           </div>
           <Input
