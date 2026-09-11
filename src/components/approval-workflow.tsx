@@ -413,7 +413,8 @@ export function PendingForMe() {
   );
 }
 
-function FlowsOverview() {
+export function MyApprovalFlows() {
+  const { data: me } = useCurrentUser();
   const { data: steps, isLoading } = useSteps();
   const { data: profiles } = useProfiles();
   const [search, setSearch] = useState("");
@@ -427,21 +428,26 @@ function FlowsOverview() {
     });
     const term = search.trim();
     return [...byOrder.entries()]
-      .filter(([, list]) => !term || (list[0]?.purchase_orders?.approval_number ?? "").includes(term))
+      .filter(([, list]) => {
+        const order = list[0]?.purchase_orders;
+        return order?.requester_id === me?.id &&
+          order.approval_status === "aguardando_aprovacao" &&
+          (!term || (order.approval_number ?? "").includes(term));
+      })
       .sort((a, b) => {
       const da = a[1][0]?.purchase_orders?.created_at ?? "";
       const db = b[1][0]?.purchase_orders?.created_at ?? "";
       return db.localeCompare(da);
     });
-  }, [steps, search]);
+  }, [steps, me?.id, search]);
 
   return (
     <Card>
       <CardHeader>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <CardTitle>Solicitações em fluxo</CardTitle>
-            <CardDescription>Sequência de aprovação de cada solicitação e trilha de auditoria.</CardDescription>
+            <CardTitle>Em fluxo de Aprovação</CardTitle>
+            <CardDescription>Approvals criados por você que ainda aguardam a conclusão da aprovação.</CardDescription>
           </div>
           <Input
             value={search}
@@ -1362,16 +1368,12 @@ function OrgChartAdmin() {
 
 export function ApprovalWorkflow() {
   return (
-    <Tabs defaultValue="pendentes">
+    <Tabs defaultValue="organograma">
       <TabsList className="mb-4">
-        <TabsTrigger value="pendentes">Pendentes comigo</TabsTrigger>
-        <TabsTrigger value="fluxos">Solicitações em fluxo</TabsTrigger>
         <TabsTrigger value="organograma">Organograma de Aprovação</TabsTrigger>
         <TabsTrigger value="padrao">Alçadas de Aprovação</TabsTrigger>
         <TabsTrigger value="regras">Etapas adicionais</TabsTrigger>
       </TabsList>
-      <TabsContent value="pendentes"><PendingForMe /></TabsContent>
-      <TabsContent value="fluxos"><FlowsOverview /></TabsContent>
       <TabsContent value="organograma"><OrgChartAdmin /></TabsContent>
       <TabsContent value="padrao"><DefaultChainAdmin /></TabsContent>
       <TabsContent value="regras"><RulesAdmin /></TabsContent>
