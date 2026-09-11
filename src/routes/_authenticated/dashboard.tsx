@@ -67,6 +67,10 @@ type Order = {
   attachments: Attachment[] | null;
   request_group_id?: string | null;
   approval_number?: string | null;
+  parent_order_id?: string | null;
+  payment_date?: string | null;
+  approval_status?: string;
+  estimated_value?: number;
   created_at: string;
   updated_at: string;
 };
@@ -219,6 +223,7 @@ const REQUEST_TYPE_LABELS: Record<string, string> = {
   rh: "Contratação de RH",
   importacao: "Importação",
   dispositivos: "Dispositivos",
+  pagamento: "Pagamento",
 };
 
 function requestTypeLabel(o: { request_type?: string | null; travel_type?: string | null }): string {
@@ -901,7 +906,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
   const qc = useQueryClient();
   const [projectId, setProjectId] = useState("");
   const [forStock, setForStock] = useState(false);
-  const [requestType, setRequestType] = useState<"materiais" | "servicos" | "viagens" | "reembolso" | "importacao" | "dispositivos" | "rh">("materiais");
+  const [requestType, setRequestType] = useState<"materiais" | "servicos" | "viagens" | "reembolso" | "pagamento" | "importacao" | "dispositivos" | "rh">("materiais");
   const [rhCargo, setRhCargo] = useState("");
   const [rhGestor, setRhGestor] = useState("");
   const [rhMotivo, setRhMotivo] = useState("");
@@ -949,6 +954,25 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
   const updateReembolsoLeg = (i: number, patch: Partial<ReembolsoLeg>) =>
     setReembolsoLegs((prev) => prev.map((l, idx) => (idx === i ? { ...l, ...patch } : l)));
   const reembolsoTotal = reembolsoLegs.reduce((acc, l) => acc + (Number(l.value) || 0), 0);
+  const [paymentDescription, setPaymentDescription] = useState("");
+  const [paymentValue, setPaymentValue] = useState("0");
+  const [paymentDate, setPaymentDate] = useState("");
+  const [linkedApprovalId, setLinkedApprovalId] = useState("none");
+  const { data: approvedOrders } = useQuery({
+    queryKey: ["orders", "approved-for-payment"],
+    enabled: requestType === "pagamento",
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("purchase_orders")
+        .select("id, approval_number, item_name, request_type, travel_type, created_at")
+        .eq("approval_status", "aprovado")
+        .neq("request_type", "pagamento")
+        .is("parent_order_id", null)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
   const [item, setItem] = useState<PurchasableItem | null>(null);
   const [itemLink, setItemLink] = useState("");
   const [estimatedValue, setEstimatedValue] = useState("0");
@@ -1026,6 +1050,10 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
     setTravelType("");
     setTravelLegs([{ destination: "", departure: "", return: "" }]);
     setReembolsoLegs([{ description: "", value: "", date: "" }]);
+    setPaymentDescription("");
+    setPaymentValue("0");
+    setPaymentDate("");
+    setLinkedApprovalId("none");
     setItem(null);
     setItemLink("");
     setEstimatedValue("0");
@@ -1087,10 +1115,12 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
           project_id: forStock ? null : (values.project_id ?? null),
           for_stock: forStock,
           request_type: requestType,
-          client_id: requestType === "rh"
+          client_id: requestType === "rh" || requestType === "pagamento"
             ? (clientId && clientId !== "none" ? clientId : null)
             : (requestType !== "materiais" && allocTarget === "cliente" ? (clientId || null) : null),
           cost_center_id: restrictedCc ? await resolveOperacaoCostCenterId() : (costCenterId || null),
+          parent_order_id: requestType === "pagamento" && linkedApprovalId !== "none" ? linkedApprovalId : null,
+          payment_date: requestType === "pagamento" ? paymentDate : null,
 
           item_name: values.item_name,
           item_link: values.item_link ?? null,
@@ -1116,6 +1146,8 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
             ? reembolsoLegs.map((l) => ({ description: l.description.trim(), value: Number(l.value), date: l.date }))
             : requestType === "rh"
             ? [{ cargo: rhCargo, gestor: rhGestor, motivo: rhMotivo.trim(), tipo: rhTipo, remuneracao: Number(rhRemuneracao) }]
+            : requestType === "pagamento"
+            ? [{ description: paymentDescription.trim(), value: Number(paymentValue), date: paymentDate }]
             : [],
           requester_id: userId,
         }).select("id").single();
@@ -1148,10 +1180,11 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
     const isMateriais = requestType === "materiais";
     const isReembolso = requestType === "reembolso";
     const isRh = requestType === "rh";
+    const isPagamento = requestType === "pagamento";
     if (!isMateriais) {
-      if (!isReembolso && !isRh && newItemName.trim().length < 2) return toast.error("Descreva o serviço ou a viagem solicitada.");
-      if (!isRh && allocTarget === "projeto" && !projectId) return toast.error("Selecione o projeto");
-      if (!isRh && allocTarget === "cliente" && !clientId) return toast.error("Selecione o cliente");
+      if (!isReembolso && !isRh && !isPagamento && newItemName.trim().length < 2) return toast.error("Descreva o serviço ou a viagem solicitada.");
+      if (!isRh && !isPagamento && allocTarget === "projeto" && !projectId) return toast.error("Selecione o projeto");
+      if (!isRh && !isPagamento && allocTarget === "cliente" && !clientId) return toast.error("Selecione o cliente");
       if (isRh) {
         if (!rhCargo) return toast.error("Selecione o cargo");
         if (!rhGestor) return toast.error("Selecione o gestor");
@@ -1183,6 +1216,12 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
           if (!leg.date) return toast.error(`Reembolso ${n}: informe a data da despesa`);
         }
       }
+      if (isPagamento) {
+        if (!costCenterId && !restrictedCc) return toast.error("Selecione o Centro de Custo");
+        if (paymentDescription.trim().length < 2) return toast.error("Informe a descrição do pagamento");
+        if (!(Number(paymentValue) > 0)) return toast.error("Informe um valor válido para o pagamento");
+        if (!paymentDate) return toast.error("Informe a data do pagamento");
+      }
     } else if (isNewItem) {
       if (newItemName.trim().length < 2) return toast.error("Descreva o item novo.");
       if (!newItemDest) return toast.error("Selecione para qual estoque esse item novo será cadastrado.");
@@ -1200,16 +1239,18 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
 
     const fd = new FormData(e.currentTarget);
     const parsed = newOrderSchema.safeParse({
-      project_id: isRh ? undefined : (!isMateriais ? (allocTarget === "projeto" ? projectId : undefined) : (forStock ? undefined : projectId)),
+      project_id: isRh || isPagamento ? (projectId || undefined) : (!isMateriais ? (allocTarget === "projeto" ? projectId : undefined) : (forStock ? undefined : projectId)),
       item_name: isReembolso
         ? "Reembolso de Despesas"
+        : isPagamento
+        ? paymentDescription.trim()
         : isRh
         ? `Contratação de RH — ${rhCargo}`
         : (!isMateriais || isNewItem ? newItemName : item!.name),
-      item_link: isReembolso || isRh ? undefined : (itemLink || undefined),
-      quantity: isReembolso || isRh ? 1 : (Number(qty) || 1),
-      estimated_value: isReembolso ? reembolsoTotal : isRh ? Number(rhRemuneracao || 0) : (Number(estimatedValue) || 0),
-      recipient: isRh ? rhGestor : recipient,
+      item_link: isReembolso || isRh || isPagamento ? undefined : (itemLink || undefined),
+      quantity: isReembolso || isRh || isPagamento ? 1 : (Number(qty) || 1),
+      estimated_value: isReembolso ? reembolsoTotal : isRh ? Number(rhRemuneracao || 0) : isPagamento ? Number(paymentValue) : (Number(estimatedValue) || 0),
+      recipient: isRh ? rhGestor : isPagamento ? "Financeiro" : recipient,
       requester_notes: isRh
         ? `${rhTipo === "reposicao" ? "Reposição" : "Nova Contratação"} — Motivo: ${rhMotivo.trim()}${fd.get("requester_notes") ? ` | ${fd.get("requester_notes")}` : ""}`
         : (fd.get("requester_notes") || undefined),
@@ -1281,6 +1322,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
             ["servicos", "Serviços"],
             ["viagens", "Viagens"],
             ["reembolso", "Reembolsos"],
+            ["pagamento", "Pagamento"],
             ["rh", "Contratação de RH"],
             ...(canImport ? [["importacao", "Importação"] as const] : []),
             ...(isAdmin ? [["dispositivos", "Dispositivos"] as const] : []),
@@ -1297,6 +1339,9 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
       )}
       {requestType === "reembolso" && (
         <p className="text-xs text-muted-foreground">Reembolso de despesas incorridas pelo solicitante.</p>
+      )}
+      {requestType === "pagamento" && (
+        <p className="text-xs text-muted-foreground">Solicitação única de pagamento, com vínculo opcional a um Approval já aprovado.</p>
       )}
       {requestType === "importacao" && (
         <p className="text-xs text-muted-foreground">Pedidos de importação e acompanhamento de embarques.</p>
@@ -1466,6 +1511,39 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
               </div>
             )}
 
+            {requestType === "pagamento" && (
+              <div className="rounded-md border p-3 space-y-4">
+                <div className="space-y-2">
+                  <Label>Vincular Approval aprovado <span className="text-muted-foreground">(opcional)</span></Label>
+                  <Select value={linkedApprovalId} onValueChange={setLinkedApprovalId}>
+                    <SelectTrigger><SelectValue placeholder="Sem Approval vinculado" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Sem Approval vinculado</SelectItem>
+                      {(approvedOrders ?? []).map((o) => (
+                        <SelectItem key={o.id} value={o.id}>
+                          {o.approval_number ?? "Sem número"} — {requestTypeLabel(o)} — {o.item_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-4 md:grid-cols-3 items-end">
+                  <div className="space-y-2">
+                    <Label htmlFor="payment_description">Descrição do pagamento</Label>
+                    <Input id="payment_description" value={paymentDescription} onChange={(e) => setPaymentDescription(e.target.value)} placeholder="Ex.: Pagamento de fornecedor" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="payment_value">Valor (R$)</Label>
+                    <MoneyInput id="payment_value" className="w-32" value={paymentValue} onChange={setPaymentValue} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="payment_date">Data do pagamento</Label>
+                    <Input id="payment_date" type="date" value={paymentDate} onChange={(e) => setPaymentDate(e.target.value)} />
+                  </div>
+                </div>
+              </div>
+            )}
+
             {requestType === "rh" && (
               <div className="rounded-md border p-3 space-y-4">
                 <div className="grid gap-4 md:grid-cols-2">
@@ -1517,7 +1595,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
             <div className="space-y-2">
             </div>
 
-            {requestType === "rh" ? (
+            {requestType === "rh" || requestType === "pagamento" ? (
               <>
                 {!restrictedCc && (
                   <div className="space-y-2">
@@ -1542,6 +1620,18 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
                     </SelectContent>
                   </Select>
                 </div>
+                {requestType === "pagamento" && (
+                  <div className="space-y-2">
+                    <Label>Projeto <span className="text-muted-foreground">(opcional)</span></Label>
+                    <Select value={projectId || "none"} onValueChange={(v) => setProjectId(v === "none" ? "" : v)}>
+                      <SelectTrigger><SelectValue placeholder="Sem projeto definido" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Sem projeto definido</SelectItem>
+                        {projects.filter((p) => !p.status || p.status === "active").map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </>
             ) : requestType === "materiais" ? (
               <>
@@ -1633,7 +1723,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
               </>
             )}
 
-            {requestType !== "reembolso" && requestType !== "rh" && (
+            {requestType !== "reembolso" && requestType !== "rh" && requestType !== "pagamento" && (
             <div className="space-y-2">
               {requestType === "materiais" ? (
                 <>
@@ -1711,7 +1801,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
               )}
             </div>
             )}
-            {requestType !== "reembolso" && requestType !== "rh" && (
+            {requestType !== "reembolso" && requestType !== "rh" && requestType !== "pagamento" && (
             <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="quantity">{requestType === "viagens" ? (travelType === "aluguel_veiculos" ? "Quantidade de veículos" : "Quantidade de Pessoas") : "Quantidade"}</Label>
@@ -1773,7 +1863,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
               )}
             </div>
             )}
-            {requestType !== "reembolso" && requestType !== "rh" && (
+            {requestType !== "reembolso" && requestType !== "rh" && requestType !== "pagamento" && (
             <div className="space-y-2">
               <Label htmlFor="item_link">
                 Link de Referência <span className="text-muted-foreground">(opcional)</span>
@@ -2487,6 +2577,37 @@ function OrderReportDialog({
     },
   });
 
+  const relatedOrderIds = [order.parent_order_id, order.id].filter((id): id is string => Boolean(id));
+  const { data: relatedOrders } = useQuery({
+    queryKey: ["order-report-related", order.id, order.parent_order_id],
+    enabled: open,
+    queryFn: async () => {
+      const originalId = order.parent_order_id ?? order.id;
+      const { data, error } = await supabase
+        .from("purchase_orders")
+        .select("id, parent_order_id, request_type, travel_type, item_name, created_at, payment_date, estimated_value")
+        .or(`id.eq.${originalId},parent_order_id.eq.${originalId}`)
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const { data: relatedLogs } = useQuery({
+    queryKey: ["order-report-related-logs", relatedOrderIds],
+    enabled: open && relatedOrderIds.length > 1,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("order_logs")
+        .select("id, order_id, actor_id, action, details, created_at")
+        .in("order_id", relatedOrderIds)
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  const displayedLogs = relatedLogs ?? logs;
+
   const allocation = order.for_stock ? "Estoque" : order.project_id ? projectName(order.project_id) : "—";
   const Row = ({ label, value }: { label: string; value: React.ReactNode }) => (
     <div className="space-y-0.5">
@@ -2511,6 +2632,7 @@ function OrderReportDialog({
         <div className="space-y-6 font-sans">
           <section className="grid grid-cols-2 gap-4 md:grid-cols-3">
             <Row label="Item" value={order.item_name} />
+            <Row label="Tipo(s)" value={(relatedOrders ?? [{ request_type: order.request_type, travel_type: order.travel_type }]).map(requestTypeLabel).filter((v, i, a) => a.indexOf(v) === i).join(" + ")} />
             <Row label="Quantidade" value={order.quantity} />
             <Row label="Alocação" value={allocation} />
             <Row label="Solicitante" value={requesterName ? requesterName(order.requester_id) : nameFor(order.requester_id)} />
@@ -2521,6 +2643,10 @@ function OrderReportDialog({
             <Row label="Status" value={STATUS_LABELS[order.status]} />
             <Row label="Palavra passe" value={order.passphrase || "—"} />
             <Row label="Criado em" value={fmtDateTime(order.created_at)} />
+            {order.payment_date && <Row label="Data do pagamento" value={new Date(order.payment_date + "T00:00:00").toLocaleDateString("pt-BR")} />}
+            {relatedOrders && relatedOrders.length > 1 && relatedOrders.map((related) => (
+              <Row key={related.id} label={`Criação — ${requestTypeLabel(related)}`} value={fmtDateTime(related.created_at)} />
+            ))}
             <Row label="Última atualização" value={fmtDateTime(order.updated_at)} />
             {order.item_link && (
               <Row label="Link do item" value={<a href={order.item_link} target="_blank" rel="noreferrer" className="text-primary hover:underline">Abrir link</a>} />
@@ -2584,11 +2710,11 @@ function OrderReportDialog({
             <h3 className="text-sm font-semibold">Histórico completo</h3>
             {loadingLogs ? (
               <p className="text-sm text-muted-foreground">Carregando...</p>
-            ) : !logs || logs.length === 0 ? (
+            ) : !displayedLogs || displayedLogs.length === 0 ? (
               <p className="text-sm text-muted-foreground">Nenhum registro.</p>
             ) : (
               <ol className="space-y-3 border-l pl-4">
-                {logs.map((l) => (
+                {displayedLogs.map((l) => (
                   <li key={l.id} className="space-y-1">
                     <div className="text-sm font-medium">{LOG_ACTION_LABELS[l.action] ?? l.action}</div>
                     <div className="text-xs text-muted-foreground">{fmtDateTime(l.created_at)} — {nameFor(l.actor_id)}</div>
@@ -3209,8 +3335,9 @@ function UsersAdmin() {
     ceo: "CEO",
     cfo: "CFO",
     cto: "CTO",
+    financeiro: "Financeiro",
   };
-  const selectableRoles: AppRole[] = ["comprador", "fabrica", "estoquista", "solicitante", "coo", "ceo", "cfo", "cto"];
+  const selectableRoles: AppRole[] = ["comprador", "financeiro", "fabrica", "estoquista", "solicitante", "coo", "ceo", "cfo", "cto"];
 
   const { data: roleHierarchy } = useQuery({
     queryKey: ["role-hierarchy"],

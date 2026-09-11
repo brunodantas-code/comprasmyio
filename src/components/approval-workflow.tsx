@@ -56,6 +56,7 @@ const REQUEST_TYPE_LABELS: Record<string, string> = {
   rh: "Contratação de RH",
   importacao: "Importação",
   dispositivos: "Dispositivos",
+  pagamento: "Pagamento",
 };
 
 function requestTypeLabel(o: { request_type?: string | null; travel_type?: string | null } | null | undefined): string {
@@ -1116,9 +1117,10 @@ const ROLE_TITLES: Record<string, string> = {
   estoquista: "Estoquista",
   fabrica: "Fábrica",
   solicitante: "Solicitante",
+  financeiro: "Financeiro",
 };
 
-const ROLE_PRIORITY = ["ceo", "coo", "cfo", "cto", "comprador", "estoquista", "fabrica", "solicitante", "admin"];
+const ROLE_PRIORITY = ["ceo", "coo", "cfo", "cto", "financeiro", "comprador", "estoquista", "fabrica", "solicitante", "admin"];
 
 function roleTitle(roles: AppRole[]) {
   const found = ROLE_PRIORITY.find((r) => roles.includes(r as AppRole));
@@ -1171,7 +1173,7 @@ function OrgBox({ node }: { node: RoleNode }) {
   );
 }
 
-const ORG_ROLES = ["ceo", "cfo", "coo", "cto", "comprador", "estoquista", "fabrica", "solicitante"];
+const ORG_ROLES = ["ceo", "cfo", "coo", "cto", "financeiro", "comprador", "estoquista", "fabrica", "solicitante"];
 
 function OrgChartAdmin() {
   const qc = useQueryClient();
