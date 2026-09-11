@@ -3122,8 +3122,14 @@ function ProjectsAdmin({ userId }: { userId: string }) {
 
   const create = useMutation({
     mutationFn: async (v: { name: string; description: string; client_id: string | null; budget: number }) => {
+      const { data: existing, error: lookupError } = await supabase.from("projects").select("id,name");
+      if (lookupError) throw lookupError;
+      const normalizedName = v.name.trim().toLocaleLowerCase("pt-BR");
+      if (existing?.some((project) => project.name.trim().toLocaleLowerCase("pt-BR") === normalizedName)) {
+        throw new Error("Este projeto já está cadastrado");
+      }
       const { error } = await supabase.from("projects").insert({ ...v, created_by: userId });
-      if (error) throw error;
+      if (error) throw new Error(error.code === "23505" ? "Este projeto já está cadastrado" : error.message);
     },
     onSuccess: () => { toast.success("Projeto criado"); qc.invalidateQueries({ queryKey: ["projects"] }); },
     onError: (e: Error) => toast.error(e.message),

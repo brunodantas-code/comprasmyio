@@ -35,14 +35,26 @@ export function useJobTitles() {
 
 type FormValues = { name: string; description: string | null };
 
+const DUPLICATE_JOB_TITLE_MESSAGE = "Este cargo já está cadastrado";
+
+function isDuplicateNameError(error: { code?: string }) {
+  return error.code === "23505";
+}
+
 export function JobTitlesTab({ userId }: { userId: string }) {
   const qc = useQueryClient();
   const { data: titles, isLoading } = useJobTitles();
 
   const create = useMutation({
     mutationFn: async (v: FormValues) => {
+      const { data: existing, error: lookupError } = await supabase.from("job_titles").select("id,name");
+      if (lookupError) throw lookupError;
+      const normalizedName = v.name.trim().toLocaleLowerCase("pt-BR");
+      if (existing?.some((item) => item.name.trim().toLocaleLowerCase("pt-BR") === normalizedName)) {
+        throw new Error(DUPLICATE_JOB_TITLE_MESSAGE);
+      }
       const { error } = await supabase.from("job_titles").insert({ ...v, created_by: userId });
-      if (error) throw error;
+      if (error) throw new Error(isDuplicateNameError(error) ? DUPLICATE_JOB_TITLE_MESSAGE : error.message);
     },
     onSuccess: () => { toast.success("Cargo criado"); qc.invalidateQueries({ queryKey: ["job_titles"] }); },
     onError: (e: Error) => toast.error(e.message),
@@ -50,8 +62,14 @@ export function JobTitlesTab({ userId }: { userId: string }) {
 
   const update = useMutation({
     mutationFn: async (v: FormValues & { id: string }) => {
+      const { data: existing, error: lookupError } = await supabase.from("job_titles").select("id,name");
+      if (lookupError) throw lookupError;
+      const normalizedName = v.name.trim().toLocaleLowerCase("pt-BR");
+      if (existing?.some((item) => item.id !== v.id && item.name.trim().toLocaleLowerCase("pt-BR") === normalizedName)) {
+        throw new Error(DUPLICATE_JOB_TITLE_MESSAGE);
+      }
       const { error } = await supabase.from("job_titles").update({ name: v.name, description: v.description }).eq("id", v.id);
-      if (error) throw error;
+      if (error) throw new Error(isDuplicateNameError(error) ? DUPLICATE_JOB_TITLE_MESSAGE : error.message);
     },
     onSuccess: () => { toast.success("Cargo atualizado"); qc.invalidateQueries({ queryKey: ["job_titles"] }); },
     onError: (e: Error) => toast.error(e.message),
