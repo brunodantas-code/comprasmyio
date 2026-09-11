@@ -2138,35 +2138,9 @@ function BuyerQueue() {
     },
   });
 
-  const { data: approvalSteps } = useQuery({
-    queryKey: ["approval-steps", "all-summary"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("approval_steps")
-        .select("order_id, step_index, approver_id, role_label, status")
-        .order("step_index", { ascending: true });
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
-
   const filtered = filterDelivered(orders ?? [], deliveredMode, deliveredFrom);
   const projectName = (id: string) => (id === ESTOQUE_PROJECT_ID ? "Estoque" : projects?.find((p) => p.id === id)?.name ?? "—");
   const requesterName = (id: string) => profiles?.get(id)?.full_name || profiles?.get(id)?.email || "—";
-  const approvalMetaWithIndex = new Map<string, { stepIndex: number; status: string; finalApprover: string }>();
-  (approvalSteps ?? []).forEach((step) => {
-    const current = approvalMetaWithIndex.get(step.order_id);
-    if (!current || step.step_index >= current.stepIndex) {
-      approvalMetaWithIndex.set(step.order_id, {
-        stepIndex: step.step_index,
-        status: step.status,
-        finalApprover: step.approver_id ? requesterName(step.approver_id) : step.role_label || "—",
-      });
-    }
-  });
-  const normalizedApprovalMeta = new Map(
-    [...approvalMetaWithIndex.entries()].map(([id, { status, finalApprover }]) => [id, { status, finalApprover }]),
-  );
 
 
   const renderOrders = (list: Order[]) => {
@@ -2188,11 +2162,11 @@ function BuyerQueue() {
             <h4 className="text-sm font-semibold">{groupLabel(pid)}</h4>
             <span className="text-xs text-muted-foreground">{plist.length} pedido(s)</span>
           </div>
-          <OrdersTable orders={plist} projectName={projectName} requesterName={requesterName} showRequester canEdit canDelete approvalMeta={normalizedApprovalMeta} />
+          <OrdersTable orders={plist} projectName={projectName} requesterName={requesterName} showRequester canEdit canDelete />
         </div>
       ));
     }
-    return <OrdersTable orders={list} projectName={projectName} requesterName={requesterName} showRequester canEdit canDelete headerFilters approvalMeta={normalizedApprovalMeta} />;
+    return <OrdersTable orders={list} projectName={projectName} requesterName={requesterName} showRequester canEdit canDelete headerFilters />;
   };
 
   return (
@@ -2200,7 +2174,7 @@ function BuyerQueue() {
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <CardTitle>Todos os approvals</CardTitle>
-          <CardDescription>Acompanhe o status de aprovação, o aprovador final e o andamento de cada solicitação.</CardDescription>
+          <CardDescription>Acompanhe o status e o andamento de cada solicitação.</CardDescription>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <DeliveredFilter mode={deliveredMode} setMode={setDeliveredMode} fromDate={deliveredFrom} setFromDate={setDeliveredFrom} />
@@ -2266,7 +2240,7 @@ function ApprovalsCenter() {
 /* ---------- Orders table ---------- */
 
 function OrdersTable({
-  orders, projectName, requesterName, showRequester, canEdit, canDelete, canEditRequester, stockParts, headerFilters, approvalMeta,
+  orders, projectName, requesterName, showRequester, canEdit, canDelete, canEditRequester, stockParts, headerFilters,
 }: {
   orders: Order[];
   projectName: (id: string) => string;
@@ -2277,7 +2251,6 @@ function OrdersTable({
   canEditRequester?: boolean;
   stockParts?: Map<string, StockPart>;
   headerFilters?: boolean;
-  approvalMeta?: Map<string, { status: string; finalApprover: string }>;
 }) {
   const { data: me } = useCurrentUser();
   const [fApproval, setFApproval] = useState("");
@@ -2401,8 +2374,6 @@ function OrdersTable({
                 />
               </Row>
               <Row label="Status"><StatusHistoryDialog order={o} canEdit={canEdit} /></Row>
-              {approvalMeta && <Row label="Aprovação"><ApprovalStatusBadge status={o.approval_status ?? approvalMeta.get(o.id)?.status ?? "aprovado"} /></Row>}
-              {approvalMeta && <Row label="Aprovador final">{approvalMeta.get(o.id)?.finalApprover ?? "—"}</Row>}
               <Row label="Palavra passe">
                 <InlineField order={o} field="passphrase" type="text" canEdit={canEdit} display={o.passphrase || "—"} />
               </Row>
@@ -2428,9 +2399,7 @@ function OrdersTable({
             <TableHead className="w-[120px] text-center font-bold">Endereço de Entrega</TableHead>
             <TableHead className="w-[100px] text-center font-bold">Prazo e Previsão</TableHead>
             <TableHead className="w-[100px] text-center font-bold">Status</TableHead>
-            {approvalMeta && <TableHead className="w-[90px] text-center font-bold">Aprovação</TableHead>}
-            {approvalMeta && <TableHead className="w-[110px] text-center font-bold">Aprovador final</TableHead>}
-             <TableHead className="w-[90px] text-center font-bold">Palavra passe</TableHead>
+            <TableHead className="w-[90px] text-center font-bold">Palavra passe</TableHead>
           </TableRow>
           {headerFilters && (
             <TableRow className="bg-primary/5 hover:bg-primary/5">
@@ -2454,8 +2423,6 @@ function OrdersTable({
                 </Select>
               </TableHead>
                <TableHead className="py-1" />
-               {approvalMeta && <TableHead className="py-1" />}
-               {approvalMeta && <TableHead className="py-1" />}
              </TableRow>
            )}
         </TableHeader>
@@ -2531,8 +2498,6 @@ function OrdersTable({
                 </div>
               </TableCell>
               <TableCell className="text-center"><StatusHistoryDialog order={o} canEdit={canEdit} /></TableCell>
-              {approvalMeta && <TableCell className="text-center"><ApprovalStatusBadge status={o.approval_status ?? approvalMeta.get(o.id)?.status ?? "aprovado"} /></TableCell>}
-              {approvalMeta && <TableCell className="text-center text-xs break-words">{approvalMeta.get(o.id)?.finalApprover ?? "—"}</TableCell>}
               <TableCell className="text-sm break-words text-center">
                 <InlineField order={o} field="passphrase" type="text" canEdit={canEdit} display={o.passphrase || "—"} align="center" />
               </TableCell>
@@ -2544,12 +2509,6 @@ function OrdersTable({
     </>
 
   );
-}
-
-function ApprovalStatusBadge({ status }: { status: string }) {
-  if (status === "rejeitado") return <Badge variant="destructive">Rejeitado</Badge>;
-  if (status === "aprovado") return <Badge className="bg-primary/20 text-foreground hover:bg-primary/20">Aprovado</Badge>;
-  return <Badge variant="secondary">Pendente</Badge>;
 }
 
 function FullTextPopover({ text }: { text: string }) {
