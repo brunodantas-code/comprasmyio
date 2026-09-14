@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowRight, Boxes, Landmark, LogOut, Settings2 } from "lucide-react";
+import { Boxes, Cog, Landmark, LogOut, RefreshCw, Settings2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -55,8 +55,8 @@ function PortalPage() {
   if (isLoading || !data) return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Carregando...</div>;
 
   const apps = [
-    { key: "supply", name: "myio supply", description: "Compras, solicitações, aprovações e estoque.", to: "/dashboard" as const, icon: Boxes, accent: "bg-myio-green text-primary-foreground" },
-    { key: "cash_flow", name: "myio cash flow", description: "Gestão financeira e fluxo de caixa.", to: "/cash-flow" as const, icon: Landmark, accent: "bg-myio-purple text-accent-foreground" },
+    { key: "supply", name: "myio supply", description: "Compras, solicitações, aprovações e estoque.", to: "/dashboard" as const },
+    { key: "cash_flow", name: "myio cash flow", description: "Gestão financeira e fluxo de caixa.", to: "/cash-flow" as const },
   ].filter((app) => data.appKeys.has(app.key));
 
   return (
@@ -81,7 +81,7 @@ function PortalPage() {
           <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <Badge variant="outline" className="mb-3">myio ERP</Badge>
-              <h1 className="text-3xl font-extrabold sm:text-4xl">Seus aplicativos</h1>
+               <h1 className="text-3xl font-extrabold sm:text-4xl">Meus Aplicativos</h1>
               <p className="mt-2 text-muted-foreground">Escolha onde deseja trabalhar.</p>
             </div>
             {data.isErpAdmin ? (
@@ -94,16 +94,28 @@ function PortalPage() {
 
           <TabsContent value="apps">
             {apps.length ? (
-              <div className="grid gap-4 sm:grid-cols-2">
-                {apps.map(({ key, name, description, to, icon: Icon, accent }) => (
-                  <Link key={key} to={to} className="group rounded-md border border-border bg-card p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:p-6">
-                    <div className="flex items-start justify-between gap-4">
-                      <span className={`flex h-14 w-14 items-center justify-center rounded-md ${accent}`}><Icon className="h-7 w-7" /></span>
-                      <ArrowRight className="h-5 w-5 text-muted-foreground transition group-hover:translate-x-1 group-hover:text-foreground" />
-                    </div>
-                    <h2 className="mt-8 text-2xl font-extrabold">{name}</h2>
-                    <p className="mt-2 text-sm text-muted-foreground">{description}</p>
-                  </Link>
+               <div className="grid gap-x-14 gap-y-10 sm:grid-cols-2">
+                 {apps.map(({ key, name, description, to }) => (
+                   <div key={key} className="flex min-w-0 flex-col items-start">
+                     <Link
+                       to={to}
+                       aria-label={`Acessar ${name}`}
+                       title={`Acessar ${name}`}
+                       className="group relative flex h-24 w-24 items-center justify-center rounded-md text-myio-purple outline-none transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4"
+                     >
+                       {key === "supply" ? (
+                         <>
+                           <Cog className="absolute left-2 top-7 h-12 w-12 stroke-[1.6]" />
+                           <Cog className="absolute right-1 top-2 h-11 w-11 stroke-[1.6]" />
+                           <RefreshCw className="absolute inset-0 h-full w-full stroke-[1.15] opacity-75" />
+                         </>
+                       ) : (
+                         <Landmark className="h-16 w-16 stroke-[1.5]" />
+                       )}
+                     </Link>
+                     <h2 className="mt-4 text-2xl font-extrabold text-myio-purple">{name}</h2>
+                     <p className="mt-1 max-w-sm text-sm text-muted-foreground">{description}</p>
+                   </div>
                 ))}
               </div>
             ) : (
