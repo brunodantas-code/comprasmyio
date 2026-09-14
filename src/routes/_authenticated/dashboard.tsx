@@ -2411,8 +2411,10 @@ function OrdersTable({
                       </Badge>
                     )}
                   </div>
-                  {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
-                  {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
+                  <div className="flex flex-col items-center gap-1">
+                    {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
+                    {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
+                  </div>
                 </div>
                 <div className="mt-1 space-y-1">
                   <ExistingAttachments orderId={o.id} attachments={o.attachments ?? []} canRemove={canEdit} />
@@ -2534,8 +2536,10 @@ function OrdersTable({
                       </Badge>
                     )}
                   </div>
-                  {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
-                  {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
+                  <div className="flex flex-col items-center gap-1">
+                    {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
+                    {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
+                  </div>
                 </div>
                 <div className="mt-1 space-y-1 font-sans">
                   <ExistingAttachments orderId={o.id} attachments={o.attachments ?? []} canRemove={canEdit} />
