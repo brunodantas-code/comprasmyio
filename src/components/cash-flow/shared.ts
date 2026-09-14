@@ -39,3 +39,16 @@ export function formatDate(value: string | null | undefined) {
   if (!value) return "—";
   return new Date(`${value.slice(0, 10)}T12:00:00`).toLocaleDateString("pt-BR");
 }
+
+export function formatPeriod(value: string | null | undefined) {
+  if (!value) return "—";
+  return new Date(`${value.slice(0, 7)}-01T12:00:00`).toLocaleDateString("pt-BR", { month: "2-digit", year: "numeric" });
+}
+
+export function monthValue(value: string | null | undefined) {
+  return value?.slice(0, 7) ?? "";
+}
+
+export function periodDate(value: string) {
+  return `${value}-01`;
+}
