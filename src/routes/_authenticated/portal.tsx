@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { AtSign, Boxes, CircleDollarSign, Cog, FileSignature, Globe2, Mail, Phone, Settings2, UserRound, UsersRound, LogOut } from "lucide-react";
+import { AtSign, Boxes, CircleDollarSign, Cog, FileSignature, Mail, Phone, Settings2, UserRound, UsersRound, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -140,9 +140,8 @@ function PortalPage() {
                           </>
                         ) : (
                           <>
-                            <span className="relative block h-20 w-full" aria-hidden="true">
-                              <Globe2 className="absolute left-1/2 top-0 h-14 w-14 -translate-x-1/2 stroke-[1.5]" />
-                              <UsersRound className="absolute bottom-0 left-1/2 h-12 w-12 -translate-x-1/2 stroke-[1.7]" />
+                            <span className="flex h-20 w-full items-center justify-center" aria-hidden="true">
+                              <UsersRound className="h-16 w-16 stroke-[1.6]" />
                             </span>
                             <span className="text-sm font-normal leading-none">{name}</span>
                           </>
