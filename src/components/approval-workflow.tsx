@@ -175,6 +175,7 @@ function PendingApprovalDetails({ step, requestTypes }: { step: StepRow; request
 }
 
 function ApproveButton({ step, onDone }: { step: StepRow; onDone: () => void }) {
+  const [open, setOpen] = useState(false);
   const approve = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.rpc("decide_approval_step", {
@@ -185,16 +186,38 @@ function ApproveButton({ step, onDone }: { step: StepRow; onDone: () => void }) 
     },
     onSuccess: () => {
       toast.success("Etapa aprovada");
+      setOpen(false);
       onDone();
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
   return (
-    <Button size="sm" onClick={() => approve.mutate()} disabled={approve.isPending}>
-      <CheckCircle2 className="mr-2 h-4 w-4" />
-      Aprovar
-    </Button>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm">
+          <CheckCircle2 className="mr-2 h-4 w-4" />
+          Aprovar
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Confirmar aprovação</DialogTitle>
+          <DialogDescription>
+            Deseja aprovar o approval {step.purchase_orders?.approval_number ?? "selecionado"}?
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)} disabled={approve.isPending}>
+            Cancelar
+          </Button>
+          <Button onClick={() => approve.mutate()} disabled={approve.isPending}>
+            <CheckCircle2 className="mr-2 h-4 w-4" />
+            {approve.isPending ? "Aprovando..." : "Confirmar aprovação"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
