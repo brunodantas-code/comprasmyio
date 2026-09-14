@@ -2384,25 +2384,25 @@ function OrdersTable({
           return (
             <div key={o.id} className="rounded-lg border border-border bg-card p-3">
               <Row label="Approval">
-                <div className="flex items-center gap-1 font-mono font-bold">
+                <div className="flex flex-wrap items-center gap-1 font-mono font-bold">
                   <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} />
+                  {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
                   {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
                 </div>
+                {o.budget_exceeded && (
+                  <Badge variant="destructive" className="mt-1.5 w-fit whitespace-normal text-left font-sans text-[10px] leading-tight">
+                    Orçamento excedido
+                  </Badge>
+                )}
                 <div className="mt-1 space-y-1">
                   <ExistingAttachments orderId={o.id} attachments={o.attachments ?? []} canRemove={canEdit} />
                   <div className="flex flex-wrap items-center gap-1">
-                    {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
                     {canEditRequester && o.status === "entregue" && <ConfirmReceiptActions order={o} />}
                   </div>
                 </div>
               </Row>
               <Row label="Tipo">
                 <div className="font-medium">{requestTypeLabel(o)}</div>
-                {o.budget_exceeded && (
-                  <Badge variant="destructive" className="mt-1.5 w-fit whitespace-normal text-left font-sans text-[10px] leading-tight">
-                    Orçamento excedido
-                  </Badge>
-                )}
                 <div className="mt-1 flex flex-wrap items-center gap-2">
                   <FullTextPopover text={o.item_name ?? ""} />
                   {o.item_link ? (
@@ -2507,23 +2507,23 @@ function OrdersTable({
               <TableCell className="font-mono text-xs text-center">
                 <div className="flex items-center justify-center gap-1">
                   <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} />
+                  {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
                   {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
                 </div>
+                {o.budget_exceeded && (
+                  <Badge variant="destructive" className="mt-1.5 w-fit whitespace-normal text-left font-sans text-[10px] leading-tight">
+                    Orçamento excedido
+                  </Badge>
+                )}
                 <div className="mt-1 space-y-1 font-sans">
                   <ExistingAttachments orderId={o.id} attachments={o.attachments ?? []} canRemove={canEdit} />
                   <div className="flex flex-wrap items-center gap-1">
-                    {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
                     {canEditRequester && o.status === "entregue" && <ConfirmReceiptActions order={o} />}
                   </div>
                 </div>
               </TableCell>
               <TableCell>
                 <div className="line-clamp-4 font-medium break-words">{requestTypeLabel(o)}</div>
-                {o.budget_exceeded && (
-                  <Badge variant="destructive" className="mt-1.5 w-fit whitespace-normal text-left font-sans text-[10px] leading-tight">
-                    Orçamento excedido
-                  </Badge>
-                )}
                 <div className="mt-1 flex flex-wrap items-center gap-2">
                   <FullTextPopover text={o.item_name ?? ""} />
                   {o.item_link ? (
