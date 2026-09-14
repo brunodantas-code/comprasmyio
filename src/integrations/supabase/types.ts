@@ -532,12 +532,15 @@ export type Database = {
           account_id: string | null
           amount: number
           approval_number: string | null
+          cash_period: string
           classified_at: string | null
           classified_by: string | null
           client_id: string | null
+          competence_period: string
           cost_center_id: string | null
           created_at: string
           due_date: string | null
+          fiscal_period: string
           id: string
           item_name: string
           paid_at: string | null
@@ -552,12 +555,15 @@ export type Database = {
           account_id?: string | null
           amount: number
           approval_number?: string | null
+          cash_period: string
           classified_at?: string | null
           classified_by?: string | null
           client_id?: string | null
+          competence_period: string
           cost_center_id?: string | null
           created_at?: string
           due_date?: string | null
+          fiscal_period: string
           id?: string
           item_name: string
           paid_at?: string | null
@@ -572,12 +578,15 @@ export type Database = {
           account_id?: string | null
           amount?: number
           approval_number?: string | null
+          cash_period?: string
           classified_at?: string | null
           classified_by?: string | null
           client_id?: string | null
+          competence_period?: string
           cost_center_id?: string | null
           created_at?: string
           due_date?: string | null
+          fiscal_period?: string
           id?: string
           item_name?: string
           paid_at?: string | null
@@ -742,11 +751,14 @@ export type Database = {
           account_id: string | null
           amount: number
           bank_account_id: string
+          cash_period: string
+          competence_period: string
           created_at: string
           created_by: string | null
           dedupe_key: string
           description: string
           external_id: string | null
+          fiscal_period: string
           id: string
           import_id: string | null
           posted_at: string
@@ -756,11 +768,14 @@ export type Database = {
           account_id?: string | null
           amount: number
           bank_account_id: string
+          cash_period: string
+          competence_period: string
           created_at?: string
           created_by?: string | null
           dedupe_key: string
           description: string
           external_id?: string | null
+          fiscal_period: string
           id?: string
           import_id?: string | null
           posted_at: string
@@ -770,11 +785,14 @@ export type Database = {
           account_id?: string | null
           amount?: number
           bank_account_id?: string
+          cash_period?: string
+          competence_period?: string
           created_at?: string
           created_by?: string | null
           dedupe_key?: string
           description?: string
           external_id?: string | null
+          fiscal_period?: string
           id?: string
           import_id?: string | null
           posted_at?: string
