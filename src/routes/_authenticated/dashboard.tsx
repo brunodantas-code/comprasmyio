@@ -2386,7 +2386,6 @@ function OrdersTable({
               <Row label="Approval">
                 <div className="flex items-center gap-1 font-mono font-bold">
                   <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} />
-                  {o.budget_exceeded && <Badge variant="destructive" className="font-sans text-[10px]">Orçamento excedido</Badge>}
                   {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
                 </div>
                 <div className="mt-1 space-y-1">
@@ -2399,6 +2398,11 @@ function OrdersTable({
               </Row>
               <Row label="Tipo">
                 <div className="font-medium">{requestTypeLabel(o)}</div>
+                {o.budget_exceeded && (
+                  <Badge variant="destructive" className="mt-1.5 w-fit whitespace-normal text-left font-sans text-[10px] leading-tight">
+                    Orçamento excedido
+                  </Badge>
+                )}
                 <div className="mt-1 flex flex-wrap items-center gap-2">
                   <FullTextPopover text={o.item_name ?? ""} />
                   {o.item_link ? (
@@ -2503,7 +2507,6 @@ function OrdersTable({
               <TableCell className="font-mono text-xs text-center">
                 <div className="flex items-center justify-center gap-1">
                   <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} />
-                  {o.budget_exceeded && <Badge variant="destructive" className="font-sans text-[10px]">Orçamento excedido</Badge>}
                   {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
                 </div>
                 <div className="mt-1 space-y-1 font-sans">
@@ -2516,6 +2519,11 @@ function OrdersTable({
               </TableCell>
               <TableCell>
                 <div className="line-clamp-4 font-medium break-words">{requestTypeLabel(o)}</div>
+                {o.budget_exceeded && (
+                  <Badge variant="destructive" className="mt-1.5 w-fit whitespace-normal text-left font-sans text-[10px] leading-tight">
+                    Orçamento excedido
+                  </Badge>
+                )}
                 <div className="mt-1 flex flex-wrap items-center gap-2">
                   <FullTextPopover text={o.item_name ?? ""} />
                   {o.item_link ? (
