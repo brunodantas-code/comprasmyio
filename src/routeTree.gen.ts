@@ -15,7 +15,9 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedPortalRouteImport } from './routes/_authenticated/portal'
 import { Route as AuthenticatedPendentesRouteImport } from './routes/_authenticated/pendentes'
+import { Route as AuthenticatedLegalRouteImport } from './routes/_authenticated/legal'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedCrmRouteImport } from './routes/_authenticated/crm'
 import { Route as AuthenticatedCashFlowRouteImport } from './routes/_authenticated/cash-flow'
 import { Route as ApiPublicHooksSyncProductStatusRouteImport } from './routes/api/public/hooks/sync-product-status'
 
@@ -48,9 +50,19 @@ const AuthenticatedPendentesRoute = AuthenticatedPendentesRouteImport.update({
   path: '/pendentes',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedLegalRoute = AuthenticatedLegalRouteImport.update({
+  id: '/legal',
+  path: '/legal',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCrmRoute = AuthenticatedCrmRouteImport.update({
+  id: '/crm',
+  path: '/crm',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedCashFlowRoute = AuthenticatedCashFlowRouteImport.update({
@@ -70,7 +82,9 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/cash-flow': typeof AuthenticatedCashFlowRoute
+  '/crm': typeof AuthenticatedCrmRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/legal': typeof AuthenticatedLegalRoute
   '/pendentes': typeof AuthenticatedPendentesRoute
   '/portal': typeof AuthenticatedPortalRoute
   '/api/public/hooks/sync-product-status': typeof ApiPublicHooksSyncProductStatusRoute
@@ -80,7 +94,9 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/cash-flow': typeof AuthenticatedCashFlowRoute
+  '/crm': typeof AuthenticatedCrmRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/legal': typeof AuthenticatedLegalRoute
   '/pendentes': typeof AuthenticatedPendentesRoute
   '/portal': typeof AuthenticatedPortalRoute
   '/api/public/hooks/sync-product-status': typeof ApiPublicHooksSyncProductStatusRoute
@@ -92,7 +108,9 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/cash-flow': typeof AuthenticatedCashFlowRoute
+  '/_authenticated/crm': typeof AuthenticatedCrmRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/legal': typeof AuthenticatedLegalRoute
   '/_authenticated/pendentes': typeof AuthenticatedPendentesRoute
   '/_authenticated/portal': typeof AuthenticatedPortalRoute
   '/api/public/hooks/sync-product-status': typeof ApiPublicHooksSyncProductStatusRoute
@@ -104,7 +122,9 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/cash-flow'
+    | '/crm'
     | '/dashboard'
+    | '/legal'
     | '/pendentes'
     | '/portal'
     | '/api/public/hooks/sync-product-status'
@@ -114,7 +134,9 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/cash-flow'
+    | '/crm'
     | '/dashboard'
+    | '/legal'
     | '/pendentes'
     | '/portal'
     | '/api/public/hooks/sync-product-status'
@@ -125,7 +147,9 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/_authenticated/cash-flow'
+    | '/_authenticated/crm'
     | '/_authenticated/dashboard'
+    | '/_authenticated/legal'
     | '/_authenticated/pendentes'
     | '/_authenticated/portal'
     | '/api/public/hooks/sync-product-status'
@@ -183,11 +207,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPendentesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/legal': {
+      id: '/_authenticated/legal'
+      path: '/legal'
+      fullPath: '/legal'
+      preLoaderRoute: typeof AuthenticatedLegalRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/crm': {
+      id: '/_authenticated/crm'
+      path: '/crm'
+      fullPath: '/crm'
+      preLoaderRoute: typeof AuthenticatedCrmRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/cash-flow': {
@@ -209,14 +247,18 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedCashFlowRoute: typeof AuthenticatedCashFlowRoute
+  AuthenticatedCrmRoute: typeof AuthenticatedCrmRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedLegalRoute: typeof AuthenticatedLegalRoute
   AuthenticatedPendentesRoute: typeof AuthenticatedPendentesRoute
   AuthenticatedPortalRoute: typeof AuthenticatedPortalRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCashFlowRoute: AuthenticatedCashFlowRoute,
+  AuthenticatedCrmRoute: AuthenticatedCrmRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedLegalRoute: AuthenticatedLegalRoute,
   AuthenticatedPendentesRoute: AuthenticatedPendentesRoute,
   AuthenticatedPortalRoute: AuthenticatedPortalRoute,
 }
