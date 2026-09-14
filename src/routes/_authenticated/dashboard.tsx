@@ -3185,6 +3185,15 @@ function formatBRL(v: number | null | undefined) {
   return (Number(v) || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+function formatBRLWithoutCents(v: number | null | undefined) {
+  return (Number(v) || 0).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+}
+
 function ProjectsAdmin({ userId }: { userId: string }) {
   const qc = useQueryClient();
   const { data: projects, isLoading } = useProjects();
@@ -3285,8 +3294,8 @@ function ProjectsAdmin({ userId }: { userId: string }) {
         <CardContent>
           {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
             !projects?.length ? <p className="text-sm text-muted-foreground">Sem projetos.</p> :
-             <Table data-responsive="true">
-               <TableHeader><TableRow><TableHead>Nome do projeto</TableHead><TableHead className="text-right">Orçamento</TableHead><TableHead className="text-right">Solicitado</TableHead><TableHead>% do orçamento</TableHead><TableHead>Cliente</TableHead><TableHead className="text-center">Status</TableHead><TableHead className="text-center">Data</TableHead><TableHead /></TableRow></TableHeader>
+             <Table data-responsive="true" className="table-fixed">
+               <TableHeader><TableRow><TableHead className="w-[23%]">Nome do projeto</TableHead><TableHead className="w-[13%] text-right">Orçamento</TableHead><TableHead className="w-[13%] text-right">Solicitado</TableHead><TableHead className="w-[18%]">% do orçamento</TableHead><TableHead className="w-[14%]">Cliente</TableHead><TableHead className="w-[11%] text-center">Status</TableHead><TableHead className="w-[8%] text-center">Data</TableHead></TableRow></TableHeader>
               <TableBody>
                 {projects.map((p) => {
                   const st = (p as { status?: string }).status ?? "active";
@@ -3296,14 +3305,36 @@ function ProjectsAdmin({ userId }: { userId: string }) {
                    const percent = summary?.requestedPercent ?? 0;
                   return (
                   <TableRow key={p.id}>
-                     <TableCell data-label="Projeto" className="font-medium">
-                       <Popover>
-                         <PopoverTrigger asChild><button type="button" className="text-left hover:text-primary hover:underline" title={p.description || "Sem descrição"}>{p.name}</button></PopoverTrigger>
-                         <PopoverContent align="start" className="max-w-sm text-sm">{p.description || "Sem descrição cadastrada."}</PopoverContent>
-                       </Popover>
+                      <TableCell data-label="Projeto" className="font-medium">
+                        <div className="space-y-2">
+                          <Popover>
+                            <PopoverTrigger asChild><button type="button" className="text-left hover:text-primary hover:underline" title={p.description || "Sem descrição"}>{p.name}</button></PopoverTrigger>
+                            <PopoverContent align="start" className="max-w-sm text-sm">{p.description || "Sem descrição cadastrada."}</PopoverContent>
+                          </Popover>
+                          <div className="flex items-center gap-2">
+                            {st === "active" && (
+                              <>
+                                <Button type="button" variant="ghost" size="icon" aria-label="Marcar como implantado" title="Marcar como implantado" className="h-7 w-7 text-blue-600 hover:text-blue-800" onClick={() => { setStatusDialog({ id: p.id, name: p.name, action: "implantado" }); setStatusDate(new Date().toISOString().slice(0, 10)); }}>
+                                  <CheckCircle2 className="h-4 w-4" />
+                                </Button>
+                                <Button type="button" variant="ghost" size="icon" aria-label="Cancelar projeto" title="Cancelar projeto" className="h-7 w-7 text-destructive hover:text-destructive/80" onClick={() => { setStatusDialog({ id: p.id, name: p.name, action: "cancelado" }); setStatusDate(new Date().toISOString().slice(0, 10)); }}>
+                                  <XCircle className="h-4 w-4" />
+                                </Button>
+                              </>
+                            )}
+                            {st !== "active" && (
+                              <Button type="button" variant="ghost" size="icon" aria-label="Reativar projeto" title="Reativar projeto" className="h-7 w-7 text-muted-foreground hover:text-foreground" disabled={setStatus.isPending} onClick={() => setStatus.mutate({ id: p.id, status: "active", concludedAt: null })}>
+                                <RotateCcw className="h-4 w-4" />
+                              </Button>
+                            )}
+                            <Button type="button" variant="ghost" size="icon" aria-label="Excluir projeto" title="Excluir projeto" className="h-7 w-7 text-destructive hover:text-destructive/80" disabled={remove.isPending} onClick={() => remove.mutate(p.id)}>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
                      </TableCell>
-                     <TableCell data-label="Orçamento" className="text-right text-sm">{formatBRL((p as { budget?: number }).budget)}</TableCell>
-                     <TableCell data-label="Solicitado" className="text-right text-sm font-medium">{formatBRL(requested)}</TableCell>
+                      <TableCell data-label="Orçamento" className="text-right text-sm">{formatBRLWithoutCents((p as { budget?: number }).budget)}</TableCell>
+                      <TableCell data-label="Solicitado" className="text-right text-sm font-medium">{formatBRLWithoutCents(requested)}</TableCell>
                      <TableCell data-label="% do orçamento" className="min-w-32 text-sm">
                        <div className="space-y-1">
                          <div className={`text-right font-medium ${percent > 100 ? "text-destructive" : ""}`}>{percent.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%</div>
@@ -3320,30 +3351,8 @@ function ProjectsAdmin({ userId }: { userId: string }) {
                         <span className="inline-block rounded bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800">Cancelado</span>
                       )}
                     </TableCell>
-                     <TableCell data-label="Data" className="text-center text-sm text-muted-foreground">
+                      <TableCell data-label="Data" className="text-center text-sm text-muted-foreground">
                       {ca ? new Date(ca).toLocaleDateString("pt-BR") : "—"}
-                    </TableCell>
-                     <TableCell data-label="Ações" className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        {st === "active" && (
-                          <>
-                            <button type="button" aria-label="Marcar como implantado" title="Marcar como implantado" className="text-blue-600 hover:text-blue-800" onClick={() => { setStatusDialog({ id: p.id, name: p.name, action: "implantado" }); setStatusDate(new Date().toISOString().slice(0, 10)); }}>
-                              <CheckCircle2 className="h-4 w-4" />
-                            </button>
-                            <button type="button" aria-label="Cancelar projeto" title="Cancelar projeto" className="text-destructive hover:text-destructive/80" onClick={() => { setStatusDialog({ id: p.id, name: p.name, action: "cancelado" }); setStatusDate(new Date().toISOString().slice(0, 10)); }}>
-                              <XCircle className="h-4 w-4" />
-                            </button>
-                          </>
-                        )}
-                        {st !== "active" && (
-                          <button type="button" aria-label="Reativar projeto" title="Reativar projeto" className="text-muted-foreground hover:text-foreground" disabled={setStatus.isPending} onClick={() => setStatus.mutate({ id: p.id, status: "active", concludedAt: null })}>
-                            <RotateCcw className="h-4 w-4" />
-                          </button>
-                        )}
-                        <button type="button" aria-label="Excluir projeto" title="Excluir projeto" className="text-destructive hover:text-destructive/80" disabled={remove.isPending} onClick={() => remove.mutate(p.id)}>
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
                     </TableCell>
                   </TableRow>
                   );
