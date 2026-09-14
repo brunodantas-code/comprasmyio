@@ -3693,13 +3693,6 @@ function UsersAdmin() {
                         </div>
                         <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-3 lg:grid-cols-6">
                           <div className="flex flex-col gap-1">
-                            <span className="text-[10px] font-medium text-muted-foreground">Aprovado por (cargo)</span>
-                            <div className="flex h-8 items-center rounded-md border border-input bg-muted/40 px-2 text-xs text-muted-foreground">
-                              {approverLabelOf(u.jobTitleId) || "—"}
-                            </div>
-                          </div>
-
-                          <div className="flex flex-col gap-1">
                             <span className="text-[10px] font-medium text-muted-foreground">Cargo</span>
                             <Select
                               value={primary}
@@ -3743,6 +3736,12 @@ function UsersAdmin() {
                               value={Number(p.tier3_limit ?? 250000)}
                               onSave={(limit) => setProfileField.mutate({ userId: u.id, patch: { tier3_limit: limit } })}
                             />
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[10px] font-medium text-muted-foreground">Aprovado por (cargo)</span>
+                            <div className="flex h-8 items-center rounded-md border border-input bg-muted/40 px-2 text-xs text-muted-foreground">
+                              {approverLabelOf(u.jobTitleId) || "—"}
+                            </div>
                           </div>
                         </div>
                       </div>
