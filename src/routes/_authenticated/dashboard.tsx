@@ -2770,7 +2770,7 @@ function OrderReportDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button type="button" className="font-bold text-black transition-colors hover:text-myio-green data-[state=open]:text-myio-green hover:underline" title="Ver relatório completo">
+        <button type="button" className="font-normal text-foreground transition-colors hover:text-myio-green data-[state=open]:text-myio-green hover:underline" title="Ver relatório completo">
           {order.approval_number ?? "—"}
         </button>
       </DialogTrigger>
@@ -2783,7 +2783,7 @@ function OrderReportDialog({
         <div className="space-y-6 font-sans">
           <section className="grid grid-cols-2 gap-4 md:grid-cols-3">
             <Row label="Item" value={order.item_name} />
-            <Row label="Tipo(s)" value={(relatedOrders ?? [{ request_type: order.request_type, travel_type: order.travel_type }]).map(requestTypeLabel).filter((v, i, a) => a.indexOf(v) === i).join(" + ")} />
+            <Row label="Tipo(s)" value={(relatedOrders ?? [{ request_type: order.request_type, travel_type: order.travel_type }]).map((related) => requestTypeLabel(related)).filter((v, i, a) => a.indexOf(v) === i).join(" + ")} />
             <Row label="Quantidade" value={order.quantity} />
             <Row label="Alocação" value={allocation} />
             <Row label="Solicitante" value={requesterName ? requesterName(order.requester_id) : nameFor(order.requester_id)} />

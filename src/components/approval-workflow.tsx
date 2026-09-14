@@ -49,17 +49,6 @@ const TRAVEL_TYPE_LABELS: Record<string, string> = {
   aluguel_veiculos: "Aluguel de Veículos",
 };
 
-const REQUEST_TYPE_LABELS: Record<string, string> = {
-  materiais: "Materiais",
-  servicos: "Serviços",
-  viagens: "Viagens",
-  reembolso: "Reembolso de Despesas",
-  rh: "Contratação de RH",
-  importacao: "Importação",
-  dispositivos: "Dispositivos",
-  pagamento: "Pagamento",
-};
-
 function requestTypeLabel(o: { request_type?: string | null; travel_type?: string | null } | null | undefined, types?: RequestTypeRecord[]): string {
   const rt = o?.request_type ?? "";
   if (rt === "viagens") {
@@ -121,7 +110,7 @@ function useSteps() {
       const { data, error } = await supabase
         .from("approval_steps")
         .select(
-          "id, order_id, step_index, role_label, approver_id, status, comment, decided_at, decided_by, created_at, purchase_orders(id, item_name, quantity, estimated_value, approval_status, requester_id, created_at, approval_number, request_type, travel_type, budget_exceeded, budget_snapshot, committed_before_snapshot, projected_committed_snapshot)"
+          "id, order_id, step_index, role_label, approver_id, status, comment, decided_at, decided_by, created_at, purchase_orders(id, item_name, item_link, quantity, estimated_value, approval_status, status, requester_id, requester_notes, buyer_notes, recipient, delivery_point, deadline_type, deadline_date, delivery_forecast, created_at, updated_at, approval_number, request_type, travel_type, travel_destination, travel_departure, travel_return, payment_date, allocation_type, for_stock, attachments, budget_exceeded, budget_snapshot, committed_before_snapshot, projected_committed_snapshot, projects(name), clients(name))"
         )
         .order("step_index", { ascending: true });
       if (error) throw error;
@@ -137,6 +126,49 @@ function StatusBadge({ status }: { status: string }) {
     return <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100">Aprovado</Badge>;
   if (status === "rejeitado") return <Badge className="bg-red-100 text-red-800 hover:bg-red-100">Rejeitado</Badge>;
   return <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100">Pendente</Badge>;
+}
+
+function PendingApprovalDetails({ step, requestTypes }: { step: StepRow; requestTypes?: RequestTypeRecord[] }) {
+  const order = step.purchase_orders;
+  if (!order) return <span>—</span>;
+  const project = Array.isArray(order.projects) ? order.projects[0] : order.projects;
+  const client = Array.isArray(order.clients) ? order.clients[0] : order.clients;
+  const budget = Number(order.budget_snapshot ?? 0);
+  const requested = Number(order.projected_committed_snapshot ?? order.estimated_value ?? 0);
+  const chartMax = Math.max(budget, requested, 1);
+  const allocation = order.allocation_type === "interna" ? "Interna" : order.for_stock ? "Estoque" : project?.name ?? client?.name ?? "—";
+  const fields = [
+    ["Tipo", requestTypeLabel(order, requestTypes)], ["Item", order.item_name], ["Quantidade", String(order.quantity ?? 1)],
+    ["Valor", BRL(Number(order.estimated_value ?? 0))], ["Projeto ou Cliente", allocation], ["Destinatário", order.recipient || "—"],
+    ["Endereço de entrega", order.delivery_point || "—"], ["Prazo", order.deadline_date ? new Date(`${order.deadline_date}T00:00:00`).toLocaleDateString("pt-BR") : order.deadline_type],
+    ["Previsão de entrega", order.delivery_forecast ? new Date(`${order.delivery_forecast}T00:00:00`).toLocaleDateString("pt-BR") : "—"],
+    ["Status da solicitação", order.status], ["Status da aprovação", order.approval_status], ["Criado em", dt(order.created_at)],
+    ["Observações do solicitante", order.requester_notes || "—"], ["Observações de Supply", order.buyer_notes || "—"],
+  ];
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="link" className="h-auto p-0 font-mono text-xs font-normal underline">{order.approval_number ?? "—"}</Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
+        <DialogHeader><DialogTitle>Approval {order.approval_number}</DialogTitle><DialogDescription>Informações completas da solicitação e da aprovação.</DialogDescription></DialogHeader>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {fields.map(([label, value]) => <div key={label}><p className="text-xs text-muted-foreground">{label}</p><p className="text-sm break-words">{value}</p></div>)}
+          {order.item_link && <div><p className="text-xs text-muted-foreground">Link</p><a href={order.item_link} target="_blank" rel="noreferrer" className="text-sm text-primary underline">Abrir link</a></div>}
+        </div>
+        {order.budget_snapshot != null && (
+          <section className="space-y-3 border-t pt-4">
+            <div><h3 className="text-sm font-semibold">Orçado x Solicitado</h3>{order.budget_exceeded && <Badge variant="destructive" className="mt-1">Orçamento excedido</Badge>}</div>
+            <div className="space-y-3">
+              <div><div className="mb-1 flex justify-between text-xs"><span>Orçado</span><span>{BRL(budget)}</span></div><div className="h-3 overflow-hidden rounded-sm bg-muted"><div className="h-full bg-primary" style={{ width: `${Math.min(100, (budget / chartMax) * 100)}%` }} /></div></div>
+              <div><div className="mb-1 flex justify-between text-xs"><span>Solicitado</span><span>{BRL(requested)}</span></div><div className="h-3 overflow-hidden rounded-sm bg-muted"><div className={`h-full ${order.budget_exceeded ? "bg-destructive" : "bg-myio-green"}`} style={{ width: `${Math.min(100, (requested / chartMax) * 100)}%` }} /></div></div>
+            </div>
+          </section>
+        )}
+        <section className="border-t pt-4"><h3 className="text-sm font-semibold">Etapa atual</h3><p className="text-sm">{step.step_index}. {step.role_label}</p></section>
+      </DialogContent>
+    </Dialog>
+  );
 }
 
 function ApproveButton({ step, onDone }: { step: StepRow; onDone: () => void }) {
@@ -388,7 +420,7 @@ export function PendingForMe() {
                 <TableHead>Tipo</TableHead>
                 <TableHead>Solicitante</TableHead>
                 <TableHead>Valor</TableHead>
-                <TableHead>Etapa</TableHead>
+                <TableHead>Projeto ou Cliente</TableHead>
                 <TableHead className="text-right">Decisão</TableHead>
               </TableRow>
             </TableHeader>
@@ -398,7 +430,7 @@ export function PendingForMe() {
                 const req = o?.requester_id ? profiles?.get(o.requester_id) : undefined;
                 return (
                   <TableRow key={s.id}>
-                    <TableCell className="whitespace-nowrap font-mono text-xs">{o?.approval_number ?? "—"}</TableCell>
+                    <TableCell className="whitespace-nowrap"><PendingApprovalDetails step={s} requestTypes={requestTypes} /></TableCell>
                     <TableCell className="font-medium">
                       {requestTypeLabel(o, requestTypes)}
                       <span className="ml-1 text-xs text-muted-foreground">x{o?.quantity ?? 1}</span>
@@ -406,9 +438,7 @@ export function PendingForMe() {
                     </TableCell>
                     <TableCell className="text-sm">{req?.full_name || req?.email || "—"}</TableCell>
                     <TableCell className="text-sm">{BRL(Number(o?.estimated_value ?? 0))}</TableCell>
-                    <TableCell className="text-sm">
-                      {s.step_index}. {s.role_label}
-                    </TableCell>
+                    <TableCell className="text-sm">{o?.allocation_type === "interna" ? "Interna" : o?.for_stock ? "Estoque" : o?.projects?.name ?? o?.clients?.name ?? "—"}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <ApproveButton step={s} onDone={refresh} />
@@ -630,11 +660,13 @@ function EditRuleDialog({
   rule,
   people,
   stepTypes,
+  requestTypesCatalog,
   onSaved,
 }: {
   rule: RuleRow;
   people: { id: string; full_name: string | null; email: string | null }[];
   stepTypes: AdditionalStepType[];
+  requestTypesCatalog: RequestTypeRecord[];
   onSaved: () => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -734,6 +766,7 @@ export function RulesAdmin() {
   const qc = useQueryClient();
   const { data: profiles } = useProfiles();
   const { data: stepTypes, isLoading: stepTypesLoading } = useAdditionalStepTypes();
+  const { data: requestTypesCatalog = [] } = useRequestTypes();
   const { data: rules, isLoading } = useQuery({
     queryKey: ["approval-rules"],
     queryFn: async () => {
@@ -864,7 +897,7 @@ export function RulesAdmin() {
             </div>
             <div className="space-y-2">
               <Label>Vincular ao Tipo de Solicitação</Label>
-              <RequestTypeCheckboxes values={requestTypes} onChange={setRequestTypes} />
+              <RequestTypeCheckboxes values={requestTypes} onChange={setRequestTypes} types={requestTypesCatalog} />
             </div>
           </div>
           <Button className="mt-4" onClick={() => create.mutate()} disabled={!name.trim() || !stepType || requestTypes.length === 0 || create.isPending}>
@@ -906,7 +939,7 @@ export function RulesAdmin() {
                       <TableCell className="text-sm text-muted-foreground">
                         {stepTypes?.find((type) => type.code === r.step_type)?.name ?? r.step_type}
                       </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{(r.request_types ?? []).map((value) => REQUEST_TYPE_LABELS[value] ?? value).join(", ") || "Todos"}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{(r.request_types ?? []).map((value) => requestTypeName(value, requestTypesCatalog)).join(", ") || "Todos"}</TableCell>
                       <TableCell className="text-sm">{ap?.full_name || ap?.email || "—"}</TableCell>
                       <TableCell>
                         <Switch
@@ -915,7 +948,7 @@ export function RulesAdmin() {
                         />
                       </TableCell>
                       <TableCell className="text-right whitespace-nowrap">
-                        <EditRuleDialog rule={r} people={people} stepTypes={stepTypes ?? []} onSaved={invalidate} />
+                        <EditRuleDialog rule={r} people={people} stepTypes={stepTypes ?? []} requestTypesCatalog={requestTypesCatalog} onSaved={invalidate} />
                         <Button
                           size="icon"
                           variant="ghost"
