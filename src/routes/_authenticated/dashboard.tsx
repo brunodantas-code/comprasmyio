@@ -4005,6 +4005,7 @@ function StatusHistoryDialog({ order, canEdit }: { order: Order; canEdit?: boole
 function BackupButton() {
   const runBackup = useServerFn(exportDatabaseBackup);
   const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const handleBackup = async () => {
     setLoading(true);
@@ -4020,6 +4021,7 @@ function BackupButton() {
       URL.revokeObjectURL(url);
       const total = Object.values(backup.tables).reduce((acc, rows) => acc + rows.length, 0);
       toast.success(`Backup baixado: ${total} registros em ${Object.keys(backup.tables).length} tabelas.`);
+      setOpen(false);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Falha ao gerar o backup");
     } finally {
@@ -4028,10 +4030,29 @@ function BackupButton() {
   };
 
   return (
-    <Button variant="outline" size="sm" onClick={handleBackup} disabled={loading}>
-      {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <DatabaseBackup className="mr-2 h-4 w-4" />}
-      Backup
-    </Button>
+    <Dialog open={open} onOpenChange={(nextOpen) => !loading && setOpen(nextOpen)}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm">
+          <DatabaseBackup className="mr-2 h-4 w-4" />
+          Gerar backup
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Confirmar geração do backup</DialogTitle>
+          <DialogDescription>
+            Deseja gerar e baixar uma cópia dos registros do sistema em formato JSON? Arquivos anexados e imagens não serão incluídos.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)} disabled={loading}>Cancelar</Button>
+          <Button onClick={handleBackup} disabled={loading}>
+            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <DatabaseBackup className="mr-2 h-4 w-4" />}
+            Confirmar e baixar
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
