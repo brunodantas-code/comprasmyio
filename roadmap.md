@@ -97,3 +97,4 @@
 - [x] Exibir o valor unitário em uma linha própria no Approval
 - [x] Destacar em negrito o valor total dos approvals pendentes
 - [x] Posicionar o ícone de exclusão abaixo do ícone de edição nos approvals
+- [x] Renomear para Valor Total e posicioná-lo após Quantidade nos approvals

@@ -423,9 +423,9 @@ export function PendingForMe() {
                 <TableHead>Approval</TableHead>
                 <TableHead>Tipo</TableHead>
                 <TableHead>Solicitante</TableHead>
-                <TableHead>Valor</TableHead>
                 <TableHead>Valor unitário</TableHead>
                 <TableHead>Quantidade</TableHead>
+                <TableHead>Valor Total</TableHead>
                 <TableHead>Projeto ou Cliente</TableHead>
                 <TableHead aria-label="Ações" />
               </TableRow>
@@ -442,11 +442,11 @@ export function PendingForMe() {
                       {o?.budget_exceeded && <Badge variant="destructive" className="ml-2 gap-1"><AlertTriangle className="h-3 w-3" />Orçamento excedido</Badge>}
                     </TableCell>
                     <TableCell className="text-sm">{req?.full_name || req?.email || "—"}</TableCell>
-                    <TableCell className="text-sm">{BRL(Number(o?.estimated_value ?? 0))}</TableCell>
                     <TableCell className="text-sm">
                       {BRL(Number(o?.estimated_value ?? 0) / Math.max(Number(o?.quantity ?? 1), 1))}
                     </TableCell>
                     <TableCell className="text-sm">{o?.quantity ?? 1}</TableCell>
+                    <TableCell className="text-sm">{BRL(Number(o?.estimated_value ?? 0))}</TableCell>
                     <TableCell className="text-sm">{o?.allocation_type === "interna" ? "Interna" : o?.for_stock ? "Estoque" : o?.projects?.name ?? o?.clients?.name ?? "—"}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
