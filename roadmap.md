@@ -77,7 +77,7 @@
 - [x] Bloquear exclusão de Projeto, Cliente ou Centro de Custo com solicitações e permitir realocação individual
 - [x] Mover Etapas Adicionais de Cadastro > Diversos para Approval Workflow e manter Diversos disponível
 - [x] Cadastrar Tipos de Etapa Adicional em Cadastro > Diversos e usá-los no dropdown das Etapas Adicionais
-- [ ] Cadastrar Tipos de Solicitação em Cadastro > Diversos e aplicar nomes/status nas telas
-- [ ] Transformar o número do Approval em link para um pop-up com todos os dados e gráfico de orçado x solicitado
-- [ ] Em Pendentes comigo, substituir a coluna Etapa por Projeto ou Cliente
-- [ ] Retirar o negrito do número do Approval nas listagens
+- [x] Cadastrar Tipos de Solicitação em Cadastro > Diversos e aplicar nomes/status nas telas
+- [x] Transformar o número do Approval em link para um pop-up com todos os dados e gráfico de orçado x solicitado
+- [x] Em Pendentes comigo, substituir a coluna Etapa por Projeto ou Cliente
+- [x] Retirar o negrito do número do Approval nas listagens

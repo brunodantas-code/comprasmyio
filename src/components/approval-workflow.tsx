@@ -110,7 +110,7 @@ function useSteps() {
       const { data, error } = await supabase
         .from("approval_steps")
         .select(
-          "id, order_id, step_index, role_label, approver_id, status, comment, decided_at, decided_by, created_at, purchase_orders(id, item_name, item_link, quantity, estimated_value, approval_status, status, requester_id, requester_notes, buyer_notes, recipient, delivery_point, deadline_type, deadline_date, delivery_forecast, created_at, updated_at, approval_number, request_type, travel_type, travel_destination, travel_departure, travel_return, payment_date, allocation_type, for_stock, attachments, budget_exceeded, budget_snapshot, committed_before_snapshot, projected_committed_snapshot, projects(name), clients(name))"
+          "id, order_id, step_index, role_label, approver_id, status, comment, decided_at, decided_by, created_at, purchase_orders(id, item_name, item_link, quantity, estimated_value, approval_status, status, requester_id, requester_notes, buyer_notes, recipient, delivery_point, deadline_type, deadline_date, delivery_forecast, passphrase, created_at, updated_at, approval_number, request_type, travel_type, travel_destination, travel_departure, travel_return, payment_date, allocation_type, for_stock, attachments, budget_exceeded, budget_snapshot, committed_before_snapshot, projected_committed_snapshot, projects(name), clients(name))"
         )
         .order("step_index", { ascending: true });
       if (error) throw error;
