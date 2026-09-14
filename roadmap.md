@@ -99,3 +99,4 @@
 - [x] Posicionar o ícone de exclusão abaixo do ícone de edição nos approvals
 - [x] Renomear para Valor Total e posicioná-lo após Quantidade nos approvals
 - [x] Exibir confirmação antes de aprovar uma solicitação
+- [x] Reduzir a coluna Tipo e incluir Valor Total sem rolagem lateral na lista de solicitações

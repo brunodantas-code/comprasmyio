@@ -2451,6 +2451,7 @@ function OrdersTable({
                   </div>
                 )}
               </Row>
+              <Row label="Valor Total">{formatBRL(o.estimated_value)}</Row>
               <Row label="Destinatário">{o.recipient || "—"}</Row>
               <Row label="Endereço de Entrega">{o.delivery_point}</Row>
               <Row label="Prazo e Previsão">
@@ -2487,16 +2488,17 @@ function OrdersTable({
       <Table className="w-full table-fixed">
         <TableHeader className="[&_tr]:border-b">
           <TableRow className="border-t bg-primary/15 hover:bg-primary/15">
-            <TableHead className="w-[110px] text-center font-bold">Approval</TableHead>
-            <TableHead className="w-[210px] text-center font-bold">Tipo</TableHead>
-            <TableHead className="w-[100px] text-center font-bold">Alocação</TableHead>
-            {showRequester && <TableHead className="w-[120px] text-center font-bold">Solicitante</TableHead>}
-            <TableHead className="w-[60px] text-center font-bold">Qtd</TableHead>
-            <TableHead className="w-[100px] text-center font-bold">Destinatário</TableHead>
-            <TableHead className="w-[120px] text-center font-bold">Endereço de Entrega</TableHead>
-            <TableHead className="w-[100px] text-center font-bold">Prazo e Previsão</TableHead>
-            <TableHead className="w-[100px] text-center font-bold">Status</TableHead>
-            <TableHead className="w-[90px] text-center font-bold">Palavra passe</TableHead>
+            <TableHead className="w-[105px] text-center font-bold">Approval</TableHead>
+            <TableHead className="w-[140px] text-center font-bold">Tipo</TableHead>
+            <TableHead className="w-[90px] text-center font-bold">Alocação</TableHead>
+            {showRequester && <TableHead className="w-[105px] text-center font-bold">Solicitante</TableHead>}
+            <TableHead className="w-[45px] text-center font-bold">Qtd</TableHead>
+            <TableHead className="w-[95px] text-center font-bold">Valor Total</TableHead>
+            <TableHead className="w-[90px] text-center font-bold">Destinatário</TableHead>
+            <TableHead className="w-[105px] text-center font-bold">Endereço de Entrega</TableHead>
+            <TableHead className="w-[95px] text-center font-bold">Prazo e Previsão</TableHead>
+            <TableHead className="w-[95px] text-center font-bold">Status</TableHead>
+            <TableHead className="w-[80px] text-center font-bold">Palavra passe</TableHead>
           </TableRow>
           {headerFilters && (
             <TableRow className="bg-primary/5 hover:bg-primary/5">
@@ -2504,6 +2506,7 @@ function OrdersTable({
               <TableHead className="py-1">{filterInput(fItem, setFItem, "Tipo")}</TableHead>
               <TableHead className="py-1">{filterInput(fAloc, setFAloc, "Alocação")}</TableHead>
               {showRequester && <TableHead className="py-1">{filterInput(fReq, setFReq, "Solicitante")}</TableHead>}
+              <TableHead className="py-1" />
               <TableHead className="py-1" />
               <TableHead className="py-1" />
               <TableHead className="py-1" />
@@ -2578,6 +2581,7 @@ function OrdersTable({
                   );
                 })()}
               </TableCell>
+              <TableCell className="text-center text-sm font-medium tabular-nums">{formatBRL(o.estimated_value)}</TableCell>
               <TableCell className="text-sm break-words text-center">{o.recipient || "—"}</TableCell>
               <TableCell className="text-sm text-muted-foreground">
                 <div className="line-clamp-4 break-words">{o.delivery_point}</div>
