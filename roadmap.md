@@ -105,3 +105,11 @@
 - [x] Transformar Backup em submenu à direita de Logs
 - [x] Exigir confirmação antes de gerar e baixar o backup em JSON
 - [x] Criar em Approvals uma consolidação dos pendentes por cargo, quantidade e valor
+
+- [ ] Criar estrutura segura do myio cash flow no banco
+- [ ] Enviar approvals concluídos para Contas a pagar sem duplicidade
+- [ ] Criar Plano de Contas hierárquico com orçamento mensal por exercício
+- [ ] Criar Contas a pagar com classificação contábil obrigatória
+- [ ] Criar Caixa com contas bancárias, importação OFX/CSV e saldo
+- [ ] Criar conciliação total e parcial de pagamentos
+- [ ] Validar o myio cash flow no computador e celular
