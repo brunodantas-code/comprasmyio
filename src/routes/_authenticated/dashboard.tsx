@@ -2018,7 +2018,7 @@ function MyOrders({ userId }: { userId: string }) {
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <CardTitle>Minhas Solicitações</CardTitle>
-          <CardDescription>Acompanhe o status dos seus pedidos de compra.</CardDescription>
+          <CardDescription>Acompanhe o status de todas as suas solicitações.</CardDescription>
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
