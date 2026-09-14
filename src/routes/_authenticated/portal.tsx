@@ -105,18 +105,8 @@ function PortalPage() {
                      >
                        {key === "supply" ? (
                          <>
-                            <svg
-                              viewBox="0 0 96 96"
-                              aria-hidden="true"
-                              className="absolute inset-0 h-full w-full fill-none stroke-current opacity-75"
-                            >
-                              <path d="M 20 61 A 34 34 0 0 0 80 66" strokeWidth="5" strokeLinecap="round" />
-                              <path d="M 80 66 L 80 52 M 80 66 L 66 66" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
-                              <path d="M 76 35 A 34 34 0 0 0 16 30" strokeWidth="5" strokeLinecap="round" />
-                              <path d="M 16 30 L 16 44 M 16 30 L 30 30" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                            <Cog className="absolute bottom-6 left-6 h-9 w-9 stroke-[1.8]" />
-                            <Cog className="absolute right-6 top-6 h-8 w-8 stroke-[1.8]" />
+                            <Cog className="absolute bottom-3 left-3 h-14 w-14 stroke-[1.7]" />
+                            <Cog className="absolute right-3 top-3 h-12 w-12 stroke-[1.7]" />
                          </>
                        ) : (
                          <Landmark className="h-16 w-16 stroke-[1.5]" />
