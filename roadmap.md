@@ -53,3 +53,5 @@
 - [x] Conectar verticalmente cada cargo aos seus subordinados no organograma
 - [x] Definir novos usuários Restritos com alçada automática de R$ 1.000 e demais faixas zeradas
 - [x] Adicionar alocação Interna para Materiais, Serviços e Viagens, sem Projeto ou Cliente
+
+- [ ] Exibir orçamento do projeto, comprometido, alerta de excesso e flag nos Approvals
