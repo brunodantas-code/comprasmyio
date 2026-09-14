@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Boxes, Cog, Landmark, LogOut, RefreshCw, Settings2 } from "lucide-react";
+import { Boxes, Cog, Landmark, LogOut, Settings2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -105,9 +105,18 @@ function PortalPage() {
                      >
                        {key === "supply" ? (
                          <>
-                           <Cog className="absolute left-2 top-7 h-12 w-12 stroke-[1.6]" />
-                           <Cog className="absolute right-1 top-2 h-11 w-11 stroke-[1.6]" />
-                           <RefreshCw className="absolute inset-0 h-full w-full stroke-[1.15] opacity-75" />
+                            <svg
+                              viewBox="0 0 96 96"
+                              aria-hidden="true"
+                              className="absolute inset-0 h-full w-full fill-none stroke-current opacity-75"
+                            >
+                              <path d="M 20 61 A 34 34 0 0 0 80 66" strokeWidth="5" strokeLinecap="round" />
+                              <path d="M 80 66 L 80 52 M 80 66 L 66 66" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+                              <path d="M 76 35 A 34 34 0 0 0 16 30" strokeWidth="5" strokeLinecap="round" />
+                              <path d="M 16 30 L 16 44 M 16 30 L 30 30" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                            <Cog className="absolute bottom-6 left-6 h-9 w-9 stroke-[1.8]" />
+                            <Cog className="absolute right-6 top-6 h-8 w-8 stroke-[1.8]" />
                          </>
                        ) : (
                          <Landmark className="h-16 w-16 stroke-[1.5]" />
