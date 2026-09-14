@@ -1140,6 +1140,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
 
   const submit = useMutation({
     mutationFn: async ({ values, buyQty, shipQty }: { values: z.infer<typeof newOrderSchema>; buyQty: number; shipQty: number }) => {
+      let createdOrder: { budget_exceeded: boolean; budget_snapshot: number | null; projected_committed_snapshot: number | null } | null = null;
       let ids = {
         material_id: isNewItem ? null : (item?.material_id ?? null),
         terceiros_material_id: isNewItem ? null : (item?.terceiros_material_id ?? null),
@@ -1218,13 +1219,14 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
           requester_id: userId,
         }).select("id,budget_exceeded,budget_snapshot,projected_committed_snapshot").single();
         if (error) throw error;
+        createdOrder = data;
         if (files.length && data?.id) {
           const uploaded = await uploadOrderAttachments(data.id, files);
           const { error: ue } = await supabase.from("purchase_orders").update({ attachments: uploaded }).eq("id", data.id);
           if (ue) throw ue;
         }
       }
-      return { buyQty, shipQty, budgetExceeded: Boolean(data?.budget_exceeded), budget: data?.budget_snapshot, projected: data?.projected_committed_snapshot };
+      return { buyQty, shipQty, budgetExceeded: Boolean(createdOrder?.budget_exceeded), budget: createdOrder?.budget_snapshot, projected: createdOrder?.projected_committed_snapshot };
     },
     onSuccess: (r) => {
       if (r.shipQty > 0 && r.buyQty > 0) toast.success(`Ordem de expedição (${r.shipQty}) e ordem de compra (${r.buyQty}) criadas.`);
@@ -1679,6 +1681,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
                         ))}
                       </SelectContent>
                     </Select>
+                    {selectedBudget && selectedBudget.budget > 0 && <BudgetProgress summary={selectedBudget} pendingValue={pendingBudgetValue} />}
                   </div>
                 )}
                 <div className="space-y-2">
