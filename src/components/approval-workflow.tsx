@@ -1,7 +1,7 @@
 import { useMemo, useState, type CSSProperties } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { CheckCircle2, Clock, History, Pencil, Plus, Trash2, XCircle } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Clock, History, Pencil, Plus, Trash2, XCircle } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -108,7 +108,7 @@ function useSteps() {
       const { data, error } = await supabase
         .from("approval_steps")
         .select(
-          "id, order_id, step_index, role_label, approver_id, status, comment, decided_at, decided_by, created_at, purchase_orders(id, item_name, quantity, estimated_value, approval_status, requester_id, created_at, approval_number, request_type, travel_type)"
+          "id, order_id, step_index, role_label, approver_id, status, comment, decided_at, decided_by, created_at, purchase_orders(id, item_name, quantity, estimated_value, approval_status, requester_id, created_at, approval_number, request_type, travel_type, budget_exceeded, budget_snapshot, committed_before_snapshot, projected_committed_snapshot)"
         )
         .order("step_index", { ascending: true });
       if (error) throw error;
@@ -388,6 +388,7 @@ export function PendingForMe() {
                     <TableCell className="font-medium">
                       {requestTypeLabel(o)}
                       <span className="ml-1 text-xs text-muted-foreground">x{o?.quantity ?? 1}</span>
+                      {o?.budget_exceeded && <Badge variant="destructive" className="ml-2 gap-1"><AlertTriangle className="h-3 w-3" />Orçamento excedido</Badge>}
                     </TableCell>
                     <TableCell className="text-sm">{req?.full_name || req?.email || "—"}</TableCell>
                     <TableCell className="text-sm">{BRL(Number(o?.estimated_value ?? 0))}</TableCell>
@@ -472,7 +473,13 @@ export function MyApprovalFlows() {
                     <p className="font-medium">
                       {requestTypeLabel(o)}{" "}
                       <span className="text-xs text-muted-foreground">x{o?.quantity ?? 1}</span>
+                      {o?.budget_exceeded && <Badge variant="destructive" className="ml-2 gap-1"><AlertTriangle className="h-3 w-3" />Orçamento excedido</Badge>}
                     </p>
+                    {o?.budget_exceeded && (
+                      <p className="mt-1 text-xs font-medium text-destructive">
+                        Total projetado {BRL(Number(o.projected_committed_snapshot ?? 0))} para orçamento de {BRL(Number(o.budget_snapshot ?? 0))}
+                      </p>
+                    )}
                     <p className="text-xs text-muted-foreground">
                       {req?.full_name || req?.email || "—"} · {BRL(Number(o?.estimated_value ?? 0))} ·{" "}
                       {dt(o?.created_at ?? null)}
