@@ -87,7 +87,7 @@
 
 - [x] Excluir Tipo de Solicitação com alerta de vínculos e realocação individual antes da exclusão
 
-- [ ] Mover Quantidade para uma linha própria abaixo de Valor no Approval
-- [ ] Remover o texto “Decisão” do Approval
+- [x] Mover Quantidade para uma linha própria abaixo de Valor no Approval
+- [x] Remover o texto “Decisão” do Approval
 
-- [ ] Alinhar os ícones de edição e exclusão em Tipos de Solicitação
+- [x] Alinhar os ícones de edição e exclusão em Tipos de Solicitação
