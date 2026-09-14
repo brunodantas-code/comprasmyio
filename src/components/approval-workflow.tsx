@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { AlertTriangle, ArrowDown, ArrowUp, CheckCircle2, Clock, History, Pencil, Plus, Trash2, XCircle } from "lucide-react";
+import { AlertTriangle, ArrowDown, ArrowUp, CheckCircle2, ChevronDown, ChevronRight, Clock, History, Pencil, Plus, Trash2, XCircle } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -485,6 +485,139 @@ export function PendingForMe() {
         )}
       </CardContent>
     </Card>
+  );
+}
+
+type PendingByRoleGroup = {
+  key: string;
+  title: string;
+  steps: StepRow[];
+  value: number;
+};
+
+export function PendingApprovalsByRole() {
+  const { data: steps, isLoading } = useSteps();
+  const { data: profiles } = useProfiles();
+  const { data: requestTypes } = useRequestTypes();
+  const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
+
+  const currentSteps = useMemo(() => {
+    const byOrder = new Map<string, StepRow[]>();
+    (steps ?? []).forEach((step) => {
+      if (step.status !== "pendente" || step.purchase_orders?.approval_status !== "aguardando_aprovacao") return;
+      const orderSteps = byOrder.get(step.order_id) ?? [];
+      orderSteps.push(step);
+      byOrder.set(step.order_id, orderSteps);
+    });
+
+    return [...byOrder.values()]
+      .map((orderSteps) => orderSteps.sort((a, b) => a.step_index - b.step_index)[0])
+      .filter((step): step is StepRow => Boolean(step));
+  }, [steps]);
+
+  const groups = useMemo(() => {
+    const grouped = new Map<string, PendingByRoleGroup>();
+    currentSteps.forEach((step) => {
+      const approver = step.approver_id ? profiles?.get(step.approver_id) : undefined;
+      const jobTitle = approver?.jobTitle;
+      const key = jobTitle?.id ?? `unassigned:${step.role_label || "sem-cargo"}`;
+      const title = jobTitle?.name ?? (step.role_label || "Sem cargo definido");
+      const current = grouped.get(key) ?? { key, title, steps: [], value: 0 };
+      current.steps.push(step);
+      current.value += Number(step.purchase_orders?.estimated_value ?? 0);
+      grouped.set(key, current);
+    });
+    return [...grouped.values()].sort((a, b) => b.value - a.value || a.title.localeCompare(b.title));
+  }, [currentSteps, profiles]);
+
+  const totalValue = groups.reduce((sum, group) => sum + group.value, 0);
+  const totalCount = currentSteps.length;
+  const toggleGroup = (key: string) => {
+    setOpenGroups((current) => {
+      const next = new Set(current);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardDescription>Approvals pendentes</CardDescription>
+            <CardTitle className="text-2xl">{totalCount}</CardTitle>
+          </CardHeader>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardDescription>Valor total pendente</CardDescription>
+            <CardTitle className="text-2xl">{BRL(totalValue)}</CardTitle>
+          </CardHeader>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Consolidado por Cargo</CardTitle>
+          <CardDescription>Cada approval aparece no cargo responsável pela etapa atual.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {isLoading ? (
+            <p className="text-sm text-muted-foreground">Carregando...</p>
+          ) : groups.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Nenhum approval pendente.</p>
+          ) : (
+            groups.map((group) => {
+              const isOpen = openGroups.has(group.key);
+              const share = totalValue > 0 ? (group.value / totalValue) * 100 : 0;
+              return (
+                <section key={group.key} className="overflow-hidden rounded-md border">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="h-auto w-full justify-start rounded-none px-3 py-3 text-left hover:bg-muted/60"
+                    onClick={() => toggleGroup(group.key)}
+                    aria-expanded={isOpen}
+                  >
+                    {isOpen ? <ChevronDown className="mr-2 h-4 w-4 shrink-0" /> : <ChevronRight className="mr-2 h-4 w-4 shrink-0" />}
+                    <span className="grid min-w-0 flex-1 gap-2 sm:grid-cols-[minmax(0,1fr)_7rem_10rem_6rem] sm:items-center">
+                      <span className="truncate font-semibold">{group.title}</span>
+                      <span className="text-sm font-normal text-muted-foreground">{group.steps.length} {group.steps.length === 1 ? "approval" : "approvals"}</span>
+                      <span className="text-sm font-semibold">{BRL(group.value)}</span>
+                      <span className="text-sm font-normal text-muted-foreground">{share.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%</span>
+                    </span>
+                  </Button>
+                  <div className="h-1 bg-muted" aria-hidden="true">
+                    <div className="h-full bg-primary" style={{ width: `${Math.min(100, share)}%` }} />
+                  </div>
+                  {isOpen && (
+                    <div className="divide-y border-t bg-muted/20">
+                      {group.steps.map((step) => {
+                        const order = step.purchase_orders;
+                        const requester = order?.requester_id ? profiles?.get(order.requester_id) : undefined;
+                        return (
+                          <div key={step.id} className="grid gap-2 px-4 py-3 text-sm sm:grid-cols-[8rem_minmax(0,1fr)_minmax(0,1fr)_9rem] sm:items-center">
+                            <PendingApprovalDetails step={step} requestTypes={requestTypes} />
+                            <div className="min-w-0">
+                              <p className="truncate font-medium">{requestTypeLabel(order, requestTypes)}</p>
+                              <p className="truncate text-xs text-muted-foreground">{order?.item_name ?? "—"}</p>
+                            </div>
+                            <p className="truncate text-muted-foreground">{requester?.full_name || requester?.email || "—"}</p>
+                            <p className="font-semibold sm:text-right">{BRL(Number(order?.estimated_value ?? 0))}</p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </section>
+              );
+            })
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 
