@@ -26,29 +26,6 @@ const MENU_GROUPS = [
     ],
   },
   { key: "armazem", label: "Armazém", children: [] },
-  {
-    key: "cadastro",
-    label: "Cadastro",
-    children: [
-      { key: "cadastro_projetos", label: "Projetos" },
-      { key: "cadastro_clientes", label: "Clientes" },
-      { key: "cadastro_centros", label: "Centro de Custo" },
-      { key: "cadastro_cargos", label: "Cargos" },
-      { key: "cadastro_lembretes", label: "Lembretes" },
-      { key: "cadastro_diversos", label: "Diversos" },
-    ],
-  },
-  {
-    key: "usuarios",
-    label: "Usuários e logs",
-    children: [
-      { key: "usuarios_lista", label: "Usuários" },
-      { key: "usuarios_acesso_restrito", label: "Acesso Restrito" },
-      { key: "usuarios_workflow", label: "Approval Workflow" },
-      { key: "usuarios_logs", label: "Logs" },
-      { key: "usuarios_backup", label: "Backup" },
-    ],
-  },
 ] as const;
 
 export function AccessProfilesTab() {
@@ -110,11 +87,11 @@ export function AccessProfilesTab() {
         <CardTitle className="flex items-center gap-2"><ShieldCheck className="h-5 w-5" />Acesso Restrito</CardTitle>
         <CardDescription>Defina individualmente os menus disponíveis para usuários com perfil Restrito.</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="max-w-4xl space-y-3">
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : null}
         {!isLoading && data?.length === 0 ? <p className="text-sm text-muted-foreground">Nenhum usuário com perfil Restrito.</p> : null}
         {data?.map((user) => (
-          <div key={user.id} className="grid gap-3 rounded-lg border border-border p-3 md:grid-cols-[minmax(180px,1fr)_2fr] md:items-center">
+          <div key={user.id} className="grid gap-3 rounded-lg border border-border p-3 md:grid-cols-[minmax(150px,0.65fr)_2fr] md:items-start">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <p className="truncate text-sm font-medium">{user.full_name || "—"}</p>
@@ -122,7 +99,7 @@ export function AccessProfilesTab() {
               </div>
               <p className="truncate text-xs text-muted-foreground">{user.email}</p>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-3">
               {MENU_GROUPS.map((menu) => (
                 <div key={menu.key} className="space-y-2">
                   <label className="flex items-center gap-2 text-sm font-medium">
