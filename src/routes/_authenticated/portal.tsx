@@ -55,7 +55,7 @@ function PortalPage() {
   if (isLoading || !data) return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Carregando...</div>;
 
   const apps = [
-    { key: "supply", name: "myio supply", description: "Compras, solicitações, aprovações e estoque.", to: "/dashboard" as const },
+    { key: "supply", name: "myio supply", description: "Compras, solicitações diversas, aprovações e estoque", to: "/dashboard" as const },
     { key: "cash_flow", name: "myio cash flow", description: "Gestão financeira e fluxo de caixa.", to: "/cash-flow" as const },
     { key: "crm", name: "myio CRM", description: "Gestão de relacionamento com clientes.", to: "/crm" as const },
     { key: "legal", name: "myio Legal", description: "Gestão jurídica e acompanhamento de demandas.", to: "/legal" as const },
@@ -99,17 +99,22 @@ function PortalPage() {
                <div className="grid gap-x-14 gap-y-10 sm:grid-cols-2">
                  {apps.map(({ key, name, description, to }) => (
                    <div key={key} className="flex min-w-0 flex-col items-start">
-                     <Link
-                       to={to}
-                       aria-label={`Acessar ${name}`}
-                       title={`Acessar ${name}`}
-                       className="group relative flex h-24 w-24 items-center justify-center rounded-md text-myio-purple outline-none transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4"
-                     >
-                       {key === "supply" ? (
-                         <>
-                            <Cog className="absolute bottom-3 left-3 h-14 w-14 stroke-[1.7]" />
-                            <Cog className="absolute right-3 top-3 h-12 w-12 stroke-[1.7]" />
-                         </>
+                      <Link
+                        to={to}
+                        aria-label={`Acessar ${name}`}
+                        title={`Acessar ${name}`}
+                        className={key === "supply"
+                          ? "group relative flex h-32 w-32 flex-col items-center justify-between rounded-[1.75rem] border-2 border-myio-purple px-3 pb-3 pt-2 text-myio-purple outline-none transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4"
+                          : "group relative flex h-24 w-24 items-center justify-center rounded-md text-myio-purple outline-none transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4"}
+                      >
+                        {key === "supply" ? (
+                          <>
+                            <span className="relative block h-20 w-full" aria-hidden="true">
+                              <Cog className="absolute bottom-0 left-2 h-14 w-14 stroke-[1.7]" />
+                              <Cog className="absolute right-2 top-0 h-12 w-12 stroke-[1.7]" />
+                            </span>
+                            <span className="text-base font-normal leading-none">{name}</span>
+                          </>
                         ) : key === "cash_flow" ? (
                          <Landmark className="h-16 w-16 stroke-[1.5]" />
                         ) : key === "crm" ? (
@@ -118,7 +123,7 @@ function PortalPage() {
                           <Scale className="h-16 w-16 stroke-[1.5]" />
                        )}
                      </Link>
-                     <h2 className="mt-4 text-2xl font-extrabold text-myio-purple">{name}</h2>
+                      {key !== "supply" ? <h2 className="mt-4 text-2xl font-extrabold text-myio-purple">{name}</h2> : null}
                      <p className="mt-1 max-w-sm text-sm text-muted-foreground">{description}</p>
                    </div>
                 ))}
