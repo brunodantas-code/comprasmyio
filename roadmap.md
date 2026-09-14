@@ -81,3 +81,6 @@
 - [x] Transformar o número do Approval em link para um pop-up com todos os dados e gráfico de orçado x solicitado
 - [x] Em Pendentes comigo, substituir a coluna Etapa por Projeto ou Cliente
 - [x] Retirar o negrito do número do Approval nas listagens
+- [ ] Tornar genérica a apresentação dos cadastros dentro de Cadastro > Diversos
+- [ ] Adicionar botão “+” para criar Tipos de Etapa Adicional
+- [ ] Aplicar o mesmo processo de criação aos Tipos de Solicitação e futuros cadastros de Diversos
