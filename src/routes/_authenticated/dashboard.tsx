@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { exportDatabaseBackup } from "@/lib/backup.functions";
 import { decideUserDeletion, requestUserDeletion, setUserAccessProfile } from "@/lib/user-admin.functions";
 import { lookupLinkPrice } from "@/lib/price-lookup.functions";
+import { getProjectBudgetSummaries, type ProjectBudgetSummary } from "@/lib/project-budget.functions";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,7 +26,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { toast } from "sonner";
 import { LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Boxes, Building2, Plane, Landmark, Briefcase } from "lucide-react";
-import { Trash2, Paperclip, X, Loader2, DatabaseBackup, CheckCircle2, XCircle, RotateCcw, Pencil, Bell, ShieldCheck } from "lucide-react";
+import { Trash2, Paperclip, X, Loader2, DatabaseBackup, CheckCircle2, XCircle, RotateCcw, Pencil, Bell, ShieldCheck, AlertTriangle } from "lucide-react";
 import { ApprovalWorkflow, MyApprovalFlows, PendingForMe } from "@/components/approval-workflow";
 import { z } from "zod";
 import { StockTab } from "@/components/stock-tab";
@@ -74,6 +75,10 @@ type Order = {
   payment_date?: string | null;
   approval_status?: string;
   estimated_value?: number;
+  budget_exceeded?: boolean;
+  budget_snapshot?: number | null;
+  committed_before_snapshot?: number | null;
+  projected_committed_snapshot?: number | null;
   created_at: string;
   updated_at: string;
 };
@@ -513,6 +518,38 @@ function useProjects() {
   });
 }
 
+function useProjectBudgetSummaries() {
+  const fetchSummaries = useServerFn(getProjectBudgetSummaries);
+  return useQuery({
+    queryKey: ["project-budget-summaries"],
+    queryFn: () => fetchSummaries(),
+  });
+}
+
+function BudgetProgress({ summary, pendingValue = 0 }: { summary: ProjectBudgetSummary; pendingValue?: number }) {
+  const projected = summary.requestedTotal + pendingValue;
+  const percentage = summary.budget > 0 ? (projected / summary.budget) * 100 : 0;
+  const exceeded = summary.budget > 0 && projected > summary.budget;
+  const width = Math.min(100, Math.max(0, percentage));
+  return (
+    <div className="space-y-2 rounded-md border bg-muted/30 p-3">
+      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs sm:grid-cols-4">
+        <div><span className="text-muted-foreground">Orçamento</span><div className="font-semibold">{formatBRL(summary.budget)}</div></div>
+        <div><span className="text-muted-foreground">Solicitado</span><div className="font-semibold">{formatBRL(summary.requestedTotal)}</div></div>
+        <div><span className="text-muted-foreground">Saldo</span><div className="font-semibold">{formatBRL(summary.budget - summary.requestedTotal)}</div></div>
+        <div><span className="text-muted-foreground">Após esta solicitação</span><div className="font-semibold">{formatBRL(projected)}</div></div>
+      </div>
+      <div className="h-2 overflow-hidden rounded-full bg-secondary" role="progressbar" aria-label="Percentual do orçamento comprometido" aria-valuemin={0} aria-valuenow={Math.round(percentage)}>
+        <div className={`h-full rounded-full transition-[width] ${exceeded ? "bg-destructive" : "bg-primary"}`} style={{ width: `${width}%` }} />
+      </div>
+      <div className="flex items-center justify-between gap-2 text-xs">
+        <span className="text-muted-foreground">{percentage.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}% comprometido</span>
+        {exceeded && <span className="flex items-center gap-1 font-semibold text-destructive"><AlertTriangle className="h-3.5 w-3.5" />Ultrapassa o orçamento em {formatBRL(projected - summary.budget)}</span>}
+      </div>
+    </div>
+  );
+}
+
 function useProfilesMap() {
   return useQuery({
     queryKey: ["profiles-map"],
@@ -922,6 +959,7 @@ function useAvgUnitPrice(item: PurchasableItem | null) {
 
 function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: string; canImport?: boolean; isAdmin?: boolean }) {
   const { data: projects, isLoading } = useProjects();
+  const { data: budgetSummaries } = useProjectBudgetSummaries();
   const qc = useQueryClient();
   const [projectId, setProjectId] = useState("");
   const [forStock, setForStock] = useState(false);
@@ -996,6 +1034,14 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
   const [itemLink, setItemLink] = useState("");
   const [estimatedValue, setEstimatedValue] = useState("0");
   const [qty, setQty] = useState("1");
+  const selectedBudget = budgetSummaries?.find((summary) => summary.projectId === projectId);
+  const pendingBudgetValue = requestType === "reembolso"
+    ? reembolsoTotal
+    : requestType === "rh"
+      ? Number(rhRemuneracao || 0)
+      : requestType === "pagamento"
+        ? Number(paymentValue || 0)
+        : Number(estimatedValue || 0) * Number(qty || 1);
   const [lookingUpPrice, setLookingUpPrice] = useState(false);
   const [isNewItem, setIsNewItem] = useState(false);
   const [newItemName, setNewItemName] = useState("");
@@ -1094,6 +1140,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
 
   const submit = useMutation({
     mutationFn: async ({ values, buyQty, shipQty }: { values: z.infer<typeof newOrderSchema>; buyQty: number; shipQty: number }) => {
+      let createdOrder: { budget_exceeded: boolean; budget_snapshot: number | null; projected_committed_snapshot: number | null } | null = null;
       let ids = {
         material_id: isNewItem ? null : (item?.material_id ?? null),
         terceiros_material_id: isNewItem ? null : (item?.terceiros_material_id ?? null),
@@ -1170,20 +1217,24 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
             ? [{ description: paymentDescription.trim(), value: Number(paymentValue), date: paymentDate }]
             : [],
           requester_id: userId,
-        }).select("id").single();
+        }).select("id,budget_exceeded,budget_snapshot,projected_committed_snapshot").single();
         if (error) throw error;
+        createdOrder = data;
         if (files.length && data?.id) {
           const uploaded = await uploadOrderAttachments(data.id, files);
           const { error: ue } = await supabase.from("purchase_orders").update({ attachments: uploaded }).eq("id", data.id);
           if (ue) throw ue;
         }
       }
-      return { buyQty, shipQty };
+      return { buyQty, shipQty, budgetExceeded: Boolean(createdOrder?.budget_exceeded), budget: createdOrder?.budget_snapshot, projected: createdOrder?.projected_committed_snapshot };
     },
     onSuccess: (r) => {
       if (r.shipQty > 0 && r.buyQty > 0) toast.success(`Ordem de expedição (${r.shipQty}) e ordem de compra (${r.buyQty}) criadas.`);
       else if (r.shipQty > 0) toast.success(`Atendido pelo estoque: ordem de expedição de ${r.shipQty} criada.`);
       else toast.success("Pedido criado!");
+      if (r.budgetExceeded) {
+        toast.warning(`Solicitação salva com alerta: o projeto chegará a ${formatBRL(r.projected)} para um orçamento de ${formatBRL(r.budget)}.`);
+      }
       qc.invalidateQueries({ queryKey: ["orders"] });
       qc.invalidateQueries({ queryKey: ["myio-orders"] });
       qc.invalidateQueries({ queryKey: ["purchasable-items"] });
@@ -1191,6 +1242,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
       qc.invalidateQueries({ queryKey: ["stock-meta"] });
       qc.invalidateQueries({ queryKey: ["terceiros-stock"] });
       qc.invalidateQueries({ queryKey: ["tool-stock"] });
+      qc.invalidateQueries({ queryKey: ["project-budget-summaries"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -1629,6 +1681,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
                         ))}
                       </SelectContent>
                     </Select>
+                    {selectedBudget && selectedBudget.budget > 0 && <BudgetProgress summary={selectedBudget} pendingValue={pendingBudgetValue} />}
                   </div>
                 )}
                 <div className="space-y-2">
@@ -1696,6 +1749,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
                         {projects.filter((p) => !p.status || p.status === "active").map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
                       </SelectContent>
                     </Select>
+                    {selectedBudget && selectedBudget.budget > 0 && <BudgetProgress summary={selectedBudget} pendingValue={pendingBudgetValue} />}
                   </div>
                 )}
               </>
@@ -1741,6 +1795,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
                         {projects.filter((p) => !p.status || p.status === "active").map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
                       </SelectContent>
                     </Select>
+                    {selectedBudget && selectedBudget.budget > 0 && <BudgetProgress summary={selectedBudget} pendingValue={pendingBudgetValue} />}
                   </div>
                 ) : allocTarget === "cliente" ? (
                   <div className="space-y-2">
@@ -2331,6 +2386,7 @@ function OrdersTable({
               <Row label="Approval">
                 <div className="flex items-center gap-1 font-mono font-bold">
                   <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} />
+                  {o.budget_exceeded && <Badge variant="destructive" className="font-sans text-[10px]">Orçamento excedido</Badge>}
                   {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
                 </div>
                 <div className="mt-1 space-y-1">
@@ -2447,6 +2503,7 @@ function OrdersTable({
               <TableCell className="font-mono text-xs text-center">
                 <div className="flex items-center justify-center gap-1">
                   <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} />
+                  {o.budget_exceeded && <Badge variant="destructive" className="font-sans text-[10px]">Orçamento excedido</Badge>}
                   {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
                 </div>
                 <div className="mt-1 space-y-1 font-sans">
@@ -2713,6 +2770,10 @@ function OrderReportDialog({
             {order.item_link && (
               <Row label="Link do item" value={<a href={order.item_link} target="_blank" rel="noreferrer" className="text-primary hover:underline">Abrir link</a>} />
             )}
+            {order.budget_exceeded && <Row label="Alerta de orçamento" value={<span className="font-semibold text-destructive">Orçamento excedido</span>} />}
+            {order.budget_snapshot != null && <Row label="Orçamento do projeto" value={formatBRL(order.budget_snapshot)} />}
+            {order.committed_before_snapshot != null && <Row label="Solicitado antes deste Approval" value={formatBRL(order.committed_before_snapshot)} />}
+            {order.projected_committed_snapshot != null && <Row label="Total projetado" value={formatBRL(order.projected_committed_snapshot)} />}
           </section>
 
           <section className="space-y-2">
@@ -3129,6 +3190,7 @@ function ProjectsAdmin({ userId }: { userId: string }) {
   const { data: projects, isLoading } = useProjects();
   const { data: clients } = useClients();
   const { data: me } = useCurrentUser();
+  const { data: budgetSummaries } = useProjectBudgetSummaries();
   const canCreate = !!me?.canCreateProjects;
   const [clientId, setClientId] = useState<string>("none");
   const [budgetVal, setBudgetVal] = useState("0");
@@ -3223,19 +3285,33 @@ function ProjectsAdmin({ userId }: { userId: string }) {
         <CardContent>
           {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
             !projects?.length ? <p className="text-sm text-muted-foreground">Sem projetos.</p> :
-            <Table>
-              <TableHeader><TableRow><TableHead>Nome do projeto</TableHead><TableHead>Orçamento</TableHead><TableHead>Cliente</TableHead><TableHead>Descrição</TableHead><TableHead className="text-center">Status</TableHead><TableHead className="text-center">Data</TableHead><TableHead /></TableRow></TableHeader>
+             <Table data-responsive="true">
+               <TableHeader><TableRow><TableHead>Nome do projeto</TableHead><TableHead className="text-right">Orçamento</TableHead><TableHead className="text-right">Solicitado</TableHead><TableHead>% do orçamento</TableHead><TableHead>Cliente</TableHead><TableHead className="text-center">Status</TableHead><TableHead className="text-center">Data</TableHead><TableHead /></TableRow></TableHeader>
               <TableBody>
                 {projects.map((p) => {
                   const st = (p as { status?: string }).status ?? "active";
                   const ca = (p as { concluded_at?: string | null }).concluded_at;
+                   const summary = budgetSummaries?.find((item) => item.projectId === p.id);
+                   const requested = summary?.requestedTotal ?? 0;
+                   const percent = summary?.requestedPercent ?? 0;
                   return (
                   <TableRow key={p.id}>
-                    <TableCell className="font-medium">{p.name}</TableCell>
-                    <TableCell className="text-sm">{formatBRL((p as { budget?: number }).budget)}</TableCell>
-                    <TableCell className="text-sm">{clientOf(p)?.name || p.client_name || "—"}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{p.description || "—"}</TableCell>
-                    <TableCell className="text-center">
+                     <TableCell data-label="Projeto" className="font-medium">
+                       <Popover>
+                         <PopoverTrigger asChild><button type="button" className="text-left hover:text-primary hover:underline" title={p.description || "Sem descrição"}>{p.name}</button></PopoverTrigger>
+                         <PopoverContent align="start" className="max-w-sm text-sm">{p.description || "Sem descrição cadastrada."}</PopoverContent>
+                       </Popover>
+                     </TableCell>
+                     <TableCell data-label="Orçamento" className="text-right text-sm">{formatBRL((p as { budget?: number }).budget)}</TableCell>
+                     <TableCell data-label="Solicitado" className="text-right text-sm font-medium">{formatBRL(requested)}</TableCell>
+                     <TableCell data-label="% do orçamento" className="min-w-32 text-sm">
+                       <div className="space-y-1">
+                         <div className={`text-right font-medium ${percent > 100 ? "text-destructive" : ""}`}>{percent.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%</div>
+                         <div className="h-1.5 overflow-hidden rounded-full bg-secondary"><div className={`h-full rounded-full ${percent > 100 ? "bg-destructive" : "bg-primary"}`} style={{ width: `${Math.min(100, percent)}%` }} /></div>
+                       </div>
+                     </TableCell>
+                     <TableCell data-label="Cliente" className="text-sm">{clientOf(p)?.name || p.client_name || "—"}</TableCell>
+                     <TableCell data-label="Status" className="text-center">
                       {st === "active" ? (
                         <span className="inline-block rounded bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">Ativo</span>
                       ) : st === "implantado" ? (
@@ -3244,10 +3320,10 @@ function ProjectsAdmin({ userId }: { userId: string }) {
                         <span className="inline-block rounded bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800">Cancelado</span>
                       )}
                     </TableCell>
-                    <TableCell className="text-center text-sm text-muted-foreground">
+                     <TableCell data-label="Data" className="text-center text-sm text-muted-foreground">
                       {ca ? new Date(ca).toLocaleDateString("pt-BR") : "—"}
                     </TableCell>
-                    <TableCell className="text-right">
+                     <TableCell data-label="Ações" className="text-right">
                       <div className="flex items-center justify-end gap-2">
                         {st === "active" && (
                           <>
