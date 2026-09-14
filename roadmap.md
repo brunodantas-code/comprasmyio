@@ -120,3 +120,4 @@
 - [x] Compactar os indicadores de Contas a pagar e alinhar os valores à direita
 - [x] Renomear situação para Classificar e aplicar o verde padrão myio
 - [x] Exigir Emissão, Competência e Caixa mensais em pagamentos e movimentações do Cash Flow
+- [x] Criar cadastro de Perfil de Acesso em Diversos e usar a lista nos usuários
