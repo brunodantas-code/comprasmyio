@@ -129,11 +129,17 @@ export function AccessProfilesTab() {
                     <Checkbox
                       checked={user.permissions.has(menu.key)}
                       disabled={updatePermission.isPending || updateGroup.isPending}
-                      onCheckedChange={(checked) => updateGroup.mutate({
-                        userId: user.id,
-                        keys: [menu.key, ...menu.children.map((child) => child.key)],
-                        allowed: checked === true,
-                      })}
+                      onCheckedChange={(checked) => {
+                        const allowed = checked === true;
+                        const children = allowed && menu.key === "approvals"
+                          ? menu.children.filter((child) => child.key === "approvals_pendentes" || child.key === "approvals_meus")
+                          : menu.children;
+                        updateGroup.mutate({
+                          userId: user.id,
+                          keys: [menu.key, ...children.map((child) => child.key)],
+                          allowed,
+                        });
+                      }}
                     />
                     {menu.label}
                   </label>
