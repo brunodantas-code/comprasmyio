@@ -498,19 +498,28 @@ function Dashboard() {
           {canSeeAdministration && (
             <TabsContent value="admin">
               <Tabs defaultValue="usuarios">
-                <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-                  <TabsList>
-                    <TabsTrigger value="usuarios"><Users className="mr-2 h-4 w-4" />Usuários</TabsTrigger>
-                    <TabsTrigger value="acesso-restrito"><ShieldCheck className="mr-2 h-4 w-4" />Acesso Restrito</TabsTrigger>
-                    <TabsTrigger value="workflow"><CheckCircle2 className="mr-2 h-4 w-4" />Approval Workflow</TabsTrigger>
-                    <TabsTrigger value="logs"><ScrollText className="mr-2 h-4 w-4" />Logs</TabsTrigger>
-                  </TabsList>
-                  <BackupButton />
-                </div>
+                <TabsList className="mb-4">
+                  <TabsTrigger value="usuarios"><Users className="mr-2 h-4 w-4" />Usuários</TabsTrigger>
+                  <TabsTrigger value="acesso-restrito"><ShieldCheck className="mr-2 h-4 w-4" />Acesso Restrito</TabsTrigger>
+                  <TabsTrigger value="workflow"><CheckCircle2 className="mr-2 h-4 w-4" />Approval Workflow</TabsTrigger>
+                  <TabsTrigger value="logs"><ScrollText className="mr-2 h-4 w-4" />Logs</TabsTrigger>
+                  <TabsTrigger value="backup"><DatabaseBackup className="mr-2 h-4 w-4" />Backup</TabsTrigger>
+                </TabsList>
                 <TabsContent value="usuarios"><UsersAdmin /></TabsContent>
                 <TabsContent value="acesso-restrito"><AccessProfilesTab /></TabsContent>
                 <TabsContent value="workflow"><ApprovalWorkflow /></TabsContent>
                 <TabsContent value="logs"><LogsAdmin /></TabsContent>
+                <TabsContent value="backup">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Backup dos dados</CardTitle>
+                      <CardDescription>Baixe uma cópia dos registros do sistema em formato JSON. Arquivos anexados e imagens não são incluídos.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <BackupButton />
+                    </CardContent>
+                  </Card>
+                </TabsContent>
               </Tabs>
             </TabsContent>
           )}
