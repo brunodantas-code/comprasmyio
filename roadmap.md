@@ -89,3 +89,5 @@
 
 - [ ] Mover Quantidade para uma linha própria abaixo de Valor no Approval
 - [ ] Remover o texto “Decisão” do Approval
+
+- [ ] Alinhar os ícones de edição e exclusão em Tipos de Solicitação
