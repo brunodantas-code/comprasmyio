@@ -38,6 +38,7 @@ import { RemindersTab } from "@/components/reminders-tab";
 import { AdditionalStepTypesTab } from "@/components/additional-step-types-tab";
 import { RequestTypesTab, requestTypeModel, requestTypeName, useRequestTypes, type RequestTypeRecord } from "@/components/request-types-tab";
 import { AccessProfilesTab } from "@/components/access-profiles-tab";
+import { AccessProfileDefinitionsTab, useAccessProfileDefinitions } from "@/components/access-profile-definitions-tab";
 import { ImportBatchesSection } from "@/components/import-batches";
 import { AddressAutocomplete } from "@/components/address-autocomplete";
 import { LinkedRecordDeletionDialog } from "@/components/linked-record-deletion-dialog";
@@ -437,7 +438,7 @@ function Dashboard() {
             <div className="min-w-0 text-right">
               <div className="truncate text-xs font-medium sm:text-sm">{me.full_name || me.email}</div>
               <div className="flex flex-wrap justify-end gap-1">
-                <Badge variant="outline" className="text-[10px] uppercase">{me.accessProfile === "padrao" ? "Padrão" : me.accessProfile}</Badge>
+                <Badge variant="outline" className="text-[10px] uppercase">{me.accessProfileName}</Badge>
                 {me.jobTitle ? <Badge variant="outline" className="text-[10px] uppercase">{me.jobTitle.name}</Badge> : null}
               </div>
             </div>
@@ -509,6 +510,7 @@ function Dashboard() {
                   <div className="space-y-6">
                     <RequestTypesTab />
                     <AdditionalStepTypesTab />
+                     <AccessProfileDefinitionsTab />
                   </div>
                 </TabsContent>}
               </Tabs>
@@ -1031,7 +1033,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
   const { data: costCenters } = useCostCenters();
 
   const { data: me } = useCurrentUser();
-  const restrictedCc = !!me && !me.isAdmin && (me.accessProfile === "restrito" || me.isEstoquista || me.isFabrica);
+  const restrictedCc = !!me && !me.isAdmin && (me.accessProfileBase === "restrito" || me.isEstoquista || me.isFabrica);
 
   async function resolveOperacaoCostCenterId(): Promise<string> {
     const existing = (costCenters ?? []).find((c) => c.name.trim().toLowerCase() === "operação");
@@ -3575,7 +3577,7 @@ function UsersAdmin() {
     queryFn: async () => {
       const [{ data: profiles, error: pe }, { data: accessProfiles, error: ae }, { data: menuPermissions, error: me }, { data: titles, error: te }] = await Promise.all([
         supabase.from("profiles").select("*").is("deleted_at", null).order("created_at", { ascending: false }),
-        supabase.from("user_access_profiles").select("user_id, profile"),
+        supabase.from("user_access_profiles").select("user_id, profile, profile_definition_id, access_profile_definitions(name,base_profile)"),
         supabase.from("user_menu_permissions").select("user_id, allowed").eq("allowed", true),
         supabase.from("job_titles").select("id,name").eq("active", true).order("name"),
       ]);
@@ -3584,13 +3586,15 @@ function UsersAdmin() {
       if (me) throw me;
       if (te) throw te;
       const titleById = new Map((titles ?? []).map((title) => [title.id, title.name]));
-      const accessByUser = new Map((accessProfiles ?? []).map((item) => [item.user_id, item.profile]));
+      const accessByUser = new Map((accessProfiles ?? []).map((item) => [item.user_id, item]));
       const configuredUsers = new Set((menuPermissions ?? []).map((item) => item.user_id));
       return (profiles ?? []).map((p) => ({
         ...p,
         jobTitleId: p.job_title_id,
         jobTitleName: p.job_title_id ? titleById.get(p.job_title_id) ?? null : null,
-        accessProfile: accessByUser.get(p.id) ?? "restrito",
+        accessProfile: accessByUser.get(p.id)?.profile_definition_id ?? "restrito",
+        accessProfileBase: accessByUser.get(p.id)?.profile ?? "restrito",
+        accessProfileName: (accessByUser.get(p.id)?.access_profile_definitions as { name?: string } | null)?.name ?? "Restrito",
         hasConfiguredAccess: configuredUsers.has(p.id),
       }));
     },
@@ -3606,7 +3610,7 @@ function UsersAdmin() {
   });
 
   const setAccessProfile = useMutation({
-    mutationFn: async ({ userId, profile }: { userId: string; profile: "admin" | "padrao" | "restrito" }) => {
+    mutationFn: async ({ userId, profile }: { userId: string; profile: string }) => {
       await setAccessProfileFn({ data: { userId, profile } });
     },
     onSuccess: () => {
@@ -3660,6 +3664,7 @@ function UsersAdmin() {
   });
 
   const { data: jobTitles } = useJobTitles();
+  const { data: accessProfileDefinitions = [] } = useAccessProfileDefinitions();
 
   const { data: roleHierarchy } = useQuery({
     queryKey: ["role-hierarchy"],
@@ -3685,7 +3690,7 @@ function UsersAdmin() {
 
   const norm = (s: string) => s.toLowerCase().trim();
   const isPendingRestrictedUser = (user: NonNullable<typeof data>[number]) =>
-    user.accessProfile === "restrito" && (!user.hasConfiguredAccess || !approverLabelOf(user.jobTitleId));
+    user.accessProfileBase === "restrito" && (!user.hasConfiguredAccess || !approverLabelOf(user.jobTitleId));
   const pendingUsers = (data ?? []).filter(isPendingRestrictedUser);
   const activeUsers = (data ?? []).filter((user) => !isPendingRestrictedUser(user));
   const rows = activeUsers.filter((u) => {
@@ -3697,7 +3702,7 @@ function UsersAdmin() {
     );
   }).sort((a, b) => {
     if (sortBy === "profile") {
-      const byProfile = String(a.accessProfile).localeCompare(String(b.accessProfile), "pt-BR");
+      const byProfile = String(a.accessProfileName).localeCompare(String(b.accessProfileName), "pt-BR");
       if (byProfile !== 0) return byProfile;
     }
     return String(a.full_name ?? "").localeCompare(String(b.full_name ?? ""), "pt-BR");
@@ -3790,8 +3795,9 @@ function UsersAdmin() {
             </div>
           ) : null}
           {(() => {
-            const groupOrder = sortBy === "profile" ? ["admin", "padrao", "restrito"] : ["all"];
-            const groupLabel: Record<string, string> = { admin: "Perfil Admin", padrao: "Perfil Padrão", restrito: "Perfil Restrito", all: "Usuários" };
+            const groupOrder = sortBy === "profile" ? accessProfileDefinitions.map((item) => item.code) : ["all"];
+            const groupLabel: Record<string, string> = Object.fromEntries(accessProfileDefinitions.map((item) => [item.code, `Perfil ${item.name}`]));
+            groupLabel.all = "Usuários";
             const groups = groupOrder
               .map((g) => ({
                 key: g,
@@ -3820,7 +3826,7 @@ function UsersAdmin() {
                             <div className="truncate text-xs text-muted-foreground">{u.email}</div>
                           </div>
                           <div className="flex flex-wrap justify-end gap-1">
-                            <Badge variant="outline">Perfil: {u.accessProfile === "admin" ? "Admin" : u.accessProfile === "restrito" ? "Restrito" : "Padrão"}</Badge>
+                            <Badge variant="outline">Perfil: {u.accessProfileName}</Badge>
                             <Badge variant="outline">Cargo: {u.jobTitleName ?? "Sem cargo"}</Badge>
                             {u.id !== currentUser?.id ? (
                               <AlertDialog>
@@ -3859,12 +3865,10 @@ function UsersAdmin() {
                           </div>
                           <div className="flex flex-col gap-1">
                             <span className="text-[10px] font-medium text-muted-foreground">Perfil de acesso</span>
-                            <Select value={u.accessProfile} onValueChange={(value) => setAccessProfile.mutate({ userId: u.id, profile: value as "admin" | "padrao" | "restrito" })}>
+                            <Select value={u.accessProfile} onValueChange={(value) => setAccessProfile.mutate({ userId: u.id, profile: value })}>
                               <SelectTrigger className="h-8 w-full text-xs"><SelectValue /></SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="admin">Admin</SelectItem>
-                                <SelectItem value="padrao">Padrão</SelectItem>
-                                <SelectItem value="restrito">Restrito</SelectItem>
+                                {accessProfileDefinitions.filter((definition) => definition.active || definition.code === u.accessProfile).map((definition) => <SelectItem key={definition.code} value={definition.code}>{definition.name}</SelectItem>)}
                               </SelectContent>
                             </Select>
                           </div>

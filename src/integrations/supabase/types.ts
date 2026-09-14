@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_profile_definitions: {
+        Row: {
+          active: boolean
+          base_profile: Database["public"]["Enums"]["access_profile"]
+          code: string
+          created_at: string
+          is_system: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          base_profile: Database["public"]["Enums"]["access_profile"]
+          code: string
+          created_at?: string
+          is_system?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          base_profile?: Database["public"]["Enums"]["access_profile"]
+          code?: string
+          created_at?: string
+          is_system?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       additional_step_types: {
         Row: {
           active: boolean
@@ -2828,22 +2858,32 @@ export type Database = {
         Row: {
           created_at: string
           profile: Database["public"]["Enums"]["access_profile"]
+          profile_definition_id: string
           updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
           profile?: Database["public"]["Enums"]["access_profile"]
+          profile_definition_id?: string
           updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
           profile?: Database["public"]["Enums"]["access_profile"]
+          profile_definition_id?: string
           updated_at?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "user_access_profiles_profile_definition_id_fkey"
+            columns: ["profile_definition_id"]
+            isOneToOne: false
+            referencedRelation: "access_profile_definitions"
+            referencedColumns: ["code"]
+          },
           {
             foreignKeyName: "user_access_profiles_user_id_fkey"
             columns: ["user_id"]
