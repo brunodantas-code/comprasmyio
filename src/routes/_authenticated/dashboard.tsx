@@ -35,6 +35,7 @@ import { ClientsTab, useClients } from "@/components/clients-tab";
 import { CostCentersTab, useCostCenters } from "@/components/cost-centers-tab";
 import { JobTitlesTab, useJobTitles } from "@/components/job-titles-tab";
 import { RemindersTab } from "@/components/reminders-tab";
+import { AdditionalStepTypesTab } from "@/components/additional-step-types-tab";
 import { AccessProfilesTab } from "@/components/access-profiles-tab";
 import { ImportBatchesSection } from "@/components/import-batches";
 import { AddressAutocomplete } from "@/components/address-autocomplete";
@@ -485,12 +486,7 @@ function Dashboard() {
                 <TabsContent value="cargos"><JobTitlesTab userId={me.id} /></TabsContent>
                 <TabsContent value="lembretes"><RemindersTab /></TabsContent>
                 <TabsContent value="diversos">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Diversos</CardTitle>
-                      <CardDescription>Cadastros adicionais serão disponibilizados neste espaço.</CardDescription>
-                    </CardHeader>
-                  </Card>
+                  <AdditionalStepTypesTab />
                 </TabsContent>
               </Tabs>
             </TabsContent>
