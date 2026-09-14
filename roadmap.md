@@ -72,6 +72,6 @@
 - [x] Reordenar as colunas do organograma e igualar as larguras de N-1 e N+1
 - [x] Adicionar myio RH ao portal e às permissões com a frase “Gestão de Pessoas”
 - [x] Remover o globo do ícone do myio RH e manter somente três pessoas
-- [ ] Reorganizar Etapas Adicionais em Cadastro > Diversos, com tipos configuráveis e vínculo à solicitação
-- [ ] Incluir filtros e ordenação na lista de Projetos
-- [ ] Bloquear exclusão de Projeto, Cliente ou Centro de Custo com solicitações e permitir realocação individual
+- [x] Reorganizar Etapas Adicionais em Cadastro > Diversos, com tipos configuráveis e vínculo à solicitação
+- [x] Incluir filtros e ordenação na lista de Projetos
+- [x] Bloquear exclusão de Projeto, Cliente ou Centro de Custo com solicitações e permitir realocação individual

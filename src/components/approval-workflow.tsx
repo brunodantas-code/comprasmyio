@@ -1,12 +1,13 @@
 import { useMemo, useState, type CSSProperties } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { AlertTriangle, CheckCircle2, Clock, History, Pencil, Plus, Trash2, XCircle } from "lucide-react";
+import { AlertTriangle, ArrowDown, ArrowUp, CheckCircle2, Clock, History, Pencil, Plus, Trash2, XCircle } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
@@ -75,10 +76,27 @@ const ACTION_LABELS: Record<string, string> = {
 };
 
 const STEP_TYPES: { value: string; label: string }[] = [
-  { value: "tecnica", label: "Validação técnica / Compliance" },
-  { value: "suprimentos", label: "Suprimentos (3 cotações)" },
-  { value: "financeiro", label: "Financeiro / Controller" },
+  { value: "validacao_tecnica", label: "Validação Técnica" },
+  { value: "compliance", label: "Compliance" },
 ];
+
+const REQUEST_TYPES = Object.entries(REQUEST_TYPE_LABELS).map(([value, label]) => ({ value, label }));
+
+function RequestTypeCheckboxes({ values, onChange }: { values: string[]; onChange: (values: string[]) => void }) {
+  return (
+    <div className="grid gap-2 sm:grid-cols-2">
+      {REQUEST_TYPES.map((type) => (
+        <label key={type.value} className="flex cursor-pointer items-center gap-2 text-sm">
+          <Checkbox
+            checked={values.includes(type.value)}
+            onCheckedChange={(checked) => onChange(checked ? [...values, type.value] : values.filter((value) => value !== type.value))}
+          />
+          {type.label}
+        </label>
+      ))}
+    </div>
+  );
+}
 
 type ProfileRow = { id: string; full_name: string | null; email: string | null; approval_limit: number | null; job_title_id: string | null };
 type ProfileWithTitle = ProfileRow & { jobTitle: { id: string; name: string } | null };
@@ -607,6 +625,7 @@ type RuleRow = {
   category: string | null;
   approver_id: string | null;
   position: number;
+  request_types: string[];
   active: boolean;
 };
 
@@ -622,17 +641,15 @@ function EditRuleDialog({
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(rule.name);
   const [stepType, setStepType] = useState(rule.step_type);
-  const [category, setCategory] = useState(rule.category ?? "");
   const [approver, setApprover] = useState(rule.approver_id ?? "none");
-  const [position, setPosition] = useState(String(rule.position));
+  const [requestTypes, setRequestTypes] = useState<string[]>(rule.request_types ?? []);
 
   const openChange = (v: boolean) => {
     if (v) {
       setName(rule.name);
-      setStepType(rule.step_type);
-      setCategory(rule.category ?? "");
+      setStepType(STEP_TYPES.some((type) => type.value === rule.step_type) ? rule.step_type : "validacao_tecnica");
       setApprover(rule.approver_id ?? "none");
-      setPosition(String(rule.position));
+      setRequestTypes(rule.request_types ?? []);
     }
     setOpen(v);
   };
@@ -644,9 +661,8 @@ function EditRuleDialog({
         .update({
           name: name.trim(),
           step_type: stepType,
-          category: category.trim() || null,
           approver_id: approver === "none" ? null : approver,
-          position: Number(position) || 1,
+          request_types: requestTypes,
         })
         .eq("id", rule.id);
       if (error) throw error;
@@ -674,7 +690,7 @@ function EditRuleDialog({
         <div className="grid gap-3">
           <div className="space-y-2">
             <Label>Nome da etapa</Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} />
+            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Inserir nome" />
           </div>
           <div className="space-y-2">
             <Label>Tipo</Label>
@@ -686,10 +702,6 @@ function EditRuleDialog({
                 ))}
               </SelectContent>
             </Select>
-          </div>
-          <div className="space-y-2">
-            <Label>Categoria (opcional)</Label>
-            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
           </div>
           <div className="space-y-2">
             <Label>Responsável</Label>
@@ -704,13 +716,13 @@ function EditRuleDialog({
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>Ordem</Label>
-            <Input type="number" min={1} value={position} onChange={(e) => setPosition(e.target.value)} />
+            <Label>Vincular ao Tipo de Solicitação</Label>
+            <RequestTypeCheckboxes values={requestTypes} onChange={setRequestTypes} />
           </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-          <Button onClick={() => update.mutate()} disabled={!name.trim() || update.isPending}>
+          <Button onClick={() => update.mutate()} disabled={!name.trim() || requestTypes.length === 0 || update.isPending}>
             Salvar
           </Button>
         </DialogFooter>
@@ -719,7 +731,7 @@ function EditRuleDialog({
   );
 }
 
-function RulesAdmin() {
+export function RulesAdmin() {
   const qc = useQueryClient();
   const { data: profiles } = useProfiles();
   const { data: rules, isLoading } = useQuery({
@@ -732,10 +744,9 @@ function RulesAdmin() {
   });
 
   const [name, setName] = useState("");
-  const [stepType, setStepType] = useState("tecnica");
-  const [category, setCategory] = useState("");
+  const [stepType, setStepType] = useState("validacao_tecnica");
   const [approver, setApprover] = useState<string>("none");
-  const [position, setPosition] = useState("1");
+  const [requestTypes, setRequestTypes] = useState<string[]>([]);
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["approval-rules"] });
 
@@ -744,17 +755,17 @@ function RulesAdmin() {
       const { error } = await supabase.from("approval_rules").insert({
         name: name.trim(),
         step_type: stepType,
-        category: category.trim() || null,
         approver_id: approver === "none" ? null : approver,
-        position: Number(position) || 1,
+        position: (rules?.length ?? 0) + 1,
+        request_types: requestTypes,
       });
       if (error) throw error;
     },
     onSuccess: () => {
       toast.success("Etapa criada");
       setName("");
-      setCategory("");
       setApprover("none");
+      setRequestTypes([]);
       invalidate();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -781,24 +792,41 @@ function RulesAdmin() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const move = useMutation({
+    mutationFn: async ({ rule, direction }: { rule: RuleRow; direction: -1 | 1 }) => {
+      const ordered = [...((rules ?? []) as RuleRow[])].sort((a, b) => a.position - b.position);
+      const index = ordered.findIndex((item) => item.id === rule.id);
+      const other = ordered[index + direction];
+      if (!other) return;
+      const temporaryPosition = Math.max(...ordered.map((item) => item.position), 0) + 1000;
+      const { error: firstError } = await supabase.from("approval_rules").update({ position: temporaryPosition }).eq("id", rule.id);
+      if (firstError) throw firstError;
+      const { error: secondError } = await supabase.from("approval_rules").update({ position: rule.position }).eq("id", other.id);
+      if (secondError) throw secondError;
+      const { error: thirdError } = await supabase.from("approval_rules").update({ position: other.position }).eq("id", rule.id);
+      if (thirdError) throw thirdError;
+    },
+    onSuccess: invalidate,
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const people = [...(profiles?.values() ?? [])];
 
   return (
     <div className="space-y-4">
-      <DualApprovalSettings />
       <Card>
         <CardHeader>
-          <CardTitle>Etapas adicionais</CardTitle>
+          <CardTitle>Tipo de Etapa Adicional</CardTitle>
           <CardDescription>
-            Validação técnica, suprimentos e financeiro. Etapas ativas são adicionadas ao final da sequência de
-            aprovação de novas solicitações.
+            Configure Validação Técnica e Compliance e escolha em quais tipos de solicitação cada etapa será aplicada.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-3 md:grid-cols-5">
+           <div className="grid gap-4 lg:grid-cols-2">
+            <div className="grid gap-3 sm:grid-cols-3">
             <div className="space-y-2">
               <Label>Nome da etapa</Label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Diretor de TI" />
+              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Inserir nome" />
             </div>
             <div className="space-y-2">
               <Label>Tipo</Label>
@@ -812,10 +840,6 @@ function RulesAdmin() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Categoria (opcional)</Label>
-              <Input value={category} onChange={(e) => setCategory(e.target.value)} placeholder="Software/Hardware" />
-            </div>
-            <div className="space-y-2">
               <Label>Responsável</Label>
               <Select value={approver} onValueChange={setApprover}>
                 <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
@@ -827,12 +851,13 @@ function RulesAdmin() {
                 </SelectContent>
               </Select>
             </div>
+            </div>
             <div className="space-y-2">
-              <Label>Ordem</Label>
-              <Input type="number" min={1} value={position} onChange={(e) => setPosition(e.target.value)} />
+              <Label>Vincular ao Tipo de Solicitação</Label>
+              <RequestTypeCheckboxes values={requestTypes} onChange={setRequestTypes} />
             </div>
           </div>
-          <Button className="mt-4" onClick={() => create.mutate()} disabled={!name.trim() || create.isPending}>
+          <Button className="mt-4" onClick={() => create.mutate()} disabled={!name.trim() || requestTypes.length === 0 || create.isPending}>
             <Plus className="mr-2 h-4 w-4" />
             Adicionar etapa
           </Button>
@@ -850,23 +875,28 @@ function RulesAdmin() {
                   <TableHead>Ordem</TableHead>
                   <TableHead>Etapa</TableHead>
                   <TableHead>Tipo</TableHead>
-                  <TableHead>Categoria</TableHead>
+                  <TableHead>Tipos de Solicitação</TableHead>
                   <TableHead>Responsável</TableHead>
                   <TableHead>Ativa</TableHead>
                   <TableHead />
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {(rules ?? []).map((r) => {
+                {(rules ?? []).map((r, index) => {
                   const ap = r.approver_id ? profiles?.get(r.approver_id) : undefined;
                   return (
                     <TableRow key={r.id}>
-                      <TableCell>{r.position}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <Button size="icon" variant="ghost" className="h-7 w-7" aria-label="Mover para cima" title="Mover para cima" disabled={index === 0 || move.isPending} onClick={() => move.mutate({ rule: r as RuleRow, direction: -1 })}><ArrowUp className="h-4 w-4" /></Button>
+                          <Button size="icon" variant="ghost" className="h-7 w-7" aria-label="Mover para baixo" title="Mover para baixo" disabled={index === (rules?.length ?? 0) - 1 || move.isPending} onClick={() => move.mutate({ rule: r as RuleRow, direction: 1 })}><ArrowDown className="h-4 w-4" /></Button>
+                        </div>
+                      </TableCell>
                       <TableCell className="font-medium">{r.name}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {STEP_TYPES.find((t) => t.value === r.step_type)?.label ?? r.step_type}
                       </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{r.category || "—"}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{(r.request_types ?? []).map((value) => REQUEST_TYPE_LABELS[value] ?? value).join(", ") || "Todos"}</TableCell>
                       <TableCell className="text-sm">{ap?.full_name || ap?.email || "—"}</TableCell>
                       <TableCell>
                         <Switch
@@ -1357,11 +1387,14 @@ export function ApprovalWorkflow() {
       <TabsList className="mb-4">
         <TabsTrigger value="organograma">Organograma de Aprovação</TabsTrigger>
         <TabsTrigger value="padrao">Alçadas de Aprovação</TabsTrigger>
-        <TabsTrigger value="regras">Etapas adicionais</TabsTrigger>
       </TabsList>
       <TabsContent value="organograma"><OrgChartAdmin /></TabsContent>
-      <TabsContent value="padrao"><DefaultChainAdmin /></TabsContent>
-      <TabsContent value="regras"><RulesAdmin /></TabsContent>
+      <TabsContent value="padrao">
+        <div className="space-y-4">
+          <DefaultChainAdmin />
+          <DualApprovalSettings />
+        </div>
+      </TabsContent>
     </Tabs>
   );
 }

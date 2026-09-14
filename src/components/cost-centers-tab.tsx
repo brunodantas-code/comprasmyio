@@ -7,9 +7,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil } from "lucide-react";
+import { LinkedRecordDeletionDialog } from "@/components/linked-record-deletion-dialog";
 
 export type CostCenter = {
   id: string;
@@ -124,7 +125,15 @@ export function CostCentersTab({ userId }: { userId: string }) {
                     <TableCell className="max-w-[220px] whitespace-pre-wrap break-words text-sm text-muted-foreground">{c.description || "—"}</TableCell>
                     <TableCell className="space-x-1 text-right">
                       <EditCostCenterDialog center={c} onSave={(v) => update.mutate({ id: c.id, ...v })} />
-                      <DeleteCostCenterDialog name={c.name} onConfirm={() => remove.mutate(c.id)} />
+                       <LinkedRecordDeletionDialog
+                         entityId={c.id}
+                         entityName={c.name}
+                         entityLabel="centro de custo"
+                         linkField="cost_center_id"
+                         destinations={(centers ?? []).map((center) => ({ id: center.id, name: center.name }))}
+                         onDelete={() => remove.mutate(c.id)}
+                         deleting={remove.isPending}
+                       />
                     </TableCell>
                   </TableRow>
                 ))}
@@ -166,28 +175,6 @@ function EditCostCenterDialog({ center, onSave }: { center: CostCenter; onSave: 
           <div className="space-y-2"><Label>Descrição</Label><Textarea name="description" rows={3} defaultValue={center.description ?? ""} /></div>
           <DialogFooter><Button type="submit">Salvar</Button></DialogFooter>
         </form>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function DeleteCostCenterDialog({ name, onConfirm }: { name: string; onConfirm: () => void }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button size="icon" variant="ghost" title="Excluir" aria-label="Excluir" className="text-destructive hover:text-destructive">
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Excluir centro de custo</DialogTitle>
-          <DialogDescription>Confirma a exclusão de {name}?</DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <Button variant="destructive" onClick={() => { onConfirm(); setOpen(false); }}>Excluir</Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
