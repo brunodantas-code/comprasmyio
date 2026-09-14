@@ -16,7 +16,7 @@ Também tornar o número do Approval clicável em **Pendentes comigo**, abrindo 
 - Não permitir criar ou excluir tipos, pois cada tipo atual possui formulário e regras próprios.
 
 ### Pendentes comigo
-- Transformar o número do Approval em um link.
+- Transformar o número do Approval em um link, sem negrito.
 - Ao clicar, abrir uma janela com todas as informações da solicitação, seus vínculos e dados de aprovação.
 - Incluir nessa janela o gráfico de **Orçado x Solicitado** quando houver projeto vinculado.
 - Substituir a coluna **Etapa** por **Projeto ou Cliente**, exibindo o vínculo aplicável; para solicitações internas ou de estoque, mostrar a respectiva identificação.

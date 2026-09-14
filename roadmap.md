@@ -80,3 +80,4 @@
 - [ ] Cadastrar Tipos de Solicitação em Cadastro > Diversos e aplicar nomes/status nas telas
 - [ ] Transformar o número do Approval em link para um pop-up com todos os dados e gráfico de orçado x solicitado
 - [ ] Em Pendentes comigo, substituir a coluna Etapa por Projeto ou Cliente
+- [ ] Retirar o negrito do número do Approval nas listagens
