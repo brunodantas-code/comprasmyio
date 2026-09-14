@@ -10,6 +10,8 @@ import { Badge } from "@/components/ui/badge";
 const APPS = [
   { key: "supply", label: "myio supply" },
   { key: "cash_flow", label: "myio cash flow" },
+  { key: "crm", label: "myio CRM" },
+  { key: "legal", label: "myio Legal" },
 ] as const;
 
 export function ErpAppAccessAdmin() {
@@ -51,7 +53,7 @@ export function ErpAppAccessAdmin() {
                 </div>
                 <p className="truncate text-xs text-muted-foreground">{user.email}</p>
               </div>
-              <div className="grid grid-cols-2 gap-3 sm:flex sm:gap-5">
+              <div className="grid grid-cols-2 gap-x-5 gap-y-3 lg:grid-cols-4">
                 {APPS.map((app) => {
                   const checked = accessSet.has(`${user.id}:${app.key}`);
                   return (

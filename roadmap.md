@@ -63,5 +63,5 @@
 
 - [x] Simplificar acesso do portal para ícone lilás de engrenagens, sem card
 - [x] Alterar o título do portal para “Meus Aplicativos”
-- [ ] Adicionar myio CRM e myio Legal ao portal, permissões e páginas “Em breve”
-- [ ] Deixar o ícone do myio supply somente com as engrenagens
+- [x] Adicionar myio CRM e myio Legal ao portal, permissões e páginas “Em breve”
+- [x] Deixar o ícone do myio supply somente com as engrenagens

@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Boxes, Cog, Landmark, LogOut, Settings2 } from "lucide-react";
+import { Boxes, Cog, ContactRound, Landmark, LogOut, Scale, Settings2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -57,6 +57,8 @@ function PortalPage() {
   const apps = [
     { key: "supply", name: "myio supply", description: "Compras, solicitações, aprovações e estoque.", to: "/dashboard" as const },
     { key: "cash_flow", name: "myio cash flow", description: "Gestão financeira e fluxo de caixa.", to: "/cash-flow" as const },
+    { key: "crm", name: "myio CRM", description: "Gestão de relacionamento com clientes.", to: "/crm" as const },
+    { key: "legal", name: "myio Legal", description: "Gestão jurídica e acompanhamento de demandas.", to: "/legal" as const },
   ].filter((app) => data.appKeys.has(app.key));
 
   return (
@@ -108,8 +110,12 @@ function PortalPage() {
                             <Cog className="absolute bottom-3 left-3 h-14 w-14 stroke-[1.7]" />
                             <Cog className="absolute right-3 top-3 h-12 w-12 stroke-[1.7]" />
                          </>
-                       ) : (
+                        ) : key === "cash_flow" ? (
                          <Landmark className="h-16 w-16 stroke-[1.5]" />
+                        ) : key === "crm" ? (
+                          <ContactRound className="h-16 w-16 stroke-[1.5]" />
+                        ) : (
+                          <Scale className="h-16 w-16 stroke-[1.5]" />
                        )}
                      </Link>
                      <h2 className="mt-4 text-2xl font-extrabold text-myio-purple">{name}</h2>
