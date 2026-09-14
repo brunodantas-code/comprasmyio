@@ -54,6 +54,7 @@ export function AdditionalStepTypesTab() {
   const qc = useQueryClient();
   const { data: types, isLoading } = useAdditionalStepTypes();
   const [name, setName] = useState("");
+  const [createOpen, setCreateOpen] = useState(false);
   const invalidate = () => qc.invalidateQueries({ queryKey: ["additional-step-types"] });
 
   const create = useMutation({
@@ -70,6 +71,7 @@ export function AdditionalStepTypesTab() {
     onSuccess: () => {
       toast.success("Tipo criado");
       setName("");
+      setCreateOpen(false);
       invalidate();
     },
     onError: (error: Error) => toast.error(error.message),
@@ -113,36 +115,20 @@ export function AdditionalStepTypesTab() {
   });
 
   return (
-    <div className="grid gap-6 [&>*]:min-w-0 lg:grid-cols-[1fr_1.5fr]">
       <Card>
-        <CardHeader>
-          <CardTitle>Novo tipo de etapa adicional</CardTitle>
-          <CardDescription>Os tipos ativos ficam disponíveis nas Etapas Adicionais.</CardDescription>
+        <CardHeader className="flex flex-row items-start justify-between gap-4">
+          <div><CardTitle>Tipos de Etapa Adicional</CardTitle><CardDescription>Os tipos ativos ficam disponíveis nas Etapas Adicionais.</CardDescription></div>
+          <Dialog open={createOpen} onOpenChange={(open) => { setCreateOpen(open); if (!open) setName(""); }}>
+            <DialogTrigger asChild><Button size="icon" aria-label="Criar tipo de etapa adicional" title="Criar tipo"><Plus className="h-4 w-4" /></Button></DialogTrigger>
+            <DialogContent>
+              <DialogHeader><DialogTitle>Novo tipo de etapa adicional</DialogTitle><DialogDescription>Cadastre um novo item para esta lista.</DialogDescription></DialogHeader>
+              <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); const trimmedName = name.trim(); if (trimmedName.length < 2) return toast.error("Nome muito curto"); create.mutate(trimmedName); }}>
+                <div className="space-y-2"><Label htmlFor="additional-step-type-name">Nome</Label><Input id="additional-step-type-name" value={name} onChange={(event) => setName(event.target.value)} placeholder="Inserir nome" required /></div>
+                <DialogFooter><Button type="submit" disabled={create.isPending}>Criar</Button></DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
         </CardHeader>
-        <CardContent>
-          <form
-            className="space-y-4"
-            onSubmit={(event) => {
-              event.preventDefault();
-              const trimmedName = name.trim();
-              if (trimmedName.length < 2) return toast.error("Nome muito curto");
-              create.mutate(trimmedName);
-            }}
-          >
-            <div className="space-y-2">
-              <Label htmlFor="additional-step-type-name">Nome</Label>
-              <Input id="additional-step-type-name" value={name} onChange={(event) => setName(event.target.value)} placeholder="Inserir nome" required />
-            </div>
-            <Button type="submit" disabled={create.isPending}>
-              <Plus className="mr-2 h-4 w-4" />
-              Criar
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader><CardTitle>Tipos de Etapa Adicional</CardTitle></CardHeader>
         <CardContent>
           {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : (
             <Table>
@@ -164,7 +150,6 @@ export function AdditionalStepTypesTab() {
           )}
         </CardContent>
       </Card>
-    </div>
   );
 }
 

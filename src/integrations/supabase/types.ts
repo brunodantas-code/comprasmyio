@@ -1511,6 +1511,7 @@ export type Database = {
           quantity: number
           recipient: string
           request_group_id: string | null
+          request_model: string
           request_type: string
           requester_id: string
           requester_notes: string | null
@@ -1556,6 +1557,7 @@ export type Database = {
           quantity?: number
           recipient?: string
           request_group_id?: string | null
+          request_model?: string
           request_type?: string
           requester_id: string
           requester_notes?: string | null
@@ -1601,6 +1603,7 @@ export type Database = {
           quantity?: number
           recipient?: string
           request_group_id?: string | null
+          request_model?: string
           request_type?: string
           requester_id?: string
           requester_notes?: string | null
@@ -1656,6 +1659,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_request_model_fkey"
+            columns: ["request_model"]
+            isOneToOne: false
+            referencedRelation: "request_types"
+            referencedColumns: ["code"]
           },
           {
             foreignKeyName: "purchase_orders_request_type_fkey"
@@ -1765,6 +1775,8 @@ export type Database = {
           active: boolean
           code: string
           created_at: string
+          is_system: boolean
+          model_code: string
           name: string
           position: number
           updated_at: string
@@ -1773,6 +1785,8 @@ export type Database = {
           active?: boolean
           code: string
           created_at?: string
+          is_system?: boolean
+          model_code: string
           name: string
           position?: number
           updated_at?: string
@@ -1781,11 +1795,21 @@ export type Database = {
           active?: boolean
           code?: string
           created_at?: string
+          is_system?: boolean
+          model_code?: string
           name?: string
           position?: number
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "request_types_model_code_fkey"
+            columns: ["model_code"]
+            isOneToOne: false
+            referencedRelation: "request_types"
+            referencedColumns: ["code"]
+          },
+        ]
       }
       role_hierarchy: {
         Row: {

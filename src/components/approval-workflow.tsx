@@ -27,7 +27,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useAdditionalStepTypes, type AdditionalStepType } from "@/components/additional-step-types-tab";
-import { requestTypeName, useRequestTypes, type RequestTypeRecord } from "@/components/request-types-tab";
+import { requestTypeModel, requestTypeName, useRequestTypes, type RequestTypeRecord } from "@/components/request-types-tab";
 
 const BRL = (v: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(v ?? 0));
@@ -51,7 +51,7 @@ const TRAVEL_TYPE_LABELS: Record<string, string> = {
 
 function requestTypeLabel(o: { request_type?: string | null; travel_type?: string | null } | null | undefined, types?: RequestTypeRecord[]): string {
   const rt = o?.request_type ?? "";
-  if (rt === "viagens") {
+  if (requestTypeModel(rt, types) === "viagens") {
     const sub = o?.travel_type ? TRAVEL_TYPE_LABELS[o.travel_type] : undefined;
     return sub ?? "Viagens";
   }

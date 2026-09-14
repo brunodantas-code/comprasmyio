@@ -36,7 +36,7 @@ import { CostCentersTab, useCostCenters } from "@/components/cost-centers-tab";
 import { JobTitlesTab, useJobTitles } from "@/components/job-titles-tab";
 import { RemindersTab } from "@/components/reminders-tab";
 import { AdditionalStepTypesTab } from "@/components/additional-step-types-tab";
-import { RequestTypesTab, requestTypeName, useRequestTypes, type RequestTypeRecord } from "@/components/request-types-tab";
+import { RequestTypesTab, requestTypeModel, requestTypeName, useRequestTypes, type RequestTypeRecord } from "@/components/request-types-tab";
 import { AccessProfilesTab } from "@/components/access-profiles-tab";
 import { ImportBatchesSection } from "@/components/import-batches";
 import { AddressAutocomplete } from "@/components/address-autocomplete";
@@ -988,7 +988,8 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
   const { data: requestTypes } = useRequestTypes();
   const [projectId, setProjectId] = useState("");
   const [forStock, setForStock] = useState(false);
-  const [requestType, setRequestType] = useState<"materiais" | "servicos" | "viagens" | "reembolso" | "pagamento" | "importacao" | "dispositivos" | "rh">("materiais");
+  const [requestType, setRequestType] = useState<string>("materiais");
+  const requestModel = requestTypeModel(requestType, requestTypes);
   const [rhCargo, setRhCargo] = useState("");
   const [rhGestor, setRhGestor] = useState("");
   const [rhMotivo, setRhMotivo] = useState("");
@@ -1042,13 +1043,13 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
   const [linkedApprovalId, setLinkedApprovalId] = useState("none");
   const { data: approvedOrders } = useQuery({
     queryKey: ["orders", "approved-for-payment"],
-    enabled: requestType === "pagamento",
+    enabled: requestModel === "pagamento",
     queryFn: async () => {
       const { data, error } = await supabase
         .from("purchase_orders")
         .select("id, approval_number, item_name, request_type, travel_type, created_at")
         .eq("approval_status", "aprovado")
-        .neq("request_type", "pagamento")
+        .neq("request_model", "pagamento")
         .is("parent_order_id", null)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -1060,11 +1061,11 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
   const [estimatedValue, setEstimatedValue] = useState("0");
   const [qty, setQty] = useState("1");
   const selectedBudget = budgetSummaries?.find((summary) => summary.projectId === projectId);
-  const pendingBudgetValue = requestType === "reembolso"
+  const pendingBudgetValue = requestModel === "reembolso"
     ? reembolsoTotal
-    : requestType === "rh"
+    : requestModel === "rh"
       ? Number(rhRemuneracao || 0)
-      : requestType === "pagamento"
+      : requestModel === "pagamento"
         ? Number(paymentValue || 0)
         : Number(estimatedValue || 0) * Number(qty || 1);
   const [lookingUpPrice, setLookingUpPrice] = useState(false);
@@ -1171,7 +1172,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
         terceiros_material_id: isNewItem ? null : (item?.terceiros_material_id ?? null),
         tool_asset_id: isNewItem ? null : (item?.tool_asset_id ?? null),
       };
-      if (isNewItem && requestType === "materiais") {
+      if (isNewItem && requestModel === "materiais") {
         if (!newItemDest) throw new Error("Selecione o estoque de destino do item novo.");
         ids = await createNewItemRecord(newItemDest, values.item_name, values.item_link ?? null, userId);
       }
@@ -1207,12 +1208,12 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
           for_stock: forStock,
           allocation_type: forStock ? "estoque" : allocTarget,
           request_type: requestType,
-          client_id: requestType === "rh" || requestType === "pagamento"
+          client_id: requestModel === "rh" || requestModel === "pagamento"
             ? (clientId && clientId !== "none" ? clientId : null)
-            : (requestType !== "materiais" && allocTarget === "cliente" ? (clientId || null) : null),
+            : (requestModel !== "materiais" && allocTarget === "cliente" ? (clientId || null) : null),
           cost_center_id: restrictedCc ? await resolveOperacaoCostCenterId() : (costCenterId || null),
-          parent_order_id: requestType === "pagamento" && linkedApprovalId !== "none" ? linkedApprovalId : null,
-          payment_date: requestType === "pagamento" ? paymentDate : null,
+          parent_order_id: requestModel === "pagamento" && linkedApprovalId !== "none" ? linkedApprovalId : null,
+          payment_date: requestModel === "pagamento" ? paymentDate : null,
 
           item_name: values.item_name,
           item_link: values.item_link ?? null,
@@ -1228,17 +1229,17 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
           delivery_point: values.delivery_point ?? null,
           deadline_type: values.deadline_type,
           deadline_date: values.deadline_type === "customizado" ? (values.deadline_date ?? null) : null,
-          travel_type: requestType === "viagens" ? travelType : null,
-          travel_destination: requestType === "viagens" ? travelDestination.trim() : null,
-          travel_departure: requestType === "viagens" ? travelDeparture : null,
-          travel_return: requestType === "viagens" ? travelReturn : null,
-          travel_legs: requestType === "viagens"
+          travel_type: requestModel === "viagens" ? travelType : null,
+          travel_destination: requestModel === "viagens" ? travelDestination.trim() : null,
+          travel_departure: requestModel === "viagens" ? travelDeparture : null,
+          travel_return: requestModel === "viagens" ? travelReturn : null,
+          travel_legs: requestModel === "viagens"
             ? travelLegs.map((l) => ({ destination: l.destination.trim(), departure: l.departure, return: l.return }))
-            : requestType === "reembolso"
+            : requestModel === "reembolso"
             ? reembolsoLegs.map((l) => ({ description: l.description.trim(), value: Number(l.value), date: l.date }))
-            : requestType === "rh"
+            : requestModel === "rh"
             ? [{ cargo: rhCargo, gestor: rhGestor, motivo: rhMotivo.trim(), tipo: rhTipo, remuneracao: Number(rhRemuneracao) }]
-            : requestType === "pagamento"
+            : requestModel === "pagamento"
             ? [{ description: paymentDescription.trim(), value: Number(paymentValue), date: paymentDate }]
             : [],
           requester_id: userId,
@@ -1274,10 +1275,10 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const isMateriais = requestType === "materiais";
-    const isReembolso = requestType === "reembolso";
-    const isRh = requestType === "rh";
-    const isPagamento = requestType === "pagamento";
+    const isMateriais = requestModel === "materiais";
+    const isReembolso = requestModel === "reembolso";
+    const isRh = requestModel === "rh";
+    const isPagamento = requestModel === "pagamento";
     if (!isMateriais) {
       if (!isReembolso && !isRh && !isPagamento && newItemName.trim().length < 2) return toast.error("Descreva o serviço ou a viagem solicitada.");
       if (!isRh && !isPagamento && allocTarget === "projeto" && !projectId) return toast.error("Selecione o projeto");
@@ -1289,7 +1290,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
         if (rhMotivo.trim().length < 3) return toast.error("Informe o motivo da contratação");
         if (!(Number(rhRemuneracao) > 0)) return toast.error("Informe a remuneração");
       }
-      if (requestType === "viagens") {
+      if (requestModel === "viagens") {
         if (!travelType) return toast.error("Selecione o tipo de viagem");
         for (let i = 0; i < travelLegs.length; i++) {
           const leg = travelLegs[i];
@@ -1400,9 +1401,9 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
       <Select
         value={requestType}
         onValueChange={(v) => {
-          const t = v as typeof requestType;
-          setRequestType(t);
-          if (t === "materiais") {
+          setRequestType(v);
+          const model = requestTypeModel(v, requestTypes);
+          if (model === "materiais") {
             setClientId("");
             setAllocTarget("projeto");
           } else {
@@ -1415,40 +1416,36 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
       >
         <SelectTrigger className="w-full sm:w-72"><SelectValue placeholder="Selecione o tipo" /></SelectTrigger>
         <SelectContent>
-          {([
-            "materiais", "servicos", "viagens", "reembolso", "pagamento", "rh",
-            ...(canImport ? ["importacao"] : []),
-            ...(isAdmin ? ["dispositivos"] : []),
-          ]).filter((code) => requestTypes?.find((type) => type.code === code)?.active !== false).map((code) => (
-            <SelectItem key={code} value={code}>{requestTypeName(code, requestTypes)}</SelectItem>
+          {(requestTypes ?? []).filter((type) => type.active && (type.model_code !== "importacao" || canImport) && (type.model_code !== "dispositivos" || isAdmin)).map((type) => (
+            <SelectItem key={type.code} value={type.code}>{type.name}</SelectItem>
           ))}
         </SelectContent>
       </Select>
-      {requestType === "materiais" && (
+      {requestModel === "materiais" && (
         <p className="text-xs text-muted-foreground">Solicitações de Materiais são cadastradas no Armazém.</p>
       )}
-      {requestType === "viagens" && (
+      {requestModel === "viagens" && (
         <p className="text-xs text-muted-foreground">Passagens, Hospedagens, Aluguel de Veículos.</p>
       )}
-      {requestType === "reembolso" && (
+      {requestModel === "reembolso" && (
         <p className="text-xs text-muted-foreground">Reembolso de despesas incorridas pelo solicitante.</p>
       )}
-      {requestType === "pagamento" && (
+      {requestModel === "pagamento" && (
         <p className="text-xs text-muted-foreground">Solicitação única de pagamento, com vínculo opcional a um Approval já aprovado.</p>
       )}
-      {requestType === "importacao" && (
+      {requestModel === "importacao" && (
         <p className="text-xs text-muted-foreground">Pedidos de importação e acompanhamento de embarques.</p>
       )}
-      {requestType === "dispositivos" && (
+      {requestModel === "dispositivos" && (
         <p className="text-xs text-muted-foreground">Solicitações de dispositivos Myio para projetos.</p>
       )}
-      {requestType === "rh" && (
+      {requestModel === "rh" && (
         <p className="text-xs text-muted-foreground">Solicitação de contratação de pessoal (reposição ou nova vaga).</p>
       )}
     </div>
   );
 
-  if (requestType === "importacao") {
+  if (requestModel === "importacao") {
     return (
       <div className="space-y-4">
         <Card className="max-w-2xl">
@@ -1462,7 +1459,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
     );
   }
 
-  if (requestType === "dispositivos") {
+  if (requestModel === "dispositivos") {
     return (
       <div className="space-y-4">
         <Card className="max-w-2xl">
@@ -1494,7 +1491,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
 
 
 
-            {requestType === "viagens" && (
+            {requestModel === "viagens" && (
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label>O que você deseja solicitar?</Label>
@@ -1510,7 +1507,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
               </div>
             )}
 
-            {requestType === "viagens" && (
+            {requestModel === "viagens" && (
               <div className="space-y-3">
                 {travelLegs.map((leg, i) => (
                   <div key={i} className="rounded-md border p-3 space-y-3">
@@ -1557,7 +1554,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
               </div>
             )}
 
-            {requestType === "reembolso" && (
+            {requestModel === "reembolso" && (
               <div className="space-y-3">
                 {reembolsoLegs.map((leg, i) => (
                   <div key={i} className="rounded-md border p-3 space-y-3">
@@ -1604,7 +1601,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
               </div>
             )}
 
-            {requestType === "pagamento" && (
+            {requestModel === "pagamento" && (
               <div className="rounded-md border p-3 space-y-4">
                 <div className="space-y-2">
                   <Label>Vincular Approval aprovado <span className="text-muted-foreground">(opcional)</span></Label>
@@ -1637,7 +1634,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
               </div>
             )}
 
-            {requestType === "rh" && (
+            {requestModel === "rh" && (
               <div className="rounded-md border p-3 space-y-4">
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
@@ -1688,7 +1685,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
             <div className="space-y-2">
             </div>
 
-            {requestType === "rh" || requestType === "pagamento" ? (
+            {requestModel === "rh" || requestModel === "pagamento" ? (
               <>
                 {!restrictedCc && (
                   <div className="space-y-2">
@@ -1714,7 +1711,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
                     </SelectContent>
                   </Select>
                 </div>
-                {requestType === "pagamento" && (
+                {requestModel === "pagamento" && (
                   <div className="space-y-2">
                     <Label>Projeto <span className="text-muted-foreground">(opcional)</span></Label>
                     <Select value={projectId || "none"} onValueChange={(v) => setProjectId(v === "none" ? "" : v)}>
@@ -1727,7 +1724,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
                   </div>
                 )}
               </>
-            ) : requestType === "materiais" ? (
+            ) : requestModel === "materiais" ? (
               <>
                 <div className="space-y-2">
                   <Label>Alocação</Label>
@@ -1831,9 +1828,9 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
               </>
             )}
 
-            {requestType !== "reembolso" && requestType !== "rh" && requestType !== "pagamento" && (
+            {requestModel !== "reembolso" && requestModel !== "rh" && requestModel !== "pagamento" && (
             <div className="space-y-2">
-              {requestType === "materiais" ? (
+              {requestModel === "materiais" ? (
                 <>
                   <div className="flex items-center gap-6">
                     <Label>Item</Label>
@@ -1848,23 +1845,23 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
                   </div>
                   <PurchasableItemPicker value={isNewItem ? null : item} onPick={(i) => { setItem(i); if (i.link) setItemLink(i.link); }} disabled={isNewItem} />
                 </>
-              ) : requestType === "servicos" ? (
+              ) : requestModel === "servicos" ? (
                 <Label>Serviço</Label>
               ) : null}
               {isNewItem ? (
 
                 <div className="space-y-2 pt-1">
                   <Label htmlFor="new_item_name">
-                    {requestType === "materiais" ? "Descrição do item" : requestType === "servicos" ? "Descrição do serviço" : "Descrição da viagem"}
+                    {requestModel === "materiais" ? "Descrição do item" : requestModel === "servicos" ? "Descrição do serviço" : "Descrição da viagem"}
                   </Label>
                   <Input
                     id="new_item_name"
                     value={newItemName}
                     onChange={(e) => setNewItemName(e.target.value)}
-                    onBlur={(e) => { if (requestType === "materiais") checkDuplicates(e.target.value); }}
-                    placeholder={requestType === "materiais" ? "Descreva o item que precisa ser comprado" : requestType === "servicos" ? "Descreva o serviço contratado" : "Descreva a viagem (destino, período, motivo)"}
+                    onBlur={(e) => { if (requestModel === "materiais") checkDuplicates(e.target.value); }}
+                    placeholder={requestModel === "materiais" ? "Descreva o item que precisa ser comprado" : requestModel === "servicos" ? "Descreva o serviço contratado" : "Descreva a viagem (destino, período, motivo)"}
                   />
-                  {requestType === "materiais" && (
+                  {requestModel === "materiais" && (
                   <div className="space-y-2 pt-1">
                     <Label>Cadastrar em qual estoque?</Label>
                     <Select value={newItemDest} onValueChange={(v) => setNewItemDest(v as NewItemDest)}>
@@ -1909,10 +1906,10 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
               )}
             </div>
             )}
-            {requestType !== "reembolso" && requestType !== "rh" && requestType !== "pagamento" && (
+            {requestModel !== "reembolso" && requestModel !== "rh" && requestModel !== "pagamento" && (
             <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="quantity">{requestType === "viagens" ? (travelType === "aluguel_veiculos" ? "Quantidade de veículos" : "Quantidade de Pessoas") : "Quantidade"}</Label>
+                <Label htmlFor="quantity">{requestModel === "viagens" ? (travelType === "aluguel_veiculos" ? "Quantidade de veículos" : "Quantidade de Pessoas") : "Quantidade"}</Label>
                 <Input id="quantity" name="quantity" type="number" min={1} max={99999} className="w-20" value={qty} onChange={(e) => setQty(e.target.value)} required />
               </div>
               <div className="space-y-2">
@@ -1954,7 +1951,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
                   )}
                 </div>
               )}
-              {requestType === "materiais" && (
+              {requestModel === "materiais" && (
                 <div className="space-y-2">
                   <Label>Destinatário</Label>
                   <Select value={recipient} onValueChange={setRecipient}>
@@ -1971,7 +1968,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
               )}
             </div>
             )}
-            {requestType !== "reembolso" && requestType !== "rh" && requestType !== "pagamento" && (
+            {requestModel !== "reembolso" && requestModel !== "rh" && requestModel !== "pagamento" && (
             <div className="space-y-2">
               <Label htmlFor="item_link">
                 Link de Referência <span className="text-muted-foreground">(opcional)</span>
@@ -1979,9 +1976,9 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
               <Input id="item_link" type="url" placeholder="https://..." value={itemLink} onChange={(e) => { setItemLink(e.target.value); scheduleAutoFillPrice(e.target.value); }} onPaste={(e) => { const t = e.clipboardData.getData("text"); if (t) setTimeout(() => void tryAutoFillPrice(t), 0); }} onBlur={() => void tryAutoFillPrice(itemLink)} />
             </div>
             )}
-            {requestType === "materiais" && <AddressAutocomplete name="delivery_point" required />}
+            {requestModel === "materiais" && <AddressAutocomplete name="delivery_point" required />}
 
-            {requestType !== "reembolso" && requestType !== "rh" && requestType !== "pagamento" && (
+            {requestModel !== "reembolso" && requestModel !== "rh" && requestModel !== "pagamento" && (
             <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>Prazo de recebimento</Label>
