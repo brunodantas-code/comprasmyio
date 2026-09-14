@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate, Link, redirect } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { MyioLogo } from "@/components/myio-logo";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,9 +25,9 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Checkbox } from "@/components/ui/checkbox";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { toast } from "sonner";
-import { LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Boxes, Building2, Plane, Landmark, Briefcase } from "lucide-react";
+import { LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Boxes, Building2, Plane, Landmark, Briefcase, Layers3, ArrowUpDown } from "lucide-react";
 import { Trash2, Paperclip, X, Loader2, DatabaseBackup, CheckCircle2, XCircle, RotateCcw, Pencil, Bell, ShieldCheck, AlertTriangle } from "lucide-react";
-import { ApprovalWorkflow, MyApprovalFlows, PendingForMe } from "@/components/approval-workflow";
+import { ApprovalWorkflow, MyApprovalFlows, PendingForMe, RulesAdmin } from "@/components/approval-workflow";
 import { z } from "zod";
 import { StockTab } from "@/components/stock-tab";
 import { MyioOrdersTab } from "@/components/myio-orders-tab";
@@ -38,6 +38,7 @@ import { RemindersTab } from "@/components/reminders-tab";
 import { AccessProfilesTab } from "@/components/access-profiles-tab";
 import { ImportBatchesSection } from "@/components/import-batches";
 import { AddressAutocomplete } from "@/components/address-autocomplete";
+import { LinkedRecordDeletionDialog } from "@/components/linked-record-deletion-dialog";
 
 
 
@@ -476,12 +477,14 @@ function Dashboard() {
                   <TabsTrigger value="centros"><Landmark className="mr-2 h-4 w-4" />Centro de Custo</TabsTrigger>
                   <TabsTrigger value="cargos"><Briefcase className="mr-2 h-4 w-4" />Cargos</TabsTrigger>
                   <TabsTrigger value="lembretes"><Bell className="mr-2 h-4 w-4" />Lembretes</TabsTrigger>
+                   <TabsTrigger value="diversos"><Layers3 className="mr-2 h-4 w-4" />Diversos</TabsTrigger>
                 </TabsList>
                 <TabsContent value="projetos"><ProjectsAdmin userId={me.id} /></TabsContent>
                 <TabsContent value="clientes"><ClientsTab userId={me.id} /></TabsContent>
                 <TabsContent value="centros"><CostCentersTab userId={me.id} /></TabsContent>
                 <TabsContent value="cargos"><JobTitlesTab userId={me.id} /></TabsContent>
                 <TabsContent value="lembretes"><RemindersTab /></TabsContent>
+                 <TabsContent value="diversos"><RulesAdmin /></TabsContent>
               </Tabs>
             </TabsContent>
           )}
@@ -3231,6 +3234,10 @@ function ProjectsAdmin({ userId }: { userId: string }) {
   const [budgetVal, setBudgetVal] = useState("0");
   const [statusDialog, setStatusDialog] = useState<{ id: string; name: string; action: "implantado" | "cancelado" } | null>(null);
   const [statusDate, setStatusDate] = useState<string>(new Date().toISOString().slice(0, 10));
+  const [projectSearch, setProjectSearch] = useState("");
+  const [projectStatus, setProjectStatus] = useState("all");
+  const [budgetRange, setBudgetRange] = useState("all");
+  const [projectSort, setProjectSort] = useState("name-asc");
 
   const create = useMutation({
     mutationFn: async (v: { name: string; description: string; client_id: string | null; budget: number }) => {
@@ -3280,6 +3287,40 @@ function ProjectsAdmin({ userId }: { userId: string }) {
   }
 
   const clientOf = (p: { client_id?: string | null }) => clients?.find((c) => c.id === p.client_id);
+  const visibleProjects = useMemo(() => {
+    const normalizedSearch = projectSearch.trim().toLocaleLowerCase("pt-BR");
+    const summaries = new Map((budgetSummaries ?? []).map((summary) => [summary.projectId, summary]));
+    return [...(projects ?? [])]
+      .filter((project) => {
+        const status = project.status ?? "active";
+        const budget = Number(project.budget ?? 0);
+        const clientName = clientOf(project)?.name || project.client_name || "";
+        const matchesSearch = !normalizedSearch || `${project.name} ${clientName}`.toLocaleLowerCase("pt-BR").includes(normalizedSearch);
+        const matchesStatus = projectStatus === "all" || status === projectStatus;
+        const matchesBudget = budgetRange === "all"
+          || (budgetRange === "under-100k" && budget < 100000)
+          || (budgetRange === "100k-500k" && budget >= 100000 && budget <= 500000)
+          || (budgetRange === "over-500k" && budget > 500000);
+        return matchesSearch && matchesStatus && matchesBudget;
+      })
+      .sort((a, b) => {
+        const [field, direction] = projectSort.split("-") as [string, "asc" | "desc"];
+        const factor = direction === "asc" ? 1 : -1;
+        const summaryA = summaries.get(a.id);
+        const summaryB = summaries.get(b.id);
+        const values: Record<string, [string | number, string | number]> = {
+          name: [a.name, b.name],
+          client: [clientOf(a)?.name || a.client_name || "", clientOf(b)?.name || b.client_name || ""],
+          budget: [Number(a.budget ?? 0), Number(b.budget ?? 0)],
+          requested: [summaryA?.requestedTotal ?? 0, summaryB?.requestedTotal ?? 0],
+          percent: [summaryA?.requestedPercent ?? 0, summaryB?.requestedPercent ?? 0],
+          status: [a.status ?? "active", b.status ?? "active"],
+          date: [a.concluded_at ?? "", b.concluded_at ?? ""],
+        };
+        const [left, right] = values[field] ?? values.name;
+        return (typeof left === "number" && typeof right === "number" ? left - right : String(left).localeCompare(String(right), "pt-BR")) * factor;
+      });
+  }, [projects, clients, budgetSummaries, projectSearch, projectStatus, budgetRange, projectSort]);
 
   return (
     <div className="grid gap-6 [&>*]:min-w-0 lg:grid-cols-[1fr_1.5fr]">
@@ -3316,14 +3357,40 @@ function ProjectsAdmin({ userId }: { userId: string }) {
         </CardContent>
       </Card>
       <Card>
-        <CardHeader><CardTitle>Projetos</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle>Projetos</CardTitle>
+          <div className="grid gap-2 pt-2 sm:grid-cols-2 xl:grid-cols-4">
+            <Input value={projectSearch} onChange={(event) => setProjectSearch(event.target.value)} placeholder="Buscar projeto ou cliente" aria-label="Buscar projeto ou cliente" />
+            <Select value={projectStatus} onValueChange={setProjectStatus}>
+              <SelectTrigger aria-label="Filtrar por status"><SelectValue /></SelectTrigger>
+              <SelectContent><SelectItem value="all">Todos os status</SelectItem><SelectItem value="active">Ativos</SelectItem><SelectItem value="implantado">Implantados</SelectItem><SelectItem value="cancelado">Cancelados</SelectItem></SelectContent>
+            </Select>
+            <Select value={budgetRange} onValueChange={setBudgetRange}>
+              <SelectTrigger aria-label="Filtrar por orçamento"><SelectValue /></SelectTrigger>
+              <SelectContent><SelectItem value="all">Todos os orçamentos</SelectItem><SelectItem value="under-100k">Até R$ 100 mil</SelectItem><SelectItem value="100k-500k">R$ 100 mil a R$ 500 mil</SelectItem><SelectItem value="over-500k">Acima de R$ 500 mil</SelectItem></SelectContent>
+            </Select>
+            <Select value={projectSort} onValueChange={setProjectSort}>
+              <SelectTrigger aria-label="Ordenar projetos"><ArrowUpDown className="mr-2 h-4 w-4" /><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="name-asc">Nome: A–Z</SelectItem><SelectItem value="name-desc">Nome: Z–A</SelectItem>
+                <SelectItem value="client-asc">Cliente: A–Z</SelectItem><SelectItem value="client-desc">Cliente: Z–A</SelectItem>
+                <SelectItem value="budget-desc">Maior orçamento</SelectItem><SelectItem value="budget-asc">Menor orçamento</SelectItem>
+                <SelectItem value="requested-desc">Maior solicitado</SelectItem><SelectItem value="requested-asc">Menor solicitado</SelectItem>
+                <SelectItem value="percent-desc">Maior percentual</SelectItem><SelectItem value="percent-asc">Menor percentual</SelectItem>
+                <SelectItem value="status-asc">Status: A–Z</SelectItem><SelectItem value="status-desc">Status: Z–A</SelectItem>
+                <SelectItem value="date-desc">Data mais recente</SelectItem><SelectItem value="date-asc">Data mais antiga</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardHeader>
         <CardContent>
           {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
             !projects?.length ? <p className="text-sm text-muted-foreground">Sem projetos.</p> :
+            !visibleProjects.length ? <p className="text-sm text-muted-foreground">Nenhum projeto corresponde aos filtros.</p> :
              <Table data-responsive="true" className="table-fixed">
                <TableHeader><TableRow><TableHead className="w-[23%]">Nome do projeto</TableHead><TableHead className="w-[13%] text-right">Orçamento</TableHead><TableHead className="w-[13%] text-right">Solicitado</TableHead><TableHead className="w-[18%]">% do orçamento</TableHead><TableHead className="w-[14%]">Cliente</TableHead><TableHead className="w-[11%] text-center">Status</TableHead><TableHead className="w-[8%] text-center">Data</TableHead></TableRow></TableHeader>
               <TableBody>
-                {projects.map((p) => {
+                 {visibleProjects.map((p) => {
                   const st = (p as { status?: string }).status ?? "active";
                   const ca = (p as { concluded_at?: string | null }).concluded_at;
                    const summary = budgetSummaries?.find((item) => item.projectId === p.id);
@@ -3353,9 +3420,15 @@ function ProjectsAdmin({ userId }: { userId: string }) {
                                 <RotateCcw className="h-4 w-4" />
                               </Button>
                             )}
-                            <Button type="button" variant="ghost" size="icon" aria-label="Excluir projeto" title="Excluir projeto" className="h-7 w-7 text-destructive hover:text-destructive/80" disabled={remove.isPending} onClick={() => remove.mutate(p.id)}>
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            <LinkedRecordDeletionDialog
+                              entityId={p.id}
+                              entityName={p.name}
+                              entityLabel="projeto"
+                              linkField="project_id"
+                              destinations={(projects ?? []).map((project) => ({ id: project.id, name: project.name }))}
+                              onDelete={() => remove.mutate(p.id)}
+                              deleting={remove.isPending}
+                            />
                           </div>
                         </div>
                      </TableCell>
