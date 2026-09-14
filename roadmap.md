@@ -61,5 +61,5 @@
 - [x] Proteger o acesso direto aos aplicativos sem liberação
 - [x] Permitir salvar solicitações com endereço digitado manualmente quando o Google Maps falhar
 
-- [ ] Simplificar acesso do portal para ícone lilás de engrenagens, sem card
-- [ ] Alterar o título do portal para “Meus Aplicativos”
+- [x] Simplificar acesso do portal para ícone lilás de engrenagens, sem card
+- [x] Alterar o título do portal para “Meus Aplicativos”
