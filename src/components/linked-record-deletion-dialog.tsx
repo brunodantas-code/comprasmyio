@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-type LinkField = "project_id" | "client_id" | "cost_center_id";
+type LinkField = "project_id" | "client_id" | "cost_center_id" | "request_type";
 type Destination = { id: string; name: string };
 
 type LinkedOrder = {
@@ -63,7 +63,9 @@ export function LinkedRecordDeletionDialog({
         ? { project_id: destinationId }
         : linkField === "client_id"
           ? { client_id: destinationId }
-          : { cost_center_id: destinationId };
+          : linkField === "cost_center_id"
+            ? { cost_center_id: destinationId }
+            : { request_type: destinationId };
       const { error } = await supabase.from("purchase_orders").update(values).eq("id", orderId);
       if (error) throw error;
     },

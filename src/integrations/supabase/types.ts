@@ -1661,13 +1661,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "purchase_orders_request_model_fkey"
-            columns: ["request_model"]
-            isOneToOne: false
-            referencedRelation: "request_types"
-            referencedColumns: ["code"]
-          },
-          {
             foreignKeyName: "purchase_orders_request_type_fkey"
             columns: ["request_type"]
             isOneToOne: false
@@ -1801,15 +1794,7 @@ export type Database = {
           position?: number
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "request_types_model_code_fkey"
-            columns: ["model_code"]
-            isOneToOne: false
-            referencedRelation: "request_types"
-            referencedColumns: ["code"]
-          },
-        ]
+        Relationships: []
       }
       role_hierarchy: {
         Row: {
