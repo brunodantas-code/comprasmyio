@@ -12,6 +12,16 @@ import { z } from "zod";
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
+  head: () => ({
+    meta: [
+      { title: "Entrar | myio ERP" },
+      { name: "description", content: "Acesse a plataforma myio ERP e seus aplicativos." },
+      { property: "og:title", content: "Entrar | myio ERP" },
+      { property: "og:description", content: "Acesse a plataforma myio ERP e seus aplicativos." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
 });
 
 const signInSchema = z.object({
@@ -30,7 +40,7 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/dashboard" });
+      if (data.session) navigate({ to: "/portal" });
     });
   }, [navigate]);
 
@@ -43,7 +53,7 @@ function AuthPage() {
     const { error } = await supabase.auth.signInWithPassword(parsed.data);
     setLoading(false);
     if (error) return toast.error(error.message);
-    navigate({ to: "/dashboard" });
+    navigate({ to: "/portal" });
   }
 
   async function handleSignUp(e: React.FormEvent<HTMLFormElement>) {
@@ -60,7 +70,7 @@ function AuthPage() {
       email: parsed.data.email,
       password: parsed.data.password,
       options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`,
+        emailRedirectTo: `${window.location.origin}/portal`,
         data: { full_name: parsed.data.full_name },
       },
     });
@@ -69,7 +79,7 @@ function AuthPage() {
     toast.success("Conta criada! Se pedirmos confirmação de e-mail, verifique sua caixa.");
     // If confirmations disabled, session already exists.
     const { data } = await supabase.auth.getSession();
-    if (data.session) navigate({ to: "/dashboard" });
+    if (data.session) navigate({ to: "/portal" });
   }
 
   async function handleForgot(e: React.FormEvent<HTMLFormElement>) {
@@ -96,7 +106,7 @@ function AuthPage() {
         <Card>
           <CardHeader>
             <CardTitle>Acesse sua conta</CardTitle>
-            <CardDescription>Entre ou crie uma conta para começar.</CardDescription>
+            <CardDescription>Entre para acessar os aplicativos da plataforma myio.</CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs value={tab} onValueChange={(v) => setTab(v as "signin" | "signup")}>
@@ -176,7 +186,7 @@ function AuthPage() {
                     </Button>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Novos usuários entram com acesso restrito até a configuração por um Admin.
+                    Novos usuários aguardam a liberação dos aplicativos por um Admin do ERP.
                   </p>
                 </form>
               </TabsContent>

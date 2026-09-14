@@ -50,7 +50,7 @@ function ResetPasswordPage() {
     setLoading(false);
     if (error) return toast.error(error.message);
     toast.success("Senha alterada com sucesso!");
-    navigate({ to: "/dashboard" });
+    navigate({ to: "/portal" });
   }
 
   return (

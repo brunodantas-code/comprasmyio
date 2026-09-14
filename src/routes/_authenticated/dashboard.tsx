@@ -42,7 +42,21 @@ import { AddressAutocomplete } from "@/components/address-autocomplete";
 
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
+  beforeLoad: async ({ context }) => {
+    const { data } = await supabase.from("user_app_access").select("app_key").eq("user_id", context.user.id).eq("app_key", "supply").maybeSingle();
+    if (!data) throw redirect({ to: "/portal" });
+  },
   component: Dashboard,
+  head: () => ({
+    meta: [
+      { title: "Painel | myio supply" },
+      { name: "description", content: "Compras, solicitações, aprovações e estoque no myio supply." },
+      { property: "og:title", content: "Painel | myio supply" },
+      { property: "og:description", content: "Compras, solicitações, aprovações e estoque no myio supply." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
 });
 
 type Order = {
