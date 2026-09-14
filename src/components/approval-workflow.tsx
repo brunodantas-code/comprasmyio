@@ -1389,6 +1389,7 @@ export function ApprovalWorkflow() {
       <TabsList className="mb-4">
         <TabsTrigger value="organograma">Organograma de Aprovação</TabsTrigger>
         <TabsTrigger value="padrao">Alçadas de Aprovação</TabsTrigger>
+        <TabsTrigger value="etapas-adicionais">Etapas Adicionais</TabsTrigger>
       </TabsList>
       <TabsContent value="organograma"><OrgChartAdmin /></TabsContent>
       <TabsContent value="padrao">
@@ -1397,6 +1398,7 @@ export function ApprovalWorkflow() {
           <DualApprovalSettings />
         </div>
       </TabsContent>
+      <TabsContent value="etapas-adicionais"><RulesAdmin /></TabsContent>
     </Tabs>
   );
 }

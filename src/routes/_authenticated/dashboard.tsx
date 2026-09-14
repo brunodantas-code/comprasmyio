@@ -27,7 +27,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { toast } from "sonner";
 import { LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Boxes, Building2, Plane, Landmark, Briefcase, Layers3, ArrowUpDown } from "lucide-react";
 import { Trash2, Paperclip, X, Loader2, DatabaseBackup, CheckCircle2, XCircle, RotateCcw, Pencil, Bell, ShieldCheck, AlertTriangle } from "lucide-react";
-import { ApprovalWorkflow, MyApprovalFlows, PendingForMe, RulesAdmin } from "@/components/approval-workflow";
+import { ApprovalWorkflow, MyApprovalFlows, PendingForMe } from "@/components/approval-workflow";
 import { z } from "zod";
 import { StockTab } from "@/components/stock-tab";
 import { MyioOrdersTab } from "@/components/myio-orders-tab";
@@ -477,14 +477,21 @@ function Dashboard() {
                   <TabsTrigger value="centros"><Landmark className="mr-2 h-4 w-4" />Centro de Custo</TabsTrigger>
                   <TabsTrigger value="cargos"><Briefcase className="mr-2 h-4 w-4" />Cargos</TabsTrigger>
                   <TabsTrigger value="lembretes"><Bell className="mr-2 h-4 w-4" />Lembretes</TabsTrigger>
-                   <TabsTrigger value="diversos"><Layers3 className="mr-2 h-4 w-4" />Diversos</TabsTrigger>
+                  <TabsTrigger value="diversos"><Layers3 className="mr-2 h-4 w-4" />Diversos</TabsTrigger>
                 </TabsList>
                 <TabsContent value="projetos"><ProjectsAdmin userId={me.id} /></TabsContent>
                 <TabsContent value="clientes"><ClientsTab userId={me.id} /></TabsContent>
                 <TabsContent value="centros"><CostCentersTab userId={me.id} /></TabsContent>
                 <TabsContent value="cargos"><JobTitlesTab userId={me.id} /></TabsContent>
                 <TabsContent value="lembretes"><RemindersTab /></TabsContent>
-                 <TabsContent value="diversos"><RulesAdmin /></TabsContent>
+                <TabsContent value="diversos">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Diversos</CardTitle>
+                      <CardDescription>Cadastros adicionais serão disponibilizados neste espaço.</CardDescription>
+                    </CardHeader>
+                  </Card>
+                </TabsContent>
               </Tabs>
             </TabsContent>
           )}
