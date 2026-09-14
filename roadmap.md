@@ -74,3 +74,4 @@
 - [x] Remover o globo do ícone do myio RH e manter somente três pessoas
 - [ ] Reorganizar Etapas Adicionais em Cadastro > Diversos, com tipos configuráveis e vínculo à solicitação
 - [ ] Incluir filtros e ordenação na lista de Projetos
+- [ ] Bloquear exclusão de Projeto, Cliente ou Centro de Custo com solicitações e permitir realocação individual
