@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-const appKeySchema = z.enum(["supply", "cash_flow", "crm", "legal"]);
+const appKeySchema = z.enum(["supply", "cash_flow", "crm", "legal", "rh"]);
 
 async function assertErpAdmin(context: { supabase: any; userId: string }) {
   const { data, error } = await context.supabase

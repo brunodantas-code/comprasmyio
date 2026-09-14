@@ -70,3 +70,4 @@
 - [x] Aplicar frame lilás arredondado ao ícone do Supply, nome interno sem negrito e descrição atualizada
 - [x] Padronizar Cash Flow, CRM e Legal com ícones em frame lilás e ajustar o espaçamento das descrições
 - [x] Reordenar as colunas do organograma e igualar as larguras de N-1 e N+1
+- [x] Adicionar myio RH ao portal e às permissões com a frase “Gestão de Pessoas”
