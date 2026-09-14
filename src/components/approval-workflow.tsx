@@ -1407,13 +1407,13 @@ function OrgChartAdmin() {
                   <TableCell className="w-56 text-sm text-muted-foreground">
                     {(directReportsByRole.get(title.id) ?? []).join(", ") || "Não definido"}
                   </TableCell>
-                  <TableCell className="w-56">
+                  <TableCell className="min-w-0 md:w-56">
                     <Select
                       value={hierarchy?.get(title.id) ?? "none"}
                       disabled={!isAdmin}
                       onValueChange={(v) => saveApprover.mutate({ role: title.id, approverRole: v === "none" ? null : v })}
                     >
-                      <SelectTrigger className="h-8 w-56"><SelectValue placeholder="Não definido" /></SelectTrigger>
+                      <SelectTrigger className="h-8 w-full min-w-0 max-w-full md:w-56"><SelectValue placeholder="Não definido" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">Não definido</SelectItem>
                         {(jobTitles ?? []).filter((option) => option.id !== title.id).map((option) => (
