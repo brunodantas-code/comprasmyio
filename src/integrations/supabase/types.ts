@@ -397,6 +397,69 @@ export type Database = {
           },
         ]
       }
+      erp_admins: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_admins_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_admins_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_apps: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string
+          key: string
+          name: string
+          position: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string
+          key: string
+          name: string
+          position?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string
+          key?: string
+          name?: string
+          position?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       external_product_states: {
         Row: {
           client_name: string | null
@@ -2181,6 +2244,52 @@ export type Database = {
             foreignKeyName: "user_access_profiles_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_app_access: {
+        Row: {
+          app_key: string
+          created_at: string
+          granted_by: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          app_key: string
+          created_at?: string
+          granted_by?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          app_key?: string
+          created_at?: string
+          granted_by?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_app_access_app_key_fkey"
+            columns: ["app_key"]
+            isOneToOne: false
+            referencedRelation: "erp_apps"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "user_app_access_granted_by_fkey"
+            columns: ["granted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_app_access_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },

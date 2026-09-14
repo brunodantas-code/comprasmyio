@@ -101,7 +101,7 @@ function Landing() {
             de materiais, serviços, viagens e reembolsos de despesas.
           </p>
           <div className="mt-9 flex flex-wrap gap-3">
-            <Link to={signedIn ? "/dashboard" : "/auth"}>
+            <Link to={signedIn ? "/portal" : "/auth"}>
               <Button
                 size="lg"
                 className="rounded-full bg-[var(--myio-green)] px-8 font-bold text-[oklch(0.18_0.09_300)] hover:opacity-90"
@@ -182,7 +182,7 @@ function Landing() {
             </h2>
             <p className="mt-2 text-white/70">Acesse o painel e comece agora.</p>
           </div>
-          <Link to={signedIn ? "/dashboard" : "/auth"}>
+          <Link to={signedIn ? "/portal" : "/auth"}>
             <Button
               size="lg"
               className="rounded-full bg-[var(--myio-green)] px-8 font-bold text-[oklch(0.18_0.09_300)] hover:opacity-90"

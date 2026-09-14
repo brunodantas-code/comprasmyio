@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { MyioLogo } from "@/components/myio-logo";
+import { MyioPlatformLogo } from "@/components/myio-platform-logo";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,14 +50,14 @@ function ResetPasswordPage() {
     setLoading(false);
     if (error) return toast.error(error.message);
     toast.success("Senha alterada com sucesso!");
-    navigate({ to: "/dashboard" });
+    navigate({ to: "/portal" });
   }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
       <div className="w-full max-w-md">
         <Link to="/" className="mb-6 flex items-center justify-center gap-2 text-sm text-muted-foreground">
-          <MyioLogo className="text-2xl" />
+          <MyioPlatformLogo className="h-12" />
         </Link>
         <Card>
           <CardHeader>
