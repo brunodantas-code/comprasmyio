@@ -55,3 +55,7 @@
 - [x] Adicionar alocação Interna para Materiais, Serviços e Viagens, sem Projeto ou Cliente
 
 - [x] Exibir orçamento do projeto, comprometido, alerta de excesso e flag nos Approvals
+- [x] Criar portal ERP após o login com myio supply e myio cash flow
+- [x] Separar acesso aos aplicativos dos perfis e permissões internas do Supply
+- [x] Criar gestão de aplicativos por usuário para Admins do ERP
+- [x] Proteger o acesso direto aos aplicativos sem liberação

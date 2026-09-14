@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link, redirect } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -408,7 +408,7 @@ function Dashboard() {
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 border-b border-border bg-card">
         <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 sm:flex sm:justify-between sm:px-6 sm:py-4">
-          <Link to="/" className="flex min-w-0 items-center font-semibold">
+          <Link to="/portal" className="flex min-w-0 items-center font-semibold" title="Voltar aos aplicativos">
             <MyioLogo className="text-xl sm:text-2xl" />
           </Link>
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
