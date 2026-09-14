@@ -1389,7 +1389,12 @@ export function ApprovalWorkflow() {
         <TabsTrigger value="padrao">Alçadas de Aprovação</TabsTrigger>
       </TabsList>
       <TabsContent value="organograma"><OrgChartAdmin /></TabsContent>
-      <TabsContent value="padrao"><DefaultChainAdmin /></TabsContent>
+      <TabsContent value="padrao">
+        <div className="space-y-4">
+          <DefaultChainAdmin />
+          <DualApprovalSettings />
+        </div>
+      </TabsContent>
     </Tabs>
   );
 }
