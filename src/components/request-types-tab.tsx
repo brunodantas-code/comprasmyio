@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { LinkedRecordDeletionDialog } from "@/components/linked-record-deletion-dialog";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -96,7 +97,11 @@ export function RequestTypesTab() {
   });
 
   const remove = useMutation({
-    mutationFn: async (code: string) => { const { error } = await supabase.from("request_types").delete().eq("code", code); if (error?.code === "23503") throw new Error("Este tipo está em uso. Desative-o ou realoque os vínculos antes de excluir."); if (error) throw error; },
+    mutationFn: async (code: string) => {
+      const { error } = await supabase.from("request_types").delete().eq("code", code);
+      if (error?.code === "23503") throw new Error("Este tipo ainda possui vínculos. Realoque-os antes de excluir.");
+      if (error) throw error;
+    },
     onSuccess: () => { toast.success("Tipo excluído"); invalidate(); },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -119,7 +124,15 @@ export function RequestTypesTab() {
                   <TableCell><Switch checked={type.active} onCheckedChange={(active) => toggle.mutate({ code: type.code, active })} /></TableCell>
                   <TableCell className="space-x-1 text-right whitespace-nowrap">
                     <EditRequestTypeDialog type={type} saving={update.isPending} onSave={(name) => update.mutateAsync({ code: type.code, name })} />
-                    {!type.is_system && <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive" aria-label={`Excluir ${type.name}`} title="Excluir" disabled={remove.isPending} onClick={() => remove.mutate(type.code)}><Trash2 className="h-4 w-4" /></Button>}
+                    <LinkedRecordDeletionDialog
+                      entityId={type.code}
+                      entityName={type.name}
+                      entityLabel="tipo de solicitação"
+                      linkField="request_type"
+                      destinations={(types ?? []).filter((item) => item.active).map((item) => ({ id: item.code, name: item.name }))}
+                      onDelete={() => remove.mutate(type.code)}
+                      deleting={remove.isPending}
+                    />
                   </TableCell>
                 </TableRow>
               ))}
