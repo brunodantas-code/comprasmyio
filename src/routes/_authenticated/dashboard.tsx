@@ -27,7 +27,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { toast } from "sonner";
 import { LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Boxes, Building2, Plane, Landmark, Briefcase, Layers3, ArrowUpDown } from "lucide-react";
 import { Trash2, Paperclip, X, Loader2, DatabaseBackup, CheckCircle2, XCircle, RotateCcw, Pencil, Bell, ShieldCheck, AlertTriangle } from "lucide-react";
-import { ApprovalWorkflow, MyApprovalFlows, PendingForMe } from "@/components/approval-workflow";
+import { ApprovalWorkflow, MyApprovalFlows, PendingApprovalsByRole, PendingForMe } from "@/components/approval-workflow";
 import { z } from "zod";
 import { StockTab } from "@/components/stock-tab";
 import { MyioOrdersTab } from "@/components/myio-orders-tab";
@@ -2325,10 +2325,12 @@ function ApprovalsCenter() {
         <TabsTrigger value="mine">Pendentes comigo</TabsTrigger>
         <TabsTrigger value="flow">Meus em aprovação</TabsTrigger>
         {!isLoading && canViewAll && <TabsTrigger value="all">Todos</TabsTrigger>}
+        {!isLoading && canViewAll && <TabsTrigger value="roles">Consolidado por Cargo</TabsTrigger>}
       </TabsList>
       <TabsContent value="mine"><PendingForMe /></TabsContent>
       <TabsContent value="flow"><MyApprovalFlows /></TabsContent>
       {canViewAll && <TabsContent value="all"><BuyerQueue /></TabsContent>}
+      {canViewAll && <TabsContent value="roles"><PendingApprovalsByRole /></TabsContent>}
     </Tabs>
   );
 }

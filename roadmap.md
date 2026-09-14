@@ -104,3 +104,4 @@
 - [x] Reduzir a fonte das datas dos logs e alinhá-las com os filtros Ação e Quem
 - [x] Transformar Backup em submenu à direita de Logs
 - [x] Exigir confirmação antes de gerar e baixar o backup em JSON
+- [x] Criar em Approvals uma consolidação dos pendentes por cargo, quantidade e valor
