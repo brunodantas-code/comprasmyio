@@ -68,3 +68,4 @@
 
 - [x] Centralizar o texto da tag “Orçamento excedido” e alinhar sua largura ao número do Approval
 - [x] Aplicar frame lilás arredondado ao ícone do Supply, nome interno sem negrito e descrição atualizada
+- [x] Padronizar Cash Flow, CRM e Legal com ícones em frame lilás e ajustar o espaçamento das descrições

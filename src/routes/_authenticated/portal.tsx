@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Boxes, Cog, ContactRound, Landmark, LogOut, Scale, Settings2 } from "lucide-react";
+import { AtSign, Boxes, CircleDollarSign, Cog, FileSignature, Mail, Phone, Settings2, UserRound, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -55,10 +55,10 @@ function PortalPage() {
   if (isLoading || !data) return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Carregando...</div>;
 
   const apps = [
-    { key: "supply", name: "myio supply", description: "Compras, solicitações diversas, aprovações e estoque", to: "/dashboard" as const },
-    { key: "cash_flow", name: "myio cash flow", description: "Gestão financeira e fluxo de caixa.", to: "/cash-flow" as const },
-    { key: "crm", name: "myio CRM", description: "Gestão de relacionamento com clientes.", to: "/crm" as const },
-    { key: "legal", name: "myio Legal", description: "Gestão jurídica e acompanhamento de demandas.", to: "/legal" as const },
+    { key: "supply", name: "myio supply", description: ["Compras, solicitações diversas", "aprovações e estoque"], to: "/dashboard" as const },
+    { key: "cash_flow", name: "myio cash flow", description: ["Gestão financeira", "e fluxo de caixa"], to: "/cash-flow" as const },
+    { key: "crm", name: "myio CRM", description: ["Relacionamento", "com clientes"], to: "/crm" as const },
+    { key: "legal", name: "myio Legal", description: ["Gestão jurídica", "e acompanhamento de demandas"], to: "/legal" as const },
   ].filter((app) => data.appKeys.has(app.key));
 
   return (
@@ -96,16 +96,14 @@ function PortalPage() {
 
           <TabsContent value="apps">
             {apps.length ? (
-               <div className="grid gap-x-14 gap-y-10 sm:grid-cols-2">
+               <div className="grid grid-cols-2 gap-x-5 gap-y-12 sm:gap-x-8 lg:grid-cols-4">
                  {apps.map(({ key, name, description, to }) => (
-                   <div key={key} className="flex min-w-0 flex-col items-start">
+                    <div key={key} className="flex min-w-0 flex-col items-center text-center">
                       <Link
                         to={to}
                         aria-label={`Acessar ${name}`}
                         title={`Acessar ${name}`}
-                        className={key === "supply"
-                          ? "group relative flex h-32 w-32 flex-col items-center justify-between rounded-[1.75rem] border-2 border-myio-purple px-3 pb-3 pt-2 text-myio-purple outline-none transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4"
-                          : "group relative flex h-24 w-24 items-center justify-center rounded-md text-myio-purple outline-none transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4"}
+                        className="group relative flex h-32 w-32 flex-col items-center justify-between rounded-[1.75rem] border-2 border-myio-purple px-3 pb-3 pt-2 text-myio-purple outline-none transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4"
                       >
                         {key === "supply" ? (
                           <>
@@ -113,18 +111,37 @@ function PortalPage() {
                               <Cog className="absolute bottom-0 left-2 h-14 w-14 stroke-[1.7]" />
                               <Cog className="absolute right-2 top-0 h-12 w-12 stroke-[1.7]" />
                             </span>
-                            <span className="text-base font-normal leading-none">{name}</span>
+                            <span className="text-sm font-normal leading-none">{name}</span>
                           </>
                         ) : key === "cash_flow" ? (
-                         <Landmark className="h-16 w-16 stroke-[1.5]" />
+                          <>
+                            <span className="flex h-20 w-full items-center justify-center" aria-hidden="true">
+                              <CircleDollarSign className="h-16 w-16 stroke-[1.5]" />
+                            </span>
+                            <span className="text-sm font-normal leading-none">{name}</span>
+                          </>
                         ) : key === "crm" ? (
-                          <ContactRound className="h-16 w-16 stroke-[1.5]" />
+                          <>
+                            <span className="relative block h-20 w-full" aria-hidden="true">
+                              <AtSign className="absolute left-1 top-2 h-9 w-9 stroke-[1.6]" />
+                              <Phone className="absolute right-1 top-1 h-8 w-8 stroke-[1.6]" />
+                              <Mail className="absolute bottom-0 left-1/2 h-9 w-9 -translate-x-1/2 stroke-[1.6]" />
+                              <UserRound className="absolute bottom-1 right-0 h-7 w-7 stroke-[1.6]" />
+                            </span>
+                            <span className="text-sm font-normal leading-none">{name}</span>
+                          </>
                         ) : (
-                          <Scale className="h-16 w-16 stroke-[1.5]" />
+                          <>
+                            <span className="flex h-20 w-full items-center justify-center" aria-hidden="true">
+                              <FileSignature className="h-16 w-16 stroke-[1.5]" />
+                            </span>
+                            <span className="text-sm font-normal leading-none">{name}</span>
+                          </>
                        )}
                      </Link>
-                      {key !== "supply" ? <h2 className="mt-4 text-2xl font-extrabold text-myio-purple">{name}</h2> : null}
-                     <p className="mt-1 max-w-sm text-sm text-muted-foreground">{description}</p>
+                      <p className="mt-5 text-sm leading-5 text-muted-foreground">
+                        {description.map((line) => <span key={line} className="block">{line}</span>)}
+                      </p>
                    </div>
                 ))}
               </div>
