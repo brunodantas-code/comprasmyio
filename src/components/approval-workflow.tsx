@@ -1327,7 +1327,7 @@ function OrgChartAdmin() {
       <Card>
         <CardHeader>
           <CardTitle>Visualização</CardTitle>
-          <CardDescription>Hierarquia de aprovação por cargo, com os usuários de cada cargo agrupados.</CardDescription>
+          <CardDescription>Hierarquia de aprovação por cargo, com os usuários e alçadas</CardDescription>
         </CardHeader>
         <CardContent className="org-chart overflow-hidden px-2 sm:px-4">
           <div
