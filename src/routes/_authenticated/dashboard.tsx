@@ -1401,9 +1401,9 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
       <Select
         value={requestType}
         onValueChange={(v) => {
-          const t = v as typeof requestType;
-          setRequestType(t);
-          if (t === "materiais") {
+          setRequestType(v);
+          const model = requestTypeModel(v, requestTypes);
+          if (model === "materiais") {
             setClientId("");
             setAllocTarget("projeto");
           } else {
@@ -1416,12 +1416,8 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
       >
         <SelectTrigger className="w-full sm:w-72"><SelectValue placeholder="Selecione o tipo" /></SelectTrigger>
         <SelectContent>
-          {([
-            "materiais", "servicos", "viagens", "reembolso", "pagamento", "rh",
-            ...(canImport ? ["importacao"] : []),
-            ...(isAdmin ? ["dispositivos"] : []),
-          ]).filter((code) => requestTypes?.find((type) => type.code === code)?.active !== false).map((code) => (
-            <SelectItem key={code} value={code}>{requestTypeName(code, requestTypes)}</SelectItem>
+          {(requestTypes ?? []).filter((type) => type.active && (type.model_code !== "importacao" || canImport) && (type.model_code !== "dispositivos" || isAdmin)).map((type) => (
+            <SelectItem key={type.code} value={type.code}>{type.name}</SelectItem>
           ))}
         </SelectContent>
       </Select>
