@@ -1,5 +1,5 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
-import { ArrowLeft, Globe2, UsersRound } from "lucide-react";
+import { ArrowLeft, UsersRound } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -34,9 +34,8 @@ function RhPage() {
       </header>
       <main className="mx-auto flex min-h-[calc(100vh-73px)] max-w-3xl items-center justify-center px-4 py-12 text-center sm:px-6">
         <div>
-          <span className="relative mx-auto block h-20 w-20 text-myio-purple">
-            <Globe2 className="absolute left-1/2 top-0 h-14 w-14 -translate-x-1/2 stroke-[1.5]" />
-            <UsersRound className="absolute bottom-0 left-1/2 h-12 w-12 -translate-x-1/2 stroke-[1.7]" />
+          <span className="mx-auto flex h-20 w-20 items-center justify-center text-myio-purple">
+            <UsersRound className="h-16 w-16 stroke-[1.6]" />
           </span>
           <Badge variant="outline" className="mt-6">Em breve</Badge>
           <h1 className="mt-4 text-4xl font-extrabold">myio RH</h1>

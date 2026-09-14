@@ -71,3 +71,4 @@
 - [x] Padronizar Cash Flow, CRM e Legal com ícones em frame lilás e ajustar o espaçamento das descrições
 - [x] Reordenar as colunas do organograma e igualar as larguras de N-1 e N+1
 - [x] Adicionar myio RH ao portal e às permissões com a frase “Gestão de Pessoas”
+- [x] Remover o globo do ícone do myio RH e manter somente três pessoas
