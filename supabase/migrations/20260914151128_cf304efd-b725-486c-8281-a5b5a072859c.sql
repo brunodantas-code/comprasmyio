@@ -1,0 +1,1 @@
+DROP VIEW public.project_budget_summaries;

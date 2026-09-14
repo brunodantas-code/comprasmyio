@@ -1021,13 +1021,6 @@ export type Database = {
             foreignKeyName: "myio_orders_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
-            referencedRelation: "project_budget_summaries"
-            referencedColumns: ["project_id"]
-          },
-          {
-            foreignKeyName: "myio_orders_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
@@ -1563,13 +1556,6 @@ export type Database = {
             foreignKeyName: "purchase_orders_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
-            referencedRelation: "project_budget_summaries"
-            referencedColumns: ["project_id"]
-          },
-          {
-            foreignKeyName: "purchase_orders_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
@@ -1854,13 +1840,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "stock_movements"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "technician_moves_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "project_budget_summaries"
-            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "technician_moves_project_id_fkey"
@@ -2173,13 +2152,6 @@ export type Database = {
             foreignKeyName: "unit_products_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
-            referencedRelation: "project_budget_summaries"
-            referencedColumns: ["project_id"]
-          },
-          {
-            foreignKeyName: "unit_products_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
@@ -2391,15 +2363,6 @@ export type Database = {
           name: string | null
           total_in: number | null
           total_out: number | null
-        }
-        Relationships: []
-      }
-      project_budget_summaries: {
-        Row: {
-          budget: number | null
-          project_id: string | null
-          requested_percent: number | null
-          requested_total: number | null
         }
         Relationships: []
       }
