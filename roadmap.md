@@ -100,3 +100,5 @@
 - [x] Renomear para Valor Total e posicioná-lo após Quantidade nos approvals
 - [x] Exibir confirmação antes de aprovar uma solicitação
 - [x] Reduzir a coluna Tipo e incluir Valor Total sem rolagem lateral na lista de solicitações
+- [ ] Melhorar a visualização mobile do organograma em tela expandida horizontal
+- [ ] Reduzir a fonte das datas dos logs e alinhá-las com os filtros Ação e Quem
