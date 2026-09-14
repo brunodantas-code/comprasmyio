@@ -93,3 +93,5 @@
 - [x] Alinhar os ícones de edição e exclusão em Tipos de Solicitação
 
 - [x] Alinhar o número do Approval à esquerda no card móvel
+
+- [x] Exibir o valor unitário em uma linha própria no Approval
