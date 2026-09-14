@@ -113,3 +113,6 @@
 - [x] Criar Caixa com contas bancárias, importação OFX/CSV e saldo
 - [x] Criar conciliação total e parcial de pagamentos
 - [x] Validar o myio cash flow no computador e celular
+
+- [x] Permitir seleção de submenus para usuários com perfil Restrito
+- [x] Padronizar o nome do myio cash flow com o myio supply e remover o título repetido

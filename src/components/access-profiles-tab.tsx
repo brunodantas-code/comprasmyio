@@ -6,10 +6,49 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 
-const MENU_OPTIONS = [
-  { key: "solicitacoes", label: "Solicitações" },
-  { key: "approvals", label: "Approvals Pendentes" },
-  { key: "armazem", label: "Armazém" },
+const MENU_GROUPS = [
+  {
+    key: "solicitacoes",
+    label: "Solicitações",
+    children: [
+      { key: "solicitacoes_minhas", label: "Minhas Solicitações" },
+      { key: "solicitacoes_novas", label: "Novas Solicitações" },
+    ],
+  },
+  {
+    key: "approvals",
+    label: "Approvals",
+    children: [
+      { key: "approvals_pendentes", label: "Pendentes comigo" },
+      { key: "approvals_meus", label: "Meus em aprovação" },
+      { key: "approvals_todos", label: "Todos" },
+      { key: "approvals_consolidado", label: "Consolidado por Cargo" },
+    ],
+  },
+  { key: "armazem", label: "Armazém", children: [] },
+  {
+    key: "cadastro",
+    label: "Cadastro",
+    children: [
+      { key: "cadastro_projetos", label: "Projetos" },
+      { key: "cadastro_clientes", label: "Clientes" },
+      { key: "cadastro_centros", label: "Centro de Custo" },
+      { key: "cadastro_cargos", label: "Cargos" },
+      { key: "cadastro_lembretes", label: "Lembretes" },
+      { key: "cadastro_diversos", label: "Diversos" },
+    ],
+  },
+  {
+    key: "usuarios",
+    label: "Usuários e logs",
+    children: [
+      { key: "usuarios_lista", label: "Usuários" },
+      { key: "usuarios_acesso_restrito", label: "Acesso Restrito" },
+      { key: "usuarios_workflow", label: "Approval Workflow" },
+      { key: "usuarios_logs", label: "Logs" },
+      { key: "usuarios_backup", label: "Backup" },
+    ],
+  },
 ] as const;
 
 export function AccessProfilesTab() {
@@ -49,6 +88,22 @@ export function AccessProfilesTab() {
     onError: (error: Error) => toast.error(error.message),
   });
 
+  const updateGroup = useMutation({
+    mutationFn: async ({ userId, keys, allowed }: { userId: string; keys: readonly string[]; allowed: boolean }) => {
+      const { error } = await supabase.from("user_menu_permissions").upsert(
+        keys.map((menuKey) => ({ user_id: userId, menu_key: menuKey, allowed })),
+        { onConflict: "user_id,menu_key" },
+      );
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["restricted-access-profiles"] });
+      qc.invalidateQueries({ queryKey: ["admin-users"] });
+      toast.success("Acesso atualizado");
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
   return (
     <Card>
       <CardHeader>
@@ -67,15 +122,49 @@ export function AccessProfilesTab() {
               </div>
               <p className="truncate text-xs text-muted-foreground">{user.email}</p>
             </div>
-            <div className="flex flex-wrap gap-x-5 gap-y-2">
-              {MENU_OPTIONS.map((menu) => (
-                <label key={menu.key} className="flex items-center gap-2 text-sm">
-                  <Checkbox
-                    checked={user.permissions.has(menu.key)}
-                    onCheckedChange={(checked) => updatePermission.mutate({ userId: user.id, menuKey: menu.key, allowed: checked === true })}
-                  />
-                  {menu.label}
-                </label>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {MENU_GROUPS.map((menu) => (
+                <div key={menu.key} className="space-y-2">
+                  <label className="flex items-center gap-2 text-sm font-medium">
+                    <Checkbox
+                      checked={user.permissions.has(menu.key)}
+                      disabled={updatePermission.isPending || updateGroup.isPending}
+                      onCheckedChange={(checked) => {
+                        const allowed = checked === true;
+                        const children = allowed && menu.key === "approvals"
+                          ? menu.children.filter((child) => child.key === "approvals_pendentes" || child.key === "approvals_meus")
+                          : menu.children;
+                        updateGroup.mutate({
+                          userId: user.id,
+                          keys: [menu.key, ...children.map((child) => child.key)],
+                          allowed,
+                        });
+                      }}
+                    />
+                    {menu.label}
+                  </label>
+                  {menu.children.length ? (
+                    <div className="grid gap-2 border-l border-border pl-4">
+                      {menu.children.map((child) => (
+                        <label key={child.key} className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Checkbox
+                            checked={user.permissions.has(child.key)}
+                            disabled={updatePermission.isPending || updateGroup.isPending}
+                            onCheckedChange={(checked) => {
+                              const allowed = checked === true;
+                              if (allowed && !user.permissions.has(menu.key)) {
+                                updateGroup.mutate({ userId: user.id, keys: [menu.key, child.key], allowed: true });
+                                return;
+                              }
+                              updatePermission.mutate({ userId: user.id, menuKey: child.key, allowed });
+                            }}
+                          />
+                          {child.label}
+                        </label>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
               ))}
             </div>
           </div>
