@@ -23,6 +23,7 @@ export type Database = {
           id: string
           name: string
           position: number
+          request_types: string[]
           step_type: string
           updated_at: string
         }
@@ -34,6 +35,7 @@ export type Database = {
           id?: string
           name: string
           position?: number
+          request_types?: string[]
           step_type?: string
           updated_at?: string
         }
@@ -45,6 +47,7 @@ export type Database = {
           id?: string
           name?: string
           position?: number
+          request_types?: string[]
           step_type?: string
           updated_at?: string
         }
