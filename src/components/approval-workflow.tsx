@@ -577,7 +577,7 @@ export function PendingApprovalsByRole() {
                   <Button
                     type="button"
                     variant="ghost"
-                    className="h-auto w-full justify-start rounded-none px-3 py-3 text-left hover:bg-muted/60"
+                    className="h-auto w-full justify-start rounded-none px-3 py-3 text-left text-foreground hover:bg-muted/60 hover:text-foreground"
                     onClick={() => toggleGroup(group.key)}
                     aria-expanded={isOpen}
                   >
