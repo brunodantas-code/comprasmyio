@@ -1658,6 +1658,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "purchase_orders_request_type_fkey"
+            columns: ["request_type"]
+            isOneToOne: false
+            referencedRelation: "request_types"
+            referencedColumns: ["code"]
+          },
+          {
             foreignKeyName: "purchase_orders_terceiros_material_id_fkey"
             columns: ["terceiros_material_id"]
             isOneToOne: false
@@ -1750,6 +1757,33 @@ export type Database = {
           time_2?: string
           updated_at?: string
           weekday?: number
+        }
+        Relationships: []
+      }
+      request_types: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          name: string
+          position: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          name: string
+          position?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          name?: string
+          position?: number
+          updated_at?: string
         }
         Relationships: []
       }

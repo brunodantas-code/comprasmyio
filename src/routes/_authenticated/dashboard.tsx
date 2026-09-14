@@ -36,6 +36,7 @@ import { CostCentersTab, useCostCenters } from "@/components/cost-centers-tab";
 import { JobTitlesTab, useJobTitles } from "@/components/job-titles-tab";
 import { RemindersTab } from "@/components/reminders-tab";
 import { AdditionalStepTypesTab } from "@/components/additional-step-types-tab";
+import { RequestTypesTab, requestTypeName, useRequestTypes, type RequestTypeRecord } from "@/components/request-types-tab";
 import { AccessProfilesTab } from "@/components/access-profiles-tab";
 import { ImportBatchesSection } from "@/components/import-batches";
 import { AddressAutocomplete } from "@/components/address-autocomplete";
@@ -250,13 +251,13 @@ const REQUEST_TYPE_LABELS: Record<string, string> = {
   pagamento: "Pagamento",
 };
 
-function requestTypeLabel(o: { request_type?: string | null; travel_type?: string | null }): string {
+function requestTypeLabel(o: { request_type?: string | null; travel_type?: string | null }, types?: RequestTypeRecord[]): string {
   const rt = o.request_type ?? "";
   if (rt === "viagens") {
     const sub = o.travel_type ? TRAVEL_TYPE_LABELS[o.travel_type] : undefined;
     return sub ?? "Viagens";
   }
-  return REQUEST_TYPE_LABELS[rt] ?? rt ?? "—";
+  return requestTypeName(rt, types);
 }
 
 const STATUS_KEYS = Object.keys(STATUS_LABELS) as Order["status"][];
@@ -486,7 +487,10 @@ function Dashboard() {
                 <TabsContent value="cargos"><JobTitlesTab userId={me.id} /></TabsContent>
                 <TabsContent value="lembretes"><RemindersTab /></TabsContent>
                 <TabsContent value="diversos">
-                  <AdditionalStepTypesTab />
+                  <div className="space-y-6">
+                    <RequestTypesTab />
+                    <AdditionalStepTypesTab />
+                  </div>
                 </TabsContent>
               </Tabs>
             </TabsContent>
@@ -981,6 +985,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
   const { data: projects, isLoading } = useProjects();
   const { data: budgetSummaries } = useProjectBudgetSummaries();
   const qc = useQueryClient();
+  const { data: requestTypes } = useRequestTypes();
   const [projectId, setProjectId] = useState("");
   const [forStock, setForStock] = useState(false);
   const [requestType, setRequestType] = useState<"materiais" | "servicos" | "viagens" | "reembolso" | "pagamento" | "importacao" | "dispositivos" | "rh">("materiais");
@@ -1411,16 +1416,11 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
         <SelectTrigger className="w-full sm:w-72"><SelectValue placeholder="Selecione o tipo" /></SelectTrigger>
         <SelectContent>
           {([
-            ["materiais", "Materiais"],
-            ["servicos", "Serviços"],
-            ["viagens", "Viagens"],
-            ["reembolso", "Reembolsos"],
-            ["pagamento", "Pagamento"],
-            ["rh", "Contratação de RH"],
-            ...(canImport ? [["importacao", "Importação"] as const] : []),
-            ...(isAdmin ? [["dispositivos", "Dispositivos"] as const] : []),
-          ] as const).map(([v, l]) => (
-            <SelectItem key={v} value={v}>{l}</SelectItem>
+            "materiais", "servicos", "viagens", "reembolso", "pagamento", "rh",
+            ...(canImport ? ["importacao"] : []),
+            ...(isAdmin ? ["dispositivos"] : []),
+          ]).filter((code) => requestTypes?.find((type) => type.code === code)?.active !== false).map((code) => (
+            <SelectItem key={code} value={code}>{requestTypeName(code, requestTypes)}</SelectItem>
           ))}
         </SelectContent>
       </Select>
@@ -2343,6 +2343,7 @@ function OrdersTable({
   headerFilters?: boolean;
 }) {
   const { data: me } = useCurrentUser();
+  const { data: requestTypes } = useRequestTypes();
   const [fApproval, setFApproval] = useState("");
   const [fItem, setFItem] = useState("");
   const [fAloc, setFAloc] = useState("");
@@ -2356,7 +2357,7 @@ function OrdersTable({
     ? orders
     : orders.filter((o) =>
         (!fApproval || norm(o.approval_number ?? "").includes(norm(fApproval))) &&
-        (!fItem || norm(`${requestTypeLabel(o)} ${o.item_name ?? ""} ${o.requester_notes ?? ""}`).includes(norm(fItem))) &&
+        (!fItem || norm(`${requestTypeLabel(o, requestTypes)} ${o.item_name ?? ""} ${o.requester_notes ?? ""}`).includes(norm(fItem))) &&
         (!fAloc || norm(allocationOf(o)).includes(norm(fAloc))) &&
         (!fReq || norm(requesterName?.(o.requester_id) ?? "").includes(norm(fReq))) &&
         (!fDate || o.deadline_date === fDate || o.delivery_forecast === fDate) &&
@@ -2424,7 +2425,7 @@ function OrdersTable({
                 </div>
               </Row>
               <Row label="Tipo">
-                <div className="font-medium">{requestTypeLabel(o)}</div>
+                <div className="font-medium">{requestTypeLabel(o, requestTypes)}</div>
                 <div className="mt-1 flex flex-wrap items-center gap-2">
                   <FullTextPopover text={o.item_name ?? ""} />
                   {o.item_link ? (
@@ -2547,7 +2548,7 @@ function OrdersTable({
                 </div>
               </TableCell>
               <TableCell>
-                <div className="line-clamp-4 font-medium break-words">{requestTypeLabel(o)}</div>
+                <div className="line-clamp-4 font-medium break-words">{requestTypeLabel(o, requestTypes)}</div>
                 <div className="mt-1 flex flex-wrap items-center gap-2">
                   <FullTextPopover text={o.item_name ?? ""} />
                   {o.item_link ? (
@@ -2693,6 +2694,7 @@ function OrderReportDialog({
   requesterName?: (id: string) => string;
 }) {
   const [open, setOpen] = useState(false);
+  const { data: requestTypes } = useRequestTypes();
   const { data: profiles } = useProfilesMap();
   const nameFor = (id: string | null | undefined) => {
     if (!id) return "—";
@@ -2770,7 +2772,7 @@ function OrderReportDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button type="button" className="font-bold text-black transition-colors hover:text-myio-green data-[state=open]:text-myio-green hover:underline" title="Ver relatório completo">
+        <button type="button" className="font-normal text-foreground transition-colors hover:text-myio-green data-[state=open]:text-myio-green hover:underline" title="Ver relatório completo">
           {order.approval_number ?? "—"}
         </button>
       </DialogTrigger>
@@ -2783,7 +2785,7 @@ function OrderReportDialog({
         <div className="space-y-6 font-sans">
           <section className="grid grid-cols-2 gap-4 md:grid-cols-3">
             <Row label="Item" value={order.item_name} />
-            <Row label="Tipo(s)" value={(relatedOrders ?? [{ request_type: order.request_type, travel_type: order.travel_type }]).map(requestTypeLabel).filter((v, i, a) => a.indexOf(v) === i).join(" + ")} />
+            <Row label="Tipo(s)" value={(relatedOrders ?? [{ request_type: order.request_type, travel_type: order.travel_type }]).map((related) => requestTypeLabel(related, requestTypes)).filter((v, i, a) => a.indexOf(v) === i).join(" + ")} />
             <Row label="Quantidade" value={order.quantity} />
             <Row label="Alocação" value={allocation} />
             <Row label="Solicitante" value={requesterName ? requesterName(order.requester_id) : nameFor(order.requester_id)} />
@@ -2796,7 +2798,7 @@ function OrderReportDialog({
             <Row label="Criado em" value={fmtDateTime(order.created_at)} />
             {order.payment_date && <Row label="Data do pagamento" value={new Date(order.payment_date + "T00:00:00").toLocaleDateString("pt-BR")} />}
             {relatedOrders && relatedOrders.length > 1 && relatedOrders.map((related) => (
-              <Row key={related.id} label={`Criação — ${requestTypeLabel(related)}`} value={fmtDateTime(related.created_at)} />
+              <Row key={related.id} label={`Criação — ${requestTypeLabel(related, requestTypes)}`} value={fmtDateTime(related.created_at)} />
             ))}
             <Row label="Última atualização" value={fmtDateTime(order.updated_at)} />
             {order.item_link && (
