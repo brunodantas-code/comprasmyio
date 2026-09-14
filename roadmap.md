@@ -91,3 +91,5 @@
 - [x] Remover o texto “Decisão” do Approval
 
 - [x] Alinhar os ícones de edição e exclusão em Tipos de Solicitação
+
+- [ ] Alinhar o número do Approval à esquerda no card móvel
