@@ -65,3 +65,6 @@
 - [x] Alterar o título do portal para “Meus Aplicativos”
 - [x] Adicionar myio CRM e myio Legal ao portal, permissões e páginas “Em breve”
 - [x] Deixar o ícone do myio supply somente com as engrenagens
+
+- [ ] Centralizar o texto da tag “Orçamento excedido” e alinhar sua largura ao número do Approval
+- [ ] Aplicar frame lilás arredondado ao ícone do Supply, nome interno sem negrito e descrição atualizada
