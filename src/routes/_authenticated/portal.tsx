@@ -58,7 +58,7 @@ function PortalPage() {
     { key: "supply", name: "myio supply", description: ["Compras, solicitações diversas", "aprovações e estoque"], to: "/dashboard" as const },
     { key: "cash_flow", name: "myio cash flow", description: ["Gestão financeira", "e fluxo de caixa"], to: "/cash-flow" as const },
     { key: "crm", name: "myio CRM", description: ["Relacionamento", "com clientes"], to: "/crm" as const },
-    { key: "legal", name: "myio Legal", description: ["Gestão jurídica", "e acompanhamento de demandas"], to: "/legal" as const },
+    { key: "legal", name: "myio Legal", description: ["Jurídico e Contratos"], to: "/legal" as const },
   ].filter((app) => data.appKeys.has(app.key));
 
   return (
