@@ -122,17 +122,19 @@ export function RequestTypesTab() {
                   <TableCell className="font-medium">{type.name}</TableCell>
                   <TableCell>{REQUEST_TYPE_FALLBACKS[type.model_code] ?? type.model_code}</TableCell>
                   <TableCell><Switch checked={type.active} onCheckedChange={(active) => toggle.mutate({ code: type.code, active })} /></TableCell>
-                  <TableCell className="space-x-1 text-right whitespace-nowrap">
-                    <EditRequestTypeDialog type={type} saving={update.isPending} onSave={(name) => update.mutateAsync({ code: type.code, name })} />
-                    <LinkedRecordDeletionDialog
-                      entityId={type.code}
-                      entityName={type.name}
-                      entityLabel="tipo de solicitação"
-                      linkField="request_type"
-                      destinations={(types ?? []).filter((item) => item.active).map((item) => ({ id: item.code, name: item.name }))}
-                      onDelete={() => remove.mutate(type.code)}
-                      deleting={remove.isPending}
-                    />
+                  <TableCell className="text-right whitespace-nowrap">
+                    <div className="flex items-center justify-end gap-1">
+                      <EditRequestTypeDialog type={type} saving={update.isPending} onSave={(name) => update.mutateAsync({ code: type.code, name })} />
+                      <LinkedRecordDeletionDialog
+                        entityId={type.code}
+                        entityName={type.name}
+                        entityLabel="tipo de solicitação"
+                        linkField="request_type"
+                        destinations={(types ?? []).filter((item) => item.active).map((item) => ({ id: item.code, name: item.name }))}
+                        onDelete={() => remove.mutate(type.code)}
+                        deleting={remove.isPending}
+                      />
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
