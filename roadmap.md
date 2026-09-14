@@ -117,3 +117,4 @@
 - [x] Permitir seleção de submenus para usuários com perfil Restrito
 - [x] Padronizar o nome do myio cash flow com o myio supply e remover o título repetido
 - [x] Simplificar e compactar a classificação de acessos Restritos
+- [x] Compactar os indicadores de Contas a pagar e alinhar os valores à direita
