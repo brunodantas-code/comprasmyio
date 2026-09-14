@@ -102,3 +102,4 @@
 - [x] Reduzir a coluna Tipo e incluir Valor Total sem rolagem lateral na lista de solicitações
 - [x] Melhorar a visualização mobile do organograma com a árvore moderna selecionada
 - [x] Reduzir a fonte das datas dos logs e alinhá-las com os filtros Ação e Quem
+- [x] Transformar Backup em submenu à direita de Logs
