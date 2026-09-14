@@ -12,7 +12,8 @@ export type AppRole =
   | "cto"
   | "financeiro";
 
-export type AccessProfile = "admin" | "padrao" | "restrito";
+export type AccessProfile = string;
+export type AccessProfileBase = "admin" | "padrao" | "restrito";
 export type MenuKey =
   | "solicitacoes" | "solicitacoes_minhas" | "solicitacoes_novas"
   | "approvals" | "approvals_pendentes" | "approvals_meus" | "approvals_todos" | "approvals_consolidado"
@@ -39,7 +40,7 @@ export function useCurrentUser() {
       const [{ data: profile }, { data: rolesData }, { data: accessData }, { data: menuData }] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
         supabase.from("user_roles").select("role").eq("user_id", user.id),
-        supabase.from("user_access_profiles").select("profile").eq("user_id", user.id).maybeSingle(),
+        supabase.from("user_access_profiles").select("profile,profile_definition_id,access_profile_definitions(name,base_profile)").eq("user_id", user.id).maybeSingle(),
         supabase.from("user_menu_permissions").select("menu_key, allowed").eq("user_id", user.id),
       ]);
 
@@ -54,11 +55,13 @@ export function useCurrentUser() {
         jobTitle = title ?? null;
       }
       const titleKey = normalizeTitle(jobTitle?.name);
-      const accessProfile = (accessData?.profile ?? "restrito") as AccessProfile;
+      const definition = accessData?.access_profile_definitions as { name: string; base_profile: AccessProfileBase } | null | undefined;
+      const accessProfile = (accessData?.profile_definition_id ?? "restrito") as AccessProfile;
+      const accessProfileBase = (definition?.base_profile ?? accessData?.profile ?? "restrito") as AccessProfileBase;
       const restrictedMenus = new Set((menuData ?? []).filter((item) => item.allowed).map((item) => item.menu_key));
       const canAccess = (menu: MenuKey) => {
-        if (accessProfile === "admin") return true;
-        if (accessProfile === "padrao") return !menu.startsWith("cadastro") && !menu.startsWith("usuarios");
+        if (accessProfileBase === "admin") return true;
+        if (accessProfileBase === "padrao") return !menu.startsWith("cadastro") && !menu.startsWith("usuarios");
         return restrictedMenus.has(menu);
       };
       return {
@@ -68,13 +71,15 @@ export function useCurrentUser() {
         roles,
         jobTitle,
         accessProfile,
+        accessProfileBase,
+        accessProfileName: definition?.name ?? (accessProfileBase === "padrao" ? "Padrão" : accessProfileBase === "admin" ? "Admin" : "Restrito"),
         canAccess,
-        isAdmin: accessProfile === "admin",
+        isAdmin: accessProfileBase === "admin",
         isComprador: titleKey === "supply" || titleKey === "time de supply",
         isFabrica: titleKey === "fabrica",
         isEstoquista: titleKey === "estoquista",
         isFinanceiro: titleKey === "financeiro",
-        canCreateProjects: accessProfile === "admin" || ["ceo", "coo", "cfo"].includes(titleKey),
+        canCreateProjects: accessProfileBase === "admin" || ["ceo", "coo", "cfo"].includes(titleKey),
       };
     },
   });

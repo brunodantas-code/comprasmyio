@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-const accessProfileSchema = z.enum(["admin", "padrao", "restrito"]);
+const accessProfileSchema = z.string().min(1).max(80).regex(/^[a-z0-9_]+$/);
 
 async function assertAdmin(context: { supabase: any; userId: string }) {
   const { data, error } = await context.supabase
@@ -28,7 +28,14 @@ export const setUserAccessProfile = createServerFn({ method: "POST" })
       .maybeSingle();
     if (targetError || !target || target.deleted_at) throw new Error("Usuário não encontrado ou excluído.");
 
-    if (data.profile === "admin") {
+    const { data: definition, error: definitionError } = await supabaseAdmin
+      .from("access_profile_definitions")
+      .select("code, base_profile, active")
+      .eq("code", data.profile)
+      .maybeSingle();
+    if (definitionError || !definition || !definition.active) throw new Error("Perfil de acesso inválido ou inativo.");
+
+    if (definition.base_profile === "admin") {
       const { count, error: countError } = await supabaseAdmin
         .from("user_access_profiles")
         .select("user_id, profiles!inner(deleted_at)", { count: "exact", head: true })
@@ -41,10 +48,10 @@ export const setUserAccessProfile = createServerFn({ method: "POST" })
 
     const { error: profileError } = await supabaseAdmin
       .from("user_access_profiles")
-      .upsert({ user_id: data.userId, profile: data.profile }, { onConflict: "user_id" });
+      .upsert({ user_id: data.userId, profile: definition.base_profile, profile_definition_id: definition.code }, { onConflict: "user_id" });
     if (profileError) throw profileError;
 
-    if (data.profile === "admin") {
+    if (definition.base_profile === "admin") {
       const { error } = await supabaseAdmin
         .from("user_roles")
         .upsert({ user_id: data.userId, role: "admin" }, { onConflict: "user_id,role" });
