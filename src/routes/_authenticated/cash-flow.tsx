@@ -4,7 +4,7 @@ import { ArrowLeft, Landmark, ListTree, LogOut, ReceiptText, WalletCards } from 
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MyioPlatformLogo } from "@/components/myio-platform-logo";
+import { MyioCashFlowLogo } from "@/components/myio-cash-flow-logo";
 import { PayablesTab } from "@/components/cash-flow/payables-tab";
 import { ChartOfAccountsTab } from "@/components/cash-flow/chart-of-accounts-tab";
 import { CashRegisterTab } from "@/components/cash-flow/cash-register-tab";
@@ -41,12 +41,12 @@ function CashFlowPage() {
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card">
         <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-3 px-4 py-4 sm:px-6">
-          <div className="flex items-center gap-4"><Link to="/portal"><MyioPlatformLogo className="h-9" /></Link><div className="hidden h-7 w-px bg-border sm:block" /><div className="hidden items-center gap-2 sm:flex"><Landmark className="h-5 w-5 text-myio-purple" /><span className="font-semibold text-myio-purple">cash flow</span></div></div>
+          <Link to="/portal" className="flex min-w-0 items-center" title="Voltar aos aplicativos"><MyioCashFlowLogo className="text-xl sm:text-2xl" /></Link>
           <div className="flex items-center gap-1"><Button asChild variant="outline" size="sm"><Link to="/portal"><ArrowLeft className="h-4 w-4" /><span className="hidden sm:inline">Aplicativos</span></Link></Button><Button variant="ghost" size="icon" onClick={signOut} title="Sair" aria-label="Sair"><LogOut className="h-4 w-4" /></Button></div>
         </div>
       </header>
       <main className="mx-auto max-w-[1500px] px-4 py-6 sm:px-6">
-        <div className="mb-6"><h1 className="text-3xl font-extrabold">myio cash flow</h1><p className="mt-1 text-muted-foreground">Planejamento, pagamentos e posição bancária em um só lugar.</p></div>
+        <p className="mb-6 text-muted-foreground">Planejamento, pagamentos e posição bancária em um só lugar.</p>
         <Tabs defaultValue="payables" className="space-y-5">
           <div className="no-scrollbar overflow-x-auto"><TabsList className="min-w-max"><TabsTrigger value="payables"><ReceiptText className="h-4 w-4" />Contas a pagar</TabsTrigger><TabsTrigger value="accounts"><ListTree className="h-4 w-4" />Plano de Contas</TabsTrigger><TabsTrigger value="cash"><WalletCards className="h-4 w-4" />Caixa</TabsTrigger></TabsList></div>
           <TabsContent value="payables"><PayablesTab userId={user.id} /></TabsContent>

@@ -13,7 +13,12 @@ export type AppRole =
   | "financeiro";
 
 export type AccessProfile = "admin" | "padrao" | "restrito";
-export type MenuKey = "solicitacoes" | "approvals" | "armazem" | "cadastro" | "usuarios";
+export type MenuKey =
+  | "solicitacoes" | "solicitacoes_minhas" | "solicitacoes_novas"
+  | "approvals" | "approvals_pendentes" | "approvals_meus" | "approvals_todos" | "approvals_consolidado"
+  | "armazem"
+  | "cadastro" | "cadastro_projetos" | "cadastro_clientes" | "cadastro_centros" | "cadastro_cargos" | "cadastro_lembretes" | "cadastro_diversos"
+  | "usuarios" | "usuarios_lista" | "usuarios_acesso_restrito" | "usuarios_workflow" | "usuarios_logs" | "usuarios_backup";
 
 export const ADMIN_ROLES: AppRole[] = ["admin", "coo", "ceo", "cfo", "cto"];
 
@@ -53,7 +58,7 @@ export function useCurrentUser() {
       const restrictedMenus = new Set((menuData ?? []).filter((item) => item.allowed).map((item) => item.menu_key));
       const canAccess = (menu: MenuKey) => {
         if (accessProfile === "admin") return true;
-        if (accessProfile === "padrao") return menu !== "cadastro" && menu !== "usuarios";
+        if (accessProfile === "padrao") return !menu.startsWith("cadastro") && !menu.startsWith("usuarios");
         return restrictedMenus.has(menu);
       };
       return {

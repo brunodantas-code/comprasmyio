@@ -404,6 +404,25 @@ function Dashboard() {
   const canSeeStock = me.canAccess("armazem");
   const canSeeQueue = me.canAccess("approvals");
   const canImport = me.isComprador || isAdmin;
+  const requestTabs = [
+    { value: "mine", allowed: me.canAccess("solicitacoes_minhas") },
+    { value: "new", allowed: me.canAccess("solicitacoes_novas") },
+  ].filter((tab) => tab.allowed);
+  const registrationTabs = [
+    { value: "projetos", allowed: me.canAccess("cadastro_projetos") },
+    { value: "clientes", allowed: me.canAccess("cadastro_clientes") },
+    { value: "centros", allowed: me.canAccess("cadastro_centros") },
+    { value: "cargos", allowed: me.canAccess("cadastro_cargos") },
+    { value: "lembretes", allowed: me.canAccess("cadastro_lembretes") },
+    { value: "diversos", allowed: me.canAccess("cadastro_diversos") },
+  ].filter((tab) => tab.allowed);
+  const administrationTabs = [
+    { value: "usuarios", allowed: me.canAccess("usuarios_lista") },
+    { value: "acesso-restrito", allowed: me.canAccess("usuarios_acesso_restrito") },
+    { value: "workflow", allowed: me.canAccess("usuarios_workflow") },
+    { value: "logs", allowed: me.canAccess("usuarios_logs") },
+    { value: "backup", allowed: me.canAccess("usuarios_backup") },
+  ].filter((tab) => tab.allowed);
   const defaultTab = canSeeRequests ? "pedidos" : canSeeQueue ? "queue" : canSeeStock ? "stock" : canSeeRegistration ? "projects" : canSeeAdministration ? "admin" : "pending";
 
 
@@ -446,13 +465,13 @@ function Dashboard() {
           </div>
 
           {canSeeRequests && <TabsContent value="pedidos">
-            <Tabs defaultValue="mine">
+            <Tabs defaultValue={requestTabs[0]?.value}>
               <TabsList className="mb-4">
-                <TabsTrigger value="mine"><ClipboardList className="mr-2 h-4 w-4" />Minhas Solicitações</TabsTrigger>
-                <TabsTrigger value="new"><Plus className="mr-2 h-4 w-4" />Novas Solicitações</TabsTrigger>
+                {me.canAccess("solicitacoes_minhas") && <TabsTrigger value="mine"><ClipboardList className="mr-2 h-4 w-4" />Minhas Solicitações</TabsTrigger>}
+                {me.canAccess("solicitacoes_novas") && <TabsTrigger value="new"><Plus className="mr-2 h-4 w-4" />Novas Solicitações</TabsTrigger>}
               </TabsList>
-              <TabsContent value="mine"><MyOrders userId={me.id} /></TabsContent>
-              <TabsContent value="new"><NewOrder userId={me.id} canImport={canImport} isAdmin={isAdmin} /></TabsContent>
+              {me.canAccess("solicitacoes_minhas") && <TabsContent value="mine"><MyOrders userId={me.id} /></TabsContent>}
+              {me.canAccess("solicitacoes_novas") && <TabsContent value="new"><NewOrder userId={me.id} canImport={canImport} isAdmin={isAdmin} /></TabsContent>}
             </Tabs>
 
           </TabsContent>}
@@ -472,44 +491,44 @@ function Dashboard() {
           )}
           {canSeeRegistration && (
             <TabsContent value="projects">
-              <Tabs defaultValue="projetos">
+              <Tabs defaultValue={registrationTabs[0]?.value}>
                 <TabsList className="mb-4">
-                  <TabsTrigger value="projetos"><FolderKanban className="mr-2 h-4 w-4" />Projetos</TabsTrigger>
-                  <TabsTrigger value="clientes"><Building2 className="mr-2 h-4 w-4" />Clientes</TabsTrigger>
-                  <TabsTrigger value="centros"><Landmark className="mr-2 h-4 w-4" />Centro de Custo</TabsTrigger>
-                  <TabsTrigger value="cargos"><Briefcase className="mr-2 h-4 w-4" />Cargos</TabsTrigger>
-                  <TabsTrigger value="lembretes"><Bell className="mr-2 h-4 w-4" />Lembretes</TabsTrigger>
-                  <TabsTrigger value="diversos"><Layers3 className="mr-2 h-4 w-4" />Diversos</TabsTrigger>
+                  {me.canAccess("cadastro_projetos") && <TabsTrigger value="projetos"><FolderKanban className="mr-2 h-4 w-4" />Projetos</TabsTrigger>}
+                  {me.canAccess("cadastro_clientes") && <TabsTrigger value="clientes"><Building2 className="mr-2 h-4 w-4" />Clientes</TabsTrigger>}
+                  {me.canAccess("cadastro_centros") && <TabsTrigger value="centros"><Landmark className="mr-2 h-4 w-4" />Centro de Custo</TabsTrigger>}
+                  {me.canAccess("cadastro_cargos") && <TabsTrigger value="cargos"><Briefcase className="mr-2 h-4 w-4" />Cargos</TabsTrigger>}
+                  {me.canAccess("cadastro_lembretes") && <TabsTrigger value="lembretes"><Bell className="mr-2 h-4 w-4" />Lembretes</TabsTrigger>}
+                  {me.canAccess("cadastro_diversos") && <TabsTrigger value="diversos"><Layers3 className="mr-2 h-4 w-4" />Diversos</TabsTrigger>}
                 </TabsList>
-                <TabsContent value="projetos"><ProjectsAdmin userId={me.id} /></TabsContent>
-                <TabsContent value="clientes"><ClientsTab userId={me.id} /></TabsContent>
-                <TabsContent value="centros"><CostCentersTab userId={me.id} /></TabsContent>
-                <TabsContent value="cargos"><JobTitlesTab userId={me.id} /></TabsContent>
-                <TabsContent value="lembretes"><RemindersTab /></TabsContent>
-                <TabsContent value="diversos">
+                {me.canAccess("cadastro_projetos") && <TabsContent value="projetos"><ProjectsAdmin userId={me.id} /></TabsContent>}
+                {me.canAccess("cadastro_clientes") && <TabsContent value="clientes"><ClientsTab userId={me.id} /></TabsContent>}
+                {me.canAccess("cadastro_centros") && <TabsContent value="centros"><CostCentersTab userId={me.id} /></TabsContent>}
+                {me.canAccess("cadastro_cargos") && <TabsContent value="cargos"><JobTitlesTab userId={me.id} /></TabsContent>}
+                {me.canAccess("cadastro_lembretes") && <TabsContent value="lembretes"><RemindersTab /></TabsContent>}
+                {me.canAccess("cadastro_diversos") && <TabsContent value="diversos">
                   <div className="space-y-6">
                     <RequestTypesTab />
                     <AdditionalStepTypesTab />
                   </div>
-                </TabsContent>
+                </TabsContent>}
               </Tabs>
             </TabsContent>
           )}
           {canSeeAdministration && (
             <TabsContent value="admin">
-              <Tabs defaultValue="usuarios">
+              <Tabs defaultValue={administrationTabs[0]?.value}>
                 <TabsList className="mb-4">
-                  <TabsTrigger value="usuarios"><Users className="mr-2 h-4 w-4" />Usuários</TabsTrigger>
-                  <TabsTrigger value="acesso-restrito"><ShieldCheck className="mr-2 h-4 w-4" />Acesso Restrito</TabsTrigger>
-                  <TabsTrigger value="workflow"><CheckCircle2 className="mr-2 h-4 w-4" />Approval Workflow</TabsTrigger>
-                  <TabsTrigger value="logs"><ScrollText className="mr-2 h-4 w-4" />Logs</TabsTrigger>
-                  <TabsTrigger value="backup"><DatabaseBackup className="mr-2 h-4 w-4" />Backup</TabsTrigger>
+                  {me.canAccess("usuarios_lista") && <TabsTrigger value="usuarios"><Users className="mr-2 h-4 w-4" />Usuários</TabsTrigger>}
+                  {me.canAccess("usuarios_acesso_restrito") && <TabsTrigger value="acesso-restrito"><ShieldCheck className="mr-2 h-4 w-4" />Acesso Restrito</TabsTrigger>}
+                  {me.canAccess("usuarios_workflow") && <TabsTrigger value="workflow"><CheckCircle2 className="mr-2 h-4 w-4" />Approval Workflow</TabsTrigger>}
+                  {me.canAccess("usuarios_logs") && <TabsTrigger value="logs"><ScrollText className="mr-2 h-4 w-4" />Logs</TabsTrigger>}
+                  {me.canAccess("usuarios_backup") && <TabsTrigger value="backup"><DatabaseBackup className="mr-2 h-4 w-4" />Backup</TabsTrigger>}
                 </TabsList>
-                <TabsContent value="usuarios"><UsersAdmin /></TabsContent>
-                <TabsContent value="acesso-restrito"><AccessProfilesTab /></TabsContent>
-                <TabsContent value="workflow"><ApprovalWorkflow /></TabsContent>
-                <TabsContent value="logs"><LogsAdmin /></TabsContent>
-                <TabsContent value="backup">
+                {me.canAccess("usuarios_lista") && <TabsContent value="usuarios"><UsersAdmin /></TabsContent>}
+                {me.canAccess("usuarios_acesso_restrito") && <TabsContent value="acesso-restrito"><AccessProfilesTab /></TabsContent>}
+                {me.canAccess("usuarios_workflow") && <TabsContent value="workflow"><ApprovalWorkflow /></TabsContent>}
+                {me.canAccess("usuarios_logs") && <TabsContent value="logs"><LogsAdmin /></TabsContent>}
+                {me.canAccess("usuarios_backup") && <TabsContent value="backup">
                   <Card>
                     <CardHeader>
                       <CardTitle>Backup dos dados</CardTitle>
@@ -519,7 +538,7 @@ function Dashboard() {
                       <BackupButton />
                     </CardContent>
                   </Card>
-                </TabsContent>
+                </TabsContent>}
               </Tabs>
             </TabsContent>
           )}
@@ -2303,6 +2322,10 @@ function BuyerQueue() {
 
 function ApprovalsCenter() {
   const { data: me } = useCurrentUser();
+  const canSeeMine = me?.canAccess("approvals_pendentes") ?? false;
+  const canSeeFlow = me?.canAccess("approvals_meus") ?? false;
+  const canSeeAllPermission = me?.canAccess("approvals_todos") ?? false;
+  const canSeeRolesPermission = me?.canAccess("approvals_consolidado") ?? false;
   const { data: canViewAll = false, isLoading } = useQuery({
     queryKey: ["can-view-all-approvals", me?.jobTitle?.id, me?.isAdmin],
     enabled: Boolean(me),
@@ -2320,17 +2343,17 @@ function ApprovalsCenter() {
   });
 
   return (
-    <Tabs defaultValue="mine">
+    <Tabs defaultValue={canSeeMine ? "mine" : canSeeFlow ? "flow" : canSeeAllPermission ? "all" : "roles"}>
       <TabsList className="mb-4">
-        <TabsTrigger value="mine">Pendentes comigo</TabsTrigger>
-        <TabsTrigger value="flow">Meus em aprovação</TabsTrigger>
-        {!isLoading && canViewAll && <TabsTrigger value="all">Todos</TabsTrigger>}
-        {!isLoading && canViewAll && <TabsTrigger value="roles">Consolidado por Cargo</TabsTrigger>}
+        {canSeeMine && <TabsTrigger value="mine">Pendentes comigo</TabsTrigger>}
+        {canSeeFlow && <TabsTrigger value="flow">Meus em aprovação</TabsTrigger>}
+        {!isLoading && canViewAll && canSeeAllPermission && <TabsTrigger value="all">Todos</TabsTrigger>}
+        {!isLoading && canViewAll && canSeeRolesPermission && <TabsTrigger value="roles">Consolidado por Cargo</TabsTrigger>}
       </TabsList>
-      <TabsContent value="mine"><PendingForMe /></TabsContent>
-      <TabsContent value="flow"><MyApprovalFlows /></TabsContent>
-      {canViewAll && <TabsContent value="all"><BuyerQueue /></TabsContent>}
-      {canViewAll && <TabsContent value="roles"><PendingApprovalsByRole /></TabsContent>}
+      {canSeeMine && <TabsContent value="mine"><PendingForMe /></TabsContent>}
+      {canSeeFlow && <TabsContent value="flow"><MyApprovalFlows /></TabsContent>}
+      {canViewAll && canSeeAllPermission && <TabsContent value="all"><BuyerQueue /></TabsContent>}
+      {canViewAll && canSeeRolesPermission && <TabsContent value="roles"><PendingApprovalsByRole /></TabsContent>}
     </Tabs>
   );
 }
