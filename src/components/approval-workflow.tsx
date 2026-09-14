@@ -142,7 +142,9 @@ function PendingApprovalDetails({ step, requestTypes }: { step: StepRow; request
     ["Valor", BRL(Number(order.estimated_value ?? 0))], ["Projeto ou Cliente", allocation], ["Destinatário", order.recipient || "—"],
     ["Endereço de entrega", order.delivery_point || "—"], ["Prazo", order.deadline_date ? new Date(`${order.deadline_date}T00:00:00`).toLocaleDateString("pt-BR") : order.deadline_type],
     ["Previsão de entrega", order.delivery_forecast ? new Date(`${order.delivery_forecast}T00:00:00`).toLocaleDateString("pt-BR") : "—"],
-    ["Status da solicitação", order.status], ["Status da aprovação", order.approval_status], ["Criado em", dt(order.created_at)],
+    ["Status da solicitação", order.status], ["Status da aprovação", order.approval_status], ["Palavra passe", order.passphrase || "—"], ["Criado em", dt(order.created_at)],
+    ["Destino da viagem", order.travel_destination || "—"], ["Ida", order.travel_departure ? new Date(`${order.travel_departure}T00:00:00`).toLocaleDateString("pt-BR") : "—"], ["Volta", order.travel_return ? new Date(`${order.travel_return}T00:00:00`).toLocaleDateString("pt-BR") : "—"],
+    ["Data de pagamento", order.payment_date ? new Date(`${order.payment_date}T00:00:00`).toLocaleDateString("pt-BR") : "—"],
     ["Observações do solicitante", order.requester_notes || "—"], ["Observações de Supply", order.buyer_notes || "—"],
   ];
   return (
@@ -156,6 +158,7 @@ function PendingApprovalDetails({ step, requestTypes }: { step: StepRow; request
           {fields.map(([label, value]) => <div key={label}><p className="text-xs text-muted-foreground">{label}</p><p className="text-sm break-words">{value}</p></div>)}
           {order.item_link && <div><p className="text-xs text-muted-foreground">Link</p><a href={order.item_link} target="_blank" rel="noreferrer" className="text-sm text-primary underline">Abrir link</a></div>}
         </div>
+        <section className="border-t pt-4"><h3 className="text-sm font-semibold">Anexos</h3><p className="text-sm text-muted-foreground">{Array.isArray(order.attachments) && order.attachments.length ? `${order.attachments.length} anexo(s)` : "Nenhum anexo."}</p></section>
         {order.budget_snapshot != null && (
           <section className="space-y-3 border-t pt-4">
             <div><h3 className="text-sm font-semibold">Orçado x Solicitado</h3>{order.budget_exceeded && <Badge variant="destructive" className="mt-1">Orçamento excedido</Badge>}</div>

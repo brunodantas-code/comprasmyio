@@ -2343,6 +2343,7 @@ function OrdersTable({
   headerFilters?: boolean;
 }) {
   const { data: me } = useCurrentUser();
+  const { data: requestTypes } = useRequestTypes();
   const [fApproval, setFApproval] = useState("");
   const [fItem, setFItem] = useState("");
   const [fAloc, setFAloc] = useState("");
@@ -2356,7 +2357,7 @@ function OrdersTable({
     ? orders
     : orders.filter((o) =>
         (!fApproval || norm(o.approval_number ?? "").includes(norm(fApproval))) &&
-        (!fItem || norm(`${requestTypeLabel(o)} ${o.item_name ?? ""} ${o.requester_notes ?? ""}`).includes(norm(fItem))) &&
+        (!fItem || norm(`${requestTypeLabel(o, requestTypes)} ${o.item_name ?? ""} ${o.requester_notes ?? ""}`).includes(norm(fItem))) &&
         (!fAloc || norm(allocationOf(o)).includes(norm(fAloc))) &&
         (!fReq || norm(requesterName?.(o.requester_id) ?? "").includes(norm(fReq))) &&
         (!fDate || o.deadline_date === fDate || o.delivery_forecast === fDate) &&
@@ -2424,7 +2425,7 @@ function OrdersTable({
                 </div>
               </Row>
               <Row label="Tipo">
-                <div className="font-medium">{requestTypeLabel(o)}</div>
+                <div className="font-medium">{requestTypeLabel(o, requestTypes)}</div>
                 <div className="mt-1 flex flex-wrap items-center gap-2">
                   <FullTextPopover text={o.item_name ?? ""} />
                   {o.item_link ? (
@@ -2547,7 +2548,7 @@ function OrdersTable({
                 </div>
               </TableCell>
               <TableCell>
-                <div className="line-clamp-4 font-medium break-words">{requestTypeLabel(o)}</div>
+                <div className="line-clamp-4 font-medium break-words">{requestTypeLabel(o, requestTypes)}</div>
                 <div className="mt-1 flex flex-wrap items-center gap-2">
                   <FullTextPopover text={o.item_name ?? ""} />
                   {o.item_link ? (
@@ -2693,6 +2694,7 @@ function OrderReportDialog({
   requesterName?: (id: string) => string;
 }) {
   const [open, setOpen] = useState(false);
+  const { data: requestTypes } = useRequestTypes();
   const { data: profiles } = useProfilesMap();
   const nameFor = (id: string | null | undefined) => {
     if (!id) return "—";
@@ -2783,7 +2785,7 @@ function OrderReportDialog({
         <div className="space-y-6 font-sans">
           <section className="grid grid-cols-2 gap-4 md:grid-cols-3">
             <Row label="Item" value={order.item_name} />
-            <Row label="Tipo(s)" value={(relatedOrders ?? [{ request_type: order.request_type, travel_type: order.travel_type }]).map((related) => requestTypeLabel(related)).filter((v, i, a) => a.indexOf(v) === i).join(" + ")} />
+            <Row label="Tipo(s)" value={(relatedOrders ?? [{ request_type: order.request_type, travel_type: order.travel_type }]).map((related) => requestTypeLabel(related, requestTypes)).filter((v, i, a) => a.indexOf(v) === i).join(" + ")} />
             <Row label="Quantidade" value={order.quantity} />
             <Row label="Alocação" value={allocation} />
             <Row label="Solicitante" value={requesterName ? requesterName(order.requester_id) : nameFor(order.requester_id)} />
@@ -2796,7 +2798,7 @@ function OrderReportDialog({
             <Row label="Criado em" value={fmtDateTime(order.created_at)} />
             {order.payment_date && <Row label="Data do pagamento" value={new Date(order.payment_date + "T00:00:00").toLocaleDateString("pt-BR")} />}
             {relatedOrders && relatedOrders.length > 1 && relatedOrders.map((related) => (
-              <Row key={related.id} label={`Criação — ${requestTypeLabel(related)}`} value={fmtDateTime(related.created_at)} />
+              <Row key={related.id} label={`Criação — ${requestTypeLabel(related, requestTypes)}`} value={fmtDateTime(related.created_at)} />
             ))}
             <Row label="Última atualização" value={fmtDateTime(order.updated_at)} />
             {order.item_link && (
