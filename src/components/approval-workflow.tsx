@@ -1247,6 +1247,51 @@ const orgLeafCount = (node: RoleNode): number =>
     ? 1
     : node.children.reduce((total, child) => total + orgLeafCount(child), 0);
 
+const flattenOrgTree = (nodes: RoleNode[], depth = 0): Array<{ node: RoleNode; depth: number }> =>
+  nodes.flatMap((node) => [
+    { node, depth },
+    ...flattenOrgTree(node.children, depth + 1),
+  ]);
+
+function MobileOrgTree({ roots }: { roots: RoleNode[] }) {
+  const rows = flattenOrgTree(roots);
+
+  return (
+    <div className="relative space-y-5 pb-1">
+      <div className="absolute bottom-8 left-3 top-8 w-px bg-border" aria-hidden="true" />
+      {rows.map(({ node, depth }, index) => (
+        <div
+          key={node.role}
+          className="relative grid grid-cols-[1.5rem_minmax(0,1fr)] items-start gap-3"
+          style={{ paddingLeft: `${Math.min(depth, 4) * 0.75}rem` }}
+        >
+          {depth > 0 && <span className="absolute left-0 top-7 h-px w-3 bg-border" aria-hidden="true" />}
+          <span className="relative z-10 mt-5 grid h-6 w-6 place-items-center rounded-full border-4 border-secondary bg-primary">
+            <span className="h-1.5 w-1.5 rounded-full bg-primary-foreground" />
+          </span>
+          <div className="min-w-0 rounded-lg border bg-card p-3 shadow-sm">
+            <p className="text-[10px] font-semibold uppercase text-accent">Nível {depth + 1}</p>
+            <p className="mt-0.5 break-words text-base font-bold leading-tight">{node.title}</p>
+            <div className="mt-2 space-y-1.5 border-t pt-2">
+              {node.names.length === 0 ? (
+                <p className="text-xs italic text-muted-foreground">Sem usuário</p>
+              ) : (
+                node.names.map((person, personIndex) => (
+                  <div key={`${person.name}-${personIndex}`} className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 text-xs">
+                    <span className="truncate text-muted-foreground">{person.name}</span>
+                    <span className="font-semibold">{formatInt(person.limit)}</span>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      ))}
+      {rows.length === 0 && <p className="text-sm text-muted-foreground">Nenhum cargo definido.</p>}
+    </div>
+  );
+}
+
 function OrgTreeBranch({ node }: { node: RoleNode }) {
   const childColumns = node.children
     .map((child) => `minmax(0, ${orgLeafCount(child)}fr)`)
@@ -1434,7 +1479,10 @@ function OrgChartAdmin() {
           <CardTitle>Visualização</CardTitle>
           <CardDescription>Hierarquia de aprovação por cargo, com os usuários e alçadas</CardDescription>
         </CardHeader>
-        <CardContent className="org-chart overflow-hidden px-2 sm:px-4">
+        <CardContent className="px-4 sm:hidden">
+          <MobileOrgTree roots={roots} />
+        </CardContent>
+        <CardContent className="org-chart hidden overflow-hidden px-4 sm:block">
           <div
             className="grid min-w-0 grid-cols-1 items-start gap-2 pb-2 sm:[grid-template-columns:var(--org-columns)]"
             style={{

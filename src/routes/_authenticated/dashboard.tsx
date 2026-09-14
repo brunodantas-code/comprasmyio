@@ -4066,34 +4066,34 @@ function LogsAdmin() {
     <Card>
       <CardHeader><CardTitle>Logs de pedidos</CardTitle><CardDescription>Últimas 200 ações.</CardDescription></CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex flex-wrap items-end gap-3">
-          <div className="space-y-1">
+        <div className="grid items-end gap-3 sm:grid-cols-[12rem_14rem_10rem_10rem_auto]">
+          <div className="min-w-0 space-y-1">
             <Label className="text-xs">Ação</Label>
             <Select value={fAction} onValueChange={setFAction}>
-              <SelectTrigger className="h-9 w-48"><SelectValue placeholder="Todas" /></SelectTrigger>
+              <SelectTrigger className="h-9 w-full"><SelectValue placeholder="Todas" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas</SelectItem>
                 {actions.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-1">
+          <div className="min-w-0 space-y-1">
             <Label className="text-xs">Quem</Label>
             <Select value={fActor} onValueChange={setFActor}>
-              <SelectTrigger className="h-9 w-56"><SelectValue placeholder="Todos" /></SelectTrigger>
+              <SelectTrigger className="h-9 w-full"><SelectValue placeholder="Todos" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
                 {actors.map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-1">
+          <div className="min-w-0 space-y-1">
             <Label className="text-xs">De</Label>
-            <Input type="date" className="h-9 w-40" value={fFrom} onChange={(e) => setFFrom(e.target.value)} />
+            <Input type="date" className="h-9 w-full text-sm" value={fFrom} onChange={(e) => setFFrom(e.target.value)} />
           </div>
-          <div className="space-y-1">
+          <div className="min-w-0 space-y-1">
             <Label className="text-xs">Até</Label>
-            <Input type="date" className="h-9 w-40" value={fTo} onChange={(e) => setFTo(e.target.value)} />
+            <Input type="date" className="h-9 w-full text-sm" value={fTo} onChange={(e) => setFTo(e.target.value)} />
           </div>
           {hasFilters && (
             <Button variant="ghost" size="sm" onClick={() => { setFAction("all"); setFActor("all"); setFFrom(""); setFTo(""); }}>
