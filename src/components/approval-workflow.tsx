@@ -78,6 +78,7 @@ const ACTION_LABELS: Record<string, string> = {
 const STEP_TYPES: { value: string; label: string }[] = [
   { value: "validacao_tecnica", label: "Validação Técnica" },
   { value: "validacao_comercial", label: "Validação Comercial" },
+  { value: "validacao_orcamentaria", label: "Validação Orçamentária" },
   { value: "compliance", label: "Compliance" },
 ];
 
@@ -819,7 +820,7 @@ export function RulesAdmin() {
         <CardHeader>
           <CardTitle>Tipo de Etapa Adicional</CardTitle>
           <CardDescription>
-            Configure Validação Técnica, Validação Comercial e Compliance e escolha em quais tipos de solicitação cada etapa será aplicada.
+            Configure Validação Técnica, Validação Comercial, Validação Orçamentária e Compliance e escolha em quais tipos de solicitação cada etapa será aplicada.
           </CardDescription>
         </CardHeader>
         <CardContent>
