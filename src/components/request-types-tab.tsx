@@ -1,18 +1,19 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Pencil } from "lucide-react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-export type RequestTypeRecord = { code: string; name: string; active: boolean; position: number };
+export type RequestTypeRecord = { code: string; name: string; active: boolean; position: number; model_code: string; is_system: boolean };
 
 export const REQUEST_TYPE_FALLBACKS: Record<string, string> = {
   materiais: "Materiais",
@@ -29,7 +30,7 @@ export function useRequestTypes() {
   return useQuery({
     queryKey: ["request-types"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("request_types").select("code,name,active,position").order("position");
+      const { data, error } = await supabase.from("request_types").select("code,name,active,position,model_code,is_system").order("position");
       if (error) throw error;
       return data as RequestTypeRecord[];
     },
@@ -41,10 +42,35 @@ export function requestTypeName(code: string | null | undefined, types?: Request
   return types?.find((type) => type.code === code)?.name ?? REQUEST_TYPE_FALLBACKS[code] ?? code;
 }
 
+export function requestTypeModel(code: string | null | undefined, types?: RequestTypeRecord[]) {
+  if (!code) return "materiais";
+  return types?.find((type) => type.code === code)?.model_code ?? code;
+}
+
+function makeCode(name: string) {
+  return name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR").trim().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+}
+
 export function RequestTypesTab() {
   const qc = useQueryClient();
   const { data: types, isLoading } = useRequestTypes();
+  const [createOpen, setCreateOpen] = useState(false);
   const invalidate = () => qc.invalidateQueries({ queryKey: ["request-types"] });
+
+  const create = useMutation({
+    mutationFn: async ({ name, modelCode }: { name: string; modelCode: string }) => {
+      const code = makeCode(name);
+      if (!code) throw new Error("Informe um nome válido");
+      const normalized = name.trim().toLocaleLowerCase("pt-BR");
+      if (types?.some((type) => type.name.trim().toLocaleLowerCase("pt-BR") === normalized || type.code === code)) throw new Error("Este tipo de solicitação já está cadastrado");
+      const position = Math.max(0, ...(types ?? []).map((type) => type.position)) + 1;
+      const { error } = await supabase.from("request_types").insert({ code, name: name.trim(), model_code: modelCode, position });
+      if (error?.code === "23505") throw new Error("Este tipo de solicitação já está cadastrado");
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success("Tipo criado"); setCreateOpen(false); invalidate(); },
+    onError: (error: Error) => toast.error(error.message),
+  });
 
   const update = useMutation({
     mutationFn: async ({ code, name }: { code: string; name: string }) => {
@@ -69,32 +95,56 @@ export function RequestTypesTab() {
     onError: (error: Error) => toast.error(error.message),
   });
 
+  const remove = useMutation({
+    mutationFn: async (code: string) => { const { error } = await supabase.from("request_types").delete().eq("code", code); if (error?.code === "23503") throw new Error("Este tipo está em uso. Desative-o ou realoque os vínculos antes de excluir."); if (error) throw error; },
+    onSuccess: () => { toast.success("Tipo excluído"); invalidate(); },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Tipos de Solicitação</CardTitle>
-        <CardDescription>Edite os nomes exibidos ou desative tipos para impedir novas solicitações.</CardDescription>
+      <CardHeader className="flex flex-row items-start justify-between gap-4">
+        <div><CardTitle>Tipos de Solicitação</CardTitle><CardDescription>Crie tipos a partir de um modelo de formulário existente.</CardDescription></div>
+        <CreateRequestTypeDialog open={createOpen} onOpenChange={setCreateOpen} saving={create.isPending} onSave={(name, modelCode) => create.mutateAsync({ name, modelCode })} />
       </CardHeader>
       <CardContent>
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : (
           <Table>
-            <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Ativo</TableHead><TableHead /></TableRow></TableHeader>
+            <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Modelo</TableHead><TableHead>Ativo</TableHead><TableHead /></TableRow></TableHeader>
             <TableBody>
               {(types ?? []).map((type) => (
                 <TableRow key={type.code}>
                   <TableCell className="font-medium">{type.name}</TableCell>
+                  <TableCell>{REQUEST_TYPE_FALLBACKS[type.model_code] ?? type.model_code}</TableCell>
                   <TableCell><Switch checked={type.active} onCheckedChange={(active) => toggle.mutate({ code: type.code, active })} /></TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="space-x-1 text-right whitespace-nowrap">
                     <EditRequestTypeDialog type={type} saving={update.isPending} onSave={(name) => update.mutateAsync({ code: type.code, name })} />
+                    {!type.is_system && <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive" aria-label={`Excluir ${type.name}`} title="Excluir" disabled={remove.isPending} onClick={() => remove.mutate(type.code)}><Trash2 className="h-4 w-4" /></Button>}
                   </TableCell>
                 </TableRow>
               ))}
+              {!types?.length && <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">Nenhum tipo cadastrado.</TableCell></TableRow>}
             </TableBody>
           </Table>
         )}
       </CardContent>
     </Card>
   );
+}
+
+function CreateRequestTypeDialog({ open, onOpenChange, saving, onSave }: { open: boolean; onOpenChange: (open: boolean) => void; saving: boolean; onSave: (name: string, modelCode: string) => Promise<unknown> }) {
+  const [name, setName] = useState("");
+  const [modelCode, setModelCode] = useState("");
+  return <Dialog open={open} onOpenChange={(next) => { onOpenChange(next); if (!next) { setName(""); setModelCode(""); } }}>
+    <DialogTrigger asChild><Button size="icon" aria-label="Criar tipo de solicitação" title="Criar tipo"><Plus className="h-4 w-4" /></Button></DialogTrigger>
+    <DialogContent><DialogHeader><DialogTitle>Novo tipo de solicitação</DialogTitle><DialogDescription>Escolha o formulário e as regras que este tipo reutilizará.</DialogDescription></DialogHeader>
+      <form className="space-y-4" onSubmit={async (event) => { event.preventDefault(); if (name.trim().length < 2) return toast.error("Nome muito curto"); if (!modelCode) return toast.error("Selecione um modelo"); try { await onSave(name.trim(), modelCode); } catch { /* A alteração exibe a mensagem. */ } }}>
+        <div className="space-y-2"><Label htmlFor="new-request-type-name">Nome</Label><Input id="new-request-type-name" value={name} onChange={(event) => setName(event.target.value)} placeholder="Inserir nome" required /></div>
+        <div className="space-y-2"><Label>Modelo</Label><Select value={modelCode} onValueChange={setModelCode}><SelectTrigger><SelectValue placeholder="Selecione o modelo" /></SelectTrigger><SelectContent>{Object.entries(REQUEST_TYPE_FALLBACKS).map(([code, label]) => <SelectItem key={code} value={code}>{label}</SelectItem>)}</SelectContent></Select></div>
+        <DialogFooter><Button type="submit" disabled={saving}>Criar</Button></DialogFooter>
+      </form>
+    </DialogContent>
+  </Dialog>;
 }
 
 function EditRequestTypeDialog({ type, saving, onSave }: { type: RequestTypeRecord; saving: boolean; onSave: (name: string) => Promise<unknown> }) {
