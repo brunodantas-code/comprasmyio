@@ -48,6 +48,7 @@ type Order = {
   id: string;
   project_id: string | null;
   for_stock: boolean;
+  allocation_type?: "projeto" | "cliente" | "estoque" | "interna" | null;
   requester_id: string;
   item_name: string;
   item_link: string | null;
@@ -931,7 +932,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
   const [rhTipo, setRhTipo] = useState("");
   const [rhRemuneracao, setRhRemuneracao] = useState("0");
 
-  const [allocTarget, setAllocTarget] = useState<"projeto" | "cliente">("projeto");
+  const [allocTarget, setAllocTarget] = useState<"projeto" | "cliente" | "interna">("projeto");
   const [clientId, setClientId] = useState("");
   const { data: clientsList } = useClients();
   const [costCenterId, setCostCenterId] = useState<string>("");
@@ -1110,8 +1111,8 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
           .from("myio_orders")
           .insert({
             title: values.item_name,
-            client_name: forStock ? "Estoque" : (projects?.find((p) => p.id === values.project_id)?.name ?? ""),
-            project_id: forStock ? null : (values.project_id ?? null),
+            client_name: forStock ? "Estoque" : allocTarget === "interna" ? "myio" : (projects?.find((p) => p.id === values.project_id)?.name ?? ""),
+            project_id: forStock || allocTarget === "interna" ? null : (values.project_id ?? null),
             delivery_date: values.deadline_type === "customizado" && values.deadline_date
               ? values.deadline_date
               : new Date().toISOString().slice(0, 10),
@@ -1130,8 +1131,9 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
 
       if (buyQty > 0) {
         const { data, error } = await supabase.from("purchase_orders").insert({
-          project_id: forStock ? null : (values.project_id ?? null),
+          project_id: forStock || allocTarget === "interna" ? null : (values.project_id ?? null),
           for_stock: forStock,
+          allocation_type: forStock ? "estoque" : allocTarget,
           request_type: requestType,
           client_id: requestType === "rh" || requestType === "pagamento"
             ? (clientId && clientId !== "none" ? clientId : null)
@@ -1248,7 +1250,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
     } else if (!item) {
       return toast.error("Selecione um item cadastrado: Insumos de Fabricação, Insumos de Instalação, Material de Almoxarifado ou Máquinas e Ferramentas.");
     }
-    if (isMateriais && !forStock && !projectId) {
+    if (isMateriais && !forStock && allocTarget === "projeto" && !projectId) {
       return toast.error("Selecione um projeto");
     }
     if (isMateriais && !recipient.trim()) {
@@ -1257,7 +1259,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
 
     const fd = new FormData(e.currentTarget);
     const parsed = newOrderSchema.safeParse({
-      project_id: isRh || isPagamento ? (projectId || undefined) : (!isMateriais ? (allocTarget === "projeto" ? projectId : undefined) : (forStock ? undefined : projectId)),
+      project_id: isRh || isPagamento ? (projectId || undefined) : (allocTarget === "projeto" && !forStock ? projectId : undefined),
       item_name: isReembolso
         ? "Reembolso de Despesas"
         : isPagamento
@@ -1325,6 +1327,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
           setRequestType(t);
           if (t === "materiais") {
             setClientId("");
+            setAllocTarget("projeto");
           } else {
             setForStock(false);
             setIsNewItem(true);
@@ -1655,16 +1658,21 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
               <>
                 <div className="space-y-2">
                   <Label>Alocação</Label>
-                  <div className="flex items-center gap-6">
+                  <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
                     <label className="flex cursor-pointer items-center gap-2 text-sm">
-                      <Checkbox checked={!forStock} onCheckedChange={() => setForStock(false)} />
+                      <Checkbox checked={!forStock && allocTarget === "projeto"} onCheckedChange={() => { setForStock(false); setAllocTarget("projeto"); setClientId(""); }} />
                       Projeto
                     </label>
                     <label className="flex cursor-pointer items-center gap-2 text-sm">
-                      <Checkbox checked={forStock} onCheckedChange={() => setForStock(true)} />
+                      <Checkbox checked={forStock} onCheckedChange={() => { setForStock(true); setAllocTarget("projeto"); setProjectId(""); setClientId(""); }} />
                       Estoque
                     </label>
+                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                      <Checkbox checked={!forStock && allocTarget === "interna"} onCheckedChange={() => { setForStock(false); setAllocTarget("interna"); setProjectId(""); setClientId(""); }} />
+                      Interna
+                    </label>
                   </div>
+                  <p className="text-xs text-muted-foreground">Qualquer despesa interna não atrelada a clientes ou projetos</p>
                   {!restrictedCc && (
                     <div className="pt-2">
                       <Label>Centro de Custo</Label>
@@ -1679,21 +1687,23 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
                     </div>
                   )}
                 </div>
-                <div className="space-y-2">
-                  <Label>Projeto</Label>
-                  <Select value={forStock ? "" : projectId} onValueChange={setProjectId} disabled={forStock}>
-                    <SelectTrigger><SelectValue placeholder={forStock ? "Compra para estoque" : "Selecione o projeto"} /></SelectTrigger>
-                    <SelectContent>
-                      {projects.filter((p) => !p.status || p.status === "active").map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
+                {!forStock && allocTarget === "projeto" && (
+                  <div className="space-y-2">
+                    <Label>Projeto</Label>
+                    <Select value={projectId} onValueChange={setProjectId}>
+                      <SelectTrigger><SelectValue placeholder="Selecione o projeto" /></SelectTrigger>
+                      <SelectContent>
+                        {projects.filter((p) => !p.status || p.status === "active").map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </>
             ) : (
               <>
                 <div className="space-y-2">
                   <Label>Alocação</Label>
-                  <div className="flex items-center gap-6">
+                  <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
                     <label className="flex cursor-pointer items-center gap-2 text-sm">
                       <Checkbox checked={allocTarget === "projeto"} onCheckedChange={() => { setAllocTarget("projeto"); setClientId(""); }} />
                       Projeto
@@ -1702,7 +1712,12 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
                       <Checkbox checked={allocTarget === "cliente"} onCheckedChange={() => { setAllocTarget("cliente"); setProjectId(""); }} />
                       Cliente
                     </label>
+                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                      <Checkbox checked={allocTarget === "interna"} onCheckedChange={() => { setAllocTarget("interna"); setProjectId(""); setClientId(""); }} />
+                      Interna
+                    </label>
                   </div>
+                  <p className="text-xs text-muted-foreground">Qualquer despesa interna não atrelada a clientes ou projetos</p>
                   {!restrictedCc && (
                     <div className="pt-2">
                       <Label>Centro de Custo</Label>
@@ -1727,7 +1742,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
                       </SelectContent>
                     </Select>
                   </div>
-                ) : (
+                ) : allocTarget === "cliente" ? (
                   <div className="space-y-2">
                     <Label>Cliente</Label>
                     <Select value={clientId} onValueChange={setClientId}>
@@ -1737,7 +1752,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
                       </SelectContent>
                     </Select>
                   </div>
-                )}
+                ) : null}
               </>
             )}
 
@@ -2145,8 +2160,8 @@ function BuyerQueue() {
 
   const renderOrders = (list: Order[]) => {
     if (groupByProject) {
-      const groupKey = (o: Order) => (o.for_stock ? "__estoque" : (o.project_id ?? "__sem_projeto"));
-      const groupLabel = (key: string) => (key === "__estoque" ? "Estoque" : key === "__sem_projeto" ? "—" : projectName(key));
+      const groupKey = (o: Order) => (o.allocation_type === "interna" ? "__interna" : o.for_stock ? "__estoque" : (o.project_id ?? "__sem_projeto"));
+      const groupLabel = (key: string) => (key === "__interna" ? "Interna" : key === "__estoque" ? "Estoque" : key === "__sem_projeto" ? "—" : projectName(key));
       const grouped = Array.from(
         list.reduce((map, o) => {
           const key = groupKey(o);
@@ -2261,7 +2276,7 @@ function OrdersTable({
   const [fStatus, setFStatus] = useState<string>("all");
 
   const norm = (s: string) => s.toLowerCase().trim();
-  const allocationOf = (o: Order) => (o.for_stock ? "Estoque" : o.project_id ? projectName(o.project_id) : "—");
+  const allocationOf = (o: Order) => (o.allocation_type === "interna" ? "Interna" : o.for_stock ? "Estoque" : o.project_id ? projectName(o.project_id) : "—");
   const visibleOrders = !headerFilters
     ? orders
     : orders.filter((o) =>
@@ -2339,7 +2354,7 @@ function OrdersTable({
                   )}
                 </div>
               </Row>
-              <Row label="Alocação">{o.for_stock ? "Estoque" : o.project_id ? projectName(o.project_id) : "—"}</Row>
+              <Row label="Alocação">{o.allocation_type === "interna" ? "Interna" : o.for_stock ? "Estoque" : o.project_id ? projectName(o.project_id) : "—"}</Row>
               {showRequester && <Row label="Solicitante">{requesterName?.(o.requester_id)}</Row>}
               <Row label="Qtd">
                 {!part || part.qty <= 0 ? (
@@ -2455,7 +2470,7 @@ function OrdersTable({
                   )}
                 </div>
               </TableCell>
-              <TableCell className="text-sm break-words text-center">{o.for_stock ? "Estoque" : o.project_id ? projectName(o.project_id) : "—"}</TableCell>
+              <TableCell className="text-sm break-words text-center">{o.allocation_type === "interna" ? "Interna" : o.for_stock ? "Estoque" : o.project_id ? projectName(o.project_id) : "—"}</TableCell>
               {showRequester && <TableCell className="text-sm break-words text-center">{requesterName?.(o.requester_id)}</TableCell>}
               <TableCell className="text-center">
                 {(() => {
@@ -2655,7 +2670,7 @@ function OrderReportDialog({
   });
   const displayedLogs = relatedLogs ?? logs;
 
-  const allocation = order.for_stock ? "Estoque" : order.project_id ? projectName(order.project_id) : "—";
+  const allocation = order.allocation_type === "interna" ? "Interna" : order.for_stock ? "Estoque" : order.project_id ? projectName(order.project_id) : "—";
   const Row = ({ label, value }: { label: string; value: React.ReactNode }) => (
     <div className="space-y-0.5">
       <div className="text-xs text-muted-foreground">{label}</div>
