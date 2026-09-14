@@ -86,3 +86,6 @@
 - [x] Aplicar o mesmo processo de criação aos Tipos de Solicitação e futuros cadastros de Diversos
 
 - [x] Excluir Tipo de Solicitação com alerta de vínculos e realocação individual antes da exclusão
+
+- [ ] Mover Quantidade para uma linha própria abaixo de Valor no Approval
+- [ ] Remover o texto “Decisão” do Approval
