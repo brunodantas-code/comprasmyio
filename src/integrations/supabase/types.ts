@@ -1382,6 +1382,7 @@ export type Database = {
       }
       purchase_orders: {
         Row: {
+          allocation_type: string | null
           approval_number: string | null
           approval_status: string
           approved_at: string | null
@@ -1422,6 +1423,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          allocation_type?: string | null
           approval_number?: string | null
           approval_status?: string
           approved_at?: string | null
@@ -1462,6 +1464,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          allocation_type?: string | null
           approval_number?: string | null
           approval_status?: string
           approved_at?: string | null
