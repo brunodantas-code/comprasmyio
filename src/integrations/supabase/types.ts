@@ -1557,7 +1557,7 @@ export type Database = {
           quantity?: number
           recipient?: string
           request_group_id?: string | null
-          request_model: string
+          request_model?: string
           request_type?: string
           requester_id: string
           requester_notes?: string | null
