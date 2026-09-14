@@ -1388,8 +1388,11 @@ export type Database = {
           approved_at: string | null
           approved_by: string | null
           attachments: Json
+          budget_exceeded: boolean
+          budget_snapshot: number | null
           buyer_notes: string | null
           client_id: string | null
+          committed_before_snapshot: number | null
           cost_center_id: string | null
           created_at: string
           deadline_date: string | null
@@ -1406,6 +1409,7 @@ export type Database = {
           passphrase: string | null
           payment_date: string | null
           project_id: string | null
+          projected_committed_snapshot: number | null
           quantity: number
           recipient: string
           request_group_id: string | null
@@ -1429,8 +1433,11 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           attachments?: Json
+          budget_exceeded?: boolean
+          budget_snapshot?: number | null
           buyer_notes?: string | null
           client_id?: string | null
+          committed_before_snapshot?: number | null
           cost_center_id?: string | null
           created_at?: string
           deadline_date?: string | null
@@ -1447,6 +1454,7 @@ export type Database = {
           passphrase?: string | null
           payment_date?: string | null
           project_id?: string | null
+          projected_committed_snapshot?: number | null
           quantity?: number
           recipient?: string
           request_group_id?: string | null
@@ -1470,8 +1478,11 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           attachments?: Json
+          budget_exceeded?: boolean
+          budget_snapshot?: number | null
           buyer_notes?: string | null
           client_id?: string | null
+          committed_before_snapshot?: number | null
           cost_center_id?: string | null
           created_at?: string
           deadline_date?: string | null
@@ -1488,6 +1499,7 @@ export type Database = {
           passphrase?: string | null
           payment_date?: string | null
           project_id?: string | null
+          projected_committed_snapshot?: number | null
           quantity?: number
           recipient?: string
           request_group_id?: string | null
@@ -2390,6 +2402,15 @@ export type Database = {
         Returns: {
           status: string
           target_user_id: string
+        }[]
+      }
+      get_project_budget_summaries: {
+        Args: never
+        Returns: {
+          budget: number
+          project_id: string
+          requested_percent: number
+          requested_total: number
         }[]
       }
       has_job_title_name: {
