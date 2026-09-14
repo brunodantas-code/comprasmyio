@@ -43,7 +43,7 @@ export function AddressAutocomplete({
   label?: string;
   detailsName?: string;
 }) {
-  // valor final salvo (endereço validado + complemento)
+  // Valor final salvo: sugestão confirmada ou endereço digitado manualmente.
   const initial = defaultValue ?? "";
   const [address, setAddress] = useState(initial);
   const [confirmed, setConfirmed] = useState(Boolean(initial));
@@ -119,7 +119,10 @@ export function AddressAutocomplete({
     sessionRef.current = null;
   };
 
-  const full = [address, details.trim()].filter(Boolean).join(" — ");
+  const manualAddress = query.trim();
+  const addressValue = confirmed ? address : manualAddress;
+  const validAddress = addressValue.length >= 3;
+  const full = [addressValue, details.trim()].filter(Boolean).join(" — ");
 
   return (
     <div className="space-y-2" ref={boxRef}>
@@ -130,7 +133,7 @@ export function AddressAutocomplete({
           id={`${name}-search`}
           autoComplete="off"
           className={cn("pl-9 pr-9", confirmed && "border-green-500")}
-          placeholder="Digite o endereço e selecione uma opção do Google"
+          placeholder="Digite o endereço ou selecione uma opção do Google"
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
@@ -160,9 +163,15 @@ export function AddressAutocomplete({
           </ul>
         )}
       </div>
-      {error && <p className="text-xs text-destructive">{error}</p>}
-      {!confirmed && query.trim().length > 0 && (
-        <p className="text-xs text-muted-foreground">Selecione um endereço sugerido pelo Google para validar.</p>
+      {error && (
+        <p className="text-xs text-muted-foreground">
+          O Google Maps está indisponível. O endereço digitado será usado normalmente.
+        </p>
+      )}
+      {!confirmed && validAddress && !error && (
+        <p className="text-xs text-muted-foreground">
+          Você pode selecionar uma sugestão ou continuar com o endereço digitado.
+        </p>
       )}
       <Textarea
         placeholder="Complemento / referência (ex.: com João no portão)"
@@ -178,7 +187,7 @@ export function AddressAutocomplete({
           aria-hidden
           className="sr-only h-0 w-0 border-0 p-0"
           required
-          value={confirmed ? "ok" : ""}
+          value={validAddress ? "ok" : ""}
           onChange={() => {}}
         />
       )}
