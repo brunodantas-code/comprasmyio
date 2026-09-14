@@ -85,4 +85,4 @@
 - [x] Adicionar botão “+” para criar Tipos de Etapa Adicional
 - [x] Aplicar o mesmo processo de criação aos Tipos de Solicitação e futuros cadastros de Diversos
 
-- [ ] Excluir Tipo de Solicitação com alerta de vínculos e realocação individual antes da exclusão
+- [x] Excluir Tipo de Solicitação com alerta de vínculos e realocação individual antes da exclusão
