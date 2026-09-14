@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Building2, Link2, Plus, Upload } from "lucide-react";
+import { Building2, Link2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
@@ -90,7 +90,34 @@ function ImportDialog({ userId, accounts, onDone }: { userId: string; accounts: 
   async function readFile(selected: File | null) { setFile(selected); setPreview([]); setCsvRows([]); if (!selected) return; const text = await selected.text(); setFileText(text); if (selected.name.toLowerCase().endsWith(".ofx")) setPreview(parseOfx(text)); else { const lines = text.split(/\r?\n/).filter(Boolean); const separator = (lines[0]?.match(/;/g)?.length ?? 0) >= (lines[0]?.match(/,/g)?.length ?? 0) ? ";" : ","; const parsed = lines.map((line) => parseCsvLine(line, separator)); setHeaders(parsed[0] ?? []); setCsvRows(parsed.slice(1)); } }
   function mapCsv() { const d = Number(mapping.date); const desc = Number(mapping.description); const amount = Number(mapping.amount); setPreview(csvRows.map((row) => ({ posted_at: isoDate(row[d] ?? ""), description: row[desc]?.trim() || "Movimentação bancária", amount: parseMoney(row[amount] ?? ""), external_id: null })).filter((item) => item.posted_at && item.amount !== 0)); }
   const save = useMutation({ mutationFn: async () => { if (!file || !bankAccountId || !preview.length) throw new Error("Selecione a conta e gere uma prévia válida."); const fileHash = await digest(fileText); const { data: batch, error: batchError } = await supabase.from("cash_flow_statement_imports").insert({ bank_account_id: bankAccountId, file_name: file.name, file_format: file.name.toLowerCase().endsWith(".ofx") ? "ofx" : "csv", file_hash: fileHash, row_count: preview.length, imported_by: userId }).select("id").single(); if (batchError) { if (batchError.code === "23505") throw new Error("Este arquivo já foi importado para a conta selecionada."); throw batchError; } const rows = await Promise.all(preview.map(async (item) => ({ ...item, bank_account_id: bankAccountId, import_id: batch.id, created_by: userId, dedupe_key: await digest(`${bankAccountId}|${item.external_id ?? ""}|${item.posted_at}|${item.amount}|${item.description}`) }))); const { error } = await supabase.from("cash_flow_transactions").upsert(rows, { onConflict: "bank_account_id,dedupe_key", ignoreDuplicates: true }); if (error) throw error; }, onSuccess: () => { toast.success(`${preview.length} movimentações importadas`); setOpen(false); setFile(null); setPreview([]); onDone(); }, onError: (error: Error) => toast.error(error.message) });
-  return <Dialog open={open} onOpenChange={setOpen}><DialogTrigger asChild><Button disabled={!accounts.length}><Upload className="h-4 w-4" />Importar extrato</Button></DialogTrigger><DialogContent className="max-w-3xl"><DialogHeader><DialogTitle>Importar extrato</DialogTitle><DialogDescription>Selecione a conta e confira as movimentações antes de importar.</DialogDescription></DialogHeader><div className="grid gap-4 sm:grid-cols-2"><div className="space-y-2"><Label>Conta bancária</Label><Select value={bankAccountId} onValueChange={setBankAccountId}><SelectTrigger><SelectValue placeholder="Selecionar conta" /></SelectTrigger><SelectContent>{accounts.filter((item) => item.active).map((account) => <SelectItem key={account.id} value={account.id}>{account.name}</SelectItem>)}</SelectContent></Select></div><div className="space-y-2"><Label>Arquivo OFX ou CSV</Label><Input type="file" accept=".ofx,.csv,text/csv,application/x-ofx" onChange={(event) => void readFile(event.target.files?.[0] ?? null)} /></div></div>{headers.length ? <div className="grid gap-3 sm:grid-cols-3">{([["date", "Coluna de data"], ["description", "Coluna de descrição"], ["amount", "Coluna de valor"]] as const).map(([key, label]) => <div key={key} className="space-y-2"><Label>{label}</Label><Select value={mapping[key]} onValueChange={(value) => setMapping((old) => ({ ...old, [key]: value }))}><SelectTrigger><SelectValue placeholder="Selecionar" /></SelectTrigger><SelectContent>{headers.map((header, index) => <SelectItem key={`${header}-${index}`} value={String(index)}>{header || `Coluna ${index + 1}`}</SelectItem>)}</SelectContent></Select></div>))}<Button type="button" variant="outline" className="sm:col-span-3" onClick={mapCsv}>Gerar prévia</Button></div> : null}{preview.length ? <div className="max-h-64 overflow-auto rounded-md border"><Table><TableHeader><TableRow><TableHead>Data</TableHead><TableHead>Descrição</TableHead><TableHead className="text-right">Valor</TableHead></TableRow></TableHeader><TableBody>{preview.slice(0, 20).map((row, index) => <TableRow key={`${row.posted_at}-${index}`}><TableCell>{formatDate(row.posted_at)}</TableCell><TableCell>{row.description}</TableCell><TableCell className="text-right">{BRL.format(row.amount)}</TableCell></TableRow>)}</TableBody></Table></div> : file ? <p className="text-sm text-muted-foreground">Nenhuma movimentação válida encontrada.</p> : null}<DialogFooter><Button onClick={() => save.mutate()} disabled={!preview.length || !bankAccountId || save.isPending}>Confirmar importação</Button></DialogFooter></DialogContent></Dialog>;
+  return <Dialog open={open} onOpenChange={setOpen}>
+    <DialogTrigger asChild><Button disabled={!accounts.length}><Upload className="h-4 w-4" />Importar extrato</Button></DialogTrigger>
+    <DialogContent className="max-w-3xl">
+      <DialogHeader><DialogTitle>Importar extrato</DialogTitle><DialogDescription>Selecione a conta e confira as movimentações antes de importar.</DialogDescription></DialogHeader>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-2"><Label>Conta bancária</Label><Select value={bankAccountId} onValueChange={setBankAccountId}><SelectTrigger><SelectValue placeholder="Selecionar conta" /></SelectTrigger><SelectContent>{accounts.filter((item) => item.active).map((account) => <SelectItem key={account.id} value={account.id}>{account.name}</SelectItem>)}</SelectContent></Select></div>
+        <div className="space-y-2"><Label>Arquivo OFX ou CSV</Label><Input type="file" accept=".ofx,.csv,text/csv,application/x-ofx" onChange={(event) => void readFile(event.target.files?.[0] ?? null)} /></div>
+      </div>
+      {headers.length ? <div className="grid gap-3 sm:grid-cols-3">
+        {([[
+          "date", "Coluna de data",
+        ], [
+          "description", "Coluna de descrição",
+        ], [
+          "amount", "Coluna de valor",
+        ]] as const).map(([key, label]) => <div key={key} className="space-y-2">
+          <Label>{label}</Label>
+          <Select value={mapping[key]} onValueChange={(value) => setMapping((old) => ({ ...old, [key]: value }))}>
+            <SelectTrigger><SelectValue placeholder="Selecionar" /></SelectTrigger>
+            <SelectContent>{headers.map((header, index) => <SelectItem key={`${header}-${index}`} value={String(index)}>{header || `Coluna ${index + 1}`}</SelectItem>)}</SelectContent>
+          </Select>
+        </div>)}
+        <Button type="button" variant="outline" className="sm:col-span-3" onClick={mapCsv}>Gerar prévia</Button>
+      </div> : null}
+      {preview.length ? <div className="max-h-64 overflow-auto rounded-md border"><Table><TableHeader><TableRow><TableHead>Data</TableHead><TableHead>Descrição</TableHead><TableHead className="text-right">Valor</TableHead></TableRow></TableHeader><TableBody>{preview.slice(0, 20).map((row, index) => <TableRow key={`${row.posted_at}-${index}`}><TableCell>{formatDate(row.posted_at)}</TableCell><TableCell>{row.description}</TableCell><TableCell className="text-right">{BRL.format(row.amount)}</TableCell></TableRow>)}</TableBody></Table></div> : file ? <p className="text-sm text-muted-foreground">Nenhuma movimentação válida encontrada.</p> : null}
+      <DialogFooter><Button onClick={() => save.mutate()} disabled={!preview.length || !bankAccountId || save.isPending}>Confirmar importação</Button></DialogFooter>
+    </DialogContent>
+  </Dialog>;
 }
 
 function ReconcileDialog({ transaction, payables, userId }: { transaction: Transaction; payables: PayableOption[]; userId: string }) {
