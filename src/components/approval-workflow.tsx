@@ -396,7 +396,8 @@ export function PendingForMe() {
               <span>Pendentes comigo</span>
               {mine.length > 0 && (
                 <span className="text-sm font-normal text-muted-foreground">
-                  {mine.length} {mine.length === 1 ? "approval" : "approvals"} · {fmtBRL(totalValue)}
+                  {mine.length} {mine.length === 1 ? "approval" : "approvals"} ·{" "}
+                  <strong className="font-semibold">{fmtBRL(totalValue)}</strong>
                 </span>
               )}
             </CardTitle>

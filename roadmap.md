@@ -95,3 +95,4 @@
 - [x] Alinhar o número do Approval à esquerda no card móvel
 
 - [x] Exibir o valor unitário em uma linha própria no Approval
+- [x] Destacar em negrito o valor total dos approvals pendentes
