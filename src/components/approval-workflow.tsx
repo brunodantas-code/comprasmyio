@@ -1,4 +1,4 @@
-import { useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AlertTriangle, ArrowDown, ArrowUp, CheckCircle2, Clock, History, Pencil, Plus, Trash2, XCircle } from "lucide-react";
@@ -26,6 +26,7 @@ import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { useAdditionalStepTypes, type AdditionalStepType } from "@/components/additional-step-types-tab";
 
 const BRL = (v: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(v ?? 0));
@@ -74,13 +75,6 @@ const ACTION_LABELS: Record<string, string> = {
   aprovado: "Aprovado",
   rejeitado: "Rejeitado",
 };
-
-const STEP_TYPES: { value: string; label: string }[] = [
-  { value: "validacao_tecnica", label: "Validação Técnica" },
-  { value: "validacao_comercial", label: "Validação Comercial" },
-  { value: "validacao_orcamentaria", label: "Validação Orçamentária" },
-  { value: "compliance", label: "Compliance" },
-];
 
 const REQUEST_TYPES = Object.entries(REQUEST_TYPE_LABELS).map(([value, label]) => ({ value, label }));
 
@@ -634,10 +628,12 @@ type RuleRow = {
 function EditRuleDialog({
   rule,
   people,
+  stepTypes,
   onSaved,
 }: {
   rule: RuleRow;
   people: { id: string; full_name: string | null; email: string | null }[];
+  stepTypes: AdditionalStepType[];
   onSaved: () => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -649,7 +645,7 @@ function EditRuleDialog({
   const openChange = (v: boolean) => {
     if (v) {
       setName(rule.name);
-      setStepType(STEP_TYPES.some((type) => type.value === rule.step_type) ? rule.step_type : "validacao_tecnica");
+      setStepType(rule.step_type);
       setApprover(rule.approver_id ?? "none");
       setRequestTypes(rule.request_types ?? []);
     }
@@ -699,8 +695,8 @@ function EditRuleDialog({
             <Select value={stepType} onValueChange={setStepType}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                {STEP_TYPES.map((t) => (
-                  <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                {stepTypes.filter((type) => type.active || type.code === rule.step_type).map((type) => (
+                  <SelectItem key={type.code} value={type.code}>{type.name}{!type.active ? " (inativo)" : ""}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -736,6 +732,7 @@ function EditRuleDialog({
 export function RulesAdmin() {
   const qc = useQueryClient();
   const { data: profiles } = useProfiles();
+  const { data: stepTypes, isLoading: stepTypesLoading } = useAdditionalStepTypes();
   const { data: rules, isLoading } = useQuery({
     queryKey: ["approval-rules"],
     queryFn: async () => {
@@ -746,11 +743,20 @@ export function RulesAdmin() {
   });
 
   const [name, setName] = useState("");
-  const [stepType, setStepType] = useState("validacao_tecnica");
+  const [stepType, setStepType] = useState("");
   const [approver, setApprover] = useState<string>("none");
   const [requestTypes, setRequestTypes] = useState<string[]>([]);
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["approval-rules"] });
+  const activeStepTypes = (stepTypes ?? []).filter((type) => type.active);
+
+  useEffect(() => {
+    if (!activeStepTypes.length) {
+      setStepType("");
+      return;
+    }
+    if (!activeStepTypes.some((type) => type.code === stepType)) setStepType(activeStepTypes[0].code);
+  }, [activeStepTypes, stepType]);
 
   const create = useMutation({
     mutationFn: async () => {
@@ -766,6 +772,7 @@ export function RulesAdmin() {
     onSuccess: () => {
       toast.success("Etapa criada");
       setName("");
+      setStepType(activeStepTypes[0]?.code ?? "");
       setApprover("none");
       setRequestTypes([]);
       invalidate();
@@ -818,9 +825,9 @@ export function RulesAdmin() {
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle>Tipo de Etapa Adicional</CardTitle>
+          <CardTitle>Nova Etapa Adicional</CardTitle>
           <CardDescription>
-            Configure Validação Técnica, Validação Comercial, Validação Orçamentária e Compliance e escolha em quais tipos de solicitação cada etapa será aplicada.
+            Escolha um tipo cadastrado em Cadastro &gt; Diversos e defina em quais solicitações a etapa será aplicada.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -832,11 +839,11 @@ export function RulesAdmin() {
             </div>
             <div className="space-y-2">
               <Label>Tipo</Label>
-              <Select value={stepType} onValueChange={setStepType}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select value={stepType} onValueChange={setStepType} disabled={stepTypesLoading || activeStepTypes.length === 0}>
+                <SelectTrigger><SelectValue placeholder={stepTypesLoading ? "Carregando..." : "Selecione"} /></SelectTrigger>
                 <SelectContent>
-                  {STEP_TYPES.map((t) => (
-                    <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                  {activeStepTypes.map((type) => (
+                    <SelectItem key={type.code} value={type.code}>{type.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -859,7 +866,7 @@ export function RulesAdmin() {
               <RequestTypeCheckboxes values={requestTypes} onChange={setRequestTypes} />
             </div>
           </div>
-          <Button className="mt-4" onClick={() => create.mutate()} disabled={!name.trim() || requestTypes.length === 0 || create.isPending}>
+          <Button className="mt-4" onClick={() => create.mutate()} disabled={!name.trim() || !stepType || requestTypes.length === 0 || create.isPending}>
             <Plus className="mr-2 h-4 w-4" />
             Adicionar etapa
           </Button>
@@ -896,7 +903,7 @@ export function RulesAdmin() {
                       </TableCell>
                       <TableCell className="font-medium">{r.name}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">
-                        {STEP_TYPES.find((t) => t.value === r.step_type)?.label ?? r.step_type}
+                        {stepTypes?.find((type) => type.code === r.step_type)?.name ?? r.step_type}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">{(r.request_types ?? []).map((value) => REQUEST_TYPE_LABELS[value] ?? value).join(", ") || "Todos"}</TableCell>
                       <TableCell className="text-sm">{ap?.full_name || ap?.email || "—"}</TableCell>
@@ -907,7 +914,7 @@ export function RulesAdmin() {
                         />
                       </TableCell>
                       <TableCell className="text-right whitespace-nowrap">
-                        <EditRuleDialog rule={r} people={people} onSaved={invalidate} />
+                        <EditRuleDialog rule={r} people={people} stepTypes={stepTypes ?? []} onSaved={invalidate} />
                         <Button
                           size="icon"
                           variant="ghost"
