@@ -59,3 +59,4 @@
 - [x] Separar acesso aos aplicativos dos perfis e permissões internas do Supply
 - [x] Criar gestão de aplicativos por usuário para Admins do ERP
 - [x] Proteger o acesso direto aos aplicativos sem liberação
+- [x] Permitir salvar solicitações com endereço digitado manualmente quando o Google Maps falhar
