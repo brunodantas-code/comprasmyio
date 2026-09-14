@@ -1283,13 +1283,13 @@ function OrgChartAdmin() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
+          <Table className="table-fixed">
             <TableHeader>
               <TableRow>
                 <TableHead>Cargo</TableHead>
-                  <TableHead>N-1</TableHead>
-                  <TableHead>N+1</TableHead>
-                  <TableHead>Usuários no cargo</TableHead>
+                <TableHead>Usuários no cargo</TableHead>
+                <TableHead className="w-56">N-1</TableHead>
+                <TableHead className="w-56">N+1</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -1297,9 +1297,12 @@ function OrgChartAdmin() {
                 <TableRow key={title.id}>
                   <TableCell className="font-medium">{title.name}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">
+                    {(namesByRole.get(title.id) ?? []).map((n) => n.name).join(", ") || "—"}
+                  </TableCell>
+                  <TableCell className="w-56 text-sm text-muted-foreground">
                     {(directReportsByRole.get(title.id) ?? []).join(", ") || "Não definido"}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="w-56">
                     <Select
                       value={hierarchy?.get(title.id) ?? "none"}
                       disabled={!isAdmin}
@@ -1313,9 +1316,6 @@ function OrgChartAdmin() {
                         ))}
                       </SelectContent>
                     </Select>
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {(namesByRole.get(title.id) ?? []).map((n) => n.name).join(", ") || "—"}
                   </TableCell>
                 </TableRow>
               ))}
