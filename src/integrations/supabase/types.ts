@@ -303,6 +303,514 @@ export type Database = {
         }
         Relationships: []
       }
+      cash_flow_accounts: {
+        Row: {
+          accepts_entries: boolean
+          active: boolean
+          code: string
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          nature: string
+          parent_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          accepts_entries?: boolean
+          active?: boolean
+          code: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          nature: string
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          accepts_entries?: boolean
+          active?: boolean
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          nature?: string
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cash_flow_accounts_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_flow_accounts_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "cash_flow_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cash_flow_bank_accounts: {
+        Row: {
+          account_number: string | null
+          active: boolean
+          agency: string | null
+          bank_name: string
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          opening_balance: number
+          opening_balance_date: string
+          updated_at: string
+        }
+        Insert: {
+          account_number?: string | null
+          active?: boolean
+          agency?: string | null
+          bank_name: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          opening_balance?: number
+          opening_balance_date?: string
+          updated_at?: string
+        }
+        Update: {
+          account_number?: string | null
+          active?: boolean
+          agency?: string | null
+          bank_name?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          opening_balance?: number
+          opening_balance_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cash_flow_bank_accounts_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cash_flow_budgets: {
+        Row: {
+          account_id: string
+          april: number
+          august: number
+          created_at: string
+          created_by: string | null
+          december: number
+          february: number
+          fiscal_year: number
+          id: string
+          january: number
+          july: number
+          june: number
+          march: number
+          may: number
+          november: number
+          october: number
+          september: number
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          april?: number
+          august?: number
+          created_at?: string
+          created_by?: string | null
+          december?: number
+          february?: number
+          fiscal_year: number
+          id?: string
+          january?: number
+          july?: number
+          june?: number
+          march?: number
+          may?: number
+          november?: number
+          october?: number
+          september?: number
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          april?: number
+          august?: number
+          created_at?: string
+          created_by?: string | null
+          december?: number
+          february?: number
+          fiscal_year?: number
+          id?: string
+          january?: number
+          july?: number
+          june?: number
+          march?: number
+          may?: number
+          november?: number
+          october?: number
+          september?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cash_flow_budgets_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "cash_flow_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_flow_budgets_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cash_flow_payable_logs: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          details: Json
+          id: string
+          payable_id: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          payable_id: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          payable_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cash_flow_payable_logs_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_flow_payable_logs_payable_id_fkey"
+            columns: ["payable_id"]
+            isOneToOne: false
+            referencedRelation: "cash_flow_payables"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cash_flow_payables: {
+        Row: {
+          account_id: string | null
+          amount: number
+          approval_number: string | null
+          classified_at: string | null
+          classified_by: string | null
+          client_id: string | null
+          cost_center_id: string | null
+          created_at: string
+          due_date: string | null
+          id: string
+          item_name: string
+          paid_at: string | null
+          project_id: string | null
+          request_type: string
+          requester_id: string
+          source_order_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          account_id?: string | null
+          amount: number
+          approval_number?: string | null
+          classified_at?: string | null
+          classified_by?: string | null
+          client_id?: string | null
+          cost_center_id?: string | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          item_name: string
+          paid_at?: string | null
+          project_id?: string | null
+          request_type: string
+          requester_id: string
+          source_order_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string | null
+          amount?: number
+          approval_number?: string | null
+          classified_at?: string | null
+          classified_by?: string | null
+          client_id?: string | null
+          cost_center_id?: string | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          item_name?: string
+          paid_at?: string | null
+          project_id?: string | null
+          request_type?: string
+          requester_id?: string
+          source_order_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cash_flow_payables_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "cash_flow_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_flow_payables_classified_by_fkey"
+            columns: ["classified_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_flow_payables_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_flow_payables_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_flow_payables_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_flow_payables_requester_id_fkey"
+            columns: ["requester_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_flow_payables_source_order_id_fkey"
+            columns: ["source_order_id"]
+            isOneToOne: true
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cash_flow_reconciliations: {
+        Row: {
+          id: string
+          matched_amount: number
+          matched_at: string
+          matched_by: string | null
+          payable_id: string
+          transaction_id: string
+        }
+        Insert: {
+          id?: string
+          matched_amount: number
+          matched_at?: string
+          matched_by?: string | null
+          payable_id: string
+          transaction_id: string
+        }
+        Update: {
+          id?: string
+          matched_amount?: number
+          matched_at?: string
+          matched_by?: string | null
+          payable_id?: string
+          transaction_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cash_flow_reconciliations_matched_by_fkey"
+            columns: ["matched_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_flow_reconciliations_payable_id_fkey"
+            columns: ["payable_id"]
+            isOneToOne: false
+            referencedRelation: "cash_flow_payables"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_flow_reconciliations_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "cash_flow_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cash_flow_statement_imports: {
+        Row: {
+          bank_account_id: string
+          file_format: string
+          file_hash: string
+          file_name: string
+          id: string
+          imported_at: string
+          imported_by: string | null
+          row_count: number
+        }
+        Insert: {
+          bank_account_id: string
+          file_format: string
+          file_hash: string
+          file_name: string
+          id?: string
+          imported_at?: string
+          imported_by?: string | null
+          row_count?: number
+        }
+        Update: {
+          bank_account_id?: string
+          file_format?: string
+          file_hash?: string
+          file_name?: string
+          id?: string
+          imported_at?: string
+          imported_by?: string | null
+          row_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cash_flow_statement_imports_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "cash_flow_bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_flow_statement_imports_imported_by_fkey"
+            columns: ["imported_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cash_flow_transactions: {
+        Row: {
+          account_id: string | null
+          amount: number
+          bank_account_id: string
+          created_at: string
+          created_by: string | null
+          dedupe_key: string
+          description: string
+          external_id: string | null
+          id: string
+          import_id: string | null
+          posted_at: string
+          reconciliation_status: string
+        }
+        Insert: {
+          account_id?: string | null
+          amount: number
+          bank_account_id: string
+          created_at?: string
+          created_by?: string | null
+          dedupe_key: string
+          description: string
+          external_id?: string | null
+          id?: string
+          import_id?: string | null
+          posted_at: string
+          reconciliation_status?: string
+        }
+        Update: {
+          account_id?: string | null
+          amount?: number
+          bank_account_id?: string
+          created_at?: string
+          created_by?: string | null
+          dedupe_key?: string
+          description?: string
+          external_id?: string | null
+          id?: string
+          import_id?: string | null
+          posted_at?: string
+          reconciliation_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cash_flow_transactions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "cash_flow_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_flow_transactions_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "cash_flow_bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_flow_transactions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_flow_transactions_import_id_fkey"
+            columns: ["import_id"]
+            isOneToOne: false
+            referencedRelation: "cash_flow_statement_imports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           cnpj: string | null
@@ -2579,6 +3087,7 @@ export type Database = {
       }
     }
     Functions: {
+      can_manage_cash_flow: { Args: { _user_id: string }; Returns: boolean }
       can_manage_limits: { Args: { _user_id: string }; Returns: boolean }
       decide_approval_step: {
         Args: { _comment?: string; _decision: string; _step_id: string }
