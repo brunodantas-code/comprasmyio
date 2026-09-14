@@ -2513,10 +2513,6 @@ export type Database = {
           target_user_id: string
         }[]
       }
-      has_app_access: {
-        Args: { _app_key: string; _user_id: string }
-        Returns: boolean
-      }
       has_job_title_name: {
         Args: { _name: string; _user_id: string }
         Returns: boolean
@@ -2529,7 +2525,6 @@ export type Database = {
         Returns: boolean
       }
       is_access_admin: { Args: { _user_id: string }; Returns: boolean }
-      is_erp_admin: { Args: { _user_id: string }; Returns: boolean }
       primary_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
