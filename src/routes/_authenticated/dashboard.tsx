@@ -36,6 +36,7 @@ import { CostCentersTab, useCostCenters } from "@/components/cost-centers-tab";
 import { JobTitlesTab, useJobTitles } from "@/components/job-titles-tab";
 import { RemindersTab } from "@/components/reminders-tab";
 import { AdditionalStepTypesTab } from "@/components/additional-step-types-tab";
+import { RequestTypesTab, requestTypeName, useRequestTypes, type RequestTypeRecord } from "@/components/request-types-tab";
 import { AccessProfilesTab } from "@/components/access-profiles-tab";
 import { ImportBatchesSection } from "@/components/import-batches";
 import { AddressAutocomplete } from "@/components/address-autocomplete";
@@ -250,13 +251,13 @@ const REQUEST_TYPE_LABELS: Record<string, string> = {
   pagamento: "Pagamento",
 };
 
-function requestTypeLabel(o: { request_type?: string | null; travel_type?: string | null }): string {
+function requestTypeLabel(o: { request_type?: string | null; travel_type?: string | null }, types?: RequestTypeRecord[]): string {
   const rt = o.request_type ?? "";
   if (rt === "viagens") {
     const sub = o.travel_type ? TRAVEL_TYPE_LABELS[o.travel_type] : undefined;
     return sub ?? "Viagens";
   }
-  return REQUEST_TYPE_LABELS[rt] ?? rt ?? "—";
+  return requestTypeName(rt, types);
 }
 
 const STATUS_KEYS = Object.keys(STATUS_LABELS) as Order["status"][];
@@ -486,7 +487,10 @@ function Dashboard() {
                 <TabsContent value="cargos"><JobTitlesTab userId={me.id} /></TabsContent>
                 <TabsContent value="lembretes"><RemindersTab /></TabsContent>
                 <TabsContent value="diversos">
-                  <AdditionalStepTypesTab />
+                  <div className="space-y-6">
+                    <RequestTypesTab />
+                    <AdditionalStepTypesTab />
+                  </div>
                 </TabsContent>
               </Tabs>
             </TabsContent>
@@ -981,6 +985,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
   const { data: projects, isLoading } = useProjects();
   const { data: budgetSummaries } = useProjectBudgetSummaries();
   const qc = useQueryClient();
+  const { data: requestTypes } = useRequestTypes();
   const [projectId, setProjectId] = useState("");
   const [forStock, setForStock] = useState(false);
   const [requestType, setRequestType] = useState<"materiais" | "servicos" | "viagens" | "reembolso" | "pagamento" | "importacao" | "dispositivos" | "rh">("materiais");
@@ -1411,16 +1416,11 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
         <SelectTrigger className="w-full sm:w-72"><SelectValue placeholder="Selecione o tipo" /></SelectTrigger>
         <SelectContent>
           {([
-            ["materiais", "Materiais"],
-            ["servicos", "Serviços"],
-            ["viagens", "Viagens"],
-            ["reembolso", "Reembolsos"],
-            ["pagamento", "Pagamento"],
-            ["rh", "Contratação de RH"],
-            ...(canImport ? [["importacao", "Importação"] as const] : []),
-            ...(isAdmin ? [["dispositivos", "Dispositivos"] as const] : []),
-          ] as const).map(([v, l]) => (
-            <SelectItem key={v} value={v}>{l}</SelectItem>
+            "materiais", "servicos", "viagens", "reembolso", "pagamento", "rh",
+            ...(canImport ? ["importacao"] : []),
+            ...(isAdmin ? ["dispositivos"] : []),
+          ]).filter((code) => requestTypes?.find((type) => type.code === code)?.active !== false).map((code) => (
+            <SelectItem key={code} value={code}>{requestTypeName(code, requestTypes)}</SelectItem>
           ))}
         </SelectContent>
       </Select>

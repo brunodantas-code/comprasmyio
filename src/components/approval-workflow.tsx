@@ -27,6 +27,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useAdditionalStepTypes, type AdditionalStepType } from "@/components/additional-step-types-tab";
+import { requestTypeName, useRequestTypes, type RequestTypeRecord } from "@/components/request-types-tab";
 
 const BRL = (v: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(v ?? 0));
@@ -59,13 +60,13 @@ const REQUEST_TYPE_LABELS: Record<string, string> = {
   pagamento: "Pagamento",
 };
 
-function requestTypeLabel(o: { request_type?: string | null; travel_type?: string | null } | null | undefined): string {
+function requestTypeLabel(o: { request_type?: string | null; travel_type?: string | null } | null | undefined, types?: RequestTypeRecord[]): string {
   const rt = o?.request_type ?? "";
   if (rt === "viagens") {
     const sub = o?.travel_type ? TRAVEL_TYPE_LABELS[o.travel_type] : undefined;
     return sub ?? "Viagens";
   }
-  return REQUEST_TYPE_LABELS[rt] ?? rt ?? "—";
+  return requestTypeName(rt, types);
 }
 
 const ACTION_LABELS: Record<string, string> = {
@@ -76,18 +77,16 @@ const ACTION_LABELS: Record<string, string> = {
   rejeitado: "Rejeitado",
 };
 
-const REQUEST_TYPES = Object.entries(REQUEST_TYPE_LABELS).map(([value, label]) => ({ value, label }));
-
-function RequestTypeCheckboxes({ values, onChange }: { values: string[]; onChange: (values: string[]) => void }) {
+function RequestTypeCheckboxes({ values, onChange, types }: { values: string[]; onChange: (values: string[]) => void; types: RequestTypeRecord[] }) {
   return (
     <div className="grid gap-2 sm:grid-cols-2">
-      {REQUEST_TYPES.map((type) => (
-        <label key={type.value} className="flex cursor-pointer items-center gap-2 text-sm">
+      {types.filter((type) => type.active || values.includes(type.code)).map((type) => (
+        <label key={type.code} className="flex cursor-pointer items-center gap-2 text-sm">
           <Checkbox
-            checked={values.includes(type.value)}
-            onCheckedChange={(checked) => onChange(checked ? [...values, type.value] : values.filter((value) => value !== type.value))}
+            checked={values.includes(type.code)}
+            onCheckedChange={(checked) => onChange(checked ? [...values, type.code] : values.filter((value) => value !== type.code))}
           />
-          {type.label}
+          {type.name}{!type.active ? " (inativo)" : ""}
         </label>
       ))}
     </div>
@@ -316,6 +315,7 @@ export function PendingForMe() {
   const { data: me } = useCurrentUser();
   const { data: steps, isLoading } = useSteps();
   const { data: profiles } = useProfiles();
+  const { data: requestTypes } = useRequestTypes();
   const [search, setSearch] = useState("");
 
   const mine = useMemo(() => {
@@ -400,7 +400,7 @@ export function PendingForMe() {
                   <TableRow key={s.id}>
                     <TableCell className="whitespace-nowrap font-mono text-xs">{o?.approval_number ?? "—"}</TableCell>
                     <TableCell className="font-medium">
-                      {requestTypeLabel(o)}
+                      {requestTypeLabel(o, requestTypes)}
                       <span className="ml-1 text-xs text-muted-foreground">x{o?.quantity ?? 1}</span>
                       {o?.budget_exceeded && <Badge variant="destructive" className="ml-2 gap-1"><AlertTriangle className="h-3 w-3" />Orçamento excedido</Badge>}
                     </TableCell>
@@ -430,6 +430,7 @@ export function MyApprovalFlows() {
   const { data: me } = useCurrentUser();
   const { data: steps, isLoading } = useSteps();
   const { data: profiles } = useProfiles();
+  const { data: requestTypes } = useRequestTypes();
   const [search, setSearch] = useState("");
 
   const orders = useMemo(() => {
@@ -485,7 +486,7 @@ export function MyApprovalFlows() {
                   <div>
                     <p className="font-mono text-xs text-muted-foreground">{o?.approval_number ?? "—"}</p>
                     <p className="font-medium">
-                      {requestTypeLabel(o)}{" "}
+                      {requestTypeLabel(o, requestTypes)}{" "}
                       <span className="text-xs text-muted-foreground">x{o?.quantity ?? 1}</span>
                       {o?.budget_exceeded && <Badge variant="destructive" className="ml-2 gap-1"><AlertTriangle className="h-3 w-3" />Orçamento excedido</Badge>}
                     </p>
@@ -715,7 +716,7 @@ function EditRuleDialog({
           </div>
           <div className="space-y-2">
             <Label>Vincular ao Tipo de Solicitação</Label>
-            <RequestTypeCheckboxes values={requestTypes} onChange={setRequestTypes} />
+            <RequestTypeCheckboxes values={requestTypes} onChange={setRequestTypes} types={requestTypesCatalog} />
           </div>
         </div>
         <DialogFooter>
