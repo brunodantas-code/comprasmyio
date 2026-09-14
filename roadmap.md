@@ -75,3 +75,4 @@
 - [x] Reorganizar Etapas Adicionais em Cadastro > Diversos, com tipos configuráveis e vínculo à solicitação
 - [x] Incluir filtros e ordenação na lista de Projetos
 - [x] Bloquear exclusão de Projeto, Cliente ou Centro de Custo com solicitações e permitir realocação individual
+- [x] Mover Etapas Adicionais de Cadastro > Diversos para Approval Workflow e manter Diversos disponível
