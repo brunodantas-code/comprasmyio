@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      additional_step_types: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       approval_rules: {
         Row: {
           active: boolean
@@ -51,7 +75,15 @@ export type Database = {
           step_type?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "approval_rules_step_type_fkey"
+            columns: ["step_type"]
+            isOneToOne: false
+            referencedRelation: "additional_step_types"
+            referencedColumns: ["code"]
+          },
+        ]
       }
       approval_settings: {
         Row: {
