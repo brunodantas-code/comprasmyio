@@ -1478,16 +1478,9 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
   );
 
   const requestTypeHeader = (
-    <div className="space-y-4">
-      <Card className="max-w-2xl">
-        <CardHeader>
-          <CardTitle>Novas Solicitações</CardTitle>
-        </CardHeader>
-      </Card>
-      <Card className="max-w-2xl">
-        <CardContent className="pt-6">{typeSelector}</CardContent>
-      </Card>
-    </div>
+    <Card className="max-w-2xl">
+      <CardContent className="pt-6">{typeSelector}</CardContent>
+    </Card>
   );
 
   if (!requestType) return requestTypeHeader;
