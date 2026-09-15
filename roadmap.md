@@ -161,3 +161,4 @@
 - [x] Atualizar a descrição de Dispositivos myio para “Dispositivos produzidos pela Fábrica”.
 - [x] Reposicionar Estoque de Componentes como o primeiro submenu de Fábrica.
 - [x] Realocar Checar QR Code para Estoque, após Insumos de Instalação.
+- [x] Realocar Transporte para dentro de Expedição, em bloco próprio abaixo do existente.
