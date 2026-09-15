@@ -122,6 +122,7 @@ function MoveUnitProductDialog({
         .from("unit_products")
         .update({
           moved_to: storedDestination,
+          destination_code: destination,
           moved_technician: destination === "tecnico" ? technician.trim() : null,
           project_id: destination === "cliente" ? projectId : product.project_id,
           client_name: destination === "cliente" ? selectedProject?.client_name ?? selectedProject?.name ?? null : product.client_name,

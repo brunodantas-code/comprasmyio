@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Minus, Pencil, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { LinkedRecordDeletionDialog } from "@/components/linked-record-deletion-dialog";
 
 export type AdditionalStepType = {
   code: string;
@@ -55,6 +57,7 @@ export function AdditionalStepTypesTab() {
   const { data: types, isLoading } = useAdditionalStepTypes();
   const [name, setName] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const invalidate = () => qc.invalidateQueries({ queryKey: ["additional-step-types"] });
 
   const create = useMutation({
@@ -115,10 +118,11 @@ export function AdditionalStepTypesTab() {
   });
 
   return (
+      <Collapsible open={expanded} onOpenChange={setExpanded} asChild>
       <Card>
         <CardHeader className="flex flex-row items-start justify-between gap-4">
           <div><CardTitle>Tipos de Etapa Adicional</CardTitle><CardDescription>Os tipos ativos ficam disponíveis nas Etapas Adicionais.</CardDescription></div>
-          <Dialog open={createOpen} onOpenChange={(open) => { setCreateOpen(open); if (!open) setName(""); }}>
+          <div className="flex items-center gap-1"><CollapsibleContent><Dialog open={createOpen} onOpenChange={(open) => { setCreateOpen(open); if (!open) setName(""); }}>
             <DialogTrigger asChild><Button size="icon" aria-label="Criar tipo de etapa adicional" title="Criar tipo"><Plus className="h-4 w-4" /></Button></DialogTrigger>
             <DialogContent>
               <DialogHeader><DialogTitle>Novo tipo de etapa adicional</DialogTitle><DialogDescription>Cadastre um novo item para esta lista.</DialogDescription></DialogHeader>
@@ -127,9 +131,9 @@ export function AdditionalStepTypesTab() {
                 <DialogFooter><Button type="submit" disabled={create.isPending}>Criar</Button></DialogFooter>
               </form>
             </DialogContent>
-          </Dialog>
+          </Dialog></CollapsibleContent><CollapsibleTrigger asChild><Button size="icon" variant="ghost" aria-label={expanded ? "Recolher Tipos de Etapa Adicional" : "Expandir Tipos de Etapa Adicional"} title={expanded ? "Recolher" : "Expandir"}>{expanded ? <Minus className="h-4 w-4" /> : <Plus className="h-4 w-4" />}</Button></CollapsibleTrigger></div>
         </CardHeader>
-        <CardContent>
+        <CollapsibleContent asChild><CardContent>
           {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : (
             <Table>
               <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Ativo</TableHead><TableHead /></TableRow></TableHeader>
@@ -140,7 +144,7 @@ export function AdditionalStepTypesTab() {
                     <TableCell><Switch checked={type.active} onCheckedChange={(active) => toggle.mutate({ code: type.code, active })} /></TableCell>
                     <TableCell className="space-x-1 text-right whitespace-nowrap">
                       <EditTypeDialog type={type} saving={update.isPending} onSave={(nextName) => update.mutateAsync({ code: type.code, name: nextName })} />
-                      <DeleteTypeDialog type={type} deleting={remove.isPending} onConfirm={() => remove.mutateAsync(type.code)} />
+                       <LinkedRecordDeletionDialog entityId={type.code} entityName={type.name} entityLabel="tipo de etapa adicional" linkField="request_type" registry="additional_step_type" destinations={(types ?? []).filter((item) => item.active).map((item) => ({ id: item.code, name: item.name }))} onDelete={() => remove.mutate(type.code)} deleting={remove.isPending} />
                     </TableCell>
                   </TableRow>
                 ))}
@@ -148,8 +152,9 @@ export function AdditionalStepTypesTab() {
               </TableBody>
             </Table>
           )}
-        </CardContent>
+        </CardContent></CollapsibleContent>
       </Card>
+      </Collapsible>
   );
 }
 
@@ -165,19 +170,6 @@ function EditTypeDialog({ type, saving, onSave }: { type: AdditionalStepType; sa
           <div className="space-y-2"><Label htmlFor={`edit-${type.code}`}>Nome</Label><Input id={`edit-${type.code}`} value={name} onChange={(event) => setName(event.target.value)} required /></div>
           <DialogFooter><Button type="submit" disabled={saving}>Salvar</Button></DialogFooter>
         </form>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function DeleteTypeDialog({ type, deleting, onConfirm }: { type: AdditionalStepType; deleting: boolean; onConfirm: () => Promise<unknown> }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild><Button size="icon" variant="ghost" title="Excluir" aria-label="Excluir" className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button></DialogTrigger>
-      <DialogContent>
-        <DialogHeader><DialogTitle>Excluir tipo</DialogTitle><DialogDescription>Confirma a exclusão de {type.name}? Tipos usados em etapas não podem ser excluídos.</DialogDescription></DialogHeader>
-        <DialogFooter><Button variant="destructive" disabled={deleting} onClick={async () => { try { await onConfirm(); setOpen(false); } catch { /* A mensagem é exibida pela alteração. */ } }}>Excluir</Button></DialogFooter>
       </DialogContent>
     </Dialog>
   );

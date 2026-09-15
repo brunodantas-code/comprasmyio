@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Pencil, Plus } from "lucide-react";
+import { Minus, Pencil, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -13,6 +13,7 @@ import { LinkedRecordDeletionDialog } from "@/components/linked-record-deletion-
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 export type RequestTypeRecord = { code: string; name: string; active: boolean; position: number; model_code: string; is_system: boolean };
 
@@ -56,6 +57,7 @@ export function RequestTypesTab() {
   const qc = useQueryClient();
   const { data: types, isLoading } = useRequestTypes();
   const [createOpen, setCreateOpen] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const invalidate = () => qc.invalidateQueries({ queryKey: ["request-types"] });
 
   const create = useMutation({
@@ -107,12 +109,16 @@ export function RequestTypesTab() {
   });
 
   return (
+    <Collapsible open={expanded} onOpenChange={setExpanded} asChild>
     <Card>
       <CardHeader className="flex flex-row items-start justify-between gap-4">
         <div><CardTitle>Tipos de Solicitação</CardTitle><CardDescription>Crie tipos a partir de um modelo de formulário existente.</CardDescription></div>
-        <CreateRequestTypeDialog open={createOpen} onOpenChange={setCreateOpen} saving={create.isPending} onSave={(name, modelCode) => create.mutateAsync({ name, modelCode })} />
+        <div className="flex items-center gap-1">
+          <CollapsibleContent><CreateRequestTypeDialog open={createOpen} onOpenChange={setCreateOpen} saving={create.isPending} onSave={(name, modelCode) => create.mutateAsync({ name, modelCode })} /></CollapsibleContent>
+          <CollapsibleTrigger asChild><Button size="icon" variant="ghost" aria-label={expanded ? "Recolher Tipos de Solicitação" : "Expandir Tipos de Solicitação"} title={expanded ? "Recolher" : "Expandir"}>{expanded ? <Minus className="h-4 w-4" /> : <Plus className="h-4 w-4" />}</Button></CollapsibleTrigger>
+        </div>
       </CardHeader>
-      <CardContent>
+      <CollapsibleContent asChild><CardContent>
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : (
           <Table>
             <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Modelo</TableHead><TableHead>Ativo</TableHead><TableHead /></TableRow></TableHeader>
@@ -130,7 +136,9 @@ export function RequestTypesTab() {
                         entityName={type.name}
                         entityLabel="tipo de solicitação"
                         linkField="request_type"
+                        registry="request_type"
                         destinations={(types ?? []).filter((item) => item.active).map((item) => ({ id: item.code, name: item.name }))}
+                        deleteBlockedReason={type.is_system ? "Este é um tipo estrutural do sistema. Ele pode ser editado ou desativado, mas não excluído." : undefined}
                         onDelete={() => remove.mutate(type.code)}
                         deleting={remove.isPending}
                       />
@@ -142,8 +150,9 @@ export function RequestTypesTab() {
             </TableBody>
           </Table>
         )}
-      </CardContent>
+      </CardContent></CollapsibleContent>
     </Card>
+    </Collapsible>
   );
 }
 
