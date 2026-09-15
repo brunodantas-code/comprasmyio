@@ -168,3 +168,4 @@
 - [x] Tornar Projeto e Cliente excludentes nas solicitações de Dispositivos myio e exigir uma classificação única para Cliente.
 - [x] Renomear o formulário para “Nova solicitação de Dispositivos myio e Insumos de Instalação”.
 - [x] Atualizar a orientação do formulário para informar a escolha exclusiva entre Projeto e Cliente.
+- [x] Corrigir a visualização de solicitações de Dispositivos myio aprovadas para usuários do perfil Fábrica.
