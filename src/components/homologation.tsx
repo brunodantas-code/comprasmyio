@@ -861,7 +861,7 @@ export function HomologateDialog({
         material_id: stockMaterialId,
         quantity: boxSize,
         type: "entrada",
-        reason: boxSize === 1 ? "Homologação — produto unitário" : `Homologação — caixa de ${boxSize}`,
+        reason: boxSize === 1 ? "Homologação — dispositivo unitário" : `Homologação — caixa de ${boxSize}`,
         created_by: userId,
       });
       if (stockErr) throw stockErr;
