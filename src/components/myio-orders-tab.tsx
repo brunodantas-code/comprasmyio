@@ -134,11 +134,10 @@ export function NewMyioOrderDialog({ userId, triggerLabel, inline = false }: { u
   const [clientReason, setClientReason] = useState<keyof typeof CLIENT_REASON_LABELS | "">("");
   const [date, setDate] = useState("");
   const [notes, setNotes] = useState("");
-  const [isReplacement, setIsReplacement] = useState(false);
   const [qty, setQty] = useState<Record<string, string>>({});
 
   const reset = () => {
-    setProjectId(""); setClientId(""); setClientReason(""); setDate(""); setNotes(""); setQty({}); setIsReplacement(false);
+    setProjectId(""); setClientId(""); setClientReason(""); setDate(""); setNotes(""); setQty({});
   };
 
   const mutation = useMutation({
@@ -155,7 +154,7 @@ export function NewMyioOrderDialog({ userId, triggerLabel, inline = false }: { u
         _project_id: (projectId || null) as never,
         _client_id: (clientId || null) as never,
         _delivery_date: date,
-        _is_replacement: isReplacement,
+        _is_replacement: clientReason === "reposicao_mau_uso",
         _client_request_reason: (clientReason || null) as never,
         _notes: (notes.trim() || null) as never,
         _items: items,
@@ -207,22 +206,20 @@ export function NewMyioOrderDialog({ userId, triggerLabel, inline = false }: { u
 
       {clientId && (
         <div className="space-y-2">
-          <Label>Motivo da solicitação para o cliente</Label>
+          <Label>Classificação da solicitação para o cliente</Label>
           <div className="grid gap-2 sm:grid-cols-3">
             {(Object.entries(CLIENT_REASON_LABELS) as [keyof typeof CLIENT_REASON_LABELS, string][]).map(([value, label]) => (
               <label key={value} className="flex cursor-pointer items-center gap-2 rounded-md border p-3 text-sm">
-                <Checkbox checked={clientReason === value} onCheckedChange={(checked) => setClientReason(checked ? value : "")} />
+                <Checkbox
+                  checked={clientReason === value}
+                  onCheckedChange={(checked) => setClientReason(checked ? value : "")}
+                />
                 {label}
               </label>
             ))}
           </div>
         </div>
       )}
-
-      <div className="flex items-center gap-2 rounded-md border p-3">
-        <Checkbox id="myio-replacement" checked={isReplacement} onCheckedChange={(v) => setIsReplacement(v === true)} />
-        <Label htmlFor="myio-replacement" className="cursor-pointer font-normal">Produto de reposição</Label>
-      </div>
 
       <div className="space-y-2">
         <Label>Produtos</Label>
