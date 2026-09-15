@@ -145,4 +145,4 @@
 - [x] Revisar a duplicidade visual entre Importações e Pedidos de Importação em Minhas Solicitações.
 - [x] Consolidar Importações e Pedidos de Importação em um único bloco.
 - [x] Alinhar os textos de acompanhamento aos tipos de solicitação exibidos em cada bloco.
-- [ ] Permitir configurar tipos de solicitação por Perfil de Acesso e tratar alterações individuais como customização.
+- [x] Permitir configurar tipos de solicitação por Perfil de Acesso e tratar alterações individuais como customização.
