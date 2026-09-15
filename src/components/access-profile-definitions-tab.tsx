@@ -50,11 +50,12 @@ export function useAccessProfileDefinitions() {
 }
 
 async function savePermissions(profileCode: string, permissions: Set<string>) {
+  const selectablePermissions = [...permissions].filter((menuKey) => menuKey !== "usuarios" && !menuKey.startsWith("usuarios_"));
   const { error: deleteError } = await supabase.from("access_profile_permissions").delete().eq("profile_code", profileCode);
   if (deleteError) throw deleteError;
-  if (permissions.size === 0) return;
+  if (selectablePermissions.length === 0) return;
   const { error } = await supabase.from("access_profile_permissions").insert(
-    [...permissions].map((menuKey) => ({ profile_code: profileCode, menu_key: menuKey, allowed: true })),
+    selectablePermissions.map((menuKey) => ({ profile_code: profileCode, menu_key: menuKey, allowed: true })),
   );
   if (error) throw error;
 }
@@ -140,7 +141,7 @@ function ProfileDialog({ definition, title, saving, onSave }: { definition?: Acc
         <DialogHeader><DialogTitle>{title}</DialogTitle><DialogDescription>Escolha exatamente quais áreas estarão disponíveis para quem receber este perfil.</DialogDescription></DialogHeader>
         <form className="space-y-5" onSubmit={async (event) => { event.preventDefault(); if (name.trim().length < 2) return toast.error("Nome muito curto."); try { await onSave(name.trim(), permissions); setOpen(false); } catch { /* A mensagem é exibida pela alteração. */ } }}>
           <div className="space-y-2"><Label>Nome</Label><Input value={name} onChange={(event) => setName(event.target.value)} placeholder="Inserir nome" required /></div>
-          <div className="space-y-2"><Label>Menus e submenus</Label><MenuPermissionSelector value={permissions} onChange={setPermissions} disabled={isAdmin} /></div>
+          <div className="space-y-2"><Label>Menus e submenus</Label><MenuPermissionSelector value={permissions} onChange={setPermissions} disabled={isAdmin} showAdministration={isAdmin} /></div>
           <DialogFooter><Button type="submit" disabled={saving}>Salvar perfil</Button></DialogFooter>
         </form>
       </DialogContent>

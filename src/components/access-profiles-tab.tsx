@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ShieldCheck } from "lucide-react";
+import { Search, ShieldCheck } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import { MenuPermissionSelector } from "@/components/menu-permission-selector";
@@ -20,6 +21,7 @@ function symmetricDifference(first: Set<string>, second: Set<string>) {
 
 export function AccessProfilesTab() {
   const qc = useQueryClient();
+  const [nameFilter, setNameFilter] = useState("");
   const { data, isLoading } = useQuery({
     queryKey: ["custom-access-profiles"],
     queryFn: async () => {
@@ -43,6 +45,7 @@ export function AccessProfilesTab() {
         return {
           ...profile,
           profileName: definition?.name ?? "Restrito",
+          isAdmin: definition?.base_profile === "admin",
           permissions: selectedPermissions,
           profilePermissions,
           differences: symmetricDifference(selectedPermissions, profilePermissions),
@@ -50,6 +53,11 @@ export function AccessProfilesTab() {
       });
     },
   });
+
+  const normalizedFilter = nameFilter.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR");
+  const filteredUsers = data?.filter((user) =>
+    (user.full_name || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR").includes(normalizedFilter),
+  );
 
   const updatePermissions = useMutation({
     mutationFn: async ({ userId, permissions, profilePermissions }: { userId: string; permissions: Set<string>; profilePermissions: Set<string> }) => {
@@ -78,9 +86,21 @@ export function AccessProfilesTab() {
         <CardDescription>Adicione ou remova acessos do perfil atual de cada usuário.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        <div className="relative max-w-sm">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <input
+            aria-label="Filtrar por nome do usuário"
+            className="flex h-10 w-full rounded-md border border-input bg-background py-2 pl-9 pr-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            onChange={(event) => setNameFilter(event.target.value)}
+            placeholder="Filtrar por nome do usuário"
+            type="search"
+            value={nameFilter}
+          />
+        </div>
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : null}
         {!isLoading && data?.length === 0 ? <p className="text-sm text-muted-foreground">Nenhum usuário cadastrado.</p> : null}
-        {data?.map((user) => (
+        {!isLoading && data?.length !== 0 && filteredUsers?.length === 0 ? <p className="text-sm text-muted-foreground">Nenhum usuário encontrado.</p> : null}
+        {filteredUsers?.map((user) => (
           <div key={user.id} className="space-y-3 rounded-md border border-border p-3">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
@@ -91,7 +111,7 @@ export function AccessProfilesTab() {
               </div>
               <p className="truncate text-xs text-muted-foreground">{user.email}</p>
             </div>
-            <MenuPermissionSelector value={user.permissions} highlightedKeys={user.differences} disabled={updatePermissions.isPending} onChange={(permissions) => updatePermissions.mutate({ userId: user.id, permissions, profilePermissions: user.profilePermissions })} />
+            <MenuPermissionSelector value={user.permissions} highlightedKeys={user.differences} showAdministration={user.isAdmin} disabled={user.isAdmin || updatePermissions.isPending} onChange={(permissions) => updatePermissions.mutate({ userId: user.id, permissions, profilePermissions: user.profilePermissions })} />
           </div>
         ))}
       </CardContent>

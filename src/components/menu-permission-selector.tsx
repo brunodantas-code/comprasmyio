@@ -7,15 +7,21 @@ export function MenuPermissionSelector({
   onChange,
   disabled = false,
   highlightedKeys = new Set<string>(),
+  showAdministration = false,
 }: {
   value: Set<string>;
   onChange: (next: Set<string>) => void;
   disabled?: boolean;
   highlightedKeys?: Set<string>;
+  showAdministration?: boolean;
 }) {
+  const visibleGroups = showAdministration
+    ? MENU_PERMISSION_GROUPS
+    : MENU_PERMISSION_GROUPS.filter((group) => group.key !== "usuarios");
+
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {MENU_PERMISSION_GROUPS.map((group) => (
+      {visibleGroups.map((group) => (
         <div key={group.key} className="space-y-2 rounded-md border border-border p-3">
           <label className="flex items-center gap-2 text-sm font-medium">
             <Checkbox

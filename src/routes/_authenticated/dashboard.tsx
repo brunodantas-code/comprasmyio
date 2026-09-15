@@ -399,7 +399,7 @@ function Dashboard() {
   const isAdmin = me.isAdmin;
   const canSeeRequests = me.canAccess("solicitacoes");
   const canSeeRegistration = me.canAccess("cadastro");
-  const canSeeAdministration = me.canAccess("usuarios");
+  const canSeeAdministration = isAdmin;
   const fabricaOnly = me.isFabrica && !isAdmin;
   const estoquistaOnly = me.isEstoquista && !isAdmin && !me.isFabrica;
   const canSeeStock = me.canAccess("armazem");
