@@ -65,6 +65,7 @@ export function useCurrentUser() {
       const profileMenus = new Set((definition?.access_profile_permissions ?? []).filter((item) => item.allowed).map((item) => item.menu_key));
       const canAccess = (menu: MenuKey) => {
         if (accessProfileBase === "admin") return true;
+        if (menu === "usuarios" || menu.startsWith("usuarios_")) return false;
         return (isCustomized ? individualMenus : profileMenus).has(menu);
       };
       return {
