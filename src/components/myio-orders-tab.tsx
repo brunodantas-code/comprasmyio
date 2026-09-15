@@ -152,12 +152,12 @@ export function NewMyioOrderDialog({ userId, triggerLabel }: { userId: string; t
       if (items.length === 0) throw new Error("Adicione a quantidade de pelo menos um produto.");
 
       const { data, error } = await supabase.rpc("create_myio_order_request", {
-        _project_id: projectId || null,
-        _client_id: clientId || null,
+        _project_id: (projectId || null) as never,
+        _client_id: (clientId || null) as never,
         _delivery_date: date,
         _is_replacement: isReplacement,
-        _client_request_reason: clientReason || null,
-        _notes: notes.trim() || null,
+        _client_request_reason: (clientReason || null) as never,
+        _notes: (notes.trim() || null) as never,
         _items: items,
       });
       if (error) throw error;
@@ -195,9 +195,10 @@ export function NewMyioOrderDialog({ userId, triggerLabel }: { userId: string; t
         <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
           <div className="space-y-2">
             <Label>Projeto (opcional)</Label>
-            <Select value={projectId} onValueChange={setProjectId}>
+            <Select value={projectId || "none"} onValueChange={(value) => setProjectId(value === "none" ? "" : value)}>
               <SelectTrigger><SelectValue placeholder="Selecione um projeto" /></SelectTrigger>
               <SelectContent>
+                <SelectItem value="none">Nenhum projeto</SelectItem>
                 {(projects ?? []).map((p) => (
                   <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                 ))}
