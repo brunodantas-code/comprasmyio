@@ -133,3 +133,4 @@
 
 - [x] Ajustar solicitações de Dispositivos myio: somente do próprio usuário, acesso pela lista de tipos, Cliente e Projeto independentes, Approval normal por quantidade e liberação após aprovação.
 - [x] Exigir classificação Manutenção, Reposição por mal uso ou Upsell quando a solicitação de Dispositivos myio tiver Cliente.
+- [x] Separar a seleção do tipo do formulário em Novas Solicitações e manter os campos ocultos até a escolha.

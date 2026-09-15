@@ -1023,8 +1023,8 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
   const { data: requestTypes } = useRequestTypes();
   const [projectId, setProjectId] = useState("");
   const [forStock, setForStock] = useState(false);
-  const [requestType, setRequestType] = useState<string>("materiais");
-  const requestModel = requestTypeModel(requestType, requestTypes);
+  const [requestType, setRequestType] = useState<string>("");
+  const requestModel = requestType ? requestTypeModel(requestType, requestTypes) : "";
   const [rhCargo, setRhCargo] = useState("");
   const [rhGestor, setRhGestor] = useState("");
   const [rhMotivo, setRhMotivo] = useState("");
@@ -1166,7 +1166,7 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
     formRef.current?.reset();
     setProjectId("");
     setForStock(false);
-    setRequestType("materiais");
+    setRequestType("");
     setAllocTarget("projeto");
     setClientId("");
 
@@ -1477,15 +1477,25 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
     </div>
   );
 
+  const requestTypeHeader = (
+    <div className="space-y-4">
+      <Card className="max-w-2xl">
+        <CardHeader>
+          <CardTitle>Novas Solicitações</CardTitle>
+        </CardHeader>
+      </Card>
+      <Card className="max-w-2xl">
+        <CardContent className="pt-6">{typeSelector}</CardContent>
+      </Card>
+    </div>
+  );
+
+  if (!requestType) return requestTypeHeader;
+
   if (requestModel === "importacao") {
     return (
       <div className="space-y-4">
-        <Card className="max-w-2xl">
-          <CardHeader>
-            <CardTitle>Novas Solicitações</CardTitle>
-          </CardHeader>
-          <CardContent>{typeSelector}</CardContent>
-        </Card>
+        {requestTypeHeader}
         <ImportOrders userId={userId} />
       </div>
     );
@@ -1494,10 +1504,9 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
   if (requestModel === "dispositivos") {
     return (
       <div className="space-y-4">
+        {requestTypeHeader}
         <Card className="max-w-2xl">
-          <CardHeader><CardTitle>Novas Solicitações</CardTitle></CardHeader>
-          <CardContent className="space-y-4">
-            {typeSelector}
+          <CardContent className="pt-6">
             <NewMyioOrderDialog userId={userId} triggerLabel="Abrir solicitação de Dispositivos myio" />
           </CardContent>
         </Card>
@@ -1506,23 +1515,16 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
   }
 
   return (
-    <Card className="max-w-2xl">
-      <CardHeader>
-        <CardTitle>Novas Solicitações</CardTitle>
-        
-      </CardHeader>
-      <CardContent>
+    <div className="space-y-4">
+      {requestTypeHeader}
+      <Card className="max-w-2xl">
+        <CardContent className="pt-6">
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando projetos...</p>
         ) : !projects?.length ? (
           <p className="text-sm text-muted-foreground">Nenhum projeto disponível. Peça a um admin para criar um.</p>
         ) : (
           <form ref={formRef} onSubmit={onSubmit} className="space-y-4">
-
-            {typeSelector}
-
-
-
             {requestModel === "viagens" && (
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
@@ -2070,8 +2072,9 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
 
   );
 }
