@@ -1,0 +1,1 @@
+ALTER FUNCTION public.create_myio_order_request(uuid, uuid, date, boolean, text, text, jsonb) SECURITY INVOKER;
