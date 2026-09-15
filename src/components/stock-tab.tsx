@@ -496,6 +496,7 @@ type StockPermissionKey =
 export function StockTab({ userId, canDelete, onlyLocation, canAccessSection = () => true }: { userId: string; canDelete?: boolean; onlyLocation?: StockLocation; canAccessSection?: (permission: StockPermissionKey) => boolean }) {
   const stockGroupPermissions: StockPermissionKey[] = [
     "armazem_estoque_myio",
+    "armazem_checar_qr",
     "armazem_expedicao",
     "armazem_transporte",
     "armazem_cliente",
@@ -510,7 +511,6 @@ export function StockTab({ userId, canDelete, onlyLocation, canAccessSection = (
   const topTabs = [
     { value: "fabrica", label: "Fábrica", allowed: canShowFactoryGroup },
     { value: "estoque", label: "Estoque", allowed: canShowStockGroup },
-    { value: "qr-check", label: "Checar QR Code", allowed: !onlyLocation && canAccessSection("armazem_checar_qr") },
     { value: "almoxarifado_geral", label: "Almoxarifado", allowed: (!onlyLocation || onlyLocation === "almoxarifado_geral") && canAccessSection("armazem_almoxarifado") },
     { value: "ferramentas", label: "Ferramentas/Ativos", allowed: !onlyLocation && canAccessSection("armazem_ferramentas_ativos") },
   ];
@@ -549,14 +549,6 @@ export function StockTab({ userId, canDelete, onlyLocation, canAccessSection = (
         <TabsContent value="almoxarifado_geral">
           <StockSection userId={userId} location="almoxarifado_geral" canDelete={canDelete} />
         </TabsContent>
-      )}
-      {permittedTabs.some((tab) => tab.value === "qr-check") && (
-          <TabsContent value="qr-check">
-            <div className="space-y-4">
-              <ExternalSyncCard />
-              <QrCheckSection />
-            </div>
-          </TabsContent>
       )}
     </Tabs>
   );
@@ -2061,6 +2053,7 @@ function EstoqueMyioSection({ userId, canDelete, canAccessSection = () => true }
     { value: "ordens", label: "Solicitações", permission: "armazem_estoque_myio" as const },
     { value: "dispositivos", label: "Dispositivos myio", permission: "armazem_estoque_myio" as const },
     { value: "insumos", label: "Insumos de Instalação", permission: "armazem_estoque_myio" as const },
+    { value: "qr-check", label: "Checar QR Code", permission: "armazem_checar_qr" as const },
     { value: "expedicao", label: "Expedição", permission: "armazem_expedicao" as const },
     { value: "transporte", label: "Transporte", permission: "armazem_transporte" as const },
     { value: "cliente", label: "Cliente", permission: "armazem_cliente" as const },
@@ -2077,6 +2070,7 @@ function EstoqueMyioSection({ userId, canDelete, canAccessSection = () => true }
       {canAccessSection("armazem_estoque_myio") && <TabsContent value="ordens"><MyioOrdersStockSection /></TabsContent>}
       {canAccessSection("armazem_estoque_myio") && <TabsContent value="dispositivos"><MyioDevicesStockSection userId={userId} canDelete={canDelete} /></TabsContent>}
       {canAccessSection("armazem_estoque_myio") && <TabsContent value="insumos"><TerceirosSection userId={userId} canDelete={canDelete} /></TabsContent>}
+      {canAccessSection("armazem_checar_qr") && <TabsContent value="qr-check"><div className="space-y-4"><ExternalSyncCard /><QrCheckSection /></div></TabsContent>}
       {canAccessSection("armazem_expedicao") && <TabsContent value="expedicao"><DistributionCard /></TabsContent>}
       {canAccessSection("armazem_transporte") && <TabsContent value="transporte"><div className="space-y-4"><TransitCard /><StockSection userId={userId} location="transito" canDelete={canDelete} /></div></TabsContent>}
       {canAccessSection("armazem_cliente") && <TabsContent value="cliente"><StockSection userId={userId} location="unidade" canDelete={canDelete} /></TabsContent>}

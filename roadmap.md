@@ -160,3 +160,4 @@
 - [x] Renomear o submenu Solicitações de Dispositivos myio para Solicitações.
 - [x] Atualizar a descrição de Dispositivos myio para “Dispositivos produzidos pela Fábrica”.
 - [x] Reposicionar Estoque de Componentes como o primeiro submenu de Fábrica.
+- [x] Realocar Checar QR Code para Estoque, após Insumos de Instalação.
