@@ -2050,13 +2050,13 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
 
 function EstoqueMyioSection({ userId, canDelete, canAccessSection = () => true }: { userId: string; canDelete?: boolean; canAccessSection?: (permission: StockPermissionKey) => boolean }) {
   const tabs = [
-    { value: "ordens", label: "Solicitações", permission: "armazem_estoque_myio" as const },
-    { value: "dispositivos", label: "Dispositivos myio", permission: "armazem_estoque_myio" as const },
+    { value: "dispositivos", label: "myio", permission: "armazem_estoque_myio" as const },
+    { value: "cliente", label: "Clientes", permission: "armazem_cliente" as const },
+    { value: "tecnico", label: "Técnicos", permission: "armazem_tecnico" as const },
     { value: "insumos", label: "Insumos de Instalação", permission: "armazem_estoque_myio" as const },
-    { value: "qr-check", label: "Checar QR Code", permission: "armazem_checar_qr" as const },
+    { value: "ordens", label: "Solicitações", permission: "armazem_estoque_myio" as const },
     { value: "expedicao", label: "Expedição", permission: "armazem_expedicao" as const },
-    { value: "cliente", label: "Cliente", permission: "armazem_cliente" as const },
-    { value: "tecnico", label: "Técnico", permission: "armazem_tecnico" as const },
+    { value: "qr-check", label: "Checar QR Code", permission: "armazem_checar_qr" as const },
   ].filter((tab) => {
     if (tab.value === "dispositivos") {
       return canAccessSection("armazem_estoque_myio")
