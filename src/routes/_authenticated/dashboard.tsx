@@ -2474,7 +2474,7 @@ function OrdersTable({
               </Row>
               <Row label="Itens da Solicitação">
                 <div className="flex flex-wrap items-center gap-2">
-                  <FullTextPopover text={o.item_name ?? ""} />
+                  <span className="text-sm break-words">{o.item_name || "—"}</span>
                   {o.item_link ? (
                     <a href={o.item_link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
                       ver link <ExternalLink className="h-3 w-3" />
@@ -2606,7 +2606,7 @@ function OrdersTable({
               </TableCell>
               <TableCell>
                 <div className="flex flex-wrap items-center gap-2">
-                  <FullTextPopover text={o.item_name ?? ""} />
+                  <span className="text-sm break-words">{o.item_name || "—"}</span>
                   {o.item_link ? (
                     <a href={o.item_link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
                       ver link <ExternalLink className="h-3 w-3" />
