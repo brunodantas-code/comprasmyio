@@ -14,6 +14,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { ProductImageUploader, ProductPhotoPreview, useProductImages } from "@/components/myio-product-image";
 import { ItemDeliveriesDialog } from "@/components/myio-delivery-qr";
+import { useClients } from "@/components/clients-tab";
 import { toast } from "sonner";
 import { Plus, Trash2, Factory, Pencil, Check } from "lucide-react";
 
@@ -63,8 +64,12 @@ type MyioOrder = {
   notes: string | null;
   created_at: string;
   project_id: string | null;
+  client_id: string | null;
+  client_request_reason: "manutencao" | "reposicao_mau_uso" | "upsell" | null;
   is_replacement: boolean | null;
   projects: { name: string } | null;
+  clients: { name: string } | null;
+  purchase_orders: { approval_number: string | null; approval_status: string } | null;
   myio_order_items: { id: string; product: string; quantity: number }[];
 };
 
@@ -111,20 +116,29 @@ function useMyioProductOptions() {
 }
 
 
-function NewMyioOrderDialog({ userId }: { userId: string }) {
+const CLIENT_REASON_LABELS = {
+  manutencao: "Manutenção",
+  reposicao_mau_uso: "Reposição por mal uso",
+  upsell: "Upsell",
+} as const;
+
+export function NewMyioOrderDialog({ userId, triggerLabel }: { userId: string; triggerLabel?: string }) {
   const qc = useQueryClient();
   const { data: projects } = useProjects();
+  const { data: clients } = useClients();
   const { data: images } = useProductImages();
   const products = useMyioProductOptions();
   const [open, setOpen] = useState(false);
   const [projectId, setProjectId] = useState("");
+  const [clientId, setClientId] = useState("");
+  const [clientReason, setClientReason] = useState<keyof typeof CLIENT_REASON_LABELS | "">("");
   const [date, setDate] = useState("");
   const [notes, setNotes] = useState("");
   const [isReplacement, setIsReplacement] = useState(false);
   const [qty, setQty] = useState<Record<string, string>>({});
 
   const reset = () => {
-    setProjectId(""); setDate(""); setNotes(""); setQty({}); setIsReplacement(false);
+    setProjectId(""); setClientId(""); setClientReason(""); setDate(""); setNotes(""); setQty({}); setIsReplacement(false);
   };
 
   const mutation = useMutation({
@@ -133,24 +147,27 @@ function NewMyioOrderDialog({ userId }: { userId: string }) {
         .map((p) => ({ product: p, quantity: parseInt(qty[p] ?? "", 10) }))
         .filter((i) => Number.isFinite(i.quantity) && i.quantity > 0);
       if (!date) throw new Error("Informe a data de entrega.");
-      if (!projectId) throw new Error("Selecione um projeto.");
+      if (!projectId && !clientId) throw new Error("Selecione um Projeto, um Cliente ou ambos.");
+      if (clientId && !clientReason) throw new Error("Selecione Manutenção, Reposição por mal uso ou Upsell.");
       if (items.length === 0) throw new Error("Adicione a quantidade de pelo menos um produto.");
 
-      const { data: order, error } = await supabase
-        .from("myio_orders")
-        .insert({ project_id: projectId, delivery_date: date, notes: notes || null, created_by: userId, is_replacement: isReplacement })
-        .select("id")
-        .single();
+      const { data, error } = await supabase.rpc("create_myio_order_request", {
+        _project_id: projectId || null,
+        _client_id: clientId || null,
+        _delivery_date: date,
+        _is_replacement: isReplacement,
+        _client_request_reason: clientReason || null,
+        _notes: notes.trim() || null,
+        _items: items,
+      });
       if (error) throw error;
-
-      const { error: itemsError } = await supabase
-        .from("myio_order_items")
-        .insert(items.map((i) => ({ ...i, order_id: order.id })));
-      if (itemsError) throw itemsError;
+      return data?.[0]?.approval_number ?? null;
     },
-    onSuccess: () => {
-      toast.success("Pedido criado.");
+    onSuccess: (approvalNumber) => {
+      toast.success(approvalNumber ? `Pedido criado. Approval ${approvalNumber}.` : "Pedido criado.");
       qc.invalidateQueries({ queryKey: ["myio-orders"] });
+      qc.invalidateQueries({ queryKey: ["approval-steps"] });
+      qc.invalidateQueries({ queryKey: ["orders"] });
       reset();
       setOpen(false);
     },
@@ -163,21 +180,21 @@ function NewMyioOrderDialog({ userId }: { userId: string }) {
         <Tooltip>
           <TooltipTrigger asChild>
             <DialogTrigger asChild>
-              <Button><Plus className="h-4 w-4" /></Button>
+              <Button>{triggerLabel ? <><Plus className="mr-2 h-4 w-4" />{triggerLabel}</> : <Plus className="h-4 w-4" />}</Button>
             </DialogTrigger>
           </TooltipTrigger>
-          <TooltipContent>Nova solicitação de Projetos</TooltipContent>
+          <TooltipContent>Nova solicitação de Dispositivos myio</TooltipContent>
         </Tooltip>
       </TooltipProvider>
       <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Novo pedido de produtos Myio</DialogTitle>
-          <DialogDescription>Selecione o projeto, a data de entrega e as quantidades por produto.</DialogDescription>
+          <DialogDescription>Selecione Projeto, Cliente ou ambos, além da data e das quantidades.</DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label>Projeto</Label>
+            <Label>Projeto (opcional)</Label>
             <Select value={projectId} onValueChange={setProjectId}>
               <SelectTrigger><SelectValue placeholder="Selecione um projeto" /></SelectTrigger>
               <SelectContent>
@@ -188,10 +205,34 @@ function NewMyioOrderDialog({ userId }: { userId: string }) {
             </Select>
           </div>
           <div className="space-y-2">
+            <Label>Cliente (opcional)</Label>
+            <Select value={clientId || "none"} onValueChange={(value) => { setClientId(value === "none" ? "" : value); if (value === "none") setClientReason(""); }}>
+              <SelectTrigger><SelectValue placeholder="Selecione um cliente" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Nenhum cliente</SelectItem>
+                {(clients ?? []).map((client) => <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
             <Label htmlFor="myio-date">Data de entrega</Label>
             <Input id="myio-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
           </div>
         </div>
+
+        {clientId && (
+          <div className="space-y-2">
+            <Label>Motivo da solicitação para o cliente</Label>
+            <div className="grid gap-2 sm:grid-cols-3">
+              {(Object.entries(CLIENT_REASON_LABELS) as [keyof typeof CLIENT_REASON_LABELS, string][]).map(([value, label]) => (
+                <label key={value} className="flex cursor-pointer items-center gap-2 rounded-md border p-3 text-sm">
+                  <Checkbox checked={clientReason === value} onCheckedChange={(checked) => setClientReason(checked ? value : "")} />
+                  {label}
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="flex items-center gap-2 rounded-md border p-3">
           <Checkbox id="myio-replacement" checked={isReplacement} onCheckedChange={(v) => setIsReplacement(v === true)} />
@@ -431,7 +472,8 @@ export function MyioOrdersTab({ userId, canManage = true }: { userId: string; ca
     queryFn: async () => {
       const { data, error } = await supabase
         .from("myio_orders")
-        .select("id, title, client_name, delivery_date, status, notes, created_at, project_id, is_replacement, projects(name), myio_order_items(id, product, quantity)")
+        .select("id, title, client_name, client_id, client_request_reason, delivery_date, status, notes, created_at, project_id, is_replacement, projects(name), clients(name), purchase_orders(approval_number, approval_status), myio_order_items(id, product, quantity)")
+        .eq("created_by", userId)
         .order("delivery_date", { ascending: true });
       if (error) throw error;
       return (data ?? []) as unknown as MyioOrder[];
@@ -491,6 +533,8 @@ export function MyioOrdersTab({ userId, canManage = true }: { userId: string; ca
             <TableHeader>
               <TableRow>
                 <TableHead>Projeto</TableHead>
+                <TableHead>Cliente</TableHead>
+                <TableHead>Approval</TableHead>
                 <TableHead>Reposição</TableHead>
                 <TableHead>Entrega</TableHead>
                 <TableHead>Produtos</TableHead>
@@ -504,6 +548,14 @@ export function MyioOrdersTab({ userId, canManage = true }: { userId: string; ca
                   <TableCell className="font-medium">
                     {o.projects?.name || "—"}
                     {o.notes && <p className="text-xs text-muted-foreground">{o.notes}</p>}
+                  </TableCell>
+                  <TableCell>
+                    <span className="font-medium">{o.clients?.name || "—"}</span>
+                    {o.client_request_reason && <p className="text-xs text-muted-foreground">{CLIENT_REASON_LABELS[o.client_request_reason]}</p>}
+                  </TableCell>
+                  <TableCell>
+                    <span className="font-mono text-xs">{o.purchase_orders?.approval_number || "—"}</span>
+                    <div><Badge variant="outline">{o.purchase_orders?.approval_status === "aprovado" ? "Aprovado" : o.purchase_orders?.approval_status === "rejeitado" ? "Rejeitado" : "Em aprovação"}</Badge></div>
                   </TableCell>
                   <TableCell>
                     {o.is_replacement ? (
@@ -541,7 +593,7 @@ export function MyioOrdersTab({ userId, canManage = true }: { userId: string; ca
                   <TableCell>
                     <div className="space-y-2">
                       <Badge variant="outline" className={STATUS_CLASSES[o.status]}>{STATUS_LABELS[o.status]}</Badge>
-                      {canManage && (
+                      {canManage && (!o.purchase_orders || o.purchase_orders.approval_status === "aprovado") && (
                       <Select value={o.status} onValueChange={(v) => statusMutation.mutate({ id: o.id, status: v as MyioStatus })}>
                         <SelectTrigger className="h-8 w-52"><SelectValue /></SelectTrigger>
                         <SelectContent>
@@ -556,8 +608,8 @@ export function MyioOrdersTab({ userId, canManage = true }: { userId: string; ca
                   {canManage && (
                     <TableCell>
                       <div className="flex items-center gap-1">
-                        <EditMyioOrderDialog order={o} userId={userId} />
-                        <DeleteMyioOrder id={o.id} />
+                        {(!o.purchase_orders || o.purchase_orders.approval_status === "aprovado") && <EditMyioOrderDialog order={o} userId={userId} />}
+                        {!o.purchase_orders && <DeleteMyioOrder id={o.id} />}
                       </div>
                     </TableCell>
                   )}
