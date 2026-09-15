@@ -439,9 +439,9 @@ export function ReleaseAssembledDialog({ userId }: { userId: string }) {
       const items = Object.entries(qty)
         .map(([material_id, v]) => ({ material_id, quantity: Number(v) }))
         .filter((i) => Number.isInteger(i.quantity) && i.quantity > 0);
-      if (!items.length) throw new Error("Selecione ao menos um produto com quantidade");
+      if (!items.length) throw new Error("Selecione ao menos um dispositivo com quantidade");
       if (!people.length) throw new Error("Selecione ao menos um responsável pela montagem");
-      if (!file) throw new Error("Anexe a foto dos produtos montados");
+      if (!file) throw new Error("Anexe a foto dos dispositivos montados");
 
       // Bloqueia a liberação quando não há componentes suficientes em estoque
       {
@@ -583,7 +583,7 @@ export function ReleaseAssembledDialog({ userId }: { userId: string }) {
       }
     },
     onSuccess: () => {
-      toast.success("Produto montado liberado");
+      toast.success("Dispositivo montado liberado");
       qc.invalidateQueries({ queryKey: ["assembly-releases"] });
       qc.invalidateQueries({ queryKey: ["material-stock"] });
       qc.invalidateQueries({ queryKey: ["stock-movements"] });
@@ -605,12 +605,12 @@ export function ReleaseAssembledDialog({ userId }: { userId: string }) {
     >
       <DialogTrigger asChild>
         <Button size="sm" className="bg-blue-600 text-white hover:bg-blue-700">
-          <PackageCheck className="mr-1 h-4 w-4" /> Liberar Produto Montado
+          <PackageCheck className="mr-1 h-4 w-4" /> Liberar Dispositivo Montado
         </Button>
       </DialogTrigger>
       <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Liberar produto montado</DialogTitle>
+          <DialogTitle>Liberar dispositivo montado</DialogTitle>
           <DialogDescription>Todos os campos são obrigatórios.</DialogDescription>
         </DialogHeader>
 
@@ -622,19 +622,19 @@ export function ReleaseAssembledDialog({ userId }: { userId: string }) {
           }}
         >
           <div className="space-y-2">
-            <Label>Produtos e quantidades</Label>
+            <Label>Dispositivos e quantidades</Label>
             <div className="relative">
               <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Buscar produto do estoque"
+                placeholder="Buscar dispositivo do estoque"
                 className="pl-8"
               />
             </div>
             <div className="max-h-64 space-y-1 overflow-y-auto rounded border p-2">
               {!filtered.length ? (
-                <p className="p-2 text-sm text-muted-foreground">Nenhum produto encontrado no estoque.</p>
+                <p className="p-2 text-sm text-muted-foreground">Nenhum dispositivo encontrado no estoque.</p>
               ) : (
                 filtered.map((m) => (
                   <div key={m.id} className="flex items-center justify-between gap-3 rounded px-2 py-1 hover:bg-muted/50">
@@ -674,7 +674,7 @@ export function ReleaseAssembledDialog({ userId }: { userId: string }) {
           </div>
 
           <div className="space-y-2">
-            <Label>Foto dos produtos montados</Label>
+            <Label>Foto dos dispositivos montados</Label>
             <input
               ref={fileRef}
               type="file"

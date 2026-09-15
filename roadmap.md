@@ -149,3 +149,4 @@
 - [x] Exibir os tipos dentro do box Solicitações, ao lado de Novas Solicitações, para todos os usuários e perfis.
 - [x] Desmarcar os tipos quando o perfil ou usuário não tiver acesso a Novas Solicitações.
 - [x] Restringir responsáveis pela liberação de produtos montados ao perfil Fábrica.
+- [x] Trocar “produto” por “dispositivo” em todos os textos do pop-up de liberação.
