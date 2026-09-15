@@ -1661,7 +1661,9 @@ export type Database = {
       }
       myio_orders: {
         Row: {
+          client_id: string | null
           client_name: string
+          client_request_reason: string | null
           created_at: string
           created_by: string | null
           delivery_date: string
@@ -1669,13 +1671,16 @@ export type Database = {
           is_replacement: boolean
           notes: string | null
           project_id: string | null
+          purchase_order_id: string | null
           request_group_id: string | null
           status: Database["public"]["Enums"]["myio_order_status"]
           title: string
           updated_at: string
         }
         Insert: {
+          client_id?: string | null
           client_name?: string
+          client_request_reason?: string | null
           created_at?: string
           created_by?: string | null
           delivery_date: string
@@ -1683,13 +1688,16 @@ export type Database = {
           is_replacement?: boolean
           notes?: string | null
           project_id?: string | null
+          purchase_order_id?: string | null
           request_group_id?: string | null
           status?: Database["public"]["Enums"]["myio_order_status"]
           title?: string
           updated_at?: string
         }
         Update: {
+          client_id?: string | null
           client_name?: string
+          client_request_reason?: string | null
           created_at?: string
           created_by?: string | null
           delivery_date?: string
@@ -1697,6 +1705,7 @@ export type Database = {
           is_replacement?: boolean
           notes?: string | null
           project_id?: string | null
+          purchase_order_id?: string | null
           request_group_id?: string | null
           status?: Database["public"]["Enums"]["myio_order_status"]
           title?: string
@@ -1704,10 +1713,24 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "myio_orders_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "myio_orders_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "myio_orders_purchase_order_id_fkey"
+            columns: ["purchase_order_id"]
+            isOneToOne: true
+            referencedRelation: "purchase_orders"
             referencedColumns: ["id"]
           },
         ]
@@ -1922,6 +1945,9 @@ export type Database = {
           created_at: string
           deleted_at: string | null
           deleted_by: string | null
+          device_approval_limit: number
+          device_tier2_limit: number
+          device_tier3_limit: number
           email: string | null
           full_name: string
           id: string
@@ -1936,6 +1962,9 @@ export type Database = {
           created_at?: string
           deleted_at?: string | null
           deleted_by?: string | null
+          device_approval_limit?: number
+          device_tier2_limit?: number
+          device_tier3_limit?: number
           email?: string | null
           full_name?: string
           id: string
@@ -1950,6 +1979,9 @@ export type Database = {
           created_at?: string
           deleted_at?: string | null
           deleted_by?: string | null
+          device_approval_limit?: number
+          device_tier2_limit?: number
+          device_tier3_limit?: number
           email?: string | null
           full_name?: string
           id?: string
@@ -3182,6 +3214,22 @@ export type Database = {
     Functions: {
       can_manage_cash_flow: { Args: { _user_id: string }; Returns: boolean }
       can_manage_limits: { Args: { _user_id: string }; Returns: boolean }
+      create_myio_order_request: {
+        Args: {
+          _client_id: string
+          _client_request_reason: string
+          _delivery_date: string
+          _is_replacement: boolean
+          _items: Json
+          _notes: string
+          _project_id: string
+        }
+        Returns: {
+          approval_number: string
+          myio_order_id: string
+          purchase_order_id: string
+        }[]
+      }
       decide_approval_step: {
         Args: { _comment?: string; _decision: string; _step_id: string }
         Returns: undefined

@@ -1,38 +1,30 @@
-# Solicitações de Dispositivos myio com Approval por Quantidade
+# Dispositivos myio com Approval por quantidade
 
-## Objetivo
-Integrar o formulário já existente de **Dispositivos myio** ao fluxo normal de Approvals, sem transformar sua tela no formulário padrão das demais solicitações.
+## O que será entregue
+- Recolocar **Dispositivos myio** na lista de **Tipo de solicitação**. Ao selecionar, abrir a mesma tela específica que já existe, sem transformá-la no formulário comum.
+- Manter o botão **+** do bloco **Solicitações de Dispositivos myio** abrindo essa mesma tela.
+- Na tela específica, permitir selecionar **Projeto**, **Cliente** ou ambos, de forma independente.
+- Quando houver Cliente, exigir uma única classificação: **Manutenção**, **Reposição por mal uso** ou **Upsell**.
+- Exibir, em **Minhas Solicitações**, somente as solicitações de Dispositivos myio feitas pelo usuário conectado.
+- Criar um número de Approval para cada solicitação e enviá-la ao fluxo normal de **Approvals**.
+- Usar a soma das quantidades dos dispositivos para determinar a alçada, em faixas separadas das alçadas financeiras.
+- Liberar produção, edição operacional e mudança de status somente após a aprovação final.
 
-## Experiência do usuário
-- Recolocar **Dispositivos myio** na lista de **Tipo de Solicitação** em **Novas Solicitações**.
-- Ao selecionar esse tipo, exibir o formulário específico já existente, mantendo produtos, quantidades, reposição, entrega e observações.
-- Manter também o botão **+** ao lado de **Todos os status** abrindo o mesmo formulário.
-- Acrescentar ao formulário a seleção independente de **Cliente** e **Projeto**; será possível informar um deles ou ambos, sem um filtrar ou preencher o outro.
-- Em **Minhas Solicitações**, mostrar no bloco de dispositivos somente pedidos criados pelo usuário conectado.
-- Exibir o número do Approval e sua situação para acompanhamento.
-- Somente liberar produção, edição operacional e alteração de status após a aprovação final.
-
-## Aprovação por quantidade
-- Cada solicitação receberá um número de Approval e aparecerá em **Pendentes comigo**, **Meus em aprovação**, **Todos** e **Consolidado por Cargo**, conforme as permissões atuais.
-- O fluxo seguirá o organograma e as etapas adicionais já configurados.
-- Para Dispositivos myio, a alçada será calculada pela soma das quantidades de todos os produtos, sem valor financeiro.
-- Adicionar no cadastro de usuários campos próprios para as faixas de quantidade de dispositivos, separados das alçadas financeiras atuais.
-- Mostrar quantidade total no Approval; os totais monetários permanecerão zerados/não aplicáveis para esse tipo.
-
-## Dados e segurança
-- Vincular cada pedido de dispositivos ao seu Approval e ao cliente/projeto escolhidos.
-- Criar o pedido e seus itens de forma atômica, derivando o solicitante da sessão autenticada; nenhum identificador de usuário enviado pela tela será aceito como dono.
-- Restringir a leitura comum ao próprio solicitante; manter acesso operacional somente para os perfis já autorizados.
-- Impedir ações operacionais antes da aprovação e impedir que uma reprovação libere o pedido.
-- Preservar os pedidos de dispositivos já existentes e seu funcionamento atual.
-
-## Validação
-- Criar pela lista de tipos e pelo botão **+**, confirmando que ambos abrem o mesmo formulário específico.
-- Testar Cliente e Projeto de forma independente.
-- Confirmar geração do número, etapas corretas pela quantidade e aparição nas telas de Approvals.
-- Confirmar que o solicitante vê somente os próprios pedidos e que outro usuário não consegue ler ou alterar seus registros.
-- Confirmar bloqueio operacional antes da aprovação e liberação após a decisão final.
-- Verificar computador, celular, compilação e execução.
+## Tela e acompanhamento
+- Preservar a lista atual de produtos, fotos, quantidades, data de entrega, observações e indicação de reposição.
+- Acrescentar Cliente, classificação do atendimento, número do Approval e status da aprovação ao acompanhamento.
+- Em Approvals, mostrar **quantidade** para Dispositivos myio, sem apresentar R$ 0,00 como valor da solicitação.
+- Manter os registros preparados para relatórios futuros de manutenção, upsell e reposição por mau uso por cliente.
 
 ## Detalhes técnicos
-A integração reutilizará a estrutura existente de Approvals e manterá o pedido de dispositivos como registro operacional próprio. A ligação entre ambos permitirá que a decisão final controle a liberação do pedido sem duplicar a tela nem misturar o fluxo de dispositivos com os formulários comuns.
+- Vincular o pedido operacional de Dispositivos myio ao registro canônico de Approval.
+- Validar formulário e gravação no servidor, incluindo produtos cadastrados, limites de quantidade e classificação obrigatória para Cliente.
+- Aplicar regras de acesso para o solicitante ver apenas seus pedidos e para os perfis operacionais autorizados gerenciarem pedidos já aprovados.
+- Adicionar três alçadas de quantidade por usuário: automática, faixa 2 e faixa 3.
+- Preservar os pedidos existentes sem Approval e o fluxo antigo de separação de estoque.
+
+## Validação
+- Testar criação por Projeto, por Cliente e por ambos.
+- Testar obrigatoriedade da classificação quando Cliente estiver selecionado.
+- Testar visibilidade somente do próprio usuário e bloqueio operacional antes da aprovação.
+- Conferir Approvals, computador e celular, além da integridade e segurança dos dados.
