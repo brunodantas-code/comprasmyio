@@ -521,7 +521,6 @@ export function MyioOrdersTab({ userId, canManage = true }: { userId: string; ca
               ))}
             </SelectContent>
           </Select>
-          <NewMyioOrderDialog userId={userId} />
         </div>
       </CardHeader>
       <CardContent>
