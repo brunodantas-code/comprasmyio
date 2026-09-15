@@ -126,4 +126,4 @@
 - [x] Exibir perfil-base e destacar em lilás as diferenças dos acessos customizados
 
 - [x] Incluir submenus de Armazém em duas colunas no seletor de acessos
-- [ ] Corrigir destaque indevido no perfil Restrito do Bruno Teles
+- [x] Corrigir destaque indevido no perfil Restrito do Bruno Teles
