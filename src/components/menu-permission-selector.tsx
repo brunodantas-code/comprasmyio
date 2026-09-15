@@ -16,8 +16,8 @@ export function MenuPermissionSelector({
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {MENU_PERMISSION_GROUPS.map((group) => (
-        <div key={group.key} className={cn("space-y-2 rounded-md border p-3", highlightedKeys.has(group.key) ? "border-myio-purple bg-myio-purple/10" : "border-border")}>
-          <label className={cn("flex items-center gap-2 text-sm font-medium", highlightedKeys.has(group.key) && "text-myio-purple")}>
+        <div key={group.key} className="space-y-2 rounded-md border border-border p-3">
+          <label className="flex items-center gap-2 text-sm font-medium">
             <Checkbox
               checked={value.has(group.key)}
               disabled={disabled}

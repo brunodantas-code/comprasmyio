@@ -127,3 +127,4 @@
 
 - [x] Incluir submenus de Armazém em duas colunas no seletor de acessos
 - [x] Corrigir destaque indevido no perfil Restrito do Bruno Teles
+- [ ] Destacar em lilás somente submenus alterados, sem colorir o bloco inteiro
