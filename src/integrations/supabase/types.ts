@@ -3311,6 +3311,14 @@ export type Database = {
           target_user_id: string
         }[]
       }
+      get_factory_access_users: {
+        Args: never
+        Returns: {
+          email: string
+          full_name: string
+          id: string
+        }[]
+      }
       has_job_title_name: {
         Args: { _name: string; _user_id: string }
         Returns: boolean
