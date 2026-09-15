@@ -554,11 +554,11 @@ export function StockTab({ userId, canDelete, onlyLocation, canAccessSection = (
   );
 }
 
-function TechnicianSection({ userId }: { userId: string }) {
+function TechnicianSection({ userId, canDelete }: { userId: string; canDelete?: boolean }) {
   const { data: stock } = useStock();
   const materialNames = Object.fromEntries((stock ?? []).map((r) => [r.material_id, r.name]));
   return (
-    <TechnicianItemsCard userId={userId} materialNames={materialNames} />
+    <TechnicianItemsCard userId={userId} materialNames={materialNames} canDelete={canDelete} />
   );
 }
 
@@ -2100,7 +2100,7 @@ function EstoqueMyioSection({ userId, canDelete, canAccessSection = () => true }
         </TabsContent>
       )}
       {canAccessSection("armazem_cliente") && <TabsContent value="cliente"><StockSection userId={userId} location="unidade" canDelete={canDelete} /></TabsContent>}
-      {canAccessSection("armazem_tecnico") && <TabsContent value="tecnico"><TechnicianSection userId={userId} /></TabsContent>}
+      {canAccessSection("armazem_tecnico") && <TabsContent value="tecnico"><TechnicianSection userId={userId} canDelete={canDelete} /></TabsContent>}
     </Tabs>
   );
 }

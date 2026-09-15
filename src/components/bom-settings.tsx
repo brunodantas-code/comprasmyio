@@ -17,6 +17,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Check, FactoryIcon, PackagePlus, Percent, Plus, RotateCcw, Search, Settings, Trash2 } from "lucide-react";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 
 type Material = { id: string; name: string; location: string; is_product: boolean; is_manufactured?: boolean | null; loss_percent?: number | null };
 type Bom = { id: string; product_material_id: string; component_material_id: string; quantity: number };
@@ -398,15 +399,13 @@ export function BomSettingsDialog() {
                       {Math.round(Number(b.quantity) * (1 + savedLoss / 100) * 1000) / 1000}
                     </TableCell>
                     <TableCell>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        disabled={remove.isPending}
-                        onClick={() => remove.mutate(b.id)}
-                        title="Remover"
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
+                      <ConfirmDeleteButton
+                        title="Remover componente da regra?"
+                        description={`Confirma a remoção de “${nameOf(b.component_material_id)}” desta regra?`}
+                        ariaLabel={`Remover ${nameOf(b.component_material_id)}`}
+                        pending={remove.isPending}
+                        onConfirm={() => remove.mutate(b.id)}
+                      />
                     </TableCell>
                   </TableRow>
                 ))

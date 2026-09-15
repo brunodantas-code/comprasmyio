@@ -12,6 +12,7 @@ import { MoneyInput } from "@/components/ui/money-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Account, BRL, MONTHS, accountLabel } from "./shared";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 
 type Budget = { id: string; account_id: string; fiscal_year: number } & Record<(typeof MONTHS)[number][0], number>;
 const natures = [["despesa", "Despesa"], ["receita", "Receita"], ["ativo", "Ativo"], ["passivo", "Passivo"], ["resultado", "Resultado"]] as const;
@@ -91,7 +92,7 @@ export function ChartOfAccountsTab({ userId }: { userId: string }) {
             <TableCell><div className="flex items-center gap-2" style={{ paddingLeft: `${depth * 16}px` }}><ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" /><div><p className="font-medium">{accountLabel(account)}</p><p className="text-xs text-muted-foreground">{account.accepts_entries ? "Conta de lançamento" : "Grupo"}</p></div></div></TableCell>
             {MONTHS.map(([key, label]) => <TableCell key={key}><MoneyInput aria-label={`${label} de ${account.name}`} value={String(drafts[account.id]?.[key] ?? budget?.[key] ?? 0)} onChange={(value) => setDrafts((old) => ({ ...old, [account.id]: { ...old[account.id], [key]: value } }))} className="h-8 min-w-24 text-right" disabled={!account.accepts_entries || children.has(account.id)} /></TableCell>)}
             <TableCell className="text-right font-semibold">{BRL.format(total)}</TableCell>
-            <TableCell><div className="flex items-center justify-end gap-1"><Button size="icon" variant="ghost" title="Salvar orçamento" aria-label="Salvar orçamento" onClick={() => saveBudget.mutate(account.id)} disabled={!account.accepts_entries || children.has(account.id) || saveBudget.isPending}><Save className="h-4 w-4" /></Button><Button size="icon" variant="ghost" title="Editar conta" aria-label="Editar conta" onClick={() => { setEditing(account); setOpen(true); }}><Pencil className="h-4 w-4" /></Button><Button size="icon" variant="ghost" className="text-destructive" title="Excluir conta" aria-label="Excluir conta" onClick={() => removeAccount.mutate(account.id)}><Trash2 className="h-4 w-4" /></Button></div></TableCell>
+            <TableCell><div className="flex items-center justify-end gap-1"><Button size="icon" variant="ghost" title="Salvar orçamento" aria-label="Salvar orçamento" onClick={() => saveBudget.mutate(account.id)} disabled={!account.accepts_entries || children.has(account.id) || saveBudget.isPending}><Save className="h-4 w-4" /></Button><Button size="icon" variant="ghost" title="Editar conta" aria-label="Editar conta" onClick={() => { setEditing(account); setOpen(true); }}><Pencil className="h-4 w-4" /></Button><ConfirmDeleteButton title="Excluir conta?" description={`Confirma a exclusão de “${accountLabel(account)}”? Contas com vínculos ou subcontas não poderão ser excluídas.`} ariaLabel={`Excluir conta ${account.name}`} pending={removeAccount.isPending} onConfirm={() => removeAccount.mutate(account.id)} /></div></TableCell>
           </TableRow>;
         })}</TableBody>
       </Table>}

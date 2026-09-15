@@ -28,6 +28,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useAdditionalStepTypes, type AdditionalStepType } from "@/components/additional-step-types-tab";
 import { requestTypeModel, requestTypeName, useRequestTypes, type RequestTypeRecord } from "@/components/request-types-tab";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 
 const BRL = (v: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(v ?? 0));
@@ -1117,15 +1118,13 @@ export function RulesAdmin() {
                       </TableCell>
                       <TableCell className="text-right whitespace-nowrap">
                         <EditRuleDialog rule={r} people={people} stepTypes={stepTypes ?? []} requestTypesCatalog={requestTypesCatalog} onSaved={invalidate} />
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          title="Excluir etapa"
-                          aria-label="Excluir etapa"
-                          onClick={() => remove.mutate(r.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <ConfirmDeleteButton
+                          title="Excluir etapa adicional?"
+                          description={`Confirma a exclusão de “${r.name}”? Esta ação não pode ser desfeita.`}
+                          ariaLabel={`Excluir etapa ${r.name}`}
+                          pending={remove.isPending}
+                          onConfirm={() => remove.mutate(r.id)}
+                        />
                       </TableCell>
                     </TableRow>
                   );
