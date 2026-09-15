@@ -122,4 +122,4 @@
 - [x] Exigir Emissão, Competência e Caixa mensais em pagamentos e movimentações do Cash Flow
 - [x] Criar cadastro de Perfil de Acesso em Diversos e usar a lista nos usuários
 - [x] Mover Perfil de Acesso para Perfis de acesso, antes dos Usuários Cadastrados
-- [ ] Permitir criar perfis com menus/submenus e atribuir perfil salvo ou acesso Customizado por usuário
+- [x] Permitir criar perfis com menus/submenus e atribuir perfil salvo ou acesso Customizado por usuário
