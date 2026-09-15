@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -605,7 +605,7 @@ function DeleteImportDialog({ id }: { id: string }) {
   );
 }
 
-export function ImportBatchesSection({ userId }: { userId: string }) {
+export function ImportBatchesSection({ userId, children }: { userId: string; children?: ReactNode }) {
   const { data: me } = useCurrentUser();
   const { data: batches, isLoading } = useImportBatches(userId);
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -617,7 +617,7 @@ export function ImportBatchesSection({ userId }: { userId: string }) {
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <CardTitle className="flex items-center gap-2"><Plane className="h-5 w-5" />Importações</CardTitle>
-          <CardDescription>Cada importação é uma compra única com seus itens, observações e documentos.</CardDescription>
+          <CardDescription>Acompanhe o status de suas solicitações de Importação.</CardDescription>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -668,6 +668,7 @@ export function ImportBatchesSection({ userId }: { userId: string }) {
             </TableBody>
           </Table>
         )}
+        {children && <div className="mt-6 border-t pt-6">{children}</div>}
       </CardContent>
     </Card>
   );

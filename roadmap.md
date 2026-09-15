@@ -143,5 +143,5 @@
 - [x] Substituir “Produto de reposição” pelas três classificações de cliente em Dispositivos myio.
 
 - [x] Revisar a duplicidade visual entre Importações e Pedidos de Importação em Minhas Solicitações.
-- [ ] Consolidar Importações e Pedidos de Importação em um único bloco.
-- [ ] Alinhar os textos de acompanhamento aos tipos de solicitação exibidos em cada bloco.
+- [x] Consolidar Importações e Pedidos de Importação em um único bloco.
+- [x] Alinhar os textos de acompanhamento aos tipos de solicitação exibidos em cada bloco.
