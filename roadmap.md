@@ -178,6 +178,6 @@
 ## Padronização dos cadastros em Diversos
 - [ ] Mapear todos os cadastros, vínculos e ações existentes
 - [ ] Disponibilizar edição e exclusão em cada cadastro
-- [ ] Bloquear exclusão vinculada e exigir realocação
-- [ ] Validar os fluxos e a interface
-- [ ] Condensar os cadastros de Diversos, mostrando somente o título e expandindo cada seção pelo botão “+”
+- [x] Bloquear exclusão vinculada e exigir realocação
+- [x] Validar os fluxos e a interface
+- [x] Condensar os cadastros de Diversos, mostrando somente o título e expandindo cada seção pelo botão “+”
