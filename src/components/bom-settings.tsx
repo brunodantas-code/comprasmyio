@@ -439,7 +439,7 @@ export function BomSettingsDialog() {
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">
-            Componentes novos devem ser criados antes em Estoque — Fábrica.
+            Componentes novos devem ser criados antes em Estoque de Componentes.
           </p>
         </div>
       </DialogContent>

@@ -692,7 +692,7 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
           ? "Já existe um componente com esse nome na Fábrica"
           : e.message.includes("materials_fabrica_only_components") ||
               e.message.includes("materials_fabrica_not_manufactured")
-            ? "O Estoque — Fábrica aceita apenas componentes"
+            ? "O Estoque de Componentes aceita apenas componentes"
             : e.message,
       ),
   });
@@ -748,7 +748,7 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
           <DialogTitle>Novo item — {LOCATION_LABELS[location]}</DialogTitle>
           <DialogDescription>
             {isFabrica
-              ? "O item é criado do zero e pertence somente ao Estoque — Fábrica."
+              ? "O item é criado do zero e pertence somente ao Estoque de Componentes."
               : independent
                 ? "O item é criado do zero e pertence somente a este estoque."
                 : "O item fica disponível para entradas e baixas neste local."}
