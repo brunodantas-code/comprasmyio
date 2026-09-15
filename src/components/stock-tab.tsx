@@ -509,94 +509,58 @@ const STOCK_TAB_PERMISSIONS: Record<string, StockPermissionKey> = {
 };
 
 export function StockTab({ userId, canDelete, onlyLocation, canAccessSection = () => true }: { userId: string; canDelete?: boolean; onlyLocation?: StockLocation; canAccessSection?: (permission: StockPermissionKey) => boolean }) {
-  const locations = (Object.keys(LOCATION_LABELS) as StockLocation[]).filter(
-    (loc) => !onlyLocation || loc === onlyLocation,
-  );
-  const showHomologacao = !onlyLocation;
-  const tabs: string[] = [];
-  locations.forEach((loc) => {
-    if (loc === "almoxarifado_geral") return; // renderizada ao final, separada
-    tabs.push(loc);
-    if (loc === "almoxarifado" && !onlyLocation) tabs.push("distribuicao");
-    if (loc === "fabrica" && showHomologacao) tabs.push("homologacao");
-    if (loc === "perdido") tabs.push("avariados");
-  });
-  if (!onlyLocation) tabs.push("qr-check");
-  if (locations.includes("almoxarifado_geral")) {
-    tabs.push("almoxarifado_geral");
-    tabs.push("ferramentas");
-  }
-  const permittedTabs = tabs.filter((tab) => canAccessSection(STOCK_TAB_PERMISSIONS[tab]));
+  const stockGroupPermissions: StockPermissionKey[] = [
+    "armazem_estoque_myio",
+    "armazem_expedicao",
+    "armazem_transporte",
+    "armazem_cliente",
+    "armazem_tecnico",
+    "armazem_perdido",
+    "armazem_itens_avariados",
+  ];
+  const canShowStockGroup = (!onlyLocation || onlyLocation === "almoxarifado")
+    && stockGroupPermissions.some(canAccessSection);
+  const topTabs = [
+    { value: "fabrica", label: "Fábrica", allowed: (!onlyLocation || onlyLocation === "fabrica") && canAccessSection("armazem_fabrica") },
+    { value: "homologacao", label: "Homologação", allowed: !onlyLocation && canAccessSection("armazem_homologacao") },
+    { value: "estoque", label: "Estoque", allowed: canShowStockGroup },
+    { value: "qr-check", label: "Checar QR Code", allowed: !onlyLocation && canAccessSection("armazem_checar_qr") },
+    { value: "almoxarifado_geral", label: "Almoxarifado", allowed: (!onlyLocation || onlyLocation === "almoxarifado_geral") && canAccessSection("armazem_almoxarifado") },
+    { value: "ferramentas", label: "Ferramentas/Ativos", allowed: !onlyLocation && canAccessSection("armazem_ferramentas_ativos") },
+  ];
+  const permittedTabs = topTabs.filter((tab) => tab.allowed);
   if (permittedTabs.length === 0) return null;
   return (
-    <Tabs defaultValue={permittedTabs[0]} className="space-y-4">
+    <Tabs defaultValue={permittedTabs[0]?.value} className="space-y-4">
       <TabsList className="h-auto flex-wrap justify-start gap-y-1">
-        {permittedTabs.map((t) => (
-          <TabsTrigger
-            key={t}
-            value={t}
-            className={
-              t === "tecnico" || t === "almoxarifado_geral"
-                ? "ml-4"
-                : t === "qr-check"
-                  ? "ml-2"
-                  : undefined
-            }
-          >
-            {t === "homologacao"
-              ? "Homologação"
-              : t === "distribuicao"
-                ? "Expedição"
-                : t === "qr-check"
-                  ? "Checar QR Code"
-                  : t === "avariados"
-                    ? "Itens Avariados"
-                    : t === "ferramentas"
-                      ? "Ferramentas/Ativos"
-                      : LOCATION_LABELS[t as StockLocation]}
+        {permittedTabs.map((tab) => (
+          <TabsTrigger key={tab.value} value={tab.value}>
+            {tab.label}
           </TabsTrigger>
         ))}
       </TabsList>
-      {locations.filter((loc) => permittedTabs.includes(loc)).map((loc) => (
-        <TabsContent key={loc} value={loc}>
-          {loc === "transito" ? (
-            <div className="space-y-4">
-              <TransitCard />
-              <StockSection userId={userId} location={loc} canDelete={canDelete} />
-            </div>
-          ) : loc === "perdido" ? (
-            <div className="space-y-4">
-              <LostCard />
-              <ExternalLostCard />
-            </div>
-          ) : loc === "tecnico" ? (
-            <TechnicianSection userId={userId} />
-          ) : (
-            <StockSection userId={userId} location={loc} canDelete={canDelete} />
-          )}
+      {permittedTabs.some((tab) => tab.value === "fabrica") && (
+        <TabsContent value="fabrica"><StockSection userId={userId} location="fabrica" canDelete={canDelete} /></TabsContent>
+      )}
+      {permittedTabs.some((tab) => tab.value === "homologacao") && (
+        <TabsContent value="homologacao"><HomologationSection userId={userId} canDelete={canDelete} /></TabsContent>
+      )}
+      {permittedTabs.some((tab) => tab.value === "estoque") && (
+        <TabsContent value="estoque">
+          <EstoqueMyioSection userId={userId} canDelete={canDelete} canAccessSection={canAccessSection} />
         </TabsContent>
-      ))}
-      {permittedTabs.includes("ferramentas") && (
+      )}
+      {permittedTabs.some((tab) => tab.value === "ferramentas") && (
         <TabsContent value="ferramentas">
           <ToolAssetsSection userId={userId} canDelete={canDelete} />
         </TabsContent>
       )}
-      {permittedTabs.includes("distribuicao") && (
-        <TabsContent value="distribuicao">
-          <DistributionCard />
+      {permittedTabs.some((tab) => tab.value === "almoxarifado_geral") && (
+        <TabsContent value="almoxarifado_geral">
+          <StockSection userId={userId} location="almoxarifado_geral" canDelete={canDelete} />
         </TabsContent>
       )}
-      {permittedTabs.includes("homologacao") && (
-        <TabsContent value="homologacao">
-          <HomologationSection userId={userId} canDelete={canDelete} />
-        </TabsContent>
-      )}
-      {permittedTabs.includes("avariados") && (
-        <TabsContent value="avariados">
-          <DamagedItemsCard userId={userId} />
-        </TabsContent>
-      )}
-      {permittedTabs.includes("qr-check") && (
+      {permittedTabs.some((tab) => tab.value === "qr-check") && (
           <TabsContent value="qr-check">
             <div className="space-y-4">
               <ExternalSyncCard />
@@ -2079,12 +2043,60 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
   );
 }
 
-function EstoqueMyioSection({ userId, canDelete }: { userId: string; canDelete?: boolean }) {
+function EstoqueMyioSection({ userId, canDelete, canAccessSection }: { userId: string; canDelete?: boolean; canAccessSection: (permission: StockPermissionKey) => boolean }) {
+  const tabs = [
+    { value: "ordens", label: "Solicitações de Dispositivos myio", permission: "armazem_estoque_myio" as const },
+    { value: "dispositivos", label: "Dispositivos myio", permission: "armazem_estoque_myio" as const },
+    { value: "insumos", label: "Insumos de Instalação", permission: "armazem_estoque_myio" as const },
+    { value: "expedicao", label: "Expedição", permission: "armazem_expedicao" as const },
+    { value: "transporte", label: "Transporte", permission: "armazem_transporte" as const },
+    { value: "cliente", label: "Cliente", permission: "armazem_cliente" as const },
+    { value: "tecnico", label: "Técnico", permission: "armazem_tecnico" as const },
+    { value: "perdido", label: "Perdido", permission: "armazem_perdido" as const },
+    { value: "avariado", label: "Avariado", permission: "armazem_itens_avariados" as const },
+  ].filter((tab) => canAccessSection(tab.permission));
+
+  return (
+    <Tabs defaultValue={tabs[0]?.value} className="space-y-4">
+      <TabsList className="h-auto flex-wrap justify-start gap-y-1">
+        {tabs.map((tab) => <TabsTrigger key={tab.value} value={tab.value}>{tab.label}</TabsTrigger>)}
+      </TabsList>
+      {canAccessSection("armazem_estoque_myio") && <TabsContent value="ordens"><MyioOrdersStockSection /></TabsContent>}
+      {canAccessSection("armazem_estoque_myio") && <TabsContent value="dispositivos"><MyioDevicesStockSection userId={userId} canDelete={canDelete} /></TabsContent>}
+      {canAccessSection("armazem_estoque_myio") && <TabsContent value="insumos"><TerceirosSection userId={userId} canDelete={canDelete} /></TabsContent>}
+      {canAccessSection("armazem_expedicao") && <TabsContent value="expedicao"><DistributionCard /></TabsContent>}
+      {canAccessSection("armazem_transporte") && <TabsContent value="transporte"><div className="space-y-4"><TransitCard /><StockSection userId={userId} location="transito" canDelete={canDelete} /></div></TabsContent>}
+      {canAccessSection("armazem_cliente") && <TabsContent value="cliente"><StockSection userId={userId} location="unidade" canDelete={canDelete} /></TabsContent>}
+      {canAccessSection("armazem_tecnico") && <TabsContent value="tecnico"><TechnicianSection userId={userId} /></TabsContent>}
+      {canAccessSection("armazem_perdido") && <TabsContent value="perdido"><div className="space-y-4"><LostCard /><ExternalLostCard /></div></TabsContent>}
+      {canAccessSection("armazem_itens_avariados") && <TabsContent value="avariado"><DamagedItemsCard userId={userId} /></TabsContent>}
+    </Tabs>
+  );
+}
+
+function MyioOrdersStockSection() {
+  const { data: stock } = useStock();
+  const { data: terceirosStock } = useTerceirosStock();
+  const scoped = (stock ?? [])
+    .filter((row) => (row.location ?? "fabrica") === "almoxarifado")
+    .filter((row) => !/ — Caixa de \d+$/.test(row.name));
+
+  return (
+    <MyioDemandCard
+      balances={[...scoped, ...(terceirosStock ?? [])].reduce<Record<string, number>>((acc, row) => {
+        const key = row.name.trim().toLowerCase();
+        acc[key] = (acc[key] ?? 0) + Number(row.balance ?? 0);
+        return acc;
+      }, {})}
+    />
+  );
+}
+
+function MyioDevicesStockSection({ userId, canDelete }: { userId: string; canDelete?: boolean }) {
   const { data: stock, isLoading } = useStock();
   const { data: movements } = useMovements();
   const { data: profiles } = useStockProfiles();
   const { data: manufactured } = useManufacturedMap();
-  const { data: terceirosStock } = useTerceirosStock();
   const [search, setSearch] = useState("");
   const [view, setView] = useState<"all" | "with" | "zero">("all");
 
@@ -2121,25 +2133,9 @@ function EstoqueMyioSection({ userId, canDelete }: { userId: string; canDelete?:
   );
 
   return (
-    <Tabs defaultValue="ordens" className="space-y-4">
-      <TabsList className="flex-wrap">
-        <TabsTrigger value="ordens">Solicitações de Dispositivos myio</TabsTrigger>
-        <TabsTrigger value="estoque">Estoque — Myio</TabsTrigger>
-      </TabsList>
-
-      <TabsContent value="ordens" className="space-y-6">
-        <MyioDemandCard
-          balances={[...scoped, ...(terceirosStock ?? [])].reduce<Record<string, number>>((acc, r) => {
-            const key = r.name.trim().toLowerCase();
-            acc[key] = (acc[key] ?? 0) + Number(r.balance ?? 0);
-            return acc;
-          }, {})}
-        />
-      </TabsContent>
-
-      <TabsContent value="estoque" className="space-y-6">
+      <div className="space-y-6">
         <StockTableCard
-          title="Estoque Myio"
+          title="Dispositivos myio"
           description="Dispositivos produzidos pela Myio (fabricados). Banco de dados próprio, separado do Estoque Fábrica e do Insumos de Instalação."
           rows={rows.filter((r) => manufactured?.[r.material_id])}
           isLoading={isLoading}
@@ -2149,7 +2145,6 @@ function EstoqueMyioSection({ userId, canDelete }: { userId: string; canDelete?:
           damageSource="Estoque Myio"
           simple
         />
-        <TerceirosSection userId={userId} canDelete={canDelete} />
         <BoxesCard />
         <Card>
           <CardHeader>
@@ -2191,8 +2186,7 @@ function EstoqueMyioSection({ userId, canDelete }: { userId: string; canDelete?:
             )}
           </CardContent>
         </Card>
-      </TabsContent>
-    </Tabs>
+      </div>
   );
 }
 

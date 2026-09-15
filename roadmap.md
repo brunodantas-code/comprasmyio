@@ -155,3 +155,4 @@
 - [x] Usar o verde padrão nos botões principais do Armazém para melhorar a legibilidade.
 - [x] Trocar Produto por Dispositivo no Estoque — Fábrica e em suas janelas.
 - [x] Trocar Produto por Dispositivo no Estoque Myio e em suas janelas.
+- [x] Reunir Expedição, Transporte, Cliente, Técnico, Perdido e Avariado dentro de Estoque e separar Dispositivos myio de Insumos de Instalação.

@@ -31,7 +31,7 @@ export const MENU_PERMISSION_GROUPS: MenuPermissionGroup[] = [
     label: "Armazém",
     children: [
       { key: "armazem_fabrica", label: "Fábrica" },
-      { key: "armazem_estoque_myio", label: "Estoque Myio" },
+      { key: "armazem_estoque_myio", label: "Estoque" },
       { key: "armazem_expedicao", label: "Expedição" },
       { key: "armazem_homologacao", label: "Homologação" },
       { key: "armazem_transporte", label: "Transporte" },
