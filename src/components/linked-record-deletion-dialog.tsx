@@ -18,6 +18,13 @@ type LinkedOrder = {
   item_name: string;
 };
 
+type ClientLink = {
+  record_key: string;
+  record_type: string;
+  record_label: string;
+  record_detail: string;
+};
+
 export function LinkedRecordDeletionDialog({
   entityId,
   entityName,
@@ -39,17 +46,31 @@ export function LinkedRecordDeletionDialog({
   const [open, setOpen] = useState(false);
   const [targets, setTargets] = useState<Record<string, string>>({});
   const queryKey = ["linked-orders", linkField, entityId];
-  const { data: orders = [], isLoading } = useQuery({
+  const { data: records = [], isLoading, isError, error } = useQuery({
     queryKey,
     enabled: open,
     queryFn: async () => {
+      if (linkField === "client_id") {
+        const { data, error: linksError } = await supabase.rpc("get_client_deletion_links", { _client_id: entityId });
+        if (linksError) throw linksError;
+        return (data ?? []).map((link: ClientLink) => ({
+          key: link.record_key,
+          label: link.record_label,
+          detail: link.record_detail,
+        }));
+      }
+
       const { data, error } = await supabase
         .from("purchase_orders")
         .select("id,approval_number,item_name")
         .eq(linkField, entityId)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data as LinkedOrder[];
+      return (data as LinkedOrder[]).map((order) => ({
+        key: order.id,
+        label: order.approval_number || "Solicitação sem número",
+        detail: order.item_name,
+      }));
     },
   });
 
@@ -58,35 +79,47 @@ export function LinkedRecordDeletionDialog({
   }, [open]);
 
   const reallocate = useMutation({
-    mutationFn: async ({ orderId, destinationId }: { orderId: string; destinationId: string }) => {
+    mutationFn: async ({ recordKey, destinationId }: { recordKey: string; destinationId: string }) => {
+      if (linkField === "client_id") {
+        const { error: reallocationError } = await supabase.rpc("reallocate_client_link", {
+          _record_key: recordKey,
+          _source_client_id: entityId,
+          _destination_client_id: destinationId,
+        });
+        if (reallocationError) throw reallocationError;
+        return;
+      }
+
       const values = linkField === "project_id"
         ? { project_id: destinationId }
-        : linkField === "client_id"
-          ? { client_id: destinationId }
-          : linkField === "cost_center_id"
-            ? { cost_center_id: destinationId }
-            : { request_type: destinationId };
-      const { error } = await supabase.from("purchase_orders").update(values).eq("id", orderId);
+        : linkField === "cost_center_id"
+          ? { cost_center_id: destinationId }
+          : { request_type: destinationId };
+      const { error } = await supabase.from("purchase_orders").update(values).eq("id", recordKey);
       if (error) throw error;
     },
     onSuccess: async (_, variables) => {
-      toast.success("Solicitação realocada");
+      toast.success("Vínculo realocado");
       setTargets((current) => {
         const next = { ...current };
-        delete next[variables.orderId];
+        delete next[variables.recordKey];
         return next;
       });
       await Promise.all([
         qc.invalidateQueries({ queryKey }),
+        qc.invalidateQueries({ queryKey: ["projects"] }),
+        qc.invalidateQueries({ queryKey: ["clients"] }),
         qc.invalidateQueries({ queryKey: ["project-budget-summaries"] }),
         qc.invalidateQueries({ queryKey: ["orders"] }),
+        qc.invalidateQueries({ queryKey: ["myio-orders"] }),
+        qc.invalidateQueries({ queryKey: ["cash-flow-payables"] }),
       ]);
     },
     onError: (error: Error) => toast.error(error.message),
   });
 
   const availableDestinations = destinations.filter((item) => item.id !== entityId);
-  const hasLinks = orders.length > 0;
+  const hasLinks = records.length > 0;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -101,23 +134,27 @@ export function LinkedRecordDeletionDialog({
           <DialogDescription>
             {isLoading
               ? "Verificando solicitações vinculadas..."
+              : isError
+                ? "Não foi possível verificar os vínculos. A exclusão permanece bloqueada."
               : hasLinks
-                ? `${orders.length} solicitação(ões) está(ão) vinculada(s) a “${entityName}”. Realoque cada uma antes de excluir.`
+                ? `${records.length} vínculo(s) está(ão) associado(s) a “${entityName}”. Realoque cada um antes de excluir.`
                 : `Confirma a exclusão de “${entityName}”?`}
           </DialogDescription>
         </DialogHeader>
 
+        {isError && <p className="text-sm text-destructive">{error instanceof Error ? error.message : "Tente novamente."}</p>}
+
         {hasLinks && (
           <div className="space-y-3">
-            {orders.map((order) => (
-              <div key={order.id} className="grid gap-3 border-b pb-3 sm:grid-cols-[minmax(0,1fr)_minmax(180px,1fr)_auto] sm:items-end">
+            {records.map((record) => (
+              <div key={record.key} className="grid gap-3 border-b pb-3 sm:grid-cols-[minmax(0,1fr)_minmax(180px,1fr)_auto] sm:items-end">
                 <div className="min-w-0">
-                  <p className="text-sm font-medium">{order.approval_number || "Sem número"}</p>
-                  <p className="truncate text-sm text-muted-foreground">{order.item_name}</p>
+                  <p className="text-sm font-medium">{record.label}</p>
+                  <p className="truncate text-sm text-muted-foreground">{record.detail}</p>
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs">Novo {entityLabel}</Label>
-                  <Select value={targets[order.id] ?? ""} onValueChange={(value) => setTargets((current) => ({ ...current, [order.id]: value }))}>
+                  <Select value={targets[record.key] ?? ""} onValueChange={(value) => setTargets((current) => ({ ...current, [record.key]: value }))}>
                     <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                     <SelectContent>
                       {availableDestinations.map((item) => <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>)}
@@ -126,10 +163,10 @@ export function LinkedRecordDeletionDialog({
                 </div>
                 <Button
                   variant="outline"
-                  disabled={!targets[order.id] || reallocate.isPending}
+                  disabled={!targets[record.key] || reallocate.isPending}
                   onClick={() => {
-                    const destinationId = targets[order.id];
-                    if (destinationId) reallocate.mutate({ orderId: order.id, destinationId });
+                    const destinationId = targets[record.key];
+                    if (destinationId) reallocate.mutate({ recordKey: record.key, destinationId });
                   }}
                 >
                   Realocar
@@ -144,7 +181,7 @@ export function LinkedRecordDeletionDialog({
           <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
           <Button
             variant="destructive"
-            disabled={isLoading || hasLinks || deleting}
+            disabled={isLoading || isError || hasLinks || deleting}
             onClick={() => {
               onDelete();
               setOpen(false);
