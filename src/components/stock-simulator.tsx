@@ -91,7 +91,7 @@ export function StockSimulatorDialog({ userId }: { userId?: string }) {
 
   const run = useMutation({
     mutationFn: async () => {
-      if (needed.length === 0) throw new Error("Informe a quantidade de ao menos um produto com regras cadastradas.");
+      if (needed.length === 0) throw new Error("Informe a quantidade de ao menos um dispositivo com regras cadastradas.");
       const rows = needed.map((n) => ({
         material_id: n.id,
         quantity: n.qty,
@@ -123,9 +123,9 @@ export function StockSimulatorDialog({ userId }: { userId?: string }) {
       </DialogTrigger>
       <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Simulador de estoque por produto</DialogTitle>
+          <DialogTitle>Simulador de estoque por dispositivo</DialogTitle>
           <DialogDescription>
-            Informe quantos produtos você quer simular. O sistema calcula os componentes pelas regras (incluindo
+            Informe quantos dispositivos você quer simular. O sistema calcula os componentes pelas regras (incluindo
             perda) e dá entrada automática no estoque da fábrica.
           </DialogDescription>
         </DialogHeader>
@@ -134,7 +134,7 @@ export function StockSimulatorDialog({ userId }: { userId?: string }) {
           <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             className="pl-8"
-            placeholder="Buscar produto"
+            placeholder="Buscar dispositivo"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -144,7 +144,7 @@ export function StockSimulatorDialog({ userId }: { userId?: string }) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Produto</TableHead>
+                <TableHead>Dispositivo</TableHead>
                 <TableHead className="w-32 text-right">Quantidade</TableHead>
               </TableRow>
             </TableHeader>
@@ -172,7 +172,7 @@ export function StockSimulatorDialog({ userId }: { userId?: string }) {
               {visibleProducts.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={2} className="text-sm text-muted-foreground">
-                    Nenhum produto encontrado.
+                    Nenhum dispositivo encontrado.
                   </TableCell>
                 </TableRow>
               )}
@@ -183,7 +183,7 @@ export function StockSimulatorDialog({ userId }: { userId?: string }) {
         {needed.length > 0 && (
           <div className="rounded-md border">
             <div className="border-b px-3 py-2 text-sm font-medium">
-              Prévia — {needed.length} componentes para {totalProducts} produto(s)
+              Prévia — {needed.length} componentes para {totalProducts} dispositivo(s)
             </div>
             <div className="max-h-64 overflow-y-auto">
               <Table>
@@ -315,7 +315,7 @@ export function ProductionCapacityCard() {
         <div>
           <CardTitle>Capacidade de produção</CardTitle>
           <CardDescription>
-            Com o estoque atual de componentes, quantas unidades de cada produto é possível montar (regras de
+            Com o estoque atual de componentes, quantas unidades de cada dispositivo é possível montar (regras de
             componentes + perda).
           </CardDescription>
         </div>
@@ -323,7 +323,7 @@ export function ProductionCapacityCard() {
           <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             className="w-full pl-8 sm:w-64"
-            placeholder="Buscar produto"
+            placeholder="Buscar dispositivo"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -333,7 +333,7 @@ export function ProductionCapacityCard() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Produto</TableHead>
+              <TableHead>Dispositivo</TableHead>
               <TableHead className="text-right">Pode produzir</TableHead>
               <TableHead>Componente limitante</TableHead>
             </TableRow>
@@ -382,7 +382,7 @@ export function ProductionCapacityCard() {
             {visible.length === 0 && (
               <TableRow>
                 <TableCell colSpan={3} className="text-sm text-muted-foreground">
-                  Nenhum produto encontrado.
+                  Nenhum dispositivo encontrado.
                 </TableCell>
               </TableRow>
             )}

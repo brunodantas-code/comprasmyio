@@ -625,8 +625,8 @@ function HomologationSection({ userId, canDelete }: { userId: string; canDelete?
       userId={userId}
       homologable
       canReportIssue
-      title="Produtos para homologar"
-      description="Etiquetagem e homologação dos produtos montados. Após homologados em caixas, seguem para o estoque."
+      title="Dispositivos para homologar"
+      description="Etiquetagem e homologação dos dispositivos montados. Após homologados em caixas, seguem para o estoque."
     />
   );
 }
@@ -812,7 +812,7 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
         )}
         {isFabrica && (
           <p className="text-xs text-muted-foreground">
-            Banco de dados único e independente: nenhum item vem de biblioteca ou de outros estoques. Produtos Myio
+            Banco de dados único e independente: nenhum item vem de biblioteca ou de outros estoques. Dispositivos Myio
             (industrializados) não entram nesta lista.
           </p>
         )}
@@ -1339,7 +1339,7 @@ function FabricaSection({ userId, canDelete }: { userId: string; canDelete?: boo
     <Tabs defaultValue="fila" className="space-y-4">
       <TabsList className="flex-wrap">
         <TabsTrigger value="fila">Fila de Produção</TabsTrigger>
-        <TabsTrigger value="liberados">Produtos Liberados</TabsTrigger>
+        <TabsTrigger value="liberados">Dispositivos Liberados</TabsTrigger>
         <TabsTrigger value="estoque">Estoque — Fábrica</TabsTrigger>
       </TabsList>
 
@@ -1358,7 +1358,7 @@ function FabricaSection({ userId, canDelete }: { userId: string; canDelete?: boo
         <ProductionCapacityCard />
         <StockTableCard
           title="Estoque — Fábrica"
-          description="Componentes exclusivos da operação da fábrica, separados dos produtos comprados de terceiros."
+          description="Componentes exclusivos da operação da fábrica, separados dos dispositivos comprados de terceiros."
           rows={rows}
           isLoading={isLoading}
           userId={userId}
