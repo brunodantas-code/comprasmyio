@@ -3581,7 +3581,7 @@ function UsersAdmin() {
     queryFn: async () => {
       const [{ data: profiles, error: pe }, { data: accessProfiles, error: ae }, { data: menuPermissions, error: me }, { data: titles, error: te }] = await Promise.all([
         supabase.from("profiles").select("*").is("deleted_at", null).order("created_at", { ascending: false }),
-        supabase.from("user_access_profiles").select("user_id, profile, profile_definition_id, access_profile_definitions(name,base_profile)"),
+        supabase.from("user_access_profiles").select("user_id, profile, profile_definition_id, is_customized, access_profile_definitions(name,base_profile)"),
         supabase.from("user_menu_permissions").select("user_id, allowed").eq("allowed", true),
         supabase.from("job_titles").select("id,name").eq("active", true).order("name"),
       ]);
@@ -3596,9 +3596,9 @@ function UsersAdmin() {
         ...p,
         jobTitleId: p.job_title_id,
         jobTitleName: p.job_title_id ? titleById.get(p.job_title_id) ?? null : null,
-        accessProfile: accessByUser.get(p.id)?.profile_definition_id ?? "restrito",
+        accessProfile: accessByUser.get(p.id)?.is_customized ? "customizado" : accessByUser.get(p.id)?.profile_definition_id ?? "restrito",
         accessProfileBase: accessByUser.get(p.id)?.profile ?? "restrito",
-        accessProfileName: (accessByUser.get(p.id)?.access_profile_definitions as { name?: string } | null)?.name ?? "Restrito",
+        accessProfileName: accessByUser.get(p.id)?.is_customized ? "Customizado" : (accessByUser.get(p.id)?.access_profile_definitions as { name?: string } | null)?.name ?? "Restrito",
         hasConfiguredAccess: configuredUsers.has(p.id),
       }));
     },
@@ -3620,7 +3620,7 @@ function UsersAdmin() {
     onSuccess: () => {
       toast.success("Perfil de acesso atualizado");
       qc.invalidateQueries({ queryKey: ["admin-users"] });
-      qc.invalidateQueries({ queryKey: ["restricted-access-profiles"] });
+      qc.invalidateQueries({ queryKey: ["custom-access-profiles"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -3694,7 +3694,7 @@ function UsersAdmin() {
 
   const norm = (s: string) => s.toLowerCase().trim();
   const isPendingRestrictedUser = (user: NonNullable<typeof data>[number]) =>
-    user.accessProfileBase === "restrito" && (!user.hasConfiguredAccess || !approverLabelOf(user.jobTitleId));
+    user.accessProfile === "customizado" && (!user.hasConfiguredAccess || !approverLabelOf(user.jobTitleId));
   const pendingUsers = (data ?? []).filter(isPendingRestrictedUser);
   const activeUsers = (data ?? []).filter((user) => !isPendingRestrictedUser(user));
   const rows = activeUsers.filter((u) => {
@@ -3872,6 +3872,7 @@ function UsersAdmin() {
                             <Select value={u.accessProfile} onValueChange={(value) => setAccessProfile.mutate({ userId: u.id, profile: value })}>
                               <SelectTrigger className="h-8 w-full text-xs"><SelectValue /></SelectTrigger>
                               <SelectContent>
+                                <SelectItem value="customizado">Customizado</SelectItem>
                                 {accessProfileDefinitions.filter((definition) => definition.active || definition.code === u.accessProfile).map((definition) => <SelectItem key={definition.code} value={definition.code}>{definition.name}</SelectItem>)}
                               </SelectContent>
                             </Select>
