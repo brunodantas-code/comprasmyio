@@ -138,3 +138,4 @@
 - [x] Realocar Importações para Minhas Solicitações e restringir a criação a Novas Solicitações.
 - [ ] Garantir exclusão de Tipos de Solicitação sem vínculos e exigir realocação individual quando houver Approvals associados.
 - [x] Abrir diretamente a tela específica ao selecionar Dispositivos myio ou Importação, sem botão intermediário.
+- [ ] Exibir os formulários de Dispositivos myio e Importação integrados abaixo do tipo selecionado, sem pop-up.
