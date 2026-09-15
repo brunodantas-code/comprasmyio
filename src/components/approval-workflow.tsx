@@ -139,7 +139,7 @@ function PendingApprovalDetails({ step, requestTypes }: { step: StepRow; request
   const allocation = order.allocation_type === "interna" ? "Interna" : order.for_stock ? "Estoque" : project?.name ?? client?.name ?? "—";
   const fields = [
     ["Tipo", requestTypeLabel(order, requestTypes)], ["Item", order.item_name], ["Quantidade", String(order.quantity ?? 1)],
-    ["Valor", BRL(Number(order.estimated_value ?? 0))], ["Projeto ou Cliente", allocation], ["Destinatário", order.recipient || "—"],
+    ...(order.request_model === "dispositivos" ? [] : [["Valor", BRL(Number(order.estimated_value ?? 0))]]), ["Projeto ou Cliente", allocation], ["Destinatário", order.recipient || "—"],
     ["Endereço de entrega", order.delivery_point || "—"], ["Prazo", order.deadline_date ? new Date(`${order.deadline_date}T00:00:00`).toLocaleDateString("pt-BR") : order.deadline_type],
     ["Previsão de entrega", order.delivery_forecast ? new Date(`${order.delivery_forecast}T00:00:00`).toLocaleDateString("pt-BR") : "—"],
     ["Status da solicitação", order.status], ["Status da aprovação", order.approval_status], ["Palavra passe", order.passphrase || "—"], ["Criado em", dt(order.created_at)],
@@ -403,7 +403,9 @@ export function PendingForMe() {
     qc.invalidateQueries({ queryKey: ["orders"] });
   };
 
-  const totalValue = mine.reduce(
+  const financialMine = mine.filter((s) => s.purchase_orders?.request_model !== "dispositivos");
+  const deviceQuantity = mine.reduce((sum, s) => sum + (s.purchase_orders?.request_model === "dispositivos" ? Number(s.purchase_orders.quantity ?? 0) : 0), 0);
+  const totalValue = financialMine.reduce(
     (sum, s) => sum + Number(s.purchase_orders?.estimated_value ?? 0),
     0,
   );
@@ -420,7 +422,8 @@ export function PendingForMe() {
               {mine.length > 0 && (
                 <span className="text-sm font-normal text-muted-foreground">
                   {mine.length} {mine.length === 1 ? "approval" : "approvals"} ·{" "}
-                  <strong className="font-semibold">{fmtBRL(totalValue)}</strong>
+                   <strong className="font-semibold">{fmtBRL(totalValue)}</strong>
+                   {deviceQuantity > 0 && <> · <strong className="font-semibold">{deviceQuantity} dispositivos</strong></>}
                 </span>
               )}
             </CardTitle>
@@ -466,10 +469,10 @@ export function PendingForMe() {
                     </TableCell>
                     <TableCell className="text-sm">{req?.full_name || req?.email || "—"}</TableCell>
                     <TableCell className="text-sm">
-                      {BRL(Number(o?.estimated_value ?? 0) / Math.max(Number(o?.quantity ?? 1), 1))}
+                      {o?.request_model === "dispositivos" ? "—" : BRL(Number(o?.estimated_value ?? 0) / Math.max(Number(o?.quantity ?? 1), 1))}
                     </TableCell>
                     <TableCell className="text-sm">{o?.quantity ?? 1}</TableCell>
-                    <TableCell className="text-sm">{BRL(Number(o?.estimated_value ?? 0))}</TableCell>
+                    <TableCell className="text-sm">{o?.request_model === "dispositivos" ? "Por quantidade" : BRL(Number(o?.estimated_value ?? 0))}</TableCell>
                     <TableCell className="text-sm">{o?.allocation_type === "interna" ? "Interna" : o?.for_stock ? "Estoque" : o?.projects?.name ?? o?.clients?.name ?? "—"}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">

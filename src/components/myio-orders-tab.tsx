@@ -468,7 +468,7 @@ export function MyioOrdersTab({ userId, canManage = true }: { userId: string; ca
     },
   });
   const { data: orders, isLoading } = useQuery({
-    queryKey: ["myio-orders"],
+    queryKey: ["myio-orders", userId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("myio_orders")
@@ -520,7 +520,7 @@ export function MyioOrdersTab({ userId, canManage = true }: { userId: string; ca
               ))}
             </SelectContent>
           </Select>
-          {canManage && <NewMyioOrderDialog userId={userId} />}
+          <NewMyioOrderDialog userId={userId} />
         </div>
       </CardHeader>
       <CardContent>

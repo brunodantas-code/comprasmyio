@@ -30,7 +30,7 @@ import { Trash2, Paperclip, X, Loader2, DatabaseBackup, CheckCircle2, XCircle, R
 import { ApprovalWorkflow, MyApprovalFlows, PendingApprovalsByRole, PendingForMe } from "@/components/approval-workflow";
 import { z } from "zod";
 import { StockTab } from "@/components/stock-tab";
-import { MyioOrdersTab } from "@/components/myio-orders-tab";
+import { MyioOrdersTab, NewMyioOrderDialog } from "@/components/myio-orders-tab";
 import { ClientsTab, useClients } from "@/components/clients-tab";
 import { CostCentersTab, useCostCenters } from "@/components/cost-centers-tab";
 import { JobTitlesTab, useJobTitles } from "@/components/job-titles-tab";
@@ -1451,7 +1451,7 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
       >
         <SelectTrigger className="w-full sm:w-72"><SelectValue placeholder="Selecione o tipo" /></SelectTrigger>
         <SelectContent>
-          {(requestTypes ?? []).filter((type) => type.active && type.model_code !== "dispositivos" && (type.model_code !== "importacao" || canImport)).map((type) => (
+          {(requestTypes ?? []).filter((type) => type.active && (type.model_code !== "importacao" || canImport)).map((type) => (
             <SelectItem key={type.code} value={type.code}>{type.name}</SelectItem>
           ))}
         </SelectContent>
@@ -1487,6 +1487,20 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
           <CardContent>{typeSelector}</CardContent>
         </Card>
         <ImportOrders userId={userId} />
+      </div>
+    );
+  }
+
+  if (requestModel === "dispositivos") {
+    return (
+      <div className="space-y-4">
+        <Card className="max-w-2xl">
+          <CardHeader><CardTitle>Novas Solicitações</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            {typeSelector}
+            <NewMyioOrderDialog userId={userId} triggerLabel="Abrir solicitação de Dispositivos myio" />
+          </CardContent>
+        </Card>
       </div>
     );
   }
