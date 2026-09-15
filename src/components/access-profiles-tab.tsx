@@ -44,6 +44,7 @@ export function AccessProfilesTab() {
           ...profile,
           profileName: definition?.name ?? "Restrito",
           permissions: selectedPermissions,
+          profilePermissions,
           differences: symmetricDifference(selectedPermissions, profilePermissions),
         };
       });
@@ -90,7 +91,7 @@ export function AccessProfilesTab() {
               </div>
               <p className="truncate text-xs text-muted-foreground">{user.email}</p>
             </div>
-            <MenuPermissionSelector value={user.permissions} highlightedKeys={user.differences} disabled={updatePermissions.isPending} onChange={(permissions) => updatePermissions.mutate({ userId: user.id, permissions, profilePermissions: new Set([...user.permissions].filter((key) => !user.differences.has(key)).concat([...user.differences].filter((key) => !user.permissions.has(key)))) })} />
+            <MenuPermissionSelector value={user.permissions} highlightedKeys={user.differences} disabled={updatePermissions.isPending} onChange={(permissions) => updatePermissions.mutate({ userId: user.id, permissions, profilePermissions: user.profilePermissions })} />
           </div>
         ))}
       </CardContent>
