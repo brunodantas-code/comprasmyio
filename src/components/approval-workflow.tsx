@@ -110,7 +110,7 @@ function useSteps() {
       const { data, error } = await supabase
         .from("approval_steps")
         .select(
-          "id, order_id, step_index, role_label, approver_id, status, comment, decided_at, decided_by, created_at, purchase_orders(id, item_name, item_link, quantity, estimated_value, approval_status, status, requester_id, requester_notes, buyer_notes, recipient, delivery_point, deadline_type, deadline_date, delivery_forecast, passphrase, created_at, updated_at, approval_number, request_type, travel_type, travel_destination, travel_departure, travel_return, payment_date, allocation_type, for_stock, attachments, budget_exceeded, budget_snapshot, committed_before_snapshot, projected_committed_snapshot, projects(name), clients(name))"
+          "id, order_id, step_index, role_label, approver_id, status, comment, decided_at, decided_by, created_at, purchase_orders(id, item_name, item_link, quantity, estimated_value, approval_status, status, requester_id, requester_notes, buyer_notes, recipient, delivery_point, deadline_type, deadline_date, delivery_forecast, passphrase, created_at, updated_at, approval_number, request_type, request_model, travel_type, travel_destination, travel_departure, travel_return, payment_date, allocation_type, for_stock, attachments, budget_exceeded, budget_snapshot, committed_before_snapshot, projected_committed_snapshot, projects(name), clients(name))"
         )
         .order("step_index", { ascending: true });
       if (error) throw error;
@@ -139,7 +139,7 @@ function PendingApprovalDetails({ step, requestTypes }: { step: StepRow; request
   const allocation = order.allocation_type === "interna" ? "Interna" : order.for_stock ? "Estoque" : project?.name ?? client?.name ?? "—";
   const fields = [
     ["Tipo", requestTypeLabel(order, requestTypes)], ["Item", order.item_name], ["Quantidade", String(order.quantity ?? 1)],
-    ["Valor", BRL(Number(order.estimated_value ?? 0))], ["Projeto ou Cliente", allocation], ["Destinatário", order.recipient || "—"],
+    ...(order.request_model === "dispositivos" ? [] : [["Valor", BRL(Number(order.estimated_value ?? 0))]]), ["Projeto ou Cliente", allocation], ["Destinatário", order.recipient || "—"],
     ["Endereço de entrega", order.delivery_point || "—"], ["Prazo", order.deadline_date ? new Date(`${order.deadline_date}T00:00:00`).toLocaleDateString("pt-BR") : order.deadline_type],
     ["Previsão de entrega", order.delivery_forecast ? new Date(`${order.delivery_forecast}T00:00:00`).toLocaleDateString("pt-BR") : "—"],
     ["Status da solicitação", order.status], ["Status da aprovação", order.approval_status], ["Palavra passe", order.passphrase || "—"], ["Criado em", dt(order.created_at)],
@@ -403,7 +403,9 @@ export function PendingForMe() {
     qc.invalidateQueries({ queryKey: ["orders"] });
   };
 
-  const totalValue = mine.reduce(
+  const financialMine = mine.filter((s) => s.purchase_orders?.request_model !== "dispositivos");
+  const deviceQuantity = mine.reduce((sum, s) => sum + (s.purchase_orders?.request_model === "dispositivos" ? Number(s.purchase_orders.quantity ?? 0) : 0), 0);
+  const totalValue = financialMine.reduce(
     (sum, s) => sum + Number(s.purchase_orders?.estimated_value ?? 0),
     0,
   );
@@ -420,7 +422,8 @@ export function PendingForMe() {
               {mine.length > 0 && (
                 <span className="text-sm font-normal text-muted-foreground">
                   {mine.length} {mine.length === 1 ? "approval" : "approvals"} ·{" "}
-                  <strong className="font-semibold">{fmtBRL(totalValue)}</strong>
+                   <strong className="font-semibold">{fmtBRL(totalValue)}</strong>
+                   {deviceQuantity > 0 && <> · <strong className="font-semibold">{deviceQuantity} dispositivos</strong></>}
                 </span>
               )}
             </CardTitle>
@@ -466,10 +469,10 @@ export function PendingForMe() {
                     </TableCell>
                     <TableCell className="text-sm">{req?.full_name || req?.email || "—"}</TableCell>
                     <TableCell className="text-sm">
-                      {BRL(Number(o?.estimated_value ?? 0) / Math.max(Number(o?.quantity ?? 1), 1))}
+                      {o?.request_model === "dispositivos" ? "—" : BRL(Number(o?.estimated_value ?? 0) / Math.max(Number(o?.quantity ?? 1), 1))}
                     </TableCell>
                     <TableCell className="text-sm">{o?.quantity ?? 1}</TableCell>
-                    <TableCell className="text-sm">{BRL(Number(o?.estimated_value ?? 0))}</TableCell>
+                    <TableCell className="text-sm">{o?.request_model === "dispositivos" ? "Por quantidade" : BRL(Number(o?.estimated_value ?? 0))}</TableCell>
                     <TableCell className="text-sm">{o?.allocation_type === "interna" ? "Interna" : o?.for_stock ? "Estoque" : o?.projects?.name ?? o?.clients?.name ?? "—"}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
@@ -1169,6 +1172,27 @@ function MoneyInput({
   );
 }
 
+function QuantityLimitInput({ value, disabled, onSave }: { value: number; disabled?: boolean; onSave: (value: number) => void }) {
+  const [draft, setDraft] = useState(String(value ?? 0));
+  useEffect(() => setDraft(String(value ?? 0)), [value]);
+  return (
+    <Input
+      type="number"
+      min={0}
+      max={99999}
+      className="h-8 w-28"
+      disabled={disabled}
+      value={draft}
+      onChange={(event) => setDraft(event.target.value.replace(/\D/g, "").slice(0, 5))}
+      onBlur={() => {
+        const next = Number(draft);
+        if (!Number.isInteger(next) || next < 0 || next > 99999) return setDraft(String(value ?? 0));
+        if (next !== value) onSave(next);
+      }}
+    />
+  );
+}
+
 function DefaultChainAdmin() {
   const qc = useQueryClient();
   const { data: me } = useCurrentUser();
@@ -1181,7 +1205,7 @@ function DefaultChainAdmin() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, full_name, email, approval_limit, tier2_limit, tier3_limit, approval_level, job_title_id")
+        .select("id, full_name, email, approval_limit, tier2_limit, tier3_limit, device_approval_limit, device_tier2_limit, device_tier3_limit, approval_level, job_title_id")
         .order("full_name");
       if (error) throw error;
       return data ?? [];
@@ -1205,7 +1229,7 @@ function DefaultChainAdmin() {
       patch,
     }: {
       userId: string;
-      patch: Partial<{ approval_limit: number; tier2_limit: number; tier3_limit: number }>;
+      patch: Partial<{ approval_limit: number; tier2_limit: number; tier3_limit: number; device_approval_limit: number; device_tier2_limit: number; device_tier3_limit: number }>;
     }) => {
       const { error } = await supabase.from("profiles").update(patch).eq("id", userId);
       if (error) throw error;
@@ -1272,6 +1296,28 @@ function DefaultChainAdmin() {
           <p>• Acima da Faixa 2 até a Faixa 3: Gestor Direto → Gestor da Área → C-Level.</p>
           <p>• Acima da Faixa 3: sobe pelo organograma até o C-Level.</p>
           <p>• Depois dessas etapas entram as “Etapas adicionais” ativas e, se aplicável, a dupla aprovação.</p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Alçadas de Dispositivos myio</CardTitle>
+          <CardDescription>Faixas independentes calculadas pela soma das quantidades solicitadas.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader><TableRow><TableHead>Usuário</TableHead><TableHead>Automática até</TableHead><TableHead>Faixa 2 até</TableHead><TableHead>Faixa 3 até</TableHead></TableRow></TableHeader>
+            <TableBody>
+              {(rows ?? []).map((profile) => (
+                <TableRow key={`devices-${profile.id}`}>
+                  <TableCell className="font-medium">{profile.full_name || profile.email}</TableCell>
+                  <TableCell><QuantityLimitInput value={profile.device_approval_limit} disabled={!isAdmin} onSave={(value) => save.mutate({ userId: profile.id, patch: { device_approval_limit: value } })} /></TableCell>
+                  <TableCell><QuantityLimitInput value={profile.device_tier2_limit} disabled={!isAdmin} onSave={(value) => save.mutate({ userId: profile.id, patch: { device_tier2_limit: value } })} /></TableCell>
+                  <TableCell><QuantityLimitInput value={profile.device_tier3_limit} disabled={!isAdmin} onSave={(value) => save.mutate({ userId: profile.id, patch: { device_tier3_limit: value } })} /></TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
 
