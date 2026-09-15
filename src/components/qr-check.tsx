@@ -382,7 +382,7 @@ function useQrTrace(rawCode: string) {
       events.sort((a, b) => +new Date(a.at) - +new Date(b.at));
 
       const STOCK_LABELS: Record<string, string> = {
-        fabrica: "Estoque — Fábrica",
+        fabrica: "Estoque de Componentes",
         almoxarifado: "Estoque",
         transito: "Transporte",
         unidade: "Cliente",

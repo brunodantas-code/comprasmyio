@@ -505,9 +505,10 @@ export function StockTab({ userId, canDelete, onlyLocation, canAccessSection = (
   ];
   const canShowStockGroup = (!onlyLocation || onlyLocation === "almoxarifado")
     && stockGroupPermissions.some(canAccessSection);
+  const canShowFactoryGroup = (!onlyLocation || onlyLocation === "fabrica")
+    && (canAccessSection("armazem_fabrica") || (!onlyLocation && canAccessSection("armazem_homologacao")));
   const topTabs = [
-    { value: "fabrica", label: "Fábrica", allowed: (!onlyLocation || onlyLocation === "fabrica") && canAccessSection("armazem_fabrica") },
-    { value: "homologacao", label: "Homologação", allowed: !onlyLocation && canAccessSection("armazem_homologacao") },
+    { value: "fabrica", label: "Fábrica", allowed: canShowFactoryGroup },
     { value: "estoque", label: "Estoque", allowed: canShowStockGroup },
     { value: "qr-check", label: "Checar QR Code", allowed: !onlyLocation && canAccessSection("armazem_checar_qr") },
     { value: "almoxarifado_geral", label: "Almoxarifado", allowed: (!onlyLocation || onlyLocation === "almoxarifado_geral") && canAccessSection("armazem_almoxarifado") },
@@ -525,10 +526,14 @@ export function StockTab({ userId, canDelete, onlyLocation, canAccessSection = (
         ))}
       </TabsList>
       {permittedTabs.some((tab) => tab.value === "fabrica") && (
-        <TabsContent value="fabrica"><StockSection userId={userId} location="fabrica" canDelete={canDelete} /></TabsContent>
-      )}
-      {permittedTabs.some((tab) => tab.value === "homologacao") && (
-        <TabsContent value="homologacao"><HomologationSection userId={userId} canDelete={canDelete} /></TabsContent>
+        <TabsContent value="fabrica">
+          <FabricaSection
+            userId={userId}
+            canDelete={canDelete}
+            canAccessFactory={canAccessSection("armazem_fabrica")}
+            canAccessHomologation={!onlyLocation && canAccessSection("armazem_homologacao")}
+          />
+        </TabsContent>
       )}
       {permittedTabs.some((tab) => tab.value === "estoque") && (
         <TabsContent value="estoque">
@@ -687,7 +692,7 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
           ? "Já existe um componente com esse nome na Fábrica"
           : e.message.includes("materials_fabrica_only_components") ||
               e.message.includes("materials_fabrica_not_manufactured")
-            ? "O Estoque — Fábrica aceita apenas componentes"
+            ? "O Estoque de Componentes aceita apenas componentes"
             : e.message,
       ),
   });
@@ -743,7 +748,7 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
           <DialogTitle>Novo item — {LOCATION_LABELS[location]}</DialogTitle>
           <DialogDescription>
             {isFabrica
-              ? "O item é criado do zero e pertence somente ao Estoque — Fábrica."
+              ? "O item é criado do zero e pertence somente ao Estoque de Componentes."
               : independent
                 ? "O item é criado do zero e pertence somente a este estoque."
                 : "O item fica disponível para entradas e baixas neste local."}
@@ -1233,7 +1238,17 @@ function StockTableCard({
   );
 }
 
-function FabricaSection({ userId, canDelete }: { userId: string; canDelete?: boolean }) {
+function FabricaSection({
+  userId,
+  canDelete,
+  canAccessFactory = true,
+  canAccessHomologation = false,
+}: {
+  userId: string;
+  canDelete?: boolean;
+  canAccessFactory?: boolean;
+  canAccessHomologation?: boolean;
+}) {
   const { data: stock, isLoading } = useStock();
   const { data: movements } = useMovements();
   const { data: profiles } = useStockProfiles();
@@ -1284,36 +1299,49 @@ function FabricaSection({ userId, canDelete }: { userId: string; canDelete?: boo
     </>
   );
 
+  const factoryTabs = [
+    { value: "fila", label: "Fila de Produção", allowed: canAccessFactory },
+    { value: "liberados", label: "Dispositivos Liberados", allowed: canAccessFactory },
+    { value: "homologacao", label: "Homologação", allowed: canAccessHomologation },
+    { value: "estoque", label: "Estoque de Componentes", allowed: canAccessFactory },
+  ].filter((tab) => tab.allowed);
+
+  if (factoryTabs.length === 0) return null;
+
   return (
-    <Tabs defaultValue="fila" className="space-y-4">
+    <Tabs defaultValue={factoryTabs[0]?.value} className="space-y-4">
       <TabsList className="flex-wrap">
-        <TabsTrigger value="fila">Fila de Produção</TabsTrigger>
-        <TabsTrigger value="liberados">Dispositivos Liberados</TabsTrigger>
-        <TabsTrigger value="estoque">Estoque — Fábrica</TabsTrigger>
+        {factoryTabs.map((tab) => (
+          <TabsTrigger key={tab.value} value={tab.value}>{tab.label}</TabsTrigger>
+        ))}
       </TabsList>
 
-      <TabsContent value="fila" className="space-y-6">
+      {canAccessFactory && <TabsContent value="fila" className="space-y-6">
         <ProductionQueueCard balances={almoxarifadoBalances} />
-      </TabsContent>
+      </TabsContent>}
 
-      <TabsContent value="liberados" className="space-y-6">
+      {canAccessFactory && <TabsContent value="liberados" className="space-y-6">
         <div className="flex justify-end">
           <ReleaseAssembledDialog userId={userId} />
         </div>
         <AssemblyReleasesCard materialNames={materialNames} userId={userId} canCorrect canDelete={canDelete} />
-      </TabsContent>
+      </TabsContent>}
 
-      <TabsContent value="estoque" className="space-y-6">
+      {canAccessHomologation && <TabsContent value="homologacao" className="space-y-6">
+        <HomologationSection userId={userId} canDelete={canDelete} />
+      </TabsContent>}
+
+      {canAccessFactory && <TabsContent value="estoque" className="space-y-6">
         <ProductionCapacityCard />
         <StockTableCard
-          title="Estoque — Fábrica"
+          title="Estoque de Componentes"
           description="Componentes exclusivos da operação da fábrica, separados dos dispositivos comprados de terceiros."
           rows={rows}
           isLoading={isLoading}
           userId={userId}
           canDelete={canDelete}
           actions={toolbar}
-          damageSource="Estoque — Fábrica"
+          damageSource="Estoque de Componentes"
           detail
         />
         <Card>
@@ -1356,7 +1384,7 @@ function FabricaSection({ userId, canDelete }: { userId: string; canDelete?: boo
             )}
           </CardContent>
         </Card>
-      </TabsContent>
+      </TabsContent>}
     </Tabs>
   );
 }
@@ -2030,7 +2058,7 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
 
 function EstoqueMyioSection({ userId, canDelete, canAccessSection = () => true }: { userId: string; canDelete?: boolean; canAccessSection?: (permission: StockPermissionKey) => boolean }) {
   const tabs = [
-    { value: "ordens", label: "Solicitações de Dispositivos myio", permission: "armazem_estoque_myio" as const },
+    { value: "ordens", label: "Solicitações", permission: "armazem_estoque_myio" as const },
     { value: "dispositivos", label: "Dispositivos myio", permission: "armazem_estoque_myio" as const },
     { value: "insumos", label: "Insumos de Instalação", permission: "armazem_estoque_myio" as const },
     { value: "expedicao", label: "Expedição", permission: "armazem_expedicao" as const },
