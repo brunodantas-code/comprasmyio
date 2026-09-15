@@ -125,4 +125,4 @@
 - [x] Permitir criar perfis com menus/submenus e atribuir perfil salvo ou acesso Customizado por usuário
 - [x] Exibir perfil-base e destacar em lilás as diferenças dos acessos customizados
 
-- [ ] Incluir submenus de Armazém em duas colunas no seletor de acessos
+- [x] Incluir submenus de Armazém em duas colunas no seletor de acessos

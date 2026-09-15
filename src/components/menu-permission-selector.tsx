@@ -26,7 +26,7 @@ export function MenuPermissionSelector({
             {group.label}
           </label>
           {group.children.length > 0 ? (
-            <div className="grid gap-2 border-l border-border pl-4">
+            <div className={cn("grid gap-2 border-l border-border pl-4", group.key === "armazem" && "grid-cols-2")}>
               {group.children.map((child) => (
                 <label key={child.key} className={cn("flex items-center gap-2 rounded px-1 py-0.5 text-sm text-muted-foreground", highlightedKeys.has(child.key) && "bg-myio-purple/10 font-medium text-myio-purple")}>
                   <Checkbox

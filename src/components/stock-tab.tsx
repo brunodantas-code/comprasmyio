@@ -488,7 +488,27 @@ function DeleteMaterialDialog({ row }: { row: StockRow }) {
   );
 }
 
-export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; canDelete?: boolean; onlyLocation?: StockLocation }) {
+type StockPermissionKey =
+  | "armazem_fabrica" | "armazem_estoque_myio" | "armazem_expedicao" | "armazem_homologacao"
+  | "armazem_transporte" | "armazem_cliente" | "armazem_tecnico" | "armazem_perdido"
+  | "armazem_itens_avariados" | "armazem_checar_qr" | "armazem_almoxarifado" | "armazem_ferramentas_ativos";
+
+const STOCK_TAB_PERMISSIONS: Record<string, StockPermissionKey> = {
+  fabrica: "armazem_fabrica",
+  almoxarifado: "armazem_estoque_myio",
+  distribuicao: "armazem_expedicao",
+  homologacao: "armazem_homologacao",
+  transito: "armazem_transporte",
+  unidade: "armazem_cliente",
+  tecnico: "armazem_tecnico",
+  perdido: "armazem_perdido",
+  avariados: "armazem_itens_avariados",
+  "qr-check": "armazem_checar_qr",
+  almoxarifado_geral: "armazem_almoxarifado",
+  ferramentas: "armazem_ferramentas_ativos",
+};
+
+export function StockTab({ userId, canDelete, onlyLocation, canAccessSection = () => true }: { userId: string; canDelete?: boolean; onlyLocation?: StockLocation; canAccessSection?: (permission: StockPermissionKey) => boolean }) {
   const locations = (Object.keys(LOCATION_LABELS) as StockLocation[]).filter(
     (loc) => !onlyLocation || loc === onlyLocation,
   );
@@ -506,10 +526,12 @@ export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; 
     tabs.push("almoxarifado_geral");
     tabs.push("ferramentas");
   }
+  const permittedTabs = tabs.filter((tab) => canAccessSection(STOCK_TAB_PERMISSIONS[tab]));
+  if (permittedTabs.length === 0) return null;
   return (
-    <Tabs defaultValue={tabs[0]} className="space-y-4">
+    <Tabs defaultValue={permittedTabs[0]} className="space-y-4">
       <TabsList className="h-auto flex-wrap justify-start gap-y-1">
-        {tabs.map((t) => (
+        {permittedTabs.map((t) => (
           <TabsTrigger
             key={t}
             value={t}
@@ -535,7 +557,7 @@ export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; 
           </TabsTrigger>
         ))}
       </TabsList>
-      {locations.map((loc) => (
+      {locations.filter((loc) => permittedTabs.includes(loc)).map((loc) => (
         <TabsContent key={loc} value={loc}>
           {loc === "transito" ? (
             <div className="space-y-4">
@@ -554,27 +576,27 @@ export function StockTab({ userId, canDelete, onlyLocation }: { userId: string; 
           )}
         </TabsContent>
       ))}
-      {locations.includes("almoxarifado_geral") && (
+      {permittedTabs.includes("ferramentas") && (
         <TabsContent value="ferramentas">
           <ToolAssetsSection userId={userId} canDelete={canDelete} />
         </TabsContent>
       )}
-      {locations.includes("almoxarifado") && !onlyLocation && (
+      {permittedTabs.includes("distribuicao") && (
         <TabsContent value="distribuicao">
           <DistributionCard />
         </TabsContent>
       )}
-      {showHomologacao && (
+      {permittedTabs.includes("homologacao") && (
         <TabsContent value="homologacao">
           <HomologationSection userId={userId} canDelete={canDelete} />
         </TabsContent>
       )}
-      {!onlyLocation && (
+      {permittedTabs.includes("avariados") && (
         <TabsContent value="avariados">
           <DamagedItemsCard userId={userId} />
         </TabsContent>
       )}
-      {!onlyLocation && (
+      {permittedTabs.includes("qr-check") && (
           <TabsContent value="qr-check">
             <div className="space-y-4">
               <ExternalSyncCard />
