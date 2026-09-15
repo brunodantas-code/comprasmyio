@@ -136,6 +136,6 @@
 - [x] Separar a seleção do tipo do formulário em Novas Solicitações e manter os campos ocultos até a escolha.
 - [x] Remover o título redundante de Novas Solicitações acima da seleção do tipo.
 - [x] Realocar Importações para Minhas Solicitações e restringir a criação a Novas Solicitações.
-- [ ] Garantir exclusão de Tipos de Solicitação sem vínculos e exigir realocação individual quando houver Approvals associados.
+- [x] Garantir exclusão de Tipos de Solicitação sem vínculos e exigir realocação individual quando houver Approvals associados.
 - [x] Abrir diretamente a tela específica ao selecionar Dispositivos myio ou Importação, sem botão intermediário.
-- [ ] Exibir os formulários de Dispositivos myio e Importação integrados abaixo do tipo selecionado, sem pop-up.
+- [x] Exibir os formulários de Dispositivos myio e Importação integrados abaixo do tipo selecionado, sem pop-up.

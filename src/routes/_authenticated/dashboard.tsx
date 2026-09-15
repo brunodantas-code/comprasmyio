@@ -1489,7 +1489,7 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
     return (
       <div className="space-y-4">
         {requestTypeHeader}
-        <NewImportDialog userId={userId} openOnMount />
+        <NewImportDialog userId={userId} inline />
       </div>
     );
   }
@@ -1498,7 +1498,7 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
     return (
       <div className="space-y-4">
         {requestTypeHeader}
-        <NewMyioOrderDialog userId={userId} openOnMount />
+        <NewMyioOrderDialog userId={userId} inline />
       </div>
     );
   }
