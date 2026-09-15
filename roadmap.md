@@ -169,3 +169,6 @@
 - [x] Renomear o formulário para “Nova solicitação de Dispositivos myio e Insumos de Instalação”.
 - [x] Atualizar a orientação do formulário para informar a escolha exclusiva entre Projeto e Cliente.
 - [x] Corrigir a visualização de solicitações de Dispositivos myio aprovadas para usuários do perfil Fábrica.
+- [ ] Corrigir a exclusão de solicitações de Dispositivos myio vinculadas indevidamente ao Cash Flow.
+- [ ] Exibir no Item do Approval a quantidade e os dispositivos/insumos realmente solicitados.
+- [ ] Restringir a etapa adicional Conformidade exclusivamente às solicitações de Materiais.
