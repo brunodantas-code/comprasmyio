@@ -28,10 +28,12 @@ export const setUserAccessProfile = createServerFn({ method: "POST" })
       .maybeSingle();
     if (targetError || !target || target.deleted_at) throw new Error("Usuário não encontrado ou excluído.");
 
+    const isCustomized = data.profile === "customizado";
+    const definitionCode = isCustomized ? "restrito" : data.profile;
     const { data: definition, error: definitionError } = await supabaseAdmin
       .from("access_profile_definitions")
       .select("code, base_profile, active")
-      .eq("code", data.profile)
+      .eq("code", definitionCode)
       .maybeSingle();
     if (definitionError || !definition || !definition.active) throw new Error("Perfil de acesso inválido ou inativo.");
 
@@ -48,7 +50,7 @@ export const setUserAccessProfile = createServerFn({ method: "POST" })
 
     const { error: profileError } = await supabaseAdmin
       .from("user_access_profiles")
-      .upsert({ user_id: data.userId, profile: definition.base_profile, profile_definition_id: definition.code }, { onConflict: "user_id" });
+      .upsert({ user_id: data.userId, profile: definition.base_profile, profile_definition_id: definition.code, is_customized: isCustomized }, { onConflict: "user_id" });
     if (profileError) throw profileError;
 
     if (definition.base_profile === "admin") {
@@ -90,7 +92,7 @@ export const relocateAccessProfileUsers = createServerFn({ method: "POST" })
     }
 
     for (const user of users ?? []) {
-      const { error: profileError } = await supabaseAdmin.from("user_access_profiles").update({ profile_definition_id: destination.code, profile: destination.base_profile }).eq("user_id", user.user_id);
+      const { error: profileError } = await supabaseAdmin.from("user_access_profiles").update({ profile_definition_id: destination.code, profile: destination.base_profile, is_customized: false }).eq("user_id", user.user_id);
       if (profileError) throw profileError;
       if (destination.base_profile === "admin") {
         const { error } = await supabaseAdmin.from("user_roles").upsert({ user_id: user.user_id, role: "admin" }, { onConflict: "user_id,role" });
