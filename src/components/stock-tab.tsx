@@ -493,21 +493,6 @@ type StockPermissionKey =
   | "armazem_transporte" | "armazem_cliente" | "armazem_tecnico" | "armazem_perdido"
   | "armazem_itens_avariados" | "armazem_checar_qr" | "armazem_almoxarifado" | "armazem_ferramentas_ativos";
 
-const STOCK_TAB_PERMISSIONS: Record<string, StockPermissionKey> = {
-  fabrica: "armazem_fabrica",
-  almoxarifado: "armazem_estoque_myio",
-  distribuicao: "armazem_expedicao",
-  homologacao: "armazem_homologacao",
-  transito: "armazem_transporte",
-  unidade: "armazem_cliente",
-  tecnico: "armazem_tecnico",
-  perdido: "armazem_perdido",
-  avariados: "armazem_itens_avariados",
-  "qr-check": "armazem_checar_qr",
-  almoxarifado_geral: "armazem_almoxarifado",
-  ferramentas: "armazem_ferramentas_ativos",
-};
-
 export function StockTab({ userId, canDelete, onlyLocation, canAccessSection = () => true }: { userId: string; canDelete?: boolean; onlyLocation?: StockLocation; canAccessSection?: (permission: StockPermissionKey) => boolean }) {
   const stockGroupPermissions: StockPermissionKey[] = [
     "armazem_estoque_myio",
@@ -2043,7 +2028,7 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
   );
 }
 
-function EstoqueMyioSection({ userId, canDelete, canAccessSection }: { userId: string; canDelete?: boolean; canAccessSection: (permission: StockPermissionKey) => boolean }) {
+function EstoqueMyioSection({ userId, canDelete, canAccessSection = () => true }: { userId: string; canDelete?: boolean; canAccessSection?: (permission: StockPermissionKey) => boolean }) {
   const tabs = [
     { value: "ordens", label: "Solicitações de Dispositivos myio", permission: "armazem_estoque_myio" as const },
     { value: "dispositivos", label: "Dispositivos myio", permission: "armazem_estoque_myio" as const },
