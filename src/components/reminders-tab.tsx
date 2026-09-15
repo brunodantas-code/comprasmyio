@@ -20,7 +20,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 type Frequency = "diaria" | "duas_vezes" | "semanal";
@@ -196,18 +196,17 @@ export function RemindersTab() {
             <p className="text-sm text-muted-foreground">Nenhum lembrete cadastrado.</p>
           ) : (
             <div className="overflow-hidden rounded-md border">
-              <div className="hidden grid-cols-[2fr_2fr_1.5fr_1fr] gap-2 border-b border-t-0 bg-myio-green/20 px-3 py-2 text-center text-sm font-bold sm:grid">
+              <div className="hidden grid-cols-[2fr_2fr_1.5fr_1fr_auto] gap-2 border-b border-t-0 bg-myio-green/20 px-3 py-2 text-center text-sm font-bold sm:grid">
                 <span className="text-left">Usuário</span>
                 <span>Frequência</span>
                 <span>Horário</span>
                 <span>Status</span>
+                <span className="w-20" aria-label="Ações" />
               </div>
               {reminders.map((r) => (
-                <button
+                <div
                   key={r.id}
-                  type="button"
-                  onClick={() => setEditing(r)}
-                  className="grid w-full grid-cols-2 gap-2 border-b border-border/60 px-3 py-2 text-left text-sm last:border-0 hover:bg-muted/50 sm:grid-cols-[2fr_2fr_1.5fr_1fr] sm:text-center"
+                  className="grid w-full grid-cols-2 items-center gap-2 border-b border-border/60 px-3 py-2 text-left text-sm last:border-0 sm:grid-cols-[2fr_2fr_1.5fr_1fr_auto] sm:text-center"
                 >
                   <span className="font-medium sm:text-left">{userLabel(r.user_id)}</span>
                   <span>{frequencyLabel(r)}</span>
@@ -215,7 +214,29 @@ export function RemindersTab() {
                   <span className={r.enabled ? "text-myio-green" : "text-muted-foreground"}>
                     {r.enabled ? "Ativo" : "Inativo"}
                   </span>
-                </button>
+                  <div className="col-span-2 flex w-20 items-center justify-end gap-1 justify-self-end sm:col-span-1">
+                    <Button type="button" variant="ghost" size="icon" title={`Editar lembrete de ${userLabel(r.user_id)}`} aria-label={`Editar lembrete de ${userLabel(r.user_id)}`} onClick={() => setEditing(r)}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button type="button" variant="ghost" size="icon" className="text-destructive hover:text-destructive" title={`Excluir lembrete de ${userLabel(r.user_id)}`} aria-label={`Excluir lembrete de ${userLabel(r.user_id)}`}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Excluir lembrete</AlertDialogTitle>
+                          <AlertDialogDescription>Deseja excluir o lembrete de {userLabel(r.user_id)}? Esta ação não pode ser desfeita.</AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => remove.mutate(r.id)} disabled={remove.isPending}>Excluir definitivamente</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </div>
               ))}
             </div>
           )}
