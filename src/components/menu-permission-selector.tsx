@@ -61,7 +61,7 @@ export function MenuPermissionSelector({
                   {requestTypes.map((type) => (
                     <label key={type.code} className={cn("flex items-center gap-2 rounded px-1 py-0.5 text-sm text-muted-foreground", highlightedRequestTypes.has(type.code) && "bg-myio-purple/10 font-medium text-myio-purple")}>
                       <Checkbox
-                        checked={requestTypeValue.has(type.code)}
+                        checked={value.has("solicitacoes_novas") && requestTypeValue.has(type.code)}
                         disabled={disabled || !value.has("solicitacoes_novas")}
                         onCheckedChange={(checked) => {
                           const next = new Set(requestTypeValue);

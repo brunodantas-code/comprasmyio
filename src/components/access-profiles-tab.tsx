@@ -139,7 +139,7 @@ export function AccessProfilesTab() {
               highlightedRequestTypes={user.requestTypeDifferences}
               showAdministration={user.isAdmin}
               disabled={user.isAdmin || updatePermissions.isPending}
-              onChange={(permissions) => updatePermissions.mutate({ userId: user.id, permissions, profilePermissions: user.profilePermissions, requestTypes: user.requestTypes, profileRequestTypes: user.profileRequestTypes })}
+              onChange={(permissions) => updatePermissions.mutate({ userId: user.id, permissions, profilePermissions: user.profilePermissions, requestTypes: permissions.has("solicitacoes_novas") ? user.requestTypes : new Set(), profileRequestTypes: user.profileRequestTypes })}
               onRequestTypeChange={(nextRequestTypes) => updatePermissions.mutate({ userId: user.id, permissions: user.permissions, profilePermissions: user.profilePermissions, requestTypes: nextRequestTypes, profileRequestTypes: user.profileRequestTypes })}
             />
           </div>
