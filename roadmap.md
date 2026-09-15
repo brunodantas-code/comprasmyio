@@ -167,3 +167,4 @@
 - [x] Cadastrar destinos de Estoque em Cadastro > Diversos e utilizar a lista nas movimentações.
 - [x] Tornar Projeto e Cliente excludentes nas solicitações de Dispositivos myio e exigir uma classificação única para Cliente.
 - [x] Renomear o formulário para “Nova solicitação de Dispositivos myio e Insumos de Instalação”.
+- [x] Atualizar a orientação do formulário para informar a escolha exclusiva entre Projeto e Cliente.
