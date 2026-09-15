@@ -152,3 +152,4 @@
 - [x] Trocar “produto” por “dispositivo” em todos os textos do pop-up de liberação.
 - [x] Aplicar o fundo lilás myio ao botão de liberar dispositivo montado.
 - [x] Padronizar as cores dos botões de todas as áreas do Armazém.
+- [x] Usar o verde padrão nos botões principais do Armazém para melhorar a legibilidade.

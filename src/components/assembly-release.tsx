@@ -604,7 +604,7 @@ export function ReleaseAssembledDialog({ userId }: { userId: string }) {
       }}
     >
       <DialogTrigger asChild>
-        <Button size="sm" className="bg-myio-purple text-primary-foreground hover:bg-myio-purple/90">
+        <Button size="sm">
           <PackageCheck className="mr-1 h-4 w-4" /> Liberar Dispositivo Montado
         </Button>
       </DialogTrigger>
@@ -736,7 +736,7 @@ export function ReleaseAssembledDialog({ userId }: { userId: string }) {
           </div>
 
           <DialogFooter>
-            <Button type="submit" disabled={save.isPending} className="bg-myio-purple text-primary-foreground hover:bg-myio-purple/90">
+            <Button type="submit" disabled={save.isPending}>
               {save.isPending ? "Liberando..." : "Liberar"}
             </Button>
           </DialogFooter>
