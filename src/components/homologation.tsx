@@ -24,6 +24,7 @@ import { Camera, CheckCircle2, Loader2, QrCode, Image as ImageIcon, Keyboard, Pa
 import { generateExternalQr } from "@/lib/external-products.functions";
 import { pushQrsToExternal } from "@/lib/push-external";
 import { normalizeQrValue } from "@/components/myio-delivery-qr";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 
 export const BOX_SIZES = [1, 10, 50, 100, 224] as const;
 
@@ -432,15 +433,14 @@ function UnitQrCard({
       <span className="text-xs font-medium">#{unit.position}</span>
       <span className="w-full break-all text-center text-[10px] text-muted-foreground">{unit.qr_value}</span>
       {box && (
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          disabled={remove.isPending}
-          onClick={() => remove.mutate({ unit, box })}
-        >
-          <PackageMinus className="mr-1 h-3 w-3" /> Tirar da caixa
-        </Button>
+        <ConfirmDeleteButton
+          title="Tirar dispositivo da caixa?"
+          description={`Confirma a retirada do dispositivo #${unit.position}? Ele passará a ser uma unidade individual.`}
+          ariaLabel={`Tirar dispositivo ${unit.position} da caixa`}
+          pending={remove.isPending}
+          onConfirm={() => remove.mutate({ unit, box })}
+          trigger={<Button type="button" size="sm" variant="outline"><PackageMinus className="mr-1 h-3 w-3" /> Tirar da caixa</Button>}
+        />
       )}
       {extraAction}
     </div>
@@ -467,7 +467,9 @@ function UnitaryDropZone() {
             unit?: UnitRow;
             box?: HomologationRef;
           };
-          if (payload.unit && payload.box) remove.mutate({ unit: payload.unit, box: payload.box });
+          if (payload.unit && payload.box && window.confirm(`Confirma a retirada do dispositivo #${payload.unit.position} da caixa?`)) {
+            remove.mutate({ unit: payload.unit, box: payload.box });
+          }
         } catch {
           /* arrasto inválido — ignora */
         }

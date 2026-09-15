@@ -18,6 +18,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { ArrowRightLeft, Camera, CheckCircle2, ImageUp, PauseCircle, Plus, Trash2 } from "lucide-react";
@@ -476,6 +477,7 @@ function ProductsTable({
   canDelete,
   installed,
   userId,
+  deleting,
 }: {
   rows: UnitProduct[];
   names: Record<string, string>;
@@ -484,6 +486,7 @@ function ProductsTable({
   canDelete?: boolean;
   installed: boolean;
   userId: string;
+  deleting?: boolean;
 }) {
   if (!rows.length) {
     return (
@@ -535,9 +538,14 @@ function ProductsTable({
                   userId={userId}
                 />
                 {canDelete && (
-                  <Button size="sm" variant="outline" onClick={() => onDelete(p.id)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <ConfirmDeleteButton
+                    title="Excluir produto da unidade?"
+                    description={`Confirma a exclusão de “${p.product ?? names[p.material_id] ?? "Produto"}”? Esta ação não pode ser desfeita.`}
+                    ariaLabel={`Excluir ${p.product ?? names[p.material_id] ?? "produto"}`}
+                    pending={deleting}
+                    onConfirm={() => onDelete(p.id)}
+                    trigger={<Button type="button" size="icon" variant="outline" title="Excluir produto" aria-label={`Excluir ${p.product ?? names[p.material_id] ?? "produto"}`}><Trash2 className="h-4 w-4" /></Button>}
+                  />
                 )}
               </div>
             </TableCell>
@@ -635,6 +643,7 @@ export function UnitProductsCard({
                   userId={userId}
                   installed
                   canDelete={canDelete}
+                  deleting={remove.isPending}
                   onToggle={(p) => toggle.mutate(p)}
                   onDelete={(id) => remove.mutate(id)}
                 />
@@ -651,6 +660,7 @@ export function UnitProductsCard({
                   userId={userId}
                   installed={false}
                   canDelete={canDelete}
+                  deleting={remove.isPending}
                   onToggle={(p) => toggle.mutate(p)}
                   onDelete={(id) => remove.mutate(id)}
                 />
