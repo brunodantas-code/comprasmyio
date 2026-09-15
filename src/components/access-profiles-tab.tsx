@@ -25,7 +25,7 @@ export function AccessProfilesTab() {
     queryFn: async () => {
       const [{ data: profiles, error: profilesError }, { data: access, error: accessError }, { data: permissions, error: permissionsError }] = await Promise.all([
         supabase.from("profiles").select("id, full_name, email").order("full_name"),
-        supabase.from("user_access_profiles").select("user_id,is_customized,access_profile_definitions(name,base_profile,access_profile_permissions(menu_key,allowed))").eq("is_customized", true),
+        supabase.from("user_access_profiles").select("user_id,is_customized,access_profile_definitions(name,base_profile,access_profile_permissions(menu_key,allowed))"),
         supabase.from("user_menu_permissions").select("user_id,menu_key,allowed"),
       ]);
       if (profilesError) throw profilesError;
@@ -35,14 +35,16 @@ export function AccessProfilesTab() {
       return (profiles ?? []).filter((profile) => accessByUser.has(profile.id)).map((profile) => {
         const accessRecord = accessByUser.get(profile.id);
         const definition = accessRecord?.access_profile_definitions as ProfileDefinition | null | undefined;
-        const selectedPermissions = new Set((permissions ?? []).filter((permission) => permission.user_id === profile.id && permission.allowed).map((permission) => permission.menu_key));
         const profilePermissions = new Set(definition?.base_profile === "admin"
           ? ALL_MENU_PERMISSION_KEYS
           : (definition?.access_profile_permissions ?? []).filter((permission) => permission.allowed).map((permission) => permission.menu_key));
+        const individualPermissions = new Set((permissions ?? []).filter((permission) => permission.user_id === profile.id && permission.allowed).map((permission) => permission.menu_key));
+        const selectedPermissions = accessRecord?.is_customized ? individualPermissions : profilePermissions;
         return {
           ...profile,
           profileName: definition?.name ?? "Restrito",
           permissions: selectedPermissions,
+          profilePermissions,
           differences: symmetricDifference(selectedPermissions, profilePermissions),
         };
       });
@@ -50,13 +52,16 @@ export function AccessProfilesTab() {
   });
 
   const updatePermissions = useMutation({
-    mutationFn: async ({ userId, permissions }: { userId: string; permissions: Set<string> }) => {
+    mutationFn: async ({ userId, permissions, profilePermissions }: { userId: string; permissions: Set<string>; profilePermissions: Set<string> }) => {
+      const isCustomized = symmetricDifference(permissions, profilePermissions).size > 0;
       const { error: deleteError } = await supabase.from("user_menu_permissions").delete().eq("user_id", userId);
       if (deleteError) throw deleteError;
-      if (permissions.size > 0) {
+      if (isCustomized && permissions.size > 0) {
         const { error } = await supabase.from("user_menu_permissions").insert([...permissions].map((menuKey) => ({ user_id: userId, menu_key: menuKey, allowed: true })));
         if (error) throw error;
       }
+      const { error: accessError } = await supabase.from("user_access_profiles").update({ is_customized: isCustomized }).eq("user_id", userId);
+      if (accessError) throw accessError;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["custom-access-profiles"] });
@@ -74,7 +79,7 @@ export function AccessProfilesTab() {
       </CardHeader>
       <CardContent className="space-y-4">
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : null}
-        {!isLoading && data?.length === 0 ? <p className="text-sm text-muted-foreground">Nenhum usuário utiliza acesso Customizado.</p> : null}
+        {!isLoading && data?.length === 0 ? <p className="text-sm text-muted-foreground">Nenhum usuário cadastrado.</p> : null}
         {data?.map((user) => (
           <div key={user.id} className="space-y-3 rounded-md border border-border p-3">
             <div className="min-w-0">
@@ -86,7 +91,7 @@ export function AccessProfilesTab() {
               </div>
               <p className="truncate text-xs text-muted-foreground">{user.email}</p>
             </div>
-            <MenuPermissionSelector value={user.permissions} highlightedKeys={user.differences} disabled={updatePermissions.isPending} onChange={(permissions) => updatePermissions.mutate({ userId: user.id, permissions })} />
+            <MenuPermissionSelector value={user.permissions} highlightedKeys={user.differences} disabled={updatePermissions.isPending} onChange={(permissions) => updatePermissions.mutate({ userId: user.id, permissions, profilePermissions: user.profilePermissions })} />
           </div>
         ))}
       </CardContent>
