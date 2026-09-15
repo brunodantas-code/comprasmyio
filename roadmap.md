@@ -165,3 +165,4 @@
 - [x] Realocar Perdido e Avariado para Dispositivos myio, em blocos próprios após o estoque.
 - [x] Reordenar os submenus de Estoque e renomear Dispositivos myio para myio.
 - [x] Cadastrar destinos de Estoque em Cadastro > Diversos e utilizar a lista nas movimentações.
+- [ ] Tornar Projeto e Cliente excludentes nas solicitações de Dispositivos myio e exigir uma classificação única para Cliente.
