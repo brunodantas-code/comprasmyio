@@ -1300,10 +1300,10 @@ function FabricaSection({
   );
 
   const factoryTabs = [
+    { value: "estoque", label: "Estoque de Componentes", allowed: canAccessFactory },
     { value: "fila", label: "Fila de Produção", allowed: canAccessFactory },
     { value: "liberados", label: "Dispositivos Liberados", allowed: canAccessFactory },
     { value: "homologacao", label: "Homologação", allowed: canAccessHomologation },
-    { value: "estoque", label: "Estoque de Componentes", allowed: canAccessFactory },
   ].filter((tab) => tab.allowed);
 
   if (factoryTabs.length === 0) return null;
