@@ -2140,7 +2140,7 @@ function EstoqueMyioSection({ userId, canDelete }: { userId: string; canDelete?:
       <TabsContent value="estoque" className="space-y-6">
         <StockTableCard
           title="Estoque Myio"
-          description="Produtos produzidos pela Myio (fabricados). Banco de dados próprio, separado do Estoque Fábrica e do Insumos de Instalação."
+          description="Dispositivos produzidos pela Myio (fabricados). Banco de dados próprio, separado do Estoque Fábrica e do Insumos de Instalação."
           rows={rows.filter((r) => manufactured?.[r.material_id])}
           isLoading={isLoading}
           userId={userId}
