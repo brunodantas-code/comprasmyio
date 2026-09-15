@@ -1578,7 +1578,7 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
             )}
 
             {requestModel === "reembolso" && (
-              <div className="space-y-3">
+              <div className="mt-2 space-y-3">
                 {reembolsoLegs.map((leg, i) => (
                   <div key={i} className="rounded-md border p-3 space-y-3">
                     <div className="flex items-center justify-between">
@@ -1658,7 +1658,7 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
             )}
 
             {requestModel === "rh" && (
-              <div className="rounded-md border p-3 space-y-4">
+              <div className="mt-2 rounded-md border p-3 space-y-4">
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label>Cargo</Label>
