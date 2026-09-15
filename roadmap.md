@@ -123,3 +123,4 @@
 - [x] Criar cadastro de Perfil de Acesso em Diversos e usar a lista nos usuários
 - [x] Mover Perfil de Acesso para Perfis de acesso, antes dos Usuários Cadastrados
 - [x] Permitir criar perfis com menus/submenus e atribuir perfil salvo ou acesso Customizado por usuário
+- [x] Exibir perfil-base e destacar em lilás as diferenças dos acessos customizados
