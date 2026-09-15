@@ -76,6 +76,39 @@ export type Database = {
           },
         ]
       }
+      access_profile_request_types: {
+        Row: {
+          created_at: string
+          profile_code: string
+          request_type_code: string
+        }
+        Insert: {
+          created_at?: string
+          profile_code: string
+          request_type_code: string
+        }
+        Update: {
+          created_at?: string
+          profile_code?: string
+          request_type_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "access_profile_request_types_profile_code_fkey"
+            columns: ["profile_code"]
+            isOneToOne: false
+            referencedRelation: "access_profile_definitions"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "access_profile_request_types_request_type_code_fkey"
+            columns: ["request_type_code"]
+            isOneToOne: false
+            referencedRelation: "request_types"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       additional_step_types: {
         Row: {
           active: boolean
@@ -3150,6 +3183,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_request_type_permissions: {
+        Row: {
+          created_at: string
+          request_type_code: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          request_type_code: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          request_type_code?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_request_type_permissions_request_type_code_fkey"
+            columns: ["request_type_code"]
+            isOneToOne: false
+            referencedRelation: "request_types"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "user_request_type_permissions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -3214,6 +3280,10 @@ export type Database = {
     Functions: {
       can_manage_cash_flow: { Args: { _user_id: string }; Returns: boolean }
       can_manage_limits: { Args: { _user_id: string }; Returns: boolean }
+      can_request_type: {
+        Args: { _request_type_code: string; _user_id: string }
+        Returns: boolean
+      }
       create_myio_order_request: {
         Args: {
           _client_id: string
