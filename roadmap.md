@@ -171,3 +171,4 @@
 - [x] Corrigir a visualização de solicitações de Dispositivos myio aprovadas para usuários do perfil Fábrica.
 - [x] Corrigir a exclusão de solicitações de Dispositivos myio vinculadas indevidamente ao Cash Flow.
 - [x] Exibir no Item do Approval a quantidade e os dispositivos/insumos realmente solicitados.
+- [x] Separar “Itens da Solicitação” de “Tipo” nos cards e incluir a coluna na visualização desktop.
