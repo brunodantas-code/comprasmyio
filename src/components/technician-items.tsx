@@ -21,6 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { ArrowRightLeft, HardHat, History } from "lucide-react";
 import { pushQrsToExternal } from "@/lib/push-external";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 
 function DispatchPhoto({ path }: { path: string }) {
   const { data } = useQuery({
@@ -379,15 +380,49 @@ function MovesHistoryDialog({ moves, projectNames, materialNames }: {
 export function TechnicianItemsCard({
   userId,
   materialNames,
+  canDelete,
 }: {
   userId: string;
   materialNames: Record<string, string>;
+  canDelete?: boolean;
 }) {
+  const qc = useQueryClient();
   const { data: dispatches, isLoading } = useDispatches();
   const { data: moves } = useTechnicianMoves();
   const { data: qrsByMovement } = useDispatchQrs();
   const { data: projects } = useProjectOptions();
   const projectNames = Object.fromEntries((projects ?? []).map((p) => [p.id, p.name]));
+
+  const remove = useMutation({
+    mutationFn: async (id: string) => {
+      const { count, error: countError } = await supabase
+        .from("technician_moves")
+        .select("id", { count: "exact", head: true })
+        .eq("movement_id", id);
+      if (countError) throw countError;
+      if ((count ?? 0) > 0) throw new Error("Este produto já possui movimentações. Use o botão Mover para ajustar o saldo restante.");
+
+      const { data: qrRows, error: qrError } = await supabase
+        .from("stock_movement_qrs")
+        .select("qr_value")
+        .eq("movement_id", id);
+      if (qrError) throw qrError;
+
+      const { error } = await supabase.from("stock_movements").delete().eq("id", id);
+      if (error) throw error;
+      return (qrRows ?? []).map((row) => row.qr_value);
+    },
+    onSuccess: (qrs) => {
+      pushQrsToExternal(qrs, { location: "estoque", clientName: null });
+      toast.success("Produto excluído do técnico e devolvido ao saldo do estoque.");
+      qc.invalidateQueries({ queryKey: ["technician-dispatches"] });
+      qc.invalidateQueries({ queryKey: ["technician-dispatch-qrs"] });
+      qc.invalidateQueries({ queryKey: ["technician-moves"] });
+      qc.invalidateQueries({ queryKey: ["material-stock"] });
+      qc.invalidateQueries({ queryKey: ["stock-movements"] });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
 
   const movedByDispatch: Record<string, number> = {};
   (moves ?? []).forEach((m) => {
@@ -472,7 +507,18 @@ export function TechnicianItemsCard({
                           </TableCell>
                           <TableCell className="text-sm text-muted-foreground">{fmt(d.created_at)}</TableCell>
                           <TableCell className="text-right">
-                            <MoveDialog dispatch={d} materialName={name} remaining={remaining} userId={userId} />
+                            <div className="flex items-center justify-end gap-1">
+                              <MoveDialog dispatch={d} materialName={name} remaining={remaining} userId={userId} />
+                              {canDelete && (
+                                <ConfirmDeleteButton
+                                  title="Excluir produto do técnico?"
+                                  description={`Confirma a exclusão de “${name}” atribuído a ${tech}? O saldo retornará ao estoque. Esta ação não será permitida se já houver movimentações posteriores.`}
+                                  ariaLabel={`Excluir ${name} de ${tech}`}
+                                  pending={remove.isPending}
+                                  onConfirm={() => remove.mutate(d.id)}
+                                />
+                              )}
+                            </div>
                           </TableCell>
                         </TableRow>
                       );
