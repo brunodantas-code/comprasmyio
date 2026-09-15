@@ -116,13 +116,14 @@ function useImportableItems() {
   });
 }
 
-function useImportBatches() {
+function useImportBatches(userId: string) {
   return useQuery({
-    queryKey: ["import-batches"],
+    queryKey: ["import-batches", userId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("import_batches")
         .select("id, name, notes, status, attachments, created_at, created_by, import_batch_items(id, source, material_id, terceiros_material_id, tool_asset_id, item_name, quantity)")
+        .eq("created_by", userId)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as unknown as ImportBatch[];
@@ -130,7 +131,7 @@ function useImportBatches() {
   });
 }
 
-function NewImportDialog({ userId }: { userId: string }) {
+export function NewImportDialog({ userId, triggerLabel = "Nova importação", inline = false }: { userId: string; triggerLabel?: string; inline?: boolean }) {
   const qc = useQueryClient();
   const { data: items, isLoading } = useImportableItems();
   const [open, setOpen] = useState(false);
@@ -231,10 +232,134 @@ function NewImportDialog({ userId }: { userId: string }) {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  if (inline) {
+    return (
+      <Card className="max-w-4xl">
+        <CardHeader>
+          <CardTitle>Nova importação</CardTitle>
+          <CardDescription>Dê um nome, anexe documentos e escolha as quantidades dos itens importados.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="import-name">Nome da importação</Label>
+          <Input id="import-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Importação Shenzhen Março" />
+        </div>
+
+        <div className="space-y-2">
+          <Label className="flex items-center gap-2"><Paperclip className="h-4 w-4" />Anexos <span className="text-xs text-muted-foreground">(máx. {MAX_FILES} documentos)</span></Label>
+          <Input
+            type="file"
+            multiple
+            accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt"
+            onChange={(e) => {
+              const fs = Array.from(e.target.files ?? []);
+              const next = [...files, ...fs];
+              if (next.length > MAX_FILES) toast.error(`Máximo de ${MAX_FILES} documentos.`);
+              setFiles(next.slice(0, MAX_FILES));
+              e.target.value = "";
+            }}
+          />
+          {files.length > 0 && (
+            <ul className="space-y-1 text-xs">
+              {files.map((f, i) => (
+                <li key={i} className="flex items-center justify-between rounded border px-2 py-1">
+                  <span className="truncate">{f.name} <span className="text-muted-foreground">({Math.round(f.size / 1024)} KB)</span></span>
+                  <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => setFiles(files.filter((_, j) => j !== i))}>
+                    <X className="h-3 w-3" />
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="import-notes">Observação</Label>
+          <Textarea id="import-notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <Label>Itens importados (quantidade em lotes)</Label>
+            <div className="flex items-center gap-2">
+              <input
+                ref={ciInputRef}
+                type="file"
+                accept=".xlsx,.xls,.csv"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  e.target.value = "";
+                  if (f) ciMutation.mutate(f);
+                }}
+              />
+              <Button type="button" variant="outline" size="sm" disabled={ciMutation.isPending || !items?.length} onClick={() => ciInputRef.current?.click()}>
+                <FileSpreadsheet className="mr-2 h-4 w-4" />
+                {ciMutation.isPending ? "Lendo planilha..." : "Importar Excel (CI)"}
+              </Button>
+              {removed.size > 0 && (
+                <Button type="button" variant="ghost" size="sm" onClick={() => setRemoved(new Set())}>Restaurar removidos</Button>
+              )}
+            </div>
+          </div>
+          {isLoading ? (
+            <p className="text-sm text-muted-foreground">Carregando itens...</p>
+          ) : visible.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Nenhum item cadastrado como importado.</p>
+          ) : (
+            <div className="space-y-2">
+              {visible.map((i) => (
+                <div key={i.key} className="flex items-center justify-between gap-3 rounded-md border p-2">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm">{i.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {i.originLabel} · {i.lotQuantity} un/lote
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <div className="text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <Input
+                          type="number"
+                          min={0}
+                          className="w-24"
+                          placeholder="0"
+                          aria-label={`Lotes de ${i.name}`}
+                          value={qty[i.key] ?? ""}
+                          onChange={(e) => setQty((p) => ({ ...p, [i.key]: e.target.value }))}
+                        />
+                        <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">Lotes</span>
+                      </div>
+                      {(() => {
+                        const l = parseInt(qty[i.key] ?? "", 10);
+                        if (!Number.isFinite(l) || l <= 0) return null;
+                        return <p className="mt-1.5 pr-1 text-[11px] text-muted-foreground">{`${l * i.lotQuantity} unid.`}</p>;
+                      })()}
+                    </div>
+                    <Button type="button" variant="ghost" size="icon" onClick={() => setRemoved((p) => new Set(p).add(i.key))}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="flex justify-end">
+          <Button onClick={() => mutation.mutate()} disabled={mutation.isPending}>
+            {mutation.isPending ? "Salvando..." : "Salvar importação"}
+          </Button>
+        </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) reset(); }}>
       <DialogTrigger asChild>
-        <Button><Plus className="mr-2 h-4 w-4" />Nova importação</Button>
+        <Button><Plus className="mr-2 h-4 w-4" />{triggerLabel}</Button>
       </DialogTrigger>
       <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
@@ -482,7 +607,7 @@ function DeleteImportDialog({ id }: { id: string }) {
 
 export function ImportBatchesSection({ userId }: { userId: string }) {
   const { data: me } = useCurrentUser();
-  const { data: batches, isLoading } = useImportBatches();
+  const { data: batches, isLoading } = useImportBatches(userId);
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const list = (batches ?? []).filter((b) => statusFilter === "all" || b.status === statusFilter);
@@ -502,7 +627,6 @@ export function ImportBatchesSection({ userId }: { userId: string }) {
               {STATUS_KEYS.map((s) => <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>)}
             </SelectContent>
           </Select>
-          <NewImportDialog userId={userId} />
         </div>
       </CardHeader>
       <CardContent>

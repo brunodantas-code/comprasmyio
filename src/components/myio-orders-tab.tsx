@@ -122,7 +122,7 @@ const CLIENT_REASON_LABELS = {
   upsell: "Upsell",
 } as const;
 
-export function NewMyioOrderDialog({ userId, triggerLabel }: { userId: string; triggerLabel?: string }) {
+export function NewMyioOrderDialog({ userId, triggerLabel, inline = false }: { userId: string; triggerLabel?: string; inline?: boolean }) {
   const qc = useQueryClient();
   const { data: projects } = useProjects();
   const { data: clients } = useClients();
@@ -174,107 +174,118 @@ export function NewMyioOrderDialog({ userId, triggerLabel }: { userId: string; t
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const formContent = (
+    <>
+      <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
+        <div className="space-y-2">
+          <Label>Projeto (opcional)</Label>
+          <Select value={projectId || "none"} onValueChange={(value) => setProjectId(value === "none" ? "" : value)}>
+            <SelectTrigger><SelectValue placeholder="Selecione um projeto" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">Nenhum projeto</SelectItem>
+              {(projects ?? []).map((p) => (
+                <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label>Cliente (opcional)</Label>
+          <Select value={clientId || "none"} onValueChange={(value) => { setClientId(value === "none" ? "" : value); if (value === "none") setClientReason(""); }}>
+            <SelectTrigger><SelectValue placeholder="Selecione um cliente" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">Nenhum cliente</SelectItem>
+              {(clients ?? []).map((client) => <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="myio-date">Data de entrega</Label>
+          <Input id="myio-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+        </div>
+      </div>
+
+      {clientId && (
+        <div className="space-y-2">
+          <Label>Motivo da solicitação para o cliente</Label>
+          <div className="grid gap-2 sm:grid-cols-3">
+            {(Object.entries(CLIENT_REASON_LABELS) as [keyof typeof CLIENT_REASON_LABELS, string][]).map(([value, label]) => (
+              <label key={value} className="flex cursor-pointer items-center gap-2 rounded-md border p-3 text-sm">
+                <Checkbox checked={clientReason === value} onCheckedChange={(checked) => setClientReason(checked ? value : "")} />
+                {label}
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="flex items-center gap-2 rounded-md border p-3">
+        <Checkbox id="myio-replacement" checked={isReplacement} onCheckedChange={(v) => setIsReplacement(v === true)} />
+        <Label htmlFor="myio-replacement" className="cursor-pointer font-normal">Produto de reposição</Label>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Produtos</Label>
+        <p className="text-xs text-muted-foreground">Clique na miniatura para adicionar ou trocar a foto do produto.</p>
+        <div className="grid gap-2 [&>*]:min-w-0 sm:grid-cols-2">
+          {products.map((p) => (
+            <div key={p} className="flex items-center justify-between gap-3 rounded-md border p-2">
+              <div className="flex min-w-0 items-center gap-2">
+                <ProductImageUploader product={p} url={images?.[p]} userId={userId} />
+                <ProductPhotoPreview product={p} url={images?.[p]} size={0}>
+                  <span className="text-sm">{p}</span>
+                </ProductPhotoPreview>
+              </div>
+              <Input type="number" min={0} className="w-20" value={qty[p] ?? ""} onChange={(e) => setQty((prev) => ({ ...prev, [p]: e.target.value }))} placeholder="0" />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="myio-notes">Observações</Label>
+        <Textarea id="myio-notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
+      </div>
+
+      <DialogFooter>
+        <Button onClick={() => mutation.mutate()} disabled={mutation.isPending}>
+          {mutation.isPending ? "Criando..." : "Criar pedido"}
+        </Button>
+      </DialogFooter>
+    </>
+  );
+
+  if (inline) {
+    return (
+      <Card className="max-w-4xl">
+        <CardHeader>
+          <CardTitle>Nova solicitação de Dispositivos myio</CardTitle>
+          <CardDescription>Selecione Projeto, Cliente ou ambos, além da data e das quantidades.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">{formContent}</CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) reset(); }}>
-      <TooltipProvider delayDuration={300}>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <DialogTrigger asChild>
-              <Button>{triggerLabel ? <><Plus className="mr-2 h-4 w-4" />{triggerLabel}</> : <Plus className="h-4 w-4" />}</Button>
-            </DialogTrigger>
-          </TooltipTrigger>
-          <TooltipContent>Nova solicitação de Dispositivos myio</TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+        <TooltipProvider delayDuration={300}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DialogTrigger asChild>
+                <Button>{triggerLabel ? <><Plus className="mr-2 h-4 w-4" />{triggerLabel}</> : <Plus className="h-4 w-4" />}</Button>
+              </DialogTrigger>
+            </TooltipTrigger>
+            <TooltipContent>Nova solicitação de Dispositivos myio</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Novo pedido de produtos Myio</DialogTitle>
           <DialogDescription>Selecione Projeto, Cliente ou ambos, além da data e das quantidades.</DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label>Projeto (opcional)</Label>
-            <Select value={projectId || "none"} onValueChange={(value) => setProjectId(value === "none" ? "" : value)}>
-              <SelectTrigger><SelectValue placeholder="Selecione um projeto" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">Nenhum projeto</SelectItem>
-                {(projects ?? []).map((p) => (
-                  <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label>Cliente (opcional)</Label>
-            <Select value={clientId || "none"} onValueChange={(value) => { setClientId(value === "none" ? "" : value); if (value === "none") setClientReason(""); }}>
-              <SelectTrigger><SelectValue placeholder="Selecione um cliente" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">Nenhum cliente</SelectItem>
-                {(clients ?? []).map((client) => <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="myio-date">Data de entrega</Label>
-            <Input id="myio-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-          </div>
-        </div>
-
-        {clientId && (
-          <div className="space-y-2">
-            <Label>Motivo da solicitação para o cliente</Label>
-            <div className="grid gap-2 sm:grid-cols-3">
-              {(Object.entries(CLIENT_REASON_LABELS) as [keyof typeof CLIENT_REASON_LABELS, string][]).map(([value, label]) => (
-                <label key={value} className="flex cursor-pointer items-center gap-2 rounded-md border p-3 text-sm">
-                  <Checkbox checked={clientReason === value} onCheckedChange={(checked) => setClientReason(checked ? value : "")} />
-                  {label}
-                </label>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div className="flex items-center gap-2 rounded-md border p-3">
-          <Checkbox id="myio-replacement" checked={isReplacement} onCheckedChange={(v) => setIsReplacement(v === true)} />
-          <Label htmlFor="myio-replacement" className="cursor-pointer font-normal">Produto de reposição</Label>
-        </div>
-
-        <div className="space-y-2">
-          <Label>Produtos</Label>
-          <p className="text-xs text-muted-foreground">Clique na miniatura para adicionar ou trocar a foto do produto.</p>
-          <div className="grid gap-2 [&>*]:min-w-0 sm:grid-cols-2">
-            {products.map((p) => (
-              <div key={p} className="flex items-center justify-between gap-3 rounded-md border p-2">
-                <div className="flex min-w-0 items-center gap-2">
-                  <ProductImageUploader product={p} url={images?.[p]} userId={userId} />
-                  <ProductPhotoPreview product={p} url={images?.[p]} size={0}>
-                    <span className="text-sm">{p}</span>
-                  </ProductPhotoPreview>
-                </div>
-                <Input
-                  type="number"
-                  min={0}
-                  className="w-20"
-                  value={qty[p] ?? ""}
-                  onChange={(e) => setQty((prev) => ({ ...prev, [p]: e.target.value }))}
-                  placeholder="0"
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="myio-notes">Observações</Label>
-          <Textarea id="myio-notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
-        </div>
-
-        <DialogFooter>
-          <Button onClick={() => mutation.mutate()} disabled={mutation.isPending}>
-            {mutation.isPending ? "Criando..." : "Criar pedido"}
-          </Button>
-        </DialogFooter>
+        {formContent}
       </DialogContent>
     </Dialog>
   );

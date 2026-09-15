@@ -39,7 +39,7 @@ import { AdditionalStepTypesTab } from "@/components/additional-step-types-tab";
 import { RequestTypesTab, requestTypeModel, requestTypeName, useRequestTypes, type RequestTypeRecord } from "@/components/request-types-tab";
 import { AccessProfilesTab } from "@/components/access-profiles-tab";
 import { AccessProfileDefinitionsTab, useAccessProfileDefinitions } from "@/components/access-profile-definitions-tab";
-import { ImportBatchesSection } from "@/components/import-batches";
+import { ImportBatchesSection, NewImportDialog } from "@/components/import-batches";
 import { AddressAutocomplete } from "@/components/address-autocomplete";
 import { LinkedRecordDeletionDialog } from "@/components/linked-record-deletion-dialog";
 
@@ -1489,7 +1489,7 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
     return (
       <div className="space-y-4">
         {requestTypeHeader}
-        <ImportOrders userId={userId} />
+        <NewImportDialog userId={userId} inline />
       </div>
     );
   }
@@ -1498,11 +1498,7 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
     return (
       <div className="space-y-4">
         {requestTypeHeader}
-        <Card className="max-w-2xl">
-          <CardContent className="pt-6">
-            <NewMyioOrderDialog userId={userId} triggerLabel="Abrir solicitação de Dispositivos myio" />
-          </CardContent>
-        </Card>
+        <NewMyioOrderDialog userId={userId} inline />
       </div>
     );
   }
@@ -2160,6 +2156,7 @@ function MyOrders({ userId, canManageDevices }: { userId: string; canManageDevic
           )}
         </CardContent>
       </Card>
+      <ImportOrders userId={userId} />
       <MyioOrdersTab userId={userId} canManage={canManageDevices} />
     </div>
   );
@@ -2208,8 +2205,8 @@ function ImportOrders({ userId }: { userId: string }) {
 
   return (
     <div className="space-y-6">
-    <ImportBatchesSection userId={userId} />
-    <Card>
+      <ImportBatchesSection userId={userId} />
+      <Card>
 
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -2228,7 +2225,7 @@ function ImportOrders({ userId }: { userId: string }) {
           <OrdersTable orders={visible} projectName={projectName} showRequester={false} canEditRequester canDelete />
         }
       </CardContent>
-    </Card>
+      </Card>
     </div>
   );
 }

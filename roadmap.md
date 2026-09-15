@@ -135,3 +135,7 @@
 - [x] Exigir classificação Manutenção, Reposição por mal uso ou Upsell quando a solicitação de Dispositivos myio tiver Cliente.
 - [x] Separar a seleção do tipo do formulário em Novas Solicitações e manter os campos ocultos até a escolha.
 - [x] Remover o título redundante de Novas Solicitações acima da seleção do tipo.
+- [x] Realocar Importações para Minhas Solicitações e restringir a criação a Novas Solicitações.
+- [x] Garantir exclusão de Tipos de Solicitação sem vínculos e exigir realocação individual quando houver Approvals associados.
+- [x] Abrir diretamente a tela específica ao selecionar Dispositivos myio ou Importação, sem botão intermediário.
+- [x] Exibir os formulários de Dispositivos myio e Importação integrados abaixo do tipo selecionado, sem pop-up.
