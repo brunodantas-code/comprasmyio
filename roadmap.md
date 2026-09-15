@@ -175,3 +175,8 @@
 - [x] Corrigir a abertura dos anexos das solicitações em uma nova aba.
 - [x] Substituir “descrição completa” pelo conteúdo do item nas solicitações.
 - [x] Bloquear a exclusão de clientes com projetos ou solicitações vinculados e exigir realocação individual.
+## Padronização dos cadastros em Diversos
+- [ ] Mapear todos os cadastros, vínculos e ações existentes
+- [ ] Disponibilizar edição e exclusão em cada cadastro
+- [ ] Bloquear exclusão vinculada e exigir realocação
+- [ ] Validar os fluxos e a interface
