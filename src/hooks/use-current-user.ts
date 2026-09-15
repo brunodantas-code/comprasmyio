@@ -40,7 +40,7 @@ export function useCurrentUser() {
       const [{ data: profile }, { data: rolesData }, { data: accessData }, { data: menuData }] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
         supabase.from("user_roles").select("role").eq("user_id", user.id),
-        supabase.from("user_access_profiles").select("profile,profile_definition_id,access_profile_definitions(name,base_profile)").eq("user_id", user.id).maybeSingle(),
+        supabase.from("user_access_profiles").select("profile,profile_definition_id,is_customized,access_profile_definitions(name,base_profile,access_profile_permissions(menu_key,allowed))").eq("user_id", user.id).maybeSingle(),
         supabase.from("user_menu_permissions").select("menu_key, allowed").eq("user_id", user.id),
       ]);
 
@@ -55,14 +55,15 @@ export function useCurrentUser() {
         jobTitle = title ?? null;
       }
       const titleKey = normalizeTitle(jobTitle?.name);
-      const definition = accessData?.access_profile_definitions as { name: string; base_profile: AccessProfileBase } | null | undefined;
-      const accessProfile = (accessData?.profile_definition_id ?? "restrito") as AccessProfile;
+      const definition = accessData?.access_profile_definitions as { name: string; base_profile: AccessProfileBase; access_profile_permissions?: Array<{ menu_key: string; allowed: boolean }> } | null | undefined;
+      const isCustomized = accessData?.is_customized ?? true;
+      const accessProfile = (isCustomized ? "customizado" : accessData?.profile_definition_id ?? "restrito") as AccessProfile;
       const accessProfileBase = (definition?.base_profile ?? accessData?.profile ?? "restrito") as AccessProfileBase;
-      const restrictedMenus = new Set((menuData ?? []).filter((item) => item.allowed).map((item) => item.menu_key));
+      const individualMenus = new Set((menuData ?? []).filter((item) => item.allowed).map((item) => item.menu_key));
+      const profileMenus = new Set((definition?.access_profile_permissions ?? []).filter((item) => item.allowed).map((item) => item.menu_key));
       const canAccess = (menu: MenuKey) => {
         if (accessProfileBase === "admin") return true;
-        if (accessProfileBase === "padrao") return !menu.startsWith("cadastro") && !menu.startsWith("usuarios");
-        return restrictedMenus.has(menu);
+        return (isCustomized ? individualMenus : profileMenus).has(menu);
       };
       return {
         id: user.id,
@@ -72,7 +73,7 @@ export function useCurrentUser() {
         jobTitle,
         accessProfile,
         accessProfileBase,
-        accessProfileName: definition?.name ?? (accessProfileBase === "padrao" ? "Padrão" : accessProfileBase === "admin" ? "Admin" : "Restrito"),
+        accessProfileName: isCustomized ? "Customizado" : definition?.name ?? "Restrito",
         canAccess,
         isAdmin: accessProfileBase === "admin",
         isComprador: titleKey === "supply" || titleKey === "time de supply",

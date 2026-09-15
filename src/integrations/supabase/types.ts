@@ -44,6 +44,38 @@ export type Database = {
         }
         Relationships: []
       }
+      access_profile_permissions: {
+        Row: {
+          allowed: boolean
+          created_at: string
+          menu_key: string
+          profile_code: string
+          updated_at: string
+        }
+        Insert: {
+          allowed?: boolean
+          created_at?: string
+          menu_key: string
+          profile_code: string
+          updated_at?: string
+        }
+        Update: {
+          allowed?: boolean
+          created_at?: string
+          menu_key?: string
+          profile_code?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "access_profile_permissions_profile_code_fkey"
+            columns: ["profile_code"]
+            isOneToOne: false
+            referencedRelation: "access_profile_definitions"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       additional_step_types: {
         Row: {
           active: boolean
@@ -2857,6 +2889,7 @@ export type Database = {
       user_access_profiles: {
         Row: {
           created_at: string
+          is_customized: boolean
           profile: Database["public"]["Enums"]["access_profile"]
           profile_definition_id: string
           updated_at: string
@@ -2864,6 +2897,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          is_customized?: boolean
           profile?: Database["public"]["Enums"]["access_profile"]
           profile_definition_id?: string
           updated_at?: string
@@ -2871,6 +2905,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          is_customized?: boolean
           profile?: Database["public"]["Enums"]["access_profile"]
           profile_definition_id?: string
           updated_at?: string

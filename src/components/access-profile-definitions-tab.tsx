@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-import { supabase } from "@/integrations/supabase/client";
+import { MenuPermissionSelector } from "@/components/menu-permission-selector";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -13,12 +13,19 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { supabase } from "@/integrations/supabase/client";
+import { ALL_MENU_PERMISSION_KEYS, STANDARD_MENU_PERMISSION_KEYS } from "@/lib/menu-permissions";
 import { relocateAccessProfileUsers } from "@/lib/user-admin.functions";
 
 export type AccessProfileBase = "admin" | "padrao" | "restrito";
-export type AccessProfileDefinition = { code: string; name: string; base_profile: AccessProfileBase; active: boolean; is_system: boolean };
-
-const BASE_LABELS: Record<AccessProfileBase, string> = { admin: "Admin", padrao: "Padrão", restrito: "Restrito" };
+export type AccessProfileDefinition = {
+  code: string;
+  name: string;
+  base_profile: AccessProfileBase;
+  active: boolean;
+  is_system: boolean;
+  permissions: Set<string>;
+};
 
 function makeCode(name: string) {
   return name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR").trim().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
@@ -28,11 +35,28 @@ export function useAccessProfileDefinitions() {
   return useQuery({
     queryKey: ["access-profile-definitions"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("access_profile_definitions").select("code,name,base_profile,active,is_system").order("name");
+      const [{ data: definitions, error }, { data: permissions, error: permissionsError }] = await Promise.all([
+        supabase.from("access_profile_definitions").select("code,name,base_profile,active,is_system").order("name"),
+        supabase.from("access_profile_permissions").select("profile_code,menu_key,allowed").eq("allowed", true),
+      ]);
       if (error) throw error;
-      return data as AccessProfileDefinition[];
+      if (permissionsError) throw permissionsError;
+      return (definitions ?? []).map((definition) => ({
+        ...definition,
+        permissions: new Set((permissions ?? []).filter((permission) => permission.profile_code === definition.code).map((permission) => permission.menu_key)),
+      })) as AccessProfileDefinition[];
     },
   });
+}
+
+async function savePermissions(profileCode: string, permissions: Set<string>) {
+  const { error: deleteError } = await supabase.from("access_profile_permissions").delete().eq("profile_code", profileCode);
+  if (deleteError) throw deleteError;
+  if (permissions.size === 0) return;
+  const { error } = await supabase.from("access_profile_permissions").insert(
+    [...permissions].map((menuKey) => ({ profile_code: profileCode, menu_key: menuKey, allowed: true })),
+  );
+  if (error) throw error;
 }
 
 export function AccessProfileDefinitionsTab() {
@@ -42,23 +66,26 @@ export function AccessProfileDefinitionsTab() {
   const invalidate = () => qc.invalidateQueries({ queryKey: ["access-profile-definitions"] });
 
   const create = useMutation({
-    mutationFn: async ({ name, base }: { name: string; base: AccessProfileBase }) => {
+    mutationFn: async ({ name, permissions }: { name: string; permissions: Set<string> }) => {
       const code = makeCode(name);
       if (!code) throw new Error("Informe um nome válido.");
-      const { error } = await supabase.from("access_profile_definitions").insert({ code, name: name.trim(), base_profile: base });
+      const { error } = await supabase.from("access_profile_definitions").insert({ code, name: name.trim(), base_profile: "restrito" });
       if (error?.code === "23505") throw new Error("Este Perfil de Acesso já está cadastrado.");
       if (error) throw error;
+      try { await savePermissions(code, permissions); }
+      catch (permissionError) { await supabase.from("access_profile_definitions").delete().eq("code", code); throw permissionError; }
     },
     onSuccess: () => { toast.success("Perfil de Acesso criado"); invalidate(); },
     onError: (error: Error) => toast.error(error.message),
   });
   const update = useMutation({
-    mutationFn: async ({ code, name, base }: { code: string; name: string; base: AccessProfileBase }) => {
-      const { error } = await supabase.from("access_profile_definitions").update({ name: name.trim(), base_profile: base }).eq("code", code);
+    mutationFn: async ({ code, name, permissions }: { code: string; name: string; permissions: Set<string> }) => {
+      const { error } = await supabase.from("access_profile_definitions").update({ name: name.trim() }).eq("code", code);
       if (error?.code === "23505") throw new Error("Este Perfil de Acesso já está cadastrado.");
       if (error) throw error;
+      await savePermissions(code, permissions);
     },
-    onSuccess: () => { toast.success("Perfil de Acesso atualizado"); invalidate(); qc.invalidateQueries({ queryKey: ["admin-users"] }); },
+    onSuccess: () => { toast.success("Perfil de Acesso atualizado"); invalidate(); qc.invalidateQueries({ queryKey: ["admin-users"] }); qc.invalidateQueries({ queryKey: ["current-user"] }); },
     onError: (error: Error) => toast.error(error.message),
   });
   const toggle = useMutation({
@@ -72,17 +99,58 @@ export function AccessProfileDefinitionsTab() {
     onError: (error: Error) => toast.error(error.message),
   });
 
-  return <Card><CardHeader className="flex flex-row items-start justify-between gap-4"><div><CardTitle>Perfil de Acesso</CardTitle><CardDescription>Cadastre os perfis disponíveis na lista de usuários a partir de um modelo existente.</CardDescription></div><ProfileDialog title="Novo Perfil de Acesso" saving={create.isPending} onSave={(name, base) => create.mutateAsync({ name, base })} /></CardHeader><CardContent>{isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : <Table><TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Modelo base</TableHead><TableHead>Ativo</TableHead><TableHead aria-label="Ações" /></TableRow></TableHeader><TableBody>{definitions.map((definition) => <TableRow key={definition.code}><TableCell className="font-medium">{definition.name}</TableCell><TableCell>{BASE_LABELS[definition.base_profile]}</TableCell><TableCell><Switch checked={definition.active} disabled={toggle.isPending} onCheckedChange={(active) => toggle.mutate({ code: definition.code, active })} /></TableCell><TableCell><div className="flex items-center justify-end gap-1"><ProfileDialog definition={definition} title="Editar Perfil de Acesso" saving={update.isPending} onSave={(name, base) => update.mutateAsync({ code: definition.code, name, base })} />{!definition.is_system ? <DeleteProfileDialog definition={definition} definitions={definitions} deleting={remove.isPending} onRelocate={async (destination) => { const result = await relocateUsers({ data: { sourceProfile: definition.code, destinationProfile: destination } }); qc.invalidateQueries({ queryKey: ["admin-users"] }); qc.invalidateQueries({ queryKey: ["restricted-access-profiles"] }); return result.moved; }} onDelete={() => remove.mutateAsync(definition.code)} /> : null}</div></TableCell></TableRow>)}</TableBody></Table>}</CardContent></Card>;
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-start justify-between gap-4">
+        <div><CardTitle>Perfis cadastrados</CardTitle><CardDescription>Crie perfis reutilizáveis escolhendo os menus e submenus permitidos.</CardDescription></div>
+        <ProfileDialog title="Novo Perfil de Acesso" saving={create.isPending} onSave={(name, permissions) => create.mutateAsync({ name, permissions })} />
+      </CardHeader>
+      <CardContent>
+        {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : (
+          <Table>
+            <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Acessos</TableHead><TableHead>Ativo</TableHead><TableHead aria-label="Ações" /></TableRow></TableHeader>
+            <TableBody>{definitions.map((definition) => (
+              <TableRow key={definition.code}>
+                <TableCell className="font-medium">{definition.name}</TableCell>
+                <TableCell>{definition.base_profile === "admin" ? "Todos" : `${definition.permissions.size} selecionados`}</TableCell>
+                <TableCell><Switch checked={definition.active} disabled={definition.is_system || toggle.isPending} onCheckedChange={(active) => toggle.mutate({ code: definition.code, active })} /></TableCell>
+                <TableCell><div className="flex items-center justify-end gap-1"><ProfileDialog definition={definition} title="Editar Perfil de Acesso" saving={update.isPending} onSave={(name, permissions) => update.mutateAsync({ code: definition.code, name, permissions })} />{!definition.is_system ? <DeleteProfileDialog definition={definition} definitions={definitions} deleting={remove.isPending} onRelocate={async (destination) => { const result = await relocateUsers({ data: { sourceProfile: definition.code, destinationProfile: destination } }); qc.invalidateQueries({ queryKey: ["admin-users"] }); return result.moved; }} onDelete={() => remove.mutateAsync(definition.code)} /> : null}</div></TableCell>
+              </TableRow>
+            ))}</TableBody>
+          </Table>
+        )}
+      </CardContent>
+    </Card>
+  );
 }
 
-function ProfileDialog({ definition, title, saving, onSave }: { definition?: AccessProfileDefinition; title: string; saving: boolean; onSave: (name: string, base: AccessProfileBase) => Promise<unknown> }) {
-  const [open, setOpen] = useState(false); const [name, setName] = useState(definition?.name ?? ""); const [base, setBase] = useState<AccessProfileBase>(definition?.base_profile ?? "restrito");
-  return <Dialog open={open} onOpenChange={(next) => { setOpen(next); if (next) { setName(definition?.name ?? ""); setBase(definition?.base_profile ?? "restrito"); } }}><DialogTrigger asChild><Button size="icon" variant={definition ? "ghost" : "default"} title={title} aria-label={title}>{definition ? <Pencil className="h-4 w-4" /> : <Plus className="h-4 w-4" />}</Button></DialogTrigger><DialogContent><DialogHeader><DialogTitle>{title}</DialogTitle><DialogDescription>O modelo base define as permissões herdadas pelo perfil.</DialogDescription></DialogHeader><form className="space-y-4" onSubmit={async (event) => { event.preventDefault(); if (name.trim().length < 2) return toast.error("Nome muito curto."); try { await onSave(name.trim(), base); setOpen(false); } catch { /* A mensagem é exibida pela alteração. */ } }}><div className="space-y-2"><Label>Nome</Label><Input value={name} onChange={(event) => setName(event.target.value)} placeholder="Inserir nome" required /></div><div className="space-y-2"><Label>Modelo base</Label><Select value={base} disabled={definition?.is_system} onValueChange={(value) => setBase(value as AccessProfileBase)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{Object.entries(BASE_LABELS).map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}</SelectContent></Select></div><DialogFooter><Button type="submit" disabled={saving}>Salvar</Button></DialogFooter></form></DialogContent></Dialog>;
+function ProfileDialog({ definition, title, saving, onSave }: { definition?: AccessProfileDefinition; title: string; saving: boolean; onSave: (name: string, permissions: Set<string>) => Promise<unknown> }) {
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState(definition?.name ?? "");
+  const [permissions, setPermissions] = useState<Set<string>>(new Set());
+  const isAdmin = definition?.base_profile === "admin";
+  const reset = () => {
+    setName(definition?.name ?? "");
+    setPermissions(new Set(isAdmin ? ALL_MENU_PERMISSION_KEYS : definition?.permissions ?? STANDARD_MENU_PERMISSION_KEYS));
+  };
+  return (
+    <Dialog open={open} onOpenChange={(next) => { setOpen(next); if (next) reset(); }}>
+      <DialogTrigger asChild><Button size="icon" variant={definition ? "ghost" : "default"} title={title} aria-label={title}>{definition ? <Pencil className="h-4 w-4" /> : <Plus className="h-4 w-4" />}</Button></DialogTrigger>
+      <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
+        <DialogHeader><DialogTitle>{title}</DialogTitle><DialogDescription>Escolha exatamente quais áreas estarão disponíveis para quem receber este perfil.</DialogDescription></DialogHeader>
+        <form className="space-y-5" onSubmit={async (event) => { event.preventDefault(); if (name.trim().length < 2) return toast.error("Nome muito curto."); try { await onSave(name.trim(), permissions); setOpen(false); } catch { /* A mensagem é exibida pela alteração. */ } }}>
+          <div className="space-y-2"><Label>Nome</Label><Input value={name} onChange={(event) => setName(event.target.value)} placeholder="Inserir nome" required /></div>
+          <div className="space-y-2"><Label>Menus e submenus</Label><MenuPermissionSelector value={permissions} onChange={setPermissions} disabled={isAdmin} /></div>
+          <DialogFooter><Button type="submit" disabled={saving}>Salvar perfil</Button></DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
 }
 
 function DeleteProfileDialog({ definition, definitions, deleting, onRelocate, onDelete }: { definition: AccessProfileDefinition; definitions: AccessProfileDefinition[]; deleting: boolean; onRelocate: (destination: string) => Promise<number>; onDelete: () => Promise<unknown> }) {
   const [open, setOpen] = useState(false); const [destination, setDestination] = useState(""); const [count, setCount] = useState(0); const [moving, setMoving] = useState(false);
-  const inspect = async (next: boolean) => { setOpen(next); if (!next) return; const { count: linked } = await supabase.from("user_access_profiles").select("user_id", { count: "exact", head: true }).eq("profile_definition_id", definition.code); setCount(linked ?? 0); };
+  const inspect = async (next: boolean) => { setOpen(next); if (!next) return; const { count: linked } = await supabase.from("user_access_profiles").select("user_id", { count: "exact", head: true }).eq("profile_definition_id", definition.code).eq("is_customized", false); setCount(linked ?? 0); };
   const relocate = async () => { if (!destination) return toast.error("Selecione o novo perfil."); setMoving(true); try { const moved = await onRelocate(destination); setCount(0); toast.success(`${moved} usuário(s) realocado(s)`); } catch (error) { toast.error(error instanceof Error ? error.message : "Não foi possível realocar os usuários."); } finally { setMoving(false); } };
-  return <Dialog open={open} onOpenChange={inspect}><DialogTrigger asChild><Button size="icon" variant="ghost" className="text-destructive hover:text-destructive" title="Excluir" aria-label={`Excluir ${definition.name}`}><Trash2 className="h-4 w-4" /></Button></DialogTrigger><DialogContent><DialogHeader><DialogTitle>Excluir Perfil de Acesso</DialogTitle><DialogDescription>{count ? `${count} usuário(s) estão vinculados a ${definition.name}. Realoque-os antes de excluir.` : `Confirma a exclusão de ${definition.name}?`}</DialogDescription></DialogHeader>{count ? <div className="flex gap-2"><Select value={destination} onValueChange={setDestination}><SelectTrigger><SelectValue placeholder="Novo perfil" /></SelectTrigger><SelectContent>{definitions.filter((item) => item.active && item.code !== definition.code).map((item) => <SelectItem key={item.code} value={item.code}>{item.name}</SelectItem>)}</SelectContent></Select><Button variant="outline" disabled={moving} onClick={relocate}>Realocar</Button></div> : null}<DialogFooter><Button variant="destructive" disabled={deleting || count > 0} onClick={async () => { try { await onDelete(); setOpen(false); } catch { /* A mensagem é exibida pela alteração. */ } }}>Excluir</Button></DialogFooter></DialogContent></Dialog>;
+  return <Dialog open={open} onOpenChange={inspect}><DialogTrigger asChild><Button size="icon" variant="ghost" className="text-destructive hover:text-destructive" title="Excluir" aria-label={`Excluir ${definition.name}`}><Trash2 className="h-4 w-4" /></Button></DialogTrigger><DialogContent><DialogHeader><DialogTitle>Excluir Perfil de Acesso</DialogTitle><DialogDescription>{count ? `${count} usuário(s) estão vinculados a ${definition.name}. Realoque-os antes de excluir.` : `Confirma a exclusão de ${definition.name}?`}</DialogDescription></DialogHeader>{count ? <div className="flex gap-2"><Select value={destination} onValueChange={setDestination}><SelectTrigger className="min-w-0 flex-1"><SelectValue placeholder="Novo perfil" /></SelectTrigger><SelectContent>{definitions.filter((item) => item.active && item.code !== definition.code).map((item) => <SelectItem key={item.code} value={item.code}>{item.name}</SelectItem>)}</SelectContent></Select><Button variant="outline" disabled={moving} onClick={relocate}>Realocar</Button></div> : null}<DialogFooter><Button variant="destructive" disabled={deleting || count > 0} onClick={async () => { try { await onDelete(); setOpen(false); } catch { /* A mensagem é exibida pela alteração. */ } }}>Excluir</Button></DialogFooter></DialogContent></Dialog>;
 }
