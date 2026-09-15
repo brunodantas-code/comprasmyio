@@ -2057,11 +2057,17 @@ function EstoqueMyioSection({ userId, canDelete, canAccessSection = () => true }
     { value: "expedicao", label: "Expedição", permission: "armazem_expedicao" as const },
     { value: "cliente", label: "Cliente", permission: "armazem_cliente" as const },
     { value: "tecnico", label: "Técnico", permission: "armazem_tecnico" as const },
-    { value: "perdido", label: "Perdido", permission: "armazem_perdido" as const },
-    { value: "avariado", label: "Avariado", permission: "armazem_itens_avariados" as const },
-  ].filter((tab) => tab.value === "expedicao"
-    ? canAccessSection("armazem_expedicao") || canAccessSection("armazem_transporte")
-    : canAccessSection(tab.permission));
+  ].filter((tab) => {
+    if (tab.value === "dispositivos") {
+      return canAccessSection("armazem_estoque_myio")
+        || canAccessSection("armazem_perdido")
+        || canAccessSection("armazem_itens_avariados");
+    }
+    if (tab.value === "expedicao") {
+      return canAccessSection("armazem_expedicao") || canAccessSection("armazem_transporte");
+    }
+    return canAccessSection(tab.permission);
+  });
 
   return (
     <Tabs defaultValue={tabs[0]?.value} className="space-y-4">
@@ -2069,7 +2075,15 @@ function EstoqueMyioSection({ userId, canDelete, canAccessSection = () => true }
         {tabs.map((tab) => <TabsTrigger key={tab.value} value={tab.value}>{tab.label}</TabsTrigger>)}
       </TabsList>
       {canAccessSection("armazem_estoque_myio") && <TabsContent value="ordens"><MyioOrdersStockSection /></TabsContent>}
-      {canAccessSection("armazem_estoque_myio") && <TabsContent value="dispositivos"><MyioDevicesStockSection userId={userId} canDelete={canDelete} /></TabsContent>}
+      {(canAccessSection("armazem_estoque_myio") || canAccessSection("armazem_perdido") || canAccessSection("armazem_itens_avariados")) && (
+        <TabsContent value="dispositivos">
+          <div className="space-y-6">
+            {canAccessSection("armazem_estoque_myio") && <MyioDevicesStockSection userId={userId} canDelete={canDelete} />}
+            {canAccessSection("armazem_perdido") && <div className="space-y-4"><LostCard /><ExternalLostCard /></div>}
+            {canAccessSection("armazem_itens_avariados") && <DamagedItemsCard userId={userId} />}
+          </div>
+        </TabsContent>
+      )}
       {canAccessSection("armazem_estoque_myio") && <TabsContent value="insumos"><TerceirosSection userId={userId} canDelete={canDelete} /></TabsContent>}
       {canAccessSection("armazem_checar_qr") && <TabsContent value="qr-check"><div className="space-y-4"><ExternalSyncCard /><QrCheckSection /></div></TabsContent>}
       {(canAccessSection("armazem_expedicao") || canAccessSection("armazem_transporte")) && (
@@ -2087,8 +2101,6 @@ function EstoqueMyioSection({ userId, canDelete, canAccessSection = () => true }
       )}
       {canAccessSection("armazem_cliente") && <TabsContent value="cliente"><StockSection userId={userId} location="unidade" canDelete={canDelete} /></TabsContent>}
       {canAccessSection("armazem_tecnico") && <TabsContent value="tecnico"><TechnicianSection userId={userId} /></TabsContent>}
-      {canAccessSection("armazem_perdido") && <TabsContent value="perdido"><div className="space-y-4"><LostCard /><ExternalLostCard /></div></TabsContent>}
-      {canAccessSection("armazem_itens_avariados") && <TabsContent value="avariado"><DamagedItemsCard userId={userId} /></TabsContent>}
     </Tabs>
   );
 }
