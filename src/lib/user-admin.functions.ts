@@ -62,6 +62,15 @@ export const setUserAccessProfile = createServerFn({ method: "POST" })
       .upsert({ user_id: data.userId, profile: definition.base_profile, profile_definition_id: definition.code, is_customized: isCustomized }, { onConflict: "user_id" });
     if (profileError) throw profileError;
 
+    if (definition.base_profile !== "admin") {
+      const { error: permissionCleanupError } = await supabaseAdmin
+        .from("user_menu_permissions")
+        .delete()
+        .eq("user_id", data.userId)
+        .or("menu_key.eq.usuarios,menu_key.like.usuarios_%");
+      if (permissionCleanupError) throw permissionCleanupError;
+    }
+
     if (isCustomized) {
       const { count: existingPermissionCount, error: permissionCountError } = await supabaseAdmin
         .from("user_menu_permissions")

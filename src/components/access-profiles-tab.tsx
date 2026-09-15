@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { MenuPermissionSelector } from "@/components/menu-permission-selector";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { ALL_MENU_PERMISSION_KEYS } from "@/lib/menu-permissions";
 
@@ -88,9 +89,9 @@ export function AccessProfilesTab() {
       <CardContent className="space-y-4">
         <div className="relative max-w-sm">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <input
+          <Input
             aria-label="Filtrar por nome do usuário"
-            className="flex h-10 w-full rounded-md border border-input bg-background py-2 pl-9 pr-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="pl-9"
             onChange={(event) => setNameFilter(event.target.value)}
             placeholder="Filtrar por nome do usuário"
             type="search"
