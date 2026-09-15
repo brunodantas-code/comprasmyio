@@ -1451,7 +1451,7 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
       >
         <SelectTrigger className="w-full sm:w-72"><SelectValue placeholder="Selecione o tipo" /></SelectTrigger>
         <SelectContent>
-          {(requestTypes ?? []).filter((type) => type.active && (type.model_code !== "importacao" || canImport)).map((type) => (
+          {(requestTypes ?? []).filter((type) => type.active && me?.canRequestType(type.code) && (type.model_code !== "importacao" || canImport)).map((type) => (
             <SelectItem key={type.code} value={type.code}>{type.name}</SelectItem>
           ))}
         </SelectContent>

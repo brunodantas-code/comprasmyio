@@ -39,11 +39,12 @@ export function useCurrentUser() {
       const user = userData.user;
       if (!user) return null;
 
-      const [{ data: profile }, { data: rolesData }, { data: accessData }, { data: menuData }] = await Promise.all([
+      const [{ data: profile }, { data: rolesData }, { data: accessData }, { data: menuData }, { data: individualRequestTypes }] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
         supabase.from("user_roles").select("role").eq("user_id", user.id),
-        supabase.from("user_access_profiles").select("profile,profile_definition_id,is_customized,access_profile_definitions(name,base_profile,access_profile_permissions(menu_key,allowed))").eq("user_id", user.id).maybeSingle(),
+        supabase.from("user_access_profiles").select("profile,profile_definition_id,is_customized,access_profile_definitions(name,base_profile,access_profile_permissions(menu_key,allowed),access_profile_request_types(request_type_code))").eq("user_id", user.id).maybeSingle(),
         supabase.from("user_menu_permissions").select("menu_key, allowed").eq("user_id", user.id),
+        supabase.from("user_request_type_permissions").select("request_type_code").eq("user_id", user.id),
       ]);
 
       const roles = (rolesData ?? []).map((r) => r.role as AppRole);
@@ -57,17 +58,20 @@ export function useCurrentUser() {
         jobTitle = title ?? null;
       }
       const titleKey = normalizeTitle(jobTitle?.name);
-      const definition = accessData?.access_profile_definitions as { name: string; base_profile: AccessProfileBase; access_profile_permissions?: Array<{ menu_key: string; allowed: boolean }> } | null | undefined;
+      const definition = accessData?.access_profile_definitions as { name: string; base_profile: AccessProfileBase; access_profile_permissions?: Array<{ menu_key: string; allowed: boolean }>; access_profile_request_types?: Array<{ request_type_code: string }> } | null | undefined;
       const isCustomized = accessData?.is_customized ?? true;
       const accessProfile = (isCustomized ? "customizado" : accessData?.profile_definition_id ?? "restrito") as AccessProfile;
       const accessProfileBase = (definition?.base_profile ?? accessData?.profile ?? "restrito") as AccessProfileBase;
       const individualMenus = new Set((menuData ?? []).filter((item) => item.allowed).map((item) => item.menu_key));
       const profileMenus = new Set((definition?.access_profile_permissions ?? []).filter((item) => item.allowed).map((item) => item.menu_key));
+      const individualTypes = new Set((individualRequestTypes ?? []).map((item) => item.request_type_code));
+      const profileTypes = new Set((definition?.access_profile_request_types ?? []).map((item) => item.request_type_code));
       const canAccess = (menu: MenuKey) => {
         if (accessProfileBase === "admin") return true;
         if (menu === "usuarios" || menu.startsWith("usuarios_")) return false;
         return (isCustomized ? individualMenus : profileMenus).has(menu);
       };
+      const canRequestType = (requestType: string) => accessProfileBase === "admin" || (isCustomized ? individualTypes : profileTypes).has(requestType);
       return {
         id: user.id,
         email: user.email ?? "",
@@ -78,6 +82,7 @@ export function useCurrentUser() {
         accessProfileBase,
         accessProfileName: isCustomized ? "Customizado" : definition?.name ?? "Restrito",
         canAccess,
+        canRequestType,
         isAdmin: accessProfileBase === "admin",
         isComprador: titleKey === "supply" || titleKey === "time de supply",
         isFabrica: titleKey === "fabrica",

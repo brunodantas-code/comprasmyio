@@ -71,6 +71,15 @@ export const setUserAccessProfile = createServerFn({ method: "POST" })
       if (permissionCleanupError) throw permissionCleanupError;
     }
 
+    if (!isCustomized) {
+      const [{ error: menuResetError }, { error: requestTypeResetError }] = await Promise.all([
+        supabaseAdmin.from("user_menu_permissions").delete().eq("user_id", data.userId),
+        supabaseAdmin.from("user_request_type_permissions").delete().eq("user_id", data.userId),
+      ]);
+      if (menuResetError) throw menuResetError;
+      if (requestTypeResetError) throw requestTypeResetError;
+    }
+
     if (isCustomized) {
       const { count: existingPermissionCount, error: permissionCountError } = await supabaseAdmin
         .from("user_menu_permissions")
@@ -101,6 +110,24 @@ export const setUserAccessProfile = createServerFn({ method: "POST" })
             menuKeys.map((menuKey) => ({ user_id: data.userId, menu_key: menuKey, allowed: true })),
           );
           if (copyError) throw copyError;
+        }
+      }
+      const { count: existingRequestTypeCount, error: requestTypeCountError } = await supabaseAdmin
+        .from("user_request_type_permissions")
+        .select("request_type_code", { count: "exact", head: true })
+        .eq("user_id", data.userId);
+      if (requestTypeCountError) throw requestTypeCountError;
+      if ((existingRequestTypeCount ?? 0) === 0) {
+        const { data: profileRequestTypes, error: profileRequestTypesError } = await supabaseAdmin
+          .from("access_profile_request_types")
+          .select("request_type_code")
+          .eq("profile_code", definition.code);
+        if (profileRequestTypesError) throw profileRequestTypesError;
+        if ((profileRequestTypes ?? []).length > 0) {
+          const { error: copyRequestTypesError } = await supabaseAdmin.from("user_request_type_permissions").insert(
+            (profileRequestTypes ?? []).map((permission) => ({ user_id: data.userId, request_type_code: permission.request_type_code })),
+          );
+          if (copyRequestTypesError) throw copyRequestTypesError;
         }
       }
     }
@@ -238,6 +265,7 @@ export const decideUserDeletion = createServerFn({ method: "POST" })
     await Promise.all([
       supabaseAdmin.from("user_roles").delete().eq("user_id", request.target_user_id),
       supabaseAdmin.from("user_menu_permissions").delete().eq("user_id", request.target_user_id),
+      supabaseAdmin.from("user_request_type_permissions").delete().eq("user_id", request.target_user_id),
       supabaseAdmin.from("user_access_profiles").delete().eq("user_id", request.target_user_id),
     ]);
     const { error: completeError } = await supabaseAdmin

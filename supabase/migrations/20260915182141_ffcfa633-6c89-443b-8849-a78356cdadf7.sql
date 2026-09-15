@@ -1,0 +1,1 @@
+ALTER FUNCTION public.can_request_type(uuid, text) SECURITY INVOKER;
