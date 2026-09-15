@@ -164,3 +164,4 @@
 - [x] Realocar Transporte para dentro de Expedição, em bloco próprio abaixo do existente.
 - [x] Realocar Perdido e Avariado para Dispositivos myio, em blocos próprios após o estoque.
 - [x] Reordenar os submenus de Estoque e renomear Dispositivos myio para myio.
+- [x] Cadastrar destinos de Estoque em Cadastro > Diversos e utilizar a lista nas movimentações.

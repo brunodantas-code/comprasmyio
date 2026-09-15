@@ -2470,6 +2470,33 @@ export type Database = {
         }
         Relationships: []
       }
+      stock_destinations: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          name: string
+          position: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          name: string
+          position?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          name?: string
+          position?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       stock_movement_qrs: {
         Row: {
           box_qr: string | null
