@@ -44,9 +44,23 @@ function useAlmoxarifadoMaterials() {
 
 function useProfilesList() {
   return useQuery({
-    queryKey: ["profiles-list"],
+    queryKey: ["profiles-list", "fabrica"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("profiles").select("id, full_name, email").order("full_name");
+      const { data: accessRows, error: accessError } = await supabase
+        .from("user_access_profiles")
+        .select("user_id")
+        .eq("profile_definition_id", "fabrica");
+      if (accessError) throw accessError;
+
+      const userIds = [...new Set((accessRows ?? []).map((row) => row.user_id))];
+      if (userIds.length === 0) return [];
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, full_name, email")
+        .in("id", userIds)
+        .is("deleted_at", null)
+        .order("full_name");
       if (error) throw error;
       return (data ?? []) as { id: string; full_name: string | null; email: string | null }[];
     },
