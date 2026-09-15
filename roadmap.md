@@ -130,3 +130,5 @@
 - [x] Destacar em lilás somente submenus alterados, sem colorir o bloco inteiro
 - [x] Filtrar a customização por nome e tornar Usuários e logs exclusivo do perfil Admin
 - [x] Realocar Solicitações de Dispositivos myio para abaixo de Minhas Solicitações
+
+- [ ] Ajustar solicitações de Dispositivos myio: somente do próprio usuário, acesso pela lista de tipos, Cliente e Projeto independentes, Approval normal por quantidade e liberação após aprovação.
