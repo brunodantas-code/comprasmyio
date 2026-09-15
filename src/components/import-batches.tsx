@@ -116,13 +116,14 @@ function useImportableItems() {
   });
 }
 
-function useImportBatches() {
+function useImportBatches(userId: string) {
   return useQuery({
-    queryKey: ["import-batches"],
+    queryKey: ["import-batches", userId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("import_batches")
         .select("id, name, notes, status, attachments, created_at, created_by, import_batch_items(id, source, material_id, terceiros_material_id, tool_asset_id, item_name, quantity)")
+        .eq("created_by", userId)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as unknown as ImportBatch[];
@@ -130,10 +131,10 @@ function useImportBatches() {
   });
 }
 
-function NewImportDialog({ userId }: { userId: string }) {
+export function NewImportDialog({ userId, triggerLabel = "Nova importação", openOnMount = false }: { userId: string; triggerLabel?: string; openOnMount?: boolean }) {
   const qc = useQueryClient();
   const { data: items, isLoading } = useImportableItems();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(openOnMount);
   const [name, setName] = useState("");
   const [notes, setNotes] = useState("");
   const [files, setFiles] = useState<File[]>([]);
@@ -233,9 +234,11 @@ function NewImportDialog({ userId }: { userId: string }) {
 
   return (
     <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) reset(); }}>
-      <DialogTrigger asChild>
-        <Button><Plus className="mr-2 h-4 w-4" />Nova importação</Button>
-      </DialogTrigger>
+      {!openOnMount && (
+        <DialogTrigger asChild>
+          <Button><Plus className="mr-2 h-4 w-4" />{triggerLabel}</Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Nova importação</DialogTitle>
@@ -482,7 +485,7 @@ function DeleteImportDialog({ id }: { id: string }) {
 
 export function ImportBatchesSection({ userId }: { userId: string }) {
   const { data: me } = useCurrentUser();
-  const { data: batches, isLoading } = useImportBatches();
+  const { data: batches, isLoading } = useImportBatches(userId);
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const list = (batches ?? []).filter((b) => statusFilter === "all" || b.status === statusFilter);
@@ -502,7 +505,6 @@ export function ImportBatchesSection({ userId }: { userId: string }) {
               {STATUS_KEYS.map((s) => <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>)}
             </SelectContent>
           </Select>
-          <NewImportDialog userId={userId} />
         </div>
       </CardHeader>
       <CardContent>

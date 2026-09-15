@@ -122,13 +122,13 @@ const CLIENT_REASON_LABELS = {
   upsell: "Upsell",
 } as const;
 
-export function NewMyioOrderDialog({ userId, triggerLabel }: { userId: string; triggerLabel?: string }) {
+export function NewMyioOrderDialog({ userId, triggerLabel, openOnMount = false }: { userId: string; triggerLabel?: string; openOnMount?: boolean }) {
   const qc = useQueryClient();
   const { data: projects } = useProjects();
   const { data: clients } = useClients();
   const { data: images } = useProductImages();
   const products = useMyioProductOptions();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(openOnMount);
   const [projectId, setProjectId] = useState("");
   const [clientId, setClientId] = useState("");
   const [clientReason, setClientReason] = useState<keyof typeof CLIENT_REASON_LABELS | "">("");
@@ -176,16 +176,18 @@ export function NewMyioOrderDialog({ userId, triggerLabel }: { userId: string; t
 
   return (
     <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) reset(); }}>
-      <TooltipProvider delayDuration={300}>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <DialogTrigger asChild>
-              <Button>{triggerLabel ? <><Plus className="mr-2 h-4 w-4" />{triggerLabel}</> : <Plus className="h-4 w-4" />}</Button>
-            </DialogTrigger>
-          </TooltipTrigger>
-          <TooltipContent>Nova solicitação de Dispositivos myio</TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      {!openOnMount && (
+        <TooltipProvider delayDuration={300}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DialogTrigger asChild>
+                <Button>{triggerLabel ? <><Plus className="mr-2 h-4 w-4" />{triggerLabel}</> : <Plus className="h-4 w-4" />}</Button>
+              </DialogTrigger>
+            </TooltipTrigger>
+            <TooltipContent>Nova solicitação de Dispositivos myio</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
       <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Novo pedido de produtos Myio</DialogTitle>
