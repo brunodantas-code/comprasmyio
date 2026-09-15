@@ -146,7 +146,7 @@ export function NewMyioOrderDialog({ userId, triggerLabel, inline = false }: { u
         .map((p) => ({ product: p, quantity: parseInt(qty[p] ?? "", 10) }))
         .filter((i) => Number.isFinite(i.quantity) && i.quantity > 0);
       if (!date) throw new Error("Informe a data de entrega.");
-      if (!projectId && !clientId) throw new Error("Selecione um Projeto, um Cliente ou ambos.");
+      if ((!projectId && !clientId) || (projectId && clientId)) throw new Error("Selecione um Projeto ou um Cliente.");
       if (clientId && !clientReason) throw new Error("Selecione Manutenção, Reposição por mal uso ou Upsell.");
       if (items.length === 0) throw new Error("Adicione a quantidade de pelo menos um produto.");
 
@@ -178,7 +178,17 @@ export function NewMyioOrderDialog({ userId, triggerLabel, inline = false }: { u
       <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
         <div className="space-y-2">
           <Label>Projeto (opcional)</Label>
-          <Select value={projectId || "none"} onValueChange={(value) => setProjectId(value === "none" ? "" : value)}>
+          <Select
+            value={projectId || "none"}
+            disabled={Boolean(clientId)}
+            onValueChange={(value) => {
+              setProjectId(value === "none" ? "" : value);
+              if (value !== "none") {
+                setClientId("");
+                setClientReason("");
+              }
+            }}
+          >
             <SelectTrigger><SelectValue placeholder="Selecione um projeto" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="none">Nenhum projeto</SelectItem>
@@ -190,7 +200,15 @@ export function NewMyioOrderDialog({ userId, triggerLabel, inline = false }: { u
         </div>
         <div className="space-y-2">
           <Label>Cliente (opcional)</Label>
-          <Select value={clientId || "none"} onValueChange={(value) => { setClientId(value === "none" ? "" : value); if (value === "none") setClientReason(""); }}>
+          <Select
+            value={clientId || "none"}
+            disabled={Boolean(projectId)}
+            onValueChange={(value) => {
+              setClientId(value === "none" ? "" : value);
+              if (value === "none") setClientReason("");
+              else setProjectId("");
+            }}
+          >
             <SelectTrigger><SelectValue placeholder="Selecione um cliente" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="none">Nenhum cliente</SelectItem>
@@ -206,7 +224,7 @@ export function NewMyioOrderDialog({ userId, triggerLabel, inline = false }: { u
 
       {clientId && (
         <div className="space-y-2">
-          <Label>Classificação da solicitação para o cliente</Label>
+          <Label>Classificação da solicitação do dispositivo myio</Label>
           <div className="grid gap-2 sm:grid-cols-3">
             {(Object.entries(CLIENT_REASON_LABELS) as [keyof typeof CLIENT_REASON_LABELS, string][]).map(([value, label]) => (
               <label key={value} className="flex cursor-pointer items-center gap-2 rounded-md border p-3 text-sm">
@@ -256,8 +274,8 @@ export function NewMyioOrderDialog({ userId, triggerLabel, inline = false }: { u
     return (
       <Card className="max-w-4xl">
         <CardHeader>
-          <CardTitle>Nova solicitação de Dispositivos myio</CardTitle>
-          <CardDescription>Selecione Projeto, Cliente ou ambos, além da data e das quantidades.</CardDescription>
+          <CardTitle>Nova solicitação de Dispositivos myio e Insumos de Instalação</CardTitle>
+          <CardDescription>Selecione Projeto ou Cliente, além da data e das quantidades.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">{formContent}</CardContent>
       </Card>
@@ -273,13 +291,13 @@ export function NewMyioOrderDialog({ userId, triggerLabel, inline = false }: { u
                 <Button>{triggerLabel ? <><Plus className="mr-2 h-4 w-4" />{triggerLabel}</> : <Plus className="h-4 w-4" />}</Button>
               </DialogTrigger>
             </TooltipTrigger>
-            <TooltipContent>Nova solicitação de Dispositivos myio</TooltipContent>
+            <TooltipContent>Nova solicitação de Dispositivos myio e Insumos de Instalação</TooltipContent>
           </Tooltip>
         </TooltipProvider>
       <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Novo pedido de produtos Myio</DialogTitle>
-          <DialogDescription>Selecione Projeto, Cliente ou ambos, além da data e das quantidades.</DialogDescription>
+          <DialogTitle>Nova solicitação de Dispositivos myio e Insumos de Instalação</DialogTitle>
+          <DialogDescription>Selecione Projeto ou Cliente, além da data e das quantidades.</DialogDescription>
         </DialogHeader>
 
         {formContent}
