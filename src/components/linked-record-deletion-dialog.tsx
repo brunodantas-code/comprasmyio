@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Trash2 } from "lucide-react";
+import { Minus, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -8,8 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 type LinkField = "project_id" | "client_id" | "cost_center_id" | "request_type";
+type DiversosRegistry = "request_type" | "additional_step_type" | "stock_destination";
 type Destination = { id: string; name: string };
 
 type LinkedOrder = {
@@ -33,6 +35,8 @@ export function LinkedRecordDeletionDialog({
   destinations,
   onDelete,
   deleting,
+  registry,
+  deleteBlockedReason,
 }: {
   entityId: string;
   entityName: string;
@@ -41,15 +45,30 @@ export function LinkedRecordDeletionDialog({
   destinations: Destination[];
   onDelete: () => void;
   deleting?: boolean;
+  registry?: DiversosRegistry;
+  deleteBlockedReason?: string;
 }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [targets, setTargets] = useState<Record<string, string>>({});
-  const queryKey = ["linked-orders", linkField, entityId];
+  const [expandedLinks, setExpandedLinks] = useState<Record<string, boolean>>({});
+  const queryKey = ["linked-orders", registry ?? linkField, entityId];
   const { data: records = [], isLoading, isError, error } = useQuery({
     queryKey,
-    enabled: open,
+    enabled: open && !deleteBlockedReason,
     queryFn: async () => {
+      if (registry) {
+        const { data, error: linksError } = await supabase.rpc("get_diversos_deletion_links", {
+          _registry: registry,
+          _source_code: entityId,
+        });
+        if (linksError) throw linksError;
+        return (data ?? []).map((link: ClientLink) => ({
+          key: link.record_key,
+          label: `${link.record_type}: ${link.record_label}`,
+          detail: link.record_detail,
+        }));
+      }
       if (linkField === "client_id") {
         const { data, error: linksError } = await supabase.rpc("get_client_deletion_links", { _client_id: entityId });
         if (linksError) throw linksError;
@@ -75,11 +94,24 @@ export function LinkedRecordDeletionDialog({
   });
 
   useEffect(() => {
-    if (!open) setTargets({});
+    if (!open) {
+      setTargets({});
+      setExpandedLinks({});
+    }
   }, [open]);
 
   const reallocate = useMutation({
     mutationFn: async ({ recordKey, destinationId }: { recordKey: string; destinationId: string }) => {
+      if (registry) {
+        const { error: reallocationError } = await supabase.rpc("reallocate_diversos_link", {
+          _registry: registry,
+          _record_key: recordKey,
+          _source_code: entityId,
+          _destination_code: destinationId,
+        });
+        if (reallocationError) throw reallocationError;
+        return;
+      }
       if (linkField === "client_id") {
         const { error: reallocationError } = await supabase.rpc("reallocate_client_link", {
           _record_key: recordKey,
@@ -113,6 +145,11 @@ export function LinkedRecordDeletionDialog({
         qc.invalidateQueries({ queryKey: ["orders"] }),
         qc.invalidateQueries({ queryKey: ["myio-orders"] }),
         qc.invalidateQueries({ queryKey: ["cash-flow-payables"] }),
+        qc.invalidateQueries({ queryKey: ["request-types"] }),
+        qc.invalidateQueries({ queryKey: ["additional-step-types"] }),
+        qc.invalidateQueries({ queryKey: ["stock-destinations"] }),
+        qc.invalidateQueries({ queryKey: ["approval-rules"] }),
+        qc.invalidateQueries({ queryKey: ["unit-products"] }),
       ]);
     },
     onError: (error: Error) => toast.error(error.message),
@@ -132,7 +169,9 @@ export function LinkedRecordDeletionDialog({
         <DialogHeader>
           <DialogTitle>Excluir {entityLabel}</DialogTitle>
           <DialogDescription>
-            {isLoading
+            {deleteBlockedReason
+              ? deleteBlockedReason
+              : isLoading
               ? "Verificando solicitações vinculadas..."
               : isError
                 ? "Não foi possível verificar os vínculos. A exclusão permanece bloqueada."
@@ -147,31 +186,40 @@ export function LinkedRecordDeletionDialog({
         {hasLinks && (
           <div className="space-y-3">
             {records.map((record) => (
-              <div key={record.key} className="grid gap-3 border-b pb-3 sm:grid-cols-[minmax(0,1fr)_minmax(180px,1fr)_auto] sm:items-end">
-                <div className="min-w-0">
-                  <p className="text-sm font-medium">{record.label}</p>
-                  <p className="truncate text-sm text-muted-foreground">{record.detail}</p>
+              <Collapsible key={record.key} open={expandedLinks[record.key] ?? false} onOpenChange={(expanded) => setExpandedLinks((current) => ({ ...current, [record.key]: expanded }))} className="border-b pb-3">
+                <div className="flex min-w-0 items-center justify-between gap-3">
+                  <p className="min-w-0 truncate text-sm font-medium">{record.label}</p>
+                  <CollapsibleTrigger asChild>
+                    <Button size="icon" variant="ghost" aria-label={(expandedLinks[record.key] ?? false) ? `Recolher ${record.label}` : `Expandir ${record.label}`} title={(expandedLinks[record.key] ?? false) ? "Recolher" : "Expandir"}>
+                      {(expandedLinks[record.key] ?? false) ? <Minus className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                    </Button>
+                  </CollapsibleTrigger>
                 </div>
-                <div className="space-y-1">
-                  <Label className="text-xs">Novo {entityLabel}</Label>
-                  <Select value={targets[record.key] ?? ""} onValueChange={(value) => setTargets((current) => ({ ...current, [record.key]: value }))}>
-                    <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                    <SelectContent>
-                      {availableDestinations.map((item) => <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button
-                  variant="outline"
-                  disabled={!targets[record.key] || reallocate.isPending}
-                  onClick={() => {
-                    const destinationId = targets[record.key];
-                    if (destinationId) reallocate.mutate({ recordKey: record.key, destinationId });
-                  }}
-                >
-                  Realocar
-                </Button>
-              </div>
+                <CollapsibleContent className="pt-3">
+                  <p className="mb-3 text-sm text-muted-foreground">{record.detail}</p>
+                  <div className="grid gap-3 sm:grid-cols-[minmax(180px,1fr)_auto] sm:items-end">
+                    <div className="space-y-1">
+                      <Label className="text-xs">Novo {entityLabel}</Label>
+                      <Select value={targets[record.key] ?? ""} onValueChange={(value) => setTargets((current) => ({ ...current, [record.key]: value }))}>
+                        <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                        <SelectContent>
+                          {availableDestinations.map((item) => <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <Button
+                      variant="outline"
+                      disabled={!targets[record.key] || reallocate.isPending}
+                      onClick={() => {
+                        const destinationId = targets[record.key];
+                        if (destinationId) reallocate.mutate({ recordKey: record.key, destinationId });
+                      }}
+                    >
+                      Realocar
+                    </Button>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
             ))}
             {!availableDestinations.length && <p className="text-sm text-destructive">Cadastre outro {entityLabel} para realizar a realocação.</p>}
           </div>
@@ -181,7 +229,7 @@ export function LinkedRecordDeletionDialog({
           <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
           <Button
             variant="destructive"
-            disabled={isLoading || isError || hasLinks || deleting}
+            disabled={Boolean(deleteBlockedReason) || isLoading || isError || hasLinks || deleting}
             onClick={() => {
               onDelete();
               setOpen(false);

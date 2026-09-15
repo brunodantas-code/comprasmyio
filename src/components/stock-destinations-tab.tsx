@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Pencil, Plus } from "lucide-react";
+import { Minus, Pencil, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { LinkedRecordDeletionDialog } from "@/components/linked-record-deletion-dialog";
 
 export type StockDestination = {
   code: string;
@@ -39,6 +41,7 @@ export function StockDestinationsTab() {
   const qc = useQueryClient();
   const { data: destinations, isLoading } = useStockDestinations();
   const [createOpen, setCreateOpen] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const invalidate = () => qc.invalidateQueries({ queryKey: ["stock-destinations"] });
 
   const create = useMutation({
@@ -76,11 +79,22 @@ export function StockDestinationsTab() {
     onError: (error: Error) => toast.error(error.message),
   });
 
+  const remove = useMutation({
+    mutationFn: async (code: string) => {
+      const { error } = await supabase.from("stock_destinations").delete().eq("code", code);
+      if (error?.code === "23503") throw new Error("Este destino ainda possui dispositivos vinculados. Realoque-os antes de excluir.");
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success("Destino excluído"); invalidate(); },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
   return (
+    <Collapsible open={expanded} onOpenChange={setExpanded} asChild>
     <Card>
       <CardHeader className="flex flex-row items-start justify-between gap-4">
-        <div><CardTitle>Destinos de Estoque</CardTitle><CardDescription>Os destinos ativos ficam disponíveis nas movimentações de dispositivos.</CardDescription></div>
-        <DestinationDialog
+        <div><CardTitle>Destinos de Estoque</CardTitle>{expanded && <CardDescription>Os destinos ativos ficam disponíveis nas movimentações de dispositivos.</CardDescription>}</div>
+        <div className="flex items-center gap-1"><CollapsibleContent><DestinationDialog
           title="Novo destino de estoque"
           description="Cadastre uma nova opção para a lista de destinos."
           defaultPosition={Math.max(0, ...(destinations ?? []).map((item) => item.position)) + 1}
@@ -89,9 +103,9 @@ export function StockDestinationsTab() {
           trigger={<Button size="icon" aria-label="Criar destino de estoque" title="Criar destino"><Plus className="h-4 w-4" /></Button>}
           open={createOpen}
           onOpenChange={setCreateOpen}
-        />
+        /></CollapsibleContent><CollapsibleTrigger asChild><Button size="icon" variant="ghost" aria-label={expanded ? "Recolher Destinos de Estoque" : "Expandir Destinos de Estoque"} title={expanded ? "Recolher" : "Expandir"}>{expanded ? <Minus className="h-4 w-4" /> : <Plus className="h-4 w-4" />}</Button></CollapsibleTrigger></div>
       </CardHeader>
-      <CardContent>
+      <CollapsibleContent asChild><CardContent>
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : (
           <Table>
             <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Ordem</TableHead><TableHead>Ativo</TableHead><TableHead /></TableRow></TableHeader>
@@ -101,7 +115,7 @@ export function StockDestinationsTab() {
                   <TableCell className="font-medium">{destination.name}</TableCell>
                   <TableCell>{destination.position}</TableCell>
                   <TableCell><Switch checked={destination.active} onCheckedChange={(active) => toggle.mutate({ code: destination.code, active })} /></TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right"><div className="flex items-center justify-end gap-1">
                     <DestinationDialog
                       title="Editar destino de estoque"
                       defaultName={destination.name}
@@ -110,15 +124,17 @@ export function StockDestinationsTab() {
                       onSave={(name, position) => update.mutateAsync({ code: destination.code, name, position })}
                       trigger={<Button size="icon" variant="ghost" title={`Editar ${destination.name}`} aria-label={`Editar ${destination.name}`}><Pencil className="h-4 w-4" /></Button>}
                     />
-                  </TableCell>
+                    <LinkedRecordDeletionDialog entityId={destination.code} entityName={destination.name} entityLabel="destino de estoque" linkField="request_type" registry="stock_destination" destinations={(destinations ?? []).filter((item) => item.active).map((item) => ({ id: item.code, name: item.name }))} onDelete={() => remove.mutate(destination.code)} deleting={remove.isPending} />
+                  </div></TableCell>
                 </TableRow>
               ))}
               {!destinations?.length && <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">Nenhum destino cadastrado.</TableCell></TableRow>}
             </TableBody>
           </Table>
         )}
-      </CardContent>
+      </CardContent></CollapsibleContent>
     </Card>
+    </Collapsible>
   );
 }
 

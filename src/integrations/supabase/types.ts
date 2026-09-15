@@ -2891,6 +2891,7 @@ export type Database = {
           client_name: string | null
           created_at: string
           created_by: string | null
+          destination_code: string | null
           id: string
           installed_at: string | null
           label: string | null
@@ -2911,6 +2912,7 @@ export type Database = {
           client_name?: string | null
           created_at?: string
           created_by?: string | null
+          destination_code?: string | null
           id?: string
           installed_at?: string | null
           label?: string | null
@@ -2931,6 +2933,7 @@ export type Database = {
           client_name?: string | null
           created_at?: string
           created_by?: string | null
+          destination_code?: string | null
           id?: string
           installed_at?: string | null
           label?: string | null
@@ -2948,6 +2951,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "unit_products_destination_code_fkey"
+            columns: ["destination_code"]
+            isOneToOne: false
+            referencedRelation: "stock_destinations"
+            referencedColumns: ["code"]
+          },
           {
             foreignKeyName: "unit_products_material_id_fkey"
             columns: ["material_id"]
@@ -3347,6 +3357,15 @@ export type Database = {
           record_type: string
         }[]
       }
+      get_diversos_deletion_links: {
+        Args: { _registry: string; _source_code: string }
+        Returns: {
+          record_detail: string
+          record_key: string
+          record_label: string
+          record_type: string
+        }[]
+      }
       has_job_title_name: {
         Args: { _name: string; _user_id: string }
         Returns: boolean
@@ -3368,6 +3387,15 @@ export type Database = {
           _destination_client_id: string
           _record_key: string
           _source_client_id: string
+        }
+        Returns: undefined
+      }
+      reallocate_diversos_link: {
+        Args: {
+          _destination_code: string
+          _record_key: string
+          _registry: string
+          _source_code: string
         }
         Returns: undefined
       }
