@@ -182,3 +182,4 @@
 - [x] Validar os fluxos e a interface
 - [x] Condensar os cadastros de Diversos, mostrando somente o título e expandindo cada seção pelo botão “+”
 - [ ] Garantir confirmação antes de toda exclusão visível no sistema
+- [ ] Incluir exclusão confirmada em Produtos com os técnicos
