@@ -84,7 +84,7 @@ export function AccessProfilesTab() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2"><ShieldCheck className="h-5 w-5" />Acesso Restrito</CardTitle>
+        <CardTitle className="flex items-center gap-2"><ShieldCheck className="h-5 w-5" />Usuários Cadastrados</CardTitle>
         <CardDescription>Defina individualmente os menus disponíveis para usuários com perfil Restrito.</CardDescription>
       </CardHeader>
       <CardContent className="max-w-4xl space-y-3">
