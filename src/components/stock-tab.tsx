@@ -2149,7 +2149,7 @@ function MyioDevicesStockSection({ userId, canDelete }: { userId: string; canDel
       <div className="space-y-6">
         <StockTableCard
           title="Dispositivos myio"
-          description="Dispositivos produzidos pela Myio (fabricados). Banco de dados próprio, separado do Estoque Fábrica e do Insumos de Instalação."
+          description="Dispositivos produzidos pela Fábrica."
           rows={rows.filter((r) => manufactured?.[r.material_id])}
           isLoading={isLoading}
           userId={userId}

@@ -158,3 +158,4 @@
 - [x] Reunir Expedição, Transporte, Cliente, Técnico, Perdido e Avariado dentro de Estoque e separar Dispositivos myio de Insumos de Instalação.
 - [x] Mover Homologação para dentro de Fábrica e renomear Estoque — Fábrica para Estoque de Componentes.
 - [x] Renomear o submenu Solicitações de Dispositivos myio para Solicitações.
+- [x] Atualizar a descrição de Dispositivos myio para “Dispositivos produzidos pela Fábrica”.
