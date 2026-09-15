@@ -22,6 +22,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { ArrowRightLeft, Camera, CheckCircle2, ImageUp, PauseCircle, Plus, Trash2 } from "lucide-react";
 import { pushQrsToExternal } from "@/lib/push-external";
+import { useStockDestinations } from "@/components/stock-destinations-tab";
 
 type UnitProduct = {
   id: string;
@@ -37,14 +38,7 @@ type UnitProduct = {
   created_at: string;
 };
 
-type MoveDestination = "tecnico" | "almoxarifado" | "perdido" | "avariado";
-
-const MOVE_LABELS: Record<MoveDestination, string> = {
-  tecnico: "Técnico",
-  almoxarifado: "Estoque",
-  perdido: "Perdido",
-  avariado: "Itens Avariados",
-};
+type MoveDestination = "myio" | "cliente" | "tecnico" | "perdido" | "avariado";
 
 type MaterialOption = { material_id: string; name: string };
 
@@ -82,6 +76,7 @@ function MoveUnitProductDialog({
   const [open, setOpen] = useState(false);
   const [destination, setDestination] = useState<MoveDestination | "">("");
   const [technician, setTechnician] = useState("");
+  const [projectId, setProjectId] = useState("");
   const [notes, setNotes] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
@@ -90,15 +85,31 @@ function MoveUnitProductDialog({
   function reset() {
     setDestination("");
     setTechnician("");
+    setProjectId("");
     setNotes("");
     setFile(null);
   }
+
+  const { data: destinations } = useStockDestinations();
+  const { data: projects } = useQuery({
+    queryKey: ["projects-for-unit-move"],
+    enabled: open && destination === "cliente",
+    queryFn: async () => {
+      const { data, error } = await supabase.from("projects").select("id,name,client_name").neq("name", "Estoque").order("name");
+      if (error) throw error;
+      return (data ?? []) as { id: string; name: string; client_name: string | null }[];
+    },
+  });
 
   const save = useMutation({
     mutationFn: async () => {
       if (!destination) throw new Error("Selecione o destino.");
       if (destination === "tecnico" && !technician.trim()) throw new Error("Informe o nome do técnico.");
+      if (destination === "cliente" && !projectId) throw new Error("Selecione o projeto do cliente.");
       if (destination === "avariado" && !notes.trim()) throw new Error("Informe o motivo da avaria nas observações.");
+
+      const selectedProject = projects?.find((project) => project.id === projectId);
+      const storedDestination = destination === "myio" ? "almoxarifado" : destination === "cliente" ? null : destination;
 
       let path: string | null = null;
       if (file) {
@@ -110,8 +121,10 @@ function MoveUnitProductDialog({
       const { error } = await supabase
         .from("unit_products")
         .update({
-          moved_to: destination,
+          moved_to: storedDestination,
           moved_technician: destination === "tecnico" ? technician.trim() : null,
+          project_id: destination === "cliente" ? projectId : product.project_id,
+          client_name: destination === "cliente" ? selectedProject?.client_name ?? selectedProject?.name ?? null : product.client_name,
           move_photo_url: path,
           move_notes: notes.trim() || null,
           moved_at: new Date().toISOString(),
@@ -125,7 +138,7 @@ function MoveUnitProductDialog({
         // cliente/técnico/perdido/avariado é apenas RASTREIO — gerar nova saída
         // aqui descontaria o mesmo produto duas vezes e deixaria o estoque
         // negativo. Apenas o retorno ao estoque gera movimentação (entrada).
-        if (destination === "almoxarifado") {
+        if (destination === "myio") {
           const reason = "Retorno do cliente para o estoque";
           const { data: mv, error: mvErr } = await supabase
             .from("stock_movements")
@@ -163,19 +176,21 @@ function MoveUnitProductDialog({
       }
 
       // Cliente → outro setor: reflete o novo local na plataforma externa
-      const EXTERNAL_LOC: Record<MoveDestination, "tecnico" | "estoque" | "perdido" | "avariado"> = {
+      const EXTERNAL_LOC: Record<MoveDestination, "tecnico" | "estoque" | "cliente" | "perdido" | "avariado"> = {
         tecnico: "tecnico",
-        almoxarifado: "estoque",
+        myio: "estoque",
+        cliente: "cliente",
         perdido: "perdido",
         avariado: "avariado",
       };
       pushQrsToExternal([product.label], {
         location: EXTERNAL_LOC[destination],
         technician: destination === "tecnico" ? technician.trim() : null,
+        clientName: destination === "cliente" ? selectedProject?.name ?? selectedProject?.client_name ?? null : null,
       });
     },
     onSuccess: () => {
-      toast.success("Produto movido.");
+      toast.success("Dispositivo movido.");
       qc.invalidateQueries({ queryKey: ["unit-products"] });
       qc.invalidateQueries({ queryKey: ["material-stock"] });
       qc.invalidateQueries({ queryKey: ["stock-movements"] });
@@ -202,8 +217,8 @@ function MoveUnitProductDialog({
       </DialogTrigger>
       <DialogContent className="max-h-[88vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Mover produto — {productName}</DialogTitle>
-          <DialogDescription>Registre o destino do produto que sai da unidade. A foto é opcional.</DialogDescription>
+          <DialogTitle>Mover dispositivo — {productName}</DialogTitle>
+          <DialogDescription>Registre o destino do dispositivo. A foto é opcional.</DialogDescription>
         </DialogHeader>
 
         <form
@@ -246,8 +261,8 @@ function MoveUnitProductDialog({
             <Select value={destination} onValueChange={(v) => setDestination(v as MoveDestination)}>
               <SelectTrigger><SelectValue placeholder="Selecione o destino" /></SelectTrigger>
               <SelectContent>
-                {(Object.keys(MOVE_LABELS) as MoveDestination[]).map((d) => (
-                  <SelectItem key={d} value={d}>{MOVE_LABELS[d]}</SelectItem>
+                {(destinations ?? []).filter((item) => item.active).map((item) => (
+                  <SelectItem key={item.code} value={item.code}>{item.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -257,6 +272,18 @@ function MoveUnitProductDialog({
             <div className="space-y-2">
               <Label htmlFor="move-tech">Nome do técnico</Label>
               <Input id="move-tech" value={technician} onChange={(e) => setTechnician(e.target.value)} />
+            </div>
+          )}
+
+          {destination === "cliente" && (
+            <div className="space-y-2">
+              <Label>Projeto do cliente</Label>
+              <Select value={projectId} onValueChange={setProjectId}>
+                <SelectTrigger><SelectValue placeholder="Selecione o projeto" /></SelectTrigger>
+                <SelectContent>
+                  {(projects ?? []).map((project) => <SelectItem key={project.id} value={project.id}>{project.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
           )}
 
