@@ -174,3 +174,4 @@
 - [x] Separar “Itens da Solicitação” de “Tipo” nos cards e incluir a coluna na visualização desktop.
 - [x] Corrigir a abertura dos anexos das solicitações em uma nova aba.
 - [x] Substituir “descrição completa” pelo conteúdo do item nas solicitações.
+- [x] Bloquear a exclusão de clientes com projetos ou solicitações vinculados e exigir realocação individual.
