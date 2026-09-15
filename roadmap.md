@@ -157,3 +157,4 @@
 - [x] Trocar Produto por Dispositivo no Estoque Myio e em suas janelas.
 - [x] Reunir Expedição, Transporte, Cliente, Técnico, Perdido e Avariado dentro de Estoque e separar Dispositivos myio de Insumos de Instalação.
 - [x] Mover Homologação para dentro de Fábrica e renomear Estoque — Fábrica para Estoque de Componentes.
+- [ ] Renomear o submenu Solicitações de Dispositivos myio para Solicitações.
