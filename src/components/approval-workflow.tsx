@@ -1172,6 +1172,27 @@ function MoneyInput({
   );
 }
 
+function QuantityLimitInput({ value, disabled, onSave }: { value: number; disabled?: boolean; onSave: (value: number) => void }) {
+  const [draft, setDraft] = useState(String(value ?? 0));
+  useEffect(() => setDraft(String(value ?? 0)), [value]);
+  return (
+    <Input
+      type="number"
+      min={0}
+      max={99999}
+      className="h-8 w-28"
+      disabled={disabled}
+      value={draft}
+      onChange={(event) => setDraft(event.target.value.replace(/\D/g, "").slice(0, 5))}
+      onBlur={() => {
+        const next = Number(draft);
+        if (!Number.isInteger(next) || next < 0 || next > 99999) return setDraft(String(value ?? 0));
+        if (next !== value) onSave(next);
+      }}
+    />
+  );
+}
+
 function DefaultChainAdmin() {
   const qc = useQueryClient();
   const { data: me } = useCurrentUser();
@@ -1184,7 +1205,7 @@ function DefaultChainAdmin() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, full_name, email, approval_limit, tier2_limit, tier3_limit, approval_level, job_title_id")
+        .select("id, full_name, email, approval_limit, tier2_limit, tier3_limit, device_approval_limit, device_tier2_limit, device_tier3_limit, approval_level, job_title_id")
         .order("full_name");
       if (error) throw error;
       return data ?? [];
@@ -1208,7 +1229,7 @@ function DefaultChainAdmin() {
       patch,
     }: {
       userId: string;
-      patch: Partial<{ approval_limit: number; tier2_limit: number; tier3_limit: number }>;
+      patch: Partial<{ approval_limit: number; tier2_limit: number; tier3_limit: number; device_approval_limit: number; device_tier2_limit: number; device_tier3_limit: number }>;
     }) => {
       const { error } = await supabase.from("profiles").update(patch).eq("id", userId);
       if (error) throw error;
@@ -1275,6 +1296,28 @@ function DefaultChainAdmin() {
           <p>• Acima da Faixa 2 até a Faixa 3: Gestor Direto → Gestor da Área → C-Level.</p>
           <p>• Acima da Faixa 3: sobe pelo organograma até o C-Level.</p>
           <p>• Depois dessas etapas entram as “Etapas adicionais” ativas e, se aplicável, a dupla aprovação.</p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Alçadas de Dispositivos myio</CardTitle>
+          <CardDescription>Faixas independentes calculadas pela soma das quantidades solicitadas.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader><TableRow><TableHead>Usuário</TableHead><TableHead>Automática até</TableHead><TableHead>Faixa 2 até</TableHead><TableHead>Faixa 3 até</TableHead></TableRow></TableHeader>
+            <TableBody>
+              {(rows ?? []).map((profile) => (
+                <TableRow key={`devices-${profile.id}`}>
+                  <TableCell className="font-medium">{profile.full_name || profile.email}</TableCell>
+                  <TableCell><QuantityLimitInput value={profile.device_approval_limit} disabled={!isAdmin} onSave={(value) => save.mutate({ userId: profile.id, patch: { device_approval_limit: value } })} /></TableCell>
+                  <TableCell><QuantityLimitInput value={profile.device_tier2_limit} disabled={!isAdmin} onSave={(value) => save.mutate({ userId: profile.id, patch: { device_tier2_limit: value } })} /></TableCell>
+                  <TableCell><QuantityLimitInput value={profile.device_tier3_limit} disabled={!isAdmin} onSave={(value) => save.mutate({ userId: profile.id, patch: { device_tier3_limit: value } })} /></TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
 
