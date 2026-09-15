@@ -204,22 +204,22 @@ export function NewMyioOrderDialog({ userId, triggerLabel, inline = false }: { u
         </div>
       </div>
 
-      <div className="space-y-2">
+      {clientId && (
+        <div className="space-y-2">
           <Label>Classificação da solicitação para o cliente</Label>
           <div className="grid gap-2 sm:grid-cols-3">
             {(Object.entries(CLIENT_REASON_LABELS) as [keyof typeof CLIENT_REASON_LABELS, string][]).map(([value, label]) => (
-              <label key={value} className="flex cursor-pointer items-center gap-2 rounded-md border p-3 text-sm has-disabled:cursor-not-allowed has-disabled:opacity-50">
+              <label key={value} className="flex cursor-pointer items-center gap-2 rounded-md border p-3 text-sm">
                 <Checkbox
                   checked={clientReason === value}
-                  disabled={!clientId}
                   onCheckedChange={(checked) => setClientReason(checked ? value : "")}
                 />
                 {label}
               </label>
             ))}
           </div>
-          {!clientId && <p className="text-xs text-muted-foreground">Selecione um Cliente para escolher uma classificação.</p>}
-      </div>
+        </div>
+      )}
 
       <div className="space-y-2">
         <Label>Produtos</Label>
