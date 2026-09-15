@@ -604,7 +604,7 @@ export function ReleaseAssembledDialog({ userId }: { userId: string }) {
       }}
     >
       <DialogTrigger asChild>
-        <Button size="sm" className="bg-blue-600 text-white hover:bg-blue-700">
+        <Button size="sm" className="bg-myio-purple text-primary-foreground hover:bg-myio-purple/90">
           <PackageCheck className="mr-1 h-4 w-4" /> Liberar Dispositivo Montado
         </Button>
       </DialogTrigger>
