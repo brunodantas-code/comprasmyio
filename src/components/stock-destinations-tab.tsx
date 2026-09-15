@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Pencil, Plus } from "lucide-react";
 import { toast } from "sonner";
@@ -128,7 +129,7 @@ function DestinationDialog({ title, description, defaultName = "", defaultPositi
   defaultPosition: number;
   saving: boolean;
   onSave: (name: string, position: number) => Promise<unknown>;
-  trigger: React.ReactNode;
+  trigger: ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }) {
