@@ -132,3 +132,4 @@
 - [x] Realocar Solicitações de Dispositivos myio para abaixo de Minhas Solicitações
 
 - [ ] Ajustar solicitações de Dispositivos myio: somente do próprio usuário, acesso pela lista de tipos, Cliente e Projeto independentes, Approval normal por quantidade e liberação após aprovação.
+- [ ] Exigir classificação Manutenção, Reposição por mal uso ou Upsell quando a solicitação de Dispositivos myio tiver Cliente.
