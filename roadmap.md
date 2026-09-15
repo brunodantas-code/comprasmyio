@@ -172,3 +172,4 @@
 - [x] Corrigir a exclusão de solicitações de Dispositivos myio vinculadas indevidamente ao Cash Flow.
 - [x] Exibir no Item do Approval a quantidade e os dispositivos/insumos realmente solicitados.
 - [x] Separar “Itens da Solicitação” de “Tipo” nos cards e incluir a coluna na visualização desktop.
+- [x] Corrigir a abertura dos anexos das solicitações em uma nova aba.

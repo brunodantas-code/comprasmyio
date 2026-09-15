@@ -122,9 +122,24 @@ async function uploadOrderAttachments(orderId: string, files: File[]): Promise<A
 }
 
 async function openAttachment(path: string) {
+  const previewWindow = window.open("", "_blank");
+  if (!previewWindow) {
+    toast.error("Permita a abertura de novas abas para visualizar o anexo.");
+    return;
+  }
+
+  previewWindow.opener = null;
+  previewWindow.document.title = "Abrindo anexo...";
+  previewWindow.document.body.textContent = "Abrindo anexo...";
+
   const { data, error } = await supabase.storage.from(ATTACHMENTS_BUCKET).createSignedUrl(path, 60 * 10);
-  if (error || !data?.signedUrl) return toast.error(error?.message || "Falha ao abrir");
-  window.open(data.signedUrl, "_blank", "noopener");
+  if (error || !data?.signedUrl) {
+    previewWindow.close();
+    toast.error(error?.message || "Falha ao abrir o anexo.");
+    return;
+  }
+
+  previewWindow.location.replace(data.signedUrl);
 }
 
 function FilePicker({ files, setFiles, label = "Anexar arquivos" }: { files: File[]; setFiles: (f: File[]) => void; label?: string }) {
