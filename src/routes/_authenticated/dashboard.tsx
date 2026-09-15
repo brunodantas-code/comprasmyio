@@ -2130,7 +2130,7 @@ function MyOrders({ userId, canManageDevices }: { userId: string; canManageDevic
         <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <CardTitle>Minhas Solicitações</CardTitle>
-            <CardDescription>Acompanhe o status de todas as suas solicitações.</CardDescription>
+            <CardDescription>Acompanhe o status de suas solicitações de Materiais, Serviços, Viagens, Reembolsos e Contratação de RH.</CardDescription>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -2205,27 +2205,25 @@ function ImportOrders({ userId }: { userId: string }) {
 
   return (
     <div className="space-y-6">
-      <ImportBatchesSection userId={userId} />
-      <Card>
-
-      <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <CardTitle>Pedidos de Importação</CardTitle>
-          <CardDescription>Acompanhe os pedidos cujo material é importado (prazos mais longos).</CardDescription>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <StatusMultiFilter selected={statusSelected} setSelected={setStatusSelected} />
-          <DeliveredFilter mode={deliveredMode} setMode={setDeliveredMode} fromDate={deliveredFrom} setFromDate={setDeliveredFrom} />
-        </div>
-      </CardHeader>
-      <CardContent>
-        {isLoading || importIds.isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
-          !importOrders.length ? <p className="text-sm text-muted-foreground">Nenhum pedido de importação.</p> :
-          !visible.length ? <p className="text-sm text-muted-foreground">Nenhum pedido para exibir com o filtro atual.</p> :
-          <OrdersTable orders={visible} projectName={projectName} showRequester={false} canEditRequester canDelete />
-        }
-      </CardContent>
-      </Card>
+      <ImportBatchesSection userId={userId}>
+        <section className="space-y-4" aria-labelledby="imported-items-title">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h3 id="imported-items-title" className="font-semibold">Itens dos pedidos</h3>
+              <p className="text-sm text-muted-foreground">Acompanhe o andamento individual dos materiais incluídos em suas importações.</p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <StatusMultiFilter selected={statusSelected} setSelected={setStatusSelected} />
+              <DeliveredFilter mode={deliveredMode} setMode={setDeliveredMode} fromDate={deliveredFrom} setFromDate={setDeliveredFrom} />
+            </div>
+          </div>
+          {isLoading || importIds.isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
+            !importOrders.length ? <p className="text-sm text-muted-foreground">Nenhum item de importação.</p> :
+            !visible.length ? <p className="text-sm text-muted-foreground">Nenhum item para exibir com o filtro atual.</p> :
+            <OrdersTable orders={visible} projectName={projectName} showRequester={false} canEditRequester canDelete />
+          }
+        </section>
+      </ImportBatchesSection>
     </div>
   );
 }
