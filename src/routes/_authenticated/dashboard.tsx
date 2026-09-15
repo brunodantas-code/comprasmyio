@@ -510,7 +510,6 @@ function Dashboard() {
                   <div className="space-y-6">
                     <RequestTypesTab />
                     <AdditionalStepTypesTab />
-                     <AccessProfileDefinitionsTab />
                   </div>
                 </TabsContent>}
               </Tabs>
@@ -521,13 +520,18 @@ function Dashboard() {
               <Tabs defaultValue={administrationTabs[0]?.value}>
                 <TabsList className="mb-4">
                   {me.canAccess("usuarios_lista") && <TabsTrigger value="usuarios"><Users className="mr-2 h-4 w-4" />Usuários</TabsTrigger>}
-                  {me.canAccess("usuarios_acesso_restrito") && <TabsTrigger value="acesso-restrito"><ShieldCheck className="mr-2 h-4 w-4" />Acesso Restrito</TabsTrigger>}
+                  {me.canAccess("usuarios_acesso_restrito") && <TabsTrigger value="acesso-restrito"><ShieldCheck className="mr-2 h-4 w-4" />Perfis de acesso</TabsTrigger>}
                   {me.canAccess("usuarios_workflow") && <TabsTrigger value="workflow"><CheckCircle2 className="mr-2 h-4 w-4" />Approval Workflow</TabsTrigger>}
                   {me.canAccess("usuarios_logs") && <TabsTrigger value="logs"><ScrollText className="mr-2 h-4 w-4" />Logs</TabsTrigger>}
                   {me.canAccess("usuarios_backup") && <TabsTrigger value="backup"><DatabaseBackup className="mr-2 h-4 w-4" />Backup</TabsTrigger>}
                 </TabsList>
                 {me.canAccess("usuarios_lista") && <TabsContent value="usuarios"><UsersAdmin /></TabsContent>}
-                {me.canAccess("usuarios_acesso_restrito") && <TabsContent value="acesso-restrito"><AccessProfilesTab /></TabsContent>}
+                {me.canAccess("usuarios_acesso_restrito") && <TabsContent value="acesso-restrito">
+                  <div className="space-y-6">
+                    <AccessProfileDefinitionsTab />
+                    <AccessProfilesTab />
+                  </div>
+                </TabsContent>}
                 {me.canAccess("usuarios_workflow") && <TabsContent value="workflow"><ApprovalWorkflow /></TabsContent>}
                 {me.canAccess("usuarios_logs") && <TabsContent value="logs"><LogsAdmin /></TabsContent>}
                 {me.canAccess("usuarios_backup") && <TabsContent value="backup">
