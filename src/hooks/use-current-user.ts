@@ -17,7 +17,9 @@ export type AccessProfileBase = "admin" | "padrao" | "restrito";
 export type MenuKey =
   | "solicitacoes" | "solicitacoes_minhas" | "solicitacoes_novas"
   | "approvals" | "approvals_pendentes" | "approvals_meus" | "approvals_todos" | "approvals_consolidado"
-  | "armazem"
+  | "armazem" | "armazem_fabrica" | "armazem_estoque_myio" | "armazem_expedicao" | "armazem_homologacao"
+  | "armazem_transporte" | "armazem_cliente" | "armazem_tecnico" | "armazem_perdido" | "armazem_itens_avariados"
+  | "armazem_checar_qr" | "armazem_almoxarifado" | "armazem_ferramentas_ativos"
   | "cadastro" | "cadastro_projetos" | "cadastro_clientes" | "cadastro_centros" | "cadastro_cargos" | "cadastro_lembretes" | "cadastro_diversos"
   | "usuarios" | "usuarios_lista" | "usuarios_acesso_restrito" | "usuarios_workflow" | "usuarios_logs" | "usuarios_backup";
 

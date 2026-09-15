@@ -29,7 +29,16 @@ export const setUserAccessProfile = createServerFn({ method: "POST" })
     if (targetError || !target || target.deleted_at) throw new Error("Usuário não encontrado ou excluído.");
 
     const isCustomized = data.profile === "customizado";
-    const definitionCode = isCustomized ? "restrito" : data.profile;
+    let definitionCode = data.profile;
+    if (isCustomized) {
+      const { data: currentAccess, error: currentAccessError } = await supabaseAdmin
+        .from("user_access_profiles")
+        .select("profile_definition_id")
+        .eq("user_id", data.userId)
+        .maybeSingle();
+      if (currentAccessError) throw currentAccessError;
+      definitionCode = currentAccess?.profile_definition_id ?? "restrito";
+    }
     const { data: definition, error: definitionError } = await supabaseAdmin
       .from("access_profile_definitions")
       .select("code, base_profile, active")
@@ -52,6 +61,40 @@ export const setUserAccessProfile = createServerFn({ method: "POST" })
       .from("user_access_profiles")
       .upsert({ user_id: data.userId, profile: definition.base_profile, profile_definition_id: definition.code, is_customized: isCustomized }, { onConflict: "user_id" });
     if (profileError) throw profileError;
+
+    if (isCustomized) {
+      const { count: existingPermissionCount, error: permissionCountError } = await supabaseAdmin
+        .from("user_menu_permissions")
+        .select("menu_key", { count: "exact", head: true })
+        .eq("user_id", data.userId);
+      if (permissionCountError) throw permissionCountError;
+      if ((existingPermissionCount ?? 0) === 0) {
+        const { data: profilePermissions, error: profilePermissionsError } = await supabaseAdmin
+          .from("access_profile_permissions")
+          .select("menu_key,allowed")
+          .eq("profile_code", definition.code)
+          .eq("allowed", true);
+        if (profilePermissionsError) throw profilePermissionsError;
+        const menuKeys = definition.base_profile === "admin"
+          ? [
+              "solicitacoes", "solicitacoes_minhas", "solicitacoes_novas",
+              "approvals", "approvals_pendentes", "approvals_meus", "approvals_todos", "approvals_consolidado",
+              "armazem", "armazem_fabrica", "armazem_estoque_myio", "armazem_expedicao", "armazem_homologacao",
+              "armazem_transporte", "armazem_cliente", "armazem_tecnico", "armazem_perdido", "armazem_itens_avariados",
+              "armazem_checar_qr", "armazem_almoxarifado", "armazem_ferramentas_ativos",
+              "cadastro", "cadastro_projetos", "cadastro_clientes", "cadastro_centros", "cadastro_cargos",
+              "cadastro_lembretes", "cadastro_diversos", "usuarios", "usuarios_lista", "usuarios_acesso_restrito",
+              "usuarios_workflow", "usuarios_logs", "usuarios_backup",
+            ]
+          : (profilePermissions ?? []).map((permission) => permission.menu_key);
+        if (menuKeys.length > 0) {
+          const { error: copyError } = await supabaseAdmin.from("user_menu_permissions").insert(
+            menuKeys.map((menuKey) => ({ user_id: data.userId, menu_key: menuKey, allowed: true })),
+          );
+          if (copyError) throw copyError;
+        }
+      }
+    }
 
     if (definition.base_profile === "admin") {
       const { error } = await supabaseAdmin

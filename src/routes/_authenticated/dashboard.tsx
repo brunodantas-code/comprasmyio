@@ -487,6 +487,7 @@ function Dashboard() {
                 userId={me.id}
                 canDelete={isAdmin}
                 onlyLocation={fabricaOnly ? "fabrica" : estoquistaOnly ? "almoxarifado" : undefined}
+                canAccessSection={me.canAccess}
               />
             </TabsContent>
           )}
