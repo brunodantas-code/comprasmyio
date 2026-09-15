@@ -274,7 +274,7 @@ export function NewMyioOrderDialog({ userId, triggerLabel, inline = false }: { u
     return (
       <Card className="max-w-4xl">
         <CardHeader>
-          <CardTitle>Nova solicitação de Dispositivos myio</CardTitle>
+          <CardTitle>Nova solicitação de Dispositivos myio e Insumos de Instalação</CardTitle>
           <CardDescription>Selecione Projeto ou Cliente, além da data e das quantidades.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">{formContent}</CardContent>
@@ -291,12 +291,12 @@ export function NewMyioOrderDialog({ userId, triggerLabel, inline = false }: { u
                 <Button>{triggerLabel ? <><Plus className="mr-2 h-4 w-4" />{triggerLabel}</> : <Plus className="h-4 w-4" />}</Button>
               </DialogTrigger>
             </TooltipTrigger>
-            <TooltipContent>Nova solicitação de Dispositivos myio</TooltipContent>
+            <TooltipContent>Nova solicitação de Dispositivos myio e Insumos de Instalação</TooltipContent>
           </Tooltip>
         </TooltipProvider>
       <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Novo pedido de produtos Myio</DialogTitle>
+          <DialogTitle>Nova solicitação de Dispositivos myio e Insumos de Instalação</DialogTitle>
           <DialogDescription>Selecione Projeto ou Cliente, além da data e das quantidades.</DialogDescription>
         </DialogHeader>
 
