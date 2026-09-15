@@ -18,7 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ItemDeliveriesDialog, extractQrCode } from "@/components/myio-delivery-qr";
-import { AlertTriangle, CheckCircle2, FileText, Loader2, PackageSearch, Send, Truck, Undo2, Upload } from "lucide-react";
+import { AlertTriangle, CheckCircle2, FileText, Loader2, PackageCheck, PackageSearch, Send, Truck, Undo2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { pushOrderToExternal, pushQrsToExternal, reconcileOrdersExternal } from "@/lib/push-external";
 
@@ -260,7 +260,7 @@ export function DistributionCard() {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Truck className="h-5 w-5" />
+          <PackageCheck className="h-5 w-5" />
           Expedição
         </CardTitle>
         <CardDescription>
