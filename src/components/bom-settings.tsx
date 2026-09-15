@@ -130,7 +130,7 @@ export function BomSettingsDialog() {
   const createProduct = useMutation({
     mutationFn: async () => {
       const name = newProductName.trim();
-      if (!name) throw new Error("Informe o nome do produto");
+      if (!name) throw new Error("Informe o nome do dispositivo");
       const existing = (materials ?? []).find((m) => normalize(m.name) === normalize(name));
       if (existing) {
         if (existing.is_product && existing.location === "almoxarifado") return existing.id;
@@ -150,7 +150,7 @@ export function BomSettingsDialog() {
       return data.id as string;
     },
     onSuccess: (id) => {
-      toast.success("Produto criado");
+      toast.success("Dispositivo criado");
       setNewProductName("");
       setProductId(id);
       qc.invalidateQueries({ queryKey: ["materials"] });
@@ -185,7 +185,7 @@ export function BomSettingsDialog() {
   const add = useMutation({
     mutationFn: async () => {
       const quantity = Number(newQty);
-      if (!selected) throw new Error("Selecione um produto");
+      if (!selected) throw new Error("Selecione um dispositivo");
       if (!newComponent) throw new Error("Selecione um componente");
       if (!(quantity > 0)) throw new Error("Quantidade inválida");
       const { error } = await supabase
@@ -212,7 +212,7 @@ export function BomSettingsDialog() {
 
   const applyLoss = useMutation({
     mutationFn: async (pctRaw: number) => {
-      if (!selected) throw new Error("Selecione um produto");
+      if (!selected) throw new Error("Selecione um dispositivo");
       if (!Number.isFinite(pctRaw) || pctRaw < 0) throw new Error("Porcentagem de perda inválida");
       const { error } = await supabase.from("materials").update({ loss_percent: pctRaw }).eq("id", selected);
       if (error) throw error;
@@ -233,7 +233,7 @@ export function BomSettingsDialog() {
       return v;
     },
     onSuccess: (v) => {
-      toast.success(v.value ? "Produto voltou para a Fábrica" : "Produto removido das listas da Fábrica");
+      toast.success(v.value ? "Dispositivo voltou para a Fábrica" : "Dispositivo removido das listas da Fábrica");
       if (!v.value && selected === v.id) setProductId("");
       qc.invalidateQueries({ queryKey: ["materials"] });
     },
@@ -243,21 +243,21 @@ export function BomSettingsDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline" title="Regras de componentes por produto">
+        <Button size="sm" variant="outline" title="Regras de componentes por dispositivo">
           <Settings className="h-4 w-4" />
         </Button>
       </DialogTrigger>
       <DialogContent className="max-h-[85vh] max-w-3xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Regras de componentes por produto</DialogTitle>
+          <DialogTitle>Regras de componentes por dispositivo</DialogTitle>
           <DialogDescription>
-            Defina quais componentes (e quanto de cada) saem do estoque quando um produto montado é liberado.
+            Defina quais componentes (e quanto de cada) saem do estoque quando um dispositivo montado é liberado.
           </DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-wrap items-center gap-2">
           <Select value={selected} onValueChange={setProductId}>
-            <SelectTrigger className="w-full sm:w-[280px]"><SelectValue placeholder="Selecione o produto" /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-[280px]"><SelectValue placeholder="Selecione o dispositivo" /></SelectTrigger>
             <SelectContent>
               {products.map((p) => (
                 <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
@@ -289,7 +289,7 @@ export function BomSettingsDialog() {
 
         {nonManufactured.length > 0 && (
           <div className="space-y-2 rounded border p-3">
-            <Label>Produtos não produzidos pela Fábrica</Label>
+            <Label>Dispositivos não produzidos pela Fábrica</Label>
             <div className="flex flex-wrap gap-2">
               {nonManufactured.map((m) => (
                 <Button
@@ -305,7 +305,7 @@ export function BomSettingsDialog() {
               ))}
             </div>
             <p className="text-xs text-muted-foreground">
-              Eles continuam disponíveis no Estoque, mas não aparecem em "Liberar produto montado", regras de
+              Eles continuam disponíveis no Estoque, mas não aparecem em "Liberar dispositivo montado", regras de
               componentes nem na capacidade de produção. Clique para reativar.
             </p>
           </div>
@@ -343,26 +343,26 @@ export function BomSettingsDialog() {
             )}
           </div>
           <p className="text-xs text-muted-foreground">
-            A perda fica salva neste produto e é aplicada sobre todas as quantidades por unidade na hora de liberar a
+            A perda fica salva neste dispositivo e é aplicada sobre todas as quantidades por unidade na hora de liberar a
             montagem. Perda atual: {savedLoss}%.
           </p>
         </div>
 
         <div className="space-y-2 rounded border p-3">
-          <Label>Criar novo produto</Label>
+          <Label>Criar novo dispositivo</Label>
           <div className="flex flex-wrap items-center gap-2">
             <Input
               value={newProductName}
               onChange={(e) => setNewProductName(e.target.value)}
-              placeholder="Nome do novo produto"
+              placeholder="Nome do novo dispositivo"
               className="w-full sm:w-[280px]"
             />
             <Button size="sm" disabled={createProduct.isPending} onClick={() => createProduct.mutate()}>
-              <PackagePlus className="mr-1 h-4 w-4" /> Criar produto
+              <PackagePlus className="mr-1 h-4 w-4" /> Criar dispositivo
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">
-            O produto entra na lista de "Liberar produto montado" e segue o fluxo normal de homologação e estoque.
+            O dispositivo entra na lista de "Liberar dispositivo montado" e segue o fluxo normal de homologação e estoque.
           </p>
         </div>
 
@@ -380,7 +380,7 @@ export function BomSettingsDialog() {
               {!rows.length ? (
                 <TableRow>
                   <TableCell colSpan={4} className="text-sm text-muted-foreground">
-                    Nenhum componente cadastrado para este produto.
+                    Nenhum componente cadastrado para este dispositivo.
                   </TableCell>
                 </TableRow>
               ) : (

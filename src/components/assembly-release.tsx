@@ -175,7 +175,7 @@ function ReportIssueDialog({
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label>Produto (opcional)</Label>
+            <Label>Dispositivo (opcional)</Label>
             <select
               className="h-9 w-full rounded-md border bg-background px-2 text-sm"
               value={itemId}
@@ -184,7 +184,7 @@ function ReportIssueDialog({
               <option value="">Toda a liberação</option>
               {items.map((i) => (
                 <option key={i.id} value={i.id}>
-                  {materialNames[i.material_id] ?? "Produto"} — liberado {i.quantity}
+                  {materialNames[i.material_id] ?? "Dispositivo"} — liberado {i.quantity}
                 </option>
               ))}
             </select>
@@ -262,7 +262,7 @@ function CorrectReleaseDialog({
         const min = minQuantities[c.item.id] ?? 0;
         if (c.next < min)
           throw new Error(
-            `${materialNames[c.item.material_id] ?? "Produto"}: já foram homologadas ${min} unidades, não é possível reduzir abaixo disso`,
+            `${materialNames[c.item.material_id] ?? "Dispositivo"}: já foram homologadas ${min} unidades, não é possível reduzir abaixo disso`,
           );
       }
 
@@ -359,7 +359,7 @@ function CorrectReleaseDialog({
             <p className="font-medium text-amber-800">Divergências sinalizadas pelo estoque</p>
             {openIssues.map((i) => (
               <p key={i.id} className="text-amber-900">
-                {i.material_id ? `${materialNames[i.material_id] ?? "Produto"}: ` : ""}
+                 {i.material_id ? `${materialNames[i.material_id] ?? "Dispositivo"}: ` : ""}
                 {i.message}
                 {i.reported_quantity !== null ? ` (quantidade correta: ${i.reported_quantity})` : ""}
               </p>
@@ -370,7 +370,7 @@ function CorrectReleaseDialog({
         <div className="space-y-2">
           {items.map((i) => (
             <div key={i.id} className="flex items-center justify-between gap-3 rounded border px-3 py-2">
-              <span className="text-sm">{materialNames[i.material_id] ?? "Produto"}</span>
+              <span className="text-sm">{materialNames[i.material_id] ?? "Dispositivo"}</span>
               <Input
                 type="number"
                 min={Math.max(minQuantities[i.id] ?? 1, 1)}
@@ -759,13 +759,13 @@ function PhotoCell({ path }: { path: string }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <img src={url} alt="Produtos montados" className="h-12 w-12 cursor-pointer rounded border object-cover" />
+        <img src={url} alt="Dispositivos montados" className="h-12 w-12 cursor-pointer rounded border object-cover" />
       </DialogTrigger>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Produtos montados</DialogTitle>
+          <DialogTitle>Dispositivos montados</DialogTitle>
         </DialogHeader>
-        <img src={url} alt="Produtos montados" className="max-h-[70vh] w-full rounded object-contain" />
+        <img src={url} alt="Dispositivos montados" className="max-h-[70vh] w-full rounded object-contain" />
       </DialogContent>
     </Dialog>
   );
@@ -833,7 +833,7 @@ function DeleteReleaseDialog({ release }: { release: { id: string; photo_url: st
 
 export function AssemblyReleasesCard({
   materialNames,
-  title = "Produtos montados liberados",
+  title = "Dispositivos montados liberados",
   description = "Histórico de liberações da fábrica.",
   userId,
   homologable = false,
@@ -880,13 +880,13 @@ export function AssemblyReleasesCard({
       </CardHeader>
       <CardContent>
         {!visibleReleases.length ? (
-          <p className="text-sm text-muted-foreground">Nenhum produto liberado até o momento.</p>
+          <p className="text-sm text-muted-foreground">Nenhum dispositivo liberado até o momento.</p>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Data</TableHead>
-                <TableHead>Produtos</TableHead>
+                <TableHead>Dispositivos</TableHead>
                 <TableHead className="w-28">Quantidade</TableHead>
                 <TableHead>Responsáveis</TableHead>
                 <TableHead>Foto</TableHead>
@@ -907,7 +907,7 @@ export function AssemblyReleasesCard({
                     <div className="space-y-1">
                       {(r.assembly_release_items ?? []).map((i) => {
                         const remaining = Math.max(i.quantity - homologatedFor(r.id, i.material_id), 0);
-                        const name = materialNames[i.material_id] ?? "Produto";
+                        const name = materialNames[i.material_id] ?? "Dispositivo";
                         const done = homologable && remaining <= 0;
                         if (!homologable || !userId || remaining <= 0) {
                           return (
@@ -927,7 +927,7 @@ export function AssemblyReleasesCard({
                               quantity={i.quantity}
                               userId={userId}
                               trigger={
-                                <button type="button" title="Homologar produto">
+                                <button type="button" title="Homologar dispositivo">
                                   <Badge
                                     variant="outline"
                                     className="cursor-pointer hover:border-myio-purple hover:bg-accent"
