@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Trash2 } from "lucide-react";
+import { Minus, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 type LinkField = "project_id" | "client_id" | "cost_center_id" | "request_type";
 type DiversosRegistry = "request_type" | "additional_step_type" | "stock_destination";
@@ -50,7 +51,8 @@ export function LinkedRecordDeletionDialog({
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [targets, setTargets] = useState<Record<string, string>>({});
-  const queryKey = ["linked-orders", linkField, entityId];
+  const [expandedLinks, setExpandedLinks] = useState<Record<string, boolean>>({});
+  const queryKey = ["linked-orders", registry ?? linkField, entityId];
   const { data: records = [], isLoading, isError, error } = useQuery({
     queryKey,
     enabled: open && !deleteBlockedReason,
@@ -92,7 +94,10 @@ export function LinkedRecordDeletionDialog({
   });
 
   useEffect(() => {
-    if (!open) setTargets({});
+    if (!open) {
+      setTargets({});
+      setExpandedLinks({});
+    }
   }, [open]);
 
   const reallocate = useMutation({
@@ -181,31 +186,40 @@ export function LinkedRecordDeletionDialog({
         {hasLinks && (
           <div className="space-y-3">
             {records.map((record) => (
-              <div key={record.key} className="grid gap-3 border-b pb-3 sm:grid-cols-[minmax(0,1fr)_minmax(180px,1fr)_auto] sm:items-end">
-                <div className="min-w-0">
-                  <p className="text-sm font-medium">{record.label}</p>
-                  <p className="truncate text-sm text-muted-foreground">{record.detail}</p>
+              <Collapsible key={record.key} open={expandedLinks[record.key] ?? false} onOpenChange={(expanded) => setExpandedLinks((current) => ({ ...current, [record.key]: expanded }))} className="border-b pb-3">
+                <div className="flex min-w-0 items-center justify-between gap-3">
+                  <p className="min-w-0 truncate text-sm font-medium">{record.label}</p>
+                  <CollapsibleTrigger asChild>
+                    <Button size="icon" variant="ghost" aria-label={(expandedLinks[record.key] ?? false) ? `Recolher ${record.label}` : `Expandir ${record.label}`} title={(expandedLinks[record.key] ?? false) ? "Recolher" : "Expandir"}>
+                      {(expandedLinks[record.key] ?? false) ? <Minus className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                    </Button>
+                  </CollapsibleTrigger>
                 </div>
-                <div className="space-y-1">
-                  <Label className="text-xs">Novo {entityLabel}</Label>
-                  <Select value={targets[record.key] ?? ""} onValueChange={(value) => setTargets((current) => ({ ...current, [record.key]: value }))}>
-                    <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                    <SelectContent>
-                      {availableDestinations.map((item) => <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button
-                  variant="outline"
-                  disabled={!targets[record.key] || reallocate.isPending}
-                  onClick={() => {
-                    const destinationId = targets[record.key];
-                    if (destinationId) reallocate.mutate({ recordKey: record.key, destinationId });
-                  }}
-                >
-                  Realocar
-                </Button>
-              </div>
+                <CollapsibleContent className="pt-3">
+                  <p className="mb-3 text-sm text-muted-foreground">{record.detail}</p>
+                  <div className="grid gap-3 sm:grid-cols-[minmax(180px,1fr)_auto] sm:items-end">
+                    <div className="space-y-1">
+                      <Label className="text-xs">Novo {entityLabel}</Label>
+                      <Select value={targets[record.key] ?? ""} onValueChange={(value) => setTargets((current) => ({ ...current, [record.key]: value }))}>
+                        <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                        <SelectContent>
+                          {availableDestinations.map((item) => <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <Button
+                      variant="outline"
+                      disabled={!targets[record.key] || reallocate.isPending}
+                      onClick={() => {
+                        const destinationId = targets[record.key];
+                        if (destinationId) reallocate.mutate({ recordKey: record.key, destinationId });
+                      }}
+                    >
+                      Realocar
+                    </Button>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
             ))}
             {!availableDestinations.length && <p className="text-sm text-destructive">Cadastre outro {entityLabel} para realizar a realocação.</p>}
           </div>
