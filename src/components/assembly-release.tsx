@@ -736,7 +736,7 @@ export function ReleaseAssembledDialog({ userId }: { userId: string }) {
           </div>
 
           <DialogFooter>
-            <Button type="submit" disabled={save.isPending} className="bg-blue-600 text-white hover:bg-blue-700">
+            <Button type="submit" disabled={save.isPending} className="bg-myio-purple text-primary-foreground hover:bg-myio-purple/90">
               {save.isPending ? "Liberando..." : "Liberar"}
             </Button>
           </DialogFooter>
@@ -930,7 +930,7 @@ export function AssemblyReleasesCard({
                                 <button type="button" title="Homologar produto">
                                   <Badge
                                     variant="outline"
-                                    className="cursor-pointer hover:bg-blue-50 hover:border-blue-300"
+                                    className="cursor-pointer hover:border-myio-purple hover:bg-accent"
                                   >
                                     {name}
                                   </Badge>
