@@ -3338,6 +3338,15 @@ export type Database = {
           target_user_id: string
         }[]
       }
+      get_client_deletion_links: {
+        Args: { _client_id: string }
+        Returns: {
+          record_detail: string
+          record_key: string
+          record_label: string
+          record_type: string
+        }[]
+      }
       has_job_title_name: {
         Args: { _name: string; _user_id: string }
         Returns: boolean
@@ -3353,6 +3362,14 @@ export type Database = {
       primary_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
+      }
+      reallocate_client_link: {
+        Args: {
+          _destination_client_id: string
+          _record_key: string
+          _source_client_id: string
+        }
+        Returns: undefined
       }
       request_user_deletion: {
         Args: { _target_user_id: string }
