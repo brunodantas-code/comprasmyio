@@ -471,8 +471,8 @@ function Dashboard() {
                 {me.canAccess("solicitacoes_minhas") && <TabsTrigger value="mine"><ClipboardList className="mr-2 h-4 w-4" />Minhas Solicitações</TabsTrigger>}
                 {me.canAccess("solicitacoes_novas") && <TabsTrigger value="new"><Plus className="mr-2 h-4 w-4" />Novas Solicitações</TabsTrigger>}
               </TabsList>
-              {me.canAccess("solicitacoes_minhas") && <TabsContent value="mine"><MyOrders userId={me.id} /></TabsContent>}
-              {me.canAccess("solicitacoes_novas") && <TabsContent value="new"><NewOrder userId={me.id} canImport={canImport} isAdmin={isAdmin} /></TabsContent>}
+              {me.canAccess("solicitacoes_minhas") && <TabsContent value="mine"><MyOrders userId={me.id} canManageDevices={isAdmin} /></TabsContent>}
+              {me.canAccess("solicitacoes_novas") && <TabsContent value="new"><NewOrder userId={me.id} canImport={canImport} /></TabsContent>}
             </Tabs>
 
           </TabsContent>}
@@ -1016,7 +1016,7 @@ function useAvgUnitPrice(item: PurchasableItem | null) {
   });
 }
 
-function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: string; canImport?: boolean; isAdmin?: boolean }) {
+function NewOrder({ userId, canImport = false }: { userId: string; canImport?: boolean }) {
   const { data: projects, isLoading } = useProjects();
   const { data: budgetSummaries } = useProjectBudgetSummaries();
   const qc = useQueryClient();
@@ -1451,7 +1451,7 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
       >
         <SelectTrigger className="w-full sm:w-72"><SelectValue placeholder="Selecione o tipo" /></SelectTrigger>
         <SelectContent>
-          {(requestTypes ?? []).filter((type) => type.active && (type.model_code !== "importacao" || canImport) && (type.model_code !== "dispositivos" || isAdmin)).map((type) => (
+          {(requestTypes ?? []).filter((type) => type.active && type.model_code !== "dispositivos" && (type.model_code !== "importacao" || canImport)).map((type) => (
             <SelectItem key={type.code} value={type.code}>{type.name}</SelectItem>
           ))}
         </SelectContent>
@@ -1471,9 +1471,6 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
       {requestModel === "importacao" && (
         <p className="text-xs text-muted-foreground">Pedidos de importação e acompanhamento de embarques.</p>
       )}
-      {requestModel === "dispositivos" && (
-        <p className="text-xs text-muted-foreground">Solicitações de dispositivos Myio para projetos.</p>
-      )}
       {requestModel === "rh" && (
         <p className="text-xs text-muted-foreground">Solicitação de contratação de pessoal (reposição ou nova vaga).</p>
       )}
@@ -1490,20 +1487,6 @@ function NewOrder({ userId, canImport = false, isAdmin = false }: { userId: stri
           <CardContent>{typeSelector}</CardContent>
         </Card>
         <ImportOrders userId={userId} />
-      </div>
-    );
-  }
-
-  if (requestModel === "dispositivos") {
-    return (
-      <div className="space-y-4">
-        <Card className="max-w-2xl">
-          <CardHeader>
-            <CardTitle>Novas Solicitações</CardTitle>
-          </CardHeader>
-          <CardContent>{typeSelector}</CardContent>
-        </Card>
-        <MyioOrdersTab userId={userId} canManage={isAdmin} />
       </div>
     );
   }
@@ -2113,7 +2096,7 @@ const MYIO_STATUS_LABELS: Record<string, string> = {
   perdido: "Perdido",
 };
 
-function MyOrders({ userId }: { userId: string }) {
+function MyOrders({ userId, canManageDevices }: { userId: string; canManageDevices: boolean }) {
   const { data: projects } = useProjects();
   const { data: stockParts } = useMyStockParts(userId);
   const { data: orders, isLoading } = useQuery({
@@ -2136,36 +2119,39 @@ function MyOrders({ userId }: { userId: string }) {
   const stockOnly = [...(stockParts?.values() ?? [])].filter((p) => !usedGroups.has(p.group));
 
   return (
-    <Card>
-      <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <CardTitle>Minhas Solicitações</CardTitle>
-          <CardDescription>Acompanhe o status de todas as suas solicitações.</CardDescription>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
-          !orders?.length ? <p className="text-sm text-muted-foreground">Nenhum pedido ainda.</p> :
-          !visible.length ? <p className="text-sm text-muted-foreground">Nenhum pedido para exibir com o filtro atual.</p> :
-          <OrdersTable orders={visible} projectName={projectName} showRequester={false} canEditRequester canDelete stockParts={stockParts} headerFilters />
-        }
-        {stockOnly.length > 0 && (
-          <div className="rounded-md border p-4">
-            <p className="text-sm font-medium">Separação do estoque</p>
-            <p className="mb-2 text-xs text-muted-foreground">Solicitações atendidas integralmente pelo estoque — retire com o estoquista.</p>
-            <ul className="space-y-1 text-sm">
-              {stockOnly.map((p) => (
-                <li key={p.group} className="flex flex-wrap items-center gap-2">
-                  <span className="font-medium">{p.title}</span>
-                  <span className="text-muted-foreground">{p.qty} unid.</span>
-                  <Badge variant="secondary">{MYIO_STATUS_LABELS[p.status] ?? p.status}</Badge>
-                </li>
-              ))}
-            </ul>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <CardTitle>Minhas Solicitações</CardTitle>
+            <CardDescription>Acompanhe o status de todas as suas solicitações.</CardDescription>
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
+            !orders?.length ? <p className="text-sm text-muted-foreground">Nenhum pedido ainda.</p> :
+            !visible.length ? <p className="text-sm text-muted-foreground">Nenhum pedido para exibir com o filtro atual.</p> :
+            <OrdersTable orders={visible} projectName={projectName} showRequester={false} canEditRequester canDelete stockParts={stockParts} headerFilters />
+          }
+          {stockOnly.length > 0 && (
+            <div className="rounded-md border p-4">
+              <p className="text-sm font-medium">Separação do estoque</p>
+              <p className="mb-2 text-xs text-muted-foreground">Solicitações atendidas integralmente pelo estoque — retire com o estoquista.</p>
+              <ul className="space-y-1 text-sm">
+                {stockOnly.map((p) => (
+                  <li key={p.group} className="flex flex-wrap items-center gap-2">
+                    <span className="font-medium">{p.title}</span>
+                    <span className="text-muted-foreground">{p.qty} unid.</span>
+                    <Badge variant="secondary">{MYIO_STATUS_LABELS[p.status] ?? p.status}</Badge>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+      <MyioOrdersTab userId={userId} canManage={canManageDevices} />
+    </div>
   );
 }
 

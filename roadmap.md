@@ -129,3 +129,4 @@
 - [x] Corrigir destaque indevido no perfil Restrito do Bruno Teles
 - [x] Destacar em lilás somente submenus alterados, sem colorir o bloco inteiro
 - [x] Filtrar a customização por nome e tornar Usuários e logs exclusivo do perfil Admin
+- [x] Realocar Solicitações de Dispositivos myio para abaixo de Minhas Solicitações
