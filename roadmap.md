@@ -140,3 +140,4 @@
 - [x] Abrir diretamente a tela específica ao selecionar Dispositivos myio ou Importação, sem botão intermediário.
 - [x] Exibir os formulários de Dispositivos myio e Importação integrados abaixo do tipo selecionado, sem pop-up.
 - [x] Separar visualmente os boxes de Reembolso e Contratação de RH da borda superior.
+- [ ] Substituir “Produto de reposição” pelas três classificações de cliente em Dispositivos myio.
