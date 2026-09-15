@@ -93,7 +93,7 @@ export function StockDestinationsTab() {
     <Collapsible open={expanded} onOpenChange={setExpanded} asChild>
     <Card>
       <CardHeader className="flex flex-row items-start justify-between gap-4">
-        <div><CardTitle>Destinos de Estoque</CardTitle><CardDescription>Os destinos ativos ficam disponíveis nas movimentações de dispositivos.</CardDescription></div>
+        <div><CardTitle>Destinos de Estoque</CardTitle>{expanded && <CardDescription>Os destinos ativos ficam disponíveis nas movimentações de dispositivos.</CardDescription>}</div>
         <div className="flex items-center gap-1"><CollapsibleContent><DestinationDialog
           title="Novo destino de estoque"
           description="Cadastre uma nova opção para a lista de destinos."

@@ -112,7 +112,7 @@ export function RequestTypesTab() {
     <Collapsible open={expanded} onOpenChange={setExpanded} asChild>
     <Card>
       <CardHeader className="flex flex-row items-start justify-between gap-4">
-        <div><CardTitle>Tipos de Solicitação</CardTitle><CardDescription>Crie tipos a partir de um modelo de formulário existente.</CardDescription></div>
+        <div><CardTitle>Tipos de Solicitação</CardTitle>{expanded && <CardDescription>Crie tipos a partir de um modelo de formulário existente.</CardDescription>}</div>
         <div className="flex items-center gap-1">
           <CollapsibleContent><CreateRequestTypeDialog open={createOpen} onOpenChange={setCreateOpen} saving={create.isPending} onSave={(name, modelCode) => create.mutateAsync({ name, modelCode })} /></CollapsibleContent>
           <CollapsibleTrigger asChild><Button size="icon" variant="ghost" aria-label={expanded ? "Recolher Tipos de Solicitação" : "Expandir Tipos de Solicitação"} title={expanded ? "Recolher" : "Expandir"}>{expanded ? <Minus className="h-4 w-4" /> : <Plus className="h-4 w-4" />}</Button></CollapsibleTrigger>

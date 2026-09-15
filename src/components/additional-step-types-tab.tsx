@@ -121,7 +121,7 @@ export function AdditionalStepTypesTab() {
       <Collapsible open={expanded} onOpenChange={setExpanded} asChild>
       <Card>
         <CardHeader className="flex flex-row items-start justify-between gap-4">
-          <div><CardTitle>Tipos de Etapa Adicional</CardTitle><CardDescription>Os tipos ativos ficam disponíveis nas Etapas Adicionais.</CardDescription></div>
+          <div><CardTitle>Tipos de Etapa Adicional</CardTitle>{expanded && <CardDescription>Os tipos ativos ficam disponíveis nas Etapas Adicionais.</CardDescription>}</div>
           <div className="flex items-center gap-1"><CollapsibleContent><Dialog open={createOpen} onOpenChange={(open) => { setCreateOpen(open); if (!open) setName(""); }}>
             <DialogTrigger asChild><Button size="icon" aria-label="Criar tipo de etapa adicional" title="Criar tipo"><Plus className="h-4 w-4" /></Button></DialogTrigger>
             <DialogContent>
