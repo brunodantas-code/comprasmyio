@@ -329,7 +329,7 @@ function useRemoveUnitFromBox() {
       await moveUnitTo(unit.id, hom.id, 1);
     },
     onSuccess: () => {
-      toast.success("Produto retirado da caixa — agora ele é unitário.");
+      toast.success("Dispositivo retirado da caixa — agora ele é unitário.");
       invalidate();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -400,7 +400,7 @@ function useAddUnitToBox() {
       }
     },
     onSuccess: () => {
-      toast.success("Produto adicionado à caixa.");
+      toast.success("Dispositivo adicionado à caixa.");
       invalidate();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -477,7 +477,7 @@ function UnitaryDropZone() {
       }`}
     >
       <PackageMinus className="h-4 w-4 shrink-0" />
-      Arraste um produto aqui para tirá-lo da caixa (ele vira unitário)
+      Arraste um dispositivo aqui para tirá-lo da caixa (ele vira unitário)
     </div>
   );
 }
@@ -546,7 +546,7 @@ function AddUnitToBoxDialog({
         return;
       }
       if (data.material_id !== materialId) {
-        setScanStatus({ type: "other", msg: "Esta caixa é de outro produto — escolha uma caixa deste material." });
+        setScanStatus({ type: "other", msg: "Esta caixa é de outro dispositivo — escolha uma caixa deste material." });
         return;
       }
       const count = data.homologation_units?.length ?? 0;
@@ -555,7 +555,7 @@ function AddUnitToBoxDialog({
         return;
       }
       setTarget(data.id);
-      setScanStatus({ type: "selected", msg: `Caixa selecionada — ${count}/${data.box_size} produtos.` });
+      setScanStatus({ type: "selected", msg: `Caixa selecionada — ${count}/${data.box_size} dispositivos.` });
     } catch (e) {
       toast.error((e as Error).message);
     } finally {
@@ -597,7 +597,7 @@ function AddUnitToBoxDialog({
         <DialogHeader>
           <DialogTitle>Adicionar à caixa — {materialName}</DialogTitle>
           <DialogDescription>
-            Escolha uma caixa incompleta deste produto ou crie uma caixa nova (de qualquer tipo) para este produto
+            Escolha uma caixa incompleta deste dispositivo ou crie uma caixa nova (de qualquer tipo) para este dispositivo
             unitário.
           </DialogDescription>
         </DialogHeader>
@@ -652,7 +652,7 @@ function AddUnitToBoxDialog({
                 <SelectItem value="new">Criar nova caixa</SelectItem>
                 {(boxes ?? []).map((b) => (
                   <SelectItem key={b.id} value={b.id}>
-                    Caixa de {b.box_size} — {b.homologation_units?.length ?? 0}/{b.box_size} produtos
+                    Caixa de {b.box_size} — {b.homologation_units?.length ?? 0}/{b.box_size} dispositivos
                     {b.box_qr ? ` · ${b.box_qr}` : ""}
                   </SelectItem>
                 ))}
@@ -660,7 +660,7 @@ function AddUnitToBoxDialog({
             </Select>
             {isLoading && <p className="text-xs text-muted-foreground">Buscando caixas incompletas...</p>}
             {!isLoading && !(boxes ?? []).length && (
-              <p className="text-xs text-muted-foreground">Nenhuma caixa incompleta deste produto — crie uma nova.</p>
+              <p className="text-xs text-muted-foreground">Nenhuma caixa incompleta deste dispositivo — crie uma nova.</p>
             )}
           </div>
 
@@ -795,10 +795,10 @@ export function HomologateDialog({
   const save = useMutation({
     mutationFn: async () => {
       const filled = units.map((u) => normalizeQrValue(u));
-      if (remaining <= 0) throw new Error("Todos os produtos deste item já foram homologados");
-      if (boxSize > remaining) throw new Error(`Restam apenas ${remaining} produto(s) para homologar`);
+      if (remaining <= 0) throw new Error("Todos os dispositivos deste item já foram homologados");
+      if (boxSize > remaining) throw new Error(`Restam apenas ${remaining} dispositivo(s) para homologar`);
       if (boxSize > 1 && !normalizeQrValue(boxQr)) throw new Error("Leia o QR Code da caixa");
-      if (filled.some((u) => !u)) throw new Error("Preencha o QR Code de todos os produtos unitários");
+      if (filled.some((u) => !u)) throw new Error("Preencha o QR Code de todos os dispositivos unitários");
       const uniq = new Set(filled);
       if (uniq.size !== filled.length) throw new Error("Existem QR Codes repetidos");
       if (!responsible) throw new Error("Selecione o responsável");
@@ -861,7 +861,7 @@ export function HomologateDialog({
         material_id: stockMaterialId,
         quantity: boxSize,
         type: "entrada",
-        reason: boxSize === 1 ? "Homologação — produto unitário" : `Homologação — caixa de ${boxSize}`,
+        reason: boxSize === 1 ? "Homologação — dispositivo unitário" : `Homologação — caixa de ${boxSize}`,
         created_by: userId,
       });
       if (stockErr) throw stockErr;
@@ -873,8 +873,8 @@ export function HomologateDialog({
       const remainingAfter = remaining - boxSize;
       toast.success(
         remainingAfter > 0
-          ? `Liberado! Restam ${remainingAfter} produto(s) — continue homologando nesta tela.`
-          : "Produtos homologados e adicionados ao estoque",
+          ? `Liberado! Restam ${remainingAfter} dispositivo(s) — continue homologando nesta tela.`
+          : "Dispositivos homologados e adicionados ao estoque",
       );
       qc.invalidateQueries({ queryKey: ["homologations"] });
       qc.invalidateQueries({ queryKey: ["box-qr-codes"] });
@@ -926,13 +926,13 @@ export function HomologateDialog({
                 <SelectContent>
                   {sizes.map((s) => (
                     <SelectItem key={s} value={String(s)}>
-                      {s === 1 ? "Unitário (1 produto)" : `Caixa de ${s}`}
+                      {s === 1 ? "Unitário (1 dispositivo)" : `Caixa de ${s}`}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            <Badge variant="outline">{boxSize} QR Code(s) de produto</Badge>
+            <Badge variant="outline">{boxSize} QR Code(s) de dispositivo</Badge>
           </div>
 
           {boxSize > 1 && (
@@ -961,7 +961,7 @@ export function HomologateDialog({
             {units.map((u, i) => (
               <QrField
                 key={i}
-                label={`${i + 1} - QR Code do produto unitário:`}
+                label={`${i + 1} - QR Code do dispositivo unitário:`}
                 value={u}
                 onChange={(v) => setUnits((prev) => prev.map((x, idx) => (idx === i ? v : x)))}
               />
@@ -988,12 +988,12 @@ export function HomologateDialog({
 
           {!!done.filter((h) => (h.homologation_units?.length ?? 0) > 0).length && (
             <div className="space-y-1 rounded border p-3 text-sm">
-              <p className="font-medium">Homologações anteriores deste produto</p>
+              <p className="font-medium">Homologações anteriores deste dispositivo</p>
               {done.filter((h) => (h.homologation_units?.length ?? 0) > 0).map((h) => (
                 <div key={h.id} className="flex items-center gap-2 text-muted-foreground">
                   <CheckCircle2 className="h-4 w-4 text-green-600" />
                   {new Date(h.created_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })} ·
-                  {h.box_size === 1 ? " unitário" : ` caixa de ${h.box_size}`} · {h.homologation_units?.length ?? 0} produto(s)
+                  {h.box_size === 1 ? " unitário" : ` caixa de ${h.box_size}`} · {h.homologation_units?.length ?? 0} dispositivo(s)
                 </div>
               ))}
             </div>
@@ -1093,7 +1093,7 @@ export function StockQrDialog({ stockName, trigger }: { stockName: string; trigg
         <DialogHeader>
           <DialogTitle>QR Codes — {stockName}</DialogTitle>
           <DialogDescription>
-            Todos os QR Codes homologados deste produto — unitários e os que estão dentro de caixas.
+            Todos os QR Codes homologados deste dispositivo — unitários e os que estão dentro de caixas.
           </DialogDescription>
         </DialogHeader>
 
@@ -1207,8 +1207,8 @@ export function BoxesCard() {
         <div>
           <CardTitle>Caixas</CardTitle>
           <CardDescription>
-            Cada caixa tem seu próprio QR Code. Os produtos dentro dela já entraram no estoque principal. Clique em uma
-            caixa para ver os produtos e seus QR Codes.
+            Cada caixa tem seu próprio QR Code. Os dispositivos dentro dela já entraram no estoque principal. Clique em uma
+            caixa para ver os dispositivos e seus QR Codes.
           </CardDescription>
         </div>
         <Input
@@ -1228,8 +1228,8 @@ export function BoxesCard() {
             <TableHeader>
               <TableRow>
                 <TableHead>Caixa</TableHead>
-                <TableHead>Produto</TableHead>
-                <TableHead className="text-right">Produtos</TableHead>
+                <TableHead>Dispositivo</TableHead>
+                <TableHead className="text-right">Dispositivos</TableHead>
                 <TableHead>QR Code da caixa</TableHead>
                 <TableHead>Homologada em</TableHead>
               </TableRow>
@@ -1278,7 +1278,7 @@ function BoxDetailsDialog({ box, trigger }: { box: BoxRow; trigger: React.ReactN
           <DialogTitle>
             Caixa de {box.box_size} — {box.materials?.name ?? ""}
           </DialogTitle>
-          <DialogDescription>QR Code da caixa e de cada produto dentro dela.</DialogDescription>
+          <DialogDescription>QR Code da caixa e de cada dispositivo dentro dela.</DialogDescription>
         </DialogHeader>
         <div className="flex flex-wrap items-start gap-4">
           <div className="flex flex-col items-center gap-2">
@@ -1295,7 +1295,7 @@ function BoxDetailsDialog({ box, trigger }: { box: BoxRow; trigger: React.ReactN
             )}
           </div>
           <div className="min-w-0 flex-1 space-y-2">
-            <p className="text-sm font-medium">Produtos na caixa ({units.length})</p>
+            <p className="text-sm font-medium">Dispositivos na caixa ({units.length})</p>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-5">
               {units.map((u) => (
                 <UnitQrCard
