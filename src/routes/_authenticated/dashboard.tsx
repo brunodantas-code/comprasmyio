@@ -2457,9 +2457,8 @@ function OrdersTable({
                   </div>
                 </div>
               </Row>
-              <Row label="Tipo">
-                <div className="font-medium">{requestTypeLabel(o, requestTypes)}</div>
-                <div className="mt-1 flex flex-wrap items-center gap-2">
+              <Row label="Itens da Solicitação">
+                <div className="flex flex-wrap items-center gap-2">
                   <FullTextPopover text={o.item_name ?? ""} />
                   {o.item_link ? (
                     <a href={o.item_link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
@@ -2469,6 +2468,9 @@ function OrdersTable({
                     <span className="text-xs text-muted-foreground">sem link</span>
                   )}
                 </div>
+              </Row>
+              <Row label="Tipo">
+                <div className="font-medium">{requestTypeLabel(o, requestTypes)}</div>
               </Row>
               <Row label="Alocação">{o.allocation_type === "interna" ? "Interna" : o.for_stock ? "Estoque" : o.project_id ? projectName(o.project_id) : "—"}</Row>
               {showRequester && <Row label="Solicitante">{requesterName?.(o.requester_id)}</Row>}
@@ -2523,7 +2525,8 @@ function OrdersTable({
         <TableHeader className="[&_tr]:border-b">
           <TableRow className="border-t bg-primary/15 hover:bg-primary/15">
             <TableHead className="w-[105px] text-center font-bold">Approval</TableHead>
-            <TableHead className="w-[140px] text-center font-bold">Tipo</TableHead>
+            <TableHead className="w-[135px] text-center font-bold">Itens da Solicitação</TableHead>
+            <TableHead className="w-[105px] text-center font-bold">Tipo</TableHead>
             <TableHead className="w-[90px] text-center font-bold">Alocação</TableHead>
             {showRequester && <TableHead className="w-[105px] text-center font-bold">Solicitante</TableHead>}
             <TableHead className="w-[45px] text-center font-bold">Qtd</TableHead>
@@ -2537,7 +2540,8 @@ function OrdersTable({
           {headerFilters && (
             <TableRow className="bg-primary/5 hover:bg-primary/5">
               <TableHead className="py-1">{filterInput(fApproval, setFApproval, "Nº")}</TableHead>
-              <TableHead className="py-1">{filterInput(fItem, setFItem, "Tipo")}</TableHead>
+              <TableHead className="py-1">{filterInput(fItem, setFItem, "Item")}</TableHead>
+              <TableHead className="py-1" />
               <TableHead className="py-1">{filterInput(fAloc, setFAloc, "Alocação")}</TableHead>
               {showRequester && <TableHead className="py-1">{filterInput(fReq, setFReq, "Solicitante")}</TableHead>}
               <TableHead className="py-1" />
@@ -2586,8 +2590,7 @@ function OrdersTable({
                 </div>
               </TableCell>
               <TableCell>
-                <div className="line-clamp-4 font-medium break-words">{requestTypeLabel(o, requestTypes)}</div>
-                <div className="mt-1 flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <FullTextPopover text={o.item_name ?? ""} />
                   {o.item_link ? (
                     <a href={o.item_link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
@@ -2597,6 +2600,9 @@ function OrdersTable({
                     <span className="text-xs text-muted-foreground">sem link</span>
                   )}
                 </div>
+              </TableCell>
+              <TableCell className="text-center">
+                <div className="line-clamp-4 font-medium break-words">{requestTypeLabel(o, requestTypes)}</div>
               </TableCell>
               <TableCell className="text-sm break-words text-center">{o.allocation_type === "interna" ? "Interna" : o.for_stock ? "Estoque" : o.project_id ? projectName(o.project_id) : "—"}</TableCell>
               {showRequester && <TableCell className="text-sm break-words text-center">{requesterName?.(o.requester_id)}</TableCell>}
