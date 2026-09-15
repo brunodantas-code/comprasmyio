@@ -2058,7 +2058,7 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
 
 function EstoqueMyioSection({ userId, canDelete, canAccessSection = () => true }: { userId: string; canDelete?: boolean; canAccessSection?: (permission: StockPermissionKey) => boolean }) {
   const tabs = [
-    { value: "ordens", label: "Solicitações de Dispositivos myio", permission: "armazem_estoque_myio" as const },
+    { value: "ordens", label: "Solicitações", permission: "armazem_estoque_myio" as const },
     { value: "dispositivos", label: "Dispositivos myio", permission: "armazem_estoque_myio" as const },
     { value: "insumos", label: "Insumos de Instalação", permission: "armazem_estoque_myio" as const },
     { value: "expedicao", label: "Expedição", permission: "armazem_expedicao" as const },
