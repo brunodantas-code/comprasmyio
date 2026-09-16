@@ -40,6 +40,8 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-dropdown-highlight: var(--dropdown-highlight);
+  --color-dropdown-highlight-foreground: var(--dropdown-highlight-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
@@ -84,6 +86,8 @@
   --muted-foreground: oklch(0.48 0.04 300);
   --accent: #673ab6;
   --accent-foreground: oklch(0.99 0 0);
+  --dropdown-highlight: color-mix(in oklab, var(--primary) 24%, var(--popover));
+  --dropdown-highlight-foreground: var(--foreground);
   --destructive: oklch(0.58 0.22 27);
   --destructive-foreground: oklch(0.99 0 0);
   --border: oklch(0.90 0.015 300);
@@ -119,6 +123,8 @@
   --muted-foreground: oklch(0.72 0.04 300);
   --accent: #673ab6;
   --accent-foreground: oklch(0.99 0 0);
+  --dropdown-highlight: color-mix(in oklab, var(--primary) 28%, var(--popover));
+  --dropdown-highlight-foreground: var(--foreground);
   --destructive: oklch(0.704 0.191 22.216);
   --destructive-foreground: oklch(0.984 0.003 247.858);
   --border: oklch(1 0 0 / 12%);
