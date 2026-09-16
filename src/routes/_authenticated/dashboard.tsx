@@ -39,6 +39,7 @@ import { AdditionalStepTypesTab } from "@/components/additional-step-types-tab";
 import { RequestTypesTab, requestTypeModel, requestTypeName, useRequestTypes, type RequestTypeRecord } from "@/components/request-types-tab";
 import { StockDestinationsTab } from "@/components/stock-destinations-tab";
 import { DamageReasonsTab } from "@/components/damage-reasons-tab";
+import { MaterialStockTypesTab, useMaterialStockTypes } from "@/components/material-stock-types-tab";
 import { AccessProfilesTab } from "@/components/access-profiles-tab";
 import { AccessProfileDefinitionsTab, useAccessProfileDefinitions } from "@/components/access-profile-definitions-tab";
 import { ImportBatchesSection, NewImportDialog } from "@/components/import-batches";
@@ -533,6 +534,7 @@ function Dashboard() {
                     <AdditionalStepTypesTab />
                     <StockDestinationsTab />
                     <DamageReasonsTab />
+                    <MaterialStockTypesTab />
                   </div>
                 </TabsContent>}
               </Tabs>
@@ -657,14 +659,7 @@ function useProfilesList() {
 
 /* ---------- Materials library ---------- */
 
-type NewItemDest = "fabrica" | "almoxarifado" | "terceiros" | "ferramentas";
-
-const NEW_ITEM_DEST_LABELS: Record<NewItemDest, string> = {
-  fabrica: "Estoque Fábrica (Insumos de Fabricação)",
-  terceiros: "Estoque Myio (Insumos de Instalação)",
-  almoxarifado: "Estoque Almoxarifado",
-  ferramentas: "Ferramentas e Ativos",
-};
+type NewItemDest = string;
 
 async function createNewItemRecord(
   dest: NewItemDest,
@@ -1162,6 +1157,7 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
   const { data: profiles } = useProfilesList();
   const { data: jobTitles } = useJobTitles();
   const { data: purchasables } = usePurchasableItems();
+  const { data: materialStockTypes } = useMaterialStockTypes();
   const [dupOpen, setDupOpen] = useState(false);
   const [dupCandidates, setDupCandidates] = useState<PurchasableItem[]>([]);
   const [dismissedText, setDismissedText] = useState("");
@@ -1231,7 +1227,9 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
       };
       if (isNewItem && requestModel === "materiais") {
         if (!newItemDest) throw new Error("Selecione o estoque de destino do item novo.");
-        ids = await createNewItemRecord(newItemDest, values.item_name, values.item_link ?? null, userId);
+        const selectedStockType = materialStockTypes?.find((type) => type.code === newItemDest && type.active);
+        if (!selectedStockType) throw new Error("O tipo de estoque selecionado não está mais disponível.");
+        ids = await createNewItemRecord(selectedStockType.destination_type, values.item_name, values.item_link ?? null, userId);
       }
 
       const requestGroupId = crypto.randomUUID();
@@ -1949,11 +1947,11 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
                   {requestModel === "materiais" && (
                   <div className="space-y-2 pt-1">
                     <Label>Cadastrar em qual estoque?</Label>
-                    <Select value={newItemDest} onValueChange={(v) => setNewItemDest(v as NewItemDest)}>
+                    <Select value={newItemDest} onValueChange={setNewItemDest}>
                       <SelectTrigger><SelectValue placeholder="Selecione o estoque de destino" /></SelectTrigger>
                       <SelectContent>
-                        {(Object.keys(NEW_ITEM_DEST_LABELS) as NewItemDest[]).map((d) => (
-                          <SelectItem key={d} value={d}>{NEW_ITEM_DEST_LABELS[d]}</SelectItem>
+                        {(materialStockTypes ?? []).filter((type) => type.active).map((type) => (
+                          <SelectItem key={type.code} value={type.code}>{type.name}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>

@@ -28,6 +28,8 @@ type Ticket = {
   expected_result: string;
   status: TicketStatus;
   reporter_id: string;
+  menu_name: string | null;
+  submenu_name: string | null;
   assignee_id: string | null;
   admin_notes: string | null;
   created_at: string;
@@ -102,6 +104,7 @@ function DevelopmentPage() {
       && (priorityFilter === "todos" || ticket.priority === priorityFilter)
       && (statusFilter === "todos" || ticket.status === statusFilter);
   }), [appFilter, data?.tickets, priorityFilter, search, statusFilter, typeFilter]);
+  const profileNames = useMemo(() => new Map((data?.profiles ?? []).map((profile) => [profile.id, profile.full_name || profile.email || "Usuário"])), [data?.profiles]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -135,10 +138,11 @@ function DevelopmentPage() {
             </div>
             {isLoading ? <p className="py-8 text-center text-sm text-muted-foreground">Carregando tickets...</p> : filteredTickets.length ? (
               <Table>
-                <TableHeader className="bg-primary/20"><TableRow><TableHead>Nº</TableHead><TableHead>Aplicativo</TableHead><TableHead>Tipo</TableHead><TableHead>Título</TableHead><TableHead>Prioridade</TableHead><TableHead>Situação</TableHead><TableHead>Data</TableHead></TableRow></TableHeader>
+                 <TableHeader className="bg-primary/20"><TableRow><TableHead>Nº</TableHead><TableHead>Solicitante</TableHead><TableHead>Aplicativo</TableHead><TableHead>Tipo</TableHead><TableHead>Título</TableHead><TableHead>Prioridade</TableHead><TableHead>Situação</TableHead><TableHead>Data</TableHead></TableRow></TableHeader>
                 <TableBody>{filteredTickets.map((ticket) => (
                   <TableRow key={ticket.id} className="cursor-pointer" onClick={() => setSelectedTicket(ticket)}>
                     <TableCell className="font-semibold">#{ticket.ticket_number}</TableCell>
+                     <TableCell>{profileNames.get(ticket.reporter_id) ?? "Usuário"}</TableCell>
                     <TableCell>{APP_NAMES[ticket.app_key] ?? ticket.app_key}</TableCell>
                     <TableCell><Badge variant="outline">{ticket.ticket_type === "bug" ? "Bug" : "Melhoria"}</Badge></TableCell>
                     <TableCell className="max-w-xs truncate font-medium">{ticket.title}</TableCell>
@@ -171,6 +175,7 @@ function NewTicketDialog({ open, onOpenChange, userId, onCreated }: { open: bool
         reporter_id: userId,
         app_key: String(values.get("app_key")), ticket_type: String(values.get("ticket_type")),
         title: String(values.get("title")).trim(), description: String(values.get("description")).trim(),
+        menu_name: String(values.get("menu_name")).trim() || null, submenu_name: String(values.get("submenu_name")).trim() || null,
         priority: String(values.get("priority")), urgency: String(values.get("urgency")),
         expected_result: String(values.get("expected_result")).trim(),
       };
@@ -198,6 +203,8 @@ function NewTicketDialog({ open, onOpenChange, userId, onCreated }: { open: bool
           <FormSelect name="ticket_type" label="Tipo" options={[{ value: "melhoria", label: "Melhoria" }, { value: "bug", label: "Bug" }]} />
           <div className="sm:col-span-2"><Label htmlFor="ticket-title">Título</Label><Input id="ticket-title" name="title" minLength={3} maxLength={120} required /></div>
           <div className="sm:col-span-2"><Label htmlFor="ticket-description">Descrição</Label><Textarea id="ticket-description" name="description" minLength={10} maxLength={4000} className="min-h-28" required /></div>
+           <div><Label htmlFor="ticket-menu">Menu (opcional)</Label><Input id="ticket-menu" name="menu_name" maxLength={100} placeholder="Ex.: Cadastro" /></div>
+           <div><Label htmlFor="ticket-submenu">Submenu (opcional)</Label><Input id="ticket-submenu" name="submenu_name" maxLength={100} placeholder="Ex.: Diversos" /></div>
           <FormSelect name="priority" label="Prioridade" options={Object.entries(PRIORITY_NAMES).map(([value, label]) => ({ value, label }))} />
           <FormSelect name="urgency" label="Urgência" options={[{ value: "normal", label: "Normal" }, { value: "urgente", label: "Urgente" }]} />
           <div className="sm:col-span-2"><Label htmlFor="ticket-result">Resultado esperado</Label><Textarea id="ticket-result" name="expected_result" minLength={5} maxLength={2000} required /></div>
@@ -253,7 +260,8 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
   return <Dialog open={Boolean(ticket)} onOpenChange={(open) => { if (!open) onClose(); }}>
     <DialogContent className="max-w-2xl">
       {ticket ? <div className="space-y-5">
-        <DialogHeader><DialogTitle>#{ticket.ticket_number} — {ticket.title}</DialogTitle><DialogDescription>{APP_NAMES[ticket.app_key]} · {ticket.ticket_type === "bug" ? "Bug" : "Melhoria"} · {new Date(ticket.created_at).toLocaleString("pt-BR")}</DialogDescription></DialogHeader>
+        <DialogHeader><DialogTitle>#{ticket.ticket_number} — {ticket.title}</DialogTitle><DialogDescription>{APP_NAMES[ticket.app_key]} · {ticket.ticket_type === "bug" ? "Bug" : "Melhoria"} · Solicitante: {data?.profiles.find((profile) => profile.id === ticket.reporter_id)?.full_name || data?.profiles.find((profile) => profile.id === ticket.reporter_id)?.email || "Usuário"} · {new Date(ticket.created_at).toLocaleString("pt-BR")}</DialogDescription></DialogHeader>
+        {ticket.menu_name || ticket.submenu_name ? <div className="flex flex-wrap gap-2">{ticket.menu_name ? <Badge variant="outline">Menu: {ticket.menu_name}</Badge> : null}{ticket.submenu_name ? <Badge variant="outline">Submenu: {ticket.submenu_name}</Badge> : null}</div> : null}
         <div className="grid gap-4 sm:grid-cols-2"><div><p className="text-xs font-semibold text-muted-foreground">Descrição</p><p className="mt-1 whitespace-pre-wrap text-sm">{ticket.description}</p></div><div><p className="text-xs font-semibold text-muted-foreground">Resultado esperado</p><p className="mt-1 whitespace-pre-wrap text-sm">{ticket.expected_result}</p></div></div>
         <div className="flex flex-wrap gap-2"><Badge>{STATUS_NAMES[ticket.status]}</Badge><Badge variant="outline">Prioridade {PRIORITY_NAMES[ticket.priority]}</Badge>{ticket.urgency === "urgente" ? <Badge variant="destructive">Urgente</Badge> : null}</div>
         {details.data?.attachments.length ? <div><p className="mb-2 flex items-center gap-2 text-sm font-semibold"><Paperclip className="h-4 w-4" />Anexos</p>{details.data.attachments.map((attachment) => <Button key={attachment.id} variant="outline" size="sm" onClick={() => download(attachment.storage_path, attachment.file_name)}><Download className="h-4 w-4" />{attachment.file_name}</Button>)}</div> : null}

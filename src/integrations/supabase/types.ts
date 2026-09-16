@@ -1212,9 +1212,11 @@ export type Database = {
           description: string
           expected_result: string
           id: string
+          menu_name: string | null
           priority: string
           reporter_id: string
           status: string
+          submenu_name: string | null
           ticket_number: number
           ticket_type: string
           title: string
@@ -1229,9 +1231,11 @@ export type Database = {
           description: string
           expected_result: string
           id?: string
+          menu_name?: string | null
           priority: string
           reporter_id: string
           status?: string
+          submenu_name?: string | null
           ticket_number?: never
           ticket_type: string
           title: string
@@ -1246,9 +1250,11 @@ export type Database = {
           description?: string
           expected_result?: string
           id?: string
+          menu_name?: string | null
           priority?: string
           reporter_id?: string
           status?: string
+          submenu_name?: string | null
           ticket_number?: never
           ticket_type?: string
           title?: string
@@ -1722,6 +1728,39 @@ export type Database = {
           id?: string
           name?: string
           short_name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      material_stock_types: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          destination_type: string
+          is_system: boolean
+          name: string
+          position: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          destination_type: string
+          is_system?: boolean
+          name: string
+          position?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          destination_type?: string
+          is_system?: boolean
+          name?: string
+          position?: number
           updated_at?: string
         }
         Relationships: []
