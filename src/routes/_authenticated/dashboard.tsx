@@ -49,6 +49,10 @@ import { LinkedRecordDeletionDialog } from "@/components/linked-record-deletion-
 
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    section: typeof search.section === "string" ? search.section : undefined,
+    subsection: typeof search.subsection === "string" ? search.subsection : undefined,
+  }),
   beforeLoad: async ({ context }) => {
     const { data } = await supabase.from("user_app_access").select("app_key").eq("user_id", context.user.id).eq("app_key", "supply").maybeSingle();
     if (!data) throw redirect({ to: "/portal" });
@@ -401,6 +405,7 @@ function DeliveredFilter({
 function Dashboard() {
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const search = Route.useSearch();
   const { data: me, isLoading: meLoading } = useCurrentUser();
 
   async function handleSignOut() {
@@ -471,7 +476,7 @@ function Dashboard() {
       </header>
 
       <main className="mx-auto max-w-7xl px-3 py-5 sm:px-6 sm:py-8">
-        <Tabs defaultValue={defaultTab}>
+        <Tabs defaultValue={search.section ?? defaultTab}>
           <div className="sticky top-[60px] z-40 -mx-3 mb-6 bg-background px-3 py-2 sm:top-[73px] sm:-mx-6 sm:px-6">
           <TabsList>
             {canSeeRequests && <TabsTrigger value="pedidos"><ClipboardList className="mr-2 h-4 w-4" />Solicitações</TabsTrigger>}
@@ -542,7 +547,7 @@ function Dashboard() {
           )}
           {canSeeAdministration && (
             <TabsContent value="admin">
-              <Tabs defaultValue={administrationTabs[0]?.value}>
+              <Tabs defaultValue={search.subsection ?? administrationTabs[0]?.value}>
                 <TabsList className="mb-4">
                   {me.canAccess("usuarios_lista") && <TabsTrigger value="usuarios"><Users className="mr-2 h-4 w-4" />Usuários</TabsTrigger>}
                   {me.canAccess("usuarios_acesso_restrito") && <TabsTrigger value="acesso-restrito"><ShieldCheck className="mr-2 h-4 w-4" />Perfis de acesso</TabsTrigger>}
@@ -3722,6 +3727,7 @@ function UsersAdmin() {
       qc.invalidateQueries({ queryKey: ["user-deletion-requests"] });
       qc.invalidateQueries({ queryKey: ["profiles-list"] });
       qc.invalidateQueries({ queryKey: ["profiles-map"] });
+      qc.invalidateQueries({ queryKey: ["pending-actions"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });

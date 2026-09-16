@@ -242,7 +242,14 @@
 - [x] Mover os filtros de Minhas solicitações para cabeçalhos verdes, no padrão dos Approvals
 
 ## Fluxo de atendimento do Code
-- [ ] Restringir o responsável do ticket aos Admins com acesso ao Code
-- [ ] Alterar o fluxo para Em aberto, Em atendimento, Atendido e Concluído
-- [ ] Reservar a conclusão ao solicitante após o ticket ser marcado como Atendido
-- [ ] Exibir no ícone do Code a quantidade de tickets atendidos aguardando aceite
+- [x] Restringir o responsável do ticket aos Admins com acesso ao Code
+- [x] Alterar o fluxo para Em aberto, Em atendimento, Atendido e Concluído
+- [x] Reservar a conclusão ao solicitante após o ticket ser marcado como Atendido
+- [x] Exibir no ícone do Code a quantidade de tickets atendidos aguardando aceite
+
+## Central de pendências da Plataforma ERP
+- [x] Mapear todas as ações pendentes por usuário em cada aplicativo
+- [x] Exibir contadores nos ícones dos aplicativos com pendências
+- [x] Criar painel consolidado com natureza, quantidade e link para o menu correspondente
+- [x] Incluir Approvals “Pendentes comigo”, aceite de tickets do Code e aprovações de exclusão de Admin
+- [x] Validar atualização dos contadores após concluir cada ação

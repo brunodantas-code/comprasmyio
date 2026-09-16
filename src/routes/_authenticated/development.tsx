@@ -16,7 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { APP_NAVIGATION_OPTIONS } from "@/lib/app-navigation-options";
 
-type TicketStatus = "aberto" | "em_andamento" | "concluido" | "cancelado";
+type TicketStatus = "aberto" | "em_atendimento" | "atendido" | "concluido";
 type Ticket = {
   id: string;
   ticket_number: number;
@@ -46,10 +46,15 @@ const APP_NAMES: Record<string, string> = {
   development: "Code",
 };
 const STATUS_NAMES: Record<TicketStatus, string> = {
-  aberto: "Aberto",
-  em_andamento: "Em andamento",
+  aberto: "Em aberto",
+  em_atendimento: "Em atendimento",
+  atendido: "Atendido",
   concluido: "Concluído",
-  cancelado: "Cancelado",
+};
+const ADMIN_STATUS_NAMES: Record<Exclude<TicketStatus, "concluido">, string> = {
+  aberto: "Em aberto",
+  em_atendimento: "Em atendimento",
+  atendido: "Atendido",
 };
 const PRIORITY_NAMES = { baixa: "Baixa", media: "Média", alta: "Alta", critica: "Crítica" } as const;
 
@@ -87,13 +92,18 @@ function DevelopmentPage() {
       const { data: authData, error: authError } = await supabase.auth.getUser();
       if (authError || !authData.user) throw authError ?? new Error("Sessão não encontrada");
       const userId = authData.user.id;
-      const [{ data: tickets, error: ticketsError }, { data: admin }, { data: profiles }] = await Promise.all([
+      const [{ data: tickets, error: ticketsError }, { data: admin }, { data: profiles }, { data: erpAdmins }, { data: codeAccesses }] = await Promise.all([
         supabase.from("development_tickets").select("*").order("created_at", { ascending: false }),
         supabase.from("erp_admins").select("user_id").eq("user_id", userId).maybeSingle(),
         supabase.from("profiles").select("id, full_name, email").is("deleted_at", null).order("full_name"),
+        supabase.from("erp_admins").select("user_id"),
+        supabase.from("user_app_access").select("user_id").eq("app_key", "development"),
       ]);
       if (ticketsError) throw ticketsError;
-      return { tickets: (tickets ?? []) as Ticket[], isAdmin: Boolean(admin), profiles: profiles ?? [], userId };
+      const codeAccessIds = new Set((codeAccesses ?? []).map((access) => access.user_id));
+      const eligibleAdminIds = new Set((erpAdmins ?? []).map((entry) => entry.user_id).filter((id) => codeAccessIds.has(id)));
+      const codeAdmins = (profiles ?? []).filter((profile) => eligibleAdminIds.has(profile.id));
+      return { tickets: (tickets ?? []) as Ticket[], isAdmin: Boolean(admin) && codeAccessIds.has(userId), profiles: profiles ?? [], codeAdmins, userId };
     },
   });
 
@@ -162,13 +172,17 @@ function DevelopmentPage() {
           </CardContent>
         </Card>
       </main>
-      <TicketDetails ticket={selectedTicket} onClose={() => setSelectedTicket(null)} data={data} onUpdated={() => queryClient.invalidateQueries({ queryKey: ["development-tickets"] })} />
+      <TicketDetails ticket={selectedTicket} onClose={() => setSelectedTicket(null)} data={data} onUpdated={() => {
+        queryClient.invalidateQueries({ queryKey: ["development-tickets"] });
+        queryClient.invalidateQueries({ queryKey: ["my-erp-access"] });
+        queryClient.invalidateQueries({ queryKey: ["pending-actions"] });
+      }} />
     </div>
   );
 }
 
-function FilterSelect({ value, onChange, placeholder, options }: { value: string; onChange: (value: string) => void; placeholder: string; options: { value: string; label: string }[] }) {
-  return <Select value={value} onValueChange={onChange}><SelectTrigger><SelectValue placeholder={placeholder} /></SelectTrigger><SelectContent><SelectItem value="todos">Todos</SelectItem>{options.map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}</SelectContent></Select>;
+function FilterSelect({ value, onChange, placeholder, options, firstOption = { value: "todos", label: "Todos" } }: { value: string; onChange: (value: string) => void; placeholder: string; options: { value: string; label: string }[]; firstOption?: { value: string; label: string } | null }) {
+  return <Select value={value} onValueChange={onChange}><SelectTrigger><SelectValue placeholder={placeholder} /></SelectTrigger><SelectContent>{firstOption ? <SelectItem value={firstOption.value}>{firstOption.label}</SelectItem> : null}{options.map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}</SelectContent></Select>;
 }
 
 function HeaderFilterSelect({ value, onChange, label, options }: { value: string; onChange: (value: string) => void; label: string; options: { value: string; label: string }[] }) {
@@ -239,7 +253,14 @@ function OptionalFormSelect({ label, value, onChange, placeholder, disabled, opt
   return <div><Label>{label}</Label><Select value={value} onValueChange={onChange} disabled={disabled}><SelectTrigger><SelectValue placeholder={placeholder} /></SelectTrigger><SelectContent><SelectItem value="none">Não informar</SelectItem>{options.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent></Select></div>;
 }
 
-function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | null; onClose: () => void; data?: { profiles: { id: string; full_name: string | null; email: string | null }[]; isAdmin: boolean }; onUpdated: () => void }) {
+type TicketPageData = {
+  profiles: { id: string; full_name: string | null; email: string | null }[];
+  codeAdmins: { id: string; full_name: string | null; email: string | null }[];
+  isAdmin: boolean;
+  userId: string;
+};
+
+function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | null; onClose: () => void; data?: TicketPageData; onUpdated: () => void }) {
   const [status, setStatus] = useState<TicketStatus>("aberto");
   const [assignee, setAssignee] = useState("none");
   const [notes, setNotes] = useState("");
@@ -271,6 +292,15 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
     onSuccess: () => { toast.success("Ticket atualizado"); onClose(); onUpdated(); },
     onError: (error: Error) => toast.error(error.message),
   });
+  const conclude = useMutation({
+    mutationFn: async () => {
+      if (!ticket || ticket.status !== "atendido" || ticket.reporter_id !== data?.userId) throw new Error("Este ticket não está disponível para conclusão");
+      const { error } = await supabase.from("development_tickets").update({ status: "concluido" }).eq("id", ticket.id);
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success("Ticket concluído"); onClose(); onUpdated(); },
+    onError: (error: Error) => toast.error(error.message),
+  });
   async function download(path: string, name: string) {
     const { data: signed, error } = await supabase.storage.from("development-ticket-attachments").createSignedUrl(path, 60);
     if (error) return toast.error(error.message);
@@ -284,7 +314,8 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
         <div className="grid gap-4 sm:grid-cols-2"><div><p className="text-xs font-semibold text-muted-foreground">Descrição</p><p className="mt-1 whitespace-pre-wrap text-sm">{ticket.description}</p></div><div><p className="text-xs font-semibold text-muted-foreground">Resultado esperado</p><p className="mt-1 whitespace-pre-wrap text-sm">{ticket.expected_result}</p></div></div>
         <div className="flex flex-wrap gap-2"><Badge>{STATUS_NAMES[ticket.status]}</Badge><Badge variant="outline">Prioridade {PRIORITY_NAMES[ticket.priority]}</Badge>{ticket.urgency === "urgente" ? <Badge variant="destructive">Urgente</Badge> : null}</div>
         {details.data?.attachments.length ? <div><p className="mb-2 flex items-center gap-2 text-sm font-semibold"><Paperclip className="h-4 w-4" />Anexos</p>{details.data.attachments.map((attachment) => <Button key={attachment.id} variant="outline" size="sm" onClick={() => download(attachment.storage_path, attachment.file_name)}><Download className="h-4 w-4" />{attachment.file_name}</Button>)}</div> : null}
-        {data?.isAdmin ? <div className="space-y-3 border-t pt-4"><h3 className="font-semibold">Gestão do ticket</h3><div className="grid gap-3 sm:grid-cols-2"><FilterSelect value={status} onChange={(value) => setStatus(value as TicketStatus)} placeholder="Situação" options={Object.entries(STATUS_NAMES).map(([value, label]) => ({ value, label }))} /><FilterSelect value={assignee} onChange={setAssignee} placeholder="Responsável" options={(data.profiles ?? []).map((profile) => ({ value: profile.id, label: profile.full_name || profile.email || "Usuário" }))} /></div><div><Label htmlFor="admin-notes">Observações</Label><Textarea id="admin-notes" value={notes} onChange={(event) => setNotes(event.target.value)} maxLength={4000} /></div><Button onClick={() => update.mutate()} disabled={update.isPending}>Salvar andamento</Button></div> : ticket.admin_notes ? <div><p className="text-sm font-semibold">Observações</p><p className="mt-1 whitespace-pre-wrap text-sm">{ticket.admin_notes}</p></div> : null}
+        {data?.isAdmin && ticket.status !== "concluido" ? <div className="space-y-3 border-t pt-4"><h3 className="font-semibold">Gestão do ticket</h3><div className="grid gap-3 sm:grid-cols-2"><div><Label>Situação</Label><FilterSelect value={status} onChange={(value) => setStatus(value as TicketStatus)} placeholder="Situação" options={Object.entries(ADMIN_STATUS_NAMES).map(([value, label]) => ({ value, label }))} firstOption={null} /></div><div><Label>Responsável pela execução</Label><FilterSelect value={assignee} onChange={setAssignee} placeholder="Responsável pela execução" options={(data.codeAdmins ?? []).map((profile) => ({ value: profile.id, label: profile.full_name || profile.email || "Usuário" }))} firstOption={{ value: "none", label: "Sem responsável" }} /></div></div><div><Label htmlFor="admin-notes">Observações</Label><Textarea id="admin-notes" value={notes} onChange={(event) => setNotes(event.target.value)} maxLength={4000} /></div><Button onClick={() => update.mutate()} disabled={update.isPending}>Salvar andamento</Button></div> : ticket.admin_notes ? <div><p className="text-sm font-semibold">Observações</p><p className="mt-1 whitespace-pre-wrap text-sm">{ticket.admin_notes}</p></div> : null}
+        {ticket.status === "atendido" && ticket.reporter_id === data?.userId ? <div className="space-y-2 border-t pt-4"><p className="text-sm text-muted-foreground">Confirme se a correção ou melhoria foi entregue conforme esperado.</p><Button onClick={() => conclude.mutate()} disabled={conclude.isPending}>{conclude.isPending ? "Concluindo..." : "Marcar como concluído"}</Button></div> : null}
         {details.data?.logs.length ? <div className="border-t pt-4"><p className="mb-2 flex items-center gap-2 text-sm font-semibold"><History className="h-4 w-4" />Histórico</p><div className="space-y-2">{details.data.logs.map((log) => <div key={log.id} className="rounded-md bg-muted p-2 text-xs">{log.previous_status !== log.new_status ? `${STATUS_NAMES[log.previous_status as TicketStatus] ?? "—"} → ${STATUS_NAMES[log.new_status as TicketStatus] ?? "—"}` : "Responsável ou observação atualizados"}<span className="ml-2 text-muted-foreground">{new Date(log.created_at).toLocaleString("pt-BR")}</span></div>)}</div></div> : null}
       </div> : null}
     </DialogContent>
