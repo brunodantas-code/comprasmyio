@@ -89,7 +89,7 @@ function PortalPage() {
             {data.isErpAdmin ? (
               <TabsList className="!grid w-full grid-cols-2 sm:w-[22rem]">
                 <TabsTrigger value="apps" className="w-full min-w-0 px-2"><Boxes className="mr-2 h-4 w-4 shrink-0" />Aplicativos</TabsTrigger>
-                <TabsTrigger value="users" className="w-full min-w-0 px-2"><Settings2 className="mr-2 h-4 w-4 shrink-0" />Usuários e aplicativos</TabsTrigger>
+                <TabsTrigger value="users" className="w-full min-w-0 px-2"><Settings2 className="mr-2 h-4 w-4 shrink-0" />Acessos</TabsTrigger>
               </TabsList>
             ) : null}
           </div>
