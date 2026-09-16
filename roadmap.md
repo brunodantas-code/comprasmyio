@@ -263,3 +263,5 @@
 - [x] Criar painel consolidado com natureza, quantidade e link para o menu correspondente
 - [x] Incluir Approvals “Pendentes comigo”, aceite de tickets do Code e aprovações de exclusão de Admin
 - [x] Validar atualização dos contadores após concluir cada ação
+
+- [ ] Corrigir permissões críticas de centros de custo e demandas de compra/produção sem interromper os fluxos autorizados
