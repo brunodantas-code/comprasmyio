@@ -232,4 +232,4 @@
 - [x] Incluir Menu e Submenu opcionais na abertura e nos detalhes dos tickets do Code.
 - [x] Criar Tipos de Estoque em Cadastro > Diversos e utilizar a lista atual no formulário de Materiais.
 
-- [ ] Usar nas páginas CRM e Legal os mesmos ícones exibidos no portal ERP
+- [x] Usar nas páginas CRM e Legal os mesmos ícones exibidos no portal ERP

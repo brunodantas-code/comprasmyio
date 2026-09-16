@@ -1,5 +1,5 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
-import { ArrowLeft, Scale } from "lucide-react";
+import { ArrowLeft, FileSignature } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -34,7 +34,7 @@ function LegalPage() {
       </header>
       <main className="mx-auto flex min-h-[calc(100vh-73px)] max-w-3xl items-center justify-center px-4 py-12 text-center sm:px-6">
         <div>
-          <span className="mx-auto flex h-20 w-20 items-center justify-center text-foreground"><Scale className="h-16 w-16 stroke-[1.5]" /></span>
+          <span className="mx-auto flex h-20 w-20 items-center justify-center text-foreground"><FileSignature className="h-16 w-16 stroke-[1.8]" /></span>
           <Badge variant="outline" className="mt-6">Em breve</Badge>
           <h1 className="mt-4 text-4xl font-extrabold">myio Legal</h1>
           <p className="mx-auto mt-3 max-w-md text-muted-foreground">Este aplicativo está sendo desenvolvido em paralelo e estará disponível aqui.</p>
