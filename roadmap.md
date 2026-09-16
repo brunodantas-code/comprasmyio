@@ -1,6 +1,8 @@
 # Roadmap
 
 ## Tarefas
+- [x] Aplicar tags de saída verde-claro e filtros no cabeçalho em Insumos de Instalação
+- [x] Padronizar tags de saída em verde-claro e incluir filtros no cabeçalho das movimentações de estoque
 - [x] Alinhar a exclusão à esquerda do Approval no desktop e mobile e substituir a lixeira por X
 - [x] Excluir o filtro de possibilidades de entrega em Todos os approvals
 - [x] Mover os filtros de “Pendentes comigo” e “Meus em aprovação” para cabeçalhos verdes no padrão de “Todos”
