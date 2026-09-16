@@ -402,6 +402,7 @@ export function PendingForMe() {
   const refresh = () => {
     qc.invalidateQueries({ queryKey: ["approval-steps"] });
     qc.invalidateQueries({ queryKey: ["orders"] });
+    qc.invalidateQueries({ queryKey: ["pending-actions"] });
   };
 
   const financialMine = mine.filter((s) => s.purchase_orders?.request_model !== "dispositivos");

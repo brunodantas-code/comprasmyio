@@ -2,15 +2,17 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { PendingForMe } from "@/components/approval-workflow";
 import { Button } from "@/components/ui/button";
 import { MyioLogo } from "@/components/myio-logo";
+import { Bell, CheckCircle2, CodeXml, ShieldCheck } from "lucide-react";
+import { usePendingActions } from "@/hooks/use-pending-actions";
 
 export const Route = createFileRoute("/_authenticated/pendentes")({
   component: PendentesPage,
   head: () => ({
     meta: [
-      { title: "Pendentes comigo | myio supply" },
-      { name: "description", content: "Approvals aguardando sua liberação no myio supply." },
-      { property: "og:title", content: "Pendentes comigo | myio supply" },
-      { property: "og:description", content: "Approvals aguardando sua liberação no myio supply." },
+      { title: "Central de Pendências | myio ERP" },
+      { name: "description", content: "Ações aguardando sua decisão nos aplicativos da plataforma myio ERP." },
+      { property: "og:title", content: "Central de Pendências | myio ERP" },
+      { property: "og:description", content: "Ações aguardando sua decisão nos aplicativos da plataforma myio ERP." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -18,22 +20,42 @@ export const Route = createFileRoute("/_authenticated/pendentes")({
 });
 
 function PendentesPage() {
+  const { data, isLoading } = usePendingActions();
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 border-b border-border bg-card">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
-          <Link to="/dashboard" className="flex min-w-0 items-center font-semibold">
+          <Link to="/portal" className="flex min-w-0 items-center font-semibold">
             <MyioLogo className="text-xl sm:text-2xl" />
           </Link>
           <Button asChild variant="outline" size="sm">
-            <Link to="/dashboard">Voltar ao painel</Link>
+            <Link to="/portal">Plataforma ERP</Link>
           </Button>
         </div>
       </header>
       <main className="mx-auto max-w-7xl px-3 py-5 sm:px-6 sm:py-8">
-        <h1 className="mb-4 text-xl font-semibold">Approvals pendentes comigo</h1>
-        <PendingForMe />
+        <div className="mb-6">
+          <h1 className="flex items-center gap-2 text-2xl font-bold"><Bell className="h-6 w-6" />Central de Pendências</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Ações que aguardam sua decisão.</p>
+        </div>
+        {isLoading ? <p className="text-sm text-muted-foreground">Carregando pendências...</p> : (
+          <div className="space-y-6">
+            <div className="divide-y divide-border overflow-hidden rounded-md border border-border bg-card">
+              <PendingLink icon={CheckCircle2} label="Approvals pendentes comigo" count={data?.approvals ?? 0} to="/pendentes" />
+              <PendingLink icon={ShieldCheck} label="Exclusões de usuários aguardando decisão" count={data?.userDeletions ?? 0} to="/dashboard" search={{ section: "admin", subsection: "usuarios" }} />
+              <PendingLink icon={CodeXml} label="Tickets atendidos aguardando conclusão" count={data?.codeTickets ?? 0} to="/development" />
+            </div>
+            {(data?.approvals ?? 0) > 0 ? <section id="approvals"><PendingForMe /></section> : null}
+            {(data?.total ?? 0) === 0 ? <p className="rounded-md border border-dashed border-border p-8 text-center text-sm text-muted-foreground">Nenhuma pendência no momento.</p> : null}
+          </div>
+        )}
       </main>
     </div>
   );
+}
+
+function PendingLink({ icon: Icon, label, count, to, search }: { icon: typeof Bell; label: string; count: number; to: "/pendentes" | "/dashboard" | "/development"; search?: { section: "admin"; subsection: "usuarios" } }) {
+  const content = <><Icon className="h-5 w-5 shrink-0" /><span className="min-w-0 flex-1 text-sm font-medium">{label}</span><span className="flex h-7 min-w-7 items-center justify-center rounded-full bg-destructive px-2 text-xs font-bold text-destructive-foreground">{count > 99 ? "99+" : count}</span></>;
+  if (to === "/pendentes") return <a href="#approvals" className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10">{content}</a>;
+  return <Link to={to} search={search} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10">{content}</Link>;
 }

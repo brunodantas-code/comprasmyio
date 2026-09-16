@@ -1,12 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Boxes, CodeXml, DollarSign, FileSignature, Settings, Settings2, UsersRound, LogOut } from "lucide-react";
+import { Bell, Boxes, CheckCircle2, CodeXml, DollarSign, FileSignature, Settings, Settings2, ShieldCheck, UsersRound, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MyioPlatformLogo } from "@/components/myio-platform-logo";
 import { ErpAppAccessAdmin } from "@/components/erp-app-access-admin";
 import { CrmFunnelIcon } from "@/components/crm-funnel-icon";
+import { usePendingActions } from "@/hooks/use-pending-actions";
 
 export const Route = createFileRoute("/_authenticated/portal")({
   component: PortalPage,
@@ -25,6 +26,7 @@ export const Route = createFileRoute("/_authenticated/portal")({
 function PortalPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { data: pendingActions } = usePendingActions();
   const { data, isLoading } = useQuery({
     queryKey: ["my-erp-access"],
     queryFn: async () => {
@@ -106,6 +108,8 @@ function PortalPage() {
                         title={`Acessar ${name}`}
                         className="group relative flex h-24 w-24 flex-col items-center justify-between rounded-3xl border-2 border-primary bg-primary px-2 pb-2 pt-1.5 text-primary-foreground outline-none transition-transform hover:scale-105 hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 sm:h-28 sm:w-28"
                       >
+                         {key === "supply" && (pendingActions?.supply ?? 0) > 0 ? <PendingBadge count={pendingActions?.supply ?? 0} label="pendências no Supply" /> : null}
+                         {key === "development" && (pendingActions?.codeTickets ?? 0) > 0 ? <PendingBadge count={pendingActions?.codeTickets ?? 0} label="tickets atendidos aguardando conclusão" /> : null}
                         {key === "supply" ? (
                           <>
                             <span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true">
@@ -162,10 +166,38 @@ function PortalPage() {
                 <p className="mt-2 text-sm text-muted-foreground">Solicite ao Admin do ERP a liberação dos aplicativos necessários.</p>
               </div>
             )}
+
+            {(pendingActions?.total ?? 0) > 0 ? (
+              <section className="mt-12" aria-labelledby="pending-title">
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <h2 id="pending-title" className="flex items-center gap-2 text-xl font-bold"><Bell className="h-5 w-5" />Minhas pendências</h2>
+                  <Button asChild variant="outline" size="sm"><Link to="/pendentes">Ver painel</Link></Button>
+                </div>
+                <div className="divide-y divide-border overflow-hidden rounded-md border border-border bg-card">
+                  {(pendingActions?.approvals ?? 0) > 0 ? <PendingRow icon={CheckCircle2} label="Approvals pendentes comigo" count={pendingActions?.approvals ?? 0} to="/pendentes" /> : null}
+                  {(pendingActions?.userDeletions ?? 0) > 0 ? <PendingRow icon={ShieldCheck} label="Exclusões de usuários aguardando decisão" count={pendingActions?.userDeletions ?? 0} to="/dashboard" search={{ section: "admin", subsection: "usuarios" }} /> : null}
+                  {(pendingActions?.codeTickets ?? 0) > 0 ? <PendingRow icon={CodeXml} label="Tickets atendidos aguardando conclusão" count={pendingActions?.codeTickets ?? 0} to="/development" /> : null}
+                </div>
+              </section>
+            ) : null}
           </TabsContent>
           {data.isErpAdmin ? <TabsContent value="users"><ErpAppAccessAdmin /></TabsContent> : null}
         </Tabs>
       </main>
     </div>
+  );
+}
+
+function PendingBadge({ count, label }: { count: number; label: string }) {
+  return <span className="absolute -right-2 -top-2 flex h-8 min-w-8 items-center justify-center rounded-full bg-destructive px-2 text-sm font-bold text-destructive-foreground shadow-md" aria-label={`${count} ${label}`}>{count > 99 ? "99+" : count}</span>;
+}
+
+function PendingRow({ icon: Icon, label, count, to, search }: { icon: typeof Bell; label: string; count: number; to: "/pendentes" | "/dashboard" | "/development"; search?: { section: "admin"; subsection: "usuarios" } }) {
+  return (
+    <Link to={to} search={search} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10">
+      <Icon className="h-5 w-5 shrink-0" />
+      <span className="min-w-0 flex-1 text-sm font-medium">{label}</span>
+      <span className="flex h-7 min-w-7 items-center justify-center rounded-full bg-destructive px-2 text-xs font-bold text-destructive-foreground">{count > 99 ? "99+" : count}</span>
+    </Link>
   );
 }
