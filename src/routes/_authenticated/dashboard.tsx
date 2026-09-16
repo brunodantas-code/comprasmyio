@@ -2380,7 +2380,7 @@ function BuyerQueue() {
                 size="sm"
                 onClick={() => setGroupByProject((v) => !v)}
               >
-                Agrupar por projeto
+                Agrupar por Projeto e Cliente
               </Button>
             </div>
             {renderOrders(filtered)}
