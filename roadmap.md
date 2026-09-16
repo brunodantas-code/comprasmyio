@@ -1,9 +1,9 @@
 # Roadmap
 
 ## Tarefas
-- [ ] Permitir ao solicitante excluir ticket próprio ainda “Em aberto”, mantendo-o no histórico como “Excluído” e fora das pendências
-- [ ] Corrigir no mobile o conflito entre logomarca/nome do App e etiquetas de perfil e cargo
-- [ ] Padronizar os indicadores de situação com fundo verde-claro em todos os Apps
+- [x] Permitir ao solicitante excluir ticket próprio ainda “Em aberto”, mantendo-o no histórico como “Excluído” e fora das pendências
+- [x] Corrigir no mobile o conflito entre logomarca/nome do App e etiquetas de perfil e cargo
+- [x] Padronizar os indicadores de situação com fundo verde-claro em todos os Apps
 - [x] Corrigir a visualização dos anexos dos tickets com tamanho limitado e botão de fechar
 - [x] Igualar a largura do filtro “Todos os status” ao filtro de entregues em Minhas solicitações
 - [x] Manter ativo o controle de habilitação do Code em Acessos

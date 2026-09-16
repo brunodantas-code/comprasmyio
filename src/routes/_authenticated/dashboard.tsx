@@ -481,7 +481,7 @@ function Dashboard() {
 
       <main className="mx-auto max-w-7xl px-3 py-5 sm:px-6 sm:py-8">
         <Tabs defaultValue={search.section ?? defaultTab}>
-          <div className="sticky top-[60px] z-40 -mx-3 mb-6 bg-background px-3 py-2 sm:top-[73px] sm:-mx-6 sm:px-6">
+          <div className="sticky top-[105px] z-40 -mx-3 mb-6 bg-background px-3 py-2 sm:top-[73px] sm:-mx-6 sm:px-6">
           <TabsList>
             {canSeeRequests && <TabsTrigger value="pedidos"><ClipboardList className="mr-2 h-4 w-4" />Solicitações</TabsTrigger>}
             {canSeeQueue && (
@@ -2217,7 +2217,7 @@ function MyOrders({ userId, canManageDevices }: { userId: string; canManageDevic
                   <li key={p.group} className="flex flex-wrap items-center gap-2">
                     <span className="font-medium">{p.title}</span>
                     <span className="text-muted-foreground">{p.qty} unid.</span>
-                    <Badge variant="secondary">{MYIO_STATUS_LABELS[p.status] ?? p.status}</Badge>
+                    <Badge variant="status">{MYIO_STATUS_LABELS[p.status] ?? p.status}</Badge>
                   </li>
                 ))}
               </ul>
