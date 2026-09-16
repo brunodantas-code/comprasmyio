@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Tarefas
+- [x] Exibir a descrição de despesa interna somente quando “Interna” estiver selecionada
 - [x] Aumentar o espaço superior de “Tipo de solicitação” seguindo o padrão de “Alocação”
 - [x] Alterar a mensagem vazia para “Nenhuma solicitação aberta.”
 - [x] Trocar por verde-claro os destaques dos droplists em todos os aplicativos
