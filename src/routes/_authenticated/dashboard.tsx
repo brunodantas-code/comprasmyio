@@ -1501,7 +1501,7 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
 
   const requestTypeHeader = (
     <Card className="max-w-2xl">
-      <CardContent className="pt-6">{typeSelector}</CardContent>
+      <CardContent className="!pt-10">{typeSelector}</CardContent>
     </Card>
   );
 

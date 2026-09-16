@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Tarefas
+- [x] Aumentar o espaço superior de “Tipo de solicitação” seguindo o padrão de “Alocação”
 - [x] Alterar a mensagem vazia para “Nenhuma solicitação aberta.”
 - [x] Trocar por verde-claro os destaques dos droplists em todos os aplicativos
 - [x] Alinhar os botões “Aplicativos” e “Acessos” à base do título no desktop
