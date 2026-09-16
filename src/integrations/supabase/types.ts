@@ -1090,6 +1090,195 @@ export type Database = {
           },
         ]
       }
+      development_ticket_attachments: {
+        Row: {
+          content_type: string
+          created_at: string
+          file_name: string
+          file_size: number
+          id: string
+          storage_path: string
+          ticket_id: string
+          uploaded_by: string
+        }
+        Insert: {
+          content_type: string
+          created_at?: string
+          file_name: string
+          file_size: number
+          id?: string
+          storage_path: string
+          ticket_id: string
+          uploaded_by: string
+        }
+        Update: {
+          content_type?: string
+          created_at?: string
+          file_name?: string
+          file_size?: number
+          id?: string
+          storage_path?: string
+          ticket_id?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "development_ticket_attachments_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "development_tickets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "development_ticket_attachments_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      development_ticket_logs: {
+        Row: {
+          changed_by: string
+          created_at: string
+          id: string
+          new_assignee_id: string | null
+          new_status: string | null
+          note: string | null
+          previous_assignee_id: string | null
+          previous_status: string | null
+          ticket_id: string
+        }
+        Insert: {
+          changed_by: string
+          created_at?: string
+          id?: string
+          new_assignee_id?: string | null
+          new_status?: string | null
+          note?: string | null
+          previous_assignee_id?: string | null
+          previous_status?: string | null
+          ticket_id: string
+        }
+        Update: {
+          changed_by?: string
+          created_at?: string
+          id?: string
+          new_assignee_id?: string | null
+          new_status?: string | null
+          note?: string | null
+          previous_assignee_id?: string | null
+          previous_status?: string | null
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "development_ticket_logs_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "development_ticket_logs_new_assignee_id_fkey"
+            columns: ["new_assignee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "development_ticket_logs_previous_assignee_id_fkey"
+            columns: ["previous_assignee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "development_ticket_logs_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "development_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      development_tickets: {
+        Row: {
+          admin_notes: string | null
+          app_key: string
+          assignee_id: string | null
+          created_at: string
+          description: string
+          expected_result: string
+          id: string
+          priority: string
+          reporter_id: string
+          status: string
+          ticket_number: number
+          ticket_type: string
+          title: string
+          updated_at: string
+          urgency: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          app_key: string
+          assignee_id?: string | null
+          created_at?: string
+          description: string
+          expected_result: string
+          id?: string
+          priority: string
+          reporter_id: string
+          status?: string
+          ticket_number?: never
+          ticket_type: string
+          title: string
+          updated_at?: string
+          urgency: string
+        }
+        Update: {
+          admin_notes?: string | null
+          app_key?: string
+          assignee_id?: string | null
+          created_at?: string
+          description?: string
+          expected_result?: string
+          id?: string
+          priority?: string
+          reporter_id?: string
+          status?: string
+          ticket_number?: never
+          ticket_type?: string
+          title?: string
+          updated_at?: string
+          urgency?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "development_tickets_app_key_fkey"
+            columns: ["app_key"]
+            isOneToOne: false
+            referencedRelation: "erp_apps"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "development_tickets_assignee_id_fkey"
+            columns: ["assignee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "development_tickets_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       erp_admins: {
         Row: {
           created_at: string
