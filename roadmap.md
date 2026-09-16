@@ -267,3 +267,5 @@
 - [ ] Corrigir permissões críticas de centros de custo e demandas de compra/produção sem interromper os fluxos autorizados
 
 - [x] Explicar que os alertas de segurança eram permissões antigas e foram detectados pela nova varredura, não causados pela troca do endereço
+
+- [ ] Verificar se https://erpmyio.lovable.app está funcional
