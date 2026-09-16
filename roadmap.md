@@ -233,3 +233,5 @@
 - [x] Criar Tipos de Estoque em Cadastro > Diversos e utilizar a lista atual no formulário de Materiais.
 
 - [x] Usar nas páginas CRM e Legal os mesmos ícones exibidos no portal ERP
+
+- [ ] Incluir no RH a mensagem de aplicativo em desenvolvimento usada no CRM e Legal
