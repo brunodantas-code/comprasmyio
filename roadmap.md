@@ -236,3 +236,4 @@
 
 - [x] Incluir no RH a mensagem de aplicativo em desenvolvimento usada no CRM e Legal
 - [x] Reduzir a largura dos botões Aplicativos e Acessos e alinhar Acessos ao ícone Code somente no desktop
+- [ ] Substituir Menu e Submenu do Code por listas dependentes do aplicativo e reposicioná-las após Aplicativo
