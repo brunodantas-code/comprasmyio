@@ -1,6 +1,8 @@
 # Roadmap
 
 ## Tarefas
+- [ ] Corrigir no mobile o conflito entre logomarca/nome do App e etiquetas de perfil e cargo
+- [ ] Padronizar os indicadores de situação com fundo verde-claro em todos os Apps
 - [x] Corrigir a visualização dos anexos dos tickets com tamanho limitado e botão de fechar
 - [x] Igualar a largura do filtro “Todos os status” ao filtro de entregues em Minhas solicitações
 - [x] Manter ativo o controle de habilitação do Code em Acessos
