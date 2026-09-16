@@ -269,3 +269,5 @@
 - [x] Explicar que os alertas de segurança eram permissões antigas e foram detectados pela nova varredura, não causados pela troca do endereço
 
 - [x] Verificar se https://erpmyio.lovable.app está funcional
+- [ ] Adicionar elemento gráfico de rede mesh no lado direito da página de acesso
+- [ ] Redesenhar o bloco de acesso para se integrar melhor ao fundo escuro
