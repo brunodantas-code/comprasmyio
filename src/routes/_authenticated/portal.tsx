@@ -55,12 +55,12 @@ function PortalPage() {
   if (isLoading || !data) return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Carregando...</div>;
 
   const apps = [
-    { key: "supply", name: "supply", description: ["Solicitações", "e Estoque"], to: "/dashboard" as const },
-    { key: "cash_flow", name: "cash flow", description: ["Gestão financeira"], to: "/cash-flow" as const },
+    { key: "supply", name: "Supply", description: ["Solicitações", "e Estoque"], to: "/dashboard" as const },
+    { key: "cash_flow", name: "Cash Flow", description: ["Gestão financeira"], to: "/cash-flow" as const },
     { key: "crm", name: "CRM", description: ["Vendas e", "Relacionamento"], to: "/crm" as const },
     { key: "legal", name: "Legal", description: ["Contratos e", "Jurídico"], to: "/legal" as const },
     { key: "rh", name: "RH", description: ["Gestão de Pessoas"], to: "/rh" as const },
-    { key: "development", name: "Desenvolvimento", description: ["Melhorias e Bugs"], to: "/development" as const },
+    { key: "development", name: "Code", description: ["Melhorias e Bugs"], to: "/development" as const },
   ].filter((app) => data.appKeys.has(app.key));
 
   return (
