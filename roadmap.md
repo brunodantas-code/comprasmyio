@@ -5,6 +5,7 @@
 - [x] Reservar o lilás apenas para títulos explicitamente definidos
 - [x] Logo myio/supply: alinhar "myio" e "supply" pela parte inferior (recorte dos assets + items-end)
 - [ ] Verificar visualmente o alinhamento do logo (hero + rodapé + dashboard)
+- [x] Alinhar a primeira coluna de ícones do portal à esquerda com a logomarca e “Meus Aplicativos”
 - [x] Botão "Criar conta" do mesmo tamanho do botão "Entrar" (auth)
 - [x] Renomear menu "Projetos, Clientes e Centros de Custo" para "Cadastro"
 - [x] Menus selecionados no padrão verde/preto do botão "Entrar"
