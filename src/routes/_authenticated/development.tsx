@@ -1,7 +1,7 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, CodeXml, Download, History, Paperclip, Plus } from "lucide-react";
+import { ArrowLeft, CodeXml, Download, Eye, History, Paperclip, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { MyioAppLogo } from "@/components/myio-app-logo";
@@ -264,6 +264,7 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
   const [status, setStatus] = useState<TicketStatus>("aberto");
   const [assignee, setAssignee] = useState("none");
   const [notes, setNotes] = useState("");
+  const [preview, setPreview] = useState<{ url: string; name: string; contentType: string } | null>(null);
   useEffect(() => {
     if (!ticket) return;
     setStatus(ticket.status);
@@ -306,18 +307,39 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
     if (error) return toast.error(error.message);
     const anchor = document.createElement("a"); anchor.href = signed.signedUrl; anchor.download = name; anchor.click();
   }
-  return <Dialog open={Boolean(ticket)} onOpenChange={(open) => { if (!open) onClose(); }}>
-    <DialogContent className="max-w-2xl">
-      {ticket ? <div className="space-y-5">
+  async function openPreview(path: string, name: string, contentType: string | null) {
+    const { data: signed, error } = await supabase.storage.from("development-ticket-attachments").createSignedUrl(path, 300);
+    if (error) return toast.error(error.message);
+    setPreview({ url: signed.signedUrl, name, contentType: contentType ?? "application/octet-stream" });
+  }
+  return <>
+    <Dialog open={Boolean(ticket)} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
+        {ticket ? <div className="space-y-5">
         <DialogHeader><DialogTitle>#{ticket.ticket_number} — {ticket.title}</DialogTitle><DialogDescription>{APP_NAMES[ticket.app_key]} · {ticket.ticket_type === "bug" ? "Bug" : "Melhoria"} · Solicitante: {data?.profiles.find((profile) => profile.id === ticket.reporter_id)?.full_name || data?.profiles.find((profile) => profile.id === ticket.reporter_id)?.email || "Usuário"} · {new Date(ticket.created_at).toLocaleString("pt-BR")}</DialogDescription></DialogHeader>
         {ticket.menu_name || ticket.submenu_name ? <div className="flex flex-wrap gap-2">{ticket.menu_name ? <Badge variant="outline">Menu: {ticket.menu_name}</Badge> : null}{ticket.submenu_name ? <Badge variant="outline">Submenu: {ticket.submenu_name}</Badge> : null}</div> : null}
         <div className="grid gap-4 sm:grid-cols-2"><div><p className="text-xs font-semibold text-muted-foreground">Descrição</p><p className="mt-1 whitespace-pre-wrap text-sm">{ticket.description}</p></div><div><p className="text-xs font-semibold text-muted-foreground">Resultado esperado</p><p className="mt-1 whitespace-pre-wrap text-sm">{ticket.expected_result}</p></div></div>
         <div className="flex flex-wrap gap-2"><Badge>{STATUS_NAMES[ticket.status]}</Badge><Badge variant="outline">Prioridade {PRIORITY_NAMES[ticket.priority]}</Badge>{ticket.urgency === "urgente" ? <Badge variant="destructive">Urgente</Badge> : null}</div>
-        {details.data?.attachments.length ? <div><p className="mb-2 flex items-center gap-2 text-sm font-semibold"><Paperclip className="h-4 w-4" />Anexos</p>{details.data.attachments.map((attachment) => <Button key={attachment.id} variant="outline" size="sm" onClick={() => download(attachment.storage_path, attachment.file_name)}><Download className="h-4 w-4" />{attachment.file_name}</Button>)}</div> : null}
+        {details.data?.attachments.length ? <div><p className="mb-2 flex items-center gap-2 text-sm font-semibold"><Paperclip className="h-4 w-4" />Anexos</p><div className="flex flex-wrap gap-2">{details.data.attachments.map((attachment) => <Button key={attachment.id} variant="outline" size="sm" onClick={() => openPreview(attachment.storage_path, attachment.file_name, attachment.content_type)}><Eye className="h-4 w-4" /><span className="max-w-64 truncate">{attachment.file_name}</span></Button>)}</div></div> : null}
         {data?.isAdmin && ticket.status !== "concluido" ? <div className="space-y-3 border-t pt-4"><h3 className="font-semibold">Gestão do ticket</h3><div className="grid gap-3 sm:grid-cols-2"><div><Label>Situação</Label><FilterSelect value={status} onChange={(value) => setStatus(value as TicketStatus)} placeholder="Situação" options={Object.entries(ADMIN_STATUS_NAMES).map(([value, label]) => ({ value, label }))} firstOption={null} /></div><div><Label>Responsável pela execução</Label><FilterSelect value={assignee} onChange={setAssignee} placeholder="Responsável pela execução" options={(data.codeAdmins ?? []).map((profile) => ({ value: profile.id, label: profile.full_name || profile.email || "Usuário" }))} firstOption={{ value: "none", label: "Sem responsável" }} /></div></div><div><Label htmlFor="admin-notes">Observações</Label><Textarea id="admin-notes" value={notes} onChange={(event) => setNotes(event.target.value)} maxLength={4000} /></div><Button onClick={() => update.mutate()} disabled={update.isPending}>Salvar andamento</Button></div> : ticket.admin_notes ? <div><p className="text-sm font-semibold">Observações</p><p className="mt-1 whitespace-pre-wrap text-sm">{ticket.admin_notes}</p></div> : null}
         {ticket.status === "atendido" && ticket.reporter_id === data?.userId ? <div className="space-y-2 border-t pt-4"><p className="text-sm text-muted-foreground">Confirme se a correção ou melhoria foi entregue conforme esperado.</p><Button onClick={() => conclude.mutate()} disabled={conclude.isPending}>{conclude.isPending ? "Concluindo..." : "Marcar como concluído"}</Button></div> : null}
         {details.data?.logs.length ? <div className="border-t pt-4"><p className="mb-2 flex items-center gap-2 text-sm font-semibold"><History className="h-4 w-4" />Histórico</p><div className="space-y-2">{details.data.logs.map((log) => <div key={log.id} className="rounded-md bg-muted p-2 text-xs">{log.previous_status !== log.new_status ? `${STATUS_NAMES[log.previous_status as TicketStatus] ?? "—"} → ${STATUS_NAMES[log.new_status as TicketStatus] ?? "—"}` : "Responsável ou observação atualizados"}<span className="ml-2 text-muted-foreground">{new Date(log.created_at).toLocaleString("pt-BR")}</span></div>)}</div></div> : null}
-      </div> : null}
-    </DialogContent>
-  </Dialog>;
+        </div> : null}
+      </DialogContent>
+    </Dialog>
+    <Dialog open={Boolean(preview)} onOpenChange={(open) => { if (!open) setPreview(null); }}>
+      <DialogContent className="flex h-[90vh] w-[94vw] max-w-5xl flex-col overflow-hidden p-4 sm:p-6">
+        <DialogHeader className="shrink-0 pr-8"><DialogTitle className="truncate">{preview?.name}</DialogTitle><DialogDescription>Visualização do anexo</DialogDescription></DialogHeader>
+        <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-md border border-border bg-muted/30">
+          {preview?.contentType.startsWith("image/") ? <img src={preview.url} alt={`Anexo ${preview.name}`} className="max-h-full max-w-full object-contain" /> : null}
+          {preview?.contentType === "application/pdf" ? <iframe src={preview.url} title={`Anexo ${preview.name}`} className="h-full w-full border-0" /> : null}
+          {preview && !preview.contentType.startsWith("image/") && preview.contentType !== "application/pdf" ? <p className="px-6 text-center text-sm text-muted-foreground">Este formato não possui visualização. Use o botão Baixar anexo.</p> : null}
+        </div>
+        <DialogFooter className="shrink-0 flex-row justify-end gap-2">
+          <Button variant="outline" onClick={() => setPreview(null)}>Fechar</Button>
+          {preview ? <Button onClick={() => { const anchor = document.createElement("a"); anchor.href = preview.url; anchor.download = preview.name; anchor.click(); }}><Download className="h-4 w-4" />Baixar anexo</Button> : null}
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  </>;
 }

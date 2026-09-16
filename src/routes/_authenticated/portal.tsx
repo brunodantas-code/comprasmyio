@@ -115,7 +115,7 @@ function PortalPage() {
                         className="group relative flex h-24 w-24 flex-col items-center justify-between rounded-3xl border-2 border-primary bg-primary px-2 pb-2 pt-1.5 text-primary-foreground outline-none transition-transform hover:scale-105 hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 sm:h-28 sm:w-28"
                       >
                          {key === "supply" && (pendingActions?.supply ?? 0) > 0 ? <PendingBadge count={pendingActions?.supply ?? 0} label="pendências no Supply" /> : null}
-                         {key === "development" && (pendingActions?.codeTickets ?? 0) > 0 ? <PendingBadge count={pendingActions?.codeTickets ?? 0} label="tickets atendidos aguardando conclusão" /> : null}
+                          {key === "development" && (pendingActions?.codeTickets ?? 0) > 0 ? <PendingBadge count={pendingActions?.codeTickets ?? 0} label="tickets pendentes no Code" /> : null}
                         {key === "supply" ? (
                           <>
                             <span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true">
@@ -182,7 +182,7 @@ function PortalPage() {
                 <div className="divide-y divide-border overflow-hidden rounded-md border border-border bg-card">
                   {(pendingActions?.approvals ?? 0) > 0 ? <PendingRow icon={CheckCircle2} label="Approvals pendentes comigo" count={pendingActions?.approvals ?? 0} to="/pendentes" /> : null}
                   {(pendingActions?.userDeletions ?? 0) > 0 ? <PendingRow icon={ShieldCheck} label="Exclusões de usuários aguardando decisão" count={pendingActions?.userDeletions ?? 0} to="/dashboard" search={{ section: "admin", subsection: "usuarios" }} /> : null}
-                  {(pendingActions?.codeTickets ?? 0) > 0 ? <PendingRow icon={CodeXml} label="Tickets atendidos aguardando conclusão" count={pendingActions?.codeTickets ?? 0} to="/development" /> : null}
+                  {(pendingActions?.codeTickets ?? 0) > 0 ? <PendingRow icon={CodeXml} label="Tickets pendentes no Code" count={pendingActions?.codeTickets ?? 0} to="/development" /> : null}
                 </div>
               </section>
             ) : null}
