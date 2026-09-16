@@ -185,3 +185,4 @@
 - [x] Incluir exclusão confirmada em Produtos com os técnicos
 - [ ] Aplicar filtros por coluna e cabeçalho verde no Estoque — Almoxarifado
 - [ ] Aplicar filtros por coluna e cabeçalho verde no submenu myio
+- [ ] Aplicar filtros por coluna e cabeçalho verde em Insumos de Instalação
