@@ -89,6 +89,7 @@ function MoveUnitProductDialog({
     setTechnician("");
     setProjectId("");
     setNotes("");
+    setDamageReasonCode("");
     setFile(null);
   }
 

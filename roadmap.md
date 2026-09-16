@@ -190,7 +190,7 @@
 - [x] Remover a coluna Cliente da lista de Projetos
 - [x] Padronizar os botões Zerar estoque em verde com texto preto, mantendo a confirmação existente
 
-- [ ] Concluir cadastro e uso dos Motivos de Avaria em Diversos
-- [ ] Aplicar ao botão Zerar estoque de Insumos de Instalação fundo verde e texto preto, preservando confirmação
-- [ ] Padronizar Estoque de Componentes com cabeçalho verde e filtros por coluna
-- [ ] Mover Liberar Dispositivo Montado para dentro do bloco Dispositivos montados liberados
+- [x] Concluir cadastro e uso dos Motivos de Avaria em Diversos
+- [x] Aplicar ao botão Zerar estoque de Insumos de Instalação fundo verde e texto preto, preservando confirmação
+- [x] Padronizar Estoque de Componentes com cabeçalho verde e filtros por coluna
+- [x] Mover Liberar Dispositivo Montado para dentro do bloco Dispositivos montados liberados

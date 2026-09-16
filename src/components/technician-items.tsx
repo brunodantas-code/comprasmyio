@@ -166,6 +166,7 @@ function MoveDialog({
     setProjectId("");
     setQuantity(String(remaining));
     setNotes("");
+    setDamageReasonCode("");
   };
 
   const save = useMutation({
