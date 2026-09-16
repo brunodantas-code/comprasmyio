@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Boxes, DollarSign, FileSignature, Settings, Settings2, UsersRound, LogOut } from "lucide-react";
+import { Boxes, CodeXml, DollarSign, FileSignature, Settings, Settings2, UsersRound, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -60,6 +60,7 @@ function PortalPage() {
     { key: "crm", name: "CRM", description: ["Vendas e", "Relacionamento"], to: "/crm" as const },
     { key: "legal", name: "Legal", description: ["Contratos e", "Jurídico"], to: "/legal" as const },
     { key: "rh", name: "RH", description: ["Gestão de Pessoas"], to: "/rh" as const },
+    { key: "development", name: "Desenvolvimento", description: ["Melhorias e Bugs"], to: "/development" as const },
   ].filter((app) => data.appKeys.has(app.key));
 
   return (
@@ -96,7 +97,7 @@ function PortalPage() {
 
           <TabsContent value="apps">
             {apps.length ? (
-               <div className="grid grid-cols-3 gap-x-3 gap-y-8 lg:grid-cols-5 lg:gap-x-5">
+               <div className="grid grid-cols-3 gap-x-3 gap-y-8 lg:grid-cols-6 lg:gap-x-4">
                  {apps.map(({ key, name, description, to }) => (
                     <div key={key} className="flex w-24 min-w-0 justify-self-start flex-col items-center text-center sm:w-28">
                       <Link
@@ -133,14 +134,21 @@ function PortalPage() {
                             </span>
                             <span className="text-sm font-normal leading-none">{name}</span>
                           </>
-                        ) : (
+                        ) : key === "rh" ? (
                           <>
                             <span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true">
                               <UsersRound className="h-14 w-14 stroke-[1.8] sm:h-16 sm:w-16" />
                             </span>
                             <span className="text-sm font-normal leading-none">{name}</span>
                           </>
-                       )}
+                        ) : (
+                          <>
+                            <span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true">
+                              <CodeXml className="h-14 w-14 stroke-[2.8] sm:h-16 sm:w-16" />
+                            </span>
+                            <span className="text-[0.7rem] font-normal leading-none sm:text-xs">{name}</span>
+                          </>
+                        )}
                      </Link>
                       <p className="mt-3 w-24 max-w-full break-words text-center text-xs leading-4 text-muted-foreground sm:w-28 sm:text-sm sm:leading-5">
                         {description.map((line) => <span key={line} className="block">{line}</span>)}
