@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Tarefas
+- [x] Ampliar o ícone do Legal e alterar a descrição para “Contratos e Jurídico”
 - [x] Alterar a descrição do CRM para “Vendas e Relacionamento”
 - [x] Trocar o ícone do CRM por pessoas sobre um funil, na proporção dos demais aplicativos
 - [x] Aumentar a margem superior dos ícones Supply e Cash Flow
