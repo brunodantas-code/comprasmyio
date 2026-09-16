@@ -1895,35 +1895,25 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
   const { data: profiles } = useStockProfiles();
   const { data: metaMap } = useStockMeta("terceiros_materials");
 
-  const [search, setSearch] = useState("");
-  const [view, setView] = useState<"all" | "with" | "zero">("all");
+  const [descriptionFilter, setDescriptionFilter] = useState("");
+  const [myioCodeFilter, setMyioCodeFilter] = useState("");
+  const [manufacturerCodeFilter, setManufacturerCodeFilter] = useState("");
+  const [balanceFilter, setBalanceFilter] = useState<"with" | "zero" | "">("");
 
-  const filtered = (rows ?? [])
-    .filter((r) => r.name.toLowerCase().includes(search.trim().toLowerCase()))
-    .filter((r) => (view === "with" ? r.balance > 0 : view === "zero" ? r.balance <= 0 : true));
+  const normalize = (value: string | null | undefined) => value?.trim().toLocaleLowerCase("pt-BR") ?? "";
+  const filtered = (rows ?? []).filter((row) => {
+    const meta = metaMap?.[row.material_id];
+    return (!normalize(descriptionFilter) || normalize(`${row.name} ${meta?.description ?? ""}`).includes(normalize(descriptionFilter)))
+      && (!normalize(myioCodeFilter) || normalize(meta?.myio_code).includes(normalize(myioCodeFilter)))
+      && (!normalize(manufacturerCodeFilter) || normalize(meta?.manufacturer_code).includes(normalize(manufacturerCodeFilter)))
+      && (balanceFilter === "with" ? row.balance > 0 : balanceFilter === "zero" ? row.balance <= 0 : true);
+  });
   const nameById = Object.fromEntries((rows ?? []).map((r) => [r.material_id, r.name]));
 
   const toolbar = (
     <>
       <AddTerceirosDialog userId={userId} />
       <TerceirosResetDialog rows={rows ?? []} />
-      <div className="relative">
-        <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar material"
-          className="w-full pl-8 sm:w-[200px]"
-        />
-      </div>
-      <Select value={view} onValueChange={(v) => setView(v as "all" | "with" | "zero")}>
-        <SelectTrigger className="w-full sm:w-[170px]"><SelectValue /></SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">Todos</SelectItem>
-          <SelectItem value="with">Com saldo</SelectItem>
-          <SelectItem value="zero">Sem saldo</SelectItem>
-        </SelectContent>
-      </Select>
     </>
   );
 
@@ -1947,14 +1937,26 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
             <p className="text-sm text-muted-foreground">Nenhum item encontrado.</p>
           ) : (
             <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[45%]">Descrição</TableHead>
-                  <TableHead className="w-[12%]">Cód. Myio</TableHead>
-                  <TableHead className="w-[12%]">Cód. Fabricante</TableHead>
-                  <TableHead className="w-[10%] text-right">Saldo Estoque</TableHead>
-                  <TableHead className="w-[10%]">Imagem</TableHead>
+              <TableHeader className="[&_tr]:border-b">
+                <TableRow className="border-t bg-primary/15 hover:bg-primary/15">
+                  <TableHead className="w-[45%] font-bold">Descrição</TableHead>
+                  <TableHead className="w-[12%] font-bold">Cód. Myio</TableHead>
+                  <TableHead className="w-[12%] font-bold">Cód. Fabricante</TableHead>
+                  <TableHead className="w-[10%] text-right font-bold">Saldo</TableHead>
+                  <TableHead className="w-[10%] font-bold">Imagem</TableHead>
                   <TableHead className="w-[11%] text-right"></TableHead>
+                </TableRow>
+                <TableRow className="bg-primary/5 hover:bg-primary/5">
+                  <TableHead className="py-1"><Input value={descriptionFilter} onChange={(e) => setDescriptionFilter(e.target.value)} placeholder="Filtrar" aria-label="Filtrar por descrição" className="h-8 bg-background" /></TableHead>
+                  <TableHead className="py-1"><Input value={myioCodeFilter} onChange={(e) => setMyioCodeFilter(e.target.value)} placeholder="Filtrar" aria-label="Filtrar por código myio" className="h-8 bg-background" /></TableHead>
+                  <TableHead className="py-1"><Input value={manufacturerCodeFilter} onChange={(e) => setManufacturerCodeFilter(e.target.value)} placeholder="Filtrar" aria-label="Filtrar por código do fabricante" className="h-8 bg-background" /></TableHead>
+                  <TableHead className="py-1">
+                    <Select value={balanceFilter} onValueChange={(value) => setBalanceFilter(value as "with" | "zero")}>
+                      <SelectTrigger className="h-8 w-full bg-background" aria-label="Filtrar por saldo"><SelectValue placeholder="Filtrar" /></SelectTrigger>
+                      <SelectContent><SelectItem value="with">Com saldo</SelectItem><SelectItem value="zero">Sem saldo</SelectItem></SelectContent>
+                    </Select>
+                  </TableHead>
+                  <TableHead className="py-1" /><TableHead className="py-1" />
                 </TableRow>
               </TableHeader>
               <TableBody>
