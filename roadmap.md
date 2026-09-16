@@ -268,4 +268,4 @@
 
 - [x] Explicar que os alertas de segurança eram permissões antigas e foram detectados pela nova varredura, não causados pela troca do endereço
 
-- [ ] Verificar se https://erpmyio.lovable.app está funcional
+- [x] Verificar se https://erpmyio.lovable.app está funcional
