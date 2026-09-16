@@ -3315,8 +3315,8 @@ function InternalDeleteOrderDialog({ order }: { order: Order }) {
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button type="button" size="icon" aria-label="Excluir pedido" title="Excluir pedido">
-          <X className="h-4 w-4" />
+        <Button type="button" size="icon" className="h-6 w-6 shrink-0" aria-label="Excluir pedido" title="Excluir pedido">
+          <X className="h-3 w-3" />
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
