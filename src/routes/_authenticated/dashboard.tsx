@@ -3246,6 +3246,7 @@ function InternalDeleteOrderDialog({ order }: { order: Order }) {
       toast.success("Pedido excluído");
       qc.invalidateQueries({ queryKey: ["orders"] });
       qc.invalidateQueries({ queryKey: ["logs"] });
+      qc.invalidateQueries({ queryKey: ["cash-flow-payables"] });
       setOpen(false);
     },
     onError: (e: Error) => toast.error(e.message),
