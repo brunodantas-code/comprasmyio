@@ -2156,38 +2156,15 @@ function MyioDevicesStockSection({ userId, canDelete }: { userId: string; canDel
   const { data: movements } = useMovements();
   const { data: profiles } = useStockProfiles();
   const { data: manufactured } = useManufacturedMap();
-  const [search, setSearch] = useState("");
-  const [view, setView] = useState<"all" | "with" | "zero">("all");
 
   const scoped = (stock ?? [])
     .filter((r) => (r.location ?? "fabrica") === "almoxarifado")
     .filter((r) => !/ — Caixa de \d+$/.test(r.name));
   const scopedIds = new Set(scoped.map((r) => r.material_id));
   const scopedMovements = (movements ?? []).filter((m) => scopedIds.has(m.material_id));
-  const rows = scoped
-    .filter((r) => r.name.toLowerCase().includes(search.trim().toLowerCase()))
-    .filter((r) => (view === "with" ? r.balance > 0 : view === "zero" ? r.balance <= 0 : true));
-
   const toolbar = (
     <>
       <ResetStockDialog rows={scoped} userId={userId} location="almoxarifado" />
-      <div className="relative">
-        <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar material"
-          className="w-full pl-8 sm:w-[200px]"
-        />
-      </div>
-      <Select value={view} onValueChange={(v) => setView(v as "all" | "with" | "zero")}>
-        <SelectTrigger className="w-full sm:w-[170px]"><SelectValue /></SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">Todos</SelectItem>
-          <SelectItem value="with">Com saldo</SelectItem>
-          <SelectItem value="zero">Sem saldo</SelectItem>
-        </SelectContent>
-      </Select>
     </>
   );
 
@@ -2196,13 +2173,14 @@ function MyioDevicesStockSection({ userId, canDelete }: { userId: string; canDel
         <StockTableCard
           title="Dispositivos myio"
           description="Dispositivos produzidos pela Fábrica."
-          rows={rows.filter((r) => manufactured?.[r.material_id])}
+          rows={scoped.filter((r) => manufactured?.[r.material_id])}
           isLoading={isLoading}
           userId={userId}
           canDelete={canDelete}
           actions={toolbar}
           damageSource="Estoque Myio"
           simple
+          columnFilters
         />
         <BoxesCard />
         <Card>
@@ -2277,7 +2255,7 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
     <>
       <AddMaterialDialog location={location} userId={userId} />
       <ResetStockDialog rows={scoped} userId={userId} location={location} />
-      <div className="relative">
+      {location !== "almoxarifado_geral" && <div className="relative">
         <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
           value={search}
@@ -2285,15 +2263,15 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
           placeholder="Buscar material"
           className="w-full pl-8 sm:w-[200px]"
         />
-      </div>
-      <Select value={view} onValueChange={(v) => setView(v as "all" | "with" | "zero")}>
+      </div>}
+      {location !== "almoxarifado_geral" && <Select value={view} onValueChange={(v) => setView(v as "all" | "with" | "zero")}>
         <SelectTrigger className="w-full sm:w-[170px]"><SelectValue /></SelectTrigger>
         <SelectContent>
           <SelectItem value="all">Todos</SelectItem>
           <SelectItem value="with">Com saldo</SelectItem>
           <SelectItem value="zero">Sem saldo</SelectItem>
         </SelectContent>
-      </Select>
+      </Select>}
     </>
   );
 
@@ -2334,12 +2312,13 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
               ? "Estoque geral independente. Toque no nome para ver foto, link de referência e parâmetros de compra."
               : 'A entrada é automática quando quem fez a solicitação confirma "Recebido corretamente" em um pedido feito pela biblioteca.'
           }
-          rows={rows}
+          rows={location === "almoxarifado_geral" ? scoped : rows}
           isLoading={isLoading}
           userId={userId}
           canDelete={canDelete}
           actions={toolbar}
           detail={location === "almoxarifado_geral"}
+          columnFilters={location === "almoxarifado_geral"}
           damageSource={`Estoque — ${LOCATION_LABELS[location]}`}
         />
 
