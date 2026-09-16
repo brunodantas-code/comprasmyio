@@ -195,14 +195,11 @@ function ExistingAttachments({ orderId, attachments, canRemove }: { orderId: str
   return (
     <ul className="space-y-0.5 text-xs">
       {attachments.map((a) => (
-        <li key={a.path} className="flex items-center gap-1">
-          <button type="button" onClick={() => openAttachment(a.path)} className="truncate text-primary hover:underline" title={a.name}>
-            {a.name}
-          </button>
+        <li key={a.path} className="flex min-w-0 items-center justify-start gap-1">
           {canRemove && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button type="button" size="icon" className="h-6 w-6" disabled={remove.isPending} aria-label="Excluir anexo" title="Excluir anexo">
+                <Button type="button" size="icon" className="h-6 w-6 shrink-0" disabled={remove.isPending} aria-label="Excluir anexo" title="Excluir anexo">
                   <X className="h-3 w-3" />
                 </Button>
               </AlertDialogTrigger>
@@ -222,6 +219,9 @@ function ExistingAttachments({ orderId, attachments, canRemove }: { orderId: str
               </AlertDialogContent>
             </AlertDialog>
           )}
+          <button type="button" onClick={() => openAttachment(a.path)} className="min-w-0 truncate text-left text-primary hover:underline" title={a.name}>
+            {a.name}
+          </button>
         </li>
       ))}
     </ul>
@@ -2592,8 +2592,8 @@ function OrdersTable({
       <Table className="w-full table-fixed">
         <TableHeader className="[&_tr]:border-b">
           <TableRow className="border-t bg-primary/15 hover:bg-primary/15">
-            <TableHead className="w-[105px] text-center font-bold">Approval</TableHead>
-            <TableHead className="w-[135px] text-center font-bold">Itens da Solicitação</TableHead>
+            <TableHead className="w-[165px] text-left font-bold">Approval</TableHead>
+            <TableHead className="w-[180px] text-center font-bold">Itens da Solicitação</TableHead>
             <TableHead className="w-[105px] text-center font-bold">Tipo</TableHead>
             <TableHead className="w-[90px] text-center font-bold">Alocação</TableHead>
             {showRequester && <TableHead className="w-[105px] text-center font-bold">Solicitante</TableHead>}
