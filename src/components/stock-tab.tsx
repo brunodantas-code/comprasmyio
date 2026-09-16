@@ -1067,6 +1067,7 @@ function StockTableCard({
   detail,
   damageSource,
   simple,
+  columnFilters,
 }: {
   title: string;
   description: string;
@@ -1079,9 +1080,21 @@ function StockTableCard({
   damageSource?: string;
   /** Estoque Myio: só saldo em estoque e baixa por avaria. */
   simple?: boolean;
+  columnFilters?: boolean;
 }) {
   const { data: metaMap } = useStockMeta("materials");
-
+  const [descriptionFilter, setDescriptionFilter] = useState("");
+  const [myioCodeFilter, setMyioCodeFilter] = useState("");
+  const [manufacturerCodeFilter, setManufacturerCodeFilter] = useState("");
+  const [balanceFilter, setBalanceFilter] = useState<"with" | "zero" | "">("");
+  const normalize = (value: string | null | undefined) => value?.trim().toLocaleLowerCase("pt-BR") ?? "";
+  const displayedRows = columnFilters ? rows.filter((row) => {
+    const meta = metaMap?.[row.material_id];
+    return (!normalize(descriptionFilter) || normalize(`${row.name} ${meta?.description ?? ""}`).includes(normalize(descriptionFilter)))
+      && (simple || !normalize(myioCodeFilter) || normalize(meta?.myio_code).includes(normalize(myioCodeFilter)))
+      && (simple || !normalize(manufacturerCodeFilter) || normalize(meta?.manufacturer_code).includes(normalize(manufacturerCodeFilter)))
+      && (balanceFilter === "with" ? row.balance > 0 : balanceFilter === "zero" ? row.balance <= 0 : true);
+  }) : rows;
 
   return (
     <Card>
@@ -1095,22 +1108,35 @@ function StockTableCard({
       <CardContent>
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando...</p>
-        ) : !rows.length ? (
+        ) : !displayedRows.length ? (
           <p className="text-sm text-muted-foreground">Nenhum material encontrado.</p>
         ) : (
           <Table>
-            <TableHeader>
-                <TableRow>
-                  <TableHead className={simple ? "w-[70%]" : "w-[45%]"}>Descrição</TableHead>
-                  {!simple && <TableHead className="w-[12%]">Cód. Myio</TableHead>}
-                  {!simple && <TableHead className="w-[12%]">Cód. Fabricante</TableHead>}
-                  <TableHead className={simple ? "w-[15%] text-right" : "w-[10%] text-right"}>Saldo Estoque</TableHead>
-                  {!simple && <TableHead className="w-[10%]">Imagem</TableHead>}
+            <TableHeader className={columnFilters ? "[&_tr]:border-b" : undefined}>
+                <TableRow className={columnFilters ? "border-t bg-primary/15 hover:bg-primary/15" : undefined}>
+                  <TableHead className={`${simple ? "w-[70%]" : "w-[45%]"}${columnFilters ? " font-bold" : ""}`}>Descrição</TableHead>
+                  {!simple && <TableHead className={`w-[12%]${columnFilters ? " font-bold" : ""}`}>Cód. Myio</TableHead>}
+                  {!simple && <TableHead className={`w-[12%]${columnFilters ? " font-bold" : ""}`}>Cód. Fabricante</TableHead>}
+                  <TableHead className={`${simple ? "w-[15%] text-right" : "w-[10%] text-right"}${columnFilters ? " font-bold" : ""}`}>Saldo</TableHead>
+                  {!simple && <TableHead className={`w-[10%]${columnFilters ? " font-bold" : ""}`}>Imagem</TableHead>}
                   <TableHead className={simple ? "w-[15%] text-right" : "w-[11%] text-right"}></TableHead>
                 </TableRow>
+                {columnFilters && <TableRow className="bg-primary/5 hover:bg-primary/5">
+                  <TableHead className="py-1"><Input value={descriptionFilter} onChange={(e) => setDescriptionFilter(e.target.value)} placeholder="Filtrar" aria-label="Filtrar por descrição" className="h-8 bg-background" /></TableHead>
+                  {!simple && <TableHead className="py-1"><Input value={myioCodeFilter} onChange={(e) => setMyioCodeFilter(e.target.value)} placeholder="Filtrar" aria-label="Filtrar por código myio" className="h-8 bg-background" /></TableHead>}
+                  {!simple && <TableHead className="py-1"><Input value={manufacturerCodeFilter} onChange={(e) => setManufacturerCodeFilter(e.target.value)} placeholder="Filtrar" aria-label="Filtrar por código do fabricante" className="h-8 bg-background" /></TableHead>}
+                  <TableHead className="py-1">
+                    <Select value={balanceFilter} onValueChange={(value) => setBalanceFilter(value as "with" | "zero")}>
+                      <SelectTrigger className="h-8 w-full bg-background" aria-label="Filtrar por saldo"><SelectValue placeholder="Filtrar" /></SelectTrigger>
+                      <SelectContent><SelectItem value="with">Com saldo</SelectItem><SelectItem value="zero">Sem saldo</SelectItem></SelectContent>
+                    </Select>
+                  </TableHead>
+                  {!simple && <TableHead className="py-1" />}
+                  <TableHead className="py-1" />
+                </TableRow>}
             </TableHeader>
             <TableBody>
-              {rows.map((r) => {
+              {displayedRows.map((r) => {
                 const meta = metaMap?.[r.material_id];
                 return (
                 <TableRow key={r.material_id}>
