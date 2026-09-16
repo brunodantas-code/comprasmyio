@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { AtSign, Boxes, CircleDollarSign, Cog, FileSignature, Mail, Phone, Settings2, UserRound, UsersRound, LogOut } from "lucide-react";
+import { AtSign, Boxes, CircleDollarSign, FileSignature, Mail, Phone, Settings, Settings2, UserRound, UsersRound, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -54,7 +54,7 @@ function PortalPage() {
   if (isLoading || !data) return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Carregando...</div>;
 
   const apps = [
-    { key: "supply", name: "supply", description: ["Compras, solicitações diversas", "aprovações e estoque"], to: "/dashboard" as const },
+    { key: "supply", name: "supply", description: ["Solicitações", "e Estoque"], to: "/dashboard" as const },
     { key: "cash_flow", name: "cash flow", description: ["Gestão financeira", "e fluxo de caixa"], to: "/cash-flow" as const },
     { key: "crm", name: "CRM", description: ["Relacionamento", "com clientes"], to: "/crm" as const },
     { key: "legal", name: "Legal", description: ["Jurídico e Contratos"], to: "/legal" as const },
@@ -106,9 +106,8 @@ function PortalPage() {
                       >
                         {key === "supply" ? (
                           <>
-                            <span className="relative block h-14 w-full sm:h-16" aria-hidden="true">
-                              <Cog className="absolute bottom-0 left-2 h-10 w-10 stroke-[1.7] sm:h-12 sm:w-12" />
-                              <Cog className="absolute right-2 top-0 h-9 w-9 stroke-[1.7] sm:h-10 sm:w-10" />
+                            <span className="flex h-14 w-full items-center justify-center sm:h-16" aria-hidden="true">
+                              <Settings className="h-16 w-16 stroke-[1.7] sm:h-20 sm:w-20" />
                             </span>
                             <span className="text-sm font-normal leading-none">{name}</span>
                           </>
