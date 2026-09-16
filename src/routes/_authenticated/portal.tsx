@@ -75,6 +75,12 @@ function PortalPage() {
               <p className="truncate text-sm font-semibold">{data.name}</p>
               <p className="text-xs text-muted-foreground">Plataforma ERP</p>
             </div>
+            <Button asChild variant="ghost" size="icon" className="relative" title="Central de Pendências" aria-label={`Central de Pendências: ${pendingActions?.total ?? 0}`}>
+              <Link to="/pendentes">
+                <Bell className="h-5 w-5" />
+                {(pendingActions?.total ?? 0) > 0 ? <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">{(pendingActions?.total ?? 0) > 99 ? "99+" : pendingActions?.total}</span> : null}
+              </Link>
+            </Button>
             <Button variant="ghost" size="icon" onClick={handleSignOut} title="Sair" aria-label="Sair">
               <LogOut className="h-4 w-4" />
             </Button>

@@ -252,4 +252,4 @@
 - [x] Exibir contadores nos ícones dos aplicativos com pendências
 - [x] Criar painel consolidado com natureza, quantidade e link para o menu correspondente
 - [x] Incluir Approvals “Pendentes comigo”, aceite de tickets do Code e aprovações de exclusão de Admin
-- [ ] Validar atualização dos contadores após concluir cada ação
+- [x] Validar atualização dos contadores após concluir cada ação
