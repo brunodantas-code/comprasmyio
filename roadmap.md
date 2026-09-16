@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Tarefas
+- [x] Excluir no Cash Flow o Approval removido no Supply e conferir as listas atuais
 - [x] Alinhar botões e nomes dos aplicativos na gestão de acessos mobile
 - [x] Padronizar todos os botões de ação com fundo verde e ícones/textos pretos
 - [x] Reservar o lilás apenas para títulos explicitamente definidos
