@@ -187,3 +187,4 @@
 - [x] Aplicar filtros por coluna e cabeçalho verde no submenu myio
 - [x] Aplicar filtros por coluna e cabeçalho verde em Insumos de Instalação
 - [x] Remover o campo Cliente do cadastro de Novo Projeto
+- [x] Remover a coluna Cliente da lista de Projetos

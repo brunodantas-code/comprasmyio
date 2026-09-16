@@ -3442,7 +3442,7 @@ function ProjectsAdmin({ userId }: { userId: string }) {
             !projects?.length ? <p className="text-sm text-muted-foreground">Sem projetos.</p> :
             !visibleProjects.length ? <p className="text-sm text-muted-foreground">Nenhum projeto corresponde aos filtros.</p> :
              <Table data-responsive="true" className="table-fixed">
-               <TableHeader><TableRow><TableHead className="w-[23%]">Nome do projeto</TableHead><TableHead className="w-[13%] text-right">Orçamento</TableHead><TableHead className="w-[13%] text-right">Solicitado</TableHead><TableHead className="w-[18%]">% do orçamento</TableHead><TableHead className="w-[14%]">Cliente</TableHead><TableHead className="w-[11%] text-center">Status</TableHead><TableHead className="w-[8%] text-center">Data</TableHead></TableRow></TableHeader>
+               <TableHeader><TableRow><TableHead className="w-[30%]">Nome do projeto</TableHead><TableHead className="w-[14%] text-right">Orçamento</TableHead><TableHead className="w-[14%] text-right">Solicitado</TableHead><TableHead className="w-[20%]">% do orçamento</TableHead><TableHead className="w-[13%] text-center">Status</TableHead><TableHead className="w-[9%] text-center">Data</TableHead></TableRow></TableHeader>
               <TableBody>
                  {visibleProjects.map((p) => {
                   const st = (p as { status?: string }).status ?? "active";
@@ -3494,7 +3494,6 @@ function ProjectsAdmin({ userId }: { userId: string }) {
                          <div className="h-1.5 overflow-hidden rounded-full bg-secondary"><div className={`h-full rounded-full ${percent > 100 ? "bg-destructive" : "bg-primary"}`} style={{ width: `${Math.min(100, percent)}%` }} /></div>
                        </div>
                      </TableCell>
-                     <TableCell data-label="Cliente" className="text-sm">{clientOf(p)?.name || p.client_name || "—"}</TableCell>
                      <TableCell data-label="Status" className="text-center">
                       {st === "active" ? (
                         <span className="inline-block rounded bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">Ativo</span>
