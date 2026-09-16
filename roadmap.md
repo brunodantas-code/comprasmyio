@@ -189,3 +189,6 @@
 - [x] Remover o campo Cliente do cadastro de Novo Projeto
 - [x] Remover a coluna Cliente da lista de Projetos
 - [x] Padronizar os botões Zerar estoque em verde com texto preto, mantendo a confirmação existente
+
+- [ ] Concluir cadastro e uso dos Motivos de Avaria em Diversos
+- [ ] Aplicar ao botão Zerar estoque de Insumos de Instalação fundo verde e texto preto, preservando confirmação
