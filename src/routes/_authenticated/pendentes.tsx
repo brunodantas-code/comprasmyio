@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { MyioLogo } from "@/components/myio-logo";
 import { Bell, CheckCircle2, CodeXml, ShieldCheck } from "lucide-react";
 import { usePendingActions } from "@/hooks/use-pending-actions";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export const Route = createFileRoute("/_authenticated/pendentes")({
   component: PendentesPage,
@@ -28,9 +29,12 @@ function PendentesPage() {
           <Link to="/portal" className="flex min-w-0 items-center font-semibold">
             <MyioLogo className="text-xl sm:text-2xl" />
           </Link>
-          <Button asChild variant="outline" size="sm">
-            <Link to="/portal">Plataforma ERP</Link>
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button asChild variant="outline" size="sm">
+              <Link to="/portal">Plataforma ERP</Link>
+            </Button>
+            <ThemeToggle />
+          </div>
         </div>
       </header>
       <main className="mx-auto max-w-7xl px-3 py-5 sm:px-6 sm:py-8">

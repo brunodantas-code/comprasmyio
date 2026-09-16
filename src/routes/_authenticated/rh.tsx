@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MyioAppLogo } from "@/components/myio-app-logo";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export const Route = createFileRoute("/_authenticated/rh")({
   beforeLoad: async ({ context }) => {
@@ -29,7 +30,7 @@ function RhPage() {
       <header className="border-b border-border bg-card">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
           <Link to="/portal"><MyioAppLogo appName="RH" className="text-xl sm:text-2xl" /></Link>
-          <Button asChild variant="outline" size="sm"><Link to="/portal"><ArrowLeft className="h-4 w-4" /><span className="hidden sm:inline">Plataforma ERP</span></Link></Button>
+          <div className="flex items-center gap-1"><Button asChild variant="outline" size="sm"><Link to="/portal"><ArrowLeft className="h-4 w-4" /><span className="hidden sm:inline">Plataforma ERP</span></Link></Button><ThemeToggle /></div>
         </div>
       </header>
       <main className="mx-auto flex min-h-[calc(100vh-73px)] max-w-3xl items-center justify-center px-4 py-12 text-center sm:px-6">

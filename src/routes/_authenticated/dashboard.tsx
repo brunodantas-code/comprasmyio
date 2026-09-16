@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { MyioLogo } from "@/components/myio-logo";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { supabase } from "@/integrations/supabase/client";
 import { exportDatabaseBackup } from "@/lib/backup.functions";
 import { decideUserDeletion, requestUserDeletion, setUserAccessProfile } from "@/lib/user-admin.functions";
@@ -462,6 +463,7 @@ function Dashboard() {
             <Button asChild variant="outline" size="sm" className="shrink-0" title="Voltar à Plataforma ERP">
               <Link to="/portal"><ArrowLeft className="h-4 w-4" /><span className="hidden md:inline">Plataforma ERP</span></Link>
             </Button>
+            <ThemeToggle />
             <Button variant="ghost" size="icon" className="shrink-0" onClick={handleSignOut} title="Sair">
               <LogOut className="h-4 w-4" />
             </Button>
