@@ -239,3 +239,4 @@
 - [x] Reduzir a largura dos botões Aplicativos e Acessos e alinhar Acessos ao ícone Code somente no desktop
 - [x] Substituir Menu e Submenu do Code por listas dependentes do aplicativo e reposicioná-las após Aplicativo
 - [x] Mover os filtros de acompanhamento do Code para o cabeçalho, no padrão dos Approvals
+- [x] Mover os filtros de Minhas solicitações para cabeçalhos verdes, no padrão dos Approvals

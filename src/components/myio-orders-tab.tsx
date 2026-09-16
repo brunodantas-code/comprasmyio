@@ -523,41 +523,16 @@ export function MyioOrdersTab({ userId, canManage = true }: { userId: string; ca
 
   return (
     <Card>
-      <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <CardHeader>
         <div className="min-w-0">
           <CardTitle className="flex items-center gap-2"><Factory className="h-5 w-5 shrink-0" />Solicitações de Dispositivos myio</CardTitle>
           <CardDescription>Acompanhe o status de suas solicitações de Dispositivos myio.</CardDescription>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Select
-            value={statusFilter.size === STATUS_KEYS.length ? "all" : (Array.from(statusFilter)[0] ?? "all")}
-            onValueChange={(v) => {
-              if (v === "all") {
-                setStatusFilter(new Set(STATUS_KEYS));
-              } else {
-                setStatusFilter(new Set([v as MyioStatus]));
-              }
-            }}
-          >
-            <SelectTrigger className="h-9 w-full sm:w-52"><SelectValue placeholder="Filtrar status" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os status</SelectItem>
-              {STATUS_KEYS.map((s) => (
-                <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
       </CardHeader>
       <CardContent>
-        {isLoading ? (
-          <p className="text-sm text-muted-foreground">Carregando...</p>
-        ) : list.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nenhum pedido cadastrado.</p>
-        ) : (
-          <Table>
+        <Table>
             <TableHeader>
-              <TableRow>
+              <TableRow className="bg-primary/20 hover:bg-primary/20">
                 <TableHead>Projeto</TableHead>
                 <TableHead>Cliente</TableHead>
                 <TableHead>Approval</TableHead>
@@ -567,9 +542,30 @@ export function MyioOrdersTab({ userId, canManage = true }: { userId: string; ca
                 <TableHead>Status</TableHead>
                 {canManage && <TableHead className="w-20" />}
               </TableRow>
+              <TableRow className="bg-primary/5 hover:bg-primary/5">
+                <TableHead className="py-1" />
+                <TableHead className="py-1" />
+                <TableHead className="py-1" />
+                <TableHead className="py-1" />
+                <TableHead className="py-1" />
+                <TableHead className="py-1" />
+                <TableHead className="py-1">
+                  <Select
+                    value={statusFilter.size === STATUS_KEYS.length ? "all" : (Array.from(statusFilter)[0] ?? "all")}
+                    onValueChange={(v) => setStatusFilter(v === "all" ? new Set(STATUS_KEYS) : new Set([v as MyioStatus]))}
+                  >
+                    <SelectTrigger className="h-8 min-w-36 bg-background" aria-label="Filtrar solicitações por status"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos os status</SelectItem>
+                      {STATUS_KEYS.map((s) => <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </TableHead>
+                {canManage && <TableHead className="py-1" />}
+              </TableRow>
             </TableHeader>
             <TableBody>
-              {list.map((o) => (
+              {isLoading ? <TableRow><TableCell colSpan={canManage ? 8 : 7} className="h-20 text-center text-muted-foreground">Carregando...</TableCell></TableRow> : list.length === 0 ? <TableRow><TableCell colSpan={canManage ? 8 : 7} className="h-20 text-center text-muted-foreground">Nenhum pedido cadastrado.</TableCell></TableRow> : list.map((o) => (
                 <TableRow key={o.id}>
                   <TableCell className="font-medium">
                     {o.projects?.name || "—"}
@@ -643,7 +639,6 @@ export function MyioOrdersTab({ userId, canManage = true }: { userId: string; ca
               ))}
             </TableBody>
           </Table>
-        )}
       </CardContent>
     </Card>
   );

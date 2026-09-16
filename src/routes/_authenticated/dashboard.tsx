@@ -2267,20 +2267,24 @@ function ImportOrders({ userId }: { userId: string }) {
     <div className="space-y-6">
       <ImportBatchesSection userId={userId}>
         <section className="space-y-4" aria-labelledby="imported-items-title">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
             <div>
               <h3 id="imported-items-title" className="font-semibold">Itens dos pedidos</h3>
               <p className="text-sm text-muted-foreground">Acompanhe o andamento individual dos materiais incluídos em suas importações.</p>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <StatusMultiFilter selected={statusSelected} setSelected={setStatusSelected} />
-              <DeliveredFilter mode={deliveredMode} setMode={setDeliveredMode} fromDate={deliveredFrom} setFromDate={setDeliveredFrom} />
             </div>
           </div>
           {isLoading || importIds.isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
             !importOrders.length ? <p className="text-sm text-muted-foreground">Nenhum item de importação.</p> :
             !visible.length ? <p className="text-sm text-muted-foreground">Nenhum item para exibir com o filtro atual.</p> :
-            <OrdersTable orders={visible} projectName={projectName} showRequester={false} canEditRequester canDelete />
+            <OrdersTable
+              orders={visible}
+              projectName={projectName}
+              showRequester={false}
+              canEditRequester
+              canDelete
+              deliveredFilterControl={<DeliveredFilter mode={deliveredMode} setMode={setDeliveredMode} fromDate={deliveredFrom} setFromDate={setDeliveredFrom} />}
+              statusFilterControl={<StatusMultiFilter selected={statusSelected} setSelected={setStatusSelected} />}
+            />
           }
         </section>
       </ImportBatchesSection>
@@ -2419,7 +2423,7 @@ function ApprovalsCenter() {
 /* ---------- Orders table ---------- */
 
 function OrdersTable({
-  orders, projectName, requesterName, showRequester, canEdit, canDelete, canEditRequester, stockParts, headerFilters,
+  orders, projectName, requesterName, showRequester, canEdit, canDelete, canEditRequester, stockParts, headerFilters, statusFilterControl, deliveredFilterControl,
 }: {
   orders: Order[];
   projectName: (id: string) => string;
@@ -2430,6 +2434,8 @@ function OrdersTable({
   canEditRequester?: boolean;
   stockParts?: Map<string, StockPart>;
   headerFilters?: boolean;
+  statusFilterControl?: React.ReactNode;
+  deliveredFilterControl?: React.ReactNode;
 }) {
   const { data: me } = useCurrentUser();
   const { data: requestTypes } = useRequestTypes();
@@ -2473,7 +2479,7 @@ function OrdersTable({
     <>
       {/* Mobile: cartões com rótulo à esquerda e informação à direita */}
       <div className="space-y-3 md:hidden">
-        {headerFilters && (
+        {(headerFilters || statusFilterControl || deliveredFilterControl) && (
           <div className="grid grid-cols-1 gap-2 rounded-lg bg-primary/10 p-2 sm:grid-cols-2">
             {filterInput(fApproval, setFApproval, "Nº do Approval")}
             {filterInput(fItem, setFItem, "Tipo")}
@@ -2487,6 +2493,8 @@ function OrdersTable({
                 {STATUS_KEYS.map((k) => <SelectItem key={k} value={k}>{STATUS_LABELS[k]}</SelectItem>)}
               </SelectContent>
             </Select>
+            {deliveredFilterControl}
+            {statusFilterControl}
           </div>
         )}
         {visibleOrders.map((o) => {
@@ -2621,6 +2629,20 @@ function OrdersTable({
                <TableHead className="py-1" />
              </TableRow>
            )}
+          {!headerFilters && (statusFilterControl || deliveredFilterControl) && (
+            <TableRow className="bg-primary/5 hover:bg-primary/5">
+              <TableHead className="py-1" />
+              <TableHead className="py-1" />
+              <TableHead className="py-1" />
+              <TableHead className="py-1" />
+              {showRequester && <TableHead className="py-1" />}
+              <TableHead className="py-1" />
+              <TableHead className="py-1" />
+              <TableHead colSpan={3} className="py-1">{deliveredFilterControl}</TableHead>
+              <TableHead className="py-1">{statusFilterControl}</TableHead>
+              <TableHead className="py-1" />
+            </TableRow>
+          )}
         </TableHeader>
         <TableBody>
           {visibleOrders.map((o) => (
