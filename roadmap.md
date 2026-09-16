@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Tarefas
+- [ ] Recuar a rede mesh para não sobrepor o card Code
 - [x] Alterar o endereço publicado para erpmyio.lovable.app, mantendo a identificação por e-mail e senha antes do portal ERP
 - [x] Aplicar tags de saída verde-claro e filtros no cabeçalho em Insumos de Instalação
 - [x] Padronizar tags de saída em verde-claro e incluir filtros no cabeçalho das movimentações de estoque
