@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Tarefas
+- [x] Corrigir o ícone do CRM para mostrar claramente três pessoas e um funil
 - [x] Ampliar o ícone do RH para a mesma proporção dos demais aplicativos
 - [x] Ampliar o ícone do Legal e alterar a descrição para “Contratos e Jurídico”
 - [x] Alterar a descrição do CRM para “Vendas e Relacionamento”
