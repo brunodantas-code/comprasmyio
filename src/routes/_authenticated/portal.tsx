@@ -3,7 +3,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AtSign, Boxes, CircleDollarSign, Cog, FileSignature, Mail, Phone, Settings2, UserRound, UsersRound, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MyioPlatformLogo } from "@/components/myio-platform-logo";
 import { ErpAppAccessAdmin } from "@/components/erp-app-access-admin";
@@ -83,8 +82,7 @@ function PortalPage() {
         <Tabs defaultValue="apps">
           <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <Badge variant="outline" className="mb-3">myio ERP</Badge>
-               <h1 className="text-3xl font-extrabold sm:text-4xl">Meus Aplicativos</h1>
+              <h1 className="text-3xl font-extrabold sm:text-4xl">Meus Aplicativos</h1>
               <p className="mt-2 text-muted-foreground">Escolha onde deseja trabalhar.</p>
             </div>
             {data.isErpAdmin ? (
