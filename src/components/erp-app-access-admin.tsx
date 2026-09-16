@@ -13,7 +13,7 @@ const APPS = [
   { key: "crm", label: "CRM" },
   { key: "legal", label: "Legal" },
   { key: "rh", label: "RH" },
-  { key: "development", label: "Desenvolvimento" },
+  { key: "development", label: "Code" },
 ] as const;
 
 export function ErpAppAccessAdmin() {

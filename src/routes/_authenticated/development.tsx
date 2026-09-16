@@ -40,7 +40,7 @@ const APP_NAMES: Record<string, string> = {
   crm: "CRM",
   legal: "Legal",
   rh: "RH",
-  development: "Desenvolvimento",
+  development: "Code",
 };
 const STATUS_NAMES: Record<TicketStatus, string> = {
   aberto: "Aberto",
@@ -58,9 +58,9 @@ export const Route = createFileRoute("/_authenticated/development")({
   component: DevelopmentPage,
   head: () => ({
     meta: [
-      { title: "Tickets | myio Desenvolvimento" },
+      { title: "Tickets | myio Code" },
       { name: "description", content: "Abertura e acompanhamento de melhorias e bugs dos aplicativos myio." },
-      { property: "og:title", content: "Tickets | myio Desenvolvimento" },
+      { property: "og:title", content: "Tickets | myio Code" },
       { property: "og:description", content: "Abertura e acompanhamento de melhorias e bugs dos aplicativos myio." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -107,7 +107,7 @@ function DevelopmentPage() {
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
-          <Link to="/portal"><MyioAppLogo appName="Desenvolvimento" className="text-base sm:text-2xl" /></Link>
+          <Link to="/portal"><MyioAppLogo appName="Code" className="text-base sm:text-2xl" /></Link>
           <Button asChild variant="outline" size="sm"><Link to="/portal"><ArrowLeft className="h-4 w-4" /><span className="hidden sm:inline">Plataforma ERP</span></Link></Button>
         </div>
       </header>
