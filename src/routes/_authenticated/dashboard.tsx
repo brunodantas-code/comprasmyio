@@ -1787,6 +1787,9 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
                       Interna
                     </label>
                   </div>
+                  {!forStock && allocTarget === "projeto" && (
+                    <p className="text-xs text-muted-foreground">Prova de conceito ou potencial cliente, ainda não implantado.</p>
+                  )}
                   {!forStock && allocTarget === "interna" && (
                     <p className="text-xs text-muted-foreground">Qualquer despesa interna não atrelada a clientes ou projetos</p>
                   )}
@@ -1835,7 +1838,15 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
                       Interna
                     </label>
                   </div>
-                  <p className="text-xs text-muted-foreground">Qualquer despesa interna não atrelada a clientes ou projetos</p>
+                  {allocTarget === "projeto" && (
+                    <p className="text-xs text-muted-foreground">Prova de conceito ou potencial cliente, ainda não implantado.</p>
+                  )}
+                  {allocTarget === "cliente" && (
+                    <p className="text-xs text-muted-foreground">Contrato assinado e ativo.</p>
+                  )}
+                  {allocTarget === "interna" && (
+                    <p className="text-xs text-muted-foreground">Qualquer despesa interna não atrelada a clientes ou projetos</p>
+                  )}
                   {!restrictedCc && (
                     <div className="pt-2">
                       <Label>Centro de Custo</Label>
