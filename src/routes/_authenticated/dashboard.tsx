@@ -2157,7 +2157,7 @@ function MyOrders({ userId, canManageDevices }: { userId: string; canManageDevic
         </CardHeader>
         <CardContent className="space-y-6">
           {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
-            !orders?.length ? <p className="text-sm text-muted-foreground">Nenhum pedido ainda.</p> :
+            !orders?.length ? <p className="text-sm text-muted-foreground">Nenhuma solicitação aberta.</p> :
             !visible.length ? <p className="text-sm text-muted-foreground">Nenhum pedido para exibir com o filtro atual.</p> :
             <OrdersTable orders={visible} projectName={projectName} showRequester={false} canEditRequester canDelete stockParts={stockParts} headerFilters />
           }
