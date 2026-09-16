@@ -38,6 +38,7 @@ import { RemindersTab } from "@/components/reminders-tab";
 import { AdditionalStepTypesTab } from "@/components/additional-step-types-tab";
 import { RequestTypesTab, requestTypeModel, requestTypeName, useRequestTypes, type RequestTypeRecord } from "@/components/request-types-tab";
 import { StockDestinationsTab } from "@/components/stock-destinations-tab";
+import { DamageReasonsTab } from "@/components/damage-reasons-tab";
 import { AccessProfilesTab } from "@/components/access-profiles-tab";
 import { AccessProfileDefinitionsTab, useAccessProfileDefinitions } from "@/components/access-profile-definitions-tab";
 import { ImportBatchesSection, NewImportDialog } from "@/components/import-batches";
@@ -528,6 +529,7 @@ function Dashboard() {
                     <RequestTypesTab />
                     <AdditionalStepTypesTab />
                     <StockDestinationsTab />
+                    <DamageReasonsTab />
                   </div>
                 </TabsContent>}
               </Tabs>
