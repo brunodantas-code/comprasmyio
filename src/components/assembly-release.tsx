@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -840,6 +840,7 @@ export function AssemblyReleasesCard({
   canDelete = false,
   canReportIssue = false,
   canCorrect = false,
+  action,
 }: {
   materialNames: Record<string, string>;
   title?: string;
@@ -849,6 +850,7 @@ export function AssemblyReleasesCard({
   canDelete?: boolean;
   canReportIssue?: boolean;
   canCorrect?: boolean;
+  action?: ReactNode;
 }) {
   const { data: releases } = useAssemblyReleases();
   const { data: profiles } = useProfilesList();
@@ -874,9 +876,9 @@ export function AssemblyReleasesCard({
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
+      <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div><CardTitle>{title}</CardTitle><CardDescription>{description}</CardDescription></div>
+        {action}
       </CardHeader>
       <CardContent>
         {!visibleReleases.length ? (

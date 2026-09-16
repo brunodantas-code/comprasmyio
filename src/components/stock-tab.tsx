@@ -1271,8 +1271,6 @@ function FabricaSection({
   const { data: movements } = useMovements();
   const { data: profiles } = useStockProfiles();
   const { data: manufactured } = useManufacturedMap();
-  const [search, setSearch] = useState("");
-  const [view, setView] = useState<"all" | "with" | "zero">("all");
 
   // Fábrica = somente componentes. Produtos fabricados pela Myio nunca aparecem aqui.
   const scoped = (stock ?? [])
@@ -1281,9 +1279,7 @@ function FabricaSection({
     .filter((r) => !/ — Caixa de \d+$/.test(r.name));
   const scopedIds = new Set(scoped.map((r) => r.material_id));
   const scopedMovements = (movements ?? []).filter((m) => scopedIds.has(m.material_id));
-  const rows = scoped
-    .filter((r) => r.name.toLowerCase().includes(search.trim().toLowerCase()))
-    .filter((r) => (view === "with" ? r.balance > 0 : view === "zero" ? r.balance <= 0 : true));
+  const rows = scoped;
   const materialNames = Object.fromEntries((stock ?? []).map((r) => [r.material_id, r.name]));
   const almoxarifadoBalances = Object.fromEntries(
     (stock ?? [])
@@ -1297,23 +1293,6 @@ function FabricaSection({
       <BomSettingsDialog />
       <StockSimulatorDialog userId={userId} />
       <ResetStockDialog rows={scoped} userId={userId} location="fabrica" />
-      <div className="relative">
-        <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar material"
-          className="w-full pl-8 sm:w-[200px]"
-        />
-      </div>
-      <Select value={view} onValueChange={(v) => setView(v as "all" | "with" | "zero")}>
-        <SelectTrigger className="w-full sm:w-[170px]"><SelectValue /></SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">Todos</SelectItem>
-          <SelectItem value="with">Com saldo</SelectItem>
-          <SelectItem value="zero">Sem saldo</SelectItem>
-        </SelectContent>
-      </Select>
     </>
   );
 
@@ -1339,10 +1318,7 @@ function FabricaSection({
       </TabsContent>}
 
       {canAccessFactory && <TabsContent value="liberados" className="space-y-6">
-        <div className="flex justify-end">
-          <ReleaseAssembledDialog userId={userId} />
-        </div>
-        <AssemblyReleasesCard materialNames={materialNames} userId={userId} canCorrect canDelete={canDelete} />
+        <AssemblyReleasesCard materialNames={materialNames} userId={userId} canCorrect canDelete={canDelete} action={<ReleaseAssembledDialog userId={userId} />} />
       </TabsContent>}
 
       {canAccessHomologation && <TabsContent value="homologacao" className="space-y-6">
@@ -1361,6 +1337,7 @@ function FabricaSection({
           actions={toolbar}
           damageSource="Estoque de Componentes"
           detail
+          columnFilters
         />
         <Card>
           <CardHeader>
@@ -1862,7 +1839,7 @@ function TerceirosResetDialog({ rows }: { rows: TerceirosRow[] }) {
       }}
     >
       <DialogTrigger asChild>
-        <Button size="sm" className="text-foreground hover:text-foreground">
+        <Button size="sm" className="bg-myio-green text-foreground hover:bg-myio-green/80 hover:text-foreground">
           <Eraser className="mr-2 h-4 w-4" /> Zerar estoque
         </Button>
       </DialogTrigger>

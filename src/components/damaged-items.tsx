@@ -19,8 +19,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { AlertTriangle, Camera, Eye, Recycle } from "lucide-react";
-
-const DAMAGE_REASONS = ["Água ou Líquidos", "Falha", "Quebra Física"] as const;
+import { useDamageReasons } from "@/components/damage-reasons-tab";
 import { pushQrsToExternal } from "@/lib/push-external";
 
 export type DamagedItem = {
@@ -31,6 +30,7 @@ export type DamagedItem = {
   source: string;
   source_detail: string | null;
   reason: string;
+  reason_code: string | null;
   photo_url: string | null;
   status: "avariado" | "recuperado";
   recovered_to: string | null;
@@ -65,6 +65,7 @@ export async function recordDamagedItem(input: {
   source: string;
   source_detail?: string | null;
   reason: string;
+  reason_code?: string | null;
   photo_url?: string | null;
   created_by: string;
 }) {
@@ -75,6 +76,7 @@ export async function recordDamagedItem(input: {
     source: input.source,
     source_detail: input.source_detail ?? null,
     reason: input.reason,
+    reason_code: input.reason_code ?? null,
     photo_url: input.photo_url ?? null,
     created_by: input.created_by,
   });
@@ -109,6 +111,7 @@ export function DamageItemDialog({
   userId: string;
 }) {
   const qc = useQueryClient();
+  const { data: damageReasons } = useDamageReasons();
   const [open, setOpen] = useState(false);
   const [quantity, setQuantity] = useState("1");
   const [reason, setReason] = useState("");
@@ -127,7 +130,8 @@ export function DamageItemDialog({
       const qty = parseInt(quantity, 10);
       if (!Number.isInteger(qty) || qty <= 0) throw new Error("Quantidade inválida.");
       if (qty > limit) throw new Error("Quantidade maior que o saldo em estoque.");
-      if (!reason) throw new Error("Selecione o motivo da avaria.");
+      const selectedReason = damageReasons?.find((item) => item.code === reason && item.active);
+      if (!selectedReason) throw new Error("Selecione o motivo da avaria.");
       if (!file) throw new Error("A foto da avaria é obrigatória.");
 
       let path: string | null = null;
@@ -141,7 +145,7 @@ export function DamageItemDialog({
         material_id: materialId,
         quantity: qty,
         type: "saida",
-        reason: `Item avariado — ${reason.trim()}`,
+        reason: `Item avariado — ${selectedReason.name}`,
         responsible: null,
         photo_url: path,
         created_by: userId,
@@ -153,7 +157,8 @@ export function DamageItemDialog({
         product: materialName,
         quantity: qty,
         source,
-        reason: reason.trim(),
+        reason: selectedReason.name,
+        reason_code: selectedReason.code,
         photo_url: path,
         created_by: userId,
       });
@@ -211,8 +216,8 @@ export function DamageItemDialog({
                 <SelectValue placeholder="Selecione o motivo" />
               </SelectTrigger>
               <SelectContent>
-                {DAMAGE_REASONS.map((r) => (
-                  <SelectItem key={r} value={r}>{r}</SelectItem>
+                {(damageReasons ?? []).filter((item) => item.active).map((item) => (
+                  <SelectItem key={item.code} value={item.code}>{item.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>

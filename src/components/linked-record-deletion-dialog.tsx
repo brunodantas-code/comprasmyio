@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 type LinkField = "project_id" | "client_id" | "cost_center_id" | "request_type";
-type DiversosRegistry = "request_type" | "additional_step_type" | "stock_destination";
+type DiversosRegistry = "request_type" | "additional_step_type" | "stock_destination" | "damage_reason";
 type Destination = { id: string; name: string };
 
 type LinkedOrder = {
@@ -148,6 +148,7 @@ export function LinkedRecordDeletionDialog({
         qc.invalidateQueries({ queryKey: ["request-types"] }),
         qc.invalidateQueries({ queryKey: ["additional-step-types"] }),
         qc.invalidateQueries({ queryKey: ["stock-destinations"] }),
+        qc.invalidateQueries({ queryKey: ["damage-reasons"] }),
         qc.invalidateQueries({ queryKey: ["approval-rules"] }),
         qc.invalidateQueries({ queryKey: ["unit-products"] }),
       ]);
