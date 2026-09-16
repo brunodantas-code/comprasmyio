@@ -416,37 +416,24 @@ export function PendingForMe() {
   return (
     <Card>
       <CardHeader>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <CardTitle className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <span>Pendentes comigo</span>
-              {mine.length > 0 && (
-                <span className="text-sm font-normal text-muted-foreground">
-                  {mine.length} {mine.length === 1 ? "approval" : "approvals"} ·{" "}
-                   <strong className="font-semibold">{fmtBRL(totalValue)}</strong>
-                   {deviceQuantity > 0 && <> · <strong className="font-semibold">{deviceQuantity} dispositivos</strong></>}
-                </span>
-              )}
-            </CardTitle>
-            <CardDescription>Etapas aguardando sua decisão na sequência de aprovação.</CardDescription>
-          </div>
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar nº do approval"
-            className="w-full sm:w-[200px]"
-          />
+        <div>
+          <CardTitle className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <span>Pendentes comigo</span>
+            {mine.length > 0 && (
+              <span className="text-sm font-normal text-muted-foreground">
+                {mine.length} {mine.length === 1 ? "approval" : "approvals"} ·{" "}
+                 <strong className="font-semibold">{fmtBRL(totalValue)}</strong>
+                 {deviceQuantity > 0 && <> · <strong className="font-semibold">{deviceQuantity} dispositivos</strong></>}
+              </span>
+            )}
+          </CardTitle>
+          <CardDescription>Etapas aguardando sua decisão na sequência de aprovação.</CardDescription>
         </div>
       </CardHeader>
       <CardContent>
-        {isLoading ? (
-          <p className="text-sm text-muted-foreground">Carregando...</p>
-        ) : mine.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nenhuma aprovação pendente.</p>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
+        <Table>
+          <TableHeader className="[&_tr]:border-b">
+              <TableRow className="border-t bg-primary/15 hover:bg-primary/15">
                 <TableHead>Approval</TableHead>
                 <TableHead>Tipo</TableHead>
                 <TableHead>Solicitante</TableHead>
@@ -456,9 +443,25 @@ export function PendingForMe() {
                 <TableHead>Projeto ou Cliente</TableHead>
                 <TableHead aria-label="Ações" />
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {mine.map((s) => {
+              <TableRow className="bg-primary/5 hover:bg-primary/5">
+                <TableHead className="py-1">
+                  <Input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Filtrar approval"
+                    aria-label="Filtrar por número do approval"
+                    className="h-8 min-w-36 bg-background"
+                  />
+                </TableHead>
+                <TableHead colSpan={7} />
+              </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              <TableRow><TableCell colSpan={8} className="text-sm text-muted-foreground">Carregando...</TableCell></TableRow>
+            ) : mine.length === 0 ? (
+              <TableRow><TableCell colSpan={8} className="text-sm text-muted-foreground">Nenhuma aprovação pendente.</TableCell></TableRow>
+            ) : mine.map((s) => {
                 const o = s.purchase_orders;
                 const req = o?.requester_id ? profiles?.get(o.requester_id) : undefined;
                 return (
@@ -484,9 +487,8 @@ export function PendingForMe() {
                   </TableRow>
                 );
               })}
-            </TableBody>
-          </Table>
-        )}
+          </TableBody>
+        </Table>
       </CardContent>
     </Card>
   );
@@ -657,20 +659,21 @@ export function MyApprovalFlows() {
   return (
     <Card>
       <CardHeader>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <CardTitle>Meus em aprovação</CardTitle>
-            <CardDescription>Approvals criados por você que ainda aguardam a conclusão da aprovação.</CardDescription>
-          </div>
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar nº do approval"
-            className="w-full sm:w-[200px]"
-          />
+        <div>
+          <CardTitle>Meus em aprovação</CardTitle>
+          <CardDescription>Approvals criados por você que ainda aguardam a conclusão da aprovação.</CardDescription>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        <div className="border-t bg-primary/5 p-2">
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Filtrar approval"
+            aria-label="Filtrar por número do approval"
+            className="h-8 w-full bg-background sm:w-[200px]"
+          />
+        </div>
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando...</p>
         ) : orders.length === 0 ? (

@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Tarefas
+- [x] Mover os filtros de “Pendentes comigo” e “Meus em aprovação” para cabeçalhos verdes no padrão de “Todos”
 - [x] Permitir ao solicitante excluir ticket próprio ainda “Em aberto”, mantendo-o no histórico como “Excluído” e fora das pendências
 - [x] Corrigir no mobile o conflito entre logomarca/nome do App e etiquetas de perfil e cargo
 - [x] Padronizar os indicadores de situação com fundo verde-claro em todos os Apps
