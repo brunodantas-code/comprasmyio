@@ -641,7 +641,7 @@ export function UnitProductsCard({
             <>
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="border-green-300 bg-green-100 text-green-800">
+                  <Badge variant="status">
                     Instalados · {installed.length}
                   </Badge>
                 </div>
@@ -658,7 +658,7 @@ export function UnitProductsCard({
               </div>
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="border-amber-300 bg-amber-100 text-amber-800">
+                  <Badge variant="status">
                     Parados · {stopped.length}
                   </Badge>
                 </div>

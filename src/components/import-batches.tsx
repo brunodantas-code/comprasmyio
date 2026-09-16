@@ -31,12 +31,12 @@ const STATUS_LABELS: Record<ImportStatus, string> = {
 };
 
 const STATUS_CLASSES: Record<ImportStatus, string> = {
-  pendente: "bg-yellow-500 hover:bg-yellow-500 text-black border-transparent",
-  comprado_aguardando: "bg-green-600 hover:bg-green-600 text-white border-transparent",
-  entregue: "bg-blue-600 hover:bg-blue-600 text-white border-transparent",
-  cancelado: "bg-red-600 hover:bg-red-600 text-white border-transparent",
-  recebido_ok: "bg-slate-200 hover:bg-slate-200 text-slate-700 border-transparent",
-  recebido_problema: "bg-amber-100 hover:bg-amber-100 text-amber-900 border-transparent",
+  pendente: "border-status-border bg-status text-status-foreground hover:bg-status",
+  comprado_aguardando: "border-status-border bg-status text-status-foreground hover:bg-status",
+  entregue: "border-status-border bg-status text-status-foreground hover:bg-status",
+  cancelado: "border-status-border bg-status text-status-foreground hover:bg-status",
+  recebido_ok: "border-status-border bg-status text-status-foreground hover:bg-status",
+  recebido_problema: "border-status-border bg-status text-status-foreground hover:bg-status",
 };
 
 const STATUS_KEYS = Object.keys(STATUS_LABELS) as ImportStatus[];

@@ -279,7 +279,7 @@ export function DistributionCard() {
                 <span className="font-medium">{o.projects?.name || o.title}</span>
                 <Badge variant="outline">{o.client_name}</Badge>
                 <Badge variant="outline">Entrega {formatDate(o.delivery_date)}</Badge>
-                <Badge variant="outline" className="border-blue-300 bg-blue-100 text-blue-800">
+                <Badge variant="status">
                   Pronto para entrega
                 </Badge>
                 {o.is_replacement && (
@@ -635,12 +635,7 @@ function TransitQrProgress({ orderId }: { orderId: string }) {
   if (!data || !data.total) return null;
   const noneLeft = data.inTransit === 0;
   return (
-    <Badge
-      variant="outline"
-      className={
-        noneLeft ? "border-emerald-300 bg-emerald-100 text-emerald-800" : "border-amber-300 bg-amber-100 text-amber-800"
-      }
-    >
+    <Badge variant="status">
       {data.inTransit} de {data.total} em transporte
     </Badge>
   );
@@ -727,7 +722,7 @@ export function TransitCard() {
                   <span className="font-medium">{o.projects?.name || o.title}</span>
                   <Badge variant="outline">{o.client_name}</Badge>
                   <Badge variant="outline">Entrega {formatDate(o.delivery_date)}</Badge>
-                  <Badge variant="outline" className="border-amber-300 bg-amber-100 text-amber-800">
+                  <Badge variant="status">
                     Transporte
                   </Badge>
                   <TransitQrProgress orderId={o.id} />
@@ -990,7 +985,7 @@ export function LostCard() {
                   <span className="font-medium">{o.projects?.name || o.title}</span>
                   <Badge variant="outline">{o.client_name}</Badge>
                   <Badge variant="outline">Entrega {formatDate(o.delivery_date)}</Badge>
-                  <Badge variant="outline" className="border-red-300 bg-red-100 text-red-800">
+                  <Badge variant="status">
                     Perdido
                   </Badge>
                   <div className="ml-auto">

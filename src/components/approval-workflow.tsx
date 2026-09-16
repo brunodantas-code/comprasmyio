@@ -123,10 +123,9 @@ function useSteps() {
 type StepRow = NonNullable<ReturnType<typeof useSteps>["data"]>[number];
 
 function StatusBadge({ status }: { status: string }) {
-  if (status === "aprovado")
-    return <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100">Aprovado</Badge>;
-  if (status === "rejeitado") return <Badge className="bg-red-100 text-red-800 hover:bg-red-100">Rejeitado</Badge>;
-  return <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100">Pendente</Badge>;
+  if (status === "aprovado") return <Badge variant="status">Aprovado</Badge>;
+  if (status === "rejeitado") return <Badge variant="status">Rejeitado</Badge>;
+  return <Badge variant="status">Pendente</Badge>;
 }
 
 function PendingApprovalDetails({ step, requestTypes }: { step: StepRow; requestTypes?: RequestTypeRecord[] }) {

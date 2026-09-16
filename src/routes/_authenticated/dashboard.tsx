@@ -237,7 +237,7 @@ const STATUS_LABELS: Record<Order["status"], string> = {
   recebido_problema: "Recebido com problemas",
 };
 
-const STATUS_BADGE_BASE = "bg-slate-200 hover:bg-slate-200 text-slate-700 border-transparent";
+const STATUS_BADGE_BASE = "border-status-border bg-status text-status-foreground hover:bg-status";
 
 const STATUS_CLASSES: Record<Order["status"], string> = {
   pendente: STATUS_BADGE_BASE,
@@ -453,31 +453,35 @@ function Dashboard() {
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 border-b border-border bg-card">
-        <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 sm:flex sm:justify-between sm:px-6 sm:py-4">
-          <Link to="/portal" className="flex min-w-0 items-center font-semibold" title="Voltar aos aplicativos">
-            <MyioLogo className="text-xl sm:text-2xl" />
-          </Link>
-          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-            <div className="min-w-0 text-right">
-              <div className="truncate text-xs font-medium sm:text-sm">{me.full_name || me.email}</div>
-              <div className="flex flex-wrap justify-end gap-1">
-                <Badge variant="outline" className="text-[10px] uppercase">{me.accessProfileName}</Badge>
-                {me.jobTitle ? <Badge variant="outline" className="text-[10px] uppercase">{me.jobTitle.name}</Badge> : null}
-              </div>
-            </div>
+        <div className="mx-auto grid max-w-7xl sm:flex sm:items-center sm:justify-between sm:px-6 sm:py-4">
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 sm:contents">
+            <Link to="/portal" className="flex min-w-0 items-center font-semibold" title="Voltar aos aplicativos">
+              <MyioLogo className="text-xl sm:text-2xl" />
+            </Link>
+            <div className="flex shrink-0 items-center gap-2 sm:order-3 sm:gap-3">
             <Button asChild variant="outline" size="sm" className="shrink-0" title="Voltar à Plataforma ERP">
               <Link to="/portal"><ArrowLeft className="h-4 w-4" /><span className="hidden md:inline">Plataforma ERP</span></Link>
             </Button>
             <Button variant="ghost" size="icon" className="shrink-0" onClick={handleSignOut} title="Sair">
               <LogOut className="h-4 w-4" />
             </Button>
+            </div>
+          </div>
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-t border-border bg-muted/50 px-4 py-2.5 sm:order-2 sm:flex sm:border-0 sm:bg-transparent sm:p-0">
+            <div className="min-w-0 sm:text-right">
+              <div className="truncate text-xs font-medium sm:text-sm">{me.full_name || me.email}</div>
+            </div>
+            <div className="flex shrink-0 flex-wrap justify-end gap-1">
+              <Badge variant="outline" className="text-[10px] uppercase">{me.accessProfileName}</Badge>
+              {me.jobTitle ? <Badge variant="outline" className="text-[10px] uppercase">{me.jobTitle.name}</Badge> : null}
+            </div>
           </div>
         </div>
       </header>
 
       <main className="mx-auto max-w-7xl px-3 py-5 sm:px-6 sm:py-8">
         <Tabs defaultValue={search.section ?? defaultTab}>
-          <div className="sticky top-[60px] z-40 -mx-3 mb-6 bg-background px-3 py-2 sm:top-[73px] sm:-mx-6 sm:px-6">
+          <div className="sticky top-[105px] z-40 -mx-3 mb-6 bg-background px-3 py-2 sm:top-[73px] sm:-mx-6 sm:px-6">
           <TabsList>
             {canSeeRequests && <TabsTrigger value="pedidos"><ClipboardList className="mr-2 h-4 w-4" />Solicitações</TabsTrigger>}
             {canSeeQueue && (
@@ -2213,7 +2217,7 @@ function MyOrders({ userId, canManageDevices }: { userId: string; canManageDevic
                   <li key={p.group} className="flex flex-wrap items-center gap-2">
                     <span className="font-medium">{p.title}</span>
                     <span className="text-muted-foreground">{p.qty} unid.</span>
-                    <Badge variant="secondary">{MYIO_STATUS_LABELS[p.status] ?? p.status}</Badge>
+                    <Badge variant="status">{MYIO_STATUS_LABELS[p.status] ?? p.status}</Badge>
                   </li>
                 ))}
               </ul>
@@ -4092,7 +4096,7 @@ function StatusHistoryDialog({ order, canEdit }: { order: Order; canEdit?: boole
               };
               const statusKey = (rawStatus && (legacyMap[rawStatus] ?? (rawStatus as Order["status"]))) as Order["status"] | undefined;
               const label = statusKey && STATUS_LABELS[statusKey] ? STATUS_LABELS[statusKey] : (rawStatus ?? l.action);
-              const cls = statusKey && STATUS_CLASSES[statusKey] ? STATUS_CLASSES[statusKey] : "bg-muted text-foreground border-transparent";
+              const cls = statusKey && STATUS_CLASSES[statusKey] ? STATUS_CLASSES[statusKey] : STATUS_BADGE_BASE;
               return (
                 <li key={l.id} className="flex items-start gap-3 border-l-2 border-muted pl-3">
                   <Badge className={cls}>{label}</Badge>

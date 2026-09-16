@@ -1,7 +1,7 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, CodeXml, Download, Eye, History, Paperclip, Plus } from "lucide-react";
+import { ArrowLeft, CodeXml, Download, Eye, History, Paperclip, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { MyioAppLogo } from "@/components/myio-app-logo";
@@ -14,9 +14,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { APP_NAVIGATION_OPTIONS } from "@/lib/app-navigation-options";
 
-type TicketStatus = "aberto" | "em_atendimento" | "atendido" | "concluido";
+type TicketStatus = "aberto" | "em_atendimento" | "atendido" | "concluido" | "excluido";
 type Ticket = {
   id: string;
   ticket_number: number;
@@ -50,8 +51,9 @@ const STATUS_NAMES: Record<TicketStatus, string> = {
   em_atendimento: "Em atendimento",
   atendido: "Atendido",
   concluido: "Concluído",
+  excluido: "Excluído",
 };
-const ADMIN_STATUS_NAMES: Record<Exclude<TicketStatus, "concluido">, string> = {
+const ADMIN_STATUS_NAMES: Record<Exclude<TicketStatus, "concluido" | "excluido">, string> = {
   aberto: "Em aberto",
   em_atendimento: "Em atendimento",
   atendido: "Atendido",
@@ -163,7 +165,7 @@ function DevelopmentPage() {
                     <TableCell><Badge variant="outline">{ticket.ticket_type === "bug" ? "Bug" : "Melhoria"}</Badge></TableCell>
                     <TableCell className="max-w-xs truncate font-medium">{ticket.title}</TableCell>
                     <TableCell>{PRIORITY_NAMES[ticket.priority]}</TableCell>
-                    <TableCell><Badge>{STATUS_NAMES[ticket.status]}</Badge></TableCell>
+                    <TableCell><Badge variant="status">{STATUS_NAMES[ticket.status]}</Badge></TableCell>
                     <TableCell>{new Date(ticket.created_at).toLocaleDateString("pt-BR")}</TableCell>
                   </TableRow>
                  ))}{!filteredTickets.length ? <TableRow><TableCell colSpan={8} className="h-24 text-center text-muted-foreground">Nenhum ticket encontrado.</TableCell></TableRow> : null}</TableBody>
@@ -302,6 +304,15 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
     onSuccess: () => { toast.success("Ticket concluído"); onClose(); onUpdated(); },
     onError: (error: Error) => toast.error(error.message),
   });
+  const remove = useMutation({
+    mutationFn: async () => {
+      if (!ticket || ticket.status !== "aberto" || ticket.reporter_id !== data?.userId) throw new Error("Somente o solicitante pode excluir seu ticket em aberto");
+      const { error } = await supabase.from("development_tickets").update({ status: "excluido" }).eq("id", ticket.id).eq("reporter_id", data.userId).eq("status", "aberto");
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success("Ticket excluído e mantido no histórico"); onClose(); onUpdated(); },
+    onError: (error: Error) => toast.error(error.message),
+  });
   async function download(path: string, name: string) {
     const { data: signed, error } = await supabase.storage.from("development-ticket-attachments").createSignedUrl(path, 60);
     if (error) return toast.error(error.message);
@@ -319,10 +330,11 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
         <DialogHeader><DialogTitle>#{ticket.ticket_number} — {ticket.title}</DialogTitle><DialogDescription>{APP_NAMES[ticket.app_key]} · {ticket.ticket_type === "bug" ? "Bug" : "Melhoria"} · Solicitante: {data?.profiles.find((profile) => profile.id === ticket.reporter_id)?.full_name || data?.profiles.find((profile) => profile.id === ticket.reporter_id)?.email || "Usuário"} · {new Date(ticket.created_at).toLocaleString("pt-BR")}</DialogDescription></DialogHeader>
         {ticket.menu_name || ticket.submenu_name ? <div className="flex flex-wrap gap-2">{ticket.menu_name ? <Badge variant="outline">Menu: {ticket.menu_name}</Badge> : null}{ticket.submenu_name ? <Badge variant="outline">Submenu: {ticket.submenu_name}</Badge> : null}</div> : null}
         <div className="grid gap-4 sm:grid-cols-2"><div><p className="text-xs font-semibold text-muted-foreground">Descrição</p><p className="mt-1 whitespace-pre-wrap text-sm">{ticket.description}</p></div><div><p className="text-xs font-semibold text-muted-foreground">Resultado esperado</p><p className="mt-1 whitespace-pre-wrap text-sm">{ticket.expected_result}</p></div></div>
-        <div className="flex flex-wrap gap-2"><Badge>{STATUS_NAMES[ticket.status]}</Badge><Badge variant="outline">Prioridade {PRIORITY_NAMES[ticket.priority]}</Badge>{ticket.urgency === "urgente" ? <Badge variant="destructive">Urgente</Badge> : null}</div>
+        <div className="flex flex-wrap gap-2"><Badge variant="status">{STATUS_NAMES[ticket.status]}</Badge><Badge variant="outline">Prioridade {PRIORITY_NAMES[ticket.priority]}</Badge>{ticket.urgency === "urgente" ? <Badge variant="destructive">Urgente</Badge> : null}</div>
         {details.data?.attachments.length ? <div><p className="mb-2 flex items-center gap-2 text-sm font-semibold"><Paperclip className="h-4 w-4" />Anexos</p><div className="flex flex-wrap gap-2">{details.data.attachments.map((attachment) => <Button key={attachment.id} variant="outline" size="sm" onClick={() => openPreview(attachment.storage_path, attachment.file_name, attachment.content_type)}><Eye className="h-4 w-4" /><span className="max-w-64 truncate">{attachment.file_name}</span></Button>)}</div></div> : null}
-        {data?.isAdmin && ticket.status !== "concluido" ? <div className="space-y-3 border-t pt-4"><h3 className="font-semibold">Gestão do ticket</h3><div className="grid gap-3 sm:grid-cols-2"><div><Label>Situação</Label><FilterSelect value={status} onChange={(value) => setStatus(value as TicketStatus)} placeholder="Situação" options={Object.entries(ADMIN_STATUS_NAMES).map(([value, label]) => ({ value, label }))} firstOption={null} /></div><div><Label>Responsável pela execução</Label><FilterSelect value={assignee} onChange={setAssignee} placeholder="Responsável pela execução" options={(data.codeAdmins ?? []).map((profile) => ({ value: profile.id, label: profile.full_name || profile.email || "Usuário" }))} firstOption={{ value: "none", label: "Sem responsável" }} /></div></div><div><Label htmlFor="admin-notes">Observações</Label><Textarea id="admin-notes" value={notes} onChange={(event) => setNotes(event.target.value)} maxLength={4000} /></div><Button onClick={() => update.mutate()} disabled={update.isPending}>Salvar andamento</Button></div> : ticket.admin_notes ? <div><p className="text-sm font-semibold">Observações</p><p className="mt-1 whitespace-pre-wrap text-sm">{ticket.admin_notes}</p></div> : null}
+        {data?.isAdmin && ticket.status !== "concluido" && ticket.status !== "excluido" ? <div className="space-y-3 border-t pt-4"><h3 className="font-semibold">Gestão do ticket</h3><div className="grid gap-3 sm:grid-cols-2"><div><Label>Situação</Label><FilterSelect value={status} onChange={(value) => setStatus(value as TicketStatus)} placeholder="Situação" options={Object.entries(ADMIN_STATUS_NAMES).map(([value, label]) => ({ value, label }))} firstOption={null} /></div><div><Label>Responsável pela execução</Label><FilterSelect value={assignee} onChange={setAssignee} placeholder="Responsável pela execução" options={(data.codeAdmins ?? []).map((profile) => ({ value: profile.id, label: profile.full_name || profile.email || "Usuário" }))} firstOption={{ value: "none", label: "Sem responsável" }} /></div></div><div><Label htmlFor="admin-notes">Observações</Label><Textarea id="admin-notes" value={notes} onChange={(event) => setNotes(event.target.value)} maxLength={4000} /></div><Button onClick={() => update.mutate()} disabled={update.isPending}>Salvar andamento</Button></div> : ticket.admin_notes ? <div><p className="text-sm font-semibold">Observações</p><p className="mt-1 whitespace-pre-wrap text-sm">{ticket.admin_notes}</p></div> : null}
         {ticket.status === "atendido" && ticket.reporter_id === data?.userId ? <div className="space-y-2 border-t pt-4"><p className="text-sm text-muted-foreground">Confirme se a correção ou melhoria foi entregue conforme esperado.</p><Button onClick={() => conclude.mutate()} disabled={conclude.isPending}>{conclude.isPending ? "Concluindo..." : "Marcar como concluído"}</Button></div> : null}
+        {ticket.status === "aberto" && ticket.reporter_id === data?.userId ? <div className="flex justify-end border-t pt-4"><AlertDialog><AlertDialogTrigger asChild><Button variant="destructive"><Trash2 className="h-4 w-4" />Excluir ticket</Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Excluir este ticket?</AlertDialogTitle><AlertDialogDescription>Ele permanecerá no histórico com a situação “Excluído” e deixará de ser uma pendência para o executor.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={() => remove.mutate()} disabled={remove.isPending}>{remove.isPending ? "Excluindo..." : "Confirmar exclusão"}</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog></div> : null}
         {details.data?.logs.length ? <div className="border-t pt-4"><p className="mb-2 flex items-center gap-2 text-sm font-semibold"><History className="h-4 w-4" />Histórico</p><div className="space-y-2">{details.data.logs.map((log) => <div key={log.id} className="rounded-md bg-muted p-2 text-xs">{log.previous_status !== log.new_status ? `${STATUS_NAMES[log.previous_status as TicketStatus] ?? "—"} → ${STATUS_NAMES[log.new_status as TicketStatus] ?? "—"}` : "Responsável ou observação atualizados"}<span className="ml-2 text-muted-foreground">{new Date(log.created_at).toLocaleString("pt-BR")}</span></div>)}</div></div> : null}
         </div> : null}
       </DialogContent>

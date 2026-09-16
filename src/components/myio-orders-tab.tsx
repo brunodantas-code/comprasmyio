@@ -45,12 +45,12 @@ const STATUS_LABELS: Record<MyioStatus, string> = {
 };
 
 const STATUS_CLASSES: Record<MyioStatus, string> = {
-  pendente: "bg-yellow-100 text-yellow-800 border-yellow-300",
-  produzindo: "bg-purple-100 text-purple-800 border-purple-300",
-  pronto_entrega: "bg-green-100 text-green-800 border-green-300",
-  em_transito: "bg-amber-100 text-amber-800 border-amber-300",
-  entregue_cliente: "bg-blue-100 text-blue-800 border-blue-300",
-  perdido: "bg-red-100 text-red-800 border-red-300",
+  pendente: "border-status-border bg-status text-status-foreground",
+  produzindo: "border-status-border bg-status text-status-foreground",
+  pronto_entrega: "border-status-border bg-status text-status-foreground",
+  em_transito: "border-status-border bg-status text-status-foreground",
+  entregue_cliente: "border-status-border bg-status text-status-foreground",
+  perdido: "border-status-border bg-status text-status-foreground",
 };
 
 const STATUS_KEYS = Object.keys(STATUS_LABELS) as MyioStatus[];
@@ -577,7 +577,7 @@ export function MyioOrdersTab({ userId, canManage = true }: { userId: string; ca
                   </TableCell>
                   <TableCell>
                     <span className="font-mono text-xs">{o.purchase_orders?.approval_number || "—"}</span>
-                    <div><Badge variant="outline">{o.purchase_orders?.approval_status === "aprovado" ? "Aprovado" : o.purchase_orders?.approval_status === "rejeitado" ? "Rejeitado" : "Em aprovação"}</Badge></div>
+                    <div><Badge variant="status">{o.purchase_orders?.approval_status === "aprovado" ? "Aprovado" : o.purchase_orders?.approval_status === "rejeitado" ? "Rejeitado" : "Em aprovação"}</Badge></div>
                   </TableCell>
                   <TableCell>
                     {o.is_replacement ? (
