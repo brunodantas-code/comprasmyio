@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Tarefas
+- [x] Alinhar os botões “Aplicativos” e “Acessos” à base do título no desktop
 - [x] Renomear “Usuários e aplicativos” para “Acessos” no portal
 - [x] Igualar a largura dos botões “Aplicativos” e “Usuários e aplicativos” também no desktop
 - [x] Simplificar a descrição do Cash Flow para “Gestão financeira”
