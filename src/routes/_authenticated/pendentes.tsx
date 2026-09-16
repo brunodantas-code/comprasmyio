@@ -43,7 +43,7 @@ function PendentesPage() {
             <div className="divide-y divide-border overflow-hidden rounded-md border border-border bg-card">
               <PendingLink icon={CheckCircle2} label="Approvals pendentes comigo" count={data?.approvals ?? 0} to="/pendentes" />
               <PendingLink icon={ShieldCheck} label="Exclusões de usuários aguardando decisão" count={data?.userDeletions ?? 0} to="/dashboard" search={{ section: "admin", subsection: "usuarios" }} />
-              <PendingLink icon={CodeXml} label="Tickets atendidos aguardando conclusão" count={data?.codeTickets ?? 0} to="/development" />
+              <PendingLink icon={CodeXml} label="Tickets pendentes no Code" count={data?.codeTickets ?? 0} to="/development" />
             </div>
             {(data?.approvals ?? 0) > 0 ? <section id="approvals"><PendingForMe /></section> : null}
             {(data?.total ?? 0) === 0 ? <p className="rounded-md border border-dashed border-border p-8 text-center text-sm text-muted-foreground">Nenhuma pendência no momento.</p> : null}

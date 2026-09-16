@@ -34,9 +34,7 @@ export function usePendingActions() {
           .eq("status", "pendente"),
         supabase
           .from("development_tickets")
-          .select("id", { count: "exact", head: true })
-          .eq("reporter_id", userId)
-          .eq("status", "atendido"),
+          .select("id, reporter_id, status"),
       ]);
 
       if (rolesResult.error) throw rolesResult.error;
@@ -56,7 +54,10 @@ export function usePendingActions() {
       const pendingUserDeletions = isAdmin
         ? (deletionsResult.data ?? []).filter((request) => request.requested_by !== userId).length
         : 0;
-      const pendingCodeTickets = codeResult.count ?? 0;
+      const pendingCodeTickets = (codeResult.data ?? []).filter((ticket) => {
+        if (ticket.status === "atendido" && ticket.reporter_id === userId) return true;
+        return isAdmin && (ticket.status === "aberto" || ticket.status === "em_atendimento");
+      }).length;
 
       return {
         approvals: pendingApprovals,
