@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { AtSign, Boxes, DollarSign, FileSignature, Mail, Phone, Settings, Settings2, UserRound, UsersRound, LogOut } from "lucide-react";
+import { Boxes, DollarSign, FileSignature, Funnel, Settings, Settings2, UsersRound, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -120,11 +120,9 @@ function PortalPage() {
                           </>
                         ) : key === "crm" ? (
                           <>
-                            <span className="relative block h-14 w-full sm:h-16" aria-hidden="true">
-                              <AtSign className="absolute left-1 top-2 h-7 w-7 stroke-[1.6] sm:h-8 sm:w-8" />
-                              <Phone className="absolute right-1 top-1 h-6 w-6 stroke-[1.6] sm:h-7 sm:w-7" />
-                              <Mail className="absolute bottom-0 left-1/2 h-7 w-7 -translate-x-1/2 stroke-[1.6] sm:h-8 sm:w-8" />
-                              <UserRound className="absolute bottom-1 right-0 h-5 w-5 stroke-[1.6] sm:h-6 sm:w-6" />
+                            <span className="relative block h-14 w-full translate-y-1 sm:h-16" aria-hidden="true">
+                              <UsersRound className="absolute left-1/2 top-0 h-10 w-12 -translate-x-1/2 stroke-[2.4] sm:h-11 sm:w-14" />
+                              <Funnel className="absolute bottom-0 left-1/2 h-9 w-14 -translate-x-1/2 stroke-[2.4] sm:h-10 sm:w-16" />
                             </span>
                             <span className="text-sm font-normal leading-none">{name}</span>
                           </>
