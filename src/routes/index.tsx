@@ -119,20 +119,42 @@ function Landing() {
       <div className="pointer-events-none absolute -bottom-44 -right-24 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-36 -left-36 h-80 w-80 rounded-full bg-myio-purple/50 sm:-bottom-48 sm:-left-48 sm:h-[28rem] sm:w-[28rem]" />
 
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-full overflow-hidden sm:w-3/4 lg:w-3/5" aria-hidden="true">
+        <svg className="absolute right-[-14%] top-1/2 h-[115%] w-[115%] -translate-y-1/2 text-erp-mesh opacity-70 sm:right-[-8%] sm:w-full" viewBox="0 0 700 700" fill="none">
+          <g stroke="currentColor" strokeWidth="1.2">
+            <path d="M395 44 594 145 654 346 553 602 321 647 124 509 84 283 221 104 395 44Z" />
+            <path d="m395 44-68 177 267-76-116 231 176-30M327 221 84 283m243-62 151 155M84 283l226 156m168-63 75 226M310 439l11 208m-11-208 243 163M124 509l186-70" />
+          </g>
+          <g className="fill-erp-mesh-node">
+            <circle cx="395" cy="44" r="5" />
+            <circle cx="594" cy="145" r="4" />
+            <circle cx="654" cy="346" r="5" />
+            <circle cx="553" cy="602" r="4" />
+            <circle cx="321" cy="647" r="5" />
+            <circle cx="124" cy="509" r="4" />
+            <circle cx="84" cy="283" r="5" />
+            <circle cx="221" cy="104" r="4" />
+            <circle cx="327" cy="221" r="7" className="animate-pulse" />
+            <circle cx="478" cy="376" r="6" />
+            <circle cx="310" cy="439" r="7" className="animate-pulse" />
+          </g>
+        </svg>
+      </div>
+
       <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center gap-12 lg:flex-row lg:gap-16">
         <section className="w-full lg:w-3/5">
-          <MyioPlatformLogo tone="light" className="mb-10 h-12 sm:mb-12 sm:h-14" />
+          <MyioPlatformLogo tone="light" className="mb-8 h-12 sm:mb-9 sm:h-14" />
 
-          <h1 className="max-w-3xl text-4xl font-extrabold leading-tight text-erp-landing-foreground sm:text-6xl">
+          <h1 className="max-w-3xl text-4xl font-extrabold leading-[1.02] text-erp-landing-foreground sm:text-6xl">
             Gestão inteligente
             <br />
             <span className="font-light text-erp-landing-muted">em um só ecossistema</span>
           </h1>
-          <p className="mt-6 max-w-xl text-lg leading-relaxed text-erp-landing-muted sm:text-xl">
+          <p className="mt-4 max-w-xl text-lg leading-snug text-erp-landing-muted sm:text-xl">
             A plataforma ERP completa para escalar o negócio.
           </p>
 
-          <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
             {MODULES.map(({ icon: Icon, title, body, available }) => (
               <div
                 key={title}
@@ -153,10 +175,10 @@ function Landing() {
         </section>
 
         <section className="w-full lg:w-2/5" aria-labelledby="access-title">
-          <div className="rounded-lg bg-card p-7 text-card-foreground shadow-2xl sm:p-10">
-            <div className="mb-8">
-              <h2 id="access-title" className="text-2xl font-extrabold">Acesse sua conta</h2>
-              <p className="mt-2 text-muted-foreground">Identifique-se para acessar seus aplicativos.</p>
+          <div className="rounded-2xl border border-erp-access-border bg-erp-access p-7 text-erp-landing-foreground shadow-2xl backdrop-blur-2xl sm:p-10">
+            <div className="mb-7">
+              <h2 id="access-title" className="text-2xl font-extrabold text-erp-landing-foreground">Acesse sua conta</h2>
+              <p className="mt-1 text-erp-landing-muted">Identifique-se para acessar seus aplicativos.</p>
             </div>
 
             {signedIn ? (
@@ -168,17 +190,17 @@ function Landing() {
             ) : (
               <form onSubmit={handleSignIn} className="space-y-5">
                 <div className="space-y-2">
-                  <Label htmlFor="landing-email">E-mail</Label>
-                  <Input id="landing-email" name="email" type="email" autoComplete="email" placeholder="seu@email.com" required className="h-12" />
+                  <Label htmlFor="landing-email" className="text-erp-landing-foreground">E-mail</Label>
+                  <Input id="landing-email" name="email" type="email" autoComplete="email" placeholder="seu@email.com" required className="h-12 border-erp-access-border bg-erp-access-field text-erp-landing-foreground placeholder:text-erp-landing-muted focus-visible:ring-primary" />
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between gap-4">
-                    <Label htmlFor="landing-password">Senha</Label>
-                    <Link to="/auth" className="text-xs font-bold text-foreground hover:text-primary">
+                    <Label htmlFor="landing-password" className="text-erp-landing-foreground">Senha</Label>
+                    <Link to="/auth" className="text-xs font-bold text-erp-landing-foreground hover:text-primary">
                       Esqueci a senha
                     </Link>
                   </div>
-                  <Input id="landing-password" name="password" type="password" autoComplete="current-password" required className="h-12" />
+                  <Input id="landing-password" name="password" type="password" autoComplete="current-password" required className="h-12 border-erp-access-border bg-erp-access-field text-erp-landing-foreground focus-visible:ring-primary" />
                 </div>
                 <Button type="submit" size="lg" className="h-12 w-full" disabled={loading}>
                   {loading ? "Entrando..." : "Entrar na plataforma"}
@@ -188,9 +210,9 @@ function Landing() {
             )}
 
             {!signedIn && (
-              <div className="mt-7 border-t border-border pt-6 text-center">
-                <p className="text-sm text-muted-foreground">Ainda não possui acesso?</p>
-                <Link to="/auth" className="mt-2 inline-block text-sm font-bold text-foreground hover:text-primary">
+              <div className="mt-7 border-t border-erp-access-border pt-6 text-center">
+                <p className="text-sm text-erp-landing-muted">Ainda não possui acesso?</p>
+                <Link to="/auth" className="mt-2 inline-block text-sm font-bold text-erp-landing-foreground hover:text-primary">
                   Criar conta
                 </Link>
               </div>
