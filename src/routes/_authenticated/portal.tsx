@@ -8,6 +8,7 @@ import { MyioPlatformLogo } from "@/components/myio-platform-logo";
 import { ErpAppAccessAdmin } from "@/components/erp-app-access-admin";
 import { CrmFunnelIcon } from "@/components/crm-funnel-icon";
 import { usePendingActions } from "@/hooks/use-pending-actions";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export const Route = createFileRoute("/_authenticated/portal")({
   component: PortalPage,
@@ -81,6 +82,7 @@ function PortalPage() {
                 {(pendingActions?.total ?? 0) > 0 ? <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">{(pendingActions?.total ?? 0) > 99 ? "99+" : pendingActions?.total}</span> : null}
               </Link>
             </Button>
+            <ThemeToggle />
             <Button variant="ghost" size="icon" onClick={handleSignOut} title="Sair" aria-label="Sair">
               <LogOut className="h-4 w-4" />
             </Button>

@@ -5,23 +5,20 @@ import logoLightSrc from "@/assets/myio-logo-light.svg";
 type Props = {
   appName: string;
   className?: string;
-  tone?: "light" | "dark";
+  tone?: "light" | "dark" | "auto";
 };
 
-export function MyioAppLogo({ appName, className, tone = "dark" }: Props) {
+export function MyioAppLogo({ appName, className, tone = "auto" }: Props) {
   return (
     <span className={cn("inline-flex items-end gap-[0.35em]", className)}>
-      <img
-        src={tone === "light" ? logoDark.url : logoLightSrc}
-        alt="myio"
-        className="h-auto w-auto select-none"
-        style={{ height: "1.5em" }}
-        draggable={false}
-      />
+      {tone === "auto" ? <>
+        <img src={logoLightSrc} alt="myio" className="h-auto w-auto select-none dark:hidden" style={{ height: "1.5em" }} draggable={false} />
+        <img src={logoDark.url} alt="myio" className="hidden h-auto w-auto select-none dark:block" style={{ height: "1.5em" }} draggable={false} />
+      </> : <img src={tone === "light" ? logoDark.url : logoLightSrc} alt="myio" className="h-auto w-auto select-none" style={{ height: "1.5em" }} draggable={false} />}
       <span
         className={cn(
           "select-none font-light leading-none tracking-normal",
-          tone === "light" ? "text-white" : "text-[var(--myio-dark)]",
+          tone === "light" ? "text-white" : tone === "auto" ? "text-foreground" : "text-[var(--myio-dark)]",
         )}
         style={{ fontSize: "1.5em", transform: "translateY(-0.155em)" }}
       >
