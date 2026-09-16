@@ -339,12 +339,7 @@ export function ProductionCapacityCard() {
                     <span className="text-sm text-muted-foreground">sem regras</span>
                   ) : (
                     <Badge
-                      variant="outline"
-                      className={
-                        r.possible > 0
-                          ? "border-green-300 bg-green-100 text-green-800"
-                          : "border-red-300 bg-red-100 text-red-800"
-                      }
+                      variant="status"
                     >
                       {r.possible} un.
                     </Badge>
@@ -359,7 +354,7 @@ export function ProductionCapacityCard() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-7 px-2"
+                        className="h-7 border border-status-border bg-status px-2 text-status-foreground hover:bg-status"
                         onClick={() => setLimitDialog({ name: r.name, possible: r.possible, items: limiters })}
                         title="Ver componentes limitantes"
                       >
