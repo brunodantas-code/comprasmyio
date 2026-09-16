@@ -1,32 +1,36 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { MyioLogo } from "@/components/myio-logo";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { MyioPlatformLogo } from "@/components/myio-platform-logo";
+import { toast } from "sonner";
+import { z } from "zod";
 import {
-  Package,
-  ClipboardList,
-  QrCode,
-  Truck,
-  Factory,
-  Boxes,
   ArrowRight,
+  BadgeDollarSign,
+  BriefcaseBusiness,
+  Code2,
+  FileSignature,
+  PackageCheck,
+  UsersRound,
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Myio Supply — Compras e Serviços sob controle total" },
+      { title: "myio ERP — Gestão integrada do negócio" },
       {
         name: "description",
         content:
-          "Plataforma Myio Supply para solicitações de materiais, serviços, viagens e reembolso de despesas, com controle de estoque, homologação por QR code e expedição.",
+          "Plataforma myio ERP para gestão integrada de solicitações, estoque, finanças, desenvolvimento e demais áreas do negócio.",
       },
-      { property: "og:title", content: "Myio Supply — Compras e Serviços sob controle total" },
+      { property: "og:title", content: "myio ERP — Gestão integrada do negócio" },
       {
         property: "og:description",
         content:
-          "Plataforma Myio Supply para solicitações de materiais, serviços, viagens e reembolso de despesas, com controle de estoque, homologação por QR code e expedição.",
+          "Plataforma myio ERP para gestão integrada de solicitações, estoque, finanças, desenvolvimento e demais áreas do negócio.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -35,170 +39,164 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
-const FEATURES = [
+const MODULES = [
   {
-    icon: ClipboardList,
-    title: "Solicitações",
-    body: "Peça materiais, serviços, viagens e reembolso de despesas por projeto, com quantidade, prazo, anexos e destinatário.",
+    icon: PackageCheck,
+    title: "Supply",
+    body: "Solicitações e Estoque",
+    available: true,
   },
   {
-    icon: Package,
-    title: "Approvals Pendentes",
-    body: "Time de Supply e gestores acompanham status, observações, palavra passe e previsão de entrega.",
+    icon: BadgeDollarSign,
+    title: "Cash Flow",
+    body: "Gestão financeira",
+    available: true,
   },
   {
-    icon: Factory,
-    title: "Fábrica e produção",
-    body: "Simulador de capacidade, componentes gargalo e liberação de produtos montados.",
+    icon: Code2,
+    title: "Code",
+    body: "Tickets e melhorias",
+    available: true,
   },
   {
-    icon: QrCode,
-    title: "Homologação por QR code",
-    body: "Etiquetagem unitária ou por caixa, com foto e rastreio completo do item.",
+    icon: BriefcaseBusiness,
+    title: "CRM",
+    body: "Vendas e relacionamento",
+    available: false,
   },
   {
-    icon: Boxes,
-    title: "Armazém",
-    body: "Estoque de dispositivos myio e insumos de instalação, no armazém ou em poder de terceiros, com movimentações auditadas.",
+    icon: FileSignature,
+    title: "Legal",
+    body: "Contratos e jurídico",
+    available: false,
   },
   {
-    icon: Truck,
-    title: "Expedição e transporte",
-    body: "Ordens de expedição, envio ao cliente e confirmação de entrega na unidade.",
+    icon: UsersRound,
+    title: "RH",
+    body: "Pessoas e cultura",
+    available: false,
   },
 ];
 
+const signInSchema = z.object({
+  email: z.string().trim().email("E-mail inválido").max(255),
+  password: z.string().min(6, "Mínimo 6 caracteres").max(72),
+});
+
 function Landing() {
   const [signedIn, setSignedIn] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
   }, []);
 
-  const cta = "Entrar";
+  async function handleSignIn(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const parsed = signInSchema.safeParse({
+      email: formData.get("email"),
+      password: formData.get("password"),
+    });
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0].message);
+      return;
+    }
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword(parsed.data);
+    setLoading(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    navigate({ to: "/portal" });
+  }
 
   return (
-    <main className="min-h-screen bg-background text-foreground">
-      {/* Hero escuro no estilo Myio */}
-      <div className="relative overflow-hidden bg-[oklch(0.18_0.09_300)]">
-        <div className="pointer-events-none absolute -left-40 bottom-[-12rem] h-[24rem] w-[24rem] rounded-full bg-[oklch(0.26_0.13_300)]" />
+    <main className="relative flex min-h-screen w-full items-center overflow-hidden bg-erp-landing px-5 py-10 text-erp-landing-foreground sm:px-10 lg:px-12">
+      <div className="pointer-events-none absolute -left-28 -top-36 h-96 w-96 rounded-full bg-erp-landing-soft/50 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-44 -right-24 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
 
+      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center gap-12 lg:flex-row lg:gap-16">
+        <section className="w-full lg:w-3/5">
+          <MyioPlatformLogo tone="light" className="mb-10 h-12 sm:mb-12 sm:h-14" />
 
-        <header className="relative z-10">
-          <div className="mx-auto flex max-w-6xl items-center gap-4 px-5 py-5 sm:px-6">
-            <MyioLogo tone="light" className="text-2xl" />
-          </div>
-        </header>
-
-        <section className="relative z-10 mx-auto max-w-6xl px-5 pb-24 pt-16 sm:px-6 sm:pb-28 sm:pt-24">
-          <h1 className="max-w-3xl text-4xl font-light leading-tight text-white sm:text-6xl">
-            Compras e Serviços
+          <h1 className="max-w-3xl text-4xl font-extrabold leading-tight text-erp-landing-foreground sm:text-6xl">
+            Gestão inteligente
             <br />
-            <span className="font-extrabold">sob controle total</span>
+            <span className="font-light text-erp-landing-muted">em um só ecossistema</span>
           </h1>
-          <p className="mt-6 max-w-xl text-lg text-white/75">
-            <span className="font-bold text-white">Solicitações rastreadas</span>{" "}
-            de materiais, serviços, viagens e reembolsos de despesas.
+          <p className="mt-6 max-w-xl text-lg leading-relaxed text-erp-landing-muted sm:text-xl">
+            A plataforma ERP completa para escalar o negócio.
           </p>
-          <div className="mt-9 flex flex-wrap gap-3">
-            <Link to={signedIn ? "/portal" : "/auth"}>
-              <Button
-                size="lg"
-                className="rounded-full bg-[var(--myio-green)] px-8 font-bold text-[oklch(0.18_0.09_300)] hover:opacity-90"
+
+          <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+            {MODULES.map(({ icon: Icon, title, body, available }) => (
+              <div
+                key={title}
+                className={`flex min-h-20 items-center gap-3 rounded-lg border border-erp-landing-border bg-erp-landing-panel p-3 transition-colors hover:border-primary/50 ${available ? "" : "opacity-60"}`}
               >
-                {cta} <ArrowRight className="ml-1 h-4 w-4" />
-              </Button>
-            </Link>
-            <a href="#recursos">
-              <Button
-                size="lg"
-                variant="outline"
-                className="rounded-full border-white/30 bg-transparent px-8 font-bold text-white hover:bg-white/10 hover:text-white"
-              >
-                Ver recursos
-              </Button>
-            </a>
-          </div>
-        </section>
-
-        <div className="relative z-10 h-12 w-full bg-background [clip-path:polygon(0_45%,100%_0,100%_100%,0_100%)]" />
-      </div>
-
-      {/* Recursos */}
-      <section id="recursos" className="mx-auto max-w-6xl px-5 py-20 sm:px-6">
-        <p className="text-sm font-extrabold uppercase tracking-widest text-foreground">
-          Recursos
-        </p>
-        <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
-          Uma plataforma para toda a cadeia
-        </h2>
-        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {FEATURES.map(({ icon: Icon, title, body }) => (
-            <div
-              key={title}
-              className="rounded-2xl border border-border bg-card p-6 transition-shadow hover:shadow-lg"
-            >
-              <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-primary/15">
-                <Icon className="h-5 w-5 text-foreground" />
-              </span>
-              <h3 className="mt-4 text-lg font-extrabold">{title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{body}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Fluxo */}
-      <section id="fluxo" className="bg-secondary/60 py-20">
-        <div className="mx-auto max-w-6xl px-5 sm:px-6">
-          <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
-            Do pedido à entrega
-          </h2>
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              ["01", "Solicitação", "O time pede materiais, serviços, viagens ou reembolsos por projeto, com prazo e anexos."],
-              ["02", "Compra", "Time de Supply atualiza status, palavra passe e previsão."],
-              ["03", "Armazém", "Entrada, homologação por QR code e controle por setor."],
-              ["04", "Expedição", "Ordem de expedição, transporte e entrega ao cliente."],
-            ].map(([n, title, body]) => (
-              <div key={n} className="rounded-2xl bg-card p-6 shadow-sm">
-                <span className="text-3xl font-extrabold text-[var(--myio-green)]">{n}</span>
-                <h3 className="mt-3 font-extrabold">{title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{body}</p>
+                <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-md ${available ? "bg-primary text-primary-foreground" : "bg-erp-landing-border text-erp-landing-muted"}`}>
+                  <Icon className="h-5 w-5" />
+                </span>
+                <span className="min-w-0">
+                  <strong className="block text-sm text-erp-landing-foreground">{title}</strong>
+                  <span className="block text-xs leading-snug text-erp-landing-muted">
+                    {available ? body : `${body} · Em desenvolvimento`}
+                  </span>
+                </span>
               </div>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
 
+        <section className="w-full lg:w-2/5" aria-labelledby="access-title">
+          <div className="rounded-lg bg-card p-7 text-card-foreground shadow-2xl sm:p-10">
+            <div className="mb-8">
+              <h2 id="access-title" className="text-2xl font-extrabold">Acesse sua conta</h2>
+              <p className="mt-2 text-muted-foreground">Identifique-se para acessar seus aplicativos.</p>
+            </div>
 
+            {signedIn ? (
+              <Button asChild size="lg" className="h-12 w-full">
+                <Link to="/portal">
+                  Entrar na plataforma <ArrowRight className="h-5 w-5" />
+                </Link>
+              </Button>
+            ) : (
+              <form onSubmit={handleSignIn} className="space-y-5">
+                <div className="space-y-2">
+                  <Label htmlFor="landing-email">E-mail</Label>
+                  <Input id="landing-email" name="email" type="email" autoComplete="email" placeholder="seu@email.com" required className="h-12" />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between gap-4">
+                    <Label htmlFor="landing-password">Senha</Label>
+                    <Link to="/auth" className="text-xs font-bold text-foreground hover:text-primary">
+                      Esqueci a senha
+                    </Link>
+                  </div>
+                  <Input id="landing-password" name="password" type="password" autoComplete="current-password" required className="h-12" />
+                </div>
+                <Button type="submit" size="lg" className="h-12 w-full" disabled={loading}>
+                  {loading ? "Entrando..." : "Entrar na plataforma"}
+                  {!loading && <ArrowRight className="h-5 w-5" />}
+                </Button>
+              </form>
+            )}
 
-      {/* CTA final */}
-      <section className="bg-[oklch(0.18_0.09_300)] py-16">
-        <div className="mx-auto flex max-w-6xl flex-col items-start gap-6 px-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <div>
-            <h2 className="text-2xl font-extrabold text-white sm:text-3xl">
-              Pronto para iniciar suas solicitações?
-            </h2>
-            <p className="mt-2 text-white/70">Acesse o painel e comece agora.</p>
+            {!signedIn && (
+              <div className="mt-7 border-t border-border pt-6 text-center">
+                <p className="text-sm text-muted-foreground">Ainda não possui acesso?</p>
+                <Link to="/auth" className="mt-2 inline-block text-sm font-bold text-foreground hover:text-primary">
+                  Criar conta
+                </Link>
+              </div>
+            )}
           </div>
-          <Link to={signedIn ? "/portal" : "/auth"}>
-            <Button
-              size="lg"
-              className="rounded-full bg-[var(--myio-green)] px-8 font-bold text-[oklch(0.18_0.09_300)] hover:opacity-90"
-            >
-              {cta}
-            </Button>
-          </Link>
-        </div>
-      </section>
-
-      <footer className="border-t border-border py-8">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 text-sm text-muted-foreground sm:flex-row sm:px-6">
-          <MyioLogo className="text-xl" />
-          <span>© {new Date().getFullYear()} Myio Supply — Gestão de Compras e Serviços</span>
-        </div>
-      </footer>
+        </section>
+      </div>
     </main>
   );
 }

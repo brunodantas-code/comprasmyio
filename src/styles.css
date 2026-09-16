@@ -67,6 +67,12 @@
   --font-sans: "Nunito", ui-sans-serif, system-ui, sans-serif;
   --color-myio-green: var(--myio-green);
   --color-myio-purple: var(--myio-purple);
+  --color-erp-landing: var(--erp-landing);
+  --color-erp-landing-soft: var(--erp-landing-soft);
+  --color-erp-landing-foreground: var(--erp-landing-foreground);
+  --color-erp-landing-muted: var(--erp-landing-muted);
+  --color-erp-landing-panel: var(--erp-landing-panel);
+  --color-erp-landing-border: var(--erp-landing-border);
 }
 
 :root {
@@ -75,6 +81,12 @@
   --myio-green: #0fc482;
   --myio-purple: #673ab6;
   --myio-dark: #0b0023;
+  --erp-landing: oklch(0.18 0.09 300);
+  --erp-landing-soft: oklch(0.27 0.12 300);
+  --erp-landing-foreground: oklch(0.99 0 0);
+  --erp-landing-muted: oklch(0.82 0.025 300);
+  --erp-landing-panel: oklch(1 0 0 / 6%);
+  --erp-landing-border: oklch(1 0 0 / 12%);
   --background: oklch(0.985 0.006 300);
   --foreground: #0b0023;
   --card: oklch(1 0 0);
