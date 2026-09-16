@@ -54,11 +54,11 @@ function PortalPage() {
   if (isLoading || !data) return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Carregando...</div>;
 
   const apps = [
-    { key: "supply", name: "myio supply", description: ["Compras, solicitações diversas", "aprovações e estoque"], to: "/dashboard" as const },
-    { key: "cash_flow", name: "myio cash flow", description: ["Gestão financeira", "e fluxo de caixa"], to: "/cash-flow" as const },
-    { key: "crm", name: "myio CRM", description: ["Relacionamento", "com clientes"], to: "/crm" as const },
-    { key: "legal", name: "myio Legal", description: ["Jurídico e Contratos"], to: "/legal" as const },
-    { key: "rh", name: "myio RH", description: ["Gestão de Pessoas"], to: "/rh" as const },
+    { key: "supply", name: "supply", description: ["Compras, solicitações diversas", "aprovações e estoque"], to: "/dashboard" as const },
+    { key: "cash_flow", name: "cash flow", description: ["Gestão financeira", "e fluxo de caixa"], to: "/cash-flow" as const },
+    { key: "crm", name: "CRM", description: ["Relacionamento", "com clientes"], to: "/crm" as const },
+    { key: "legal", name: "Legal", description: ["Jurídico e Contratos"], to: "/legal" as const },
+    { key: "rh", name: "RH", description: ["Gestão de Pessoas"], to: "/rh" as const },
   ].filter((app) => data.appKeys.has(app.key));
 
   return (
@@ -95,57 +95,57 @@ function PortalPage() {
 
           <TabsContent value="apps">
             {apps.length ? (
-               <div className="grid grid-cols-2 gap-x-5 gap-y-12 sm:gap-x-8 lg:grid-cols-4">
+               <div className="grid grid-cols-3 gap-x-3 gap-y-8 lg:grid-cols-5 lg:gap-x-5">
                  {apps.map(({ key, name, description, to }) => (
-                    <div key={key} className="flex w-32 min-w-0 justify-self-start flex-col items-center text-center">
+                    <div key={key} className="flex w-24 min-w-0 justify-self-start flex-col items-center text-center sm:w-28">
                       <Link
                         to={to}
                         aria-label={`Acessar ${name}`}
                         title={`Acessar ${name}`}
-                        className="group relative flex h-32 w-32 flex-col items-center justify-between rounded-[1.75rem] border-2 border-primary bg-primary px-3 pb-3 pt-2 text-primary-foreground outline-none transition-transform hover:scale-105 hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4"
+                        className="group relative flex h-24 w-24 flex-col items-center justify-between rounded-3xl border-2 border-primary bg-primary px-2 pb-2 pt-1.5 text-primary-foreground outline-none transition-transform hover:scale-105 hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 sm:h-28 sm:w-28"
                       >
                         {key === "supply" ? (
                           <>
-                            <span className="relative block h-20 w-full" aria-hidden="true">
-                              <Cog className="absolute bottom-0 left-2 h-14 w-14 stroke-[1.7]" />
-                              <Cog className="absolute right-2 top-0 h-12 w-12 stroke-[1.7]" />
+                            <span className="relative block h-14 w-full sm:h-16" aria-hidden="true">
+                              <Cog className="absolute bottom-0 left-2 h-10 w-10 stroke-[1.7] sm:h-12 sm:w-12" />
+                              <Cog className="absolute right-2 top-0 h-9 w-9 stroke-[1.7] sm:h-10 sm:w-10" />
                             </span>
                             <span className="text-sm font-normal leading-none">{name}</span>
                           </>
                         ) : key === "cash_flow" ? (
                           <>
-                            <span className="flex h-20 w-full items-center justify-center" aria-hidden="true">
-                              <CircleDollarSign className="h-16 w-16 stroke-[1.5]" />
+                            <span className="flex h-14 w-full items-center justify-center sm:h-16" aria-hidden="true">
+                              <CircleDollarSign className="h-12 w-12 stroke-[1.5] sm:h-14 sm:w-14" />
                             </span>
                             <span className="text-sm font-normal leading-none">{name}</span>
                           </>
                         ) : key === "crm" ? (
                           <>
-                            <span className="relative block h-20 w-full" aria-hidden="true">
-                              <AtSign className="absolute left-1 top-2 h-9 w-9 stroke-[1.6]" />
-                              <Phone className="absolute right-1 top-1 h-8 w-8 stroke-[1.6]" />
-                              <Mail className="absolute bottom-0 left-1/2 h-9 w-9 -translate-x-1/2 stroke-[1.6]" />
-                              <UserRound className="absolute bottom-1 right-0 h-7 w-7 stroke-[1.6]" />
+                            <span className="relative block h-14 w-full sm:h-16" aria-hidden="true">
+                              <AtSign className="absolute left-1 top-2 h-7 w-7 stroke-[1.6] sm:h-8 sm:w-8" />
+                              <Phone className="absolute right-1 top-1 h-6 w-6 stroke-[1.6] sm:h-7 sm:w-7" />
+                              <Mail className="absolute bottom-0 left-1/2 h-7 w-7 -translate-x-1/2 stroke-[1.6] sm:h-8 sm:w-8" />
+                              <UserRound className="absolute bottom-1 right-0 h-5 w-5 stroke-[1.6] sm:h-6 sm:w-6" />
                             </span>
                             <span className="text-sm font-normal leading-none">{name}</span>
                           </>
                         ) : key === "legal" ? (
                           <>
-                            <span className="flex h-20 w-full items-center justify-center" aria-hidden="true">
-                              <FileSignature className="h-16 w-16 stroke-[1.5]" />
+                            <span className="flex h-14 w-full items-center justify-center sm:h-16" aria-hidden="true">
+                              <FileSignature className="h-12 w-12 stroke-[1.5] sm:h-14 sm:w-14" />
                             </span>
                             <span className="text-sm font-normal leading-none">{name}</span>
                           </>
                         ) : (
                           <>
-                            <span className="flex h-20 w-full items-center justify-center" aria-hidden="true">
-                              <UsersRound className="h-16 w-16 stroke-[1.6]" />
+                            <span className="flex h-14 w-full items-center justify-center sm:h-16" aria-hidden="true">
+                              <UsersRound className="h-12 w-12 stroke-[1.6] sm:h-14 sm:w-14" />
                             </span>
                             <span className="text-sm font-normal leading-none">{name}</span>
                           </>
                        )}
                      </Link>
-                      <p className="mt-5 w-32 max-w-full break-words text-center text-sm leading-5 text-muted-foreground">
+                      <p className="mt-3 w-24 max-w-full break-words text-center text-xs leading-4 text-muted-foreground sm:w-28 sm:text-sm sm:leading-5">
                         {description.map((line) => <span key={line} className="block">{line}</span>)}
                       </p>
                    </div>

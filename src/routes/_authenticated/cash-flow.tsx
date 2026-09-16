@@ -42,7 +42,7 @@ function CashFlowPage() {
       <header className="border-b border-border bg-card">
         <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-3 px-4 py-4 sm:px-6">
           <Link to="/portal" className="flex min-w-0 items-center" title="Voltar aos aplicativos"><MyioCashFlowLogo className="text-xl sm:text-2xl" /></Link>
-          <div className="flex items-center gap-1"><Button asChild variant="outline" size="sm"><Link to="/portal"><ArrowLeft className="h-4 w-4" /><span className="hidden sm:inline">Aplicativos</span></Link></Button><Button variant="ghost" size="icon" onClick={signOut} title="Sair" aria-label="Sair"><LogOut className="h-4 w-4" /></Button></div>
+          <div className="flex items-center gap-1"><Button asChild variant="outline" size="sm"><Link to="/portal"><ArrowLeft className="h-4 w-4" /><span className="hidden sm:inline">Plataforma ERP</span></Link></Button><Button variant="ghost" size="icon" onClick={signOut} title="Sair" aria-label="Sair"><LogOut className="h-4 w-4" /></Button></div>
         </div>
       </header>
       <main className="mx-auto max-w-[1500px] px-4 py-6 sm:px-6">
