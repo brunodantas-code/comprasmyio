@@ -463,7 +463,7 @@ function DeleteMaterialDialog({ row }: { row: StockRow }) {
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
         <Button size="sm" variant="ghost" title="Excluir item">
-          <Trash2 className="h-4 w-4 text-destructive" />
+          <Trash2 className="h-4 w-4 text-primary-foreground" />
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
@@ -1592,7 +1592,7 @@ function TerceirosDeleteDialog({ row }: { row: TerceirosRow }) {
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
         <Button size="sm" variant="ghost" title="Excluir item">
-          <Trash2 className="h-4 w-4 text-destructive" />
+          <Trash2 className="h-4 w-4 text-primary-foreground" />
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
