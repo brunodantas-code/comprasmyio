@@ -429,7 +429,7 @@ function AddToolDialog({ userId }: { userId: string }) {
   return (
     <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) resetForm(); }}>
       <DialogTrigger asChild>
-        <Button size="sm"><Plus className="mr-1 h-4 w-4" /> Adicionar ferramenta</Button>
+        <Button size="sm" className="w-full sm:w-auto"><Plus className="mr-1 h-4 w-4" /> Adicionar ferramenta</Button>
       </DialogTrigger>
       <DialogContent className="max-h-[85vh] overflow-y-auto">
         <DialogHeader>
@@ -537,33 +537,38 @@ export function ToolAssetsSection({ userId, canDelete }: { userId: string; canDe
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
+        <CardHeader className="gap-5 lg:flex-row lg:items-start lg:justify-between">
+          <div className="min-w-0 flex-1">
             <CardTitle>Ferramentas / Ativos</CardTitle>
-            <CardDescription>
+            <CardDescription className="mt-1 max-w-2xl leading-relaxed">
               Banco de dados próprio. Toda baixa exige um destino (técnico ou local). Toque no nome para ver foto,
               link de referência e configurações de compra.
             </CardDescription>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <AddToolDialog userId={userId} />
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Buscar ferramenta"
-                className="w-full pl-8 sm:w-[200px]"
-              />
+          <div className="grid w-full shrink-0 gap-3 lg:w-auto">
+            <div className="flex justify-stretch sm:justify-end">
+              <AddToolDialog userId={userId} />
             </div>
-            <Select value={view} onValueChange={(v) => setView(v as "all" | "with" | "zero")}>
-              <SelectTrigger className="w-full sm:w-[170px]"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
-                <SelectItem value="with">Com saldo</SelectItem>
-                <SelectItem value="zero">Sem saldo</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(220px,1fr)_170px]">
+              <div className="relative min-w-0">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Buscar ferramenta"
+                  aria-label="Buscar ferramenta"
+                  className="w-full bg-muted/30 pl-9 sm:w-[260px]"
+                />
+              </div>
+              <Select value={view} onValueChange={(v) => setView(v as "all" | "with" | "zero")}>
+                <SelectTrigger className="w-full bg-muted/30" aria-label="Filtrar ferramentas por saldo"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="with">Com saldo</SelectItem>
+                  <SelectItem value="zero">Sem saldo</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
