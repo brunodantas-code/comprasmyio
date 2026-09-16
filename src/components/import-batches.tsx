@@ -614,30 +614,16 @@ export function ImportBatchesSection({ userId, children }: { userId: string; chi
 
   return (
     <Card>
-      <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <CardHeader>
         <div>
           <CardTitle className="flex items-center gap-2"><Plane className="h-5 w-5" />Importações</CardTitle>
           <CardDescription>Acompanhe o status de suas solicitações de Importação.</CardDescription>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="h-9 w-52"><SelectValue placeholder="Filtrar status" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os status</SelectItem>
-              {STATUS_KEYS.map((s) => <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
       </CardHeader>
       <CardContent>
-        {isLoading ? (
-          <p className="text-sm text-muted-foreground">Carregando...</p>
-        ) : list.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nenhuma importação cadastrada.</p>
-        ) : (
-          <Table>
+        <Table>
             <TableHeader>
-              <TableRow>
+              <TableRow className="bg-primary/20 hover:bg-primary/20">
                 <TableHead>Importação</TableHead>
                 <TableHead>Itens</TableHead>
                 <TableHead>Anexos</TableHead>
@@ -645,9 +631,25 @@ export function ImportBatchesSection({ userId, children }: { userId: string; chi
                 <TableHead>Status</TableHead>
                 <TableHead className="w-32" />
               </TableRow>
+              <TableRow className="bg-primary/5 hover:bg-primary/5">
+                <TableHead className="py-1" />
+                <TableHead className="py-1" />
+                <TableHead className="py-1" />
+                <TableHead className="py-1" />
+                <TableHead className="py-1">
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="h-8 min-w-36 bg-background" aria-label="Filtrar importações por status"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos os status</SelectItem>
+                      {STATUS_KEYS.map((s) => <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </TableHead>
+                <TableHead className="py-1" />
+              </TableRow>
             </TableHeader>
             <TableBody>
-              {list.map((b) => (
+              {isLoading ? <TableRow><TableCell colSpan={6} className="h-20 text-center text-muted-foreground">Carregando...</TableCell></TableRow> : list.length === 0 ? <TableRow><TableCell colSpan={6} className="h-20 text-center text-muted-foreground">Nenhuma importação cadastrada.</TableCell></TableRow> : list.map((b) => (
                 <TableRow key={b.id}>
                   <TableCell className="font-medium">
                     {b.name}
@@ -667,7 +669,6 @@ export function ImportBatchesSection({ userId, children }: { userId: string; chi
               ))}
             </TableBody>
           </Table>
-        )}
         {children && <div className="mt-6 border-t pt-6">{children}</div>}
       </CardContent>
     </Card>
