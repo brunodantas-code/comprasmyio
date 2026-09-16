@@ -1,7 +1,7 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, CodeXml, Download, History, Paperclip, Plus, Search } from "lucide-react";
+import { ArrowLeft, CodeXml, Download, History, Paperclip, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { MyioAppLogo } from "@/components/myio-app-logo";
@@ -129,17 +129,22 @@ function DevelopmentPage() {
             <CardTitle>Acompanhamento</CardTitle>
             <CardDescription>{data?.isAdmin ? "Todos os tickets abertos na plataforma." : "Tickets abertos por você ou atribuídos a você."}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-              <div className="relative"><Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Número ou título" className="pl-9" /></div>
-              <FilterSelect value={appFilter} onChange={setAppFilter} placeholder="Aplicativo" options={Object.entries(APP_NAMES).map(([value, label]) => ({ value, label }))} />
-              <FilterSelect value={typeFilter} onChange={setTypeFilter} placeholder="Tipo" options={[{ value: "melhoria", label: "Melhoria" }, { value: "bug", label: "Bug" }]} />
-              <FilterSelect value={priorityFilter} onChange={setPriorityFilter} placeholder="Prioridade" options={Object.entries(PRIORITY_NAMES).map(([value, label]) => ({ value, label }))} />
-              <FilterSelect value={statusFilter} onChange={setStatusFilter} placeholder="Situação" options={Object.entries(STATUS_NAMES).map(([value, label]) => ({ value, label }))} />
-            </div>
-            {isLoading ? <p className="py-8 text-center text-sm text-muted-foreground">Carregando tickets...</p> : filteredTickets.length ? (
+          <CardContent>
+            {isLoading ? <p className="py-8 text-center text-sm text-muted-foreground">Carregando tickets...</p> : (
               <Table>
-                 <TableHeader className="bg-primary/20"><TableRow><TableHead>Nº</TableHead><TableHead>Solicitante</TableHead><TableHead>Aplicativo</TableHead><TableHead>Tipo</TableHead><TableHead>Título</TableHead><TableHead>Prioridade</TableHead><TableHead>Situação</TableHead><TableHead>Data</TableHead></TableRow></TableHeader>
+                 <TableHeader>
+                   <TableRow className="bg-primary/20 hover:bg-primary/20"><TableHead>Nº</TableHead><TableHead>Solicitante</TableHead><TableHead>Aplicativo</TableHead><TableHead>Tipo</TableHead><TableHead>Título</TableHead><TableHead>Prioridade</TableHead><TableHead>Situação</TableHead><TableHead>Data</TableHead></TableRow>
+                   <TableRow className="bg-primary/5 hover:bg-primary/5">
+                     <TableHead className="py-1" />
+                     <TableHead className="py-1" />
+                     <TableHead className="py-1"><HeaderFilterSelect value={appFilter} onChange={setAppFilter} label="Filtrar por aplicativo" options={Object.entries(APP_NAMES).map(([value, label]) => ({ value, label }))} /></TableHead>
+                     <TableHead className="py-1"><HeaderFilterSelect value={typeFilter} onChange={setTypeFilter} label="Filtrar por tipo" options={[{ value: "melhoria", label: "Melhoria" }, { value: "bug", label: "Bug" }]} /></TableHead>
+                     <TableHead className="py-1"><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Filtrar" aria-label="Filtrar por número ou título" className="h-8 min-w-28 bg-background" /></TableHead>
+                     <TableHead className="py-1"><HeaderFilterSelect value={priorityFilter} onChange={setPriorityFilter} label="Filtrar por prioridade" options={Object.entries(PRIORITY_NAMES).map(([value, label]) => ({ value, label }))} /></TableHead>
+                     <TableHead className="py-1"><HeaderFilterSelect value={statusFilter} onChange={setStatusFilter} label="Filtrar por situação" options={Object.entries(STATUS_NAMES).map(([value, label]) => ({ value, label }))} /></TableHead>
+                     <TableHead className="py-1" />
+                   </TableRow>
+                 </TableHeader>
                 <TableBody>{filteredTickets.map((ticket) => (
                   <TableRow key={ticket.id} className="cursor-pointer" onClick={() => setSelectedTicket(ticket)}>
                     <TableCell className="font-semibold">#{ticket.ticket_number}</TableCell>
@@ -151,9 +156,9 @@ function DevelopmentPage() {
                     <TableCell><Badge>{STATUS_NAMES[ticket.status]}</Badge></TableCell>
                     <TableCell>{new Date(ticket.created_at).toLocaleDateString("pt-BR")}</TableCell>
                   </TableRow>
-                ))}</TableBody>
+                 ))}{!filteredTickets.length ? <TableRow><TableCell colSpan={8} className="h-24 text-center text-muted-foreground">Nenhum ticket encontrado.</TableCell></TableRow> : null}</TableBody>
               </Table>
-            ) : <div className="rounded-md border border-dashed py-10 text-center text-sm text-muted-foreground">Nenhum ticket encontrado.</div>}
+            )}
           </CardContent>
         </Card>
       </main>
@@ -164,6 +169,10 @@ function DevelopmentPage() {
 
 function FilterSelect({ value, onChange, placeholder, options }: { value: string; onChange: (value: string) => void; placeholder: string; options: { value: string; label: string }[] }) {
   return <Select value={value} onValueChange={onChange}><SelectTrigger><SelectValue placeholder={placeholder} /></SelectTrigger><SelectContent><SelectItem value="todos">Todos</SelectItem>{options.map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}</SelectContent></Select>;
+}
+
+function HeaderFilterSelect({ value, onChange, label, options }: { value: string; onChange: (value: string) => void; label: string; options: { value: string; label: string }[] }) {
+  return <Select value={value} onValueChange={onChange}><SelectTrigger className="h-8 min-w-24 bg-background" aria-label={label}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="todos">Todos</SelectItem>{options.map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}</SelectContent></Select>;
 }
 
 function NewTicketDialog({ open, onOpenChange, userId, onCreated }: { open: boolean; onOpenChange: (open: boolean) => void; userId?: string; onCreated: () => void }) {
