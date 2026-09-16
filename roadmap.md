@@ -227,3 +227,5 @@
 - [x] Exibir cinco aplicativos por linha no desktop e três no celular, com ícones compactos
 - [x] Remover “myio” dos nomes dos aplicativos no portal e manter a logomarca ao lado do nome dentro de cada aplicativo
 - [x] Incluir retorno à Plataforma ERP sem encerrar a sessão em todos os aplicativos
+
+- [ ] Incluir o nome do solicitante no acompanhamento de tickets do Code.
