@@ -659,7 +659,7 @@ function useProfilesList() {
 
 /* ---------- Materials library ---------- */
 
-type NewItemDest = MaterialStockType["destination_type"];
+type NewItemDest = string;
 
 async function createNewItemRecord(
   dest: NewItemDest,
@@ -1227,7 +1227,9 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
       };
       if (isNewItem && requestModel === "materiais") {
         if (!newItemDest) throw new Error("Selecione o estoque de destino do item novo.");
-        ids = await createNewItemRecord(newItemDest, values.item_name, values.item_link ?? null, userId);
+        const selectedStockType = materialStockTypes?.find((type) => type.code === newItemDest && type.active);
+        if (!selectedStockType) throw new Error("O tipo de estoque selecionado não está mais disponível.");
+        ids = await createNewItemRecord(selectedStockType.destination_type, values.item_name, values.item_link ?? null, userId);
       }
 
       const requestGroupId = crypto.randomUUID();
@@ -1945,11 +1947,11 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
                   {requestModel === "materiais" && (
                   <div className="space-y-2 pt-1">
                     <Label>Cadastrar em qual estoque?</Label>
-                    <Select value={newItemDest} onValueChange={(v) => setNewItemDest(v as NewItemDest)}>
+                    <Select value={newItemDest} onValueChange={setNewItemDest}>
                       <SelectTrigger><SelectValue placeholder="Selecione o estoque de destino" /></SelectTrigger>
                       <SelectContent>
                         {(materialStockTypes ?? []).filter((type) => type.active).map((type) => (
-                          <SelectItem key={type.code} value={type.destination_type}>{type.name}</SelectItem>
+                          <SelectItem key={type.code} value={type.code}>{type.name}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
