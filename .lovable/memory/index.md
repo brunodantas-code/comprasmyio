@@ -3,7 +3,7 @@
 ## Core
 Comunicação sempre em pt-BR.
 Plataforma externa de QR codes (produto.myio.com.br) é a fonte da verdade para LOCALIZAÇÃO, mas só para QRs gerados na homologação.
-Projeto = Cliente: a API externa envia/recebe o nome do PROJETO no campo nome_cliente.
+Projeto só vira Cliente após estar implantado e com contrato assinado; a API externa usa o nome do projeto no campo nome_cliente.
 Estoque Fábrica, Estoque Myio Terceiros e Ferramentas/Ativos são áreas diferentes e nunca devem ser misturadas.
 Compra só de item cadastrado (Fábrica/Almoxarifado/Terceiros/Ferramentas), sem texto livre; produtos fabricados Myio (is_manufactured) nunca são compráveis.
 
@@ -17,3 +17,4 @@ Compra só de item cadastrado (Fábrica/Almoxarifado/Terceiros/Ferramentas), sem
 - [Fila de compras separada](mem://features/buyer-queue-split) — Duas seções: Nacionais e Importados (purchase_type='importacao'); sem vínculo/tipo cai em Nacionais
 - [Recuperação de avariado carrega o QR](mem://features/damaged-recovery-qr) — Recuperar item da plataforma externa vincula o QR à movimentação de destino e empurra o novo local para a API; sem isso o sync desfaz a recuperação
 - [Estoque Ferramentas/Ativos](mem://features/tools-assets-stock) — Sub-aba ao lado de Almoxarifado com banco próprio; baixa exige destino (técnico ou local); disponível na solicitação de compras
+- [Conversão de projeto em cliente](mem://features/project-client-conversion) — Projeto só vira Cliente após implantação e contrato assinado; Novo Projeto não escolhe Cliente

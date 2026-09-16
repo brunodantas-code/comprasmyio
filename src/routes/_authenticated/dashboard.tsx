@@ -3295,7 +3295,6 @@ function ProjectsAdmin({ userId }: { userId: string }) {
   const { data: me } = useCurrentUser();
   const { data: budgetSummaries } = useProjectBudgetSummaries();
   const canCreate = !!me?.canCreateProjects;
-  const [clientId, setClientId] = useState<string>("none");
   const [budgetVal, setBudgetVal] = useState("0");
   const [statusDialog, setStatusDialog] = useState<{ id: string; name: string; action: "implantado" | "cancelado" } | null>(null);
   const [statusDate, setStatusDate] = useState<string>(new Date().toISOString().slice(0, 10));
@@ -3305,7 +3304,7 @@ function ProjectsAdmin({ userId }: { userId: string }) {
   const [projectSort, setProjectSort] = useState("name-asc");
 
   const create = useMutation({
-    mutationFn: async (v: { name: string; description: string; client_id: string | null; budget: number }) => {
+    mutationFn: async (v: { name: string; description: string; budget: number }) => {
       const { data: existing, error: lookupError } = await supabase.from("projects").select("id,name");
       if (lookupError) throw lookupError;
       const normalizedName = v.name.trim().toLocaleLowerCase("pt-BR");
@@ -3346,8 +3345,8 @@ function ProjectsAdmin({ userId }: { userId: string }) {
     if (name.length < 2) return toast.error("Nome muito curto");
     if (!Number.isFinite(budget) || budget <= 0) return toast.error("Informe o orçamento aprovado do projeto.");
     create.mutate(
-      { name, description, client_id: clientId === "none" ? null : clientId, budget },
-      { onSuccess: () => { (e.target as HTMLFormElement).reset(); setClientId("none"); } },
+      { name, description, budget },
+      { onSuccess: () => { (e.target as HTMLFormElement).reset(); } },
     );
   }
 
@@ -3404,16 +3403,6 @@ function ProjectsAdmin({ userId }: { userId: string }) {
             <div className="space-y-2">
               <Label htmlFor="p-budget">Orçamento aprovado (R$)</Label>
               <MoneyInput id="p-budget" className="w-32" value={budgetVal} onChange={setBudgetVal} required placeholder="0,00" />
-            </div>
-            <div className="space-y-2">
-              <Label>Cliente</Label>
-              <Select value={clientId} onValueChange={setClientId}>
-                <SelectTrigger><SelectValue placeholder="Selecione (opcional)" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Sem cliente</SelectItem>
-                  {(clients ?? []).map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
             </div>
             <div className="space-y-2"><Label htmlFor="p-desc">Descrição</Label><Textarea id="p-desc" name="description" /></div>
             <Button type="submit" disabled={create.isPending}>Criar</Button>
