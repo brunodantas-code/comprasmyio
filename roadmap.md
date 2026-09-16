@@ -1,7 +1,7 @@
 # Roadmap
 
 ## Tarefas
-- [ ] Alterar o endereço publicado para erpmyio.lovable.app, mantendo a identificação por e-mail e senha antes do portal ERP
+- [x] Alterar o endereço publicado para erpmyio.lovable.app, mantendo a identificação por e-mail e senha antes do portal ERP
 - [x] Aplicar tags de saída verde-claro e filtros no cabeçalho em Insumos de Instalação
 - [x] Padronizar tags de saída em verde-claro e incluir filtros no cabeçalho das movimentações de estoque
 - [x] Alinhar a exclusão à esquerda do Approval no desktop e mobile e substituir a lixeira por X
