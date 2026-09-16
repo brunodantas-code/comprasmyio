@@ -271,3 +271,4 @@
 - [x] Verificar se https://erpmyio.lovable.app está funcional
 - [ ] Adicionar elemento gráfico de rede mesh no lado direito da página de acesso
 - [ ] Redesenhar o bloco de acesso para se integrar melhor ao fundo escuro
+- [ ] Reduzir o espaçamento vertical entre título, subtítulo e descrição na página de acesso
