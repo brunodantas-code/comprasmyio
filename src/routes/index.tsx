@@ -119,7 +119,7 @@ function Landing() {
       <div className="pointer-events-none absolute -bottom-44 -right-24 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-36 -left-36 h-80 w-80 rounded-full bg-myio-purple/50 sm:-bottom-48 sm:-left-48 sm:h-[28rem] sm:w-[28rem]" />
 
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-full overflow-hidden sm:w-3/4 lg:w-3/5" aria-hidden="true">
+      <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-3/5 overflow-hidden lg:block" aria-hidden="true">
         <svg className="absolute right-[-14%] top-1/2 h-[115%] w-[115%] -translate-y-1/2 text-erp-mesh opacity-70 sm:right-[-8%] sm:w-full" viewBox="0 0 700 700" fill="none">
           <g stroke="currentColor" strokeWidth="1.2">
             <path d="M395 44 594 145 654 346 553 602 321 647 124 509 84 283 221 104 395 44Z" />
