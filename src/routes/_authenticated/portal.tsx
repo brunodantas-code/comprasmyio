@@ -135,8 +135,8 @@ function PortalPage() {
                           </>
                         ) : (
                           <>
-                            <span className="flex h-14 w-full items-center justify-center sm:h-16" aria-hidden="true">
-                              <UsersRound className="h-12 w-12 stroke-[1.6] sm:h-14 sm:w-14" />
+                            <span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true">
+                              <UsersRound className="h-14 w-14 stroke-[1.8] sm:h-16 sm:w-16" />
                             </span>
                             <span className="text-sm font-normal leading-none">{name}</span>
                           </>
