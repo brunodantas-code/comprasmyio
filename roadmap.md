@@ -183,3 +183,6 @@
 - [x] Condensar os cadastros de Diversos, mostrando somente o título e expandindo cada seção pelo botão “+”
 - [x] Garantir confirmação antes de toda exclusão visível no sistema
 - [x] Incluir exclusão confirmada em Produtos com os técnicos
+- [x] Aplicar filtros por coluna e cabeçalho verde no Estoque — Almoxarifado
+- [x] Aplicar filtros por coluna e cabeçalho verde no submenu myio
+- [x] Aplicar filtros por coluna e cabeçalho verde em Insumos de Instalação

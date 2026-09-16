@@ -1067,6 +1067,7 @@ function StockTableCard({
   detail,
   damageSource,
   simple,
+  columnFilters,
 }: {
   title: string;
   description: string;
@@ -1079,9 +1080,21 @@ function StockTableCard({
   damageSource?: string;
   /** Estoque Myio: só saldo em estoque e baixa por avaria. */
   simple?: boolean;
+  columnFilters?: boolean;
 }) {
   const { data: metaMap } = useStockMeta("materials");
-
+  const [descriptionFilter, setDescriptionFilter] = useState("");
+  const [myioCodeFilter, setMyioCodeFilter] = useState("");
+  const [manufacturerCodeFilter, setManufacturerCodeFilter] = useState("");
+  const [balanceFilter, setBalanceFilter] = useState<"with" | "zero" | "">("");
+  const normalize = (value: string | null | undefined) => value?.trim().toLocaleLowerCase("pt-BR") ?? "";
+  const displayedRows = columnFilters ? rows.filter((row) => {
+    const meta = metaMap?.[row.material_id];
+    return (!normalize(descriptionFilter) || normalize(`${row.name} ${meta?.description ?? ""}`).includes(normalize(descriptionFilter)))
+      && (simple || !normalize(myioCodeFilter) || normalize(meta?.myio_code).includes(normalize(myioCodeFilter)))
+      && (simple || !normalize(manufacturerCodeFilter) || normalize(meta?.manufacturer_code).includes(normalize(manufacturerCodeFilter)))
+      && (balanceFilter === "with" ? row.balance > 0 : balanceFilter === "zero" ? row.balance <= 0 : true);
+  }) : rows;
 
   return (
     <Card>
@@ -1095,22 +1108,35 @@ function StockTableCard({
       <CardContent>
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando...</p>
-        ) : !rows.length ? (
+        ) : !displayedRows.length ? (
           <p className="text-sm text-muted-foreground">Nenhum material encontrado.</p>
         ) : (
           <Table>
-            <TableHeader>
-                <TableRow>
-                  <TableHead className={simple ? "w-[70%]" : "w-[45%]"}>Descrição</TableHead>
-                  {!simple && <TableHead className="w-[12%]">Cód. Myio</TableHead>}
-                  {!simple && <TableHead className="w-[12%]">Cód. Fabricante</TableHead>}
-                  <TableHead className={simple ? "w-[15%] text-right" : "w-[10%] text-right"}>Saldo Estoque</TableHead>
-                  {!simple && <TableHead className="w-[10%]">Imagem</TableHead>}
+            <TableHeader className={columnFilters ? "[&_tr]:border-b" : undefined}>
+                <TableRow className={columnFilters ? "border-t bg-primary/15 hover:bg-primary/15" : undefined}>
+                  <TableHead className={`${simple ? "w-[70%]" : "w-[45%]"}${columnFilters ? " font-bold" : ""}`}>Descrição</TableHead>
+                  {!simple && <TableHead className={`w-[12%]${columnFilters ? " font-bold" : ""}`}>Cód. Myio</TableHead>}
+                  {!simple && <TableHead className={`w-[12%]${columnFilters ? " font-bold" : ""}`}>Cód. Fabricante</TableHead>}
+                  <TableHead className={`${simple ? "w-[15%] text-right" : "w-[10%] text-right"}${columnFilters ? " font-bold" : ""}`}>Saldo</TableHead>
+                  {!simple && <TableHead className={`w-[10%]${columnFilters ? " font-bold" : ""}`}>Imagem</TableHead>}
                   <TableHead className={simple ? "w-[15%] text-right" : "w-[11%] text-right"}></TableHead>
                 </TableRow>
+                {columnFilters && <TableRow className="bg-primary/5 hover:bg-primary/5">
+                  <TableHead className="py-1"><Input value={descriptionFilter} onChange={(e) => setDescriptionFilter(e.target.value)} placeholder="Filtrar" aria-label="Filtrar por descrição" className="h-8 bg-background" /></TableHead>
+                  {!simple && <TableHead className="py-1"><Input value={myioCodeFilter} onChange={(e) => setMyioCodeFilter(e.target.value)} placeholder="Filtrar" aria-label="Filtrar por código myio" className="h-8 bg-background" /></TableHead>}
+                  {!simple && <TableHead className="py-1"><Input value={manufacturerCodeFilter} onChange={(e) => setManufacturerCodeFilter(e.target.value)} placeholder="Filtrar" aria-label="Filtrar por código do fabricante" className="h-8 bg-background" /></TableHead>}
+                  <TableHead className="py-1">
+                    <Select value={balanceFilter} onValueChange={(value) => setBalanceFilter(value as "with" | "zero")}>
+                      <SelectTrigger className="h-8 w-full bg-background" aria-label="Filtrar por saldo"><SelectValue placeholder="Filtrar" /></SelectTrigger>
+                      <SelectContent><SelectItem value="with">Com saldo</SelectItem><SelectItem value="zero">Sem saldo</SelectItem></SelectContent>
+                    </Select>
+                  </TableHead>
+                  {!simple && <TableHead className="py-1" />}
+                  <TableHead className="py-1" />
+                </TableRow>}
             </TableHeader>
             <TableBody>
-              {rows.map((r) => {
+              {displayedRows.map((r) => {
                 const meta = metaMap?.[r.material_id];
                 return (
                 <TableRow key={r.material_id}>
@@ -1869,35 +1895,25 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
   const { data: profiles } = useStockProfiles();
   const { data: metaMap } = useStockMeta("terceiros_materials");
 
-  const [search, setSearch] = useState("");
-  const [view, setView] = useState<"all" | "with" | "zero">("all");
+  const [descriptionFilter, setDescriptionFilter] = useState("");
+  const [myioCodeFilter, setMyioCodeFilter] = useState("");
+  const [manufacturerCodeFilter, setManufacturerCodeFilter] = useState("");
+  const [balanceFilter, setBalanceFilter] = useState<"with" | "zero" | "">("");
 
-  const filtered = (rows ?? [])
-    .filter((r) => r.name.toLowerCase().includes(search.trim().toLowerCase()))
-    .filter((r) => (view === "with" ? r.balance > 0 : view === "zero" ? r.balance <= 0 : true));
+  const normalize = (value: string | null | undefined) => value?.trim().toLocaleLowerCase("pt-BR") ?? "";
+  const filtered = (rows ?? []).filter((row) => {
+    const meta = metaMap?.[row.material_id];
+    return (!normalize(descriptionFilter) || normalize(`${row.name} ${meta?.description ?? ""}`).includes(normalize(descriptionFilter)))
+      && (!normalize(myioCodeFilter) || normalize(meta?.myio_code).includes(normalize(myioCodeFilter)))
+      && (!normalize(manufacturerCodeFilter) || normalize(meta?.manufacturer_code).includes(normalize(manufacturerCodeFilter)))
+      && (balanceFilter === "with" ? row.balance > 0 : balanceFilter === "zero" ? row.balance <= 0 : true);
+  });
   const nameById = Object.fromEntries((rows ?? []).map((r) => [r.material_id, r.name]));
 
   const toolbar = (
     <>
       <AddTerceirosDialog userId={userId} />
       <TerceirosResetDialog rows={rows ?? []} />
-      <div className="relative">
-        <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar material"
-          className="w-full pl-8 sm:w-[200px]"
-        />
-      </div>
-      <Select value={view} onValueChange={(v) => setView(v as "all" | "with" | "zero")}>
-        <SelectTrigger className="w-full sm:w-[170px]"><SelectValue /></SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">Todos</SelectItem>
-          <SelectItem value="with">Com saldo</SelectItem>
-          <SelectItem value="zero">Sem saldo</SelectItem>
-        </SelectContent>
-      </Select>
     </>
   );
 
@@ -1921,14 +1937,26 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
             <p className="text-sm text-muted-foreground">Nenhum item encontrado.</p>
           ) : (
             <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[45%]">Descrição</TableHead>
-                  <TableHead className="w-[12%]">Cód. Myio</TableHead>
-                  <TableHead className="w-[12%]">Cód. Fabricante</TableHead>
-                  <TableHead className="w-[10%] text-right">Saldo Estoque</TableHead>
-                  <TableHead className="w-[10%]">Imagem</TableHead>
+              <TableHeader className="[&_tr]:border-b">
+                <TableRow className="border-t bg-primary/15 hover:bg-primary/15">
+                  <TableHead className="w-[45%] font-bold">Descrição</TableHead>
+                  <TableHead className="w-[12%] font-bold">Cód. Myio</TableHead>
+                  <TableHead className="w-[12%] font-bold">Cód. Fabricante</TableHead>
+                  <TableHead className="w-[10%] text-right font-bold">Saldo</TableHead>
+                  <TableHead className="w-[10%] font-bold">Imagem</TableHead>
                   <TableHead className="w-[11%] text-right"></TableHead>
+                </TableRow>
+                <TableRow className="bg-primary/5 hover:bg-primary/5">
+                  <TableHead className="py-1"><Input value={descriptionFilter} onChange={(e) => setDescriptionFilter(e.target.value)} placeholder="Filtrar" aria-label="Filtrar por descrição" className="h-8 bg-background" /></TableHead>
+                  <TableHead className="py-1"><Input value={myioCodeFilter} onChange={(e) => setMyioCodeFilter(e.target.value)} placeholder="Filtrar" aria-label="Filtrar por código myio" className="h-8 bg-background" /></TableHead>
+                  <TableHead className="py-1"><Input value={manufacturerCodeFilter} onChange={(e) => setManufacturerCodeFilter(e.target.value)} placeholder="Filtrar" aria-label="Filtrar por código do fabricante" className="h-8 bg-background" /></TableHead>
+                  <TableHead className="py-1">
+                    <Select value={balanceFilter} onValueChange={(value) => setBalanceFilter(value as "with" | "zero")}>
+                      <SelectTrigger className="h-8 w-full bg-background" aria-label="Filtrar por saldo"><SelectValue placeholder="Filtrar" /></SelectTrigger>
+                      <SelectContent><SelectItem value="with">Com saldo</SelectItem><SelectItem value="zero">Sem saldo</SelectItem></SelectContent>
+                    </Select>
+                  </TableHead>
+                  <TableHead className="py-1" /><TableHead className="py-1" />
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -2128,38 +2156,15 @@ function MyioDevicesStockSection({ userId, canDelete }: { userId: string; canDel
   const { data: movements } = useMovements();
   const { data: profiles } = useStockProfiles();
   const { data: manufactured } = useManufacturedMap();
-  const [search, setSearch] = useState("");
-  const [view, setView] = useState<"all" | "with" | "zero">("all");
 
   const scoped = (stock ?? [])
     .filter((r) => (r.location ?? "fabrica") === "almoxarifado")
     .filter((r) => !/ — Caixa de \d+$/.test(r.name));
   const scopedIds = new Set(scoped.map((r) => r.material_id));
   const scopedMovements = (movements ?? []).filter((m) => scopedIds.has(m.material_id));
-  const rows = scoped
-    .filter((r) => r.name.toLowerCase().includes(search.trim().toLowerCase()))
-    .filter((r) => (view === "with" ? r.balance > 0 : view === "zero" ? r.balance <= 0 : true));
-
   const toolbar = (
     <>
       <ResetStockDialog rows={scoped} userId={userId} location="almoxarifado" />
-      <div className="relative">
-        <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar material"
-          className="w-full pl-8 sm:w-[200px]"
-        />
-      </div>
-      <Select value={view} onValueChange={(v) => setView(v as "all" | "with" | "zero")}>
-        <SelectTrigger className="w-full sm:w-[170px]"><SelectValue /></SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">Todos</SelectItem>
-          <SelectItem value="with">Com saldo</SelectItem>
-          <SelectItem value="zero">Sem saldo</SelectItem>
-        </SelectContent>
-      </Select>
     </>
   );
 
@@ -2168,13 +2173,14 @@ function MyioDevicesStockSection({ userId, canDelete }: { userId: string; canDel
         <StockTableCard
           title="Dispositivos myio"
           description="Dispositivos produzidos pela Fábrica."
-          rows={rows.filter((r) => manufactured?.[r.material_id])}
+          rows={scoped.filter((r) => manufactured?.[r.material_id])}
           isLoading={isLoading}
           userId={userId}
           canDelete={canDelete}
           actions={toolbar}
           damageSource="Estoque Myio"
           simple
+          columnFilters
         />
         <BoxesCard />
         <Card>
@@ -2249,7 +2255,7 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
     <>
       <AddMaterialDialog location={location} userId={userId} />
       <ResetStockDialog rows={scoped} userId={userId} location={location} />
-      <div className="relative">
+      {location !== "almoxarifado_geral" && <div className="relative">
         <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
           value={search}
@@ -2257,15 +2263,15 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
           placeholder="Buscar material"
           className="w-full pl-8 sm:w-[200px]"
         />
-      </div>
-      <Select value={view} onValueChange={(v) => setView(v as "all" | "with" | "zero")}>
+      </div>}
+      {location !== "almoxarifado_geral" && <Select value={view} onValueChange={(v) => setView(v as "all" | "with" | "zero")}>
         <SelectTrigger className="w-full sm:w-[170px]"><SelectValue /></SelectTrigger>
         <SelectContent>
           <SelectItem value="all">Todos</SelectItem>
           <SelectItem value="with">Com saldo</SelectItem>
           <SelectItem value="zero">Sem saldo</SelectItem>
         </SelectContent>
-      </Select>
+      </Select>}
     </>
   );
 
@@ -2306,12 +2312,13 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
               ? "Estoque geral independente. Toque no nome para ver foto, link de referência e parâmetros de compra."
               : 'A entrada é automática quando quem fez a solicitação confirma "Recebido corretamente" em um pedido feito pela biblioteca.'
           }
-          rows={rows}
+          rows={location === "almoxarifado_geral" ? scoped : rows}
           isLoading={isLoading}
           userId={userId}
           canDelete={canDelete}
           actions={toolbar}
           detail={location === "almoxarifado_geral"}
+          columnFilters={location === "almoxarifado_geral"}
           damageSource={`Estoque — ${LOCATION_LABELS[location]}`}
         />
 
