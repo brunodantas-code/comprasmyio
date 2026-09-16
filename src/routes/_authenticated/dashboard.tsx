@@ -2506,7 +2506,8 @@ function OrdersTable({
           return (
             <div key={o.id} className="rounded-lg border border-border bg-card p-3">
               <Row label="Approval">
-                <div className="flex flex-wrap items-start gap-1 font-mono font-bold">
+                <div className="flex flex-wrap items-start justify-start gap-1 font-mono font-bold">
+                  {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
                   <div className="inline-flex flex-col items-stretch">
                     <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} />
                     {o.budget_exceeded && (
@@ -2515,10 +2516,7 @@ function OrdersTable({
                       </Badge>
                     )}
                   </div>
-                  <div className="flex flex-col items-center gap-1">
-                    {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
-                    {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
-                  </div>
+                  {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
                 </div>
                 <div className="mt-1 space-y-1">
                   <ExistingAttachments orderId={o.id} attachments={o.attachments ?? []} canRemove={canEdit} />
@@ -2651,8 +2649,9 @@ function OrdersTable({
         <TableBody>
           {visibleOrders.map((o) => (
             <TableRow key={o.id} className="align-top">
-              <TableCell className="font-mono text-xs text-center">
-                <div className="flex items-start justify-center gap-1">
+              <TableCell className="font-mono text-xs text-left">
+                <div className="flex items-start justify-start gap-1">
+                  {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
                   <div className="inline-flex flex-col items-stretch">
                     <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} />
                     {o.budget_exceeded && (
@@ -2661,10 +2660,7 @@ function OrdersTable({
                       </Badge>
                     )}
                   </div>
-                  <div className="flex flex-col items-center gap-1">
-                    {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
-                    {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
-                  </div>
+                  {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
                 </div>
                 <div className="mt-1 space-y-1 font-sans">
                   <ExistingAttachments orderId={o.id} attachments={o.attachments ?? []} canRemove={canEdit} />
@@ -3320,7 +3316,7 @@ function InternalDeleteOrderDialog({ order }: { order: Order }) {
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
         <Button type="button" size="icon" aria-label="Excluir pedido" title="Excluir pedido">
-          <Trash2 className="h-4 w-4" />
+          <X className="h-4 w-4" />
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>

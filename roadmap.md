@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Tarefas
+- [x] Alinhar a exclusão à esquerda do Approval no desktop e mobile e substituir a lixeira por X
 - [x] Excluir o filtro de possibilidades de entrega em Todos os approvals
 - [x] Mover os filtros de “Pendentes comigo” e “Meus em aprovação” para cabeçalhos verdes no padrão de “Todos”
 - [x] Permitir ao solicitante excluir ticket próprio ainda “Em aberto”, mantendo-o no histórico como “Excluído” e fora das pendências
