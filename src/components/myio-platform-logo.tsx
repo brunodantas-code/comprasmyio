@@ -4,10 +4,18 @@ import logoDark from "@/assets/myio-logo-dark.png.asset.json";
 
 type Props = {
   className?: string;
-  tone?: "light" | "dark";
+  tone?: "light" | "dark" | "auto";
 };
 
-export function MyioPlatformLogo({ className, tone = "dark" }: Props) {
+export function MyioPlatformLogo({ className, tone = "auto" }: Props) {
+  if (tone === "auto") {
+    return (
+      <span className={cn("inline-flex items-center", className)}>
+        <img src={logoLightSrc} alt="myio" className="h-full w-auto select-none dark:hidden" draggable={false} />
+        <img src={logoDark.url} alt="myio" className="hidden h-full w-auto select-none dark:block" draggable={false} />
+      </span>
+    );
+  }
   return (
     <img
       src={tone === "light" ? logoDark.url : logoLightSrc}
