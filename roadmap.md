@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Tarefas
+- [x] Incluir alocação em Cliente para solicitações de Materiais
 - [x] Criar o aplicativo Desenvolvimento para tickets de bugs e melhorias
 - [x] Liberar automaticamente o Desenvolvimento para todos os usuários atuais e futuros
 - [x] Manter os seis aplicativos na mesma linha no desktop

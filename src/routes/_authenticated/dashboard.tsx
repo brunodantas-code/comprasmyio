@@ -1241,8 +1241,14 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
           .from("myio_orders")
           .insert({
             title: values.item_name,
-            client_name: forStock ? "Estoque" : allocTarget === "interna" ? "myio" : (projects?.find((p) => p.id === values.project_id)?.name ?? ""),
-            project_id: forStock || allocTarget === "interna" ? null : (values.project_id ?? null),
+            client_name: forStock
+              ? "Estoque"
+              : allocTarget === "interna"
+              ? "myio"
+              : allocTarget === "cliente"
+              ? (clientsList?.find((client) => client.id === clientId)?.name ?? "")
+              : (projects?.find((p) => p.id === values.project_id)?.name ?? ""),
+            project_id: forStock || allocTarget !== "projeto" ? null : (values.project_id ?? null),
             delivery_date: values.deadline_type === "customizado" && values.deadline_date
               ? values.deadline_date
               : new Date().toISOString().slice(0, 10),
@@ -1267,7 +1273,7 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
           request_type: requestType,
           client_id: requestModel === "rh" || requestModel === "pagamento"
             ? (clientId && clientId !== "none" ? clientId : null)
-            : (requestModel !== "materiais" && allocTarget === "cliente" ? (clientId || null) : null),
+            : (allocTarget === "cliente" ? (clientId || null) : null),
           cost_center_id: restrictedCc ? await resolveOperacaoCostCenterId() : (costCenterId || null),
           parent_order_id: requestModel === "pagamento" && linkedApprovalId !== "none" ? linkedApprovalId : null,
           payment_date: requestModel === "pagamento" ? paymentDate : null,
@@ -1387,6 +1393,9 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
     }
     if (isMateriais && !forStock && allocTarget === "projeto" && !projectId) {
       return toast.error("Selecione um projeto");
+    }
+    if (isMateriais && !forStock && allocTarget === "cliente" && !clientId) {
+      return toast.error("Selecione um cliente");
     }
     if (isMateriais && !recipient.trim()) {
       return toast.error("Selecione o destinatário");
@@ -1779,6 +1788,10 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
                       Projeto
                     </label>
                     <label className="flex cursor-pointer items-center gap-2 text-sm">
+                      <Checkbox checked={!forStock && allocTarget === "cliente"} onCheckedChange={() => { setForStock(false); setAllocTarget("cliente"); setProjectId(""); }} />
+                      Cliente
+                    </label>
+                    <label className="flex cursor-pointer items-center gap-2 text-sm">
                       <Checkbox checked={forStock} onCheckedChange={() => { setForStock(true); setAllocTarget("projeto"); setProjectId(""); setClientId(""); }} />
                       Estoque
                     </label>
@@ -1789,6 +1802,9 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
                   </div>
                   {!forStock && allocTarget === "projeto" && (
                     <p className="text-xs text-muted-foreground">Prova de conceito ou potencial cliente, ainda não implantado.</p>
+                  )}
+                  {!forStock && allocTarget === "cliente" && (
+                    <p className="text-xs text-muted-foreground">Contrato assinado e ativo.</p>
                   )}
                   {!forStock && allocTarget === "interna" && (
                     <p className="text-xs text-muted-foreground">Qualquer despesa interna não atrelada a clientes ou projetos</p>
@@ -1817,6 +1833,17 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
                       </SelectContent>
                     </Select>
                     {selectedBudget && selectedBudget.budget > 0 && <BudgetProgress summary={selectedBudget} pendingValue={pendingBudgetValue} />}
+                  </div>
+                )}
+                {!forStock && allocTarget === "cliente" && (
+                  <div className="space-y-2">
+                    <Label>Cliente</Label>
+                    <Select value={clientId} onValueChange={setClientId}>
+                      <SelectTrigger><SelectValue placeholder="Selecione o cliente" /></SelectTrigger>
+                      <SelectContent>
+                        {(clientsList ?? []).map((client) => <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
                   </div>
                 )}
               </>
