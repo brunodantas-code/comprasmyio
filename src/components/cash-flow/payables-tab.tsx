@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -49,11 +48,14 @@ function ClassifyPayable({ payable, accounts, userId, onDone }: { payable: Payab
 }
 
 function PeriodSelect({ label, value, onValueChange }: { label: string; value: string; onValueChange: (value: string) => void }) {
-  const [selectedYear = "", selectedMonth = ""] = value.split("-");
+  const [initialYear = "", initialMonth = ""] = value.split("-");
+  const [selectedMonth, setSelectedMonth] = useState(initialMonth);
+  const [selectedYear, setSelectedYear] = useState(initialYear);
   const currentYear = new Date().getFullYear();
   const years = Array.from(new Set([selectedYear, ...Array.from({ length: 16 }, (_, index) => String(currentYear - 5 + index))].filter(Boolean))).sort();
-  const update = (year: string, month: string) => onValueChange(year && month ? `${year}-${month}` : "");
-  return <div className="space-y-2"><Label>{label}</Label><div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] gap-2"><Select value={selectedMonth} onValueChange={(month) => update(selectedYear, month)}><SelectTrigger aria-label={`${label}: mês`}><SelectValue placeholder="MM" /></SelectTrigger><SelectContent>{Array.from({ length: 12 }, (_, index) => String(index + 1).padStart(2, "0")).map((month) => <SelectItem key={month} value={month}>{month}</SelectItem>)}</SelectContent></Select><Select value={selectedYear} onValueChange={(year) => update(year, selectedMonth)}><SelectTrigger aria-label={`${label}: ano`}><SelectValue placeholder="AAAA" /></SelectTrigger><SelectContent>{years.map((year) => <SelectItem key={year} value={year}>{year}</SelectItem>)}</SelectContent></Select></div></div>;
+  const selectMonth = (month: string) => { setSelectedMonth(month); if (selectedYear) onValueChange(`${selectedYear}-${month}`); };
+  const selectYear = (year: string) => { setSelectedYear(year); if (selectedMonth) onValueChange(`${year}-${selectedMonth}`); };
+  return <div className="space-y-2"><Label>{label}</Label><div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] gap-2"><Select value={selectedMonth} onValueChange={selectMonth}><SelectTrigger aria-label={`${label}: mês`}><SelectValue placeholder="MM" /></SelectTrigger><SelectContent>{Array.from({ length: 12 }, (_, index) => String(index + 1).padStart(2, "0")).map((month) => <SelectItem key={month} value={month}>{month}</SelectItem>)}</SelectContent></Select><Select value={selectedYear} onValueChange={selectYear}><SelectTrigger aria-label={`${label}: ano`}><SelectValue placeholder="AAAA" /></SelectTrigger><SelectContent>{years.map((year) => <SelectItem key={year} value={year}>{year}</SelectItem>)}</SelectContent></Select></div></div>;
 }
 
 function AccountPicker({ accounts, value, onValueChange }: { accounts: Account[]; value: string; onValueChange: (value: string) => void }) {
