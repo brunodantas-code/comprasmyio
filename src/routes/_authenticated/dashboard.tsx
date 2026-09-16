@@ -296,7 +296,7 @@ function StatusMultiFilter({ selected, setSelected }: { selected: Order["status"
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button type="button" variant="outline" size="sm" className="w-full justify-start sm:w-[200px]">
+        <Button type="button" variant="outline" size="sm" className="w-full justify-start sm:w-[240px]">
           <Filter className="mr-2 h-4 w-4" />
           <span className="truncate">{label}</span>
         </Button>
