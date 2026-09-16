@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Tarefas
+- [x] Manter ativo o controle de habilitação do Code em Acessos
 - [x] Padronizar nomes dos aplicativos como Supply, Cash Flow e Code
 - [x] Incluir alocação em Cliente para solicitações de Materiais
 - [x] Criar o aplicativo Desenvolvimento para tickets de bugs e melhorias

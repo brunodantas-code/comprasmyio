@@ -57,13 +57,12 @@ export function ErpAppAccessAdmin() {
               </div>
               <div className="grid grid-cols-2 gap-x-4 gap-y-3 lg:grid-cols-6 lg:gap-x-5">
                 {APPS.map((app) => {
-                  const isUniversal = app.key === "development";
-                  const checked = isUniversal || accessSet.has(`${user.id}:${app.key}`);
+                  const checked = accessSet.has(`${user.id}:${app.key}`);
                   return (
                     <label key={app.key} className="grid min-w-0 grid-cols-[2.75rem_minmax(0,1fr)] items-center gap-2 text-sm">
                       <Switch
                         checked={checked}
-                        disabled={update.isPending || isUniversal}
+                        disabled={update.isPending}
                         onCheckedChange={(allowed) => update.mutate({ data: { userId: user.id, appKey: app.key, allowed } })}
                         aria-label={`${app.label} para ${user.full_name || user.email || "usuário"}`}
                       />
