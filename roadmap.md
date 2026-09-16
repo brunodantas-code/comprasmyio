@@ -235,4 +235,4 @@
 - [x] Usar nas páginas CRM e Legal os mesmos ícones exibidos no portal ERP
 
 - [x] Incluir no RH a mensagem de aplicativo em desenvolvimento usada no CRM e Legal
-- [ ] Reduzir a largura dos botões Aplicativos e Acessos e alinhar Acessos ao ícone Code
+- [x] Reduzir a largura dos botões Aplicativos e Acessos e alinhar Acessos ao ícone Code
