@@ -186,3 +186,4 @@
 - [x] Aplicar filtros por coluna e cabeçalho verde no Estoque — Almoxarifado
 - [x] Aplicar filtros por coluna e cabeçalho verde no submenu myio
 - [x] Aplicar filtros por coluna e cabeçalho verde em Insumos de Instalação
+- [x] Remover o campo Cliente do cadastro de Novo Projeto
