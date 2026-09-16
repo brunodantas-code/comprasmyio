@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { APP_NAVIGATION_OPTIONS } from "@/lib/app-navigation-options";
 
 type TicketStatus = "aberto" | "em_andamento" | "concluido" | "cancelado";
 type Ticket = {
@@ -167,6 +168,11 @@ function FilterSelect({ value, onChange, placeholder, options }: { value: string
 
 function NewTicketDialog({ open, onOpenChange, userId, onCreated }: { open: boolean; onOpenChange: (open: boolean) => void; userId?: string; onCreated: () => void }) {
   const [file, setFile] = useState<File | null>(null);
+  const [appKey, setAppKey] = useState("supply");
+  const [menuName, setMenuName] = useState("none");
+  const [submenuName, setSubmenuName] = useState("none");
+  const menuOptions = APP_NAVIGATION_OPTIONS[appKey] ?? [];
+  const submenuOptions = menuOptions.find((menu) => menu.label === menuName)?.submenus ?? [];
   const createTicket = useMutation({
     mutationFn: async (form: HTMLFormElement) => {
       if (!userId) throw new Error("Sessão não encontrada");
@@ -175,7 +181,7 @@ function NewTicketDialog({ open, onOpenChange, userId, onCreated }: { open: bool
         reporter_id: userId,
         app_key: String(values.get("app_key")), ticket_type: String(values.get("ticket_type")),
         title: String(values.get("title")).trim(), description: String(values.get("description")).trim(),
-        menu_name: String(values.get("menu_name")).trim() || null, submenu_name: String(values.get("submenu_name")).trim() || null,
+        menu_name: menuName === "none" ? null : menuName, submenu_name: submenuName === "none" ? null : submenuName,
         priority: String(values.get("priority")), urgency: String(values.get("urgency")),
         expected_result: String(values.get("expected_result")).trim(),
       };
@@ -190,7 +196,7 @@ function NewTicketDialog({ open, onOpenChange, userId, onCreated }: { open: bool
         if (attachmentError) throw attachmentError;
       }
     },
-    onSuccess: () => { toast.success("Ticket aberto com sucesso"); setFile(null); onOpenChange(false); onCreated(); },
+    onSuccess: () => { toast.success("Ticket aberto com sucesso"); setFile(null); setAppKey("supply"); setMenuName("none"); setSubmenuName("none"); onOpenChange(false); onCreated(); },
     onError: (error: Error) => toast.error(error.message),
   });
   return <Dialog open={open} onOpenChange={onOpenChange}>
@@ -199,12 +205,12 @@ function NewTicketDialog({ open, onOpenChange, userId, onCreated }: { open: bool
       <form onSubmit={(event) => { event.preventDefault(); createTicket.mutate(event.currentTarget); }} className="space-y-4">
         <DialogHeader><DialogTitle>Novo ticket</DialogTitle><DialogDescription>Registre uma melhoria ou um problema encontrado.</DialogDescription></DialogHeader>
         <div className="grid gap-4 sm:grid-cols-2">
-          <FormSelect name="app_key" label="Aplicativo afetado" options={Object.entries(APP_NAMES).map(([value, label]) => ({ value, label }))} />
+           <FormSelect name="app_key" label="Aplicativo" value={appKey} onChange={(value) => { setAppKey(value); setMenuName("none"); setSubmenuName("none"); }} options={Object.entries(APP_NAMES).map(([value, label]) => ({ value, label }))} />
+           <OptionalFormSelect label="Menu (opcional)" value={menuName} onChange={(value) => { setMenuName(value); setSubmenuName("none"); }} placeholder={menuOptions.length ? "Selecione" : "Sem menus disponíveis"} disabled={!menuOptions.length} options={menuOptions.map((menu) => menu.label)} />
+           <OptionalFormSelect label="Submenu (opcional)" value={submenuName} onChange={setSubmenuName} placeholder={menuName === "none" ? "Selecione o menu" : submenuOptions.length ? "Selecione" : "Sem submenus disponíveis"} disabled={menuName === "none" || !submenuOptions.length} options={submenuOptions} />
           <FormSelect name="ticket_type" label="Tipo" options={[{ value: "melhoria", label: "Melhoria" }, { value: "bug", label: "Bug" }]} />
           <div className="sm:col-span-2"><Label htmlFor="ticket-title">Título</Label><Input id="ticket-title" name="title" minLength={3} maxLength={120} required /></div>
           <div className="sm:col-span-2"><Label htmlFor="ticket-description">Descrição</Label><Textarea id="ticket-description" name="description" minLength={10} maxLength={4000} className="min-h-28" required /></div>
-           <div><Label htmlFor="ticket-menu">Menu (opcional)</Label><Input id="ticket-menu" name="menu_name" maxLength={100} placeholder="Ex.: Cadastro" /></div>
-           <div><Label htmlFor="ticket-submenu">Submenu (opcional)</Label><Input id="ticket-submenu" name="submenu_name" maxLength={100} placeholder="Ex.: Diversos" /></div>
           <FormSelect name="priority" label="Prioridade" options={Object.entries(PRIORITY_NAMES).map(([value, label]) => ({ value, label }))} />
           <FormSelect name="urgency" label="Urgência" options={[{ value: "normal", label: "Normal" }, { value: "urgente", label: "Urgente" }]} />
           <div className="sm:col-span-2"><Label htmlFor="ticket-result">Resultado esperado</Label><Textarea id="ticket-result" name="expected_result" minLength={5} maxLength={2000} required /></div>
@@ -216,8 +222,12 @@ function NewTicketDialog({ open, onOpenChange, userId, onCreated }: { open: bool
   </Dialog>;
 }
 
-function FormSelect({ name, label, options }: { name: string; label: string; options: { value: string; label: string }[] }) {
-  return <div><Label>{label}</Label><Select name={name} required><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent>{options.map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}</SelectContent></Select></div>;
+function FormSelect({ name, label, options, value, onChange }: { name: string; label: string; options: { value: string; label: string }[]; value?: string; onChange?: (value: string) => void }) {
+  return <div><Label>{label}</Label><Select name={name} required value={value} onValueChange={onChange}><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent>{options.map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}</SelectContent></Select></div>;
+}
+
+function OptionalFormSelect({ label, value, onChange, placeholder, disabled, options }: { label: string; value: string; onChange: (value: string) => void; placeholder: string; disabled: boolean; options: string[] }) {
+  return <div><Label>{label}</Label><Select value={value} onValueChange={onChange} disabled={disabled}><SelectTrigger><SelectValue placeholder={placeholder} /></SelectTrigger><SelectContent><SelectItem value="none">Não informar</SelectItem>{options.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent></Select></div>;
 }
 
 function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | null; onClose: () => void; data?: { profiles: { id: string; full_name: string | null; email: string | null }[]; isAdmin: boolean }; onUpdated: () => void }) {
