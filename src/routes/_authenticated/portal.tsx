@@ -97,7 +97,7 @@ function PortalPage() {
             {apps.length ? (
                <div className="grid grid-cols-2 gap-x-5 gap-y-12 sm:gap-x-8 lg:grid-cols-4">
                  {apps.map(({ key, name, description, to }) => (
-                    <div key={key} className="flex min-w-0 flex-col items-center text-center">
+                    <div key={key} className="flex w-32 min-w-0 justify-self-start flex-col items-center text-center">
                       <Link
                         to={to}
                         aria-label={`Acessar ${name}`}
