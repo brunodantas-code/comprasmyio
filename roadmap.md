@@ -228,5 +228,6 @@
 - [x] Remover “myio” dos nomes dos aplicativos no portal e manter a logomarca ao lado do nome dentro de cada aplicativo
 - [x] Incluir retorno à Plataforma ERP sem encerrar a sessão em todos os aplicativos
 
-- [ ] Incluir o nome do solicitante no acompanhamento de tickets do Code.
-- [ ] Incluir Menu e Submenu opcionais na abertura e nos detalhes dos tickets do Code.
+- [x] Incluir o nome do solicitante no acompanhamento de tickets do Code.
+- [x] Incluir Menu e Submenu opcionais na abertura e nos detalhes dos tickets do Code.
+- [x] Criar Tipos de Estoque em Cadastro > Diversos e utilizar a lista atual no formulário de Materiais.
