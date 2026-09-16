@@ -1,15 +1,15 @@
-# Padronização dos botões de status
+# Opção de modo escuro
 
 ## Objetivo
-Aplicar fundo verde-claro e texto preto a todos os indicadores de situação dos aplicativos, sem alterar filtros, botões de ação, alertas ou etiquetas informativas.
+Permitir que cada usuário alterne entre o modo claro e o modo escuro após entrar na plataforma, mantendo sua escolha nos próximos acessos.
 
-## Alterações
-- Criar um estilo semântico único para status, com fundo verde-claro, borda verde e texto preto, incluindo tema escuro.
-- Aplicar esse padrão nas situações de Supply, Approvals, Estoques, Cash Flow e Code.
-- Preservar o texto de cada situação e seu comportamento atual; somente a apresentação visual será alterada.
-- Validar a tela atual e as principais listagens em computador e celular.
+## Implementação
+- Adicionar um controle de tema no cabeçalho da plataforma, ao lado das ações de pendências e saída.
+- Exibir ícone de lua no modo claro e de sol no modo escuro, com identificação acessível ao passar o cursor.
+- Aplicar o tema a todos os aplicativos usando as cores semânticas já existentes, sem alterar fluxos ou permissões.
+- Salvar a preferência no navegador do usuário e, no primeiro acesso, respeitar a configuração de aparência do aparelho.
+- Aplicar o tema antes da tela aparecer para evitar mudança brusca de cores durante o carregamento.
 
-## Detalhes técnicos
-- Adicionar tokens de cor e uma variante `status` ao componente compartilhado de etiquetas.
-- Substituir classes específicas amarelas, vermelhas, azuis, lilases e cinzas apenas nos elementos que representam status.
-- Manter cores próprias de alertas como urgência, orçamento excedido, reposição e disponibilidade, pois não são botões de status.
+## Validação
+- Conferir alternância e persistência no portal, Supply, Cash Flow e Code.
+- Validar contraste e legibilidade em computador e celular.
