@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Tarefas
+- [ ] Corrigir a visualização dos anexos dos tickets com tamanho limitado e botão de fechar
 - [x] Igualar a largura do filtro “Todos os status” ao filtro de entregues em Minhas solicitações
 - [x] Manter ativo o controle de habilitação do Code em Acessos
 - [x] Padronizar nomes dos aplicativos como Supply, Cash Flow e Code
