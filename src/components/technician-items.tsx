@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import { ArrowRightLeft, HardHat, History } from "lucide-react";
 import { pushQrsToExternal } from "@/lib/push-external";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
+import { useDamageReasons } from "@/components/damage-reasons-tab";
 
 function DispatchPhoto({ path }: { path: string }) {
   const { data } = useQuery({
@@ -157,6 +158,8 @@ function MoveDialog({
   const [projectId, setProjectId] = useState("");
   const [quantity, setQuantity] = useState(String(remaining));
   const [notes, setNotes] = useState("");
+  const [damageReasonCode, setDamageReasonCode] = useState("");
+  const { data: damageReasons } = useDamageReasons();
 
   const reset = () => {
     setDestination("");
@@ -172,7 +175,8 @@ function MoveDialog({
       if (!Number.isInteger(qty) || qty <= 0) throw new Error("Quantidade inválida.");
       if (qty > remaining) throw new Error("Quantidade maior que o disponível com o técnico.");
       if (destination === "unidade" && !projectId) throw new Error("Selecione o projeto da unidade.");
-      if (destination === "avariado" && !notes.trim()) throw new Error("Informe o motivo da avaria na observação.");
+      const damageReason = damageReasons?.find((item) => item.code === damageReasonCode && item.active);
+      if (destination === "avariado" && !damageReason) throw new Error("Selecione o motivo da avaria.");
 
       const { error } = await supabase.from("technician_moves").insert({
         movement_id: dispatch.id,
@@ -217,7 +221,8 @@ function MoveDialog({
           quantity: qty,
           source: "Técnico",
           source_detail: dispatch.responsible!.trim(),
-          reason: notes.trim(),
+          reason: damageReason?.name ?? "Avaria",
+          reason_code: damageReason?.code ?? null,
           created_by: userId,
         });
       }
@@ -303,6 +308,8 @@ function MoveDialog({
               </Select>
             </div>
           )}
+
+          {destination === "avariado" && <div className="space-y-2"><Label>Motivo da avaria</Label><Select value={damageReasonCode} onValueChange={setDamageReasonCode}><SelectTrigger><SelectValue placeholder="Selecione o motivo" /></SelectTrigger><SelectContent>{(damageReasons ?? []).filter((item) => item.active).map((item) => <SelectItem key={item.code} value={item.code}>{item.name}</SelectItem>)}</SelectContent></Select></div>}
 
           <div className="space-y-2">
             <Label htmlFor={`tm-qty-${dispatch.id}`}>Quantidade</Label>

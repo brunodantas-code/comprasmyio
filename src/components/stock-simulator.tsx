@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FlaskConical, Search, ListTree } from "lucide-react";
+import { FlaskConical, ListTree } from "lucide-react";
 
 type Material = { id: string; name: string; location: string; is_product: boolean; is_manufactured?: boolean | null; loss_percent?: number | null };
 type Bom = { id: string; product_material_id: string; component_material_id: string; quantity: number };
@@ -311,7 +311,7 @@ export function ProductionCapacityCard() {
 
   return (
     <Card>
-      <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <CardHeader>
         <div>
           <CardTitle>Capacidade de produção</CardTitle>
           <CardDescription>
@@ -319,24 +319,16 @@ export function ProductionCapacityCard() {
             componentes + perda).
           </CardDescription>
         </div>
-        <div className="relative">
-          <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            className="w-full pl-8 sm:w-64"
-            placeholder="Buscar dispositivo"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
       </CardHeader>
       <CardContent>
         <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Dispositivo</TableHead>
-              <TableHead className="text-right">Pode produzir</TableHead>
-              <TableHead>Componente limitante</TableHead>
+          <TableHeader className="[&_tr]:border-b">
+            <TableRow className="border-t bg-primary/15 hover:bg-primary/15">
+              <TableHead className="font-bold">Dispositivo</TableHead>
+              <TableHead className="text-right font-bold">Pode produzir</TableHead>
+              <TableHead className="font-bold">Componente limitante</TableHead>
             </TableRow>
+            <TableRow className="bg-primary/5 hover:bg-primary/5"><TableHead className="py-1"><Input className="h-8 bg-background" placeholder="Filtrar" aria-label="Filtrar por dispositivo" value={search} onChange={(e) => setSearch(e.target.value)} /></TableHead><TableHead className="py-1" /><TableHead className="py-1" /></TableRow>
           </TableHeader>
           <TableBody>
             {visible.map((r) => (

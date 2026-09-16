@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { ArrowRightLeft, Camera, CheckCircle2, ImageUp, PauseCircle, Plus, Trash2 } from "lucide-react";
 import { pushQrsToExternal } from "@/lib/push-external";
 import { useStockDestinations } from "@/components/stock-destinations-tab";
+import { useDamageReasons } from "@/components/damage-reasons-tab";
 
 type UnitProduct = {
   id: string;
@@ -92,6 +93,8 @@ function MoveUnitProductDialog({
   }
 
   const { data: destinations } = useStockDestinations();
+  const { data: damageReasons } = useDamageReasons();
+  const [damageReasonCode, setDamageReasonCode] = useState("");
   const { data: projects } = useQuery({
     queryKey: ["projects-for-unit-move"],
     enabled: open && destination === "cliente",
@@ -107,7 +110,8 @@ function MoveUnitProductDialog({
       if (!destination) throw new Error("Selecione o destino.");
       if (destination === "tecnico" && !technician.trim()) throw new Error("Informe o nome do técnico.");
       if (destination === "cliente" && !projectId) throw new Error("Selecione o projeto do cliente.");
-      if (destination === "avariado" && !notes.trim()) throw new Error("Informe o motivo da avaria nas observações.");
+      const damageReason = damageReasons?.find((item) => item.code === damageReasonCode && item.active);
+      if (destination === "avariado" && !damageReason) throw new Error("Selecione o motivo da avaria.");
 
       const selectedProject = projects?.find((project) => project.id === projectId);
       const storedDestination = destination === "myio" ? "almoxarifado" : destination === "cliente" ? null : destination;
@@ -170,7 +174,8 @@ function MoveUnitProductDialog({
             quantity: 1,
             source: "Cliente",
             source_detail: product.projects?.name ?? null,
-            reason: notes.trim(),
+            reason: damageReason?.name ?? "Avaria",
+            reason_code: damageReason?.code ?? null,
             photo_url: path,
             created_by: userId,
           });
@@ -288,6 +293,8 @@ function MoveUnitProductDialog({
               </Select>
             </div>
           )}
+
+          {destination === "avariado" && <div className="space-y-2"><Label>Motivo da avaria</Label><Select value={damageReasonCode} onValueChange={setDamageReasonCode}><SelectTrigger><SelectValue placeholder="Selecione o motivo" /></SelectTrigger><SelectContent>{(damageReasons ?? []).filter((item) => item.active).map((item) => <SelectItem key={item.code} value={item.code}>{item.name}</SelectItem>)}</SelectContent></Select></div>}
 
           <div className="space-y-2">
             <Label htmlFor="move-notes">Observações</Label>
