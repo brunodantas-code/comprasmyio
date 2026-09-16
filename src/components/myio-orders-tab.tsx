@@ -177,7 +177,7 @@ export function NewMyioOrderDialog({ userId, triggerLabel, inline = false }: { u
     <>
       <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label>Projeto (opcional)</Label>
+          <Label>Projeto</Label>
           <Select
             value={projectId || "none"}
             disabled={Boolean(clientId)}
@@ -199,7 +199,7 @@ export function NewMyioOrderDialog({ userId, triggerLabel, inline = false }: { u
           </Select>
         </div>
         <div className="space-y-2">
-          <Label>Cliente (opcional)</Label>
+          <Label>Cliente</Label>
           <Select
             value={clientId || "none"}
             disabled={Boolean(projectId)}
