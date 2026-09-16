@@ -461,8 +461,7 @@ export function PendingForMe() {
               <TableRow><TableCell colSpan={8} className="text-sm text-muted-foreground">Carregando...</TableCell></TableRow>
             ) : mine.length === 0 ? (
               <TableRow><TableCell colSpan={8} className="text-sm text-muted-foreground">Nenhuma aprovação pendente.</TableCell></TableRow>
-            ) : (
-              {mine.map((s) => {
+            ) : mine.map((s) => {
                 const o = s.purchase_orders;
                 const req = o?.requester_id ? profiles?.get(o.requester_id) : undefined;
                 return (
@@ -488,7 +487,6 @@ export function PendingForMe() {
                   </TableRow>
                 );
               })}
-            )}
           </TableBody>
         </Table>
       </CardContent>
@@ -667,7 +665,7 @@ export function MyApprovalFlows() {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="border-y bg-primary/5 p-2">
+        <div className="border-t bg-primary/5 p-2">
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
