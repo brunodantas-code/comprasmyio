@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Tarefas
+- [x] Trocar o ícone do CRM por pessoas sobre um funil, na proporção dos demais aplicativos
 - [x] Aumentar a margem superior dos ícones Supply e Cash Flow
 - [x] Remover o círculo do cifrão do Cash Flow e ampliar o símbolo na proporção do Supply
 - [x] Trocar o ícone do Supply por uma engrenagem maior e renomear para “Solicitações e Estoque”
