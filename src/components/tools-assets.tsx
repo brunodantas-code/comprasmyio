@@ -42,7 +42,6 @@ import {
   History,
   ImagePlus,
   Plus,
-  Search,
   Trash2,
   Upload,
 } from "lucide-react";
@@ -526,18 +525,28 @@ export function ToolAssetsSection({ userId, canDelete }: { userId: string; canDe
   const { data: profiles } = useToolProfiles();
   const { data: metaMap } = useStockMeta("tool_assets");
 
-  const [search, setSearch] = useState("");
-  const [view, setView] = useState<"all" | "with" | "zero">("all");
+  const [toolFilter, setToolFilter] = useState("");
+  const [myioCodeFilter, setMyioCodeFilter] = useState("");
+  const [manufacturerCodeFilter, setManufacturerCodeFilter] = useState("");
+  const [balanceFilter, setBalanceFilter] = useState<"with" | "zero" | "">("");
 
-  const filtered = (rows ?? [])
-    .filter((r) => r.name.toLowerCase().includes(search.trim().toLowerCase()))
-    .filter((r) => (view === "with" ? r.balance > 0 : view === "zero" ? r.balance <= 0 : true));
+  const normalize = (value: string | null | undefined) => value?.trim().toLocaleLowerCase("pt-BR") ?? "";
+  const filtered = (rows ?? []).filter((r) => {
+    const meta = metaMap?.[r.material_id];
+    const toolTerm = normalize(toolFilter);
+    const toolMatches = !toolTerm || normalize(`${r.name} ${meta?.description ?? ""}`).includes(toolTerm);
+    const myioCodeMatches = !normalize(myioCodeFilter) || normalize(meta?.myio_code).includes(normalize(myioCodeFilter));
+    const manufacturerCodeMatches =
+      !normalize(manufacturerCodeFilter) || normalize(meta?.manufacturer_code).includes(normalize(manufacturerCodeFilter));
+    const balanceMatches = balanceFilter === "with" ? r.balance > 0 : balanceFilter === "zero" ? r.balance <= 0 : true;
+    return toolMatches && myioCodeMatches && manufacturerCodeMatches && balanceMatches;
+  });
   const nameById = Object.fromEntries((rows ?? []).map((r) => [r.material_id, r.name]));
 
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader className="gap-5 lg:flex-row lg:items-start lg:justify-between">
+        <CardHeader className="gap-5 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0 flex-1">
             <CardTitle>Ferramentas / Ativos</CardTitle>
             <CardDescription className="mt-1 max-w-2xl leading-relaxed">
@@ -545,30 +554,8 @@ export function ToolAssetsSection({ userId, canDelete }: { userId: string; canDe
               link de referência e configurações de compra.
             </CardDescription>
           </div>
-          <div className="grid w-full shrink-0 gap-3 lg:w-auto">
-            <div className="flex justify-stretch sm:justify-end">
-              <AddToolDialog userId={userId} />
-            </div>
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(220px,1fr)_170px]">
-              <div className="relative min-w-0">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Buscar ferramenta"
-                  aria-label="Buscar ferramenta"
-                  className="w-full bg-muted/30 pl-9 sm:w-[260px]"
-                />
-              </div>
-              <Select value={view} onValueChange={(v) => setView(v as "all" | "with" | "zero")}>
-                <SelectTrigger className="w-full bg-muted/30" aria-label="Filtrar ferramentas por saldo"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="with">Com saldo</SelectItem>
-                  <SelectItem value="zero">Sem saldo</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="w-full shrink-0 sm:w-auto">
+            <AddToolDialog userId={userId} />
           </div>
         </CardHeader>
         <CardContent>
@@ -578,14 +565,59 @@ export function ToolAssetsSection({ userId, canDelete }: { userId: string; canDe
             <p className="text-sm text-muted-foreground">Nenhuma ferramenta encontrada.</p>
           ) : (
             <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[45%]">Ferramenta / Ativo</TableHead>
-                  <TableHead className="w-[12%]">Cód. Myio</TableHead>
-                  <TableHead className="w-[12%]">Cód. Fabricante</TableHead>
-                  <TableHead className="w-[10%] text-right">Saldo Estoque</TableHead>
-                  <TableHead className="w-[10%]">Imagem</TableHead>
-                  <TableHead className="w-[11%] text-right"></TableHead>
+              <TableHeader className="[&_tr]:border-b">
+                <TableRow className="border-t bg-primary/15 hover:bg-primary/15">
+                  <TableHead className="w-[45%] font-bold">Ferramenta / Ativo</TableHead>
+                  <TableHead className="w-[12%] font-bold">Cód. Myio</TableHead>
+                  <TableHead className="w-[12%] font-bold">Cód. Fabricante</TableHead>
+                  <TableHead className="w-[10%] text-right font-bold">Saldo</TableHead>
+                  <TableHead className="w-[10%] font-bold">Imagem</TableHead>
+                  <TableHead className="w-[11%] text-right" />
+                </TableRow>
+                <TableRow className="bg-primary/5 hover:bg-primary/5">
+                  <TableHead className="py-1">
+                    <Input
+                      value={toolFilter}
+                      onChange={(event) => setToolFilter(event.target.value)}
+                      placeholder="Filtrar"
+                      aria-label="Filtrar por ferramenta ou ativo"
+                      className="h-8 bg-background"
+                    />
+                  </TableHead>
+                  <TableHead className="py-1">
+                    <Input
+                      value={myioCodeFilter}
+                      onChange={(event) => setMyioCodeFilter(event.target.value)}
+                      placeholder="Filtrar"
+                      aria-label="Filtrar por código myio"
+                      className="h-8 bg-background"
+                    />
+                  </TableHead>
+                  <TableHead className="py-1">
+                    <Input
+                      value={manufacturerCodeFilter}
+                      onChange={(event) => setManufacturerCodeFilter(event.target.value)}
+                      placeholder="Filtrar"
+                      aria-label="Filtrar por código do fabricante"
+                      className="h-8 bg-background"
+                    />
+                  </TableHead>
+                  <TableHead className="py-1">
+                    <Select
+                      value={balanceFilter}
+                      onValueChange={(value) => setBalanceFilter(value as "with" | "zero")}
+                    >
+                      <SelectTrigger className="h-8 w-full bg-background" aria-label="Filtrar por saldo">
+                        <SelectValue placeholder="Filtrar" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="with">Com saldo</SelectItem>
+                        <SelectItem value="zero">Sem saldo</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </TableHead>
+                  <TableHead className="py-1" />
+                  <TableHead className="py-1" />
                 </TableRow>
               </TableHeader>
               <TableBody>
