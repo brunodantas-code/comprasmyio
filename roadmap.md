@@ -193,3 +193,4 @@
 - [ ] Concluir cadastro e uso dos Motivos de Avaria em Diversos
 - [ ] Aplicar ao botão Zerar estoque de Insumos de Instalação fundo verde e texto preto, preservando confirmação
 - [ ] Padronizar Estoque de Componentes com cabeçalho verde e filtros por coluna
+- [ ] Mover Liberar Dispositivo Montado para dentro do bloco Dispositivos montados liberados
