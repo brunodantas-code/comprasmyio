@@ -145,7 +145,7 @@ function PortalPage() {
                           </>
                        )}
                      </Link>
-                      <p className="mt-5 text-sm leading-5 text-muted-foreground">
+                      <p className="mt-5 w-32 max-w-full break-words text-center text-sm leading-5 text-muted-foreground">
                         {description.map((line) => <span key={line} className="block">{line}</span>)}
                       </p>
                    </div>
