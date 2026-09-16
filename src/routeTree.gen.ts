@@ -17,6 +17,7 @@ import { Route as AuthenticatedRhRouteImport } from './routes/_authenticated/rh'
 import { Route as AuthenticatedPortalRouteImport } from './routes/_authenticated/portal'
 import { Route as AuthenticatedPendentesRouteImport } from './routes/_authenticated/pendentes'
 import { Route as AuthenticatedLegalRouteImport } from './routes/_authenticated/legal'
+import { Route as AuthenticatedDevelopmentRouteImport } from './routes/_authenticated/development'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedCrmRouteImport } from './routes/_authenticated/crm'
 import { Route as AuthenticatedCashFlowRouteImport } from './routes/_authenticated/cash-flow'
@@ -61,6 +62,12 @@ const AuthenticatedLegalRoute = AuthenticatedLegalRouteImport.update({
   path: '/legal',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedDevelopmentRoute =
+  AuthenticatedDevelopmentRouteImport.update({
+    id: '/development',
+    path: '/development',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -90,6 +97,7 @@ export interface FileRoutesByFullPath {
   '/cash-flow': typeof AuthenticatedCashFlowRoute
   '/crm': typeof AuthenticatedCrmRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/development': typeof AuthenticatedDevelopmentRoute
   '/legal': typeof AuthenticatedLegalRoute
   '/pendentes': typeof AuthenticatedPendentesRoute
   '/portal': typeof AuthenticatedPortalRoute
@@ -103,6 +111,7 @@ export interface FileRoutesByTo {
   '/cash-flow': typeof AuthenticatedCashFlowRoute
   '/crm': typeof AuthenticatedCrmRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/development': typeof AuthenticatedDevelopmentRoute
   '/legal': typeof AuthenticatedLegalRoute
   '/pendentes': typeof AuthenticatedPendentesRoute
   '/portal': typeof AuthenticatedPortalRoute
@@ -118,6 +127,7 @@ export interface FileRoutesById {
   '/_authenticated/cash-flow': typeof AuthenticatedCashFlowRoute
   '/_authenticated/crm': typeof AuthenticatedCrmRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/development': typeof AuthenticatedDevelopmentRoute
   '/_authenticated/legal': typeof AuthenticatedLegalRoute
   '/_authenticated/pendentes': typeof AuthenticatedPendentesRoute
   '/_authenticated/portal': typeof AuthenticatedPortalRoute
@@ -133,6 +143,7 @@ export interface FileRouteTypes {
     | '/cash-flow'
     | '/crm'
     | '/dashboard'
+    | '/development'
     | '/legal'
     | '/pendentes'
     | '/portal'
@@ -146,6 +157,7 @@ export interface FileRouteTypes {
     | '/cash-flow'
     | '/crm'
     | '/dashboard'
+    | '/development'
     | '/legal'
     | '/pendentes'
     | '/portal'
@@ -160,6 +172,7 @@ export interface FileRouteTypes {
     | '/_authenticated/cash-flow'
     | '/_authenticated/crm'
     | '/_authenticated/dashboard'
+    | '/_authenticated/development'
     | '/_authenticated/legal'
     | '/_authenticated/pendentes'
     | '/_authenticated/portal'
@@ -233,6 +246,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedLegalRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/development': {
+      id: '/_authenticated/development'
+      path: '/development'
+      fullPath: '/development'
+      preLoaderRoute: typeof AuthenticatedDevelopmentRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -268,6 +288,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCashFlowRoute: typeof AuthenticatedCashFlowRoute
   AuthenticatedCrmRoute: typeof AuthenticatedCrmRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedDevelopmentRoute: typeof AuthenticatedDevelopmentRoute
   AuthenticatedLegalRoute: typeof AuthenticatedLegalRoute
   AuthenticatedPendentesRoute: typeof AuthenticatedPendentesRoute
   AuthenticatedPortalRoute: typeof AuthenticatedPortalRoute
@@ -278,6 +299,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCashFlowRoute: AuthenticatedCashFlowRoute,
   AuthenticatedCrmRoute: AuthenticatedCrmRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedDevelopmentRoute: AuthenticatedDevelopmentRoute,
   AuthenticatedLegalRoute: AuthenticatedLegalRoute,
   AuthenticatedPendentesRoute: AuthenticatedPendentesRoute,
   AuthenticatedPortalRoute: AuthenticatedPortalRoute,
