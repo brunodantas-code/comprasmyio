@@ -1024,7 +1024,7 @@ function ResetStockDialog({
       }}
     >
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="text-destructive">
+        <Button size="sm" className="text-foreground hover:text-foreground">
           <Eraser className="mr-2 h-4 w-4" /> Zerar estoque
         </Button>
       </DialogTrigger>
@@ -1862,7 +1862,7 @@ function TerceirosResetDialog({ rows }: { rows: TerceirosRow[] }) {
       }}
     >
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="text-destructive">
+        <Button size="sm" className="text-foreground hover:text-foreground">
           <Eraser className="mr-2 h-4 w-4" /> Zerar estoque
         </Button>
       </DialogTrigger>
