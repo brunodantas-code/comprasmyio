@@ -3,12 +3,13 @@ import type { SVGProps } from "react";
 export function CrmFunnelIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <circle cx="32" cy="14" r="8" />
-      <circle cx="15" cy="18" r="6" />
-      <circle cx="49" cy="18" r="6" />
-      <path d="M7 31c0-6 4-10 9-10 3 0 6 2 8 5M57 31c0-6-4-10-9-10-3 0-6 2-8 5" />
-      <path d="M17 27c2-5 7-8 15-8s13 3 15 8" />
-      <path d="M12 29h40L38 45v10l-6 4-6-4V45L12 29Z" />
+      <circle cx="13" cy="12" r="5" />
+      <circle cx="32" cy="9" r="6" />
+      <circle cx="51" cy="12" r="5" />
+      <path d="M4 26c0-5 4-9 9-9s9 4 9 9" />
+      <path d="M20 25c0-6 5-10 12-10s12 4 12 10" />
+      <path d="M42 26c0-5 4-9 9-9s9 4 9 9" />
+      <path d="M9 33h46L38 49v9l-6 4-6-4v-9L9 33Z" />
     </svg>
   );
 }

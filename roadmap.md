@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Tarefas
+- [x] Separar visualmente as três pessoas do funil no ícone do CRM
 - [x] Igualar o tamanho dos botões “Aplicativos” e “Usuários e aplicativos” no portal
 - [x] Corrigir o ícone do CRM para mostrar claramente três pessoas e um funil
 - [x] Ampliar o ícone do RH para a mesma proporção dos demais aplicativos
