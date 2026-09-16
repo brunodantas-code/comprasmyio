@@ -106,15 +106,15 @@ function PortalPage() {
                       >
                         {key === "supply" ? (
                           <>
-                            <span className="flex h-14 w-full items-center justify-center sm:h-16" aria-hidden="true">
-                              <Settings className="h-16 w-16 stroke-[1.7] sm:h-20 sm:w-20" />
+                            <span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true">
+                              <Settings className="h-14 w-14 stroke-[1.7] sm:h-16 sm:w-16" />
                             </span>
                             <span className="text-sm font-normal leading-none">{name}</span>
                           </>
                         ) : key === "cash_flow" ? (
                           <>
-                            <span className="flex h-14 w-full items-center justify-center sm:h-16" aria-hidden="true">
-                              <DollarSign className="h-16 w-16 stroke-[3.5] sm:h-20 sm:w-20" />
+                            <span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true">
+                              <DollarSign className="h-14 w-14 stroke-[3.5] sm:h-16 sm:w-16" />
                             </span>
                             <span className="text-sm font-normal leading-none">{name}</span>
                           </>
