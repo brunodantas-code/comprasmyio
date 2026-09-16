@@ -412,20 +412,13 @@ export function ProductionCapacityCard() {
                     <TableCell className="font-medium">
                       {it.name}
                       {idx === 0 && (
-                        <Badge variant="outline" className="ml-2 border-amber-300 bg-amber-100 text-amber-800">
+                        <Badge variant="status" className="ml-2">
                           limitante
                         </Badge>
                       )}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Badge
-                        variant="outline"
-                        className={
-                          it.can > 0
-                            ? "border-green-300 bg-green-100 text-green-800"
-                            : "border-red-300 bg-red-100 text-red-800"
-                        }
-                      >
+                      <Badge variant="status">
                         {it.can} un.
                       </Badge>
                     </TableCell>
