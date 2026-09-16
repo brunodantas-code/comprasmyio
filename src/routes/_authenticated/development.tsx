@@ -1,7 +1,7 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
-import { ArrowLeft, Bug, CodeXml, Download, History, Paperclip, Plus, Search } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { ArrowLeft, CodeXml, Download, History, Paperclip, Plus, Search } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { MyioAppLogo } from "@/components/myio-app-logo";
@@ -217,6 +217,12 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
   const [status, setStatus] = useState<TicketStatus>("aberto");
   const [assignee, setAssignee] = useState("none");
   const [notes, setNotes] = useState("");
+  useEffect(() => {
+    if (!ticket) return;
+    setStatus(ticket.status);
+    setAssignee(ticket.assignee_id ?? "none");
+    setNotes(ticket.admin_notes ?? "");
+  }, [ticket]);
   const details = useQuery({
     queryKey: ["development-ticket-details", ticket?.id], enabled: Boolean(ticket),
     queryFn: async () => {
