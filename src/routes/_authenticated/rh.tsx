@@ -40,6 +40,7 @@ function RhPage() {
           <Badge variant="outline" className="mt-6">Em breve</Badge>
           <h1 className="mt-4 text-4xl font-extrabold">myio RH</h1>
           <p className="mx-auto mt-3 max-w-md text-muted-foreground">Gestão de Pessoas</p>
+          <p className="mx-auto mt-3 max-w-md text-muted-foreground">Este aplicativo está sendo desenvolvido em paralelo e estará disponível aqui.</p>
         </div>
       </main>
     </div>

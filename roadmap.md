@@ -234,4 +234,4 @@
 
 - [x] Usar nas páginas CRM e Legal os mesmos ícones exibidos no portal ERP
 
-- [ ] Incluir no RH a mensagem de aplicativo em desenvolvimento usada no CRM e Legal
+- [x] Incluir no RH a mensagem de aplicativo em desenvolvimento usada no CRM e Legal
