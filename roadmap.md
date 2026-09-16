@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Tarefas
+- [x] Simplificar a descrição do Cash Flow para “Gestão financeira”
 - [x] Separar visualmente as três pessoas do funil no ícone do CRM
 - [x] Igualar o tamanho dos botões “Aplicativos” e “Usuários e aplicativos” no portal
 - [x] Corrigir o ícone do CRM para mostrar claramente três pessoas e um funil
