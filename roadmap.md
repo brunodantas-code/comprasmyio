@@ -240,3 +240,9 @@
 - [x] Substituir Menu e Submenu do Code por listas dependentes do aplicativo e reposicioná-las após Aplicativo
 - [x] Mover os filtros de acompanhamento do Code para o cabeçalho, no padrão dos Approvals
 - [x] Mover os filtros de Minhas solicitações para cabeçalhos verdes, no padrão dos Approvals
+
+## Fluxo de atendimento do Code
+- [ ] Restringir o responsável do ticket aos Admins com acesso ao Code
+- [ ] Alterar o fluxo para Em aberto, Em atendimento, Atendido e Concluído
+- [ ] Reservar a conclusão ao solicitante após o ticket ser marcado como Atendido
+- [ ] Exibir no ícone do Code a quantidade de tickets atendidos aguardando aceite
