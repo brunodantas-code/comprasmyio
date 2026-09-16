@@ -1,11 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Boxes, DollarSign, FileSignature, Funnel, Settings, Settings2, UsersRound, LogOut } from "lucide-react";
+import { Boxes, DollarSign, FileSignature, Settings, Settings2, UsersRound, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MyioPlatformLogo } from "@/components/myio-platform-logo";
 import { ErpAppAccessAdmin } from "@/components/erp-app-access-admin";
+import { CrmFunnelIcon } from "@/components/crm-funnel-icon";
 
 export const Route = createFileRoute("/_authenticated/portal")({
   component: PortalPage,
@@ -120,9 +121,8 @@ function PortalPage() {
                           </>
                         ) : key === "crm" ? (
                           <>
-                            <span className="relative block h-14 w-full translate-y-1 sm:h-16" aria-hidden="true">
-                              <UsersRound className="absolute left-1/2 top-0 h-10 w-12 -translate-x-1/2 stroke-[2.4] sm:h-11 sm:w-14" />
-                              <Funnel className="absolute bottom-0 left-1/2 h-9 w-14 -translate-x-1/2 stroke-[2.4] sm:h-10 sm:w-16" />
+                            <span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true">
+                              <CrmFunnelIcon className="h-14 w-14 stroke-[3] sm:h-16 sm:w-16" />
                             </span>
                             <span className="text-sm font-normal leading-none">{name}</span>
                           </>
