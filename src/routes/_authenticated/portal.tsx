@@ -56,7 +56,7 @@ function PortalPage() {
   const apps = [
     { key: "supply", name: "supply", description: ["Solicitações", "e Estoque"], to: "/dashboard" as const },
     { key: "cash_flow", name: "cash flow", description: ["Gestão financeira", "e fluxo de caixa"], to: "/cash-flow" as const },
-    { key: "crm", name: "CRM", description: ["Relacionamento", "com clientes"], to: "/crm" as const },
+    { key: "crm", name: "CRM", description: ["Vendas e", "Relacionamento"], to: "/crm" as const },
     { key: "legal", name: "Legal", description: ["Jurídico e Contratos"], to: "/legal" as const },
     { key: "rh", name: "RH", description: ["Gestão de Pessoas"], to: "/rh" as const },
   ].filter((app) => data.appKeys.has(app.key));
