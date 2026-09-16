@@ -90,7 +90,7 @@ const MOVEMENT_LABELS: Record<MovementType, string> = {
 
 const MOVEMENT_CLASSES: Record<MovementType, string> = {
   entrada: "bg-green-100 text-green-800 border-green-300",
-  saida: "bg-orange-100 text-orange-800 border-orange-300",
+  saida: "border-status-border bg-status text-status-foreground",
   ajuste: "bg-blue-100 text-blue-800 border-blue-300",
 };
 
@@ -197,6 +197,75 @@ function useTerceirosMovements() {
       return (data ?? []) as TerceirosMovement[];
     },
   });
+}
+
+function MovementHistoryTable({
+  movements,
+  names,
+  profiles,
+}: {
+  movements: Array<Movement | TerceirosMovement>;
+  names: Record<string, string>;
+  profiles?: Record<string, string>;
+}) {
+  const [dateFilter, setDateFilter] = useState("");
+  const [descriptionFilter, setDescriptionFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState<MovementType | "all">("all");
+  const [quantityFilter, setQuantityFilter] = useState("");
+  const [reasonFilter, setReasonFilter] = useState("");
+  const [responsibleFilter, setResponsibleFilter] = useState("");
+  const normalize = (value: string | null | undefined) => value?.trim().toLocaleLowerCase("pt-BR") ?? "";
+  const filtered = movements.filter((movement) => {
+    const responsible = movement.created_by ? (profiles?.[movement.created_by] ?? "Usuário") : "Sistema";
+    const signedQuantity = `${movement.type === "saida" ? "-" : "+"}${movement.quantity}`;
+    return (!normalize(dateFilter) || normalize(fmt(movement.created_at)).includes(normalize(dateFilter)))
+      && (!normalize(descriptionFilter) || normalize(names[movement.material_id] ?? "—").includes(normalize(descriptionFilter)))
+      && (typeFilter === "all" || movement.type === typeFilter)
+      && (!normalize(quantityFilter) || normalize(signedQuantity).includes(normalize(quantityFilter)))
+      && (!normalize(reasonFilter) || normalize(movement.reason ?? "—").includes(normalize(reasonFilter)))
+      && (!normalize(responsibleFilter) || normalize(responsible).includes(normalize(responsibleFilter)));
+  });
+
+  return (
+    <Table>
+      <TableHeader className="[&_tr]:border-b">
+        <TableRow className="border-t bg-primary/15 hover:bg-primary/15">
+          <TableHead className="font-bold">Data</TableHead>
+          <TableHead className="font-bold">Descrição</TableHead>
+          <TableHead className="font-bold">Tipo</TableHead>
+          <TableHead className="text-right font-bold">Qtd.</TableHead>
+          <TableHead className="font-bold">Motivo</TableHead>
+          <TableHead className="font-bold">Responsável</TableHead>
+        </TableRow>
+        <TableRow className="bg-primary/5 hover:bg-primary/5">
+          <TableHead className="py-1"><Input value={dateFilter} onChange={(event) => setDateFilter(event.target.value)} placeholder="Filtrar" aria-label="Filtrar por data" className="h-8 min-w-32 bg-background" /></TableHead>
+          <TableHead className="py-1"><Input value={descriptionFilter} onChange={(event) => setDescriptionFilter(event.target.value)} placeholder="Filtrar" aria-label="Filtrar por descrição" className="h-8 min-w-36 bg-background" /></TableHead>
+          <TableHead className="py-1">
+            <Select value={typeFilter} onValueChange={(value) => setTypeFilter(value as MovementType | "all")}>
+              <SelectTrigger className="h-8 min-w-28 bg-background" aria-label="Filtrar por tipo"><SelectValue /></SelectTrigger>
+              <SelectContent><SelectItem value="all">Todos</SelectItem><SelectItem value="entrada">Entrada</SelectItem><SelectItem value="saida">Saída</SelectItem><SelectItem value="ajuste">Ajuste</SelectItem></SelectContent>
+            </Select>
+          </TableHead>
+          <TableHead className="py-1"><Input value={quantityFilter} onChange={(event) => setQuantityFilter(event.target.value)} placeholder="Filtrar" aria-label="Filtrar por quantidade" className="h-8 min-w-24 bg-background text-right" /></TableHead>
+          <TableHead className="py-1"><Input value={reasonFilter} onChange={(event) => setReasonFilter(event.target.value)} placeholder="Filtrar" aria-label="Filtrar por motivo" className="h-8 min-w-36 bg-background" /></TableHead>
+          <TableHead className="py-1"><Input value={responsibleFilter} onChange={(event) => setResponsibleFilter(event.target.value)} placeholder="Filtrar" aria-label="Filtrar por responsável" className="h-8 min-w-36 bg-background" /></TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {filtered.slice(0, 50).map((movement) => (
+          <TableRow key={movement.id}>
+            <TableCell className="whitespace-nowrap text-sm text-muted-foreground">{fmt(movement.created_at)}</TableCell>
+            <TableCell className="font-medium">{names[movement.material_id] ?? "—"}</TableCell>
+            <TableCell><Badge variant="outline" className={MOVEMENT_CLASSES[movement.type]}>{MOVEMENT_LABELS[movement.type]}</Badge></TableCell>
+            <TableCell className="text-right">{movement.type === "saida" ? "-" : "+"}{movement.quantity}</TableCell>
+            <TableCell className="text-sm text-muted-foreground">{movement.reason ?? "—"}</TableCell>
+            <TableCell className="text-sm">{movement.created_by ? (profiles?.[movement.created_by] ?? "Usuário") : "Sistema"}</TableCell>
+          </TableRow>
+        ))}
+        {!filtered.length && <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">Nenhuma movimentação encontrada.</TableCell></TableRow>}
+      </TableBody>
+    </Table>
+  );
 }
 
 function MovementDialog({
@@ -1345,38 +1414,7 @@ function FabricaSection({
             <CardDescription>Histórico completo de entradas e saídas.</CardDescription>
           </CardHeader>
           <CardContent>
-            {!scopedMovements.length ? (
-              <p className="text-sm text-muted-foreground">Nenhuma movimentação registrada.</p>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Data</TableHead>
-                    <TableHead>Descrição</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead className="text-right">Qtd.</TableHead>
-                    <TableHead>Motivo</TableHead>
-                    <TableHead>Responsável</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {scopedMovements.slice(0, 50).map((m) => (
-                    <TableRow key={m.id}>
-                      <TableCell className="whitespace-nowrap text-sm text-muted-foreground">{fmt(m.created_at)}</TableCell>
-                      <TableCell className="font-medium">
-                        {(stock ?? []).find((s) => s.material_id === m.material_id)?.name ?? "—"}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className={MOVEMENT_CLASSES[m.type]}>{MOVEMENT_LABELS[m.type]}</Badge>
-                      </TableCell>
-                      <TableCell className="text-right">{m.type === "saida" ? "-" : "+"}{m.quantity}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{m.reason ?? "—"}</TableCell>
-                      <TableCell className="text-sm">{m.created_by ? (profiles?.[m.created_by] ?? "Usuário") : "Sistema"}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
+            <MovementHistoryTable movements={scopedMovements} names={materialNames} profiles={profiles} />
           </CardContent>
         </Card>
       </TabsContent>}
@@ -2017,36 +2055,7 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
           <CardDescription>Histórico próprio de entradas e saídas do Insumos de Instalação.</CardDescription>
         </CardHeader>
         <CardContent>
-          {!(movements ?? []).length ? (
-            <p className="text-sm text-muted-foreground">Nenhuma movimentação registrada.</p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Data</TableHead>
-                  <TableHead>Descrição</TableHead>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead className="text-right">Qtd.</TableHead>
-                  <TableHead>Motivo</TableHead>
-                  <TableHead>Responsável</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {(movements ?? []).slice(0, 50).map((m) => (
-                  <TableRow key={m.id}>
-                    <TableCell className="whitespace-nowrap text-sm text-muted-foreground">{fmt(m.created_at)}</TableCell>
-                    <TableCell className="font-medium">{nameById[m.material_id] ?? "—"}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={MOVEMENT_CLASSES[m.type]}>{MOVEMENT_LABELS[m.type]}</Badge>
-                    </TableCell>
-                    <TableCell className="text-right">{m.type === "saida" ? "-" : "+"}{m.quantity}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{m.reason ?? "—"}</TableCell>
-                    <TableCell className="text-sm">{m.created_by ? (profiles?.[m.created_by] ?? "Usuário") : "Sistema"}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
+          <MovementHistoryTable movements={movements ?? []} names={nameById} profiles={profiles} />
         </CardContent>
       </Card>
     </div>
@@ -2139,6 +2148,7 @@ function MyioDevicesStockSection({ userId, canDelete }: { userId: string; canDel
     .filter((r) => !/ — Caixa de \d+$/.test(r.name));
   const scopedIds = new Set(scoped.map((r) => r.material_id));
   const scopedMovements = (movements ?? []).filter((m) => scopedIds.has(m.material_id));
+  const materialNames = Object.fromEntries((stock ?? []).map((row) => [row.material_id, row.name]));
   const toolbar = (
     <>
       <ResetStockDialog rows={scoped} userId={userId} location="almoxarifado" />
@@ -2166,38 +2176,7 @@ function MyioDevicesStockSection({ userId, canDelete }: { userId: string; canDel
             <CardDescription>Histórico completo de entradas e saídas.</CardDescription>
           </CardHeader>
           <CardContent>
-            {!scopedMovements.length ? (
-              <p className="text-sm text-muted-foreground">Nenhuma movimentação registrada.</p>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Data</TableHead>
-                    <TableHead>Descrição</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead className="text-right">Qtd.</TableHead>
-                    <TableHead>Motivo</TableHead>
-                    <TableHead>Responsável</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {scopedMovements.slice(0, 50).map((m) => (
-                    <TableRow key={m.id}>
-                      <TableCell className="whitespace-nowrap text-sm text-muted-foreground">{fmt(m.created_at)}</TableCell>
-                      <TableCell className="font-medium">
-                        {(stock ?? []).find((s) => s.material_id === m.material_id)?.name ?? "—"}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className={MOVEMENT_CLASSES[m.type]}>{MOVEMENT_LABELS[m.type]}</Badge>
-                      </TableCell>
-                      <TableCell className="text-right">{m.type === "saida" ? "-" : "+"}{m.quantity}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{m.reason ?? "—"}</TableCell>
-                      <TableCell className="text-sm">{m.created_by ? (profiles?.[m.created_by] ?? "Usuário") : "Sistema"}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
+            <MovementHistoryTable movements={scopedMovements} names={materialNames} profiles={profiles} />
           </CardContent>
         </Card>
       </div>
@@ -2221,6 +2200,7 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
     .filter((r) => !/ — Caixa de \d+$/.test(r.name));
   const scopedIds = new Set(scoped.map((r) => r.material_id));
   const scopedMovements = (movements ?? []).filter((m) => scopedIds.has(m.material_id));
+  const materialNames = Object.fromEntries((stock ?? []).map((row) => [row.material_id, row.name]));
 
   const rows = scoped
     .filter((r) => r.name.toLowerCase().includes(search.trim().toLowerCase()))
@@ -2308,38 +2288,7 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
           <CardDescription>Histórico completo de entradas e saídas.</CardDescription>
         </CardHeader>
         <CardContent>
-          {!scopedMovements.length ? (
-            <p className="text-sm text-muted-foreground">Nenhuma movimentação registrada.</p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Data</TableHead>
-                  <TableHead>Descrição</TableHead>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead className="text-right">Qtd.</TableHead>
-                  <TableHead>Motivo</TableHead>
-                  <TableHead>Responsável</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {scopedMovements.slice(0, 50).map((m) => (
-                  <TableRow key={m.id}>
-                    <TableCell className="whitespace-nowrap text-sm text-muted-foreground">{fmt(m.created_at)}</TableCell>
-                    <TableCell className="font-medium">
-                      {(stock ?? []).find((s) => s.material_id === m.material_id)?.name ?? "—"}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={MOVEMENT_CLASSES[m.type]}>{MOVEMENT_LABELS[m.type]}</Badge>
-                    </TableCell>
-                    <TableCell className="text-right">{m.type === "saida" ? "-" : "+"}{m.quantity}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{m.reason ?? "—"}</TableCell>
-                    <TableCell className="text-sm">{m.created_by ? (profiles?.[m.created_by] ?? "Usuário") : "Sistema"}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
+          <MovementHistoryTable movements={scopedMovements} names={materialNames} profiles={profiles} />
         </CardContent>
       </Card>
     </div>
