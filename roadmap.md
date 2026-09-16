@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Tarefas
+- [x] Remover o círculo do cifrão do Cash Flow e ampliar o símbolo na proporção do Supply
 - [x] Trocar o ícone do Supply por uma engrenagem maior e renomear para “Solicitações e Estoque”
 - [x] Excluir no Cash Flow o Approval removido no Supply e conferir as listas atuais
 - [x] Alinhar botões e nomes dos aplicativos na gestão de acessos mobile

@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { AtSign, Boxes, CircleDollarSign, FileSignature, Mail, Phone, Settings, Settings2, UserRound, UsersRound, LogOut } from "lucide-react";
+import { AtSign, Boxes, DollarSign, FileSignature, Mail, Phone, Settings, Settings2, UserRound, UsersRound, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -114,7 +114,7 @@ function PortalPage() {
                         ) : key === "cash_flow" ? (
                           <>
                             <span className="flex h-14 w-full items-center justify-center sm:h-16" aria-hidden="true">
-                              <CircleDollarSign className="h-12 w-12 stroke-[1.5] sm:h-14 sm:w-14" />
+                              <DollarSign className="h-16 w-16 stroke-[3.5] sm:h-20 sm:w-20" />
                             </span>
                             <span className="text-sm font-normal leading-none">{name}</span>
                           </>
