@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Tarefas
+- [x] Igualar a largura dos botões “Aplicativos” e “Usuários e aplicativos” também no desktop
 - [x] Simplificar a descrição do Cash Flow para “Gestão financeira”
 - [x] Separar visualmente as três pessoas do funil no ícone do CRM
 - [x] Igualar o tamanho dos botões “Aplicativos” e “Usuários e aplicativos” no portal
