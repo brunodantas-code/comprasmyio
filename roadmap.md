@@ -197,6 +197,6 @@
 - [x] Aplicar ao botão Zerar estoque de Insumos de Instalação fundo verde e texto preto, preservando confirmação
 - [x] Padronizar Estoque de Componentes com cabeçalho verde e filtros por coluna
 - [x] Mover Liberar Dispositivo Montado para dentro do bloco Dispositivos montados liberados
-- [ ] Exibir cinco aplicativos por linha no desktop e três no celular, com ícones compactos
-- [ ] Remover “myio” dos nomes dos aplicativos no portal e manter a logomarca ao lado do nome dentro de cada aplicativo
-- [ ] Incluir retorno à Plataforma ERP sem encerrar a sessão em todos os aplicativos
+- [x] Exibir cinco aplicativos por linha no desktop e três no celular, com ícones compactos
+- [x] Remover “myio” dos nomes dos aplicativos no portal e manter a logomarca ao lado do nome dentro de cada aplicativo
+- [x] Incluir retorno à Plataforma ERP sem encerrar a sessão em todos os aplicativos

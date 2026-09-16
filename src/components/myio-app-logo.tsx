@@ -1,0 +1,32 @@
+import { cn } from "@/lib/utils";
+import logoDark from "@/assets/myio-logo-dark.png.asset.json";
+import logoLightSrc from "@/assets/myio-logo-light.svg";
+
+type Props = {
+  appName: string;
+  className?: string;
+  tone?: "light" | "dark";
+};
+
+export function MyioAppLogo({ appName, className, tone = "dark" }: Props) {
+  return (
+    <span className={cn("inline-flex items-end gap-[0.35em]", className)}>
+      <img
+        src={tone === "light" ? logoDark.url : logoLightSrc}
+        alt="myio"
+        className="h-auto w-auto select-none"
+        style={{ height: "1.5em" }}
+        draggable={false}
+      />
+      <span
+        className={cn(
+          "select-none font-light leading-none tracking-normal",
+          tone === "light" ? "text-white" : "text-[var(--myio-dark)]",
+        )}
+        style={{ fontSize: "1.5em", transform: "translateY(-0.155em)" }}
+      >
+        {appName}
+      </span>
+    </span>
+  );
+}
