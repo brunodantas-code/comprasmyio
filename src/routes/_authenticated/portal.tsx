@@ -104,7 +104,7 @@ function PortalPage() {
                         to={to}
                         aria-label={`Acessar ${name}`}
                         title={`Acessar ${name}`}
-                        className="group relative flex h-32 w-32 flex-col items-center justify-between rounded-[1.75rem] border-2 border-myio-purple px-3 pb-3 pt-2 text-myio-purple outline-none transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4"
+                        className="group relative flex h-32 w-32 flex-col items-center justify-between rounded-[1.75rem] border-2 border-primary bg-primary px-3 pb-3 pt-2 text-primary-foreground outline-none transition-transform hover:scale-105 hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4"
                       >
                         {key === "supply" ? (
                           <>

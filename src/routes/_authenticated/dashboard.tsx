@@ -197,9 +197,9 @@ function ExistingAttachments({ orderId, attachments, canRemove }: { orderId: str
           {canRemove && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <button type="button" className="text-muted-foreground hover:text-destructive" disabled={remove.isPending} aria-label="Excluir anexo" title="Excluir anexo">
+                <Button type="button" size="icon" className="h-6 w-6" disabled={remove.isPending} aria-label="Excluir anexo" title="Excluir anexo">
                   <X className="h-3 w-3" />
-                </button>
+                </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
@@ -3251,9 +3251,9 @@ function InternalDeleteOrderDialog({ order }: { order: Order }) {
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <button type="button" aria-label="Excluir pedido" title="Excluir pedido" className="text-destructive hover:text-destructive/80">
+        <Button type="button" size="icon" aria-label="Excluir pedido" title="Excluir pedido">
           <Trash2 className="h-4 w-4" />
-        </button>
+        </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
@@ -3265,7 +3265,6 @@ function InternalDeleteOrderDialog({ order }: { order: Order }) {
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
           <AlertDialogAction
-            className="bg-destructive text-white hover:bg-destructive/90"
             disabled={del.isPending}
             onClick={() => del.mutate()}
           >

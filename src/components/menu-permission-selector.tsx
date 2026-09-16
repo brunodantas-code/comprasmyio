@@ -43,7 +43,7 @@ export function MenuPermissionSelector({
             {group.children.length > 0 ? (
               <div className={cn("grid content-start gap-2 border-l border-border pl-4", group.key === "armazem" && "grid-cols-2")}>
                 {group.children.map((child) => (
-                  <label key={child.key} className={cn("flex items-center gap-2 rounded px-1 py-0.5 text-sm text-muted-foreground", highlightedKeys.has(child.key) && "bg-myio-purple/10 font-medium text-myio-purple")}>
+                  <label key={child.key} className={cn("flex items-center gap-2 rounded px-1 py-0.5 text-sm text-muted-foreground", highlightedKeys.has(child.key) && "bg-primary/15 font-medium text-foreground")}>
                     <Checkbox
                       checked={value.has(child.key)}
                       disabled={disabled}
@@ -59,7 +59,7 @@ export function MenuPermissionSelector({
                 <p className="text-sm font-medium">Tipos de solicitação</p>
                 <div className="grid gap-2">
                   {requestTypes.map((type) => (
-                    <label key={type.code} className={cn("flex items-center gap-2 rounded px-1 py-0.5 text-sm text-muted-foreground", highlightedRequestTypes.has(type.code) && "bg-myio-purple/10 font-medium text-myio-purple")}>
+                    <label key={type.code} className={cn("flex items-center gap-2 rounded px-1 py-0.5 text-sm text-muted-foreground", highlightedRequestTypes.has(type.code) && "bg-primary/15 font-medium text-foreground")}>
                       <Checkbox
                         checked={value.has("solicitacoes_novas") && requestTypeValue.has(type.code)}
                         disabled={disabled || !value.has("solicitacoes_novas")}

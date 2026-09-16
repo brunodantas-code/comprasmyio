@@ -34,7 +34,7 @@ function RhPage() {
       </header>
       <main className="mx-auto flex min-h-[calc(100vh-73px)] max-w-3xl items-center justify-center px-4 py-12 text-center sm:px-6">
         <div>
-          <span className="mx-auto flex h-20 w-20 items-center justify-center text-myio-purple">
+          <span className="mx-auto flex h-20 w-20 items-center justify-center text-foreground">
             <UsersRound className="h-16 w-16 stroke-[1.6]" />
           </span>
           <Badge variant="outline" className="mt-6">Em breve</Badge>

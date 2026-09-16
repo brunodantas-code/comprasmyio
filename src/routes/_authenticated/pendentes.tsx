@@ -31,7 +31,7 @@ function PendentesPage() {
         </div>
       </header>
       <main className="mx-auto max-w-7xl px-3 py-5 sm:px-6 sm:py-8">
-        <h1 className="mb-4 text-xl font-semibold text-myio-purple">Approvals pendentes comigo</h1>
+        <h1 className="mb-4 text-xl font-semibold">Approvals pendentes comigo</h1>
         <PendingForMe />
       </main>
     </div>

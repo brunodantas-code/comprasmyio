@@ -1,6 +1,8 @@
 # Roadmap
 
 ## Tarefas
+- [x] Padronizar todos os botões de ação com fundo verde e ícones/textos pretos
+- [x] Reservar o lilás apenas para títulos explicitamente definidos
 - [x] Logo myio/supply: alinhar "myio" e "supply" pela parte inferior (recorte dos assets + items-end)
 - [ ] Verificar visualmente o alinhamento do logo (hero + rodapé + dashboard)
 - [x] Botão "Criar conta" do mesmo tamanho do botão "Entrar" (auth)

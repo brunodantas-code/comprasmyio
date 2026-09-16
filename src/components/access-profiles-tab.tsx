@@ -126,7 +126,7 @@ export function AccessProfilesTab() {
               <div className="flex flex-wrap items-center gap-2">
                 <p className="truncate text-sm font-medium">{user.full_name || "—"}</p>
                 <Badge variant="outline">{user.profileName}</Badge>
-                {user.differences.size > 0 || user.requestTypeDifferences.size > 0 ? <Badge className="border-myio-purple bg-myio-purple/10 text-myio-purple hover:bg-myio-purple/10">Acesso Customizado</Badge> : null}
+                {user.differences.size > 0 || user.requestTypeDifferences.size > 0 ? <Badge className="border-primary bg-primary/15 text-foreground hover:bg-primary/20">Acesso Customizado</Badge> : null}
                 {user.permissions.size === 0 ? <Badge variant="outline">Configuração pendente</Badge> : null}
               </div>
               <p className="truncate text-xs text-muted-foreground">{user.email}</p>

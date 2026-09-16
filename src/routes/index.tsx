@@ -126,7 +126,7 @@ function Landing() {
 
       {/* Recursos */}
       <section id="recursos" className="mx-auto max-w-6xl px-5 py-20 sm:px-6">
-        <p className="text-sm font-extrabold uppercase tracking-widest text-[var(--myio-purple)]">
+        <p className="text-sm font-extrabold uppercase tracking-widest text-foreground">
           Recursos
         </p>
         <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
@@ -138,8 +138,8 @@ function Landing() {
               key={title}
               className="rounded-2xl border border-border bg-card p-6 transition-shadow hover:shadow-lg"
             >
-              <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--myio-purple)]/10">
-                <Icon className="h-5 w-5 text-[var(--myio-purple)]" />
+              <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-primary/15">
+                <Icon className="h-5 w-5 text-foreground" />
               </span>
               <h3 className="mt-4 text-lg font-extrabold">{title}</h3>
               <p className="mt-2 text-sm text-muted-foreground">{body}</p>

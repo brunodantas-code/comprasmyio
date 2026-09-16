@@ -929,10 +929,10 @@ export function AssemblyReleasesCard({
                               quantity={i.quantity}
                               userId={userId}
                               trigger={
-                                <button type="button" title="Homologar dispositivo">
+                                <button type="button" title="Homologar dispositivo" className="rounded-md bg-primary text-primary-foreground hover:bg-primary/90">
                                   <Badge
                                     variant="outline"
-                                    className="cursor-pointer hover:border-myio-purple hover:bg-accent"
+                                    className="cursor-pointer border-primary bg-primary text-primary-foreground hover:bg-primary/90"
                                   >
                                     {name}
                                   </Badge>
