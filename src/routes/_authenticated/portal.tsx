@@ -57,7 +57,7 @@ function PortalPage() {
     { key: "supply", name: "supply", description: ["Solicitações", "e Estoque"], to: "/dashboard" as const },
     { key: "cash_flow", name: "cash flow", description: ["Gestão financeira", "e fluxo de caixa"], to: "/cash-flow" as const },
     { key: "crm", name: "CRM", description: ["Vendas e", "Relacionamento"], to: "/crm" as const },
-    { key: "legal", name: "Legal", description: ["Jurídico e Contratos"], to: "/legal" as const },
+    { key: "legal", name: "Legal", description: ["Contratos e", "Jurídico"], to: "/legal" as const },
     { key: "rh", name: "RH", description: ["Gestão de Pessoas"], to: "/rh" as const },
   ].filter((app) => data.appKeys.has(app.key));
 
@@ -128,15 +128,15 @@ function PortalPage() {
                           </>
                         ) : key === "legal" ? (
                           <>
-                            <span className="flex h-14 w-full items-center justify-center sm:h-16" aria-hidden="true">
-                              <FileSignature className="h-12 w-12 stroke-[1.5] sm:h-14 sm:w-14" />
+                            <span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true">
+                              <FileSignature className="h-14 w-14 stroke-[1.8] sm:h-16 sm:w-16" />
                             </span>
                             <span className="text-sm font-normal leading-none">{name}</span>
                           </>
                         ) : (
                           <>
-                            <span className="flex h-14 w-full items-center justify-center sm:h-16" aria-hidden="true">
-                              <UsersRound className="h-12 w-12 stroke-[1.6] sm:h-14 sm:w-14" />
+                            <span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true">
+                              <UsersRound className="h-14 w-14 stroke-[1.8] sm:h-16 sm:w-16" />
                             </span>
                             <span className="text-sm font-normal leading-none">{name}</span>
                           </>
