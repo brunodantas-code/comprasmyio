@@ -150,9 +150,9 @@
     font-family: var(--font-sans);
   }
 
-  /* Títulos em tom lilás da marca */
+  /* Títulos usam a cor padrão; o lilás é aplicado somente quando solicitado. */
   h1, h2, h3, h4, h5, h6 {
-    color: var(--myio-purple);
+    color: var(--foreground);
   }
 
   /* Variantes de botão alinhadas à marca: verde (primary) e preto (dark) */

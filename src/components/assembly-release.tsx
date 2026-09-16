@@ -932,7 +932,7 @@ export function AssemblyReleasesCard({
                                 <button type="button" title="Homologar dispositivo">
                                   <Badge
                                     variant="outline"
-                                    className="cursor-pointer hover:border-myio-purple hover:bg-accent"
+                                    className="cursor-pointer hover:border-primary hover:bg-primary/15"
                                   >
                                     {name}
                                   </Badge>

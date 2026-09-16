@@ -6,6 +6,7 @@ Plataforma externa de QR codes (produto.myio.com.br) é a fonte da verdade para 
 Projeto só vira Cliente após estar implantado e com contrato assinado; a API externa usa o nome do projeto no campo nome_cliente.
 Estoque Fábrica, Estoque Myio Terceiros e Ferramentas/Ativos são áreas diferentes e nunca devem ser misturadas.
 Compra só de item cadastrado (Fábrica/Almoxarifado/Terceiros/Ferramentas), sem texto livre; produtos fabricados Myio (is_manufactured) nunca são compráveis.
+Botões de ação sempre com fundo verde e ícones/textos pretos; lilás somente em títulos explicitamente solicitados.
 
 ## Memories
 - [Regra de sync de QR externos](mem://features/external-qr-sync) — Só sincroniza QRs da homologation_units; externos desconhecidos são ignorados/removidos
@@ -18,3 +19,4 @@ Compra só de item cadastrado (Fábrica/Almoxarifado/Terceiros/Ferramentas), sem
 - [Recuperação de avariado carrega o QR](mem://features/damaged-recovery-qr) — Recuperar item da plataforma externa vincula o QR à movimentação de destino e empurra o novo local para a API; sem isso o sync desfaz a recuperação
 - [Estoque Ferramentas/Ativos](mem://features/tools-assets-stock) — Sub-aba ao lado de Almoxarifado com banco próprio; baixa exige destino (técnico ou local); disponível na solicitação de compras
 - [Conversão de projeto em cliente](mem://features/project-client-conversion) — Projeto só vira Cliente após implantação e contrato assinado; Novo Projeto não escolhe Cliente
+- [Cores dos botões de ação](mem://design/action-button-colors) — Fundo verde com ícones/textos pretos; lilás reservado a títulos solicitados
