@@ -984,6 +984,33 @@ export type Database = {
         }
         Relationships: []
       }
+      damage_reasons: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          name: string
+          position: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          name: string
+          position?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          name?: string
+          position?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       damaged_items: {
         Row: {
           created_at: string
@@ -994,6 +1021,7 @@ export type Database = {
           product: string
           quantity: number
           reason: string
+          reason_code: string | null
           recovered_at: string | null
           recovered_by: string | null
           recovered_to: string | null
@@ -1011,6 +1039,7 @@ export type Database = {
           product: string
           quantity?: number
           reason: string
+          reason_code?: string | null
           recovered_at?: string | null
           recovered_by?: string | null
           recovered_to?: string | null
@@ -1028,6 +1057,7 @@ export type Database = {
           product?: string
           quantity?: number
           reason?: string
+          reason_code?: string | null
           recovered_at?: string | null
           recovered_by?: string | null
           recovered_to?: string | null
@@ -1050,6 +1080,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "materials"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "damaged_items_reason_code_fkey"
+            columns: ["reason_code"]
+            isOneToOne: false
+            referencedRelation: "damage_reasons"
+            referencedColumns: ["code"]
           },
         ]
       }
