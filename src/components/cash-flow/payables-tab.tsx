@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ExternalLink, Tags } from "lucide-react";
+import { Check, ExternalLink, ListTree, Tags } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -44,7 +45,42 @@ function Summary({ label, value }: { label: string; value: string }) { return <C
 function ClassifyPayable({ payable, accounts, userId, onDone }: { payable: Payable; accounts: Account[]; userId: string; onDone: () => void }) {
   const [open, setOpen] = useState(false); const [accountId, setAccountId] = useState(payable.account_id ?? ""); const [fiscal, setFiscal] = useState(monthValue(payable.fiscal_period)); const [competence, setCompetence] = useState(monthValue(payable.competence_period)); const [cash, setCash] = useState(monthValue(payable.cash_period));
   const save = useMutation({ mutationFn: async () => { if (!accountId || !fiscal || !competence || !cash) throw new Error("Preencha o Plano de Contas e as três referências mensais."); const { error } = await supabase.from("cash_flow_payables").update({ account_id: accountId, fiscal_period: periodDate(fiscal), competence_period: periodDate(competence), cash_period: periodDate(cash), status: payable.status === "a_classificar" ? "a_pagar" : payable.status, classified_by: userId, classified_at: new Date().toISOString() }).eq("id", payable.id); if (error) throw error; }, onSuccess: () => { toast.success("Classificação salva"); setOpen(false); onDone(); }, onError: (error: Error) => toast.error(error.message) });
-  return <Dialog open={open} onOpenChange={setOpen}><DialogTrigger asChild><Button variant="ghost" className="h-auto p-0 hover:bg-transparent" title="Classificar" aria-label="Classificar"><Badge variant="status" className="cursor-pointer">Classificar</Badge></Button></DialogTrigger><DialogContent><DialogHeader><DialogTitle>Classificar pagamento</DialogTitle></DialogHeader><div className="grid gap-4 sm:grid-cols-2"><div className="space-y-2 sm:col-span-2"><Label>Plano de Contas</Label><Select value={accountId} onValueChange={setAccountId}><SelectTrigger><SelectValue placeholder="Selecionar conta" /></SelectTrigger><SelectContent>{accounts.map((account) => <SelectItem key={account.id} value={account.id}>{accountLabel(account)}</SelectItem>)}</SelectContent></Select></div>{[["Emissão fiscal", fiscal, setFiscal], ["Competência", competence, setCompetence], ["Caixa (previsão)", cash, setCash]].map(([label, value, setter]) => <div key={String(label)} className="space-y-2"><Label>{String(label)}</Label><Input type="month" value={String(value)} onChange={(event) => (setter as (value: string) => void)(event.target.value)} required /></div>)}</div><Button onClick={() => save.mutate()} disabled={save.isPending}>Salvar classificação</Button></DialogContent></Dialog>;
+  return <Dialog open={open} onOpenChange={setOpen}><DialogTrigger asChild><Button variant="ghost" className="h-auto p-0 hover:bg-transparent" title="Classificar" aria-label="Classificar"><Badge variant="status" className="cursor-pointer">Classificar</Badge></Button></DialogTrigger><DialogContent><DialogHeader><DialogTitle>Classificar pagamento</DialogTitle></DialogHeader><div className="grid gap-4 sm:grid-cols-2"><div className="space-y-2 sm:col-span-2"><Label>Plano de Contas</Label><AccountPicker accounts={accounts} value={accountId} onValueChange={setAccountId} /></div>{[["Emissão fiscal", fiscal, setFiscal], ["Competência", competence, setCompetence], ["Caixa (previsão)", cash, setCash]].map(([label, value, setter]) => <div key={String(label)} className="space-y-2"><Label>{String(label)}</Label><Input type="month" value={String(value)} onChange={(event) => (setter as (value: string) => void)(event.target.value)} required /></div>)}</div><Button onClick={() => save.mutate()} disabled={save.isPending}>Salvar classificação</Button></DialogContent></Dialog>;
+}
+
+function AccountPicker({ accounts, value, onValueChange }: { accounts: Account[]; value: string; onValueChange: (value: string) => void }) {
+  const selected = accounts.find((account) => account.id === value);
+  const [query, setQuery] = useState(selected ? accountLabel(selected) : "");
+  const [showAll, setShowAll] = useState(false);
+  const normalized = query.trim().toLocaleLowerCase("pt-BR");
+  const visible = showAll || normalized
+    ? accounts.filter((account) => showAll || account.code.toLocaleLowerCase("pt-BR").includes(normalized) || account.name.toLocaleLowerCase("pt-BR").includes(normalized))
+    : [];
+
+  function updateQuery(next: string) {
+    setQuery(next);
+    setShowAll(false);
+    const exact = accounts.find((account) => account.code.toLocaleLowerCase("pt-BR") === next.trim().toLocaleLowerCase("pt-BR") || account.name.toLocaleLowerCase("pt-BR") === next.trim().toLocaleLowerCase("pt-BR"));
+    onValueChange(exact?.id ?? "");
+  }
+
+  return <div className="space-y-2">
+    <Command shouldFilter={false} className="rounded-md border bg-background">
+      <CommandInput value={query} onValueChange={updateQuery} placeholder="Digite o número ou nome da conta" />
+      {(showAll || normalized) && <CommandList className="border-t">
+        {!visible.length && <CommandEmpty>Nenhuma conta encontrada.</CommandEmpty>}
+        <CommandGroup heading={showAll ? "Plano de Contas" : "Sugestões"}>
+          {visible.map((account) => <CommandItem key={account.id} value={`${account.code} ${account.name}`} onSelect={() => { onValueChange(account.id); setQuery(accountLabel(account)); setShowAll(false); }}>
+            <Check className={account.id === value ? "opacity-100" : "opacity-0"} />
+            <span>{accountLabel(account)}</span>
+          </CommandItem>)}
+        </CommandGroup>
+      </CommandList>}
+    </Command>
+    <Button type="button" variant="outline" size="sm" className="w-full" onClick={() => setShowAll((current) => !current)}>
+      <ListTree className="h-4 w-4" />{showAll ? "Ocultar Plano de Contas" : "Exibir todo o Plano de Contas"}
+    </Button>
+  </div>;
 }
 
 function PayableHistory({ payable, accounts }: { payable: Payable; accounts: Account[] }) {
