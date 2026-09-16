@@ -2309,8 +2309,6 @@ function BuyerQueue() {
   const { data: profiles } = useProfilesMap();
   const { data: me } = useCurrentUser();
   const [groupByProject, setGroupByProject] = useState(false);
-  const [deliveredMode, setDeliveredMode] = useState<DeliveredMode>("all");
-  const [deliveredFrom, setDeliveredFrom] = useState("");
 
   const { data: orders, isLoading } = useQuery({
     queryKey: ["orders", "all"],
@@ -2324,7 +2322,7 @@ function BuyerQueue() {
     },
   });
 
-  const filtered = filterDelivered(orders ?? [], deliveredMode, deliveredFrom);
+  const filtered = orders ?? [];
   const projectName = (id: string) => (id === ESTOQUE_PROJECT_ID ? "Estoque" : projects?.find((p) => p.id === id)?.name ?? "—");
   const requesterName = (id: string) => profiles?.get(id)?.full_name || profiles?.get(id)?.email || "—";
 
@@ -2357,13 +2355,10 @@ function BuyerQueue() {
 
   return (
     <Card>
-      <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <CardHeader>
         <div>
           <CardTitle>Todos os approvals</CardTitle>
           <CardDescription>Acompanhe o status e o andamento de cada solicitação.</CardDescription>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <DeliveredFilter mode={deliveredMode} setMode={setDeliveredMode} fromDate={deliveredFrom} setFromDate={setDeliveredFrom} />
         </div>
       </CardHeader>
       <CardContent>
