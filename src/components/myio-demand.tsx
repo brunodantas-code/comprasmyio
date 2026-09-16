@@ -528,7 +528,7 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
               <div className="flex flex-wrap items-center gap-2">
                 <span className="font-medium">{o.projects?.name || "Sem projeto"}</span>
                 <Badge variant="outline">Entrega {formatDate(o.delivery_date)}</Badge>
-                <Badge variant="secondary">{STATUS_LABELS[o.status] ?? o.status}</Badge>
+                <Badge variant="status">{STATUS_LABELS[o.status] ?? o.status}</Badge>
                 {o.is_replacement && (
                   <Badge variant="outline" className="border-orange-300 bg-orange-100 text-orange-800">Reposição</Badge>
                 )}

@@ -83,7 +83,7 @@ function ExternalStateTable({ states }: { states: ExternalState[] }) {
             </TableCell>
             <TableCell>
               {s.status ? (
-                <Badge variant="outline">{EXTERNAL_STATUS_LABELS[s.status] ?? s.status}</Badge>
+                <Badge variant="status">{EXTERNAL_STATUS_LABELS[s.status] ?? s.status}</Badge>
               ) : (
                 <span className="text-sm text-muted-foreground">—</span>
               )}

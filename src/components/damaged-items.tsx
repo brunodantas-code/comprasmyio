@@ -520,7 +520,7 @@ export function DamagedItemsCard({ userId }: { userId: string; canDelete?: boole
         <CardTitle className="flex items-center gap-2">
           Itens Avariados
           {pending > 0 && (
-            <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-700">
+            <Badge variant="status">
               {pending} aguardando
             </Badge>
           )}
@@ -568,11 +568,11 @@ export function DamagedItemsCard({ userId }: { userId: string; canDelete?: boole
                     <TableCell>{item.photo_url ? <DamagedPhoto path={item.photo_url} /> : "—"}</TableCell>
                     <TableCell>
                       {item.status === "avariado" ? (
-                        <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-700">
+                        <Badge variant="status">
                           Avariado
                         </Badge>
                       ) : (
-                        <Badge variant="outline" className="border-slate-300 bg-slate-100 text-slate-600">
+                        <Badge variant="status">
                           Recuperado
                           {item.recovered_to ? ` · ${item.recovered_to}` : ""}
                         </Badge>
