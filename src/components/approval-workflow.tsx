@@ -1208,6 +1208,7 @@ function DefaultChainAdmin() {
       const { data, error } = await supabase
         .from("profiles")
         .select("id, full_name, email, approval_limit, tier2_limit, tier3_limit, device_approval_limit, device_tier2_limit, device_tier3_limit, approval_level, job_title_id")
+        .is("deleted_at", null)
         .order("full_name");
       if (error) throw error;
       return data ?? [];
