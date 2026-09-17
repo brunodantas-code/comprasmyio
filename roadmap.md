@@ -1,6 +1,8 @@
 # Roadmap
 
 ## Tarefas
+- [x] Padronizar todos os botões de ação dos approvals pelo menor tamanho mostrado na captura
+- [x] Exibir a Fila do Supply nos lembretes do app Supply e na Central de Pendências
 - [x] Reduzir os botões de editar e excluir nas listas Meus com Supply e Fila do Supply, mantendo o anexo compacto
 - [x] Ocultar tipos zerados na Central de Pendências e mostrar somente a mensagem quando não houver pendências
 - [x] Corrigir listas vazias em Fila do Supply e Meus com Supply

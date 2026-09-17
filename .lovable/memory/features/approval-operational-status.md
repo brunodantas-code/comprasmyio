@@ -10,3 +10,5 @@ Somente usuários do Time de Supply e usuários com Perfil Admin podem alterar s
 O solicitante apenas acompanha o andamento. Quando o pedido estiver Entregue, ele pode confirmar o recebimento correto ou com problema.
 
 Os submenus de Approvals são: Aguardando minha aprovação, Meus em aprovação, Meus com Supply, Fila do Supply, Todos e Consolidado por Cargo. A Fila do Supply é inicial para Supply/Admin e contém pedidos aprovados nos estados Pendente, Comprado/aguardando envio e Recebido com problemas, com contagem própria.
+
+Para usuários do Time de Supply e Admin, essa contagem é uma pendência operacional: aparece no indicador do app Supply e na Central de Pendências. Usuários sem essa função não recebem o alerta da fila.
