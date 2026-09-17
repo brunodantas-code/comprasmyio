@@ -29,6 +29,13 @@
       "when": 1789679156668,
       "tag": "0003_restrict_purchase_order_operational_updates",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1789679172521,
+      "tag": "0004_allow_supply_to_view_approved_orders",
+      "breakpoints": true
     }
   ]
 }
