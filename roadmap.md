@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Tarefas
+- [x] Padronizar o botão Excluir em Cadastro > Projetos com os demais botões de ação
 - [x] Igualar o tamanho dos botões Editar e Excluir em Minhas Solicitações e alinhá-los à esquerda
 - [x] Cadastrar Pontos de Entrega em Diversos e usar Sala Cittá como opção padrão no campo de entrega
 - [x] Recuar a rede mesh para não sobrepor o card Code
