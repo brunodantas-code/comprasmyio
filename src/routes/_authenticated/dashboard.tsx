@@ -2308,7 +2308,9 @@ function ImportOrders({ userId }: { userId: string }) {
 
 /* ---------- Buyer queue ---------- */
 
-function BuyerQueue() {
+type ApprovalListMode = "all" | "supply" | "mine-supply";
+
+function BuyerQueue({ mode = "all" }: { mode?: ApprovalListMode }) {
   const { data: projects } = useProjects();
   const { data: profiles } = useProfilesMap();
   const { data: me } = useCurrentUser();
@@ -2327,7 +2329,12 @@ function BuyerQueue() {
     },
   });
 
-  const filtered = orders ?? [];
+  const filtered = (orders ?? []).filter((order) => {
+    if (mode === "all") return true;
+    if (order.approval_status !== "aprovado") return false;
+    if (mode === "mine-supply" && order.requester_id !== me?.id) return false;
+    return ["pendente", "comprado_aguardando", "recebido_problema"].includes(order.status);
+  });
   const projectName = (id: string) => (id === ESTOQUE_PROJECT_ID ? "Estoque" : projects?.find((p) => p.id === id)?.name ?? "—");
   const requesterName = (id: string) => profiles?.get(id)?.full_name || profiles?.get(id)?.email || "—";
 
@@ -2362,8 +2369,14 @@ function BuyerQueue() {
     <Card>
       <CardHeader>
         <div>
-          <CardTitle>Todos os approvals</CardTitle>
-          <CardDescription>{canManageOperationalStatus ? "Atualize o status e o andamento das solicitações aprovadas." : "Acompanhe o status e o andamento de cada solicitação."}</CardDescription>
+          <CardTitle>{mode === "supply" ? "Fila do Supply" : mode === "mine-supply" ? "Meus com Supply" : "Todos os approvals"}</CardTitle>
+          <CardDescription>
+            {mode === "supply"
+              ? "Pedidos aprovados que aguardam atuação do Time de Supply."
+              : mode === "mine-supply"
+                ? "Seus pedidos aprovados que estão em execução pelo Time de Supply."
+                : canManageOperationalStatus ? "Consulte e atualize o andamento das solicitações." : "Acompanhe o status e o andamento de cada solicitação."}
+          </CardDescription>
         </div>
       </CardHeader>
       <CardContent>
@@ -2397,6 +2410,20 @@ function ApprovalsCenter() {
   const canSeeFlow = me?.canAccess("approvals_meus") ?? false;
   const canSeeAllPermission = me?.canAccess("approvals_todos") ?? false;
   const canSeeRolesPermission = me?.canAccess("approvals_consolidado") ?? false;
+  const canSeeSupplyQueue = Boolean(me?.isAdmin || me?.isComprador);
+  const { data: supplyQueueCount = 0 } = useQuery({
+    queryKey: ["orders", "supply-queue-count"],
+    enabled: canSeeSupplyQueue,
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("purchase_orders")
+        .select("id", { count: "exact", head: true })
+        .eq("approval_status", "aprovado")
+        .in("status", ["pendente", "comprado_aguardando", "recebido_problema"]);
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
   const { data: canViewAll = false, isLoading } = useQuery({
     queryKey: ["can-view-all-approvals", me?.jobTitle?.id, me?.isAdmin, me?.isComprador],
     enabled: Boolean(me),
@@ -2414,15 +2441,24 @@ function ApprovalsCenter() {
   });
 
   return (
-    <Tabs defaultValue={canSeeMine ? "mine" : canSeeFlow ? "flow" : canSeeAllPermission ? "all" : "roles"}>
+    <Tabs defaultValue={canSeeSupplyQueue ? "supply" : canSeeMine ? "mine" : canSeeFlow ? "flow" : canSeeAllPermission ? "all" : "roles"}>
       <TabsList className="mb-4">
-        {canSeeMine && <TabsTrigger value="mine">Pendentes comigo</TabsTrigger>}
+        {canSeeMine && <TabsTrigger value="mine">Aguardando minha aprovação</TabsTrigger>}
         {canSeeFlow && <TabsTrigger value="flow">Meus em aprovação</TabsTrigger>}
+        {canSeeFlow && <TabsTrigger value="mine-supply">Meus com Supply</TabsTrigger>}
+        {canSeeSupplyQueue && (
+          <TabsTrigger value="supply">
+            Fila do Supply
+            {supplyQueueCount > 0 && <Badge variant="status" className="ml-2">{supplyQueueCount}</Badge>}
+          </TabsTrigger>
+        )}
         {!isLoading && canViewAll && canSeeAllPermission && <TabsTrigger value="all">Todos</TabsTrigger>}
         {!isLoading && canViewAll && canSeeRolesPermission && <TabsTrigger value="roles">Consolidado por Cargo</TabsTrigger>}
       </TabsList>
       {canSeeMine && <TabsContent value="mine"><PendingForMe /></TabsContent>}
       {canSeeFlow && <TabsContent value="flow"><MyApprovalFlows /></TabsContent>}
+      {canSeeFlow && <TabsContent value="mine-supply"><BuyerQueue mode="mine-supply" /></TabsContent>}
+      {canSeeSupplyQueue && <TabsContent value="supply"><BuyerQueue mode="supply" /></TabsContent>}
       {canViewAll && canSeeAllPermission && <TabsContent value="all"><BuyerQueue /></TabsContent>}
       {canViewAll && canSeeRolesPermission && <TabsContent value="roles"><PendingApprovalsByRole /></TabsContent>}
     </Tabs>

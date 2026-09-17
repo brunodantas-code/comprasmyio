@@ -1,7 +1,7 @@
 # Roadmap
 
 ## Tarefas
-- [ ] Reorganizar Approvals em Aguardando minha aprovação, Meus em aprovação, Meus com Supply, Fila do Supply, Todos e Consolidado por Cargo
+- [x] Reorganizar Approvals em Aguardando minha aprovação, Meus em aprovação, Meus com Supply, Fila do Supply, Todos e Consolidado por Cargo
 - [x] Restringir alterações do status operacional dos approvals ao Time de Supply e Admin
 - [x] Padronizar o botão Excluir em Cadastro > Projetos com os demais botões de ação
 - [x] Igualar o tamanho dos botões Editar e Excluir em Minhas Solicitações e alinhá-los à esquerda
