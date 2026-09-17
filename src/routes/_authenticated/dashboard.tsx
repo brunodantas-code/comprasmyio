@@ -2512,6 +2512,7 @@ function OrdersTable({
               <Row label="Approval">
                 <div className="flex flex-wrap items-start justify-start gap-1 font-mono font-bold">
                   {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
+                  {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
                   <div className="inline-flex flex-col items-stretch">
                     <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} />
                     {o.budget_exceeded && (
@@ -2520,7 +2521,6 @@ function OrdersTable({
                       </Badge>
                     )}
                   </div>
-                  {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
                 </div>
                 <div className="mt-1 space-y-1">
                   <ExistingAttachments orderId={o.id} attachments={o.attachments ?? []} canRemove={canEdit} />
@@ -2656,6 +2656,7 @@ function OrdersTable({
               <TableCell className="font-mono text-xs text-left">
                 <div className="flex items-start justify-start gap-1">
                   {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
+                  {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
                   <div className="inline-flex flex-col items-stretch">
                     <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} />
                     {o.budget_exceeded && (
@@ -2664,7 +2665,6 @@ function OrdersTable({
                       </Badge>
                     )}
                   </div>
-                  {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
                 </div>
                 <div className="mt-1 space-y-1 font-sans">
                   <ExistingAttachments orderId={o.id} attachments={o.attachments ?? []} canRemove={canEdit} />
