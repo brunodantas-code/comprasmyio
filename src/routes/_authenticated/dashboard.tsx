@@ -2312,6 +2312,7 @@ function BuyerQueue() {
   const { data: projects } = useProjects();
   const { data: profiles } = useProfilesMap();
   const { data: me } = useCurrentUser();
+  const canManageOperationalStatus = Boolean(me?.isAdmin || me?.isComprador);
   const [groupByProject, setGroupByProject] = useState(false);
 
   const { data: orders, isLoading } = useQuery({
@@ -2350,11 +2351,11 @@ function BuyerQueue() {
             <h4 className="text-sm font-semibold">{groupLabel(pid)}</h4>
             <span className="text-xs text-muted-foreground">{plist.length} pedido(s)</span>
           </div>
-          <OrdersTable orders={plist} projectName={projectName} requesterName={requesterName} showRequester canEdit canDelete />
+          <OrdersTable orders={plist} projectName={projectName} requesterName={requesterName} showRequester canEdit={canManageOperationalStatus} canDelete />
         </div>
       ));
     }
-    return <OrdersTable orders={list} projectName={projectName} requesterName={requesterName} showRequester canEdit canDelete headerFilters />;
+    return <OrdersTable orders={list} projectName={projectName} requesterName={requesterName} showRequester canEdit={canManageOperationalStatus} canDelete headerFilters />;
   };
 
   return (
@@ -2362,7 +2363,7 @@ function BuyerQueue() {
       <CardHeader>
         <div>
           <CardTitle>Todos os approvals</CardTitle>
-          <CardDescription>Acompanhe o status e o andamento de cada solicitação.</CardDescription>
+          <CardDescription>{canManageOperationalStatus ? "Atualize o status e o andamento das solicitações aprovadas." : "Acompanhe o status e o andamento de cada solicitação."}</CardDescription>
         </div>
       </CardHeader>
       <CardContent>
@@ -2397,10 +2398,10 @@ function ApprovalsCenter() {
   const canSeeAllPermission = me?.canAccess("approvals_todos") ?? false;
   const canSeeRolesPermission = me?.canAccess("approvals_consolidado") ?? false;
   const { data: canViewAll = false, isLoading } = useQuery({
-    queryKey: ["can-view-all-approvals", me?.jobTitle?.id, me?.isAdmin],
+    queryKey: ["can-view-all-approvals", me?.jobTitle?.id, me?.isAdmin, me?.isComprador],
     enabled: Boolean(me),
     queryFn: async () => {
-      if (me?.isAdmin) return true;
+      if (me?.isAdmin || me?.isComprador) return true;
       if (!me?.jobTitle?.id) return false;
       const { data, error } = await supabase
         .from("job_title_hierarchy")

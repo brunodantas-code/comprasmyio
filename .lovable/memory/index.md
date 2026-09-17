@@ -6,6 +6,7 @@ Plataforma externa de QR codes (produto.myio.com.br) é a fonte da verdade para 
 Projeto só vira Cliente após estar implantado e com contrato assinado; a API externa usa o nome do projeto no campo nome_cliente.
 Estoque Fábrica, Estoque Myio Terceiros e Ferramentas/Ativos são áreas diferentes e nunca devem ser misturadas.
 Compra só de item cadastrado (Fábrica/Almoxarifado/Terceiros/Ferramentas), sem texto livre; produtos fabricados Myio (is_manufactured) nunca são compráveis.
+Status operacional de approval aprovado só pode ser alterado pelo Time de Supply ou Admin; solicitante apenas acompanha e confirma recebimento.
 Botões de ação sempre com fundo verde e ícones/textos pretos; lilás somente em títulos explicitamente solicitados.
 
 ## Memories
