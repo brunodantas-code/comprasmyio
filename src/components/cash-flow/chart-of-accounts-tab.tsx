@@ -41,6 +41,12 @@ export function ChartOfAccountsTab({ userId }: { userId: string }) {
 
   const budgetByAccount = useMemo(() => new Map(budgets.map((item) => [item.account_id, item])), [budgets]);
   const children = useMemo(() => new Set(accounts.map((item) => item.parent_id).filter(Boolean)), [accounts]);
+  const monthlyTotals = MONTHS.map(([key]) => accounts.reduce((sum, account) => {
+    if (!account.accepts_entries || children.has(account.id)) return sum;
+    const budget = budgetByAccount.get(account.id);
+    return sum + Number(drafts[account.id]?.[key] ?? budget?.[key] ?? 0);
+  }, 0));
+  const annualTotal = monthlyTotals.reduce((sum, value) => sum + value, 0);
   const rows = useMemo(() => {
     const result: Array<{ account: Account; depth: number }> = [];
     const walk = (parent: string | null, depth: number) => accounts.filter((a) => a.parent_id === parent).forEach((account) => { result.push({ account, depth }); walk(account.id, depth + 1); });
@@ -85,7 +91,14 @@ export function ChartOfAccountsTab({ userId }: { userId: string }) {
     <Card><CardHeader><CardTitle>Orçamento {year}</CardTitle><CardDescription>Valores em reais. Cada linha é salva individualmente.</CardDescription></CardHeader><CardContent>
       {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : !rows.length ? <p className="text-sm text-muted-foreground">Cadastre a primeira conta do plano.</p> : <Table className="md:table-fixed">
         <TableHeader><TableRow><TableHead className="md:w-[18%]">Conta</TableHead>{MONTHS.map(([, label]) => <TableHead key={label} className="px-1 text-center">{label}</TableHead>)}<TableHead className="px-1 text-center md:w-[9%]">Total anual</TableHead><TableHead className="md:w-24" aria-label="Ações" /></TableRow></TableHeader>
-        <TableBody>{rows.map(({ account, depth }) => {
+        <TableBody>
+          <TableRow className="bg-primary font-bold text-primary-foreground hover:bg-primary">
+            <TableCell>Total mensal</TableCell>
+            {monthlyTotals.map((total, index) => <TableCell key={MONTHS[index][0]} className="px-1 text-center text-xs">{BRL.format(total)}</TableCell>)}
+            <TableCell className="px-1 text-center text-xs">{BRL.format(annualTotal)}</TableCell>
+            <TableCell />
+          </TableRow>
+          {rows.map(({ account, depth }) => {
           const budget = budgetByAccount.get(account.id);
           const total = MONTHS.reduce((sum, [key]) => sum + Number(drafts[account.id]?.[key] ?? budget?.[key] ?? 0), 0);
           return <TableRow key={account.id} className={!account.active ? "opacity-50" : undefined}>
