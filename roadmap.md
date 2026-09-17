@@ -82,6 +82,7 @@
 - [x] Vincular Pagamento a Approval existente, mantendo número e histórico, com registro das duas datas/tipos
 - [x] Encaminhar Pagamento criado por Financeiro direto ao CFO; demais cargos ao Financeiro
 - [x] Separar Cargo (cadeia de aprovação) de Perfil (acesso às funcionalidades)
+- [x] Permitir Função Operacional adicional separada do Cargo, inicialmente para Time de Supply
 - [x] Criar perfis Admin, Padrão e Restrito, com menus configuráveis por checkboxes
 - [x] Permitir atribuir um Cargo e um Perfil a cada usuário
 - [x] Exclusão de usuários com dupla aprovação por outro Admin
