@@ -881,7 +881,7 @@ function EditRuleDialog({
   return (
     <Dialog open={open} onOpenChange={openChange}>
       <DialogTrigger asChild>
-        <Button size="icon" variant="ghost" className="!h-6 !w-6 shrink-0" title="Editar etapa" aria-label="Editar etapa">
+        <Button size="icon" variant="ghost" className="h-6! w-6! shrink-0" title="Editar etapa" aria-label="Editar etapa">
           <Pencil className="h-3.5 w-3.5" />
         </Button>
       </DialogTrigger>
@@ -1103,8 +1103,8 @@ export function RulesAdmin() {
                     <TableRow key={r.id}>
                       <TableCell>
                         <div className="flex items-center gap-1">
-                          <Button size="icon" variant="ghost" className="h-7 w-7" aria-label="Mover para cima" title="Mover para cima" disabled={index === 0 || move.isPending} onClick={() => move.mutate({ rule: r as RuleRow, direction: -1 })}><ArrowUp className="h-4 w-4" /></Button>
-                          <Button size="icon" variant="ghost" className="h-7 w-7" aria-label="Mover para baixo" title="Mover para baixo" disabled={index === (rules?.length ?? 0) - 1 || move.isPending} onClick={() => move.mutate({ rule: r as RuleRow, direction: 1 })}><ArrowDown className="h-4 w-4" /></Button>
+                           <Button size="icon" variant="ghost" className="h-6! w-6! shrink-0" aria-label="Mover para cima" title="Mover para cima" disabled={index === 0 || move.isPending} onClick={() => move.mutate({ rule: r as RuleRow, direction: -1 })}><ArrowUp className="h-3.5 w-3.5" /></Button>
+                           <Button size="icon" variant="ghost" className="h-6! w-6! shrink-0" aria-label="Mover para baixo" title="Mover para baixo" disabled={index === (rules?.length ?? 0) - 1 || move.isPending} onClick={() => move.mutate({ rule: r as RuleRow, direction: 1 })}><ArrowDown className="h-3.5 w-3.5" /></Button>
                         </div>
                       </TableCell>
                       <TableCell className="font-medium">{r.name}</TableCell>
@@ -1119,20 +1119,22 @@ export function RulesAdmin() {
                           onCheckedChange={(v) => toggle.mutate({ id: r.id, active: v })}
                         />
                       </TableCell>
-                      <TableCell className="text-right whitespace-nowrap">
-                        <EditRuleDialog rule={r} people={people} stepTypes={stepTypes ?? []} requestTypesCatalog={requestTypesCatalog} onSaved={invalidate} />
-                        <ConfirmDeleteButton
+                      <TableCell className="whitespace-nowrap">
+                        <div className="flex items-center justify-end gap-1">
+                          <EditRuleDialog rule={r} people={people} stepTypes={stepTypes ?? []} requestTypesCatalog={requestTypesCatalog} onSaved={invalidate} />
+                          <ConfirmDeleteButton
                           title="Excluir etapa adicional?"
                           description={`Confirma a exclusão de “${r.name}”? Esta ação não pode ser desfeita.`}
                           ariaLabel={`Excluir etapa ${r.name}`}
                           pending={remove.isPending}
                           onConfirm={() => remove.mutate(r.id)}
                           trigger={
-                            <Button type="button" size="icon" variant="ghost" className="!h-6 !w-6 shrink-0 text-destructive hover:text-destructive" title={`Excluir etapa ${r.name}`} aria-label={`Excluir etapa ${r.name}`}>
+                            <Button type="button" size="icon" variant="ghost" className="h-6! w-6! shrink-0 text-destructive hover:text-destructive" title={`Excluir etapa ${r.name}`} aria-label={`Excluir etapa ${r.name}`}>
                               <Trash2 className="h-3.5 w-3.5" />
                             </Button>
                           }
-                        />
+                          />
+                        </div>
                       </TableCell>
                     </TableRow>
                   );

@@ -2,7 +2,7 @@
 
 ## Tarefas
 - [x] Igualar os ícones da página principal aos ícones da Plataforma ERP
-- [x] Reduzir os ícones de editar e excluir das Etapas Adicionais para o padrão compacto dos approvals
+- [x] Reduzir e separar os ícones de ordem, editar e excluir das Etapas Adicionais no padrão compacto dos approvals
 - [x] Garantir o padrão compacto dos ícones de ação em Todos os approvals, incluindo anexos
 - [x] Corrigir os submenus de Approvals do perfil Financeiro do João de Deus
 - [x] Restringir o alerta da Fila do Supply ao Time de Supply, sem incluí-lo apenas por ser Admin
