@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1789677801713,
+      "tag": "0000_create_delivery_points",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789677836959,
+      "tag": "0001_add_delivery_point_default",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789677917566,
+      "tag": "0002_enforce_single_default_delivery_point",
+      "breakpoints": true
+    }
+  ]
+}

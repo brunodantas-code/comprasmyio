@@ -39,6 +39,7 @@ import { RemindersTab } from "@/components/reminders-tab";
 import { AdditionalStepTypesTab } from "@/components/additional-step-types-tab";
 import { RequestTypesTab, requestTypeModel, requestTypeName, useRequestTypes, type RequestTypeRecord } from "@/components/request-types-tab";
 import { StockDestinationsTab } from "@/components/stock-destinations-tab";
+import { DeliveryPointsTab } from "@/components/delivery-points-tab";
 import { DamageReasonsTab } from "@/components/damage-reasons-tab";
 import { MaterialStockTypesTab, useMaterialStockTypes } from "@/components/material-stock-types-tab";
 import { AccessProfilesTab } from "@/components/access-profiles-tab";
@@ -544,6 +545,7 @@ function Dashboard() {
                     <RequestTypesTab />
                     <AdditionalStepTypesTab />
                     <StockDestinationsTab />
+                    <DeliveryPointsTab />
                     <DamageReasonsTab />
                     <MaterialStockTypesTab />
                   </div>
@@ -2510,6 +2512,7 @@ function OrdersTable({
               <Row label="Approval">
                 <div className="flex flex-wrap items-start justify-start gap-1 font-mono font-bold">
                   {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
+                  {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
                   <div className="inline-flex flex-col items-stretch">
                     <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} />
                     {o.budget_exceeded && (
@@ -2518,7 +2521,6 @@ function OrdersTable({
                       </Badge>
                     )}
                   </div>
-                  {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
                 </div>
                 <div className="mt-1 space-y-1">
                   <ExistingAttachments orderId={o.id} attachments={o.attachments ?? []} canRemove={canEdit} />
@@ -2654,6 +2656,7 @@ function OrdersTable({
               <TableCell className="font-mono text-xs text-left">
                 <div className="flex items-start justify-start gap-1">
                   {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
+                  {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
                   <div className="inline-flex flex-col items-stretch">
                     <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} />
                     {o.budget_exceeded && (
@@ -2662,7 +2665,6 @@ function OrdersTable({
                       </Badge>
                     )}
                   </div>
-                  {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
                 </div>
                 <div className="mt-1 space-y-1 font-sans">
                   <ExistingAttachments orderId={o.id} attachments={o.attachments ?? []} canRemove={canEdit} />
@@ -3202,7 +3204,7 @@ function EditRequesterDialog({ order }: { order: Order }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="icon" variant="ghost" title="Editar pedido" aria-label="Editar pedido">
+        <Button size="icon" variant="ghost" className="h-12 w-12 shrink-0" title="Editar pedido" aria-label="Editar pedido">
           <Pencil className="h-4 w-4" />
         </Button>
       </DialogTrigger>
@@ -3317,8 +3319,8 @@ function InternalDeleteOrderDialog({ order }: { order: Order }) {
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button type="button" size="icon" className="h-6 w-6 shrink-0" aria-label="Excluir pedido" title="Excluir pedido">
-          <X className="h-3 w-3" />
+        <Button type="button" size="icon" className="h-12 w-12 shrink-0" aria-label="Excluir pedido" title="Excluir pedido">
+          <X className="h-4 w-4" />
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
