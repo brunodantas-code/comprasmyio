@@ -590,9 +590,9 @@ export function PendingApprovalsByRole() {
                     {isOpen ? <ChevronDown className="mr-2 h-4 w-4 shrink-0" /> : <ChevronRight className="mr-2 h-4 w-4 shrink-0" />}
                     <span className="grid min-w-0 flex-1 gap-2 sm:grid-cols-[minmax(0,1fr)_7rem_10rem_6rem] sm:items-center">
                       <span className="truncate font-semibold">{group.title}</span>
-                      <span className="text-sm font-normal text-muted-foreground">{group.steps.length} {group.steps.length === 1 ? "approval" : "approvals"}</span>
+                      <span className="text-sm font-normal text-muted-foreground dark:text-primary-foreground">{group.steps.length} {group.steps.length === 1 ? "approval" : "approvals"}</span>
                       <span className="text-sm font-semibold">{BRL(group.value)}</span>
-                      <span className="text-sm font-normal text-muted-foreground">{share.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%</span>
+                      <span className="text-sm font-normal text-muted-foreground dark:text-primary-foreground">{share.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%</span>
                     </span>
                   </Button>
                   <div className="h-1 bg-muted" aria-hidden="true">
