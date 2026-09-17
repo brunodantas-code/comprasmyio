@@ -3241,7 +3241,7 @@ function EditRequesterDialog({ order }: { order: Order }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="icon" variant="ghost" className="h-12 w-12 shrink-0" title="Editar pedido" aria-label="Editar pedido">
+        <Button size="icon" variant="ghost" className="h-7 w-7 shrink-0" title="Editar pedido" aria-label="Editar pedido">
           <Pencil className="h-4 w-4" />
         </Button>
       </DialogTrigger>
@@ -3356,7 +3356,7 @@ function InternalDeleteOrderDialog({ order }: { order: Order }) {
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button type="button" size="icon" className="h-12 w-12 shrink-0" aria-label="Excluir pedido" title="Excluir pedido">
+        <Button type="button" size="icon" className="h-7 w-7 shrink-0" aria-label="Excluir pedido" title="Excluir pedido">
           <X className="h-4 w-4" />
         </Button>
       </AlertDialogTrigger>
