@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { PendingForMe } from "@/components/approval-workflow";
 import { Button } from "@/components/ui/button";
 import { MyioLogo } from "@/components/myio-logo";
-import { Bell, CheckCircle2, CodeXml, ShieldCheck } from "lucide-react";
+import { Bell, CheckCircle2, CodeXml, ShieldCheck, ShoppingCart } from "lucide-react";
 import { usePendingActions } from "@/hooks/use-pending-actions";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -47,6 +47,7 @@ function PendentesPage() {
             {(data?.total ?? 0) > 0 ? (
               <div className="divide-y divide-border overflow-hidden rounded-md border border-border bg-card">
                 {(data?.approvals ?? 0) > 0 ? <PendingLink icon={CheckCircle2} label="Aguardando minha aprovação" count={data?.approvals ?? 0} to="/pendentes" /> : null}
+                {(data?.supplyQueue ?? 0) > 0 ? <PendingLink icon={ShoppingCart} label="Fila do Supply" count={data?.supplyQueue ?? 0} to="/dashboard" search={{ section: "queue" }} /> : null}
                 {(data?.userDeletions ?? 0) > 0 ? <PendingLink icon={ShieldCheck} label="Exclusões de usuários aguardando decisão" count={data?.userDeletions ?? 0} to="/dashboard" search={{ section: "admin", subsection: "usuarios" }} /> : null}
                 {(data?.codeTickets ?? 0) > 0 ? <PendingLink icon={CodeXml} label="Tickets pendentes no Code" count={data?.codeTickets ?? 0} to="/development" /> : null}
               </div>
@@ -60,7 +61,7 @@ function PendentesPage() {
   );
 }
 
-function PendingLink({ icon: Icon, label, count, to, search }: { icon: typeof Bell; label: string; count: number; to: "/pendentes" | "/dashboard" | "/development"; search?: { section: "admin"; subsection: "usuarios" } }) {
+function PendingLink({ icon: Icon, label, count, to, search }: { icon: typeof Bell; label: string; count: number; to: "/pendentes" | "/dashboard" | "/development"; search?: { section: "admin"; subsection: "usuarios" } | { section: "queue" } }) {
   const content = <><Icon className="h-5 w-5 shrink-0" /><span className="min-w-0 flex-1 text-sm font-medium">{label}</span><span className="flex h-7 min-w-7 items-center justify-center rounded-full bg-destructive px-2 text-xs font-bold text-destructive-foreground">{count > 99 ? "99+" : count}</span></>;
   if (to === "/pendentes") return <a href="#approvals" className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10">{content}</a>;
   return <Link to={to} search={search} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10">{content}</Link>;

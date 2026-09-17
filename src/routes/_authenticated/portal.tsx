@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Bell, Boxes, CheckCircle2, CodeXml, DollarSign, FileSignature, Settings, Settings2, ShieldCheck, UsersRound, LogOut } from "lucide-react";
+import { Bell, Boxes, CheckCircle2, CodeXml, DollarSign, FileSignature, Settings, Settings2, ShieldCheck, ShoppingCart, UsersRound, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -183,6 +183,7 @@ function PortalPage() {
                 </div>
                 <div className="divide-y divide-border overflow-hidden rounded-md border border-border bg-card">
                   {(pendingActions?.approvals ?? 0) > 0 ? <PendingRow icon={CheckCircle2} label="Aguardando minha aprovação" count={pendingActions?.approvals ?? 0} to="/pendentes" /> : null}
+                  {(pendingActions?.supplyQueue ?? 0) > 0 ? <PendingRow icon={ShoppingCart} label="Fila do Supply" count={pendingActions?.supplyQueue ?? 0} to="/dashboard" search={{ section: "queue" }} /> : null}
                   {(pendingActions?.userDeletions ?? 0) > 0 ? <PendingRow icon={ShieldCheck} label="Exclusões de usuários aguardando decisão" count={pendingActions?.userDeletions ?? 0} to="/dashboard" search={{ section: "admin", subsection: "usuarios" }} /> : null}
                   {(pendingActions?.codeTickets ?? 0) > 0 ? <PendingRow icon={CodeXml} label="Tickets pendentes no Code" count={pendingActions?.codeTickets ?? 0} to="/development" /> : null}
                 </div>
@@ -200,7 +201,7 @@ function PendingBadge({ count, label }: { count: number; label: string }) {
   return <span className="absolute -right-2 -top-2 flex h-8 min-w-8 items-center justify-center rounded-full bg-destructive px-2 text-sm font-bold text-destructive-foreground shadow-md" aria-label={`${count} ${label}`}>{count > 99 ? "99+" : count}</span>;
 }
 
-function PendingRow({ icon: Icon, label, count, to, search }: { icon: typeof Bell; label: string; count: number; to: "/pendentes" | "/dashboard" | "/development"; search?: { section: "admin"; subsection: "usuarios" } }) {
+function PendingRow({ icon: Icon, label, count, to, search }: { icon: typeof Bell; label: string; count: number; to: "/pendentes" | "/dashboard" | "/development"; search?: { section: "admin"; subsection: "usuarios" } | { section: "queue" } }) {
   return (
     <Link to={to} search={search} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10">
       <Icon className="h-5 w-5 shrink-0" />
