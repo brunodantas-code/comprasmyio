@@ -1,6 +1,8 @@
 # Roadmap
 
 ## Tarefas
+- [x] Reduzir os ícones de editar e excluir das Etapas Adicionais para o padrão compacto dos approvals
+- [x] Garantir o padrão compacto dos ícones de ação em Todos os approvals, incluindo anexos
 - [x] Corrigir os submenus de Approvals do perfil Financeiro do João de Deus
 - [x] Restringir o alerta da Fila do Supply ao Time de Supply, sem incluí-lo apenas por ser Admin
 - [x] Padronizar todos os botões de ação dos approvals pelo menor tamanho mostrado na captura
