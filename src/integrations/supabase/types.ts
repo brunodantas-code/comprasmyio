@@ -1090,6 +1090,36 @@ export type Database = {
           },
         ]
       }
+      delivery_points: {
+        Row: {
+          active: boolean
+          address: string
+          code: string
+          created_at: string
+          name: string
+          position: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          address: string
+          code: string
+          created_at?: string
+          name: string
+          position?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          address?: string
+          code?: string
+          created_at?: string
+          name?: string
+          position?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       development_ticket_attachments: {
         Row: {
           content_type: string
