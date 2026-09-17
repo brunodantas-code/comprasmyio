@@ -3553,7 +3553,7 @@ function ProjectsAdmin({ userId }: { userId: string }) {
                               onDelete={() => remove.mutate(p.id)}
                               deleting={remove.isPending}
                                trigger={
-                                 <Button type="button" size="icon" title="Excluir projeto" aria-label="Excluir projeto">
+                                 <Button type="button" variant="ghost" size="icon" className="h-7 w-7" title="Excluir projeto" aria-label="Excluir projeto">
                                    <Trash2 className="h-4 w-4" />
                                  </Button>
                                }
