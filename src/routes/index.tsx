@@ -175,7 +175,7 @@ function Landing() {
           </div>
         </section>
 
-        <section className="w-full lg:w-[21rem]" aria-labelledby="access-title">
+        <section className="w-full lg:w-[21rem] lg:self-end" aria-labelledby="access-title">
           <div className="rounded-2xl border border-erp-access-border bg-erp-access p-7 text-erp-landing-foreground shadow-2xl backdrop-blur-2xl sm:p-10">
             <div className="mb-7">
               <h2 id="access-title" className="text-2xl font-extrabold text-erp-landing-foreground">Acesse sua conta</h2>
