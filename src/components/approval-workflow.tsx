@@ -150,7 +150,7 @@ function PendingApprovalDetails({ step, requestTypes }: { step: StepRow; request
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="link" className="h-auto justify-self-start p-0 text-left font-mono text-xs font-normal underline">{order.approval_number ?? "—"}</Button>
+        <Button variant="link" className="h-auto justify-self-start p-0 text-left font-mono text-xs font-normal !bg-transparent !text-foreground no-underline hover:!bg-transparent hover:!text-primary hover:underline">{order.approval_number ?? "—"}</Button>
       </DialogTrigger>
       <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
         <DialogHeader><DialogTitle>Approval {order.approval_number}</DialogTitle><DialogDescription>Informações completas da solicitação e da aprovação.</DialogDescription></DialogHeader>
