@@ -43,6 +43,13 @@
       "when": 1789680654798,
       "tag": "0005_restore_authenticated_access_admin_check",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1789681906889,
+      "tag": "0006_recognize_supply_job_titles",
+      "breakpoints": true
     }
   ]
 }

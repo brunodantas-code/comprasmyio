@@ -2424,22 +2424,6 @@ function ApprovalsCenter() {
       return count ?? 0;
     },
   });
-  const { data: canViewAll = false, isLoading } = useQuery({
-    queryKey: ["can-view-all-approvals", me?.jobTitle?.id, me?.isAdmin, me?.isComprador],
-    enabled: Boolean(me),
-    queryFn: async () => {
-      if (me?.isAdmin || me?.isComprador) return true;
-      if (!me?.jobTitle?.id) return false;
-      const { data, error } = await supabase
-        .from("job_title_hierarchy")
-        .select("job_title_id")
-        .eq("approver_job_title_id", me.jobTitle.id)
-        .limit(1);
-      if (error) throw error;
-      return (data?.length ?? 0) > 0;
-    },
-  });
-
   return (
     <Tabs defaultValue={canSeeSupplyQueue ? "supply" : canSeeMine ? "mine" : canSeeFlow ? "flow" : canSeeAllPermission ? "all" : "roles"}>
       <TabsList className="mb-4">
@@ -2452,15 +2436,15 @@ function ApprovalsCenter() {
             {supplyQueueCount > 0 && <Badge variant="status" className="ml-2">{supplyQueueCount}</Badge>}
           </TabsTrigger>
         )}
-        {!isLoading && canViewAll && canSeeAllPermission && <TabsTrigger value="all">Todos</TabsTrigger>}
-        {!isLoading && canViewAll && canSeeRolesPermission && <TabsTrigger value="roles">Consolidado por Cargo</TabsTrigger>}
+        {canSeeAllPermission && <TabsTrigger value="all">Todos</TabsTrigger>}
+        {canSeeRolesPermission && <TabsTrigger value="roles">Consolidado por Cargo</TabsTrigger>}
       </TabsList>
       {canSeeMine && <TabsContent value="mine"><PendingForMe /></TabsContent>}
       {canSeeFlow && <TabsContent value="flow"><MyApprovalFlows /></TabsContent>}
       {canSeeFlow && <TabsContent value="mine-supply"><BuyerQueue mode="mine-supply" /></TabsContent>}
       {canSeeSupplyQueue && <TabsContent value="supply"><BuyerQueue mode="supply" /></TabsContent>}
-      {canViewAll && canSeeAllPermission && <TabsContent value="all"><BuyerQueue /></TabsContent>}
-      {canViewAll && canSeeRolesPermission && <TabsContent value="roles"><PendingApprovalsByRole /></TabsContent>}
+      {canSeeAllPermission && <TabsContent value="all"><BuyerQueue /></TabsContent>}
+      {canSeeRolesPermission && <TabsContent value="roles"><PendingApprovalsByRole /></TabsContent>}
     </Tabs>
   );
 }

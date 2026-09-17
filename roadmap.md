@@ -1,6 +1,8 @@
 # Roadmap
 
 ## Tarefas
+- [x] Corrigir os submenus de Approvals do perfil Financeiro do João de Deus
+- [x] Restringir o alerta da Fila do Supply ao Time de Supply, sem incluí-lo apenas por ser Admin
 - [x] Padronizar todos os botões de ação dos approvals pelo menor tamanho mostrado na captura
 - [x] Exibir a Fila do Supply nos lembretes do app Supply e na Central de Pendências
 - [x] Reduzir os botões de editar e excluir nas listas Meus com Supply e Fila do Supply, mantendo o anexo compacto

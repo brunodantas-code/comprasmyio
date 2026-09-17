@@ -38,7 +38,7 @@ export function usePendingActions() {
         supabase
           .from("development_tickets")
           .select("id, reporter_id, status"),
-        currentUser?.isAdmin || currentUser?.isComprador
+        currentUser?.isComprador
           ? supabase
               .from("purchase_orders")
               .select("id", { count: "exact", head: true })
