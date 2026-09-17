@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Tarefas
+- [x] Identificar por que os ícones corrigidos não aparecem em outros navegadores: versão publicada ainda não atualizada
 - [x] Igualar os ícones da página principal aos ícones da Plataforma ERP
 - [x] Reduzir e separar os ícones de ordem, editar e excluir das Etapas Adicionais no padrão compacto dos approvals
 - [x] Garantir o padrão compacto dos ícones de ação em Todos os approvals, incluindo anexos
