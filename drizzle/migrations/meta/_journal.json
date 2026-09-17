@@ -36,6 +36,13 @@
       "when": 1789679172521,
       "tag": "0004_allow_supply_to_view_approved_orders",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1789680654798,
+      "tag": "0005_restore_authenticated_access_admin_check",
+      "breakpoints": true
     }
   ]
 }

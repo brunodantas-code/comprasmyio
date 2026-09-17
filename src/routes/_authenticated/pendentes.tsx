@@ -44,11 +44,13 @@ function PendentesPage() {
         </div>
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando pendências...</p> : (
           <div className="space-y-6">
-            <div className="divide-y divide-border overflow-hidden rounded-md border border-border bg-card">
-              <PendingLink icon={CheckCircle2} label="Aguardando minha aprovação" count={data?.approvals ?? 0} to="/pendentes" />
-              <PendingLink icon={ShieldCheck} label="Exclusões de usuários aguardando decisão" count={data?.userDeletions ?? 0} to="/dashboard" search={{ section: "admin", subsection: "usuarios" }} />
-              <PendingLink icon={CodeXml} label="Tickets pendentes no Code" count={data?.codeTickets ?? 0} to="/development" />
-            </div>
+            {(data?.total ?? 0) > 0 ? (
+              <div className="divide-y divide-border overflow-hidden rounded-md border border-border bg-card">
+                {(data?.approvals ?? 0) > 0 ? <PendingLink icon={CheckCircle2} label="Aguardando minha aprovação" count={data?.approvals ?? 0} to="/pendentes" /> : null}
+                {(data?.userDeletions ?? 0) > 0 ? <PendingLink icon={ShieldCheck} label="Exclusões de usuários aguardando decisão" count={data?.userDeletions ?? 0} to="/dashboard" search={{ section: "admin", subsection: "usuarios" }} /> : null}
+                {(data?.codeTickets ?? 0) > 0 ? <PendingLink icon={CodeXml} label="Tickets pendentes no Code" count={data?.codeTickets ?? 0} to="/development" /> : null}
+              </div>
+            ) : null}
             {(data?.approvals ?? 0) > 0 ? <section id="approvals"><PendingForMe /></section> : null}
             {(data?.total ?? 0) === 0 ? <p className="rounded-md border border-dashed border-border p-8 text-center text-sm text-muted-foreground">Nenhuma pendência no momento.</p> : null}
           </div>
