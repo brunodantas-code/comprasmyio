@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Tarefas
+- [ ] Cadastrar Pontos de Entrega em Diversos e usar Sala Cittá como opção padrão no campo de entrega
 - [x] Recuar a rede mesh para não sobrepor o card Code
 - [x] Alterar o endereço publicado para erpmyio.lovable.app, mantendo a identificação por e-mail e senha antes do portal ERP
 - [x] Aplicar tags de saída verde-claro e filtros no cabeçalho em Insumos de Instalação
