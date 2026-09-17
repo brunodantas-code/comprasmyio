@@ -15,6 +15,13 @@
       "when": 1789677836959,
       "tag": "0001_add_delivery_point_default",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789677917566,
+      "tag": "0002_enforce_single_default_delivery_point",
+      "breakpoints": true
     }
   ]
 }
