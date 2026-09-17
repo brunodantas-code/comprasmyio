@@ -1096,6 +1096,7 @@ export type Database = {
           address: string
           code: string
           created_at: string
+          is_default: boolean
           name: string
           position: number
           updated_at: string
@@ -1105,6 +1106,7 @@ export type Database = {
           address: string
           code: string
           created_at?: string
+          is_default?: boolean
           name: string
           position?: number
           updated_at?: string
@@ -1114,6 +1116,7 @@ export type Database = {
           address?: string
           code?: string
           created_at?: string
+          is_default?: boolean
           name?: string
           position?: number
           updated_at?: string
