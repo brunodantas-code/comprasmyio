@@ -140,7 +140,12 @@ export function AddressAutocomplete({
       <Label htmlFor={`${name}-search`}>{label}</Label>
       {deliveryPoints && deliveryPoints.length > 0 && (
         <Select value={deliveryPoints.find((point) => point.address === addressValue)?.code ?? "manual"} onValueChange={(code) => {
-          if (code === "manual") return;
+          if (code === "manual") {
+            setAddress("");
+            setQuery("");
+            setConfirmed(false);
+            return;
+          }
           const point = deliveryPoints.find((item) => item.code === code);
           if (!point) return;
           setAddress(point.address);
