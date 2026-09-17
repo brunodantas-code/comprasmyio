@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Tarefas
+- [x] Igualar os ícones da página principal aos ícones da Plataforma ERP
 - [x] Reduzir os ícones de editar e excluir das Etapas Adicionais para o padrão compacto dos approvals
 - [x] Garantir o padrão compacto dos ícones de ação em Todos os approvals, incluindo anexos
 - [x] Corrigir os submenus de Approvals do perfil Financeiro do João de Deus
