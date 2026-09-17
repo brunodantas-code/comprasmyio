@@ -6,7 +6,7 @@ import { MyioLogo } from "@/components/myio-logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { supabase } from "@/integrations/supabase/client";
 import { exportDatabaseBackup } from "@/lib/backup.functions";
-import { decideUserDeletion, requestUserDeletion, setUserAccessProfile } from "@/lib/user-admin.functions";
+import { decideUserDeletion, requestUserDeletion, setUserAccessProfile, setUserOperationalFunction } from "@/lib/user-admin.functions";
 import { lookupLinkPrice } from "@/lib/price-lookup.functions";
 import { getProjectBudgetSummaries, type ProjectBudgetSummary } from "@/lib/project-budget.functions";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -3672,24 +3672,28 @@ function UsersAdmin() {
   const qc = useQueryClient();
   const { data: currentUser } = useCurrentUser();
   const setAccessProfileFn = useServerFn(setUserAccessProfile);
+  const setOperationalFunctionFn = useServerFn(setUserOperationalFunction);
   const requestDeletionFn = useServerFn(requestUserDeletion);
   const decideDeletionFn = useServerFn(decideUserDeletion);
   const { data, isLoading } = useQuery({
     queryKey: ["admin-users"],
     queryFn: async () => {
-      const [{ data: profiles, error: pe }, { data: accessProfiles, error: ae }, { data: menuPermissions, error: me }, { data: titles, error: te }] = await Promise.all([
+      const [{ data: profiles, error: pe }, { data: accessProfiles, error: ae }, { data: menuPermissions, error: me }, { data: titles, error: te }, { data: roles, error: re }] = await Promise.all([
         supabase.from("profiles").select("*").is("deleted_at", null).order("created_at", { ascending: false }),
         supabase.from("user_access_profiles").select("user_id, profile, profile_definition_id, is_customized, access_profile_definitions(name,base_profile)"),
         supabase.from("user_menu_permissions").select("user_id, allowed").eq("allowed", true),
         supabase.from("job_titles").select("id,name").eq("active", true).order("name"),
+        supabase.from("user_roles").select("user_id,role").eq("role", "comprador"),
       ]);
       if (pe) throw pe;
       if (ae) throw ae;
       if (me) throw me;
       if (te) throw te;
+      if (re) throw re;
       const titleById = new Map((titles ?? []).map((title) => [title.id, title.name]));
       const accessByUser = new Map((accessProfiles ?? []).map((item) => [item.user_id, item]));
       const configuredUsers = new Set((menuPermissions ?? []).map((item) => item.user_id));
+      const supplyUsers = new Set((roles ?? []).map((item) => item.user_id));
       return (profiles ?? []).map((p) => ({
         ...p,
         jobTitleId: p.job_title_id,
@@ -3698,6 +3702,7 @@ function UsersAdmin() {
         accessProfileBase: accessByUser.get(p.id)?.profile ?? "restrito",
         accessProfileName: accessByUser.get(p.id)?.is_customized ? "Customizado" : (accessByUser.get(p.id)?.access_profile_definitions as { name?: string } | null)?.name ?? "Restrito",
         hasConfiguredAccess: configuredUsers.has(p.id),
+        operationalFunction: supplyUsers.has(p.id) ? "supply" : "none",
       }));
     },
   });
@@ -3719,6 +3724,19 @@ function UsersAdmin() {
       toast.success("Perfil de acesso atualizado");
       qc.invalidateQueries({ queryKey: ["admin-users"] });
       qc.invalidateQueries({ queryKey: ["custom-access-profiles"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const setOperationalFunction = useMutation({
+    mutationFn: async ({ userId, operationalFunction }: { userId: string; operationalFunction: "none" | "supply" }) => {
+      await setOperationalFunctionFn({ data: { userId, operationalFunction } });
+    },
+    onSuccess: () => {
+      toast.success("Função operacional atualizada");
+      qc.invalidateQueries({ queryKey: ["admin-users"] });
+      qc.invalidateQueries({ queryKey: ["current-user"] });
+      qc.invalidateQueries({ queryKey: ["pending-actions"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -3820,7 +3838,7 @@ function UsersAdmin() {
     <Card>
       <CardHeader>
         <CardTitle>Usuários cadastrados</CardTitle>
-        <CardDescription>Defina separadamente o cargo da cadeia de aprovação e o perfil de acesso às funcionalidades.</CardDescription>
+        <CardDescription>Defina separadamente o cargo da cadeia de aprovação, a função operacional adicional e o perfil de acesso.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
@@ -3931,6 +3949,7 @@ function UsersAdmin() {
                           <div className="flex flex-wrap justify-end gap-1">
                             <Badge variant="outline">Perfil: {u.accessProfileName}</Badge>
                             <Badge variant="outline">Cargo: {u.jobTitleName ?? "Sem cargo"}</Badge>
+                            {u.operationalFunction === "supply" ? <Badge variant="outline">Função: Time de Supply</Badge> : null}
                             {u.id !== currentUser?.id ? (
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
@@ -3952,7 +3971,7 @@ function UsersAdmin() {
                             ) : null}
                           </div>
                         </div>
-                        <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-3 lg:grid-cols-6">
+                        <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-4 lg:grid-cols-7">
                           <div className="flex flex-col gap-1">
                             <span className="text-[10px] font-medium text-muted-foreground">Cargo</span>
                             <Select
@@ -3963,6 +3982,20 @@ function UsersAdmin() {
                               <SelectContent>
                                 <SelectItem value="none">Sem cargo</SelectItem>
                                 {(jobTitles ?? []).map((title) => <SelectItem key={title.id} value={title.id}>{title.name}</SelectItem>)}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[10px] font-medium text-muted-foreground">Função operacional adicional</span>
+                            <Select
+                              value={u.operationalFunction}
+                              onValueChange={(value) => setOperationalFunction.mutate({ userId: u.id, operationalFunction: value as "none" | "supply" })}
+                              disabled={setOperationalFunction.isPending}
+                            >
+                              <SelectTrigger className="h-8 w-full text-xs"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="none">Nenhuma</SelectItem>
+                                <SelectItem value="supply">Time de Supply</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>

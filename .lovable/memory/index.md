@@ -10,6 +10,7 @@ Status operacional de approval aprovado só pode ser alterado pelo Time de Suppl
 Botões de ação sempre com fundo verde e ícones/textos pretos; lilás somente em títulos explicitamente solicitados.
 
 ## Memories
+- [Função operacional adicional](features/additional-operational-function.md) — Cargo define alçadas; função adicional Time de Supply libera fila e ações sem alterar a hierarquia
 - [Regra de sync de QR externos](mem://features/external-qr-sync) — Só sincroniza QRs da homologation_units; externos desconhecidos são ignorados/removidos
 - [Desconto único de estoque por QR](mem://features/stock-single-deduction) — QR homologado desconta estoque 1x só; mudança de setor é rastreio, nunca nova saída; estoque nunca negativo
 - [Caixa é mestra do rastreio](mem://features/box-tracking-propagation) — Status/local da caixa propaga para todos os produtos internos (sync e push); produto instalado no cliente sai da caixa automaticamente; QR da caixa nunca vai à plataforma externa como código próprio

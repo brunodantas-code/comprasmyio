@@ -84,7 +84,7 @@ export function useCurrentUser() {
         canAccess,
         canRequestType,
         isAdmin: accessProfileBase === "admin",
-        isComprador: titleKey.includes("supply"),
+        isComprador: roles.includes("comprador") || titleKey.includes("supply"),
         isFabrica: titleKey === "fabrica",
         isEstoquista: titleKey === "estoquista",
         isFinanceiro: titleKey === "financeiro",

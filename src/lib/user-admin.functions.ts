@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const accessProfileSchema = z.string().min(1).max(80).regex(/^[a-z0-9_]+$/);
+const operationalFunctionSchema = z.enum(["none", "supply"]);
 
 async function assertAdmin(context: { supabase: any; userId: string }) {
   const { data, error } = await context.supabase
@@ -141,6 +142,40 @@ export const setUserAccessProfile = createServerFn({ method: "POST" })
       const { error } = await supabaseAdmin.from("user_roles").delete().eq("user_id", data.userId).eq("role", "admin");
       if (error) throw error;
     }
+    return { ok: true };
+  });
+
+export const setUserOperationalFunction = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({
+    userId: z.string().uuid(),
+    operationalFunction: operationalFunctionSchema,
+  }).parse(input))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: target, error: targetError } = await supabaseAdmin
+      .from("profiles")
+      .select("id, deleted_at")
+      .eq("id", data.userId)
+      .maybeSingle();
+    if (targetError || !target || target.deleted_at) throw new Error("Usuário não encontrado ou excluído.");
+
+    if (data.operationalFunction === "supply") {
+      const { error } = await supabaseAdmin
+        .from("user_roles")
+        .upsert({ user_id: data.userId, role: "comprador" }, { onConflict: "user_id,role" });
+      if (error) throw error;
+    } else {
+      const { error } = await supabaseAdmin
+        .from("user_roles")
+        .delete()
+        .eq("user_id", data.userId)
+        .eq("role", "comprador");
+      if (error) throw error;
+    }
+
     return { ok: true };
   });
 
