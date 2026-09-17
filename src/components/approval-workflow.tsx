@@ -91,7 +91,7 @@ function useProfiles() {
     queryKey: ["aw-profiles"],
     queryFn: async () => {
       const [{ data: profiles, error: pe }, { data: titles, error: te }] = await Promise.all([
-        supabase.from("profiles").select("id, full_name, email, approval_limit, job_title_id").order("full_name"),
+        supabase.from("profiles").select("id, full_name, email, approval_limit, job_title_id").is("deleted_at", null).order("full_name"),
         supabase.from("job_titles").select("id,name").eq("active", true),
       ]);
       if (pe) throw pe;
@@ -1523,6 +1523,7 @@ function OrgChartAdmin() {
       const { data, error } = await supabase
         .from("profiles")
         .select("id, full_name, email, approval_limit, job_title_id")
+        .is("deleted_at", null)
         .order("full_name");
       if (error) throw error;
       return data ?? [];
