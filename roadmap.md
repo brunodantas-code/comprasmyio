@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Tarefas
+- [ ] Corrigir listas vazias em Fila do Supply e Meus com Supply
 - [x] Reorganizar Approvals em Aguardando minha aprovação, Meus em aprovação, Meus com Supply, Fila do Supply, Todos e Consolidado por Cargo
 - [x] Restringir alterações do status operacional dos approvals ao Time de Supply e Admin
 - [x] Padronizar o botão Excluir em Cadastro > Projetos com os demais botões de ação
