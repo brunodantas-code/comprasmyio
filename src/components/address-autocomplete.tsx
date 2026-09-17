@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useDeliveryPoints } from "@/components/delivery-points-tab";
 
 const BROWSER_KEY = import.meta.env['VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY'] as string | undefined;
 const TRACKING_ID = import.meta.env['VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_TRACKING_ID'] as string | undefined;
@@ -53,6 +55,7 @@ export function AddressAutocomplete({
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { data: deliveryPoints } = useDeliveryPoints(true);
   const sessionRef = useRef<unknown>(null);
   const boxRef = useRef<HTMLDivElement>(null);
 
@@ -124,9 +127,35 @@ export function AddressAutocomplete({
   const validAddress = addressValue.length >= 3;
   const full = [addressValue, details.trim()].filter(Boolean).join(" — ");
 
+  useEffect(() => {
+    if (defaultValue || query || !deliveryPoints?.length) return;
+    const preferred = deliveryPoints.find((point) => point.is_default) ?? deliveryPoints[0];
+    setAddress(preferred.address);
+    setQuery(preferred.address);
+    setConfirmed(true);
+  }, [defaultValue, deliveryPoints, query]);
+
   return (
     <div className="space-y-2" ref={boxRef}>
       <Label htmlFor={`${name}-search`}>{label}</Label>
+      {deliveryPoints && deliveryPoints.length > 0 && (
+        <Select value={deliveryPoints.find((point) => point.address === addressValue)?.code ?? "manual"} onValueChange={(code) => {
+          if (code === "manual") return;
+          const point = deliveryPoints.find((item) => item.code === code);
+          if (!point) return;
+          setAddress(point.address);
+          setQuery(point.address);
+          setConfirmed(true);
+          setOpen(false);
+          setSuggestions([]);
+        }}>
+          <SelectTrigger aria-label="Selecionar ponto de entrega"><SelectValue placeholder="Selecione um ponto cadastrado" /></SelectTrigger>
+          <SelectContent>
+            {deliveryPoints.map((point) => <SelectItem key={point.code} value={point.code}>{point.name}</SelectItem>)}
+            <SelectItem value="manual">Outro endereço</SelectItem>
+          </SelectContent>
+        </Select>
+      )}
       <div className="relative">
         <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input

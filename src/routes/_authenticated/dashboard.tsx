@@ -39,6 +39,7 @@ import { RemindersTab } from "@/components/reminders-tab";
 import { AdditionalStepTypesTab } from "@/components/additional-step-types-tab";
 import { RequestTypesTab, requestTypeModel, requestTypeName, useRequestTypes, type RequestTypeRecord } from "@/components/request-types-tab";
 import { StockDestinationsTab } from "@/components/stock-destinations-tab";
+import { DeliveryPointsTab } from "@/components/delivery-points-tab";
 import { DamageReasonsTab } from "@/components/damage-reasons-tab";
 import { MaterialStockTypesTab, useMaterialStockTypes } from "@/components/material-stock-types-tab";
 import { AccessProfilesTab } from "@/components/access-profiles-tab";
@@ -544,6 +545,7 @@ function Dashboard() {
                     <RequestTypesTab />
                     <AdditionalStepTypesTab />
                     <StockDestinationsTab />
+                    <DeliveryPointsTab />
                     <DamageReasonsTab />
                     <MaterialStockTypesTab />
                   </div>
@@ -3202,7 +3204,7 @@ function EditRequesterDialog({ order }: { order: Order }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="icon" variant="ghost" title="Editar pedido" aria-label="Editar pedido">
+        <Button size="icon" variant="ghost" className="h-12 w-12 shrink-0" title="Editar pedido" aria-label="Editar pedido">
           <Pencil className="h-4 w-4" />
         </Button>
       </DialogTrigger>
@@ -3317,8 +3319,8 @@ function InternalDeleteOrderDialog({ order }: { order: Order }) {
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button type="button" size="icon" className="h-6 w-6 shrink-0" aria-label="Excluir pedido" title="Excluir pedido">
-          <X className="h-3 w-3" />
+        <Button type="button" size="icon" className="h-12 w-12 shrink-0" aria-label="Excluir pedido" title="Excluir pedido">
+          <X className="h-4 w-4" />
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
