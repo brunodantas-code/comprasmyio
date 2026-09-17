@@ -5,15 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MyioPlatformLogo } from "@/components/myio-platform-logo";
+import { CrmFunnelIcon } from "@/components/crm-funnel-icon";
 import { toast } from "sonner";
 import { z } from "zod";
 import {
   ArrowRight,
-  BadgeDollarSign,
-  BriefcaseBusiness,
-  Code2,
+  CodeXml,
+  DollarSign,
   FileSignature,
-  PackageCheck,
+  Settings,
   UsersRound,
 } from "lucide-react";
 
@@ -41,25 +41,25 @@ export const Route = createFileRoute("/")({
 
 const MODULES = [
   {
-    icon: PackageCheck,
+    icon: Settings,
     title: "Supply",
     body: "Solicitações e Estoque",
     available: true,
   },
   {
-    icon: BadgeDollarSign,
+    icon: DollarSign,
     title: "Cash Flow",
     body: "Gestão financeira",
     available: true,
   },
   {
-    icon: Code2,
+    icon: CodeXml,
     title: "Code",
     body: "Tickets e melhorias",
     available: true,
   },
   {
-    icon: BriefcaseBusiness,
+    icon: CrmFunnelIcon,
     title: "CRM",
     body: "Vendas e relacionamento",
     available: false,
