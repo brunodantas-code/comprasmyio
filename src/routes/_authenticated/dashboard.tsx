@@ -3551,6 +3551,11 @@ function ProjectsAdmin({ userId }: { userId: string }) {
                               destinations={(projects ?? []).map((project) => ({ id: project.id, name: project.name }))}
                               onDelete={() => remove.mutate(p.id)}
                               deleting={remove.isPending}
+                               trigger={
+                                 <Button type="button" size="icon" title="Excluir projeto" aria-label="Excluir projeto">
+                                   <Trash2 className="h-4 w-4" />
+                                 </Button>
+                               }
                             />
                           </div>
                         </div>

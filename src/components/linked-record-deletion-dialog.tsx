@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -37,6 +37,7 @@ export function LinkedRecordDeletionDialog({
   deleting,
   registry,
   deleteBlockedReason,
+  trigger,
 }: {
   entityId: string;
   entityName: string;
@@ -47,6 +48,7 @@ export function LinkedRecordDeletionDialog({
   deleting?: boolean;
   registry?: DiversosRegistry;
   deleteBlockedReason?: string;
+  trigger?: ReactNode;
 }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -162,9 +164,11 @@ export function LinkedRecordDeletionDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="icon" variant="ghost" title={`Excluir ${entityLabel}`} aria-label={`Excluir ${entityLabel}`} className="text-destructive hover:text-destructive">
-          <Trash2 className="h-4 w-4" />
-        </Button>
+        {trigger ?? (
+          <Button size="icon" variant="ghost" title={`Excluir ${entityLabel}`} aria-label={`Excluir ${entityLabel}`} className="text-destructive hover:text-destructive">
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
