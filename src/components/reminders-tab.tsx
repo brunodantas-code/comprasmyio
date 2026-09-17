@@ -350,7 +350,7 @@ function ReminderEditor({
           <Label>Texto do corpo do e-mail</Label>
           <Textarea rows={4} value={form.body_text} onChange={(e) => setForm({ ...form, body_text: e.target.value })} />
           <p className="text-xs text-muted-foreground">
-            O e-mail inclui automaticamente o botão “Pendentes comigo” apontando para: <span className="font-medium">{link}</span>
+            O e-mail inclui automaticamente o botão “Aguardando minha aprovação” apontando para: <span className="font-medium">{link}</span>
           </p>
         </div>
 

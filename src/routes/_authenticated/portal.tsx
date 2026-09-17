@@ -182,7 +182,7 @@ function PortalPage() {
                   <Button asChild variant="outline" size="sm"><Link to="/pendentes">Ver painel</Link></Button>
                 </div>
                 <div className="divide-y divide-border overflow-hidden rounded-md border border-border bg-card">
-                  {(pendingActions?.approvals ?? 0) > 0 ? <PendingRow icon={CheckCircle2} label="Approvals pendentes comigo" count={pendingActions?.approvals ?? 0} to="/pendentes" /> : null}
+                  {(pendingActions?.approvals ?? 0) > 0 ? <PendingRow icon={CheckCircle2} label="Aguardando minha aprovação" count={pendingActions?.approvals ?? 0} to="/pendentes" /> : null}
                   {(pendingActions?.userDeletions ?? 0) > 0 ? <PendingRow icon={ShieldCheck} label="Exclusões de usuários aguardando decisão" count={pendingActions?.userDeletions ?? 0} to="/dashboard" search={{ section: "admin", subsection: "usuarios" }} /> : null}
                   {(pendingActions?.codeTickets ?? 0) > 0 ? <PendingRow icon={CodeXml} label="Tickets pendentes no Code" count={pendingActions?.codeTickets ?? 0} to="/development" /> : null}
                 </div>

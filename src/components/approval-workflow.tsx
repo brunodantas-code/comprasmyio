@@ -418,7 +418,7 @@ export function PendingForMe() {
       <CardHeader>
         <div>
           <CardTitle className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <span>Pendentes comigo</span>
+            <span>Aguardando minha aprovação</span>
             {mine.length > 0 && (
               <span className="text-sm font-normal text-muted-foreground">
                 {mine.length} {mine.length === 1 ? "approval" : "approvals"} ·{" "}

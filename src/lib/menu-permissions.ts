@@ -20,7 +20,7 @@ export const MENU_PERMISSION_GROUPS: MenuPermissionGroup[] = [
     key: "approvals",
     label: "Approvals",
     children: [
-      { key: "approvals_pendentes", label: "Pendentes comigo" },
+      { key: "approvals_pendentes", label: "Aguardando minha aprovação" },
       { key: "approvals_meus", label: "Meus em aprovação" },
       { key: "approvals_todos", label: "Todos" },
       { key: "approvals_consolidado", label: "Consolidado por Cargo" },
