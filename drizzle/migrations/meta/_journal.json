@@ -22,6 +22,13 @@
       "when": 1789677917566,
       "tag": "0002_enforce_single_default_delivery_point",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1789679156668,
+      "tag": "0003_restrict_purchase_order_operational_updates",
+      "breakpoints": true
     }
   ]
 }
