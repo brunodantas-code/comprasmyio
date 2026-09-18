@@ -3478,6 +3478,8 @@ function ProjectsAdmin({ userId }: { userId: string }) {
   const canCreate = !!me?.canCreateProjects;
   const [budgetVal, setBudgetVal] = useState("0");
   const [newProjectClientId, setNewProjectClientId] = useState("");
+  const [newProjectClientUnitId, setNewProjectClientUnitId] = useState("");
+  const { data: newProjectClientUnits } = useClientUnits(newProjectClientId || undefined);
   const [statusDialog, setStatusDialog] = useState<{ id: string; name: string; action: "implantado" | "cancelado" } | null>(null);
   const [statusDate, setStatusDate] = useState<string>(new Date().toISOString().slice(0, 10));
   const [projectSearch, setProjectSearch] = useState("");
@@ -3486,7 +3488,7 @@ function ProjectsAdmin({ userId }: { userId: string }) {
   const [projectSort, setProjectSort] = useState("name-asc");
 
   const create = useMutation({
-    mutationFn: async (v: { name: string; description: string; budget: number; client_id: string | null; client_name: string }) => {
+    mutationFn: async (v: { name: string; description: string; budget: number; client_id: string | null; client_unit_id: string | null; client_name: string }) => {
       const { data: existing, error: lookupError } = await supabase.from("projects").select("id,name");
       if (lookupError) throw lookupError;
       const normalizedName = v.name.trim().toLocaleLowerCase("pt-BR");
@@ -3528,12 +3530,14 @@ function ProjectsAdmin({ userId }: { userId: string }) {
     if (name.length < 2) return toast.error("Nome muito curto");
     if (!Number.isFinite(budget) || budget <= 0) return toast.error("Informe o orçamento aprovado do projeto.");
     create.mutate(
-      { name, description, budget, client_id: client?.id ?? null, client_name: client?.name ?? "" },
-      { onSuccess: () => { (e.target as HTMLFormElement).reset(); setNewProjectClientId(""); setBudgetVal("0"); } },
+      { name, description, budget, client_id: client?.id ?? null, client_unit_id: newProjectClientUnitId || null, client_name: client?.name ?? "" },
+      { onSuccess: () => { (e.target as HTMLFormElement).reset(); setNewProjectClientId(""); setNewProjectClientUnitId(""); setBudgetVal("0"); } },
     );
   }
 
   const clientOf = (p: { client_id?: string | null }) => clients?.find((c) => c.id === p.client_id);
+  const { data: clientUnits } = useClientUnits();
+  const clientUnitOf = (p: { client_unit_id?: string | null }) => clientUnits?.find((unit) => unit.id === p.client_unit_id);
   const visibleProjects = useMemo(() => {
     const normalizedSearch = projectSearch.trim().toLocaleLowerCase("pt-BR");
     const summaries = new Map((budgetSummaries ?? []).map((summary) => [summary.projectId, summary]));
@@ -3542,7 +3546,8 @@ function ProjectsAdmin({ userId }: { userId: string }) {
         const status = project.status ?? "active";
         const budget = Number(project.budget ?? 0);
         const clientName = clientOf(project)?.name || project.client_name || "";
-        const matchesSearch = !normalizedSearch || `${project.name} ${clientName}`.toLocaleLowerCase("pt-BR").includes(normalizedSearch);
+        const clientUnitName = clientUnitOf(project)?.name || "";
+        const matchesSearch = !normalizedSearch || `${project.name} ${clientName} ${clientUnitName}`.toLocaleLowerCase("pt-BR").includes(normalizedSearch);
         const matchesStatus = projectStatus === "all" || status === projectStatus;
         const matchesBudget = budgetRange === "all"
           || (budgetRange === "under-100k" && budget < 100000)
@@ -3567,7 +3572,7 @@ function ProjectsAdmin({ userId }: { userId: string }) {
         const [left, right] = values[field] ?? values.name;
         return (typeof left === "number" && typeof right === "number" ? left - right : String(left).localeCompare(String(right), "pt-BR")) * factor;
       });
-  }, [projects, clients, budgetSummaries, projectSearch, projectStatus, budgetRange, projectSort]);
+  }, [projects, clients, clientUnits, budgetSummaries, projectSearch, projectStatus, budgetRange, projectSort]);
 
   return (
     <div className="grid gap-6 [&>*]:min-w-0 lg:grid-cols-[1fr_1.5fr]">
@@ -3585,7 +3590,7 @@ function ProjectsAdmin({ userId }: { userId: string }) {
             <div className="space-y-2"><Label htmlFor="p-name">Nome do projeto</Label><Input id="p-name" name="name" required /></div>
             <div className="space-y-2">
               <Label>Cliente</Label>
-              <Select value={newProjectClientId || "none"} onValueChange={(value) => setNewProjectClientId(value === "none" ? "" : value)}>
+              <Select value={newProjectClientId || "none"} onValueChange={(value) => { setNewProjectClientId(value === "none" ? "" : value); setNewProjectClientUnitId(""); }}>
                 <SelectTrigger><SelectValue placeholder="Selecione um cliente" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">Sem cliente vinculado</SelectItem>
@@ -3593,6 +3598,18 @@ function ProjectsAdmin({ userId }: { userId: string }) {
                 </SelectContent>
               </Select>
             </div>
+            {newProjectClientId && (
+              <div className="space-y-2">
+                <Label>Unidade ou filial</Label>
+                <Select value={newProjectClientUnitId || "corporate"} onValueChange={(value) => setNewProjectClientUnitId(value === "corporate" ? "" : value)}>
+                  <SelectTrigger><SelectValue placeholder="Selecione uma unidade ou filial" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="corporate">Cliente corporativo</SelectItem>
+                    {(newProjectClientUnits ?? []).filter((unit) => unit.active).map((unit) => <SelectItem key={unit.id} value={unit.id}>{unit.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="p-budget">Orçamento aprovado (R$)</Label>
               <MoneyInput id="p-budget" className="w-32" value={budgetVal} onChange={setBudgetVal} required placeholder="0,00" />
@@ -3651,7 +3668,11 @@ function ProjectsAdmin({ userId }: { userId: string }) {
                             <PopoverTrigger asChild><button type="button" className="text-left hover:text-primary hover:underline" title={p.description || "Sem descrição"}>{p.name}</button></PopoverTrigger>
                             <PopoverContent align="start" className="max-w-sm text-sm">{p.description || "Sem descrição cadastrada."}</PopoverContent>
                           </Popover>
-                          {(clientOf(p)?.name || p.client_name) && <p className="text-xs text-muted-foreground">Cliente: {clientOf(p)?.name || p.client_name}</p>}
+                          {(clientOf(p)?.name || p.client_name) && (
+                            <p className="text-xs text-muted-foreground">
+                              Cliente: {clientOf(p)?.name || p.client_name}{clientUnitOf(p) ? ` — ${clientUnitOf(p)?.name}` : ""}
+                            </p>
+                          )}
                           <div className="flex items-center gap-2">
                             {st === "active" && (
                               <>
