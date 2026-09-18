@@ -35,6 +35,7 @@ import { MyioOrdersTab, NewMyioOrderDialog } from "@/components/myio-orders-tab"
 import { ClientsTab, useClients } from "@/components/clients-tab";
 import { CostCentersTab, useCostCenters } from "@/components/cost-centers-tab";
 import { JobTitlesTab, useJobTitles } from "@/components/job-titles-tab";
+import { useOperationalFunctions } from "@/components/operational-functions-tab";
 import { RemindersTab } from "@/components/reminders-tab";
 import { AdditionalStepTypesTab } from "@/components/additional-step-types-tab";
 import { RequestTypesTab, requestTypeModel, requestTypeName, useRequestTypes, type RequestTypeRecord } from "@/components/request-types-tab";
@@ -3678,22 +3679,22 @@ function UsersAdmin() {
   const { data, isLoading } = useQuery({
     queryKey: ["admin-users"],
     queryFn: async () => {
-      const [{ data: profiles, error: pe }, { data: accessProfiles, error: ae }, { data: menuPermissions, error: me }, { data: titles, error: te }, { data: roles, error: re }] = await Promise.all([
+      const [{ data: profiles, error: pe }, { data: accessProfiles, error: ae }, { data: menuPermissions, error: me }, { data: titles, error: te }, { data: operationalLinks, error: oe }] = await Promise.all([
         supabase.from("profiles").select("*").is("deleted_at", null).order("created_at", { ascending: false }),
         supabase.from("user_access_profiles").select("user_id, profile, profile_definition_id, is_customized, access_profile_definitions(name,base_profile)"),
         supabase.from("user_menu_permissions").select("user_id, allowed").eq("allowed", true),
         supabase.from("job_titles").select("id,name").eq("active", true).order("name"),
-        supabase.from("user_roles").select("user_id,role").eq("role", "comprador"),
+        supabase.from("user_operational_functions").select("user_id,operational_function_id,operational_functions(id,code,name,active)"),
       ]);
       if (pe) throw pe;
       if (ae) throw ae;
       if (me) throw me;
       if (te) throw te;
-      if (re) throw re;
+      if (oe) throw oe;
       const titleById = new Map((titles ?? []).map((title) => [title.id, title.name]));
       const accessByUser = new Map((accessProfiles ?? []).map((item) => [item.user_id, item]));
       const configuredUsers = new Set((menuPermissions ?? []).map((item) => item.user_id));
-      const supplyUsers = new Set((roles ?? []).map((item) => item.user_id));
+      const operationalByUser = new Map((operationalLinks ?? []).map((item) => [item.user_id, item]));
       return (profiles ?? []).map((p) => ({
         ...p,
         jobTitleId: p.job_title_id,
@@ -3702,7 +3703,8 @@ function UsersAdmin() {
         accessProfileBase: accessByUser.get(p.id)?.profile ?? "restrito",
         accessProfileName: accessByUser.get(p.id)?.is_customized ? "Customizado" : (accessByUser.get(p.id)?.access_profile_definitions as { name?: string } | null)?.name ?? "Restrito",
         hasConfiguredAccess: configuredUsers.has(p.id),
-        operationalFunction: supplyUsers.has(p.id) ? "supply" : "none",
+        operationalFunction: operationalByUser.get(p.id)?.operational_function_id ?? "none",
+        operationalFunctionRecord: operationalByUser.get(p.id)?.operational_functions as { id: string; code: string; name: string; active: boolean } | null | undefined,
       }));
     },
   });
@@ -3729,7 +3731,7 @@ function UsersAdmin() {
   });
 
   const setOperationalFunction = useMutation({
-    mutationFn: async ({ userId, operationalFunction }: { userId: string; operationalFunction: "none" | "supply" }) => {
+    mutationFn: async ({ userId, operationalFunction }: { userId: string; operationalFunction: string | null }) => {
       await setOperationalFunctionFn({ data: { userId, operationalFunction } });
     },
     onSuccess: () => {
@@ -3785,6 +3787,7 @@ function UsersAdmin() {
   });
 
   const { data: jobTitles } = useJobTitles();
+  const { data: operationalFunctions = [] } = useOperationalFunctions();
   const { data: accessProfileDefinitions = [] } = useAccessProfileDefinitions();
 
   const { data: roleHierarchy } = useQuery({
@@ -3949,7 +3952,7 @@ function UsersAdmin() {
                           <div className="flex flex-wrap justify-end gap-1">
                             <Badge variant="outline">Perfil: {u.accessProfileName}</Badge>
                             <Badge variant="outline">Cargo: {u.jobTitleName ?? "Sem cargo"}</Badge>
-                            {u.operationalFunction === "supply" ? <Badge variant="outline">Função: Time de Supply</Badge> : null}
+                            {u.operationalFunctionRecord ? <Badge variant="outline">Função: {u.operationalFunctionRecord.name}</Badge> : null}
                             {u.id !== currentUser?.id ? (
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
@@ -3989,13 +3992,14 @@ function UsersAdmin() {
                             <span className="text-[10px] font-medium text-muted-foreground">Função operacional adicional</span>
                             <Select
                               value={u.operationalFunction}
-                              onValueChange={(value) => setOperationalFunction.mutate({ userId: u.id, operationalFunction: value as "none" | "supply" })}
+                              onValueChange={(value) => setOperationalFunction.mutate({ userId: u.id, operationalFunction: value === "none" ? null : value })}
                               disabled={setOperationalFunction.isPending}
                             >
                               <SelectTrigger className="h-8 w-full text-xs"><SelectValue /></SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="none">Nenhuma</SelectItem>
-                                <SelectItem value="supply">Time de Supply</SelectItem>
+                                {operationalFunctions.map((item) => <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>)}
+                                {u.operationalFunctionRecord && !u.operationalFunctionRecord.active ? <SelectItem value={u.operationalFunctionRecord.id} disabled>{u.operationalFunctionRecord.name} (inativa)</SelectItem> : null}
                               </SelectContent>
                             </Select>
                           </div>
