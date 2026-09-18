@@ -65,5 +65,5 @@ function PendingLink({ icon: Icon, label, count, to, search }: { icon: typeof Be
   const content = <><Icon className="h-5 w-5 shrink-0" /><span className="min-w-0 flex-1 text-sm font-medium">{label}</span><span className="flex h-7 min-w-7 items-center justify-center rounded-full bg-destructive px-2 text-xs font-bold text-destructive-foreground">{count > 99 ? "99+" : count}</span></>;
   if (to === "/pendentes") return <a href="#approvals" className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10">{content}</a>;
   if (to === "/development") return <Link to="/development" search={(search && "ticket" in search) ? search : { ticket: undefined }} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10">{content}</Link>;
-  return <Link to="/dashboard" search={search && "section" in search ? search : { section: "queue" }} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10">{content}</Link>;
+  return <Link to="/dashboard" search={search && "section" in search ? { section: search.section, subsection: "subsection" in search ? search.subsection : undefined } : { section: "queue", subsection: undefined }} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10">{content}</Link>;
 }
