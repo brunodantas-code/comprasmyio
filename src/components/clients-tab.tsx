@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -166,7 +166,7 @@ export function ClientsTab({ userId }: { userId: string }) {
                 {clients.map((c) => {
                   const expanded = expandedClients.has(c.id);
                   return (
-                  <>
+                  <Fragment key={c.id}>
                     <TableRow key={c.id}>
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-2">
@@ -206,7 +206,7 @@ export function ClientsTab({ userId }: { userId: string }) {
                       </TableCell>
                     </TableRow>
                     {expanded && <TableRow key={`${c.id}-units`} className="hover:bg-transparent"><TableCell colSpan={3} className="px-3 py-4 sm:px-6"><ClientUnitsList client={c} userId={userId} /></TableCell></TableRow>}
-                  </>
+                  </Fragment>
                 );})}
               </TableBody>
             </Table>
