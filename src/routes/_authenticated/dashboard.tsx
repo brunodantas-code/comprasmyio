@@ -32,7 +32,7 @@ import { ApprovalWorkflow, MyApprovalFlows, PendingApprovalsByRole, PendingForMe
 import { z } from "zod";
 import { StockTab } from "@/components/stock-tab";
 import { MyioOrdersTab, NewMyioOrderDialog } from "@/components/myio-orders-tab";
-import { ClientsTab, useClients } from "@/components/clients-tab";
+import { ClientsTab, useClients, useClientUnits } from "@/components/clients-tab";
 import { CostCentersTab, useCostCenters } from "@/components/cost-centers-tab";
 import { JobTitlesTab, useJobTitles } from "@/components/job-titles-tab";
 import { useOperationalFunctions } from "@/components/operational-functions-tab";
@@ -76,6 +76,8 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 type Order = {
   id: string;
   project_id: string | null;
+  client_id?: string | null;
+  client_unit_id?: string | null;
   for_stock: boolean;
   allocation_type?: "projeto" | "cliente" | "estoque" | "interna" | null;
   requester_id: string;
@@ -1065,6 +1067,8 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
   const [allocTarget, setAllocTarget] = useState<"projeto" | "cliente" | "interna">("projeto");
   const [clientId, setClientId] = useState("");
   const { data: clientsList } = useClients();
+  const [clientUnitId, setClientUnitId] = useState("");
+  const { data: clientUnits } = useClientUnits(clientId || undefined);
   const [costCenterId, setCostCenterId] = useState<string>("");
   const { data: costCenters } = useCostCenters();
 
@@ -1201,6 +1205,7 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
     setRequestType("");
     setAllocTarget("projeto");
     setClientId("");
+    setClientUnitId("");
 
     setFiles([]);
     setDeadlineType("esta_semana");
@@ -1261,6 +1266,8 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
               ? (clientsList?.find((client) => client.id === clientId)?.name ?? "")
               : (projects?.find((p) => p.id === values.project_id)?.name ?? ""),
             project_id: forStock || allocTarget !== "projeto" ? null : (values.project_id ?? null),
+            client_id: allocTarget === "cliente" ? (clientId || null) : null,
+            client_unit_id: allocTarget === "cliente" && clientUnitId ? clientUnitId : null,
             delivery_date: values.deadline_type === "customizado" && values.deadline_date
               ? values.deadline_date
               : new Date().toISOString().slice(0, 10),
@@ -1286,6 +1293,7 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
           client_id: requestModel === "rh" || requestModel === "pagamento"
             ? (clientId && clientId !== "none" ? clientId : null)
             : (allocTarget === "cliente" ? (clientId || null) : null),
+          client_unit_id: allocTarget === "cliente" && clientUnitId ? clientUnitId : null,
           cost_center_id: restrictedCc ? await resolveOperacaoCostCenterId() : (costCenterId || null),
           parent_order_id: requestModel === "pagamento" && linkedApprovalId !== "none" ? linkedApprovalId : null,
           payment_date: requestModel === "pagamento" ? paymentDate : null,
@@ -1796,7 +1804,7 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
                   <Label>Alocação</Label>
                   <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
                     <label className="flex cursor-pointer items-center gap-2 text-sm">
-                      <Checkbox checked={!forStock && allocTarget === "projeto"} onCheckedChange={() => { setForStock(false); setAllocTarget("projeto"); setClientId(""); }} />
+                      <Checkbox checked={!forStock && allocTarget === "projeto"} onCheckedChange={() => { setForStock(false); setAllocTarget("projeto"); setClientId(""); setClientUnitId(""); }} />
                       Projeto
                     </label>
                     <label className="flex cursor-pointer items-center gap-2 text-sm">
@@ -1804,11 +1812,11 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
                       Cliente
                     </label>
                     <label className="flex cursor-pointer items-center gap-2 text-sm">
-                      <Checkbox checked={forStock} onCheckedChange={() => { setForStock(true); setAllocTarget("projeto"); setProjectId(""); setClientId(""); }} />
+                      <Checkbox checked={forStock} onCheckedChange={() => { setForStock(true); setAllocTarget("projeto"); setProjectId(""); setClientId(""); setClientUnitId(""); }} />
                       Estoque
                     </label>
                     <label className="flex cursor-pointer items-center gap-2 text-sm">
-                      <Checkbox checked={!forStock && allocTarget === "interna"} onCheckedChange={() => { setForStock(false); setAllocTarget("interna"); setProjectId(""); setClientId(""); }} />
+                      <Checkbox checked={!forStock && allocTarget === "interna"} onCheckedChange={() => { setForStock(false); setAllocTarget("interna"); setProjectId(""); setClientId(""); setClientUnitId(""); }} />
                       Interna
                     </label>
                   </div>
@@ -1850,12 +1858,24 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
                 {!forStock && allocTarget === "cliente" && (
                   <div className="space-y-2">
                     <Label>Cliente</Label>
-                    <Select value={clientId} onValueChange={setClientId}>
+                    <Select value={clientId} onValueChange={(value) => { setClientId(value); setClientUnitId(""); }}>
                       <SelectTrigger><SelectValue placeholder="Selecione o cliente" /></SelectTrigger>
                       <SelectContent>
                         {(clientsList ?? []).map((client) => <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>)}
                       </SelectContent>
                     </Select>
+                    {!!clientId && !!clientUnits?.length && (
+                      <div className="space-y-2 pt-2">
+                        <Label>Filial ou unidade</Label>
+                        <Select value={clientUnitId || "corporativo"} onValueChange={(value) => setClientUnitId(value === "corporativo" ? "" : value)}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="corporativo">Cliente corporativo</SelectItem>
+                            {clientUnits.filter((unit) => unit.active).map((unit) => <SelectItem key={unit.id} value={unit.id}>{unit.name}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
                   </div>
                 )}
               </>
@@ -1865,7 +1885,7 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
                   <Label>Alocação</Label>
                   <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
                     <label className="flex cursor-pointer items-center gap-2 text-sm">
-                      <Checkbox checked={allocTarget === "projeto"} onCheckedChange={() => { setAllocTarget("projeto"); setClientId(""); }} />
+                      <Checkbox checked={allocTarget === "projeto"} onCheckedChange={() => { setAllocTarget("projeto"); setClientId(""); setClientUnitId(""); }} />
                       Projeto
                     </label>
                     <label className="flex cursor-pointer items-center gap-2 text-sm">
@@ -1873,7 +1893,7 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
                       Cliente
                     </label>
                     <label className="flex cursor-pointer items-center gap-2 text-sm">
-                      <Checkbox checked={allocTarget === "interna"} onCheckedChange={() => { setAllocTarget("interna"); setProjectId(""); setClientId(""); }} />
+                      <Checkbox checked={allocTarget === "interna"} onCheckedChange={() => { setAllocTarget("interna"); setProjectId(""); setClientId(""); setClientUnitId(""); }} />
                       Interna
                     </label>
                   </div>
@@ -1914,12 +1934,24 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
                 ) : allocTarget === "cliente" ? (
                   <div className="space-y-2">
                     <Label>Cliente</Label>
-                    <Select value={clientId} onValueChange={setClientId}>
+                    <Select value={clientId} onValueChange={(value) => { setClientId(value); setClientUnitId(""); }}>
                       <SelectTrigger><SelectValue placeholder="Selecione o cliente" /></SelectTrigger>
                       <SelectContent>
                         {(clientsList ?? []).map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
                       </SelectContent>
                     </Select>
+                    {!!clientId && !!clientUnits?.length && (
+                      <div className="space-y-2 pt-2">
+                        <Label>Filial ou unidade</Label>
+                        <Select value={clientUnitId || "corporativo"} onValueChange={(value) => setClientUnitId(value === "corporativo" ? "" : value)}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="corporativo">Cliente corporativo</SelectItem>
+                            {clientUnits.filter((unit) => unit.active).map((unit) => <SelectItem key={unit.id} value={unit.id}>{unit.name}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
                   </div>
                 ) : null}
               </>
@@ -2469,6 +2501,8 @@ function OrdersTable({
 }) {
   const { data: me } = useCurrentUser();
   const { data: requestTypes } = useRequestTypes();
+  const { data: clients } = useClients();
+  const { data: clientUnits } = useClientUnits();
   const [fApproval, setFApproval] = useState("");
   const [fItem, setFItem] = useState("");
   const [fAloc, setFAloc] = useState("");
@@ -2477,7 +2511,9 @@ function OrdersTable({
   const [fStatus, setFStatus] = useState<string>("all");
 
   const norm = (s: string) => s.toLowerCase().trim();
-  const allocationOf = (o: Order) => (o.allocation_type === "interna" ? "Interna" : o.for_stock ? "Estoque" : o.project_id ? projectName(o.project_id) : "—");
+  const allocationOf = (o: Order) => o.allocation_type === "cliente"
+    ? [clients?.find((client) => client.id === o.client_id)?.name, clientUnits?.find((unit) => unit.id === o.client_unit_id)?.name].filter(Boolean).join(" — ") || "Cliente"
+    : o.allocation_type === "interna" ? "Interna" : o.for_stock ? "Estoque" : o.project_id ? projectName(o.project_id) : "—";
   const visibleOrders = !headerFilters
     ? orders
     : orders.filter((o) =>
@@ -2566,7 +2602,7 @@ function OrdersTable({
               <Row label="Tipo">
                 <div className="font-medium">{requestTypeLabel(o, requestTypes)}</div>
               </Row>
-              <Row label="Alocação">{o.allocation_type === "interna" ? "Interna" : o.for_stock ? "Estoque" : o.project_id ? projectName(o.project_id) : "—"}</Row>
+              <Row label="Alocação">{allocationOf(o)}</Row>
               {showRequester && <Row label="Solicitante">{requesterName?.(o.requester_id)}</Row>}
               <Row label="Qtd">
                 {!part || part.qty <= 0 ? (
@@ -2710,7 +2746,7 @@ function OrdersTable({
               <TableCell className="text-center">
                 <div className="line-clamp-4 font-medium break-words">{requestTypeLabel(o, requestTypes)}</div>
               </TableCell>
-              <TableCell className="text-sm break-words text-center">{o.allocation_type === "interna" ? "Interna" : o.for_stock ? "Estoque" : o.project_id ? projectName(o.project_id) : "—"}</TableCell>
+              <TableCell className="text-sm break-words text-center">{allocationOf(o)}</TableCell>
               {showRequester && <TableCell className="text-sm break-words text-center">{requesterName?.(o.requester_id)}</TableCell>}
               <TableCell className="text-center">
                 {(() => {
@@ -2847,6 +2883,8 @@ function OrderReportDialog({
   const [open, setOpen] = useState(false);
   const { data: requestTypes } = useRequestTypes();
   const { data: profiles } = useProfilesMap();
+  const { data: clients } = useClients();
+  const { data: clientUnits } = useClientUnits();
   const nameFor = (id: string | null | undefined) => {
     if (!id) return "—";
     const p = profiles?.get(id);
@@ -2912,7 +2950,9 @@ function OrderReportDialog({
   });
   const displayedLogs = relatedLogs ?? logs;
 
-  const allocation = order.allocation_type === "interna" ? "Interna" : order.for_stock ? "Estoque" : order.project_id ? projectName(order.project_id) : "—";
+  const allocation = order.allocation_type === "cliente"
+    ? [clients?.find((client) => client.id === order.client_id)?.name, clientUnits?.find((unit) => unit.id === order.client_unit_id)?.name].filter(Boolean).join(" — ") || "Cliente"
+    : order.allocation_type === "interna" ? "Interna" : order.for_stock ? "Estoque" : order.project_id ? projectName(order.project_id) : "—";
   const Row = ({ label, value }: { label: string; value: React.ReactNode }) => (
     <div className="space-y-0.5">
       <div className="text-xs text-muted-foreground">{label}</div>
@@ -3146,9 +3186,14 @@ function DeleteOrderDialog({ order }: { order: Order }) {
 function EditRequesterDialog({ order }: { order: Order }) {
   const qc = useQueryClient();
   const { data: projects } = useProjects();
+  const { data: clients } = useClients();
   const [open, setOpen] = useState(false);
   const [projectId, setProjectId] = useState(order.project_id ?? "");
-  const [forStock, setForStock] = useState(order.for_stock ?? false);
+  const initialAllocation = order.for_stock ? "estoque" : order.allocation_type === "cliente" || order.allocation_type === "interna" ? order.allocation_type : "projeto";
+  const [allocation, setAllocation] = useState<"projeto" | "cliente" | "estoque" | "interna">(initialAllocation);
+  const [clientId, setClientId] = useState(order.client_id ?? "");
+  const [clientUnitId, setClientUnitId] = useState(order.client_unit_id ?? "");
+  const { data: clientUnits } = useClientUnits(clientId || undefined);
   const [files, setFiles] = useState<File[]>([]);
   const [deadlineType, setDeadlineType] = useState<Order["deadline_type"]>(order.deadline_type);
   const [deadlineDate, setDeadlineDate] = useState(order.deadline_date ?? "");
@@ -3173,8 +3218,11 @@ function EditRequesterDialog({ order }: { order: Order }) {
         attachments = [...attachments, ...uploaded];
       }
       const { error } = await supabase.from("purchase_orders").update({
-        project_id: forStock ? null : (v.project_id ?? null),
-        for_stock: forStock,
+        project_id: allocation === "projeto" ? (v.project_id ?? null) : null,
+        client_id: allocation === "cliente" ? clientId : null,
+        client_unit_id: allocation === "cliente" && clientUnitId ? clientUnitId : null,
+        allocation_type: allocation,
+        for_stock: allocation === "estoque",
         item_name: v.item_name,
         item_link: v.item_link ?? null,
         material_id: selectedItem?.material_id ?? null,
@@ -3204,12 +3252,13 @@ function EditRequesterDialog({ order }: { order: Order }) {
     if (!selectedItem) {
       return toast.error("Selecione um item cadastrado: Insumos de Fabricação, Insumos de Instalação, Material de Almoxarifado ou Máquinas e Ferramentas.");
     }
-    if (!forStock && !projectId) {
+    if (allocation === "projeto" && !projectId) {
       return toast.error("Selecione um projeto");
     }
+    if (allocation === "cliente" && !clientId) return toast.error("Selecione um cliente");
     const fd = new FormData(e.currentTarget);
     const parsed = newOrderSchema.safeParse({
-      project_id: forStock ? undefined : projectId,
+      project_id: allocation === "projeto" ? projectId : undefined,
       item_name: selectedItem.name,
       item_link: itemLink || undefined,
       quantity: fd.get("quantity"),
@@ -3224,7 +3273,15 @@ function EditRequesterDialog({ order }: { order: Order }) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(nextOpen) => {
+      if (nextOpen) {
+        setAllocation(initialAllocation);
+        setProjectId(order.project_id ?? "");
+        setClientId(order.client_id ?? "");
+        setClientUnitId(order.client_unit_id ?? "");
+      }
+      setOpen(nextOpen);
+    }}>
       <DialogTrigger asChild>
         <Button size="icon" variant="ghost" className="!h-6 !w-6 shrink-0" title="Editar pedido" aria-label="Editar pedido">
           <Pencil className="h-3.5 w-3.5" />
@@ -3238,26 +3295,59 @@ function EditRequesterDialog({ order }: { order: Order }) {
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label>Alocação</Label>
-            <div className="flex items-center gap-6">
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
               <label className="flex cursor-pointer items-center gap-2 text-sm">
-                <Checkbox checked={!forStock} onCheckedChange={() => setForStock(false)} />
+                <Checkbox checked={allocation === "projeto"} onCheckedChange={() => { setAllocation("projeto"); setClientId(""); setClientUnitId(""); }} />
                 Projeto
               </label>
               <label className="flex cursor-pointer items-center gap-2 text-sm">
-                <Checkbox checked={forStock} onCheckedChange={() => setForStock(true)} />
+                <Checkbox checked={allocation === "cliente"} onCheckedChange={() => { setAllocation("cliente"); setProjectId(""); }} />
+                Cliente
+              </label>
+              <label className="flex cursor-pointer items-center gap-2 text-sm">
+                <Checkbox checked={allocation === "estoque"} onCheckedChange={() => { setAllocation("estoque"); setProjectId(""); setClientId(""); setClientUnitId(""); }} />
                 Estoque
+              </label>
+              <label className="flex cursor-pointer items-center gap-2 text-sm">
+                <Checkbox checked={allocation === "interna"} onCheckedChange={() => { setAllocation("interna"); setProjectId(""); setClientId(""); setClientUnitId(""); }} />
+                Interna
               </label>
             </div>
           </div>
-          <div className="space-y-2">
-            <Label>Projeto</Label>
-            <Select value={forStock ? "" : projectId} onValueChange={setProjectId} disabled={forStock}>
-              <SelectTrigger><SelectValue placeholder={forStock ? "Compra para estoque" : "Selecione o projeto"} /></SelectTrigger>
-              <SelectContent>
-                {(projects ?? []).filter((p) => !p.status || p.status === "active").map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
+          {allocation === "projeto" && (
+            <div className="space-y-2">
+              <Label>Projeto</Label>
+              <Select value={projectId} onValueChange={setProjectId}>
+                <SelectTrigger><SelectValue placeholder="Selecione o projeto" /></SelectTrigger>
+                <SelectContent>
+                  {(projects ?? []).filter((p) => !p.status || p.status === "active").map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+          {allocation === "cliente" && (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Cliente</Label>
+                <Select value={clientId} onValueChange={(value) => { setClientId(value); setClientUnitId(""); }}>
+                  <SelectTrigger><SelectValue placeholder="Selecione o cliente" /></SelectTrigger>
+                  <SelectContent>
+                    {(clients ?? []).map((client) => <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Filial ou unidade</Label>
+                <Select value={clientUnitId || "corporativo"} onValueChange={(value) => setClientUnitId(value === "corporativo" ? "" : value)} disabled={!clientId}>
+                  <SelectTrigger><SelectValue placeholder="Cliente corporativo" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="corporativo">Cliente corporativo</SelectItem>
+                    {(clientUnits ?? []).filter((unit) => unit.active).map((unit) => <SelectItem key={unit.id} value={unit.id}>{unit.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
           <div className="space-y-2">
             <Label>Item</Label>
             <PurchasableItemPicker value={selectedItem} onPick={(i) => { setItemKey(i.key); if (i.link) setItemLink(i.link); }} />
@@ -3387,6 +3477,7 @@ function ProjectsAdmin({ userId }: { userId: string }) {
   const { data: budgetSummaries } = useProjectBudgetSummaries();
   const canCreate = !!me?.canCreateProjects;
   const [budgetVal, setBudgetVal] = useState("0");
+  const [newProjectClientId, setNewProjectClientId] = useState("");
   const [statusDialog, setStatusDialog] = useState<{ id: string; name: string; action: "implantado" | "cancelado" } | null>(null);
   const [statusDate, setStatusDate] = useState<string>(new Date().toISOString().slice(0, 10));
   const [projectSearch, setProjectSearch] = useState("");
@@ -3395,7 +3486,7 @@ function ProjectsAdmin({ userId }: { userId: string }) {
   const [projectSort, setProjectSort] = useState("name-asc");
 
   const create = useMutation({
-    mutationFn: async (v: { name: string; description: string; budget: number }) => {
+    mutationFn: async (v: { name: string; description: string; budget: number; client_id: string | null; client_name: string }) => {
       const { data: existing, error: lookupError } = await supabase.from("projects").select("id,name");
       if (lookupError) throw lookupError;
       const normalizedName = v.name.trim().toLocaleLowerCase("pt-BR");
@@ -3433,11 +3524,12 @@ function ProjectsAdmin({ userId }: { userId: string }) {
     const name = String(fd.get("name") || "").trim();
     const description = String(fd.get("description") || "").trim();
     const budget = Number(budgetVal || "0");
+    const client = clients?.find((item) => item.id === newProjectClientId);
     if (name.length < 2) return toast.error("Nome muito curto");
     if (!Number.isFinite(budget) || budget <= 0) return toast.error("Informe o orçamento aprovado do projeto.");
     create.mutate(
-      { name, description, budget },
-      { onSuccess: () => { (e.target as HTMLFormElement).reset(); } },
+      { name, description, budget, client_id: client?.id ?? null, client_name: client?.name ?? "" },
+      { onSuccess: () => { (e.target as HTMLFormElement).reset(); setNewProjectClientId(""); setBudgetVal("0"); } },
     );
   }
 
@@ -3491,6 +3583,16 @@ function ProjectsAdmin({ userId }: { userId: string }) {
           ) : (
           <form onSubmit={onCreate} className="space-y-4">
             <div className="space-y-2"><Label htmlFor="p-name">Nome do projeto</Label><Input id="p-name" name="name" required /></div>
+            <div className="space-y-2">
+              <Label>Cliente</Label>
+              <Select value={newProjectClientId || "none"} onValueChange={(value) => setNewProjectClientId(value === "none" ? "" : value)}>
+                <SelectTrigger><SelectValue placeholder="Selecione um cliente" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Sem cliente vinculado</SelectItem>
+                  {(clients ?? []).map((client) => <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="space-y-2">
               <Label htmlFor="p-budget">Orçamento aprovado (R$)</Label>
               <MoneyInput id="p-budget" className="w-32" value={budgetVal} onChange={setBudgetVal} required placeholder="0,00" />
@@ -3549,6 +3651,7 @@ function ProjectsAdmin({ userId }: { userId: string }) {
                             <PopoverTrigger asChild><button type="button" className="text-left hover:text-primary hover:underline" title={p.description || "Sem descrição"}>{p.name}</button></PopoverTrigger>
                             <PopoverContent align="start" className="max-w-sm text-sm">{p.description || "Sem descrição cadastrada."}</PopoverContent>
                           </Popover>
+                          {(clientOf(p)?.name || p.client_name) && <p className="text-xs text-muted-foreground">Cliente: {clientOf(p)?.name || p.client_name}</p>}
                           <div className="flex items-center gap-2">
                             {st === "active" && (
                               <>

@@ -924,6 +924,47 @@ export type Database = {
           },
         ]
       }
+      client_units: {
+        Row: {
+          active: boolean
+          client_id: string
+          cnpj: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          client_id: string
+          cnpj?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          client_id?: string
+          cnpj?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_units_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           cnpj: string | null
@@ -2047,6 +2088,7 @@ export type Database = {
           client_id: string | null
           client_name: string
           client_request_reason: string | null
+          client_unit_id: string | null
           created_at: string
           created_by: string | null
           delivery_date: string
@@ -2064,6 +2106,7 @@ export type Database = {
           client_id?: string | null
           client_name?: string
           client_request_reason?: string | null
+          client_unit_id?: string | null
           created_at?: string
           created_by?: string | null
           delivery_date: string
@@ -2081,6 +2124,7 @@ export type Database = {
           client_id?: string | null
           client_name?: string
           client_request_reason?: string | null
+          client_unit_id?: string | null
           created_at?: string
           created_by?: string | null
           delivery_date?: string
@@ -2100,6 +2144,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "myio_orders_client_unit_id_fkey"
+            columns: ["client_unit_id"]
+            isOneToOne: false
+            referencedRelation: "client_units"
             referencedColumns: ["id"]
           },
           {
@@ -2526,6 +2577,7 @@ export type Database = {
           budget_snapshot: number | null
           buyer_notes: string | null
           client_id: string | null
+          client_unit_id: string | null
           committed_before_snapshot: number | null
           cost_center_id: string | null
           created_at: string
@@ -2572,6 +2624,7 @@ export type Database = {
           budget_snapshot?: number | null
           buyer_notes?: string | null
           client_id?: string | null
+          client_unit_id?: string | null
           committed_before_snapshot?: number | null
           cost_center_id?: string | null
           created_at?: string
@@ -2618,6 +2671,7 @@ export type Database = {
           budget_snapshot?: number | null
           buyer_notes?: string | null
           client_id?: string | null
+          client_unit_id?: string | null
           committed_before_snapshot?: number | null
           cost_center_id?: string | null
           created_at?: string
@@ -2659,6 +2713,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_client_unit_id_fkey"
+            columns: ["client_unit_id"]
+            isOneToOne: false
+            referencedRelation: "client_units"
             referencedColumns: ["id"]
           },
           {
