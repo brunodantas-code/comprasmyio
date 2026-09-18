@@ -26,7 +26,7 @@ export function usePendingActions() {
       if (authError || !authData.user) throw authError ?? new Error("Sessão não encontrada");
       const userId = authData.user.id;
 
-      const [stepsResult, deletionsResult, codeResult, supplyQueueResult] = await Promise.all([
+      const [stepsResult, deletionsResult, codeResult, codeMessagesResult, supplyQueueResult] = await Promise.all([
         supabase
           .from("approval_steps")
           .select("order_id, step_index, approver_id, status, purchase_orders(requester_id)")
@@ -37,7 +37,10 @@ export function usePendingActions() {
           .eq("status", "pendente"),
         supabase
           .from("development_tickets")
-          .select("id, reporter_id, status"),
+          .select("id, ticket_number, title, reporter_id, status"),
+        supabase
+          .from("development_ticket_messages")
+          .select("id, ticket_id, message_type, parent_message_id, development_tickets(ticket_number,title,reporter_id)"),
         currentUser?.isComprador
           ? supabase
               .from("purchase_orders")
@@ -50,6 +53,7 @@ export function usePendingActions() {
       if (stepsResult.error) throw stepsResult.error;
       if (deletionsResult.error) throw deletionsResult.error;
       if (codeResult.error) throw codeResult.error;
+      if (codeMessagesResult.error) throw codeMessagesResult.error;
       if (supplyQueueResult.error) throw supplyQueueResult.error;
 
       const isAdmin = currentUser?.isAdmin ?? false;
@@ -64,16 +68,33 @@ export function usePendingActions() {
       const pendingUserDeletions = isAdmin
         ? (deletionsResult.data ?? []).filter((request) => request.requested_by !== userId).length
         : 0;
-      const pendingCodeTickets = (codeResult.data ?? []).filter((ticket) => {
-        if (ticket.status === "atendido" && ticket.reporter_id === userId) return true;
-        return isAdmin && (ticket.status === "aberto" || ticket.status === "em_atendimento");
-      }).length;
+      const answeredQuestionIds = new Set(
+        (codeMessagesResult.data ?? [])
+          .filter((message) => message.message_type === "answer" && message.parent_message_id)
+          .map((message) => message.parent_message_id),
+      );
+      const codeItems = new Map<string, { ticketId: string; ticketNumber: number; title: string; reason: "responder" | "aceitar" | "atender" }>();
+      for (const ticket of codeResult.data ?? []) {
+        if (ticket.status === "atendido" && ticket.reporter_id === userId) {
+          codeItems.set(ticket.id, { ticketId: ticket.id, ticketNumber: ticket.ticket_number, title: ticket.title, reason: "aceitar" });
+        } else if (isAdmin && (ticket.status === "aberto" || ticket.status === "em_atendimento")) {
+          codeItems.set(ticket.id, { ticketId: ticket.id, ticketNumber: ticket.ticket_number, title: ticket.title, reason: "atender" });
+        }
+      }
+      for (const message of codeMessagesResult.data ?? []) {
+        const relatedTicket = Array.isArray(message.development_tickets) ? message.development_tickets[0] : message.development_tickets;
+        if (message.message_type !== "question" || answeredQuestionIds.has(message.id) || relatedTicket?.reporter_id !== userId) continue;
+        codeItems.set(message.ticket_id, { ticketId: message.ticket_id, ticketNumber: relatedTicket.ticket_number, title: relatedTicket.title, reason: "responder" });
+      }
+      const pendingCodeItems = [...codeItems.values()];
+      const pendingCodeTickets = pendingCodeItems.length;
       const pendingSupplyQueue = supplyQueueResult.count ?? 0;
 
       return {
         approvals: pendingApprovals,
         userDeletions: pendingUserDeletions,
         codeTickets: pendingCodeTickets,
+        codeItems: pendingCodeItems,
         supplyQueue: pendingSupplyQueue,
         supply: pendingApprovals + pendingUserDeletions + pendingSupplyQueue,
         total: pendingApprovals + pendingUserDeletions + pendingCodeTickets + pendingSupplyQueue,
