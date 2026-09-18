@@ -293,3 +293,10 @@
 - [x] Redesenhar o bloco de acesso para se integrar melhor ao fundo escuro
 - [x] Reduzir o espaçamento vertical entre título, subtítulo e descrição na página de acesso
 - [x] Preservar os mesmos ícones e tamanhos atuais dos aplicativos na página inicial de acesso
+
+## Conversas nos tickets do Code
+- [ ] Criar conversa protegida entre Admin e Solicitante com perguntas e respostas imutáveis
+- [ ] Registrar mensagens no histórico do ticket
+- [ ] Gerar pendência ao Solicitante enquanto houver pergunta sem resposta
+- [ ] Manter tickets ativos como pendência do Admin até Atendido
+- [ ] Abrir o ticket correto pela Central de Pendências e validar os fluxos
