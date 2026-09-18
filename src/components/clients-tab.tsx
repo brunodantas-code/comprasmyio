@@ -8,8 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Building2, Pencil, Plus, Trash2 } from "lucide-react";
+import { Minus, Pencil, Plus, Trash2 } from "lucide-react";
 import { LinkedRecordDeletionDialog } from "@/components/linked-record-deletion-dialog";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 
 export type Client = { id: string; name: string; cnpj: string | null };
 export type ClientUnit = { id: string; client_id: string; name: string; cnpj: string | null; active: boolean };
@@ -47,8 +48,8 @@ export function useClientUnits(clientId?: string) {
 export function ClientsTab({ userId }: { userId: string }) {
   const qc = useQueryClient();
   const { data: clients, isLoading } = useClients();
-  const { data: units } = useClientUnits();
   const [newUnits, setNewUnits] = useState<string[]>([]);
+  const [expandedClients, setExpandedClients] = useState<Set<string>>(new Set());
 
   const create = useMutation({
     mutationFn: async (v: { name: string; cnpj: string | null; units: string[] }) => {
@@ -160,18 +161,37 @@ export function ClientsTab({ userId }: { userId: string }) {
           {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
             !clients?.length ? <p className="text-sm text-muted-foreground">Sem clientes.</p> :
             <Table>
-              <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>CNPJ</TableHead><TableHead>Filiais ou unidades</TableHead><TableHead /></TableRow></TableHeader>
+              <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>CNPJ</TableHead><TableHead className="w-20" /></TableRow></TableHeader>
               <TableBody>
-                {clients.map((c) => (
-                  <TableRow key={c.id}>
-                    <TableCell className="font-medium">{c.name}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{c.cnpj || "—"}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {(units ?? []).filter((unit) => unit.client_id === c.id && unit.active).map((unit) => unit.name).join(", ") || "—"}
-                    </TableCell>
-                    <TableCell className="space-x-1 text-right">
-                      <ManageClientUnitsDialog client={c} userId={userId} />
-                      <EditClientDialog client={c} onSave={(v) => update.mutate({ id: c.id, ...v })} />
+                {clients.map((c) => {
+                  const expanded = expandedClients.has(c.id);
+                  return (
+                  <>
+                    <TableRow key={c.id}>
+                      <TableCell className="font-medium">
+                        <div className="flex items-center gap-2">
+                          <Button
+                            type="button"
+                            size="icon"
+                            variant="ghost"
+                            className="h-6! w-6! shrink-0"
+                            onClick={() => setExpandedClients((current) => {
+                              const next = new Set(current);
+                              if (next.has(c.id)) next.delete(c.id); else next.add(c.id);
+                              return next;
+                            })}
+                            title={expanded ? `Recolher unidades de ${c.name}` : `Exibir unidades de ${c.name}`}
+                            aria-label={expanded ? `Recolher unidades de ${c.name}` : `Exibir unidades de ${c.name}`}
+                          >
+                            {expanded ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                          </Button>
+                          <span>{c.name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{c.cnpj || "—"}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1 whitespace-nowrap">
+                          <EditClientDialog client={c} onSave={(v) => update.mutate({ id: c.id, ...v })} />
                        <LinkedRecordDeletionDialog
                          entityId={c.id}
                          entityName={c.name}
@@ -180,10 +200,14 @@ export function ClientsTab({ userId }: { userId: string }) {
                          destinations={(clients ?? []).map((client) => ({ id: client.id, name: client.name }))}
                          onDelete={() => remove.mutate(c.id)}
                          deleting={remove.isPending}
+                          trigger={<Button type="button" size="icon" variant="ghost" className="h-6! w-6! shrink-0 text-destructive hover:text-destructive" title={`Excluir ${c.name}`} aria-label={`Excluir ${c.name}`}><Trash2 className="h-3.5 w-3.5" /></Button>}
                        />
-                    </TableCell>
-                  </TableRow>
-                ))}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                    {expanded && <TableRow key={`${c.id}-units`} className="hover:bg-transparent"><TableCell colSpan={3} className="px-3 py-4 sm:px-6"><ClientUnitsList client={c} userId={userId} /></TableCell></TableRow>}
+                  </>
+                );})}
               </TableBody>
             </Table>
           }
@@ -193,20 +217,15 @@ export function ClientsTab({ userId }: { userId: string }) {
   );
 }
 
-function ManageClientUnitsDialog({ client, userId }: { client: Client; userId: string }) {
+function ClientUnitsList({ client, userId }: { client: Client; userId: string }) {
   const qc = useQueryClient();
-  const [open, setOpen] = useState(false);
-  const [name, setName] = useState("");
   const { data: units } = useClientUnits(client.id);
   const create = useMutation({
-    mutationFn: async () => {
-      const trimmed = name.trim();
-      if (trimmed.length < 2) throw new Error("Informe o nome da filial ou unidade");
-      const { error } = await supabase.from("client_units").insert({ client_id: client.id, name: trimmed, created_by: userId });
+    mutationFn: async (values: { name: string; cnpj: string | null }) => {
+      const { error } = await supabase.from("client_units").insert({ client_id: client.id, name: values.name, cnpj: values.cnpj, created_by: userId });
       if (error) throw new Error(error.code === "23505" ? "Esta unidade já está cadastrada para o cliente" : error.message);
     },
     onSuccess: () => {
-      setName("");
       toast.success("Unidade cadastrada");
       qc.invalidateQueries({ queryKey: ["client-units"] });
     },
@@ -220,33 +239,91 @@ function ManageClientUnitsDialog({ client, userId }: { client: Client; userId: s
     onSuccess: () => qc.invalidateQueries({ queryKey: ["client-units"] }),
     onError: (error: Error) => toast.error(error.message),
   });
+  const update = useMutation({
+    mutationFn: async ({ id, name, cnpj }: { id: string; name: string; cnpj: string | null }) => {
+      const { error } = await supabase.from("client_units").update({ name, cnpj }).eq("id", id);
+      if (error) throw new Error(error.code === "23505" ? "Esta unidade já está cadastrada para o cliente" : error.message);
+    },
+    onSuccess: () => { toast.success("Unidade atualizada"); qc.invalidateQueries({ queryKey: ["client-units"] }); },
+    onError: (error: Error) => toast.error(error.message),
+  });
+  const remove = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("client_units").delete().eq("id", id);
+      if (error?.code === "23503") throw new Error("Esta unidade possui solicitações vinculadas e não pode ser excluída.");
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success("Unidade excluída"); qc.invalidateQueries({ queryKey: ["client-units"] }); },
+    onError: (error: Error) => toast.error(error.message),
+  });
 
   return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm font-semibold">Filiais ou unidades</p>
+        <UnitDialog
+          title={`Nova unidade de ${client.name}`}
+          saving={create.isPending}
+          onSave={(values) => create.mutateAsync(values)}
+          trigger={<Button type="button" size="sm"><Plus className="mr-1 h-4 w-4" />Adicionar unidade</Button>}
+        />
+      </div>
+      {!units?.length ? <p className="text-sm text-muted-foreground">Nenhuma unidade cadastrada.</p> : (
+        <div className="overflow-hidden rounded-md border">
+          <Table>
+            <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>CNPJ</TableHead><TableHead>Status</TableHead><TableHead className="w-20" /></TableRow></TableHeader>
+            <TableBody>
+              {(units ?? []).map((unit) => (
+                <TableRow key={unit.id}>
+                  <TableCell className="font-medium">{unit.name}</TableCell>
+                  <TableCell className="text-muted-foreground">{unit.cnpj || "—"}</TableCell>
+                  <TableCell><Button type="button" variant="outline" size="sm" disabled={toggle.isPending} onClick={() => toggle.mutate(unit)}>{unit.active ? "Ativa" : "Inativa"}</Button></TableCell>
+                  <TableCell className="text-right"><div className="flex items-center justify-end gap-1 whitespace-nowrap">
+                    <UnitDialog
+                      title={`Editar ${unit.name}`}
+                      unit={unit}
+                      saving={update.isPending}
+                      onSave={(values) => update.mutateAsync({ id: unit.id, ...values })}
+                      trigger={<Button type="button" size="icon" variant="ghost" className="h-6! w-6! shrink-0" title={`Editar ${unit.name}`} aria-label={`Editar ${unit.name}`}><Pencil className="h-3.5 w-3.5" /></Button>}
+                    />
+                    <ConfirmDeleteButton
+                      title="Excluir unidade"
+                      description={`Confirma a exclusão de “${unit.name}”?`}
+                      pending={remove.isPending}
+                      onConfirm={() => remove.mutate(unit.id)}
+                      ariaLabel={`Excluir ${unit.name}`}
+                      trigger={<Button type="button" size="icon" variant="ghost" className="h-6! w-6! shrink-0 text-destructive hover:text-destructive" title={`Excluir ${unit.name}`} aria-label={`Excluir ${unit.name}`}><Trash2 className="h-3.5 w-3.5" /></Button>}
+                    />
+                  </div></TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function UnitDialog({ title, unit, saving, onSave, trigger }: { title: string; unit?: ClientUnit; saving: boolean; onSave: (values: { name: string; cnpj: string | null }) => Promise<unknown>; trigger: React.ReactNode }) {
+  const [open, setOpen] = useState(false);
+  return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button size="icon" variant="ghost" title="Gerenciar filiais ou unidades" aria-label="Gerenciar filiais ou unidades">
-          <Building2 className="h-4 w-4" />
-        </Button>
-      </DialogTrigger>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>Filiais ou unidades de {client.name}</DialogTitle></DialogHeader>
-        <div className="flex items-end gap-2">
-          <div className="flex-1 space-y-2">
-            <Label htmlFor={`unit-${client.id}`}>Nova filial ou unidade</Label>
-            <Input id={`unit-${client.id}`} value={name} onChange={(event) => setName(event.target.value)} />
-          </div>
-          <Button type="button" disabled={create.isPending} onClick={() => create.mutate()}><Plus className="mr-1 h-4 w-4" />Adicionar</Button>
-        </div>
-        <div className="space-y-2">
-          {(units ?? []).map((unit) => (
-            <div key={unit.id} className="flex items-center justify-between gap-3 rounded-md border p-3">
-              <div><p className="font-medium">{unit.name}</p><p className="text-xs text-muted-foreground">{unit.active ? "Ativa" : "Inativa"}</p></div>
-              <Button type="button" variant="outline" size="sm" disabled={toggle.isPending} onClick={() => toggle.mutate(unit)}>{unit.active ? "Desativar" : "Ativar"}</Button>
-            </div>
-          ))}
-          {!units?.length && <p className="text-sm text-muted-foreground">Nenhuma unidade cadastrada.</p>}
-        </div>
-        <DialogFooter><Button type="button" variant="outline" onClick={() => setOpen(false)}>Fechar</Button></DialogFooter>
+        <DialogHeader><DialogTitle>{title}</DialogTitle></DialogHeader>
+        <form className="space-y-4" onSubmit={async (event) => {
+          event.preventDefault();
+          const formData = new FormData(event.currentTarget);
+          const name = String(formData.get("name") || "").trim();
+          const cnpj = String(formData.get("cnpj") || "").trim();
+          if (name.length < 2) return toast.error("Informe o nome da unidade");
+          try { await onSave({ name, cnpj: cnpj || null }); setOpen(false); } catch { /* A alteração exibe a mensagem. */ }
+        }}>
+          <div className="space-y-2"><Label>Nome da unidade</Label><Input name="name" defaultValue={unit?.name ?? ""} required /></div>
+          <div className="space-y-2"><Label>CNPJ</Label><Input name="cnpj" defaultValue={unit?.cnpj ?? ""} placeholder="00.000.000/0000-00" /></div>
+          <DialogFooter><Button type="submit" disabled={saving}>Salvar</Button></DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
@@ -257,8 +334,8 @@ function EditClientDialog({ client, onSave }: { client: Client; onSave: (v: { na
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="icon" variant="ghost" title="Editar" aria-label="Editar">
-          <Pencil className="h-4 w-4" />
+        <Button size="icon" variant="ghost" className="h-6! w-6! shrink-0" title="Editar" aria-label="Editar">
+          <Pencil className="h-3.5 w-3.5" />
         </Button>
       </DialogTrigger>
       <DialogContent>
