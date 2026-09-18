@@ -32,7 +32,7 @@ import { ApprovalWorkflow, MyApprovalFlows, PendingApprovalsByRole, PendingForMe
 import { z } from "zod";
 import { StockTab } from "@/components/stock-tab";
 import { MyioOrdersTab, NewMyioOrderDialog } from "@/components/myio-orders-tab";
-import { ClientsTab, useClients } from "@/components/clients-tab";
+import { ClientsTab, useClients, useClientUnits } from "@/components/clients-tab";
 import { CostCentersTab, useCostCenters } from "@/components/cost-centers-tab";
 import { JobTitlesTab, useJobTitles } from "@/components/job-titles-tab";
 import { useOperationalFunctions } from "@/components/operational-functions-tab";
@@ -76,6 +76,8 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 type Order = {
   id: string;
   project_id: string | null;
+  client_id?: string | null;
+  client_unit_id?: string | null;
   for_stock: boolean;
   allocation_type?: "projeto" | "cliente" | "estoque" | "interna" | null;
   requester_id: string;
@@ -1065,6 +1067,8 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
   const [allocTarget, setAllocTarget] = useState<"projeto" | "cliente" | "interna">("projeto");
   const [clientId, setClientId] = useState("");
   const { data: clientsList } = useClients();
+  const [clientUnitId, setClientUnitId] = useState("");
+  const { data: clientUnits } = useClientUnits(clientId || undefined);
   const [costCenterId, setCostCenterId] = useState<string>("");
   const { data: costCenters } = useCostCenters();
 
@@ -1201,6 +1205,7 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
     setRequestType("");
     setAllocTarget("projeto");
     setClientId("");
+    setClientUnitId("");
 
     setFiles([]);
     setDeadlineType("esta_semana");
@@ -1286,6 +1291,7 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
           client_id: requestModel === "rh" || requestModel === "pagamento"
             ? (clientId && clientId !== "none" ? clientId : null)
             : (allocTarget === "cliente" ? (clientId || null) : null),
+          client_unit_id: allocTarget === "cliente" && clientUnitId ? clientUnitId : null,
           cost_center_id: restrictedCc ? await resolveOperacaoCostCenterId() : (costCenterId || null),
           parent_order_id: requestModel === "pagamento" && linkedApprovalId !== "none" ? linkedApprovalId : null,
           payment_date: requestModel === "pagamento" ? paymentDate : null,
@@ -1796,7 +1802,7 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
                   <Label>Alocação</Label>
                   <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
                     <label className="flex cursor-pointer items-center gap-2 text-sm">
-                      <Checkbox checked={!forStock && allocTarget === "projeto"} onCheckedChange={() => { setForStock(false); setAllocTarget("projeto"); setClientId(""); }} />
+                      <Checkbox checked={!forStock && allocTarget === "projeto"} onCheckedChange={() => { setForStock(false); setAllocTarget("projeto"); setClientId(""); setClientUnitId(""); }} />
                       Projeto
                     </label>
                     <label className="flex cursor-pointer items-center gap-2 text-sm">
@@ -1804,11 +1810,11 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
                       Cliente
                     </label>
                     <label className="flex cursor-pointer items-center gap-2 text-sm">
-                      <Checkbox checked={forStock} onCheckedChange={() => { setForStock(true); setAllocTarget("projeto"); setProjectId(""); setClientId(""); }} />
+                      <Checkbox checked={forStock} onCheckedChange={() => { setForStock(true); setAllocTarget("projeto"); setProjectId(""); setClientId(""); setClientUnitId(""); }} />
                       Estoque
                     </label>
                     <label className="flex cursor-pointer items-center gap-2 text-sm">
-                      <Checkbox checked={!forStock && allocTarget === "interna"} onCheckedChange={() => { setForStock(false); setAllocTarget("interna"); setProjectId(""); setClientId(""); }} />
+                      <Checkbox checked={!forStock && allocTarget === "interna"} onCheckedChange={() => { setForStock(false); setAllocTarget("interna"); setProjectId(""); setClientId(""); setClientUnitId(""); }} />
                       Interna
                     </label>
                   </div>
@@ -1850,12 +1856,24 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
                 {!forStock && allocTarget === "cliente" && (
                   <div className="space-y-2">
                     <Label>Cliente</Label>
-                    <Select value={clientId} onValueChange={setClientId}>
+                    <Select value={clientId} onValueChange={(value) => { setClientId(value); setClientUnitId(""); }}>
                       <SelectTrigger><SelectValue placeholder="Selecione o cliente" /></SelectTrigger>
                       <SelectContent>
                         {(clientsList ?? []).map((client) => <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>)}
                       </SelectContent>
                     </Select>
+                    {!!clientId && !!clientUnits?.length && (
+                      <div className="space-y-2 pt-2">
+                        <Label>Filial ou unidade</Label>
+                        <Select value={clientUnitId || "corporativo"} onValueChange={(value) => setClientUnitId(value === "corporativo" ? "" : value)}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="corporativo">Cliente corporativo</SelectItem>
+                            {clientUnits.filter((unit) => unit.active).map((unit) => <SelectItem key={unit.id} value={unit.id}>{unit.name}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
                   </div>
                 )}
               </>
@@ -1865,7 +1883,7 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
                   <Label>Alocação</Label>
                   <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
                     <label className="flex cursor-pointer items-center gap-2 text-sm">
-                      <Checkbox checked={allocTarget === "projeto"} onCheckedChange={() => { setAllocTarget("projeto"); setClientId(""); }} />
+                      <Checkbox checked={allocTarget === "projeto"} onCheckedChange={() => { setAllocTarget("projeto"); setClientId(""); setClientUnitId(""); }} />
                       Projeto
                     </label>
                     <label className="flex cursor-pointer items-center gap-2 text-sm">
@@ -1873,7 +1891,7 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
                       Cliente
                     </label>
                     <label className="flex cursor-pointer items-center gap-2 text-sm">
-                      <Checkbox checked={allocTarget === "interna"} onCheckedChange={() => { setAllocTarget("interna"); setProjectId(""); setClientId(""); }} />
+                      <Checkbox checked={allocTarget === "interna"} onCheckedChange={() => { setAllocTarget("interna"); setProjectId(""); setClientId(""); setClientUnitId(""); }} />
                       Interna
                     </label>
                   </div>
@@ -1914,12 +1932,24 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
                 ) : allocTarget === "cliente" ? (
                   <div className="space-y-2">
                     <Label>Cliente</Label>
-                    <Select value={clientId} onValueChange={setClientId}>
+                    <Select value={clientId} onValueChange={(value) => { setClientId(value); setClientUnitId(""); }}>
                       <SelectTrigger><SelectValue placeholder="Selecione o cliente" /></SelectTrigger>
                       <SelectContent>
                         {(clientsList ?? []).map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
                       </SelectContent>
                     </Select>
+                    {!!clientId && !!clientUnits?.length && (
+                      <div className="space-y-2 pt-2">
+                        <Label>Filial ou unidade</Label>
+                        <Select value={clientUnitId || "corporativo"} onValueChange={(value) => setClientUnitId(value === "corporativo" ? "" : value)}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="corporativo">Cliente corporativo</SelectItem>
+                            {clientUnits.filter((unit) => unit.active).map((unit) => <SelectItem key={unit.id} value={unit.id}>{unit.name}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
                   </div>
                 ) : null}
               </>
@@ -3387,6 +3417,7 @@ function ProjectsAdmin({ userId }: { userId: string }) {
   const { data: budgetSummaries } = useProjectBudgetSummaries();
   const canCreate = !!me?.canCreateProjects;
   const [budgetVal, setBudgetVal] = useState("0");
+  const [newProjectClientId, setNewProjectClientId] = useState("");
   const [statusDialog, setStatusDialog] = useState<{ id: string; name: string; action: "implantado" | "cancelado" } | null>(null);
   const [statusDate, setStatusDate] = useState<string>(new Date().toISOString().slice(0, 10));
   const [projectSearch, setProjectSearch] = useState("");
@@ -3395,7 +3426,7 @@ function ProjectsAdmin({ userId }: { userId: string }) {
   const [projectSort, setProjectSort] = useState("name-asc");
 
   const create = useMutation({
-    mutationFn: async (v: { name: string; description: string; budget: number }) => {
+    mutationFn: async (v: { name: string; description: string; budget: number; client_id: string | null; client_name: string }) => {
       const { data: existing, error: lookupError } = await supabase.from("projects").select("id,name");
       if (lookupError) throw lookupError;
       const normalizedName = v.name.trim().toLocaleLowerCase("pt-BR");
@@ -3433,11 +3464,12 @@ function ProjectsAdmin({ userId }: { userId: string }) {
     const name = String(fd.get("name") || "").trim();
     const description = String(fd.get("description") || "").trim();
     const budget = Number(budgetVal || "0");
+    const client = clients?.find((item) => item.id === newProjectClientId);
     if (name.length < 2) return toast.error("Nome muito curto");
     if (!Number.isFinite(budget) || budget <= 0) return toast.error("Informe o orçamento aprovado do projeto.");
     create.mutate(
-      { name, description, budget },
-      { onSuccess: () => { (e.target as HTMLFormElement).reset(); } },
+      { name, description, budget, client_id: client?.id ?? null, client_name: client?.name ?? "" },
+      { onSuccess: () => { (e.target as HTMLFormElement).reset(); setNewProjectClientId(""); setBudgetVal("0"); } },
     );
   }
 
@@ -3491,6 +3523,16 @@ function ProjectsAdmin({ userId }: { userId: string }) {
           ) : (
           <form onSubmit={onCreate} className="space-y-4">
             <div className="space-y-2"><Label htmlFor="p-name">Nome do projeto</Label><Input id="p-name" name="name" required /></div>
+            <div className="space-y-2">
+              <Label>Cliente</Label>
+              <Select value={newProjectClientId || "none"} onValueChange={(value) => setNewProjectClientId(value === "none" ? "" : value)}>
+                <SelectTrigger><SelectValue placeholder="Selecione um cliente" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Sem cliente vinculado</SelectItem>
+                  {(clients ?? []).map((client) => <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="space-y-2">
               <Label htmlFor="p-budget">Orçamento aprovado (R$)</Label>
               <MoneyInput id="p-budget" className="w-32" value={budgetVal} onChange={setBudgetVal} required placeholder="0,00" />
@@ -3549,6 +3591,7 @@ function ProjectsAdmin({ userId }: { userId: string }) {
                             <PopoverTrigger asChild><button type="button" className="text-left hover:text-primary hover:underline" title={p.description || "Sem descrição"}>{p.name}</button></PopoverTrigger>
                             <PopoverContent align="start" className="max-w-sm text-sm">{p.description || "Sem descrição cadastrada."}</PopoverContent>
                           </Popover>
+                          {(clientOf(p)?.name || p.client_name) && <p className="text-xs text-muted-foreground">Cliente: {clientOf(p)?.name || p.client_name}</p>}
                           <div className="flex items-center gap-2">
                             {st === "active" && (
                               <>
