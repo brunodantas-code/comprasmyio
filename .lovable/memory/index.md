@@ -22,3 +22,4 @@ Botões de ação sempre com fundo verde e ícones/textos pretos; lilás somente
 - [Estoque Ferramentas/Ativos](mem://features/tools-assets-stock) — Sub-aba ao lado de Almoxarifado com banco próprio; baixa exige destino (técnico ou local); disponível na solicitação de compras
 - [Conversão de projeto em cliente](mem://features/project-client-conversion) — Projeto só vira Cliente após implantação e contrato assinado; Novo Projeto não escolhe Cliente
 - [Cores dos botões de ação](mem://design/action-button-colors) — Fundo verde com ícones/textos pretos; lilás reservado a títulos solicitados
+- [Conversas nos tickets do Code](mem://features/code-ticket-conversations) — Admin pergunta, Solicitante responde, histórico imutável e pendência direcionada a quem deve agir

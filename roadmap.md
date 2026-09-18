@@ -295,8 +295,8 @@
 - [x] Preservar os mesmos ícones e tamanhos atuais dos aplicativos na página inicial de acesso
 
 ## Conversas nos tickets do Code
-- [ ] Criar conversa protegida entre Admin e Solicitante com perguntas e respostas imutáveis
-- [ ] Registrar mensagens no histórico do ticket
-- [ ] Gerar pendência ao Solicitante enquanto houver pergunta sem resposta
-- [ ] Manter tickets ativos como pendência do Admin até Atendido
-- [ ] Abrir o ticket correto pela Central de Pendências e validar os fluxos
+- [x] Criar conversa protegida entre Admin e Solicitante com perguntas e respostas imutáveis
+- [x] Registrar mensagens no histórico do ticket
+- [x] Gerar pendência ao Solicitante enquanto houver pergunta sem resposta
+- [x] Manter tickets ativos como pendência do Admin até Atendido
+- [x] Abrir o ticket correto pela Central de Pendências e validar os fluxos

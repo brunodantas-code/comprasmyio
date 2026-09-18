@@ -318,7 +318,7 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
   const messages = details.data?.messages ?? [];
   const answeredQuestionIds = new Set(messages.filter((entry) => entry.message_type === "answer" && entry.parent_message_id).map((entry) => entry.parent_message_id));
   const pendingQuestion = messages.find((entry) => entry.message_type === "question" && !answeredQuestionIds.has(entry.id));
-  const canAsk = Boolean(data?.isAdmin && ticket && !["atendido", "concluido", "excluido"].includes(ticket.status));
+  const canAsk = Boolean(data?.isAdmin && ticket && !pendingQuestion && !["atendido", "concluido", "excluido"].includes(ticket.status));
   const canAnswer = Boolean(ticket && ticket.reporter_id === data?.userId && pendingQuestion && !["concluido", "excluido"].includes(ticket.status));
   const sendMessage = useMutation({
     mutationFn: async () => {
