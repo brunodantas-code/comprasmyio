@@ -1266,6 +1266,8 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
               ? (clientsList?.find((client) => client.id === clientId)?.name ?? "")
               : (projects?.find((p) => p.id === values.project_id)?.name ?? ""),
             project_id: forStock || allocTarget !== "projeto" ? null : (values.project_id ?? null),
+            client_id: allocTarget === "cliente" ? (clientId || null) : null,
+            client_unit_id: allocTarget === "cliente" && clientUnitId ? clientUnitId : null,
             delivery_date: values.deadline_type === "customizado" && values.deadline_date
               ? values.deadline_date
               : new Date().toISOString().slice(0, 10),
@@ -2343,6 +2345,8 @@ type ApprovalListMode = "all" | "supply" | "mine-supply";
 
 function BuyerQueue({ mode = "all" }: { mode?: ApprovalListMode }) {
   const { data: projects } = useProjects();
+  const { data: clients } = useClients();
+  const { data: clientUnits } = useClientUnits();
   const { data: profiles } = useProfilesMap();
   const { data: me } = useCurrentUser();
   const canManageOperationalStatus = Boolean(me?.isAdmin || me?.isComprador);
@@ -2367,6 +2371,9 @@ function BuyerQueue({ mode = "all" }: { mode?: ApprovalListMode }) {
     return ["pendente", "comprado_aguardando", "recebido_problema"].includes(order.status);
   });
   const projectName = (id: string) => (id === ESTOQUE_PROJECT_ID ? "Estoque" : projects?.find((p) => p.id === id)?.name ?? "—");
+  const allocationName = (order: Order) => order.allocation_type === "cliente"
+    ? [clients?.find((client) => client.id === order.client_id)?.name, clientUnits?.find((unit) => unit.id === order.client_unit_id)?.name].filter(Boolean).join(" — ") || "Cliente"
+    : order.allocation_type === "interna" ? "Interna" : order.for_stock ? "Estoque" : order.project_id ? projectName(order.project_id) : "—";
   const requesterName = (id: string) => profiles?.get(id)?.full_name || profiles?.get(id)?.email || "—";
 
 
@@ -2389,11 +2396,11 @@ function BuyerQueue({ mode = "all" }: { mode?: ApprovalListMode }) {
             <h4 className="text-sm font-semibold">{groupLabel(pid)}</h4>
             <span className="text-xs text-muted-foreground">{plist.length} pedido(s)</span>
           </div>
-          <OrdersTable orders={plist} projectName={projectName} requesterName={requesterName} showRequester canEdit={canManageOperationalStatus} canDelete />
+          <OrdersTable orders={plist} projectName={projectName} allocationName={allocationName} requesterName={requesterName} showRequester canEdit={canManageOperationalStatus} canDelete />
         </div>
       ));
     }
-    return <OrdersTable orders={list} projectName={projectName} requesterName={requesterName} showRequester canEdit={canManageOperationalStatus} canDelete headerFilters />;
+    return <OrdersTable orders={list} projectName={projectName} allocationName={allocationName} requesterName={requesterName} showRequester canEdit={canManageOperationalStatus} canDelete headerFilters />;
   };
 
   return (
@@ -2483,10 +2490,11 @@ function ApprovalsCenter() {
 /* ---------- Orders table ---------- */
 
 function OrdersTable({
-  orders, projectName, requesterName, showRequester, canEdit, canDelete, canEditRequester, stockParts, headerFilters, statusFilterControl, deliveredFilterControl,
+  orders, projectName, allocationName, requesterName, showRequester, canEdit, canDelete, canEditRequester, stockParts, headerFilters, statusFilterControl, deliveredFilterControl,
 }: {
   orders: Order[];
   projectName: (id: string) => string;
+  allocationName?: (order: Order) => string;
   requesterName?: (id: string) => string;
   showRequester?: boolean;
   canEdit?: boolean;
@@ -2507,7 +2515,7 @@ function OrdersTable({
   const [fStatus, setFStatus] = useState<string>("all");
 
   const norm = (s: string) => s.toLowerCase().trim();
-  const allocationOf = (o: Order) => (o.allocation_type === "interna" ? "Interna" : o.for_stock ? "Estoque" : o.project_id ? projectName(o.project_id) : "—");
+  const allocationOf = (o: Order) => allocationName?.(o) ?? (o.allocation_type === "interna" ? "Interna" : o.for_stock ? "Estoque" : o.project_id ? projectName(o.project_id) : "—");
   const visibleOrders = !headerFilters
     ? orders
     : orders.filter((o) =>
@@ -2596,7 +2604,7 @@ function OrdersTable({
               <Row label="Tipo">
                 <div className="font-medium">{requestTypeLabel(o, requestTypes)}</div>
               </Row>
-              <Row label="Alocação">{o.allocation_type === "interna" ? "Interna" : o.for_stock ? "Estoque" : o.project_id ? projectName(o.project_id) : "—"}</Row>
+              <Row label="Alocação">{allocationOf(o)}</Row>
               {showRequester && <Row label="Solicitante">{requesterName?.(o.requester_id)}</Row>}
               <Row label="Qtd">
                 {!part || part.qty <= 0 ? (
@@ -2740,7 +2748,7 @@ function OrdersTable({
               <TableCell className="text-center">
                 <div className="line-clamp-4 font-medium break-words">{requestTypeLabel(o, requestTypes)}</div>
               </TableCell>
-              <TableCell className="text-sm break-words text-center">{o.allocation_type === "interna" ? "Interna" : o.for_stock ? "Estoque" : o.project_id ? projectName(o.project_id) : "—"}</TableCell>
+              <TableCell className="text-sm break-words text-center">{allocationOf(o)}</TableCell>
               {showRequester && <TableCell className="text-sm break-words text-center">{requesterName?.(o.requester_id)}</TableCell>}
               <TableCell className="text-center">
                 {(() => {
