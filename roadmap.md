@@ -300,3 +300,8 @@
 - [x] Gerar pendência ao Solicitante enquanto houver pergunta sem resposta
 - [x] Manter tickets ativos como pendência do Admin até Atendido
 - [x] Abrir o ticket correto pela Central de Pendências e validar os fluxos
+
+## Vínculos de clientes, projetos e unidades
+- [ ] Vincular um novo projeto a um cliente ativo e bloquear novos custos após implantação
+- [ ] Permitir cadastrar filiais ou unidades vinculadas ao cliente corporativo
+- [ ] Disponibilizar unidade opcional em Novas Solicitações quando a alocação for Cliente
