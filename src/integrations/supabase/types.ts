@@ -2088,6 +2088,7 @@ export type Database = {
           client_id: string | null
           client_name: string
           client_request_reason: string | null
+          client_unit_id: string | null
           created_at: string
           created_by: string | null
           delivery_date: string
@@ -2105,6 +2106,7 @@ export type Database = {
           client_id?: string | null
           client_name?: string
           client_request_reason?: string | null
+          client_unit_id?: string | null
           created_at?: string
           created_by?: string | null
           delivery_date: string
@@ -2122,6 +2124,7 @@ export type Database = {
           client_id?: string | null
           client_name?: string
           client_request_reason?: string | null
+          client_unit_id?: string | null
           created_at?: string
           created_by?: string | null
           delivery_date?: string
@@ -2141,6 +2144,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "myio_orders_client_unit_id_fkey"
+            columns: ["client_unit_id"]
+            isOneToOne: false
+            referencedRelation: "client_units"
             referencedColumns: ["id"]
           },
           {
