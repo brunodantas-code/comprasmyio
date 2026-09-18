@@ -142,7 +142,7 @@ function DevelopmentPage() {
 
   const closeTicket = () => {
     setSelectedTicket(null);
-    if (routeSearch.ticket) navigate({ to: "/development", search: {}, replace: true });
+    if (routeSearch.ticket) navigate({ to: "/development", search: { ticket: undefined }, replace: true });
   };
 
   return (
