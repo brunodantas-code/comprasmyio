@@ -78,6 +78,13 @@
       "when": 1789753311192,
       "tag": "0010_allow_admin_reporter_ticket_answers",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1789753807220,
+      "tag": "0011_create_client_units_and_guard_implanted_projects",
+      "breakpoints": true
     }
   ]
 }
