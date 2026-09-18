@@ -297,6 +297,7 @@
 ## Conversas nos tickets do Code
 - [x] Criar conversa protegida entre Admin e Solicitante com perguntas e respostas imutáveis
 - [x] Registrar mensagens no histórico do ticket
+- [x] Iniciar o histórico de cada ticket com sua data de abertura
 - [x] Gerar pendência ao Solicitante enquanto houver pergunta sem resposta
 - [x] Manter tickets ativos como pendência do Admin até Atendido
 - [x] Abrir o ticket correto pela Central de Pendências e validar os fluxos
