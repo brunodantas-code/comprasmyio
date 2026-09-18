@@ -303,6 +303,7 @@
 
 ## Vínculos de clientes, projetos e unidades
 - [x] Vincular um novo projeto a um cliente ativo e bloquear novos custos após implantação
+- [x] Permitir vincular uma unidade ou filial opcional ao criar um projeto
 - [x] Permitir cadastrar filiais ou unidades vinculadas ao cliente corporativo
 - [x] Disponibilizar unidade opcional em Novas Solicitações quando a alocação for Cliente
 - [x] Exibir unidades de cada cliente em lista expansível e permitir editar ou excluir cada unidade

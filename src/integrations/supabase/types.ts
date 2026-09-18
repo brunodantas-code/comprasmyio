@@ -2473,6 +2473,7 @@ export type Database = {
           client_cnpj: string | null
           client_id: string | null
           client_name: string
+          client_unit_id: string | null
           concluded_at: string | null
           created_at: string
           created_by: string | null
@@ -2486,6 +2487,7 @@ export type Database = {
           client_cnpj?: string | null
           client_id?: string | null
           client_name?: string
+          client_unit_id?: string | null
           concluded_at?: string | null
           created_at?: string
           created_by?: string | null
@@ -2499,6 +2501,7 @@ export type Database = {
           client_cnpj?: string | null
           client_id?: string | null
           client_name?: string
+          client_unit_id?: string | null
           concluded_at?: string | null
           created_at?: string
           created_by?: string | null
@@ -2513,6 +2516,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_client_unit_id_fkey"
+            columns: ["client_unit_id"]
+            isOneToOne: false
+            referencedRelation: "client_units"
             referencedColumns: ["id"]
           },
         ]
