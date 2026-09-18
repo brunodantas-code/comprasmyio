@@ -83,8 +83,8 @@
 - [x] Encaminhar Pagamento criado por Financeiro direto ao CFO; demais cargos ao Financeiro
 - [x] Separar Cargo (cadeia de aprovação) de Perfil (acesso às funcionalidades)
 - [x] Permitir Função Operacional adicional separada do Cargo, inicialmente para Time de Supply
-- [ ] Cadastrar Funções Operacionais em Cadastro > Cargos e usar a lista no campo adicional dos usuários
-- [ ] Corrigir a alçada automática para não encaminhar ao CEO pedidos dentro do limite do solicitante
+- [x] Cadastrar Funções Operacionais em Cadastro > Cargos e usar a lista no campo adicional dos usuários
+- [x] Corrigir a alçada automática para não encaminhar ao CEO pedidos dentro do limite do solicitante
 - [x] Criar perfis Admin, Padrão e Restrito, com menus configuráveis por checkboxes
 - [x] Permitir atribuir um Cargo e um Perfil a cada usuário
 - [x] Exclusão de usuários com dupla aprovação por outro Admin
