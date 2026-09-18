@@ -50,6 +50,20 @@
       "when": 1789681906889,
       "tag": "0006_recognize_supply_job_titles",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1789729323786,
+      "tag": "0007_create_operational_functions",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1789729536286,
+      "tag": "0008_skip_final_approver_for_automatic_approval",
+      "breakpoints": true
     }
   ]
 }

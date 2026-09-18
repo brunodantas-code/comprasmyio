@@ -3,7 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const accessProfileSchema = z.string().min(1).max(80).regex(/^[a-z0-9_]+$/);
-const operationalFunctionSchema = z.enum(["none", "supply"]);
+const operationalFunctionSchema = z.string().uuid().nullable();
 
 async function assertAdmin(context: { supabase: any; userId: string }) {
   const { data, error } = await context.supabase
@@ -162,17 +162,31 @@ export const setUserOperationalFunction = createServerFn({ method: "POST" })
       .maybeSingle();
     if (targetError || !target || target.deleted_at) throw new Error("Usuário não encontrado ou excluído.");
 
-    if (data.operationalFunction === "supply") {
-      const { error } = await supabaseAdmin
-        .from("user_roles")
-        .upsert({ user_id: data.userId, role: "comprador" }, { onConflict: "user_id,role" });
+    let functionCode: string | null = null;
+    if (data.operationalFunction) {
+      const { data: operationalFunction, error: functionError } = await supabaseAdmin
+        .from("operational_functions")
+        .select("id,code,active")
+        .eq("id", data.operationalFunction)
+        .maybeSingle();
+      if (functionError || !operationalFunction?.active) throw new Error("Função operacional inválida ou inativa.");
+      functionCode = operationalFunction.code;
+      const { error } = await supabaseAdmin.from("user_operational_functions").upsert({
+        user_id: data.userId,
+        operational_function_id: operationalFunction.id,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "user_id" });
       if (error) throw error;
     } else {
-      const { error } = await supabaseAdmin
-        .from("user_roles")
-        .delete()
-        .eq("user_id", data.userId)
-        .eq("role", "comprador");
+      const { error } = await supabaseAdmin.from("user_operational_functions").delete().eq("user_id", data.userId);
+      if (error) throw error;
+    }
+
+    if (functionCode === "supply") {
+      const { error } = await supabaseAdmin.from("user_roles").upsert({ user_id: data.userId, role: "comprador" }, { onConflict: "user_id,role" });
+      if (error) throw error;
+    } else {
+      const { error } = await supabaseAdmin.from("user_roles").delete().eq("user_id", data.userId).eq("role", "comprador");
       if (error) throw error;
     }
 

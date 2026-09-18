@@ -10,6 +10,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Pencil, Trash2 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { OperationalFunctionsTab } from "@/components/operational-functions-tab";
 
 export type JobTitle = {
   id: string;
@@ -96,7 +98,7 @@ export function JobTitlesTab({ userId }: { userId: string }) {
     create.mutate({ name, short_name: shortName || null, description: description || null }, { onSuccess: () => form.reset() });
   }
 
-  return (
+  const cargos = (
     <div className="grid gap-6 [&>*]:min-w-0 lg:grid-cols-[1fr_1.5fr]">
       <Card>
         <CardHeader><CardTitle>Novo cargo</CardTitle></CardHeader>
@@ -135,6 +137,17 @@ export function JobTitlesTab({ userId }: { userId: string }) {
         </CardContent>
       </Card>
     </div>
+  );
+
+  return (
+    <Tabs defaultValue="cargos" className="space-y-4">
+      <TabsList>
+        <TabsTrigger value="cargos">Cargos</TabsTrigger>
+        <TabsTrigger value="funcoes">Funções Operacionais</TabsTrigger>
+      </TabsList>
+      <TabsContent value="cargos">{cargos}</TabsContent>
+      <TabsContent value="funcoes"><OperationalFunctionsTab userId={userId} /></TabsContent>
+    </Tabs>
   );
 }
 

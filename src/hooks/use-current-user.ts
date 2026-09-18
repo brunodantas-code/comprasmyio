@@ -39,15 +39,17 @@ export function useCurrentUser() {
       const user = userData.user;
       if (!user) return null;
 
-      const [{ data: profile }, { data: rolesData }, { data: accessData }, { data: menuData }, { data: individualRequestTypes }] = await Promise.all([
+      const [{ data: profile }, { data: rolesData }, { data: operationalData }, { data: accessData }, { data: menuData }, { data: individualRequestTypes }] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
         supabase.from("user_roles").select("role").eq("user_id", user.id),
+        supabase.from("user_operational_functions").select("operational_functions(code,active)").eq("user_id", user.id).maybeSingle(),
         supabase.from("user_access_profiles").select("profile,profile_definition_id,is_customized,access_profile_definitions(name,base_profile,access_profile_permissions(menu_key,allowed),access_profile_request_types(request_type_code))").eq("user_id", user.id).maybeSingle(),
         supabase.from("user_menu_permissions").select("menu_key, allowed").eq("user_id", user.id),
         supabase.from("user_request_type_permissions").select("request_type_code").eq("user_id", user.id),
       ]);
 
       const roles = (rolesData ?? []).map((r) => r.role as AppRole);
+      const operationalFunction = operationalData?.operational_functions as { code?: string; active?: boolean } | null | undefined;
       let jobTitle: { id: string; name: string } | null = null;
       if (profile?.job_title_id) {
         const { data: title } = await supabase
@@ -84,7 +86,7 @@ export function useCurrentUser() {
         canAccess,
         canRequestType,
         isAdmin: accessProfileBase === "admin",
-        isComprador: roles.includes("comprador") || titleKey.includes("supply"),
+        isComprador: (operationalFunction?.active && operationalFunction.code === "supply") || roles.includes("comprador") || titleKey.includes("supply"),
         isFabrica: titleKey === "fabrica",
         isEstoquista: titleKey === "estoquista",
         isFinanceiro: titleKey === "financeiro",
