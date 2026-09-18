@@ -1,7 +1,7 @@
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, CodeXml, Download, Eye, History, Paperclip, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, CodeXml, Download, Eye, History, MessageCircleQuestion, Paperclip, Plus, Send, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { MyioAppLogo } from "@/components/myio-app-logo";
@@ -39,6 +39,16 @@ type Ticket = {
   updated_at: string;
 };
 
+type TicketMessage = {
+  id: string;
+  ticket_id: string;
+  author_id: string;
+  message_type: "question" | "answer";
+  parent_message_id: string | null;
+  message: string;
+  created_at: string;
+};
+
 const APP_NAMES: Record<string, string> = {
   supply: "Supply",
   cash_flow: "Cash Flow",
@@ -62,6 +72,9 @@ const ADMIN_STATUS_NAMES: Record<Exclude<TicketStatus, "concluido" | "excluido">
 const PRIORITY_NAMES = { baixa: "Baixa", media: "Média", alta: "Alta", critica: "Crítica" } as const;
 
 export const Route = createFileRoute("/_authenticated/development")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    ticket: typeof search.ticket === "string" ? search.ticket : undefined,
+  }),
   beforeLoad: async ({ context }) => {
     const { data } = await supabase.from("user_app_access").select("app_key").eq("user_id", context.user.id).eq("app_key", "development").maybeSingle();
     if (!data) throw redirect({ to: "/portal" });
@@ -81,6 +94,8 @@ export const Route = createFileRoute("/_authenticated/development")({
 
 function DevelopmentPage() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const routeSearch = Route.useSearch();
   const [createOpen, setCreateOpen] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [search, setSearch] = useState("");
@@ -119,6 +134,16 @@ function DevelopmentPage() {
       && (statusFilter === "todos" || ticket.status === statusFilter);
   }), [appFilter, data?.tickets, priorityFilter, search, statusFilter, typeFilter]);
   const profileNames = useMemo(() => new Map((data?.profiles ?? []).map((profile) => [profile.id, profile.full_name || profile.email || "Usuário"])), [data?.profiles]);
+  useEffect(() => {
+    if (!routeSearch.ticket || !data?.tickets.length) return;
+    const linkedTicket = data.tickets.find((ticket) => ticket.id === routeSearch.ticket);
+    if (linkedTicket) setSelectedTicket(linkedTicket);
+  }, [data?.tickets, routeSearch.ticket]);
+
+  const closeTicket = () => {
+    setSelectedTicket(null);
+    if (routeSearch.ticket) navigate({ to: "/development", search: { ticket: undefined }, replace: true });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -175,7 +200,7 @@ function DevelopmentPage() {
           </CardContent>
         </Card>
       </main>
-      <TicketDetails ticket={selectedTicket} onClose={() => setSelectedTicket(null)} data={data} onUpdated={() => {
+      <TicketDetails ticket={selectedTicket} onClose={closeTicket} data={data} onUpdated={() => {
         queryClient.invalidateQueries({ queryKey: ["development-tickets"] });
         queryClient.invalidateQueries({ queryKey: ["my-erp-access"] });
         queryClient.invalidateQueries({ queryKey: ["pending-actions"] });
@@ -267,6 +292,7 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
   const [status, setStatus] = useState<TicketStatus>("aberto");
   const [assignee, setAssignee] = useState("none");
   const [notes, setNotes] = useState("");
+  const [message, setMessage] = useState("");
   const [preview, setPreview] = useState<{ url: string; name: string; contentType: string } | null>(null);
   useEffect(() => {
     if (!ticket) return;
@@ -277,15 +303,43 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
   const details = useQuery({
     queryKey: ["development-ticket-details", ticket?.id], enabled: Boolean(ticket),
     queryFn: async () => {
-      if (!ticket) return { logs: [], attachments: [] };
-      const [{ data: logs, error: logsError }, { data: attachments, error: attachmentsError }] = await Promise.all([
+      if (!ticket) return { logs: [], attachments: [], messages: [] };
+      const [{ data: logs, error: logsError }, { data: attachments, error: attachmentsError }, { data: messages, error: messagesError }] = await Promise.all([
         supabase.from("development_ticket_logs").select("*").eq("ticket_id", ticket.id).order("created_at", { ascending: false }),
         supabase.from("development_ticket_attachments").select("*").eq("ticket_id", ticket.id).order("created_at"),
+        supabase.from("development_ticket_messages").select("*").eq("ticket_id", ticket.id).order("created_at"),
       ]);
       if (logsError) throw logsError;
       if (attachmentsError) throw attachmentsError;
-      return { logs: logs ?? [], attachments: attachments ?? [] };
+      if (messagesError) throw messagesError;
+      return { logs: logs ?? [], attachments: attachments ?? [], messages: (messages ?? []) as TicketMessage[] };
     },
+  });
+  const messages = details.data?.messages ?? [];
+  const answeredQuestionIds = new Set(messages.filter((entry) => entry.message_type === "answer" && entry.parent_message_id).map((entry) => entry.parent_message_id));
+  const pendingQuestion = messages.find((entry) => entry.message_type === "question" && !answeredQuestionIds.has(entry.id));
+  const canAsk = Boolean(data?.isAdmin && ticket && !pendingQuestion && !["atendido", "concluido", "excluido"].includes(ticket.status));
+  const canAnswer = Boolean(ticket && ticket.reporter_id === data?.userId && pendingQuestion && !["concluido", "excluido"].includes(ticket.status));
+  const sendMessage = useMutation({
+    mutationFn: async () => {
+      if (!ticket || !data?.userId || !message.trim()) throw new Error("Digite uma mensagem");
+      if (!canAsk && !canAnswer) throw new Error("Não há uma conversa pendente para responder");
+      const { error } = await supabase.from("development_ticket_messages").insert({
+        ticket_id: ticket.id,
+        author_id: data.userId,
+        message_type: canAnswer ? "answer" : "question",
+        parent_message_id: canAnswer ? pendingQuestion?.id ?? null : null,
+        message: message.trim(),
+      });
+      if (error) throw error;
+    },
+    onSuccess: async () => {
+      toast.success(canAnswer ? "Resposta enviada" : "Pergunta enviada ao solicitante");
+      setMessage("");
+      await details.refetch();
+      onUpdated();
+    },
+    onError: (error: Error) => toast.error(error.message),
   });
   const update = useMutation({
     mutationFn: async () => {
@@ -333,10 +387,11 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
         <div className="grid gap-4 sm:grid-cols-2"><div><p className="text-xs font-semibold text-muted-foreground">Descrição</p><p className="mt-1 whitespace-pre-wrap text-sm">{ticket.description}</p></div><div><p className="text-xs font-semibold text-muted-foreground">Resultado esperado</p><p className="mt-1 whitespace-pre-wrap text-sm">{ticket.expected_result}</p></div></div>
         <div className="flex flex-wrap gap-2"><Badge variant="status">{STATUS_NAMES[ticket.status]}</Badge><Badge variant="outline">Prioridade {PRIORITY_NAMES[ticket.priority]}</Badge>{ticket.urgency === "urgente" ? <Badge variant="destructive">Urgente</Badge> : null}</div>
         {details.data?.attachments.length ? <div><p className="mb-2 flex items-center gap-2 text-sm font-semibold"><Paperclip className="h-4 w-4" />Anexos</p><div className="flex flex-wrap gap-2">{details.data.attachments.map((attachment) => <Button key={attachment.id} variant="outline" size="sm" onClick={() => openPreview(attachment.storage_path, attachment.file_name, attachment.content_type)}><Eye className="h-4 w-4" /><span className="max-w-64 truncate">{attachment.file_name}</span></Button>)}</div></div> : null}
+        {messages.length || canAsk || canAnswer ? <div className="space-y-3 border-t pt-4"><p className="flex items-center gap-2 text-sm font-semibold"><MessageCircleQuestion className="h-4 w-4" />Conversa</p>{messages.length ? <div className="space-y-2">{messages.map((entry) => <div key={entry.id} className={`rounded-md border p-3 text-sm ${entry.message_type === "question" ? "border-border bg-muted/50" : "border-primary/40 bg-primary/10"}`}><div className="mb-1 flex flex-wrap items-center justify-between gap-2"><span className="font-semibold">{entry.message_type === "question" ? "Admin" : "Solicitante"} · {data?.profiles.find((profile) => profile.id === entry.author_id)?.full_name || data?.profiles.find((profile) => profile.id === entry.author_id)?.email || "Usuário"}</span><span className="text-xs text-muted-foreground">{new Date(entry.created_at).toLocaleString("pt-BR")}</span></div><p className="whitespace-pre-wrap">{entry.message}</p>{entry.message_type === "question" && !answeredQuestionIds.has(entry.id) ? <Badge variant="destructive" className="mt-2">Aguardando resposta</Badge> : null}</div>)}</div> : <p className="text-sm text-muted-foreground">Nenhuma mensagem registrada.</p>}{canAsk || canAnswer ? <div><Label htmlFor="ticket-message">{canAnswer ? "Responder ao Admin" : "Pergunta ao solicitante"}</Label><Textarea id="ticket-message" value={message} onChange={(event) => setMessage(event.target.value)} maxLength={4000} className="mt-1 min-h-24" placeholder={canAnswer ? "Digite sua resposta" : "Digite a dúvida que precisa ser esclarecida"} /><div className="mt-2 flex justify-end"><Button onClick={() => sendMessage.mutate()} disabled={sendMessage.isPending || !message.trim()}><Send className="h-4 w-4" />{sendMessage.isPending ? "Enviando..." : canAnswer ? "Enviar resposta" : "Enviar pergunta"}</Button></div></div> : null}</div> : null}
         {data?.isAdmin && ticket.status !== "concluido" && ticket.status !== "excluido" ? <div className="space-y-3 border-t pt-4"><h3 className="font-semibold">Gestão do ticket</h3><div className="grid gap-3 sm:grid-cols-2"><div><Label>Situação</Label><FilterSelect value={status} onChange={(value) => setStatus(value as TicketStatus)} placeholder="Situação" options={Object.entries(ADMIN_STATUS_NAMES).map(([value, label]) => ({ value, label }))} firstOption={null} /></div><div><Label>Responsável pela execução</Label><FilterSelect value={assignee} onChange={setAssignee} placeholder="Responsável pela execução" options={(data.codeAdmins ?? []).map((profile) => ({ value: profile.id, label: profile.full_name || profile.email || "Usuário" }))} firstOption={{ value: "none", label: "Sem responsável" }} /></div></div><div><Label htmlFor="admin-notes">Observações</Label><Textarea id="admin-notes" value={notes} onChange={(event) => setNotes(event.target.value)} maxLength={4000} /></div><Button onClick={() => update.mutate()} disabled={update.isPending}>Salvar andamento</Button></div> : ticket.admin_notes ? <div><p className="text-sm font-semibold">Observações</p><p className="mt-1 whitespace-pre-wrap text-sm">{ticket.admin_notes}</p></div> : null}
         {ticket.status === "atendido" && ticket.reporter_id === data?.userId ? <div className="space-y-2 border-t pt-4"><p className="text-sm text-muted-foreground">Confirme se a correção ou melhoria foi entregue conforme esperado.</p><Button onClick={() => conclude.mutate()} disabled={conclude.isPending}>{conclude.isPending ? "Concluindo..." : "Marcar como concluído"}</Button></div> : null}
         {ticket.status === "aberto" && ticket.reporter_id === data?.userId ? <div className="flex justify-end border-t pt-4"><AlertDialog><AlertDialogTrigger asChild><Button variant="destructive"><Trash2 className="h-4 w-4" />Excluir ticket</Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Excluir este ticket?</AlertDialogTitle><AlertDialogDescription>Ele permanecerá no histórico com a situação “Excluído” e deixará de ser uma pendência para o executor.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={() => remove.mutate()} disabled={remove.isPending}>{remove.isPending ? "Excluindo..." : "Confirmar exclusão"}</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog></div> : null}
-        {details.data?.logs.length ? <div className="border-t pt-4"><p className="mb-2 flex items-center gap-2 text-sm font-semibold"><History className="h-4 w-4" />Histórico</p><div className="space-y-2">{details.data.logs.map((log) => <div key={log.id} className="rounded-md bg-muted p-2 text-xs">{log.previous_status !== log.new_status ? `${STATUS_NAMES[log.previous_status as TicketStatus] ?? "—"} → ${STATUS_NAMES[log.new_status as TicketStatus] ?? "—"}` : "Responsável ou observação atualizados"}<span className="ml-2 text-muted-foreground">{new Date(log.created_at).toLocaleString("pt-BR")}</span></div>)}</div></div> : null}
+        {details.data?.logs.length || messages.length ? <div className="border-t pt-4"><p className="mb-2 flex items-center gap-2 text-sm font-semibold"><History className="h-4 w-4" />Histórico</p><div className="space-y-2">{[...(details.data?.logs ?? []).map((log) => ({ id: log.id, created_at: log.created_at, text: log.previous_status !== log.new_status ? `${STATUS_NAMES[log.previous_status as TicketStatus] ?? "—"} → ${STATUS_NAMES[log.new_status as TicketStatus] ?? "—"}` : "Responsável ou observação atualizados" })), ...messages.map((entry) => ({ id: entry.id, created_at: entry.created_at, text: entry.message_type === "question" ? "Pergunta enviada pelo Admin" : "Resposta enviada pelo Solicitante" }))].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).map((entry) => <div key={entry.id} className="rounded-md bg-muted p-2 text-xs">{entry.text}<span className="ml-2 text-muted-foreground">{new Date(entry.created_at).toLocaleString("pt-BR")}</span></div>)}</div></div> : null}
         </div> : null}
       </DialogContent>
     </Dialog>

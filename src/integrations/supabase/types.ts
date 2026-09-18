@@ -1236,6 +1236,58 @@ export type Database = {
           },
         ]
       }
+      development_ticket_messages: {
+        Row: {
+          author_id: string
+          created_at: string
+          id: string
+          message: string
+          message_type: string
+          parent_message_id: string | null
+          ticket_id: string
+        }
+        Insert: {
+          author_id: string
+          created_at?: string
+          id?: string
+          message: string
+          message_type: string
+          parent_message_id?: string | null
+          ticket_id: string
+        }
+        Update: {
+          author_id?: string
+          created_at?: string
+          id?: string
+          message?: string
+          message_type?: string
+          parent_message_id?: string | null
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "development_ticket_messages_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "development_ticket_messages_parent_message_id_fkey"
+            columns: ["parent_message_id"]
+            isOneToOne: false
+            referencedRelation: "development_ticket_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "development_ticket_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "development_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       development_tickets: {
         Row: {
           admin_notes: string | null

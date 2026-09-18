@@ -64,6 +64,20 @@
       "when": 1789729536286,
       "tag": "0008_skip_final_approver_for_automatic_approval",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1789753217225,
+      "tag": "0009_create_development_ticket_conversations",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1789753311192,
+      "tag": "0010_allow_admin_reporter_ticket_answers",
+      "breakpoints": true
     }
   ]
 }
