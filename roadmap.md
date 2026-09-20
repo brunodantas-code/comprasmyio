@@ -319,3 +319,9 @@
 ## Cadastro de clientes
 - [x] Adicionar Razão social antes de Nome fantasia no cadastro e edição de clientes
 - [x] Manter Nome fantasia como identificação em todas as telas e listas de seleção
+
+## Layout dos cadastros
+- [x] Reorganizar Centro de Custo com formulário superior em linha e listagem abaixo em largura total
+- [x] Reorganizar Cargos com formulário superior em linha e listagem abaixo em largura total
+- [x] Validar Centro de Custo e Cargos em desktop e celular
+- [x] Incluir botão Editar em cada projeto, preservando os vínculos e campos atuais

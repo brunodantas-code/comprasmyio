@@ -97,15 +97,15 @@ export function CostCentersTab({ userId }: { userId: string }) {
   }
 
   return (
-    <div className="grid gap-6 [&>*]:min-w-0 lg:grid-cols-[1fr_1.5fr]">
+    <div className="space-y-6">
       <Card>
         <CardHeader><CardTitle>Novo centro de custo</CardTitle></CardHeader>
         <CardContent>
-          <form onSubmit={onCreate} className="space-y-4">
-            <div className="space-y-2"><Label htmlFor="cc-name">Nome</Label><Input id="cc-name" name="name" required /></div>
-            <div className="space-y-2"><Label htmlFor="cc-code">Código</Label><Input id="cc-code" name="code" placeholder="Ex.: CC-100" /></div>
-            <div className="space-y-2"><Label htmlFor="cc-desc">Descrição</Label><Textarea id="cc-desc" name="description" rows={3} /></div>
-            <Button type="submit" disabled={create.isPending}>Criar</Button>
+          <form onSubmit={onCreate} className="grid items-end gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_12rem_minmax(0,1.5fr)_auto]">
+            <div className="min-w-0 space-y-2"><Label htmlFor="cc-name">Nome</Label><Input id="cc-name" name="name" required /></div>
+            <div className="min-w-0 space-y-2"><Label htmlFor="cc-code">Código</Label><Input id="cc-code" name="code" placeholder="Ex.: CC-100" /></div>
+            <div className="min-w-0 space-y-2"><Label htmlFor="cc-desc">Descrição</Label><Textarea id="cc-desc" name="description" rows={1} className="min-h-9 resize-none" /></div>
+            <Button type="submit" disabled={create.isPending} className="shrink-0">Criar</Button>
           </form>
         </CardContent>
       </Card>
