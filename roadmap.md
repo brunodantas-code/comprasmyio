@@ -329,4 +329,4 @@
 - [x] Mapear botões +, -, editar e excluir em todas as telas e submenus
 - [x] Padronizar dimensões conforme Cadastro > Clientes
 - [x] Substituir ícones X de exclusão por lixeira
-- [ ] Validar Solicitações, Approvals, menus e submenus no desktop e mobile
+- [x] Validar Solicitações, Approvals, menus e submenus no desktop e mobile
