@@ -3587,7 +3587,9 @@ function ProjectsAdmin({ userId }: { userId: string }) {
             </p>
           ) : (
           <form onSubmit={onCreate} className="space-y-4">
-            <div className={`grid items-end gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)${newProjectClientId ? "_minmax(0,0.9fr)" : ""}_10rem_minmax(0,1.2fr)_auto]`}>
+            <div className={newProjectClientId
+              ? "grid items-end gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)_minmax(0,0.9fr)_10rem_minmax(0,1.2fr)_auto]"
+              : "grid items-end gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)_10rem_minmax(0,1.2fr)_auto]"}>
             <div className="min-w-0 space-y-2"><Label htmlFor="p-name">Nome do projeto</Label><Input id="p-name" name="name" required /></div>
             <div className="min-w-0 space-y-2">
               <Label>Cliente</Label>
