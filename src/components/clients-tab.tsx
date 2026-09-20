@@ -160,16 +160,16 @@ export function ClientsTab({ userId }: { userId: string }) {
         <CardHeader><CardTitle>Novo cliente</CardTitle></CardHeader>
         <CardContent>
           <form onSubmit={onCreate} className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2"><Label htmlFor="c-legal-name">Razão social</Label><Input id="c-legal-name" name="legal_name" /></div>
-              <div className="space-y-2"><Label htmlFor="c-name">Nome fantasia</Label><Input id="c-name" name="name" required /></div>
-            </div>
-            <div className="grid items-end gap-3 md:grid-cols-[minmax(16rem,1fr)_auto_auto]">
-              <div className="space-y-2"><Label htmlFor="c-cnpj">CNPJ</Label><Input id="c-cnpj" name="cnpj" placeholder="00.000.000/0000-00" /></div>
-              <Button type="button" variant="ghost" onClick={() => setNewUnits((current) => [...current, ""])}>
-                <Plus className="mr-1 h-4 w-4" />Adicionar filial
-              </Button>
-              <Button type="submit" disabled={create.isPending}>Criar</Button>
+            <div className="grid items-end gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_16rem_auto]">
+              <div className="min-w-0 space-y-2"><Label htmlFor="c-legal-name">Razão social</Label><Input id="c-legal-name" name="legal_name" /></div>
+              <div className="min-w-0 space-y-2"><Label htmlFor="c-name">Nome fantasia</Label><Input id="c-name" name="name" required /></div>
+              <div className="min-w-0 space-y-2"><Label htmlFor="c-cnpj">CNPJ</Label><Input id="c-cnpj" name="cnpj" placeholder="00.000.000/0000-00" /></div>
+              <div className="grid grid-cols-2 gap-2 lg:flex lg:w-auto">
+                <Button type="button" className="whitespace-nowrap" onClick={() => setNewUnits((current) => [...current, ""])}>
+                  <Plus className="mr-1 h-4 w-4" />Filial
+                </Button>
+                <Button type="submit" className="whitespace-nowrap px-6" disabled={create.isPending}>Criar</Button>
+              </div>
             </div>
             {newUnits.length > 0 && (
               <div className="space-y-2">
