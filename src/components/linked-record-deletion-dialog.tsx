@@ -165,8 +165,8 @@ export function LinkedRecordDeletionDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger ?? (
-          <Button size="icon" variant="ghost" title={`Excluir ${entityLabel}`} aria-label={`Excluir ${entityLabel}`} className="text-destructive hover:text-destructive">
-            <Trash2 className="h-4 w-4" />
+          <Button size="compactIcon" variant="ghost" title={`Excluir ${entityLabel}`} aria-label={`Excluir ${entityLabel}`} className="text-destructive hover:text-destructive">
+            <Trash2 className="h-3.5 w-3.5" />
           </Button>
         )}
       </DialogTrigger>
@@ -195,8 +195,8 @@ export function LinkedRecordDeletionDialog({
                 <div className="flex min-w-0 items-center justify-between gap-3">
                   <p className="min-w-0 truncate text-sm font-medium">{record.label}</p>
                   <CollapsibleTrigger asChild>
-                    <Button size="icon" variant="ghost" aria-label={(expandedLinks[record.key] ?? false) ? `Recolher ${record.label}` : `Expandir ${record.label}`} title={(expandedLinks[record.key] ?? false) ? "Recolher" : "Expandir"}>
-                      {(expandedLinks[record.key] ?? false) ? <Minus className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                    <Button size="compactIcon" variant="ghost" aria-label={(expandedLinks[record.key] ?? false) ? `Recolher ${record.label}` : `Expandir ${record.label}`} title={(expandedLinks[record.key] ?? false) ? "Recolher" : "Expandir"}>
+                      {(expandedLinks[record.key] ?? false) ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
                     </Button>
                   </CollapsibleTrigger>
                 </div>

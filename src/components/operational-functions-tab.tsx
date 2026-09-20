@@ -141,7 +141,7 @@ export function OperationalFunctionsTab({ userId }: { userId: string }) {
 function EditOperationalFunctionDialog({ item, onSave }: { item: OperationalFunction; onSave: (values: Values) => void }) {
   const [open, setOpen] = useState(false);
   return <Dialog open={open} onOpenChange={setOpen}>
-    <DialogTrigger asChild><Button size="icon" variant="ghost" title="Editar" aria-label={`Editar ${item.name}`}><Pencil className="h-4 w-4" /></Button></DialogTrigger>
+    <DialogTrigger asChild><Button size="compactIcon" variant="ghost" title="Editar" aria-label={`Editar ${item.name}`}><Pencil className="h-3.5 w-3.5" /></Button></DialogTrigger>
     <DialogContent>
       <DialogHeader><DialogTitle>Editar função operacional</DialogTitle></DialogHeader>
       <form className="space-y-4" onSubmit={(event) => {
@@ -164,7 +164,7 @@ function EditOperationalFunctionDialog({ item, onSave }: { item: OperationalFunc
 function DeactivateOperationalFunctionDialog({ name, onConfirm }: { name: string; onConfirm: () => void }) {
   const [open, setOpen] = useState(false);
   return <Dialog open={open} onOpenChange={setOpen}>
-    <DialogTrigger asChild><Button size="icon" variant="ghost" className="text-destructive hover:text-destructive" title="Desativar" aria-label={`Desativar ${name}`}><Trash2 className="h-4 w-4" /></Button></DialogTrigger>
+    <DialogTrigger asChild><Button size="compactIcon" variant="ghost" className="text-destructive hover:text-destructive" title="Desativar" aria-label={`Desativar ${name}`}><Trash2 className="h-3.5 w-3.5" /></Button></DialogTrigger>
     <DialogContent>
       <DialogHeader><DialogTitle>Desativar função operacional?</DialogTitle><DialogDescription>Ela deixará de aparecer para novas atribuições. Os usuários já vinculados serão preservados.</DialogDescription></DialogHeader>
       <DialogFooter><Button variant="destructive" onClick={() => { onConfirm(); setOpen(false); }}>Desativar</Button></DialogFooter>

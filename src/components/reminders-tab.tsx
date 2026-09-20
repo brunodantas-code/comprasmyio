@@ -215,13 +215,13 @@ export function RemindersTab() {
                     {r.enabled ? "Ativo" : "Inativo"}
                   </span>
                   <div className="col-span-2 flex w-20 items-center justify-end gap-1 justify-self-end sm:col-span-1">
-                    <Button type="button" variant="ghost" size="icon" title={`Editar lembrete de ${userLabel(r.user_id)}`} aria-label={`Editar lembrete de ${userLabel(r.user_id)}`} onClick={() => setEditing(r)}>
-                      <Pencil className="h-4 w-4" />
+                    <Button type="button" variant="ghost" size="compactIcon" title={`Editar lembrete de ${userLabel(r.user_id)}`} aria-label={`Editar lembrete de ${userLabel(r.user_id)}`} onClick={() => setEditing(r)}>
+                      <Pencil className="h-3.5 w-3.5" />
                     </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button type="button" variant="ghost" size="icon" className="text-destructive hover:text-destructive" title={`Excluir lembrete de ${userLabel(r.user_id)}`} aria-label={`Excluir lembrete de ${userLabel(r.user_id)}`}>
-                          <Trash2 className="h-4 w-4" />
+                        <Button type="button" variant="ghost" size="compactIcon" className="text-destructive hover:text-destructive" title={`Excluir lembrete de ${userLabel(r.user_id)}`} aria-label={`Excluir lembrete de ${userLabel(r.user_id)}`}>
+                          <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
@@ -361,12 +361,12 @@ function ReminderEditor({
               <Button
                 type="button"
                 variant="ghost"
-                size="icon"
+                size="compactIcon"
                 className="text-destructive"
                 title="Excluir lembrete"
                 aria-label="Excluir lembrete"
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-3.5 w-3.5" />
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>

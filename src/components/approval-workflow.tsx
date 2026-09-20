@@ -881,7 +881,7 @@ function EditRuleDialog({
   return (
     <Dialog open={open} onOpenChange={openChange}>
       <DialogTrigger asChild>
-        <Button size="icon" variant="ghost" className="h-6! w-6! shrink-0" title="Editar etapa" aria-label="Editar etapa">
+        <Button size="compactIcon" variant="ghost" title="Editar etapa" aria-label="Editar etapa">
           <Pencil className="h-3.5 w-3.5" />
         </Button>
       </DialogTrigger>
@@ -1129,7 +1129,7 @@ export function RulesAdmin() {
                           pending={remove.isPending}
                           onConfirm={() => remove.mutate(r.id)}
                           trigger={
-                            <Button type="button" size="icon" variant="ghost" className="h-6! w-6! shrink-0 text-destructive hover:text-destructive" title={`Excluir etapa ${r.name}`} aria-label={`Excluir etapa ${r.name}`}>
+                            <Button type="button" size="compactIcon" variant="ghost" className="text-destructive hover:text-destructive" title={`Excluir etapa ${r.name}`} aria-label={`Excluir etapa ${r.name}`}>
                               <Trash2 className="h-3.5 w-3.5" />
                             </Button>
                           }
