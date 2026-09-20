@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { PendingForMe } from "@/components/approval-workflow";
 import { Button } from "@/components/ui/button";
 import { MyioLogo } from "@/components/myio-logo";
-import { Bell, CheckCircle2, CodeXml, ShieldCheck, ShoppingCart } from "lucide-react";
+import { Bell, CheckCircle2, CodeXml, Home, ShieldCheck, ShoppingCart } from "lucide-react";
 import { usePendingActions } from "@/hooks/use-pending-actions";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -30,8 +30,8 @@ function PendentesPage() {
             <MyioLogo className="text-xl sm:text-2xl" />
           </Link>
           <div className="flex items-center gap-1">
-            <Button asChild variant="outline" size="sm">
-              <Link to="/portal">Plataforma ERP</Link>
+            <Button asChild variant="outline" size="icon" title="Início">
+              <Link to="/portal" aria-label="Início"><Home className="h-4 w-4" /></Link>
             </Button>
             <ThemeToggle />
           </div>

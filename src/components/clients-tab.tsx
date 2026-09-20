@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Minus, Pencil, Plus, Trash2 } from "lucide-react";
 import { LinkedRecordDeletionDialog } from "@/components/linked-record-deletion-dialog";
@@ -118,6 +120,28 @@ export function ClientsTab({ userId }: { userId: string }) {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const convertToUnit = useMutation({
+    mutationFn: async ({ sourceClientId, destinationClientId }: { sourceClientId: string; destinationClientId: string }) => {
+      const { error } = await supabase.rpc("convert_client_to_unit", {
+        _source_client_id: sourceClientId,
+        _destination_client_id: destinationClientId,
+      });
+      if (error) throw error;
+    },
+    onSuccess: async () => {
+      toast.success("Cliente convertido em unidade");
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ["clients"] }),
+        qc.invalidateQueries({ queryKey: ["client-units"] }),
+        qc.invalidateQueries({ queryKey: ["projects"] }),
+        qc.invalidateQueries({ queryKey: ["orders"] }),
+        qc.invalidateQueries({ queryKey: ["myio-orders"] }),
+        qc.invalidateQueries({ queryKey: ["cash-flow-payables"] }),
+      ]);
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
   function onCreate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
@@ -217,7 +241,13 @@ export function ClientsTab({ userId }: { userId: string }) {
                       <TableCell className="text-sm text-muted-foreground">{c.cnpj || "—"}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1 whitespace-nowrap">
-                          <EditClientDialog client={c} onSave={(v) => update.mutate({ id: c.id, ...v })} />
+                          <EditClientDialog
+                            client={c}
+                            clients={clients ?? []}
+                            saving={update.isPending || convertToUnit.isPending}
+                            onSave={(v) => update.mutateAsync({ id: c.id, ...v })}
+                            onConvert={(destinationClientId) => convertToUnit.mutateAsync({ sourceClientId: c.id, destinationClientId })}
+                          />
                        <LinkedRecordDeletionDialog
                          entityId={c.id}
                          entityName={c.name}
@@ -355,10 +385,41 @@ function UnitDialog({ title, unit, saving, onSave, trigger }: { title: string; u
   );
 }
 
-function EditClientDialog({ client, onSave }: { client: Client; onSave: (v: { name: string; legal_name: string | null; cnpj: string | null }) => void }) {
+function EditClientDialog({ client, clients, saving, onSave, onConvert }: {
+  client: Client;
+  clients: Client[];
+  saving: boolean;
+  onSave: (v: { name: string; legal_name: string | null; cnpj: string | null }) => Promise<unknown>;
+  onConvert: (destinationClientId: string) => Promise<unknown>;
+}) {
   const [open, setOpen] = useState(false);
+  const [corporateClientId, setCorporateClientId] = useState("none");
+  const [confirmConversion, setConfirmConversion] = useState(false);
+  const [pendingValues, setPendingValues] = useState<{ name: string; legal_name: string | null; cnpj: string | null } | null>(null);
+  const corporateClient = clients.find((item) => item.id === corporateClientId);
+
+  async function saveEdit(values: { name: string; legal_name: string | null; cnpj: string | null }) {
+    try {
+      await onSave(values);
+      setOpen(false);
+    } catch { /* A alteração exibe a mensagem. */ }
+  }
+
+  async function convertClient() {
+    if (!corporateClient || !pendingValues) return;
+    try {
+      await onSave(pendingValues);
+      await onConvert(corporateClient.id);
+      setConfirmConversion(false);
+      setOpen(false);
+      setCorporateClientId("none");
+      setPendingValues(null);
+    } catch { /* A alteração exibe a mensagem. */ }
+  }
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <>
+    <Dialog open={open} onOpenChange={(nextOpen) => { setOpen(nextOpen); if (!nextOpen) setCorporateClientId("none"); }}>
       <DialogTrigger asChild>
         <Button size="icon" variant="ghost" className="h-6! w-6! shrink-0" title="Editar" aria-label="Editar">
           <Pencil className="h-3.5 w-3.5" />
@@ -375,16 +436,47 @@ function EditClientDialog({ client, onSave }: { client: Client; onSave: (v: { na
             const name = String(fd.get("name") || "").trim();
             const cnpj = String(fd.get("cnpj") || "").trim();
             if (name.length < 2) return toast.error("Nome muito curto");
-            onSave({ name, legal_name: legalName || null, cnpj: cnpj || null });
-            setOpen(false);
+            const values = { name, legal_name: legalName || null, cnpj: cnpj || null };
+            if (corporateClientId !== "none") {
+              setPendingValues(values);
+              setConfirmConversion(true);
+              return;
+            }
+            void saveEdit(values);
           }}
         >
           <div className="space-y-2"><Label>Razão social</Label><Input name="legal_name" defaultValue={client.legal_name ?? ""} /></div>
           <div className="space-y-2"><Label>Nome fantasia</Label><Input name="name" defaultValue={client.name} required /></div>
           <div className="space-y-2"><Label>CNPJ</Label><Input name="cnpj" defaultValue={client.cnpj ?? ""} /></div>
-          <DialogFooter><Button type="submit">Salvar</Button></DialogFooter>
+          <div className="space-y-2">
+            <Label>Cliente corporativo</Label>
+            <Select value={corporateClientId} onValueChange={setCorporateClientId}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Manter como cliente corporativo</SelectItem>
+                {clients.filter((item) => item.id !== client.id).map((item) => <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">Selecione uma matriz para transformar este cliente em filial ou unidade.</p>
+          </div>
+          <DialogFooter><Button type="submit" disabled={saving}>Salvar</Button></DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
+    <AlertDialog open={confirmConversion} onOpenChange={setConfirmConversion}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Converter cliente em unidade?</AlertDialogTitle>
+          <AlertDialogDescription>
+            “{client.name}” passará a ser uma unidade de “{corporateClient?.name}”. Projetos, solicitações e lançamentos serão transferidos automaticamente.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={saving}>Cancelar</AlertDialogCancel>
+          <AlertDialogAction disabled={saving} onClick={(event) => { event.preventDefault(); void convertClient(); }}>Confirmar conversão</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }
