@@ -2846,6 +2846,26 @@ function ConfirmReceiptActions({ order }: { order: Order }) {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const update = useMutation({
+    mutationFn: async (v: { id: string; name: string; description: string; budget: number; client_id: string | null; client_unit_id: string | null; client_name: string }) => {
+      const { data: existing, error: lookupError } = await supabase.from("projects").select("id,name");
+      if (lookupError) throw lookupError;
+      const normalizedName = v.name.trim().toLocaleLowerCase("pt-BR");
+      if (existing?.some((project) => project.id !== v.id && project.name.trim().toLocaleLowerCase("pt-BR") === normalizedName)) {
+        throw new Error("Este projeto já está cadastrado");
+      }
+      const { id, ...changes } = v;
+      const { error } = await supabase.from("projects").update(changes).eq("id", id);
+      if (error) throw new Error(error.code === "23505" ? "Este projeto já está cadastrado" : error.message);
+    },
+    onSuccess: () => {
+      toast.success("Projeto atualizado");
+      qc.invalidateQueries({ queryKey: ["projects"] });
+      qc.invalidateQueries({ queryKey: ["project-budget-summaries"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   return (
     <>
       <Button size="sm" variant="outline" disabled={setStatus.isPending} onClick={() => setStatus.mutate("recebido_ok")}>
@@ -3677,20 +3697,28 @@ function ProjectsAdmin({ userId }: { userId: string }) {
                               Cliente: {clientOf(p)?.name || p.client_name}{clientUnitOf(p) ? ` — ${clientUnitOf(p)?.name}` : ""}
                             </p>
                           )}
-                          <div className="flex items-center gap-2">
+                           <div className="flex items-center gap-1">
+                             {canCreate && (
+                               <EditProjectDialog
+                                 project={p}
+                                 clients={clients ?? []}
+                                 saving={update.isPending}
+                                 onSave={(values) => update.mutateAsync({ id: p.id, ...values })}
+                               />
+                             )}
                             {st === "active" && (
                               <>
-                                <Button type="button" variant="ghost" size="icon" aria-label="Marcar como implantado" title="Marcar como implantado" className="h-7 w-7 text-blue-600 hover:text-blue-800" onClick={() => { setStatusDialog({ id: p.id, name: p.name, action: "implantado" }); setStatusDate(new Date().toISOString().slice(0, 10)); }}>
-                                  <CheckCircle2 className="h-4 w-4" />
+                                 <Button type="button" variant="ghost" size="icon" aria-label="Marcar como implantado" title="Marcar como implantado" className="h-6! w-6! shrink-0 text-blue-600 hover:text-blue-800" onClick={() => { setStatusDialog({ id: p.id, name: p.name, action: "implantado" }); setStatusDate(new Date().toISOString().slice(0, 10)); }}>
+                                   <CheckCircle2 className="h-3.5 w-3.5" />
                                 </Button>
-                                <Button type="button" variant="ghost" size="icon" aria-label="Cancelar projeto" title="Cancelar projeto" className="h-7 w-7 text-destructive hover:text-destructive/80" onClick={() => { setStatusDialog({ id: p.id, name: p.name, action: "cancelado" }); setStatusDate(new Date().toISOString().slice(0, 10)); }}>
-                                  <XCircle className="h-4 w-4" />
+                                 <Button type="button" variant="ghost" size="icon" aria-label="Cancelar projeto" title="Cancelar projeto" className="h-6! w-6! shrink-0 text-destructive hover:text-destructive/80" onClick={() => { setStatusDialog({ id: p.id, name: p.name, action: "cancelado" }); setStatusDate(new Date().toISOString().slice(0, 10)); }}>
+                                   <XCircle className="h-3.5 w-3.5" />
                                 </Button>
                               </>
                             )}
                             {st !== "active" && (
-                              <Button type="button" variant="ghost" size="icon" aria-label="Reativar projeto" title="Reativar projeto" className="h-7 w-7 text-muted-foreground hover:text-foreground" disabled={setStatus.isPending} onClick={() => setStatus.mutate({ id: p.id, status: "active", concludedAt: null })}>
-                                <RotateCcw className="h-4 w-4" />
+                               <Button type="button" variant="ghost" size="icon" aria-label="Reativar projeto" title="Reativar projeto" className="h-6! w-6! shrink-0 text-muted-foreground hover:text-foreground" disabled={setStatus.isPending} onClick={() => setStatus.mutate({ id: p.id, status: "active", concludedAt: null })}>
+                                 <RotateCcw className="h-3.5 w-3.5" />
                               </Button>
                             )}
                             <LinkedRecordDeletionDialog
@@ -3702,8 +3730,8 @@ function ProjectsAdmin({ userId }: { userId: string }) {
                               onDelete={() => remove.mutate(p.id)}
                               deleting={remove.isPending}
                                trigger={
-                                 <Button type="button" variant="ghost" size="icon" className="h-7 w-7" title="Excluir projeto" aria-label="Excluir projeto">
-                                   <Trash2 className="h-4 w-4" />
+                                  <Button type="button" variant="ghost" size="icon" className="h-6! w-6! shrink-0" title="Excluir projeto" aria-label="Excluir projeto">
+                                    <Trash2 className="h-3.5 w-3.5" />
                                  </Button>
                                }
                             />
@@ -3775,6 +3803,106 @@ function ProjectsAdmin({ userId }: { userId: string }) {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+  );
+}
+
+type EditableProject = {
+  id: string;
+  name: string;
+  description: string | null;
+  budget: number | null;
+  client_id: string | null;
+  client_unit_id?: string | null;
+};
+
+type ProjectClientOption = { id: string; name: string };
+
+function EditProjectDialog({
+  project,
+  clients,
+  saving,
+  onSave,
+}: {
+  project: EditableProject;
+  clients: ProjectClientOption[];
+  saving: boolean;
+  onSave: (values: { name: string; description: string; budget: number; client_id: string | null; client_unit_id: string | null; client_name: string }) => Promise<unknown>;
+}) {
+  const [open, setOpen] = useState(false);
+  const [clientId, setClientId] = useState(project.client_id ?? "");
+  const [clientUnitId, setClientUnitId] = useState(project.client_unit_id ?? "");
+  const [budget, setBudget] = useState(String(project.budget ?? 0));
+  const { data: units } = useClientUnits(clientId || undefined);
+
+  function resetValues() {
+    setClientId(project.client_id ?? "");
+    setClientUnitId(project.client_unit_id ?? "");
+    setBudget(String(project.budget ?? 0));
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={(nextOpen) => { setOpen(nextOpen); if (nextOpen) resetValues(); }}>
+      <DialogTrigger asChild>
+        <Button type="button" variant="ghost" size="icon" className="h-6! w-6! shrink-0" title="Editar projeto" aria-label="Editar projeto">
+          <Pencil className="h-3.5 w-3.5" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Editar projeto</DialogTitle>
+          <DialogDescription>Atualize os dados e vínculos deste projeto.</DialogDescription>
+        </DialogHeader>
+        <form
+          className="space-y-4"
+          onSubmit={async (event) => {
+            event.preventDefault();
+            const formData = new FormData(event.currentTarget);
+            const name = String(formData.get("name") || "").trim();
+            const description = String(formData.get("description") || "").trim();
+            const numericBudget = Number(budget || "0");
+            const client = clients.find((item) => item.id === clientId);
+            if (name.length < 2) return toast.error("Nome muito curto");
+            if (!Number.isFinite(numericBudget) || numericBudget <= 0) return toast.error("Informe o orçamento aprovado do projeto.");
+            await onSave({
+              name,
+              description,
+              budget: numericBudget,
+              client_id: client?.id ?? null,
+              client_unit_id: clientUnitId || null,
+              client_name: client?.name ?? "",
+            });
+            setOpen(false);
+          }}
+        >
+          <div className="space-y-2"><Label htmlFor={`edit-project-name-${project.id}`}>Nome do projeto</Label><Input id={`edit-project-name-${project.id}`} name="name" defaultValue={project.name} required /></div>
+          <div className="space-y-2">
+            <Label>Cliente</Label>
+            <Select value={clientId || "none"} onValueChange={(value) => { setClientId(value === "none" ? "" : value); setClientUnitId(""); }}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Sem cliente vinculado</SelectItem>
+                {clients.map((client) => <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          {clientId && (
+            <div className="space-y-2">
+              <Label>Unidade ou filial</Label>
+              <Select value={clientUnitId || "corporate"} onValueChange={(value) => setClientUnitId(value === "corporate" ? "" : value)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="corporate">Cliente corporativo</SelectItem>
+                  {(units ?? []).filter((unit) => unit.active).map((unit) => <SelectItem key={unit.id} value={unit.id}>{unit.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+          <div className="space-y-2"><Label htmlFor={`edit-project-budget-${project.id}`}>Orçamento aprovado (R$)</Label><MoneyInput id={`edit-project-budget-${project.id}`} value={budget} onChange={setBudget} required /></div>
+          <div className="space-y-2"><Label htmlFor={`edit-project-description-${project.id}`}>Descrição</Label><Textarea id={`edit-project-description-${project.id}`} name="description" rows={3} defaultValue={project.description ?? ""} /></div>
+          <DialogFooter><Button type="submit" disabled={saving}>Salvar</Button></DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
 
