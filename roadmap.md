@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Tarefas
+- [x] Reorganizar Novo cliente no topo em duas linhas e ampliar a lista de clientes para toda a largura
 - [x] Permitir converter um cliente existente em unidade de outro cliente, transferindo automaticamente todos os vínculos
 - [x] Substituir “Plataforma ERP” pelo novo botão compacto de Início nos cabeçalhos dos aplicativos
 - [x] Manter o controle de modo claro/escuro somente na tela de Início
