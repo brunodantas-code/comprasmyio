@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Tarefas
+- [x] Reorganizar Projetos no padrão de Clientes, com cadastro no topo e lista abaixo em largura total
 - [x] Apresentar e aplicar a prévia escolhida do cadastro de cliente em linha única no desktop, com botão “+ Filial”
 - [x] Reorganizar Novo cliente no topo em duas linhas e ampliar a lista de clientes para toda a largura
 - [x] Permitir converter um cliente existente em unidade de outro cliente, transferindo automaticamente todos os vínculos

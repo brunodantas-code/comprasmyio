@@ -3575,7 +3575,7 @@ function ProjectsAdmin({ userId }: { userId: string }) {
   }, [projects, clients, clientUnits, budgetSummaries, projectSearch, projectStatus, budgetRange, projectSort]);
 
   return (
-    <div className="grid gap-6 [&>*]:min-w-0 lg:grid-cols-[1fr_1.5fr]">
+    <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle>Novo projeto</CardTitle>
@@ -3587,8 +3587,11 @@ function ProjectsAdmin({ userId }: { userId: string }) {
             </p>
           ) : (
           <form onSubmit={onCreate} className="space-y-4">
-            <div className="space-y-2"><Label htmlFor="p-name">Nome do projeto</Label><Input id="p-name" name="name" required /></div>
-            <div className="space-y-2">
+            <div className={newProjectClientId
+              ? "grid items-end gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)_minmax(0,0.9fr)_12rem_minmax(0,1.2fr)_auto]"
+              : "grid items-end gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)_12rem_minmax(0,1.2fr)_auto]"}>
+            <div className="min-w-0 space-y-2"><Label htmlFor="p-name">Nome do projeto</Label><Input id="p-name" name="name" required /></div>
+            <div className="min-w-0 space-y-2">
               <Label>Cliente</Label>
               <Select value={newProjectClientId || "none"} onValueChange={(value) => { setNewProjectClientId(value === "none" ? "" : value); setNewProjectClientUnitId(""); }}>
                 <SelectTrigger><SelectValue placeholder="Selecione um cliente" /></SelectTrigger>
@@ -3599,7 +3602,7 @@ function ProjectsAdmin({ userId }: { userId: string }) {
               </Select>
             </div>
             {newProjectClientId && (
-              <div className="space-y-2">
+              <div className="min-w-0 space-y-2">
                 <Label>Unidade ou filial</Label>
                 <Select value={newProjectClientUnitId || "corporate"} onValueChange={(value) => setNewProjectClientUnitId(value === "corporate" ? "" : value)}>
                   <SelectTrigger><SelectValue placeholder="Selecione uma unidade ou filial" /></SelectTrigger>
@@ -3610,12 +3613,13 @@ function ProjectsAdmin({ userId }: { userId: string }) {
                 </Select>
               </div>
             )}
-            <div className="space-y-2">
+            <div className="min-w-0 space-y-2">
               <Label htmlFor="p-budget">Orçamento aprovado (R$)</Label>
-              <MoneyInput id="p-budget" className="w-32" value={budgetVal} onChange={setBudgetVal} required placeholder="0,00" />
+              <MoneyInput id="p-budget" className="w-full" value={budgetVal} onChange={setBudgetVal} required placeholder="0,00" />
             </div>
-            <div className="space-y-2"><Label htmlFor="p-desc">Descrição</Label><Textarea id="p-desc" name="description" /></div>
-            <Button type="submit" disabled={create.isPending}>Criar</Button>
+            <div className="min-w-0 space-y-2"><Label htmlFor="p-desc">Descrição</Label><Input id="p-desc" name="description" /></div>
+            <Button type="submit" className="w-full whitespace-nowrap xl:w-auto" disabled={create.isPending}>Criar</Button>
+            </div>
           </form>
           )}
         </CardContent>
