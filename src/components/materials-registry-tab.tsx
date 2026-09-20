@@ -52,9 +52,6 @@ function DeleteMaterialButton({ material }: { material: RegistryMaterial }) {
   const [open, setOpen] = useState(false);
   const remove = useMutation({
     mutationFn: async () => {
-      const movementTable = material.source === "materials" ? "stock_movements" : material.source === "terceiros_materials" ? "terceiros_movements" : "tool_movements";
-      const { error: movementError } = await supabase.from(movementTable).delete().eq("material_id", material.id);
-      if (movementError) throw movementError;
       const { error } = await supabase.from(material.source).delete().eq("id", material.id);
       if (error) throw error;
     },
@@ -70,7 +67,7 @@ function DeleteMaterialButton({ material }: { material: RegistryMaterial }) {
         queryClient.invalidateQueries({ queryKey: ["tool-stock"] }),
       ]);
     },
-    onError: (error: Error) => toast.error(error.message.includes("foreign key") ? "Este material possui vínculos e não pode ser excluído." : error.message),
+    onError: (error: Error) => toast.error(error.message.includes("foreign key") || error.message.includes("constraint") ? "Este material possui vínculos e não pode ser excluído." : error.message),
   });
 
   return <AlertDialog open={open} onOpenChange={setOpen}>
