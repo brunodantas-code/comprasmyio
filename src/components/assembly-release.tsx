@@ -342,8 +342,8 @@ function CorrectReleaseDialog({
   return (
     <Dialog open={open} onOpenChange={start}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="ghost" title="Corrigir quantidades" className="h-8 w-8 p-0">
-          <Pencil className="h-4 w-4" />
+        <Button size="compactIcon" variant="ghost" title="Corrigir quantidades">
+          <Pencil className="h-3.5 w-3.5" />
         </Button>
       </DialogTrigger>
       <DialogContent className="max-h-[85vh] overflow-y-auto">
@@ -804,8 +804,8 @@ function DeleteReleaseDialog({ release }: { release: { id: string; photo_url: st
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="ghost" title="Excluir liberação" className="h-8 w-8 p-0">
-          <Trash2 className="h-4 w-4 text-destructive" />
+        <Button size="compactIcon" variant="ghost" title="Excluir liberação">
+          <Trash2 className="h-3.5 w-3.5 text-destructive" />
         </Button>
       </DialogTrigger>
       <DialogContent>

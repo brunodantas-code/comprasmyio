@@ -123,7 +123,7 @@ export function AdditionalStepTypesTab() {
         <CardHeader className="flex flex-row items-start justify-between gap-4">
           <div><CardTitle>Tipos de Etapa Adicional</CardTitle>{expanded && <CardDescription>Os tipos ativos ficam disponíveis nas Etapas Adicionais.</CardDescription>}</div>
           <div className="flex items-center gap-1"><CollapsibleContent><Dialog open={createOpen} onOpenChange={(open) => { setCreateOpen(open); if (!open) setName(""); }}>
-            <DialogTrigger asChild><Button size="icon" aria-label="Criar tipo de etapa adicional" title="Criar tipo"><Plus className="h-4 w-4" /></Button></DialogTrigger>
+            <DialogTrigger asChild><Button size="compactIcon" aria-label="Criar tipo de etapa adicional" title="Criar tipo"><Plus className="h-3.5 w-3.5" /></Button></DialogTrigger>
             <DialogContent>
               <DialogHeader><DialogTitle>Novo tipo de etapa adicional</DialogTitle><DialogDescription>Cadastre um novo item para esta lista.</DialogDescription></DialogHeader>
               <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); const trimmedName = name.trim(); if (trimmedName.length < 2) return toast.error("Nome muito curto"); create.mutate(trimmedName); }}>
@@ -131,7 +131,7 @@ export function AdditionalStepTypesTab() {
                 <DialogFooter><Button type="submit" disabled={create.isPending}>Criar</Button></DialogFooter>
               </form>
             </DialogContent>
-          </Dialog></CollapsibleContent><CollapsibleTrigger asChild><Button size="icon" variant="ghost" aria-label={expanded ? "Recolher Tipos de Etapa Adicional" : "Expandir Tipos de Etapa Adicional"} title={expanded ? "Recolher" : "Expandir"}>{expanded ? <Minus className="h-4 w-4" /> : <Plus className="h-4 w-4" />}</Button></CollapsibleTrigger></div>
+          </Dialog></CollapsibleContent><CollapsibleTrigger asChild><Button size="compactIcon" variant="ghost" aria-label={expanded ? "Recolher Tipos de Etapa Adicional" : "Expandir Tipos de Etapa Adicional"} title={expanded ? "Recolher" : "Expandir"}>{expanded ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}</Button></CollapsibleTrigger></div>
         </CardHeader>
         <CollapsibleContent asChild><CardContent>
           {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : (
@@ -163,7 +163,7 @@ function EditTypeDialog({ type, saving, onSave }: { type: AdditionalStepType; sa
   const [name, setName] = useState(type.name);
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => { setOpen(nextOpen); if (nextOpen) setName(type.name); }}>
-      <DialogTrigger asChild><Button size="icon" variant="ghost" title="Editar" aria-label="Editar"><Pencil className="h-4 w-4" /></Button></DialogTrigger>
+      <DialogTrigger asChild><Button size="compactIcon" variant="ghost" title="Editar" aria-label="Editar"><Pencil className="h-3.5 w-3.5" /></Button></DialogTrigger>
       <DialogContent>
         <DialogHeader><DialogTitle>Editar tipo</DialogTitle></DialogHeader>
         <form className="space-y-4" onSubmit={async (event) => { event.preventDefault(); if (name.trim().length < 2) return toast.error("Nome muito curto"); try { await onSave(name.trim()); setOpen(false); } catch { /* A mensagem é exibida pela alteração. */ } }}>

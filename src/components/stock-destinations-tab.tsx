@@ -100,10 +100,10 @@ export function StockDestinationsTab() {
           defaultPosition={Math.max(0, ...(destinations ?? []).map((item) => item.position)) + 1}
           saving={create.isPending}
           onSave={(name, position) => create.mutateAsync({ name, position })}
-          trigger={<Button size="icon" aria-label="Criar destino de estoque" title="Criar destino"><Plus className="h-4 w-4" /></Button>}
+          trigger={<Button size="compactIcon" aria-label="Criar destino de estoque" title="Criar destino"><Plus className="h-3.5 w-3.5" /></Button>}
           open={createOpen}
           onOpenChange={setCreateOpen}
-        /></CollapsibleContent><CollapsibleTrigger asChild><Button size="icon" variant="ghost" aria-label={expanded ? "Recolher Destinos de Estoque" : "Expandir Destinos de Estoque"} title={expanded ? "Recolher" : "Expandir"}>{expanded ? <Minus className="h-4 w-4" /> : <Plus className="h-4 w-4" />}</Button></CollapsibleTrigger></div>
+        /></CollapsibleContent><CollapsibleTrigger asChild><Button size="compactIcon" variant="ghost" aria-label={expanded ? "Recolher Destinos de Estoque" : "Expandir Destinos de Estoque"} title={expanded ? "Recolher" : "Expandir"}>{expanded ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}</Button></CollapsibleTrigger></div>
       </CardHeader>
       <CollapsibleContent asChild><CardContent>
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : (
@@ -122,7 +122,7 @@ export function StockDestinationsTab() {
                       defaultPosition={destination.position}
                       saving={update.isPending}
                       onSave={(name, position) => update.mutateAsync({ code: destination.code, name, position })}
-                      trigger={<Button size="icon" variant="ghost" title={`Editar ${destination.name}`} aria-label={`Editar ${destination.name}`}><Pencil className="h-4 w-4" /></Button>}
+                      trigger={<Button size="compactIcon" variant="ghost" title={`Editar ${destination.name}`} aria-label={`Editar ${destination.name}`}><Pencil className="h-3.5 w-3.5" /></Button>}
                     />
                     <LinkedRecordDeletionDialog entityId={destination.code} entityName={destination.name} entityLabel="destino de estoque" linkField="request_type" registry="stock_destination" destinations={(destinations ?? []).filter((item) => item.active).map((item) => ({ id: item.code, name: item.name }))} onDelete={() => remove.mutate(destination.code)} deleting={remove.isPending} />
                   </div></TableCell>

@@ -72,7 +72,7 @@ function DeleteMaterialButton({ material }: { material: RegistryMaterial }) {
 
   return <AlertDialog open={open} onOpenChange={setOpen}>
     <AlertDialogTrigger asChild>
-      <Button variant="ghost" size="icon" className="!h-6 !w-6 shrink-0 text-destructive hover:text-destructive" title={`Excluir ${material.name}`} aria-label={`Excluir ${material.name}`}>
+      <Button variant="ghost" size="compactIcon" className="!h-6 !w-6 shrink-0 text-destructive hover:text-destructive" title={`Excluir ${material.name}`} aria-label={`Excluir ${material.name}`}>
         <Trash2 className="h-3.5 w-3.5" />
       </Button>
     </AlertDialogTrigger>
@@ -107,8 +107,8 @@ export function MaterialsRegistryTab() {
           {expanded && <CardDescription>Itens cadastrados e disponíveis para novas solicitações.</CardDescription>}
         </div>
         <CollapsibleTrigger asChild>
-          <Button size="icon" variant="ghost" aria-label={expanded ? "Recolher Materiais" : "Expandir Materiais"} title={expanded ? "Recolher" : "Expandir"}>
-            {expanded ? <Minus className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+          <Button size="compactIcon" variant="ghost" aria-label={expanded ? "Recolher Materiais" : "Expandir Materiais"} title={expanded ? "Recolher" : "Expandir"}>
+            {expanded ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
           </Button>
         </CollapsibleTrigger>
       </CardHeader>
@@ -125,7 +125,7 @@ export function MaterialsRegistryTab() {
               <TableCell>{material.group}</TableCell>
               <TableCell>{material.manufacturer_code || "—"}</TableCell>
               <TableCell><div className="flex items-center justify-end gap-1">
-                <MaterialDetailDialog materialId={material.id} name={material.name} table={material.source} startEditing trigger={<Button variant="ghost" size="icon" className="!h-6 !w-6 shrink-0" title={`Editar ${material.name}`} aria-label={`Editar ${material.name}`}><Pencil className="h-3.5 w-3.5" /></Button>} />
+                <MaterialDetailDialog materialId={material.id} name={material.name} table={material.source} startEditing trigger={<Button variant="ghost" size="compactIcon" className="!h-6 !w-6 shrink-0" title={`Editar ${material.name}`} aria-label={`Editar ${material.name}`}><Pencil className="h-3.5 w-3.5" /></Button>} />
                 <DeleteMaterialButton material={material} />
               </div></TableCell>
             </TableRow>)}</TableBody>

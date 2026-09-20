@@ -288,7 +288,7 @@ export function NewMyioOrderDialog({ userId, triggerLabel, inline = false }: { u
           <Tooltip>
             <TooltipTrigger asChild>
               <DialogTrigger asChild>
-                <Button>{triggerLabel ? <><Plus className="mr-2 h-4 w-4" />{triggerLabel}</> : <Plus className="h-4 w-4" />}</Button>
+                <Button>{triggerLabel ? <><Plus className="mr-2 h-4 w-4" />{triggerLabel}</> : <Plus className="h-3.5 w-3.5" />}</Button>
               </DialogTrigger>
             </TooltipTrigger>
             <TooltipContent>Nova solicitação de Dispositivos myio e Insumos de Instalação</TooltipContent>
@@ -366,7 +366,7 @@ function EditMyioOrderDialog({ order, userId }: { order: MyioOrder; userId: stri
   return (
     <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (o) load(); }}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon"><Pencil className="h-4 w-4" /></Button>
+        <Button variant="ghost" size="compactIcon"><Pencil className="h-3.5 w-3.5" /></Button>
       </DialogTrigger>
       <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
@@ -459,7 +459,7 @@ function DeleteMyioOrderInner({ id }: { id: string }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4 text-destructive" /></Button>
+        <Button variant="ghost" size="compactIcon"><Trash2 className="h-4 w-4 text-destructive" /></Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

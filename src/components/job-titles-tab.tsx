@@ -156,8 +156,8 @@ function EditJobTitleDialog({ title, onSave }: { title: JobTitle; onSave: (v: Fo
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="icon" variant="ghost" title="Editar" aria-label="Editar">
-          <Pencil className="h-4 w-4" />
+        <Button size="compactIcon" variant="ghost" title="Editar" aria-label="Editar">
+          <Pencil className="h-3.5 w-3.5" />
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -190,8 +190,8 @@ function DeleteJobTitleDialog({ name, onConfirm }: { name: string; onConfirm: ()
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="icon" variant="ghost" title="Excluir" aria-label="Excluir" className="text-destructive hover:text-destructive">
-          <Trash2 className="h-4 w-4" />
+        <Button size="compactIcon" variant="ghost" title="Excluir" aria-label="Excluir" className="text-destructive hover:text-destructive">
+          <Trash2 className="h-3.5 w-3.5" />
         </Button>
       </DialogTrigger>
       <DialogContent>
