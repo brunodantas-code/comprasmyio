@@ -24,3 +24,7 @@ Permitir que, ao editar um cliente, ele seja vinculado a outro cliente corporati
 - Confirmar que o cliente deixa a lista principal e aparece expandido como unidade da matriz.
 - Confirmar que projetos e solicitações continuam exibindo a matriz e a unidade corretas.
 - Verificar a versão para computador e celular e confirmar que não há erros.
+
+## Ajuste adicional dos cabeçalhos
+- Substituir o botão textual **Plataforma ERP** pelo mesmo botão compacto de **Início** já usado no portal.
+- Aplicar o botão em Supply, Cash Flow, Code, CRM, Legal, RH e Central de Pendências, mantendo o retorno à página inicial dos aplicativos.
