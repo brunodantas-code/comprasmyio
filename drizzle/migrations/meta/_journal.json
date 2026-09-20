@@ -99,6 +99,13 @@
       "when": 1789755424042,
       "tag": "0013_link_projects_to_client_units",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1789940616684,
+      "tag": "0014_add_client_legal_name",
+      "breakpoints": true
     }
   ]
 }
