@@ -67,11 +67,13 @@ export function MaterialDetailDialog({
   name,
   trigger,
   table = "materials",
+  startEditing = false,
 }: {
   materialId: string;
   name: string;
   trigger: React.ReactNode;
   table?: DetailTable;
+  startEditing?: boolean;
 }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -165,7 +167,7 @@ export function MaterialDetailDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setEditing(false); }}>
+    <Dialog open={open} onOpenChange={(o) => { setOpen(o); setEditing(o ? startEditing : false); }}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="max-h-[85vh] max-w-lg overflow-y-auto">
         <DialogHeader className="pr-10">
