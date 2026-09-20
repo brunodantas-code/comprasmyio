@@ -1,18 +1,16 @@
-# Padronização global dos botões de ação
+# Padronização dos botões de ação
 
 ## Objetivo
-Uniformizar em todo o ERP os controles de adicionar, expandir/recolher, editar e excluir pelo padrão compacto já usado em Cadastro > Clientes.
+Uniformizar em todas as telas os botões compactos de adicionar, remover, editar e excluir conforme o padrão visual já usado em Clientes.
 
 ## Alterações
-- Aplicar dimensão fixa de 24 × 24 px aos botões apenas com ícone de `+`, `−`, lápis e exclusão.
-- Aplicar ícones de 14 px, espaçamento estável e alinhamento consistente entre ações vizinhas.
-- Substituir o ícone `X` por lixeira quando a ação representar exclusão ou remoção de um registro, item ou anexo.
-- Preservar o `X` somente quando sua função semântica for fechar uma janela, cancelar uma seleção ou limpar conteúdo.
-- Revisar Solicitações, Approvals, Cadastro, Estoques, Supply, Cash Flow, Code e demais menus e submenus.
-- Manter botões textuais de criação, como “Criar” ou “Adicionar etapa”, sem redução; o padrão compacto vale para controles representados somente por ícones.
+- Aplicar aos botões de ação em listas e tabelas o tamanho compacto de Clientes: 24 × 24 px, ícones de 14 × 14 px e espaçamento consistente.
+- Substituir ícones `X` usados para exclusão ou remoção pelo ícone de lixeira.
+- Manter botões textuais de formulário e ações principais em seus tamanhos atuais; a padronização compacta será aplicada apenas aos botões de ação por ícone.
+- Revisar Solicitações, Approvals, Cadastros, Armazém, Code e seus submenus para eliminar variações restantes.
+- Preservar cores, permissões, confirmações e comportamentos existentes.
 
 ## Detalhes técnicos
-- Centralizar o estilo compacto no componente de botão para evitar novas divergências.
-- Atualizar acionadores personalizados que hoje sobrescrevem o tamanho padrão.
-- Manter `title` e `aria-label` em todos os botões compactos.
-- Validar visualmente no desktop e no mobile, incluindo ausência de sobreposição e rolagem lateral indevida.
+- Usar `size="icon"`, `h-6! w-6! shrink-0` e ícones `h-3.5 w-3.5` nas ações compactas.
+- Usar `Trash2` com estilo destrutivo em exclusões.
+- Validar visualmente as telas afetadas e corrigir eventuais regressões de alinhamento.
