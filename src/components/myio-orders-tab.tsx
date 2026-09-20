@@ -459,7 +459,7 @@ function DeleteMyioOrderInner({ id }: { id: string }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="compactIcon"><Trash2 className="h-4 w-4 text-destructive" /></Button>
+        <Button variant="ghost" size="compactIcon" title="Excluir pedido" aria-label="Excluir pedido"><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

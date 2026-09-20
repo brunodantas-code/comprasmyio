@@ -1103,8 +1103,8 @@ export function RulesAdmin() {
                     <TableRow key={r.id}>
                       <TableCell>
                         <div className="flex items-center gap-1">
-                           <Button size="icon" variant="ghost" className="h-6! w-6! shrink-0" aria-label="Mover para cima" title="Mover para cima" disabled={index === 0 || move.isPending} onClick={() => move.mutate({ rule: r as RuleRow, direction: -1 })}><ArrowUp className="h-3.5 w-3.5" /></Button>
-                           <Button size="icon" variant="ghost" className="h-6! w-6! shrink-0" aria-label="Mover para baixo" title="Mover para baixo" disabled={index === (rules?.length ?? 0) - 1 || move.isPending} onClick={() => move.mutate({ rule: r as RuleRow, direction: 1 })}><ArrowDown className="h-3.5 w-3.5" /></Button>
+                           <Button size="compactIcon" variant="ghost" aria-label="Mover para cima" title="Mover para cima" disabled={index === 0 || move.isPending} onClick={() => move.mutate({ rule: r as RuleRow, direction: -1 })}><ArrowUp className="h-3.5 w-3.5" /></Button>
+                           <Button size="compactIcon" variant="ghost" aria-label="Mover para baixo" title="Mover para baixo" disabled={index === (rules?.length ?? 0) - 1 || move.isPending} onClick={() => move.mutate({ rule: r as RuleRow, direction: 1 })}><ArrowDown className="h-3.5 w-3.5" /></Button>
                         </div>
                       </TableCell>
                       <TableCell className="font-medium">{r.name}</TableCell>

@@ -26,7 +26,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { toast } from "sonner";
 import { ArrowLeft, Home, LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Boxes, Building2, Plane, Landmark, Briefcase, Layers3, ArrowUpDown } from "lucide-react";
-import { Trash2, Paperclip, X, Loader2, DatabaseBackup, CheckCircle2, XCircle, RotateCcw, Pencil, Bell, ShieldCheck, AlertTriangle } from "lucide-react";
+import { Trash2, Paperclip, Loader2, DatabaseBackup, CheckCircle2, XCircle, RotateCcw, Pencil, Bell, ShieldCheck, AlertTriangle } from "lucide-react";
 import { ApprovalWorkflow, MyApprovalFlows, PendingApprovalsByRole, PendingForMe } from "@/components/approval-workflow";
 import { z } from "zod";
 import { StockTab } from "@/components/stock-tab";
@@ -3289,7 +3289,7 @@ function EditRequesterDialog({ order }: { order: Order }) {
       setOpen(nextOpen);
     }}>
       <DialogTrigger asChild>
-        <Button size="icon" variant="ghost" className="!h-6 !w-6 shrink-0" title="Editar pedido" aria-label="Editar pedido">
+        <Button size="compactIcon" variant="ghost" title="Editar pedido" aria-label="Editar pedido">
           <Pencil className="h-3.5 w-3.5" />
         </Button>
       </DialogTrigger>
@@ -3714,16 +3714,16 @@ function ProjectsAdmin({ userId }: { userId: string }) {
                              )}
                             {st === "active" && (
                               <>
-                                 <Button type="button" variant="ghost" size="icon" aria-label="Marcar como implantado" title="Marcar como implantado" className="h-6! w-6! shrink-0 text-blue-600 hover:text-blue-800" onClick={() => { setStatusDialog({ id: p.id, name: p.name, action: "implantado" }); setStatusDate(new Date().toISOString().slice(0, 10)); }}>
+                                 <Button type="button" variant="ghost" size="compactIcon" aria-label="Marcar como implantado" title="Marcar como implantado" className="text-blue-600 hover:text-blue-800" onClick={() => { setStatusDialog({ id: p.id, name: p.name, action: "implantado" }); setStatusDate(new Date().toISOString().slice(0, 10)); }}>
                                    <CheckCircle2 className="h-3.5 w-3.5" />
                                 </Button>
-                                 <Button type="button" variant="ghost" size="icon" aria-label="Cancelar projeto" title="Cancelar projeto" className="h-6! w-6! shrink-0 text-destructive hover:text-destructive/80" onClick={() => { setStatusDialog({ id: p.id, name: p.name, action: "cancelado" }); setStatusDate(new Date().toISOString().slice(0, 10)); }}>
+                                 <Button type="button" variant="ghost" size="compactIcon" aria-label="Cancelar projeto" title="Cancelar projeto" className="text-destructive hover:text-destructive/80" onClick={() => { setStatusDialog({ id: p.id, name: p.name, action: "cancelado" }); setStatusDate(new Date().toISOString().slice(0, 10)); }}>
                                    <XCircle className="h-3.5 w-3.5" />
                                 </Button>
                               </>
                             )}
                             {st !== "active" && (
-                               <Button type="button" variant="ghost" size="icon" aria-label="Reativar projeto" title="Reativar projeto" className="h-6! w-6! shrink-0 text-muted-foreground hover:text-foreground" disabled={setStatus.isPending} onClick={() => setStatus.mutate({ id: p.id, status: "active", concludedAt: null })}>
+                               <Button type="button" variant="ghost" size="compactIcon" aria-label="Reativar projeto" title="Reativar projeto" className="text-muted-foreground hover:text-foreground" disabled={setStatus.isPending} onClick={() => setStatus.mutate({ id: p.id, status: "active", concludedAt: null })}>
                                  <RotateCcw className="h-3.5 w-3.5" />
                               </Button>
                             )}
@@ -3736,7 +3736,7 @@ function ProjectsAdmin({ userId }: { userId: string }) {
                               onDelete={() => remove.mutate(p.id)}
                               deleting={remove.isPending}
                                trigger={
-                                  <Button type="button" variant="ghost" size="icon" className="h-6! w-6! shrink-0" title="Excluir projeto" aria-label="Excluir projeto">
+                                  <Button type="button" variant="ghost" size="compactIcon" title="Excluir projeto" aria-label="Excluir projeto">
                                     <Trash2 className="h-3.5 w-3.5" />
                                  </Button>
                                }
@@ -3849,7 +3849,7 @@ function EditProjectDialog({
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => { setOpen(nextOpen); if (nextOpen) resetValues(); }}>
       <DialogTrigger asChild>
-        <Button type="button" variant="ghost" size="icon" className="h-6! w-6! shrink-0" title="Editar projeto" aria-label="Editar projeto">
+        <Button type="button" variant="ghost" size="compactIcon" title="Editar projeto" aria-label="Editar projeto">
           <Pencil className="h-3.5 w-3.5" />
         </Button>
       </DialogTrigger>

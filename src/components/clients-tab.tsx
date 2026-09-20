@@ -226,9 +226,8 @@ export function ClientsTab({ userId }: { userId: string }) {
                         <div className="flex items-center gap-2">
                           <Button
                             type="button"
-                            size="icon"
+                            size="compactIcon"
                             variant="ghost"
-                            className="h-6! w-6! shrink-0"
                             onClick={() => setExpandedClients((current) => {
                               const next = new Set(current);
                               if (next.has(c.id)) next.delete(c.id); else next.add(c.id);
@@ -261,7 +260,7 @@ export function ClientsTab({ userId }: { userId: string }) {
                          destinations={(clients ?? []).map((client) => ({ id: client.id, name: client.name }))}
                          onDelete={() => remove.mutate(c.id)}
                          deleting={remove.isPending}
-                          trigger={<Button type="button" size="icon" variant="ghost" className="h-6! w-6! shrink-0 text-destructive hover:text-destructive" title={`Excluir ${c.name}`} aria-label={`Excluir ${c.name}`}><Trash2 className="h-3.5 w-3.5" /></Button>}
+                          trigger={<Button type="button" size="compactIcon" variant="ghost" className="text-destructive hover:text-destructive" title={`Excluir ${c.name}`} aria-label={`Excluir ${c.name}`}><Trash2 className="h-3.5 w-3.5" /></Button>}
                        />
                         </div>
                       </TableCell>
@@ -345,7 +344,7 @@ function ClientUnitsList({ client, userId }: { client: Client; userId: string })
                       unit={unit}
                       saving={update.isPending}
                       onSave={(values) => update.mutateAsync({ id: unit.id, ...values })}
-                      trigger={<Button type="button" size="icon" variant="ghost" className="h-6! w-6! shrink-0" title={`Editar ${unit.name}`} aria-label={`Editar ${unit.name}`}><Pencil className="h-3.5 w-3.5" /></Button>}
+                      trigger={<Button type="button" size="compactIcon" variant="ghost" title={`Editar ${unit.name}`} aria-label={`Editar ${unit.name}`}><Pencil className="h-3.5 w-3.5" /></Button>}
                     />
                     <ConfirmDeleteButton
                       title="Excluir unidade"
@@ -353,7 +352,7 @@ function ClientUnitsList({ client, userId }: { client: Client; userId: string })
                       pending={remove.isPending}
                       onConfirm={() => remove.mutate(unit.id)}
                       ariaLabel={`Excluir ${unit.name}`}
-                      trigger={<Button type="button" size="icon" variant="ghost" className="h-6! w-6! shrink-0 text-destructive hover:text-destructive" title={`Excluir ${unit.name}`} aria-label={`Excluir ${unit.name}`}><Trash2 className="h-3.5 w-3.5" /></Button>}
+                      trigger={<Button type="button" size="compactIcon" variant="ghost" className="text-destructive hover:text-destructive" title={`Excluir ${unit.name}`} aria-label={`Excluir ${unit.name}`}><Trash2 className="h-3.5 w-3.5" /></Button>}
                     />
                   </div></TableCell>
                 </TableRow>

@@ -326,7 +326,7 @@
 - [x] Validar Centro de Custo e Cargos em desktop e celular
 - [x] Incluir botão Editar em cada projeto, preservando os vínculos e campos atuais
 ## Padronização global dos botões compactos
-- [ ] Mapear botões +, -, editar e excluir em todas as telas e submenus
-- [ ] Padronizar dimensões conforme Cadastro > Clientes
-- [ ] Substituir ícones X de exclusão por lixeira
-- [ ] Validar Solicitações, Approvals, menus e submenus no desktop e mobile
+- [x] Mapear botões +, -, editar e excluir em todas as telas e submenus
+- [x] Padronizar dimensões conforme Cadastro > Clientes
+- [x] Substituir ícones X de exclusão por lixeira
+- [x] Validar Solicitações, Approvals, menus e submenus no desktop e mobile
