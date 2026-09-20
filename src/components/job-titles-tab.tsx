@@ -99,15 +99,15 @@ export function JobTitlesTab({ userId }: { userId: string }) {
   }
 
   const cargos = (
-    <div className="grid gap-6 [&>*]:min-w-0 lg:grid-cols-[1fr_1.5fr]">
+    <div className="space-y-6">
       <Card>
         <CardHeader><CardTitle>Novo cargo</CardTitle></CardHeader>
         <CardContent>
-          <form onSubmit={onCreate} className="space-y-4">
-            <div className="space-y-2"><Label htmlFor="jt-name">Nome</Label><Input id="jt-name" name="name" required /></div>
-            <div className="space-y-2"><Label htmlFor="jt-short-name">Nome abreviado</Label><Input id="jt-short-name" name="short_name" maxLength={30} placeholder="Usado no organograma" /></div>
-            <div className="space-y-2"><Label htmlFor="jt-desc">Descrição</Label><Textarea id="jt-desc" name="description" rows={3} /></div>
-            <Button type="submit" disabled={create.isPending}>Criar</Button>
+          <form onSubmit={onCreate} className="grid items-end gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_14rem_minmax(0,1.5fr)_auto]">
+            <div className="min-w-0 space-y-2"><Label htmlFor="jt-name">Nome</Label><Input id="jt-name" name="name" required /></div>
+            <div className="min-w-0 space-y-2"><Label htmlFor="jt-short-name">Nome abreviado</Label><Input id="jt-short-name" name="short_name" maxLength={30} placeholder="Usado no organograma" /></div>
+            <div className="min-w-0 space-y-2"><Label htmlFor="jt-desc">Descrição</Label><Textarea id="jt-desc" name="description" rows={1} className="min-h-9 resize-none" /></div>
+            <Button type="submit" disabled={create.isPending} className="shrink-0">Criar</Button>
           </form>
         </CardContent>
       </Card>
