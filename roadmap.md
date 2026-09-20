@@ -324,3 +324,4 @@
 - [x] Reorganizar Centro de Custo com formulário superior em linha e listagem abaixo em largura total
 - [x] Reorganizar Cargos com formulário superior em linha e listagem abaixo em largura total
 - [ ] Validar Centro de Custo e Cargos em desktop e celular
+- [ ] Incluir botão Editar em cada projeto, preservando os vínculos e campos atuais
