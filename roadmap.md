@@ -4,6 +4,7 @@
 - [x] Permitir converter um cliente existente em unidade de outro cliente, transferindo automaticamente todos os vínculos
 - [x] Substituir “Plataforma ERP” pelo novo botão compacto de Início nos cabeçalhos dos aplicativos
 - [x] Manter o controle de modo claro/escuro somente na tela de Início
+- [x] Remover o botão de Início da própria tela inicial e mantê-lo nas demais telas
 - [x] Identificar por que os ícones corrigidos não aparecem em outros navegadores: versão publicada ainda não atualizada
 - [x] Igualar os ícones da página principal aos ícones da Plataforma ERP
 - [x] Reduzir e separar os ícones de ordem, editar e excluir das Etapas Adicionais no padrão compacto dos approvals

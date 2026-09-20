@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Bell, CheckCircle2, CodeXml, DollarSign, FileSignature, Home, Settings, Settings2, ShieldCheck, ShoppingCart, UserRound, UsersRound, LogOut } from "lucide-react";
+import { Bell, CheckCircle2, CodeXml, DollarSign, FileSignature, Settings, Settings2, ShieldCheck, ShoppingCart, UserRound, UsersRound, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
@@ -79,9 +79,6 @@ function PortalPage() {
               <p className="truncate text-sm font-semibold">{data.name}</p>
               <p className="text-xs text-muted-foreground">Plataforma ERP</p>
             </div>
-            <Button variant="ghost" size="icon" onClick={() => setActiveView("apps")} title="Início" aria-label="Início">
-              <Home className="h-4 w-4" />
-            </Button>
             <Button asChild variant="ghost" size="icon" className="relative" title="Central de Pendências" aria-label={`Central de Pendências: ${pendingActions?.total ?? 0}`}>
               <Link to="/pendentes">
                 <Bell className="h-5 w-5" />
