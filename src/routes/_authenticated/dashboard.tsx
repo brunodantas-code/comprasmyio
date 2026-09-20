@@ -3862,7 +3862,7 @@ function EditProjectDialog({
             const numericBudget = Number(budget || "0");
             const client = clients.find((item) => item.id === clientId);
             if (name.length < 2) return toast.error("Nome muito curto");
-            if (!Number.isFinite(numericBudget) || numericBudget <= 0) return toast.error("Informe o orçamento aprovado do projeto.");
+            if (!Number.isFinite(numericBudget) || numericBudget < 0) return toast.error("Informe um orçamento válido para o projeto.");
             await onSave({
               name,
               description,
