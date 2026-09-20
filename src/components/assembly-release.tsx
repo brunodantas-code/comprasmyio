@@ -161,8 +161,8 @@ function ReportIssueDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="ghost" title="Sinalizar divergência" className="h-8 w-8 p-0">
-          <AlertTriangle className="h-4 w-4 text-amber-600" />
+        <Button size="compactIcon" variant="ghost" title="Sinalizar divergência" aria-label="Sinalizar divergência">
+          <AlertTriangle className="h-3.5 w-3.5 text-amber-600" />
         </Button>
       </DialogTrigger>
       <DialogContent>

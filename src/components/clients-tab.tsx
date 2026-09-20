@@ -226,9 +226,8 @@ export function ClientsTab({ userId }: { userId: string }) {
                         <div className="flex items-center gap-2">
                           <Button
                             type="button"
-                            size="icon"
+                            size="compactIcon"
                             variant="ghost"
-                            className="h-6! w-6! shrink-0"
                             onClick={() => setExpandedClients((current) => {
                               const next = new Set(current);
                               if (next.has(c.id)) next.delete(c.id); else next.add(c.id);
