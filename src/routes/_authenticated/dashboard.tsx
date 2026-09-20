@@ -3,7 +3,6 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { MyioLogo } from "@/components/myio-logo";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { supabase } from "@/integrations/supabase/client";
 import { exportDatabaseBackup } from "@/lib/backup.functions";
 import { decideUserDeletion, requestUserDeletion, setUserAccessProfile, setUserOperationalFunction } from "@/lib/user-admin.functions";
@@ -26,7 +25,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Checkbox } from "@/components/ui/checkbox";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { toast } from "sonner";
-import { ArrowLeft, LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Boxes, Building2, Plane, Landmark, Briefcase, Layers3, ArrowUpDown } from "lucide-react";
+import { ArrowLeft, Home, LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Boxes, Building2, Plane, Landmark, Briefcase, Layers3, ArrowUpDown } from "lucide-react";
 import { Trash2, Paperclip, X, Loader2, DatabaseBackup, CheckCircle2, XCircle, RotateCcw, Pencil, Bell, ShieldCheck, AlertTriangle } from "lucide-react";
 import { ApprovalWorkflow, MyApprovalFlows, PendingApprovalsByRole, PendingForMe } from "@/components/approval-workflow";
 import { z } from "zod";
@@ -465,10 +464,9 @@ function Dashboard() {
               <MyioLogo className="text-xl sm:text-2xl" />
             </Link>
             <div className="flex shrink-0 items-center gap-2 sm:order-3 sm:gap-3">
-            <Button asChild variant="outline" size="sm" className="shrink-0" title="Voltar à Plataforma ERP">
-              <Link to="/portal"><ArrowLeft className="h-4 w-4" /><span className="hidden md:inline">Plataforma ERP</span></Link>
+            <Button asChild variant="outline" size="icon" className="shrink-0" title="Início">
+              <Link to="/portal" aria-label="Início"><Home className="h-4 w-4" /></Link>
             </Button>
-            <ThemeToggle />
             <Button variant="ghost" size="icon" className="shrink-0" onClick={handleSignOut} title="Sair">
               <LogOut className="h-4 w-4" />
             </Button>

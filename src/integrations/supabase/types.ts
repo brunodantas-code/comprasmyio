@@ -631,6 +631,7 @@ export type Database = {
           classified_at: string | null
           classified_by: string | null
           client_id: string | null
+          client_unit_id: string | null
           competence_period: string
           cost_center_id: string | null
           created_at: string
@@ -654,6 +655,7 @@ export type Database = {
           classified_at?: string | null
           classified_by?: string | null
           client_id?: string | null
+          client_unit_id?: string | null
           competence_period: string
           cost_center_id?: string | null
           created_at?: string
@@ -677,6 +679,7 @@ export type Database = {
           classified_at?: string | null
           classified_by?: string | null
           client_id?: string | null
+          client_unit_id?: string | null
           competence_period?: string
           cost_center_id?: string | null
           created_at?: string
@@ -712,6 +715,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_flow_payables_client_unit_id_fkey"
+            columns: ["client_unit_id"]
+            isOneToOne: false
+            referencedRelation: "client_units"
             referencedColumns: ["id"]
           },
           {
@@ -3809,6 +3819,10 @@ export type Database = {
       can_request_type: {
         Args: { _request_type_code: string; _user_id: string }
         Returns: boolean
+      }
+      convert_client_to_unit: {
+        Args: { _destination_client_id: string; _source_client_id: string }
+        Returns: string
       }
       create_myio_order_request: {
         Args: {
