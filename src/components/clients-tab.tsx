@@ -50,6 +50,15 @@ export function ClientsTab({ userId }: { userId: string }) {
   const { data: clients, isLoading } = useClients();
   const [newUnits, setNewUnits] = useState<string[]>([]);
   const [expandedClients, setExpandedClients] = useState<Set<string>>(new Set());
+  const [clientSearch, setClientSearch] = useState("");
+
+  const normalizedSearch = clientSearch.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const filteredClients = (clients ?? []).filter((client) => {
+    if (!normalizedSearch) return true;
+    return [client.name, client.legal_name, client.cnpj].some((value) =>
+      (value ?? "").toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(normalizedSearch),
+    );
+  });
 
   const create = useMutation({
     mutationFn: async (v: { name: string; legal_name: string | null; cnpj: string | null; units: string[] }) => {
@@ -163,9 +172,23 @@ export function ClientsTab({ userId }: { userId: string }) {
           {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
             !clients?.length ? <p className="text-sm text-muted-foreground">Sem clientes.</p> :
             <Table>
-              <TableHeader><TableRow><TableHead>Nome fantasia</TableHead><TableHead>Razão social</TableHead><TableHead>CNPJ</TableHead><TableHead className="w-20" /></TableRow></TableHeader>
+              <TableHeader>
+                <TableRow><TableHead>Nome fantasia</TableHead><TableHead>Razão social</TableHead><TableHead>CNPJ</TableHead><TableHead className="w-20" /></TableRow>
+                <TableRow className="bg-primary/5 hover:bg-primary/5">
+                  <TableHead className="py-1">
+                    <Input
+                      value={clientSearch}
+                      onChange={(event) => setClientSearch(event.target.value)}
+                      placeholder="Filtrar clientes"
+                      aria-label="Filtrar clientes por nome fantasia, razão social ou CNPJ"
+                      className="h-8 min-w-36 bg-background"
+                    />
+                  </TableHead>
+                  <TableHead colSpan={3} />
+                </TableRow>
+              </TableHeader>
               <TableBody>
-                {clients.map((c) => {
+                {!filteredClients.length ? <TableRow><TableCell colSpan={4} className="py-8 text-center text-sm text-muted-foreground">Nenhum cliente encontrado.</TableCell></TableRow> : filteredClients.map((c) => {
                   const expanded = expandedClients.has(c.id);
                   return (
                   <Fragment key={c.id}>
