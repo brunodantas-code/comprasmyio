@@ -2846,26 +2846,6 @@ function ConfirmReceiptActions({ order }: { order: Order }) {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const update = useMutation({
-    mutationFn: async (v: { id: string; name: string; description: string; budget: number; client_id: string | null; client_unit_id: string | null; client_name: string }) => {
-      const { data: existing, error: lookupError } = await supabase.from("projects").select("id,name");
-      if (lookupError) throw lookupError;
-      const normalizedName = v.name.trim().toLocaleLowerCase("pt-BR");
-      if (existing?.some((project) => project.id !== v.id && project.name.trim().toLocaleLowerCase("pt-BR") === normalizedName)) {
-        throw new Error("Este projeto já está cadastrado");
-      }
-      const { id, ...changes } = v;
-      const { error } = await supabase.from("projects").update(changes).eq("id", id);
-      if (error) throw new Error(error.code === "23505" ? "Este projeto já está cadastrado" : error.message);
-    },
-    onSuccess: () => {
-      toast.success("Projeto atualizado");
-      qc.invalidateQueries({ queryKey: ["projects"] });
-      qc.invalidateQueries({ queryKey: ["project-budget-summaries"] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
   return (
     <>
       <Button size="sm" variant="outline" disabled={setStatus.isPending} onClick={() => setStatus.mutate("recebido_ok")}>
@@ -3537,6 +3517,26 @@ function ProjectsAdmin({ userId }: { userId: string }) {
       if (error) throw error;
     },
     onSuccess: () => { toast.success("Status do projeto atualizado"); qc.invalidateQueries({ queryKey: ["projects"] }); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const update = useMutation({
+    mutationFn: async (v: { id: string; name: string; description: string; budget: number; client_id: string | null; client_unit_id: string | null; client_name: string }) => {
+      const { data: existing, error: lookupError } = await supabase.from("projects").select("id,name");
+      if (lookupError) throw lookupError;
+      const normalizedName = v.name.trim().toLocaleLowerCase("pt-BR");
+      if (existing?.some((project) => project.id !== v.id && project.name.trim().toLocaleLowerCase("pt-BR") === normalizedName)) {
+        throw new Error("Este projeto já está cadastrado");
+      }
+      const { id, ...changes } = v;
+      const { error } = await supabase.from("projects").update(changes).eq("id", id);
+      if (error) throw new Error(error.code === "23505" ? "Este projeto já está cadastrado" : error.message);
+    },
+    onSuccess: () => {
+      toast.success("Projeto atualizado");
+      qc.invalidateQueries({ queryKey: ["projects"] });
+      qc.invalidateQueries({ queryKey: ["project-budget-summaries"] });
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
