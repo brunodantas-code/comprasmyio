@@ -1,14 +1,16 @@
+import { useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Bell, Boxes, CheckCircle2, CodeXml, DollarSign, FileSignature, Settings, Settings2, ShieldCheck, ShoppingCart, UsersRound, LogOut } from "lucide-react";
+import { Bell, CheckCircle2, CodeXml, DollarSign, FileSignature, Home, Settings, Settings2, ShieldCheck, ShoppingCart, UserRound, UsersRound, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MyioPlatformLogo } from "@/components/myio-platform-logo";
 import { ErpAppAccessAdmin } from "@/components/erp-app-access-admin";
 import { CrmFunnelIcon } from "@/components/crm-funnel-icon";
 import { usePendingActions } from "@/hooks/use-pending-actions";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { ThemeMenuItem } from "@/components/theme-toggle";
 
 export const Route = createFileRoute("/_authenticated/portal")({
   component: PortalPage,
@@ -27,6 +29,7 @@ export const Route = createFileRoute("/_authenticated/portal")({
 function PortalPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [activeView, setActiveView] = useState<"apps" | "users">("apps");
   const { data: pendingActions } = usePendingActions();
   const { data, isLoading } = useQuery({
     queryKey: ["my-erp-access"],
@@ -68,7 +71,7 @@ function PortalPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
+      <header className="sticky top-0 z-40 border-b border-border bg-card">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
           <MyioPlatformLogo className="h-9 sm:h-10" />
           <div className="flex min-w-0 items-center gap-2">
@@ -76,35 +79,41 @@ function PortalPage() {
               <p className="truncate text-sm font-semibold">{data.name}</p>
               <p className="text-xs text-muted-foreground">Plataforma ERP</p>
             </div>
+            <Button variant="ghost" size="icon" onClick={() => setActiveView("apps")} title="Início" aria-label="Início">
+              <Home className="h-4 w-4" />
+            </Button>
             <Button asChild variant="ghost" size="icon" className="relative" title="Central de Pendências" aria-label={`Central de Pendências: ${pendingActions?.total ?? 0}`}>
               <Link to="/pendentes">
                 <Bell className="h-5 w-5" />
                 {(pendingActions?.total ?? 0) > 0 ? <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">{(pendingActions?.total ?? 0) > 99 ? "99+" : pendingActions?.total}</span> : null}
               </Link>
             </Button>
-            <ThemeToggle />
-            <Button variant="ghost" size="icon" onClick={handleSignOut} title="Sair" aria-label="Sair">
-              <LogOut className="h-4 w-4" />
-            </Button>
+            {data.isErpAdmin ? (
+              <Button variant={activeView === "users" ? "secondary" : "ghost"} size="icon" onClick={() => setActiveView("users")} title="Acessos" aria-label="Acessos">
+                <Settings2 className="h-4 w-4" />
+              </Button>
+            ) : null}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" title="Menu do usuário" aria-label="Menu do usuário">
+                  <UserRound className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52">
+                <DropdownMenuLabel className="truncate">{data.name}</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <ThemeMenuItem />
+                <DropdownMenuItem onSelect={handleSignOut} className="text-destructive focus:text-destructive">
+                  <LogOut />Sair
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>
 
       <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
-        <Tabs defaultValue="apps">
-          <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h1 className="text-3xl font-extrabold sm:text-4xl">Meus Aplicativos</h1>
-              <p className="mt-2 text-muted-foreground">Escolha onde deseja trabalhar.</p>
-            </div>
-            {data.isErpAdmin ? (
-              <TabsList className="!grid w-full grid-cols-2 sm:mb-8 lg:mr-[calc((100%-5rem)/6-7.25rem)] lg:w-56 lg:self-end">
-                <TabsTrigger value="apps" className="w-full min-w-0 px-2"><Boxes className="mr-2 h-4 w-4 shrink-0" />Aplicativos</TabsTrigger>
-                <TabsTrigger value="users" className="w-full min-w-0 px-2"><Settings2 className="mr-2 h-4 w-4 shrink-0" />Acessos</TabsTrigger>
-              </TabsList>
-            ) : null}
-          </div>
-
+        <Tabs value={activeView} onValueChange={(value) => setActiveView(value as "apps" | "users")}>
           <TabsContent value="apps">
             {apps.length ? (
                <div className="grid grid-cols-3 gap-x-3 gap-y-8 lg:grid-cols-6 lg:gap-x-4">
