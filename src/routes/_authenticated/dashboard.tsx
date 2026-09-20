@@ -3289,7 +3289,7 @@ function EditRequesterDialog({ order }: { order: Order }) {
       setOpen(nextOpen);
     }}>
       <DialogTrigger asChild>
-        <Button size="icon" variant="ghost" className="!h-6 !w-6 shrink-0" title="Editar pedido" aria-label="Editar pedido">
+        <Button size="compactIcon" variant="ghost" title="Editar pedido" aria-label="Editar pedido">
           <Pencil className="h-3.5 w-3.5" />
         </Button>
       </DialogTrigger>
@@ -3736,7 +3736,7 @@ function ProjectsAdmin({ userId }: { userId: string }) {
                               onDelete={() => remove.mutate(p.id)}
                               deleting={remove.isPending}
                                trigger={
-                                  <Button type="button" variant="ghost" size="icon" className="h-6! w-6! shrink-0" title="Excluir projeto" aria-label="Excluir projeto">
+                                  <Button type="button" variant="ghost" size="compactIcon" title="Excluir projeto" aria-label="Excluir projeto">
                                     <Trash2 className="h-3.5 w-3.5" />
                                  </Button>
                                }
@@ -3849,7 +3849,7 @@ function EditProjectDialog({
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => { setOpen(nextOpen); if (nextOpen) resetValues(); }}>
       <DialogTrigger asChild>
-        <Button type="button" variant="ghost" size="icon" className="h-6! w-6! shrink-0" title="Editar projeto" aria-label="Editar projeto">
+        <Button type="button" variant="ghost" size="compactIcon" title="Editar projeto" aria-label="Editar projeto">
           <Pencil className="h-3.5 w-3.5" />
         </Button>
       </DialogTrigger>
