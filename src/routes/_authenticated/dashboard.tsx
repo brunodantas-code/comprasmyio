@@ -172,8 +172,8 @@ function FilePicker({ files, setFiles, label = "Anexar arquivos" }: { files: Fil
           {files.map((f, i) => (
             <li key={i} className="flex items-center justify-between rounded border px-2 py-1">
               <span className="truncate">{f.name} <span className="text-muted-foreground">({Math.round(f.size / 1024)} KB)</span></span>
-              <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => setFiles(files.filter((_, j) => j !== i))}>
-                <X className="h-3 w-3" />
+              <Button type="button" variant="ghost" size="compactIcon" className="text-destructive hover:text-destructive" onClick={() => setFiles(files.filter((_, j) => j !== i))} aria-label={`Remover ${f.name}`} title="Remover anexo">
+                <Trash2 className="h-3.5 w-3.5" />
               </Button>
             </li>
           ))}
@@ -204,8 +204,8 @@ function ExistingAttachments({ orderId, attachments, canRemove }: { orderId: str
           {canRemove && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button type="button" size="icon" className="h-6 w-6 shrink-0" disabled={remove.isPending} aria-label="Excluir anexo" title="Excluir anexo">
-                  <X className="h-3 w-3" />
+                <Button type="button" size="compactIcon" disabled={remove.isPending} aria-label="Excluir anexo" title="Excluir anexo">
+                  <Trash2 className="h-3.5 w-3.5" />
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
@@ -1591,10 +1591,13 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
                         <Button
                           type="button"
                           variant="ghost"
-                          size="sm"
+                          size="compactIcon"
+                          className="text-destructive hover:text-destructive"
+                          title="Remover solicitação"
+                          aria-label="Remover solicitação"
                           onClick={() => setTravelLegs((prev) => prev.filter((_, idx) => idx !== i))}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       )}
                     </div>
@@ -1618,10 +1621,10 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
                   <Button
                     type="button"
                     variant="outline"
-                    size="icon"
+                    size="compactIcon"
                     onClick={() => setTravelLegs((prev) => [...prev, { destination: "", departure: "", return: "" }])}
                   >
-                    <Plus className="h-4 w-4" />
+                    <Plus className="h-3.5 w-3.5" />
                   </Button>
                   <span className="text-sm text-muted-foreground">Deseja adicionar outra solicitação para esta viagem?</span>
                 </div>
@@ -1638,10 +1641,13 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
                         <Button
                           type="button"
                           variant="ghost"
-                          size="sm"
+                          size="compactIcon"
+                          className="text-destructive hover:text-destructive"
+                          title="Remover reembolso"
+                          aria-label="Remover reembolso"
                           onClick={() => setReembolsoLegs((prev) => prev.filter((_, idx) => idx !== i))}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       )}
                     </div>
@@ -1665,10 +1671,10 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
                   <Button
                     type="button"
                     variant="outline"
-                    size="icon"
+                    size="compactIcon"
                     onClick={() => setReembolsoLegs((prev) => [...prev, { description: "", value: "", date: "" }])}
                   >
-                    <Plus className="h-4 w-4" />
+                    <Plus className="h-3.5 w-3.5" />
                   </Button>
                   <span className="text-sm text-muted-foreground">Deseja adicionar outro reembolso a esta Solicitação?</span>
                 </div>
@@ -3431,8 +3437,8 @@ function InternalDeleteOrderDialog({ order }: { order: Order }) {
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button type="button" size="icon" className="!h-6 !w-6 shrink-0" aria-label="Excluir pedido" title="Excluir pedido">
-          <X className="h-3.5 w-3.5" />
+        <Button type="button" size="compactIcon" aria-label="Excluir pedido" title="Excluir pedido">
+          <Trash2 className="h-3.5 w-3.5" />
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
@@ -4212,8 +4218,8 @@ function UsersAdmin() {
                             {u.id !== currentUser?.id ? (
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" title="Solicitar exclusão" aria-label={`Solicitar exclusão de ${u.full_name || u.email}`}>
-                                    <Trash2 className="h-4 w-4" />
+                                  <Button variant="ghost" size="compactIcon" className="text-destructive hover:text-destructive" title="Solicitar exclusão" aria-label={`Solicitar exclusão de ${u.full_name || u.email}`}>
+                                    <Trash2 className="h-3.5 w-3.5" />
                                   </Button>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>

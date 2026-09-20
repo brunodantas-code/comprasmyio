@@ -12,7 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { QrScannerDialog, GalleryQrButton, ManualQrDialog } from "@/components/homologation";
-import { Boxes, QrCode, X } from "lucide-react";
+import { Boxes, QrCode, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export type LinkedQr = {

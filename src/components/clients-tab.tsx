@@ -183,8 +183,8 @@ export function ClientsTab({ userId }: { userId: string }) {
                         placeholder="Nome da filial ou unidade"
                         aria-label={`Filial ou unidade ${index + 1}`}
                       />
-                      <Button type="button" variant="ghost" size="icon" className="shrink-0" onClick={() => setNewUnits((current) => current.filter((_, itemIndex) => itemIndex !== index))} aria-label="Remover unidade" title="Remover unidade">
-                        <Trash2 className="h-4 w-4" />
+                      <Button type="button" variant="ghost" size="compactIcon" className="text-destructive hover:text-destructive" onClick={() => setNewUnits((current) => current.filter((_, itemIndex) => itemIndex !== index))} aria-label="Remover unidade" title="Remover unidade">
+                        <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
                   ))}
@@ -426,7 +426,7 @@ function EditClientDialog({ client, clients, saving, onSave, onConvert }: {
     <>
     <Dialog open={open} onOpenChange={(nextOpen) => { setOpen(nextOpen); if (!nextOpen) setCorporateClientId("none"); }}>
       <DialogTrigger asChild>
-        <Button size="icon" variant="ghost" className="h-6! w-6! shrink-0" title="Editar" aria-label="Editar">
+        <Button size="compactIcon" variant="ghost" title="Editar" aria-label="Editar">
           <Pencil className="h-3.5 w-3.5" />
         </Button>
       </DialogTrigger>
