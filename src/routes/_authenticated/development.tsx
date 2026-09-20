@@ -16,7 +16,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { APP_NAVIGATION_OPTIONS } from "@/lib/app-navigation-options";
-import { ThemeToggle } from "@/components/theme-toggle";
 
 type TicketStatus = "aberto" | "em_atendimento" | "atendido" | "concluido" | "excluido";
 type Ticket = {
@@ -150,7 +149,7 @@ function DevelopmentPage() {
       <header className="border-b border-border bg-card">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
           <Link to="/portal"><MyioAppLogo appName="Code" className="text-base sm:text-2xl" /></Link>
-          <div className="flex items-center gap-1"><Button asChild variant="outline" size="icon" title="Início"><Link to="/portal" aria-label="Início"><Home className="h-4 w-4" /></Link></Button><ThemeToggle /></div>
+          <div className="flex items-center gap-1"><Button asChild variant="outline" size="icon" title="Início"><Link to="/portal" aria-label="Início"><Home className="h-4 w-4" /></Link></Button></div>
         </div>
       </header>
       <main className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6">

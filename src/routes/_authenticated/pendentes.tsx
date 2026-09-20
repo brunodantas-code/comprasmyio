@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { MyioLogo } from "@/components/myio-logo";
 import { Bell, CheckCircle2, CodeXml, Home, ShieldCheck, ShoppingCart } from "lucide-react";
 import { usePendingActions } from "@/hooks/use-pending-actions";
-import { ThemeToggle } from "@/components/theme-toggle";
 
 export const Route = createFileRoute("/_authenticated/pendentes")({
   component: PendentesPage,
@@ -33,7 +32,6 @@ function PendentesPage() {
             <Button asChild variant="outline" size="icon" title="Início">
               <Link to="/portal" aria-label="Início"><Home className="h-4 w-4" /></Link>
             </Button>
-            <ThemeToggle />
           </div>
         </div>
       </header>

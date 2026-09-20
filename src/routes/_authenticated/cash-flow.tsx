@@ -8,7 +8,6 @@ import { MyioCashFlowLogo } from "@/components/myio-cash-flow-logo";
 import { PayablesTab } from "@/components/cash-flow/payables-tab";
 import { ChartOfAccountsTab } from "@/components/cash-flow/chart-of-accounts-tab";
 import { CashRegisterTab } from "@/components/cash-flow/cash-register-tab";
-import { ThemeToggle } from "@/components/theme-toggle";
 
 export const Route = createFileRoute("/_authenticated/cash-flow")({
   beforeLoad: async ({ context }) => {
@@ -43,7 +42,7 @@ function CashFlowPage() {
       <header className="border-b border-border bg-card">
         <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-3 px-4 py-4 sm:px-6">
           <Link to="/portal" className="flex min-w-0 items-center" title="Voltar aos aplicativos"><MyioCashFlowLogo className="text-xl sm:text-2xl" /></Link>
-          <div className="flex items-center gap-1"><Button asChild variant="outline" size="icon" title="Início"><Link to="/portal" aria-label="Início"><Home className="h-4 w-4" /></Link></Button><ThemeToggle /><Button variant="ghost" size="icon" onClick={signOut} title="Sair" aria-label="Sair"><LogOut className="h-4 w-4" /></Button></div>
+          <div className="flex items-center gap-1"><Button asChild variant="outline" size="icon" title="Início"><Link to="/portal" aria-label="Início"><Home className="h-4 w-4" /></Link></Button><Button variant="ghost" size="icon" onClick={signOut} title="Sair" aria-label="Sair"><LogOut className="h-4 w-4" /></Button></div>
         </div>
       </header>
       <main className="mx-auto max-w-[1500px] px-4 py-6 sm:px-6">
