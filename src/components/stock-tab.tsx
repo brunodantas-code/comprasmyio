@@ -531,8 +531,8 @@ function DeleteMaterialDialog({ row }: { row: StockRow }) {
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button size="sm" variant="ghost" title="Excluir item">
-          <Trash2 className="h-4 w-4 text-primary-foreground" />
+        <Button size="compactIcon" variant="ghost" title="Excluir item" aria-label="Excluir item">
+          <Trash2 className="h-3.5 w-3.5 text-primary-foreground" />
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
@@ -1278,8 +1278,8 @@ function StockTableCard({
                             userId={userId}
                             type="entrada"
                             trigger={
-                              <Button size="icon" variant="outline" title="Entrada" aria-label="Entrada">
-                                <ArrowDownCircle className="h-4 w-4" />
+                              <Button size="compactIcon" variant="outline" title="Entrada" aria-label="Entrada">
+                                <ArrowDownCircle className="h-3.5 w-3.5" />
                               </Button>
                             }
                           />
@@ -1288,8 +1288,8 @@ function StockTableCard({
                             userId={userId}
                             type="saida"
                             trigger={
-                              <Button size="icon" variant="outline" disabled={r.balance <= 0} title="Saída" aria-label="Saída">
-                                <ArrowUpCircle className="h-4 w-4" />
+                              <Button size="compactIcon" variant="outline" disabled={r.balance <= 0} title="Saída" aria-label="Saída">
+                                <ArrowUpCircle className="h-3.5 w-3.5" />
                               </Button>
                             }
                           />
@@ -1629,8 +1629,8 @@ function TerceirosDeleteDialog({ row }: { row: TerceirosRow }) {
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button size="sm" variant="ghost" title="Excluir item">
-          <Trash2 className="h-4 w-4 text-primary-foreground" />
+        <Button size="compactIcon" variant="ghost" title="Excluir item" aria-label="Excluir item">
+          <Trash2 className="h-3.5 w-3.5 text-primary-foreground" />
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
@@ -2018,8 +2018,8 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
                           userId={userId}
                           type="entrada"
                           trigger={
-                            <Button size="icon" variant="outline" title="Entrada" aria-label="Entrada">
-                              <ArrowDownCircle className="h-4 w-4" />
+                            <Button size="compactIcon" variant="outline" title="Entrada" aria-label="Entrada">
+                              <ArrowDownCircle className="h-3.5 w-3.5" />
                             </Button>
                           }
                         />
@@ -2028,8 +2028,8 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
                           userId={userId}
                           type="saida"
                           trigger={
-                            <Button size="icon" variant="outline" disabled={r.balance <= 0} title="Saída" aria-label="Saída">
-                              <ArrowUpCircle className="h-4 w-4" />
+                            <Button size="compactIcon" variant="outline" disabled={r.balance <= 0} title="Saída" aria-label="Saída">
+                              <ArrowUpCircle className="h-3.5 w-3.5" />
                             </Button>
                           }
                         />

@@ -552,7 +552,7 @@ function ProductsTable({
                     ariaLabel={`Excluir ${p.product ?? names[p.material_id] ?? "produto"}`}
                     pending={deleting}
                     onConfirm={() => onDelete(p.id)}
-                    trigger={<Button type="button" size="icon" variant="outline" title="Excluir produto" aria-label={`Excluir ${p.product ?? names[p.material_id] ?? "produto"}`}><Trash2 className="h-4 w-4" /></Button>}
+                    trigger={<Button type="button" size="compactIcon" variant="outline" title="Excluir produto" aria-label={`Excluir ${p.product ?? names[p.material_id] ?? "produto"}`}><Trash2 className="h-3.5 w-3.5" /></Button>}
                   />
                 )}
               </div>

@@ -334,8 +334,8 @@ function ToolDeleteDialog({ row }: { row: ToolRow }) {
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button size="sm" variant="ghost" className="text-destructive" title="Excluir">
-          <Trash2 className="h-4 w-4" />
+        <Button size="compactIcon" variant="ghost" className="text-destructive hover:text-destructive" title="Excluir" aria-label="Excluir">
+          <Trash2 className="h-3.5 w-3.5" />
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
@@ -664,8 +664,8 @@ export function ToolAssetsSection({ userId, canDelete }: { userId: string; canDe
                           userId={userId}
                           type="entrada"
                           trigger={
-                            <Button size="icon" variant="outline" title="Entrada" aria-label="Entrada">
-                              <ArrowDownCircle className="h-4 w-4" />
+                            <Button size="compactIcon" variant="outline" title="Entrada" aria-label="Entrada">
+                              <ArrowDownCircle className="h-3.5 w-3.5" />
                             </Button>
                           }
                         />
@@ -674,8 +674,8 @@ export function ToolAssetsSection({ userId, canDelete }: { userId: string; canDe
                           userId={userId}
                           type="saida"
                           trigger={
-                            <Button size="icon" variant="outline" disabled={r.balance <= 0} title="Saída" aria-label="Saída">
-                              <ArrowUpCircle className="h-4 w-4" />
+                            <Button size="compactIcon" variant="outline" disabled={r.balance <= 0} title="Saída" aria-label="Saída">
+                              <ArrowUpCircle className="h-3.5 w-3.5" />
                             </Button>
                           }
                         />
