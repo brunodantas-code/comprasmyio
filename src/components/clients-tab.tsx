@@ -155,37 +155,42 @@ export function ClientsTab({ userId }: { userId: string }) {
   }
 
   return (
-    <div className="grid gap-6 [&>*]:min-w-0 lg:grid-cols-[1fr_1.5fr]">
+    <div className="space-y-6">
       <Card>
         <CardHeader><CardTitle>Novo cliente</CardTitle></CardHeader>
         <CardContent>
           <form onSubmit={onCreate} className="space-y-4">
-            <div className="space-y-2"><Label htmlFor="c-legal-name">Razão social</Label><Input id="c-legal-name" name="legal_name" /></div>
-            <div className="space-y-2"><Label htmlFor="c-name">Nome fantasia</Label><Input id="c-name" name="name" required /></div>
-            <div className="space-y-2"><Label htmlFor="c-cnpj">CNPJ</Label><Input id="c-cnpj" name="cnpj" placeholder="00.000.000/0000-00" /></div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between gap-2">
-                <Label>Filiais ou unidades</Label>
-                <Button type="button" variant="ghost" size="sm" onClick={() => setNewUnits((current) => [...current, ""])}>
-                  <Plus className="mr-1 h-4 w-4" />Adicionar
-                </Button>
-              </div>
-              {!newUnits.length && <p className="text-xs text-muted-foreground">Você poderá cadastrar unidades agora ou depois.</p>}
-              {newUnits.map((unit, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <Input
-                    value={unit}
-                    onChange={(event) => setNewUnits((current) => current.map((item, itemIndex) => itemIndex === index ? event.target.value : item))}
-                    placeholder="Nome da filial ou unidade"
-                    aria-label={`Filial ou unidade ${index + 1}`}
-                  />
-                  <Button type="button" variant="ghost" size="icon" className="shrink-0" onClick={() => setNewUnits((current) => current.filter((_, itemIndex) => itemIndex !== index))} aria-label="Remover unidade" title="Remover unidade">
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2"><Label htmlFor="c-legal-name">Razão social</Label><Input id="c-legal-name" name="legal_name" /></div>
+              <div className="space-y-2"><Label htmlFor="c-name">Nome fantasia</Label><Input id="c-name" name="name" required /></div>
             </div>
-            <Button type="submit" disabled={create.isPending}>Criar</Button>
+            <div className="grid items-end gap-3 md:grid-cols-[minmax(16rem,1fr)_auto_auto]">
+              <div className="space-y-2"><Label htmlFor="c-cnpj">CNPJ</Label><Input id="c-cnpj" name="cnpj" placeholder="00.000.000/0000-00" /></div>
+              <Button type="button" variant="ghost" onClick={() => setNewUnits((current) => [...current, ""])}>
+                <Plus className="mr-1 h-4 w-4" />Adicionar filial
+              </Button>
+              <Button type="submit" disabled={create.isPending}>Criar</Button>
+            </div>
+            {newUnits.length > 0 && (
+              <div className="space-y-2">
+                <Label>Filiais ou unidades</Label>
+                <div className="grid gap-2 md:grid-cols-2">
+                  {newUnits.map((unit, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <Input
+                        value={unit}
+                        onChange={(event) => setNewUnits((current) => current.map((item, itemIndex) => itemIndex === index ? event.target.value : item))}
+                        placeholder="Nome da filial ou unidade"
+                        aria-label={`Filial ou unidade ${index + 1}`}
+                      />
+                      <Button type="button" variant="ghost" size="icon" className="shrink-0" onClick={() => setNewUnits((current) => current.filter((_, itemIndex) => itemIndex !== index))} aria-label="Remover unidade" title="Remover unidade">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </form>
         </CardContent>
       </Card>
