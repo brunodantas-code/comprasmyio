@@ -308,3 +308,7 @@
 - [x] Permitir cadastrar filiais ou unidades vinculadas ao cliente corporativo
 - [x] Disponibilizar unidade opcional em Novas Solicitações quando a alocação for Cliente
 - [x] Exibir unidades de cada cliente em lista expansível e permitir editar ou excluir cada unidade
+
+## Cadastro de clientes
+- [x] Adicionar Razão social antes de Nome fantasia no cadastro e edição de clientes
+- [x] Manter Nome fantasia como identificação em todas as telas e listas de seleção

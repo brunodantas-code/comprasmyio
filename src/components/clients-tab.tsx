@@ -12,7 +12,7 @@ import { Minus, Pencil, Plus, Trash2 } from "lucide-react";
 import { LinkedRecordDeletionDialog } from "@/components/linked-record-deletion-dialog";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 
-export type Client = { id: string; name: string; cnpj: string | null };
+export type Client = { id: string; name: string; legal_name: string | null; cnpj: string | null };
 export type ClientUnit = { id: string; client_id: string; name: string; cnpj: string | null; active: boolean };
 
 const DUPLICATE_CLIENT_MESSAGE = "Este cliente já está cadastrado";
@@ -25,7 +25,7 @@ export function useClients() {
   return useQuery({
     queryKey: ["clients"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("clients").select("id,name,cnpj").order("name");
+      const { data, error } = await supabase.from("clients").select("id,name,legal_name,cnpj").order("name");
       if (error) throw error;
       return data as Client[];
     },
@@ -52,7 +52,7 @@ export function ClientsTab({ userId }: { userId: string }) {
   const [expandedClients, setExpandedClients] = useState<Set<string>>(new Set());
 
   const create = useMutation({
-    mutationFn: async (v: { name: string; cnpj: string | null; units: string[] }) => {
+    mutationFn: async (v: { name: string; legal_name: string | null; cnpj: string | null; units: string[] }) => {
       const { data: existing, error: lookupError } = await supabase.from("clients").select("id,name");
       if (lookupError) throw lookupError;
       const normalizedName = v.name.trim().toLocaleLowerCase("pt-BR");
@@ -61,7 +61,7 @@ export function ClientsTab({ userId }: { userId: string }) {
       }
       const { data: client, error } = await supabase
         .from("clients")
-        .insert({ name: v.name, cnpj: v.cnpj, created_by: userId })
+        .insert({ name: v.name, legal_name: v.legal_name, cnpj: v.cnpj, created_by: userId })
         .select("id")
         .single();
       if (error) throw new Error(isDuplicateNameError(error) ? DUPLICATE_CLIENT_MESSAGE : error.message);
@@ -82,14 +82,14 @@ export function ClientsTab({ userId }: { userId: string }) {
   });
 
   const update = useMutation({
-    mutationFn: async (v: { id: string; name: string; cnpj: string | null }) => {
+    mutationFn: async (v: { id: string; name: string; legal_name: string | null; cnpj: string | null }) => {
       const { data: existing, error: lookupError } = await supabase.from("clients").select("id,name");
       if (lookupError) throw lookupError;
       const normalizedName = v.name.trim().toLocaleLowerCase("pt-BR");
       if (existing?.some((item) => item.id !== v.id && item.name.trim().toLocaleLowerCase("pt-BR") === normalizedName)) {
         throw new Error(DUPLICATE_CLIENT_MESSAGE);
       }
-      const { error } = await supabase.from("clients").update({ name: v.name, cnpj: v.cnpj }).eq("id", v.id);
+      const { error } = await supabase.from("clients").update({ name: v.name, legal_name: v.legal_name, cnpj: v.cnpj }).eq("id", v.id);
       if (error) throw new Error(isDuplicateNameError(error) ? DUPLICATE_CLIENT_MESSAGE : error.message);
     },
     onSuccess: () => { toast.success("Cliente atualizado"); qc.invalidateQueries({ queryKey: ["clients"] }); },
@@ -113,11 +113,12 @@ export function ClientsTab({ userId }: { userId: string }) {
     e.preventDefault();
     const form = e.currentTarget;
     const fd = new FormData(form);
+    const legalName = String(fd.get("legal_name") || "").trim();
     const name = String(fd.get("name") || "").trim();
     const cnpj = String(fd.get("cnpj") || "").trim();
     if (name.length < 2) return toast.error("Nome muito curto");
     const normalizedUnits = newUnits.map((unit) => unit.trim()).filter((unit, index, list) => unit.length >= 2 && list.indexOf(unit) === index);
-    create.mutate({ name, cnpj: cnpj || null, units: normalizedUnits }, { onSuccess: () => form.reset() });
+    create.mutate({ name, legal_name: legalName || null, cnpj: cnpj || null, units: normalizedUnits }, { onSuccess: () => form.reset() });
   }
 
   return (
@@ -126,7 +127,8 @@ export function ClientsTab({ userId }: { userId: string }) {
         <CardHeader><CardTitle>Novo cliente</CardTitle></CardHeader>
         <CardContent>
           <form onSubmit={onCreate} className="space-y-4">
-            <div className="space-y-2"><Label htmlFor="c-name">Nome do cliente</Label><Input id="c-name" name="name" required /></div>
+            <div className="space-y-2"><Label htmlFor="c-legal-name">Razão social</Label><Input id="c-legal-name" name="legal_name" /></div>
+            <div className="space-y-2"><Label htmlFor="c-name">Nome fantasia</Label><Input id="c-name" name="name" required /></div>
             <div className="space-y-2"><Label htmlFor="c-cnpj">CNPJ</Label><Input id="c-cnpj" name="cnpj" placeholder="00.000.000/0000-00" /></div>
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-2">
@@ -161,7 +163,7 @@ export function ClientsTab({ userId }: { userId: string }) {
           {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
             !clients?.length ? <p className="text-sm text-muted-foreground">Sem clientes.</p> :
             <Table>
-              <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>CNPJ</TableHead><TableHead className="w-20" /></TableRow></TableHeader>
+              <TableHeader><TableRow><TableHead>Nome fantasia</TableHead><TableHead>Razão social</TableHead><TableHead>CNPJ</TableHead><TableHead className="w-20" /></TableRow></TableHeader>
               <TableBody>
                 {clients.map((c) => {
                   const expanded = expandedClients.has(c.id);
@@ -188,6 +190,7 @@ export function ClientsTab({ userId }: { userId: string }) {
                           <span>{c.name}</span>
                         </div>
                       </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{c.legal_name || "—"}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{c.cnpj || "—"}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1 whitespace-nowrap">
@@ -205,7 +208,7 @@ export function ClientsTab({ userId }: { userId: string }) {
                         </div>
                       </TableCell>
                     </TableRow>
-                    {expanded && <TableRow key={`${c.id}-units`} className="hover:bg-transparent"><TableCell colSpan={3} className="px-3 py-4 sm:px-6"><ClientUnitsList client={c} userId={userId} /></TableCell></TableRow>}
+                    {expanded && <TableRow key={`${c.id}-units`} className="hover:bg-transparent"><TableCell colSpan={4} className="px-3 py-4 sm:px-6"><ClientUnitsList client={c} userId={userId} /></TableCell></TableRow>}
                   </Fragment>
                 );})}
               </TableBody>
@@ -329,7 +332,7 @@ function UnitDialog({ title, unit, saving, onSave, trigger }: { title: string; u
   );
 }
 
-function EditClientDialog({ client, onSave }: { client: Client; onSave: (v: { name: string; cnpj: string | null }) => void }) {
+function EditClientDialog({ client, onSave }: { client: Client; onSave: (v: { name: string; legal_name: string | null; cnpj: string | null }) => void }) {
   const [open, setOpen] = useState(false);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -345,14 +348,16 @@ function EditClientDialog({ client, onSave }: { client: Client; onSave: (v: { na
           onSubmit={(e) => {
             e.preventDefault();
             const fd = new FormData(e.currentTarget);
+            const legalName = String(fd.get("legal_name") || "").trim();
             const name = String(fd.get("name") || "").trim();
             const cnpj = String(fd.get("cnpj") || "").trim();
             if (name.length < 2) return toast.error("Nome muito curto");
-            onSave({ name, cnpj: cnpj || null });
+            onSave({ name, legal_name: legalName || null, cnpj: cnpj || null });
             setOpen(false);
           }}
         >
-          <div className="space-y-2"><Label>Nome do cliente</Label><Input name="name" defaultValue={client.name} required /></div>
+          <div className="space-y-2"><Label>Razão social</Label><Input name="legal_name" defaultValue={client.legal_name ?? ""} /></div>
+          <div className="space-y-2"><Label>Nome fantasia</Label><Input name="name" defaultValue={client.name} required /></div>
           <div className="space-y-2"><Label>CNPJ</Label><Input name="cnpj" defaultValue={client.cnpj ?? ""} /></div>
           <DialogFooter><Button type="submit">Salvar</Button></DialogFooter>
         </form>
