@@ -402,3 +402,10 @@
 ## Realocação de Novos Produtos P&D
 - [x] Realocar os Approvals 202607210001, 202607290001 e 202607300001 para Interna
 - [x] Preservar e conferir os vínculos derivados dos três Approvals
+
+## Edição administrativa de Approvals
+- [x] Incluir lápis para Admin nas listas de Approvals
+- [x] Permitir editar dados da solicitação e centro de custo sem alterar etapas ou decisões
+- [x] Sincronizar Approvals concluídos com Cash Flow e vínculos derivados
+- [x] Registrar as alterações no histórico e recalcular orçamento
+- [ ] Validar permissões, desktop e celular

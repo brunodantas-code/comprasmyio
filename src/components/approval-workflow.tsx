@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AlertTriangle, ArrowDown, ArrowUp, CheckCircle2, ChevronDown, ChevronRight, Clock, History, Pencil, Plus, Trash2, XCircle } from "lucide-react";
@@ -65,6 +65,7 @@ const ACTION_LABELS: Record<string, string> = {
   observacao_atualizada: "Alterado",
   aprovado: "Aprovado",
   rejeitado: "Rejeitado",
+  approval_editado: "Approval editado",
 };
 
 function RequestTypeCheckboxes({ values, onChange, types }: { values: string[]; onChange: (values: string[]) => void; types: RequestTypeRecord[] }) {
@@ -111,7 +112,7 @@ function useSteps() {
       const { data, error } = await supabase
         .from("approval_steps")
         .select(
-          "id, order_id, step_index, role_label, approver_id, status, comment, decided_at, decided_by, created_at, purchase_orders(id, item_name, item_link, quantity, estimated_value, approval_status, status, requester_id, requester_notes, buyer_notes, recipient, delivery_point, deadline_type, deadline_date, delivery_forecast, passphrase, created_at, updated_at, approval_number, request_type, request_model, travel_type, travel_destination, travel_departure, travel_return, payment_date, allocation_type, for_stock, attachments, budget_exceeded, budget_snapshot, committed_before_snapshot, projected_committed_snapshot, projects(name), clients(name), purchase_order_items(id, item_name, item_link, quantity, estimated_unit_value, position))"
+          "id, order_id, step_index, role_label, approver_id, status, comment, decided_at, decided_by, created_at, purchase_orders(id, project_id, client_id, client_unit_id, cost_center_id, item_name, item_link, quantity, estimated_value, approval_status, status, requester_id, requester_notes, buyer_notes, recipient, delivery_point, deadline_type, deadline_date, delivery_forecast, passphrase, created_at, updated_at, approval_number, request_type, request_model, travel_type, travel_destination, travel_departure, travel_return, payment_date, allocation_type, for_stock, attachments, budget_exceeded, budget_snapshot, committed_before_snapshot, projected_committed_snapshot, projects(name), clients(name), purchase_order_items(id, order_id, item_name, item_link, quantity, estimated_unit_value, position))"
         )
         .order("step_index", { ascending: true });
       if (error) throw error;
@@ -121,6 +122,8 @@ function useSteps() {
 }
 
 type StepRow = NonNullable<ReturnType<typeof useSteps>["data"]>[number];
+export type ApprovalListOrder = NonNullable<StepRow["purchase_orders"]>;
+type EditAction = (order: ApprovalListOrder) => ReactNode;
 
 function StatusBadge({ status }: { status: string }) {
   if (status === "aprovado") return <Badge variant="status">Aprovado</Badge>;
@@ -369,7 +372,7 @@ function AuditTrailDialog({ orderId, title }: { orderId: string; title: string }
   );
 }
 
-export function PendingForMe() {
+export function PendingForMe({ renderEditAction }: { renderEditAction?: EditAction } = {}) {
   const qc = useQueryClient();
   const { data: me } = useCurrentUser();
   const { data: steps, isLoading } = useSteps();
@@ -467,7 +470,7 @@ export function PendingForMe() {
                 const req = o?.requester_id ? profiles?.get(o.requester_id) : undefined;
                 return (
                   <TableRow key={s.id}>
-                    <TableCell className="whitespace-nowrap"><PendingApprovalDetails step={s} requestTypes={requestTypes} /></TableCell>
+                    <TableCell className="whitespace-nowrap"><div className="flex items-start gap-1">{o && renderEditAction?.(o)}<PendingApprovalDetails step={s} requestTypes={requestTypes} /></div></TableCell>
                     <TableCell className="font-medium">
                       {requestTypeLabel(o, requestTypes)}
                       {o?.budget_exceeded && <Badge variant="destructive" className="ml-2 gap-1"><AlertTriangle className="h-3 w-3" />Orçamento excedido</Badge>}
@@ -509,7 +512,7 @@ type PendingByRoleGroup = {
   value: number;
 };
 
-export function PendingApprovalsByRole() {
+export function PendingApprovalsByRole({ renderEditAction }: { renderEditAction?: EditAction } = {}) {
   const { data: steps, isLoading } = useSteps();
   const { data: profiles } = useProfiles();
   const { data: requestTypes } = useRequestTypes();
@@ -613,7 +616,7 @@ export function PendingApprovalsByRole() {
                         const requester = order?.requester_id ? profiles?.get(order.requester_id) : undefined;
                         return (
                           <div key={step.id} className="grid gap-2 px-4 py-3 text-sm sm:grid-cols-[8rem_minmax(0,1fr)_minmax(0,1fr)_9rem] sm:items-center">
-                            <PendingApprovalDetails step={step} requestTypes={requestTypes} />
+                            <div className="flex items-start gap-1">{order && renderEditAction?.(order)}<PendingApprovalDetails step={step} requestTypes={requestTypes} /></div>
                             <div className="min-w-0">
                               <p className="truncate font-medium">{requestTypeLabel(order, requestTypes)}</p>
                                <p className="line-clamp-2 text-xs text-muted-foreground">{order?.purchase_order_items?.length ? order.purchase_order_items.map((item) => `${item.item_name} × ${item.quantity}`).join("; ") : order?.item_name ?? "—"}</p>
@@ -635,7 +638,7 @@ export function PendingApprovalsByRole() {
   );
 }
 
-export function MyApprovalFlows() {
+export function MyApprovalFlows({ renderEditAction }: { renderEditAction?: EditAction } = {}) {
   const { data: me } = useCurrentUser();
   const { data: steps, isLoading } = useSteps();
   const { data: profiles } = useProfiles();
@@ -694,7 +697,7 @@ export function MyApprovalFlows() {
               <div key={orderId} className="rounded-lg border p-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
-                    <p className="font-mono text-xs text-muted-foreground">{o?.approval_number ?? "—"}</p>
+                    <div className="flex items-center gap-1">{o && renderEditAction?.(o)}<p className="font-mono text-xs text-muted-foreground">{o?.approval_number ?? "—"}</p></div>
                     <p className="font-medium">
                       {requestTypeLabel(o, requestTypes)}{" "}
                       <span className="text-xs text-muted-foreground">x{o?.quantity ?? 1}</span>
