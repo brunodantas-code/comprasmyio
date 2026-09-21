@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Tarefas
+- [ ] Permitir classificar a categoria diretamente em cada material cadastrado no menu Materiais
 - [ ] Permitir realocar vínculos ao excluir Projetos ou Clientes para outro Projeto, Cliente ou Unidade/Filial
 - [x] Vincular Materiais a categorias configuráveis e incluir Categorias de Materiais em Cadastro > Diversos
 - [x] Adicionar o botão “+” e o cadastro de Materiais em Cadastro > Diversos
