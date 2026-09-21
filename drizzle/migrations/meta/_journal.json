@@ -169,6 +169,13 @@
       "when": 1790014295504,
       "tag": "0023_allow_supply_to_create_material_products",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1790014637862,
+      "tag": "0024_add_purchase_order_material_items",
+      "breakpoints": true
     }
   ]
 }

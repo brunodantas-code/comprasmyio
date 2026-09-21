@@ -2659,6 +2659,98 @@ export type Database = {
           },
         ]
       }
+      purchase_order_items: {
+        Row: {
+          created_at: string
+          estimated_unit_value: number
+          id: string
+          item_link: string | null
+          item_name: string
+          material_id: string | null
+          order_id: string
+          position: number
+          quantity: number
+          terceiros_material_id: string | null
+          tool_asset_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          estimated_unit_value?: number
+          id?: string
+          item_link?: string | null
+          item_name: string
+          material_id?: string | null
+          order_id: string
+          position?: number
+          quantity: number
+          terceiros_material_id?: string | null
+          tool_asset_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          estimated_unit_value?: number
+          id?: string
+          item_link?: string | null
+          item_name?: string
+          material_id?: string | null
+          order_id?: string
+          position?: number
+          quantity?: number
+          terceiros_material_id?: string | null
+          tool_asset_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_order_items_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "material_stock"
+            referencedColumns: ["material_id"]
+          },
+          {
+            foreignKeyName: "purchase_order_items_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_order_items_terceiros_material_id_fkey"
+            columns: ["terceiros_material_id"]
+            isOneToOne: false
+            referencedRelation: "terceiros_material_stock"
+            referencedColumns: ["material_id"]
+          },
+          {
+            foreignKeyName: "purchase_order_items_terceiros_material_id_fkey"
+            columns: ["terceiros_material_id"]
+            isOneToOne: false
+            referencedRelation: "terceiros_materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_order_items_tool_asset_id_fkey"
+            columns: ["tool_asset_id"]
+            isOneToOne: false
+            referencedRelation: "tool_asset_stock"
+            referencedColumns: ["material_id"]
+          },
+          {
+            foreignKeyName: "purchase_order_items_tool_asset_id_fkey"
+            columns: ["tool_asset_id"]
+            isOneToOne: false
+            referencedRelation: "tool_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       purchase_orders: {
         Row: {
           allocation_type: string | null
