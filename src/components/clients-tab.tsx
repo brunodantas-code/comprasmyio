@@ -324,9 +324,10 @@ export function ClientsTab({ userId }: { userId: string }) {
 function ClientUnitsList({ client, userId }: { client: Client; userId: string }) {
   const qc = useQueryClient();
   const { data: units } = useClientUnits(client.id);
+  const { data: categories } = useClientCategories(true);
   const create = useMutation({
-    mutationFn: async (values: { name: string; cnpj: string | null; city: string | null; state: string | null }) => {
-      const { error } = await supabase.from("client_units").insert({ client_id: client.id, name: values.name, cnpj: values.cnpj, city: values.city, state: values.state, created_by: userId });
+    mutationFn: async (values: { name: string; cnpj: string | null; city: string | null; state: string | null; category_id: string | null }) => {
+      const { error } = await supabase.from("client_units").insert({ client_id: client.id, name: values.name, cnpj: values.cnpj, city: values.city, state: values.state, category_id: values.category_id, created_by: userId });
       if (error) throw new Error(error.code === "23505" ? "Esta unidade já está cadastrada para o cliente" : error.message);
     },
     onSuccess: () => {
@@ -344,8 +345,8 @@ function ClientUnitsList({ client, userId }: { client: Client; userId: string })
     onError: (error: Error) => toast.error(error.message),
   });
   const update = useMutation({
-    mutationFn: async ({ id, name, cnpj, city, state }: { id: string; name: string; cnpj: string | null; city: string | null; state: string | null }) => {
-      const { error } = await supabase.from("client_units").update({ name, cnpj, city, state }).eq("id", id);
+    mutationFn: async ({ id, name, cnpj, city, state, category_id }: { id: string; name: string; cnpj: string | null; city: string | null; state: string | null; category_id: string | null }) => {
+      const { error } = await supabase.from("client_units").update({ name, cnpj, city, state, category_id }).eq("id", id);
       if (error) throw new Error(error.code === "23505" ? "Esta unidade já está cadastrada para o cliente" : error.message);
     },
     onSuccess: () => { toast.success("Unidade atualizada"); qc.invalidateQueries({ queryKey: ["client-units"] }); },
@@ -367,6 +368,7 @@ function ClientUnitsList({ client, userId }: { client: Client; userId: string })
         <p className="text-sm font-semibold">Filiais ou unidades</p>
         <UnitDialog
           title={`Nova unidade de ${client.name}`}
+          categories={categories ?? []}
           saving={create.isPending}
           onSave={(values) => create.mutateAsync(values)}
           trigger={<Button type="button" size="sm"><Plus className="mr-1 h-4 w-4" />Adicionar unidade</Button>}
@@ -375,11 +377,12 @@ function ClientUnitsList({ client, userId }: { client: Client; userId: string })
       {!units?.length ? <p className="text-sm text-muted-foreground">Nenhuma unidade cadastrada.</p> : (
         <div className="overflow-hidden rounded-md border">
           <Table>
-            <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Cidade</TableHead><TableHead>UF</TableHead><TableHead>CNPJ</TableHead><TableHead>Status</TableHead><TableHead className="w-20" /></TableRow></TableHeader>
+            <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Categoria</TableHead><TableHead>Cidade</TableHead><TableHead>UF</TableHead><TableHead>CNPJ</TableHead><TableHead>Status</TableHead><TableHead className="w-20" /></TableRow></TableHeader>
             <TableBody>
               {(units ?? []).map((unit) => (
                 <TableRow key={unit.id}>
                   <TableCell className="font-medium">{unit.name}</TableCell>
+                  <TableCell className="text-muted-foreground">{categories?.find((category) => category.id === unit.category_id)?.name || "—"}</TableCell>
                   <TableCell className="text-muted-foreground">{unit.city || "—"}</TableCell>
                   <TableCell className="text-muted-foreground">{unit.state || "—"}</TableCell>
                   <TableCell className="text-muted-foreground">{unit.cnpj || "—"}</TableCell>
@@ -388,6 +391,7 @@ function ClientUnitsList({ client, userId }: { client: Client; userId: string })
                     <UnitDialog
                       title={`Editar ${unit.name}`}
                       unit={unit}
+                      categories={categories ?? []}
                       saving={update.isPending}
                       onSave={(values) => update.mutateAsync({ id: unit.id, ...values })}
                       trigger={<Button type="button" size="compactIcon" variant="ghost" title={`Editar ${unit.name}`} aria-label={`Editar ${unit.name}`}><Pencil className="h-3.5 w-3.5" /></Button>}
@@ -411,7 +415,7 @@ function ClientUnitsList({ client, userId }: { client: Client; userId: string })
   );
 }
 
-function UnitDialog({ title, unit, saving, onSave, trigger }: { title: string; unit?: ClientUnit; saving: boolean; onSave: (values: { name: string; cnpj: string | null; city: string | null; state: string | null }) => Promise<unknown>; trigger: React.ReactNode }) {
+function UnitDialog({ title, unit, categories, saving, onSave, trigger }: { title: string; unit?: ClientUnit; categories: ClientCategory[]; saving: boolean; onSave: (values: { name: string; cnpj: string | null; city: string | null; state: string | null; category_id: string | null }) => Promise<unknown>; trigger: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -425,14 +429,16 @@ function UnitDialog({ title, unit, saving, onSave, trigger }: { title: string; u
           const cnpj = String(formData.get("cnpj") || "").trim();
            const city = String(formData.get("city") || "").trim();
            const state = String(formData.get("state") || "").trim();
+           const categoryId = String(formData.get("category_id") || "").trim();
           if (name.length < 2) return toast.error("Informe o nome da unidade");
-           try { await onSave({ name, cnpj: cnpj || null, city: city || null, state: state || null }); setOpen(false); } catch { /* A alteração exibe a mensagem. */ }
+            try { await onSave({ name, cnpj: cnpj || null, city: city || null, state: state || null, category_id: categoryId || null }); setOpen(false); } catch { /* A alteração exibe a mensagem. */ }
         }}>
           <div className="space-y-2"><Label>Nome da unidade</Label><Input name="name" defaultValue={unit?.name ?? ""} required /></div>
            <div className="grid grid-cols-[minmax(0,1fr)_6rem] gap-3">
              <div className="grid grid-rows-[auto_2.25rem] gap-2"><Label>Cidade</Label><Input name="city" defaultValue={unit?.city ?? ""} /></div>
              <div className="grid grid-rows-[auto_2.25rem] gap-2"><Label>UF</Label><Select name="state" defaultValue={unit?.state ?? undefined}><SelectTrigger className="h-9"><SelectValue placeholder="UF" /></SelectTrigger><SelectContent>{BRAZILIAN_STATES.map((state) => <SelectItem key={state} value={state}>{state}</SelectItem>)}</SelectContent></Select></div>
            </div>
+           <div className="space-y-2"><Label>Categoria</Label><Select name="category_id" defaultValue={unit?.category_id ?? undefined}><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent>{categories.map((category) => <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>)}</SelectContent></Select></div>
           <div className="space-y-2"><Label>CNPJ</Label><Input name="cnpj" defaultValue={unit?.cnpj ?? ""} placeholder="00.000.000/0000-00" /></div>
           <DialogFooter><Button type="submit" disabled={saving}>Salvar</Button></DialogFooter>
         </form>
@@ -441,20 +447,21 @@ function UnitDialog({ title, unit, saving, onSave, trigger }: { title: string; u
   );
 }
 
-function EditClientDialog({ client, clients, saving, onSave, onConvert }: {
+function EditClientDialog({ client, clients, categories, saving, onSave, onConvert }: {
   client: Client;
   clients: Client[];
+  categories: ClientCategory[];
   saving: boolean;
-  onSave: (v: { name: string; legal_name: string | null; cnpj: string | null; city: string | null; state: string | null }) => Promise<unknown>;
+  onSave: (v: { name: string; legal_name: string | null; cnpj: string | null; city: string | null; state: string | null; category_id: string | null }) => Promise<unknown>;
   onConvert: (destinationClientId: string) => Promise<unknown>;
 }) {
   const [open, setOpen] = useState(false);
   const [corporateClientId, setCorporateClientId] = useState("none");
   const [confirmConversion, setConfirmConversion] = useState(false);
-  const [pendingValues, setPendingValues] = useState<{ name: string; legal_name: string | null; cnpj: string | null; city: string | null; state: string | null } | null>(null);
+  const [pendingValues, setPendingValues] = useState<{ name: string; legal_name: string | null; cnpj: string | null; city: string | null; state: string | null; category_id: string | null } | null>(null);
   const corporateClient = clients.find((item) => item.id === corporateClientId);
 
-  async function saveEdit(values: { name: string; legal_name: string | null; cnpj: string | null; city: string | null; state: string | null }) {
+  async function saveEdit(values: { name: string; legal_name: string | null; cnpj: string | null; city: string | null; state: string | null; category_id: string | null }) {
     try {
       await onSave(values);
       setOpen(false);
@@ -493,8 +500,9 @@ function EditClientDialog({ client, clients, saving, onSave, onConvert }: {
             const cnpj = String(fd.get("cnpj") || "").trim();
             const city = String(fd.get("city") || "").trim();
             const state = String(fd.get("state") || "").trim();
+            const categoryId = String(fd.get("category_id") || "").trim();
             if (name.length < 2) return toast.error("Nome muito curto");
-            const values = { name, legal_name: legalName || null, cnpj: cnpj || null, city: city || null, state: state || null };
+            const values = { name, legal_name: legalName || null, cnpj: cnpj || null, city: city || null, state: state || null, category_id: categoryId || null };
             if (corporateClientId !== "none") {
               setPendingValues(values);
               setConfirmConversion(true);
@@ -505,6 +513,7 @@ function EditClientDialog({ client, clients, saving, onSave, onConvert }: {
         >
           <div className="space-y-2"><Label>Razão social</Label><Input name="legal_name" defaultValue={client.legal_name ?? ""} /></div>
           <div className="space-y-2"><Label>Nome fantasia</Label><Input name="name" defaultValue={client.name} required /></div>
+          <div className="space-y-2"><Label>Categoria</Label><Select name="category_id" defaultValue={client.category_id ?? undefined}><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent>{categories.map((category) => <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>)}</SelectContent></Select></div>
           <div className="grid grid-cols-[minmax(0,1fr)_6rem] gap-3">
             <div className="space-y-2"><Label>Cidade</Label><Input name="city" defaultValue={client.city ?? ""} /></div>
             <div className="space-y-2"><Label>UF</Label><Select name="state" defaultValue={client.state ?? undefined}><SelectTrigger><SelectValue placeholder="UF" /></SelectTrigger><SelectContent>{BRAZILIAN_STATES.map((state) => <SelectItem key={state} value={state}>{state}</SelectItem>)}</SelectContent></Select></div>
