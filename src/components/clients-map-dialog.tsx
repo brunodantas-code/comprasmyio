@@ -4,19 +4,23 @@ import Brazil from "@svg-maps/brazil";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { ClientCategory } from "@/components/client-categories-tab";
 import type { Client, ClientUnit } from "@/components/clients-tab";
 
 type Marker = { x: number; y: number };
 type BrazilLocation = { id: string; name: string; path: string };
 
-export function ClientsMapDialog({ clients, units }: { clients: Client[]; units: ClientUnit[] }) {
+export function ClientsMapDialog({ clients, units, categories }: { clients: Client[]; units: ClientUnit[]; categories: ClientCategory[] }) {
   const [open, setOpen] = useState(false);
   const [hoveredState, setHoveredState] = useState<string | null>(null);
   const [selectedState, setSelectedState] = useState<string | null>(null);
+  const [categoryId, setCategoryId] = useState("all");
   const [markers, setMarkers] = useState<Record<string, Marker>>({});
   const svgRef = useRef<SVGSVGElement>(null);
   const clientsById = new Map(clients.map((client) => [client.id, client]));
-  const unitsByState = units.reduce<Record<string, ClientUnit[]>>((groups, unit) => {
+  const filteredUnits = categoryId === "all" ? units : units.filter((unit) => unit.category_id === categoryId);
+  const unitsByState = filteredUnits.reduce<Record<string, ClientUnit[]>>((groups, unit) => {
     const state = unit.state?.toUpperCase();
     if (!state) return groups;
     groups[state] = [...(groups[state] ?? []), unit];
@@ -53,7 +57,16 @@ export function ClientsMapDialog({ clients, units }: { clients: Client[]; units:
   return <Dialog open={open} onOpenChange={handleOpenChange}>
     <DialogTrigger asChild><Button type="button" size="compactIcon" variant="ghost" title="Mapa de unidades por UF" aria-label="Mapa de unidades por UF"><MapPinned /></Button></DialogTrigger>
     <DialogContent className="max-w-5xl overflow-hidden">
-      <DialogHeader><DialogTitle>Unidades por UF</DialogTitle></DialogHeader>
+      <DialogHeader className="flex-row items-center justify-between gap-4 pr-8">
+        <DialogTitle>Unidades por UF</DialogTitle>
+        <Select value={categoryId} onValueChange={(value) => { setCategoryId(value); setHoveredState(null); setSelectedState(null); }}>
+          <SelectTrigger className="w-52" aria-label="Filtrar mapa por categoria"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas as categorias</SelectItem>
+            {categories.filter((category) => category.active).map((category) => <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      </DialogHeader>
       <div className="relative min-h-[34rem] overflow-hidden rounded-md border bg-muted/20" onClick={() => setSelectedState(null)}>
         <svg ref={svgRef} viewBox={Brazil.viewBox} className="mx-auto h-[34rem] w-full max-w-2xl" role="img" aria-label="Mapa interativo do Brasil com unidades por estado">
           {(Brazil.locations as BrazilLocation[]).map((location) => {
