@@ -734,6 +734,7 @@ type PurchasableItem = {
   material_id: string | null;
   terceiros_material_id: string | null;
   tool_asset_id: string | null;
+  fulfillment_type: "purchase" | "myio_device";
 };
 
 function usePurchasableItems() {
@@ -741,7 +742,7 @@ function usePurchasableItems() {
     queryKey: ["purchasable-items"],
     queryFn: async () => {
       const [{ data: mats, error: me }, { data: ters, error: te }, { data: tools, error: fe }] = await Promise.all([
-        supabase.from("materials").select("id, name, description, link, manufacturer_code, photo_url, location").in("location", ["fabrica", "almoxarifado"]).eq("is_manufactured", false).order("name"),
+        supabase.from("materials").select("id, name, description, link, manufacturer_code, photo_url, location, is_manufactured").in("location", ["fabrica", "almoxarifado"]).order("name"),
         supabase.from("terceiros_materials").select("id, name, description, link, manufacturer_code, photo_url").order("name"),
         supabase.from("tool_assets").select("id, name, description, link, manufacturer_code, photo_url").order("name"),
       ]);
@@ -757,10 +758,11 @@ function usePurchasableItems() {
           link: m.link,
           manufacturer_code: m.manufacturer_code ?? null,
           photo_url: m.photo_url ?? null,
-          origin: m.location === "fabrica" ? "Insumos de Fabricação" : "Material de Almoxarifado",
+          origin: m.is_manufactured ? "Dispositivos myio" : m.location === "fabrica" ? "Insumos de Fabricação" : "Material de Almoxarifado",
           material_id: m.id,
           terceiros_material_id: null,
           tool_asset_id: null,
+          fulfillment_type: m.is_manufactured ? "myio_device" : "purchase",
         })
       );
       (ters ?? []).forEach((t) =>
@@ -775,6 +777,7 @@ function usePurchasableItems() {
           material_id: null,
           terceiros_material_id: t.id,
           tool_asset_id: null,
+          fulfillment_type: "purchase",
         })
       );
       (tools ?? []).forEach((t) =>
@@ -789,6 +792,7 @@ function usePurchasableItems() {
           material_id: null,
           terceiros_material_id: null,
           tool_asset_id: t.id,
+          fulfillment_type: "purchase",
         })
       );
       return items;
@@ -923,12 +927,13 @@ const CATEGORIES = [
   { value: "Insumos de Fabricação", label: "Insumos de Fabricação" },
   { value: "Material de Almoxarifado", label: "Material de Almoxarifado" },
   { value: "Máquinas e Ferramentas", label: "Máquinas e Ferramentas" },
+  { value: "Dispositivos myio", label: "Dispositivos myio" },
 ] as const;
 
 function PurchasableItemPicker({ value, onPick, disabled, categories = ["todas"], excludedKeys = [] }: { value: PurchasableItem | null; onPick: (i: PurchasableItem) => void; disabled?: boolean; categories?: string[]; excludedKeys?: string[] }) {
   const { data: items, isLoading } = usePurchasableItems();
   const [open, setOpen] = useState(false);
-  const origins = ["Insumos de Fabricação", "Insumos de Instalação", "Material de Almoxarifado", "Máquinas e Ferramentas"];
+  const origins = ["Insumos de Fabricação", "Insumos de Instalação", "Material de Almoxarifado", "Máquinas e Ferramentas", "Dispositivos myio"];
   const filtered = (items ?? []).filter((i) => (categories.includes("todas") || categories.includes(i.origin)) && (!excludedKeys.includes(i.key) || i.key === value?.key));
   return (
     <Popover open={open} onOpenChange={setOpen}>
