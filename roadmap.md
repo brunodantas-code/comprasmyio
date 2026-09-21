@@ -352,3 +352,8 @@
 - [x] Destacar a UF em verde-claro ao passar o cursor
 - [x] Mostrar nome da unidade e cliente corporativo em uma janela sobre o mapa
 - [x] Validar o mapa em computador e celular
+
+## Totalizadores do relatório de clientes
+- [ ] Incluir resumo por UF com clientes, unidades e total
+- [ ] Incluir resumo por categoria com clientes, unidades e total
+- [ ] Validar todas as páginas do PDF
