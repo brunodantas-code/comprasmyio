@@ -226,10 +226,10 @@ export function ClientsTab({ userId }: { userId: string }) {
       <Card>
         <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2"><CardTitle>Clientes</CardTitle><ClientsReportDialog clients={clients ?? []} units={allClientUnits ?? []} categories={categories ?? []} /><ClientsMapDialog clients={clients ?? []} units={allClientUnits ?? []} categories={categories ?? []} /></div>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm" aria-label="Totais de clientes e unidades">
-            <span><span className="font-semibold text-foreground">{activeClientsCount}</span> <span className="text-muted-foreground">clientes ativos</span></span>
-            <span><span className="font-semibold text-foreground">{activeUnitsCount}</span> <span className="text-muted-foreground">unidades</span></span>
-            <span className="font-semibold text-foreground">Total geral: <span className="text-[2em] leading-none">{totalActiveRecords}</span></span>
+          <div className="flex flex-wrap items-end gap-x-4 gap-y-1 text-sm" aria-label="Totais de clientes e unidades">
+            <span className="inline-flex items-end"><span className="font-semibold text-foreground">{activeClientsCount}</span>&nbsp;<span className="text-muted-foreground">clientes ativos</span></span>
+            <span className="inline-flex items-end"><span className="font-semibold text-foreground">{activeUnitsCount}</span>&nbsp;<span className="text-muted-foreground">unidades</span></span>
+            <span className="inline-flex items-end gap-1 font-semibold leading-none text-foreground"><span>Total geral:</span><span className="text-[2em] leading-[0.8]">{totalActiveRecords}</span></span>
           </div>
         </CardHeader>
         <CardContent>
