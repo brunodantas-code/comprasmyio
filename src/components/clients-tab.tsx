@@ -50,6 +50,7 @@ export function useClientUnits(clientId?: string) {
 export function ClientsTab({ userId }: { userId: string }) {
   const qc = useQueryClient();
   const { data: clients, isLoading } = useClients();
+  const { data: allClientUnits } = useClientUnits();
   const [newUnits, setNewUnits] = useState<string[]>([]);
   const [expandedClients, setExpandedClients] = useState<Set<string>>(new Set());
   const [clientSearch, setClientSearch] = useState("");
@@ -219,25 +220,28 @@ export function ClientsTab({ userId }: { userId: string }) {
               <TableBody>
                 {!filteredClients.length ? <TableRow><TableCell colSpan={4} className="py-8 text-center text-sm text-muted-foreground">Nenhum cliente encontrado.</TableCell></TableRow> : filteredClients.map((c) => {
                   const expanded = expandedClients.has(c.id);
+                  const hasUnits = (allClientUnits ?? []).some((unit) => unit.client_id === c.id);
                   return (
                   <Fragment key={c.id}>
                     <TableRow key={c.id}>
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-2">
-                          <Button
-                            type="button"
-                            size="compactIcon"
-                            variant="ghost"
-                            onClick={() => setExpandedClients((current) => {
-                              const next = new Set(current);
-                              if (next.has(c.id)) next.delete(c.id); else next.add(c.id);
-                              return next;
-                            })}
-                            title={expanded ? `Recolher unidades de ${c.name}` : `Exibir unidades de ${c.name}`}
-                            aria-label={expanded ? `Recolher unidades de ${c.name}` : `Exibir unidades de ${c.name}`}
-                          >
-                            {expanded ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
-                          </Button>
+                          {hasUnits && (
+                            <Button
+                              type="button"
+                              size="compactIcon"
+                              variant="ghost"
+                              onClick={() => setExpandedClients((current) => {
+                                const next = new Set(current);
+                                if (next.has(c.id)) next.delete(c.id); else next.add(c.id);
+                                return next;
+                              })}
+                              title={expanded ? `Recolher unidades de ${c.name}` : `Exibir unidades de ${c.name}`}
+                              aria-label={expanded ? `Recolher unidades de ${c.name}` : `Exibir unidades de ${c.name}`}
+                            >
+                              {expanded ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                            </Button>
+                          )}
                           <span>{c.name}</span>
                         </div>
                       </TableCell>
@@ -265,7 +269,7 @@ export function ClientsTab({ userId }: { userId: string }) {
                         </div>
                       </TableCell>
                     </TableRow>
-                    {expanded && <TableRow key={`${c.id}-units`} className="hover:bg-transparent"><TableCell colSpan={4} className="px-3 py-4 sm:px-6"><ClientUnitsList client={c} userId={userId} /></TableCell></TableRow>}
+                    {hasUnits && expanded && <TableRow key={`${c.id}-units`} className="hover:bg-transparent"><TableCell colSpan={4} className="px-3 py-4 sm:px-6"><ClientUnitsList client={c} userId={userId} /></TableCell></TableRow>}
                   </Fragment>
                 );})}
               </TableBody>
