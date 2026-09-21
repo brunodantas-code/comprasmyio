@@ -380,3 +380,9 @@
 - [x] Validar envio, estoque, aprovação e visualização em computador e celular
 - [x] Confirmar e informar a categoria atual dos antigos Dispositivos myio
 - [x] Verificar por que produtos myio fabricados do Almoxarifado não aparecem na lista de Materiais
+
+## Dispositivos myio em Cadastro e Solicitações
+- [ ] Adicionar a lista “Dispositivos myio” em Cadastro > Diversos
+- [ ] Adicionar o checkbox “Dispositivos myio” nas categorias da solicitação
+- [ ] Reunir dispositivos e materiais no mesmo Approval, preservando seus fluxos de estoque
+- [ ] Validar cadastro, solicitação e acompanhamento em computador e celular
