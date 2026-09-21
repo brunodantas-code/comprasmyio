@@ -113,6 +113,13 @@
       "when": 1789942724236,
       "tag": "0015_convert_client_to_unit",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1789999344628,
+      "tag": "0016_add_client_city_and_state",
+      "breakpoints": true
     }
   ]
 }

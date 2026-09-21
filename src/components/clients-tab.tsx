@@ -14,10 +14,11 @@ import { Minus, Pencil, Plus, Trash2 } from "lucide-react";
 import { LinkedRecordDeletionDialog } from "@/components/linked-record-deletion-dialog";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 
-export type Client = { id: string; name: string; legal_name: string | null; cnpj: string | null };
+export type Client = { id: string; name: string; legal_name: string | null; cnpj: string | null; city: string | null; state: string | null };
 export type ClientUnit = { id: string; client_id: string; name: string; cnpj: string | null; active: boolean };
 
 const DUPLICATE_CLIENT_MESSAGE = "Este cliente já está cadastrado";
+const BRAZILIAN_STATES = ["AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"];
 const normalizeSearchValue = (value: string | null | undefined) =>
   (value ?? "").toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
@@ -29,7 +30,7 @@ export function useClients() {
   return useQuery({
     queryKey: ["clients"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("clients").select("id,name,legal_name,cnpj").order("name");
+      const { data, error } = await supabase.from("clients").select("id,name,legal_name,cnpj,city,state").order("name");
       if (error) throw error;
       return data as Client[];
     },
@@ -63,7 +64,7 @@ export function ClientsTab({ userId }: { userId: string }) {
   const totalActiveRecords = activeClientsCount + activeUnitsCount;
   const filteredClients = (clients ?? []).filter((client) => {
     if (!normalizedSearch) return true;
-    const clientMatches = [client.name, client.legal_name, client.cnpj].some((value) =>
+    const clientMatches = [client.name, client.legal_name, client.cnpj, client.city, client.state].some((value) =>
       normalizeSearchValue(value).includes(normalizedSearch),
     );
     const unitMatches = (allClientUnits ?? []).some((unit) =>
@@ -73,7 +74,7 @@ export function ClientsTab({ userId }: { userId: string }) {
   });
 
   const create = useMutation({
-    mutationFn: async (v: { name: string; legal_name: string | null; cnpj: string | null; units: string[] }) => {
+    mutationFn: async (v: { name: string; legal_name: string | null; cnpj: string | null; city: string | null; state: string | null; units: string[] }) => {
       const { data: existing, error: lookupError } = await supabase.from("clients").select("id,name");
       if (lookupError) throw lookupError;
       const normalizedName = v.name.trim().toLocaleLowerCase("pt-BR");
@@ -82,7 +83,7 @@ export function ClientsTab({ userId }: { userId: string }) {
       }
       const { data: client, error } = await supabase
         .from("clients")
-        .insert({ name: v.name, legal_name: v.legal_name, cnpj: v.cnpj, created_by: userId })
+        .insert({ name: v.name, legal_name: v.legal_name, cnpj: v.cnpj, city: v.city, state: v.state, created_by: userId })
         .select("id")
         .single();
       if (error) throw new Error(isDuplicateNameError(error) ? DUPLICATE_CLIENT_MESSAGE : error.message);
@@ -103,14 +104,14 @@ export function ClientsTab({ userId }: { userId: string }) {
   });
 
   const update = useMutation({
-    mutationFn: async (v: { id: string; name: string; legal_name: string | null; cnpj: string | null }) => {
+    mutationFn: async (v: { id: string; name: string; legal_name: string | null; cnpj: string | null; city: string | null; state: string | null }) => {
       const { data: existing, error: lookupError } = await supabase.from("clients").select("id,name");
       if (lookupError) throw lookupError;
       const normalizedName = v.name.trim().toLocaleLowerCase("pt-BR");
       if (existing?.some((item) => item.id !== v.id && item.name.trim().toLocaleLowerCase("pt-BR") === normalizedName)) {
         throw new Error(DUPLICATE_CLIENT_MESSAGE);
       }
-      const { error } = await supabase.from("clients").update({ name: v.name, legal_name: v.legal_name, cnpj: v.cnpj }).eq("id", v.id);
+      const { error } = await supabase.from("clients").update({ name: v.name, legal_name: v.legal_name, cnpj: v.cnpj, city: v.city, state: v.state }).eq("id", v.id);
       if (error) throw new Error(isDuplicateNameError(error) ? DUPLICATE_CLIENT_MESSAGE : error.message);
     },
     onSuccess: () => { toast.success("Cliente atualizado"); qc.invalidateQueries({ queryKey: ["clients"] }); },
@@ -159,27 +160,33 @@ export function ClientsTab({ userId }: { userId: string }) {
     const legalName = String(fd.get("legal_name") || "").trim();
     const name = String(fd.get("name") || "").trim();
     const cnpj = String(fd.get("cnpj") || "").trim();
+    const city = String(fd.get("city") || "").trim();
+    const state = String(fd.get("state") || "").trim();
     if (name.length < 2) return toast.error("Nome muito curto");
     const normalizedUnits = newUnits.map((unit) => unit.trim()).filter((unit, index, list) => unit.length >= 2 && list.indexOf(unit) === index);
-    create.mutate({ name, legal_name: legalName || null, cnpj: cnpj || null, units: normalizedUnits }, { onSuccess: () => form.reset() });
+    create.mutate({ name, legal_name: legalName || null, cnpj: cnpj || null, city: city || null, state: state || null, units: normalizedUnits }, { onSuccess: () => form.reset() });
   }
 
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader><CardTitle>Novo cliente</CardTitle></CardHeader>
+        <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
+          <CardTitle>Novo cliente</CardTitle>
+          <div className="flex items-center gap-2">
+            <Button type="button" variant="outline" className="whitespace-nowrap" onClick={() => setNewUnits((current) => [...current, ""])}>
+              <Plus className="mr-1 h-4 w-4" />Filial
+            </Button>
+            <Button type="submit" form="new-client-form" className="whitespace-nowrap px-6" disabled={create.isPending}>Criar</Button>
+          </div>
+        </CardHeader>
         <CardContent>
-          <form onSubmit={onCreate} className="space-y-4">
-            <div className="grid items-end gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_16rem_auto]">
+          <form id="new-client-form" onSubmit={onCreate} className="space-y-4">
+            <div className="grid items-end gap-4 md:grid-cols-2 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1.15fr)_minmax(9rem,.7fr)_6rem_13rem]">
               <div className="min-w-0 space-y-2"><Label htmlFor="c-legal-name">Razão social</Label><Input id="c-legal-name" name="legal_name" /></div>
               <div className="min-w-0 space-y-2"><Label htmlFor="c-name">Nome fantasia</Label><Input id="c-name" name="name" required /></div>
-              <div className="min-w-0 space-y-2"><Label htmlFor="c-cnpj">CNPJ</Label><Input id="c-cnpj" name="cnpj" placeholder="00.000.000/0000-00" /></div>
-              <div className="grid grid-cols-2 gap-2 lg:flex lg:w-auto">
-                <Button type="button" className="whitespace-nowrap" onClick={() => setNewUnits((current) => [...current, ""])}>
-                  <Plus className="mr-1 h-4 w-4" />Filial
-                </Button>
-                <Button type="submit" className="whitespace-nowrap px-6" disabled={create.isPending}>Criar</Button>
-              </div>
+              <div className="min-w-0 space-y-2"><Label htmlFor="c-city">Cidade</Label><Input id="c-city" name="city" /></div>
+              <div className="min-w-0 space-y-2"><Label htmlFor="c-state">UF</Label><Select name="state"><SelectTrigger id="c-state"><SelectValue placeholder="UF" /></SelectTrigger><SelectContent>{BRAZILIAN_STATES.map((state) => <SelectItem key={state} value={state}>{state}</SelectItem>)}</SelectContent></Select></div>
+              <div className="min-w-0 space-y-2"><Label htmlFor="c-cnpj">CNPJ</Label><Input id="c-cnpj" name="cnpj" placeholder="00.000.000/0000-00" maxLength={18} /></div>
             </div>
             {newUnits.length > 0 && (
               <div className="space-y-2">
@@ -219,22 +226,22 @@ export function ClientsTab({ userId }: { userId: string }) {
             !clients?.length ? <p className="text-sm text-muted-foreground">Sem clientes.</p> :
             <Table>
               <TableHeader>
-                <TableRow><TableHead>Nome fantasia</TableHead><TableHead>Razão social</TableHead><TableHead>CNPJ</TableHead><TableHead className="w-20" /></TableRow>
+                <TableRow><TableHead>Nome fantasia</TableHead><TableHead>Razão social</TableHead><TableHead>Cidade</TableHead><TableHead>UF</TableHead><TableHead>CNPJ</TableHead><TableHead className="w-20" /></TableRow>
                 <TableRow className="bg-primary/5 hover:bg-primary/5">
                   <TableHead className="py-1">
                     <Input
                       value={clientSearch}
                       onChange={(event) => setClientSearch(event.target.value)}
                       placeholder="Filtrar clientes"
-                      aria-label="Filtrar clientes por nome fantasia, razão social ou CNPJ"
+                      aria-label="Filtrar clientes por nome fantasia, razão social, cidade, UF ou CNPJ"
                       className="h-8 min-w-36 bg-background"
                     />
                   </TableHead>
-                  <TableHead colSpan={3} />
+                  <TableHead colSpan={5} />
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {!filteredClients.length ? <TableRow><TableCell colSpan={4} className="py-8 text-center text-sm text-muted-foreground">Nenhum cliente encontrado.</TableCell></TableRow> : filteredClients.map((c) => {
+                {!filteredClients.length ? <TableRow><TableCell colSpan={6} className="py-8 text-center text-sm text-muted-foreground">Nenhum cliente encontrado.</TableCell></TableRow> : filteredClients.map((c) => {
                   const unitMatchesSearch = Boolean(normalizedSearch) && (allClientUnits ?? []).some((unit) =>
                     unit.client_id === c.id && [unit.name, unit.cnpj].some((value) => normalizeSearchValue(value).includes(normalizedSearch)),
                   );
@@ -265,6 +272,8 @@ export function ClientsTab({ userId }: { userId: string }) {
                         </div>
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">{c.legal_name || "—"}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{c.city || "—"}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{c.state || "—"}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{c.cnpj || "—"}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1 whitespace-nowrap">
@@ -288,7 +297,7 @@ export function ClientsTab({ userId }: { userId: string }) {
                         </div>
                       </TableCell>
                     </TableRow>
-                    {hasUnits && expanded && <TableRow key={`${c.id}-units`} className="hover:bg-transparent"><TableCell colSpan={4} className="px-3 py-4 sm:px-6"><ClientUnitsList client={c} userId={userId} /></TableCell></TableRow>}
+                    {hasUnits && expanded && <TableRow key={`${c.id}-units`} className="hover:bg-transparent"><TableCell colSpan={6} className="px-3 py-4 sm:px-6"><ClientUnitsList client={c} userId={userId} /></TableCell></TableRow>}
                   </Fragment>
                 );})}
               </TableBody>
@@ -416,16 +425,16 @@ function EditClientDialog({ client, clients, saving, onSave, onConvert }: {
   client: Client;
   clients: Client[];
   saving: boolean;
-  onSave: (v: { name: string; legal_name: string | null; cnpj: string | null }) => Promise<unknown>;
+  onSave: (v: { name: string; legal_name: string | null; cnpj: string | null; city: string | null; state: string | null }) => Promise<unknown>;
   onConvert: (destinationClientId: string) => Promise<unknown>;
 }) {
   const [open, setOpen] = useState(false);
   const [corporateClientId, setCorporateClientId] = useState("none");
   const [confirmConversion, setConfirmConversion] = useState(false);
-  const [pendingValues, setPendingValues] = useState<{ name: string; legal_name: string | null; cnpj: string | null } | null>(null);
+  const [pendingValues, setPendingValues] = useState<{ name: string; legal_name: string | null; cnpj: string | null; city: string | null; state: string | null } | null>(null);
   const corporateClient = clients.find((item) => item.id === corporateClientId);
 
-  async function saveEdit(values: { name: string; legal_name: string | null; cnpj: string | null }) {
+  async function saveEdit(values: { name: string; legal_name: string | null; cnpj: string | null; city: string | null; state: string | null }) {
     try {
       await onSave(values);
       setOpen(false);
@@ -462,8 +471,10 @@ function EditClientDialog({ client, clients, saving, onSave, onConvert }: {
             const legalName = String(fd.get("legal_name") || "").trim();
             const name = String(fd.get("name") || "").trim();
             const cnpj = String(fd.get("cnpj") || "").trim();
+            const city = String(fd.get("city") || "").trim();
+            const state = String(fd.get("state") || "").trim();
             if (name.length < 2) return toast.error("Nome muito curto");
-            const values = { name, legal_name: legalName || null, cnpj: cnpj || null };
+            const values = { name, legal_name: legalName || null, cnpj: cnpj || null, city: city || null, state: state || null };
             if (corporateClientId !== "none") {
               setPendingValues(values);
               setConfirmConversion(true);
@@ -474,7 +485,11 @@ function EditClientDialog({ client, clients, saving, onSave, onConvert }: {
         >
           <div className="space-y-2"><Label>Razão social</Label><Input name="legal_name" defaultValue={client.legal_name ?? ""} /></div>
           <div className="space-y-2"><Label>Nome fantasia</Label><Input name="name" defaultValue={client.name} required /></div>
-          <div className="space-y-2"><Label>CNPJ</Label><Input name="cnpj" defaultValue={client.cnpj ?? ""} /></div>
+          <div className="grid grid-cols-[minmax(0,1fr)_6rem] gap-3">
+            <div className="space-y-2"><Label>Cidade</Label><Input name="city" defaultValue={client.city ?? ""} /></div>
+            <div className="space-y-2"><Label>UF</Label><Select name="state" defaultValue={client.state ?? undefined}><SelectTrigger><SelectValue placeholder="UF" /></SelectTrigger><SelectContent>{BRAZILIAN_STATES.map((state) => <SelectItem key={state} value={state}>{state}</SelectItem>)}</SelectContent></Select></div>
+          </div>
+          <div className="space-y-2"><Label>CNPJ</Label><Input name="cnpj" defaultValue={client.cnpj ?? ""} maxLength={18} /></div>
           <div className="space-y-2">
             <Label>Cliente corporativo</Label>
             <Select value={corporateClientId} onValueChange={setCorporateClientId}>
