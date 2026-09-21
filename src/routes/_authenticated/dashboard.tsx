@@ -508,7 +508,7 @@ function Dashboard() {
                 {me.canAccess("solicitacoes_novas") && <TabsTrigger value="new"><Plus className="mr-2 h-4 w-4" />Novas Solicitações</TabsTrigger>}
               </TabsList>
               {me.canAccess("solicitacoes_minhas") && <TabsContent value="mine"><MyOrders userId={me.id} canManageDevices={isAdmin} /></TabsContent>}
-              {me.canAccess("solicitacoes_novas") && <TabsContent value="new"><NewOrder userId={me.id} canImport={canImport} /></TabsContent>}
+              {me.canAccess("solicitacoes_novas") && <TabsContent value="new"><NewOrder userId={me.id} canImport={canImport} canManageProducts={isAdmin || me.isComprador} /></TabsContent>}
             </Tabs>
 
           </TabsContent>}
@@ -546,7 +546,7 @@ function Dashboard() {
                 {me.canAccess("cadastro_diversos") && <TabsContent value="diversos">
                   <div className="space-y-6">
                     <ClientCategoriesTab />
-                    <MaterialsRegistryTab />
+                    <MaterialsRegistryTab canCreate={isAdmin || me.isComprador} />
                     <RequestTypesTab />
                     <AdditionalStepTypesTab />
                     <StockDestinationsTab />
@@ -1051,7 +1051,7 @@ function useAvgUnitPrice(item: PurchasableItem | null) {
   });
 }
 
-function NewOrder({ userId, canImport = false }: { userId: string; canImport?: boolean }) {
+function NewOrder({ userId, canImport = false, canManageProducts = false }: { userId: string; canImport?: boolean; canManageProducts?: boolean }) {
   const { data: projects, isLoading } = useProjects();
   const { data: budgetSummaries } = useProjectBudgetSummaries();
   const qc = useQueryClient();
@@ -1060,6 +1060,7 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
   const [forStock, setForStock] = useState(false);
   const [requestType, setRequestType] = useState<string>("");
   const requestModel = requestType ? requestTypeModel(requestType, requestTypes) : "";
+  const isMaterialsRequest = requestModel === "materiais";
   const [rhCargo, setRhCargo] = useState("");
   const [rhGestor, setRhGestor] = useState("");
   const [rhMotivo, setRhMotivo] = useState("");
@@ -1247,6 +1248,7 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
         tool_asset_id: isNewItem ? null : (item?.tool_asset_id ?? null),
       };
       if (isNewItem && requestModel === "materiais") {
+        if (!canManageProducts) throw new Error("Somente Admin ou Time de Supply pode cadastrar novos produtos.");
         if (!newItemDest) throw new Error("Selecione o estoque de destino do item novo.");
         const selectedStockType = materialStockTypes?.find((type) => type.code === newItemDest && type.active);
         if (!selectedStockType) throw new Error("O tipo de estoque selecionado não está mais disponível.");
@@ -1433,9 +1435,9 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
         : isRh
         ? `Contratação de RH — ${rhCargo}`
         : (!isMateriais || isNewItem ? newItemName : item!.name),
-      item_link: isReembolso || isRh || isPagamento ? undefined : (itemLink || undefined),
+      item_link: isReembolso || isRh || isPagamento || (isMateriais && !canManageProducts) ? undefined : (itemLink || undefined),
       quantity: isReembolso || isRh || isPagamento ? 1 : (Number(qty) || 1),
-      estimated_value: isReembolso ? reembolsoTotal : isRh ? Number(rhRemuneracao || 0) : isPagamento ? Number(paymentValue) : (Number(estimatedValue) || 0),
+      estimated_value: isReembolso ? reembolsoTotal : isRh ? Number(rhRemuneracao || 0) : isPagamento ? Number(paymentValue) : (isMateriais && !canManageProducts ? 0 : (Number(estimatedValue) || 0)),
       recipient: isRh ? rhGestor : isPagamento ? "Financeiro" : recipient,
       requester_notes: isRh
         ? `${rhTipo === "reposicao" ? "Reposição" : "Nova Contratação"} — Motivo: ${rhMotivo.trim()}${fd.get("requester_notes") ? ` | ${fd.get("requester_notes")}` : ""}`
@@ -1975,10 +1977,10 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
                       <Checkbox checked={!isNewItem} onCheckedChange={() => { setIsNewItem(false); setNewItemName(""); }} />
                       Cadastrado
                     </label>
-                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                    {canManageProducts && <label className="flex cursor-pointer items-center gap-2 text-sm">
                       <Checkbox checked={isNewItem} onCheckedChange={() => { setIsNewItem(true); setItem(null); setItemLink(""); }} />
                       Novo
-                    </label>
+                    </label>}
                   </div>
                   <PurchasableItemPicker value={isNewItem ? null : item} onPick={(i) => { setItem(i); if (i.link) setItemLink(i.link); }} disabled={isNewItem} />
                 </>
@@ -2049,7 +2051,7 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
                 <Label htmlFor="quantity">{requestModel === "viagens" ? (travelType === "aluguel_veiculos" ? "Quantidade de veículos" : "Quantidade de Pessoas") : "Quantidade"}</Label>
                 <Input id="quantity" name="quantity" type="number" min={1} max={99999} className="w-20" value={qty} onChange={(e) => setQty(e.target.value)} required />
               </div>
-              <div className="space-y-2">
+              {(!isMaterialsRequest || canManageProducts) && <div className="space-y-2">
                 <Label htmlFor="estimated_value">Valor unitário estimado (R$)</Label>
                 <div className="relative">
                   <MoneyInput id="estimated_value" name="estimated_value" className="w-32 pr-8" value={estimatedValue} onChange={setEstimatedValue} required />
@@ -2065,7 +2067,7 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
                     value={`R$ ${(Number(estimatedValue || 0) * Number(qty || 1)).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                   />
                 </div>
-              </div>
+              </div>}
               {!isNewItem && item && (
                 <div className="space-y-2">
                   <Label>Valor médio (últimos 6 meses)</Label>
@@ -2105,7 +2107,7 @@ function NewOrder({ userId, canImport = false }: { userId: string; canImport?: b
               )}
             </div>
             )}
-            {requestModel !== "reembolso" && requestModel !== "rh" && requestModel !== "pagamento" && (
+            {requestModel !== "reembolso" && requestModel !== "rh" && requestModel !== "pagamento" && (!isMaterialsRequest || canManageProducts) && (
             <div className="space-y-2">
               <Label htmlFor="item_link">
                 Link de Referência <span className="text-muted-foreground">(opcional)</span>

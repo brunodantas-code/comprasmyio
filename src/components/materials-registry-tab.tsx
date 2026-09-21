@@ -193,7 +193,7 @@ function AddMaterialDialog({ categories }: { categories: MaterialStockType[] }) 
   </Dialog>;
 }
 
-export function MaterialsRegistryTab() {
+export function MaterialsRegistryTab({ canCreate = false }: { canCreate?: boolean }) {
   const queryClient = useQueryClient();
   const [expanded, setExpanded] = useState(false);
   const [search, setSearch] = useState("");
@@ -239,7 +239,7 @@ export function MaterialsRegistryTab() {
           {expanded && <CardDescription>Itens cadastrados e disponíveis para novas solicitações.</CardDescription>}
         </div>
         <div className="flex items-center gap-1">
-          <CollapsibleContent><AddMaterialDialog categories={activeCategories} /></CollapsibleContent>
+          {canCreate && <CollapsibleContent><AddMaterialDialog categories={activeCategories} /></CollapsibleContent>}
           <CollapsibleTrigger asChild>
             <Button size="compactIcon" variant="ghost" aria-label={expanded ? "Recolher Materiais" : "Expandir Materiais"} title={expanded ? "Recolher" : "Expandir"}>
               {expanded ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
