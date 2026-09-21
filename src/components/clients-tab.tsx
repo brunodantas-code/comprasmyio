@@ -480,6 +480,9 @@ function ClientsReportDialog({ clients, units, categories }: { clients: Client[]
       const [{ jsPDF }, autoTableModule] = await Promise.all([import("jspdf"), import("jspdf-autotable")]);
       const autoTable = autoTableModule.default;
       const categoryName = (id: string | null) => categories.find((category) => category.id === id)?.name ?? "Sem categoria";
+      const activeUnits = units.filter((unit) => unit.active);
+      const clientIdsWithActiveUnits = new Set(activeUnits.map((unit) => unit.client_id));
+      const standaloneClients = clients.filter((client) => !clientIdsWithActiveUnits.has(client.id));
       const rows = clients.flatMap((client) => {
         const corporate = [client.name, client.legal_name || "—", categoryName(client.category_id), client.city || "—", client.state || "—", client.cnpj || "—", "Corporativo", client.name];
         const clientUnits = units.filter((unit) => unit.client_id === client.id).map((unit) => [unit.name, "—", categoryName(unit.category_id), unit.city || "—", unit.state || "—", unit.cnpj || "—", unit.active ? "Unidade ativa" : "Unidade inativa", client.name]);
@@ -487,13 +490,13 @@ function ClientsReportDialog({ clients, units, categories }: { clients: Client[]
       });
       const summarize = (getClientGroup: (client: Client) => string, getUnitGroup: (unit: ClientUnit) => string) => {
         const summary = new Map<string, { clients: number; units: number }>();
-        clients.forEach((client) => {
+        standaloneClients.forEach((client) => {
           const group = getClientGroup(client);
           const current = summary.get(group) ?? { clients: 0, units: 0 };
           current.clients += 1;
           summary.set(group, current);
         });
-        units.forEach((unit) => {
+        activeUnits.forEach((unit) => {
           const group = getUnitGroup(unit);
           const current = summary.get(group) ?? { clients: 0, units: 0 };
           current.units += 1;
@@ -512,7 +515,7 @@ function ClientsReportDialog({ clients, units, categories }: { clients: Client[]
       doc.setFontSize(16);
       doc.text("Relatório de Clientes", 14, 15);
       doc.setFontSize(9);
-      doc.text(`Ordenação: ${orderLabel} | ${clients.length} clientes | ${units.length} unidades | Total: ${clients.length + units.length}`, 14, 21);
+      doc.text(`Ordenação: ${orderLabel} | ${standaloneClients.length} clientes sem unidades | ${activeUnits.length} unidades | Total: ${standaloneClients.length + activeUnits.length}`, 14, 21);
       doc.setFontSize(11);
       doc.text("Totalizadores por UF", 10, 31);
       doc.text("Totalizadores por categoria", 154, 31);
