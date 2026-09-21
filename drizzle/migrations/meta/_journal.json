@@ -162,6 +162,13 @@
       "when": 1790014193839,
       "tag": "0022_route_myio_device_orders_through_materials",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1790014295504,
+      "tag": "0023_allow_supply_to_create_material_products",
+      "breakpoints": true
     }
   ]
 }
