@@ -93,7 +93,7 @@ export function ClientsTab({ userId }: { userId: string }) {
       if (error) throw new Error(isDuplicateNameError(error) ? DUPLICATE_CLIENT_MESSAGE : error.message);
       if (v.units.length) {
         const { error: unitsError } = await supabase.from("client_units").insert(
-          v.units.map((unit) => ({ client_id: client.id, name: unit.name, city: unit.city || null, state: unit.state || null, created_by: userId })),
+          v.units.map((unit) => ({ client_id: client.id, name: unit.name, city: unit.city || null, state: unit.state || null, category_id: v.category_id, created_by: userId })),
         );
         if (unitsError) throw unitsError;
       }
@@ -243,7 +243,7 @@ export function ClientsTab({ userId }: { userId: string }) {
                       value={clientSearch}
                       onChange={(event) => setClientSearch(event.target.value)}
                       placeholder="Filtrar clientes"
-                      aria-label="Filtrar clientes por nome fantasia, razão social, cidade, UF ou CNPJ"
+                      aria-label="Filtrar clientes por nome fantasia, razão social, categoria, cidade, UF ou CNPJ"
                       className="h-8 min-w-36 bg-background"
                     />
                   </TableHead>
@@ -429,7 +429,7 @@ function UnitDialog({ title, unit, categories, saving, onSave, trigger }: { titl
           const cnpj = String(formData.get("cnpj") || "").trim();
            const city = String(formData.get("city") || "").trim();
            const state = String(formData.get("state") || "").trim();
-           const categoryId = String(formData.get("category_id") || "").trim();
+            const categoryId = String(formData.get("category_id") || "").trim();
           if (name.length < 2) return toast.error("Informe o nome da unidade");
             try { await onSave({ name, cnpj: cnpj || null, city: city || null, state: state || null, category_id: categoryId || null }); setOpen(false); } catch { /* A alteração exibe a mensagem. */ }
         }}>
@@ -438,7 +438,7 @@ function UnitDialog({ title, unit, categories, saving, onSave, trigger }: { titl
              <div className="grid grid-rows-[auto_2.25rem] gap-2"><Label>Cidade</Label><Input name="city" defaultValue={unit?.city ?? ""} /></div>
              <div className="grid grid-rows-[auto_2.25rem] gap-2"><Label>UF</Label><Select name="state" defaultValue={unit?.state ?? undefined}><SelectTrigger className="h-9"><SelectValue placeholder="UF" /></SelectTrigger><SelectContent>{BRAZILIAN_STATES.map((state) => <SelectItem key={state} value={state}>{state}</SelectItem>)}</SelectContent></Select></div>
            </div>
-           <div className="space-y-2"><Label>Categoria</Label><Select name="category_id" defaultValue={unit?.category_id ?? undefined}><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent>{categories.map((category) => <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>)}</SelectContent></Select></div>
+           <div className="space-y-2"><Label>Categoria</Label><Select name="category_id" defaultValue={unit?.category_id ?? "none"}><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent><SelectItem value="none">Sem categoria</SelectItem>{categories.map((category) => <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>)}</SelectContent></Select></div>
           <div className="space-y-2"><Label>CNPJ</Label><Input name="cnpj" defaultValue={unit?.cnpj ?? ""} placeholder="00.000.000/0000-00" /></div>
           <DialogFooter><Button type="submit" disabled={saving}>Salvar</Button></DialogFooter>
         </form>
@@ -558,7 +558,7 @@ function EditClientDialog({ client, clients, categories, saving, onSave, onConve
             const state = String(fd.get("state") || "").trim();
             const categoryId = String(fd.get("category_id") || "").trim();
             if (name.length < 2) return toast.error("Nome muito curto");
-            const values = { name, legal_name: legalName || null, cnpj: cnpj || null, city: city || null, state: state || null, category_id: categoryId || null };
+            const values = { name, legal_name: legalName || null, cnpj: cnpj || null, city: city || null, state: state || null, category_id: categoryId === "none" ? null : categoryId || null };
             if (corporateClientId !== "none") {
               setPendingValues(values);
               setConfirmConversion(true);
@@ -569,7 +569,7 @@ function EditClientDialog({ client, clients, categories, saving, onSave, onConve
         >
           <div className="space-y-2"><Label>Razão social</Label><Input name="legal_name" defaultValue={client.legal_name ?? ""} /></div>
           <div className="space-y-2"><Label>Nome fantasia</Label><Input name="name" defaultValue={client.name} required /></div>
-          <div className="space-y-2"><Label>Categoria</Label><Select name="category_id" defaultValue={client.category_id ?? undefined}><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent>{categories.map((category) => <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>)}</SelectContent></Select></div>
+          <div className="space-y-2"><Label>Categoria</Label><Select name="category_id" defaultValue={client.category_id ?? "none"}><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent><SelectItem value="none">Sem categoria</SelectItem>{categories.map((category) => <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>)}</SelectContent></Select></div>
           <div className="grid grid-cols-[minmax(0,1fr)_6rem] gap-3">
             <div className="space-y-2"><Label>Cidade</Label><Input name="city" defaultValue={client.city ?? ""} /></div>
             <div className="space-y-2"><Label>UF</Label><Select name="state" defaultValue={client.state ?? undefined}><SelectTrigger><SelectValue placeholder="UF" /></SelectTrigger><SelectContent>{BRAZILIAN_STATES.map((state) => <SelectItem key={state} value={state}>{state}</SelectItem>)}</SelectContent></Select></div>
