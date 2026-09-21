@@ -354,6 +354,6 @@
 - [x] Validar o mapa em computador e celular
 
 ## Totalizadores do relatório de clientes
-- [ ] Incluir resumo por UF com clientes, unidades e total
-- [ ] Incluir resumo por categoria com clientes, unidades e total
-- [ ] Validar todas as páginas do PDF
+- [x] Incluir resumo por UF com clientes, unidades e total
+- [x] Incluir resumo por categoria com clientes, unidades e total
+- [x] Validar todas as páginas do PDF
