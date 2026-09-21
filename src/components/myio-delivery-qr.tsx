@@ -14,6 +14,7 @@ import {
 import { QrScannerDialog, GalleryQrButton, ManualQrDialog } from "@/components/homologation";
 import { Boxes, QrCode, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 
 export type LinkedQr = {
   qr_value: string;
@@ -387,17 +388,7 @@ export function QrLinkPicker({
               <li key={v.qr_value} className="flex items-center gap-2 text-xs">
                 <QrCode className="h-3 w-3 shrink-0 text-muted-foreground" />
                 <span className="min-w-0 flex-1 break-all">{v.qr_value}</span>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="compactIcon"
-                  className="text-destructive hover:text-destructive"
-                  title="Remover QR code"
-                  aria-label="Remover QR code"
-                  onClick={() => onChange(value.filter((x) => x.qr_value !== v.qr_value))}
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
+                <ConfirmDeleteButton title="Remover QR code?" description={`Confirma a remoção do QR code “${v.qr_value}”?`} ariaLabel="Remover QR code" confirmLabel="Remover" onConfirm={() => onChange(value.filter((x) => x.qr_value !== v.qr_value))} trigger={<Button type="button" variant="ghost" size="compactIcon" className="text-destructive hover:text-destructive" title="Remover QR code" aria-label="Remover QR code"><Trash2 className="h-3.5 w-3.5" /></Button>} />
               </li>
             ))}
           </ul>

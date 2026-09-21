@@ -388,3 +388,8 @@
 - [x] Reunir dispositivos e materiais no mesmo Approval, preservando seus fluxos de estoque
 - [x] Validar cadastro, solicitação e acompanhamento em computador e celular
 - [x] Confirmar visualmente a prévia antes de informar conclusão ou orientar nova publicação
+
+## Confirmação obrigatória em exclusões
+- [x] Exigir confirmação ao remover materiais, anexos, trechos, reembolsos, unidades e QR codes em formulários
+- [x] Auditar novamente todas as ações de exclusão do sistema
+- [x] Validar cancelamento e confirmação no computador e celular

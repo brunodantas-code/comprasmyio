@@ -229,9 +229,7 @@ export function ClientsTab({ userId }: { userId: string }) {
                       />
                        <Input className="col-span-3 md:col-span-1 md:col-start-2 md:row-start-1" value={unit.city} onChange={(event) => setNewUnits((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, city: event.target.value } : item))} placeholder="Cidade" aria-label={`Cidade da unidade ${index + 1}`} />
                        <Select value={unit.state} onValueChange={(state) => setNewUnits((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, state } : item))}><SelectTrigger className="h-9" aria-label={`UF da unidade ${index + 1}`}><SelectValue placeholder="UF" /></SelectTrigger><SelectContent>{BRAZILIAN_STATES.map((state) => <SelectItem key={state} value={state}>{state}</SelectItem>)}</SelectContent></Select>
-                      <Button type="button" variant="ghost" size="compactIcon" className="text-destructive hover:text-destructive" onClick={() => setNewUnits((current) => current.filter((_, itemIndex) => itemIndex !== index))} aria-label="Remover unidade" title="Remover unidade">
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
+                      <ConfirmDeleteButton title="Remover unidade?" description={`Confirma a remoção de “${unit.name || `Unidade ${index + 1}`}” deste cadastro?`} ariaLabel="Remover unidade" confirmLabel="Remover" onConfirm={() => setNewUnits((current) => current.filter((_, itemIndex) => itemIndex !== index))} trigger={<Button type="button" variant="ghost" size="compactIcon" className="text-destructive hover:text-destructive" aria-label="Remover unidade" title="Remover unidade"><Trash2 className="h-3.5 w-3.5" /></Button>} />
                     </div>
                   ))}
                 </div>

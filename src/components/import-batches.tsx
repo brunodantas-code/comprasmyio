@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { Plus, Paperclip, Trash2, Plane, ExternalLink, FileSpreadsheet } from "lucide-react";
 import * as XLSX from "xlsx";
 import { matchCiSpreadsheet } from "@/lib/import-ci.functions";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 
 const BUCKET = "order-attachments";
 const MAX_FILES = 10;
@@ -264,9 +265,7 @@ export function NewImportDialog({ userId, triggerLabel = "Nova importação", in
               {files.map((f, i) => (
                 <li key={i} className="flex items-center justify-between rounded border px-2 py-1">
                   <span className="truncate">{f.name} <span className="text-muted-foreground">({Math.round(f.size / 1024)} KB)</span></span>
-                   <Button type="button" variant="ghost" size="compactIcon" className="text-destructive hover:text-destructive" onClick={() => setFiles(files.filter((_, j) => j !== i))} title="Remover anexo" aria-label="Remover anexo">
-                     <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
+                   <ConfirmDeleteButton title="Remover anexo?" description={`Confirma a remoção de “${f.name}”?`} ariaLabel="Remover anexo" confirmLabel="Remover" onConfirm={() => setFiles(files.filter((_, j) => j !== i))} trigger={<Button type="button" variant="ghost" size="compactIcon" className="text-destructive hover:text-destructive" title="Remover anexo" aria-label="Remover anexo"><Trash2 className="h-3.5 w-3.5" /></Button>} />
                 </li>
               ))}
             </ul>
@@ -336,9 +335,7 @@ export function NewImportDialog({ userId, triggerLabel = "Nova importação", in
                         return <p className="mt-1.5 pr-1 text-[11px] text-muted-foreground">{`${l * i.lotQuantity} unid.`}</p>;
                       })()}
                     </div>
-                    <Button type="button" variant="ghost" size="compactIcon" className="text-destructive hover:text-destructive" onClick={() => setRemoved((p) => new Set(p).add(i.key))} title="Remover item" aria-label="Remover item">
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
+                    <ConfirmDeleteButton title="Remover item?" description={`Confirma a remoção de “${i.name}” desta importação?`} ariaLabel="Remover item" confirmLabel="Remover" onConfirm={() => setRemoved((p) => new Set(p).add(i.key))} trigger={<Button type="button" variant="ghost" size="compactIcon" className="text-destructive hover:text-destructive" title="Remover item" aria-label="Remover item"><Trash2 className="h-3.5 w-3.5" /></Button>} />
                   </div>
                 </div>
               ))}
@@ -391,9 +388,7 @@ export function NewImportDialog({ userId, triggerLabel = "Nova importação", in
               {files.map((f, i) => (
                 <li key={i} className="flex items-center justify-between rounded border px-2 py-1">
                   <span className="truncate">{f.name} <span className="text-muted-foreground">({Math.round(f.size / 1024)} KB)</span></span>
-                   <Button type="button" variant="ghost" size="compactIcon" className="text-destructive hover:text-destructive" onClick={() => setFiles(files.filter((_, j) => j !== i))} title="Remover anexo" aria-label="Remover anexo">
-                     <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
+                   <ConfirmDeleteButton title="Remover anexo?" description={`Confirma a remoção de “${f.name}”?`} ariaLabel="Remover anexo" confirmLabel="Remover" onConfirm={() => setFiles(files.filter((_, j) => j !== i))} trigger={<Button type="button" variant="ghost" size="compactIcon" className="text-destructive hover:text-destructive" title="Remover anexo" aria-label="Remover anexo"><Trash2 className="h-3.5 w-3.5" /></Button>} />
                 </li>
               ))}
             </ul>
@@ -463,9 +458,7 @@ export function NewImportDialog({ userId, triggerLabel = "Nova importação", in
                         return <p className="mt-1.5 pr-1 text-[11px] text-muted-foreground">{`${l * i.lotQuantity} unid.`}</p>;
                       })()}
                     </div>
-                    <Button type="button" variant="ghost" size="compactIcon" className="text-destructive hover:text-destructive" onClick={() => setRemoved((p) => new Set(p).add(i.key))} title="Remover item" aria-label="Remover item">
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
+                    <ConfirmDeleteButton title="Remover item?" description={`Confirma a remoção de “${i.name}” desta importação?`} ariaLabel="Remover item" confirmLabel="Remover" onConfirm={() => setRemoved((p) => new Set(p).add(i.key))} trigger={<Button type="button" variant="ghost" size="compactIcon" className="text-destructive hover:text-destructive" title="Remover item" aria-label="Remover item"><Trash2 className="h-3.5 w-3.5" /></Button>} />
                   </div>
                 </div>
               ))}
