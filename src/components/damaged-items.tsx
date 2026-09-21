@@ -177,8 +177,8 @@ export function DamageItemDialog({
   return (
     <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) reset(); }}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="ghost" title="Registrar avaria (baixa do estoque)">
-          <AlertTriangle className="h-4 w-4 text-primary-foreground" />
+        <Button size="compactIcon" variant="ghost" title="Registrar avaria (baixa do estoque)" aria-label="Registrar avaria">
+          <AlertTriangle className="h-3.5 w-3.5 text-primary-foreground" />
         </Button>
       </DialogTrigger>
       <DialogContent className="max-h-[88vh] overflow-y-auto">
