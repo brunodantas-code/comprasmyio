@@ -79,6 +79,7 @@ export function LinkedRecordDeletionDialog({
         if (linksError) throw linksError;
         return (data ?? []).map((link: ClientLink) => ({
           key: link.record_key,
+          type: link.record_key.split(":", 1)[0],
           label: link.record_label,
           detail: link.record_detail,
         }));
@@ -88,7 +89,7 @@ export function LinkedRecordDeletionDialog({
         if (linksError) throw linksError;
         return (data ?? []).map((link: ClientLink) => ({
           key: link.record_key,
-          type: link.record_type,
+          type: link.record_key.split(":", 1)[0],
           label: link.record_label,
           detail: link.record_detail,
         }));
