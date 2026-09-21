@@ -7,8 +7,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import type { Client, ClientUnit } from "@/components/clients-tab";
 
 type Marker = { x: number; y: number };
+type BrazilLocation = { id: string; name: string; path: string };
 
 export function ClientsMapDialog({ clients, units }: { clients: Client[]; units: ClientUnit[] }) {
+  const [open, setOpen] = useState(false);
   const [hoveredState, setHoveredState] = useState<string | null>(null);
   const [markers, setMarkers] = useState<Record<string, Marker>>({});
   const svgRef = useRef<SVGSVGElement>(null);
@@ -32,15 +34,15 @@ export function ClientsMapDialog({ clients, units }: { clients: Client[]; units:
       next[state] = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
     });
     setMarkers(next);
-  }, []);
+  }, [open]);
 
-  return <Dialog>
+  return <Dialog open={open} onOpenChange={setOpen}>
     <DialogTrigger asChild><Button type="button" size="compactIcon" variant="ghost" title="Mapa de unidades por UF" aria-label="Mapa de unidades por UF"><MapPinned /></Button></DialogTrigger>
     <DialogContent className="max-w-5xl overflow-hidden">
       <DialogHeader><DialogTitle>Unidades por UF</DialogTitle></DialogHeader>
       <div className="relative min-h-[34rem] overflow-hidden rounded-md border bg-muted/20">
         <svg ref={svgRef} viewBox={Brazil.viewBox} className="mx-auto h-[34rem] w-full max-w-2xl" role="img" aria-label="Mapa interativo do Brasil com unidades por estado">
-          {Brazil.locations.map((location) => {
+          {(Brazil.locations as BrazilLocation[]).map((location) => {
             const state = location.id.toUpperCase();
             const active = hoveredState === state;
             return <path key={location.id} data-state={state} d={location.path} onMouseEnter={() => setHoveredState(state)} onMouseLeave={() => setHoveredState(null)} onClick={() => setHoveredState(state)} className={`cursor-pointer stroke-background stroke-[1.5] transition-colors ${active ? "fill-primary/35" : unitsByState[state]?.length ? "fill-primary/20 hover:fill-primary/35" : "fill-muted hover:fill-primary/35"}`}><title>{location.name}: {unitsByState[state]?.length ?? 0} unidades</title></path>;
