@@ -12,6 +12,7 @@ type BrazilLocation = { id: string; name: string; path: string };
 export function ClientsMapDialog({ clients, units }: { clients: Client[]; units: ClientUnit[] }) {
   const [open, setOpen] = useState(false);
   const [hoveredState, setHoveredState] = useState<string | null>(null);
+  const [selectedState, setSelectedState] = useState<string | null>(null);
   const [markers, setMarkers] = useState<Record<string, Marker>>({});
   const svgRef = useRef<SVGSVGElement>(null);
   const clientsById = new Map(clients.map((client) => [client.id, client]));
@@ -21,7 +22,8 @@ export function ClientsMapDialog({ clients, units }: { clients: Client[]; units:
     groups[state] = [...(groups[state] ?? []), unit];
     return groups;
   }, {});
-  const hoveredUnits = hoveredState ? unitsByState[hoveredState] ?? [] : [];
+  const visibleState = selectedState ?? hoveredState;
+  const visibleUnits = visibleState ? unitsByState[visibleState] ?? [] : [];
 
   useEffect(() => {
     if (!open) return;
@@ -40,16 +42,24 @@ export function ClientsMapDialog({ clients, units }: { clients: Client[]; units:
     return () => cancelAnimationFrame(frame);
   }, [open]);
 
-  return <Dialog open={open} onOpenChange={setOpen}>
+  function handleOpenChange(nextOpen: boolean) {
+    setOpen(nextOpen);
+    if (!nextOpen) {
+      setHoveredState(null);
+      setSelectedState(null);
+    }
+  }
+
+  return <Dialog open={open} onOpenChange={handleOpenChange}>
     <DialogTrigger asChild><Button type="button" size="compactIcon" variant="ghost" title="Mapa de unidades por UF" aria-label="Mapa de unidades por UF"><MapPinned /></Button></DialogTrigger>
     <DialogContent className="max-w-5xl overflow-hidden">
       <DialogHeader><DialogTitle>Unidades por UF</DialogTitle></DialogHeader>
-      <div className="relative min-h-[34rem] overflow-hidden rounded-md border bg-muted/20">
+      <div className="relative min-h-[34rem] overflow-hidden rounded-md border bg-muted/20" onClick={() => setSelectedState(null)}>
         <svg ref={svgRef} viewBox={Brazil.viewBox} className="mx-auto h-[34rem] w-full max-w-2xl" role="img" aria-label="Mapa interativo do Brasil com unidades por estado">
           {(Brazil.locations as BrazilLocation[]).map((location) => {
             const state = location.id.toUpperCase();
-            const active = hoveredState === state;
-            return <path key={location.id} data-state={state} d={location.path} onMouseEnter={() => setHoveredState(state)} onMouseLeave={() => setHoveredState(null)} onClick={() => setHoveredState(state)} className={`cursor-pointer stroke-background stroke-[1.5] transition-colors ${active ? "fill-primary/35" : unitsByState[state]?.length ? "fill-primary/20 hover:fill-primary/35" : "fill-muted hover:fill-primary/35"}`}><title>{location.name}: {unitsByState[state]?.length ?? 0} unidades</title></path>;
+            const active = visibleState === state;
+            return <path key={location.id} data-state={state} d={location.path} onMouseEnter={() => setHoveredState(state)} onMouseLeave={() => setHoveredState(null)} onClick={(event) => { event.stopPropagation(); setSelectedState((current) => current === state ? null : state); }} className={`cursor-pointer stroke-background stroke-[1.5] transition-colors ${active ? "fill-primary/35" : unitsByState[state]?.length ? "fill-primary/20 hover:fill-primary/35" : "fill-muted hover:fill-primary/35"}`}><title>{location.name}: {unitsByState[state]?.length ?? 0} unidades</title></path>;
           })}
           {Object.entries(unitsByState).map(([state, stateUnits]) => {
             const marker = markers[state];
@@ -57,9 +67,9 @@ export function ClientsMapDialog({ clients, units }: { clients: Client[]; units:
             return <g key={state} pointerEvents="none"><circle cx={marker.x} cy={marker.y} r="13" className="fill-primary stroke-background stroke-2" /><text x={marker.x} y={marker.y + 4} textAnchor="middle" className="fill-primary-foreground text-[11px] font-bold">{stateUnits.length}</text></g>;
           })}
         </svg>
-        {hoveredState && <div className="pointer-events-none absolute right-4 top-4 max-h-[28rem] w-72 overflow-y-auto rounded-md border bg-background/95 p-3 shadow-lg backdrop-blur-sm">
-          <p className="font-semibold">{hoveredState} · {hoveredUnits.length} {hoveredUnits.length === 1 ? "unidade" : "unidades"}</p>
-          {!hoveredUnits.length ? <p className="mt-2 text-sm text-muted-foreground">Nenhuma unidade cadastrada nesta UF.</p> : <div className="mt-2 space-y-2">{hoveredUnits.map((unit) => <div key={unit.id} className="border-t pt-2 first:border-0 first:pt-0"><p className="text-sm font-medium">{unit.name}</p><p className="text-xs text-muted-foreground">Corporativo: {clientsById.get(unit.client_id)?.name ?? "—"}</p></div>)}</div>}
+        {visibleState && <div className={`absolute right-4 top-4 max-h-[28rem] w-72 overflow-y-auto rounded-md border bg-background/95 p-3 shadow-lg backdrop-blur-sm ${selectedState ? "pointer-events-auto" : "pointer-events-none"}`} onClick={(event) => event.stopPropagation()}>
+          <p className="font-semibold">{visibleState} · {visibleUnits.length} {visibleUnits.length === 1 ? "unidade" : "unidades"}</p>
+          {!visibleUnits.length ? <p className="mt-2 text-sm text-muted-foreground">Nenhuma unidade cadastrada nesta UF.</p> : <div className="mt-2 space-y-2">{visibleUnits.map((unit) => <div key={unit.id} className="border-t pt-2 first:border-0 first:pt-0"><p className="text-sm font-medium">{unit.name}</p><p className="text-xs text-muted-foreground">Corporativo: {clientsById.get(unit.client_id)?.name ?? "—"}</p></div>)}</div>}
         </div>}
       </div>
     </DialogContent>
