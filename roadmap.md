@@ -397,8 +397,8 @@
 ## Pesquisa nos destinos de realocação
 - [x] Permitir digitar para filtrar projetos, clientes e unidades/filiais
 - [x] Manter os destinos agrupados por categoria
-- [ ] Validar a seleção pesquisável em computador e celular
+- [x] Validar a seleção pesquisável em computador e celular
 
 ## Realocação de Novos Produtos P&D
-- [ ] Realocar os Approvals 202607210001, 202607290001 e 202607300001 para Interna
-- [ ] Preservar e conferir os vínculos derivados dos três Approvals
+- [x] Realocar os Approvals 202607210001, 202607290001 e 202607300001 para Interna
+- [x] Preservar e conferir os vínculos derivados dos três Approvals
