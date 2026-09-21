@@ -378,3 +378,4 @@
 - [ ] Compartilhar destinatário, entrega, prazo, observações e anexos
 - [ ] Gerar um único Approval para todos os materiais da solicitação
 - [ ] Validar envio, estoque, aprovação e visualização em computador e celular
+- [ ] Confirmar e informar a categoria atual dos antigos Dispositivos myio
