@@ -1981,6 +1981,7 @@ export type Database = {
           name: string
           photo_url: string | null
           purchase_type: string | null
+          stock_type_code: string | null
           updated_at: string
         }
         Insert: {
@@ -1999,6 +2000,7 @@ export type Database = {
           name: string
           photo_url?: string | null
           purchase_type?: string | null
+          stock_type_code?: string | null
           updated_at?: string
         }
         Update: {
@@ -2017,9 +2019,18 @@ export type Database = {
           name?: string
           photo_url?: string | null
           purchase_type?: string | null
+          stock_type_code?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "materials_stock_type_code_fkey"
+            columns: ["stock_type_code"]
+            isOneToOne: false
+            referencedRelation: "material_stock_types"
+            referencedColumns: ["code"]
+          },
+        ]
       }
       myio_delivery_qrs: {
         Row: {
@@ -3211,6 +3222,7 @@ export type Database = {
           name: string
           photo_url: string | null
           purchase_type: string | null
+          stock_type_code: string | null
           updated_at: string
         }
         Insert: {
@@ -3225,6 +3237,7 @@ export type Database = {
           name: string
           photo_url?: string | null
           purchase_type?: string | null
+          stock_type_code?: string | null
           updated_at?: string
         }
         Update: {
@@ -3239,9 +3252,18 @@ export type Database = {
           name?: string
           photo_url?: string | null
           purchase_type?: string | null
+          stock_type_code?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "terceiros_materials_stock_type_code_fkey"
+            columns: ["stock_type_code"]
+            isOneToOne: false
+            referencedRelation: "material_stock_types"
+            referencedColumns: ["code"]
+          },
+        ]
       }
       terceiros_movements: {
         Row: {
@@ -3317,6 +3339,7 @@ export type Database = {
           name: string
           photo_url: string | null
           purchase_type: string | null
+          stock_type_code: string | null
           updated_at: string
         }
         Insert: {
@@ -3331,6 +3354,7 @@ export type Database = {
           name: string
           photo_url?: string | null
           purchase_type?: string | null
+          stock_type_code?: string | null
           updated_at?: string
         }
         Update: {
@@ -3345,9 +3369,18 @@ export type Database = {
           name?: string
           photo_url?: string | null
           purchase_type?: string | null
+          stock_type_code?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tool_assets_stock_type_code_fkey"
+            columns: ["stock_type_code"]
+            isOneToOne: false
+            referencedRelation: "material_stock_types"
+            referencedColumns: ["code"]
+          },
+        ]
       }
       tool_movements: {
         Row: {
