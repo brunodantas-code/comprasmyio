@@ -477,7 +477,14 @@ export function PendingForMe() {
                     </TableCell>
                     <TableCell className="text-sm">{o?.quantity ?? 1}</TableCell>
                     <TableCell className="text-sm">{o?.request_model === "dispositivos" ? "Por quantidade" : BRL(Number(o?.estimated_value ?? 0))}</TableCell>
-                    <TableCell className="text-sm">{o?.allocation_type === "interna" ? "Interna" : o?.for_stock ? "Estoque" : o?.projects?.name ?? o?.clients?.name ?? "—"}</TableCell>
+                    <TableCell className="text-sm">
+                      <div>{o?.allocation_type === "interna" ? "Interna" : o?.for_stock ? "Estoque" : o?.projects?.name ?? o?.clients?.name ?? "—"}</div>
+                      {o?.allocation_type === "cliente" ? (
+                        <div className="text-xs text-muted-foreground">Cliente</div>
+                      ) : !o?.for_stock && o?.allocation_type !== "interna" && o?.projects?.name ? (
+                        <div className="text-xs text-muted-foreground">Projeto</div>
+                      ) : null}
+                    </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <ApproveButton step={s} onDone={refresh} />
