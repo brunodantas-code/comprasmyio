@@ -83,7 +83,11 @@ export function ClientsMapDialog({ clients, units, categories }: { clients: Clie
           {Object.entries(entriesByState).map(([state, stateEntries]) => {
             const marker = markers[state];
             if (!marker) return null;
-            return <g key={state} pointerEvents="none"><circle cx={marker.x} cy={marker.y} r="13" className="fill-primary stroke-background stroke-2" /><text x={marker.x} y={marker.y + 4} textAnchor="middle" className="fill-primary-foreground text-[11px] font-bold">{stateEntries.length}</text></g>;
+            return <g key={state} className="cursor-pointer" onMouseEnter={() => setHoveredState(state)} onMouseLeave={() => setHoveredState(null)} onClick={(event) => { event.stopPropagation(); setSelectedState((current) => current === state ? null : state); }}>
+              <title>Selecionar {state}: {stateEntries.length} cadastros</title>
+              <circle cx={marker.x} cy={marker.y} r="13" className={`stroke-background stroke-2 transition-colors ${visibleState === state ? "fill-primary/80" : "fill-primary hover:fill-primary/80"}`} />
+              <text x={marker.x} y={marker.y + 4} textAnchor="middle" pointerEvents="none" className="fill-primary-foreground text-[11px] font-bold">{stateEntries.length}</text>
+            </g>;
           })}
         </svg>
         {visibleState && <div className={`absolute right-4 top-4 max-h-[28rem] w-72 overflow-y-auto rounded-md border bg-background/95 p-3 shadow-lg backdrop-blur-sm ${selectedState ? "pointer-events-auto" : "pointer-events-none"}`} onClick={(event) => event.stopPropagation()}>
