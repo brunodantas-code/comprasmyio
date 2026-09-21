@@ -61,6 +61,7 @@ export function ClientsTab({ userId }: { userId: string }) {
   const [newUnits, setNewUnits] = useState<NewClientUnit[]>([]);
   const [expandedClients, setExpandedClients] = useState<Set<string>>(new Set());
   const [clientSearch, setClientSearch] = useState("");
+  const [clientSort, setClientSort] = useState<"name" | "category" | "state" | "city">("name");
 
   const normalizedSearch = normalizeSearchValue(clientSearch.trim());
   const activeClientsCount = clients?.length ?? 0;
@@ -76,6 +77,11 @@ export function ClientsTab({ userId }: { userId: string }) {
       unit.client_id === client.id && [unit.name, categories?.find((category) => category.id === unit.category_id)?.name, unit.cnpj, unit.city, unit.state].some((value) => normalizeSearchValue(value).includes(normalizedSearch)),
     );
     return clientMatches || unitMatches;
+  }).sort((first, second) => {
+    const categoryName = (client: Client) => categories?.find((category) => category.id === client.category_id)?.name ?? "";
+    const firstValue = clientSort === "category" ? categoryName(first) : clientSort === "state" ? first.state ?? "" : clientSort === "city" ? first.city ?? "" : first.name;
+    const secondValue = clientSort === "category" ? categoryName(second) : clientSort === "state" ? second.state ?? "" : clientSort === "city" ? second.city ?? "" : second.name;
+    return firstValue.localeCompare(secondValue, "pt-BR", { sensitivity: "base" }) || first.name.localeCompare(second.name, "pt-BR", { sensitivity: "base" });
   });
 
   const create = useMutation({
@@ -225,7 +231,20 @@ export function ClientsTab({ userId }: { userId: string }) {
 
       <Card>
         <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2"><CardTitle>Clientes</CardTitle><ClientsReportDialog clients={clients ?? []} units={allClientUnits ?? []} categories={categories ?? []} /><ClientsMapDialog clients={clients ?? []} units={allClientUnits ?? []} categories={categories ?? []} /></div>
+          <div className="flex flex-wrap items-center gap-2">
+            <CardTitle>Clientes</CardTitle>
+            <ClientsReportDialog clients={clients ?? []} units={allClientUnits ?? []} categories={categories ?? []} />
+            <ClientsMapDialog clients={clients ?? []} units={allClientUnits ?? []} categories={categories ?? []} />
+            <Select value={clientSort} onValueChange={(value: "name" | "category" | "state" | "city") => setClientSort(value)}>
+              <SelectTrigger className="h-8 w-40" aria-label="Ordenar clientes"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="name">Ordenar por nome</SelectItem>
+                <SelectItem value="category">Ordenar por categoria</SelectItem>
+                <SelectItem value="state">Ordenar por UF</SelectItem>
+                <SelectItem value="city">Ordenar por cidade</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <div className="flex flex-wrap items-end gap-x-4 gap-y-1 text-sm" aria-label="Totais de clientes e unidades">
             <span className="inline-flex items-end"><span className="font-semibold text-foreground">{activeClientsCount}</span>&nbsp;<span className="text-muted-foreground">clientes ativos</span></span>
             <span className="inline-flex items-end"><span className="font-semibold text-foreground">{activeUnitsCount}</span>&nbsp;<span className="text-muted-foreground">unidades</span></span>
