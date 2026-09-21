@@ -431,7 +431,7 @@ function UnitDialog({ title, unit, categories, saving, onSave, trigger }: { titl
            const state = String(formData.get("state") || "").trim();
             const categoryId = String(formData.get("category_id") || "").trim();
           if (name.length < 2) return toast.error("Informe o nome da unidade");
-            try { await onSave({ name, cnpj: cnpj || null, city: city || null, state: state || null, category_id: categoryId || null }); setOpen(false); } catch { /* A alteração exibe a mensagem. */ }
+            try { await onSave({ name, cnpj: cnpj || null, city: city || null, state: state || null, category_id: categoryId === "none" ? null : categoryId || null }); setOpen(false); } catch { /* A alteração exibe a mensagem. */ }
         }}>
           <div className="space-y-2"><Label>Nome da unidade</Label><Input name="name" defaultValue={unit?.name ?? ""} required /></div>
            <div className="grid grid-cols-[minmax(0,1fr)_6rem] gap-3">
