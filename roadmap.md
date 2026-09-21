@@ -382,9 +382,9 @@
 - [x] Verificar por que produtos myio fabricados do Almoxarifado não aparecem na lista de Materiais
 
 ## Dispositivos myio em Cadastro e Solicitações
-- [ ] Manter as opções “Cadastrado” e “Novo” e o botão para adicionar vários materiais
-- [ ] Adicionar a lista “Dispositivos myio” em Cadastro > Diversos
-- [ ] Adicionar o checkbox “Dispositivos myio” nas categorias da solicitação
-- [ ] Reunir dispositivos e materiais no mesmo Approval, preservando seus fluxos de estoque
-- [ ] Validar cadastro, solicitação e acompanhamento em computador e celular
-- [ ] Confirmar visualmente a prévia antes de informar conclusão ou orientar nova publicação
+- [x] Manter as opções “Cadastrado” e “Novo” e o botão para adicionar vários materiais
+- [x] Adicionar a lista “Dispositivos myio” em Cadastro > Diversos
+- [x] Adicionar o checkbox “Dispositivos myio” nas categorias da solicitação
+- [x] Reunir dispositivos e materiais no mesmo Approval, preservando seus fluxos de estoque
+- [x] Validar cadastro, solicitação e acompanhamento em computador e celular
+- [x] Confirmar visualmente a prévia antes de informar conclusão ou orientar nova publicação
