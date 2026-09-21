@@ -1984,7 +1984,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
               </>
             )}
 
-            {requestModel !== "reembolso" && requestModel !== "rh" && requestModel !== "pagamento" && (!isMaterialsRequest || isNewItem) && (
+            {requestModel !== "reembolso" && requestModel !== "rh" && requestModel !== "pagamento" && (
             <div className="space-y-2">
               {requestModel === "materiais" ? (
                 <>
