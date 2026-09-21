@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Minus, Plus, Trash2 } from "lucide-react";
+import { Check, ChevronsUpDown, Minus, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -9,6 +9,9 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { cn } from "@/lib/utils";
 
 type LinkField = "project_id" | "client_id" | "cost_center_id" | "request_type";
 type DiversosRegistry = "request_type" | "additional_step_type" | "stock_destination" | "damage_reason";
@@ -27,6 +30,75 @@ type ClientLink = {
   record_label: string;
   record_detail: string;
 };
+
+const destinationKindLabels: Record<DestinationKind, string> = {
+  project: "Projetos",
+  client: "Clientes",
+  unit: "Unidades / Filiais",
+};
+
+function SearchableDestinationSelect({
+  destinations,
+  value,
+  onValueChange,
+}: {
+  destinations: Destination[];
+  value: string;
+  onValueChange: (value: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const selected = destinations.find((item) => `${item.kind}:${item.id}` === value);
+  const groupedKinds: DestinationKind[] = ["project", "client", "unit"];
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          type="button"
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-full justify-between font-normal"
+        >
+          <span className={cn("truncate", !selected && "text-muted-foreground")}>{selected?.name ?? "Digite ou selecione"}</span>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-(--radix-popover-trigger-width) p-0">
+        <Command>
+          <CommandInput placeholder="Buscar projeto, cliente ou unidade..." />
+          <CommandList>
+            <CommandEmpty>Nenhum destino encontrado.</CommandEmpty>
+            {groupedKinds.map((kind) => {
+              const options = destinations.filter((item) => item.kind === kind);
+              if (!options.length) return null;
+              return (
+                <CommandGroup key={kind} heading={destinationKindLabels[kind]}>
+                  {options.map((item) => {
+                    const itemValue = `${kind}:${item.id}`;
+                    return (
+                      <CommandItem
+                        key={itemValue}
+                        value={`${item.name} ${destinationKindLabels[kind]}`}
+                        onSelect={() => {
+                          onValueChange(itemValue);
+                          setOpen(false);
+                        }}
+                      >
+                        <Check className={cn("h-4 w-4", value === itemValue ? "opacity-100" : "opacity-0")} />
+                        <span className="truncate">{item.name}</span>
+                      </CommandItem>
+                    );
+                  })}
+                </CommandGroup>
+              );
+            })}
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
 
 export function LinkedRecordDeletionDialog({
   entityId,
@@ -228,7 +300,6 @@ export function LinkedRecordDeletionDialog({
                 : sourceEntityType === "project" && (recordType === "unit_product" || recordType === "technician_move")
                   ? availableDestinations.filter((item) => item.kind === "project")
                   : availableDestinations;
-              const groupedKinds: DestinationKind[] = ["project", "client", "unit"];
               return (
               <Collapsible key={record.key} open={expandedLinks[record.key] ?? false} onOpenChange={(expanded) => setExpandedLinks((current) => ({ ...current, [record.key]: expanded }))} className="border-b pb-3">
                 <div className="flex min-w-0 items-center justify-between gap-3">
@@ -244,20 +315,23 @@ export function LinkedRecordDeletionDialog({
                   <div className="grid gap-3 sm:grid-cols-[minmax(180px,1fr)_auto] sm:items-end">
                     <div className="space-y-1">
                       <Label className="text-xs">Novo destino</Label>
-                      <Select value={targets[record.key] ?? ""} onValueChange={(value) => setTargets((current) => ({ ...current, [record.key]: value }))}>
-                        <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                        <SelectContent>
-                          {sourceEntityType ? groupedKinds.map((kind, groupIndex) => {
-                            const options = recordDestinations.filter((item) => item.kind === kind);
-                            if (!options.length) return null;
-                            return <SelectGroup key={kind}>
-                              {groupIndex > 0 && <SelectSeparator />}
-                              <SelectLabel>{kind === "project" ? "Projetos" : kind === "client" ? "Clientes" : "Unidades / Filiais"}</SelectLabel>
-                              {options.map((item) => <SelectItem key={`${kind}:${item.id}`} value={`${kind}:${item.id}`}>{item.name}</SelectItem>)}
-                            </SelectGroup>;
-                          }) : recordDestinations.map((item) => <SelectItem key={item.id} value={`legacy:${item.id}`}>{item.name}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
+                       {sourceEntityType ? (
+                         <SearchableDestinationSelect
+                           destinations={recordDestinations}
+                           value={targets[record.key] ?? ""}
+                           onValueChange={(value) => setTargets((current) => ({ ...current, [record.key]: value }))}
+                         />
+                       ) : (
+                         <Select value={targets[record.key] ?? ""} onValueChange={(value) => setTargets((current) => ({ ...current, [record.key]: value }))}>
+                           <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                           <SelectContent>
+                             <SelectGroup>
+                               <SelectLabel>Destinos</SelectLabel>
+                               {recordDestinations.map((item) => <SelectItem key={item.id} value={`legacy:${item.id}`}>{item.name}</SelectItem>)}
+                             </SelectGroup>
+                           </SelectContent>
+                         </Select>
+                       )}
                     </div>
                     <Button
                       variant="outline"
