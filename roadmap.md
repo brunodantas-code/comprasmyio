@@ -330,3 +330,5 @@
 - [x] Padronizar dimensões conforme Cadastro > Clientes
 - [x] Substituir ícones X de exclusão por lixeira
 - [x] Validar Solicitações, Approvals, menus e submenus no desktop e mobile
+- [ ] Adicionar Cidade e UF às unidades/filiais, incluindo cadastro, edição, lista, filtro e conversão
+- [ ] Alinhar o seletor de UF do cadastro de cliente com os demais campos
