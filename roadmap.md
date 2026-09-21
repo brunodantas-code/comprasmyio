@@ -334,21 +334,21 @@
 - [x] Alinhar o seletor de UF do cadastro de cliente com os demais campos
 
 ## Categorias de clientes
-- [ ] Criar cadastro de categorias em Cadastro > Diversos com Shoppings e Lojas iniciais
-- [ ] Vincular categoria ao cadastro e edição de clientes e exibi-la na lista
-- [ ] Classificar os shoppings e as Obrasmax existentes nas categorias solicitadas
-- [ ] Ajustar o total geral para preto e número com o dobro do tamanho
-- [ ] Validar em computador e celular
+- [x] Criar cadastro de categorias em Cadastro > Diversos com Shoppings e Lojas iniciais
+- [x] Vincular categoria ao cadastro e edição de clientes e exibi-la na lista
+- [x] Classificar os shoppings e as Obrasmax existentes nas categorias solicitadas
+- [x] Ajustar o total geral para preto e número com o dobro do tamanho
+- [x] Validar em computador e celular
 
 ## Relatório PDF de clientes
-- [ ] Adicionar botão de relatório ao lado do título Clientes
-- [ ] Permitir ordenar o PDF por UF, Categoria ou Cliente corporativo
-- [ ] Exportar clientes, unidades e todas as informações cadastrais
-- [ ] Validar o PDF e o fluxo em computador e celular
+- [x] Adicionar botão de relatório ao lado do título Clientes
+- [x] Permitir ordenar o PDF por UF, Categoria ou Cliente corporativo
+- [x] Exportar clientes, unidades e todas as informações cadastrais
+- [x] Validar o PDF e o fluxo em computador e celular
 
 ## Mapa de unidades por UF
-- [ ] Adicionar botão de mapa ao lado do título Clientes
-- [ ] Exibir mapa interativo do Brasil com quantidade de unidades por UF
-- [ ] Destacar a UF em verde-claro ao passar o cursor
-- [ ] Mostrar nome da unidade e cliente corporativo em uma janela sobre o mapa
-- [ ] Validar o mapa em computador e celular
+- [x] Adicionar botão de mapa ao lado do título Clientes
+- [x] Exibir mapa interativo do Brasil com quantidade de unidades por UF
+- [x] Destacar a UF em verde-claro ao passar o cursor
+- [x] Mostrar nome da unidade e cliente corporativo em uma janela sobre o mapa
+- [x] Validar o mapa em computador e celular
