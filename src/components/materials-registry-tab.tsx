@@ -8,8 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 
 type MaterialSource = "materials" | "terceiros_materials" | "tool_assets";
@@ -89,6 +92,106 @@ function DeleteMaterialButton({ material }: { material: RegistryMaterial }) {
   </AlertDialog>;
 }
 
+type MaterialCategory = "fabrica" | "almoxarifado" | "terceiros" | "ferramentas";
+
+function AddMaterialDialog() {
+  const queryClient = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [category, setCategory] = useState<MaterialCategory>("fabrica");
+  const [description, setDescription] = useState("");
+  const [manufacturerCode, setManufacturerCode] = useState("");
+
+  const reset = () => {
+    setName("");
+    setCategory("fabrica");
+    setDescription("");
+    setManufacturerCode("");
+  };
+
+  const create = useMutation({
+    mutationFn: async () => {
+      const materialName = name.trim();
+      if (!materialName) throw new Error("Informe o nome do material");
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      if (authError) throw authError;
+      if (!authData.user) throw new Error("Usuário não identificado");
+      const common = {
+        name: materialName,
+        description: description.trim() || null,
+        manufacturer_code: manufacturerCode.trim() || null,
+        created_by: authData.user.id,
+      };
+      const result = category === "terceiros"
+        ? await supabase.from("terceiros_materials").insert(common as never)
+        : category === "ferramentas"
+          ? await supabase.from("tool_assets").insert(common as never)
+          : await supabase.from("materials").insert({
+              ...common,
+              location: category,
+              ...(category === "fabrica" ? { is_product: false, is_manufactured: false } : {}),
+            });
+      if (result.error) throw result.error;
+    },
+    onSuccess: async () => {
+      toast.success("Material adicionado");
+      setOpen(false);
+      reset();
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["materials-registry"] }),
+        queryClient.invalidateQueries({ queryKey: ["materials"] }),
+        queryClient.invalidateQueries({ queryKey: ["purchasable-items"] }),
+        queryClient.invalidateQueries({ queryKey: ["material-stock"] }),
+        queryClient.invalidateQueries({ queryKey: ["terceiros-stock"] }),
+        queryClient.invalidateQueries({ queryKey: ["tool-stock"] }),
+      ]);
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  return <Dialog open={open} onOpenChange={(nextOpen) => { setOpen(nextOpen); if (!nextOpen) reset(); }}>
+    <DialogTrigger asChild>
+      <Button size="compactIcon" aria-label="Adicionar material" title="Adicionar material"><Plus className="h-3.5 w-3.5" /></Button>
+    </DialogTrigger>
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>Novo material</DialogTitle>
+        <DialogDescription>Cadastre o item na categoria de estoque correspondente.</DialogDescription>
+      </DialogHeader>
+      <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); create.mutate(); }}>
+        <div className="space-y-1.5">
+          <Label htmlFor="registry-material-name">Material</Label>
+          <Input id="registry-material-name" value={name} onChange={(event) => setName(event.target.value)} autoFocus />
+        </div>
+        <div className="space-y-1.5">
+          <Label>Categoria</Label>
+          <Select value={category} onValueChange={(value) => setCategory(value as MaterialCategory)}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="fabrica">Insumos de Fabricação</SelectItem>
+              <SelectItem value="almoxarifado">Material de Almoxarifado</SelectItem>
+              <SelectItem value="terceiros">Insumos de Instalação</SelectItem>
+              <SelectItem value="ferramentas">Máquinas e Ferramentas</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="registry-material-description">Descrição</Label>
+          <Input id="registry-material-description" value={description} onChange={(event) => setDescription(event.target.value)} />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="registry-material-code">Código do Fabricante</Label>
+          <Input id="registry-material-code" value={manufacturerCode} onChange={(event) => setManufacturerCode(event.target.value)} />
+        </div>
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+          <Button type="submit" disabled={create.isPending}>{create.isPending ? "Salvando..." : "Adicionar"}</Button>
+        </DialogFooter>
+      </form>
+    </DialogContent>
+  </Dialog>;
+}
+
 export function MaterialsRegistryTab() {
   const [expanded, setExpanded] = useState(false);
   const [search, setSearch] = useState("");
@@ -106,11 +209,14 @@ export function MaterialsRegistryTab() {
           <CardTitle>Materiais</CardTitle>
           {expanded && <CardDescription>Itens cadastrados e disponíveis para novas solicitações.</CardDescription>}
         </div>
-        <CollapsibleTrigger asChild>
-          <Button size="compactIcon" variant="ghost" aria-label={expanded ? "Recolher Materiais" : "Expandir Materiais"} title={expanded ? "Recolher" : "Expandir"}>
-            {expanded ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
-          </Button>
-        </CollapsibleTrigger>
+        <div className="flex items-center gap-1">
+          <CollapsibleContent><AddMaterialDialog /></CollapsibleContent>
+          <CollapsibleTrigger asChild>
+            <Button size="compactIcon" variant="ghost" aria-label={expanded ? "Recolher Materiais" : "Expandir Materiais"} title={expanded ? "Recolher" : "Expandir"}>
+              {expanded ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+            </Button>
+          </CollapsibleTrigger>
+        </div>
       </CardHeader>
       <CollapsibleContent asChild>
         <CardContent className="space-y-4">
