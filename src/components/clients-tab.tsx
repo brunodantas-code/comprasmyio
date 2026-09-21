@@ -18,6 +18,8 @@ export type Client = { id: string; name: string; legal_name: string | null; cnpj
 export type ClientUnit = { id: string; client_id: string; name: string; cnpj: string | null; active: boolean };
 
 const DUPLICATE_CLIENT_MESSAGE = "Este cliente já está cadastrado";
+const normalizeSearchValue = (value: string | null | undefined) =>
+  (value ?? "").toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
 function isDuplicateNameError(error: { code?: string }) {
   return error.code === "23505";
@@ -55,12 +57,16 @@ export function ClientsTab({ userId }: { userId: string }) {
   const [expandedClients, setExpandedClients] = useState<Set<string>>(new Set());
   const [clientSearch, setClientSearch] = useState("");
 
-  const normalizedSearch = clientSearch.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const normalizedSearch = normalizeSearchValue(clientSearch.trim());
   const filteredClients = (clients ?? []).filter((client) => {
     if (!normalizedSearch) return true;
-    return [client.name, client.legal_name, client.cnpj].some((value) =>
-      (value ?? "").toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(normalizedSearch),
+    const clientMatches = [client.name, client.legal_name, client.cnpj].some((value) =>
+      normalizeSearchValue(value).includes(normalizedSearch),
     );
+    const unitMatches = (allClientUnits ?? []).some((unit) =>
+      unit.client_id === client.id && [unit.name, unit.cnpj].some((value) => normalizeSearchValue(value).includes(normalizedSearch)),
+    );
+    return clientMatches || unitMatches;
   });
 
   const create = useMutation({
@@ -219,7 +225,10 @@ export function ClientsTab({ userId }: { userId: string }) {
               </TableHeader>
               <TableBody>
                 {!filteredClients.length ? <TableRow><TableCell colSpan={4} className="py-8 text-center text-sm text-muted-foreground">Nenhum cliente encontrado.</TableCell></TableRow> : filteredClients.map((c) => {
-                  const expanded = expandedClients.has(c.id);
+                  const unitMatchesSearch = Boolean(normalizedSearch) && (allClientUnits ?? []).some((unit) =>
+                    unit.client_id === c.id && [unit.name, unit.cnpj].some((value) => normalizeSearchValue(value).includes(normalizedSearch)),
+                  );
+                  const expanded = expandedClients.has(c.id) || unitMatchesSearch;
                   const hasUnits = (allClientUnits ?? []).some((unit) => unit.client_id === c.id);
                   return (
                   <Fragment key={c.id}>
