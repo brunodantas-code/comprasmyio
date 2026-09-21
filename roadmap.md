@@ -371,3 +371,10 @@
 - [x] Permitir cadastrar novos produtos somente para Admin ou Time de Supply
 - [x] Ocultar Link de Referência e Valor Unitário dos demais usuários
 - [x] Validar permissões, formulário e tipos disponíveis
+
+## Solicitação com vários materiais
+- [ ] Permitir adicionar e remover blocos de material com quantidade
+- [ ] Mover categorias para seletores externos que filtram cada lista
+- [ ] Compartilhar destinatário, entrega, prazo, observações e anexos
+- [ ] Gerar um único Approval para todos os materiais da solicitação
+- [ ] Validar envio, estoque, aprovação e visualização em computador e celular
