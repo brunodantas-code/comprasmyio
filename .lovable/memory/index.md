@@ -23,3 +23,5 @@ Botões de ação sempre com fundo verde e ícones/textos pretos; lilás somente
 - [Conversão de projeto em cliente](mem://features/project-client-conversion) — Projeto só vira Cliente após implantação e contrato assinado; Novo Projeto não escolhe Cliente
 - [Cores dos botões de ação](mem://design/action-button-colors) — Fundo verde com ícones/textos pretos; lilás reservado a títulos solicitados
 - [Conversas nos tickets do Code](mem://features/code-ticket-conversations) — Admin pergunta, Solicitante responde, histórico imutável e pendência direcionada a quem deve agir
+
+- [Categorias de clientes](mem://features/client-categories) — Cadastro administrável com Shoppings e Lojas e classificação inicial automática

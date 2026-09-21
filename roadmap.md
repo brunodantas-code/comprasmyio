@@ -332,3 +332,10 @@
 - [x] Validar Solicitações, Approvals, menus e submenus no desktop e mobile
 - [x] Adicionar Cidade e UF às unidades/filiais, incluindo cadastro, edição, lista, filtro e conversão
 - [x] Alinhar o seletor de UF do cadastro de cliente com os demais campos
+
+## Categorias de clientes
+- [ ] Criar cadastro de categorias em Cadastro > Diversos com Shoppings e Lojas iniciais
+- [ ] Vincular categoria ao cadastro e edição de clientes e exibi-la na lista
+- [ ] Classificar os shoppings e as Obrasmax existentes nas categorias solicitadas
+- [ ] Ajustar o total geral para preto e número com o dobro do tamanho
+- [ ] Validar em computador e celular
