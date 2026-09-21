@@ -977,30 +977,36 @@ export type Database = {
       }
       clients: {
         Row: {
+          city: string | null
           cnpj: string | null
           created_at: string
           created_by: string | null
           id: string
           legal_name: string | null
           name: string
+          state: string | null
           updated_at: string
         }
         Insert: {
+          city?: string | null
           cnpj?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
           legal_name?: string | null
           name: string
+          state?: string | null
           updated_at?: string
         }
         Update: {
+          city?: string | null
           cnpj?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
           legal_name?: string | null
           name?: string
+          state?: string | null
           updated_at?: string
         }
         Relationships: []
