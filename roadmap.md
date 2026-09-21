@@ -387,3 +387,4 @@
 - [ ] Adicionar o checkbox “Dispositivos myio” nas categorias da solicitação
 - [ ] Reunir dispositivos e materiais no mesmo Approval, preservando seus fluxos de estoque
 - [ ] Validar cadastro, solicitação e acompanhamento em computador e celular
+- [ ] Confirmar visualmente a prévia antes de informar conclusão ou orientar nova publicação
