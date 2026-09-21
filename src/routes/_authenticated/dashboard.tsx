@@ -43,6 +43,7 @@ import { DeliveryPointsTab } from "@/components/delivery-points-tab";
 import { DamageReasonsTab } from "@/components/damage-reasons-tab";
 import { MaterialStockTypesTab, useMaterialStockTypes } from "@/components/material-stock-types-tab";
 import { MaterialsRegistryTab } from "@/components/materials-registry-tab";
+import { ClientCategoriesTab } from "@/components/client-categories-tab";
 import { AccessProfilesTab } from "@/components/access-profiles-tab";
 import { AccessProfileDefinitionsTab, useAccessProfileDefinitions } from "@/components/access-profile-definitions-tab";
 import { ImportBatchesSection, NewImportDialog } from "@/components/import-batches";
@@ -544,6 +545,7 @@ function Dashboard() {
                 {me.canAccess("cadastro_lembretes") && <TabsContent value="lembretes"><RemindersTab /></TabsContent>}
                 {me.canAccess("cadastro_diversos") && <TabsContent value="diversos">
                   <div className="space-y-6">
+                    <ClientCategoriesTab />
                     <MaterialsRegistryTab />
                     <RequestTypesTab />
                     <AdditionalStepTypesTab />
