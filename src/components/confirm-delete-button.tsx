@@ -14,12 +14,14 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-export function ConfirmDeleteButton({ title, description, onConfirm, pending = false, ariaLabel = "Excluir", trigger }: {
+export function ConfirmDeleteButton({ title, description, onConfirm, pending = false, ariaLabel = "Excluir", confirmLabel = "Excluir definitivamente", pendingLabel = "Excluindo...", trigger }: {
   title: string;
   description: ReactNode;
   onConfirm: () => void;
   pending?: boolean;
   ariaLabel?: string;
+  confirmLabel?: string;
+  pendingLabel?: string;
   trigger?: ReactNode;
 }) {
   return (
@@ -39,7 +41,7 @@ export function ConfirmDeleteButton({ title, description, onConfirm, pending = f
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
           <AlertDialogAction disabled={pending} onClick={onConfirm}>
-            {pending ? "Excluindo..." : "Excluir definitivamente"}
+            {pending ? pendingLabel : confirmLabel}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

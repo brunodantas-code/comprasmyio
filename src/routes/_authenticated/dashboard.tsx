@@ -49,6 +49,7 @@ import { AccessProfileDefinitionsTab, useAccessProfileDefinitions } from "@/comp
 import { ImportBatchesSection, NewImportDialog } from "@/components/import-batches";
 import { AddressAutocomplete } from "@/components/address-autocomplete";
 import { LinkedRecordDeletionDialog } from "@/components/linked-record-deletion-dialog";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 
 
 
@@ -182,9 +183,7 @@ function FilePicker({ files, setFiles, label = "Anexar arquivos" }: { files: Fil
           {files.map((f, i) => (
             <li key={i} className="flex items-center justify-between rounded border px-2 py-1">
               <span className="truncate">{f.name} <span className="text-muted-foreground">({Math.round(f.size / 1024)} KB)</span></span>
-              <Button type="button" variant="ghost" size="compactIcon" className="text-destructive hover:text-destructive" onClick={() => setFiles(files.filter((_, j) => j !== i))} aria-label={`Remover ${f.name}`} title="Remover anexo">
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
+              <ConfirmDeleteButton title="Remover anexo?" description={`Confirma a remoção de “${f.name}”?`} ariaLabel={`Remover ${f.name}`} confirmLabel="Remover" onConfirm={() => setFiles(files.filter((_, j) => j !== i))} trigger={<Button type="button" variant="ghost" size="compactIcon" className="text-destructive hover:text-destructive" aria-label={`Remover ${f.name}`} title="Remover anexo"><Trash2 className="h-3.5 w-3.5" /></Button>} />
             </li>
           ))}
         </ul>
@@ -1609,17 +1608,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-semibold">Solicitação {i + 1}</span>
                       {travelLegs.length > 1 && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="compactIcon"
-                          className="text-destructive hover:text-destructive"
-                          title="Remover solicitação"
-                          aria-label="Remover solicitação"
-                          onClick={() => setTravelLegs((prev) => prev.filter((_, idx) => idx !== i))}
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
+                        <ConfirmDeleteButton title="Remover solicitação?" description={`Confirma a remoção da solicitação ${i + 1} desta viagem?`} ariaLabel="Remover solicitação" confirmLabel="Remover" onConfirm={() => setTravelLegs((prev) => prev.filter((_, idx) => idx !== i))} trigger={<Button type="button" variant="ghost" size="compactIcon" className="text-destructive hover:text-destructive" title="Remover solicitação" aria-label="Remover solicitação"><Trash2 className="h-3.5 w-3.5" /></Button>} />
                       )}
                     </div>
                     <div className="grid gap-4 md:grid-cols-3 items-end">
@@ -1659,17 +1648,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-semibold">Reembolso {i + 1}</span>
                       {reembolsoLegs.length > 1 && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="compactIcon"
-                          className="text-destructive hover:text-destructive"
-                          title="Remover reembolso"
-                          aria-label="Remover reembolso"
-                          onClick={() => setReembolsoLegs((prev) => prev.filter((_, idx) => idx !== i))}
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
+                        <ConfirmDeleteButton title="Remover reembolso?" description={`Confirma a remoção do reembolso ${i + 1}?`} ariaLabel="Remover reembolso" confirmLabel="Remover" onConfirm={() => setReembolsoLegs((prev) => prev.filter((_, idx) => idx !== i))} trigger={<Button type="button" variant="ghost" size="compactIcon" className="text-destructive hover:text-destructive" title="Remover reembolso" aria-label="Remover reembolso"><Trash2 className="h-3.5 w-3.5" /></Button>} />
                       )}
                     </div>
                     <div className="grid gap-4 md:grid-cols-3 items-end">
@@ -2047,17 +2026,14 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
                                 onChange={(event) => setMaterialItems((current) => current.map((entry) => entry.id === row.id ? { ...entry, quantity: event.target.value } : entry))}
                               />
                             </div>
-                            <Button
-                              type="button"
-                              size="compactIcon"
-                              variant="outline"
-                              aria-label={`Remover material ${index + 1}`}
-                              title="Remover material"
-                              disabled={materialItems.length === 1}
-                              onClick={() => setMaterialItems((current) => current.filter((entry) => entry.id !== row.id))}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            <ConfirmDeleteButton
+                              title="Remover material?"
+                              description={`Confirma a remoção de “${row.item?.name ?? `Material ${index + 1}`}” desta solicitação?`}
+                              ariaLabel={`Remover material ${index + 1}`}
+                              confirmLabel="Remover"
+                              onConfirm={() => setMaterialItems((current) => current.filter((entry) => entry.id !== row.id))}
+                              trigger={<Button type="button" size="compactIcon" variant="outline" aria-label={`Remover material ${index + 1}`} title="Remover material" disabled={materialItems.length === 1}><Trash2 className="h-4 w-4" /></Button>}
+                            />
                           </div>
                         ))}
                         <Button type="button" size="compactIcon" variant="outline" aria-label="Adicionar material" title="Adicionar material" onClick={() => setMaterialItems((current) => [...current, emptyMaterialItem()])}>
