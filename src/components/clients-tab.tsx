@@ -466,6 +466,26 @@ function ClientsReportDialog({ clients, units, categories }: { clients: Client[]
         const clientUnits = units.filter((unit) => unit.client_id === client.id).map((unit) => [unit.name, "—", categoryName(unit.category_id), unit.city || "—", unit.state || "—", unit.cnpj || "—", unit.active ? "Unidade ativa" : "Unidade inativa", client.name]);
         return [corporate, ...clientUnits];
       });
+      const summarize = (getClientGroup: (client: Client) => string, getUnitGroup: (unit: ClientUnit) => string) => {
+        const summary = new Map<string, { clients: number; units: number }>();
+        clients.forEach((client) => {
+          const group = getClientGroup(client);
+          const current = summary.get(group) ?? { clients: 0, units: 0 };
+          current.clients += 1;
+          summary.set(group, current);
+        });
+        units.forEach((unit) => {
+          const group = getUnitGroup(unit);
+          const current = summary.get(group) ?? { clients: 0, units: 0 };
+          current.units += 1;
+          summary.set(group, current);
+        });
+        return [...summary.entries()]
+          .sort(([a], [b]) => a.localeCompare(b, "pt-BR", { sensitivity: "base" }))
+          .map(([group, totals]) => [group, totals.clients, totals.units, totals.clients + totals.units]);
+      };
+      const stateSummary = summarize((client) => client.state || "Sem UF", (unit) => unit.state || "Sem UF");
+      const categorySummary = summarize((client) => categoryName(client.category_id), (unit) => categoryName(unit.category_id));
       const orderIndex = order === "state" ? 4 : order === "category" ? 2 : 7;
       rows.sort((a, b) => String(a[orderIndex]).localeCompare(String(b[orderIndex]), "pt-BR", { sensitivity: "base" }) || String(a[0]).localeCompare(String(b[0]), "pt-BR", { sensitivity: "base" }));
       const orderLabel = order === "state" ? "UF" : order === "category" ? "Categoria" : "Cliente corporativo";
@@ -474,8 +494,24 @@ function ClientsReportDialog({ clients, units, categories }: { clients: Client[]
       doc.text("Relatório de Clientes", 14, 15);
       doc.setFontSize(9);
       doc.text(`Ordenação: ${orderLabel} | ${clients.length} clientes | ${units.length} unidades | Total: ${clients.length + units.length}`, 14, 21);
+      doc.setFontSize(11);
+      doc.text("Totalizadores por UF", 10, 31);
+      doc.text("Totalizadores por categoria", 154, 31);
+      const summaryTable = {
+        startY: 35,
+        head: [["Grupo", "Clientes", "Unidades", "Total"]],
+        styles: { fontSize: 7, cellPadding: 1.5 },
+        headStyles: { fillColor: [20, 184, 130] as [number, number, number], textColor: [0, 0, 0] as [number, number, number], fontStyle: "bold" as const },
+        alternateRowStyles: { fillColor: [244, 248, 247] as [number, number, number] },
+        tableWidth: 133,
+      };
+      autoTable(doc, { ...summaryTable, body: stateSummary, margin: { left: 10, right: 154 } });
+      autoTable(doc, { ...summaryTable, body: categorySummary, margin: { left: 154, right: 10 } });
+      doc.addPage();
+      doc.setFontSize(12);
+      doc.text("Relação completa de clientes e unidades", 14, 12);
       autoTable(doc, {
-        startY: 26,
+        startY: 16,
         head: [["Nome fantasia / Unidade", "Razão social", "Categoria", "Cidade", "UF", "CNPJ", "Tipo / Status", "Cliente corporativo"]],
         body: rows,
         styles: { fontSize: 7, cellPadding: 1.8, overflow: "linebreak" },
