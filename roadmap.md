@@ -345,3 +345,10 @@
 - [ ] Permitir ordenar o PDF por UF, Categoria ou Cliente corporativo
 - [ ] Exportar clientes, unidades e todas as informações cadastrais
 - [ ] Validar o PDF e o fluxo em computador e celular
+
+## Mapa de unidades por UF
+- [ ] Adicionar botão de mapa ao lado do título Clientes
+- [ ] Exibir mapa interativo do Brasil com quantidade de unidades por UF
+- [ ] Destacar a UF em verde-claro ao passar o cursor
+- [ ] Mostrar nome da unidade e cliente corporativo em uma janela sobre o mapa
+- [ ] Validar o mapa em computador e celular
