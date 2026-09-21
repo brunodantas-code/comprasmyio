@@ -114,6 +114,15 @@ type Order = {
   updated_at: string;
 };
 
+type PurchaseOrderItem = {
+  id: string;
+  order_id: string;
+  item_name: string;
+  item_link: string | null;
+  quantity: number;
+  estimated_unit_value: number;
+};
+
 type Attachment = { path: string; name: string; size: number; type: string };
 
 const ATTACHMENTS_BUCKET = "order-attachments";
@@ -915,12 +924,11 @@ const CATEGORIES = [
   { value: "Máquinas e Ferramentas", label: "Máquinas e Ferramentas" },
 ] as const;
 
-function PurchasableItemPicker({ value, onPick, disabled }: { value: PurchasableItem | null; onPick: (i: PurchasableItem) => void; disabled?: boolean }) {
+function PurchasableItemPicker({ value, onPick, disabled, categories = ["todas"], excludedKeys = [] }: { value: PurchasableItem | null; onPick: (i: PurchasableItem) => void; disabled?: boolean; categories?: string[]; excludedKeys?: string[] }) {
   const { data: items, isLoading } = usePurchasableItems();
   const [open, setOpen] = useState(false);
-  const [category, setCategory] = useState<string>("todas");
   const origins = ["Insumos de Fabricação", "Insumos de Instalação", "Material de Almoxarifado", "Máquinas e Ferramentas"];
-  const filtered = (items ?? []).filter((i) => category === "todas" || i.origin === category);
+  const filtered = (items ?? []).filter((i) => (categories.includes("todas") || categories.includes(i.origin)) && (!excludedKeys.includes(i.key) || i.key === value?.key));
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -935,20 +943,6 @@ function PurchasableItemPicker({ value, onPick, disabled }: { value: Purchasable
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[min(28rem,calc(100vw-2rem))] p-0" align="start">
-        <div className="flex flex-wrap gap-1 border-b p-2">
-          {CATEGORIES.map((c) => (
-            <Button
-              key={c.value}
-              type="button"
-              size="sm"
-              variant={category === c.value ? "default" : "outline"}
-              className="h-7 px-2 text-xs"
-              onClick={() => setCategory(c.value)}
-            >
-              {c.label}
-            </Button>
-          ))}
-        </div>
         <Command>
           <CommandInput placeholder="Buscar item cadastrado..." />
           <CommandList>
@@ -1130,6 +1124,10 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
     },
   });
   const [item, setItem] = useState<PurchasableItem | null>(null);
+  type MaterialRequestItem = { id: string; item: PurchasableItem | null; quantity: string; estimatedValue: string; itemLink: string };
+  const emptyMaterialItem = (): MaterialRequestItem => ({ id: crypto.randomUUID(), item: null, quantity: "1", estimatedValue: "0", itemLink: "" });
+  const [materialItems, setMaterialItems] = useState<MaterialRequestItem[]>(() => [emptyMaterialItem()]);
+  const [materialCategories, setMaterialCategories] = useState<string[]>(["todas"]);
   const [itemLink, setItemLink] = useState("");
   const [estimatedValue, setEstimatedValue] = useState("0");
   const [qty, setQty] = useState("1");
@@ -1140,7 +1138,9 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
       ? Number(rhRemuneracao || 0)
       : requestModel === "pagamento"
         ? Number(paymentValue || 0)
-        : Number(estimatedValue || 0) * Number(qty || 1);
+        : isMaterialsRequest
+          ? materialItems.reduce((sum, row) => sum + Number(row.estimatedValue || 0) * Number(row.quantity || 1), 0)
+          : Number(estimatedValue || 0) * Number(qty || 1);
   const [lookingUpPrice, setLookingUpPrice] = useState(false);
   const [isNewItem, setIsNewItem] = useState(false);
   const [newItemName, setNewItemName] = useState("");
@@ -1221,6 +1221,8 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
     setPaymentDate("");
     setLinkedApprovalId("none");
     setItem(null);
+    setMaterialItems([emptyMaterialItem()]);
+    setMaterialCategories(["todas"]);
     setItemLink("");
     setEstimatedValue("0");
     setQty("1");
@@ -1240,7 +1242,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
   const avgPrice = useAvgUnitPrice(isNewItem ? null : item);
 
   const submit = useMutation({
-    mutationFn: async ({ values, buyQty, shipQty }: { values: z.infer<typeof newOrderSchema>; buyQty: number; shipQty: number }) => {
+    mutationFn: async ({ values, buyQty, shipQty, groupedItems }: { values: z.infer<typeof newOrderSchema>; buyQty: number; shipQty: number; groupedItems?: MaterialRequestItem[] }) => {
       let createdOrder: { budget_exceeded: boolean; budget_snapshot: number | null; projected_committed_snapshot: number | null } | null = null;
       let ids = {
         material_id: isNewItem ? null : (item?.material_id ?? null),
@@ -1309,8 +1311,8 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
           terceiros_material_id: ids.terceiros_material_id,
           tool_asset_id: ids.tool_asset_id,
 
-          quantity: buyQty,
-          estimated_value: Number((values.estimated_value * buyQty).toFixed(2)),
+          quantity: groupedItems ? groupedItems.reduce((sum, row) => sum + Number(row.quantity), 0) : buyQty,
+          estimated_value: groupedItems ? Number(groupedItems.reduce((sum, row) => sum + Number(row.estimatedValue || 0) * Number(row.quantity), 0).toFixed(2)) : Number((values.estimated_value * buyQty).toFixed(2)),
           recipient: values.recipient,
           requester_notes: values.requester_notes ?? null,
           delivery_point: values.delivery_point ?? null,
@@ -1333,6 +1335,23 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
         }).select("id,budget_exceeded,budget_snapshot,projected_committed_snapshot").single();
         if (error) throw error;
         createdOrder = data;
+        if (groupedItems?.length && data?.id) {
+          const { error: itemError } = await supabase.from("purchase_order_items").insert(groupedItems.map((row, position) => ({
+            order_id: data.id,
+            position,
+            item_name: row.item?.description || row.item?.name || "Material",
+            item_link: row.itemLink || row.item?.link || null,
+            quantity: Number(row.quantity),
+            estimated_unit_value: canManageProducts ? Number(row.estimatedValue || 0) : 0,
+            material_id: row.item?.material_id ?? null,
+            terceiros_material_id: row.item?.terceiros_material_id ?? null,
+            tool_asset_id: row.item?.tool_asset_id ?? null,
+          })));
+          if (itemError) {
+            await supabase.from("purchase_orders").delete().eq("id", data.id);
+            throw itemError;
+          }
+        }
         if (files.length && data?.id) {
           const uploaded = await uploadOrderAttachments(data.id, files);
           const { error: ue } = await supabase.from("purchase_orders").update({ attachments: uploaded }).eq("id", data.id);
@@ -1407,13 +1426,17 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
         if (!(Number(paymentValue) > 0)) return toast.error("Informe um valor válido para o pagamento");
         if (!paymentDate) return toast.error("Informe a data do pagamento");
       }
+    } else if (!isNewItem) {
+      if (!materialItems.length || materialItems.some((row) => !row.item || !(Number(row.quantity) > 0))) {
+        return toast.error("Selecione cada material e informe uma quantidade válida.");
+      }
+      const selectedKeys = materialItems.map((row) => row.item?.key);
+      if (new Set(selectedKeys).size !== selectedKeys.length) return toast.error("O mesmo material não pode ser incluído duas vezes.");
     } else if (isNewItem) {
       if (newItemName.trim().length < 2) return toast.error("Descreva o item novo.");
       if (!newItemDest) return toast.error("Selecione para qual estoque esse item novo será cadastrado.");
       if (checkDuplicates(newItemName)) return;
       
-    } else if (!item) {
-      return toast.error("Selecione um item cadastrado: Insumos de Fabricação, Insumos de Instalação, Material de Almoxarifado ou Máquinas e Ferramentas.");
     }
     if (isMateriais && !forStock && allocTarget === "projeto" && !projectId) {
       return toast.error("Selecione um projeto");
@@ -1434,10 +1457,10 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
         ? paymentDescription.trim()
         : isRh
         ? `Contratação de RH — ${rhCargo}`
-        : (!isMateriais || isNewItem ? newItemName : item!.name),
+        : (!isMateriais || isNewItem ? newItemName : materialItems.map((row) => row.item?.description || row.item?.name).join("; ")),
       item_link: isReembolso || isRh || isPagamento || (isMateriais && !canManageProducts) ? undefined : (itemLink || undefined),
-      quantity: isReembolso || isRh || isPagamento ? 1 : (Number(qty) || 1),
-      estimated_value: isReembolso ? reembolsoTotal : isRh ? Number(rhRemuneracao || 0) : isPagamento ? Number(paymentValue) : (isMateriais && !canManageProducts ? 0 : (Number(estimatedValue) || 0)),
+      quantity: isReembolso || isRh || isPagamento ? 1 : isMateriais && !isNewItem ? materialItems.reduce((sum, row) => sum + Number(row.quantity || 0), 0) : (Number(qty) || 1),
+      estimated_value: isReembolso ? reembolsoTotal : isRh ? Number(rhRemuneracao || 0) : isPagamento ? Number(paymentValue) : isMateriais && !isNewItem ? materialItems.reduce((sum, row) => sum + Number(row.estimatedValue || 0) * Number(row.quantity || 0), 0) : (isMateriais && !canManageProducts ? 0 : (Number(estimatedValue) || 0)),
       recipient: isRh ? rhGestor : isPagamento ? "Financeiro" : recipient,
       requester_notes: isRh
         ? `${rhTipo === "reposicao" ? "Reposição" : "Nova Contratação"} — Motivo: ${rhMotivo.trim()}${fd.get("requester_notes") ? ` | ${fd.get("requester_notes")}` : ""}`
@@ -1463,25 +1486,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
       return toast.error(field ? `${field}: ${iss.message}` : iss.message);
     }
 
-    if (isMateriais && !isNewItem && item) {
-
-      setChecking(true);
-      try {
-        const available = Math.max(0, Math.floor(await fetchAvailableStock(item)));
-        if (available > 0) {
-          const shipQty = Math.min(available, parsed.data.quantity);
-          setSplit({ values: parsed.data, available, shipQty, buyQty: parsed.data.quantity - shipQty });
-          return;
-        }
-      } catch (err) {
-        toast.error((err as Error).message);
-        return;
-      } finally {
-        setChecking(false);
-      }
-    }
-
-    submit.mutate({ values: parsed.data, buyQty: parsed.data.quantity, shipQty: 0 }, { onSuccess: resetForm });
+    submit.mutate({ values: parsed.data, buyQty: parsed.data.quantity, shipQty: 0, groupedItems: isMateriais && !isNewItem ? materialItems : undefined }, { onSuccess: resetForm });
   }
 
 
@@ -1967,7 +1972,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
               </>
             )}
 
-            {requestModel !== "reembolso" && requestModel !== "rh" && requestModel !== "pagamento" && (
+            {requestModel !== "reembolso" && requestModel !== "rh" && requestModel !== "pagamento" && (!isMaterialsRequest || isNewItem) && (
             <div className="space-y-2">
               {requestModel === "materiais" ? (
                 <>
@@ -1982,7 +1987,73 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
                       Novo
                     </label>}
                   </div>
-                  <PurchasableItemPicker value={isNewItem ? null : item} onPick={(i) => { setItem(i); if (i.link) setItemLink(i.link); }} disabled={isNewItem} />
+                  {!isNewItem && (
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Categorias</Label>
+                        <div className="flex flex-wrap gap-x-5 gap-y-2">
+                          {CATEGORIES.map((category) => (
+                            <label key={category.value} className="flex cursor-pointer items-center gap-2 text-sm">
+                              <Checkbox
+                                checked={materialCategories.includes(category.value)}
+                                onCheckedChange={() => {
+                                  setMaterialCategories((current) => {
+                                    if (category.value === "todas") return ["todas"];
+                                    const withoutAll = current.filter((value) => value !== "todas");
+                                    const next = withoutAll.includes(category.value)
+                                      ? withoutAll.filter((value) => value !== category.value)
+                                      : [...withoutAll, category.value];
+                                    return next.length ? next : ["todas"];
+                                  });
+                                }}
+                              />
+                              {category.label}
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        {materialItems.map((row, index) => (
+                          <div key={row.id} className="grid items-end gap-3 rounded-md border p-3 sm:grid-cols-[minmax(0,1fr)_6rem_2rem]">
+                            <div className="space-y-2">
+                              <Label>Material {index + 1}</Label>
+                              <PurchasableItemPicker
+                                value={row.item}
+                                categories={materialCategories}
+                                excludedKeys={materialItems.map((entry) => entry.item?.key).filter((key): key is string => Boolean(key))}
+                                onPick={(selected) => setMaterialItems((current) => current.map((entry) => entry.id === row.id ? { ...entry, item: selected, itemLink: selected.link ?? "" } : entry))}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor={`material-quantity-${row.id}`}>Qtd.</Label>
+                              <Input
+                                id={`material-quantity-${row.id}`}
+                                type="number"
+                                min={1}
+                                max={99999}
+                                value={row.quantity}
+                                onChange={(event) => setMaterialItems((current) => current.map((entry) => entry.id === row.id ? { ...entry, quantity: event.target.value } : entry))}
+                              />
+                            </div>
+                            <Button
+                              type="button"
+                              size="compactIcon"
+                              variant="outline"
+                              aria-label={`Remover material ${index + 1}`}
+                              title="Remover material"
+                              disabled={materialItems.length === 1}
+                              onClick={() => setMaterialItems((current) => current.filter((entry) => entry.id !== row.id))}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                        <Button type="button" size="compactIcon" variant="outline" aria-label="Adicionar material" title="Adicionar material" onClick={() => setMaterialItems((current) => [...current, emptyMaterialItem()])}>
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </>
               ) : requestModel === "servicos" ? (
                 <Label>Serviço</Label>
@@ -2068,7 +2139,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
                   />
                 </div>
               </div>}
-              {!isNewItem && item && (
+              {!isMaterialsRequest && !isNewItem && item && (
                 <div className="space-y-2">
                   <Label>Valor médio (últimos 6 meses)</Label>
                   <Input
@@ -2117,7 +2188,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
             )}
             {requestModel === "materiais" && <AddressAutocomplete name="delivery_point" required />}
 
-            {requestModel !== "reembolso" && requestModel !== "rh" && requestModel !== "pagamento" && (
+            {requestModel !== "reembolso" && requestModel !== "rh" && requestModel !== "pagamento" && (!isMaterialsRequest || isNewItem) && (
             <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>Prazo de recebimento</Label>
@@ -2513,6 +2584,26 @@ function OrdersTable({
   const { data: requestTypes } = useRequestTypes();
   const { data: clients } = useClients();
   const { data: clientUnits } = useClientUnits();
+  const orderIds = orders.map((order) => order.id);
+  const { data: groupedOrderItems } = useQuery({
+    queryKey: ["purchase-order-items", orderIds],
+    enabled: orderIds.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("purchase_order_items")
+        .select("id, order_id, item_name, item_link, quantity, estimated_unit_value")
+        .in("order_id", orderIds)
+        .order("position", { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as PurchaseOrderItem[];
+    },
+    select: (rows) => rows.reduce((map, row) => {
+      const current = map.get(row.order_id) ?? [];
+      current.push(row);
+      map.set(row.order_id, current);
+      return map;
+    }, new Map<string, PurchaseOrderItem[]>()),
+  });
   const [fApproval, setFApproval] = useState("");
   const [fItem, setFItem] = useState("");
   const [fAloc, setFAloc] = useState("");
@@ -2531,7 +2622,7 @@ function OrdersTable({
     ? orders
     : orders.filter((o) =>
         (!fApproval || norm(o.approval_number ?? "").includes(norm(fApproval))) &&
-        (!fItem || norm(`${requestTypeLabel(o, requestTypes)} ${o.item_name ?? ""} ${o.requester_notes ?? ""}`).includes(norm(fItem))) &&
+        (!fItem || norm(`${requestTypeLabel(o, requestTypes)} ${o.item_name ?? ""} ${(groupedOrderItems?.get(o.id) ?? []).map((row) => row.item_name).join(" ")} ${o.requester_notes ?? ""}`).includes(norm(fItem))) &&
         (!fAloc || norm(allocationOf(o)).includes(norm(fAloc))) &&
         (!fReq || norm(requesterName?.(o.requester_id) ?? "").includes(norm(fReq))) &&
         (!fDate || o.deadline_date === fDate || o.delivery_forecast === fDate) &&
@@ -2601,16 +2692,9 @@ function OrdersTable({
                 </div>
               </Row>
               <Row label="Itens da Solicitação">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-sm break-words">{o.item_name || "—"}</span>
-                  {o.item_link ? (
-                    <a href={o.item_link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
-                      ver link <ExternalLink className="h-3 w-3" />
-                    </a>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">sem link</span>
-                  )}
-                </div>
+                {(groupedOrderItems?.get(o.id) ?? []).length ? (
+                  <ul className="space-y-1">{groupedOrderItems?.get(o.id)?.map((row) => <li key={row.id} className="text-sm"><span className="font-medium">{row.item_name}</span> <span className="text-xs text-muted-foreground">× {row.quantity}</span></li>)}</ul>
+                ) : <span className="text-sm break-words">{o.item_name || "—"}</span>}
               </Row>
               <Row label="Tipo">
                 <div className="font-medium">{requestTypeLabel(o, requestTypes)}</div>
@@ -2748,16 +2832,9 @@ function OrdersTable({
                 </div>
               </TableCell>
               <TableCell>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-sm break-words">{o.item_name || "—"}</span>
-                  {o.item_link ? (
-                    <a href={o.item_link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
-                      ver link <ExternalLink className="h-3 w-3" />
-                    </a>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">sem link</span>
-                  )}
-                </div>
+                {(groupedOrderItems?.get(o.id) ?? []).length ? (
+                  <ul className="space-y-1">{groupedOrderItems?.get(o.id)?.map((row) => <li key={row.id} className="text-sm break-words"><span className="font-medium">{row.item_name}</span> <span className="text-xs text-muted-foreground">× {row.quantity}</span></li>)}</ul>
+                ) : <span className="text-sm break-words">{o.item_name || "—"}</span>}
               </TableCell>
               <TableCell className="text-center">
                 <div className="line-clamp-4 font-medium break-words">{requestTypeLabel(o, requestTypes)}</div>

@@ -111,7 +111,7 @@ function useSteps() {
       const { data, error } = await supabase
         .from("approval_steps")
         .select(
-          "id, order_id, step_index, role_label, approver_id, status, comment, decided_at, decided_by, created_at, purchase_orders(id, item_name, item_link, quantity, estimated_value, approval_status, status, requester_id, requester_notes, buyer_notes, recipient, delivery_point, deadline_type, deadline_date, delivery_forecast, passphrase, created_at, updated_at, approval_number, request_type, request_model, travel_type, travel_destination, travel_departure, travel_return, payment_date, allocation_type, for_stock, attachments, budget_exceeded, budget_snapshot, committed_before_snapshot, projected_committed_snapshot, projects(name), clients(name))"
+          "id, order_id, step_index, role_label, approver_id, status, comment, decided_at, decided_by, created_at, purchase_orders(id, item_name, item_link, quantity, estimated_value, approval_status, status, requester_id, requester_notes, buyer_notes, recipient, delivery_point, deadline_type, deadline_date, delivery_forecast, passphrase, created_at, updated_at, approval_number, request_type, request_model, travel_type, travel_destination, travel_departure, travel_return, payment_date, allocation_type, for_stock, attachments, budget_exceeded, budget_snapshot, committed_before_snapshot, projected_committed_snapshot, projects(name), clients(name), purchase_order_items(id, item_name, item_link, quantity, estimated_unit_value, position))"
         )
         .order("step_index", { ascending: true });
       if (error) throw error;
@@ -137,8 +137,9 @@ function PendingApprovalDetails({ step, requestTypes }: { step: StepRow; request
   const requested = Number(order.projected_committed_snapshot ?? order.estimated_value ?? 0);
   const chartMax = Math.max(budget, requested, 1);
   const allocation = order.allocation_type === "interna" ? "Interna" : order.for_stock ? "Estoque" : project?.name ?? client?.name ?? "—";
+  const materialItems = [...(order.purchase_order_items ?? [])].sort((a, b) => a.position - b.position);
   const fields = [
-    ["Tipo", requestTypeLabel(order, requestTypes)], ["Item", order.item_name], ["Quantidade", String(order.quantity ?? 1)],
+    ["Tipo", requestTypeLabel(order, requestTypes)], ["Itens", materialItems.length ? materialItems.map((item) => `${item.item_name} × ${item.quantity}`).join("\n") : order.item_name], ["Quantidade total", String(order.quantity ?? 1)],
     ...(order.request_model === "dispositivos" ? [] : [["Valor", BRL(Number(order.estimated_value ?? 0))]]), ["Projeto ou Cliente", allocation], ["Destinatário", order.recipient || "—"],
     ["Endereço de entrega", order.delivery_point || "—"], ["Prazo", order.deadline_date ? new Date(`${order.deadline_date}T00:00:00`).toLocaleDateString("pt-BR") : order.deadline_type],
     ["Previsão de entrega", order.delivery_forecast ? new Date(`${order.delivery_forecast}T00:00:00`).toLocaleDateString("pt-BR") : "—"],
@@ -155,7 +156,7 @@ function PendingApprovalDetails({ step, requestTypes }: { step: StepRow; request
       <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
         <DialogHeader><DialogTitle>Approval {order.approval_number}</DialogTitle><DialogDescription>Informações completas da solicitação e da aprovação.</DialogDescription></DialogHeader>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {fields.map(([label, value]) => <div key={label}><p className="text-xs text-muted-foreground">{label}</p><p className="text-sm break-words">{value}</p></div>)}
+          {fields.map(([label, value]) => <div key={label}><p className="text-xs text-muted-foreground">{label}</p><p className="whitespace-pre-line text-sm break-words">{value}</p></div>)}
           {order.item_link && <div><p className="text-xs text-muted-foreground">Link</p><a href={order.item_link} target="_blank" rel="noreferrer" className="text-sm text-primary underline">Abrir link</a></div>}
         </div>
         <section className="border-t pt-4"><h3 className="text-sm font-semibold">Anexos</h3><p className="text-sm text-muted-foreground">{Array.isArray(order.attachments) && order.attachments.length ? `${order.attachments.length} anexo(s)` : "Nenhum anexo."}</p></section>
@@ -615,7 +616,7 @@ export function PendingApprovalsByRole() {
                             <PendingApprovalDetails step={step} requestTypes={requestTypes} />
                             <div className="min-w-0">
                               <p className="truncate font-medium">{requestTypeLabel(order, requestTypes)}</p>
-                              <p className="truncate text-xs text-muted-foreground">{order?.item_name ?? "—"}</p>
+                               <p className="line-clamp-2 text-xs text-muted-foreground">{order?.purchase_order_items?.length ? order.purchase_order_items.map((item) => `${item.item_name} × ${item.quantity}`).join("; ") : order?.item_name ?? "—"}</p>
                             </div>
                             <p className="truncate text-muted-foreground">{requester?.full_name || requester?.email || "—"}</p>
                             <p className="font-semibold sm:text-right">{BRL(Number(order?.estimated_value ?? 0))}</p>

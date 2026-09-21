@@ -373,8 +373,10 @@
 - [x] Validar permissões, formulário e tipos disponíveis
 
 ## Solicitação com vários materiais
-- [ ] Permitir adicionar e remover blocos de material com quantidade
-- [ ] Mover categorias para seletores externos que filtram cada lista
-- [ ] Compartilhar destinatário, entrega, prazo, observações e anexos
-- [ ] Gerar um único Approval para todos os materiais da solicitação
-- [ ] Validar envio, estoque, aprovação e visualização em computador e celular
+- [x] Permitir adicionar e remover blocos de material com quantidade
+- [x] Mover categorias para seletores externos que filtram cada lista
+- [x] Compartilhar destinatário, entrega, prazo, observações e anexos
+- [x] Gerar um único Approval para todos os materiais da solicitação
+- [x] Validar envio, estoque, aprovação e visualização em computador e celular
+- [x] Confirmar e informar a categoria atual dos antigos Dispositivos myio
+- [x] Verificar por que produtos myio fabricados do Almoxarifado não aparecem na lista de Materiais
