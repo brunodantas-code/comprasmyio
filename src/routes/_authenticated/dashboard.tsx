@@ -2522,6 +2522,9 @@ function OrdersTable({
   const allocationOf = (o: Order) => o.allocation_type === "cliente"
     ? [clients?.find((client) => client.id === o.client_id)?.name, clientUnits?.find((unit) => unit.id === o.client_unit_id)?.name].filter(Boolean).join(" — ") || "Cliente"
     : o.allocation_type === "interna" ? "Interna" : o.for_stock ? "Estoque" : o.project_id ? projectName(o.project_id) : "—";
+  const allocationCategoryOf = (o: Order) => o.allocation_type === "cliente"
+    ? "Cliente"
+    : !o.for_stock && o.allocation_type !== "interna" && o.project_id ? "Projeto" : null;
   const visibleOrders = !headerFilters
     ? orders
     : orders.filter((o) =>
@@ -2610,7 +2613,10 @@ function OrdersTable({
               <Row label="Tipo">
                 <div className="font-medium">{requestTypeLabel(o, requestTypes)}</div>
               </Row>
-              <Row label="Alocação">{allocationOf(o)}</Row>
+              <Row label="Alocação">
+                <div>{allocationOf(o)}</div>
+                {allocationCategoryOf(o) && <div className="text-xs text-muted-foreground">{allocationCategoryOf(o)}</div>}
+              </Row>
               {showRequester && <Row label="Solicitante">{requesterName?.(o.requester_id)}</Row>}
               <Row label="Qtd">
                 {!part || part.qty <= 0 ? (
@@ -2754,7 +2760,10 @@ function OrdersTable({
               <TableCell className="text-center">
                 <div className="line-clamp-4 font-medium break-words">{requestTypeLabel(o, requestTypes)}</div>
               </TableCell>
-              <TableCell className="text-sm break-words text-center">{allocationOf(o)}</TableCell>
+              <TableCell className="text-sm break-words text-center">
+                <div>{allocationOf(o)}</div>
+                {allocationCategoryOf(o) && <div className="text-xs text-muted-foreground">{allocationCategoryOf(o)}</div>}
+              </TableCell>
               {showRequester && <TableCell className="text-sm break-words text-center">{requesterName?.(o.requester_id)}</TableCell>}
               <TableCell className="text-center">
                 {(() => {

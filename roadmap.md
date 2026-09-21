@@ -1,7 +1,7 @@
 # Roadmap
 
 ## Tarefas
-- [ ] Identificar como Cliente ou Projeto a alocação em Solicitações e Approvals
+- [x] Identificar como Cliente ou Projeto a alocação em Solicitações e Approvals
 - [x] Alinhar “Total geral” pela mesma linha de base dos indicadores de clientes e unidades
 - [x] Corrigir totalizadores do relatório para não somar o cliente corporativo quando ele possui unidades ou filiais ativas
 - [x] Aplicar a todos os ícones de ação o padrão 24×24 px, fundo verde-claro, borda preta e verde-escuro ao passar o cursor
