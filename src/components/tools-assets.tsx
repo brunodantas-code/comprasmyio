@@ -277,8 +277,8 @@ function ToolHistoryDialog({ row }: { row: ToolRow }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="ghost" title="Histórico">
-          <History className="h-4 w-4" />
+        <Button size="compactIcon" variant="ghost" title="Histórico" aria-label="Histórico">
+          <History className="h-3.5 w-3.5" />
         </Button>
       </DialogTrigger>
       <DialogContent className="max-h-[80vh] overflow-y-auto">
@@ -680,8 +680,8 @@ export function ToolAssetsSection({ userId, canDelete }: { userId: string; canDe
                           }
                         />
                         <ToolHistoryDialog row={r} />
-                        <Button size="sm" variant="ghost" disabled title="Sem avaria para registrar">
-                          <AlertTriangle className="h-4 w-4 text-muted-foreground/40" />
+                        <Button size="compactIcon" variant="ghost" disabled title="Sem avaria para registrar" aria-label="Sem avaria para registrar">
+                          <AlertTriangle className="h-3.5 w-3.5 text-muted-foreground/40" />
                         </Button>
                         {canDelete && <ToolDeleteDialog row={r} />}
                       </div>
