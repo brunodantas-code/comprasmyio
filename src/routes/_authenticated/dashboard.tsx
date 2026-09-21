@@ -114,6 +114,15 @@ type Order = {
   updated_at: string;
 };
 
+type PurchaseOrderItem = {
+  id: string;
+  order_id: string;
+  item_name: string;
+  item_link: string | null;
+  quantity: number;
+  estimated_unit_value: number;
+};
+
 type Attachment = { path: string; name: string; size: number; type: string };
 
 const ATTACHMENTS_BUCKET = "order-attachments";
@@ -2575,6 +2584,26 @@ function OrdersTable({
   const { data: requestTypes } = useRequestTypes();
   const { data: clients } = useClients();
   const { data: clientUnits } = useClientUnits();
+  const orderIds = orders.map((order) => order.id);
+  const { data: groupedOrderItems } = useQuery({
+    queryKey: ["purchase-order-items", orderIds],
+    enabled: orderIds.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("purchase_order_items")
+        .select("id, order_id, item_name, item_link, quantity, estimated_unit_value")
+        .in("order_id", orderIds)
+        .order("position", { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as PurchaseOrderItem[];
+    },
+    select: (rows) => rows.reduce((map, row) => {
+      const current = map.get(row.order_id) ?? [];
+      current.push(row);
+      map.set(row.order_id, current);
+      return map;
+    }, new Map<string, PurchaseOrderItem[]>()),
+  });
   const [fApproval, setFApproval] = useState("");
   const [fItem, setFItem] = useState("");
   const [fAloc, setFAloc] = useState("");
@@ -2593,7 +2622,7 @@ function OrdersTable({
     ? orders
     : orders.filter((o) =>
         (!fApproval || norm(o.approval_number ?? "").includes(norm(fApproval))) &&
-        (!fItem || norm(`${requestTypeLabel(o, requestTypes)} ${o.item_name ?? ""} ${o.requester_notes ?? ""}`).includes(norm(fItem))) &&
+        (!fItem || norm(`${requestTypeLabel(o, requestTypes)} ${o.item_name ?? ""} ${(groupedOrderItems?.get(o.id) ?? []).map((row) => row.item_name).join(" ")} ${o.requester_notes ?? ""}`).includes(norm(fItem))) &&
         (!fAloc || norm(allocationOf(o)).includes(norm(fAloc))) &&
         (!fReq || norm(requesterName?.(o.requester_id) ?? "").includes(norm(fReq))) &&
         (!fDate || o.deadline_date === fDate || o.delivery_forecast === fDate) &&
@@ -2663,16 +2692,9 @@ function OrdersTable({
                 </div>
               </Row>
               <Row label="Itens da Solicitação">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-sm break-words">{o.item_name || "—"}</span>
-                  {o.item_link ? (
-                    <a href={o.item_link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
-                      ver link <ExternalLink className="h-3 w-3" />
-                    </a>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">sem link</span>
-                  )}
-                </div>
+                {(groupedOrderItems?.get(o.id) ?? []).length ? (
+                  <ul className="space-y-1">{groupedOrderItems?.get(o.id)?.map((row) => <li key={row.id} className="text-sm"><span className="font-medium">{row.item_name}</span> <span className="text-xs text-muted-foreground">× {row.quantity}</span></li>)}</ul>
+                ) : <span className="text-sm break-words">{o.item_name || "—"}</span>}
               </Row>
               <Row label="Tipo">
                 <div className="font-medium">{requestTypeLabel(o, requestTypes)}</div>
@@ -2810,16 +2832,9 @@ function OrdersTable({
                 </div>
               </TableCell>
               <TableCell>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-sm break-words">{o.item_name || "—"}</span>
-                  {o.item_link ? (
-                    <a href={o.item_link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
-                      ver link <ExternalLink className="h-3 w-3" />
-                    </a>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">sem link</span>
-                  )}
-                </div>
+                {(groupedOrderItems?.get(o.id) ?? []).length ? (
+                  <ul className="space-y-1">{groupedOrderItems?.get(o.id)?.map((row) => <li key={row.id} className="text-sm break-words"><span className="font-medium">{row.item_name}</span> <span className="text-xs text-muted-foreground">× {row.quantity}</span></li>)}</ul>
+                ) : <span className="text-sm break-words">{o.item_name || "—"}</span>}
               </TableCell>
               <TableCell className="text-center">
                 <div className="line-clamp-4 font-medium break-words">{requestTypeLabel(o, requestTypes)}</div>
