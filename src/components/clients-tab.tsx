@@ -53,10 +53,22 @@ export function useClientUnits(clientId?: string) {
   });
 }
 
+function useProjectsForReallocation() {
+  return useQuery({
+    queryKey: ["projects"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("projects").select("id,name").order("name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
 export function ClientsTab({ userId }: { userId: string }) {
   const qc = useQueryClient();
   const { data: clients, isLoading } = useClients();
   const { data: allClientUnits } = useClientUnits();
+  const { data: reallocationProjects } = useProjectsForReallocation();
   const { data: categories } = useClientCategories(true);
   const [newUnits, setNewUnits] = useState<NewClientUnit[]>([]);
   const [expandedClients, setExpandedClients] = useState<Set<string>>(new Set());
@@ -321,7 +333,12 @@ export function ClientsTab({ userId }: { userId: string }) {
                          entityName={c.name}
                          entityLabel="cliente"
                          linkField="client_id"
-                         destinations={(clients ?? []).map((client) => ({ id: client.id, name: client.name }))}
+                          sourceEntityType="client"
+                          destinations={[
+                            ...(reallocationProjects ?? []).map((project) => ({ id: project.id, name: project.name, kind: "project" as const })),
+                            ...(clients ?? []).map((client) => ({ id: client.id, name: client.name, kind: "client" as const })),
+                            ...(allClientUnits ?? []).filter((unit) => unit.active).map((unit) => ({ id: unit.id, name: `${clients?.find((client) => client.id === unit.client_id)?.name ?? "Cliente"} — ${unit.name}`, kind: "unit" as const, parentClientId: unit.client_id })),
+                          ]}
                          onDelete={() => remove.mutate(c.id)}
                          deleting={remove.isPending}
                           trigger={<Button type="button" size="compactIcon" variant="ghost" className="text-destructive hover:text-destructive" title={`Excluir ${c.name}`} aria-label={`Excluir ${c.name}`}><Trash2 className="h-3.5 w-3.5" /></Button>}

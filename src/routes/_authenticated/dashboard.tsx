@@ -3743,7 +3743,12 @@ function ProjectsAdmin({ userId }: { userId: string }) {
                               entityName={p.name}
                               entityLabel="projeto"
                               linkField="project_id"
-                              destinations={(projects ?? []).map((project) => ({ id: project.id, name: project.name }))}
+                              sourceEntityType="project"
+                              destinations={[
+                                ...(projects ?? []).map((project) => ({ id: project.id, name: project.name, kind: "project" as const })),
+                                ...(clients ?? []).map((client) => ({ id: client.id, name: client.name, kind: "client" as const })),
+                                ...(clientUnits ?? []).filter((unit) => unit.active).map((unit) => ({ id: unit.id, name: `${clients?.find((client) => client.id === unit.client_id)?.name ?? "Cliente"} — ${unit.name}`, kind: "unit" as const, parentClientId: unit.client_id })),
+                              ]}
                               onDelete={() => remove.mutate(p.id)}
                               deleting={remove.isPending}
                                trigger={

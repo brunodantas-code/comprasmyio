@@ -25,6 +25,8 @@ type RegistryMaterial = {
   manufacturer_code: string | null;
   source: MaterialSource;
   group: string;
+  stock_type_code: string | null;
+  location?: string | null;
 };
 
 const normalize = (value: string | null) => (value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR");
@@ -192,12 +194,37 @@ function AddMaterialDialog({ categories }: { categories: MaterialStockType[] }) 
 }
 
 export function MaterialsRegistryTab() {
+  const queryClient = useQueryClient();
   const [expanded, setExpanded] = useState(false);
   const [search, setSearch] = useState("");
   const { data: stockTypes = [] } = useMaterialStockTypes();
   const activeCategories = stockTypes.filter((item) => item.active);
   const categoryNames = useMemo(() => new Map(stockTypes.map((item) => [item.code, item.name])), [stockTypes]);
   const { data: materials = [], isLoading } = useRegistryMaterials(categoryNames);
+  const classify = useMutation({
+    mutationFn: async ({ material, category }: { material: RegistryMaterial; category: MaterialStockType }) => {
+      const compatible = material.source === "materials"
+        ? category.destination_type === "fabrica" || category.destination_type === "almoxarifado"
+        : material.source === "terceiros_materials"
+          ? category.destination_type === "terceiros"
+          : category.destination_type === "ferramentas";
+      if (!compatible) throw new Error("Esta categoria pertence a outro tipo de estoque e não pode ser aplicada a este material.");
+      const values = material.source === "materials"
+        ? { stock_type_code: category.code, location: category.destination_type }
+        : { stock_type_code: category.code };
+      const { error } = await supabase.from(material.source).update(values as never).eq("id", material.id);
+      if (error) throw error;
+    },
+    onSuccess: async () => {
+      toast.success("Categoria atualizada");
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["materials-registry"] }),
+        queryClient.invalidateQueries({ queryKey: ["materials"] }),
+        queryClient.invalidateQueries({ queryKey: ["purchasable-items"] }),
+      ]);
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
   const filtered = useMemo(() => {
     const term = normalize(search.trim());
     if (!term) return materials;
@@ -230,7 +257,25 @@ export function MaterialsRegistryTab() {
             <TableHeader><TableRow><TableHead>Material</TableHead><TableHead>Categoria</TableHead><TableHead>Cód. Fabricante</TableHead><TableHead className="w-16" /></TableRow></TableHeader>
             <TableBody>{filtered.map((material) => <TableRow key={`${material.source}:${material.id}`}>
               <TableCell><div className="font-medium">{material.name}</div>{material.description && <div className="max-w-xl truncate text-xs text-muted-foreground">{material.description}</div>}</TableCell>
-              <TableCell>{material.group}</TableCell>
+               <TableCell>
+                 <Select
+                   value={material.stock_type_code ?? ""}
+                   onValueChange={(code) => {
+                     const category = activeCategories.find((item) => item.code === code);
+                     if (category) classify.mutate({ material, category });
+                   }}
+                   disabled={classify.isPending}
+                 >
+                   <SelectTrigger className="max-w-64" aria-label={`Categoria de ${material.name}`}><SelectValue placeholder={material.group} /></SelectTrigger>
+                   <SelectContent>
+                     {activeCategories.filter((category) => material.source === "materials"
+                       ? category.destination_type === "fabrica" || category.destination_type === "almoxarifado"
+                       : material.source === "terceiros_materials"
+                         ? category.destination_type === "terceiros"
+                         : category.destination_type === "ferramentas").map((category) => <SelectItem key={category.code} value={category.code}>{category.name}</SelectItem>)}
+                   </SelectContent>
+                 </Select>
+               </TableCell>
               <TableCell>{material.manufacturer_code || "—"}</TableCell>
               <TableCell><div className="flex items-center justify-end gap-1">
                 <MaterialDetailDialog materialId={material.id} name={material.name} table={material.source} startEditing trigger={<Button variant="ghost" size="compactIcon" className="!h-6 !w-6 shrink-0" title={`Editar ${material.name}`} aria-label={`Editar ${material.name}`}><Pencil className="h-3.5 w-3.5" /></Button>} />
