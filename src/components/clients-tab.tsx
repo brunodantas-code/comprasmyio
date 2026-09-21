@@ -58,6 +58,9 @@ export function ClientsTab({ userId }: { userId: string }) {
   const [clientSearch, setClientSearch] = useState("");
 
   const normalizedSearch = normalizeSearchValue(clientSearch.trim());
+  const activeClientsCount = clients?.length ?? 0;
+  const activeUnitsCount = (allClientUnits ?? []).filter((unit) => unit.active).length;
+  const totalActiveRecords = activeClientsCount + activeUnitsCount;
   const filteredClients = (clients ?? []).filter((client) => {
     if (!normalizedSearch) return true;
     const clientMatches = [client.name, client.legal_name, client.cnpj].some((value) =>
@@ -203,7 +206,14 @@ export function ClientsTab({ userId }: { userId: string }) {
       </Card>
 
       <Card>
-        <CardHeader><CardTitle>Clientes</CardTitle></CardHeader>
+        <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
+          <CardTitle>Clientes</CardTitle>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm" aria-label="Totais de clientes e unidades">
+            <span><span className="font-semibold text-foreground">{activeClientsCount}</span> <span className="text-muted-foreground">clientes ativos</span></span>
+            <span><span className="font-semibold text-foreground">{activeUnitsCount}</span> <span className="text-muted-foreground">unidades</span></span>
+            <span className="font-semibold text-primary">Total geral: {totalActiveRecords}</span>
+          </div>
+        </CardHeader>
         <CardContent>
           {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
             !clients?.length ? <p className="text-sm text-muted-foreground">Sem clientes.</p> :
