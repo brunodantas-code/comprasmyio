@@ -393,3 +393,12 @@
 - [x] Exigir confirmação ao remover materiais, anexos, trechos, reembolsos, unidades e QR codes em formulários
 - [x] Auditar novamente todas as ações de exclusão do sistema
 - [x] Validar cancelamento e confirmação no computador e celular
+
+## Pesquisa nos destinos de realocação
+- [x] Permitir digitar para filtrar projetos, clientes e unidades/filiais
+- [x] Manter os destinos agrupados por categoria
+- [x] Validar a seleção pesquisável em computador e celular
+
+## Realocação de Novos Produtos P&D
+- [x] Realocar os Approvals 202607210001, 202607290001 e 202607300001 para Interna
+- [x] Preservar e conferir os vínculos derivados dos três Approvals
