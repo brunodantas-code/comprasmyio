@@ -20,8 +20,9 @@ export function ClientsMapDialog({ clients, units, categories }: { clients: Clie
   const [markers, setMarkers] = useState<Record<string, Marker>>({});
   const svgRef = useRef<SVGSVGElement>(null);
   const clientsById = new Map(clients.map((client) => [client.id, client]));
+  const clientIdsWithUnits = new Set(units.filter((unit) => unit.active).map((unit) => unit.client_id));
   const entries: MapEntry[] = [
-    ...clients.filter((client) => client.state).map((client) => ({ id: `client-${client.id}`, name: client.name, state: client.state?.toUpperCase() ?? "", categoryId: client.category_id, corporateName: client.name, kind: "Cliente corporativo" as const })),
+    ...clients.filter((client) => client.state && !clientIdsWithUnits.has(client.id)).map((client) => ({ id: `client-${client.id}`, name: client.name, state: client.state?.toUpperCase() ?? "", categoryId: client.category_id, corporateName: client.name, kind: "Cliente corporativo" as const })),
     ...units.filter((unit) => unit.active && unit.state).map((unit) => ({ id: `unit-${unit.id}`, name: unit.name, state: unit.state?.toUpperCase() ?? "", categoryId: unit.category_id, corporateName: clientsById.get(unit.client_id)?.name ?? "—", kind: "Unidade" as const })),
   ];
   const filteredEntries = categoryId === "all" ? entries : entries.filter((entry) => entry.categoryId === categoryId);
