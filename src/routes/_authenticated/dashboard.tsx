@@ -1978,7 +1978,73 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
                       Novo
                     </label>}
                   </div>
-                  <PurchasableItemPicker value={isNewItem ? null : item} onPick={(i) => { setItem(i); if (i.link) setItemLink(i.link); }} disabled={isNewItem} />
+                  {!isNewItem && (
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Categorias</Label>
+                        <div className="flex flex-wrap gap-x-5 gap-y-2">
+                          {CATEGORIES.map((category) => (
+                            <label key={category.value} className="flex cursor-pointer items-center gap-2 text-sm">
+                              <Checkbox
+                                checked={materialCategories.includes(category.value)}
+                                onCheckedChange={() => {
+                                  setMaterialCategories((current) => {
+                                    if (category.value === "todas") return ["todas"];
+                                    const withoutAll = current.filter((value) => value !== "todas");
+                                    const next = withoutAll.includes(category.value)
+                                      ? withoutAll.filter((value) => value !== category.value)
+                                      : [...withoutAll, category.value];
+                                    return next.length ? next : ["todas"];
+                                  });
+                                }}
+                              />
+                              {category.label}
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        {materialItems.map((row, index) => (
+                          <div key={row.id} className="grid items-end gap-3 rounded-md border p-3 sm:grid-cols-[minmax(0,1fr)_6rem_2rem]">
+                            <div className="space-y-2">
+                              <Label>Material {index + 1}</Label>
+                              <PurchasableItemPicker
+                                value={row.item}
+                                categories={materialCategories}
+                                excludedKeys={materialItems.map((entry) => entry.item?.key).filter((key): key is string => Boolean(key))}
+                                onPick={(selected) => setMaterialItems((current) => current.map((entry) => entry.id === row.id ? { ...entry, item: selected, itemLink: selected.link ?? "" } : entry))}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor={`material-quantity-${row.id}`}>Qtd.</Label>
+                              <Input
+                                id={`material-quantity-${row.id}`}
+                                type="number"
+                                min={1}
+                                max={99999}
+                                value={row.quantity}
+                                onChange={(event) => setMaterialItems((current) => current.map((entry) => entry.id === row.id ? { ...entry, quantity: event.target.value } : entry))}
+                              />
+                            </div>
+                            <Button
+                              type="button"
+                              size="compactIcon"
+                              variant="outline"
+                              aria-label={`Remover material ${index + 1}`}
+                              title="Remover material"
+                              disabled={materialItems.length === 1}
+                              onClick={() => setMaterialItems((current) => current.filter((entry) => entry.id !== row.id))}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                        <Button type="button" size="compactIcon" variant="outline" aria-label="Adicionar material" title="Adicionar material" onClick={() => setMaterialItems((current) => [...current, emptyMaterialItem()])}>
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </>
               ) : requestModel === "servicos" ? (
                 <Label>Serviço</Label>
@@ -2064,7 +2130,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
                   />
                 </div>
               </div>}
-              {!isNewItem && item && (
+              {!isMaterialsRequest && !isNewItem && item && (
                 <div className="space-y-2">
                   <Label>Valor médio (últimos 6 meses)</Label>
                   <Input
@@ -2113,7 +2179,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
             )}
             {requestModel === "materiais" && <AddressAutocomplete name="delivery_point" required />}
 
-            {requestModel !== "reembolso" && requestModel !== "rh" && requestModel !== "pagamento" && (
+            {requestModel !== "reembolso" && requestModel !== "rh" && requestModel !== "pagamento" && (!isMaterialsRequest || isNewItem) && (
             <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>Prazo de recebimento</Label>
