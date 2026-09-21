@@ -1264,12 +1264,13 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
       }
 
       const requestGroupId = crypto.randomUUID();
-      if (shipQty > 0) {
+      const deviceItems = groupedItems?.filter((row) => row.item?.fulfillment_type === "myio_device") ?? [];
+      if (deviceItems.length > 0) {
 
         const { data: exp, error: expError } = await supabase
           .from("myio_orders")
           .insert({
-            title: values.item_name,
+            title: deviceItems.map((row) => row.item?.description || row.item?.name).join("; "),
             client_name: forStock
               ? "Estoque"
               : allocTarget === "interna"
@@ -1283,7 +1284,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
             delivery_date: values.deadline_type === "customizado" && values.deadline_date
               ? values.deadline_date
               : new Date().toISOString().slice(0, 10),
-            notes: `Gerado a partir de solicitação (${shipQty} em estoque). Destinatário: ${values.recipient}. Entrega: ${values.delivery_point}.`,
+            notes: `Gerado a partir do Approval consolidado. Destinatário: ${values.recipient}. Entrega: ${values.delivery_point}.`,
             created_by: userId,
             request_group_id: requestGroupId,
           })
@@ -1292,7 +1293,11 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
         if (expError) throw expError;
         const { error: itemsError } = await supabase
           .from("myio_order_items")
-          .insert({ order_id: exp.id, product: values.item_name, quantity: shipQty });
+          .insert(deviceItems.map((row) => ({
+            order_id: exp.id,
+            product: row.item?.name || row.item?.description || "Dispositivo myio",
+            quantity: Number(row.quantity),
+          })));
         if (itemsError) throw itemsError;
       }
 
@@ -1352,6 +1357,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
             material_id: row.item?.material_id ?? null,
             terceiros_material_id: row.item?.terceiros_material_id ?? null,
             tool_asset_id: row.item?.tool_asset_id ?? null,
+            fulfillment_type: row.item?.fulfillment_type ?? "purchase",
           })));
           if (itemError) {
             await supabase.from("purchase_orders").delete().eq("id", data.id);
@@ -1364,7 +1370,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
           if (ue) throw ue;
         }
       }
-      return { buyQty, shipQty, budgetExceeded: Boolean(createdOrder?.budget_exceeded), budget: createdOrder?.budget_snapshot, projected: createdOrder?.projected_committed_snapshot };
+      return { buyQty, shipQty: deviceItems.reduce((sum, row) => sum + Number(row.quantity), 0), budgetExceeded: Boolean(createdOrder?.budget_exceeded), budget: createdOrder?.budget_snapshot, projected: createdOrder?.projected_committed_snapshot };
     },
     onSuccess: (r) => {
       if (r.shipQty > 0 && r.buyQty > 0) toast.success(`Ordem de expedição (${r.shipQty}) e ordem de compra (${r.buyQty}) criadas.`);
@@ -2117,12 +2123,12 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
               ) : (
 
                 <p className="text-xs text-muted-foreground">
-                  Somente itens cadastrados em Insumos de Fabricação, Insumos de Instalação, Material de Almoxarifado ou Máquinas e Ferramentas. Ao receber, entra automaticamente no estoque de origem.
+                  Materiais comprados entram no estoque de origem ao receber. Dispositivos myio seguem para separação após o mesmo Approval.
                 </p>
               )}
             </div>
             )}
-            {requestModel !== "reembolso" && requestModel !== "rh" && requestModel !== "pagamento" && (
+            {requestModel !== "reembolso" && requestModel !== "rh" && requestModel !== "pagamento" && (!isMaterialsRequest || isNewItem) && (
             <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="quantity">{requestModel === "viagens" ? (travelType === "aluguel_veiculos" ? "Quantidade de veículos" : "Quantidade de Pessoas") : "Quantidade"}</Label>
