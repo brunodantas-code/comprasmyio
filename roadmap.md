@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Tarefas
+- [x] Aplicar a todos os ícones de ação o padrão 24×24 px, fundo verde-claro, borda preta e verde-escuro ao passar o cursor
 - [x] Reorganizar Projetos no padrão de Clientes, com cadastro no topo e lista abaixo em largura total
 - [x] Apresentar e aplicar a prévia escolhida do cadastro de cliente em linha única no desktop, com botão “+ Filial”
 - [x] Reorganizar Novo cliente no topo em duas linhas e ampliar a lista de clientes para toda a largura
