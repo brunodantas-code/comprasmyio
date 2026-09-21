@@ -934,9 +934,37 @@ export type Database = {
           },
         ]
       }
+      client_categories: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          name: string
+          position: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name: string
+          position?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+          position?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       client_units: {
         Row: {
           active: boolean
+          category_id: string | null
           city: string | null
           client_id: string
           cnpj: string | null
@@ -949,6 +977,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          category_id?: string | null
           city?: string | null
           client_id: string
           cnpj?: string | null
@@ -961,6 +990,7 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          category_id?: string | null
           city?: string | null
           client_id?: string
           cnpj?: string | null
@@ -973,6 +1003,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "client_units_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "client_categories"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "client_units_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
@@ -983,6 +1020,7 @@ export type Database = {
       }
       clients: {
         Row: {
+          category_id: string | null
           city: string | null
           cnpj: string | null
           created_at: string
@@ -994,6 +1032,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          category_id?: string | null
           city?: string | null
           cnpj?: string | null
           created_at?: string
@@ -1005,6 +1044,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          category_id?: string | null
           city?: string | null
           cnpj?: string | null
           created_at?: string
@@ -1015,7 +1055,15 @@ export type Database = {
           state?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "clients_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "client_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       cost_centers: {
         Row: {

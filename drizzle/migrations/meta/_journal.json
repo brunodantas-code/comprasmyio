@@ -127,6 +127,13 @@
       "when": 1789999861299,
       "tag": "0017_add_client_unit_city_state",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1790002248593,
+      "tag": "0018_create_client_categories",
+      "breakpoints": true
     }
   ]
 }
