@@ -379,4 +379,4 @@
 - [ ] Gerar um único Approval para todos os materiais da solicitação
 - [ ] Validar envio, estoque, aprovação e visualização em computador e celular
 - [x] Confirmar e informar a categoria atual dos antigos Dispositivos myio
-- [ ] Verificar por que produtos myio fabricados do Almoxarifado não aparecem na lista de Materiais
+- [x] Verificar por que produtos myio fabricados do Almoxarifado não aparecem na lista de Materiais
