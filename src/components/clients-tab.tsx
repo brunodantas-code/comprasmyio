@@ -245,10 +245,10 @@ export function ClientsTab({ userId }: { userId: string }) {
               </SelectContent>
             </Select>
           </div>
-          <div className="flex flex-wrap items-end gap-x-4 gap-y-1 text-sm" aria-label="Totais de clientes e unidades">
-            <span className="inline-flex items-end"><span className="font-semibold text-foreground">{activeClientsCount}</span>&nbsp;<span className="text-muted-foreground">clientes ativos</span></span>
-            <span className="inline-flex items-end"><span className="font-semibold text-foreground">{activeUnitsCount}</span>&nbsp;<span className="text-muted-foreground">unidades</span></span>
-            <span className="inline-flex items-end gap-1 font-semibold leading-none text-foreground"><span>Total geral:</span><span className="text-[2em] leading-[0.8]">{totalActiveRecords}</span></span>
+          <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm" aria-label="Totais de clientes e unidades">
+            <span><span className="font-semibold text-foreground">{activeClientsCount}</span>&nbsp;<span className="text-muted-foreground">clientes ativos</span></span>
+            <span><span className="font-semibold text-foreground">{activeUnitsCount}</span>&nbsp;<span className="text-muted-foreground">unidades</span></span>
+            <span className="inline-flex items-baseline gap-1 font-semibold text-foreground"><span>Total geral:</span><span className="text-[2em] leading-none">{totalActiveRecords}</span></span>
           </div>
         </CardHeader>
         <CardContent>
