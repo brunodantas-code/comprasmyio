@@ -339,3 +339,9 @@
 - [ ] Classificar os shoppings e as Obrasmax existentes nas categorias solicitadas
 - [ ] Ajustar o total geral para preto e número com o dobro do tamanho
 - [ ] Validar em computador e celular
+
+## Relatório PDF de clientes
+- [ ] Adicionar botão de relatório ao lado do título Clientes
+- [ ] Permitir ordenar o PDF por UF, Categoria ou Cliente corporativo
+- [ ] Exportar clientes, unidades e todas as informações cadastrais
+- [ ] Validar o PDF e o fluxo em computador e celular
