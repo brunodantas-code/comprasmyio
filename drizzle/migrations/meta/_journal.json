@@ -134,6 +134,13 @@
       "when": 1790002248593,
       "tag": "0018_create_client_categories",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1790002534084,
+      "tag": "0019_preserve_category_on_client_conversion",
+      "breakpoints": true
     }
   ]
 }
