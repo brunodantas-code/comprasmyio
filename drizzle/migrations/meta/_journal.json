@@ -190,6 +190,13 @@
       "when": 1790015317147,
       "tag": "0026_separate_device_fulfillment_in_grouped_approvals",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1790021419733,
+      "tag": "0027_admin_edit_purchase_approval",
+      "breakpoints": true
     }
   ]
 }

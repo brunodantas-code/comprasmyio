@@ -27,7 +27,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { toast } from "sonner";
 import { ArrowLeft, Home, LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Boxes, Building2, Plane, Landmark, Briefcase, Layers3, ArrowUpDown } from "lucide-react";
 import { Trash2, Paperclip, Loader2, DatabaseBackup, CheckCircle2, XCircle, RotateCcw, Pencil, Bell, ShieldCheck, AlertTriangle } from "lucide-react";
-import { ApprovalWorkflow, MyApprovalFlows, PendingApprovalsByRole, PendingForMe } from "@/components/approval-workflow";
+import { ApprovalWorkflow, MyApprovalFlows, PendingApprovalsByRole, PendingForMe, type ApprovalListOrder } from "@/components/approval-workflow";
 import { z } from "zod";
 import { StockTab } from "@/components/stock-tab";
 import { MyioOrdersTab, NewMyioOrderDialog } from "@/components/myio-orders-tab";
@@ -106,6 +106,7 @@ type Order = {
   parent_order_id?: string | null;
   payment_date?: string | null;
   approval_status?: string;
+  cost_center_id?: string | null;
   estimated_value?: number;
   budget_exceeded?: boolean;
   budget_snapshot?: number | null;
@@ -2513,6 +2514,9 @@ function ApprovalsCenter() {
   const canSeeAllPermission = me?.canAccess("approvals_todos") ?? false;
   const canSeeRolesPermission = me?.canAccess("approvals_consolidado") ?? false;
   const canSeeSupplyQueue = Boolean(me?.isAdmin || me?.isComprador);
+  const renderAdminEdit = me?.isAdmin
+    ? (order: ApprovalListOrder) => <AdminEditApprovalDialog order={order as unknown as Order} items={(order.purchase_order_items ?? []) as ApprovalEditItem[]} />
+    : undefined;
   const { data: supplyQueueCount = 0 } = useQuery({
     queryKey: ["orders", "supply-queue-count"],
     enabled: canSeeSupplyQueue,
@@ -2541,17 +2545,108 @@ function ApprovalsCenter() {
         {canSeeAllPermission && <TabsTrigger value="all">Todos</TabsTrigger>}
         {canSeeRolesPermission && <TabsTrigger value="roles">Consolidado por Cargo</TabsTrigger>}
       </TabsList>
-      {canSeeMine && <TabsContent value="mine"><PendingForMe /></TabsContent>}
-      {canSeeFlow && <TabsContent value="flow"><MyApprovalFlows /></TabsContent>}
+      {canSeeMine && <TabsContent value="mine"><PendingForMe renderEditAction={renderAdminEdit} /></TabsContent>}
+      {canSeeFlow && <TabsContent value="flow"><MyApprovalFlows renderEditAction={renderAdminEdit} /></TabsContent>}
       {canSeeFlow && <TabsContent value="mine-supply"><BuyerQueue mode="mine-supply" /></TabsContent>}
       {canSeeSupplyQueue && <TabsContent value="supply"><BuyerQueue mode="supply" /></TabsContent>}
       {canSeeAllPermission && <TabsContent value="all"><BuyerQueue /></TabsContent>}
-      {canSeeRolesPermission && <TabsContent value="roles"><PendingApprovalsByRole /></TabsContent>}
+      {canSeeRolesPermission && <TabsContent value="roles"><PendingApprovalsByRole renderEditAction={renderAdminEdit} /></TabsContent>}
     </Tabs>
   );
 }
 
 /* ---------- Orders table ---------- */
+
+type ApprovalEditItem = PurchaseOrderItem & { item_link: string | null };
+
+function AdminEditApprovalDialog({ order, items }: { order: Order; items: ApprovalEditItem[] }) {
+  const qc = useQueryClient();
+  const { data: projects } = useProjects();
+  const { data: clients } = useClients();
+  const { data: units } = useClientUnits();
+  const { data: costCenters } = useCostCenters();
+  const [open, setOpen] = useState(false);
+  const [destinationOpen, setDestinationOpen] = useState(false);
+  const [allocationType, setAllocationType] = useState(order.allocation_type ?? (order.for_stock ? "estoque" : "interna"));
+  const [destinationId, setDestinationId] = useState(order.project_id ?? order.client_unit_id ?? order.client_id ?? "");
+  const [costCenterId, setCostCenterId] = useState(order.cost_center_id ?? "none");
+  const [itemName, setItemName] = useState(order.item_name);
+  const [itemLink, setItemLink] = useState(order.item_link ?? "");
+  const [quantity, setQuantity] = useState(String(order.quantity));
+  const [estimatedValue, setEstimatedValue] = useState(String(order.estimated_value ?? 0));
+  const [recipient, setRecipient] = useState(order.recipient ?? "");
+  const [deliveryPoint, setDeliveryPoint] = useState(order.delivery_point ?? "");
+  const [deadlineType, setDeadlineType] = useState<Order["deadline_type"]>(order.deadline_type);
+  const [deadlineDate, setDeadlineDate] = useState(order.deadline_date ?? "");
+  const [deliveryForecast, setDeliveryForecast] = useState(order.delivery_forecast ?? "");
+  const [requesterNotes, setRequesterNotes] = useState(order.requester_notes ?? "");
+  const [buyerNotes, setBuyerNotes] = useState(order.buyer_notes ?? "");
+  const [editedItems, setEditedItems] = useState(() => items.map((item) => ({ ...item, quantity: String(item.quantity), estimated_unit_value: String(item.estimated_unit_value) })));
+
+  const destinations = allocationType === "projeto"
+    ? (projects ?? []).filter((project) => project.status !== "concluido").map((project) => ({ id: project.id, label: project.name }))
+    : allocationType === "cliente"
+      ? [
+          ...(clients ?? []).map((client) => ({ id: client.id, label: client.name })),
+          ...(units ?? []).filter((unit) => unit.active).map((unit) => ({ id: unit.id, label: `${clients?.find((client) => client.id === unit.client_id)?.name ?? "Cliente"} — ${unit.name}` })),
+        ]
+      : [];
+  const selectedDestination = destinations.find((destination) => destination.id === destinationId);
+
+  function reset() {
+    setAllocationType(order.allocation_type ?? (order.for_stock ? "estoque" : "interna"));
+    setDestinationId(order.project_id ?? order.client_unit_id ?? order.client_id ?? "");
+    setCostCenterId(order.cost_center_id ?? "none");
+    setItemName(order.item_name); setItemLink(order.item_link ?? ""); setQuantity(String(order.quantity)); setEstimatedValue(String(order.estimated_value ?? 0));
+    setRecipient(order.recipient ?? ""); setDeliveryPoint(order.delivery_point ?? ""); setDeadlineType(order.deadline_type); setDeadlineDate(order.deadline_date ?? "");
+    setDeliveryForecast(order.delivery_forecast ?? ""); setRequesterNotes(order.requester_notes ?? ""); setBuyerNotes(order.buyer_notes ?? "");
+    setEditedItems(items.map((item) => ({ ...item, quantity: String(item.quantity), estimated_unit_value: String(item.estimated_unit_value) })));
+  }
+
+  const save = useMutation({
+    mutationFn: async () => {
+      if ((allocationType === "projeto" || allocationType === "cliente") && !destinationId) throw new Error("Selecione o destino da alocação.");
+      const unit = units?.find((candidate) => candidate.id === destinationId);
+      const changes = {
+        allocation_type: allocationType,
+        project_id: allocationType === "projeto" ? destinationId : null,
+        client_id: allocationType === "cliente" ? unit?.client_id ?? destinationId : null,
+        client_unit_id: allocationType === "cliente" ? unit?.id ?? null : null,
+        cost_center_id: costCenterId === "none" ? null : costCenterId,
+        item_name: itemName.trim(), item_link: itemLink.trim() || null, quantity: Number(quantity), estimated_value: Number(estimatedValue),
+        recipient: recipient.trim(), delivery_point: deliveryPoint.trim() || null, deadline_type: deadlineType,
+        deadline_date: deadlineType === "customizado" ? deadlineDate || null : null, delivery_forecast: deliveryForecast || null,
+        requester_notes: requesterNotes.trim() || null, buyer_notes: buyerNotes.trim() || null,
+      };
+      const payloadItems = editedItems.map((item) => ({ id: item.id, item_name: item.item_name.trim(), item_link: item.item_link?.trim() || null, quantity: Number(item.quantity), estimated_unit_value: Number(item.estimated_unit_value) }));
+      const { error } = await supabase.rpc("admin_edit_purchase_approval", { _order_id: order.id, _changes: changes, _items: payloadItems });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Approval atualizado");
+      setOpen(false);
+      ["orders", "approval-steps", "cash-flow-payables", "project-budget-summaries", "order-report-logs"].forEach((key) => qc.invalidateQueries({ queryKey: [key] }));
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  return <Dialog open={open} onOpenChange={(next) => { setOpen(next); if (next) reset(); }}>
+    <DialogTrigger asChild><Button type="button" variant="ghost" size="compactIcon" title="Editar Approval" aria-label={`Editar Approval ${order.approval_number ?? ""}`}><Pencil className="h-3.5 w-3.5" /></Button></DialogTrigger>
+    <DialogContent className="max-h-[92vh] max-w-3xl overflow-y-auto">
+      <DialogHeader><DialogTitle>Editar Approval {order.approval_number}</DialogTitle><DialogDescription>As etapas e decisões de aprovação serão preservadas.</DialogDescription></DialogHeader>
+      <div className="space-y-5">
+        <section className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2"><Label>Alocação</Label><Select value={allocationType} onValueChange={(value) => { setAllocationType(value as typeof allocationType); setDestinationId(""); }}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="interna">Interna</SelectItem><SelectItem value="projeto">Projeto</SelectItem><SelectItem value="cliente">Cliente ou Unidade/Filial</SelectItem><SelectItem value="estoque">Estoque</SelectItem></SelectContent></Select></div>
+          {(allocationType === "projeto" || allocationType === "cliente") && <div className="space-y-2"><Label>Destino</Label><Popover open={destinationOpen} onOpenChange={setDestinationOpen}><PopoverTrigger asChild><Button type="button" variant="outline" role="combobox" className="w-full justify-between font-normal"><span className="truncate">{selectedDestination?.label ?? "Digite ou selecione"}</span><ArrowUpDown className="h-4 w-4 opacity-50" /></Button></PopoverTrigger><PopoverContent className="w-(--radix-popover-trigger-width) p-0"><Command><CommandInput placeholder="Buscar destino..." /><CommandList><CommandEmpty>Nenhum destino encontrado.</CommandEmpty><CommandGroup>{destinations.map((destination) => <CommandItem key={destination.id} value={destination.label} onSelect={() => { setDestinationId(destination.id); setDestinationOpen(false); }}><CheckCircle2 className={destination.id === destinationId ? "opacity-100" : "opacity-0"} />{destination.label}</CommandItem>)}</CommandGroup></CommandList></Command></PopoverContent></Popover></div>}
+          <div className="space-y-2 sm:col-span-2"><Label>Centro de Custo</Label><Select value={costCenterId} onValueChange={setCostCenterId}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="none">Sem centro de custo</SelectItem>{(costCenters ?? []).filter((center) => center.active).map((center) => <SelectItem key={center.id} value={center.id}>{center.code ? `${center.code} — ` : ""}{center.name}</SelectItem>)}</SelectContent></Select></div>
+        </section>
+        <section className="space-y-3 border-t pt-4"><h3 className="text-sm font-semibold">Itens e valores</h3>{editedItems.length ? editedItems.map((item, index) => <div key={item.id} className="grid gap-3 rounded-md border p-3 sm:grid-cols-[minmax(0,2fr)_6rem_9rem]"><div className="space-y-2"><Label>Item {index + 1}</Label><Input value={item.item_name} onChange={(event) => setEditedItems((current) => current.map((row) => row.id === item.id ? { ...row, item_name: event.target.value } : row))} /><Input value={item.item_link ?? ""} placeholder="Link de referência" onChange={(event) => setEditedItems((current) => current.map((row) => row.id === item.id ? { ...row, item_link: event.target.value } : row))} /></div><div className="space-y-2"><Label>Qtd.</Label><Input type="number" min={1} value={item.quantity} onChange={(event) => setEditedItems((current) => current.map((row) => row.id === item.id ? { ...row, quantity: event.target.value } : row))} /></div><div className="space-y-2"><Label>Valor unitário</Label><MoneyInput value={item.estimated_unit_value} onChange={(value) => setEditedItems((current) => current.map((row) => row.id === item.id ? { ...row, estimated_unit_value: value } : row))} /></div></div>) : <div className="grid gap-3 sm:grid-cols-2"><div className="space-y-2 sm:col-span-2"><Label>Item</Label><Input value={itemName} onChange={(event) => setItemName(event.target.value)} /></div><div className="space-y-2"><Label>Link de referência</Label><Input value={itemLink} onChange={(event) => setItemLink(event.target.value)} /></div><div className="space-y-2"><Label>Quantidade</Label><Input type="number" min={1} value={quantity} onChange={(event) => setQuantity(event.target.value)} /></div><div className="space-y-2"><Label>Valor total</Label><MoneyInput value={estimatedValue} onChange={setEstimatedValue} /></div></div>}</section>
+        <section className="grid gap-4 border-t pt-4 sm:grid-cols-2"><div className="space-y-2"><Label>Destinatário</Label><Input value={recipient} onChange={(event) => setRecipient(event.target.value)} /></div><div className="space-y-2"><Label>Ponto ou endereço de entrega</Label><Input value={deliveryPoint} onChange={(event) => setDeliveryPoint(event.target.value)} /></div><div className="space-y-2"><Label>Prazo</Label><Select value={deadlineType} onValueChange={(value) => setDeadlineType(value as Order["deadline_type"])}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="urgente">Urgente</SelectItem><SelectItem value="esta_semana">Esta semana</SelectItem><SelectItem value="este_mes">Este mês</SelectItem><SelectItem value="customizado">Data específica</SelectItem></SelectContent></Select></div>{deadlineType === "customizado" && <div className="space-y-2"><Label>Data do prazo</Label><Input type="date" value={deadlineDate} onChange={(event) => setDeadlineDate(event.target.value)} /></div>}<div className="space-y-2"><Label>Previsão de entrega</Label><Input type="date" value={deliveryForecast} onChange={(event) => setDeliveryForecast(event.target.value)} /></div><div className="space-y-2"><Label>Observações do solicitante</Label><Textarea value={requesterNotes} onChange={(event) => setRequesterNotes(event.target.value)} /></div><div className="space-y-2 sm:col-span-2"><Label>Observações de Supply</Label><Textarea value={buyerNotes} onChange={(event) => setBuyerNotes(event.target.value)} /></div></section>
+      </div>
+      <DialogFooter><Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button><Button type="button" onClick={() => save.mutate()} disabled={save.isPending}>{save.isPending ? "Salvando..." : "Salvar alterações"}</Button></DialogFooter>
+    </DialogContent>
+  </Dialog>;
+}
 
 function OrdersTable({
   orders, projectName, requesterName, showRequester, canEdit, canDelete, canEditRequester, stockParts, headerFilters, statusFilterControl, deliveredFilterControl,
@@ -2661,7 +2756,8 @@ function OrdersTable({
             <div key={o.id} className="rounded-lg border border-border bg-card p-3">
               <Row label="Approval">
                 <div className="flex flex-wrap items-start justify-start gap-1 font-mono font-bold">
-                  {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
+                   {me?.isAdmin && <AdminEditApprovalDialog order={o} items={(groupedOrderItems?.get(o.id) ?? []) as ApprovalEditItem[]} />}
+                   {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
                   {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
                   <div className="inline-flex flex-col items-stretch">
                     <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} />
@@ -2801,7 +2897,8 @@ function OrdersTable({
             <TableRow key={o.id} className="align-top">
               <TableCell className="font-mono text-xs text-left">
                 <div className="flex items-start justify-start gap-1">
-                  {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
+                   {me?.isAdmin && <AdminEditApprovalDialog order={o} items={(groupedOrderItems?.get(o.id) ?? []) as ApprovalEditItem[]} />}
+                   {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
                   {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
                   <div className="inline-flex flex-col items-stretch">
                     <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} />
