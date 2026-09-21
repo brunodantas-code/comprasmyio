@@ -390,6 +390,6 @@
 - [x] Confirmar visualmente a prévia antes de informar conclusão ou orientar nova publicação
 
 ## Confirmação obrigatória em exclusões
-- [ ] Exigir confirmação ao remover materiais, anexos, trechos, reembolsos, unidades e QR codes em formulários
-- [ ] Auditar novamente todas as ações de exclusão do sistema
-- [ ] Validar cancelamento e confirmação no computador e celular
+- [x] Exigir confirmação ao remover materiais, anexos, trechos, reembolsos, unidades e QR codes em formulários
+- [x] Auditar novamente todas as ações de exclusão do sistema
+- [x] Validar cancelamento e confirmação no computador e celular
