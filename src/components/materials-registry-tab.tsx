@@ -53,6 +53,21 @@ function useRegistryMaterials(categoryNames: Map<string, string>) {
   });
 }
 
+function useMyioDevices() {
+  return useQuery({
+    queryKey: ["myio-devices-registry"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("materials")
+        .select("id,name,description,manufacturer_code,location,stock_type_code")
+        .eq("is_manufactured", true)
+        .order("name");
+      if (error) throw error;
+      return (data ?? []).map((item) => ({ ...item, source: "materials" as const, group: "Dispositivos myio" })) satisfies RegistryMaterial[];
+    },
+  });
+}
+
 function DeleteMaterialButton({ material }: { material: RegistryMaterial }) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -281,6 +296,49 @@ export function MaterialsRegistryTab({ canCreate = false }: { canCreate?: boolea
                 <MaterialDetailDialog materialId={material.id} name={material.name} table={material.source} startEditing trigger={<Button variant="ghost" size="compactIcon" className="!h-6 !w-6 shrink-0" title={`Editar ${material.name}`} aria-label={`Editar ${material.name}`}><Pencil className="h-3.5 w-3.5" /></Button>} />
                 <DeleteMaterialButton material={material} />
               </div></TableCell>
+            </TableRow>)}</TableBody>
+          </Table>}
+        </CardContent>
+      </CollapsibleContent>
+    </Card>
+  </Collapsible>;
+}
+
+export function MyioDevicesRegistryTab() {
+  const [expanded, setExpanded] = useState(false);
+  const [search, setSearch] = useState("");
+  const { data: devices = [], isLoading } = useMyioDevices();
+  const filtered = useMemo(() => {
+    const term = normalize(search.trim());
+    if (!term) return devices;
+    return devices.filter((item) => normalize(`${item.name} ${item.description ?? ""} ${item.manufacturer_code ?? ""}`).includes(term));
+  }, [devices, search]);
+
+  return <Collapsible open={expanded} onOpenChange={setExpanded} asChild>
+    <Card>
+      <CardHeader className="flex flex-row items-start justify-between gap-4">
+        <div>
+          <CardTitle>Dispositivos myio</CardTitle>
+          {expanded && <CardDescription>Produtos fabricados myio disponíveis para solicitações.</CardDescription>}
+        </div>
+        <CollapsibleTrigger asChild>
+          <Button size="compactIcon" variant="ghost" aria-label={expanded ? "Recolher Dispositivos myio" : "Expandir Dispositivos myio"} title={expanded ? "Recolher" : "Expandir"}>
+            {expanded ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+          </Button>
+        </CollapsibleTrigger>
+      </CardHeader>
+      <CollapsibleContent asChild>
+        <CardContent className="space-y-4">
+          <div className="relative max-w-md">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar dispositivo..." className="pl-9" />
+          </div>
+          {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : !filtered.length ? <p className="text-sm text-muted-foreground">Nenhum dispositivo encontrado.</p> : <Table>
+            <TableHeader><TableRow><TableHead>Dispositivo</TableHead><TableHead>Cód. Fabricante</TableHead><TableHead className="w-16" /></TableRow></TableHeader>
+            <TableBody>{filtered.map((device) => <TableRow key={device.id}>
+              <TableCell><div className="font-medium">{device.name}</div>{device.description && <div className="max-w-xl truncate text-xs text-muted-foreground">{device.description}</div>}</TableCell>
+              <TableCell>{device.manufacturer_code || "—"}</TableCell>
+              <TableCell><MaterialDetailDialog materialId={device.id} name={device.name} table="materials" trigger={<Button variant="ghost" size="compactIcon" className="!h-6 !w-6 shrink-0" title={`Editar ${device.name}`} aria-label={`Editar ${device.name}`}><Pencil className="h-3.5 w-3.5" /></Button>} /></TableCell>
             </TableRow>)}</TableBody>
           </Table>}
         </CardContent>

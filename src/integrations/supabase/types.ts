@@ -2663,6 +2663,7 @@ export type Database = {
         Row: {
           created_at: string
           estimated_unit_value: number
+          fulfillment_type: string
           id: string
           item_link: string | null
           item_name: string
@@ -2676,6 +2677,7 @@ export type Database = {
         Insert: {
           created_at?: string
           estimated_unit_value?: number
+          fulfillment_type?: string
           id?: string
           item_link?: string | null
           item_name: string
@@ -2689,6 +2691,7 @@ export type Database = {
         Update: {
           created_at?: string
           estimated_unit_value?: number
+          fulfillment_type?: string
           id?: string
           item_link?: string | null
           item_name?: string

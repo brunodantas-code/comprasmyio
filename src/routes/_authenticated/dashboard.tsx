@@ -42,7 +42,7 @@ import { StockDestinationsTab } from "@/components/stock-destinations-tab";
 import { DeliveryPointsTab } from "@/components/delivery-points-tab";
 import { DamageReasonsTab } from "@/components/damage-reasons-tab";
 import { MaterialStockTypesTab, useMaterialStockTypes } from "@/components/material-stock-types-tab";
-import { MaterialsRegistryTab } from "@/components/materials-registry-tab";
+import { MaterialsRegistryTab, MyioDevicesRegistryTab } from "@/components/materials-registry-tab";
 import { ClientCategoriesTab } from "@/components/client-categories-tab";
 import { AccessProfilesTab } from "@/components/access-profiles-tab";
 import { AccessProfileDefinitionsTab, useAccessProfileDefinitions } from "@/components/access-profile-definitions-tab";
@@ -556,6 +556,7 @@ function Dashboard() {
                   <div className="space-y-6">
                     <ClientCategoriesTab />
                     <MaterialsRegistryTab canCreate={isAdmin || me.isComprador} />
+                     <MyioDevicesRegistryTab />
                     <RequestTypesTab />
                     <AdditionalStepTypesTab />
                     <StockDestinationsTab />
@@ -733,6 +734,7 @@ type PurchasableItem = {
   material_id: string | null;
   terceiros_material_id: string | null;
   tool_asset_id: string | null;
+  fulfillment_type: "purchase" | "myio_device";
 };
 
 function usePurchasableItems() {
@@ -740,7 +742,7 @@ function usePurchasableItems() {
     queryKey: ["purchasable-items"],
     queryFn: async () => {
       const [{ data: mats, error: me }, { data: ters, error: te }, { data: tools, error: fe }] = await Promise.all([
-        supabase.from("materials").select("id, name, description, link, manufacturer_code, photo_url, location").in("location", ["fabrica", "almoxarifado"]).eq("is_manufactured", false).order("name"),
+        supabase.from("materials").select("id, name, description, link, manufacturer_code, photo_url, location, is_manufactured").in("location", ["fabrica", "almoxarifado"]).order("name"),
         supabase.from("terceiros_materials").select("id, name, description, link, manufacturer_code, photo_url").order("name"),
         supabase.from("tool_assets").select("id, name, description, link, manufacturer_code, photo_url").order("name"),
       ]);
@@ -756,10 +758,11 @@ function usePurchasableItems() {
           link: m.link,
           manufacturer_code: m.manufacturer_code ?? null,
           photo_url: m.photo_url ?? null,
-          origin: m.location === "fabrica" ? "Insumos de Fabricação" : "Material de Almoxarifado",
+          origin: m.is_manufactured ? "Dispositivos myio" : m.location === "fabrica" ? "Insumos de Fabricação" : "Material de Almoxarifado",
           material_id: m.id,
           terceiros_material_id: null,
           tool_asset_id: null,
+          fulfillment_type: m.is_manufactured ? "myio_device" : "purchase",
         })
       );
       (ters ?? []).forEach((t) =>
@@ -774,6 +777,7 @@ function usePurchasableItems() {
           material_id: null,
           terceiros_material_id: t.id,
           tool_asset_id: null,
+          fulfillment_type: "purchase",
         })
       );
       (tools ?? []).forEach((t) =>
@@ -788,6 +792,7 @@ function usePurchasableItems() {
           material_id: null,
           terceiros_material_id: null,
           tool_asset_id: t.id,
+          fulfillment_type: "purchase",
         })
       );
       return items;
@@ -922,12 +927,13 @@ const CATEGORIES = [
   { value: "Insumos de Fabricação", label: "Insumos de Fabricação" },
   { value: "Material de Almoxarifado", label: "Material de Almoxarifado" },
   { value: "Máquinas e Ferramentas", label: "Máquinas e Ferramentas" },
+  { value: "Dispositivos myio", label: "Dispositivos myio" },
 ] as const;
 
 function PurchasableItemPicker({ value, onPick, disabled, categories = ["todas"], excludedKeys = [] }: { value: PurchasableItem | null; onPick: (i: PurchasableItem) => void; disabled?: boolean; categories?: string[]; excludedKeys?: string[] }) {
   const { data: items, isLoading } = usePurchasableItems();
   const [open, setOpen] = useState(false);
-  const origins = ["Insumos de Fabricação", "Insumos de Instalação", "Material de Almoxarifado", "Máquinas e Ferramentas"];
+  const origins = ["Insumos de Fabricação", "Insumos de Instalação", "Material de Almoxarifado", "Máquinas e Ferramentas", "Dispositivos myio"];
   const filtered = (items ?? []).filter((i) => (categories.includes("todas") || categories.includes(i.origin)) && (!excludedKeys.includes(i.key) || i.key === value?.key));
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -1258,12 +1264,13 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
       }
 
       const requestGroupId = crypto.randomUUID();
-      if (shipQty > 0) {
+      const deviceItems = groupedItems?.filter((row) => row.item?.fulfillment_type === "myio_device") ?? [];
+      if (deviceItems.length > 0) {
 
         const { data: exp, error: expError } = await supabase
           .from("myio_orders")
           .insert({
-            title: values.item_name,
+            title: deviceItems.map((row) => row.item?.description || row.item?.name).join("; "),
             client_name: forStock
               ? "Estoque"
               : allocTarget === "interna"
@@ -1277,7 +1284,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
             delivery_date: values.deadline_type === "customizado" && values.deadline_date
               ? values.deadline_date
               : new Date().toISOString().slice(0, 10),
-            notes: `Gerado a partir de solicitação (${shipQty} em estoque). Destinatário: ${values.recipient}. Entrega: ${values.delivery_point}.`,
+            notes: `Gerado a partir do Approval consolidado. Destinatário: ${values.recipient}. Entrega: ${values.delivery_point}.`,
             created_by: userId,
             request_group_id: requestGroupId,
           })
@@ -1286,7 +1293,11 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
         if (expError) throw expError;
         const { error: itemsError } = await supabase
           .from("myio_order_items")
-          .insert({ order_id: exp.id, product: values.item_name, quantity: shipQty });
+          .insert(deviceItems.map((row) => ({
+            order_id: exp.id,
+            product: row.item?.name || row.item?.description || "Dispositivo myio",
+            quantity: Number(row.quantity),
+          })));
         if (itemsError) throw itemsError;
       }
 
@@ -1346,6 +1357,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
             material_id: row.item?.material_id ?? null,
             terceiros_material_id: row.item?.terceiros_material_id ?? null,
             tool_asset_id: row.item?.tool_asset_id ?? null,
+            fulfillment_type: row.item?.fulfillment_type ?? "purchase",
           })));
           if (itemError) {
             await supabase.from("purchase_orders").delete().eq("id", data.id);
@@ -1358,7 +1370,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
           if (ue) throw ue;
         }
       }
-      return { buyQty, shipQty, budgetExceeded: Boolean(createdOrder?.budget_exceeded), budget: createdOrder?.budget_snapshot, projected: createdOrder?.projected_committed_snapshot };
+      return { buyQty, shipQty: deviceItems.reduce((sum, row) => sum + Number(row.quantity), 0), budgetExceeded: Boolean(createdOrder?.budget_exceeded), budget: createdOrder?.budget_snapshot, projected: createdOrder?.projected_committed_snapshot };
     },
     onSuccess: (r) => {
       if (r.shipQty > 0 && r.buyQty > 0) toast.success(`Ordem de expedição (${r.shipQty}) e ordem de compra (${r.buyQty}) criadas.`);
@@ -1972,7 +1984,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
               </>
             )}
 
-            {requestModel !== "reembolso" && requestModel !== "rh" && requestModel !== "pagamento" && (!isMaterialsRequest || isNewItem) && (
+            {requestModel !== "reembolso" && requestModel !== "rh" && requestModel !== "pagamento" && (
             <div className="space-y-2">
               {requestModel === "materiais" ? (
                 <>
@@ -2111,12 +2123,12 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
               ) : (
 
                 <p className="text-xs text-muted-foreground">
-                  Somente itens cadastrados em Insumos de Fabricação, Insumos de Instalação, Material de Almoxarifado ou Máquinas e Ferramentas. Ao receber, entra automaticamente no estoque de origem.
+                  Materiais comprados entram no estoque de origem ao receber. Dispositivos myio seguem para separação após o mesmo Approval.
                 </p>
               )}
             </div>
             )}
-            {requestModel !== "reembolso" && requestModel !== "rh" && requestModel !== "pagamento" && (
+            {requestModel !== "reembolso" && requestModel !== "rh" && requestModel !== "pagamento" && (!isMaterialsRequest || isNewItem) && (
             <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="quantity">{requestModel === "viagens" ? (travelType === "aluguel_veiculos" ? "Quantidade de veículos" : "Quantidade de Pessoas") : "Quantidade"}</Label>

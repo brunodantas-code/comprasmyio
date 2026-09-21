@@ -183,6 +183,13 @@
       "when": 1790014776512,
       "tag": "0025_receive_grouped_purchase_order_items",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1790015317147,
+      "tag": "0026_separate_device_fulfillment_in_grouped_approvals",
+      "breakpoints": true
     }
   ]
 }
