@@ -447,6 +447,62 @@ function UnitDialog({ title, unit, categories, saving, onSave, trigger }: { titl
   );
 }
 
+type ClientReportOrder = "state" | "category" | "corporate";
+
+function ClientsReportDialog({ clients, units, categories }: { clients: Client[]; units: ClientUnit[]; categories: ClientCategory[] }) {
+  const [open, setOpen] = useState(false);
+  const [order, setOrder] = useState<ClientReportOrder>("state");
+  const [exporting, setExporting] = useState(false);
+
+  async function exportPdf() {
+    setExporting(true);
+    try {
+      const [{ jsPDF }, autoTableModule] = await Promise.all([import("jspdf"), import("jspdf-autotable")]);
+      const autoTable = autoTableModule.default;
+      const categoryName = (id: string | null) => categories.find((category) => category.id === id)?.name ?? "Sem categoria";
+      const rows = clients.flatMap((client) => {
+        const corporate = [client.name, client.legal_name || "—", categoryName(client.category_id), client.city || "—", client.state || "—", client.cnpj || "—", "Corporativo", client.name];
+        const clientUnits = units.filter((unit) => unit.client_id === client.id).map((unit) => [unit.name, "—", categoryName(unit.category_id), unit.city || "—", unit.state || "—", unit.cnpj || "—", unit.active ? "Unidade ativa" : "Unidade inativa", client.name]);
+        return [corporate, ...clientUnits];
+      });
+      const orderIndex = order === "state" ? 4 : order === "category" ? 2 : 7;
+      rows.sort((a, b) => String(a[orderIndex]).localeCompare(String(b[orderIndex]), "pt-BR", { sensitivity: "base" }) || String(a[0]).localeCompare(String(b[0]), "pt-BR", { sensitivity: "base" }));
+      const orderLabel = order === "state" ? "UF" : order === "category" ? "Categoria" : "Cliente corporativo";
+      const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+      doc.setFontSize(16);
+      doc.text("Relatório de Clientes", 14, 15);
+      doc.setFontSize(9);
+      doc.text(`Ordenação: ${orderLabel} | ${clients.length} clientes | ${units.length} unidades | Total: ${clients.length + units.length}`, 14, 21);
+      autoTable(doc, {
+        startY: 26,
+        head: [["Nome fantasia / Unidade", "Razão social", "Categoria", "Cidade", "UF", "CNPJ", "Tipo / Status", "Cliente corporativo"]],
+        body: rows,
+        styles: { fontSize: 7, cellPadding: 1.8, overflow: "linebreak" },
+        headStyles: { fillColor: [20, 184, 130], textColor: [0, 0, 0], fontStyle: "bold" },
+        alternateRowStyles: { fillColor: [244, 248, 247] },
+        columnStyles: { 0: { cellWidth: 38 }, 1: { cellWidth: 48 }, 2: { cellWidth: 25 }, 3: { cellWidth: 28 }, 4: { cellWidth: 10 }, 5: { cellWidth: 31 }, 6: { cellWidth: 24 }, 7: { cellWidth: 35 } },
+        margin: { left: 10, right: 10 },
+      });
+      doc.save(`relatorio-clientes-${order}.pdf`);
+      setOpen(false);
+      toast.success("Relatório PDF gerado");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Não foi possível gerar o relatório");
+    } finally {
+      setExporting(false);
+    }
+  }
+
+  return <Dialog open={open} onOpenChange={setOpen}>
+    <DialogTrigger asChild><Button type="button" size="compactIcon" variant="ghost" title="Exportar relatório PDF" aria-label="Exportar relatório PDF"><Download /></Button></DialogTrigger>
+    <DialogContent>
+      <DialogHeader><DialogTitle>Relatório de clientes</DialogTitle></DialogHeader>
+      <div className="space-y-2"><Label>Ordenar por</Label><Select value={order} onValueChange={(value) => setOrder(value as ClientReportOrder)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="state">UF</SelectItem><SelectItem value="category">Categoria</SelectItem><SelectItem value="corporate">Cliente corporativo</SelectItem></SelectContent></Select></div>
+      <DialogFooter><Button type="button" onClick={() => void exportPdf()} disabled={exporting}><Download className="mr-2 h-4 w-4" />{exporting ? "Gerando..." : "Exportar PDF"}</Button></DialogFooter>
+    </DialogContent>
+  </Dialog>;
+}
+
 function EditClientDialog({ client, clients, categories, saving, onSave, onConvert }: {
   client: Client;
   clients: Client[];
