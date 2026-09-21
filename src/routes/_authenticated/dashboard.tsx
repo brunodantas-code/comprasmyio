@@ -42,7 +42,7 @@ import { StockDestinationsTab } from "@/components/stock-destinations-tab";
 import { DeliveryPointsTab } from "@/components/delivery-points-tab";
 import { DamageReasonsTab } from "@/components/damage-reasons-tab";
 import { MaterialStockTypesTab, useMaterialStockTypes } from "@/components/material-stock-types-tab";
-import { MaterialsRegistryTab } from "@/components/materials-registry-tab";
+import { MaterialsRegistryTab, MyioDevicesRegistryTab } from "@/components/materials-registry-tab";
 import { ClientCategoriesTab } from "@/components/client-categories-tab";
 import { AccessProfilesTab } from "@/components/access-profiles-tab";
 import { AccessProfileDefinitionsTab, useAccessProfileDefinitions } from "@/components/access-profile-definitions-tab";
@@ -556,6 +556,7 @@ function Dashboard() {
                   <div className="space-y-6">
                     <ClientCategoriesTab />
                     <MaterialsRegistryTab canCreate={isAdmin || me.isComprador} />
+                     <MyioDevicesRegistryTab />
                     <RequestTypesTab />
                     <AdditionalStepTypesTab />
                     <StockDestinationsTab />
