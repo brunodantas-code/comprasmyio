@@ -1060,6 +1060,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
   const [forStock, setForStock] = useState(false);
   const [requestType, setRequestType] = useState<string>("");
   const requestModel = requestType ? requestTypeModel(requestType, requestTypes) : "";
+  const isMaterialsRequest = requestModel === "materiais";
   const [rhCargo, setRhCargo] = useState("");
   const [rhGestor, setRhGestor] = useState("");
   const [rhMotivo, setRhMotivo] = useState("");
@@ -2050,7 +2051,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
                 <Label htmlFor="quantity">{requestModel === "viagens" ? (travelType === "aluguel_veiculos" ? "Quantidade de veículos" : "Quantidade de Pessoas") : "Quantidade"}</Label>
                 <Input id="quantity" name="quantity" type="number" min={1} max={99999} className="w-20" value={qty} onChange={(e) => setQty(e.target.value)} required />
               </div>
-              {(!isMateriais || canManageProducts) && <div className="space-y-2">
+              {(!isMaterialsRequest || canManageProducts) && <div className="space-y-2">
                 <Label htmlFor="estimated_value">Valor unitário estimado (R$)</Label>
                 <div className="relative">
                   <MoneyInput id="estimated_value" name="estimated_value" className="w-32 pr-8" value={estimatedValue} onChange={setEstimatedValue} required />
@@ -2106,7 +2107,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
               )}
             </div>
             )}
-            {requestModel !== "reembolso" && requestModel !== "rh" && requestModel !== "pagamento" && (!isMateriais || canManageProducts) && (
+            {requestModel !== "reembolso" && requestModel !== "rh" && requestModel !== "pagamento" && (!isMaterialsRequest || canManageProducts) && (
             <div className="space-y-2">
               <Label htmlFor="item_link">
                 Link de Referência <span className="text-muted-foreground">(opcional)</span>
