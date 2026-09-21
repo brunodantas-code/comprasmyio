@@ -1988,17 +1988,17 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
             <div className="space-y-2">
               {requestModel === "materiais" ? (
                 <>
-                  <div className="flex items-center gap-6">
+                  {canManageProducts && <div className="flex items-center gap-6">
                     <Label>Item</Label>
                     <label className="flex cursor-pointer items-center gap-2 text-sm">
                       <Checkbox checked={!isNewItem} onCheckedChange={() => { setIsNewItem(false); setNewItemName(""); }} />
                       Cadastrado
                     </label>
-                    {canManageProducts && <label className="flex cursor-pointer items-center gap-2 text-sm">
+                    <label className="flex cursor-pointer items-center gap-2 text-sm">
                       <Checkbox checked={isNewItem} onCheckedChange={() => { setIsNewItem(true); setItem(null); setItemLink(""); }} />
                       Novo
-                    </label>}
-                  </div>
+                    </label>
+                  </div>}
                   {!isNewItem && (
                     <div className="space-y-4">
                       <div className="space-y-2">
