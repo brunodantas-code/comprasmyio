@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Tarefas
+- [x] Alinhar “Total geral” pela mesma linha de base dos indicadores de clientes e unidades
 - [x] Corrigir totalizadores do relatório para não somar o cliente corporativo quando ele possui unidades ou filiais ativas
 - [x] Aplicar a todos os ícones de ação o padrão 24×24 px, fundo verde-claro, borda preta e verde-escuro ao passar o cursor
 - [x] Reorganizar Projetos no padrão de Clientes, com cadastro no topo e lista abaixo em largura total
