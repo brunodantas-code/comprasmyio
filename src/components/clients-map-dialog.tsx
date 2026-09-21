@@ -24,16 +24,20 @@ export function ClientsMapDialog({ clients, units }: { clients: Client[]; units:
   const hoveredUnits = hoveredState ? unitsByState[hoveredState] ?? [] : [];
 
   useEffect(() => {
-    const svg = svgRef.current;
-    if (!svg) return;
-    const next: Record<string, Marker> = {};
-    svg.querySelectorAll<SVGPathElement>("path[data-state]").forEach((path) => {
-      const state = path.dataset.state;
-      if (!state) return;
-      const box = path.getBBox();
-      next[state] = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+    if (!open) return;
+    const frame = requestAnimationFrame(() => {
+      const svg = svgRef.current;
+      if (!svg) return;
+      const next: Record<string, Marker> = {};
+      svg.querySelectorAll<SVGPathElement>("path[data-state]").forEach((path) => {
+        const state = path.dataset.state;
+        if (!state) return;
+        const box = path.getBBox();
+        next[state] = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+      });
+      setMarkers(next);
     });
-    setMarkers(next);
+    return () => cancelAnimationFrame(frame);
   }, [open]);
 
   return <Dialog open={open} onOpenChange={setOpen}>
