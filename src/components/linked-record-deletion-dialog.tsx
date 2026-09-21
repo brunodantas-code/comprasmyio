@@ -7,12 +7,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 type LinkField = "project_id" | "client_id" | "cost_center_id" | "request_type";
 type DiversosRegistry = "request_type" | "additional_step_type" | "stock_destination" | "damage_reason";
-type Destination = { id: string; name: string };
+type DestinationKind = "project" | "client" | "unit";
+type Destination = { id: string; name: string; kind?: DestinationKind; parentClientId?: string };
 
 type LinkedOrder = {
   id: string;
@@ -37,6 +38,7 @@ export function LinkedRecordDeletionDialog({
   deleting,
   registry,
   deleteBlockedReason,
+  sourceEntityType,
   trigger,
 }: {
   entityId: string;
@@ -48,6 +50,7 @@ export function LinkedRecordDeletionDialog({
   deleting?: boolean;
   registry?: DiversosRegistry;
   deleteBlockedReason?: string;
+  sourceEntityType?: "project" | "client";
   trigger?: ReactNode;
 }) {
   const qc = useQueryClient();
@@ -80,6 +83,16 @@ export function LinkedRecordDeletionDialog({
           detail: link.record_detail,
         }));
       }
+      if (linkField === "project_id" && sourceEntityType === "project") {
+        const { data, error: linksError } = await supabase.rpc("get_project_deletion_links", { _project_id: entityId });
+        if (linksError) throw linksError;
+        return (data ?? []).map((link: ClientLink) => ({
+          key: link.record_key,
+          type: link.record_type,
+          label: link.record_label,
+          detail: link.record_detail,
+        }));
+      }
 
       const { data, error } = await supabase
         .from("purchase_orders")
@@ -103,13 +116,26 @@ export function LinkedRecordDeletionDialog({
   }, [open]);
 
   const reallocate = useMutation({
-    mutationFn: async ({ recordKey, destinationId }: { recordKey: string; destinationId: string }) => {
+    mutationFn: async ({ recordKey, destinationValue }: { recordKey: string; destinationValue: string }) => {
+      const destination = destinations.find((item) => `${item.kind ?? "legacy"}:${item.id}` === destinationValue);
+      if (!destination) throw new Error("Destino inválido");
       if (registry) {
         const { error: reallocationError } = await supabase.rpc("reallocate_diversos_link", {
           _registry: registry,
           _record_key: recordKey,
           _source_code: entityId,
-          _destination_code: destinationId,
+          _destination_code: destination.id,
+        });
+        if (reallocationError) throw reallocationError;
+        return;
+      }
+      if (sourceEntityType && destination.kind) {
+        const { error: reallocationError } = await supabase.rpc("reallocate_allocation_link", {
+          _record_key: recordKey,
+          _source_type: sourceEntityType,
+          _source_id: entityId,
+          _destination_type: destination.kind,
+          _destination_id: destination.id,
         });
         if (reallocationError) throw reallocationError;
         return;
@@ -118,17 +144,17 @@ export function LinkedRecordDeletionDialog({
         const { error: reallocationError } = await supabase.rpc("reallocate_client_link", {
           _record_key: recordKey,
           _source_client_id: entityId,
-          _destination_client_id: destinationId,
+          _destination_client_id: destination.id,
         });
         if (reallocationError) throw reallocationError;
         return;
       }
 
       const values = linkField === "project_id"
-        ? { project_id: destinationId }
+        ? { project_id: destination.id }
         : linkField === "cost_center_id"
-          ? { cost_center_id: destinationId }
-          : { request_type: destinationId };
+          ? { cost_center_id: destination.id }
+          : { request_type: destination.id };
       const { error } = await supabase.from("purchase_orders").update(values).eq("id", recordKey);
       if (error) throw error;
     },
@@ -158,7 +184,11 @@ export function LinkedRecordDeletionDialog({
     onError: (error: Error) => toast.error(error.message),
   });
 
-  const availableDestinations = destinations.filter((item) => item.id !== entityId);
+  const availableDestinations = destinations.filter((item) => {
+    if (sourceEntityType === "project" && item.kind === "project" && item.id === entityId) return false;
+    if (sourceEntityType === "client" && (item.kind === "client" && item.id === entityId || item.kind === "unit" && item.parentClientId === entityId)) return false;
+    return !sourceEntityType ? item.id !== entityId : true;
+  });
   const hasLinks = records.length > 0;
 
   return (
@@ -190,7 +220,15 @@ export function LinkedRecordDeletionDialog({
 
         {hasLinks && (
           <div className="space-y-3">
-            {records.map((record) => (
+            {records.map((record) => {
+              const recordType = "type" in record ? record.type : "";
+              const recordDestinations = sourceEntityType === "client" && recordType === "project"
+                ? availableDestinations.filter((item) => item.kind === "client" || item.kind === "unit")
+                : sourceEntityType === "project" && (recordType === "unit_product" || recordType === "technician_move")
+                  ? availableDestinations.filter((item) => item.kind === "project")
+                  : availableDestinations;
+              const groupedKinds: DestinationKind[] = ["project", "client", "unit"];
+              return (
               <Collapsible key={record.key} open={expandedLinks[record.key] ?? false} onOpenChange={(expanded) => setExpandedLinks((current) => ({ ...current, [record.key]: expanded }))} className="border-b pb-3">
                 <div className="flex min-w-0 items-center justify-between gap-3">
                   <p className="min-w-0 truncate text-sm font-medium">{record.label}</p>
@@ -204,11 +242,19 @@ export function LinkedRecordDeletionDialog({
                   <p className="mb-3 text-sm text-muted-foreground">{record.detail}</p>
                   <div className="grid gap-3 sm:grid-cols-[minmax(180px,1fr)_auto] sm:items-end">
                     <div className="space-y-1">
-                      <Label className="text-xs">Novo {entityLabel}</Label>
+                      <Label className="text-xs">Novo destino</Label>
                       <Select value={targets[record.key] ?? ""} onValueChange={(value) => setTargets((current) => ({ ...current, [record.key]: value }))}>
                         <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                         <SelectContent>
-                          {availableDestinations.map((item) => <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>)}
+                          {sourceEntityType ? groupedKinds.map((kind, groupIndex) => {
+                            const options = recordDestinations.filter((item) => item.kind === kind);
+                            if (!options.length) return null;
+                            return <SelectGroup key={kind}>
+                              {groupIndex > 0 && <SelectSeparator />}
+                              <SelectLabel>{kind === "project" ? "Projetos" : kind === "client" ? "Clientes" : "Unidades / Filiais"}</SelectLabel>
+                              {options.map((item) => <SelectItem key={`${kind}:${item.id}`} value={`${kind}:${item.id}`}>{item.name}</SelectItem>)}
+                            </SelectGroup>;
+                          }) : recordDestinations.map((item) => <SelectItem key={item.id} value={`legacy:${item.id}`}>{item.name}</SelectItem>)}
                         </SelectContent>
                       </Select>
                     </div>
@@ -216,8 +262,8 @@ export function LinkedRecordDeletionDialog({
                       variant="outline"
                       disabled={!targets[record.key] || reallocate.isPending}
                       onClick={() => {
-                        const destinationId = targets[record.key];
-                        if (destinationId) reallocate.mutate({ recordKey: record.key, destinationId });
+                         const destinationValue = targets[record.key];
+                         if (destinationValue) reallocate.mutate({ recordKey: record.key, destinationValue });
                       }}
                     >
                       Realocar
@@ -225,7 +271,7 @@ export function LinkedRecordDeletionDialog({
                   </div>
                 </CollapsibleContent>
               </Collapsible>
-            ))}
+            );})}
             {!availableDestinations.length && <p className="text-sm text-destructive">Cadastre outro {entityLabel} para realizar a realocação.</p>}
           </div>
         )}
