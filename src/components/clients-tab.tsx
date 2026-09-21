@@ -14,6 +14,7 @@ import { Download, Minus, Pencil, Plus, Trash2 } from "lucide-react";
 import { LinkedRecordDeletionDialog } from "@/components/linked-record-deletion-dialog";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { useClientCategories, type ClientCategory } from "@/components/client-categories-tab";
+import { ClientsMapDialog } from "@/components/clients-map-dialog";
 
 export type Client = { id: string; name: string; legal_name: string | null; cnpj: string | null; city: string | null; state: string | null; category_id: string | null };
 export type ClientUnit = { id: string; client_id: string; name: string; cnpj: string | null; city: string | null; state: string | null; category_id: string | null; active: boolean };
@@ -224,7 +225,7 @@ export function ClientsTab({ userId }: { userId: string }) {
 
       <Card>
         <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2"><CardTitle>Clientes</CardTitle><ClientsReportDialog clients={clients ?? []} units={allClientUnits ?? []} categories={categories ?? []} /></div>
+          <div className="flex items-center gap-2"><CardTitle>Clientes</CardTitle><ClientsReportDialog clients={clients ?? []} units={allClientUnits ?? []} categories={categories ?? []} /><ClientsMapDialog clients={clients ?? []} units={allClientUnits ?? []} /></div>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm" aria-label="Totais de clientes e unidades">
             <span><span className="font-semibold text-foreground">{activeClientsCount}</span> <span className="text-muted-foreground">clientes ativos</span></span>
             <span><span className="font-semibold text-foreground">{activeUnitsCount}</span> <span className="text-muted-foreground">unidades</span></span>
