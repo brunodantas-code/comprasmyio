@@ -3962,6 +3962,15 @@ export type Database = {
           record_type: string
         }[]
       }
+      get_project_deletion_links: {
+        Args: { _project_id: string }
+        Returns: {
+          record_detail: string
+          record_key: string
+          record_label: string
+          record_type: string
+        }[]
+      }
       has_job_title_name: {
         Args: { _name: string; _user_id: string }
         Returns: boolean
@@ -3978,6 +3987,16 @@ export type Database = {
       primary_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
+      }
+      reallocate_allocation_link: {
+        Args: {
+          _destination_id: string
+          _destination_type: string
+          _record_key: string
+          _source_id: string
+          _source_type: string
+        }
+        Returns: undefined
       }
       reallocate_client_link: {
         Args: {
