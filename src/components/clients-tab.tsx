@@ -501,8 +501,8 @@ function ClientsReportDialog({ clients, units, categories }: { clients: Client[]
         startY: 35,
         head: [["Grupo", "Clientes", "Unidades", "Total"]],
         styles: { fontSize: 7, cellPadding: 1.5 },
-        headStyles: { fillColor: [20, 184, 130], textColor: [0, 0, 0], fontStyle: "bold" as const },
-        alternateRowStyles: { fillColor: [244, 248, 247] },
+        headStyles: { fillColor: [20, 184, 130] as [number, number, number], textColor: [0, 0, 0] as [number, number, number], fontStyle: "bold" as const },
+        alternateRowStyles: { fillColor: [244, 248, 247] as [number, number, number] },
         tableWidth: 133,
       };
       autoTable(doc, { ...summaryTable, body: stateSummary, margin: { left: 10, right: 154 } });
