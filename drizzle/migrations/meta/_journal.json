@@ -176,6 +176,13 @@
       "when": 1790014637862,
       "tag": "0024_add_purchase_order_material_items",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1790014776512,
+      "tag": "0025_receive_grouped_purchase_order_items",
+      "breakpoints": true
     }
   ]
 }
