@@ -45,6 +45,11 @@
   --color-status: var(--status);
   --color-status-foreground: var(--status-foreground);
   --color-status-border: var(--status-border);
+  --color-action: var(--action);
+  --color-action-foreground: var(--action-foreground);
+  --color-action-border: var(--action-border);
+  --color-action-hover: var(--action-hover);
+  --color-action-hover-foreground: var(--action-hover-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
@@ -116,6 +121,11 @@
   --status: color-mix(in oklab, var(--primary) 24%, white);
   --status-foreground: var(--myio-dark);
   --status-border: color-mix(in oklab, var(--primary) 48%, white);
+  --action: color-mix(in oklab, var(--primary) 38%, white);
+  --action-foreground: var(--myio-dark);
+  --action-border: var(--myio-dark);
+  --action-hover: oklch(0.37 0.105 166);
+  --action-hover-foreground: oklch(0.99 0 0);
   --destructive: oklch(0.58 0.22 27);
   --destructive-foreground: oklch(0.99 0 0);
   --border: oklch(0.90 0.015 300);
@@ -156,6 +166,11 @@
   --status: color-mix(in oklab, var(--primary) 32%, var(--card));
   --status-foreground: var(--foreground);
   --status-border: color-mix(in oklab, var(--primary) 58%, var(--card));
+  --action: color-mix(in oklab, var(--primary) 38%, white);
+  --action-foreground: var(--myio-dark);
+  --action-border: var(--myio-dark);
+  --action-hover: oklch(0.37 0.105 166);
+  --action-hover-foreground: oklch(0.99 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --destructive-foreground: oklch(0.984 0.003 247.858);
   --border: oklch(1 0 0 / 12%);
