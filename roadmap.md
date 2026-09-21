@@ -367,7 +367,7 @@
 - [x] Validar todas as páginas do PDF
 
 ## Consolidação de tipos e cadastro de produtos
-- [ ] Consolidar “Dispositivos myio e Insumos de Instalação” em “Materiais” sem perder o fluxo por quantidade
-- [ ] Permitir cadastrar novos produtos somente para Admin ou Time de Supply
-- [ ] Ocultar Link de Referência e Valor Unitário dos demais usuários
+- [x] Consolidar “Dispositivos myio e Insumos de Instalação” em “Materiais” sem perder o fluxo por quantidade
+- [x] Permitir cadastrar novos produtos somente para Admin ou Time de Supply
+- [x] Ocultar Link de Referência e Valor Unitário dos demais usuários
 - [ ] Validar permissões, formulário e tipos disponíveis
