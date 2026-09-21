@@ -15,7 +15,8 @@ import { LinkedRecordDeletionDialog } from "@/components/linked-record-deletion-
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 
 export type Client = { id: string; name: string; legal_name: string | null; cnpj: string | null; city: string | null; state: string | null };
-export type ClientUnit = { id: string; client_id: string; name: string; cnpj: string | null; active: boolean };
+export type ClientUnit = { id: string; client_id: string; name: string; cnpj: string | null; city: string | null; state: string | null; active: boolean };
+type NewClientUnit = { name: string; city: string; state: string };
 
 const DUPLICATE_CLIENT_MESSAGE = "Este cliente já está cadastrado";
 const BRAZILIAN_STATES = ["AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"];
@@ -41,7 +42,7 @@ export function useClientUnits(clientId?: string) {
   return useQuery({
     queryKey: ["client-units", clientId ?? "all"],
     queryFn: async () => {
-      let query = supabase.from("client_units").select("id,client_id,name,cnpj,active").order("name");
+      let query = supabase.from("client_units").select("id,client_id,name,cnpj,city,state,active").order("name");
       if (clientId) query = query.eq("client_id", clientId);
       const { data, error } = await query;
       if (error) throw error;
@@ -54,7 +55,7 @@ export function ClientsTab({ userId }: { userId: string }) {
   const qc = useQueryClient();
   const { data: clients, isLoading } = useClients();
   const { data: allClientUnits } = useClientUnits();
-  const [newUnits, setNewUnits] = useState<string[]>([]);
+  const [newUnits, setNewUnits] = useState<NewClientUnit[]>([]);
   const [expandedClients, setExpandedClients] = useState<Set<string>>(new Set());
   const [clientSearch, setClientSearch] = useState("");
 
@@ -68,13 +69,13 @@ export function ClientsTab({ userId }: { userId: string }) {
       normalizeSearchValue(value).includes(normalizedSearch),
     );
     const unitMatches = (allClientUnits ?? []).some((unit) =>
-      unit.client_id === client.id && [unit.name, unit.cnpj].some((value) => normalizeSearchValue(value).includes(normalizedSearch)),
+      unit.client_id === client.id && [unit.name, unit.cnpj, unit.city, unit.state].some((value) => normalizeSearchValue(value).includes(normalizedSearch)),
     );
     return clientMatches || unitMatches;
   });
 
   const create = useMutation({
-    mutationFn: async (v: { name: string; legal_name: string | null; cnpj: string | null; city: string | null; state: string | null; units: string[] }) => {
+    mutationFn: async (v: { name: string; legal_name: string | null; cnpj: string | null; city: string | null; state: string | null; units: NewClientUnit[] }) => {
       const { data: existing, error: lookupError } = await supabase.from("clients").select("id,name");
       if (lookupError) throw lookupError;
       const normalizedName = v.name.trim().toLocaleLowerCase("pt-BR");
@@ -89,7 +90,7 @@ export function ClientsTab({ userId }: { userId: string }) {
       if (error) throw new Error(isDuplicateNameError(error) ? DUPLICATE_CLIENT_MESSAGE : error.message);
       if (v.units.length) {
         const { error: unitsError } = await supabase.from("client_units").insert(
-          v.units.map((name) => ({ client_id: client.id, name, created_by: userId })),
+          v.units.map((unit) => ({ client_id: client.id, name: unit.name, city: unit.city || null, state: unit.state || null, created_by: userId })),
         );
         if (unitsError) throw unitsError;
       }
@@ -163,7 +164,9 @@ export function ClientsTab({ userId }: { userId: string }) {
     const city = String(fd.get("city") || "").trim();
     const state = String(fd.get("state") || "").trim();
     if (name.length < 2) return toast.error("Nome muito curto");
-    const normalizedUnits = newUnits.map((unit) => unit.trim()).filter((unit, index, list) => unit.length >= 2 && list.indexOf(unit) === index);
+    const normalizedUnits = newUnits
+      .map((unit) => ({ ...unit, name: unit.name.trim(), city: unit.city.trim() }))
+      .filter((unit, index, list) => unit.name.length >= 2 && list.findIndex((item) => item.name.toLocaleLowerCase("pt-BR") === unit.name.toLocaleLowerCase("pt-BR")) === index);
     create.mutate({ name, legal_name: legalName || null, cnpj: cnpj || null, city: city || null, state: state || null, units: normalizedUnits }, { onSuccess: () => form.reset() });
   }
 
@@ -173,7 +176,7 @@ export function ClientsTab({ userId }: { userId: string }) {
         <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
           <CardTitle>Novo cliente</CardTitle>
           <div className="flex items-center gap-2">
-            <Button type="button" variant="outline" className="whitespace-nowrap" onClick={() => setNewUnits((current) => [...current, ""])}>
+            <Button type="button" variant="outline" className="whitespace-nowrap" onClick={() => setNewUnits((current) => [...current, { name: "", city: "", state: "" }])}>
               <Plus className="mr-1 h-4 w-4" />Filial
             </Button>
             <Button type="submit" form="new-client-form" className="whitespace-nowrap px-6" disabled={create.isPending}>Criar</Button>
@@ -182,24 +185,26 @@ export function ClientsTab({ userId }: { userId: string }) {
         <CardContent>
           <form id="new-client-form" onSubmit={onCreate} className="space-y-4">
             <div className="grid items-end gap-4 md:grid-cols-2 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1.15fr)_minmax(9rem,.7fr)_6rem_13rem]">
-              <div className="min-w-0 space-y-2"><Label htmlFor="c-legal-name">Razão social</Label><Input id="c-legal-name" name="legal_name" /></div>
-              <div className="min-w-0 space-y-2"><Label htmlFor="c-name">Nome fantasia</Label><Input id="c-name" name="name" required /></div>
-              <div className="min-w-0 space-y-2"><Label htmlFor="c-city">Cidade</Label><Input id="c-city" name="city" /></div>
-              <div className="min-w-0 space-y-2"><Label htmlFor="c-state">UF</Label><Select name="state"><SelectTrigger id="c-state"><SelectValue placeholder="UF" /></SelectTrigger><SelectContent>{BRAZILIAN_STATES.map((state) => <SelectItem key={state} value={state}>{state}</SelectItem>)}</SelectContent></Select></div>
-              <div className="min-w-0 space-y-2"><Label htmlFor="c-cnpj">CNPJ</Label><Input id="c-cnpj" name="cnpj" placeholder="00.000.000/0000-00" maxLength={18} /></div>
+               <div className="grid min-w-0 grid-rows-[auto_2.25rem] gap-2"><Label htmlFor="c-legal-name">Razão social</Label><Input id="c-legal-name" name="legal_name" /></div>
+               <div className="grid min-w-0 grid-rows-[auto_2.25rem] gap-2"><Label htmlFor="c-name">Nome fantasia</Label><Input id="c-name" name="name" required /></div>
+               <div className="grid min-w-0 grid-rows-[auto_2.25rem] gap-2"><Label htmlFor="c-city">Cidade</Label><Input id="c-city" name="city" /></div>
+               <div className="grid min-w-0 grid-rows-[auto_2.25rem] gap-2"><Label htmlFor="c-state">UF</Label><Select name="state"><SelectTrigger id="c-state" className="h-9"><SelectValue placeholder="UF" /></SelectTrigger><SelectContent>{BRAZILIAN_STATES.map((state) => <SelectItem key={state} value={state}>{state}</SelectItem>)}</SelectContent></Select></div>
+               <div className="grid min-w-0 grid-rows-[auto_2.25rem] gap-2"><Label htmlFor="c-cnpj">CNPJ</Label><Input id="c-cnpj" name="cnpj" placeholder="00.000.000/0000-00" maxLength={18} /></div>
             </div>
             {newUnits.length > 0 && (
               <div className="space-y-2">
                 <Label>Filiais ou unidades</Label>
-                <div className="grid gap-2 md:grid-cols-2">
+                 <div className="space-y-2">
                   {newUnits.map((unit, index) => (
-                    <div key={index} className="flex items-center gap-2">
+                     <div key={index} className="grid grid-cols-[minmax(0,1fr)_6rem_auto] items-center gap-2 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_6rem_auto]">
                       <Input
-                        value={unit}
-                        onChange={(event) => setNewUnits((current) => current.map((item, itemIndex) => itemIndex === index ? event.target.value : item))}
+                         value={unit.name}
+                         onChange={(event) => setNewUnits((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, name: event.target.value } : item))}
                         placeholder="Nome da filial ou unidade"
                         aria-label={`Filial ou unidade ${index + 1}`}
                       />
+                       <Input className="col-span-3 md:col-span-1 md:col-start-2 md:row-start-1" value={unit.city} onChange={(event) => setNewUnits((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, city: event.target.value } : item))} placeholder="Cidade" aria-label={`Cidade da unidade ${index + 1}`} />
+                       <Select value={unit.state} onValueChange={(state) => setNewUnits((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, state } : item))}><SelectTrigger className="h-9" aria-label={`UF da unidade ${index + 1}`}><SelectValue placeholder="UF" /></SelectTrigger><SelectContent>{BRAZILIAN_STATES.map((state) => <SelectItem key={state} value={state}>{state}</SelectItem>)}</SelectContent></Select>
                       <Button type="button" variant="ghost" size="compactIcon" className="text-destructive hover:text-destructive" onClick={() => setNewUnits((current) => current.filter((_, itemIndex) => itemIndex !== index))} aria-label="Remover unidade" title="Remover unidade">
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
@@ -243,7 +248,7 @@ export function ClientsTab({ userId }: { userId: string }) {
               <TableBody>
                 {!filteredClients.length ? <TableRow><TableCell colSpan={6} className="py-8 text-center text-sm text-muted-foreground">Nenhum cliente encontrado.</TableCell></TableRow> : filteredClients.map((c) => {
                   const unitMatchesSearch = Boolean(normalizedSearch) && (allClientUnits ?? []).some((unit) =>
-                    unit.client_id === c.id && [unit.name, unit.cnpj].some((value) => normalizeSearchValue(value).includes(normalizedSearch)),
+                     unit.client_id === c.id && [unit.name, unit.cnpj, unit.city, unit.state].some((value) => normalizeSearchValue(value).includes(normalizedSearch)),
                   );
                   const expanded = expandedClients.has(c.id) || unitMatchesSearch;
                   const hasUnits = (allClientUnits ?? []).some((unit) => unit.client_id === c.id);
@@ -313,8 +318,8 @@ function ClientUnitsList({ client, userId }: { client: Client; userId: string })
   const qc = useQueryClient();
   const { data: units } = useClientUnits(client.id);
   const create = useMutation({
-    mutationFn: async (values: { name: string; cnpj: string | null }) => {
-      const { error } = await supabase.from("client_units").insert({ client_id: client.id, name: values.name, cnpj: values.cnpj, created_by: userId });
+    mutationFn: async (values: { name: string; cnpj: string | null; city: string | null; state: string | null }) => {
+      const { error } = await supabase.from("client_units").insert({ client_id: client.id, name: values.name, cnpj: values.cnpj, city: values.city, state: values.state, created_by: userId });
       if (error) throw new Error(error.code === "23505" ? "Esta unidade já está cadastrada para o cliente" : error.message);
     },
     onSuccess: () => {
@@ -332,8 +337,8 @@ function ClientUnitsList({ client, userId }: { client: Client; userId: string })
     onError: (error: Error) => toast.error(error.message),
   });
   const update = useMutation({
-    mutationFn: async ({ id, name, cnpj }: { id: string; name: string; cnpj: string | null }) => {
-      const { error } = await supabase.from("client_units").update({ name, cnpj }).eq("id", id);
+    mutationFn: async ({ id, name, cnpj, city, state }: { id: string; name: string; cnpj: string | null; city: string | null; state: string | null }) => {
+      const { error } = await supabase.from("client_units").update({ name, cnpj, city, state }).eq("id", id);
       if (error) throw new Error(error.code === "23505" ? "Esta unidade já está cadastrada para o cliente" : error.message);
     },
     onSuccess: () => { toast.success("Unidade atualizada"); qc.invalidateQueries({ queryKey: ["client-units"] }); },
@@ -363,11 +368,13 @@ function ClientUnitsList({ client, userId }: { client: Client; userId: string })
       {!units?.length ? <p className="text-sm text-muted-foreground">Nenhuma unidade cadastrada.</p> : (
         <div className="overflow-hidden rounded-md border">
           <Table>
-            <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>CNPJ</TableHead><TableHead>Status</TableHead><TableHead className="w-20" /></TableRow></TableHeader>
+            <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Cidade</TableHead><TableHead>UF</TableHead><TableHead>CNPJ</TableHead><TableHead>Status</TableHead><TableHead className="w-20" /></TableRow></TableHeader>
             <TableBody>
               {(units ?? []).map((unit) => (
                 <TableRow key={unit.id}>
                   <TableCell className="font-medium">{unit.name}</TableCell>
+                  <TableCell className="text-muted-foreground">{unit.city || "—"}</TableCell>
+                  <TableCell className="text-muted-foreground">{unit.state || "—"}</TableCell>
                   <TableCell className="text-muted-foreground">{unit.cnpj || "—"}</TableCell>
                   <TableCell><Button type="button" variant="outline" size="sm" disabled={toggle.isPending} onClick={() => toggle.mutate(unit)}>{unit.active ? "Ativa" : "Inativa"}</Button></TableCell>
                   <TableCell className="text-right"><div className="flex items-center justify-end gap-1 whitespace-nowrap">
@@ -397,7 +404,7 @@ function ClientUnitsList({ client, userId }: { client: Client; userId: string })
   );
 }
 
-function UnitDialog({ title, unit, saving, onSave, trigger }: { title: string; unit?: ClientUnit; saving: boolean; onSave: (values: { name: string; cnpj: string | null }) => Promise<unknown>; trigger: React.ReactNode }) {
+function UnitDialog({ title, unit, saving, onSave, trigger }: { title: string; unit?: ClientUnit; saving: boolean; onSave: (values: { name: string; cnpj: string | null; city: string | null; state: string | null }) => Promise<unknown>; trigger: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -409,10 +416,16 @@ function UnitDialog({ title, unit, saving, onSave, trigger }: { title: string; u
           const formData = new FormData(event.currentTarget);
           const name = String(formData.get("name") || "").trim();
           const cnpj = String(formData.get("cnpj") || "").trim();
+           const city = String(formData.get("city") || "").trim();
+           const state = String(formData.get("state") || "").trim();
           if (name.length < 2) return toast.error("Informe o nome da unidade");
-          try { await onSave({ name, cnpj: cnpj || null }); setOpen(false); } catch { /* A alteração exibe a mensagem. */ }
+           try { await onSave({ name, cnpj: cnpj || null, city: city || null, state: state || null }); setOpen(false); } catch { /* A alteração exibe a mensagem. */ }
         }}>
           <div className="space-y-2"><Label>Nome da unidade</Label><Input name="name" defaultValue={unit?.name ?? ""} required /></div>
+           <div className="grid grid-cols-[minmax(0,1fr)_6rem] gap-3">
+             <div className="grid grid-rows-[auto_2.25rem] gap-2"><Label>Cidade</Label><Input name="city" defaultValue={unit?.city ?? ""} /></div>
+             <div className="grid grid-rows-[auto_2.25rem] gap-2"><Label>UF</Label><Select name="state" defaultValue={unit?.state ?? undefined}><SelectTrigger className="h-9"><SelectValue placeholder="UF" /></SelectTrigger><SelectContent>{BRAZILIAN_STATES.map((state) => <SelectItem key={state} value={state}>{state}</SelectItem>)}</SelectContent></Select></div>
+           </div>
           <div className="space-y-2"><Label>CNPJ</Label><Input name="cnpj" defaultValue={unit?.cnpj ?? ""} placeholder="00.000.000/0000-00" /></div>
           <DialogFooter><Button type="submit" disabled={saving}>Salvar</Button></DialogFooter>
         </form>

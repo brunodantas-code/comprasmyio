@@ -937,32 +937,38 @@ export type Database = {
       client_units: {
         Row: {
           active: boolean
+          city: string | null
           client_id: string
           cnpj: string | null
           created_at: string
           created_by: string | null
           id: string
           name: string
+          state: string | null
           updated_at: string
         }
         Insert: {
           active?: boolean
+          city?: string | null
           client_id: string
           cnpj?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
           name: string
+          state?: string | null
           updated_at?: string
         }
         Update: {
           active?: boolean
+          city?: string | null
           client_id?: string
           cnpj?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
           name?: string
+          state?: string | null
           updated_at?: string
         }
         Relationships: [
