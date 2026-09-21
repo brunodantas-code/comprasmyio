@@ -10,6 +10,7 @@ import type { Client, ClientUnit } from "@/components/clients-tab";
 
 type Marker = { x: number; y: number };
 type BrazilLocation = { id: string; name: string; path: string };
+type MapEntry = { id: string; name: string; state: string; categoryId: string | null; corporateName: string; kind: "Cliente corporativo" | "Unidade" };
 
 export function ClientsMapDialog({ clients, units, categories }: { clients: Client[]; units: ClientUnit[]; categories: ClientCategory[] }) {
   const [open, setOpen] = useState(false);
@@ -19,15 +20,19 @@ export function ClientsMapDialog({ clients, units, categories }: { clients: Clie
   const [markers, setMarkers] = useState<Record<string, Marker>>({});
   const svgRef = useRef<SVGSVGElement>(null);
   const clientsById = new Map(clients.map((client) => [client.id, client]));
-  const filteredUnits = categoryId === "all" ? units : units.filter((unit) => unit.category_id === categoryId);
-  const unitsByState = filteredUnits.reduce<Record<string, ClientUnit[]>>((groups, unit) => {
-    const state = unit.state?.toUpperCase();
+  const entries: MapEntry[] = [
+    ...clients.filter((client) => client.state).map((client) => ({ id: `client-${client.id}`, name: client.name, state: client.state?.toUpperCase() ?? "", categoryId: client.category_id, corporateName: client.name, kind: "Cliente corporativo" as const })),
+    ...units.filter((unit) => unit.active && unit.state).map((unit) => ({ id: `unit-${unit.id}`, name: unit.name, state: unit.state?.toUpperCase() ?? "", categoryId: unit.category_id, corporateName: clientsById.get(unit.client_id)?.name ?? "—", kind: "Unidade" as const })),
+  ];
+  const filteredEntries = categoryId === "all" ? entries : entries.filter((entry) => entry.categoryId === categoryId);
+  const entriesByState = filteredEntries.reduce<Record<string, MapEntry[]>>((groups, entry) => {
+    const state = entry.state;
     if (!state) return groups;
-    groups[state] = [...(groups[state] ?? []), unit];
+    groups[state] = [...(groups[state] ?? []), entry];
     return groups;
   }, {});
   const visibleState = selectedState ?? hoveredState;
-  const visibleUnits = visibleState ? unitsByState[visibleState] ?? [] : [];
+  const visibleEntries = visibleState ? entriesByState[visibleState] ?? [] : [];
 
   useEffect(() => {
     if (!open) return;
@@ -58,7 +63,7 @@ export function ClientsMapDialog({ clients, units, categories }: { clients: Clie
     <DialogTrigger asChild><Button type="button" size="compactIcon" variant="ghost" title="Mapa de unidades por UF" aria-label="Mapa de unidades por UF"><MapPinned /></Button></DialogTrigger>
     <DialogContent className="max-w-5xl overflow-hidden">
       <DialogHeader className="flex-row items-center justify-between gap-4 pr-8">
-        <DialogTitle>Unidades por UF</DialogTitle>
+        <DialogTitle>Clientes por UF</DialogTitle>
         <Select value={categoryId} onValueChange={(value) => { setCategoryId(value); setHoveredState(null); setSelectedState(null); }}>
           <SelectTrigger className="w-52" aria-label="Filtrar mapa por categoria"><SelectValue /></SelectTrigger>
           <SelectContent>
@@ -72,17 +77,17 @@ export function ClientsMapDialog({ clients, units, categories }: { clients: Clie
           {(Brazil.locations as BrazilLocation[]).map((location) => {
             const state = location.id.toUpperCase();
             const active = visibleState === state;
-            return <path key={location.id} data-state={state} d={location.path} onMouseEnter={() => setHoveredState(state)} onMouseLeave={() => setHoveredState(null)} onClick={(event) => { event.stopPropagation(); setSelectedState((current) => current === state ? null : state); }} className={`cursor-pointer stroke-background stroke-[1.5] transition-colors ${active ? "fill-primary/35" : unitsByState[state]?.length ? "fill-primary/20 hover:fill-primary/35" : "fill-muted hover:fill-primary/35"}`}><title>{location.name}: {unitsByState[state]?.length ?? 0} unidades</title></path>;
+            return <path key={location.id} data-state={state} d={location.path} onMouseEnter={() => setHoveredState(state)} onMouseLeave={() => setHoveredState(null)} onClick={(event) => { event.stopPropagation(); setSelectedState((current) => current === state ? null : state); }} className={`cursor-pointer stroke-background stroke-[1.5] transition-colors ${active ? "fill-primary/35" : entriesByState[state]?.length ? "fill-primary/20 hover:fill-primary/35" : "fill-muted hover:fill-primary/35"}`}><title>{location.name}: {entriesByState[state]?.length ?? 0} cadastros</title></path>;
           })}
-          {Object.entries(unitsByState).map(([state, stateUnits]) => {
+          {Object.entries(entriesByState).map(([state, stateEntries]) => {
             const marker = markers[state];
             if (!marker) return null;
-            return <g key={state} pointerEvents="none"><circle cx={marker.x} cy={marker.y} r="13" className="fill-primary stroke-background stroke-2" /><text x={marker.x} y={marker.y + 4} textAnchor="middle" className="fill-primary-foreground text-[11px] font-bold">{stateUnits.length}</text></g>;
+            return <g key={state} pointerEvents="none"><circle cx={marker.x} cy={marker.y} r="13" className="fill-primary stroke-background stroke-2" /><text x={marker.x} y={marker.y + 4} textAnchor="middle" className="fill-primary-foreground text-[11px] font-bold">{stateEntries.length}</text></g>;
           })}
         </svg>
         {visibleState && <div className={`absolute right-4 top-4 max-h-[28rem] w-72 overflow-y-auto rounded-md border bg-background/95 p-3 shadow-lg backdrop-blur-sm ${selectedState ? "pointer-events-auto" : "pointer-events-none"}`} onClick={(event) => event.stopPropagation()}>
-          <p className="font-semibold">{visibleState} · {visibleUnits.length} {visibleUnits.length === 1 ? "unidade" : "unidades"}</p>
-          {!visibleUnits.length ? <p className="mt-2 text-sm text-muted-foreground">Nenhuma unidade cadastrada nesta UF.</p> : <div className="mt-2 space-y-2">{visibleUnits.map((unit) => <div key={unit.id} className="border-t pt-2 first:border-0 first:pt-0"><p className="text-sm font-medium">{unit.name}</p><p className="text-xs text-muted-foreground">Corporativo: {clientsById.get(unit.client_id)?.name ?? "—"}</p></div>)}</div>}
+          <p className="font-semibold">{visibleState} · {visibleEntries.length} {visibleEntries.length === 1 ? "cadastro" : "cadastros"}</p>
+          {!visibleEntries.length ? <p className="mt-2 text-sm text-muted-foreground">Nenhum cliente cadastrado nesta UF.</p> : <div className="mt-2 space-y-2">{visibleEntries.map((entry) => <div key={entry.id} className="border-t pt-2 first:border-0 first:pt-0"><p className="text-sm font-medium">{entry.name}</p><p className="text-xs text-muted-foreground">{entry.kind}{entry.kind === "Unidade" ? ` · Corporativo: ${entry.corporateName}` : ""}</p></div>)}</div>}
         </div>}
       </div>
     </DialogContent>
