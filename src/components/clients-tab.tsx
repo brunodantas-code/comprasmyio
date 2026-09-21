@@ -10,12 +10,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Minus, Pencil, Plus, Trash2 } from "lucide-react";
+import { Download, Minus, Pencil, Plus, Trash2 } from "lucide-react";
 import { LinkedRecordDeletionDialog } from "@/components/linked-record-deletion-dialog";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
+import { useClientCategories, type ClientCategory } from "@/components/client-categories-tab";
 
-export type Client = { id: string; name: string; legal_name: string | null; cnpj: string | null; city: string | null; state: string | null };
-export type ClientUnit = { id: string; client_id: string; name: string; cnpj: string | null; city: string | null; state: string | null; active: boolean };
+export type Client = { id: string; name: string; legal_name: string | null; cnpj: string | null; city: string | null; state: string | null; category_id: string | null };
+export type ClientUnit = { id: string; client_id: string; name: string; cnpj: string | null; city: string | null; state: string | null; category_id: string | null; active: boolean };
 type NewClientUnit = { name: string; city: string; state: string };
 
 const DUPLICATE_CLIENT_MESSAGE = "Este cliente já está cadastrado";
@@ -31,7 +32,7 @@ export function useClients() {
   return useQuery({
     queryKey: ["clients"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("clients").select("id,name,legal_name,cnpj,city,state").order("name");
+      const { data, error } = await supabase.from("clients").select("id,name,legal_name,cnpj,city,state,category_id").order("name");
       if (error) throw error;
       return data as Client[];
     },
@@ -42,7 +43,7 @@ export function useClientUnits(clientId?: string) {
   return useQuery({
     queryKey: ["client-units", clientId ?? "all"],
     queryFn: async () => {
-      let query = supabase.from("client_units").select("id,client_id,name,cnpj,city,state,active").order("name");
+      let query = supabase.from("client_units").select("id,client_id,name,cnpj,city,state,category_id,active").order("name");
       if (clientId) query = query.eq("client_id", clientId);
       const { data, error } = await query;
       if (error) throw error;
@@ -55,6 +56,7 @@ export function ClientsTab({ userId }: { userId: string }) {
   const qc = useQueryClient();
   const { data: clients, isLoading } = useClients();
   const { data: allClientUnits } = useClientUnits();
+  const { data: categories } = useClientCategories(true);
   const [newUnits, setNewUnits] = useState<NewClientUnit[]>([]);
   const [expandedClients, setExpandedClients] = useState<Set<string>>(new Set());
   const [clientSearch, setClientSearch] = useState("");
@@ -65,17 +67,18 @@ export function ClientsTab({ userId }: { userId: string }) {
   const totalActiveRecords = activeClientsCount + activeUnitsCount;
   const filteredClients = (clients ?? []).filter((client) => {
     if (!normalizedSearch) return true;
-    const clientMatches = [client.name, client.legal_name, client.cnpj, client.city, client.state].some((value) =>
+    const clientCategory = categories?.find((category) => category.id === client.category_id)?.name;
+    const clientMatches = [client.name, client.legal_name, clientCategory, client.cnpj, client.city, client.state].some((value) =>
       normalizeSearchValue(value).includes(normalizedSearch),
     );
     const unitMatches = (allClientUnits ?? []).some((unit) =>
-      unit.client_id === client.id && [unit.name, unit.cnpj, unit.city, unit.state].some((value) => normalizeSearchValue(value).includes(normalizedSearch)),
+      unit.client_id === client.id && [unit.name, categories?.find((category) => category.id === unit.category_id)?.name, unit.cnpj, unit.city, unit.state].some((value) => normalizeSearchValue(value).includes(normalizedSearch)),
     );
     return clientMatches || unitMatches;
   });
 
   const create = useMutation({
-    mutationFn: async (v: { name: string; legal_name: string | null; cnpj: string | null; city: string | null; state: string | null; units: NewClientUnit[] }) => {
+    mutationFn: async (v: { name: string; legal_name: string | null; cnpj: string | null; city: string | null; state: string | null; category_id: string | null; units: NewClientUnit[] }) => {
       const { data: existing, error: lookupError } = await supabase.from("clients").select("id,name");
       if (lookupError) throw lookupError;
       const normalizedName = v.name.trim().toLocaleLowerCase("pt-BR");
@@ -84,7 +87,7 @@ export function ClientsTab({ userId }: { userId: string }) {
       }
       const { data: client, error } = await supabase
         .from("clients")
-        .insert({ name: v.name, legal_name: v.legal_name, cnpj: v.cnpj, city: v.city, state: v.state, created_by: userId })
+        .insert({ name: v.name, legal_name: v.legal_name, cnpj: v.cnpj, city: v.city, state: v.state, category_id: v.category_id, created_by: userId })
         .select("id")
         .single();
       if (error) throw new Error(isDuplicateNameError(error) ? DUPLICATE_CLIENT_MESSAGE : error.message);
@@ -105,14 +108,14 @@ export function ClientsTab({ userId }: { userId: string }) {
   });
 
   const update = useMutation({
-    mutationFn: async (v: { id: string; name: string; legal_name: string | null; cnpj: string | null; city: string | null; state: string | null }) => {
+    mutationFn: async (v: { id: string; name: string; legal_name: string | null; cnpj: string | null; city: string | null; state: string | null; category_id: string | null }) => {
       const { data: existing, error: lookupError } = await supabase.from("clients").select("id,name");
       if (lookupError) throw lookupError;
       const normalizedName = v.name.trim().toLocaleLowerCase("pt-BR");
       if (existing?.some((item) => item.id !== v.id && item.name.trim().toLocaleLowerCase("pt-BR") === normalizedName)) {
         throw new Error(DUPLICATE_CLIENT_MESSAGE);
       }
-      const { error } = await supabase.from("clients").update({ name: v.name, legal_name: v.legal_name, cnpj: v.cnpj, city: v.city, state: v.state }).eq("id", v.id);
+      const { error } = await supabase.from("clients").update({ name: v.name, legal_name: v.legal_name, cnpj: v.cnpj, city: v.city, state: v.state, category_id: v.category_id }).eq("id", v.id);
       if (error) throw new Error(isDuplicateNameError(error) ? DUPLICATE_CLIENT_MESSAGE : error.message);
     },
     onSuccess: () => { toast.success("Cliente atualizado"); qc.invalidateQueries({ queryKey: ["clients"] }); },
@@ -163,11 +166,12 @@ export function ClientsTab({ userId }: { userId: string }) {
     const cnpj = String(fd.get("cnpj") || "").trim();
     const city = String(fd.get("city") || "").trim();
     const state = String(fd.get("state") || "").trim();
+    const categoryId = String(fd.get("category_id") || "").trim();
     if (name.length < 2) return toast.error("Nome muito curto");
     const normalizedUnits = newUnits
       .map((unit) => ({ ...unit, name: unit.name.trim(), city: unit.city.trim() }))
       .filter((unit, index, list) => unit.name.length >= 2 && list.findIndex((item) => item.name.toLocaleLowerCase("pt-BR") === unit.name.toLocaleLowerCase("pt-BR")) === index);
-    create.mutate({ name, legal_name: legalName || null, cnpj: cnpj || null, city: city || null, state: state || null, units: normalizedUnits }, { onSuccess: () => form.reset() });
+    create.mutate({ name, legal_name: legalName || null, cnpj: cnpj || null, city: city || null, state: state || null, category_id: categoryId || null, units: normalizedUnits }, { onSuccess: () => form.reset() });
   }
 
   return (
@@ -184,11 +188,12 @@ export function ClientsTab({ userId }: { userId: string }) {
         </CardHeader>
         <CardContent>
           <form id="new-client-form" onSubmit={onCreate} className="space-y-4">
-            <div className="grid items-end gap-4 md:grid-cols-2 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1.15fr)_minmax(9rem,.7fr)_6rem_13rem]">
+             <div className="grid items-end gap-4 md:grid-cols-2 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1.15fr)_minmax(9rem,.7fr)_6rem_11rem_13rem]">
                <div className="grid min-w-0 grid-rows-[auto_2.25rem] gap-2"><Label htmlFor="c-legal-name">Razão social</Label><Input id="c-legal-name" name="legal_name" /></div>
                <div className="grid min-w-0 grid-rows-[auto_2.25rem] gap-2"><Label htmlFor="c-name">Nome fantasia</Label><Input id="c-name" name="name" required /></div>
                <div className="grid min-w-0 grid-rows-[auto_2.25rem] gap-2"><Label htmlFor="c-city">Cidade</Label><Input id="c-city" name="city" /></div>
                <div className="grid min-w-0 grid-rows-[auto_2.25rem] gap-2"><Label htmlFor="c-state">UF</Label><Select name="state"><SelectTrigger id="c-state" className="h-9"><SelectValue placeholder="UF" /></SelectTrigger><SelectContent>{BRAZILIAN_STATES.map((state) => <SelectItem key={state} value={state}>{state}</SelectItem>)}</SelectContent></Select></div>
+                <div className="grid min-w-0 grid-rows-[auto_2.25rem] gap-2"><Label htmlFor="c-category">Categoria</Label><Select name="category_id"><SelectTrigger id="c-category" className="h-9"><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent>{(categories ?? []).map((category) => <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>)}</SelectContent></Select></div>
                <div className="grid min-w-0 grid-rows-[auto_2.25rem] gap-2"><Label htmlFor="c-cnpj">CNPJ</Label><Input id="c-cnpj" name="cnpj" placeholder="00.000.000/0000-00" maxLength={18} /></div>
             </div>
             {newUnits.length > 0 && (
@@ -219,11 +224,11 @@ export function ClientsTab({ userId }: { userId: string }) {
 
       <Card>
         <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
-          <CardTitle>Clientes</CardTitle>
+          <div className="flex items-center gap-2"><CardTitle>Clientes</CardTitle><ClientsReportDialog clients={clients ?? []} units={allClientUnits ?? []} categories={categories ?? []} /></div>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm" aria-label="Totais de clientes e unidades">
             <span><span className="font-semibold text-foreground">{activeClientsCount}</span> <span className="text-muted-foreground">clientes ativos</span></span>
             <span><span className="font-semibold text-foreground">{activeUnitsCount}</span> <span className="text-muted-foreground">unidades</span></span>
-            <span className="font-semibold text-primary">Total geral: {totalActiveRecords}</span>
+            <span className="font-semibold text-foreground">Total geral: <span className="text-[2em] leading-none">{totalActiveRecords}</span></span>
           </div>
         </CardHeader>
         <CardContent>
@@ -231,7 +236,7 @@ export function ClientsTab({ userId }: { userId: string }) {
             !clients?.length ? <p className="text-sm text-muted-foreground">Sem clientes.</p> :
             <Table>
               <TableHeader>
-                <TableRow><TableHead>Nome fantasia</TableHead><TableHead>Razão social</TableHead><TableHead>Cidade</TableHead><TableHead>UF</TableHead><TableHead>CNPJ</TableHead><TableHead className="w-20" /></TableRow>
+                 <TableRow><TableHead>Nome fantasia</TableHead><TableHead>Razão social</TableHead><TableHead>Categoria</TableHead><TableHead>Cidade</TableHead><TableHead>UF</TableHead><TableHead>CNPJ</TableHead><TableHead className="w-20" /></TableRow>
                 <TableRow className="bg-primary/5 hover:bg-primary/5">
                   <TableHead className="py-1">
                     <Input
@@ -242,13 +247,13 @@ export function ClientsTab({ userId }: { userId: string }) {
                       className="h-8 min-w-36 bg-background"
                     />
                   </TableHead>
-                  <TableHead colSpan={5} />
+                   <TableHead colSpan={6} />
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {!filteredClients.length ? <TableRow><TableCell colSpan={6} className="py-8 text-center text-sm text-muted-foreground">Nenhum cliente encontrado.</TableCell></TableRow> : filteredClients.map((c) => {
+                 {!filteredClients.length ? <TableRow><TableCell colSpan={7} className="py-8 text-center text-sm text-muted-foreground">Nenhum cliente encontrado.</TableCell></TableRow> : filteredClients.map((c) => {
                   const unitMatchesSearch = Boolean(normalizedSearch) && (allClientUnits ?? []).some((unit) =>
-                     unit.client_id === c.id && [unit.name, unit.cnpj, unit.city, unit.state].some((value) => normalizeSearchValue(value).includes(normalizedSearch)),
+                      unit.client_id === c.id && [unit.name, categories?.find((category) => category.id === unit.category_id)?.name, unit.cnpj, unit.city, unit.state].some((value) => normalizeSearchValue(value).includes(normalizedSearch)),
                   );
                   const expanded = expandedClients.has(c.id) || unitMatchesSearch;
                   const hasUnits = (allClientUnits ?? []).some((unit) => unit.client_id === c.id);
@@ -277,6 +282,7 @@ export function ClientsTab({ userId }: { userId: string }) {
                         </div>
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">{c.legal_name || "—"}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{categories?.find((category) => category.id === c.category_id)?.name || "—"}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{c.city || "—"}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{c.state || "—"}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{c.cnpj || "—"}</TableCell>
@@ -285,6 +291,7 @@ export function ClientsTab({ userId }: { userId: string }) {
                           <EditClientDialog
                             client={c}
                             clients={clients ?? []}
+                            categories={categories ?? []}
                             saving={update.isPending || convertToUnit.isPending}
                             onSave={(v) => update.mutateAsync({ id: c.id, ...v })}
                             onConvert={(destinationClientId) => convertToUnit.mutateAsync({ sourceClientId: c.id, destinationClientId })}
@@ -302,7 +309,7 @@ export function ClientsTab({ userId }: { userId: string }) {
                         </div>
                       </TableCell>
                     </TableRow>
-                    {hasUnits && expanded && <TableRow key={`${c.id}-units`} className="hover:bg-transparent"><TableCell colSpan={6} className="px-3 py-4 sm:px-6"><ClientUnitsList client={c} userId={userId} /></TableCell></TableRow>}
+                    {hasUnits && expanded && <TableRow key={`${c.id}-units`} className="hover:bg-transparent"><TableCell colSpan={7} className="px-3 py-4 sm:px-6"><ClientUnitsList client={c} userId={userId} /></TableCell></TableRow>}
                   </Fragment>
                 );})}
               </TableBody>
