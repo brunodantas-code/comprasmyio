@@ -14,6 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { useMaterialStockTypes, type MaterialStockType } from "@/components/material-stock-types-tab";
 
 type MaterialSource = "materials" | "terceiros_materials" | "tool_assets";
 
@@ -28,23 +29,23 @@ type RegistryMaterial = {
 
 const normalize = (value: string | null) => (value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR");
 
-function useRegistryMaterials() {
+function useRegistryMaterials(categoryNames: Map<string, string>) {
   return useQuery({
     queryKey: ["materials-registry"],
     queryFn: async () => {
       const [{ data: materials, error: materialsError }, { data: terceiros, error: terceirosError }, { data: tools, error: toolsError }] = await Promise.all([
-        supabase.from("materials").select("id,name,description,manufacturer_code,location").in("location", ["fabrica", "almoxarifado"]).eq("is_manufactured", false).order("name"),
-        supabase.from("terceiros_materials").select("id,name,description,manufacturer_code").order("name"),
-        supabase.from("tool_assets").select("id,name,description,manufacturer_code").order("name"),
+        supabase.from("materials").select("id,name,description,manufacturer_code,location,stock_type_code").in("location", ["fabrica", "almoxarifado"]).eq("is_manufactured", false).order("name"),
+        supabase.from("terceiros_materials").select("id,name,description,manufacturer_code,stock_type_code").order("name"),
+        supabase.from("tool_assets").select("id,name,description,manufacturer_code,stock_type_code").order("name"),
       ]);
       if (materialsError) throw materialsError;
       if (terceirosError) throw terceirosError;
       if (toolsError) throw toolsError;
 
       return [
-        ...(materials ?? []).map((item) => ({ ...item, source: "materials" as const, group: item.location === "fabrica" ? "Insumos de Fabricação" : "Material de Almoxarifado" })),
-        ...(terceiros ?? []).map((item) => ({ ...item, source: "terceiros_materials" as const, group: "Insumos de Instalação" })),
-        ...(tools ?? []).map((item) => ({ ...item, source: "tool_assets" as const, group: "Máquinas e Ferramentas" })),
+        ...(materials ?? []).map((item) => ({ ...item, source: "materials" as const, group: categoryNames.get(item.stock_type_code ?? "") ?? (item.location === "fabrica" ? "Insumos de Fabricação" : "Material de Almoxarifado") })),
+        ...(terceiros ?? []).map((item) => ({ ...item, source: "terceiros_materials" as const, group: categoryNames.get(item.stock_type_code ?? "") ?? "Insumos de Instalação" })),
+        ...(tools ?? []).map((item) => ({ ...item, source: "tool_assets" as const, group: categoryNames.get(item.stock_type_code ?? "") ?? "Máquinas e Ferramentas" })),
       ] satisfies RegistryMaterial[];
     },
   });
@@ -92,19 +93,17 @@ function DeleteMaterialButton({ material }: { material: RegistryMaterial }) {
   </AlertDialog>;
 }
 
-type MaterialCategory = "fabrica" | "almoxarifado" | "terceiros" | "ferramentas";
-
-function AddMaterialDialog() {
+function AddMaterialDialog({ categories }: { categories: MaterialStockType[] }) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
-  const [category, setCategory] = useState<MaterialCategory>("fabrica");
+  const [categoryCode, setCategoryCode] = useState(categories[0]?.code ?? "");
   const [description, setDescription] = useState("");
   const [manufacturerCode, setManufacturerCode] = useState("");
 
   const reset = () => {
     setName("");
-    setCategory("fabrica");
+    setCategoryCode(categories[0]?.code ?? "");
     setDescription("");
     setManufacturerCode("");
   };
@@ -113,6 +112,8 @@ function AddMaterialDialog() {
     mutationFn: async () => {
       const materialName = name.trim();
       if (!materialName) throw new Error("Informe o nome do material");
+      const category = categories.find((item) => item.code === categoryCode);
+      if (!category) throw new Error("Selecione uma categoria de material");
       const { data: authData, error: authError } = await supabase.auth.getUser();
       if (authError) throw authError;
       if (!authData.user) throw new Error("Usuário não identificado");
@@ -122,14 +123,15 @@ function AddMaterialDialog() {
         manufacturer_code: manufacturerCode.trim() || null,
         created_by: authData.user.id,
       };
-      const result = category === "terceiros"
-        ? await supabase.from("terceiros_materials").insert(common as never)
-        : category === "ferramentas"
-          ? await supabase.from("tool_assets").insert(common as never)
+      const result = category.destination_type === "terceiros"
+        ? await supabase.from("terceiros_materials").insert({ ...common, stock_type_code: category.code } as never)
+        : category.destination_type === "ferramentas"
+          ? await supabase.from("tool_assets").insert({ ...common, stock_type_code: category.code } as never)
           : await supabase.from("materials").insert({
               ...common,
-              location: category,
-              ...(category === "fabrica" ? { is_product: false, is_manufactured: false } : {}),
+              location: category.destination_type,
+              stock_type_code: category.code,
+              ...(category.destination_type === "fabrica" ? { is_product: false, is_manufactured: false } : {}),
             });
       if (result.error) throw result.error;
     },
@@ -165,13 +167,10 @@ function AddMaterialDialog() {
         </div>
         <div className="space-y-1.5">
           <Label>Categoria</Label>
-          <Select value={category} onValueChange={(value) => setCategory(value as MaterialCategory)}>
+          <Select value={categoryCode} onValueChange={setCategoryCode}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="fabrica">Insumos de Fabricação</SelectItem>
-              <SelectItem value="almoxarifado">Material de Almoxarifado</SelectItem>
-              <SelectItem value="terceiros">Insumos de Instalação</SelectItem>
-              <SelectItem value="ferramentas">Máquinas e Ferramentas</SelectItem>
+              {categories.map((category) => <SelectItem key={category.code} value={category.code}>{category.name}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
@@ -195,7 +194,10 @@ function AddMaterialDialog() {
 export function MaterialsRegistryTab() {
   const [expanded, setExpanded] = useState(false);
   const [search, setSearch] = useState("");
-  const { data: materials = [], isLoading } = useRegistryMaterials();
+  const { data: stockTypes = [] } = useMaterialStockTypes();
+  const activeCategories = stockTypes.filter((item) => item.active);
+  const categoryNames = useMemo(() => new Map(stockTypes.map((item) => [item.code, item.name])), [stockTypes]);
+  const { data: materials = [], isLoading } = useRegistryMaterials(categoryNames);
   const filtered = useMemo(() => {
     const term = normalize(search.trim());
     if (!term) return materials;
@@ -210,7 +212,7 @@ export function MaterialsRegistryTab() {
           {expanded && <CardDescription>Itens cadastrados e disponíveis para novas solicitações.</CardDescription>}
         </div>
         <div className="flex items-center gap-1">
-          <CollapsibleContent><AddMaterialDialog /></CollapsibleContent>
+          <CollapsibleContent><AddMaterialDialog categories={activeCategories} /></CollapsibleContent>
           <CollapsibleTrigger asChild>
             <Button size="compactIcon" variant="ghost" aria-label={expanded ? "Recolher Materiais" : "Expandir Materiais"} title={expanded ? "Recolher" : "Expandir"}>
               {expanded ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}

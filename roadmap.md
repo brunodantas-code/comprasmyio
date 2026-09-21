@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Tarefas
+- [x] Vincular Materiais a categorias configuráveis e incluir Categorias de Materiais em Cadastro > Diversos
 - [x] Adicionar o botão “+” e o cadastro de Materiais em Cadastro > Diversos
 - [x] Identificar como Cliente ou Projeto a coluna Alocação em todos os submenus
 - [x] Alinhar “Total geral” pela mesma linha de base dos indicadores de clientes e unidades
