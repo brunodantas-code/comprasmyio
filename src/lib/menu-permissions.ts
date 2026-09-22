@@ -10,6 +10,8 @@ export type MenuPermissionGroup = MenuPermissionItem & {
 export const REQUEST_FIELD_PERMISSIONS: MenuPermissionItem[] = [
   { key: "solicitacoes_centro_custo", label: "Centro de Custo" },
   { key: "solicitacoes_item_novo", label: "Item novo" },
+  { key: "solicitacoes_alocacao_projeto", label: "Alocação: Projeto" },
+  { key: "solicitacoes_alocacao_cliente", label: "Alocação: Cliente" },
   { key: "solicitacoes_alocacao_estoque", label: "Alocação: Estoque" },
   { key: "solicitacoes_alocacao_interna", label: "Alocação: Interna" },
 ];
@@ -87,6 +89,8 @@ export const STANDARD_MENU_PERMISSION_KEYS = [
   "solicitacoes_novas",
   "solicitacoes_centro_custo",
   "solicitacoes_item_novo",
+  "solicitacoes_alocacao_projeto",
+  "solicitacoes_alocacao_cliente",
   "solicitacoes_alocacao_estoque",
   "solicitacoes_alocacao_interna",
   "approvals",

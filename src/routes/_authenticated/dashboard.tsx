@@ -516,7 +516,7 @@ function Dashboard() {
                 {me.canAccess("solicitacoes_novas") && <TabsTrigger value="new"><Plus className="mr-2 h-4 w-4" />Novas Solicitações</TabsTrigger>}
               </TabsList>
               {me.canAccess("solicitacoes_minhas") && <TabsContent value="mine"><MyOrders userId={me.id} canManageDevices={isAdmin} /></TabsContent>}
-              {me.canAccess("solicitacoes_novas") && <TabsContent value="new"><NewOrder userId={me.id} canImport={canImport} canManageProducts={isAdmin || me.isComprador} canShowCostCenter={me.canAccess("solicitacoes_centro_custo")} canCreateNewItem={me.canAccess("solicitacoes_item_novo")} canAllocateStock={me.canAccess("solicitacoes_alocacao_estoque")} canAllocateInternal={me.canAccess("solicitacoes_alocacao_interna")} /></TabsContent>}
+              {me.canAccess("solicitacoes_novas") && <TabsContent value="new"><NewOrder userId={me.id} canImport={canImport} canManageProducts={isAdmin || me.isComprador} canShowCostCenter={me.canAccess("solicitacoes_centro_custo")} canCreateNewItem={me.canAccess("solicitacoes_item_novo")} canAllocateProject={me.canAccess("solicitacoes_alocacao_projeto")} canAllocateClient={me.canAccess("solicitacoes_alocacao_cliente")} canAllocateStock={me.canAccess("solicitacoes_alocacao_estoque")} canAllocateInternal={me.canAccess("solicitacoes_alocacao_interna")} /></TabsContent>}
             </Tabs>
 
           </TabsContent>}
@@ -1050,7 +1050,7 @@ function useAvgUnitPrice(item: PurchasableItem | null) {
   });
 }
 
-function NewOrder({ userId, canImport = false, canManageProducts = false, canShowCostCenter = false, canCreateNewItem = false, canAllocateStock = false, canAllocateInternal = false }: { userId: string; canImport?: boolean; canManageProducts?: boolean; canShowCostCenter?: boolean; canCreateNewItem?: boolean; canAllocateStock?: boolean; canAllocateInternal?: boolean }) {
+function NewOrder({ userId, canImport = false, canManageProducts = false, canShowCostCenter = false, canCreateNewItem = false, canAllocateProject = false, canAllocateClient = false, canAllocateStock = false, canAllocateInternal = false }: { userId: string; canImport?: boolean; canManageProducts?: boolean; canShowCostCenter?: boolean; canCreateNewItem?: boolean; canAllocateProject?: boolean; canAllocateClient?: boolean; canAllocateStock?: boolean; canAllocateInternal?: boolean }) {
   const { data: projects, isLoading } = useProjects();
   const { data: budgetSummaries } = useProjectBudgetSummaries();
   const qc = useQueryClient();
@@ -1066,7 +1066,9 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
   const [rhTipo, setRhTipo] = useState("");
   const [rhRemuneracao, setRhRemuneracao] = useState("0");
 
-  const [allocTarget, setAllocTarget] = useState<"projeto" | "cliente" | "interna">("projeto");
+  const [allocTarget, setAllocTarget] = useState<"projeto" | "cliente" | "interna">(
+    canAllocateProject ? "projeto" : canAllocateClient ? "cliente" : "interna",
+  );
   const [clientId, setClientId] = useState("");
   const { data: clientsList } = useClients();
   const [clientUnitId, setClientUnitId] = useState("");

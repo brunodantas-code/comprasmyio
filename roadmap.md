@@ -457,6 +457,8 @@
 - [ ] Confirmar e corrigir a ausência dos quatro controles no perfil individual de Alexandre
 - [x] Mostrar a prévia corrigida ao usuário antes de declarar conclusão
 - [x] Exibir no chat as prévias dos controles e dos conectores para conferência
+- [ ] Incluir controles independentes para Alocação: Projeto e Alocação: Cliente
+- [ ] Ocultar no novo pedido as alocações desmarcadas no perfil
 
 ## Esclarecimento das faixas de aprovação
 - [x] Confirmar a posição de “Aprovado por (cargo)” em relação às Faixas 2 e 3
