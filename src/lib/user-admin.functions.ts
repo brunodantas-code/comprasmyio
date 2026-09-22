@@ -243,7 +243,7 @@ export const deleteAccessProfile = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: moved, error } = await supabaseAdmin.rpc("admin_delete_access_profile", {
       _source_profile: data.sourceProfile,
-      _destination_profile: data.destinationProfile,
+      _destination_profile: data.destinationProfile ?? undefined,
     });
     if (error) throw new Error(error.message);
     return { moved: Number(moved ?? 0) };
