@@ -4034,6 +4034,10 @@ export type Database = {
       }
     }
     Functions: {
+      admin_delete_access_profile: {
+        Args: { _destination_profile?: string; _source_profile: string }
+        Returns: number
+      }
       admin_edit_purchase_approval: {
         Args: { _changes: Json; _items: Json; _order_id: string }
         Returns: undefined

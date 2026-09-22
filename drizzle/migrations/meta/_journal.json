@@ -211,6 +211,13 @@
       "when": 1790106296167,
       "tag": "0029_align_approval_tiers_with_organizational_levels",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1790106553038,
+      "tag": "0030_transactional_access_profile_reallocation_and_deletion",
+      "breakpoints": true
     }
   ]
 }
