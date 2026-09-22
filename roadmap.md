@@ -442,6 +442,7 @@
 - [x] Fazer os conectores verticais terminarem e iniciarem no limite da linha horizontal
 - [x] Validar as junções no computador e celular
 - [ ] Corrigir a sobreposição ainda visível nas junções dos segmentos horizontais
+- [ ] Gerar e mostrar uma nova prévia ampliada sem conectores ultrapassando a linha horizontal
 
 ## Aparência de Cargos adicionais
 - [x] Remover o fundo colorido do campo Cargos adicionais
