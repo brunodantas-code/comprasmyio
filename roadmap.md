@@ -468,6 +468,7 @@
 - [x] Confirmar a posição de “Aprovado por (cargo)” em relação às Faixas 2 e 3
 - [x] Conferir a explicação exibida para Faixa 2, Faixa 3 e C-Level contra a regra real
 - [x] Corrigir o texto explicativo se ele estiver deslocando os níveis de aprovação
+- [x] Exibir no texto: Faixa 2 = Gestor Direto; Faixa 3 acrescenta Gestor da Área; C-Level somente acima
 
 ## Exclusão e realocação de perfis de acesso
 - [ ] Permitir ao Admin editar e excluir qualquer perfil, inclusive os atuais perfis do sistema
