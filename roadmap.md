@@ -439,3 +439,5 @@
 - [x] Remover a linha horizontal quando houver somente um box no nível seguinte
 - [x] Limitar cada linha horizontal ao centro dos conectores extremos, sem ultrapassar os boxes
 - [x] Validar a hierarquia com ramificações simples e múltiplas
+- [ ] Fazer os conectores verticais terminarem e iniciarem no limite da linha horizontal
+- [ ] Validar as junções no computador e celular
