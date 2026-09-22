@@ -499,3 +499,10 @@
 ## Fonte única das alçadas de aprovação
 - [x] Remover os campos editáveis de Aprovação automática, Faixa 2 e Faixa 3 do menu Usuários
 - [ ] Validar que os valores permanecem editáveis somente em Alçadas de Aprovação
+
+## Aprovação conjunta configurável
+- [ ] Permitir ao Admin selecionar os dois cargos da aprovação conjunta
+- [ ] Identificar os cargos por vínculo e sigla, incluindo cargos adicionais
+- [ ] Exigir somente o aprovador configurado que ainda não participou da cadeia normal
+- [ ] Impedir aprovação automática acima do limite da aprovação conjunta
+- [ ] Validar a regra e a configuração em computador e celular, mostrando a prévia
