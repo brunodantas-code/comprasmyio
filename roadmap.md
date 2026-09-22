@@ -409,3 +409,7 @@
 - [x] Sincronizar Approvals concluídos com Cash Flow e vínculos derivados
 - [x] Registrar as alterações no histórico e recalcular orçamento
 - [x] Validar permissões, desktop e celular
+
+## Tipos de solicitação do perfil Admin
+- [x] Exibir todos os tipos ativos como selecionados para usuários Admin
+- [ ] Validar Bruno e João Paulo no computador e celular
