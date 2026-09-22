@@ -445,3 +445,8 @@
 ## Aparência de Cargos adicionais
 - [x] Remover o fundo colorido do campo Cargos adicionais
 - [ ] Manter aparência neutra e validar no computador e celular
+
+## Correção dos campos parametrizáveis em Perfis de acesso
+- [ ] Exibir os quatro controles no mesmo bloco de Tipos de solicitação
+- [ ] Aplicar e salvar as permissões por perfil e por usuário
+- [ ] Validar perfil Operação no computador e celular
