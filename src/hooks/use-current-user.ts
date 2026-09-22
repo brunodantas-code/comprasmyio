@@ -15,7 +15,7 @@ export type AppRole =
 export type AccessProfile = string;
 export type AccessProfileBase = "admin" | "padrao" | "restrito";
 export type MenuKey =
-  | "solicitacoes" | "solicitacoes_minhas" | "solicitacoes_novas"
+  | "solicitacoes" | "solicitacoes_minhas" | "solicitacoes_novas" | "solicitacoes_centro_custo" | "solicitacoes_item_novo" | "solicitacoes_alocacao_estoque" | "solicitacoes_alocacao_interna"
   | "approvals" | "approvals_pendentes" | "approvals_meus" | "approvals_todos" | "approvals_consolidado"
   | "armazem" | "armazem_fabrica" | "armazem_estoque_myio" | "armazem_expedicao" | "armazem_homologacao"
   | "armazem_transporte" | "armazem_cliente" | "armazem_tecnico" | "armazem_perdido" | "armazem_itens_avariados"
@@ -68,9 +68,11 @@ export function useCurrentUser() {
       const profileMenus = new Set((definition?.access_profile_permissions ?? []).filter((item) => item.allowed).map((item) => item.menu_key));
       const individualTypes = new Set((individualRequestTypes ?? []).map((item) => item.request_type_code));
       const profileTypes = new Set((definition?.access_profile_request_types ?? []).map((item) => item.request_type_code));
+      const isSupply = Boolean((operationalFunction?.active && operationalFunction.code === "supply") || roles.includes("comprador") || titleKey.includes("supply"));
       const canAccess = (menu: MenuKey) => {
         if (accessProfileBase === "admin") return true;
         if (menu === "usuarios" || menu.startsWith("usuarios_")) return false;
+        if (menu === "solicitacoes_item_novo" && !isCustomized && isSupply) return true;
         return (isCustomized ? individualMenus : profileMenus).has(menu);
       };
       const canRequestType = (requestType: string) => accessProfileBase === "admin" || (isCustomized ? individualTypes : profileTypes).has(requestType);
@@ -86,7 +88,7 @@ export function useCurrentUser() {
         canAccess,
         canRequestType,
         isAdmin: accessProfileBase === "admin",
-        isComprador: (operationalFunction?.active && operationalFunction.code === "supply") || roles.includes("comprador") || titleKey.includes("supply"),
+        isComprador: isSupply,
         isFabrica: titleKey === "fabrica",
         isEstoquista: titleKey === "estoquista",
         isFinanceiro: titleKey === "financeiro",

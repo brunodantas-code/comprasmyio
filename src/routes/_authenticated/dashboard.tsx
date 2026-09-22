@@ -517,7 +517,7 @@ function Dashboard() {
                 {me.canAccess("solicitacoes_novas") && <TabsTrigger value="new"><Plus className="mr-2 h-4 w-4" />Novas Solicitações</TabsTrigger>}
               </TabsList>
               {me.canAccess("solicitacoes_minhas") && <TabsContent value="mine"><MyOrders userId={me.id} canManageDevices={isAdmin} /></TabsContent>}
-              {me.canAccess("solicitacoes_novas") && <TabsContent value="new"><NewOrder userId={me.id} canImport={canImport} canManageProducts={isAdmin || me.isComprador} /></TabsContent>}
+              {me.canAccess("solicitacoes_novas") && <TabsContent value="new"><NewOrder userId={me.id} canImport={canImport} canManageProducts={isAdmin || me.isComprador} canShowCostCenter={me.canAccess("solicitacoes_centro_custo")} canCreateNewItem={me.canAccess("solicitacoes_item_novo")} canAllocateStock={me.canAccess("solicitacoes_alocacao_estoque")} canAllocateInternal={me.canAccess("solicitacoes_alocacao_interna")} /></TabsContent>}
             </Tabs>
 
           </TabsContent>}
@@ -1051,7 +1051,7 @@ function useAvgUnitPrice(item: PurchasableItem | null) {
   });
 }
 
-function NewOrder({ userId, canImport = false, canManageProducts = false }: { userId: string; canImport?: boolean; canManageProducts?: boolean }) {
+function NewOrder({ userId, canImport = false, canManageProducts = false, canShowCostCenter = false, canCreateNewItem = false, canAllocateStock = false, canAllocateInternal = false }: { userId: string; canImport?: boolean; canManageProducts?: boolean; canShowCostCenter?: boolean; canCreateNewItem?: boolean; canAllocateStock?: boolean; canAllocateInternal?: boolean }) {
   const { data: projects, isLoading } = useProjects();
   const { data: budgetSummaries } = useProjectBudgetSummaries();
   const qc = useQueryClient();
@@ -1076,7 +1076,8 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
   const { data: costCenters } = useCostCenters();
 
   const { data: me } = useCurrentUser();
-  const restrictedCc = !!me && !me.isAdmin && (me.accessProfileBase === "restrito" || me.isEstoquista || me.isFabrica);
+  const restrictedCc = !canShowCostCenter;
+  const canUseNewItem = canCreateNewItem;
 
   async function resolveOperacaoCostCenterId(): Promise<string> {
     const existing = (costCenters ?? []).find((c) => c.name.trim().toLowerCase() === "operação");
@@ -1256,7 +1257,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
         tool_asset_id: isNewItem ? null : (item?.tool_asset_id ?? null),
       };
       if (isNewItem && requestModel === "materiais") {
-        if (!canManageProducts) throw new Error("Somente Admin ou Time de Supply pode cadastrar novos produtos.");
+        if (!canUseNewItem) throw new Error("Seu acesso não permite cadastrar novos produtos.");
         if (!newItemDest) throw new Error("Selecione o estoque de destino do item novo.");
         const selectedStockType = materialStockTypes?.find((type) => type.code === newItemDest && type.active);
         if (!selectedStockType) throw new Error("O tipo de estoque selecionado não está mais disponível.");
@@ -1818,14 +1819,14 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
                       <Checkbox checked={!forStock && allocTarget === "cliente"} onCheckedChange={() => { setForStock(false); setAllocTarget("cliente"); setProjectId(""); }} />
                       Cliente
                     </label>
-                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                    {canAllocateStock && <label className="flex cursor-pointer items-center gap-2 text-sm">
                       <Checkbox checked={forStock} onCheckedChange={() => { setForStock(true); setAllocTarget("projeto"); setProjectId(""); setClientId(""); setClientUnitId(""); }} />
                       Estoque
-                    </label>
-                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                    </label>}
+                    {canAllocateInternal && <label className="flex cursor-pointer items-center gap-2 text-sm">
                       <Checkbox checked={!forStock && allocTarget === "interna"} onCheckedChange={() => { setForStock(false); setAllocTarget("interna"); setProjectId(""); setClientId(""); setClientUnitId(""); }} />
                       Interna
-                    </label>
+                    </label>}
                   </div>
                   {!forStock && allocTarget === "projeto" && (
                     <p className="text-xs text-muted-foreground">Prova de conceito ou potencial cliente, ainda não implantado.</p>
@@ -1899,10 +1900,10 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
                       <Checkbox checked={allocTarget === "cliente"} onCheckedChange={() => { setAllocTarget("cliente"); setProjectId(""); }} />
                       Cliente
                     </label>
-                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                    {canAllocateInternal && <label className="flex cursor-pointer items-center gap-2 text-sm">
                       <Checkbox checked={allocTarget === "interna"} onCheckedChange={() => { setAllocTarget("interna"); setProjectId(""); setClientId(""); setClientUnitId(""); }} />
                       Interna
-                    </label>
+                    </label>}
                   </div>
                   {allocTarget === "projeto" && (
                     <p className="text-xs text-muted-foreground">Prova de conceito ou potencial cliente, ainda não implantado.</p>
@@ -1968,7 +1969,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false }: { us
             <div className="space-y-2">
               {requestModel === "materiais" ? (
                 <>
-                  {canManageProducts && <div className="flex items-center gap-6">
+                  {canUseNewItem && <div className="flex items-center gap-6">
                     <Label>Item</Label>
                     <label className="flex cursor-pointer items-center gap-2 text-sm">
                       <Checkbox checked={!isNewItem} onCheckedChange={() => { setIsNewItem(false); setNewItemName(""); }} />

@@ -416,3 +416,13 @@
 
 ## Localização das Funções Operacionais
 - [x] Confirmar onde o cadastro de Função Operacional Adicional está disponível
+
+## Campos parametrizáveis das solicitações
+- [x] Adicionar quatro controles no bloco de Solicitações dos Perfis de acesso
+- [x] Ocultar Centro de Custo, Item novo, Estoque e Interna do perfil Operação por padrão
+- [x] Preservar a customização individual por usuário
+- [ ] Validar os perfis no computador e celular
+
+## Função Operacional Adicional
+- [ ] Explicar a lógica atual de Funções Operacionais
+- [ ] Avaliar a composição de permissões entre o cargo principal e a função adicional
