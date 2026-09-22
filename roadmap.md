@@ -466,5 +466,11 @@
 
 ## Esclarecimento das faixas de aprovação
 - [x] Confirmar a posição de “Aprovado por (cargo)” em relação às Faixas 2 e 3
-- [ ] Conferir a explicação exibida para Faixa 2, Faixa 3 e C-Level contra a regra real
-- [ ] Corrigir o texto explicativo se ele estiver deslocando os níveis de aprovação
+- [x] Conferir a explicação exibida para Faixa 2, Faixa 3 e C-Level contra a regra real
+- [x] Corrigir o texto explicativo se ele estiver deslocando os níveis de aprovação
+
+## Exclusão e realocação de perfis de acesso
+- [ ] Permitir ao Admin editar e excluir qualquer perfil, inclusive os atuais perfis do sistema
+- [ ] Antes de excluir perfil com usuários vinculados, exigir escolha de outro perfil para realocação
+- [ ] Realocar usuários e excluir o perfil em uma única operação segura
+- [ ] Validar o fluxo completo e mostrar prévia antes de declarar conclusão
