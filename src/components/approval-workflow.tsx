@@ -1356,7 +1356,9 @@ function DefaultChainAdmin() {
   const approverRoleOf = (userId: string) => {
     const main = mainRoleOf(userId);
     const next = main ? hierarchy?.get(main) ?? null : null;
-    return next ? (profilesMap ? Array.from(profilesMap.values()).find((p) => p.jobTitle?.id === next)?.jobTitle?.name ?? null : null) : null;
+    if (!next || !profilesMap) return null;
+    const nextTitle = Array.from(profilesMap.values()).find((p) => p.jobTitle?.id === next)?.jobTitle;
+    return nextTitle?.short_name?.trim() || nextTitle?.name || null;
   };
 
   const chainFor = (userId: string, levels: number) => {
@@ -1370,7 +1372,11 @@ function DefaultChainAdmin() {
       const nextTitle = profilesMap && Array.from(profilesMap.values()).find((p) => p.jobTitle?.id === next)?.jobTitle;
       if (nextTitle && isBoardTitle(nextTitle)) break;
       const people = namesByRole.get(next) ?? [];
-      const relationshipLabel = i === 0 ? "Gestor Direto" : i === 1 ? "Gestor da Área" : nextTitle?.name ?? "C-Level";
+      const relationshipLabel = i === 0
+        ? "Gestor Direto"
+        : i === 1
+          ? "Gestor da Área"
+          : nextTitle?.short_name?.trim() || nextTitle?.name || "C-Level";
       names.push(`${relationshipLabel}: ${people.length ? people.join(", ") : "sem usuário no cargo"}`);
       cur = next;
     }
