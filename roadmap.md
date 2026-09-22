@@ -434,6 +434,8 @@
 - [x] Remover a aba Funções Operacionais do Cadastro de Cargos
 - [x] Migrar Alexandre Ribeiro para o cargo adicional Analista de Supply
 - [x] Validar acessos, aprovações, computador e celular
+- [ ] Exibir no organograma os colaboradores que exercem cargos principais ou adicionais
+- [ ] Validar nomes dos ocupantes no organograma em computador e celular
 
 ## Conectores da hierarquia de aprovação
 - [x] Remover a linha horizontal quando houver somente um box no nível seguinte
