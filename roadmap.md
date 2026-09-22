@@ -466,3 +466,5 @@
 
 ## Esclarecimento das faixas de aprovação
 - [x] Confirmar a posição de “Aprovado por (cargo)” em relação às Faixas 2 e 3
+- [ ] Conferir a explicação exibida para Faixa 2, Faixa 3 e C-Level contra a regra real
+- [ ] Corrigir o texto explicativo se ele estiver deslocando os níveis de aprovação
