@@ -1516,9 +1516,9 @@ function OrgTreeBranch({ node }: { node: RoleNode }) {
                     <span
                       className={cn(
                         "absolute top-0 h-px bg-border",
-                        index === 0 && "left-1/2 -right-1",
-                        index > 0 && index < node.children.length - 1 && "-left-1 -right-1",
-                        index === node.children.length - 1 && "-left-1 right-1/2",
+                        index === 0 && "left-1/2 -right-[3px]",
+                        index > 0 && index < node.children.length - 1 && "-left-[3px] -right-[3px]",
+                        index === node.children.length - 1 && "-left-[3px] right-1/2",
                       )}
                       aria-hidden="true"
                     />
