@@ -26,8 +26,9 @@ export function AccessProfilesTab() {
   const qc = useQueryClient();
   const [nameFilter, setNameFilter] = useState("");
   const { data: requestTypes = [] } = useRequestTypes();
+  const activeRequestTypeCodes = requestTypes.filter((type) => type.active).map((type) => type.code);
   const { data, isLoading } = useQuery({
-    queryKey: ["custom-access-profiles"],
+    queryKey: ["custom-access-profiles", activeRequestTypeCodes],
     queryFn: async () => {
       const [{ data: profiles, error: profilesError }, { data: access, error: accessError }, { data: permissions, error: permissionsError }, { data: individualTypes, error: individualTypesError }] = await Promise.all([
         supabase.from("profiles").select("id, full_name, email").order("full_name"),
@@ -47,7 +48,9 @@ export function AccessProfilesTab() {
           ? ALL_MENU_PERMISSION_KEYS
           : (definition?.access_profile_permissions ?? []).filter((permission) => permission.allowed).map((permission) => permission.menu_key));
         const individualPermissions = new Set((permissions ?? []).filter((permission) => permission.user_id === profile.id && permission.allowed).map((permission) => permission.menu_key));
-        const profileRequestTypes = new Set(definition?.access_profile_request_types?.map((permission) => permission.request_type_code) ?? []);
+        const profileRequestTypes = new Set(definition?.base_profile === "admin"
+          ? activeRequestTypeCodes
+          : definition?.access_profile_request_types?.map((permission) => permission.request_type_code) ?? []);
         const individualRequestTypes = new Set((individualTypes ?? []).filter((permission) => permission.user_id === profile.id).map((permission) => permission.request_type_code));
         const selectedPermissions = accessRecord?.is_customized ? individualPermissions : profilePermissions;
         const selectedRequestTypes = accessRecord?.is_customized ? individualRequestTypes : profileRequestTypes;
