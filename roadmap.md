@@ -413,3 +413,6 @@
 ## Tipos de solicitação do perfil Admin
 - [x] Exibir todos os tipos ativos como selecionados para usuários Admin
 - [ ] Validar Bruno e João Paulo no computador e celular
+
+## Localização das Funções Operacionais
+- [ ] Confirmar onde o cadastro de Função Operacional Adicional está disponível
