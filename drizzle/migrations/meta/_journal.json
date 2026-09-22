@@ -204,6 +204,13 @@
       "when": 1790103685936,
       "tag": "0028_add_user_additional_job_titles",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1790106296167,
+      "tag": "0029_align_approval_tiers_with_organizational_levels",
+      "breakpoints": true
     }
   ]
 }

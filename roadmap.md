@@ -457,6 +457,21 @@
 - [ ] Confirmar e corrigir a ausência dos quatro controles no perfil individual de Alexandre
 - [x] Mostrar a prévia corrigida ao usuário antes de declarar conclusão
 - [x] Exibir no chat as prévias dos controles e dos conectores para conferência
+- [ ] Incluir controles independentes para Alocação: Projeto e Alocação: Cliente
+- [ ] Ocultar no novo pedido as alocações desmarcadas no perfil
+
+## Exclusão de perfis de acesso
+- [ ] Verificar por que alguns perfis não exibem o botão de exclusão
+- [ ] Ajustar a regra conforme a proteção necessária dos perfis em uso ou do sistema
 
 ## Esclarecimento das faixas de aprovação
 - [x] Confirmar a posição de “Aprovado por (cargo)” em relação às Faixas 2 e 3
+- [x] Conferir a explicação exibida para Faixa 2, Faixa 3 e C-Level contra a regra real
+- [x] Corrigir o texto explicativo se ele estiver deslocando os níveis de aprovação
+- [x] Exibir no texto: Faixa 2 = Gestor Direto; Faixa 3 acrescenta Gestor da Área; C-Level somente acima
+
+## Exclusão e realocação de perfis de acesso
+- [ ] Permitir ao Admin editar e excluir qualquer perfil, inclusive os atuais perfis do sistema
+- [ ] Antes de excluir perfil com usuários vinculados, exigir escolha de outro perfil para realocação
+- [ ] Realocar usuários e excluir o perfil em uma única operação segura
+- [ ] Validar o fluxo completo e mostrar prévia antes de declarar conclusão

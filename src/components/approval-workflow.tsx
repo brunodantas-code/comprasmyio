@@ -1314,8 +1314,8 @@ function DefaultChainAdmin() {
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">
           <p>• Até a alçada automática do solicitante: aprovação automática, sem etapas.</p>
-          <p>• Acima da alçada até a Faixa 2: Gestor Direto → Gestor da Área.</p>
-          <p>• Acima da Faixa 2 até a Faixa 3: Gestor Direto → Gestor da Área → C-Level.</p>
+          <p>• Acima da alçada automática até a Faixa 2: Gestor Direto.</p>
+          <p>• Acima da Faixa 2 até a Faixa 3: Gestor Direto → Gestor da Área.</p>
           <p>• Acima da Faixa 3: sobe pelo organograma até o C-Level.</p>
           <p>• Depois dessas etapas entram as “Etapas adicionais” ativas e, se aplicável, a dupla aprovação.</p>
         </CardContent>

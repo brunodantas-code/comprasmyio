@@ -516,7 +516,7 @@ function Dashboard() {
                 {me.canAccess("solicitacoes_novas") && <TabsTrigger value="new"><Plus className="mr-2 h-4 w-4" />Novas Solicitações</TabsTrigger>}
               </TabsList>
               {me.canAccess("solicitacoes_minhas") && <TabsContent value="mine"><MyOrders userId={me.id} canManageDevices={isAdmin} /></TabsContent>}
-              {me.canAccess("solicitacoes_novas") && <TabsContent value="new"><NewOrder userId={me.id} canImport={canImport} canManageProducts={isAdmin || me.isComprador} canShowCostCenter={me.canAccess("solicitacoes_centro_custo")} canCreateNewItem={me.canAccess("solicitacoes_item_novo")} canAllocateStock={me.canAccess("solicitacoes_alocacao_estoque")} canAllocateInternal={me.canAccess("solicitacoes_alocacao_interna")} /></TabsContent>}
+              {me.canAccess("solicitacoes_novas") && <TabsContent value="new"><NewOrder userId={me.id} canImport={canImport} canManageProducts={isAdmin || me.isComprador} canShowCostCenter={me.canAccess("solicitacoes_centro_custo")} canCreateNewItem={me.canAccess("solicitacoes_item_novo")} canAllocateProject={me.canAccess("solicitacoes_alocacao_projeto")} canAllocateClient={me.canAccess("solicitacoes_alocacao_cliente")} canAllocateStock={me.canAccess("solicitacoes_alocacao_estoque")} canAllocateInternal={me.canAccess("solicitacoes_alocacao_interna")} /></TabsContent>}
             </Tabs>
 
           </TabsContent>}
@@ -1050,13 +1050,13 @@ function useAvgUnitPrice(item: PurchasableItem | null) {
   });
 }
 
-function NewOrder({ userId, canImport = false, canManageProducts = false, canShowCostCenter = false, canCreateNewItem = false, canAllocateStock = false, canAllocateInternal = false }: { userId: string; canImport?: boolean; canManageProducts?: boolean; canShowCostCenter?: boolean; canCreateNewItem?: boolean; canAllocateStock?: boolean; canAllocateInternal?: boolean }) {
+function NewOrder({ userId, canImport = false, canManageProducts = false, canShowCostCenter = false, canCreateNewItem = false, canAllocateProject = false, canAllocateClient = false, canAllocateStock = false, canAllocateInternal = false }: { userId: string; canImport?: boolean; canManageProducts?: boolean; canShowCostCenter?: boolean; canCreateNewItem?: boolean; canAllocateProject?: boolean; canAllocateClient?: boolean; canAllocateStock?: boolean; canAllocateInternal?: boolean }) {
   const { data: projects, isLoading } = useProjects();
   const { data: budgetSummaries } = useProjectBudgetSummaries();
   const qc = useQueryClient();
   const { data: requestTypes } = useRequestTypes();
   const [projectId, setProjectId] = useState("");
-  const [forStock, setForStock] = useState(false);
+  const [forStock, setForStock] = useState(!canAllocateProject && !canAllocateClient && !canAllocateInternal && canAllocateStock);
   const [requestType, setRequestType] = useState<string>("");
   const requestModel = requestType ? requestTypeModel(requestType, requestTypes) : "";
   const isMaterialsRequest = requestModel === "materiais";
@@ -1066,7 +1066,9 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
   const [rhTipo, setRhTipo] = useState("");
   const [rhRemuneracao, setRhRemuneracao] = useState("0");
 
-  const [allocTarget, setAllocTarget] = useState<"projeto" | "cliente" | "interna">("projeto");
+  const [allocTarget, setAllocTarget] = useState<"projeto" | "cliente" | "interna">(
+    canAllocateProject ? "projeto" : canAllocateClient ? "cliente" : "interna",
+  );
   const [clientId, setClientId] = useState("");
   const { data: clientsList } = useClients();
   const [clientUnitId, setClientUnitId] = useState("");
@@ -1397,6 +1399,9 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
     const isReembolso = requestModel === "reembolso";
     const isRh = requestModel === "rh";
     const isPagamento = requestModel === "pagamento";
+    if (!isRh && !isPagamento && allocTarget === "projeto" && !canAllocateProject) return toast.error("Alocação em Projeto não permitida para este perfil.");
+    if (!isRh && !isPagamento && allocTarget === "cliente" && !canAllocateClient) return toast.error("Alocação em Cliente não permitida para este perfil.");
+    if (!isRh && !isPagamento && forStock && !canAllocateStock) return toast.error("Alocação em Estoque não permitida para este perfil.");
     if (!isMateriais) {
       if (!isReembolso && !isRh && !isPagamento && newItemName.trim().length < 2) return toast.error("Descreva o serviço ou a viagem solicitada.");
       if (!isRh && !isPagamento && allocTarget === "projeto" && !projectId) return toast.error("Selecione o projeto");
@@ -1782,7 +1787,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                     {selectedBudget && selectedBudget.budget > 0 && <BudgetProgress summary={selectedBudget} pendingValue={pendingBudgetValue} />}
                   </div>
                 )}
-                <div className="space-y-2">
+                {canAllocateClient && <div className="space-y-2">
                   <Label>Cliente <span className="text-muted-foreground">(opcional)</span></Label>
                   <Select value={clientId || "none"} onValueChange={setClientId}>
                     <SelectTrigger><SelectValue placeholder="Sem cliente definido" /></SelectTrigger>
@@ -1791,8 +1796,8 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                       {(clientsList ?? []).map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
-                </div>
-                {requestModel === "pagamento" && (
+                </div>}
+                {requestModel === "pagamento" && canAllocateProject && (
                   <div className="space-y-2">
                     <Label>Projeto <span className="text-muted-foreground">(opcional)</span></Label>
                     <Select value={projectId || "none"} onValueChange={(v) => setProjectId(v === "none" ? "" : v)}>
@@ -1810,14 +1815,14 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                 <div className="space-y-2">
                   <Label>Alocação</Label>
                   <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                    {canAllocateProject && <label className="flex cursor-pointer items-center gap-2 text-sm">
                       <Checkbox checked={!forStock && allocTarget === "projeto"} onCheckedChange={() => { setForStock(false); setAllocTarget("projeto"); setClientId(""); setClientUnitId(""); }} />
                       Projeto
-                    </label>
-                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                    </label>}
+                    {canAllocateClient && <label className="flex cursor-pointer items-center gap-2 text-sm">
                       <Checkbox checked={!forStock && allocTarget === "cliente"} onCheckedChange={() => { setForStock(false); setAllocTarget("cliente"); setProjectId(""); }} />
                       Cliente
-                    </label>
+                    </label>}
                     {canAllocateStock && <label className="flex cursor-pointer items-center gap-2 text-sm">
                       <Checkbox checked={forStock} onCheckedChange={() => { setForStock(true); setAllocTarget("projeto"); setProjectId(""); setClientId(""); setClientUnitId(""); }} />
                       Estoque
@@ -1827,13 +1832,13 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                       Interna
                     </label>}
                   </div>
-                  {!forStock && allocTarget === "projeto" && (
+                  {canAllocateProject && !forStock && allocTarget === "projeto" && (
                     <p className="text-xs text-muted-foreground">Prova de conceito ou potencial cliente, ainda não implantado.</p>
                   )}
-                  {!forStock && allocTarget === "cliente" && (
+                  {canAllocateClient && !forStock && allocTarget === "cliente" && (
                     <p className="text-xs text-muted-foreground">Contrato assinado e ativo.</p>
                   )}
-                  {!forStock && allocTarget === "interna" && (
+                  {canAllocateInternal && !forStock && allocTarget === "interna" && (
                     <p className="text-xs text-muted-foreground">Qualquer despesa interna não atrelada a clientes ou projetos</p>
                   )}
                   {!restrictedCc && (
@@ -1850,7 +1855,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                     </div>
                   )}
                 </div>
-                {!forStock && allocTarget === "projeto" && (
+                {canAllocateProject && !forStock && allocTarget === "projeto" && (
                   <div className="space-y-2">
                     <Label>Projeto</Label>
                     <Select value={projectId} onValueChange={setProjectId}>
@@ -1862,7 +1867,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                     {selectedBudget && selectedBudget.budget > 0 && <BudgetProgress summary={selectedBudget} pendingValue={pendingBudgetValue} />}
                   </div>
                 )}
-                {!forStock && allocTarget === "cliente" && (
+                {canAllocateClient && !forStock && allocTarget === "cliente" && (
                   <div className="space-y-2">
                     <Label>Cliente</Label>
                     <Select value={clientId} onValueChange={(value) => { setClientId(value); setClientUnitId(""); }}>
@@ -1891,26 +1896,26 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                 <div className="space-y-2">
                   <Label>Alocação</Label>
                   <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                    {canAllocateProject && <label className="flex cursor-pointer items-center gap-2 text-sm">
                       <Checkbox checked={allocTarget === "projeto"} onCheckedChange={() => { setAllocTarget("projeto"); setClientId(""); setClientUnitId(""); }} />
                       Projeto
-                    </label>
-                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                    </label>}
+                    {canAllocateClient && <label className="flex cursor-pointer items-center gap-2 text-sm">
                       <Checkbox checked={allocTarget === "cliente"} onCheckedChange={() => { setAllocTarget("cliente"); setProjectId(""); }} />
                       Cliente
-                    </label>
+                    </label>}
                     {canAllocateInternal && <label className="flex cursor-pointer items-center gap-2 text-sm">
                       <Checkbox checked={allocTarget === "interna"} onCheckedChange={() => { setAllocTarget("interna"); setProjectId(""); setClientId(""); setClientUnitId(""); }} />
                       Interna
                     </label>}
                   </div>
-                  {allocTarget === "projeto" && (
+                  {canAllocateProject && allocTarget === "projeto" && (
                     <p className="text-xs text-muted-foreground">Prova de conceito ou potencial cliente, ainda não implantado.</p>
                   )}
-                  {allocTarget === "cliente" && (
+                  {canAllocateClient && allocTarget === "cliente" && (
                     <p className="text-xs text-muted-foreground">Contrato assinado e ativo.</p>
                   )}
-                  {allocTarget === "interna" && (
+                  {canAllocateInternal && allocTarget === "interna" && (
                     <p className="text-xs text-muted-foreground">Qualquer despesa interna não atrelada a clientes ou projetos</p>
                   )}
                   {!restrictedCc && (
@@ -1927,7 +1932,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                     </div>
                   )}
                 </div>
-                {allocTarget === "projeto" ? (
+                {canAllocateProject && allocTarget === "projeto" ? (
                   <div className="space-y-2">
                     <Label>Projeto</Label>
                     <Select value={projectId} onValueChange={setProjectId}>
@@ -1938,7 +1943,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                     </Select>
                     {selectedBudget && selectedBudget.budget > 0 && <BudgetProgress summary={selectedBudget} pendingValue={pendingBudgetValue} />}
                   </div>
-                ) : allocTarget === "cliente" ? (
+                ) : canAllocateClient && allocTarget === "cliente" ? (
                   <div className="space-y-2">
                     <Label>Cliente</Label>
                     <Select value={clientId} onValueChange={(value) => { setClientId(value); setClientUnitId(""); }}>
