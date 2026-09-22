@@ -4111,6 +4111,49 @@ function ApprovalLimitInput({ value, onSave }: { value: number; onSave: (v: numb
   );
 }
 
+function AdditionalJobTitlesSelect({ titles, value, onChange, disabled = false }: {
+  titles: Array<{ id: string; name: string }>;
+  value: string[];
+  onChange: (value: string[]) => void;
+  disabled?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const selected = new Set(value);
+  const label = value.length === 0 ? "Nenhum" : value.length === 1 ? titles.find((title) => title.id === value[0])?.name ?? "1 cargo" : `${value.length} cargos`;
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button type="button" variant="outline" className="h-8 w-full min-w-0 justify-start truncate px-2 text-xs font-normal" disabled={disabled}>
+          {label}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-72 p-0">
+        <Command>
+          <CommandInput placeholder="Buscar cargo" />
+          <CommandList>
+            <CommandEmpty>Nenhum cargo encontrado.</CommandEmpty>
+            <CommandGroup>
+              {titles.map((title) => {
+                const checked = selected.has(title.id);
+                return (
+                  <CommandItem
+                    key={title.id}
+                    value={title.name}
+                    onSelect={() => onChange(checked ? value.filter((id) => id !== title.id) : [...value, title.id])}
+                  >
+                    <Checkbox checked={checked} aria-label={`Selecionar ${title.name}`} />
+                    <span>{title.name}</span>
+                  </CommandItem>
+                );
+              })}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 function UsersAdmin() {
   const qc = useQueryClient();
   const { data: currentUser } = useCurrentUser();
@@ -4159,6 +4202,10 @@ function UsersAdmin() {
 
   const setJobTitle = useMutation({
     mutationFn: async ({ userId, jobTitleId }: { userId: string; jobTitleId: string | null }) => {
+      if (jobTitleId) {
+        const { error: cleanupError } = await supabase.from("user_additional_job_titles").delete().eq("user_id", userId).eq("job_title_id", jobTitleId);
+        if (cleanupError) throw cleanupError;
+      }
       const { error } = await supabase.from("profiles").update({ job_title_id: jobTitleId }).eq("id", userId);
       if (error) throw error;
     },

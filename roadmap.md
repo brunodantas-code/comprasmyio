@@ -424,5 +424,13 @@
 - [ ] Validar os perfis no computador e celular
 
 ## Função Operacional Adicional
-- [ ] Explicar a lógica atual de Funções Operacionais
-- [ ] Avaliar a composição de permissões entre o cargo principal e a função adicional
+- [x] Explicar a lógica atual de Funções Operacionais
+- [x] Avaliar a composição de permissões entre o cargo principal e a função adicional
+
+## Cargos adicionais
+- [x] Criar vínculos de múltiplos cargos adicionais com proteção administrativa
+- [x] Manter o cargo principal como origem das solicitações e somar cargos adicionais aos aprovadores
+- [x] Substituir Função Operacional Adicional por Cargos adicionais no cadastro de usuários
+- [x] Remover a aba Funções Operacionais do Cadastro de Cargos
+- [ ] Migrar Alexandre Ribeiro para o cargo adicional Analista de Supply
+- [ ] Validar acessos, aprovações, computador e celular
