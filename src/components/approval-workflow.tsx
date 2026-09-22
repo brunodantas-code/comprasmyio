@@ -1511,7 +1511,7 @@ function OrgTreeBranch({ node }: { node: RoleNode }) {
           >
               {node.children.map((child, index) => (
                 <div key={child.role} className="org-chart-child relative min-w-0 pt-2">
-                  <span className="absolute bottom-0 left-1/2 top-px w-px bg-border" aria-hidden="true" />
+                  <span className="absolute left-1/2 top-px h-[calc(0.5rem-1px)] w-px bg-border" aria-hidden="true" />
                   {hasMultipleChildren && (
                     <span
                       className={cn(
