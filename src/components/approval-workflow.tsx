@@ -45,6 +45,11 @@ const shortName = (full: string | null | undefined): string => {
   return full.trim().split(/\s+/)[0];
 };
 
+const isBoardTitle = (title: { name: string; short_name: string | null }) => {
+  const code = title.short_name?.trim().toUpperCase();
+  return code === "BOARD" || title.name.toLowerCase().includes("conselho");
+};
+
 const TRAVEL_TYPE_LABELS: Record<string, string> = {
   passagens: "Passagens",
   hospedagens: "Hospedagens",
@@ -1298,8 +1303,10 @@ function DefaultChainAdmin() {
       const next = hierarchy?.get(cur) ?? null;
       if (!next || seen.has(next)) break;
       seen.add(next);
+      const nextTitle = profilesMap && Array.from(profilesMap.values()).find((p) => p.jobTitle?.id === next)?.jobTitle;
+      if (nextTitle && isBoardTitle(nextTitle)) break;
       const people = namesByRole.get(next) ?? [];
-      const titleName = profilesMap && Array.from(profilesMap.values()).find((p) => p.jobTitle?.id === next)?.jobTitle?.name;
+      const titleName = nextTitle?.name;
       names.push(`${titleName ?? "Cargo"}: ${people.length ? people.join(", ") : "sem usuário no cargo"}`);
       cur = next;
     }
@@ -1544,6 +1551,8 @@ function OrgChartAdmin() {
       return data ?? [];
     },
   });
+
+  const approvalJobTitles = useMemo(() => (jobTitles ?? []).filter((title) => !isBoardTitle(title)), [jobTitles]);
   const isAdmin = Boolean(me?.isAdmin);
 
   const { data: rows, isLoading } = useQuery({
@@ -1640,7 +1649,7 @@ function OrgChartAdmin() {
 
   const directReportsByRole = useMemo(() => {
     const map = new Map<string, string[]>();
-    (jobTitles ?? []).forEach((title) => map.set(title.id, []));
+    approvalJobTitles.forEach((title) => map.set(title.id, []));
     hierarchy?.forEach((approverId, titleId) => {
       if (!approverId) return;
       const titleName = titleById.get(titleId);
@@ -1649,16 +1658,16 @@ function OrgChartAdmin() {
     });
     map.forEach((titles) => titles.sort((a, b) => a.localeCompare(b, "pt-BR")));
     return map;
-  }, [hierarchy, jobTitles, titleById]);
+  }, [hierarchy, approvalJobTitles, titleById]);
 
   const roots = useMemo(() => {
     const h = hierarchy ?? new Map<string, string | null>();
     const nodes = new Map<string, RoleNode>();
-    (jobTitles ?? []).forEach((title) =>
+    approvalJobTitles.forEach((title) =>
       nodes.set(title.id, { role: title.id, title: title.short_name?.trim() || title.name, names: namesByRole.get(title.id) ?? [], children: [] })
     );
     const top: RoleNode[] = [];
-    (jobTitles ?? []).forEach((title) => {
+    approvalJobTitles.forEach((title) => {
       const r = title.id;
       const parentRole = h.get(r) ?? null;
       const node = nodes.get(r)!;
@@ -1669,7 +1678,7 @@ function OrgChartAdmin() {
       }
     });
     return top;
-  }, [hierarchy, namesByRole, jobTitles]);
+  }, [hierarchy, namesByRole, approvalJobTitles]);
 
   return (
     <div className="space-y-4">
@@ -1687,9 +1696,9 @@ function OrgChartAdmin() {
             <Select value={approvalSettings?.ceo_approver_job_title_id ?? ""} disabled={!isAdmin || saveCeoApprover.isPending} onValueChange={(value) => saveCeoApprover.mutate(value)}>
               <SelectTrigger><SelectValue placeholder="Selecione o cargo aprovador" /></SelectTrigger>
               <SelectContent>
-                {(jobTitles ?? []).filter((title) => {
+                {approvalJobTitles.filter((title) => {
                   const shortName = title.short_name?.trim().toUpperCase();
-                  return shortName !== "CEO" && shortName !== "BOARD" && !title.name.toLowerCase().includes("conselho");
+                  return shortName !== "CEO";
                 }).map((title) => <SelectItem key={title.id} value={title.id}>{title.name}{title.short_name ? ` (${title.short_name})` : ""}</SelectItem>)}
               </SelectContent>
             </Select>
@@ -1705,7 +1714,7 @@ function OrgChartAdmin() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {(jobTitles ?? []).map((title) => (
+              {approvalJobTitles.map((title) => (
                 <TableRow key={title.id}>
                   <TableCell className="font-medium">{title.name}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">
@@ -1723,7 +1732,7 @@ function OrgChartAdmin() {
                       <SelectTrigger className="h-8 w-full min-w-0 max-w-full md:w-56"><SelectValue placeholder="Não definido" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">Não definido</SelectItem>
-                        {(jobTitles ?? []).filter((option) => option.id !== title.id).map((option) => (
+                        {approvalJobTitles.filter((option) => option.id !== title.id).map((option) => (
                           <SelectItem key={option.id} value={option.id}>{option.name}</SelectItem>
                         ))}
                       </SelectContent>
