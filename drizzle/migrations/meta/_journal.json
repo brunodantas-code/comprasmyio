@@ -253,6 +253,13 @@
       "when": 1790108870347,
       "tag": "0035_configure_joint_approval_roles",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1790108948366,
+      "tag": "0036_count_final_approver_in_joint_approval",
+      "breakpoints": true
     }
   ]
 }
