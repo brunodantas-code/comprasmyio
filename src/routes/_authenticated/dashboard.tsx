@@ -4099,23 +4099,6 @@ function EditProjectDialog({
 
 /* ---------- Users admin ---------- */
 
-function ApprovalLimitInput({ value, onSave }: { value: number; onSave: (v: number) => void }) {
-  const [draft, setDraft] = useState(String(value ?? 0));
-  useEffect(() => { setDraft(String(value ?? 0)); }, [value]);
-  return (
-    <MoneyInput
-      className="h-8 w-full min-w-0 px-1 text-right text-xs md:text-xs"
-      value={draft}
-      onChange={setDraft}
-      onBlur={() => {
-        const n = Number(draft);
-        if (!Number.isFinite(n) || n < 0) { setDraft(String(value ?? 0)); return; }
-        if (n !== Number(value ?? 0)) onSave(n);
-      }}
-    />
-  );
-}
-
 function AdditionalJobTitlesSelect({ titles, value, onChange, disabled = false }: {
   titles: Array<{ id: string; name: string }>;
   value: string[];
