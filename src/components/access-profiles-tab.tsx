@@ -47,7 +47,9 @@ export function AccessProfilesTab() {
           ? ALL_MENU_PERMISSION_KEYS
           : (definition?.access_profile_permissions ?? []).filter((permission) => permission.allowed).map((permission) => permission.menu_key));
         const individualPermissions = new Set((permissions ?? []).filter((permission) => permission.user_id === profile.id && permission.allowed).map((permission) => permission.menu_key));
-        const profileRequestTypes = new Set(definition?.access_profile_request_types?.map((permission) => permission.request_type_code) ?? []);
+        const profileRequestTypes = new Set(definition?.base_profile === "admin"
+          ? requestTypes.filter((type) => type.active).map((type) => type.code)
+          : definition?.access_profile_request_types?.map((permission) => permission.request_type_code) ?? []);
         const individualRequestTypes = new Set((individualTypes ?? []).filter((permission) => permission.user_id === profile.id).map((permission) => permission.request_type_code));
         const selectedPermissions = accessRecord?.is_customized ? individualPermissions : profilePermissions;
         const selectedRequestTypes = accessRecord?.is_customized ? individualRequestTypes : profileRequestTypes;
