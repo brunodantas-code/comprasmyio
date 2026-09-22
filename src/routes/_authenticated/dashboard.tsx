@@ -1399,10 +1399,9 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
     const isReembolso = requestModel === "reembolso";
     const isRh = requestModel === "rh";
     const isPagamento = requestModel === "pagamento";
-    if (allocTarget === "projeto" && !canAllocateProject) return toast.error("Alocação em Projeto não permitida para este perfil.");
-    if (allocTarget === "cliente" && !canAllocateClient) return toast.error("Alocação em Cliente não permitida para este perfil.");
-    if (allocTarget === "interna" && !canAllocateInternal && !forStock) return toast.error("Selecione uma alocação permitida para este perfil.");
-    if (forStock && !canAllocateStock) return toast.error("Alocação em Estoque não permitida para este perfil.");
+    if (!isRh && !isPagamento && allocTarget === "projeto" && !canAllocateProject) return toast.error("Alocação em Projeto não permitida para este perfil.");
+    if (!isRh && !isPagamento && allocTarget === "cliente" && !canAllocateClient) return toast.error("Alocação em Cliente não permitida para este perfil.");
+    if (!isRh && !isPagamento && forStock && !canAllocateStock) return toast.error("Alocação em Estoque não permitida para este perfil.");
     if (!isMateriais) {
       if (!isReembolso && !isRh && !isPagamento && newItemName.trim().length < 2) return toast.error("Descreva o serviço ou a viagem solicitada.");
       if (!isRh && !isPagamento && allocTarget === "projeto" && !projectId) return toast.error("Selecione o projeto");
