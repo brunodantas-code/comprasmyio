@@ -1595,7 +1595,7 @@ function OrgChartAdmin() {
   const namesByRole = useMemo(() => {
     const map = new Map<string, { name: string; limit: number }[]>();
     const profileById = new Map((rows?.profiles ?? []).map((profile) => [profile.id, profile]));
-    const addPerson = (jobTitleId: string, profile: (typeof rows.profiles)[number]) => {
+    const addPerson = (jobTitleId: string, profile: { full_name: string | null; approval_limit: number | null }) => {
       const current = map.get(jobTitleId) ?? [];
       const name = shortName(profile.full_name);
       if (!current.some((person) => person.name === name)) {
