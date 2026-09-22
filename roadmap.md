@@ -471,16 +471,16 @@
 - [x] Exibir no texto: Faixa 2 = Gestor Direto; Faixa 3 acrescenta Gestor da Área; C-Level somente acima
 
 ## Exclusão e realocação de perfis de acesso
-- [ ] Permitir ao Admin editar e excluir qualquer perfil, inclusive os atuais perfis do sistema
-- [ ] Antes de excluir perfil com usuários vinculados, exigir escolha de outro perfil para realocação
-- [ ] Realocar usuários e excluir o perfil em uma única operação segura
-- [ ] Validar o fluxo completo e mostrar prévia antes de declarar conclusão
+- [x] Permitir ao Admin editar e excluir qualquer perfil, inclusive os atuais perfis do sistema
+- [x] Antes de excluir perfil com usuários vinculados, exigir escolha de outro perfil para realocação
+- [x] Realocar usuários e excluir o perfil em uma única operação segura
+- [x] Validar o fluxo completo e mostrar prévia antes de declarar conclusão
 
 ## Alçadas para cargos C-Level
-- [ ] Identificar usuários cujo cargo principal é C-Level
-- [ ] Para C-Level, mostrar somente Aprovação automática e Faixa 2
-- [ ] Garantir que a regra use apenas o CEO como nível superior
-- [ ] Para o CEO, permitir selecionar um aprovador específico, normalmente o CFO
-- [ ] Aplicar o aprovador escolhido do CEO na geração da cadeia
-- [ ] Não incluir o Conselho de Administração na cadeia de despesas/approvals do CEO
-- [ ] Validar visualmente em desktop e celular
+- [x] Identificar usuários cujo cargo principal é C-Level
+- [x] Para C-Level, mostrar somente Aprovação automática e Faixa 2
+- [x] Garantir que a regra use apenas o CEO como nível superior
+- [x] Para o CEO, permitir selecionar um aprovador específico, normalmente o CFO
+- [x] Aplicar o aprovador escolhido do CEO na geração da cadeia
+- [x] Não incluir o Conselho de Administração na cadeia de despesas/approvals do CEO
+- [x] Validar visualmente em desktop e celular
