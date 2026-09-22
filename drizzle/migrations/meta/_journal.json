@@ -218,6 +218,13 @@
       "when": 1790106553038,
       "tag": "0030_transactional_access_profile_reallocation_and_deletion",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1790106731302,
+      "tag": "0031_configure_ceo_expense_approver",
+      "breakpoints": true
     }
   ]
 }

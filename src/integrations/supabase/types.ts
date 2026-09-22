@@ -182,6 +182,7 @@ export type Database = {
       }
       approval_settings: {
         Row: {
+          ceo_approver_job_title_id: string | null
           created_at: string
           dual_approval_enabled: boolean
           dual_approval_threshold: number
@@ -189,6 +190,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          ceo_approver_job_title_id?: string | null
           created_at?: string
           dual_approval_enabled?: boolean
           dual_approval_threshold?: number
@@ -196,13 +198,22 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          ceo_approver_job_title_id?: string | null
           created_at?: string
           dual_approval_enabled?: boolean
           dual_approval_threshold?: number
           id?: boolean
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "approval_settings_ceo_approver_job_title_id_fkey"
+            columns: ["ceo_approver_job_title_id"]
+            isOneToOne: false
+            referencedRelation: "job_titles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       approval_steps: {
         Row: {
