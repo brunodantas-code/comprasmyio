@@ -86,7 +86,7 @@ function RequestTypeCheckboxes({ values, onChange, types }: { values: string[]; 
 }
 
 type ProfileRow = { id: string; full_name: string | null; email: string | null; approval_limit: number | null; job_title_id: string | null };
-type ProfileWithTitle = ProfileRow & { jobTitle: { id: string; name: string } | null };
+type ProfileWithTitle = ProfileRow & { jobTitle: { id: string; name: string; short_name: string | null } | null };
 
 function useProfiles() {
   return useQuery({
@@ -94,7 +94,7 @@ function useProfiles() {
     queryFn: async () => {
       const [{ data: profiles, error: pe }, { data: titles, error: te }] = await Promise.all([
         supabase.from("profiles").select("id, full_name, email, approval_limit, job_title_id").is("deleted_at", null).order("full_name"),
-        supabase.from("job_titles").select("id,name").eq("active", true),
+        supabase.from("job_titles").select("id,name,short_name").eq("active", true),
       ]);
       if (pe) throw pe;
       if (te) throw te;
@@ -1279,6 +1279,11 @@ function DefaultChainAdmin() {
     return profilesMap?.get(userId)?.jobTitle?.id ?? null;
   };
 
+  const isCLevel = (userId: string) => {
+    const shortName = profilesMap?.get(userId)?.jobTitle?.short_name?.trim().toUpperCase();
+    return ["CEO", "CFO", "COO", "CTO", "CIO", "CRO"].includes(shortName ?? "");
+  };
+
   const approverRoleOf = (userId: string) => {
     const main = mainRoleOf(userId);
     const next = main ? hierarchy?.get(main) ?? null : null;
@@ -1335,7 +1340,7 @@ function DefaultChainAdmin() {
                   <TableCell className="font-medium">{profile.full_name || profile.email}</TableCell>
                   <TableCell><QuantityLimitInput value={profile.device_approval_limit} disabled={!isAdmin} onSave={(value) => save.mutate({ userId: profile.id, patch: { device_approval_limit: value } })} /></TableCell>
                   <TableCell><QuantityLimitInput value={profile.device_tier2_limit} disabled={!isAdmin} onSave={(value) => save.mutate({ userId: profile.id, patch: { device_tier2_limit: value } })} /></TableCell>
-                  <TableCell><QuantityLimitInput value={profile.device_tier3_limit} disabled={!isAdmin} onSave={(value) => save.mutate({ userId: profile.id, patch: { device_tier3_limit: value } })} /></TableCell>
+                  <TableCell>{isCLevel(profile.id) ? <span className="text-xs text-muted-foreground">Não se aplica</span> : <QuantityLimitInput value={profile.device_tier3_limit} disabled={!isAdmin} onSave={(value) => save.mutate({ userId: profile.id, patch: { device_tier3_limit: value } })} />}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -1383,13 +1388,7 @@ function DefaultChainAdmin() {
                           onSave={(v) => save.mutate({ userId: p.id, patch: { tier2_limit: v } })}
                         />
                       </TableCell>
-                      <TableCell>
-                        <MoneyInput
-                          value={Number(p.tier3_limit ?? 250000)}
-                          disabled={!isAdmin}
-                          onSave={(v) => save.mutate({ userId: p.id, patch: { tier3_limit: v } })}
-                        />
-                      </TableCell>
+                      <TableCell>{isCLevel(p.id) ? <span className="text-xs text-muted-foreground">Não se aplica</span> : <MoneyInput value={Number(p.tier3_limit ?? 250000)} disabled={!isAdmin} onSave={(v) => save.mutate({ userId: p.id, patch: { tier3_limit: v } })} />}</TableCell>
                       <TableCell className="text-xs text-muted-foreground">
                         {seq.length === 0 ? (
                           <span className="text-amber-600">Sem gestor definido — sem etapas de aprovação</span>
@@ -1577,6 +1576,28 @@ function OrgChartAdmin() {
     },
   });
 
+  const { data: approvalSettings } = useQuery({
+    queryKey: ["approval-settings"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("approval_settings").select("ceo_approver_job_title_id").eq("id", true).maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const saveCeoApprover = useMutation({
+    mutationFn: async (jobTitleId: string) => {
+      const { error } = await supabase.from("approval_settings").update({ ceo_approver_job_title_id: jobTitleId }).eq("id", true);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Aprovador de despesas do CEO atualizado");
+      qc.invalidateQueries({ queryKey: ["approval-settings"] });
+      qc.invalidateQueries({ queryKey: ["aw-default-chain"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const saveApprover = useMutation({
     mutationFn: async ({ role, approverRole }: { role: string; approverRole: string | null }) => {
       const { error } = await supabase
@@ -1660,7 +1681,20 @@ function OrgChartAdmin() {
             Se um cargo ficar sem usuário, a solicitação segue automaticamente para o nível acima.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-5">
+          <div className="max-w-md space-y-2">
+            <Label>Aprovador de despesas do CEO</Label>
+            <Select value={approvalSettings?.ceo_approver_job_title_id ?? ""} disabled={!isAdmin || saveCeoApprover.isPending} onValueChange={(value) => saveCeoApprover.mutate(value)}>
+              <SelectTrigger><SelectValue placeholder="Selecione o cargo aprovador" /></SelectTrigger>
+              <SelectContent>
+                {(jobTitles ?? []).filter((title) => {
+                  const shortName = title.short_name?.trim().toUpperCase();
+                  return shortName !== "CEO" && shortName !== "BOARD" && !title.name.toLowerCase().includes("conselho");
+                }).map((title) => <SelectItem key={title.id} value={title.id}>{title.name}{title.short_name ? ` (${title.short_name})` : ""}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">Usado nas solicitações do CEO acima da aprovação automática. O Conselho de Administração não participa desse fluxo.</p>
+          </div>
           <Table className="table-fixed">
             <TableHeader>
               <TableRow>
