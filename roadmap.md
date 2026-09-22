@@ -452,7 +452,7 @@
 - [x] Aplicar e salvar as permissões por perfil e por usuário
 - [x] Validar perfil Operação no computador e celular
 - [ ] Confirmar e corrigir a ausência dos quatro controles no perfil individual de Alexandre
-- [ ] Mostrar a prévia corrigida ao usuário antes de declarar conclusão
+- [x] Mostrar a prévia corrigida ao usuário antes de declarar conclusão
 
 ## Esclarecimento das faixas de aprovação
 - [x] Confirmar a posição de “Aprovado por (cargo)” em relação às Faixas 2 e 3
