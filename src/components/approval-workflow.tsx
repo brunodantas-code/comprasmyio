@@ -1496,6 +1496,7 @@ function OrgTreeBranch({ node }: { node: RoleNode }) {
   const childColumns = node.children
     .map((child) => `minmax(0, ${orgLeafCount(child)}fr)`)
     .join(" ");
+  const hasMultipleChildren = node.children.length > 1;
 
   return (
     <div className="flex min-w-0 flex-col items-stretch">
@@ -1503,17 +1504,27 @@ function OrgTreeBranch({ node }: { node: RoleNode }) {
       {node.children.length > 0 && (
         <>
           <div className="mx-auto h-2 w-px bg-border" />
-          <div className="border-t border-border pt-2">
-            <div
-              className="grid min-w-0 grid-cols-1 items-start gap-1.5 sm:[grid-template-columns:var(--org-columns)]"
-              style={{ "--org-columns": childColumns } as CSSProperties}
-            >
-              {node.children.map((child) => (
-                <div key={child.role} className="org-chart-child min-w-0">
+          <div
+            className="grid min-w-0 grid-cols-1 items-start gap-1.5 sm:[grid-template-columns:var(--org-columns)]"
+            style={{ "--org-columns": childColumns } as CSSProperties}
+          >
+              {node.children.map((child, index) => (
+                <div key={child.role} className="org-chart-child relative min-w-0 pt-2">
+                  <span className="absolute left-1/2 top-0 h-2 w-px bg-border" aria-hidden="true" />
+                  {hasMultipleChildren && (
+                    <span
+                      className={cn(
+                        "absolute top-0 h-px bg-border",
+                        index === 0 && "left-1/2 -right-1",
+                        index > 0 && index < node.children.length - 1 && "-left-1 -right-1",
+                        index === node.children.length - 1 && "-left-1 right-1/2",
+                      )}
+                      aria-hidden="true"
+                    />
+                  )}
                   <OrgTreeBranch node={child} />
                 </div>
               ))}
-            </div>
           </div>
         </>
       )}

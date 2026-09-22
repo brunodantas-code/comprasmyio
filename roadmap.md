@@ -436,6 +436,6 @@
 - [ ] Validar acessos, aprovações, computador e celular
 
 ## Conectores da hierarquia de aprovação
-- [ ] Remover a linha horizontal quando houver somente um box no nível seguinte
-- [ ] Limitar cada linha horizontal ao centro dos conectores extremos, sem ultrapassar os boxes
+- [x] Remover a linha horizontal quando houver somente um box no nível seguinte
+- [x] Limitar cada linha horizontal ao centro dos conectores extremos, sem ultrapassar os boxes
 - [ ] Validar a hierarquia com ramificações simples e múltiplas
