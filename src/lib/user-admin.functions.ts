@@ -236,14 +236,20 @@ export const deleteAccessProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => z.object({
     sourceProfile: accessProfileSchema,
-    destinationProfile: accessProfileSchema.nullable(),
+    reallocations: z.array(z.object({
+      userId: z.string().uuid(),
+      destinationProfile: accessProfileSchema,
+    })).max(500),
   }).parse(input))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: moved, error } = await supabaseAdmin.rpc("admin_delete_access_profile", {
+    const { data: moved, error } = await supabaseAdmin.rpc("admin_delete_access_profile_individual", {
       _source_profile: data.sourceProfile,
-      _destination_profile: data.destinationProfile ?? undefined,
+      _reallocations: data.reallocations.map((item) => ({
+        user_id: item.userId,
+        destination_profile: item.destinationProfile,
+      })),
     });
     if (error) throw new Error(error.message);
     return { moved: Number(moved ?? 0) };
