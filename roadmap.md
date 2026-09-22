@@ -460,5 +460,9 @@
 - [ ] Incluir controles independentes para Alocação: Projeto e Alocação: Cliente
 - [ ] Ocultar no novo pedido as alocações desmarcadas no perfil
 
+## Exclusão de perfis de acesso
+- [ ] Verificar por que alguns perfis não exibem o botão de exclusão
+- [ ] Ajustar a regra conforme a proteção necessária dos perfis em uso ou do sistema
+
 ## Esclarecimento das faixas de aprovação
 - [x] Confirmar a posição de “Aprovado por (cargo)” em relação às Faixas 2 e 3
