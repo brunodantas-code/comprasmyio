@@ -1784,7 +1784,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                     {selectedBudget && selectedBudget.budget > 0 && <BudgetProgress summary={selectedBudget} pendingValue={pendingBudgetValue} />}
                   </div>
                 )}
-                <div className="space-y-2">
+                {canAllocateClient && <div className="space-y-2">
                   <Label>Cliente <span className="text-muted-foreground">(opcional)</span></Label>
                   <Select value={clientId || "none"} onValueChange={setClientId}>
                     <SelectTrigger><SelectValue placeholder="Sem cliente definido" /></SelectTrigger>
@@ -1793,8 +1793,8 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                       {(clientsList ?? []).map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
-                </div>
-                {requestModel === "pagamento" && (
+                </div>}
+                {requestModel === "pagamento" && canAllocateProject && (
                   <div className="space-y-2">
                     <Label>Projeto <span className="text-muted-foreground">(opcional)</span></Label>
                     <Select value={projectId || "none"} onValueChange={(v) => setProjectId(v === "none" ? "" : v)}>
@@ -1812,14 +1812,14 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                 <div className="space-y-2">
                   <Label>Alocação</Label>
                   <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                    {canAllocateProject && <label className="flex cursor-pointer items-center gap-2 text-sm">
                       <Checkbox checked={!forStock && allocTarget === "projeto"} onCheckedChange={() => { setForStock(false); setAllocTarget("projeto"); setClientId(""); setClientUnitId(""); }} />
                       Projeto
-                    </label>
-                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                    </label>}
+                    {canAllocateClient && <label className="flex cursor-pointer items-center gap-2 text-sm">
                       <Checkbox checked={!forStock && allocTarget === "cliente"} onCheckedChange={() => { setForStock(false); setAllocTarget("cliente"); setProjectId(""); }} />
                       Cliente
-                    </label>
+                    </label>}
                     {canAllocateStock && <label className="flex cursor-pointer items-center gap-2 text-sm">
                       <Checkbox checked={forStock} onCheckedChange={() => { setForStock(true); setAllocTarget("projeto"); setProjectId(""); setClientId(""); setClientUnitId(""); }} />
                       Estoque
@@ -1852,7 +1852,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                     </div>
                   )}
                 </div>
-                {!forStock && allocTarget === "projeto" && (
+                {canAllocateProject && !forStock && allocTarget === "projeto" && (
                   <div className="space-y-2">
                     <Label>Projeto</Label>
                     <Select value={projectId} onValueChange={setProjectId}>
@@ -1864,7 +1864,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                     {selectedBudget && selectedBudget.budget > 0 && <BudgetProgress summary={selectedBudget} pendingValue={pendingBudgetValue} />}
                   </div>
                 )}
-                {!forStock && allocTarget === "cliente" && (
+                {canAllocateClient && !forStock && allocTarget === "cliente" && (
                   <div className="space-y-2">
                     <Label>Cliente</Label>
                     <Select value={clientId} onValueChange={(value) => { setClientId(value); setClientUnitId(""); }}>
@@ -1893,14 +1893,14 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                 <div className="space-y-2">
                   <Label>Alocação</Label>
                   <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                    {canAllocateProject && <label className="flex cursor-pointer items-center gap-2 text-sm">
                       <Checkbox checked={allocTarget === "projeto"} onCheckedChange={() => { setAllocTarget("projeto"); setClientId(""); setClientUnitId(""); }} />
                       Projeto
-                    </label>
-                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                    </label>}
+                    {canAllocateClient && <label className="flex cursor-pointer items-center gap-2 text-sm">
                       <Checkbox checked={allocTarget === "cliente"} onCheckedChange={() => { setAllocTarget("cliente"); setProjectId(""); }} />
                       Cliente
-                    </label>
+                    </label>}
                     {canAllocateInternal && <label className="flex cursor-pointer items-center gap-2 text-sm">
                       <Checkbox checked={allocTarget === "interna"} onCheckedChange={() => { setAllocTarget("interna"); setProjectId(""); setClientId(""); setClientUnitId(""); }} />
                       Interna
@@ -1929,7 +1929,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                     </div>
                   )}
                 </div>
-                {allocTarget === "projeto" ? (
+                {canAllocateProject && allocTarget === "projeto" ? (
                   <div className="space-y-2">
                     <Label>Projeto</Label>
                     <Select value={projectId} onValueChange={setProjectId}>
@@ -1940,7 +1940,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                     </Select>
                     {selectedBudget && selectedBudget.budget > 0 && <BudgetProgress summary={selectedBudget} pendingValue={pendingBudgetValue} />}
                   </div>
-                ) : allocTarget === "cliente" ? (
+                ) : canAllocateClient && allocTarget === "cliente" ? (
                   <div className="space-y-2">
                     <Label>Cliente</Label>
                     <Select value={clientId} onValueChange={(value) => { setClientId(value); setClientUnitId(""); }}>
