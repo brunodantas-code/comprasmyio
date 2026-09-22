@@ -1077,7 +1077,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
 
   const { data: me } = useCurrentUser();
   const restrictedCc = !canShowCostCenter;
-  const canUseNewItem = canManageProducts && canCreateNewItem;
+  const canUseNewItem = canCreateNewItem;
 
   async function resolveOperacaoCostCenterId(): Promise<string> {
     const existing = (costCenters ?? []).find((c) => c.name.trim().toLowerCase() === "operação");

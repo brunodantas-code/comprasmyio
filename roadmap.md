@@ -420,7 +420,7 @@
 ## Campos parametrizáveis das solicitações
 - [x] Adicionar quatro controles no bloco de Solicitações dos Perfis de acesso
 - [x] Ocultar Centro de Custo, Item novo, Estoque e Interna do perfil Operação por padrão
-- [ ] Preservar a customização individual por usuário
+- [x] Preservar a customização individual por usuário
 - [ ] Validar os perfis no computador e celular
 
 ## Função Operacional Adicional
