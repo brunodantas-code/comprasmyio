@@ -29,6 +29,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAdditionalStepTypes, type AdditionalStepType } from "@/components/additional-step-types-tab";
 import { requestTypeModel, requestTypeName, useRequestTypes, type RequestTypeRecord } from "@/components/request-types-tab";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
+import { cn } from "@/lib/utils";
 
 const BRL = (v: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(v ?? 0));
