@@ -450,3 +450,6 @@
 - [ ] Exibir os quatro controles no mesmo bloco de Tipos de solicitação
 - [ ] Aplicar e salvar as permissões por perfil e por usuário
 - [ ] Validar perfil Operação no computador e celular
+
+## Esclarecimento das faixas de aprovação
+- [ ] Confirmar a posição de “Aprovado por (cargo)” em relação às Faixas 2 e 3
