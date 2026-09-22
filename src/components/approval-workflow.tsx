@@ -1314,6 +1314,15 @@ function DefaultChainAdmin() {
     },
   });
 
+  const { data: titlesById } = useQuery({
+    queryKey: ["aw-chain-job-titles"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("job_titles").select("id,name,short_name").eq("active", true);
+      if (error) throw error;
+      return new Map((data ?? []).map((title) => [title.id, title]));
+    },
+  });
+
   const save = useMutation({
     mutationFn: async ({
       userId,
@@ -1356,8 +1365,8 @@ function DefaultChainAdmin() {
   const approverRoleOf = (userId: string) => {
     const main = mainRoleOf(userId);
     const next = main ? hierarchy?.get(main) ?? null : null;
-    if (!next || !profilesMap) return null;
-    const nextTitle = Array.from(profilesMap.values()).find((p) => p.jobTitle?.id === next)?.jobTitle;
+    if (!next) return null;
+    const nextTitle = titlesById?.get(next);
     return nextTitle?.short_name?.trim() || nextTitle?.name || null;
   };
 
@@ -1369,15 +1378,18 @@ function DefaultChainAdmin() {
       const next = hierarchy?.get(cur) ?? null;
       if (!next || seen.has(next)) break;
       seen.add(next);
-      const nextTitle = profilesMap && Array.from(profilesMap.values()).find((p) => p.jobTitle?.id === next)?.jobTitle;
+      const nextTitle = titlesById?.get(next);
       if (nextTitle && isBoardTitle(nextTitle)) break;
       const people = namesByRole.get(next) ?? [];
-      const relationshipLabel = i === 0
-        ? "Gestor Direto"
-        : i === 1
-          ? "Gestor da Área"
-          : nextTitle?.short_name?.trim() || nextTitle?.name || "C-Level";
+      const shortName = nextTitle?.short_name?.trim().toUpperCase();
+      const isNextCLevel = ["CEO", "CFO", "COO", "CTO", "CIO", "CRO"].includes(shortName ?? "");
+      const relationshipLabel = isNextCLevel
+        ? shortName
+        : i === 0
+          ? "Gestor Direto"
+          : "Gestor da Área";
       names.push(`${relationshipLabel}: ${people.length ? people.join(", ") : "sem usuário no cargo"}`);
+      if (isNextCLevel) break;
       cur = next;
     }
     return names;
