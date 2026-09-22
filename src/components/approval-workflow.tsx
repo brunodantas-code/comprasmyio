@@ -1702,7 +1702,7 @@ function OrgChartAdmin() {
                 }).map((title) => <SelectItem key={title.id} value={title.id}>{title.name}{title.short_name ? ` (${title.short_name})` : ""}</SelectItem>)}
               </SelectContent>
             </Select>
-            <p className="text-xs text-muted-foreground">Usado nas solicitações do CEO acima da aprovação automática. O Conselho de Administração não participa desse fluxo.</p>
+            <p className="text-xs text-muted-foreground">Usado nas solicitações do CEO acima da aprovação automática.</p>
           </div>
           <Table className="table-fixed">
             <TableHeader>

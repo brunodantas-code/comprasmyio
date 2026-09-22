@@ -184,7 +184,7 @@ function DeleteProfileDialog({ definition, definitions, deleting, onDelete }: { 
     const { data: links, error } = await supabase.from("user_access_profiles").select("user_id").eq("profile_definition_id", definition.code);
     const userIds = (links ?? []).map((link) => link.user_id);
     const { data: profiles, error: profilesError } = userIds.length
-      ? await supabase.from("profiles").select("id,full_name,email").in("id", userIds).is("deleted_at", null).order("full_name")
+      ? await supabase.from("profiles").select("id,full_name,email").in("id", userIds).order("full_name")
       : { data: [], error: null };
     setInspecting(false);
     if (error || profilesError) { toast.error(error?.message ?? profilesError?.message ?? "Não foi possível carregar os usuários."); setOpen(false); return; }
