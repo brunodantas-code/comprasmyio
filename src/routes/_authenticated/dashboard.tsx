@@ -4099,23 +4099,6 @@ function EditProjectDialog({
 
 /* ---------- Users admin ---------- */
 
-function ApprovalLimitInput({ value, onSave }: { value: number; onSave: (v: number) => void }) {
-  const [draft, setDraft] = useState(String(value ?? 0));
-  useEffect(() => { setDraft(String(value ?? 0)); }, [value]);
-  return (
-    <MoneyInput
-      className="h-8 w-full min-w-0 px-1 text-right text-xs md:text-xs"
-      value={draft}
-      onChange={setDraft}
-      onBlur={() => {
-        const n = Number(draft);
-        if (!Number.isFinite(n) || n < 0) { setDraft(String(value ?? 0)); return; }
-        if (n !== Number(value ?? 0)) onSave(n);
-      }}
-    />
-  );
-}
-
 function AdditionalJobTitlesSelect({ titles, value, onChange, disabled = false }: {
   titles: Array<{ id: string; name: string }>;
   value: string[];
@@ -4282,15 +4265,6 @@ function UsersAdmin() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const setProfileField = useMutation({
-    mutationFn: async ({ userId, patch }: { userId: string; patch: Partial<{ approval_limit: number; manager_id: string | null; tier2_limit: number; tier3_limit: number }> }) => {
-      const { error } = await supabase.from("profiles").update(patch).eq("id", userId);
-      if (error) throw error;
-    },
-    onSuccess: () => { toast.success("Usuário atualizado"); qc.invalidateQueries({ queryKey: ["admin-users"] }); },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
   const { data: jobTitles } = useJobTitles();
   const { data: accessProfileDefinitions = [] } = useAccessProfileDefinitions();
 
@@ -4444,7 +4418,6 @@ function UsersAdmin() {
                 </div>
                 <div className="divide-y divide-border">
                   {g.users.map((u) => {
-                    const p = u as unknown as { approval_limit?: number; tier2_limit?: number; tier3_limit?: number; manager_id?: string | null };
                     const primary = u.jobTitleId ?? "none";
                     return (
                       <div key={u.id} className="p-3">
@@ -4478,7 +4451,7 @@ function UsersAdmin() {
                             ) : null}
                           </div>
                         </div>
-                        <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-4 lg:grid-cols-7">
+                        <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-4">
                           <div className="flex flex-col gap-1">
                             <span className="text-[10px] font-medium text-muted-foreground">Cargo</span>
                             <Select
@@ -4510,27 +4483,6 @@ function UsersAdmin() {
                                 {accessProfileDefinitions.filter((definition) => definition.active || definition.code === u.accessProfile).map((definition) => <SelectItem key={definition.code} value={definition.code}>{definition.name}</SelectItem>)}
                               </SelectContent>
                             </Select>
-                          </div>
-                          <div className="flex flex-col gap-1">
-                            <span className="text-[10px] font-medium text-muted-foreground">Faixa 1 - Aprovação automática</span>
-                            <ApprovalLimitInput
-                              value={Number(p.approval_limit ?? 0)}
-                              onSave={(limit) => setProfileField.mutate({ userId: u.id, patch: { approval_limit: limit } })}
-                            />
-                          </div>
-                          <div className="flex flex-col gap-1">
-                            <span className="text-[10px] font-medium text-muted-foreground">Faixa 2</span>
-                            <ApprovalLimitInput
-                              value={Number(p.tier2_limit ?? 50000)}
-                              onSave={(limit) => setProfileField.mutate({ userId: u.id, patch: { tier2_limit: limit } })}
-                            />
-                          </div>
-                          <div className="flex flex-col gap-1">
-                            <span className="text-[10px] font-medium text-muted-foreground">Faixa 3</span>
-                            <ApprovalLimitInput
-                              value={Number(p.tier3_limit ?? 250000)}
-                              onSave={(limit) => setProfileField.mutate({ userId: u.id, patch: { tier3_limit: limit } })}
-                            />
                           </div>
                           <div className="flex flex-col gap-1">
                             <span className="text-[10px] font-medium text-muted-foreground">Aprovado por (cargo)</span>

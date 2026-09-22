@@ -495,3 +495,7 @@
 - [x] Permitir selecionar um perfil de destino diferente para cada usuário
 - [x] Executar todas as realocações e a exclusão do perfil em uma única operação segura
 - [x] Validar o fluxo em computador e celular e mostrar a prévia
+
+## Fonte única das alçadas de aprovação
+- [x] Remover os campos editáveis de Aprovação automática, Faixa 2 e Faixa 3 do menu Usuários
+- [ ] Validar que os valores permanecem editáveis somente em Alçadas de Aprovação
