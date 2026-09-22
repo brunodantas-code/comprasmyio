@@ -480,4 +480,6 @@
 - [ ] Identificar usuários cujo cargo principal é C-Level
 - [ ] Para C-Level, mostrar somente Aprovação automática e Faixa 2
 - [ ] Garantir que a regra use apenas o CEO como nível superior
+- [ ] Para o CEO, permitir selecionar um aprovador específico, normalmente o CFO
+- [ ] Aplicar o aprovador escolhido do CEO na geração da cadeia
 - [ ] Validar visualmente em desktop e celular
