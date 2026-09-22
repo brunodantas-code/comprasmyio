@@ -421,7 +421,7 @@
 - [x] Adicionar quatro controles no bloco de Solicitações dos Perfis de acesso
 - [x] Ocultar Centro de Custo, Item novo, Estoque e Interna do perfil Operação por padrão
 - [x] Preservar a customização individual por usuário
-- [ ] Validar os perfis no computador e celular
+- [x] Validar os perfis no computador e celular
 
 ## Função Operacional Adicional
 - [x] Explicar a lógica atual de Funções Operacionais
@@ -433,9 +433,9 @@
 - [x] Substituir Função Operacional Adicional por Cargos adicionais no cadastro de usuários
 - [x] Remover a aba Funções Operacionais do Cadastro de Cargos
 - [x] Migrar Alexandre Ribeiro para o cargo adicional Analista de Supply
-- [ ] Validar acessos, aprovações, computador e celular
+- [x] Validar acessos, aprovações, computador e celular
 
 ## Conectores da hierarquia de aprovação
 - [x] Remover a linha horizontal quando houver somente um box no nível seguinte
 - [x] Limitar cada linha horizontal ao centro dos conectores extremos, sem ultrapassar os boxes
-- [ ] Validar a hierarquia com ramificações simples e múltiplas
+- [x] Validar a hierarquia com ramificações simples e múltiplas
