@@ -4125,8 +4125,8 @@ function AdditionalJobTitlesSelect({ titles, value, onChange, disabled = false }
       <PopoverTrigger asChild>
         <Button
           type="button"
-          variant="outline"
-          className="h-8 w-full min-w-0 justify-start truncate border-input !bg-background px-2 text-xs font-normal !text-foreground hover:!bg-accent hover:!text-accent-foreground"
+          variant="ghost"
+          className="h-8 w-full min-w-0 justify-start truncate border border-input !bg-background px-2 text-xs font-normal !text-foreground shadow-sm hover:!bg-muted hover:!text-foreground"
           disabled={disabled}
         >
           {label}
