@@ -232,6 +232,23 @@ export const relocateAccessProfileUsers = createServerFn({ method: "POST" })
     return { moved: users?.length ?? 0 };
   });
 
+export const deleteAccessProfile = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({
+    sourceProfile: accessProfileSchema,
+    destinationProfile: accessProfileSchema.nullable(),
+  }).parse(input))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: moved, error } = await supabaseAdmin.rpc("admin_delete_access_profile", {
+      _source_profile: data.sourceProfile,
+      _destination_profile: data.destinationProfile,
+    });
+    if (error) throw new Error(error.message);
+    return { moved: Number(moved ?? 0) };
+  });
+
 export const requestUserDeletion = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => z.object({ userId: z.string().uuid() }).parse(input))

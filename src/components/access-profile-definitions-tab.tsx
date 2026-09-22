@@ -15,7 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
 import { ALL_MENU_PERMISSION_KEYS, STANDARD_MENU_PERMISSION_KEYS } from "@/lib/menu-permissions";
-import { relocateAccessProfileUsers } from "@/lib/user-admin.functions";
+import { deleteAccessProfile } from "@/lib/user-admin.functions";
 import { useRequestTypes } from "@/components/request-types-tab";
 
 export type AccessProfileBase = "admin" | "padrao" | "restrito";
@@ -77,7 +77,7 @@ async function saveRequestTypes(profileCode: string, requestTypes: Set<string>) 
 
 export function AccessProfileDefinitionsTab() {
   const qc = useQueryClient();
-  const relocateUsers = useServerFn(relocateAccessProfileUsers);
+  const deleteProfile = useServerFn(deleteAccessProfile);
   const { data: definitions = [], isLoading } = useAccessProfileDefinitions();
   const { data: requestTypes = [] } = useRequestTypes();
   const invalidate = () => qc.invalidateQueries({ queryKey: ["access-profile-definitions"] });
@@ -111,8 +111,14 @@ export function AccessProfileDefinitionsTab() {
     onError: (error: Error) => toast.error(error.message),
   });
   const remove = useMutation({
-    mutationFn: async (code: string) => { const { error } = await supabase.from("access_profile_definitions").delete().eq("code", code); if (error?.code === "23503") throw new Error("Este perfil possui usuários vinculados. Realoque-os antes de excluir."); if (error) throw error; },
-    onSuccess: () => { toast.success("Perfil de Acesso excluído"); invalidate(); },
+    mutationFn: async ({ code, destination }: { code: string; destination: string | null }) => deleteProfile({ data: { sourceProfile: code, destinationProfile: destination } }),
+    onSuccess: ({ moved }) => {
+      toast.success(moved > 0 ? `Perfil excluído e ${moved} usuário(s) realocado(s)` : "Perfil de Acesso excluído");
+      invalidate();
+      qc.invalidateQueries({ queryKey: ["admin-users"] });
+      qc.invalidateQueries({ queryKey: ["current-user"] });
+      qc.invalidateQueries({ queryKey: ["custom-access-profiles"] });
+    },
     onError: (error: Error) => toast.error(error.message),
   });
 
@@ -130,8 +136,8 @@ export function AccessProfileDefinitionsTab() {
               <TableRow key={definition.code}>
                 <TableCell className="font-medium">{definition.name}</TableCell>
                 <TableCell>{definition.base_profile === "admin" ? "Todos" : `${definition.permissions.size} selecionados`}</TableCell>
-                <TableCell><Switch checked={definition.active} disabled={definition.is_system || toggle.isPending} onCheckedChange={(active) => toggle.mutate({ code: definition.code, active })} /></TableCell>
-                <TableCell><div className="flex items-center justify-end gap-1"><ProfileDialog requestTypes={requestTypes} definition={definition} title="Editar Perfil de Acesso" saving={update.isPending} onSave={(name, permissions, allowedRequestTypes) => update.mutateAsync({ code: definition.code, name, permissions, allowedRequestTypes })} />{!definition.is_system ? <DeleteProfileDialog definition={definition} definitions={definitions} deleting={remove.isPending} onRelocate={async (destination) => { const result = await relocateUsers({ data: { sourceProfile: definition.code, destinationProfile: destination } }); qc.invalidateQueries({ queryKey: ["admin-users"] }); return result.moved; }} onDelete={() => remove.mutateAsync(definition.code)} /> : null}</div></TableCell>
+                <TableCell><Switch checked={definition.active} disabled={toggle.isPending} onCheckedChange={(active) => toggle.mutate({ code: definition.code, active })} /></TableCell>
+                <TableCell><div className="flex items-center justify-end gap-1"><ProfileDialog requestTypes={requestTypes} definition={definition} title="Editar Perfil de Acesso" saving={update.isPending} onSave={(name, permissions, allowedRequestTypes) => update.mutateAsync({ code: definition.code, name, permissions, allowedRequestTypes })} /><DeleteProfileDialog definition={definition} definitions={definitions} deleting={remove.isPending} onDelete={(destination) => remove.mutateAsync({ code: definition.code, destination })} /></div></TableCell>
               </TableRow>
             ))}</TableBody>
           </Table>
@@ -167,9 +173,16 @@ function ProfileDialog({ definition, requestTypes, title, saving, onSave }: { de
   );
 }
 
-function DeleteProfileDialog({ definition, definitions, deleting, onRelocate, onDelete }: { definition: AccessProfileDefinition; definitions: AccessProfileDefinition[]; deleting: boolean; onRelocate: (destination: string) => Promise<number>; onDelete: () => Promise<unknown> }) {
-  const [open, setOpen] = useState(false); const [destination, setDestination] = useState(""); const [count, setCount] = useState(0); const [moving, setMoving] = useState(false);
-  const inspect = async (next: boolean) => { setOpen(next); if (!next) return; const { count: linked } = await supabase.from("user_access_profiles").select("user_id", { count: "exact", head: true }).eq("profile_definition_id", definition.code).eq("is_customized", false); setCount(linked ?? 0); };
-  const relocate = async () => { if (!destination) return toast.error("Selecione o novo perfil."); setMoving(true); try { const moved = await onRelocate(destination); setCount(0); toast.success(`${moved} usuário(s) realocado(s)`); } catch (error) { toast.error(error instanceof Error ? error.message : "Não foi possível realocar os usuários."); } finally { setMoving(false); } };
-  return <Dialog open={open} onOpenChange={inspect}><DialogTrigger asChild><Button size="compactIcon" variant="ghost" className="text-destructive hover:text-destructive" title="Excluir" aria-label={`Excluir ${definition.name}`}><Trash2 className="h-3.5 w-3.5" /></Button></DialogTrigger><DialogContent><DialogHeader><DialogTitle>Excluir Perfil de Acesso</DialogTitle><DialogDescription>{count ? `${count} usuário(s) estão vinculados a ${definition.name}. Realoque-os antes de excluir.` : `Confirma a exclusão de ${definition.name}?`}</DialogDescription></DialogHeader>{count ? <div className="flex gap-2"><Select value={destination} onValueChange={setDestination}><SelectTrigger className="min-w-0 flex-1"><SelectValue placeholder="Novo perfil" /></SelectTrigger><SelectContent>{definitions.filter((item) => item.active && item.code !== definition.code).map((item) => <SelectItem key={item.code} value={item.code}>{item.name}</SelectItem>)}</SelectContent></Select><Button variant="outline" disabled={moving} onClick={relocate}>Realocar</Button></div> : null}<DialogFooter><Button variant="destructive" disabled={deleting || count > 0} onClick={async () => { try { await onDelete(); setOpen(false); } catch { /* A mensagem é exibida pela alteração. */ } }}>Excluir</Button></DialogFooter></DialogContent></Dialog>;
+function DeleteProfileDialog({ definition, definitions, deleting, onDelete }: { definition: AccessProfileDefinition; definitions: AccessProfileDefinition[]; deleting: boolean; onDelete: (destination: string | null) => Promise<unknown> }) {
+  const [open, setOpen] = useState(false); const [destination, setDestination] = useState(""); const [count, setCount] = useState(0); const [inspecting, setInspecting] = useState(false);
+  const inspect = async (next: boolean) => {
+    setOpen(next);
+    if (!next) { setDestination(""); return; }
+    setInspecting(true);
+    const { count: linked, error } = await supabase.from("user_access_profiles").select("user_id", { count: "exact", head: true }).eq("profile_definition_id", definition.code);
+    setInspecting(false);
+    if (error) { toast.error(error.message); setOpen(false); return; }
+    setCount(linked ?? 0);
+  };
+  return <Dialog open={open} onOpenChange={inspect}><DialogTrigger asChild><Button size="compactIcon" variant="ghost" className="text-destructive hover:text-destructive" title="Excluir" aria-label={`Excluir ${definition.name}`}><Trash2 className="h-3.5 w-3.5" /></Button></DialogTrigger><DialogContent><DialogHeader><DialogTitle>Excluir Perfil de Acesso</DialogTitle><DialogDescription>{count ? `${count} usuário(s) estão vinculados a ${definition.name}. Escolha o novo perfil para realocá-los antes da exclusão.` : `Confirma a exclusão de ${definition.name}?`}</DialogDescription></DialogHeader>{count ? <Select value={destination} onValueChange={setDestination}><SelectTrigger className="w-full"><SelectValue placeholder="Selecione o novo perfil" /></SelectTrigger><SelectContent>{definitions.filter((item) => item.active && item.code !== definition.code).map((item) => <SelectItem key={item.code} value={item.code}>{item.name}</SelectItem>)}</SelectContent></Select> : null}<DialogFooter><Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button><Button variant="destructive" disabled={deleting || inspecting || (count > 0 && !destination)} onClick={async () => { try { await onDelete(count > 0 ? destination : null); setOpen(false); } catch { /* A mensagem é exibida pela alteração. */ } }}>{count > 0 ? "Realocar e excluir" : "Excluir"}</Button></DialogFooter></DialogContent></Dialog>;
 }
