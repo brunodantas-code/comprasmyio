@@ -443,5 +443,5 @@
 - [ ] Validar as junções no computador e celular
 
 ## Aparência de Cargos adicionais
-- [ ] Remover o fundo colorido do campo Cargos adicionais
+- [x] Remover o fundo colorido do campo Cargos adicionais
 - [ ] Manter aparência neutra e validar no computador e celular
