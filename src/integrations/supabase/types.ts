@@ -3685,6 +3685,38 @@ export type Database = {
           },
         ]
       }
+      user_additional_job_titles: {
+        Row: {
+          created_at: string
+          id: string
+          job_title_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          job_title_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          job_title_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_additional_job_titles_job_title_id_fkey"
+            columns: ["job_title_id"]
+            isOneToOne: false
+            referencedRelation: "job_titles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_app_access: {
         Row: {
           app_key: string
@@ -4069,6 +4101,10 @@ export type Database = {
           record_label: string
           record_type: string
         }[]
+      }
+      has_job_title: {
+        Args: { _job_title_id: string; _user_id: string }
+        Returns: boolean
       }
       has_job_title_name: {
         Args: { _name: string; _user_id: string }
