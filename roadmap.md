@@ -482,4 +482,5 @@
 - [ ] Garantir que a regra use apenas o CEO como nível superior
 - [ ] Para o CEO, permitir selecionar um aprovador específico, normalmente o CFO
 - [ ] Aplicar o aprovador escolhido do CEO na geração da cadeia
+- [ ] Não incluir o Conselho de Administração na cadeia de despesas/approvals do CEO
 - [ ] Validar visualmente em desktop e celular
