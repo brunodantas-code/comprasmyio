@@ -765,23 +765,43 @@ export function MyApprovalFlows({ renderEditAction }: { renderEditAction?: EditA
 
 function DualApprovalSettings() {
   const qc = useQueryClient();
+  const { data: me } = useCurrentUser();
   const { data: cfg, isLoading } = useQuery({
     queryKey: ["approval-settings"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("approval_settings")
-        .select("id, dual_approval_enabled, dual_approval_threshold")
+        .select("id, dual_approval_enabled, dual_approval_threshold, dual_approval_job_title_1_id, dual_approval_job_title_2_id")
         .maybeSingle();
       if (error) throw error;
       return data;
     },
   });
+  const { data: jobTitles } = useQuery({
+    queryKey: ["job_titles"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("job_titles")
+        .select("id,name,short_name")
+        .eq("active", true)
+        .order("name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
 
   const [value, setValue] = useState<string>("");
   const current = cfg?.dual_approval_threshold ?? 100000;
+  const isAdmin = Boolean(me?.isAdmin);
+  const availableTitles = (jobTitles ?? []).filter((title) => !isBoardTitle(title));
 
   const save = useMutation({
-    mutationFn: async (patch: { dual_approval_enabled?: boolean; dual_approval_threshold?: number }) => {
+    mutationFn: async (patch: {
+      dual_approval_enabled?: boolean;
+      dual_approval_threshold?: number;
+      dual_approval_job_title_1_id?: string;
+      dual_approval_job_title_2_id?: string;
+    }) => {
       const { error } = await supabase.from("approval_settings").update(patch).eq("id", true);
       if (error) throw error;
     },
@@ -795,9 +815,9 @@ function DualApprovalSettings() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Dupla aprovação (CFO + CEO)</CardTitle>
+        <CardTitle>Aprovação conjunta</CardTitle>
         <CardDescription>
-          Solicitações acima do valor definido exigem aprovação conjunta do CFO e do CEO, em qualquer ordem.
+          Solicitações acima do valor definido exigem a aprovação dos dois cargos, em qualquer ordem. Quem já aprovou na cadeia normal não recebe uma etapa repetida.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -808,6 +828,7 @@ function DualApprovalSettings() {
             <div className="flex items-center gap-2">
               <Switch
                 checked={Boolean(cfg?.dual_approval_enabled)}
+                disabled={!isAdmin || save.isPending}
                 onCheckedChange={(v) => save.mutate({ dual_approval_enabled: v })}
               />
               <Label>Ativa</Label>
@@ -818,11 +839,54 @@ function DualApprovalSettings() {
                 className="w-32"
                 value={value === "" ? String(current) : value}
                 onChange={setValue}
+                disabled={!isAdmin}
               />
+            </div>
+            <div className="min-w-56 space-y-2">
+              <Label>Cargo 1</Label>
+              <Select
+                value={cfg?.dual_approval_job_title_1_id ?? ""}
+                disabled={!isAdmin || save.isPending}
+                onValueChange={(jobTitleId) => {
+                  if (jobTitleId === cfg?.dual_approval_job_title_2_id) {
+                    toast.error("Selecione dois cargos diferentes");
+                    return;
+                  }
+                  save.mutate({ dual_approval_job_title_1_id: jobTitleId });
+                }}
+              >
+                <SelectTrigger><SelectValue placeholder="Selecione o primeiro cargo" /></SelectTrigger>
+                <SelectContent>
+                  {availableTitles.filter((title) => title.id !== cfg?.dual_approval_job_title_2_id).map((title) => (
+                    <SelectItem key={title.id} value={title.id}>{title.name}{title.short_name ? ` (${title.short_name})` : ""}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="min-w-56 space-y-2">
+              <Label>Cargo 2</Label>
+              <Select
+                value={cfg?.dual_approval_job_title_2_id ?? ""}
+                disabled={!isAdmin || save.isPending}
+                onValueChange={(jobTitleId) => {
+                  if (jobTitleId === cfg?.dual_approval_job_title_1_id) {
+                    toast.error("Selecione dois cargos diferentes");
+                    return;
+                  }
+                  save.mutate({ dual_approval_job_title_2_id: jobTitleId });
+                }}
+              >
+                <SelectTrigger><SelectValue placeholder="Selecione o segundo cargo" /></SelectTrigger>
+                <SelectContent>
+                  {availableTitles.filter((title) => title.id !== cfg?.dual_approval_job_title_1_id).map((title) => (
+                    <SelectItem key={title.id} value={title.id}>{title.name}{title.short_name ? ` (${title.short_name})` : ""}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <Button
               onClick={() => save.mutate({ dual_approval_threshold: Number(value === "" ? current : value) || 0 })}
-              disabled={save.isPending}
+              disabled={!isAdmin || save.isPending}
             >
               Salvar
             </Button>
