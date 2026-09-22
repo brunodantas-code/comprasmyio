@@ -439,3 +439,17 @@
 - [x] Remover a linha horizontal quando houver somente um box no nível seguinte
 - [x] Limitar cada linha horizontal ao centro dos conectores extremos, sem ultrapassar os boxes
 - [x] Validar a hierarquia com ramificações simples e múltiplas
+- [x] Fazer os conectores verticais terminarem e iniciarem no limite da linha horizontal
+- [x] Validar as junções no computador e celular
+
+## Aparência de Cargos adicionais
+- [x] Remover o fundo colorido do campo Cargos adicionais
+- [x] Manter aparência neutra e validar no computador e celular
+
+## Correção dos campos parametrizáveis em Perfis de acesso
+- [x] Exibir os quatro controles no mesmo bloco de Tipos de solicitação
+- [x] Aplicar e salvar as permissões por perfil e por usuário
+- [x] Validar perfil Operação no computador e celular
+
+## Esclarecimento das faixas de aprovação
+- [x] Confirmar a posição de “Aprovado por (cargo)” em relação às Faixas 2 e 3
