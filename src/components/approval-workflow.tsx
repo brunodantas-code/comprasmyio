@@ -1370,8 +1370,8 @@ function DefaultChainAdmin() {
       const nextTitle = profilesMap && Array.from(profilesMap.values()).find((p) => p.jobTitle?.id === next)?.jobTitle;
       if (nextTitle && isBoardTitle(nextTitle)) break;
       const people = namesByRole.get(next) ?? [];
-      const titleName = nextTitle?.name;
-      names.push(`${titleName ?? "Cargo"}: ${people.length ? people.join(", ") : "sem usuário no cargo"}`);
+      const relationshipLabel = i === 0 ? "Gestor Direto" : i === 1 ? "Gestor da Área" : nextTitle?.name ?? "C-Level";
+      names.push(`${relationshipLabel}: ${people.length ? people.join(", ") : "sem usuário no cargo"}`);
       cur = next;
     }
     return names;
