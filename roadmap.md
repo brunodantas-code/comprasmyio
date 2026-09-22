@@ -432,5 +432,5 @@
 - [x] Manter o cargo principal como origem das solicitações e somar cargos adicionais aos aprovadores
 - [x] Substituir Função Operacional Adicional por Cargos adicionais no cadastro de usuários
 - [x] Remover a aba Funções Operacionais do Cadastro de Cargos
-- [ ] Migrar Alexandre Ribeiro para o cargo adicional Analista de Supply
+- [x] Migrar Alexandre Ribeiro para o cargo adicional Analista de Supply
 - [ ] Validar acessos, aprovações, computador e celular

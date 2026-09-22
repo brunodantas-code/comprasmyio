@@ -96,7 +96,8 @@ export const setUserAccessProfile = createServerFn({ method: "POST" })
         if (profilePermissionsError) throw profilePermissionsError;
         const menuKeys = definition.base_profile === "admin"
           ? [
-              "solicitacoes", "solicitacoes_minhas", "solicitacoes_novas",
+              "solicitacoes", "solicitacoes_minhas", "solicitacoes_novas", "solicitacoes_centro_custo",
+              "solicitacoes_item_novo", "solicitacoes_alocacao_estoque", "solicitacoes_alocacao_interna",
               "approvals", "approvals_pendentes", "approvals_meus", "approvals_todos", "approvals_consolidado",
               "armazem", "armazem_fabrica", "armazem_estoque_myio", "armazem_expedicao", "armazem_homologacao",
               "armazem_transporte", "armazem_cliente", "armazem_tecnico", "armazem_perdido", "armazem_itens_avariados",
