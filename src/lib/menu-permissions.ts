@@ -7,6 +7,13 @@ export type MenuPermissionGroup = MenuPermissionItem & {
   children: MenuPermissionItem[];
 };
 
+export const REQUEST_FIELD_PERMISSIONS: MenuPermissionItem[] = [
+  { key: "solicitacoes_centro_custo", label: "Centro de Custo" },
+  { key: "solicitacoes_item_novo", label: "Item novo" },
+  { key: "solicitacoes_alocacao_estoque", label: "Alocação: Estoque" },
+  { key: "solicitacoes_alocacao_interna", label: "Alocação: Interna" },
+];
+
 export const MENU_PERMISSION_GROUPS: MenuPermissionGroup[] = [
   {
     key: "solicitacoes",
@@ -72,12 +79,16 @@ export const MENU_PERMISSION_GROUPS: MenuPermissionGroup[] = [
 export const ALL_MENU_PERMISSION_KEYS = MENU_PERMISSION_GROUPS.flatMap((group) => [
   group.key,
   ...group.children.map((child) => child.key),
-]);
+]).concat(REQUEST_FIELD_PERMISSIONS.map((permission) => permission.key));
 
 export const STANDARD_MENU_PERMISSION_KEYS = [
   "solicitacoes",
   "solicitacoes_minhas",
   "solicitacoes_novas",
+  "solicitacoes_centro_custo",
+  "solicitacoes_item_novo",
+  "solicitacoes_alocacao_estoque",
+  "solicitacoes_alocacao_interna",
   "approvals",
   "approvals_pendentes",
   "approvals_meus",

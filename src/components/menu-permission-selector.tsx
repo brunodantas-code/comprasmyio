@@ -1,6 +1,6 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
-import { MENU_PERMISSION_GROUPS, togglePermissionGroup, togglePermissionItem } from "@/lib/menu-permissions";
+import { MENU_PERMISSION_GROUPS, REQUEST_FIELD_PERMISSIONS, togglePermissionGroup, togglePermissionItem } from "@/lib/menu-permissions";
 
 export function MenuPermissionSelector({
   value,
@@ -30,7 +30,7 @@ export function MenuPermissionSelector({
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {visibleGroups.map((group) => (
-        <div key={group.key} className={cn("space-y-2 rounded-md border border-border p-3", group.key === "solicitacoes" && requestTypes.length > 0 && "lg:col-span-2")}>
+        <div key={group.key} className={cn("space-y-2 rounded-md border border-border p-3", group.key === "solicitacoes" && requestTypes.length > 0 && "sm:col-span-2 lg:col-span-3")}>
           <label className="flex items-center gap-2 text-sm font-medium">
             <Checkbox
               checked={value.has(group.key)}
@@ -39,7 +39,7 @@ export function MenuPermissionSelector({
             />
             {group.label}
           </label>
-          <div className={cn(group.key === "solicitacoes" && requestTypes.length > 0 && "grid gap-4 sm:grid-cols-2")}>
+          <div className={cn(group.key === "solicitacoes" && requestTypes.length > 0 && "grid gap-4 sm:grid-cols-2 lg:grid-cols-3")}>
             {group.children.length > 0 ? (
               <div className={cn("grid content-start gap-2 border-l border-border pl-4", group.key === "armazem" && "grid-cols-2")}>
                 {group.children.map((child) => (
@@ -71,6 +71,23 @@ export function MenuPermissionSelector({
                         }}
                       />
                       {type.name}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+            {group.key === "solicitacoes" && requestTypes.length > 0 ? (
+              <div className="space-y-2 border-l border-border pl-4">
+                <p className="text-sm font-medium">Campos da solicitação</p>
+                <div className="grid gap-2">
+                  {REQUEST_FIELD_PERMISSIONS.map((permission) => (
+                    <label key={permission.key} className={cn("flex items-center gap-2 rounded px-1 py-0.5 text-sm text-muted-foreground", highlightedKeys.has(permission.key) && "bg-primary/15 font-medium text-foreground")}>
+                      <Checkbox
+                        checked={value.has("solicitacoes_novas") && value.has(permission.key)}
+                        disabled={disabled || !value.has("solicitacoes_novas")}
+                        onCheckedChange={(checked) => onChange(togglePermissionItem(value, group, permission.key, checked === true))}
+                      />
+                      {permission.label}
                     </label>
                   ))}
                 </div>
