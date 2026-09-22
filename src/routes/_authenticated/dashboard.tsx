@@ -4426,10 +4426,7 @@ function UsersAdmin() {
                             <div className="truncate font-medium">{u.full_name || "—"}</div>
                             <div className="truncate text-xs text-muted-foreground">{u.email}</div>
                           </div>
-                          <div className="flex flex-wrap justify-end gap-1">
-                            <Badge variant="outline">Perfil: {u.accessProfileName}</Badge>
-                            <Badge variant="outline">Cargo: {u.jobTitleName ?? "Sem cargo"}</Badge>
-                            {u.additionalJobTitles.map((title) => <Badge key={title.id} variant="outline">Cargo adicional: {title.name}</Badge>)}
+                          <div className="flex justify-end">
                             {u.id !== currentUser?.id ? (
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
