@@ -111,7 +111,7 @@ export function AccessProfileDefinitionsTab() {
     onError: (error: Error) => toast.error(error.message),
   });
   const remove = useMutation({
-    mutationFn: async ({ code, destination }: { code: string; destination: string | null }) => deleteProfile({ data: { sourceProfile: code, destinationProfile: destination } }),
+    mutationFn: async ({ code, reallocations }: { code: string; reallocations: Array<{ userId: string; destinationProfile: string }> }) => deleteProfile({ data: { sourceProfile: code, reallocations } }),
     onSuccess: ({ moved }) => {
       toast.success(moved > 0 ? `Perfil excluído e ${moved} usuário(s) realocado(s)` : "Perfil de Acesso excluído");
       invalidate();
@@ -137,7 +137,7 @@ export function AccessProfileDefinitionsTab() {
                 <TableCell className="font-medium">{definition.name}</TableCell>
                 <TableCell>{definition.base_profile === "admin" ? "Todos" : `${definition.permissions.size} selecionados`}</TableCell>
                 <TableCell><Switch checked={definition.active} disabled={toggle.isPending} onCheckedChange={(active) => toggle.mutate({ code: definition.code, active })} /></TableCell>
-                <TableCell><div className="flex items-center justify-end gap-1"><ProfileDialog requestTypes={requestTypes} definition={definition} title="Editar Perfil de Acesso" saving={update.isPending} onSave={(name, permissions, allowedRequestTypes) => update.mutateAsync({ code: definition.code, name, permissions, allowedRequestTypes })} /><DeleteProfileDialog definition={definition} definitions={definitions} deleting={remove.isPending} onDelete={(destination) => remove.mutateAsync({ code: definition.code, destination })} /></div></TableCell>
+                <TableCell><div className="flex items-center justify-end gap-1"><ProfileDialog requestTypes={requestTypes} definition={definition} title="Editar Perfil de Acesso" saving={update.isPending} onSave={(name, permissions, allowedRequestTypes) => update.mutateAsync({ code: definition.code, name, permissions, allowedRequestTypes })} /><DeleteProfileDialog definition={definition} definitions={definitions} deleting={remove.isPending} onDelete={(reallocations) => remove.mutateAsync({ code: definition.code, reallocations })} /></div></TableCell>
               </TableRow>
             ))}</TableBody>
           </Table>
@@ -173,16 +173,24 @@ function ProfileDialog({ definition, requestTypes, title, saving, onSave }: { de
   );
 }
 
-function DeleteProfileDialog({ definition, definitions, deleting, onDelete }: { definition: AccessProfileDefinition; definitions: AccessProfileDefinition[]; deleting: boolean; onDelete: (destination: string | null) => Promise<unknown> }) {
-  const [open, setOpen] = useState(false); const [destination, setDestination] = useState(""); const [count, setCount] = useState(0); const [inspecting, setInspecting] = useState(false);
+type LinkedProfileUser = { id: string; name: string; email: string };
+
+function DeleteProfileDialog({ definition, definitions, deleting, onDelete }: { definition: AccessProfileDefinition; definitions: AccessProfileDefinition[]; deleting: boolean; onDelete: (reallocations: Array<{ userId: string; destinationProfile: string }>) => Promise<unknown> }) {
+  const [open, setOpen] = useState(false); const [users, setUsers] = useState<LinkedProfileUser[]>([]); const [destinations, setDestinations] = useState<Record<string, string>>({}); const [inspecting, setInspecting] = useState(false);
   const inspect = async (next: boolean) => {
     setOpen(next);
-    if (!next) { setDestination(""); return; }
+    if (!next) { setDestinations({}); setUsers([]); return; }
     setInspecting(true);
-    const { count: linked, error } = await supabase.from("user_access_profiles").select("user_id", { count: "exact", head: true }).eq("profile_definition_id", definition.code);
+    const { data: links, error } = await supabase.from("user_access_profiles").select("user_id").eq("profile_definition_id", definition.code);
+    const userIds = (links ?? []).map((link) => link.user_id);
+    const { data: profiles, error: profilesError } = userIds.length
+      ? await supabase.from("profiles").select("id,full_name,email").in("id", userIds).order("full_name")
+      : { data: [], error: null };
     setInspecting(false);
-    if (error) { toast.error(error.message); setOpen(false); return; }
-    setCount(linked ?? 0);
+    if (error || profilesError) { toast.error(error?.message ?? profilesError?.message ?? "Não foi possível carregar os usuários."); setOpen(false); return; }
+    setUsers((profiles ?? []).map((profile) => ({ id: profile.id, name: profile.full_name || profile.email || "Usuário sem nome", email: profile.email || "" })));
   };
-  return <Dialog open={open} onOpenChange={inspect}><DialogTrigger asChild><Button size="compactIcon" variant="ghost" className="text-destructive hover:text-destructive" title="Excluir" aria-label={`Excluir ${definition.name}`}><Trash2 className="h-3.5 w-3.5" /></Button></DialogTrigger><DialogContent><DialogHeader><DialogTitle>Excluir Perfil de Acesso</DialogTitle><DialogDescription>{count ? `${count} usuário(s) estão vinculados a ${definition.name}. Escolha o novo perfil para realocá-los antes da exclusão.` : `Confirma a exclusão de ${definition.name}?`}</DialogDescription></DialogHeader>{count ? <Select value={destination} onValueChange={setDestination}><SelectTrigger className="w-full"><SelectValue placeholder="Selecione o novo perfil" /></SelectTrigger><SelectContent>{definitions.filter((item) => item.active && item.code !== definition.code).map((item) => <SelectItem key={item.code} value={item.code}>{item.name}</SelectItem>)}</SelectContent></Select> : null}<DialogFooter><Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button><Button variant="destructive" disabled={deleting || inspecting || (count > 0 && !destination)} onClick={async () => { try { await onDelete(count > 0 ? destination : null); setOpen(false); } catch { /* A mensagem é exibida pela alteração. */ } }}>{count > 0 ? "Realocar e excluir" : "Excluir"}</Button></DialogFooter></DialogContent></Dialog>;
+  const availableDestinations = definitions.filter((item) => item.active && item.code !== definition.code);
+  const allAssigned = users.every((user) => Boolean(destinations[user.id]));
+  return <Dialog open={open} onOpenChange={inspect}><DialogTrigger asChild><Button size="compactIcon" variant="ghost" className="text-destructive hover:text-destructive" title="Excluir" aria-label={`Excluir ${definition.name}`}><Trash2 className="h-3.5 w-3.5" /></Button></DialogTrigger><DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto"><DialogHeader><DialogTitle>Excluir Perfil de Acesso</DialogTitle><DialogDescription>{users.length ? `${users.length} usuário(s) estão vinculados a ${definition.name}. Escolha individualmente o novo perfil de cada usuário.` : `Confirma a exclusão de ${definition.name}?`}</DialogDescription></DialogHeader>{inspecting ? <p className="text-sm text-muted-foreground">Carregando usuários...</p> : users.length ? <div className="space-y-3">{users.map((user) => <div key={user.id} className="grid gap-2 border-b pb-3 sm:grid-cols-[minmax(0,1fr)_minmax(220px,1fr)] sm:items-center"><div className="min-w-0"><p className="truncate text-sm font-medium">{user.name}</p>{user.email && user.email !== user.name ? <p className="truncate text-xs text-muted-foreground">{user.email}</p> : null}</div><Select value={destinations[user.id] ?? ""} onValueChange={(value) => setDestinations((current) => ({ ...current, [user.id]: value }))}><SelectTrigger className="w-full"><SelectValue placeholder="Selecione o novo perfil" /></SelectTrigger><SelectContent>{availableDestinations.map((item) => <SelectItem key={item.code} value={item.code}>{item.name}</SelectItem>)}</SelectContent></Select></div>)}</div> : null}<DialogFooter><Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button><Button variant="destructive" disabled={deleting || inspecting || !allAssigned} onClick={async () => { try { await onDelete(users.map((user) => ({ userId: user.id, destinationProfile: destinations[user.id] }))); setOpen(false); } catch { /* A mensagem é exibida pela alteração. */ } }}>{users.length ? "Realocar e excluir" : "Excluir"}</Button></DialogFooter></DialogContent></Dialog>;
 }

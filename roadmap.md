@@ -484,3 +484,14 @@
 - [x] Aplicar o aprovador escolhido do CEO na geração da cadeia
 - [x] Não incluir o Conselho de Administração na cadeia de despesas/approvals do CEO
 - [x] Validar visualmente em desktop e celular
+
+## Remoção do Conselho das aprovações
+- [x] Remover o Conselho de Administração como superior na hierarquia
+- [x] Excluir o Conselho das sequências atuais e do organograma de aprovação
+- [x] Validar a alteração visualmente em computador e celular
+
+## Realocação individual na exclusão de perfil
+- [x] Listar individualmente os usuários vinculados ao perfil que será excluído
+- [x] Permitir selecionar um perfil de destino diferente para cada usuário
+- [x] Executar todas as realocações e a exclusão do perfil em uma única operação segura
+- [x] Validar o fluxo em computador e celular e mostrar a prévia

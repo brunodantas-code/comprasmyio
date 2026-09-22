@@ -4049,6 +4049,10 @@ export type Database = {
         Args: { _destination_profile?: string; _source_profile: string }
         Returns: number
       }
+      admin_delete_access_profile_individual: {
+        Args: { _reallocations?: Json; _source_profile: string }
+        Returns: number
+      }
       admin_edit_purchase_approval: {
         Args: { _changes: Json; _items: Json; _order_id: string }
         Returns: undefined
