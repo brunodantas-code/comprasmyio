@@ -434,8 +434,8 @@
 - [x] Remover a aba Funções Operacionais do Cadastro de Cargos
 - [x] Migrar Alexandre Ribeiro para o cargo adicional Analista de Supply
 - [x] Validar acessos, aprovações, computador e celular
-- [ ] Exibir no organograma os colaboradores que exercem cargos principais ou adicionais
-- [ ] Validar nomes dos ocupantes no organograma em computador e celular
+- [x] Exibir no organograma os colaboradores que exercem cargos principais ou adicionais
+- [x] Validar nomes dos ocupantes no organograma em computador e celular
 
 ## Conectores da hierarquia de aprovação
 - [x] Remover a linha horizontal quando houver somente um box no nível seguinte
@@ -443,8 +443,8 @@
 - [x] Validar a hierarquia com ramificações simples e múltiplas
 - [x] Fazer os conectores verticais terminarem e iniciarem no limite da linha horizontal
 - [x] Validar as junções no computador e celular
-- [ ] Corrigir a sobreposição ainda visível nas junções dos segmentos horizontais
-- [ ] Gerar e mostrar uma nova prévia ampliada sem conectores ultrapassando a linha horizontal
+- [x] Corrigir a sobreposição ainda visível nas junções dos segmentos horizontais
+- [x] Gerar e mostrar uma nova prévia ampliada sem conectores ultrapassando a linha horizontal
 
 ## Aparência de Cargos adicionais
 - [x] Remover o fundo colorido do campo Cargos adicionais
@@ -454,15 +454,15 @@
 - [x] Exibir os quatro controles no mesmo bloco de Tipos de solicitação
 - [x] Aplicar e salvar as permissões por perfil e por usuário
 - [x] Validar perfil Operação no computador e celular
-- [ ] Confirmar e corrigir a ausência dos quatro controles no perfil individual de Alexandre
+- [x] Confirmar e corrigir a ausência dos quatro controles no perfil individual de Alexandre
 - [x] Mostrar a prévia corrigida ao usuário antes de declarar conclusão
 - [x] Exibir no chat as prévias dos controles e dos conectores para conferência
-- [ ] Incluir controles independentes para Alocação: Projeto e Alocação: Cliente
-- [ ] Ocultar no novo pedido as alocações desmarcadas no perfil
+- [x] Incluir controles independentes para Alocação: Projeto e Alocação: Cliente
+- [x] Ocultar no novo pedido as alocações desmarcadas no perfil
 
 ## Exclusão de perfis de acesso
-- [ ] Verificar por que alguns perfis não exibem o botão de exclusão
-- [ ] Ajustar a regra conforme a proteção necessária dos perfis em uso ou do sistema
+- [x] Verificar por que alguns perfis não exibem o botão de exclusão
+- [x] Ajustar a regra conforme a proteção necessária dos perfis em uso ou do sistema
 
 ## Esclarecimento das faixas de aprovação
 - [x] Confirmar a posição de “Aprovado por (cargo)” em relação às Faixas 2 e 3
