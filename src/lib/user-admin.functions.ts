@@ -3,7 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const accessProfileSchema = z.string().min(1).max(80).regex(/^[a-z0-9_]+$/);
-const operationalFunctionSchema = z.string().uuid().nullable();
+const additionalJobTitlesSchema = z.array(z.string().uuid()).max(20);
 
 async function assertAdmin(context: { supabase: any; userId: string }) {
   const { data, error } = await context.supabase
@@ -96,7 +96,8 @@ export const setUserAccessProfile = createServerFn({ method: "POST" })
         if (profilePermissionsError) throw profilePermissionsError;
         const menuKeys = definition.base_profile === "admin"
           ? [
-              "solicitacoes", "solicitacoes_minhas", "solicitacoes_novas",
+              "solicitacoes", "solicitacoes_minhas", "solicitacoes_novas", "solicitacoes_centro_custo",
+              "solicitacoes_item_novo", "solicitacoes_alocacao_estoque", "solicitacoes_alocacao_interna",
               "approvals", "approvals_pendentes", "approvals_meus", "approvals_todos", "approvals_consolidado",
               "armazem", "armazem_fabrica", "armazem_estoque_myio", "armazem_expedicao", "armazem_homologacao",
               "armazem_transporte", "armazem_cliente", "armazem_tecnico", "armazem_perdido", "armazem_itens_avariados",
@@ -145,11 +146,11 @@ export const setUserAccessProfile = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-export const setUserOperationalFunction = createServerFn({ method: "POST" })
+export const setUserAdditionalJobTitles = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => z.object({
     userId: z.string().uuid(),
-    operationalFunction: operationalFunctionSchema,
+    jobTitleIds: additionalJobTitlesSchema,
   }).parse(input))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
@@ -157,32 +158,29 @@ export const setUserOperationalFunction = createServerFn({ method: "POST" })
 
     const { data: target, error: targetError } = await supabaseAdmin
       .from("profiles")
-      .select("id, deleted_at")
+      .select("id, deleted_at, job_title_id")
       .eq("id", data.userId)
       .maybeSingle();
     if (targetError || !target || target.deleted_at) throw new Error("Usuário não encontrado ou excluído.");
 
-    let functionCode: string | null = null;
-    if (data.operationalFunction) {
-      const { data: operationalFunction, error: functionError } = await supabaseAdmin
-        .from("operational_functions")
-        .select("id,code,active")
-        .eq("id", data.operationalFunction)
-        .maybeSingle();
-      if (functionError || !operationalFunction?.active) throw new Error("Função operacional inválida ou inativa.");
-      functionCode = operationalFunction.code;
-      const { error } = await supabaseAdmin.from("user_operational_functions").upsert({
-        user_id: data.userId,
-        operational_function_id: operationalFunction.id,
-        updated_at: new Date().toISOString(),
-      }, { onConflict: "user_id" });
-      if (error) throw error;
-    } else {
-      const { error } = await supabaseAdmin.from("user_operational_functions").delete().eq("user_id", data.userId);
-      if (error) throw error;
+    const jobTitleIds = [...new Set(data.jobTitleIds)].filter((id) => id !== target.job_title_id);
+    if (jobTitleIds.length > 0) {
+      const { data: titles, error: titlesError } = await supabaseAdmin.from("job_titles").select("id,name,active").in("id", jobTitleIds);
+      if (titlesError) throw titlesError;
+      if ((titles ?? []).length !== jobTitleIds.length || titles?.some((title) => !title.active)) throw new Error("Um dos cargos adicionais é inválido ou está inativo.");
+    }
+    const { error: deleteError } = await supabaseAdmin.from("user_additional_job_titles").delete().eq("user_id", data.userId);
+    if (deleteError) throw deleteError;
+    if (jobTitleIds.length > 0) {
+      const { error: insertError } = await supabaseAdmin.from("user_additional_job_titles").insert(jobTitleIds.map((jobTitleId) => ({ user_id: data.userId, job_title_id: jobTitleId })));
+      if (insertError) throw insertError;
     }
 
-    if (functionCode === "supply") {
+    const { data: supplyTitles, error: supplyError } = jobTitleIds.length > 0
+      ? await supabaseAdmin.from("job_titles").select("id").in("id", jobTitleIds).ilike("name", "%supply%")
+      : { data: [], error: null };
+    if (supplyError) throw supplyError;
+    if ((supplyTitles ?? []).length > 0) {
       const { error } = await supabaseAdmin.from("user_roles").upsert({ user_id: data.userId, role: "comprador" }, { onConflict: "user_id,role" });
       if (error) throw error;
     } else {

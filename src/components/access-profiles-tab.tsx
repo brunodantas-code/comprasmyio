@@ -30,22 +30,22 @@ export function AccessProfilesTab() {
   const { data, isLoading } = useQuery({
     queryKey: ["custom-access-profiles", activeRequestTypeCodes],
     queryFn: async () => {
-      const [{ data: profiles, error: profilesError }, { data: access, error: accessError }, { data: permissions, error: permissionsError }, { data: individualTypes, error: individualTypesError }, { data: operationalFunctions, error: operationalError }] = await Promise.all([
+      const [{ data: profiles, error: profilesError }, { data: access, error: accessError }, { data: permissions, error: permissionsError }, { data: individualTypes, error: individualTypesError }, { data: additionalTitles, error: additionalTitlesError }] = await Promise.all([
         supabase.from("profiles").select("id, full_name, email").order("full_name"),
         supabase.from("user_access_profiles").select("user_id,is_customized,access_profile_definitions(name,base_profile,access_profile_permissions(menu_key,allowed),access_profile_request_types(request_type_code))"),
         supabase.from("user_menu_permissions").select("user_id,menu_key,allowed"),
         supabase.from("user_request_type_permissions").select("user_id,request_type_code"),
-        supabase.from("user_operational_functions").select("user_id,operational_functions(code,active)"),
+        supabase.from("user_additional_job_titles").select("user_id,job_titles(name,active)"),
       ]);
       if (profilesError) throw profilesError;
       if (accessError) throw accessError;
       if (permissionsError) throw permissionsError;
       if (individualTypesError) throw individualTypesError;
-      if (operationalError) throw operationalError;
+      if (additionalTitlesError) throw additionalTitlesError;
       const accessByUser = new Map((access ?? []).map((item) => [item.user_id, item]));
-      const supplyUserIds = new Set((operationalFunctions ?? []).filter((item) => {
-        const operational = item.operational_functions as { code?: string; active?: boolean } | null;
-        return operational?.code === "supply" && operational.active;
+      const supplyUserIds = new Set((additionalTitles ?? []).filter((item) => {
+        const title = item.job_titles as { name?: string; active?: boolean } | null;
+        return title?.name?.toLowerCase().includes("supply") && title.active;
       }).map((item) => item.user_id));
       return (profiles ?? []).filter((profile) => accessByUser.has(profile.id)).map((profile) => {
         const accessRecord = accessByUser.get(profile.id);

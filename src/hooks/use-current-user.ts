@@ -39,17 +39,17 @@ export function useCurrentUser() {
       const user = userData.user;
       if (!user) return null;
 
-      const [{ data: profile }, { data: rolesData }, { data: operationalData }, { data: accessData }, { data: menuData }, { data: individualRequestTypes }] = await Promise.all([
+      const [{ data: profile }, { data: rolesData }, { data: additionalTitleData }, { data: accessData }, { data: menuData }, { data: individualRequestTypes }] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
         supabase.from("user_roles").select("role").eq("user_id", user.id),
-        supabase.from("user_operational_functions").select("operational_functions(code,active)").eq("user_id", user.id).maybeSingle(),
+        supabase.from("user_additional_job_titles").select("job_titles(id,name,active)").eq("user_id", user.id),
         supabase.from("user_access_profiles").select("profile,profile_definition_id,is_customized,access_profile_definitions(name,base_profile,access_profile_permissions(menu_key,allowed),access_profile_request_types(request_type_code))").eq("user_id", user.id).maybeSingle(),
         supabase.from("user_menu_permissions").select("menu_key, allowed").eq("user_id", user.id),
         supabase.from("user_request_type_permissions").select("request_type_code").eq("user_id", user.id),
       ]);
 
       const roles = (rolesData ?? []).map((r) => r.role as AppRole);
-      const operationalFunction = operationalData?.operational_functions as { code?: string; active?: boolean } | null | undefined;
+      const additionalJobTitles = (additionalTitleData ?? []).map((item) => item.job_titles as { id: string; name: string; active: boolean } | null).filter((item): item is { id: string; name: string; active: boolean } => Boolean(item?.active));
       let jobTitle: { id: string; name: string } | null = null;
       if (profile?.job_title_id) {
         const { data: title } = await supabase
@@ -60,6 +60,7 @@ export function useCurrentUser() {
         jobTitle = title ?? null;
       }
       const titleKey = normalizeTitle(jobTitle?.name);
+      const titleKeys = [titleKey, ...additionalJobTitles.map((title) => normalizeTitle(title.name))];
       const definition = accessData?.access_profile_definitions as { name: string; base_profile: AccessProfileBase; access_profile_permissions?: Array<{ menu_key: string; allowed: boolean }>; access_profile_request_types?: Array<{ request_type_code: string }> } | null | undefined;
       const isCustomized = accessData?.is_customized ?? true;
       const accessProfile = (isCustomized ? "customizado" : accessData?.profile_definition_id ?? "restrito") as AccessProfile;
@@ -68,7 +69,7 @@ export function useCurrentUser() {
       const profileMenus = new Set((definition?.access_profile_permissions ?? []).filter((item) => item.allowed).map((item) => item.menu_key));
       const individualTypes = new Set((individualRequestTypes ?? []).map((item) => item.request_type_code));
       const profileTypes = new Set((definition?.access_profile_request_types ?? []).map((item) => item.request_type_code));
-      const isSupply = Boolean((operationalFunction?.active && operationalFunction.code === "supply") || roles.includes("comprador") || titleKey.includes("supply"));
+      const isSupply = titleKeys.some((title) => title.includes("supply"));
       const canAccess = (menu: MenuKey) => {
         if (accessProfileBase === "admin") return true;
         if (menu === "usuarios" || menu.startsWith("usuarios_")) return false;
@@ -82,6 +83,7 @@ export function useCurrentUser() {
         full_name: profile?.full_name ?? "",
         roles,
         jobTitle,
+        additionalJobTitles,
         accessProfile,
         accessProfileBase,
         accessProfileName: isCustomized ? "Customizado" : definition?.name ?? "Restrito",
@@ -89,10 +91,10 @@ export function useCurrentUser() {
         canRequestType,
         isAdmin: accessProfileBase === "admin",
         isComprador: isSupply,
-        isFabrica: titleKey === "fabrica",
-        isEstoquista: titleKey === "estoquista",
-        isFinanceiro: titleKey === "financeiro",
-        canCreateProjects: accessProfileBase === "admin" || ["ceo", "coo", "cfo"].includes(titleKey),
+        isFabrica: titleKeys.includes("fabrica"),
+        isEstoquista: titleKeys.includes("estoquista"),
+        isFinanceiro: titleKeys.includes("financeiro"),
+        canCreateProjects: accessProfileBase === "admin" || titleKeys.some((title) => ["ceo", "coo", "cfo"].includes(title)),
       };
     },
   });

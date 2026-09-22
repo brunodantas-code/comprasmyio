@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { MyioLogo } from "@/components/myio-logo";
 import { supabase } from "@/integrations/supabase/client";
 import { exportDatabaseBackup } from "@/lib/backup.functions";
-import { decideUserDeletion, requestUserDeletion, setUserAccessProfile, setUserOperationalFunction } from "@/lib/user-admin.functions";
+import { decideUserDeletion, requestUserDeletion, setUserAccessProfile, setUserAdditionalJobTitles } from "@/lib/user-admin.functions";
 import { lookupLinkPrice } from "@/lib/price-lookup.functions";
 import { getProjectBudgetSummaries, type ProjectBudgetSummary } from "@/lib/project-budget.functions";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -34,7 +34,6 @@ import { MyioOrdersTab, NewMyioOrderDialog } from "@/components/myio-orders-tab"
 import { ClientsTab, useClients, useClientUnits } from "@/components/clients-tab";
 import { CostCentersTab, useCostCenters } from "@/components/cost-centers-tab";
 import { JobTitlesTab, useJobTitles } from "@/components/job-titles-tab";
-import { useOperationalFunctions } from "@/components/operational-functions-tab";
 import { RemindersTab } from "@/components/reminders-tab";
 import { AdditionalStepTypesTab } from "@/components/additional-step-types-tab";
 import { RequestTypesTab, requestTypeModel, requestTypeName, useRequestTypes, type RequestTypeRecord } from "@/components/request-types-tab";
@@ -4112,22 +4111,65 @@ function ApprovalLimitInput({ value, onSave }: { value: number; onSave: (v: numb
   );
 }
 
+function AdditionalJobTitlesSelect({ titles, value, onChange, disabled = false }: {
+  titles: Array<{ id: string; name: string }>;
+  value: string[];
+  onChange: (value: string[]) => void;
+  disabled?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const selected = new Set(value);
+  const label = value.length === 0 ? "Nenhum" : value.length === 1 ? titles.find((title) => title.id === value[0])?.name ?? "1 cargo" : `${value.length} cargos`;
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button type="button" variant="outline" className="h-8 w-full min-w-0 justify-start truncate px-2 text-xs font-normal" disabled={disabled}>
+          {label}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-72 p-0">
+        <Command>
+          <CommandInput placeholder="Buscar cargo" />
+          <CommandList>
+            <CommandEmpty>Nenhum cargo encontrado.</CommandEmpty>
+            <CommandGroup>
+              {titles.map((title) => {
+                const checked = selected.has(title.id);
+                return (
+                  <CommandItem
+                    key={title.id}
+                    value={title.name}
+                    onSelect={() => onChange(checked ? value.filter((id) => id !== title.id) : [...value, title.id])}
+                  >
+                    <Checkbox checked={checked} aria-label={`Selecionar ${title.name}`} />
+                    <span>{title.name}</span>
+                  </CommandItem>
+                );
+              })}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 function UsersAdmin() {
   const qc = useQueryClient();
   const { data: currentUser } = useCurrentUser();
   const setAccessProfileFn = useServerFn(setUserAccessProfile);
-  const setOperationalFunctionFn = useServerFn(setUserOperationalFunction);
+  const setAdditionalJobTitlesFn = useServerFn(setUserAdditionalJobTitles);
   const requestDeletionFn = useServerFn(requestUserDeletion);
   const decideDeletionFn = useServerFn(decideUserDeletion);
   const { data, isLoading } = useQuery({
     queryKey: ["admin-users"],
     queryFn: async () => {
-      const [{ data: profiles, error: pe }, { data: accessProfiles, error: ae }, { data: menuPermissions, error: me }, { data: titles, error: te }, { data: operationalLinks, error: oe }] = await Promise.all([
+      const [{ data: profiles, error: pe }, { data: accessProfiles, error: ae }, { data: menuPermissions, error: me }, { data: titles, error: te }, { data: additionalTitleLinks, error: oe }] = await Promise.all([
         supabase.from("profiles").select("*").is("deleted_at", null).order("created_at", { ascending: false }),
         supabase.from("user_access_profiles").select("user_id, profile, profile_definition_id, is_customized, access_profile_definitions(name,base_profile)"),
         supabase.from("user_menu_permissions").select("user_id, allowed").eq("allowed", true),
         supabase.from("job_titles").select("id,name").eq("active", true).order("name"),
-        supabase.from("user_operational_functions").select("user_id,operational_function_id,operational_functions(id,code,name,active)"),
+        supabase.from("user_additional_job_titles").select("user_id,job_title_id,job_titles(id,name,active)"),
       ]);
       if (pe) throw pe;
       if (ae) throw ae;
@@ -4137,7 +4179,14 @@ function UsersAdmin() {
       const titleById = new Map((titles ?? []).map((title) => [title.id, title.name]));
       const accessByUser = new Map((accessProfiles ?? []).map((item) => [item.user_id, item]));
       const configuredUsers = new Set((menuPermissions ?? []).map((item) => item.user_id));
-      const operationalByUser = new Map((operationalLinks ?? []).map((item) => [item.user_id, item]));
+      const additionalByUser = new Map<string, Array<{ id: string; name: string; active: boolean }>>();
+      for (const item of additionalTitleLinks ?? []) {
+        const title = item.job_titles as { id: string; name: string; active: boolean } | null;
+        if (!title) continue;
+        const current = additionalByUser.get(item.user_id) ?? [];
+        current.push(title);
+        additionalByUser.set(item.user_id, current);
+      }
       return (profiles ?? []).map((p) => ({
         ...p,
         jobTitleId: p.job_title_id,
@@ -4146,14 +4195,17 @@ function UsersAdmin() {
         accessProfileBase: accessByUser.get(p.id)?.profile ?? "restrito",
         accessProfileName: accessByUser.get(p.id)?.is_customized ? "Customizado" : (accessByUser.get(p.id)?.access_profile_definitions as { name?: string } | null)?.name ?? "Restrito",
         hasConfiguredAccess: configuredUsers.has(p.id),
-        operationalFunction: operationalByUser.get(p.id)?.operational_function_id ?? "none",
-        operationalFunctionRecord: operationalByUser.get(p.id)?.operational_functions as { id: string; code: string; name: string; active: boolean } | null | undefined,
+        additionalJobTitles: additionalByUser.get(p.id) ?? [],
       }));
     },
   });
 
   const setJobTitle = useMutation({
     mutationFn: async ({ userId, jobTitleId }: { userId: string; jobTitleId: string | null }) => {
+      if (jobTitleId) {
+        const { error: cleanupError } = await supabase.from("user_additional_job_titles").delete().eq("user_id", userId).eq("job_title_id", jobTitleId);
+        if (cleanupError) throw cleanupError;
+      }
       const { error } = await supabase.from("profiles").update({ job_title_id: jobTitleId }).eq("id", userId);
       if (error) throw error;
     },
@@ -4173,12 +4225,12 @@ function UsersAdmin() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const setOperationalFunction = useMutation({
-    mutationFn: async ({ userId, operationalFunction }: { userId: string; operationalFunction: string | null }) => {
-      await setOperationalFunctionFn({ data: { userId, operationalFunction } });
+  const setAdditionalJobTitles = useMutation({
+    mutationFn: async ({ userId, jobTitleIds }: { userId: string; jobTitleIds: string[] }) => {
+      await setAdditionalJobTitlesFn({ data: { userId, jobTitleIds } });
     },
     onSuccess: () => {
-      toast.success("Função operacional atualizada");
+      toast.success("Cargos adicionais atualizados");
       qc.invalidateQueries({ queryKey: ["admin-users"] });
       qc.invalidateQueries({ queryKey: ["current-user"] });
       qc.invalidateQueries({ queryKey: ["pending-actions"] });
@@ -4230,7 +4282,6 @@ function UsersAdmin() {
   });
 
   const { data: jobTitles } = useJobTitles();
-  const { data: operationalFunctions = [] } = useOperationalFunctions();
   const { data: accessProfileDefinitions = [] } = useAccessProfileDefinitions();
 
   const { data: roleHierarchy } = useQuery({
@@ -4284,7 +4335,7 @@ function UsersAdmin() {
     <Card>
       <CardHeader>
         <CardTitle>Usuários cadastrados</CardTitle>
-        <CardDescription>Defina separadamente o cargo da cadeia de aprovação, a função operacional adicional e o perfil de acesso.</CardDescription>
+        <CardDescription>Defina o cargo principal da cadeia, cargos adicionais e o perfil de acesso.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
@@ -4395,7 +4446,7 @@ function UsersAdmin() {
                           <div className="flex flex-wrap justify-end gap-1">
                             <Badge variant="outline">Perfil: {u.accessProfileName}</Badge>
                             <Badge variant="outline">Cargo: {u.jobTitleName ?? "Sem cargo"}</Badge>
-                            {u.operationalFunctionRecord ? <Badge variant="outline">Função: {u.operationalFunctionRecord.name}</Badge> : null}
+                            {u.additionalJobTitles.map((title) => <Badge key={title.id} variant="outline">Cargo adicional: {title.name}</Badge>)}
                             {u.id !== currentUser?.id ? (
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
@@ -4432,19 +4483,13 @@ function UsersAdmin() {
                             </Select>
                           </div>
                           <div className="flex flex-col gap-1">
-                            <span className="text-[10px] font-medium text-muted-foreground">Função operacional adicional</span>
-                            <Select
-                              value={u.operationalFunction}
-                              onValueChange={(value) => setOperationalFunction.mutate({ userId: u.id, operationalFunction: value === "none" ? null : value })}
-                              disabled={setOperationalFunction.isPending}
-                            >
-                              <SelectTrigger className="h-8 w-full text-xs"><SelectValue /></SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="none">Nenhuma</SelectItem>
-                                {operationalFunctions.map((item) => <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>)}
-                                {u.operationalFunctionRecord && !u.operationalFunctionRecord.active ? <SelectItem value={u.operationalFunctionRecord.id} disabled>{u.operationalFunctionRecord.name} (inativa)</SelectItem> : null}
-                              </SelectContent>
-                            </Select>
+                            <span className="text-[10px] font-medium text-muted-foreground">Cargos adicionais</span>
+                            <AdditionalJobTitlesSelect
+                              titles={(jobTitles ?? []).filter((title) => title.id !== u.jobTitleId)}
+                              value={u.additionalJobTitles.map((title) => title.id)}
+                              disabled={setAdditionalJobTitles.isPending}
+                              onChange={(jobTitleIds) => setAdditionalJobTitles.mutate({ userId: u.id, jobTitleIds })}
+                            />
                           </div>
                           <div className="flex flex-col gap-1">
                             <span className="text-[10px] font-medium text-muted-foreground">Perfil de acesso</span>
