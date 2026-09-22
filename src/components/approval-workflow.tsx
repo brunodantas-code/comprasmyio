@@ -1550,13 +1550,19 @@ function OrgChartAdmin() {
   const { data: rows, isLoading } = useQuery({
     queryKey: ["aw-org-chart"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id, full_name, email, approval_limit, job_title_id")
-        .is("deleted_at", null)
-        .order("full_name");
-      if (error) throw error;
-      return data ?? [];
+      const [{ data: profilesData, error: profilesError }, { data: additionalTitles, error: additionalTitlesError }] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("id, full_name, email, approval_limit, job_title_id")
+          .is("deleted_at", null)
+          .order("full_name"),
+        supabase
+          .from("user_additional_job_titles")
+          .select("user_id, job_title_id"),
+      ]);
+      if (profilesError) throw profilesError;
+      if (additionalTitlesError) throw additionalTitlesError;
+      return { profiles: profilesData ?? [], additionalTitles: additionalTitles ?? [] };
     },
   });
 
@@ -1588,14 +1594,23 @@ function OrgChartAdmin() {
 
   const namesByRole = useMemo(() => {
     const map = new Map<string, { name: string; limit: number }[]>();
-    (rows ?? []).forEach((p) => {
-      const main = p.job_title_id;
-      if (!main) return;
-      if (!map.has(main)) map.set(main, []);
-      map.get(main)!.push({ name: shortName(p.full_name), limit: Number(p.approval_limit ?? 0) });
+    const profileById = new Map((rows?.profiles ?? []).map((profile) => [profile.id, profile]));
+    const addPerson = (jobTitleId: string, profile: { full_name: string | null; approval_limit: number | null }) => {
+      const current = map.get(jobTitleId) ?? [];
+      const name = shortName(profile.full_name);
+      if (!current.some((person) => person.name === name)) {
+        map.set(jobTitleId, [...current, { name, limit: Number(profile.approval_limit ?? 0) }]);
+      }
+    };
+    (rows?.profiles ?? []).forEach((profile) => {
+      if (profile.job_title_id) addPerson(profile.job_title_id, profile);
+    });
+    (rows?.additionalTitles ?? []).forEach((link) => {
+      const profile = profileById.get(link.user_id);
+      if (profile) addPerson(link.job_title_id, profile);
     });
     return map;
-  }, [rows, profiles]);
+  }, [rows]);
 
   const titleById = useMemo(
     () => new Map((jobTitles ?? []).map((title) => [title.id, title.name])),
