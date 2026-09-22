@@ -185,6 +185,8 @@ export type Database = {
           ceo_approver_job_title_id: string | null
           created_at: string
           dual_approval_enabled: boolean
+          dual_approval_job_title_1_id: string | null
+          dual_approval_job_title_2_id: string | null
           dual_approval_threshold: number
           id: boolean
           updated_at: string
@@ -193,6 +195,8 @@ export type Database = {
           ceo_approver_job_title_id?: string | null
           created_at?: string
           dual_approval_enabled?: boolean
+          dual_approval_job_title_1_id?: string | null
+          dual_approval_job_title_2_id?: string | null
           dual_approval_threshold?: number
           id?: boolean
           updated_at?: string
@@ -201,6 +205,8 @@ export type Database = {
           ceo_approver_job_title_id?: string | null
           created_at?: string
           dual_approval_enabled?: boolean
+          dual_approval_job_title_1_id?: string | null
+          dual_approval_job_title_2_id?: string | null
           dual_approval_threshold?: number
           id?: boolean
           updated_at?: string
@@ -209,6 +215,20 @@ export type Database = {
           {
             foreignKeyName: "approval_settings_ceo_approver_job_title_id_fkey"
             columns: ["ceo_approver_job_title_id"]
+            isOneToOne: false
+            referencedRelation: "job_titles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approval_settings_dual_approval_job_title_1_id_fkey"
+            columns: ["dual_approval_job_title_1_id"]
+            isOneToOne: false
+            referencedRelation: "job_titles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approval_settings_dual_approval_job_title_2_id_fkey"
+            columns: ["dual_approval_job_title_2_id"]
             isOneToOne: false
             referencedRelation: "job_titles"
             referencedColumns: ["id"]
