@@ -475,3 +475,9 @@
 - [ ] Antes de excluir perfil com usuários vinculados, exigir escolha de outro perfil para realocação
 - [ ] Realocar usuários e excluir o perfil em uma única operação segura
 - [ ] Validar o fluxo completo e mostrar prévia antes de declarar conclusão
+
+## Alçadas para cargos C-Level
+- [ ] Identificar usuários cujo cargo principal é C-Level
+- [ ] Para C-Level, mostrar somente Aprovação automática e Faixa 2
+- [ ] Garantir que a regra use apenas o CEO como nível superior
+- [ ] Validar visualmente em desktop e celular
