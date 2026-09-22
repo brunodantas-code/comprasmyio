@@ -1056,7 +1056,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
   const qc = useQueryClient();
   const { data: requestTypes } = useRequestTypes();
   const [projectId, setProjectId] = useState("");
-  const [forStock, setForStock] = useState(false);
+  const [forStock, setForStock] = useState(!canAllocateProject && !canAllocateClient && !canAllocateInternal && canAllocateStock);
   const [requestType, setRequestType] = useState<string>("");
   const requestModel = requestType ? requestTypeModel(requestType, requestTypes) : "";
   const isMaterialsRequest = requestModel === "materiais";
@@ -1399,6 +1399,10 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
     const isReembolso = requestModel === "reembolso";
     const isRh = requestModel === "rh";
     const isPagamento = requestModel === "pagamento";
+    if (allocTarget === "projeto" && !canAllocateProject) return toast.error("Alocação em Projeto não permitida para este perfil.");
+    if (allocTarget === "cliente" && !canAllocateClient) return toast.error("Alocação em Cliente não permitida para este perfil.");
+    if (allocTarget === "interna" && !canAllocateInternal && !forStock) return toast.error("Selecione uma alocação permitida para este perfil.");
+    if (forStock && !canAllocateStock) return toast.error("Alocação em Estoque não permitida para este perfil.");
     if (!isMateriais) {
       if (!isReembolso && !isRh && !isPagamento && newItemName.trim().length < 2) return toast.error("Descreva o serviço ou a viagem solicitada.");
       if (!isRh && !isPagamento && allocTarget === "projeto" && !projectId) return toast.error("Selecione o projeto");
@@ -1829,13 +1833,13 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                       Interna
                     </label>}
                   </div>
-                  {!forStock && allocTarget === "projeto" && (
+                  {canAllocateProject && !forStock && allocTarget === "projeto" && (
                     <p className="text-xs text-muted-foreground">Prova de conceito ou potencial cliente, ainda não implantado.</p>
                   )}
-                  {!forStock && allocTarget === "cliente" && (
+                  {canAllocateClient && !forStock && allocTarget === "cliente" && (
                     <p className="text-xs text-muted-foreground">Contrato assinado e ativo.</p>
                   )}
-                  {!forStock && allocTarget === "interna" && (
+                  {canAllocateInternal && !forStock && allocTarget === "interna" && (
                     <p className="text-xs text-muted-foreground">Qualquer despesa interna não atrelada a clientes ou projetos</p>
                   )}
                   {!restrictedCc && (
@@ -1906,13 +1910,13 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                       Interna
                     </label>}
                   </div>
-                  {allocTarget === "projeto" && (
+                  {canAllocateProject && allocTarget === "projeto" && (
                     <p className="text-xs text-muted-foreground">Prova de conceito ou potencial cliente, ainda não implantado.</p>
                   )}
-                  {allocTarget === "cliente" && (
+                  {canAllocateClient && allocTarget === "cliente" && (
                     <p className="text-xs text-muted-foreground">Contrato assinado e ativo.</p>
                   )}
-                  {allocTarget === "interna" && (
+                  {canAllocateInternal && allocTarget === "interna" && (
                     <p className="text-xs text-muted-foreground">Qualquer despesa interna não atrelada a clientes ou projetos</p>
                   )}
                   {!restrictedCc && (
