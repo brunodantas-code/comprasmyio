@@ -422,3 +422,7 @@
 - [x] Ocultar Centro de Custo, Item novo, Estoque e Interna do perfil Operação por padrão
 - [ ] Preservar a customização individual por usuário
 - [ ] Validar os perfis no computador e celular
+
+## Função Operacional Adicional
+- [ ] Explicar a lógica atual de Funções Operacionais
+- [ ] Avaliar a composição de permissões entre o cargo principal e a função adicional
