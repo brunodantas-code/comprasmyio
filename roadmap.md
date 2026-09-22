@@ -484,3 +484,8 @@
 - [x] Aplicar o aprovador escolhido do CEO na geração da cadeia
 - [x] Não incluir o Conselho de Administração na cadeia de despesas/approvals do CEO
 - [x] Validar visualmente em desktop e celular
+
+## Remoção do Conselho das aprovações
+- [x] Remover o Conselho de Administração como superior na hierarquia
+- [x] Excluir o Conselho das sequências atuais e do organograma de aprovação
+- [ ] Validar a alteração visualmente em computador e celular
