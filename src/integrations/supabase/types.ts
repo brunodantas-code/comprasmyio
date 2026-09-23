@@ -2535,6 +2535,7 @@ export type Database = {
           id: string
           job_title_id: string | null
           manager_id: string | null
+          mobile_phone: string | null
           tier2_limit: number
           tier3_limit: number
         }
@@ -2552,6 +2553,7 @@ export type Database = {
           id: string
           job_title_id?: string | null
           manager_id?: string | null
+          mobile_phone?: string | null
           tier2_limit?: number
           tier3_limit?: number
         }
@@ -2569,6 +2571,7 @@ export type Database = {
           id?: string
           job_title_id?: string | null
           manager_id?: string | null
+          mobile_phone?: string | null
           tier2_limit?: number
           tier3_limit?: number
         }
@@ -5203,6 +5206,7 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          mobile_phone: string
         }[]
       }
       has_job_title: {
@@ -5227,6 +5231,7 @@ export type Database = {
       is_access_admin: { Args: { _user_id: string }; Returns: boolean }
       is_erp_admin: { Args: { _user_id: string }; Returns: boolean }
       is_supply_member: { Args: { _user_id: string }; Returns: boolean }
+      is_supply_technician: { Args: { _user_id: string }; Returns: boolean }
       primary_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -5261,6 +5266,10 @@ export type Database = {
       request_user_deletion: {
         Args: { _target_user_id: string }
         Returns: string
+      }
+      set_technician_mobile_phone: {
+        Args: { _mobile_phone: string; _technician_id: string }
+        Returns: undefined
       }
       set_user_access_profile: {
         Args: {
