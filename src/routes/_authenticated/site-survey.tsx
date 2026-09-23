@@ -254,7 +254,7 @@ function ChecklistSection({ section, order, open, onToggle, children }: { sectio
   return <section className="overflow-hidden rounded-md border border-border bg-card transition-colors">
     <Button type="button" variant="ghost" className="h-auto w-full justify-between rounded-none !bg-card px-4 py-3 text-left !text-foreground hover:!bg-muted/50 hover:!text-foreground" onClick={onToggle} aria-expanded={open}>
       <span className="flex min-w-0 items-center gap-3"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm bg-myio-green/10 text-sm font-bold text-myio-green">{order}</span><span className="min-w-0"><span className="block truncate text-sm font-semibold text-foreground">{section.title}</span>{section.description ? <span className="block truncate text-xs text-muted-foreground">{section.description}</span> : null}</span></span>
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center text-muted-foreground" aria-hidden="true">{open ? <Minus className="h-4 w-4" /> : <Plus className="h-4 w-4" />}</span>
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center text-myio-green" aria-hidden="true">{open ? <Minus className="h-5 w-5" strokeWidth={3} /> : <Plus className="h-5 w-5" strokeWidth={3} />}</span>
     </Button>
     <div className={`${open ? "block" : "hidden"} space-y-3 border-t border-border p-3 sm:p-4`}>{children}</div>
   </section>;
