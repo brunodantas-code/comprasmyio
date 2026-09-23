@@ -260,6 +260,13 @@
       "when": 1790108948366,
       "tag": "0036_count_final_approver_in_joint_approval",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1790166724852,
+      "tag": "0037_fix_request_type_links_and_approval_defaults",
+      "breakpoints": true
     }
   ]
 }
