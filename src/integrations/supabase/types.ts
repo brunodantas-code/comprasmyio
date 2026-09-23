@@ -3134,6 +3134,33 @@ export type Database = {
         }
         Relationships: []
       }
+      site_survey_access_profiles: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          is_system: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          is_system?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          is_system?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       site_survey_attachments: {
         Row: {
           content_type: string | null
@@ -3231,6 +3258,35 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "site_survey_visits"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      site_survey_profile_permissions: {
+        Row: {
+          allowed: boolean
+          created_at: string
+          permission_key: string
+          profile_code: string
+        }
+        Insert: {
+          allowed?: boolean
+          created_at?: string
+          permission_key: string
+          profile_code: string
+        }
+        Update: {
+          allowed?: boolean
+          created_at?: string
+          permission_key?: string
+          profile_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_survey_profile_permissions_profile_code_fkey"
+            columns: ["profile_code"]
+            isOneToOne: false
+            referencedRelation: "site_survey_access_profiles"
+            referencedColumns: ["code"]
           },
         ]
       }
@@ -3407,6 +3463,71 @@ export type Database = {
             foreignKeyName: "site_survey_templates_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      site_survey_user_permissions: {
+        Row: {
+          allowed: boolean
+          created_at: string
+          permission_key: string
+          user_id: string
+        }
+        Insert: {
+          allowed?: boolean
+          created_at?: string
+          permission_key: string
+          user_id: string
+        }
+        Update: {
+          allowed?: boolean
+          created_at?: string
+          permission_key?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_survey_user_permissions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      site_survey_user_profiles: {
+        Row: {
+          is_customized: boolean
+          profile_code: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          is_customized?: boolean
+          profile_code?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          is_customized?: boolean
+          profile_code?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_survey_user_profiles_profile_code_fkey"
+            columns: ["profile_code"]
+            isOneToOne: false
+            referencedRelation: "site_survey_access_profiles"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "site_survey_user_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -4570,6 +4691,7 @@ export type Database = {
         Returns: boolean
       }
       is_access_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_erp_admin: { Args: { _user_id: string }; Returns: boolean }
       is_supply_member: { Args: { _user_id: string }; Returns: boolean }
       primary_role: {
         Args: { _user_id: string }
