@@ -593,3 +593,7 @@
 - [x] Validar o resultado em computador e celular
 - [x] Consolidar Perfis de acesso e Logs como submenus dentro de Usuários, seguindo o Supply
 - [x] Validar a navegação consolidada em computador e celular
+
+## Técnicos do Supply no Site Survey
+- [ ] Exibir na seleção de responsável somente os técnicos cadastrados no Supply
+- [ ] Validar a lista na criação de visita técnica
