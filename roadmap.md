@@ -1,6 +1,6 @@
 # Aplicativo Site Survey
 
-- [ ] Na abertura da OS, registrar LUC e nome da loja para Shopping; para demais categorias, permitir ambientes repetíveis com botão “+”.
+- [ ] Na abertura e edição da OS, manter LUC e nome da loja em campos separados para Shopping; para demais categorias, permitir ambientes repetíveis e editáveis com botão “+”.
 
 - [x] Adicionar Site Survey ao portal com ícone de lupa e ao controle de acesso por aplicativo.
 - [x] Reutilizar Perfis de acesso do Supply para menus e telas do Site Survey, sem alçadas nem Approval Workflow.
