@@ -211,7 +211,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
       const applies = config.condition?.value === undefined || (Array.isArray(value) ? value.includes(config.condition.value) : value === config.condition.value);
       if (question.required && (Array.isArray(value) ? value.length === 0 : value === "" || value === false)) throw new Error(`Responda: ${question.prompt}`);
       if (applies && config.detail?.required && !detail) throw new Error(`Preencha: ${config.detail.label ?? question.prompt}`);
-      return { visit_id: visit.id, question_id: question.id, answered_by: data.userId, answer: config.detail ? { value, detail: detail || null } : value, question_snapshot: { prompt: question.prompt, options: question.options, configuration: question.configuration } };
+      return { visit_id: visit.id, question_id: question.id, answered_by: data.userId, answer: config.detail ? { value, detail: detail || null } : value, question_snapshot: JSON.parse(JSON.stringify({ prompt: question.prompt, options: question.options, configuration: question.configuration })) };
     });
     for (const question of questions) {
       const config = asQuestionConfig(question.configuration);
