@@ -602,3 +602,6 @@
 - [x] Agrupar as permissões por menus e submenus, no mesmo padrão do Supply
 - [x] Preservar a seleção e o salvamento individual de cada acesso
 - [x] Validar a organização em computador e celular
+
+## Botões do checklist
+- [ ] Igualar o tamanho do botão Editar ao botão Excluir nas perguntas
