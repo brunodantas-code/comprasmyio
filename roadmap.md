@@ -594,6 +594,12 @@
 - [x] Validar o resultado em computador e celular
 - [x] Consolidar Perfis de acesso e Logs como submenus dentro de Usuários, seguindo o Supply
 - [x] Validar a navegação consolidada em computador e celular
+- [ ] Consolidar os perfis cadastrados e as customizações individuais no Supply e no Site Survey, com usuários recolhidos e botões de expandir/recolher.
+- [ ] Validar a nova arquitetura de perfis no Supply e no Site Survey em computador e celular.
+
+## Ordenação dos aplicativos no portal
+- [ ] Reposicionar o Site Survey na linha atual de aplicativos e manter o Code sempre como último aplicativo.
+- [ ] Validar a ordenação do portal em computador e celular.
 
 ## Técnicos do Supply no Site Survey
 - [x] Exibir na seleção de responsável somente os técnicos cadastrados no Supply
