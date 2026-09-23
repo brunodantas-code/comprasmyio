@@ -3544,12 +3544,15 @@ export type Database = {
           contact_phone: string | null
           created_at: string
           created_by: string
+          environments: Json
           id: string
+          luc_number: string | null
           notes: string | null
           project_id: string | null
           review_notes: string | null
           scheduled_end: string | null
           scheduled_start: string
+          shop_name: string | null
           started_at: string | null
           status: string
           submitted_at: string | null
@@ -3568,12 +3571,15 @@ export type Database = {
           contact_phone?: string | null
           created_at?: string
           created_by: string
+          environments?: Json
           id?: string
+          luc_number?: string | null
           notes?: string | null
           project_id?: string | null
           review_notes?: string | null
           scheduled_end?: string | null
           scheduled_start: string
+          shop_name?: string | null
           started_at?: string | null
           status?: string
           submitted_at?: string | null
@@ -3592,12 +3598,15 @@ export type Database = {
           contact_phone?: string | null
           created_at?: string
           created_by?: string
+          environments?: Json
           id?: string
+          luc_number?: string | null
           notes?: string | null
           project_id?: string | null
           review_notes?: string | null
           scheduled_end?: string | null
           scheduled_start?: string
+          shop_name?: string | null
           started_at?: string | null
           status?: string
           submitted_at?: string | null
