@@ -266,7 +266,8 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
         const { error } = await supabase.from("site_survey_attachments").insert({ visit_id: visit.id, ...attachmentScope, question_id: question.id, uploaded_by: data.userId, file_name: photo.name, storage_path: path, content_type: photo.type, file_size: photo.size }); if (error) throw error;
       }
     }
-    const { error: generalDeleteError } = await supabase.from("site_survey_responses").delete().eq("visit_id", visit.id).is("visit_luc_id", null).is("visit_environment_id", null); if (generalDeleteError) throw generalDeleteError;
+    const generalQuestionIdList = Array.from(generalQuestionIds);
+    if (generalQuestionIdList.length) { const { error: generalDeleteError } = await supabase.from("site_survey_responses").delete().eq("visit_id", visit.id).in("question_id", generalQuestionIdList); if (generalDeleteError) throw generalDeleteError; }
     let responseDelete = supabase.from("site_survey_responses").delete().eq("visit_id", visit.id); responseDelete = pointKind === "luc" ? responseDelete.eq("visit_luc_id", pointId) : responseDelete.eq("visit_environment_id", pointId); const { error: responseDeleteError } = await responseDelete; if (responseDeleteError) throw responseDeleteError;
     if (rows.length) { const { error } = await supabase.from("site_survey_responses").insert(rows); if (error) throw error; }
     const { error: clearTechniciansError } = await supabase.from("site_survey_visit_technicians").delete().eq("visit_id", visit.id).is("visit_luc_id", null).is("visit_environment_id", null); if (clearTechniciansError) throw clearTechniciansError;
