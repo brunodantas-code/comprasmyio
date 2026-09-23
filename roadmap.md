@@ -621,3 +621,4 @@
 
 ## Campos editáveis da nova visita
 - [x] Aplicar aos campos editáveis o mesmo verde-claro usado no Site Survey e nos demais aplicativos.
+- [ ] Exibir “hh:mm” nos campos de horário de Início e Término previsto, substituindo o tracejado nativo.
