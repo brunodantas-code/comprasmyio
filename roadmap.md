@@ -574,3 +574,6 @@
 - [x] Exigir somente o aprovador configurado que ainda não participou da cadeia normal
 - [x] Impedir aprovação automática acima do limite da aprovação conjunta
 - [x] Validar a regra e a configuração em computador e celular, mostrando a prévia
+
+## Esclarecimento do cadastro de checklists
+- [x] Explicar a relação entre Modelos, Seções e Perguntas no Site Survey
