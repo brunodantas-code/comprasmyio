@@ -96,7 +96,7 @@ export const exportDatabaseBackup = createServerFn({ method: "POST" })
       "erp_apps",
       "external_product_states",
       "external_sync_state",
-    ] as const;
+    ] as string[];
 
     const PAGE = 1000;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -106,7 +106,7 @@ export const exportDatabaseBackup = createServerFn({ method: "POST" })
       const rows: any[] = [];
       for (let from = 0; ; from += PAGE) {
         const { data, error } = await supabaseAdmin
-          .from(table)
+          .from(table as never)
           .select("*")
           .range(from, from + PAGE - 1);
         if (error) throw new Error(`Falha ao exportar a tabela ${table}: ${error.message}`);
