@@ -640,4 +640,4 @@
 ## Ações da visita
 - [x] Mover o cancelamento para a coluna Ações, junto de editar e excluir.
 - [x] Manter confirmação obrigatória antes do cancelamento.
-- [ ] Validar a nova organização em computador e celular.
+- [x] Validar a nova organização em computador e celular.
