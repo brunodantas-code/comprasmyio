@@ -56,7 +56,7 @@ export function ErpAppAccessAdmin() {
                 </div>
                 <p className="break-all text-xs text-muted-foreground">{user.email}</p>
               </div>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-flow-col sm:grid-rows-2 sm:grid-cols-none sm:auto-cols-min sm:justify-between sm:gap-x-5">
+              <div className="grid min-w-0 grid-cols-2 gap-x-4 gap-y-3 sm:grid-flow-col sm:grid-rows-2 sm:grid-cols-4 sm:gap-x-4">
                 {APPS.map((app) => {
                   const checked = accessSet.has(`${user.id}:${app.key}`);
                   return (
