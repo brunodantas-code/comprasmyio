@@ -386,6 +386,13 @@
       "when": 1790192739697,
       "tag": "0054_add_site_survey_luc_location",
       "breakpoints": true
+    },
+    {
+      "idx": 55,
+      "version": "7",
+      "when": 1790201718255,
+      "tag": "0055_format_site_survey_daily_numbers",
+      "breakpoints": true
     }
   ]
 }
