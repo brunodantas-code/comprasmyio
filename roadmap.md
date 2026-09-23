@@ -6,6 +6,7 @@
 - [ ] Checklist da OS — Encaminhamento elétrico até o hidrômetro: seleção única entre “Instalar canaleta” e “Via instalação existente”, sempre com foto obrigatória.
 - [ ] Checklist da OS — Tipo de registro existente: seleção única entre “Esfera”, “Gaveta”, “Pressão” e “Agulha”, sempre com foto obrigatória.
 - [ ] Checklist da OS — Condição do registro: seleção única entre “Funcional” e “Inoperante”.
+- [ ] Checklist da OS — Sentido do fluxo de água: seleção única entre “Antes do registro (correto)” e “Depois do registro (incorreto)”; ao marcar a opção incorreta, exigir “Solicitar intervenção do cliente” e foto.
 - [x] Site Survey — criar Cadastro > Diversos com materiais, equipamentos, tipos de chave de fenda e bitolas de chave de grifo administráveis.
 - [x] Checklist da OS — permitir selecionar vários materiais/equipamentos cadastrados, informando quantidade e observação em cada item.
 
