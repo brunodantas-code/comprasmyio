@@ -7,7 +7,7 @@
 - [x] Incluir Ferramentas/Ativos e suas movimentações no backup.
 - [x] Remover permissões derivadas automaticamente ao excluir um Tipo de Solicitação.
 - [x] Corrigir os padrões das novas alçadas para R$ 3.000 e R$ 10.000.
-- [ ] Validar visualmente os fluxos corrigidos em computador e celular.
+- [x] Validar visualmente os fluxos corrigidos em computador e celular.
 
 # Roadmap
 

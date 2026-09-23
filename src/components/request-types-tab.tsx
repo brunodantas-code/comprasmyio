@@ -100,14 +100,7 @@ export function RequestTypesTab() {
 
   const remove = useMutation({
     mutationFn: async (code: string) => {
-      const [{ error: profilePermissionsError }, { error: userPermissionsError }] = await Promise.all([
-        supabase.from("access_profile_request_types").delete().eq("request_type_code", code),
-        supabase.from("user_request_type_permissions").delete().eq("request_type_code", code),
-      ]);
-      if (profilePermissionsError) throw profilePermissionsError;
-      if (userPermissionsError) throw userPermissionsError;
-      const { error } = await supabase.from("request_types").delete().eq("code", code);
-      if (error?.code === "23503") throw new Error("Este tipo ainda possui vínculos. Realoque-os antes de excluir.");
+      const { error } = await supabase.rpc("admin_delete_request_type", { _code: code });
       if (error) throw error;
     },
     onSuccess: () => { toast.success("Tipo excluído"); invalidate(); },
