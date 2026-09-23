@@ -108,6 +108,10 @@ export const exportDatabaseBackup = createServerFn({ method: "POST" })
       "site_survey_user_profiles",
       "site_survey_user_permissions",
       "site_survey_luc_history",
+      "site_survey_material_catalog",
+      "site_survey_screwdriver_types",
+      "site_survey_wrench_sizes",
+      "site_survey_visit_materials",
     ] as string[];
 
     const PAGE = 1000;
