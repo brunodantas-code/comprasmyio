@@ -1,6 +1,6 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { DndContext, KeyboardSensor, PointerSensor, TouchSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -413,7 +413,7 @@ function SortableSectionCard({ id, children }: { id: string; order: number; chil
   return <Card ref={sortable.setNodeRef} style={{ transform: CSS.Transform.toString(sortable.transform), transition: sortable.transition }} className={sortable.isDragging ? "relative z-20 border-myio-green/50 shadow-lg" : undefined}><SortableHandleContext.Provider value={{ attributes: sortable.attributes, listeners: sortable.listeners }}>{children}</SortableHandleContext.Provider></Card>;
 }
 
-const SortableHandleContext = React.createContext<{ attributes: ReturnType<typeof useSortable>["attributes"]; listeners: ReturnType<typeof useSortable>["listeners"] } | null>(null);
+const SortableHandleContext = createContext<{ attributes: ReturnType<typeof useSortable>["attributes"]; listeners: ReturnType<typeof useSortable>["listeners"] } | null>(null);
 
 function SortableQuestionRow({ id, children }: { id: string; children: ReactNode }) {
   const sortable = useSortable({ id });
@@ -421,7 +421,7 @@ function SortableQuestionRow({ id, children }: { id: string; children: ReactNode
 }
 
 function OrderHandle({ order, label }: { order: number; label: string }) {
-  const sortable = React.useContext(SortableHandleContext);
+  const sortable = useContext(SortableHandleContext);
   return <div className="space-y-2 self-end"><Label>Ordem</Label><Button type="button" variant="outline" className="h-10 min-w-20 cursor-grab gap-1.5 px-2 active:cursor-grabbing touch-none" aria-label={label} title="Arraste para reordenar" {...sortable?.attributes} {...sortable?.listeners}><GripVertical className="h-4 w-4 text-myio-green" /><span className="font-semibold tabular-nums">{order}</span></Button></div>;
 }
 
