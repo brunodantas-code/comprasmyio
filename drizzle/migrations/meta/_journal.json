@@ -407,6 +407,13 @@
       "when": 1790204707485,
       "tag": "0057_allow_supply_request_field_permissions",
       "breakpoints": true
+    },
+    {
+      "idx": 58,
+      "version": "7",
+      "when": 1790205785378,
+      "tag": "0058_add_technician_mobile_phone_to_profiles",
+      "breakpoints": true
     }
   ]
 }
