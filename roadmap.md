@@ -624,3 +624,5 @@
 - [x] Exibir “hh:mm” nos campos de horário de Início e Término previsto, substituindo o tracejado nativo.
 - [x] Aplicar máscara e validação de celular no campo Telefone no padrão (DDD) 9XXXX-XXXX.
 - [x] Aplicar máscara e validação nos horários, convertendo automaticamente 0800 em 08:00.
+- [x] Exibir e recolher a visita na própria tela, sem pop-up, em desktop e mobile.
+- [x] Consolidar as sete seções do checklist em blocos numerados com controles +/− e somente uma seção aberta por vez.
