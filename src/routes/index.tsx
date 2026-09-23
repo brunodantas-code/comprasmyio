@@ -128,33 +128,28 @@ function Landing() {
 
       <div className="pointer-events-none absolute bottom-0 right-0 hidden h-full w-[52%] overflow-hidden min-[960px]:block" aria-hidden="true">
         <svg className="absolute -bottom-[18%] -right-[12%] h-[112%] w-[125%] text-erp-mesh opacity-60" viewBox="0 0 700 700" fill="none">
-          <g stroke="currentColor" strokeWidth="1.2">
-            <path d="M395 44 594 145 654 346 553 602 321 647 124 509 84 283 221 104 395 44Z" />
-            <path d="m395 44-68 177 267-76-116 231 176-30M327 221 84 283m243-62 151 155M84 283l226 156m168-63 75 226M310 439l11 208m-11-208 243 163M124 509l186-70" />
-            <path d="M221 104 148 31M395 44 503 14M594 145 684 91M654 346 692 475M553 602 636 682M321 647 220 695M124 509 24 591M84 283 12 204" />
-            <path d="M148 31 327 221M503 14 594 145M684 91 654 346M692 475 553 602M636 682 321 647M220 695 124 509M24 591 310 439M12 204 221 104" />
-            <path d="M148 31 503 14M684 91 478 376M692 475 478 376M636 682 310 439M220 695 310 439M24 591 84 283M12 204 327 221" />
+          <g stroke="currentColor" strokeWidth="1.15">
+            <path d="M82 172 210 68 374 104 526 42 644 154 608 302 676 430 548 590 368 654 206 574 72 458 116 310 82 172Z" />
+            <path d="M82 172 252 236 210 68M210 68 374 104 252 236 116 310 82 172M374 104 480 232 252 236M526 42 480 232 374 104M526 42 644 154 480 232M644 154 608 302 480 232M608 302 676 430 506 418 480 232M676 430 548 590 506 418M548 590 368 654 356 500 506 418M368 654 206 574 356 500M206 574 72 458 224 410 356 500M72 458 116 310 224 410M116 310 252 236 224 410M252 236 480 232 356 500 224 410 252 236M480 232 506 418 356 500" />
           </g>
           <g className="fill-erp-mesh-node">
-            <circle cx="395" cy="44" r="5" />
-            <circle cx="594" cy="145" r="4" />
-            <circle cx="654" cy="346" r="5" />
-            <circle cx="553" cy="602" r="4" />
-            <circle cx="321" cy="647" r="5" />
-            <circle cx="124" cy="509" r="4" />
-            <circle cx="84" cy="283" r="5" />
-            <circle cx="221" cy="104" r="4" />
-            <circle cx="327" cy="221" r="7" className="animate-pulse" />
-            <circle cx="478" cy="376" r="6" />
-            <circle cx="310" cy="439" r="7" className="animate-pulse" />
-            <circle cx="148" cy="31" r="4" />
-            <circle cx="503" cy="14" r="5" />
-            <circle cx="684" cy="91" r="4" />
-            <circle cx="692" cy="475" r="5" />
-            <circle cx="636" cy="682" r="4" />
-            <circle cx="220" cy="695" r="5" />
-            <circle cx="24" cy="591" r="4" />
-            <circle cx="12" cy="204" r="5" />
+            <circle cx="82" cy="172" r="5" />
+            <circle cx="210" cy="68" r="6" />
+            <circle cx="374" cy="104" r="5" className="animate-pulse" />
+            <circle cx="526" cy="42" r="6" />
+            <circle cx="644" cy="154" r="5" />
+            <circle cx="608" cy="302" r="6" className="animate-pulse" />
+            <circle cx="676" cy="430" r="5" />
+            <circle cx="548" cy="590" r="6" />
+            <circle cx="368" cy="654" r="5" />
+            <circle cx="206" cy="574" r="6" className="animate-pulse" />
+            <circle cx="72" cy="458" r="5" />
+            <circle cx="116" cy="310" r="6" />
+            <circle cx="252" cy="236" r="7" className="animate-pulse" />
+            <circle cx="480" cy="232" r="6" />
+            <circle cx="506" cy="418" r="7" className="animate-pulse" />
+            <circle cx="356" cy="500" r="6" />
+            <circle cx="224" cy="410" r="5" />
           </g>
         </svg>
       </div>
