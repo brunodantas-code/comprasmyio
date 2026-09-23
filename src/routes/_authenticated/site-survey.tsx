@@ -77,6 +77,9 @@ type Section = { id: string; template_id: string; title: string; description: st
 type QuestionConfig = { condition?: { value?: string }; detail?: { label?: string; required?: boolean; options?: string[]; repeatable?: boolean; suboptions?: Record<string, string[]> }; photo?: { required?: boolean }; create_ticket?: boolean; weather_required?: boolean; classification?: boolean; other_detail?: boolean };
 type Question = { id: string; section_id: string; question_key: string | null; prompt: string; question_type: "checkbox" | "text" | "textarea" | "number" | "select" | "radio" | "multiselect"; required: boolean; options: unknown; configuration: unknown; position: number; active: boolean };
 type CatalogItem = Named & { category: "material" | "equipamento"; active: boolean; position: number };
+
+const sortByPosition = <T extends { position: number; id: string }>(items: T[]) =>
+  [...items].sort((left, right) => left.position - right.position || left.id.localeCompare(right.id));
 type VisitTechnician = { technician_id: string; mobile_phone: string };
 
 const STATUS: Record<VisitStatus, string> = { agendada: "Agendada", em_andamento: "Em andamento", em_revisao: "Em revisão", concluida: "Concluída", cancelada: "Cancelada" };
@@ -246,7 +249,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
   const [visitTechnicians, setVisitTechnicians] = useState<VisitTechnician[]>([{ technician_id: "", mobile_phone: "" }]);
   const [selectedPoint, setSelectedPoint] = useState("");
   const [pointFilter, setPointFilter] = useState("");
-  const questions = data.questions.filter((question) => question.active && data.sections.some((section) => section.active && section.id === question.section_id && section.template_id === visit?.template_id));
+  const questions = sortByPosition(data.questions.filter((question) => question.active && data.sections.some((section) => section.active && section.id === question.section_id && section.template_id === visit?.template_id)));
   const sections = data.sections.filter((section) => section.active && section.template_id === visit?.template_id);
   const generalSections = sections.filter((section) => GENERAL_CHECKLIST_SECTIONS.has(section.title));
   const pointSections = sections.filter((section) => !GENERAL_CHECKLIST_SECTIONS.has(section.title));
