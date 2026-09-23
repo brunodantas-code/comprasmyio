@@ -620,5 +620,5 @@
 - [x] Substituir o ícone de edição das perguntas por um ícone de salvar, refletindo sua função real.
 
 ## Campos editáveis da nova visita
-- [x] Aplicar aos campos editáveis o mesmo verde-claro usado no Site Survey e nos demais aplicativos.
+- [x] Aplicar o verde-claro somente aos campos com lista suspensa; manter os demais campos brancos.
 - [x] Exibir “hh:mm” nos campos de horário de Início e Término previsto, substituindo o tracejado nativo.
