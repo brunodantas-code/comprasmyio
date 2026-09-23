@@ -126,8 +126,8 @@ function Landing() {
       <div className="pointer-events-none absolute -bottom-44 -right-24 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-36 -left-36 h-80 w-80 rounded-full bg-myio-purple/50 sm:-bottom-48 sm:-left-48 sm:h-[28rem] sm:w-[28rem]" />
 
-      <div className="pointer-events-none absolute bottom-0 right-0 hidden h-[58%] w-[38%] overflow-hidden md:block" aria-hidden="true">
-        <svg className="absolute bottom-[-12%] right-[-18%] h-[112%] w-[112%] text-erp-mesh opacity-70" viewBox="0 0 700 700" fill="none">
+      <div className="pointer-events-none absolute bottom-0 right-0 hidden h-[54%] w-[32%] overflow-hidden md:block" aria-hidden="true">
+        <svg className="absolute bottom-[-18%] right-[-28%] h-[108%] w-[108%] text-erp-mesh opacity-70" viewBox="0 0 700 700" fill="none">
           <g stroke="currentColor" strokeWidth="1.2">
             <path d="M395 44 594 145 654 346 553 602 321 647 124 509 84 283 221 104 395 44Z" />
             <path d="m395 44-68 177 267-76-116 231 176-30M327 221 84 283m243-62 151 155M84 283l226 156m168-63 75 226M310 439l11 208m-11-208 243 163M124 509l186-70" />
@@ -182,7 +182,7 @@ function Landing() {
           </div>
         </section>
 
-        <section className="w-full md:w-[17.5rem] md:-translate-x-5 lg:w-[18.5rem] lg:-translate-x-8" aria-labelledby="access-title">
+        <section className="w-full md:w-[17.5rem] md:-translate-x-8 lg:w-[18.5rem] lg:-translate-x-12" aria-labelledby="access-title">
           <div className="rounded-2xl border border-erp-access-border bg-erp-access p-5 text-erp-landing-foreground shadow-2xl backdrop-blur-2xl lg:p-6">
             <div className="mb-5">
               <h2 id="access-title" className="text-2xl font-extrabold text-erp-landing-foreground">Acesse sua conta</h2>
