@@ -1,5 +1,8 @@
 # Aplicativo Site Survey
 
+- [ ] Checklist prévio à visita técnica — confirmar, com seleção única “Sim” ou “Não”, se o celular está com 100% de bateria.
+- [ ] Checklist prévio à visita técnica — confirmar, com seleção única “Sim” ou “Não”, se o powerbank está com 100% de bateria.
+- [ ] Checklist prévio à visita técnica — confirmar, com seleção única “Sim” ou “Não”, se a parafusadeira está com 100% de bateria; ao marcar “Não”, exigir o relato do problema e abrir automaticamente um ticket como pendência do suporte.
 - [ ] Checklist da OS — Hidrômetro: seleção única “Fácil”, “Regular” ou “Difícil”; ao marcar “Difícil”, exigir detalhamento e foto.
 - [ ] Checklist da OS — Localização do hidrômetro: seleção única entre “Loja”, “Sobreloja”, “Parede” e “Debaixo da pia”, com foto obrigatória.
 - [ ] Checklist da OS — Ponto elétrico próximo: seleção única “Sim” ou “Não”; ao marcar “Sim”, exigir uma única opção entre “Luminária de emergência”, “Tomada”, “Teto”, “Parede” e “Quadro elétrico próximo”, além de foto obrigatória.
