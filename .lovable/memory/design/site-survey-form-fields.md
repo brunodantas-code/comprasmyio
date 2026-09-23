@@ -6,3 +6,5 @@ type: design
 No formulário de nova visita do Site Survey, aplicar o fundo verde-claro padrão somente aos campos com lista suspensa, como Cliente, Unidade/filial, Projeto, Técnico responsável e Checklist. Manter os demais campos com fundo branco.
 
 O campo Telefone deve formatar e validar obrigatoriamente o valor no padrão de celular (DDD) 9XXXX-XXXX quando for preenchido.
+
+Os campos de horário devem aceitar somente horários válidos e aplicar automaticamente o padrão hh:mm; por exemplo, 0800 torna-se 08:00.

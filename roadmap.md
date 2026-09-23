@@ -623,3 +623,4 @@
 - [x] Aplicar o verde-claro somente aos campos com lista suspensa; manter os demais campos brancos.
 - [x] Exibir “hh:mm” nos campos de horário de Início e Término previsto, substituindo o tracejado nativo.
 - [x] Aplicar máscara e validação de celular no campo Telefone no padrão (DDD) 9XXXX-XXXX.
+- [x] Aplicar máscara e validação nos horários, convertendo automaticamente 0800 em 08:00.

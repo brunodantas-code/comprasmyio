@@ -422,15 +422,25 @@ function PhoneInput({ name, label, defaultValue = "" }: { name: string; label: s
   const [value, setValue] = useState(() => formatMobilePhone(defaultValue));
   return <div className="space-y-2"><Label htmlFor={name}>{label}</Label><Input id={name} name={name} type="tel" inputMode="numeric" autoComplete="tel-national" value={value} onChange={(event) => setValue(formatMobilePhone(event.target.value))} placeholder="(DDD) 9XXXX-XXXX" pattern="\([0-9]{2}\) 9[0-9]{4}-[0-9]{4}" maxLength={15} title="Informe um celular no formato (DDD) 9XXXX-XXXX" /></div>;
 }
+function formatTime(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 4);
+  const validDigits = digits.split("").reduce((result, digit, index) => {
+    if (index === 0 && Number(digit) > 2) return result;
+    if (index === 1 && result[0] === "2" && Number(digit) > 3) return result;
+    if (index === 2 && Number(digit) > 5) return result;
+    return result + digit;
+  }, "");
+  return validDigits.length > 2 ? `${validDigits.slice(0, 2)}:${validDigits.slice(2)}` : validDigits;
+}
 function DateTimeInput({ name, label, defaultValue = "", required = false }: { name: string; label: string; defaultValue?: string; required?: boolean }) {
   const [date, setDate] = useState(defaultValue.slice(0, 10));
-  const [time, setTime] = useState(defaultValue.slice(11, 16));
+  const [time, setTime] = useState(() => formatTime(defaultValue.slice(11, 16)));
   const normalizedTime = /^([01]\d|2[0-3]):[0-5]\d$/.test(time) ? time : "";
   return <div className="space-y-2">
     <Label htmlFor={`${name}-date`}>{label}</Label>
     <div className="grid grid-cols-[minmax(0,1fr)_7rem] gap-2">
       <Input id={`${name}-date`} type="date" value={date} onChange={(event) => setDate(event.target.value)} required={required} aria-label={`${label}: data`} />
-      <Input type="text" inputMode="numeric" placeholder="hh:mm" value={time} onChange={(event) => setTime(event.target.value)} pattern="(?:[01][0-9]|2[0-3]):[0-5][0-9]" maxLength={5} required={required} aria-label={`${label}: hora e minutos`} />
+      <Input type="text" inputMode="numeric" placeholder="hh:mm" value={time} onChange={(event) => setTime(formatTime(event.target.value))} pattern="(?:[01][0-9]|2[0-3]):[0-5][0-9]" maxLength={5} required={required} title="Informe o horário no formato hh:mm" aria-label={`${label}: hora e minutos`} />
     </div>
     <input type="hidden" name={name} value={date && normalizedTime ? `${date}T${normalizedTime}` : ""} />
   </div>;
