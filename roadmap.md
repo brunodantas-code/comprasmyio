@@ -577,3 +577,8 @@
 
 ## Esclarecimento do cadastro de checklists
 - [x] Explicar a relação entre Modelos, Seções e Perguntas no Site Survey
+
+## Foto da fachada no Site Survey
+- [ ] Ao identificar a fachada, oferecer Tirar foto ou Escolher da galeria
+- [ ] Enviar a imagem escolhida para a identificação automática existente
+- [ ] Validar a escolha em computador e celular
