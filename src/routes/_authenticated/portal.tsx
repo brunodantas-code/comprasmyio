@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Bell, CheckCircle2, CodeXml, DollarSign, FileSignature, Home, Settings, Settings2, ShieldCheck, ShoppingCart, UserRound, UsersRound, LogOut } from "lucide-react";
+import { Bell, CheckCircle2, CodeXml, DollarSign, FileSignature, Home, Search, Settings, Settings2, ShieldCheck, ShoppingCart, UserRound, UsersRound, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
@@ -67,6 +67,7 @@ function PortalPage() {
     { key: "legal", name: "Legal", description: ["Contratos e", "Jurídico"], to: "/legal" as const },
     { key: "rh", name: "RH", description: ["Gestão de Pessoas"], to: "/rh" as const },
     { key: "development", name: "Code", description: ["Melhorias e Bugs"], to: "/development" as const },
+    { key: "site_survey", name: "Site Survey", description: ["Visitas técnicas"], to: "/site-survey" as const },
   ].filter((app) => data.appKeys.has(app.key));
 
   return (
@@ -163,6 +164,13 @@ function PortalPage() {
                               <UsersRound className="h-14 w-14 stroke-[1.8] sm:h-16 sm:w-16" />
                             </span>
                             <span className="text-sm font-normal leading-none">{name}</span>
+                          </>
+                        ) : key === "site_survey" ? (
+                          <>
+                            <span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true">
+                              <Search className="h-14 w-14 stroke-[2.8] sm:h-16 sm:w-16" />
+                            </span>
+                            <span className="text-xs font-normal leading-none">{name}</span>
                           </>
                         ) : (
                           <>

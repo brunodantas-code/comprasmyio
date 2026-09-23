@@ -96,6 +96,17 @@ export const exportDatabaseBackup = createServerFn({ method: "POST" })
       "erp_apps",
       "external_product_states",
       "external_sync_state",
+      "site_survey_templates",
+      "site_survey_sections",
+      "site_survey_questions",
+      "site_survey_visits",
+      "site_survey_responses",
+      "site_survey_attachments",
+      "site_survey_logs",
+      "site_survey_access_profiles",
+      "site_survey_profile_permissions",
+      "site_survey_user_profiles",
+      "site_survey_user_permissions",
     ] as string[];
 
     const PAGE = 1000;

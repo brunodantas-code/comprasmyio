@@ -21,4 +21,9 @@ export const APP_NAVIGATION_OPTIONS: Record<string, TicketMenuOption[]> = {
   development: [
     { label: "Tickets", submenus: ["Novo ticket", "Acompanhamento"] },
   ],
+  site_survey: [
+    { label: "Visitas", submenus: ["Agenda", "Nova visita", "Execução", "Revisão"] },
+    { label: "Checklists", submenus: ["Modelos", "Seções", "Perguntas"] },
+    { label: "Usuários e Logs", submenus: ["Usuários", "Perfis de acesso", "Logs"] },
+  ],
 };
