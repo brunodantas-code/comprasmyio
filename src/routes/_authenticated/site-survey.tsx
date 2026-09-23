@@ -245,11 +245,11 @@ function VisitDialog({ data, visit, onSaved, inline = false }: { data: NonNullab
 
 function ChecklistSection({ section, order, open, onToggle, children }: { section: Section; order: number; open: boolean; onToggle: () => void; children: ReactNode }) {
   return <section className={`overflow-hidden rounded-md border bg-card transition-colors ${open ? "border-myio-green shadow-sm" : "border-border"}`}>
-    <button type="button" className={`flex w-full items-center justify-between gap-3 border-l-4 px-4 py-3 text-left transition-colors ${open ? "border-l-myio-green bg-myio-green/5" : "border-l-border hover:bg-muted/40"}`} onClick={onToggle} aria-expanded={open}>
+    <Button type="button" variant="ghost" className={`h-auto w-full justify-between rounded-none border-l-4 px-4 py-3 text-left ${open ? "border-l-myio-green bg-myio-green/5 hover:bg-myio-green/5" : "border-l-border hover:bg-muted/40"}`} onClick={onToggle} aria-expanded={open}>
       <span className="flex min-w-0 items-center gap-3"><span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-sm text-sm font-bold ${open ? "bg-myio-green text-primary-foreground" : "bg-muted text-muted-foreground"}`}>{order}</span><span className="min-w-0"><span className="block truncate text-sm font-semibold text-foreground">{section.title}</span>{section.description ? <span className="block truncate text-xs text-muted-foreground">{section.description}</span> : null}</span></span>
       <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${open ? "bg-myio-green/15 text-myio-green" : "bg-muted text-muted-foreground"}`} aria-hidden="true">{open ? <Minus className="h-4 w-4" /> : <Plus className="h-4 w-4" />}</span>
-    </button>
-    {open ? <div className="space-y-5 border-t border-border p-4 sm:p-6">{children}</div> : null}
+    </Button>
+    <div className={`${open ? "block" : "hidden"} space-y-5 border-t border-border p-4 sm:p-6`}>{children}</div>
   </section>;
 }
 
@@ -261,7 +261,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
   const [pointFilter, setPointFilter] = useState("");
   const [openSectionId, setOpenSectionId] = useState<string | null>(null);
   const questions = sortByPosition(data.questions.filter((question) => question.active && data.sections.some((section) => section.active && section.id === question.section_id && section.template_id === visit?.template_id)));
-  const sections = data.sections.filter((section) => section.active && section.template_id === visit?.template_id);
+  const sections = sortByPosition(data.sections.filter((section) => section.active && section.template_id === visit?.template_id));
   const generalSections = sections.filter((section) => GENERAL_CHECKLIST_SECTIONS.has(section.title));
   const pointSections = sections.filter((section) => !GENERAL_CHECKLIST_SECTIONS.has(section.title));
   const generalQuestionIds = new Set(questions.filter((question) => generalSections.some((section) => section.id === question.section_id)).map((question) => question.id));
@@ -273,6 +273,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
   const scopedMaterials = (detail?.visitMaterials ?? []).filter(matchesPoint);
   const scopedTechnicians = (detail?.technicians ?? []).filter((item) => !item.visit_luc_id && !item.visit_environment_id);
   useEffect(() => { if (!selectedPoint && points[0]) { setSelectedPoint(points[0].value); setPointFilter(points[0].label); } }, [selectedPoint, points]);
+  useEffect(() => { setOpenSectionId(null); }, [visit?.id]);
   useEffect(() => { setMaterialRows(scopedMaterials.map((item) => ({ catalog_item_id: item.catalog_item_id, quantity: String(item.quantity), notes: item.notes ?? "", screwdriver_type_id: item.screwdriver_type_id ?? "none", wrench_size_id: item.wrench_size_id ?? "none" }))); }, [selectedPoint, detail?.visitMaterials]);
   useEffect(() => { setVisitTechnicians(scopedTechnicians.length ? scopedTechnicians.map((item) => ({ technician_id: item.technician_id, mobile_phone: item.mobile_phone })) : [{ technician_id: "", mobile_phone: "" }]); }, [selectedPoint, detail?.technicians]);
   if (!visit) return null;
