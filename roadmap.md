@@ -1,5 +1,7 @@
 # Aplicativo Site Survey
 
+- [ ] Em Shopping, analisar foto da fachada com IA e sugerir um nome editável, preservando a confirmação do usuário.
+
 - [ ] Exibir Perfis de acesso do Site Survey em tela aberta no padrão visual do Supply, sem popup.
 
 - [ ] Preservar o histórico de nomes de lojas por LUC sempre que o ocupante for alterado.
