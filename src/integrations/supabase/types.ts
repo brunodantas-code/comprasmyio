@@ -3371,11 +3371,13 @@ export type Database = {
       site_survey_questions: {
         Row: {
           active: boolean
+          configuration: Json
           created_at: string
           id: string
           options: Json
           position: number
           prompt: string
+          question_key: string | null
           question_type: string
           required: boolean
           section_id: string
@@ -3383,11 +3385,13 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          configuration?: Json
           created_at?: string
           id?: string
           options?: Json
           position?: number
           prompt: string
+          question_key?: string | null
           question_type?: string
           required?: boolean
           section_id: string
@@ -3395,11 +3399,13 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          configuration?: Json
           created_at?: string
           id?: string
           options?: Json
           position?: number
           prompt?: string
+          question_key?: string | null
           question_type?: string
           required?: boolean
           section_id?: string
@@ -3423,6 +3429,7 @@ export type Database = {
           created_at: string
           id: string
           question_id: string
+          question_snapshot: Json
           updated_at: string
           visit_id: string
         }
@@ -3433,6 +3440,7 @@ export type Database = {
           created_at?: string
           id?: string
           question_id: string
+          question_snapshot?: Json
           updated_at?: string
           visit_id: string
         }
@@ -3443,6 +3451,7 @@ export type Database = {
           created_at?: string
           id?: string
           question_id?: string
+          question_snapshot?: Json
           updated_at?: string
           visit_id?: string
         }
@@ -3496,6 +3505,7 @@ export type Database = {
       }
       site_survey_sections: {
         Row: {
+          active: boolean
           created_at: string
           description: string | null
           id: string
@@ -3505,6 +3515,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          active?: boolean
           created_at?: string
           description?: string | null
           id?: string
@@ -3514,6 +3525,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          active?: boolean
           created_at?: string
           description?: string | null
           id?: string
@@ -3535,32 +3547,45 @@ export type Database = {
       site_survey_templates: {
         Row: {
           active: boolean
+          client_category_id: string | null
           created_at: string
           created_by: string | null
           description: string | null
           id: string
+          is_default: boolean
           name: string
           updated_at: string
         }
         Insert: {
           active?: boolean
+          client_category_id?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
           id?: string
+          is_default?: boolean
           name: string
           updated_at?: string
         }
         Update: {
           active?: boolean
+          client_category_id?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
           id?: string
+          is_default?: boolean
           name?: string
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "site_survey_templates_client_category_id_fkey"
+            columns: ["client_category_id"]
+            isOneToOne: false
+            referencedRelation: "client_categories"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "site_survey_templates_created_by_fkey"
             columns: ["created_by"]

@@ -351,6 +351,13 @@
       "when": 1790174659708,
       "tag": "0049_soft_delete_site_survey_visit_lucs",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1790178579271,
+      "tag": "0050_extend_site_survey_configurable_checklists",
+      "breakpoints": true
     }
   ]
 }
