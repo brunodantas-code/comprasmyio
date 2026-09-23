@@ -618,3 +618,6 @@
 - [x] Incluir ordem numérica no cadastro e na edição das perguntas, alterando sua sequência de exibição.
 - [x] Validar a ordenação das perguntas em computador e celular.
 - [x] Substituir o ícone de edição das perguntas por um ícone de salvar, refletindo sua função real.
+
+## Campos editáveis da nova visita
+- [x] Aplicar aos campos editáveis o mesmo verde-claro usado no Site Survey e nos demais aplicativos.
