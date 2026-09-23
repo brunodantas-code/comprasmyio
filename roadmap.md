@@ -2,6 +2,8 @@
 
 - [x] Página inicial — subir o bloco do logo aos aplicativos, reduzir a largura dos blocos para manter duas linhas, adicionar o Site Survey e evitar sobreposição do CRM com o elemento lilás.
 - [x] Acesso — deslocar o bloco “Acesse sua conta” para a esquerda, evitando sobreposição com a rede mesh.
+- [ ] Estimar automaticamente a duração da visita com base nos dados da proposta comercial — quantidade de lojas/ambientes, hidrômetros, pontos elétricos, áreas técnicas e demais fatores — usando o histórico dos levantamentos realizados para apoiar futuros orçamentos e propostas.
+- [ ] Registrar na OS a data e hora reais de início e conclusão, incluindo o dia inicial e final, e comparar duração estimada versus realizada.
 - [x] Permitir que o suporte pré-cadastre os ambientes de uma OS de shopping por Excel, com colunas LUC e Nome da loja, conferência antes da gravação, prevenção de duplicidade e atualização sem exclusão dos LUCs ausentes.
 - [x] Manter histórico individual de alterações do nome de cada loja por LUC e permitir correção manual ou por análise da foto da fachada.
 - [ ] Checklist prévio à visita técnica — confirmar, com seleção única “Sim” ou “Não”, se o celular está com 100% de bateria.
