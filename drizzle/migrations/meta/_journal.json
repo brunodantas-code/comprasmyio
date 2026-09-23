@@ -316,6 +316,13 @@
       "when": 1790169800314,
       "tag": "0044_create_site_survey_access_profiles",
       "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1790170425916,
+      "tag": "0045_add_site_survey_location_details",
+      "breakpoints": true
     }
   ]
 }
