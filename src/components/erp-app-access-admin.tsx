@@ -13,8 +13,8 @@ const APPS = [
   { key: "crm", label: "CRM" },
   { key: "legal", label: "Legal" },
   { key: "rh", label: "RH" },
-  { key: "development", label: "Code" },
   { key: "site_survey", label: "Site Survey" },
+  { key: "development", label: "Code" },
 ] as const;
 
 export function ErpAppAccessAdmin() {
@@ -48,15 +48,15 @@ export function ErpAppAccessAdmin() {
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando usuários...</p> : null}
         <div className="space-y-2">
           {data?.users.map((user) => (
-            <div key={user.id} className="grid gap-3 rounded-md border border-border p-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+            <div key={user.id} className="grid gap-4 rounded-md border border-border p-3 lg:grid-cols-[minmax(12rem,16rem)_minmax(0,1fr)] lg:items-center">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className="truncate font-semibold">{user.full_name || "Sem nome"}</p>
+                  <p className="break-words font-semibold">{user.full_name || "Sem nome"}</p>
                   {adminSet.has(user.id) ? <Badge variant="outline">Admin do ERP</Badge> : null}
                 </div>
-                <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+                <p className="break-all text-xs text-muted-foreground">{user.email}</p>
               </div>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-3 lg:grid-cols-7 lg:gap-x-5">
+              <div className="grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-flow-col sm:grid-rows-2 sm:grid-cols-none sm:auto-cols-min sm:justify-between sm:gap-x-5">
                 {APPS.map((app) => {
                   const checked = accessSet.has(`${user.id}:${app.key}`);
                   return (
