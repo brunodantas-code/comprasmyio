@@ -38,6 +38,25 @@ const PERMISSIONS = [
   ["site_survey_cadastro", "Cadastro e Diversos"],
 ] as const;
 
+const SITE_SURVEY_PERMISSION_GROUPS = [
+  {
+    label: "Visitas",
+    children: PERMISSIONS.slice(0, 7),
+  },
+  {
+    label: "Checklists",
+    children: PERMISSIONS.slice(10, 11),
+  },
+  {
+    label: "Cadastro",
+    children: PERMISSIONS.slice(11, 12),
+  },
+  {
+    label: "Usuários",
+    children: PERMISSIONS.slice(7, 10),
+  },
+] as const;
+
 type VisitStatus = "agendada" | "em_andamento" | "em_revisao" | "concluida" | "cancelada";
 type Visit = {
   id: string; survey_number: number; client_id: string | null; client_unit_id: string | null; project_id: string | null;
@@ -309,8 +328,11 @@ function SurveyProfilesAdmin() {
 }
 
 function InlineProfileForm({ profile, onSave, onCancel }: { profile?: { code: string; name: string; site_survey_profile_permissions: Array<{ permission_key: string; allowed: boolean }> }; onSave: (form: HTMLFormElement, profile?: any) => Promise<void>; onCancel?: () => void }) {
-  const checked = new Set(profile?.site_survey_profile_permissions.filter((item) => item.allowed).map((item) => item.permission_key) ?? []);
-  return <form onSubmit={async (event) => { event.preventDefault(); await onSave(event.currentTarget, profile); }} className="space-y-5 rounded-md border border-border p-4"><div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"><div className="w-full max-w-sm"><LabeledInput name="name" label={profile ? "Nome do perfil" : "Novo perfil de acesso"} defaultValue={profile?.name ?? ""} required /></div>{profile ? <Badge variant="outline">{profile.site_survey_profile_permissions.length} acessos selecionados</Badge> : null}</div><div className="grid gap-x-8 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">{PERMISSIONS.map(([key, label]) => <label key={key} className="flex min-w-0 items-center gap-2 text-sm"><Checkbox name={key} defaultChecked={checked.has(key)} /><span>{label}</span></label>)}</div><div className="flex justify-end gap-2">{onCancel ? <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button> : null}<Button type="submit">Salvar perfil</Button></div></form>;
+  const initialPermissions = profile?.site_survey_profile_permissions.filter((item) => item.allowed).map((item) => item.permission_key) ?? [];
+  const [checked, setChecked] = useState(() => new Set(initialPermissions));
+  const toggleGroup = (keys: readonly (readonly [string, string])[], allowed: boolean) => setChecked((current) => { const next = new Set(current); keys.forEach(([key]) => allowed ? next.add(key) : next.delete(key)); return next; });
+  const toggleItem = (key: string, allowed: boolean) => setChecked((current) => { const next = new Set(current); if (allowed) next.add(key); else next.delete(key); return next; });
+  return <form onSubmit={async (event) => { event.preventDefault(); await onSave(event.currentTarget, profile); }} className="space-y-5 rounded-md border border-border p-4"><div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"><div className="w-full max-w-sm"><LabeledInput name="name" label={profile ? "Nome do perfil" : "Novo perfil de acesso"} defaultValue={profile?.name ?? ""} required /></div><Badge variant="outline">{checked.size} {checked.size === 1 ? "acesso selecionado" : "acessos selecionados"}</Badge></div><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{SITE_SURVEY_PERMISSION_GROUPS.map((group) => { const selectedCount = group.children.filter(([key]) => checked.has(key)).length; const allSelected = selectedCount === group.children.length; return <div key={group.label} className={group.label === "Visitas" ? "space-y-2 rounded-md border border-border p-3 sm:col-span-2" : "space-y-2 rounded-md border border-border p-3"}><label className="flex items-center gap-2 text-sm font-medium"><Checkbox checked={allSelected ? true : selectedCount > 0 ? "indeterminate" : false} onCheckedChange={(value) => toggleGroup(group.children, value === true)} />{group.label}</label><div className={group.label === "Visitas" ? "grid gap-2 border-l border-border pl-4 sm:grid-cols-2" : "grid gap-2 border-l border-border pl-4"}>{group.children.map(([key, label]) => <label key={key} className="flex min-w-0 items-center gap-2 px-1 py-0.5 text-sm text-muted-foreground"><Checkbox checked={checked.has(key)} onCheckedChange={(value) => toggleItem(key, value === true)} /><span>{label}</span>{checked.has(key) ? <input type="hidden" name={key} value="on" /> : null}</label>)}</div></div>; })}</div><div className="flex justify-end gap-2">{onCancel ? <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button> : null}<Button type="submit">Salvar perfil</Button></div></form>;
 }
 
 function SurveyUsersAdmin() {

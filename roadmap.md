@@ -597,3 +597,8 @@
 ## Técnicos do Supply no Site Survey
 - [x] Exibir na seleção de responsável somente os técnicos cadastrados no Supply
 - [x] Validar a lista na criação de visita técnica
+
+## Organização das permissões do Site Survey
+- [x] Agrupar as permissões por menus e submenus, no mesmo padrão do Supply
+- [x] Preservar a seleção e o salvamento individual de cada acesso
+- [x] Validar a organização em computador e celular
