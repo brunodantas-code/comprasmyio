@@ -126,8 +126,8 @@ function Landing() {
       <div className="pointer-events-none absolute -bottom-44 -right-24 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-36 -left-36 h-80 w-80 rounded-full bg-myio-purple/50 sm:-bottom-48 sm:-left-48 sm:h-[28rem] sm:w-[28rem]" />
 
-      <div className="pointer-events-none absolute bottom-0 right-0 hidden h-[54%] w-[32%] overflow-hidden md:block" aria-hidden="true">
-        <svg className="absolute bottom-[-18%] right-[-28%] h-[108%] w-[108%] text-erp-mesh opacity-70" viewBox="0 0 700 700" fill="none">
+      <div className="pointer-events-none absolute bottom-0 right-0 hidden h-[48%] w-[11%] overflow-hidden min-[960px]:block lg:w-[18%]" aria-hidden="true">
+        <svg className="absolute bottom-[-18%] right-[-38%] h-[108%] w-[220%] text-erp-mesh opacity-70 lg:right-[-28%] lg:w-[150%]" viewBox="0 0 700 700" fill="none">
           <g stroke="currentColor" strokeWidth="1.2">
             <path d="M395 44 594 145 654 346 553 602 321 647 124 509 84 283 221 104 395 44Z" />
             <path d="m395 44-68 177 267-76-116 231 176-30M327 221 84 283m243-62 151 155M84 283l226 156m168-63 75 226M310 439l11 208m-11-208 243 163M124 509l186-70" />
@@ -148,8 +148,8 @@ function Landing() {
         </svg>
       </div>
 
-      <div className="relative z-10 mx-auto grid w-full max-w-7xl grid-cols-1 items-start gap-8 md:grid-cols-[minmax(0,1fr)_17.5rem] md:gap-6 lg:grid-cols-[minmax(0,1fr)_18.5rem] lg:gap-8">
-        <section className="w-full">
+      <div className="relative z-10 mx-auto grid w-full max-w-7xl grid-cols-1 items-start gap-8 min-[960px]:grid-cols-[37rem_17rem] min-[960px]:gap-3 lg:grid-cols-[41rem_18rem] lg:gap-6">
+        <section className="w-full min-w-0">
           <MyioPlatformLogo tone="light" className="mb-4 h-10 sm:h-11" />
 
           <h1 className="max-w-3xl text-4xl font-extrabold leading-[1.02] text-erp-landing-foreground sm:text-5xl lg:text-6xl">
@@ -161,11 +161,11 @@ function Landing() {
             A plataforma ERP completa para escalar o negócio.
           </p>
 
-          <div className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-4 md:gap-2 lg:gap-2.5">
+          <div className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-4 min-[960px]:gap-2 lg:gap-2.5">
             {MODULES.map(({ icon: Icon, title, body, available }) => (
               <div
                 key={title}
-                className={`flex h-24 min-w-0 items-center gap-2 rounded-lg border border-erp-landing-border bg-erp-landing-panel p-2.5 transition-colors hover:border-primary/50 sm:h-[4.75rem] lg:p-3 ${available ? "" : "opacity-60"}`}
+                className={`flex h-24 min-w-0 items-center gap-2 rounded-lg border border-erp-landing-border bg-erp-landing-panel p-2 transition-colors hover:border-primary/50 sm:h-[4.75rem] lg:p-2.5 ${available ? "" : "opacity-60"}`}
               >
                 <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-md ${available ? "bg-primary text-primary-foreground" : "bg-erp-landing-border text-erp-landing-muted"}`}>
                   <Icon className="h-5 w-5" />
@@ -182,7 +182,7 @@ function Landing() {
           </div>
         </section>
 
-        <section className="w-full md:w-[17.5rem] md:-translate-x-8 lg:w-[18.5rem] lg:-translate-x-12" aria-labelledby="access-title">
+         <section className="w-full min-[960px]:w-[17rem] lg:w-[18rem]" aria-labelledby="access-title">
           <div className="rounded-2xl border border-erp-access-border bg-erp-access p-5 text-erp-landing-foreground shadow-2xl backdrop-blur-2xl lg:p-6">
             <div className="mb-5">
               <h2 id="access-title" className="text-2xl font-extrabold text-erp-landing-foreground">Acesse sua conta</h2>
