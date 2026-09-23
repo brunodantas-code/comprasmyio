@@ -38,12 +38,14 @@ export function AddressAutocomplete({
   required,
   label = "Ponto de entrega",
   detailsName,
+  allowDeliveryPoints = true,
 }: {
   name: string;
   defaultValue?: string;
   required?: boolean;
   label?: string;
   detailsName?: string;
+  allowDeliveryPoints?: boolean;
 }) {
   // Valor final salvo: sugestão confirmada ou endereço digitado manualmente.
   const initial = defaultValue ?? "";
@@ -55,7 +57,7 @@ export function AddressAutocomplete({
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { data: deliveryPoints } = useDeliveryPoints(true);
+  const { data: deliveryPoints } = useDeliveryPoints(allowDeliveryPoints);
   const sessionRef = useRef<unknown>(null);
   const boxRef = useRef<HTMLDivElement>(null);
   const initializedDefaultRef = useRef(false);
@@ -129,18 +131,18 @@ export function AddressAutocomplete({
   const full = [addressValue, details.trim()].filter(Boolean).join(" — ");
 
   useEffect(() => {
-    if (initializedDefaultRef.current || defaultValue || !deliveryPoints?.length) return;
+    if (!allowDeliveryPoints || initializedDefaultRef.current || defaultValue || !deliveryPoints?.length) return;
     initializedDefaultRef.current = true;
     const preferred = deliveryPoints.find((point) => point.is_default) ?? deliveryPoints[0];
     setAddress(preferred.address);
     setQuery(preferred.address);
     setConfirmed(true);
-  }, [defaultValue, deliveryPoints]);
+  }, [allowDeliveryPoints, defaultValue, deliveryPoints]);
 
   return (
     <div className="space-y-2" ref={boxRef}>
       <Label htmlFor={`${name}-search`}>{label}</Label>
-      {deliveryPoints && deliveryPoints.length > 0 && (
+      {allowDeliveryPoints && deliveryPoints && deliveryPoints.length > 0 && (
         <Select value={deliveryPoints.find((point) => point.address === addressValue)?.code ?? "manual"} onValueChange={(code) => {
           if (code === "manual") {
             setAddress("");
