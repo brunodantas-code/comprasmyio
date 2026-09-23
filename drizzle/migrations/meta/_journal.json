@@ -393,6 +393,13 @@
       "when": 1790201718255,
       "tag": "0055_format_site_survey_daily_numbers",
       "breakpoints": true
+    },
+    {
+      "idx": 56,
+      "version": "7",
+      "when": 1790201730811,
+      "tag": "0056_enforce_site_survey_daily_numbers",
+      "breakpoints": true
     }
   ]
 }
