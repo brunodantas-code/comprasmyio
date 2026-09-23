@@ -337,6 +337,13 @@
       "when": 1790171642532,
       "tag": "0047_create_site_survey_material_catalog",
       "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1790174573724,
+      "tag": "0048_create_site_survey_visit_lucs",
+      "breakpoints": true
     }
   ]
 }

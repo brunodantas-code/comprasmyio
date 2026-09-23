@@ -3635,6 +3635,119 @@ export type Database = {
           },
         ]
       }
+      site_survey_visit_luc_history: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          id: string
+          luc_number: string
+          shop_name: string
+          valid_from: string
+          valid_until: string | null
+          visit_id: string
+          visit_luc_id: string
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          luc_number: string
+          shop_name: string
+          valid_from?: string
+          valid_until?: string | null
+          visit_id: string
+          visit_luc_id: string
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          luc_number?: string
+          shop_name?: string
+          valid_from?: string
+          valid_until?: string | null
+          visit_id?: string
+          visit_luc_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_survey_visit_luc_history_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_visit_luc_history_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_visits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_visit_luc_history_visit_luc_id_fkey"
+            columns: ["visit_luc_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_visit_lucs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      site_survey_visit_lucs: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          luc_number: string
+          shop_name: string
+          updated_at: string
+          updated_by: string | null
+          visit_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          luc_number: string
+          shop_name: string
+          updated_at?: string
+          updated_by?: string | null
+          visit_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          luc_number?: string
+          shop_name?: string
+          updated_at?: string
+          updated_by?: string | null
+          visit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_survey_visit_lucs_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_visit_lucs_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_visit_lucs_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_visits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_survey_visit_materials: {
         Row: {
           catalog_item_id: string
