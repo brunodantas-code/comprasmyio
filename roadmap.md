@@ -630,4 +630,4 @@
 ## Cadastro de técnicos no myio RH
 - [x] Criar ficha básica dos técnicos do Supply no myio RH com celular no padrão (DDD) 9XXXX-XXXX.
 - [x] Consultar automaticamente o celular cadastrado no RH ao selecionar técnicos no Site Survey.
-- [ ] Validar o cadastro no RH e o preenchimento automático no Site Survey em computador e celular.
+- [x] Validar o cadastro no RH e o preenchimento automático no Site Survey em computador e celular.
