@@ -6,7 +6,7 @@
 - [x] Vincular visitas a cliente e/ou projeto e técnico responsável.
 - [x] Criar modelos configuráveis de checklist, respostas, fotos, anexos e histórico.
 - [x] Incluir dados do Site Survey no backup e no cadastro de tickets do Code.
-- [ ] Validar permissões e fluxos em computador e celular e mostrar prévia antes de concluir.
+- [x] Validar permissões e fluxos em computador e celular e mostrar prévia antes de concluir.
 
 # Correções dos alertas de monitoramento
 
