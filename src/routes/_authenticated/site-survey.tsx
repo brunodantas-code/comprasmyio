@@ -126,7 +126,10 @@ function SiteSurveyPage() {
     { value: "visitas", label: "Visitas", icon: CalendarDays, allowed: can("site_survey_visitas_minhas") || can("site_survey_visitas_todas") },
     { value: "checklists", label: "Checklists", icon: ClipboardCheck, allowed: can("site_survey_configuracoes") },
     { value: "cadastro", label: "Cadastro", icon: Package, allowed: can("site_survey_cadastro") || can("site_survey_configuracoes") },
-    { value: "usuarios", label: "Usuários", icon: UsersRound, allowed: can("site_survey_usuarios") },
+    { value: "usuarios", label: "Usuários", icon: UsersRound, allowed: can("site_survey_usuarios") || can("site_survey_perfis") || can("site_survey_logs") },
+  ].filter((item) => item.allowed);
+  const userTabs = [
+    { value: "lista", label: "Usuários", icon: UsersRound, allowed: can("site_survey_usuarios") },
     { value: "perfis", label: "Perfis de acesso", icon: ShieldCheck, allowed: can("site_survey_perfis") },
     { value: "logs", label: "Logs", icon: History, allowed: can("site_survey_logs") },
   ].filter((item) => item.allowed);
@@ -144,9 +147,16 @@ function SiteSurveyPage() {
         </TabsContent>
         <TabsContent value="checklists"><ChecklistAdmin data={data} onChanged={invalidate} /></TabsContent>
         <TabsContent value="cadastro"><SurveyCatalogAdmin data={data} onChanged={invalidate} /></TabsContent>
-        <TabsContent value="usuarios"><SurveyUsersAdmin /></TabsContent>
-        <TabsContent value="perfis"><SurveyProfilesAdmin /></TabsContent>
-        <TabsContent value="logs"><SurveyLogs names={names} /></TabsContent>
+        <TabsContent value="usuarios">
+          <Tabs defaultValue={userTabs[0]?.value}>
+            <TabsList className="no-scrollbar mb-4 flex h-auto w-full justify-start overflow-x-auto">
+              {userTabs.map(({ value, label, icon: Icon }) => <TabsTrigger key={value} value={value} className="shrink-0"><Icon className="mr-2 h-4 w-4" />{label}</TabsTrigger>)}
+            </TabsList>
+            {can("site_survey_usuarios") ? <TabsContent value="lista"><SurveyUsersAdmin /></TabsContent> : null}
+            {can("site_survey_perfis") ? <TabsContent value="perfis"><SurveyProfilesAdmin /></TabsContent> : null}
+            {can("site_survey_logs") ? <TabsContent value="logs"><SurveyLogs names={names} /></TabsContent> : null}
+          </Tabs>
+        </TabsContent>
       </Tabs>
     </main>
     <VisitDetails visit={selected} data={data} onClose={() => setSelected(null)} onChanged={() => { invalidate(); setSelected(null); }} />
@@ -300,7 +310,7 @@ function SurveyProfilesAdmin() {
 
 function InlineProfileForm({ profile, onSave, onCancel }: { profile?: { code: string; name: string; site_survey_profile_permissions: Array<{ permission_key: string; allowed: boolean }> }; onSave: (form: HTMLFormElement, profile?: any) => Promise<void>; onCancel?: () => void }) {
   const checked = new Set(profile?.site_survey_profile_permissions.filter((item) => item.allowed).map((item) => item.permission_key) ?? []);
-  return <form onSubmit={async (event) => { event.preventDefault(); await onSave(event.currentTarget, profile); }} className="space-y-4 rounded-md border border-border p-4"><div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"><div className="w-full max-w-sm"><LabeledInput name="name" label={profile ? "Nome do perfil" : "Novo perfil de acesso"} defaultValue={profile?.name ?? ""} required /></div>{profile ? <Badge variant="outline">{profile.site_survey_profile_permissions.length} acessos selecionados</Badge> : null}</div><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{PERMISSIONS.map(([key, label]) => <label key={key} className="flex items-center gap-2 rounded-md border p-3 text-sm"><Checkbox name={key} defaultChecked={checked.has(key)} />{label}</label>)}</div><div className="flex justify-end gap-2">{onCancel ? <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button> : null}<Button type="submit">Salvar perfil</Button></div></form>;
+  return <form onSubmit={async (event) => { event.preventDefault(); await onSave(event.currentTarget, profile); }} className="space-y-5 rounded-md border border-border p-4"><div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"><div className="w-full max-w-sm"><LabeledInput name="name" label={profile ? "Nome do perfil" : "Novo perfil de acesso"} defaultValue={profile?.name ?? ""} required /></div>{profile ? <Badge variant="outline">{profile.site_survey_profile_permissions.length} acessos selecionados</Badge> : null}</div><div className="grid gap-x-8 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">{PERMISSIONS.map(([key, label]) => <label key={key} className="flex min-w-0 items-center gap-2 text-sm"><Checkbox name={key} defaultChecked={checked.has(key)} /><span>{label}</span></label>)}</div><div className="flex justify-end gap-2">{onCancel ? <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button> : null}<Button type="submit">Salvar perfil</Button></div></form>;
 }
 
 function SurveyUsersAdmin() {
