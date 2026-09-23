@@ -55,6 +55,7 @@ const APP_NAMES: Record<string, string> = {
   legal: "Legal",
   rh: "RH",
   development: "Code",
+  site_survey: "Site Survey",
 };
 const STATUS_NAMES: Record<TicketStatus, string> = {
   aberto: "Em aberto",
