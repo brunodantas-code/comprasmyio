@@ -121,13 +121,13 @@ function Landing() {
   }
 
   return (
-    <main className="relative flex min-h-screen w-full items-center overflow-hidden bg-erp-landing px-5 py-6 text-erp-landing-foreground sm:px-10 lg:items-start lg:px-12 lg:pb-7 lg:pt-20 xl:pt-24">
+    <main className="relative flex min-h-screen w-full items-start overflow-hidden bg-erp-landing px-5 py-6 text-erp-landing-foreground sm:px-8 md:px-10 md:py-8 lg:px-12 lg:py-10">
       <div className="pointer-events-none absolute -left-28 -top-36 h-96 w-96 rounded-full bg-erp-landing-soft/50 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-44 -right-24 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-36 -left-36 h-80 w-80 rounded-full bg-myio-purple/50 sm:-bottom-48 sm:-left-48 sm:h-[28rem] sm:w-[28rem]" />
 
-      <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[40%] overflow-hidden lg:block" aria-hidden="true">
-        <svg className="absolute right-[-14%] top-1/2 h-[115%] w-[112%] -translate-y-1/2 text-erp-mesh opacity-70" viewBox="0 0 700 700" fill="none">
+      <div className="pointer-events-none absolute bottom-0 right-0 hidden h-[58%] w-[38%] overflow-hidden md:block" aria-hidden="true">
+        <svg className="absolute bottom-[-12%] right-[-18%] h-[112%] w-[112%] text-erp-mesh opacity-70" viewBox="0 0 700 700" fill="none">
           <g stroke="currentColor" strokeWidth="1.2">
             <path d="M395 44 594 145 654 346 553 602 321 647 124 509 84 283 221 104 395 44Z" />
             <path d="m395 44-68 177 267-76-116 231 176-30M327 221 84 283m243-62 151 155M84 283l226 156m168-63 75 226M310 439l11 208m-11-208 243 163M124 509l186-70" />
@@ -148,11 +148,11 @@ function Landing() {
         </svg>
       </div>
 
-      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col items-center gap-8 lg:grid lg:grid-cols-[minmax(0,1fr)_19rem] lg:items-end lg:gap-7">
+      <div className="relative z-10 mx-auto grid w-full max-w-7xl grid-cols-1 items-start gap-8 md:grid-cols-[minmax(0,1fr)_17.5rem] md:gap-6 lg:grid-cols-[minmax(0,1fr)_18.5rem] lg:gap-8">
         <section className="w-full">
-          <MyioPlatformLogo tone="light" className="mb-5 h-11 sm:mb-6 sm:h-12" />
+          <MyioPlatformLogo tone="light" className="mb-4 h-10 sm:h-11" />
 
-          <h1 className="max-w-3xl text-4xl font-extrabold leading-[1.02] text-erp-landing-foreground sm:text-5xl xl:text-6xl">
+          <h1 className="max-w-3xl text-4xl font-extrabold leading-[1.02] text-erp-landing-foreground sm:text-5xl lg:text-6xl">
             Gestão inteligente
             <br />
             <span className="font-light text-erp-landing-muted">em um só ecossistema</span>
@@ -161,11 +161,11 @@ function Landing() {
             A plataforma ERP completa para escalar o negócio.
           </p>
 
-          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-4 md:gap-2 lg:gap-2.5">
             {MODULES.map(({ icon: Icon, title, body, available }) => (
               <div
                 key={title}
-                className={`flex h-24 min-w-0 items-center gap-2.5 rounded-lg border border-erp-landing-border bg-erp-landing-panel p-3 transition-colors hover:border-primary/50 sm:h-20 ${available ? "" : "opacity-60"}`}
+                className={`flex h-24 min-w-0 items-center gap-2 rounded-lg border border-erp-landing-border bg-erp-landing-panel p-2.5 transition-colors hover:border-primary/50 sm:h-[4.75rem] lg:p-3 ${available ? "" : "opacity-60"}`}
               >
                 <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-md ${available ? "bg-primary text-primary-foreground" : "bg-erp-landing-border text-erp-landing-muted"}`}>
                   <Icon className="h-5 w-5" />
@@ -182,9 +182,9 @@ function Landing() {
           </div>
         </section>
 
-        <section className="w-full lg:w-[19rem] lg:-translate-x-8 lg:self-end xl:-translate-x-12" aria-labelledby="access-title">
-          <div className="rounded-2xl border border-erp-access-border bg-erp-access p-7 text-erp-landing-foreground shadow-2xl backdrop-blur-2xl">
-            <div className="mb-7">
+        <section className="w-full md:w-[17.5rem] md:-translate-x-5 lg:w-[18.5rem] lg:-translate-x-8" aria-labelledby="access-title">
+          <div className="rounded-2xl border border-erp-access-border bg-erp-access p-5 text-erp-landing-foreground shadow-2xl backdrop-blur-2xl lg:p-6">
+            <div className="mb-5">
               <h2 id="access-title" className="text-2xl font-extrabold text-erp-landing-foreground">Acesse sua conta</h2>
               <p className="mt-1 text-erp-landing-muted">Identifique-se para acessar seus aplicativos.</p>
             </div>
@@ -196,7 +196,7 @@ function Landing() {
                 </Link>
               </Button>
             ) : (
-              <form onSubmit={handleSignIn} className="space-y-5">
+              <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="landing-email" className="text-erp-landing-foreground">E-mail</Label>
                   <Input id="landing-email" name="email" type="email" autoComplete="email" placeholder="seu@email.com" required className="h-12 border-erp-access-border bg-erp-access-field text-erp-landing-foreground placeholder:text-erp-landing-muted focus-visible:ring-primary" />
@@ -218,7 +218,7 @@ function Landing() {
             )}
 
             {!signedIn && (
-              <div className="mt-7 border-t border-erp-access-border pt-6 text-center">
+              <div className="mt-5 border-t border-erp-access-border pt-4 text-center">
                 <p className="text-sm text-erp-landing-muted">Ainda não possui acesso?</p>
                 <Link to="/auth" className="mt-2 inline-block text-sm font-bold text-erp-landing-foreground hover:text-primary">
                   Criar conta
