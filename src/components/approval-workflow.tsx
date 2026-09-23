@@ -476,7 +476,7 @@ export function PendingForMe({ renderEditAction }: { renderEditAction?: EditActi
                 const req = o?.requester_id ? profiles?.get(o.requester_id) : undefined;
                 return (
                   <TableRow key={s.id}>
-                    <TableCell className="whitespace-nowrap"><div className="flex items-start gap-1">{o && renderEditAction?.(o)}<PendingApprovalDetails step={s} requestTypes={requestTypes} /></div></TableCell>
+                    <TableCell className="whitespace-nowrap"><div className="inline-flex flex-col items-start gap-1"><PendingApprovalDetails step={s} requestTypes={requestTypes} />{o && renderEditAction?.(o)}</div></TableCell>
                     <TableCell className="font-medium">
                       {requestTypeLabel(o, requestTypes)}
                       {o?.budget_exceeded && <Badge variant="destructive" className="ml-2 gap-1"><AlertTriangle className="h-3 w-3" />Orçamento excedido</Badge>}
@@ -622,7 +622,7 @@ export function PendingApprovalsByRole({ renderEditAction }: { renderEditAction?
                         const requester = order?.requester_id ? profiles?.get(order.requester_id) : undefined;
                         return (
                           <div key={step.id} className="grid gap-2 px-4 py-3 text-sm sm:grid-cols-[8rem_minmax(0,1fr)_minmax(0,1fr)_9rem] sm:items-center">
-                            <div className="flex items-start gap-1">{order && renderEditAction?.(order)}<PendingApprovalDetails step={step} requestTypes={requestTypes} /></div>
+                            <div className="inline-flex flex-col items-start gap-1"><PendingApprovalDetails step={step} requestTypes={requestTypes} />{order && renderEditAction?.(order)}</div>
                             <div className="min-w-0">
                               <p className="truncate font-medium">{requestTypeLabel(order, requestTypes)}</p>
                                <p className="line-clamp-2 text-xs text-muted-foreground">{order?.purchase_order_items?.length ? order.purchase_order_items.map((item) => `${item.item_name} × ${item.quantity}`).join("; ") : order?.item_name ?? "—"}</p>
@@ -703,7 +703,7 @@ export function MyApprovalFlows({ renderEditAction }: { renderEditAction?: EditA
               <div key={orderId} className="rounded-lg border p-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
-                    <div className="flex items-center gap-1">{o && renderEditAction?.(o)}<p className="font-mono text-xs text-muted-foreground">{o?.approval_number ?? "—"}</p></div>
+                    <div className="inline-flex flex-col items-start gap-1"><p className="font-mono text-xs text-muted-foreground">{o?.approval_number ?? "—"}</p>{o && renderEditAction?.(o)}</div>
                     <p className="font-medium">
                       {requestTypeLabel(o, requestTypes)}{" "}
                       <span className="text-xs text-muted-foreground">x{o?.quantity ?? 1}</span>
