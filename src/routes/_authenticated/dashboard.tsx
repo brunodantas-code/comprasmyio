@@ -741,7 +741,7 @@ function usePurchasableItems() {
     queryKey: ["purchasable-items"],
     queryFn: async () => {
       const [{ data: mats, error: me }, { data: ters, error: te }, { data: tools, error: fe }] = await Promise.all([
-        supabase.from("materials").select("id, name, description, link, manufacturer_code, photo_url, location, is_manufactured").in("location", ["fabrica", "almoxarifado"]).order("name"),
+        supabase.from("materials").select("id, name, description, link, manufacturer_code, photo_url, location, is_manufactured").in("location", ["fabrica", "almoxarifado", "almoxarifado_geral"]).order("name"),
         supabase.from("terceiros_materials").select("id, name, description, link, manufacturer_code, photo_url").order("name"),
         supabase.from("tool_assets").select("id, name, description, link, manufacturer_code, photo_url").order("name"),
       ]);
@@ -2155,22 +2155,22 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                   )}
                 </div>
               )}
-              {requestModel === "materiais" && (
-                <div className="space-y-2">
-                  <Label>Destinatário</Label>
-                  <Select value={recipient} onValueChange={setRecipient}>
-                    <SelectTrigger><SelectValue placeholder="Selecione o usuário" /></SelectTrigger>
-                    <SelectContent>
-                      {(profiles ?? []).map((p) => (
-                        <SelectItem key={p.id} value={p.full_name || p.email || p.id}>
-                          {p.full_name || p.email || p.id}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
             </div>
+            )}
+            {requestModel === "materiais" && (
+              <div className="space-y-2">
+                <Label>Destinatário</Label>
+                <Select value={recipient} onValueChange={setRecipient}>
+                  <SelectTrigger><SelectValue placeholder="Selecione o usuário" /></SelectTrigger>
+                  <SelectContent>
+                    {(profiles ?? []).map((p) => (
+                      <SelectItem key={p.id} value={p.full_name || p.email || p.id}>
+                        {p.full_name || p.email || p.id}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             )}
             {requestModel !== "reembolso" && requestModel !== "rh" && requestModel !== "pagamento" && (!isMaterialsRequest || canManageProducts) && (
             <div className="space-y-2">
@@ -2182,7 +2182,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
             )}
             {requestModel === "materiais" && <AddressAutocomplete name="delivery_point" required />}
 
-            {requestModel !== "reembolso" && requestModel !== "rh" && requestModel !== "pagamento" && (!isMaterialsRequest || isNewItem) && (
+            {requestModel !== "reembolso" && requestModel !== "rh" && requestModel !== "pagamento" && (
             <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>Prazo de recebimento</Label>

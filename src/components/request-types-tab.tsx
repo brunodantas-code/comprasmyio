@@ -100,8 +100,7 @@ export function RequestTypesTab() {
 
   const remove = useMutation({
     mutationFn: async (code: string) => {
-      const { error } = await supabase.from("request_types").delete().eq("code", code);
-      if (error?.code === "23503") throw new Error("Este tipo ainda possui vínculos. Realoque-os antes de excluir.");
+      const { error } = await supabase.rpc("admin_delete_request_type", { _code: code });
       if (error) throw error;
     },
     onSuccess: () => { toast.success("Tipo excluído"); invalidate(); },

@@ -18,14 +18,41 @@ export const exportDatabaseBackup = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const TABLES = [
+      "access_profile_definitions",
+      "access_profile_permissions",
+      "access_profile_request_types",
+      "additional_step_types",
+      "approval_rules",
+      "approval_settings",
+      "approval_steps",
       "profiles",
       "user_roles",
+      "user_access_profiles",
+      "user_additional_job_titles",
+      "user_app_access",
+      "user_deletion_requests",
+      "user_menu_permissions",
+      "user_operational_functions",
+      "user_reminders",
+      "user_request_type_permissions",
+      "request_types",
+      "role_hierarchy",
+      "job_titles",
+      "job_title_hierarchy",
+      "operational_functions",
       "clients",
+      "client_categories",
+      "client_units",
       "projects",
+      "cost_centers",
+      "delivery_points",
       "purchase_orders",
+      "purchase_order_items",
       "order_logs",
       "materials",
+      "material_stock_types",
       "product_boms",
+      "stock_destinations",
       "stock_movements",
       "stock_movement_qrs",
       "purchase_demands",
@@ -46,9 +73,30 @@ export const exportDatabaseBackup = createServerFn({ method: "POST" })
       "myio_product_images",
       "terceiros_materials",
       "terceiros_movements",
+      "tool_assets",
+      "tool_movements",
+      "cash_flow_accounts",
+      "cash_flow_bank_accounts",
+      "cash_flow_budgets",
+      "cash_flow_payable_logs",
+      "cash_flow_payables",
+      "cash_flow_reconciliations",
+      "cash_flow_statement_imports",
+      "cash_flow_transactions",
+      "damage_reasons",
+      "import_batches",
+      "import_batch_items",
+      "reminder_settings",
+      "reminder_send_log",
+      "development_tickets",
+      "development_ticket_attachments",
+      "development_ticket_logs",
+      "development_ticket_messages",
+      "erp_admins",
+      "erp_apps",
       "external_product_states",
       "external_sync_state",
-    ] as const;
+    ] as string[];
 
     const PAGE = 1000;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -58,7 +106,7 @@ export const exportDatabaseBackup = createServerFn({ method: "POST" })
       const rows: any[] = [];
       for (let from = 0; ; from += PAGE) {
         const { data, error } = await supabaseAdmin
-          .from(table)
+          .from(table as never)
           .select("*")
           .range(from, from + PAGE - 1);
         if (error) throw new Error(`Falha ao exportar a tabela ${table}: ${error.message}`);

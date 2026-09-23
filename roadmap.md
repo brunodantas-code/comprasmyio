@@ -1,3 +1,14 @@
+# Correções dos alertas de monitoramento
+
+- [x] Restaurar Destinatário e Prazo no pedido consolidado de Materiais.
+- [x] Permitir endereço de entrega manual sem restaurar automaticamente o ponto padrão.
+- [x] Incluir itens de Almoxarifado Geral no seletor de materiais.
+- [x] Reativar cargos excluídos quando o mesmo nome for cadastrado novamente.
+- [x] Incluir Ferramentas/Ativos e suas movimentações no backup.
+- [x] Remover permissões derivadas automaticamente ao excluir um Tipo de Solicitação.
+- [x] Corrigir os padrões das novas alçadas para R$ 3.000 e R$ 10.000.
+- [x] Validar visualmente os fluxos corrigidos em computador e celular.
+
 # Roadmap
 
 ## Tarefas

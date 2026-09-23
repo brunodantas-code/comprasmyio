@@ -260,6 +260,34 @@
       "when": 1790108948366,
       "tag": "0036_count_final_approver_in_joint_approval",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1790166724852,
+      "tag": "0037_fix_request_type_links_and_approval_defaults",
+      "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1790167056984,
+      "tag": "0038_transactional_request_type_deletion",
+      "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1790167105943,
+      "tag": "0039_align_admin_authorization_with_access_profiles",
+      "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1790167199214,
+      "tag": "0040_prevent_approval_without_configured_approver",
+      "breakpoints": true
     }
   ]
 }
