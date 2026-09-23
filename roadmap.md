@@ -591,5 +591,5 @@
 - [x] Exibir as permissões em grade, seguindo o padrão visual do Supply
 - [x] Remover as caixas individuais ao redor de cada opção
 - [x] Validar o resultado em computador e celular
-- [ ] Consolidar Perfis de acesso e Logs como submenus dentro de Usuários, seguindo o Supply
-- [ ] Validar a navegação consolidada em computador e celular
+- [x] Consolidar Perfis de acesso e Logs como submenus dentro de Usuários, seguindo o Supply
+- [x] Validar a navegação consolidada em computador e celular
