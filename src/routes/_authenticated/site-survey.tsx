@@ -163,9 +163,9 @@ function SiteSurveyPage() {
         <TabsList className="no-scrollbar mb-6 flex h-auto w-full justify-start overflow-x-auto bg-transparent p-0">{tabs.map(({ value, label, icon: Icon }) => <TabsTrigger key={value} value={value} className="shrink-0"><Icon className="mr-2 h-4 w-4" />{label}</TabsTrigger>)}</TabsList>
         <TabsContent value="visitas">
           <Tabs value={visitsSection} onValueChange={setVisitsSection}>
-            <TabsList className="no-scrollbar mb-4 flex h-auto w-full justify-start overflow-x-auto">
-              <TabsTrigger value="minhas" className="shrink-0"><CalendarDays className="mr-2 h-4 w-4" />Minhas Visitas</TabsTrigger>
-              {can("site_survey_agendar") ? <TabsTrigger value="nova" className="shrink-0"><Plus className="mr-2 h-4 w-4" />Nova Visita</TabsTrigger> : null}
+            <TabsList className="mb-4 grid h-auto w-fit grid-cols-2">
+              <TabsTrigger value="minhas" className="w-44"><CalendarDays className="mr-2 h-4 w-4" />Minhas Visitas</TabsTrigger>
+              {can("site_survey_agendar") ? <TabsTrigger value="nova" className="w-44"><Plus className="mr-2 h-4 w-4" />Nova Visita</TabsTrigger> : null}
             </TabsList>
             <TabsContent value="minhas">
               <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">{STATUS_ORDER.map((status) => <Card key={status}><CardContent className="flex min-h-28 flex-col items-center justify-center gap-1 p-4 text-center"><span className="text-sm text-muted-foreground">{STATUS[status]}</span><strong className="text-2xl">{data.visits.filter((visit) => visit.status === status).length}</strong></CardContent></Card>)}</div>
