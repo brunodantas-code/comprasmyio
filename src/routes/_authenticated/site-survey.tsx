@@ -273,9 +273,9 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
     const hiddenHydrometerQuestionIds = new Set<string>();
     for (const section of pointSections.filter((item) => isWaterHydrometerSection(item.title))) {
       const sectionQuestions = questions.filter((question) => question.section_id === section.id);
-      const firstQuestion = sectionQuestions[0];
-      if (firstQuestion && String(values.get(firstQuestion.id) ?? "").toLocaleLowerCase("pt-BR") === "não") {
-        sectionQuestions.slice(1).forEach((question) => hiddenHydrometerQuestionIds.add(question.id));
+      const gateQuestion = sectionQuestions.find(isHydrometerPresenceQuestion);
+      if (gateQuestion && String(values.get(gateQuestion.id) ?? "").toLocaleLowerCase("pt-BR") === "não") {
+        sectionQuestions.filter((question) => question.id !== gateQuestion.id).forEach((question) => hiddenHydrometerQuestionIds.add(question.id));
       }
     }
     const visibleQuestions = questions.filter((question) => !hiddenHydrometerQuestionIds.has(question.id));
@@ -332,12 +332,19 @@ function isWaterHydrometerSection(title: string) {
   return normalized.includes("agua") && normalized.includes("hidrometro");
 }
 
+function isHydrometerPresenceQuestion(question: Question) {
+  const normalized = question.prompt.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR");
+  return normalized.includes("existe hidrometro");
+}
+
 function ConditionalSectionQuestions({ sectionTitle, questions, answers, attachments, matchesPoint, selectedPoint }: { sectionTitle: string; questions: Question[]; answers: Map<string, unknown>; attachments: Array<{ question_id: string | null; visit_luc_id?: string | null; visit_environment_id?: string | null }>; matchesPoint: (item: { visit_luc_id?: string | null; visit_environment_id?: string | null }) => boolean; selectedPoint: string }) {
-  const firstQuestion = questions[0];
-  const initialAnswer = firstQuestion ? answerParts(answers.get(firstQuestion.id)).value : "";
+  const gateQuestion = questions.find(isHydrometerPresenceQuestion);
+  const orderedQuestions = gateQuestion ? [gateQuestion, ...questions.filter((question) => question.id !== gateQuestion.id)] : questions;
+  const initialAnswer = gateQuestion ? answerParts(answers.get(gateQuestion.id)).value : "";
   const [firstAnswer, setFirstAnswer] = useState(typeof initialAnswer === "string" ? initialAnswer : "");
-  const visibleQuestions = isWaterHydrometerSection(sectionTitle) && firstAnswer.toLocaleLowerCase("pt-BR") !== "sim" ? questions.slice(0, 1) : questions;
-  return <>{visibleQuestions.map((question, index) => <QuestionField key={`${selectedPoint}-${question.id}`} question={question} answer={answers.get(question.id)} hasPhoto={attachments.some((item) => item.question_id === question.id && matchesPoint(item))} onAnswerChange={index === 0 && isWaterHydrometerSection(sectionTitle) ? setFirstAnswer : undefined} />)}</>;
+  const isConditionalSection = isWaterHydrometerSection(sectionTitle) && Boolean(gateQuestion);
+  const visibleQuestions = isConditionalSection && firstAnswer.toLocaleLowerCase("pt-BR") !== "sim" ? orderedQuestions.slice(0, 1) : orderedQuestions;
+  return <>{visibleQuestions.map((question) => <QuestionField key={`${selectedPoint}-${question.id}`} question={question} answer={answers.get(question.id)} hasPhoto={attachments.some((item) => item.question_id === question.id && matchesPoint(item))} onAnswerChange={question.id === gateQuestion?.id ? setFirstAnswer : undefined} />)}</>;
 }
 
 function TechnicianSelector({ technicians, rows, onChange }: { technicians: Profile[]; rows: VisitTechnician[]; onChange: (rows: VisitTechnician[]) => void }) {
