@@ -1,7 +1,7 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
-import { CalendarDays, Camera, Check, ClipboardCheck, Eye, FileText, History, Home, MapPin, Pencil, Plus, Search, Settings2, ShieldCheck, Sparkles, Trash2, UserRound, UsersRound, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { CalendarDays, Camera, Check, ClipboardCheck, Eye, FileText, History, Home, MapPin, Package, Pencil, Plus, Search, ShieldCheck, Sparkles, UsersRound, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -32,6 +32,7 @@ const PERMISSIONS = [
   ["site_survey_perfis", "Perfis de acesso"],
   ["site_survey_logs", "Logs"],
   ["site_survey_configuracoes", "Modelos de checklist"],
+  ["site_survey_cadastro", "Cadastro e Diversos"],
 ] as const;
 
 type VisitStatus = "agendada" | "em_andamento" | "em_revisao" | "concluida" | "cancelada";
@@ -50,6 +51,7 @@ type Profile = { id: string; full_name: string; email: string | null };
 type Template = { id: string; name: string; description: string | null; active: boolean };
 type Section = { id: string; template_id: string; title: string; description: string | null; position: number };
 type Question = { id: string; section_id: string; prompt: string; question_type: "checkbox" | "text" | "textarea" | "number" | "select"; required: boolean; options: unknown; position: number; active: boolean };
+type CatalogItem = Named & { category: "material" | "equipamento"; active: boolean; position: number };
 
 const STATUS: Record<VisitStatus, string> = { agendada: "Agendada", em_andamento: "Em andamento", em_revisao: "Em revisão", concluida: "Concluída", cancelada: "Cancelada" };
 const STATUS_ORDER: VisitStatus[] = ["agendada", "em_andamento", "em_revisao", "concluida", "cancelada"];
@@ -81,7 +83,7 @@ function SiteSurveyPage() {
     queryFn: async () => {
       const { data: auth } = await supabase.auth.getUser();
       if (!auth.user) throw new Error("Sessão não encontrada");
-      const [{ data: visits, error }, { data: clients }, { data: clientCategories }, { data: projects }, { data: units }, { data: technicians }, { data: templates }, { data: sections }, { data: questions }, { data: surveyProfile }, { data: surveyPermissions }, { data: erpAdmin }] = await Promise.all([
+      const [{ data: visits, error }, { data: clients }, { data: clientCategories }, { data: projects }, { data: units }, { data: technicians }, { data: templates }, { data: sections }, { data: questions }, { data: surveyProfile }, { data: surveyPermissions }, { data: erpAdmin }, { data: catalog }, { data: screwdriverTypes }, { data: wrenchSizes }] = await Promise.all([
         supabase.from("site_survey_visits").select("*").order("scheduled_start", { ascending: false }),
         supabase.from("clients").select("id,name,category_id").order("name"),
         supabase.from("client_categories").select("id,name").eq("active", true).order("position"),
@@ -94,11 +96,14 @@ function SiteSurveyPage() {
         supabase.from("site_survey_user_profiles").select("profile_code,is_customized,site_survey_access_profiles(name,site_survey_profile_permissions(permission_key,allowed))").eq("user_id", auth.user.id).maybeSingle(),
         supabase.from("site_survey_user_permissions").select("permission_key,allowed").eq("user_id", auth.user.id),
         supabase.from("erp_admins").select("user_id").eq("user_id", auth.user.id).maybeSingle(),
+        supabase.from("site_survey_material_catalog").select("*").order("position").order("name"),
+        supabase.from("site_survey_screwdriver_types").select("id,name").eq("active", true).order("position").order("name"),
+        supabase.from("site_survey_wrench_sizes").select("id,name").eq("active", true).order("position").order("name"),
       ]);
       if (error) throw error;
       const profile = surveyProfile as unknown as { profile_code: string; is_customized: boolean; site_survey_access_profiles: { name: string; site_survey_profile_permissions: Array<{ permission_key: string; allowed: boolean }> } | null } | null;
       const permissions = new Set(Boolean(erpAdmin) ? PERMISSIONS.map(([key]) => key) : profile?.is_customized ? (surveyPermissions ?? []).filter((item) => item.allowed).map((item) => item.permission_key) : (profile?.site_survey_access_profiles?.site_survey_profile_permissions ?? []).filter((item) => item.allowed).map((item) => item.permission_key));
-      return { userId: auth.user.id, visits: (visits ?? []) as Visit[], clients: (clients ?? []) as ClientOption[], clientCategories: (clientCategories ?? []) as ClientCategory[], projects: (projects ?? []) as ProjectOption[], units: (units ?? []) as Array<Named & { client_id: string }>, technicians: (technicians ?? []) as Profile[], templates: (templates ?? []) as Template[], sections: (sections ?? []) as Section[], questions: (questions ?? []) as Question[], permissions, profileName: profile?.site_survey_access_profiles?.name ?? "Sem perfil", isErpAdmin: Boolean(erpAdmin) };
+      return { userId: auth.user.id, visits: (visits ?? []) as Visit[], clients: (clients ?? []) as ClientOption[], clientCategories: (clientCategories ?? []) as ClientCategory[], projects: (projects ?? []) as ProjectOption[], units: (units ?? []) as Array<Named & { client_id: string }>, technicians: (technicians ?? []) as Profile[], templates: (templates ?? []) as Template[], sections: (sections ?? []) as Section[], questions: (questions ?? []) as Question[], catalog: (catalog ?? []) as CatalogItem[], screwdriverTypes: (screwdriverTypes ?? []) as Named[], wrenchSizes: (wrenchSizes ?? []) as Named[], permissions, profileName: profile?.site_survey_access_profiles?.name ?? "Sem perfil", isErpAdmin: Boolean(erpAdmin) };
     },
   });
   const can = (permission: string) => data?.permissions.has(permission) ?? false;
@@ -115,6 +120,7 @@ function SiteSurveyPage() {
   const tabs = [
     { value: "visitas", label: "Visitas", icon: CalendarDays, allowed: can("site_survey_visitas_minhas") || can("site_survey_visitas_todas") },
     { value: "checklists", label: "Checklists", icon: ClipboardCheck, allowed: can("site_survey_configuracoes") },
+    { value: "cadastro", label: "Cadastro", icon: Package, allowed: can("site_survey_cadastro") || can("site_survey_configuracoes") },
     { value: "usuarios", label: "Usuários", icon: UsersRound, allowed: can("site_survey_usuarios") },
     { value: "perfis", label: "Perfis de acesso", icon: ShieldCheck, allowed: can("site_survey_perfis") },
     { value: "logs", label: "Logs", icon: History, allowed: can("site_survey_logs") },
@@ -132,6 +138,7 @@ function SiteSurveyPage() {
           <div className="overflow-hidden rounded-md border border-border bg-card"><div className="hidden grid-cols-[90px_1fr_1fr_1fr_150px_90px] gap-3 border-b bg-primary/20 px-4 py-3 text-sm font-semibold lg:grid"><span>Nº</span><span>Cliente / Projeto</span><span>Técnico</span><span>Agendamento</span><span>Situação</span><span>Ações</span></div>{filtered.map((visit) => <div key={visit.id} className="grid gap-3 border-b border-border px-4 py-4 last:border-0 lg:grid-cols-[90px_1fr_1fr_1fr_150px_90px] lg:items-center"><span className="text-sm font-semibold">#{String(visit.survey_number).padStart(6, "0")}</span><div className="min-w-0"><p className="truncate text-sm font-medium">{names.clients.get(visit.client_id ?? "") ?? names.projects.get(visit.project_id ?? "") ?? "—"}</p>{visit.client_id && visit.project_id ? <p className="truncate text-xs text-muted-foreground">{names.projects.get(visit.project_id)}</p> : null}</div><span className="truncate text-sm">{names.technicians.get(visit.technician_id) ?? "—"}</span><div className="text-sm"><p>{new Date(visit.scheduled_start).toLocaleDateString("pt-BR")}</p><p className="text-xs text-muted-foreground">{new Date(visit.scheduled_start).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</p></div><Badge variant="status" className="w-fit">{STATUS[visit.status]}</Badge><div className="flex gap-1"><Button size="compactIcon" variant="ghost" title="Abrir visita" aria-label="Abrir visita" onClick={() => setSelected(visit)}><Eye className="h-3.5 w-3.5" /></Button>{can("site_survey_editar") ? <VisitDialog data={data} visit={visit} onSaved={invalidate} /> : null}{can("site_survey_excluir") ? <ConfirmDeleteButton title="Excluir visita?" description="Esta ação excluirá a visita, respostas, fotos e histórico." onConfirm={async () => { const { error } = await supabase.from("site_survey_visits").delete().eq("id", visit.id); if (error) return toast.error(error.message); toast.success("Visita excluída"); invalidate(); }} /> : null}</div></div>)}{filtered.length === 0 ? <p className="px-4 py-12 text-center text-sm text-muted-foreground">Nenhuma visita encontrada.</p> : null}</div>
         </TabsContent>
         <TabsContent value="checklists"><ChecklistAdmin data={data} onChanged={invalidate} /></TabsContent>
+        <TabsContent value="cadastro"><SurveyCatalogAdmin data={data} onChanged={invalidate} /></TabsContent>
         <TabsContent value="usuarios"><SurveyUsersAdmin /></TabsContent>
         <TabsContent value="perfis"><SurveyProfilesAdmin /></TabsContent>
         <TabsContent value="logs"><SurveyLogs names={names} /></TabsContent>
