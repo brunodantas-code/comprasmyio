@@ -126,7 +126,10 @@ function SiteSurveyPage() {
     { value: "visitas", label: "Visitas", icon: CalendarDays, allowed: can("site_survey_visitas_minhas") || can("site_survey_visitas_todas") },
     { value: "checklists", label: "Checklists", icon: ClipboardCheck, allowed: can("site_survey_configuracoes") },
     { value: "cadastro", label: "Cadastro", icon: Package, allowed: can("site_survey_cadastro") || can("site_survey_configuracoes") },
-    { value: "usuarios", label: "Usuários", icon: UsersRound, allowed: can("site_survey_usuarios") },
+    { value: "usuarios", label: "Usuários", icon: UsersRound, allowed: can("site_survey_usuarios") || can("site_survey_perfis") || can("site_survey_logs") },
+  ].filter((item) => item.allowed);
+  const userTabs = [
+    { value: "lista", label: "Usuários", icon: UsersRound, allowed: can("site_survey_usuarios") },
     { value: "perfis", label: "Perfis de acesso", icon: ShieldCheck, allowed: can("site_survey_perfis") },
     { value: "logs", label: "Logs", icon: History, allowed: can("site_survey_logs") },
   ].filter((item) => item.allowed);
@@ -144,9 +147,16 @@ function SiteSurveyPage() {
         </TabsContent>
         <TabsContent value="checklists"><ChecklistAdmin data={data} onChanged={invalidate} /></TabsContent>
         <TabsContent value="cadastro"><SurveyCatalogAdmin data={data} onChanged={invalidate} /></TabsContent>
-        <TabsContent value="usuarios"><SurveyUsersAdmin /></TabsContent>
-        <TabsContent value="perfis"><SurveyProfilesAdmin /></TabsContent>
-        <TabsContent value="logs"><SurveyLogs names={names} /></TabsContent>
+        <TabsContent value="usuarios">
+          <Tabs defaultValue={userTabs[0]?.value}>
+            <TabsList className="no-scrollbar mb-4 flex h-auto w-full justify-start overflow-x-auto">
+              {userTabs.map(({ value, label, icon: Icon }) => <TabsTrigger key={value} value={value} className="shrink-0"><Icon className="mr-2 h-4 w-4" />{label}</TabsTrigger>)}
+            </TabsList>
+            {can("site_survey_usuarios") ? <TabsContent value="lista"><SurveyUsersAdmin /></TabsContent> : null}
+            {can("site_survey_perfis") ? <TabsContent value="perfis"><SurveyProfilesAdmin /></TabsContent> : null}
+            {can("site_survey_logs") ? <TabsContent value="logs"><SurveyLogs names={names} /></TabsContent> : null}
+          </Tabs>
+        </TabsContent>
       </Tabs>
     </main>
     <VisitDetails visit={selected} data={data} onClose={() => setSelected(null)} onChanged={() => { invalidate(); setSelected(null); }} />
