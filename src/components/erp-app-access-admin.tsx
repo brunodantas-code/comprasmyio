@@ -14,6 +14,7 @@ const APPS = [
   { key: "legal", label: "Legal" },
   { key: "rh", label: "RH" },
   { key: "development", label: "Code" },
+  { key: "site_survey", label: "Site Survey" },
 ] as const;
 
 export function ErpAppAccessAdmin() {
@@ -55,7 +56,7 @@ export function ErpAppAccessAdmin() {
                 </div>
                 <p className="truncate text-xs text-muted-foreground">{user.email}</p>
               </div>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-3 lg:grid-cols-6 lg:gap-x-5">
+              <div className="grid grid-cols-2 gap-x-4 gap-y-3 lg:grid-cols-7 lg:gap-x-5">
                 {APPS.map((app) => {
                   const checked = accessSet.has(`${user.id}:${app.key}`);
                   return (

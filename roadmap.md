@@ -1,3 +1,13 @@
+# Aplicativo Site Survey
+
+- [x] Adicionar Site Survey ao portal com ícone de lupa e ao controle de acesso por aplicativo.
+- [x] Reutilizar Perfis de acesso do Supply para menus e telas do Site Survey, sem alçadas nem Approval Workflow.
+- [x] Criar agenda e ciclo Agendada → Em andamento → Em revisão → Concluída, com cancelamento e reabertura.
+- [x] Vincular visitas a cliente e/ou projeto e técnico responsável.
+- [x] Criar modelos configuráveis de checklist, respostas, fotos, anexos e histórico.
+- [x] Incluir dados do Site Survey no backup e no cadastro de tickets do Code.
+- [x] Validar permissões e fluxos em computador e celular e mostrar prévia antes de concluir.
+
 # Correções dos alertas de monitoramento
 
 - [x] Restaurar Destinatário e Prazo no pedido consolidado de Materiais.

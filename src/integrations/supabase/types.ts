@@ -3134,6 +3134,523 @@ export type Database = {
         }
         Relationships: []
       }
+      site_survey_access_profiles: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          is_system: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          is_system?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          is_system?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      site_survey_attachments: {
+        Row: {
+          content_type: string | null
+          created_at: string
+          file_name: string
+          file_size: number
+          id: string
+          question_id: string | null
+          storage_path: string
+          uploaded_by: string | null
+          visit_id: string
+        }
+        Insert: {
+          content_type?: string | null
+          created_at?: string
+          file_name: string
+          file_size?: number
+          id?: string
+          question_id?: string | null
+          storage_path: string
+          uploaded_by?: string | null
+          visit_id: string
+        }
+        Update: {
+          content_type?: string | null
+          created_at?: string
+          file_name?: string
+          file_size?: number
+          id?: string
+          question_id?: string | null
+          storage_path?: string
+          uploaded_by?: string | null
+          visit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_survey_attachments_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_attachments_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_attachments_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_visits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      site_survey_logs: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          details: Json
+          id: string
+          visit_id: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          visit_id: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          visit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_survey_logs_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_logs_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_visits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      site_survey_profile_permissions: {
+        Row: {
+          allowed: boolean
+          created_at: string
+          permission_key: string
+          profile_code: string
+        }
+        Insert: {
+          allowed?: boolean
+          created_at?: string
+          permission_key: string
+          profile_code: string
+        }
+        Update: {
+          allowed?: boolean
+          created_at?: string
+          permission_key?: string
+          profile_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_survey_profile_permissions_profile_code_fkey"
+            columns: ["profile_code"]
+            isOneToOne: false
+            referencedRelation: "site_survey_access_profiles"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      site_survey_questions: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          options: Json
+          position: number
+          prompt: string
+          question_type: string
+          required: boolean
+          section_id: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          options?: Json
+          position?: number
+          prompt: string
+          question_type?: string
+          required?: boolean
+          section_id: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          options?: Json
+          position?: number
+          prompt?: string
+          question_type?: string
+          required?: boolean
+          section_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_survey_questions_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      site_survey_responses: {
+        Row: {
+          answer: Json
+          answered_at: string
+          answered_by: string | null
+          created_at: string
+          id: string
+          question_id: string
+          updated_at: string
+          visit_id: string
+        }
+        Insert: {
+          answer?: Json
+          answered_at?: string
+          answered_by?: string | null
+          created_at?: string
+          id?: string
+          question_id: string
+          updated_at?: string
+          visit_id: string
+        }
+        Update: {
+          answer?: Json
+          answered_at?: string
+          answered_by?: string | null
+          created_at?: string
+          id?: string
+          question_id?: string
+          updated_at?: string
+          visit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_survey_responses_answered_by_fkey"
+            columns: ["answered_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_responses_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_responses_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_visits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      site_survey_sections: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          position: number
+          template_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          position?: number
+          template_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          position?: number
+          template_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_survey_sections_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      site_survey_templates: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_survey_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      site_survey_user_permissions: {
+        Row: {
+          allowed: boolean
+          created_at: string
+          permission_key: string
+          user_id: string
+        }
+        Insert: {
+          allowed?: boolean
+          created_at?: string
+          permission_key: string
+          user_id: string
+        }
+        Update: {
+          allowed?: boolean
+          created_at?: string
+          permission_key?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_survey_user_permissions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      site_survey_user_profiles: {
+        Row: {
+          is_customized: boolean
+          profile_code: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          is_customized?: boolean
+          profile_code?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          is_customized?: boolean
+          profile_code?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_survey_user_profiles_profile_code_fkey"
+            columns: ["profile_code"]
+            isOneToOne: false
+            referencedRelation: "site_survey_access_profiles"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "site_survey_user_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      site_survey_visits: {
+        Row: {
+          address: string
+          cancelled_at: string | null
+          client_id: string | null
+          client_unit_id: string | null
+          completed_at: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          created_by: string
+          id: string
+          notes: string | null
+          project_id: string | null
+          review_notes: string | null
+          scheduled_end: string | null
+          scheduled_start: string
+          started_at: string | null
+          status: string
+          submitted_at: string | null
+          survey_number: number
+          technician_id: string
+          template_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          cancelled_at?: string | null
+          client_id?: string | null
+          client_unit_id?: string | null
+          completed_at?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          notes?: string | null
+          project_id?: string | null
+          review_notes?: string | null
+          scheduled_end?: string | null
+          scheduled_start: string
+          started_at?: string | null
+          status?: string
+          submitted_at?: string | null
+          survey_number?: number
+          technician_id: string
+          template_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          cancelled_at?: string | null
+          client_id?: string | null
+          client_unit_id?: string | null
+          completed_at?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          notes?: string | null
+          project_id?: string | null
+          review_notes?: string | null
+          scheduled_end?: string | null
+          scheduled_start?: string
+          started_at?: string | null
+          status?: string
+          submitted_at?: string | null
+          survey_number?: number
+          technician_id?: string
+          template_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_survey_visits_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_visits_client_unit_id_fkey"
+            columns: ["client_unit_id"]
+            isOneToOne: false
+            referencedRelation: "client_units"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_visits_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_visits_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_visits_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_visits_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stock_destinations: {
         Row: {
           active: boolean
@@ -4084,6 +4601,10 @@ export type Database = {
         Args: { _request_type_code: string; _user_id: string }
         Returns: boolean
       }
+      can_view_site_survey_visit: {
+        Args: { _user_id: string; _visit_id: string }
+        Returns: boolean
+      }
       convert_client_to_unit: {
         Args: { _destination_client_id: string; _source_client_id: string }
         Returns: string
@@ -4142,6 +4663,14 @@ export type Database = {
           record_type: string
         }[]
       }
+      get_site_survey_users: {
+        Args: never
+        Returns: {
+          email: string
+          full_name: string
+          id: string
+        }[]
+      }
       has_job_title: {
         Args: { _job_title_id: string; _user_id: string }
         Returns: boolean
@@ -4157,7 +4686,12 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_site_survey_permission: {
+        Args: { _permission: string; _user_id: string }
+        Returns: boolean
+      }
       is_access_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_erp_admin: { Args: { _user_id: string }; Returns: boolean }
       is_supply_member: { Args: { _user_id: string }; Returns: boolean }
       primary_role: {
         Args: { _user_id: string }
