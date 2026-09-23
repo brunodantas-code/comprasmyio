@@ -1,7 +1,7 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { CalendarDays, Camera, Check, ClipboardCheck, Eye, FileText, History, Home, MapPin, Pencil, Plus, Search, Settings2, ShieldCheck, Trash2, UserRound, UsersRound, X } from "lucide-react";
+import { CalendarDays, Camera, Check, ClipboardCheck, Eye, FileText, History, Home, MapPin, Pencil, Plus, Search, Settings2, ShieldCheck, Sparkles, Trash2, UserRound, UsersRound, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { suggestShopNameFromFacade } from "@/lib/site-survey-ai.functions";
 
 const PERMISSIONS = [
   ["site_survey_visitas_minhas", "Minhas visitas"],
@@ -146,10 +147,24 @@ function VisitDialog({ data, visit, onSaved }: { data: NonNullable<ReturnType<ty
   const [projectId, setProjectId] = useState(visit?.project_id ?? "none");
   const initialEnvironments = Array.isArray(visit?.environments) ? visit.environments.filter((item): item is string => typeof item === "string") : [];
   const [environments, setEnvironments] = useState<string[]>(initialEnvironments.length ? initialEnvironments : [""]);
+  const [shopName, setShopName] = useState(visit?.shop_name ?? "");
+  const [analyzingFacade, setAnalyzingFacade] = useState(false);
   const linkedClientId = clientId !== "none" ? clientId : data.projects.find((project) => project.id === projectId)?.client_id ?? null;
   const selectedClient = data.clients.find((client) => client.id === linkedClientId);
   const selectedCategory = data.clientCategories.find((category) => category.id === selectedClient?.category_id);
   const isShopping = selectedCategory?.name.trim().toLocaleLowerCase("pt-BR") === "shoppings";
+  const analyzeFacade = async (file?: File) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) return toast.error("Selecione uma foto da fachada.");
+    setAnalyzingFacade(true);
+    try {
+      const imageDataUrl = await new Promise<string>((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result)); reader.onerror = () => reject(new Error("Não foi possível ler a foto.")); reader.readAsDataURL(file); });
+      const result = await suggestShopNameFromFacade({ data: { imageDataUrl, mimeType: file.type as "image/jpeg" | "image/png" | "image/webp" | "image/heic" | "image/heif" } });
+      setShopName(result.name);
+      toast.success("Nome sugerido. Confira antes de salvar.");
+    } catch (error) { toast.error(error instanceof Error ? error.message : "Não foi possível analisar a fachada."); }
+    finally { setAnalyzingFacade(false); }
+  };
   const save = useMutation({ mutationFn: async (form: HTMLFormElement) => {
     const values = new FormData(form); const projectId = String(values.get("project_id")); const selectedClient = String(values.get("client_id"));
     if (selectedClient === "none" && projectId === "none") throw new Error("Selecione um cliente e/ou projeto.");
