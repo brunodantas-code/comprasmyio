@@ -4073,6 +4073,7 @@ export type Database = {
         Args: { _reallocations?: Json; _source_profile: string }
         Returns: number
       }
+      admin_delete_request_type: { Args: { _code: string }; Returns: undefined }
       admin_edit_purchase_approval: {
         Args: { _changes: Json; _items: Json; _order_id: string }
         Returns: undefined

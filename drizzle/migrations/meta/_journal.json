@@ -267,6 +267,13 @@
       "when": 1790166724852,
       "tag": "0037_fix_request_type_links_and_approval_defaults",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1790167056984,
+      "tag": "0038_transactional_request_type_deletion",
+      "breakpoints": true
     }
   ]
 }
