@@ -48,11 +48,17 @@ export function JobTitlesTab({ userId }: { userId: string }) {
 
   const create = useMutation({
     mutationFn: async (v: FormValues) => {
-      const { data: existing, error: lookupError } = await supabase.from("job_titles").select("id,name");
+      const { data: existing, error: lookupError } = await supabase.from("job_titles").select("id,name,active");
       if (lookupError) throw lookupError;
       const normalizedName = v.name.trim().toLocaleLowerCase("pt-BR");
-      if (existing?.some((item) => item.name.trim().toLocaleLowerCase("pt-BR") === normalizedName)) {
+      const matching = existing?.find((item) => item.name.trim().toLocaleLowerCase("pt-BR") === normalizedName);
+      if (matching?.active) {
         throw new Error(DUPLICATE_JOB_TITLE_MESSAGE);
+      }
+      if (matching) {
+        const { error } = await supabase.from("job_titles").update({ ...v, active: true }).eq("id", matching.id);
+        if (error) throw error;
+        return;
       }
       const { error } = await supabase.from("job_titles").insert({ ...v, created_by: userId });
       if (error) throw new Error(isDuplicateNameError(error) ? DUPLICATE_JOB_TITLE_MESSAGE : error.message);

@@ -46,6 +46,8 @@ export const exportDatabaseBackup = createServerFn({ method: "POST" })
       "myio_product_images",
       "terceiros_materials",
       "terceiros_movements",
+      "tool_assets",
+      "tool_movements",
       "external_product_states",
       "external_sync_state",
     ] as const;

@@ -58,6 +58,7 @@ export function AddressAutocomplete({
   const { data: deliveryPoints } = useDeliveryPoints(true);
   const sessionRef = useRef<unknown>(null);
   const boxRef = useRef<HTMLDivElement>(null);
+  const initializedDefaultRef = useRef(false);
 
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
@@ -128,12 +129,13 @@ export function AddressAutocomplete({
   const full = [addressValue, details.trim()].filter(Boolean).join(" — ");
 
   useEffect(() => {
-    if (defaultValue || query || !deliveryPoints?.length) return;
+    if (initializedDefaultRef.current || defaultValue || !deliveryPoints?.length) return;
+    initializedDefaultRef.current = true;
     const preferred = deliveryPoints.find((point) => point.is_default) ?? deliveryPoints[0];
     setAddress(preferred.address);
     setQuery(preferred.address);
     setConfirmed(true);
-  }, [defaultValue, deliveryPoints, query]);
+  }, [defaultValue, deliveryPoints]);
 
   return (
     <div className="space-y-2" ref={boxRef}>
