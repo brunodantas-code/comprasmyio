@@ -3819,6 +3819,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          location: string | null
           luc_number: string
           shop_name: string
           updated_at: string
@@ -3830,6 +3831,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          location?: string | null
           luc_number: string
           shop_name: string
           updated_at?: string
@@ -3841,6 +3843,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          location?: string | null
           luc_number?: string
           shop_name?: string
           updated_at?: string
