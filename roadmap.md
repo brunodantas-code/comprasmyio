@@ -631,3 +631,8 @@
 - [x] Criar ficha básica dos técnicos do Supply no myio RH com celular no padrão (DDD) 9XXXX-XXXX.
 - [x] Consultar automaticamente o celular cadastrado no RH ao selecionar técnicos no Site Survey.
 - [x] Validar o cadastro no RH e o preenchimento automático no Site Survey em computador e celular.
+
+## Confirmações e destaque das visitas
+- [x] Aplicar fundo verde-claro ao botão Exibir/Recolher da visita.
+- [x] Exigir confirmação antes do cancelamento de uma visita.
+- [x] Validar em computador e celular.
