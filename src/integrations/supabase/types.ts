@@ -3261,6 +3261,54 @@ export type Database = {
           },
         ]
       }
+      site_survey_luc_history: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          id: string
+          luc_number: string
+          shop_name: string
+          valid_from: string
+          valid_until: string | null
+          visit_id: string
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          luc_number: string
+          shop_name: string
+          valid_from?: string
+          valid_until?: string | null
+          visit_id: string
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          luc_number?: string
+          shop_name?: string
+          valid_from?: string
+          valid_until?: string | null
+          visit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_survey_luc_history_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_luc_history_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_visits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_survey_profile_permissions: {
         Row: {
           allowed: boolean

@@ -323,6 +323,13 @@
       "when": 1790170425916,
       "tag": "0045_add_site_survey_location_details",
       "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "7",
+      "when": 1790170765148,
+      "tag": "0046_add_site_survey_luc_history",
+      "breakpoints": true
     }
   ]
 }
