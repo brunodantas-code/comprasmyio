@@ -595,5 +595,5 @@
 - [x] Validar a navegação consolidada em computador e celular
 
 ## Técnicos do Supply no Site Survey
-- [ ] Exibir na seleção de responsável somente os técnicos cadastrados no Supply
-- [ ] Validar a lista na criação de visita técnica
+- [x] Exibir na seleção de responsável somente os técnicos cadastrados no Supply
+- [x] Validar a lista na criação de visita técnica
