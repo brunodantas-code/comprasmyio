@@ -79,6 +79,7 @@ type VisitTechnician = { technician_id: string; mobile_phone: string };
 
 const STATUS: Record<VisitStatus, string> = { agendada: "Agendada", em_andamento: "Em andamento", em_revisao: "Em revisão", concluida: "Concluída", cancelada: "Cancelada" };
 const STATUS_ORDER: VisitStatus[] = ["agendada", "em_andamento", "em_revisao", "concluida", "cancelada"];
+const GENERAL_CHECKLIST_SECTIONS = new Set(["Preparação pré-visita", "Chegada e responsáveis", "Condições e perfil do local"]);
 
 export const Route = createFileRoute("/_authenticated/site-survey")({
   beforeLoad: async ({ context }) => {
@@ -209,14 +210,20 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
   const [materialRows, setMaterialRows] = useState<Array<{ catalog_item_id: string; quantity: string; notes: string; screwdriver_type_id: string; wrench_size_id: string }>>([]);
   const [visitTechnicians, setVisitTechnicians] = useState<VisitTechnician[]>([{ technician_id: "", mobile_phone: "" }]);
   const [selectedPoint, setSelectedPoint] = useState("");
+  const [pointFilter, setPointFilter] = useState("");
   const questions = data.questions.filter((question) => question.active && data.sections.some((section) => section.active && section.id === question.section_id && section.template_id === visit?.template_id));
+  const sections = data.sections.filter((section) => section.active && section.template_id === visit?.template_id);
+  const generalSections = sections.filter((section) => GENERAL_CHECKLIST_SECTIONS.has(section.title));
+  const pointSections = sections.filter((section) => !GENERAL_CHECKLIST_SECTIONS.has(section.title));
+  const generalQuestionIds = new Set(questions.filter((question) => generalSections.some((section) => section.id === question.section_id)).map((question) => question.id));
   const { data: detail, refetch: refetchDetail } = useQuery({ queryKey: ["site-survey-detail", visit?.id], enabled: Boolean(visit), queryFn: async () => { const [{ data: responses }, { data: attachments }, { data: logs }, { data: lucHistory }, { data: visitMaterials }, { data: technicians }, { data: lucs }, { data: environments }] = await Promise.all([supabase.from("site_survey_responses").select("*").eq("visit_id", visit?.id ?? ""), supabase.from("site_survey_attachments").select("*").eq("visit_id", visit?.id ?? "").order("created_at"), supabase.from("site_survey_logs").select("*").eq("visit_id", visit?.id ?? "").order("created_at", { ascending: false }), supabase.from("site_survey_luc_history").select("*").eq("visit_id", visit?.id ?? "").order("valid_from", { ascending: false }), supabase.from("site_survey_visit_materials").select("*").eq("visit_id", visit?.id ?? "").order("created_at"), supabase.from("site_survey_visit_technicians").select("technician_id,mobile_phone,visit_luc_id,visit_environment_id").eq("visit_id", visit?.id ?? "").order("created_at"), supabase.from("site_survey_visit_lucs").select("id,luc_number,shop_name").eq("visit_id", visit?.id ?? "").eq("active", true).order("luc_number"), supabase.from("site_survey_visit_environments").select("id,name").eq("visit_id", visit?.id ?? "").eq("active", true).order("name")]); return { responses: responses ?? [], attachments: attachments ?? [], logs: logs ?? [], lucHistory: lucHistory ?? [], visitMaterials: visitMaterials ?? [], technicians: technicians ?? [], lucs: lucs ?? [], environments: environments ?? [] }; } });
   const points = [...(detail?.lucs ?? []).map((item) => ({ value: `luc:${item.id}`, label: `LUC ${item.luc_number} — ${item.shop_name}` })), ...(detail?.environments ?? []).map((item) => ({ value: `environment:${item.id}`, label: item.name }))];
+  const visiblePoints = points.filter((point) => point.label.toLocaleLowerCase("pt-BR").includes(pointFilter.trim().toLocaleLowerCase("pt-BR")));
   const pointKind = selectedPoint.startsWith("luc:") ? "luc" : "environment";
   const pointId = selectedPoint.split(":")[1] ?? "";
   const matchesPoint = (item: { visit_luc_id?: string | null; visit_environment_id?: string | null }) => pointKind === "luc" ? item.visit_luc_id === pointId : item.visit_environment_id === pointId;
   const scopedMaterials = (detail?.visitMaterials ?? []).filter(matchesPoint);
-  const scopedTechnicians = (detail?.technicians ?? []).filter(matchesPoint);
+  const scopedTechnicians = (detail?.technicians ?? []).filter((item) => !item.visit_luc_id && !item.visit_environment_id);
   useEffect(() => { if (!selectedPoint && points[0]) setSelectedPoint(points[0].value); }, [selectedPoint, points]);
   useEffect(() => { setMaterialRows(scopedMaterials.map((item) => ({ catalog_item_id: item.catalog_item_id, quantity: String(item.quantity), notes: item.notes ?? "", screwdriver_type_id: item.screwdriver_type_id ?? "none", wrench_size_id: item.wrench_size_id ?? "none" }))); }, [selectedPoint, detail?.visitMaterials]);
   useEffect(() => { setVisitTechnicians(scopedTechnicians.length ? scopedTechnicians.map((item) => ({ technician_id: item.technician_id, mobile_phone: item.mobile_phone })) : [{ technician_id: "", mobile_phone: "" }]); }, [selectedPoint, detail?.technicians]);
