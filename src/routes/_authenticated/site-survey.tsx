@@ -1,6 +1,6 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { CalendarDays, Camera, Check, ChevronDown, ClipboardCheck, Eye, FileText, History, Home, MapPin, Minus, Package, Pencil, Plus, Search, ShieldCheck, UsersRound, Save, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -243,12 +243,23 @@ function VisitDialog({ data, visit, onSaved, inline = false }: { data: NonNullab
   return <Dialog open={open} onOpenChange={(next) => { setOpen(next); if (next) { setClientId(visit?.client_id ?? "none"); setProjectId(visit?.project_id ?? "none"); } }}><DialogTrigger asChild><Button size="compactIcon" variant="ghost" title="Editar visita" aria-label="Editar visita"><Pencil className="h-3.5 w-3.5" /></Button></DialogTrigger><DialogContent className="max-h-[92vh] max-w-3xl overflow-y-auto">{form}</DialogContent></Dialog>;
 }
 
+function ChecklistSection({ section, order, open, onToggle, children }: { section: Section; order: number; open: boolean; onToggle: () => void; children: ReactNode }) {
+  return <section className={`overflow-hidden rounded-md border bg-card transition-colors ${open ? "border-myio-green shadow-sm" : "border-border"}`}>
+    <button type="button" className={`flex w-full items-center justify-between gap-3 border-l-4 px-4 py-3 text-left transition-colors ${open ? "border-l-myio-green bg-myio-green/5" : "border-l-border hover:bg-muted/40"}`} onClick={onToggle} aria-expanded={open}>
+      <span className="flex min-w-0 items-center gap-3"><span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-sm text-sm font-bold ${open ? "bg-myio-green text-primary-foreground" : "bg-muted text-muted-foreground"}`}>{order}</span><span className="min-w-0"><span className="block truncate text-sm font-semibold text-foreground">{section.title}</span>{section.description ? <span className="block truncate text-xs text-muted-foreground">{section.description}</span> : null}</span></span>
+      <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${open ? "bg-myio-green/15 text-myio-green" : "bg-muted text-muted-foreground"}`} aria-hidden="true">{open ? <Minus className="h-4 w-4" /> : <Plus className="h-4 w-4" />}</span>
+    </button>
+    {open ? <div className="space-y-5 border-t border-border p-4 sm:p-6">{children}</div> : null}
+  </section>;
+}
+
 function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null; data: NonNullable<ReturnType<typeof useSurveyDataShape>>; onClose: () => void; onChanged: () => void }) {
   const [reviewNotes, setReviewNotes] = useState(""); const [files, setFiles] = useState<File[]>([]);
   const [materialRows, setMaterialRows] = useState<Array<{ catalog_item_id: string; quantity: string; notes: string; screwdriver_type_id: string; wrench_size_id: string }>>([]);
   const [visitTechnicians, setVisitTechnicians] = useState<VisitTechnician[]>([{ technician_id: "", mobile_phone: "" }]);
   const [selectedPoint, setSelectedPoint] = useState("");
   const [pointFilter, setPointFilter] = useState("");
+  const [openSectionId, setOpenSectionId] = useState<string | null>(null);
   const questions = sortByPosition(data.questions.filter((question) => question.active && data.sections.some((section) => section.active && section.id === question.section_id && section.template_id === visit?.template_id)));
   const sections = data.sections.filter((section) => section.active && section.template_id === visit?.template_id);
   const generalSections = sections.filter((section) => GENERAL_CHECKLIST_SECTIONS.has(section.title));
