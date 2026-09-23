@@ -599,6 +599,6 @@
 - [x] Validar a lista na criação de visita técnica
 
 ## Organização das permissões do Site Survey
-- [ ] Agrupar as permissões por menus e submenus, no mesmo padrão do Supply
-- [ ] Preservar a seleção e o salvamento individual de cada acesso
-- [ ] Validar a organização em computador e celular
+- [x] Agrupar as permissões por menus e submenus, no mesmo padrão do Supply
+- [x] Preservar a seleção e o salvamento individual de cada acesso
+- [x] Validar a organização em computador e celular
