@@ -288,6 +288,13 @@
       "when": 1790167199214,
       "tag": "0040_prevent_approval_without_configured_approver",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1790167334641,
+      "tag": "0041_harden_employee_and_purchase_data_access",
+      "breakpoints": true
     }
   ]
 }
