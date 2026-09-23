@@ -302,6 +302,13 @@
       "when": 1790169703389,
       "tag": "0042_create_site_survey_app",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1790169759345,
+      "tag": "0043_secure_site_survey_storage",
+      "breakpoints": true
     }
   ]
 }
