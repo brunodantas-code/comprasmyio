@@ -636,3 +636,8 @@
 - [x] Aplicar fundo verde-claro ao botão Exibir/Recolher da visita.
 - [x] Exigir confirmação antes do cancelamento de uma visita.
 - [x] Validar em computador e celular.
+
+## Ações da visita
+- [x] Mover o cancelamento para a coluna Ações, junto de editar e excluir.
+- [x] Manter confirmação obrigatória antes do cancelamento.
+- [x] Validar a nova organização em computador e celular.
