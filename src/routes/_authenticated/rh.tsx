@@ -85,7 +85,7 @@ function TechnicianRecord({ technician, expanded, onToggle, onSaved }: { technic
     onError: (error: Error) => toast.error(error.message),
   });
   return <article className="border-b border-border last:border-0">
-    <Button type="button" variant="ghost" className="grid h-auto w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-none px-4 py-3 text-left hover:bg-muted/40" onClick={onToggle} aria-expanded={expanded}>
+    <Button type="button" variant="ghost" className="grid h-auto w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-none px-4 py-3 text-left !bg-card hover:!bg-muted/40" onClick={onToggle} aria-expanded={expanded}>
       <span className="flex min-w-0 items-center gap-3"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-myio-green/10 text-myio-green"><UserRound className="h-4 w-4" /></span><span className="min-w-0"><span className="block truncate text-sm font-semibold">{technician.full_name}</span><span className="block truncate text-xs text-muted-foreground">{technician.mobile_phone || "Celular não cadastrado"}</span></span></span>
       <span className="flex h-8 w-8 shrink-0 items-center justify-center text-muted-foreground">{expanded ? <Minus className="h-4 w-4" /> : <Plus className="h-4 w-4" />}</span>
     </Button>
