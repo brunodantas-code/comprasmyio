@@ -5,6 +5,7 @@
 - [x] Página inicial — retirar o texto “Em desenvolvimento” dos aplicativos indisponíveis.
 - [x] Página inicial — alinhar o topo do bloco “Acesse sua conta” à primeira linha dos aplicativos.
 - [x] Página inicial — ampliar e adensar a rede mesh exclusivamente na área direita, com todos os pontos conectados e sem linhas soltas, inspirada no site da myio.
+- [x] Página inicial — manter nós somente nos vértices e elevar a rede até próximo ao topo da página.
 - [ ] Estimar automaticamente a duração da visita com base nos dados da proposta comercial — quantidade de lojas/ambientes, hidrômetros, pontos elétricos, áreas técnicas e demais fatores — usando o histórico dos levantamentos realizados para apoiar futuros orçamentos e propostas.
 - [x] Registrar automaticamente na OS a data e hora reais de início e conclusão, incluindo o dia inicial e final.
 - [ ] Comparar a duração estimada versus a duração realizada.
