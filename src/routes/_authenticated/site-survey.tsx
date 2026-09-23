@@ -1,7 +1,7 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { CalendarDays, Camera, Check, ClipboardCheck, Eye, FileText, History, Home, MapPin, Package, Pencil, Plus, Search, ShieldCheck, UsersRound, Save, X } from "lucide-react";
+import { CalendarDays, Camera, Check, ChevronDown, ClipboardCheck, Eye, FileText, History, Home, MapPin, Package, Pencil, Plus, Search, ShieldCheck, UsersRound, Save, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -15,9 +15,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -357,7 +359,42 @@ function QuestionField({ question, answer, hasPhoto }: { question: Question; ans
   </div>;
 }
 
-function FormSelect({ name, label, options, defaultValue, value, onChange, optional = false }: { name: string; label: string; options: Named[]; defaultValue?: string; value?: string; onChange?: (value: string) => void; optional?: boolean }) { return <div className="space-y-2"><Label>{label}</Label><Select name={name} value={value} defaultValue={value === undefined ? defaultValue : undefined} onValueChange={onChange} required={!optional}><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent>{optional ? <SelectItem value="none">Não se aplica</SelectItem> : null}{options.map((item) => <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>)}</SelectContent></Select></div>; }
+function FormSelect({ name, label, options, defaultValue, value, onChange, optional = false }: { name: string; label: string; options: Named[]; defaultValue?: string; value?: string; onChange?: (value: string) => void; optional?: boolean }) {
+  const [open, setOpen] = useState(false);
+  const [internalValue, setInternalValue] = useState(defaultValue ?? (optional ? "none" : ""));
+  const selectedValue = value ?? internalValue;
+  const selectedLabel = selectedValue === "none" ? "Não se aplica" : options.find((item) => item.id === selectedValue)?.name;
+  const choose = (next: string) => {
+    if (value === undefined) setInternalValue(next);
+    onChange?.(next);
+    setOpen(false);
+  };
+
+  return <div className="space-y-2">
+    <Label>{label}</Label>
+    <input type="hidden" name={name} value={selectedValue} />
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button type="button" variant="outline" role="combobox" aria-expanded={open} className="w-full justify-between font-normal">
+          <span className={selectedLabel ? "truncate" : "truncate text-muted-foreground"}>{selectedLabel ?? "Digite ou selecione"}</span>
+          <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-(--radix-popover-trigger-width) p-0" align="start">
+        <Command>
+          <CommandInput placeholder={`Buscar ${label.toLocaleLowerCase("pt-BR")}...`} />
+          <CommandList>
+            <CommandEmpty>Nenhuma opção encontrada.</CommandEmpty>
+            <CommandGroup>
+              {optional ? <CommandItem value="Não se aplica" onSelect={() => choose("none")}><Check className={selectedValue === "none" ? "opacity-100" : "opacity-0"} />Não se aplica</CommandItem> : null}
+              {options.map((item) => <CommandItem key={item.id} value={item.name} onSelect={() => choose(item.id)}><Check className={selectedValue === item.id ? "opacity-100" : "opacity-0"} />{item.name}</CommandItem>)}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  </div>;
+}
 function LabeledInput({ name, label, type = "text", defaultValue, required, min, step }: { name: string; label: string; type?: string; defaultValue?: string; required?: boolean; min?: string; step?: string }) { return <div className="space-y-2"><Label htmlFor={name}>{label}</Label><Input id={name} name={name} type={type} defaultValue={defaultValue} required={required} min={min} step={step} /></div>; }
 function LabeledControlled({ label, value, onChange, type = "text" }: { label: string; value: string; onChange: (value: string) => void; type?: string }) { return <div className="space-y-2"><Label>{label}</Label><Input type={type} min={type === "number" ? "0.01" : undefined} step={type === "number" ? "0.01" : undefined} value={value} onChange={(event) => onChange(event.target.value)} /></div>; }
 function Info({ label, value }: { label: string; value: string }) { return <div className="border-l-2 border-primary pl-3"><p className="text-xs text-muted-foreground">{label}</p><p className="text-sm font-medium">{value}</p></div>; }
