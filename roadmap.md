@@ -604,4 +604,4 @@
 - [x] Validar a organização em computador e celular
 
 ## Botões do checklist
-- [ ] Igualar o tamanho do botão Editar ao botão Excluir nas perguntas
+- [x] Igualar o tamanho do botão Editar ao botão Excluir nas perguntas
