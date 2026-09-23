@@ -126,11 +126,14 @@ function Landing() {
       <div className="pointer-events-none absolute -bottom-44 -right-24 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-36 -left-36 h-80 w-80 rounded-full bg-myio-purple/50 sm:-bottom-48 sm:-left-48 sm:h-[28rem] sm:w-[28rem]" />
 
-      <div className="pointer-events-none absolute bottom-0 left-0 hidden h-[62%] w-full overflow-hidden min-[960px]:block" aria-hidden="true">
-        <svg className="absolute -bottom-[34%] -left-[7%] h-[138%] w-[78%] text-erp-mesh opacity-55" viewBox="0 0 700 700" fill="none">
+      <div className="pointer-events-none absolute bottom-0 right-0 hidden h-full w-[52%] overflow-hidden min-[960px]:block" aria-hidden="true">
+        <svg className="absolute -bottom-[18%] -right-[12%] h-[112%] w-[125%] text-erp-mesh opacity-60" viewBox="0 0 700 700" fill="none">
           <g stroke="currentColor" strokeWidth="1.2">
             <path d="M395 44 594 145 654 346 553 602 321 647 124 509 84 283 221 104 395 44Z" />
             <path d="m395 44-68 177 267-76-116 231 176-30M327 221 84 283m243-62 151 155M84 283l226 156m168-63 75 226M310 439l11 208m-11-208 243 163M124 509l186-70" />
+            <path d="M221 104 148 31M395 44 503 14M594 145 684 91M654 346 692 475M553 602 636 682M321 647 220 695M124 509 24 591M84 283 12 204" />
+            <path d="M148 31 327 221M503 14 594 145M684 91 654 346M692 475 553 602M636 682 321 647M220 695 124 509M24 591 310 439M12 204 221 104" />
+            <path d="M148 31 503 14M684 91 478 376M692 475 478 376M636 682 310 439M220 695 310 439M24 591 84 283M12 204 327 221" />
           </g>
           <g className="fill-erp-mesh-node">
             <circle cx="395" cy="44" r="5" />
@@ -144,6 +147,14 @@ function Landing() {
             <circle cx="327" cy="221" r="7" className="animate-pulse" />
             <circle cx="478" cy="376" r="6" />
             <circle cx="310" cy="439" r="7" className="animate-pulse" />
+            <circle cx="148" cy="31" r="4" />
+            <circle cx="503" cy="14" r="5" />
+            <circle cx="684" cy="91" r="4" />
+            <circle cx="692" cy="475" r="5" />
+            <circle cx="636" cy="682" r="4" />
+            <circle cx="220" cy="695" r="5" />
+            <circle cx="24" cy="591" r="4" />
+            <circle cx="12" cy="204" r="5" />
           </g>
         </svg>
       </div>
