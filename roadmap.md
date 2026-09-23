@@ -1,6 +1,7 @@
 # Aplicativo Site Survey
 
 - [ ] Checklist da OS — Hidrômetro: seleção única “Fácil”, “Regular” ou “Difícil”; ao marcar “Difícil”, exigir detalhamento e foto.
+- [ ] Checklist da OS — Localização do hidrômetro: seleção única entre “Loja”, “Sobreloja”, “Parede” e “Debaixo da pia”, com foto obrigatória.
 
 - [x] Em Shopping, analisar foto da fachada com IA e sugerir um nome editável, preservando a confirmação do usuário.
 
