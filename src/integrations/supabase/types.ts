@@ -3171,7 +3171,9 @@ export type Database = {
           question_id: string | null
           storage_path: string
           uploaded_by: string | null
+          visit_environment_id: string | null
           visit_id: string
+          visit_luc_id: string | null
         }
         Insert: {
           content_type?: string | null
@@ -3182,7 +3184,9 @@ export type Database = {
           question_id?: string | null
           storage_path: string
           uploaded_by?: string | null
+          visit_environment_id?: string | null
           visit_id: string
+          visit_luc_id?: string | null
         }
         Update: {
           content_type?: string | null
@@ -3193,7 +3197,9 @@ export type Database = {
           question_id?: string | null
           storage_path?: string
           uploaded_by?: string | null
+          visit_environment_id?: string | null
           visit_id?: string
+          visit_luc_id?: string | null
         }
         Relationships: [
           {
@@ -3211,10 +3217,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "site_survey_attachments_visit_environment_id_fkey"
+            columns: ["visit_environment_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_visit_environments"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "site_survey_attachments_visit_id_fkey"
             columns: ["visit_id"]
             isOneToOne: false
             referencedRelation: "site_survey_visits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_attachments_visit_luc_id_fkey"
+            columns: ["visit_luc_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_visit_lucs"
             referencedColumns: ["id"]
           },
         ]
@@ -3431,7 +3451,9 @@ export type Database = {
           question_id: string
           question_snapshot: Json
           updated_at: string
+          visit_environment_id: string | null
           visit_id: string
+          visit_luc_id: string | null
         }
         Insert: {
           answer?: Json
@@ -3442,7 +3464,9 @@ export type Database = {
           question_id: string
           question_snapshot?: Json
           updated_at?: string
+          visit_environment_id?: string | null
           visit_id: string
+          visit_luc_id?: string | null
         }
         Update: {
           answer?: Json
@@ -3453,7 +3477,9 @@ export type Database = {
           question_id?: string
           question_snapshot?: Json
           updated_at?: string
+          visit_environment_id?: string | null
           visit_id?: string
+          visit_luc_id?: string | null
         }
         Relationships: [
           {
@@ -3471,10 +3497,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "site_survey_responses_visit_environment_id_fkey"
+            columns: ["visit_environment_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_visit_environments"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "site_survey_responses_visit_id_fkey"
             columns: ["visit_id"]
             isOneToOne: false
             referencedRelation: "site_survey_visits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_responses_visit_luc_id_fkey"
+            columns: ["visit_luc_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_visit_lucs"
             referencedColumns: ["id"]
           },
         ]
@@ -3660,6 +3700,61 @@ export type Database = {
           },
         ]
       }
+      site_survey_visit_environments: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          updated_at: string
+          updated_by: string | null
+          visit_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+          updated_by?: string | null
+          visit_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+          updated_by?: string | null
+          visit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_survey_visit_environments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_visit_environments_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_visit_environments_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_visits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_survey_visit_luc_history: {
         Row: {
           changed_by: string | null
@@ -3786,7 +3881,9 @@ export type Database = {
           recorded_by: string
           screwdriver_type_id: string | null
           updated_at: string
+          visit_environment_id: string | null
           visit_id: string
+          visit_luc_id: string | null
           wrench_size_id: string | null
         }
         Insert: {
@@ -3798,7 +3895,9 @@ export type Database = {
           recorded_by: string
           screwdriver_type_id?: string | null
           updated_at?: string
+          visit_environment_id?: string | null
           visit_id: string
+          visit_luc_id?: string | null
           wrench_size_id?: string | null
         }
         Update: {
@@ -3810,7 +3909,9 @@ export type Database = {
           recorded_by?: string
           screwdriver_type_id?: string | null
           updated_at?: string
+          visit_environment_id?: string | null
           visit_id?: string
+          visit_luc_id?: string | null
           wrench_size_id?: string | null
         }
         Relationships: [
@@ -3836,10 +3937,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "site_survey_visit_materials_visit_environment_id_fkey"
+            columns: ["visit_environment_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_visit_environments"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "site_survey_visit_materials_visit_id_fkey"
             columns: ["visit_id"]
             isOneToOne: false
             referencedRelation: "site_survey_visits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_visit_materials_visit_luc_id_fkey"
+            columns: ["visit_luc_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_visit_lucs"
             referencedColumns: ["id"]
           },
           {
@@ -3859,7 +3974,9 @@ export type Database = {
           recorded_by: string
           technician_id: string
           updated_at: string
+          visit_environment_id: string | null
           visit_id: string
+          visit_luc_id: string | null
         }
         Insert: {
           created_at?: string
@@ -3868,7 +3985,9 @@ export type Database = {
           recorded_by: string
           technician_id: string
           updated_at?: string
+          visit_environment_id?: string | null
           visit_id: string
+          visit_luc_id?: string | null
         }
         Update: {
           created_at?: string
@@ -3877,7 +3996,9 @@ export type Database = {
           recorded_by?: string
           technician_id?: string
           updated_at?: string
+          visit_environment_id?: string | null
           visit_id?: string
+          visit_luc_id?: string | null
         }
         Relationships: [
           {
@@ -3888,10 +4009,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "site_survey_visit_technicians_visit_environment_id_fkey"
+            columns: ["visit_environment_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_visit_environments"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "site_survey_visit_technicians_visit_id_fkey"
             columns: ["visit_id"]
             isOneToOne: false
             referencedRelation: "site_survey_visits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_visit_technicians_visit_luc_id_fkey"
+            columns: ["visit_luc_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_visit_lucs"
             referencedColumns: ["id"]
           },
         ]
