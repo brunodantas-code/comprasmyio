@@ -13,6 +13,7 @@ import {
   CodeXml,
   DollarSign,
   FileSignature,
+  Search,
   Settings,
   UsersRound,
 } from "lucide-react";
@@ -56,6 +57,12 @@ const MODULES = [
     icon: CodeXml,
     title: "Code",
     body: "Tickets e melhorias",
+    available: true,
+  },
+  {
+    icon: Search,
+    title: "Site Survey",
+    body: "Visitas técnicas",
     available: true,
   },
   {
@@ -114,7 +121,7 @@ function Landing() {
   }
 
   return (
-    <main className="relative flex min-h-screen w-full items-center overflow-hidden bg-erp-landing px-5 py-10 text-erp-landing-foreground sm:px-10 lg:px-12">
+    <main className="relative flex min-h-screen w-full items-center overflow-hidden bg-erp-landing px-5 py-6 text-erp-landing-foreground sm:px-10 lg:px-12 lg:py-7">
       <div className="pointer-events-none absolute -left-28 -top-36 h-96 w-96 rounded-full bg-erp-landing-soft/50 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-44 -right-24 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-36 -left-36 h-80 w-80 rounded-full bg-myio-purple/50 sm:-bottom-48 sm:-left-48 sm:h-[28rem] sm:w-[28rem]" />
@@ -141,33 +148,33 @@ function Landing() {
         </svg>
       </div>
 
-      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center gap-12 lg:grid lg:grid-cols-[minmax(0,1fr)_21rem] lg:gap-12">
+      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col items-center gap-8 lg:grid lg:grid-cols-[minmax(0,1fr)_19rem] lg:items-end lg:gap-7">
         <section className="w-full">
-          <MyioPlatformLogo tone="light" className="mb-8 h-12 sm:mb-9 sm:h-14" />
+          <MyioPlatformLogo tone="light" className="mb-5 h-11 sm:mb-6 sm:h-12" />
 
-          <h1 className="max-w-3xl text-4xl font-extrabold leading-[1.02] text-erp-landing-foreground sm:text-6xl">
+          <h1 className="max-w-3xl text-4xl font-extrabold leading-[1.02] text-erp-landing-foreground sm:text-5xl xl:text-6xl">
             Gestão inteligente
             <br />
             <span className="font-light text-erp-landing-muted">em um só ecossistema</span>
           </h1>
-          <p className="mt-4 max-w-xl text-lg leading-snug text-erp-landing-muted sm:text-xl">
+          <p className="mt-3 max-w-xl text-base leading-snug text-erp-landing-muted sm:text-lg">
             A plataforma ERP completa para escalar o negócio.
           </p>
 
-          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
             {MODULES.map(({ icon: Icon, title, body, available }) => (
               <div
                 key={title}
-                className={`flex h-28 items-center gap-3 rounded-lg border border-erp-landing-border bg-erp-landing-panel p-3 transition-colors hover:border-primary/50 sm:h-24 ${available ? "" : "opacity-60"}`}
+                className={`flex h-24 min-w-0 items-center gap-2.5 rounded-lg border border-erp-landing-border bg-erp-landing-panel p-3 transition-colors hover:border-primary/50 sm:h-20 ${available ? "" : "opacity-60"}`}
               >
                 <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-md ${available ? "bg-primary text-primary-foreground" : "bg-erp-landing-border text-erp-landing-muted"}`}>
                   <Icon className="h-5 w-5" />
                 </span>
                 <span className="min-w-0">
-                  <strong className="block text-sm text-erp-landing-foreground">{title}</strong>
-                  <span className="block text-xs leading-snug text-erp-landing-muted">{body}</span>
+                   <strong className="block text-sm leading-tight text-erp-landing-foreground">{title}</strong>
+                   <span className="block text-xs leading-tight text-erp-landing-muted">{body}</span>
                   {!available && (
-                    <span className="mt-1 block text-xs leading-snug text-erp-landing-muted">Em desenvolvimento</span>
+                     <span className="mt-1 block text-xs leading-tight text-erp-landing-muted">Em desenvolvimento</span>
                   )}
                 </span>
               </div>
@@ -175,8 +182,8 @@ function Landing() {
           </div>
         </section>
 
-        <section className="w-full lg:w-[21rem] lg:self-end" aria-labelledby="access-title">
-          <div className="rounded-2xl border border-erp-access-border bg-erp-access p-7 text-erp-landing-foreground shadow-2xl backdrop-blur-2xl sm:p-10">
+        <section className="w-full lg:w-[19rem] lg:-translate-x-8 lg:self-end xl:-translate-x-12" aria-labelledby="access-title">
+          <div className="rounded-2xl border border-erp-access-border bg-erp-access p-7 text-erp-landing-foreground shadow-2xl backdrop-blur-2xl">
             <div className="mb-7">
               <h2 id="access-title" className="text-2xl font-extrabold text-erp-landing-foreground">Acesse sua conta</h2>
               <p className="mt-1 text-erp-landing-muted">Identifique-se para acessar seus aplicativos.</p>

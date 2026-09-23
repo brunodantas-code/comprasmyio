@@ -1,7 +1,7 @@
 # Aplicativo Site Survey
 
-- [ ] Página inicial — subir o bloco do logo aos aplicativos, reduzir a largura dos blocos para manter duas linhas, adicionar o Site Survey e evitar sobreposição do CRM com o elemento lilás.
-- [ ] Acesso — deslocar o bloco “Acesse sua conta” para a esquerda, evitando sobreposição com a rede mesh.
+- [x] Página inicial — subir o bloco do logo aos aplicativos, reduzir a largura dos blocos para manter duas linhas, adicionar o Site Survey e evitar sobreposição do CRM com o elemento lilás.
+- [x] Acesso — deslocar o bloco “Acesse sua conta” para a esquerda, evitando sobreposição com a rede mesh.
 - [x] Permitir que o suporte pré-cadastre os ambientes de uma OS de shopping por Excel, com colunas LUC e Nome da loja, conferência antes da gravação, prevenção de duplicidade e atualização sem exclusão dos LUCs ausentes.
 - [x] Manter histórico individual de alterações do nome de cada loja por LUC e permitir correção manual ou por análise da foto da fachada.
 - [ ] Checklist prévio à visita técnica — confirmar, com seleção única “Sim” ou “Não”, se o celular está com 100% de bateria.
