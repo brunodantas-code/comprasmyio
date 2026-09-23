@@ -586,3 +586,8 @@
 - [x] Enviar a imagem escolhida para a identificação automática existente
 - [x] Validar a escolha em computador e celular
 - [x] Checklist por ponto — cada loja/LUC ou ambiente da OS tem seu próprio checklist completo, respostas, fotos, técnicos e materiais, sem compartilhar dados entre pontos.
+
+## Layout dos Perfis de Acesso do Site Survey
+- [x] Exibir as permissões em grade, seguindo o padrão visual do Supply
+- [x] Remover as caixas individuais ao redor de cada opção
+- [ ] Validar o resultado em computador e celular
