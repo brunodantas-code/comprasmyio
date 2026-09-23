@@ -585,4 +585,4 @@
 - [x] Ao identificar a fachada, oferecer Tirar foto ou Escolher da galeria
 - [x] Enviar a imagem escolhida para a identificação automática existente
 - [x] Validar a escolha em computador e celular
-- [ ] Checklist por ponto — cada loja/LUC ou ambiente da OS deve ter seu próprio checklist completo, respostas, fotos, técnicos e materiais, sem compartilhar dados entre pontos.
+- [x] Checklist por ponto — cada loja/LUC ou ambiente da OS tem seu próprio checklist completo, respostas, fotos, técnicos e materiais, sem compartilhar dados entre pontos.
