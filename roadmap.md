@@ -4,7 +4,7 @@
 - [x] Acesso — deslocar o bloco “Acesse sua conta” para a esquerda, evitando sobreposição com a rede mesh.
 - [x] Página inicial — retirar o texto “Em desenvolvimento” dos aplicativos indisponíveis.
 - [x] Página inicial — alinhar o topo do bloco “Acesse sua conta” à primeira linha dos aplicativos.
-- [x] Página inicial — ampliar a rede mesh pelo fundo de toda a área direita, com mais pontos e conexões, inspirada no site da myio.
+- [x] Página inicial — ampliar e adensar a rede mesh exclusivamente na área direita, com todos os pontos conectados e sem linhas soltas, inspirada no site da myio.
 - [ ] Estimar automaticamente a duração da visita com base nos dados da proposta comercial — quantidade de lojas/ambientes, hidrômetros, pontos elétricos, áreas técnicas e demais fatores — usando o histórico dos levantamentos realizados para apoiar futuros orçamentos e propostas.
 - [x] Registrar automaticamente na OS a data e hora reais de início e conclusão, incluindo o dia inicial e final.
 - [ ] Comparar a duração estimada versus a duração realizada.
