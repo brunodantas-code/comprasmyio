@@ -170,21 +170,28 @@ function SiteSurveyPage() {
               {can("site_survey_agendar") ? <TabsTrigger value="nova" className="w-44"><Plus className="mr-2 h-4 w-4" />Nova Visita</TabsTrigger> : null}
             </TabsList>
             <TabsContent value="minhas">
-              <div className="mb-5 overflow-hidden rounded-md border border-border bg-card shadow-sm">
-                <div className="grid grid-cols-2 lg:grid-cols-5">
-                  {STATUS_ORDER.map((status, index) => {
+              <section className="mb-5 overflow-hidden rounded-md border border-border bg-card shadow-sm" aria-label="Resumo de visitas">
+                <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-border px-4 py-3">
+                  <h2 className="truncate text-xs font-bold uppercase text-muted-foreground">Resumo de visitas</h2>
+                  <span className="shrink-0 rounded-full bg-myio-green/10 px-2 py-1 text-[10px] font-semibold text-myio-green">Atualizado</span>
+                </header>
+                <div className="divide-y divide-border p-2 lg:grid lg:grid-cols-5 lg:divide-x lg:divide-y-0">
+                  {STATUS_ORDER.map((status) => {
                     const count = data.visits.filter((visit) => visit.status === status).length;
                     const isActive = count > 0;
                     return <div
                       key={status}
-                      className={`flex min-h-20 flex-col items-center justify-center gap-1 border-b-2 px-2 py-3 text-center transition-colors lg:min-h-24 lg:px-4 lg:py-4 ${index % 2 === 0 && index < STATUS_ORDER.length - 1 ? "border-r border-r-border" : ""} ${index < 3 ? "border-b-border lg:border-b-transparent" : "border-b-transparent"} ${index === STATUS_ORDER.length - 1 ? "col-span-2 lg:col-span-1 lg:border-l lg:border-l-border" : ""} ${index > 0 && index < STATUS_ORDER.length - 1 ? "lg:border-l lg:border-l-border" : ""} ${isActive ? "border-b-myio-green bg-myio-green/10" : "hover:bg-muted/40"}`}
+                      className={`flex min-h-12 items-center justify-between gap-3 rounded-sm px-3 py-2.5 transition-colors lg:min-h-16 lg:rounded-none lg:px-4 ${isActive ? "bg-myio-green/5" : "hover:bg-muted/40"}`}
                     >
-                      <strong className="text-2xl leading-none text-foreground lg:text-3xl">{count}</strong>
-                      <span className={`text-xs font-semibold ${isActive ? "text-myio-green" : "text-muted-foreground"}`}>{STATUS[status]}</span>
+                      <div className="flex min-w-0 items-center gap-3">
+                        <span className={`h-6 w-1.5 shrink-0 rounded-full ${isActive ? "bg-myio-green" : "bg-muted-foreground/25"}`} aria-hidden="true" />
+                        <span className={`truncate text-sm font-medium ${isActive ? "text-foreground" : "text-muted-foreground"}`}>{STATUS[status]}</span>
+                      </div>
+                      <strong className={`shrink-0 text-lg leading-none ${isActive ? "text-foreground" : "text-muted-foreground/70"}`}>{count}</strong>
                     </div>;
                   })}
                 </div>
-              </div>
+              </section>
               <div className="mb-4 flex flex-col gap-3 sm:flex-row"><div className="relative flex-1"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar visita, cliente, projeto ou técnico" className="pl-9" /></div><Select value={statusFilter} onValueChange={setStatusFilter}><SelectTrigger className="sm:w-52"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="todos">Todas as situações</SelectItem>{STATUS_ORDER.map((status) => <SelectItem key={status} value={status}>{STATUS[status]}</SelectItem>)}</SelectContent></Select></div>
                <div className="overflow-hidden rounded-md border border-border bg-card"><div className="hidden grid-cols-[160px_1fr_1fr_1fr_150px_70px] gap-3 border-b bg-primary/20 px-4 py-3 text-sm font-semibold lg:grid"><span>Nº / Abrir</span><span>Cliente / Projeto</span><span>Técnico</span><span>Agendamento</span><span>Situação</span><span>Ações</span></div>{filtered.map((visit) => <div key={visit.id} className="grid gap-3 border-b border-border px-4 py-4 last:border-0 lg:grid-cols-[160px_1fr_1fr_1fr_150px_70px] lg:items-center"><div className="flex items-center gap-2"><span className="text-sm font-semibold">{String(visit.survey_number).padStart(12, "0")}</span><Button size="compactIcon" variant="secondary" title="Abrir visita" aria-label={`Abrir visita ${String(visit.survey_number).padStart(12, "0")}`} onClick={() => setSelected(visit)}><Eye className="h-3.5 w-3.5" /></Button></div><div className="min-w-0"><p className="truncate text-sm font-medium">{names.clients.get(visit.client_id ?? "") ?? names.projects.get(visit.project_id ?? "") ?? "—"}</p>{visit.client_id && visit.project_id ? <p className="truncate text-xs text-muted-foreground">{names.projects.get(visit.project_id)}</p> : null}</div><span className="truncate text-sm">{names.technicians.get(visit.technician_id) ?? "—"}</span><div className="text-sm"><p>{new Date(visit.scheduled_start).toLocaleDateString("pt-BR")}</p><p className="text-xs text-muted-foreground">{new Date(visit.scheduled_start).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</p></div><Badge variant="status" className="w-fit">{STATUS[visit.status]}</Badge><div className="flex gap-1">{can("site_survey_editar") ? <VisitDialog data={data} visit={visit} onSaved={invalidate} /> : null}{can("site_survey_excluir") ? <ConfirmDeleteButton title="Excluir visita?" description="Esta ação excluirá a visita, respostas, fotos e histórico." onConfirm={async () => { const { error } = await supabase.from("site_survey_visits").delete().eq("id", visit.id); if (error) return toast.error(error.message); toast.success("Visita excluída"); invalidate(); }} /> : null}</div></div>)}{filtered.length === 0 ? <p className="px-4 py-12 text-center text-sm text-muted-foreground">Nenhuma visita encontrada.</p> : null}</div>
             </TabsContent>
