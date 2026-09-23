@@ -5,6 +5,7 @@
 - [ ] Checklist da OS — Ponto elétrico próximo: seleção única “Sim” ou “Não”; ao marcar “Sim”, exigir uma única opção entre “Luminária de emergência”, “Tomada”, “Teto”, “Parede” e “Quadro elétrico próximo”, além de foto obrigatória.
 - [ ] Checklist da OS — Encaminhamento elétrico até o hidrômetro: seleção única entre “Instalar canaleta” e “Via instalação existente”, sempre com foto obrigatória.
 - [ ] Checklist da OS — Tipo de registro existente: seleção única entre “Esfera”, “Gaveta”, “Pressão” e “Agulha”, sempre com foto obrigatória.
+- [ ] Checklist da OS — Condição do registro: seleção única entre “Funcional” e “Inoperante”.
 - [x] Site Survey — criar Cadastro > Diversos com materiais, equipamentos, tipos de chave de fenda e bitolas de chave de grifo administráveis.
 - [x] Checklist da OS — permitir selecionar vários materiais/equipamentos cadastrados, informando quantidade e observação em cada item.
 
