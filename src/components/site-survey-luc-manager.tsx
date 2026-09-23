@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { suggestShopNameFromFacade } from "@/lib/site-survey-ai.functions";
 
 type LucRow = { id: string; luc_number: string; shop_name: string };
+type LucHistoryRow = { id: string; visit_luc_id: string; luc_number: string; shop_name: string; valid_from: string; valid_until: string | null };
 type PreviewRow = { lucNumber: string; shopName: string; issue?: string };
 
 const normalizeHeader = (value: unknown) => String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLocaleLowerCase("pt-BR");
@@ -20,6 +21,7 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit }: { 
   const inputRef = useRef<HTMLInputElement>(null);
   const facadeRef = useRef<HTMLInputElement>(null);
   const [rows, setRows] = useState<LucRow[]>([]);
+  const [history, setHistory] = useState<LucHistoryRow[]>([]);
   const [preview, setPreview] = useState<PreviewRow[]>([]);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -29,9 +31,13 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit }: { 
   const [analyzing, setAnalyzing] = useState(false);
 
   const load = async () => {
-    const { data, error } = await supabase.from("site_survey_visit_lucs").select("id,luc_number,shop_name").eq("visit_id", visitId).eq("active", true).order("luc_number");
-    if (error) return toast.error(error.message);
+    const [{ data, error }, { data: historyRows, error: historyError }] = await Promise.all([
+      supabase.from("site_survey_visit_lucs").select("id,luc_number,shop_name").eq("visit_id", visitId).eq("active", true).order("luc_number"),
+      supabase.from("site_survey_visit_luc_history").select("id,visit_luc_id,luc_number,shop_name,valid_from,valid_until").eq("visit_id", visitId).order("valid_from", { ascending: false }),
+    ]);
+    if (error || historyError) return toast.error(error?.message ?? historyError?.message ?? "Não foi possível carregar os ambientes.");
     setRows((data ?? []) as LucRow[]);
+    setHistory((historyRows ?? []) as LucHistoryRow[]);
   };
   useEffect(() => { void load(); }, [visitId]);
 
@@ -104,6 +110,7 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit }: { 
   return <section className="space-y-3 border-t pt-5">
     <div className="flex flex-wrap items-start justify-between gap-3"><div><h3 className="font-bold">Ambientes do shopping</h3><p className="text-sm text-muted-foreground">LUCs preparados para esta OS.</p></div><div className="flex flex-wrap gap-2">{canEdit ? <Button type="button" size="sm" variant="outline" onClick={() => startEdit()}><Plus className="h-4 w-4" />Adicionar</Button> : null}{canImport ? <><input ref={inputRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; if (file) void parseFile(file).catch((error: Error) => toast.error(error.message)); }} /><Button type="button" size="sm" onClick={() => inputRef.current?.click()}><FileSpreadsheet className="h-4 w-4" />Importar Excel</Button></> : null}</div></div>
     <div className="overflow-hidden rounded-md border"><div className="grid grid-cols-[110px_1fr_72px] gap-3 bg-primary/20 px-3 py-2 text-xs font-semibold"><span>LUC</span><span>Nome da loja</span><span>Ações</span></div>{rows.map((row) => <div key={row.id} className="grid grid-cols-[110px_1fr_72px] items-center gap-3 border-t px-3 py-2 text-sm"><span className="font-medium">{row.luc_number}</span><span className="min-w-0 truncate">{row.shop_name}</span><div className="flex gap-1">{canEdit ? <Button type="button" size="compactIcon" variant="ghost" title="Editar ambiente" onClick={() => startEdit(row)}><Pencil className="h-3.5 w-3.5" /></Button> : null}{canEdit ? <ConfirmDeleteButton title={`Excluir LUC ${row.luc_number}?`} description="O ambiente será removido desta OS, mantendo o histórico registrado." onConfirm={async () => { const { error } = await supabase.from("site_survey_visit_lucs").update({ active: false, updated_by: userId }).eq("id", row.id); if (error) return toast.error(error.message); toast.success("Ambiente removido da OS."); await load(); }} /> : null}</div></div>)}{!rows.length ? <p className="border-t p-4 text-sm text-muted-foreground">Nenhum LUC cadastrado nesta OS.</p> : null}</div>
+    {history.some((item) => item.valid_until) ? <details className="rounded-md border px-3 py-2"><summary className="cursor-pointer text-sm font-medium">Histórico de nomes</summary><div className="mt-2 divide-y">{history.filter((item) => item.valid_until).map((item) => <div key={item.id} className="grid gap-1 py-2 text-sm sm:grid-cols-[110px_1fr_170px]"><span>LUC {item.luc_number}</span><span>{item.shop_name}</span><span className="text-muted-foreground">até {new Date(item.valid_until ?? item.valid_from).toLocaleString("pt-BR")}</span></div>)}</div></details> : null}
     <Dialog open={Boolean(editing)} onOpenChange={(open) => !open && setEditing(null)}><DialogContent><DialogHeader><DialogTitle>{editing?.id ? "Editar ambiente" : "Adicionar ambiente"}</DialogTitle><DialogDescription>Informe o LUC e o nome atual da loja.</DialogDescription></DialogHeader><div className="grid gap-4 sm:grid-cols-2"><div className="space-y-2"><Label htmlFor="luc-draft">LUC</Label><Input id="luc-draft" value={draftLuc} onChange={(event) => setDraftLuc(event.target.value)} /></div><div className="space-y-2"><Label htmlFor="shop-draft">Nome da loja</Label><Input id="shop-draft" value={draftName} onChange={(event) => setDraftName(event.target.value)} /></div></div><div className="space-y-2"><input ref={facadeRef} type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" className="hidden" onChange={(event) => void analyzeFacade(event.target.files?.[0])} /><Button type="button" variant="outline" disabled={analyzing} onClick={() => facadeRef.current?.click()}>{analyzing ? <Sparkles className="h-4 w-4" /> : <Camera className="h-4 w-4" />}{analyzing ? "Analisando fachada..." : "Identificar pela fachada"}</Button></div><DialogFooter><Button type="button" variant="outline" onClick={() => setEditing(null)}>Cancelar</Button><Button type="button" onClick={() => void saveEdit()}>Salvar</Button></DialogFooter></DialogContent></Dialog>
     <Dialog open={previewOpen} onOpenChange={setPreviewOpen}><DialogContent className="max-h-[88vh] max-w-3xl overflow-y-auto"><DialogHeader><DialogTitle>Conferir importação</DialogTitle><DialogDescription>{validPreview.length} linha(s) válida(s) e {invalidCount} com pendência. LUCs já cadastrados terão o nome atualizado.</DialogDescription></DialogHeader><div className="overflow-hidden rounded-md border"><div className="grid grid-cols-[110px_1fr_180px] gap-3 bg-primary/20 px-3 py-2 text-xs font-semibold"><span>LUC</span><span>Nome da loja</span><span>Resultado</span></div>{preview.map((item, index) => <div key={`${item.lucNumber}-${index}`} className="grid grid-cols-[110px_1fr_180px] gap-3 border-t px-3 py-2 text-sm"><span>{item.lucNumber || "—"}</span><span>{item.shopName || "—"}</span><span className={item.issue ? "text-destructive" : "text-muted-foreground"}>{item.issue ?? (currentByLuc.has(item.lucNumber.toLocaleLowerCase("pt-BR")) ? "Atualizar" : "Adicionar")}</span></div>)}</div><DialogFooter><Button type="button" variant="outline" onClick={() => setPreviewOpen(false)}>Cancelar</Button><Button type="button" disabled={loading || !validPreview.length} onClick={() => void importRows()}>{loading ? "Importando..." : `Importar ${validPreview.length} ambiente(s)`}</Button></DialogFooter></DialogContent></Dialog>
   </section>;
