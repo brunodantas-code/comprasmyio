@@ -633,6 +633,6 @@
 - [x] Validar o cadastro no RH e o preenchimento automático no Site Survey em computador e celular.
 
 ## Confirmações e destaque das visitas
-- [ ] Aplicar fundo verde-claro ao botão Exibir/Recolher da visita.
-- [ ] Exigir confirmação antes do cancelamento de uma visita.
-- [ ] Validar em computador e celular.
+- [x] Aplicar fundo verde-claro ao botão Exibir/Recolher da visita.
+- [x] Exigir confirmação antes do cancelamento de uma visita.
+- [x] Validar em computador e celular.
