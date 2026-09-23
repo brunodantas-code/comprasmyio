@@ -274,6 +274,13 @@
       "when": 1790167056984,
       "tag": "0038_transactional_request_type_deletion",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1790167105943,
+      "tag": "0039_align_admin_authorization_with_access_profiles",
+      "breakpoints": true
     }
   ]
 }
