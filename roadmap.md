@@ -1,5 +1,7 @@
 # Aplicativo Site Survey
 
+- [ ] Checklist da OS — Hidrômetro: seleção única “Fácil”, “Regular” ou “Difícil”; ao marcar “Difícil”, exigir detalhamento e foto.
+
 - [x] Em Shopping, analisar foto da fachada com IA e sugerir um nome editável, preservando a confirmação do usuário.
 
 - [x] Exibir Perfis de acesso do Site Survey em tela aberta no padrão visual do Supply, sem popup.
