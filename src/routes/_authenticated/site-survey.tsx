@@ -102,7 +102,7 @@ function SiteSurveyPage() {
       ]);
       if (error) throw error;
       const profile = surveyProfile as unknown as { profile_code: string; is_customized: boolean; site_survey_access_profiles: { name: string; site_survey_profile_permissions: Array<{ permission_key: string; allowed: boolean }> } | null } | null;
-      const permissions = new Set(Boolean(erpAdmin) ? PERMISSIONS.map(([key]) => key) : profile?.is_customized ? (surveyPermissions ?? []).filter((item) => item.allowed).map((item) => item.permission_key) : (profile?.site_survey_access_profiles?.site_survey_profile_permissions ?? []).filter((item) => item.allowed).map((item) => item.permission_key));
+      const permissions = new Set<string>(Boolean(erpAdmin) ? PERMISSIONS.map(([key]) => key) : profile?.is_customized ? (surveyPermissions ?? []).filter((item) => item.allowed).map((item) => item.permission_key) : (profile?.site_survey_access_profiles?.site_survey_profile_permissions ?? []).filter((item) => item.allowed).map((item) => item.permission_key));
       return { userId: auth.user.id, visits: (visits ?? []) as Visit[], clients: (clients ?? []) as ClientOption[], clientCategories: (clientCategories ?? []) as ClientCategory[], projects: (projects ?? []) as ProjectOption[], units: (units ?? []) as Array<Named & { client_id: string }>, technicians: (technicians ?? []) as Profile[], templates: (templates ?? []) as Template[], sections: (sections ?? []) as Section[], questions: (questions ?? []) as Question[], catalog: (catalog ?? []) as CatalogItem[], screwdriverTypes: (screwdriverTypes ?? []) as Named[], wrenchSizes: (wrenchSizes ?? []) as Named[], permissions, profileName: profile?.site_survey_access_profiles?.name ?? "Sem perfil", isErpAdmin: Boolean(erpAdmin) };
     },
   });
