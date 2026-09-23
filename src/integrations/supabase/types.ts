@@ -3851,6 +3851,51 @@ export type Database = {
           },
         ]
       }
+      site_survey_visit_technicians: {
+        Row: {
+          created_at: string
+          id: string
+          mobile_phone: string
+          recorded_by: string
+          technician_id: string
+          updated_at: string
+          visit_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mobile_phone: string
+          recorded_by: string
+          technician_id: string
+          updated_at?: string
+          visit_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mobile_phone?: string
+          recorded_by?: string
+          technician_id?: string
+          updated_at?: string
+          visit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_survey_visit_technicians_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_visit_technicians_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_visits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_survey_visits: {
         Row: {
           address: string

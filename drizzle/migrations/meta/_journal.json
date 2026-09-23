@@ -358,6 +358,13 @@
       "when": 1790178579271,
       "tag": "0050_extend_site_survey_configurable_checklists",
       "breakpoints": true
+    },
+    {
+      "idx": 51,
+      "version": "7",
+      "when": 1790179479714,
+      "tag": "0051_add_site_survey_visit_technicians",
+      "breakpoints": true
     }
   ]
 }

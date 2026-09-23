@@ -16,10 +16,10 @@
 - [ ] Checklist prévio à visita técnica — confirmar, com seleção única “Sim” ou “Não”, se a parafusadeira está com 100% de bateria; ao marcar “Não”, exigir o relato do problema e abrir automaticamente um ticket como pendência do suporte.
 - [ ] Checklist prévio à visita técnica — confirmar, com seleção única obrigatória “Sim” ou “Não”, se a OS já foi previamente cadastrada; ao marcar “Não”, solicitar suporte e abrir automaticamente um ticket como pendência do suporte.
 - [ ] Checklist prévio à visita técnica — confirmar, com seleção única obrigatória “Sim” ou “Não”, se o cliente já foi previamente contactado; ao marcar “Não”, solicitar suporte e abrir automaticamente um ticket como pendência do suporte.
-- [ ] Checklist prévio à visita técnica — registrar o nome e o celular do técnico de manutenção que acompanhará a equipe da myio, permitindo adicionar mais de um técnico; nome e celular são obrigatórios para cada registro.
+- [ ] Checklist prévio à visita técnica — selecionar um ou mais técnicos pré-cadastrados em lista, sem conceito de acompanhante; cada técnico deve ter um campo específico de celular obrigatório.
 - [ ] Checklist prévio à visita técnica — confirmar, com seleção única obrigatória “Sim” ou “Não”, se existe restrição de horário para início ou conclusão da visita técnica; ao marcar “Sim”, exigir a descrição da restrição.
 - [ ] Checklist prévio à visita técnica — exigir que a data e o local do Site Survey sejam informados previamente no agendamento. Confirmar, com seleção única “Sim” ou “Não”, se haverá visita em áreas externas, como telhados ou acessos por escada externa; ao marcar “Sim”, consultar automaticamente uma fonte meteorológica pela data e endereço da OS. Qualquer possibilidade de chuva deve preencher “Existe previsão de chuva?” como “Sim”; sem possibilidade, preencher “Não”. Registrar fonte, data e hora da consulta e anexar uma imagem padronizada da previsão à OS e ao relatório. Para visitas fora da janela disponível de previsão, executar a consulta automaticamente assim que a data entrar nessa janela.
-- [ ] Checklist da OS — Perfil de consumo da loja: permitir seleção múltipla entre vestiários, copas, pias, banheiros e somente bebedouro; classificar automaticamente a loja como consumo baixo, médio ou alto. Os critérios de classificação devem ser configuráveis no menu Cadastro, sem regras fixas no sistema.
+- [ ] Checklist da OS — Perfil de consumo da loja: permitir seleção múltipla entre vestiários, copas, pias, banheiros e somente bebedouro; classificar automaticamente a loja como consumo baixo, médio ou alto. Os critérios de classificação devem ser configuráveis no menu Cadastro, sem regras fixas no sistema, dentro da etapa Água e hidrômetros.
 - [ ] Site Survey — exibir os checkboxes no padrão visual do Supply, sem envolver cada opção em um campo ou box individual.
 - [ ] Site Survey — mostrar todos os checkboxes solicitados dentro da tela de execução da OS, substituindo o aviso vazio e respeitando a sequência lógica.
 - [x] Site Survey — permitir ao Admin adicionar, editar e excluir o modelo Shoppings, suas seções, perguntas e opções, sempre com confirmação de exclusão.
@@ -27,7 +27,7 @@
 - [ ] Consolidar o histórico técnico de cada cliente e ponto implantado em uma OS contínua, reutilizada pelos times de inspeção e instalação. Criar uma linha do tempo com fotos, observações, autor, equipe e data/hora, separada visualmente por quatro marcos: 1) Site Survey para proposta comercial; 2) Site Survey prévio à instalação; 3) Implantação; 4) Serviços pós-venda. Permitir comparar o estado antes e depois da implantação e consultar todas as intervenções e manutenções, mantendo os registros anteriores imutáveis e disponíveis para futuras buscas e análises preditivas por IA.
 - [ ] Checklist da OS — Hidrômetro: seleção única “Fácil”, “Regular” ou “Difícil”; ao marcar “Difícil”, exigir detalhamento e foto.
 - [ ] Checklist da OS — Localização do hidrômetro: seleção única entre “Loja”, “Sobreloja”, “Parede” e “Debaixo da pia”, com foto obrigatória.
-- [ ] Checklist da OS — Ponto elétrico próximo: seleção única “Sim” ou “Não”; ao marcar “Sim”, exigir uma única opção entre “Luminária de emergência”, “Tomada”, “Teto”, “Parede” e “Quadro elétrico próximo”, além de foto obrigatória.
+- [ ] Checklist da OS — Ponto elétrico próximo: seleção única “Sim” ou “Não”; ao marcar “Sim”, exigir uma única opção entre “Luminária de emergência”, “Tomada” e “Quadro elétrico próximo”; ao selecionar “Tomada”, exigir a subopção “Teto” ou “Parede”; foto obrigatória.
 - [ ] Checklist da OS — Encaminhamento elétrico até o hidrômetro: seleção única entre “Instalar canaleta” e “Via instalação existente”, sempre com foto obrigatória.
 - [ ] Checklist da OS — Tipo de registro existente: seleção única entre “Esfera”, “Gaveta”, “Pressão” e “Agulha”, sempre com foto obrigatória.
 - [ ] Checklist da OS — Condição do registro: seleção única entre “Funcional” e “Inoperante”.
@@ -37,7 +37,7 @@
 - [ ] Checklist da OS — Diâmetro da tubulação de água: seleção única em lista pré-cadastrada, incluindo inicialmente “20 mm — 1/2 pol.”, “25 mm — 3/4 pol.”, “32 mm — 1 pol.”, “50 mm — 1 1/2 pol.” e “60 mm — 2 pol.”, com opção “Outros”; administrar os diâmetros em Cadastro > Diversos e permitir foto opcional.
 - [ ] Checklist da OS — Saída pulsada do hidrômetro: seleção única “Sim” ou “Não”; ao marcar “Sim”, exigir uma única condição entre “Funcional” e “Inoperante”.
 - [x] Site Survey — criar Cadastro > Diversos com materiais, equipamentos, tipos de chave de fenda e bitolas de chave de grifo administráveis.
-- [x] Checklist da OS — permitir selecionar vários materiais/equipamentos cadastrados, informando quantidade e observação em cada item.
+- [x] Checklist da OS — manter um único título “Materiais necessários” e exibir diretamente abaixo dele uma lista suspensa para selecionar vários materiais/equipamentos cadastrados, informando quantidade e observação em cada item.
 
 - [x] Em Shopping, analisar foto da fachada com IA e sugerir um nome editável, preservando a confirmação do usuário.
 
@@ -585,3 +585,4 @@
 - [x] Ao identificar a fachada, oferecer Tirar foto ou Escolher da galeria
 - [x] Enviar a imagem escolhida para a identificação automática existente
 - [x] Validar a escolha em computador e celular
+- [ ] Checklist por ponto — cada loja/LUC ou ambiente da OS deve ter seu próprio checklist completo, respostas, fotos, técnicos e materiais, sem compartilhar dados entre pontos.
