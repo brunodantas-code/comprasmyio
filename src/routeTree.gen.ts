@@ -13,6 +13,7 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedSiteSurveyRouteImport } from './routes/_authenticated/site-survey'
 import { Route as AuthenticatedRhRouteImport } from './routes/_authenticated/rh'
 import { Route as AuthenticatedPortalRouteImport } from './routes/_authenticated/portal'
 import { Route as AuthenticatedPendentesRouteImport } from './routes/_authenticated/pendentes'
@@ -41,6 +42,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedSiteSurveyRoute = AuthenticatedSiteSurveyRouteImport.update({
+  id: '/site-survey',
+  path: '/site-survey',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedRhRoute = AuthenticatedRhRouteImport.update({
   id: '/rh',
@@ -102,6 +108,7 @@ export interface FileRoutesByFullPath {
   '/pendentes': typeof AuthenticatedPendentesRoute
   '/portal': typeof AuthenticatedPortalRoute
   '/rh': typeof AuthenticatedRhRoute
+  '/site-survey': typeof AuthenticatedSiteSurveyRoute
   '/api/public/hooks/sync-product-status': typeof ApiPublicHooksSyncProductStatusRoute
 }
 export interface FileRoutesByTo {
@@ -116,6 +123,7 @@ export interface FileRoutesByTo {
   '/pendentes': typeof AuthenticatedPendentesRoute
   '/portal': typeof AuthenticatedPortalRoute
   '/rh': typeof AuthenticatedRhRoute
+  '/site-survey': typeof AuthenticatedSiteSurveyRoute
   '/api/public/hooks/sync-product-status': typeof ApiPublicHooksSyncProductStatusRoute
 }
 export interface FileRoutesById {
@@ -132,6 +140,7 @@ export interface FileRoutesById {
   '/_authenticated/pendentes': typeof AuthenticatedPendentesRoute
   '/_authenticated/portal': typeof AuthenticatedPortalRoute
   '/_authenticated/rh': typeof AuthenticatedRhRoute
+  '/_authenticated/site-survey': typeof AuthenticatedSiteSurveyRoute
   '/api/public/hooks/sync-product-status': typeof ApiPublicHooksSyncProductStatusRoute
 }
 export interface FileRouteTypes {
@@ -148,6 +157,7 @@ export interface FileRouteTypes {
     | '/pendentes'
     | '/portal'
     | '/rh'
+    | '/site-survey'
     | '/api/public/hooks/sync-product-status'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -162,6 +172,7 @@ export interface FileRouteTypes {
     | '/pendentes'
     | '/portal'
     | '/rh'
+    | '/site-survey'
     | '/api/public/hooks/sync-product-status'
   id:
     | '__root__'
@@ -177,6 +188,7 @@ export interface FileRouteTypes {
     | '/_authenticated/pendentes'
     | '/_authenticated/portal'
     | '/_authenticated/rh'
+    | '/_authenticated/site-survey'
     | '/api/public/hooks/sync-product-status'
   fileRoutesById: FileRoutesById
 }
@@ -217,6 +229,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/site-survey': {
+      id: '/_authenticated/site-survey'
+      path: '/site-survey'
+      fullPath: '/site-survey'
+      preLoaderRoute: typeof AuthenticatedSiteSurveyRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/rh': {
       id: '/_authenticated/rh'
@@ -293,6 +312,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPendentesRoute: typeof AuthenticatedPendentesRoute
   AuthenticatedPortalRoute: typeof AuthenticatedPortalRoute
   AuthenticatedRhRoute: typeof AuthenticatedRhRoute
+  AuthenticatedSiteSurveyRoute: typeof AuthenticatedSiteSurveyRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -304,6 +324,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPendentesRoute: AuthenticatedPendentesRoute,
   AuthenticatedPortalRoute: AuthenticatedPortalRoute,
   AuthenticatedRhRoute: AuthenticatedRhRoute,
+  AuthenticatedSiteSurveyRoute: AuthenticatedSiteSurveyRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
