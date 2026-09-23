@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { MenuPermissionSelector } from "@/components/menu-permission-selector";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
