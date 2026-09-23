@@ -9,6 +9,7 @@
 - [ ] Checklist da OS — Sentido do fluxo de água: seleção única entre “Antes do registro (correto)” e “Depois do registro (incorreto)”; ao marcar a opção incorreta, exigir “Solicitar intervenção do cliente” e foto.
 - [ ] Checklist da OS — Vazão nominal do hidrômetro: seleção única em lista pré-cadastrada, incluindo inicialmente “3,5 m³/h” e “5 m³/h”, com opção “Outros”; administrar as vazões em Cadastro > Diversos e exigir foto em qualquer seleção.
 - [ ] Checklist da OS — Tipo de flange: seleção única entre “Integrado (corpo do hidrômetro)”, “Soldável” e “Roscável”, sempre com foto obrigatória.
+- [ ] Checklist da OS — Diâmetro da tubulação de água: seleção única em lista pré-cadastrada, incluindo inicialmente “20 mm — 1/2 pol.”, “25 mm — 3/4 pol.”, “32 mm — 1 pol.”, “50 mm — 1 1/2 pol.” e “60 mm — 2 pol.”, com opção “Outros”; administrar os diâmetros em Cadastro > Diversos e permitir foto opcional.
 - [x] Site Survey — criar Cadastro > Diversos com materiais, equipamentos, tipos de chave de fenda e bitolas de chave de grifo administráveis.
 - [x] Checklist da OS — permitir selecionar vários materiais/equipamentos cadastrados, informando quantidade e observação em cada item.
 
