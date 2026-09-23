@@ -25,3 +25,4 @@ Botões de ação sempre com fundo verde e ícones/textos pretos; lilás somente
 - [Conversas nos tickets do Code](mem://features/code-ticket-conversations) — Admin pergunta, Solicitante responde, histórico imutável e pendência direcionada a quem deve agir
 
 - [Categorias de clientes](mem://features/client-categories) — Cadastro administrável com Shoppings e Lojas e classificação inicial automática
+- [Campos da nova visita](design/site-survey-form-fields.md) — Na nova visita, somente campos com lista suspensa usam fundo verde-claro; demais campos ficam brancos
