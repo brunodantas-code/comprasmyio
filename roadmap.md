@@ -594,6 +594,12 @@
 - [x] Validar o resultado em computador e celular
 - [x] Consolidar Perfis de acesso e Logs como submenus dentro de Usuários, seguindo o Supply
 - [x] Validar a navegação consolidada em computador e celular
+- [x] Consolidar os perfis cadastrados e as customizações individuais no Supply e no Site Survey, com usuários recolhidos e botões de expandir/recolher.
+- [x] Validar a nova arquitetura de perfis no Supply e no Site Survey em computador e celular.
+
+## Ordenação dos aplicativos no portal
+- [x] Reposicionar o Site Survey na linha atual de aplicativos e manter o Code sempre como último aplicativo.
+- [x] Validar a ordenação do portal em computador e celular.
 
 ## Técnicos do Supply no Site Survey
 - [x] Exibir na seleção de responsável somente os técnicos cadastrados no Supply
@@ -606,3 +612,6 @@
 
 ## Botões do checklist
 - [x] Igualar o tamanho do botão Editar ao botão Excluir nas perguntas
+- [x] Incluir ordem numérica no cadastro e na edição das perguntas, alterando sua sequência de exibição.
+- [x] Validar a ordenação das perguntas em computador e celular.
+- [x] Substituir o ícone de edição das perguntas por um ícone de salvar, refletindo sua função real.
