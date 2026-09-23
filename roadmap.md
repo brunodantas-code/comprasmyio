@@ -614,4 +614,4 @@
 - [x] Igualar o tamanho do botão Editar ao botão Excluir nas perguntas
 - [x] Incluir ordem numérica no cadastro e na edição das perguntas, alterando sua sequência de exibição.
 - [ ] Validar a ordenação das perguntas em computador e celular.
-- [ ] Substituir o ícone de edição das perguntas por um ícone de salvar, refletindo sua função real.
+- [x] Substituir o ícone de edição das perguntas por um ícone de salvar, refletindo sua função real.
