@@ -2759,20 +2759,20 @@ function OrdersTable({
           const part = o.request_group_id ? stockParts?.get(o.request_group_id) : undefined;
           return (
             <div key={o.id} className="rounded-lg border border-border bg-card p-3">
-              <Row label="Approval">
-                <div className="flex flex-wrap items-start justify-start gap-1 font-mono font-bold">
-                   {me?.isAdmin && <AdminEditApprovalDialog order={o} items={(groupedOrderItems?.get(o.id) ?? []) as ApprovalEditItem[]} />}
-                   {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
-                  {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
-                  <div className="inline-flex flex-col items-stretch">
-                    <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} />
-                    {o.budget_exceeded && (
-                      <Badge variant="destructive" className="mt-1.5 w-full justify-center whitespace-normal text-center font-sans text-[10px] leading-tight">
-                        Orçamento excedido
-                      </Badge>
-                    )}
-                  </div>
-                </div>
+               <Row label="Approval">
+                 <div className="inline-flex flex-col items-start font-mono font-bold">
+                   <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} />
+                   <div className="mt-1 flex flex-wrap items-center gap-1">
+                     {me?.isAdmin && <AdminEditApprovalDialog order={o} items={(groupedOrderItems?.get(o.id) ?? []) as ApprovalEditItem[]} />}
+                     {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
+                     {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
+                   </div>
+                   {o.budget_exceeded && (
+                     <Badge variant="destructive" className="mt-1.5 w-full justify-center whitespace-normal text-center font-sans text-[10px] leading-tight">
+                       Orçamento excedido
+                     </Badge>
+                   )}
+                 </div>
                 <div className="mt-1 space-y-1">
                   <ExistingAttachments orderId={o.id} attachments={o.attachments ?? []} canRemove={canEdit} />
                   <div className="flex flex-wrap items-center gap-1">
@@ -2900,20 +2900,20 @@ function OrdersTable({
         <TableBody>
           {visibleOrders.map((o) => (
             <TableRow key={o.id} className="align-top">
-              <TableCell className="font-mono text-xs text-left">
-                <div className="flex items-start justify-start gap-1">
-                   {me?.isAdmin && <AdminEditApprovalDialog order={o} items={(groupedOrderItems?.get(o.id) ?? []) as ApprovalEditItem[]} />}
-                   {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
-                  {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
-                  <div className="inline-flex flex-col items-stretch">
-                    <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} />
-                    {o.budget_exceeded && (
-                      <Badge variant="destructive" className="mt-1.5 w-full justify-center whitespace-normal text-center font-sans text-[10px] leading-tight">
-                        Orçamento excedido
-                      </Badge>
-                    )}
-                  </div>
-                </div>
+               <TableCell className="font-mono text-xs text-left">
+                 <div className="inline-flex flex-col items-start">
+                   <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} />
+                   <div className="mt-1 flex flex-wrap items-center gap-1">
+                     {me?.isAdmin && <AdminEditApprovalDialog order={o} items={(groupedOrderItems?.get(o.id) ?? []) as ApprovalEditItem[]} />}
+                     {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
+                     {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
+                   </div>
+                   {o.budget_exceeded && (
+                     <Badge variant="destructive" className="mt-1.5 w-full justify-center whitespace-normal text-center font-sans text-[10px] leading-tight">
+                       Orçamento excedido
+                     </Badge>
+                   )}
+                 </div>
                 <div className="mt-1 space-y-1 font-sans">
                   <ExistingAttachments orderId={o.id} attachments={o.attachments ?? []} canRemove={canEdit} />
                   <div className="flex flex-wrap items-center gap-1">
@@ -3469,7 +3469,7 @@ function EditRequesterDialog({ order }: { order: Order }) {
       setOpen(nextOpen);
     }}>
       <DialogTrigger asChild>
-        <Button size="compactIcon" variant="ghost" title="Editar pedido" aria-label="Editar pedido">
+        <Button size="compactIcon" variant="ghost" title="Editar pedido pendente (Solicitante)" aria-label="Editar pedido pendente como solicitante">
           <Pencil className="h-3.5 w-3.5" />
         </Button>
       </DialogTrigger>

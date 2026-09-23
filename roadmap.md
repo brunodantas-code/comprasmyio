@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Tarefas
+- [x] Posicionar os botões de editar e excluir abaixo do número do Approval e diferenciar as duas edições
 - [x] Exibir a abreviação do cargo na sequência das alçadas, como CEO, em vez do nome completo
 - [x] Encerrar a sequência no primeiro C-Level e não classificá-lo como Gestor da Área
 - [x] Permitir classificar a categoria diretamente em cada material cadastrado no menu Materiais
