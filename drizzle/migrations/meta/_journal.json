@@ -330,6 +330,13 @@
       "when": 1790170765148,
       "tag": "0046_add_site_survey_luc_history",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1790171642532,
+      "tag": "0047_create_site_survey_material_catalog",
+      "breakpoints": true
     }
   ]
 }

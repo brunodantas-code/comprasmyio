@@ -3309,6 +3309,36 @@ export type Database = {
           },
         ]
       }
+      site_survey_material_catalog: {
+        Row: {
+          active: boolean
+          category: string
+          created_at: string
+          id: string
+          name: string
+          position: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          category: string
+          created_at?: string
+          id?: string
+          name: string
+          position?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          category?: string
+          created_at?: string
+          id?: string
+          name?: string
+          position?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       site_survey_profile_permissions: {
         Row: {
           allowed: boolean
@@ -3439,6 +3469,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      site_survey_screwdriver_types: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          name: string
+          position: number
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name: string
+          position?: number
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+          position?: number
+        }
+        Relationships: []
       }
       site_survey_sections: {
         Row: {
@@ -3581,6 +3635,81 @@ export type Database = {
           },
         ]
       }
+      site_survey_visit_materials: {
+        Row: {
+          catalog_item_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          quantity: number
+          recorded_by: string
+          screwdriver_type_id: string | null
+          updated_at: string
+          visit_id: string
+          wrench_size_id: string | null
+        }
+        Insert: {
+          catalog_item_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          quantity?: number
+          recorded_by: string
+          screwdriver_type_id?: string | null
+          updated_at?: string
+          visit_id: string
+          wrench_size_id?: string | null
+        }
+        Update: {
+          catalog_item_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          quantity?: number
+          recorded_by?: string
+          screwdriver_type_id?: string | null
+          updated_at?: string
+          visit_id?: string
+          wrench_size_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_survey_visit_materials_catalog_item_id_fkey"
+            columns: ["catalog_item_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_material_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_visit_materials_recorded_by_fkey"
+            columns: ["recorded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_visit_materials_screwdriver_type_id_fkey"
+            columns: ["screwdriver_type_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_screwdriver_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_visit_materials_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_visits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_visit_materials_wrench_size_id_fkey"
+            columns: ["wrench_size_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_wrench_sizes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_survey_visits: {
         Row: {
           address: string
@@ -3707,6 +3836,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      site_survey_wrench_sizes: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          name: string
+          position: number
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name: string
+          position?: number
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+          position?: number
+        }
+        Relationships: []
       }
       stock_destinations: {
         Row: {
