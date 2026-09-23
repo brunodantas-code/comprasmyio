@@ -249,7 +249,7 @@ function ChecklistSection({ section, order, open, onToggle, children }: { sectio
       <span className="flex min-w-0 items-center gap-3"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm bg-myio-green/10 text-sm font-bold text-myio-green">{order}</span><span className="min-w-0"><span className="block truncate text-sm font-semibold text-foreground">{section.title}</span>{section.description ? <span className="block truncate text-xs text-muted-foreground">{section.description}</span> : null}</span></span>
       <span className="flex h-8 w-8 shrink-0 items-center justify-center text-muted-foreground" aria-hidden="true">{open ? <Minus className="h-4 w-4" /> : <Plus className="h-4 w-4" />}</span>
     </Button>
-    <div className={`${open ? "block" : "hidden"} space-y-5 border-t border-border p-4 sm:p-6`}>{children}</div>
+    <div className={`${open ? "block" : "hidden"} space-y-3 border-t border-border p-3 sm:p-4`}>{children}</div>
   </section>;
 }
 
@@ -412,10 +412,10 @@ function QuestionField({ question, answer, hasPhoto, onAnswerChange }: { questio
   const [storedDetail, storedSubdetail] = stored.detail.split(" | ");
   const [selectedDetail, setSelectedDetail] = useState(storedDetail ?? "");
   const suboptions = config.detail?.suboptions?.[selectedDetail] ?? [];
-  return <div className="space-y-3"><Label className="text-sm font-semibold">{question.prompt}{question.required ? " *" : ""}</Label>
+  return <div className="space-y-2"><Label className="text-sm font-semibold">{question.prompt}{question.required ? " *" : ""}</Label>
     {question.question_type === "checkbox" ? <label className="flex items-center gap-2 text-sm"><Checkbox name={question.id} defaultChecked={stored.value === true} />Sim</label> : null}
-    {question.question_type === "radio" ? <RadioGroup name={question.id} defaultValue={typeof stored.value === "string" ? stored.value : undefined} onValueChange={onAnswerChange} className="grid gap-x-6 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">{options.map((option) => <label key={option} className="flex items-center gap-2 text-sm"><RadioGroupItem value={option} />{option}</label>)}</RadioGroup> : null}
-    {question.question_type === "multiselect" ? <div className="grid gap-x-6 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">{options.map((option) => <label key={option} className="flex items-center gap-2 text-sm"><Checkbox name={question.id} value={option} defaultChecked={storedValues.includes(option)} />{option}</label>)}</div> : null}
+    {question.question_type === "radio" ? <RadioGroup name={question.id} defaultValue={typeof stored.value === "string" ? stored.value : undefined} onValueChange={onAnswerChange} className="flex flex-wrap items-center gap-x-8 gap-y-2">{options.map((option) => <label key={option} className="flex shrink-0 items-center gap-2 text-sm"><RadioGroupItem value={option} />{option}</label>)}</RadioGroup> : null}
+    {question.question_type === "multiselect" ? <div className="flex flex-wrap items-center gap-x-8 gap-y-2">{options.map((option) => <label key={option} className="flex shrink-0 items-center gap-2 text-sm"><Checkbox name={question.id} value={option} defaultChecked={storedValues.includes(option)} />{option}</label>)}</div> : null}
     {question.question_type === "select" ? <Select name={question.id} defaultValue={typeof stored.value === "string" ? stored.value : undefined}><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent>{options.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent></Select> : null}
     {question.question_type === "textarea" ? <Textarea name={question.id} defaultValue={typeof stored.value === "string" ? stored.value : ""} /> : null}
     {question.question_type === "text" || question.question_type === "number" ? <Input name={question.id} type={question.question_type === "number" ? "number" : "text"} defaultValue={typeof stored.value === "string" || typeof stored.value === "number" ? String(stored.value) : ""} /> : null}
