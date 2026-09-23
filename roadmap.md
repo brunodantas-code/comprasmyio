@@ -2,6 +2,7 @@
 
 - [ ] Checklist da OS — Hidrômetro: seleção única “Fácil”, “Regular” ou “Difícil”; ao marcar “Difícil”, exigir detalhamento e foto.
 - [ ] Checklist da OS — Localização do hidrômetro: seleção única entre “Loja”, “Sobreloja”, “Parede” e “Debaixo da pia”, com foto obrigatória.
+- [ ] Checklist da OS — Ponto elétrico próximo: seleção única “Sim” ou “Não”; ao marcar “Sim”, exigir uma única opção entre “Luminária de emergência”, “Tomada”, “Teto”, “Parede” e “Quadro elétrico próximo”, além de foto obrigatória.
 - [x] Site Survey — criar Cadastro > Diversos com materiais, equipamentos, tipos de chave de fenda e bitolas de chave de grifo administráveis.
 - [x] Checklist da OS — permitir selecionar vários materiais/equipamentos cadastrados, informando quantidade e observação em cada item.
 
