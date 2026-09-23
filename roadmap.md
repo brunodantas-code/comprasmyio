@@ -10,6 +10,7 @@
 - [x] Registrar automaticamente na OS a data e hora reais de início e conclusão, incluindo o dia inicial e final.
 - [ ] Comparar a duração estimada versus a duração realizada.
 - [x] Permitir que o suporte pré-cadastre os ambientes de uma OS de shopping por Excel, com colunas LUC e Nome da loja, conferência antes da gravação, prevenção de duplicidade e atualização sem exclusão dos LUCs ausentes.
+- [x] Simplificar a abertura da OS para somente dados gerais; cadastrar ou importar todas as lojas, LUCs e ambientes dentro da OS já salva, antes dos checklists.
 - [x] Manter histórico individual de alterações do nome de cada loja por LUC e permitir correção manual ou por análise da foto da fachada.
 - [ ] Checklist prévio à visita técnica — confirmar, com seleção única “Sim” ou “Não”, se o celular está com 100% de bateria.
 - [ ] Checklist prévio à visita técnica — confirmar, com seleção única “Sim” ou “Não”, se o powerbank está com 100% de bateria.
