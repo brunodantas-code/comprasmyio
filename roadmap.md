@@ -1,5 +1,7 @@
 # Aplicativo Site Survey
 
+- [x] Permitir que o suporte pré-cadastre os ambientes de uma OS de shopping por Excel, com colunas LUC e Nome da loja, conferência antes da gravação, prevenção de duplicidade e atualização sem exclusão dos LUCs ausentes.
+- [x] Manter histórico individual de alterações do nome de cada loja por LUC e permitir correção manual ou por análise da foto da fachada.
 - [ ] Checklist prévio à visita técnica — confirmar, com seleção única “Sim” ou “Não”, se o celular está com 100% de bateria.
 - [ ] Checklist prévio à visita técnica — confirmar, com seleção única “Sim” ou “Não”, se o powerbank está com 100% de bateria.
 - [ ] Checklist prévio à visita técnica — confirmar, com seleção única “Sim” ou “Não”, se a parafusadeira está com 100% de bateria; ao marcar “Não”, exigir o relato do problema e abrir automaticamente um ticket como pendência do suporte.
