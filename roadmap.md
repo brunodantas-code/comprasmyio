@@ -612,5 +612,5 @@
 
 ## Botões do checklist
 - [x] Igualar o tamanho do botão Editar ao botão Excluir nas perguntas
-- [ ] Incluir ordem numérica no cadastro e na edição das perguntas, alterando sua sequência de exibição.
+- [x] Incluir ordem numérica no cadastro e na edição das perguntas, alterando sua sequência de exibição.
 - [ ] Validar a ordenação das perguntas em computador e celular.
