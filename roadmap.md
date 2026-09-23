@@ -11,7 +11,7 @@
 - [ ] Comparar a duração estimada versus a duração realizada.
 - [x] Permitir que o suporte pré-cadastre os ambientes de uma OS de shopping por Excel, com colunas LUC e Nome da loja, conferência antes da gravação, prevenção de duplicidade e atualização sem exclusão dos LUCs ausentes.
 - [x] Simplificar a abertura da OS para somente dados gerais; cadastrar ou importar todas as lojas, LUCs e ambientes dentro da OS já salva, antes dos checklists.
-- [x] Avaliar colunas adicionais na importação de lojas/LUCs: a planilha pode conter outras colunas, mas atualmente somente LUC e Nome da loja são importados; localização pode ser adicionada futuramente.
+- [x] Incluir Localização opcional no cadastro, edição, listagem e importação de lojas/LUCs; aceitar os cabeçalhos Localização, Piso, Andar ou Local e manter o campo vazio quando não informado.
 - [x] Manter Preparação pré-visita, Chegada e responsáveis e Condições e perfil do local como etapas únicas da OS, antes da seleção pesquisável da loja/ambiente.
 - [x] Manter histórico individual de alterações do nome de cada loja por LUC e permitir correção manual ou por análise da foto da fachada.
 - [ ] Checklist prévio à visita técnica — confirmar, com seleção única “Sim” ou “Não”, se o celular está com 100% de bateria.

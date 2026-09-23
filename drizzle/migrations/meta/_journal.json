@@ -379,6 +379,13 @@
       "when": 1790188462756,
       "tag": "0053_filter_site_survey_users_to_supply_technicians",
       "breakpoints": true
+    },
+    {
+      "idx": 54,
+      "version": "7",
+      "when": 1790192739697,
+      "tag": "0054_add_site_survey_luc_location",
+      "breakpoints": true
     }
   ]
 }
