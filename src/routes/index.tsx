@@ -173,9 +173,6 @@ function Landing() {
                 <span className="min-w-0">
                    <strong className="block text-sm leading-tight text-erp-landing-foreground">{title}</strong>
                    <span className="block text-xs leading-tight text-erp-landing-muted">{body}</span>
-                  {!available && (
-                     <span className="mt-1 block text-xs leading-tight text-erp-landing-muted">Em desenvolvimento</span>
-                  )}
                 </span>
               </div>
             ))}

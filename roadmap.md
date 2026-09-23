@@ -2,6 +2,7 @@
 
 - [x] Página inicial — subir o bloco do logo aos aplicativos, reduzir a largura dos blocos para manter duas linhas, adicionar o Site Survey e evitar sobreposição do CRM com o elemento lilás.
 - [x] Acesso — deslocar o bloco “Acesse sua conta” para a esquerda, evitando sobreposição com a rede mesh.
+- [x] Página inicial — retirar o texto “Em desenvolvimento” dos aplicativos indisponíveis.
 - [ ] Estimar automaticamente a duração da visita com base nos dados da proposta comercial — quantidade de lojas/ambientes, hidrômetros, pontos elétricos, áreas técnicas e demais fatores — usando o histórico dos levantamentos realizados para apoiar futuros orçamentos e propostas.
 - [x] Registrar automaticamente na OS a data e hora reais de início e conclusão, incluindo o dia inicial e final.
 - [ ] Comparar a duração estimada versus a duração realizada.
