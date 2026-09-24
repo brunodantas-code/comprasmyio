@@ -719,3 +719,5 @@
 - [x] OpDesk — verificar e recuperar o histórico do chamado vinculado à OS 202609230001 e validar o link direto.
 
 - [x] Site Survey — reapresentar corretamente as respostas salvas das etapas 1, 2 e 3 após refresh.
+
+- [ ] Site Survey — usar no desktop a mesma barra inferior fixa do mobile, incluindo submenus ascendentes.
