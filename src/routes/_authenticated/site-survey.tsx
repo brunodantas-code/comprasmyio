@@ -701,7 +701,11 @@ function SurveyLogs({ names }: { names: { clients: Map<string, string>; projects
 
 function asQuestionConfig(value: unknown): QuestionConfig { return value && typeof value === "object" ? value as QuestionConfig : {}; }
 function answerParts(answer: unknown): { value: unknown; detail: string } { if (answer && typeof answer === "object" && !Array.isArray(answer) && "value" in answer) { const stored = answer as { value: unknown; detail?: unknown }; return { value: stored.value, detail: typeof stored.detail === "string" ? stored.detail : "" }; } return { value: answer, detail: "" }; }
-function answerMatches(value: unknown, expected: string) { return Array.isArray(value) ? value.map(String).includes(expected) : String(value ?? "").toLocaleLowerCase("pt-BR") === expected.toLocaleLowerCase("pt-BR"); }
+function answerMatches(value: unknown, expected: string) {
+  const expectedValues = expected.split(";").map((item) => item.trim().toLocaleLowerCase("pt-BR")).filter(Boolean);
+  const actualValues = (Array.isArray(value) ? value : [value]).map((item) => String(item ?? "").trim().toLocaleLowerCase("pt-BR"));
+  return expectedValues.some((item) => actualValues.includes(item));
+}
 function isQuestionVisible(question: Question, answers: Map<string, unknown>) {
   if (!question.conditioned_on_question_id || !question.conditioned_value) return true;
   const matches = answerMatches(answerParts(answers.get(question.conditioned_on_question_id)).value, question.conditioned_value);
