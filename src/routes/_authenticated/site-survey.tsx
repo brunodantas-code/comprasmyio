@@ -89,6 +89,10 @@ const STATUS: Record<VisitStatus, string> = { agendada: "Agendada", em_andamento
 const STATUS_ORDER: VisitStatus[] = ["agendada", "em_andamento", "em_revisao", "concluida", "cancelada"];
 const GENERAL_CHECKLIST_SECTIONS = new Set(["Preparação pré-visita", "Chegada e responsáveis", "Condições e perfil do local"]);
 const questionRequiresPhoto = (question: Question) => Boolean((question.configuration as QuestionConfig | null)?.photo?.required);
+const isOtherOption = (value: string) => {
+  const normalized = value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLocaleLowerCase("pt-BR");
+  return normalized === "outro" || normalized === "outros";
+};
 
 export const Route = createFileRoute("/_authenticated/site-survey")({
   beforeLoad: async ({ context }) => {
@@ -313,20 +317,21 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
       const subdetail = String(values.get(`${question.id}__subdetail`) ?? "").trim();
       const detailValue = subdetail ? `${baseDetail} | ${subdetail}` : baseDetail;
       const applies = config.condition?.value === undefined || (Array.isArray(value) ? value.includes(config.condition.value) : value === config.condition.value);
-      const otherApplies = config.other_detail === true && (Array.isArray(value) ? value.includes("Outros") : value === "Outros");
+       const hasOtherOption = Array.isArray(question.options) && question.options.some((option) => typeof option === "string" && isOtherOption(option));
+       const otherApplies = (config.other_detail === true || hasOtherOption) && (Array.isArray(value) ? value.some((item) => isOtherOption(String(item))) : isOtherOption(String(value)));
       if (!config.photo_only && question.required && (Array.isArray(value) ? value.length === 0 : value === "" || value === false)) throw new Error(`Responda: ${question.prompt}`);
       if (applies && config.detail?.required && !detailValue) throw new Error(`Preencha: ${config.detail.label ?? question.prompt}`);
       if (otherApplies && !detailValue) throw new Error(`Especifique: ${question.prompt}`);
       if (applies && config.detail?.suboptions?.[baseDetail]?.length && !subdetail) throw new Error(`Selecione a localização de ${baseDetail.toLocaleLowerCase("pt-BR")}.`);
       const questionScope = phase === "pre_visit" ? { visit_luc_id: null, visit_environment_id: null } : scope;
-      return { visit_id: visit.id, ...questionScope, question_id: question.id, answered_by: data.userId, answer: config.detail || config.other_detail ? { value, detail: detailValue || null } : value, question_snapshot: JSON.parse(JSON.stringify({ prompt: question.prompt, options: question.options, configuration: question.configuration })) };
+       return { visit_id: visit.id, ...questionScope, question_id: question.id, answered_by: data.userId, answer: config.detail || config.other_detail || hasOtherOption ? { value, detail: detailValue || null } : value, question_snapshot: JSON.parse(JSON.stringify({ prompt: question.prompt, options: question.options, configuration: question.configuration })) };
     });
     const phonePattern = /^\+?[0-9 ()-]{8,24}$/;
     if (phase === "pre_visit" && visitTechnicians.some((item) => !item.technician_id || !phonePattern.test(item.mobile_phone.trim()))) throw new Error("Selecione cada técnico e informe um celular válido.");
     if (phase === "pre_visit" && new Set(visitTechnicians.map((item) => item.technician_id)).size !== visitTechnicians.length) throw new Error("O mesmo técnico não pode ser selecionado duas vezes.");
     for (const question of visibleQuestions.filter((item) => item.question_key !== "shopping_maintenance_companions")) {
       const config = asQuestionConfig(question.configuration);
-      const value = question.question_type === "multiselect" ? values.getAll(question.id).map(String) : String(values.get(question.id) ?? "");
+     const value = question.question_type === "multiselect" ? values.getAll(question.id).map(String) : String(values.get(question.id) ?? "");
       const applies = config.condition?.value === undefined || (Array.isArray(value) ? value.includes(config.condition.value) : value === config.condition.value);
       const photo = values.get(`${question.id}__photo`);
       const isGeneralQuestion = phase === "pre_visit";
@@ -488,7 +493,8 @@ function QuestionField({ question, answer, hasPhoto, onAnswerChange }: { questio
   const normalizedPrompt = question.prompt.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR");
   const showRequiredMark = normalizedPrompt.includes("os ja foi previamente cadastrada");
   const conditionApplies = config.condition?.value === undefined || selectedValue === config.condition.value || selectedValues.includes(config.condition.value);
-  const showOtherDetail = config.other_detail === true && (selectedValue === "Outros" || selectedValues.includes("Outros"));
+   const hasOtherOption = options.some(isOtherOption);
+   const showOtherDetail = (config.other_detail === true || hasOtherOption) && (isOtherOption(selectedValue) || selectedValues.some(isOtherOption));
   const showDetail = (Boolean(config.detail) && conditionApplies) || showOtherDetail;
   const setAnswer = (value: string) => { setSelectedValue(value); onAnswerChange?.(value); };
   return <div className={`grid gap-3 py-1 ${showDetail || (config.photo && conditionApplies) ? "lg:grid-cols-[minmax(0,1.35fr)_minmax(260px,0.65fr)] lg:items-start lg:gap-5" : ""}`}>
@@ -504,7 +510,7 @@ function QuestionField({ question, answer, hasPhoto, onAnswerChange }: { questio
        </div> : null}
     </div>
     {showDetail || (config.photo && conditionApplies) ? <div className="min-w-0 space-y-3">
-      {showDetail ? <div className="min-w-64 flex-1 space-y-2"><Label className="text-xs text-muted-foreground">{showOtherDetail ? "Especifique" : config.detail?.label ?? "Detalhes"}</Label>{config.detail?.options?.length ? <Select name={`${question.id}__detail`} value={selectedDetail || undefined} onValueChange={setSelectedDetail}><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent>{config.detail.options.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent></Select> : <Textarea name={`${question.id}__detail`} defaultValue={stored.detail} rows={2} />}{suboptions.length ? <div className="space-y-2"><Label className="text-xs text-muted-foreground">Localização da tomada</Label><Select name={`${question.id}__subdetail`} defaultValue={storedSubdetail || undefined}><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent>{suboptions.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent></Select></div> : null}</div> : null}
+       {showDetail ? <div className="min-w-64 flex-1 space-y-2"><Label className="text-xs text-muted-foreground">{showOtherDetail ? "Especifique" : config.detail?.label ?? "Detalhes"}</Label>{config.detail?.options?.length && !showOtherDetail ? <Select name={`${question.id}__detail`} value={selectedDetail || undefined} onValueChange={setSelectedDetail}><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent>{config.detail.options.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent></Select> : <Textarea name={`${question.id}__detail`} defaultValue={stored.detail} rows={2} maxLength={500} required={showOtherDetail || config.detail?.required === true} />}{suboptions.length ? <div className="space-y-2"><Label className="text-xs text-muted-foreground">Localização da tomada</Label><Select name={`${question.id}__subdetail`} defaultValue={storedSubdetail || undefined}><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent>{suboptions.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent></Select></div> : null}</div> : null}
       {config.photo && conditionApplies ? <div className="min-w-64 flex-1 space-y-2"><Label htmlFor={`${question.id}__photo`} className="flex items-center gap-2 text-xs text-muted-foreground"><Camera className="h-4 w-4" />Foto{config.photo.required ? " obrigatória" : " opcional"}{hasPhoto ? " · anexada" : ""}</Label><Input id={`${question.id}__photo`} name={`${question.id}__photo`} type="file" accept="image/*" capture="environment" /></div> : null}
     </div> : null}
   </div>;
