@@ -194,15 +194,10 @@ function SiteSurveyPage() {
 
   return <div className="min-h-screen bg-background">
     <AppHeader logo={<MyioAppLogo appName="Site Survey" className="text-base sm:text-2xl" />}><Badge variant="outline">{data.profileName}</Badge></AppHeader>
-    <main className="mx-auto max-w-7xl px-4 pb-28 pt-8 sm:px-6 sm:pb-8">
+    <main className="mx-auto max-w-7xl px-4 pb-28 pt-8 sm:px-6">
       <Tabs value={section} onValueChange={setSection}>
-        <TabsList className="no-scrollbar mb-6 hidden h-auto w-full justify-start overflow-x-auto bg-transparent p-0 sm:flex">{tabs.map(({ value, label, icon: Icon }) => <TabsTrigger key={value} value={value} className="shrink-0"><Icon className="mr-2 h-4 w-4" />{label}</TabsTrigger>)}</TabsList>
         <TabsContent value="visitas">
           <Tabs value={visitsSection} onValueChange={setVisitsSection}>
-            <TabsList className="mb-4 hidden h-auto w-fit grid-cols-2 sm:grid">
-              <TabsTrigger value="minhas" className="w-44"><CalendarDays className="mr-2 h-4 w-4" />Minhas Visitas</TabsTrigger>
-              {can("site_survey_agendar") ? <TabsTrigger value="nova" className="w-44"><Plus className="mr-2 h-4 w-4" />Nova Visita</TabsTrigger> : null}
-            </TabsList>
             <TabsContent value="minhas">
               <section className="mb-5 overflow-hidden rounded-md border border-border bg-card shadow-sm" aria-label="Resumo de visitas">
                 <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-border px-4 py-3">
@@ -237,9 +232,6 @@ function SiteSurveyPage() {
         <TabsContent value="cadastro"><SurveyCatalogAdmin data={data} onChanged={invalidate} /></TabsContent>
         <TabsContent value="usuarios">
           <Tabs value={userSection} onValueChange={setUserSection}>
-            <TabsList className="no-scrollbar mb-4 hidden h-auto w-full justify-start overflow-x-auto sm:flex">
-              {userTabs.map(({ value, label, icon: Icon }) => <TabsTrigger key={value} value={value} className="shrink-0"><Icon className="mr-2 h-4 w-4" />{label}</TabsTrigger>)}
-            </TabsList>
             {can("site_survey_usuarios") ? <TabsContent value="lista"><SurveyUsersAdmin /></TabsContent> : null}
             {can("site_survey_perfis") ? <TabsContent value="perfis"><SiteSurveyProfilesAdmin /></TabsContent> : null}
             {can("site_survey_logs") ? <TabsContent value="logs"><SurveyLogs names={names} /></TabsContent> : null}
@@ -247,7 +239,7 @@ function SiteSurveyPage() {
         </TabsContent>
       </Tabs>
     </main>
-    <nav className="fixed inset-x-3 bottom-3 z-50 sm:hidden" aria-label="Navegação do Site Survey">
+    <nav className="fixed inset-x-3 bottom-3 z-50" aria-label="Navegação do Site Survey">
       <div className="mx-auto grid max-w-md grid-cols-4 items-stretch rounded-[1.75rem] border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/90">
         {tabs.map(({ value, label, icon: Icon }) => {
           const active = section === value;
