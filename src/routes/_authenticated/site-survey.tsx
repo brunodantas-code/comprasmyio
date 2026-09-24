@@ -297,7 +297,8 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
   const visitClientId = visit.client_id ?? data.projects.find((project) => project.id === visit.project_id)?.client_id ?? null;
   const visitCategory = data.clientCategories.find((category) => category.id === data.clients.find((client) => client.id === visitClientId)?.category_id);
   const isShoppingVisit = visitCategory?.name.trim().toLocaleLowerCase("pt-BR") === "shoppings";
-  const updateStatus = async (status: VisitStatus) => { const stamps: Record<string, string> = {}; if (status === "em_andamento") stamps.started_at = new Date().toISOString(); if (status === "em_revisao") stamps.submitted_at = new Date().toISOString(); if (status === "concluida") stamps.completed_at = new Date().toISOString(); if (status === "cancelada") stamps.cancelled_at = new Date().toISOString(); const { error } = await supabase.from("site_survey_visits").update({ status, review_notes: reviewNotes || visit.review_notes, ...stamps }).eq("id", visit.id); if (error) return toast.error(error.message); toast.success(`Visita ${STATUS[status].toLocaleLowerCase("pt-BR")}`); onChanged(); };
+  const phonePattern = /^\+?[0-9 ()-]{8,24}$/;
+  const updateStatus = async (status: VisitStatus) => { if ((status === "em_revisao" || status === "concluida") && !allRequiredComplete) return toast.error("Preencha todos os campos obrigatórios antes de concluir."); const stamps: Record<string, string> = {}; if (status === "em_andamento") stamps.started_at = new Date().toISOString(); if (status === "em_revisao") stamps.submitted_at = new Date().toISOString(); if (status === "concluida") stamps.completed_at = new Date().toISOString(); if (status === "cancelada") stamps.cancelled_at = new Date().toISOString(); const { error } = await supabase.from("site_survey_visits").update({ status, review_notes: reviewNotes || visit.review_notes, ...stamps }).eq("id", visit.id); if (error) return toast.error(error.message); toast.success(`Visita ${STATUS[status].toLocaleLowerCase("pt-BR")}`); onChanged(); };
   const saveAnswers = async (form: HTMLFormElement, phase: "pre_visit" | "point") => {
     if (phase === "point" && !pointId) throw new Error("Selecione a loja ou ambiente deste checklist.");
     const values = new FormData(form);
@@ -319,22 +320,13 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
       const baseDetail = String(values.get(`${question.id}__detail`) ?? "").trim();
       const subdetail = String(values.get(`${question.id}__subdetail`) ?? "").trim();
       const detailValue = subdetail ? `${baseDetail} | ${subdetail}` : baseDetail;
-      const applies = config.condition?.value === undefined || (Array.isArray(value) ? value.includes(config.condition.value) : value === config.condition.value);
        const hasOtherOption = Array.isArray(question.options) && question.options.some((option) => typeof option === "string" && isOtherOption(option));
-       const otherApplies = (config.other_detail === true || hasOtherOption) && (Array.isArray(value) ? value.some((item) => isOtherOption(String(item))) : isOtherOption(String(value)));
       const questionScope = phase === "pre_visit" ? { visit_luc_id: null, visit_environment_id: null } : scope;
        return { visit_id: visit.id, ...questionScope, question_id: question.id, answered_by: data.userId, answer: config.detail || config.other_detail || hasOtherOption ? { value, detail: detailValue || null } : value, question_snapshot: JSON.parse(JSON.stringify({ prompt: question.prompt, options: question.options, configuration: question.configuration })) };
     });
-    const phonePattern = /^\+?[0-9 ()-]{8,24}$/;
-    if (phase === "pre_visit" && visitTechnicians.some((item) => !item.technician_id || !phonePattern.test(item.mobile_phone.trim()))) throw new Error("Selecione cada técnico e informe um celular válido.");
-    if (phase === "pre_visit" && new Set(visitTechnicians.map((item) => item.technician_id)).size !== visitTechnicians.length) throw new Error("O mesmo técnico não pode ser selecionado duas vezes.");
     for (const question of visibleQuestions.filter((item) => item.question_key !== "shopping_maintenance_companions")) {
-      const config = asQuestionConfig(question.configuration);
-     const value = question.question_type === "multiselect" ? values.getAll(question.id).map(String) : String(values.get(question.id) ?? "");
-      const applies = config.condition?.value === undefined || (Array.isArray(value) ? value.includes(config.condition.value) : value === config.condition.value);
       const photo = values.get(`${question.id}__photo`);
       const isGeneralQuestion = phase === "pre_visit";
-      const alreadyHasPhoto = (detail?.attachments ?? []).some((item) => item.question_id === question.id && (isGeneralQuestion ? !item.visit_luc_id && !item.visit_environment_id : matchesPoint(item)));
       if (photo instanceof File && photo.size > 0) {
         const safe = photo.name.replace(/[^a-zA-Z0-9._-]/g, "-"); const path = `${visit.id}/${isGeneralQuestion ? "geral" : pointId}/${crypto.randomUUID()}-${safe}`;
         const { error: uploadError } = await supabase.storage.from("site-survey-attachments").upload(path, photo); if (uploadError) throw uploadError;
