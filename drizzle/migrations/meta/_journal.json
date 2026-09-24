@@ -449,6 +449,13 @@
       "when": 1790265286142,
       "tag": "0063_secure_internal_call_attachments",
       "breakpoints": true
+    },
+    {
+      "idx": 64,
+      "version": "7",
+      "when": 1790265695108,
+      "tag": "0064_grant_new_users_internal_calls_access",
+      "breakpoints": true
     }
   ]
 }
