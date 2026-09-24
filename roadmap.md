@@ -729,3 +729,5 @@
 - [x] Site Survey — incluir lixeira em Usuários com confirmação para remover somente o acesso ao aplicativo.
 
 - [x] Site Survey — ao salvar progresso nas etapas 4 a 7, manter a Loja/LUC selecionada, recolher somente a etapa salva e preservar as demais visíveis.
+
+- [x] Site Survey — corrigir divergência da etapa 7 na Vivara: distinguir pendências reais do estado de conclusão da loja.
