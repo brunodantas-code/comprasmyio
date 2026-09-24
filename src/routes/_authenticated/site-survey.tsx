@@ -451,7 +451,7 @@ function SortableQuestionRow({ id, children }: { id: string; children: ReactNode
 
 function OrderHandle({ order, label }: { order: number; label: string }) {
   const sortable = useContext(SortableHandleContext);
-  return <div className="flex w-24 flex-col items-center justify-end gap-1 self-end"><Button type="button" variant="ghost" className="h-10 w-10 cursor-grab bg-myio-green/10 p-0 font-bold text-myio-green hover:bg-myio-green/20 hover:text-myio-green active:cursor-grabbing touch-none" aria-label={label} title="Arraste para ordenar" {...sortable?.attributes} {...sortable?.listeners}><span className="tabular-nums">{order}</span></Button><span className="text-center text-[10px] leading-tight text-muted-foreground">Arrastar para ordenar</span></div>;
+  return <div className="flex w-24 flex-col items-center gap-1 self-start sm:pt-7"><Button type="button" variant="ghost" className="h-9 w-10 cursor-grab bg-myio-green/10 p-0 font-bold text-myio-green hover:bg-myio-green/20 hover:text-myio-green active:cursor-grabbing touch-none" aria-label={label} title="Arraste para ordenar" {...sortable?.attributes} {...sortable?.listeners}><span className="tabular-nums">{order}</span></Button><span className="text-center text-[10px] leading-tight text-muted-foreground">Arrastar para ordenar</span></div>;
 }
 
 function SurveyCatalogAdmin({ data, onChanged }: { data: NonNullable<ReturnType<typeof useSurveyDataShape>>; onChanged: () => void }) {
