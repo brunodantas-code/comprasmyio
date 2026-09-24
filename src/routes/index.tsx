@@ -63,7 +63,7 @@ const MODULES = [
   {
     icon: Phone,
     title: "OpDesk",
-    body: "Atendimento interno",
+    body: "Suporte ao cliente e operação",
     available: true,
   },
   {
