@@ -1,6 +1,6 @@
 # Aplicativo Site Survey
 
-- [ ] Site Survey — limitar nomes de modelos e seções a 50 caracteres, compactar o seletor, alinhar ações e recolher os três blocos administrativos.
+- [x] Site Survey — limitar nomes de modelos e seções a 50 caracteres, compactar o seletor, alinhar ações e recolher os três blocos administrativos.
 
 - [x] Site Survey — alinhar pela base os controles das perguntas, padronizar Salvar e Excluir, usar pergunta em linha com limite e contador de 50 caracteres e permitir editar o tipo de resposta.
 - [x] Site Survey — aplicar linhas finas aos demais campos, manter verde somente em edição e alinhar seções, obrigatoriedade e ações pela base.
