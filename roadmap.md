@@ -1,5 +1,7 @@
 # Aplicativo Site Survey
 
+- [x] OpDesk — remover o nome repetido do conteúdo, mantendo ícone monocromático e texto explicativo.
+
 - [x] Acesso — unificar `/auth` com a tela inicial da plataforma, eliminando o segundo padrão visual de login.
 
 - [x] Todos os apps — ampliar o cabeçalho móvel, mostrar usuário e menu, e retirar o fundo verde dos botões Início e Voltar.
