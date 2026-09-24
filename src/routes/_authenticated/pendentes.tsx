@@ -37,7 +37,7 @@ function PendentesPage() {
                 {(data?.supplyQueue ?? 0) > 0 ? <PendingLink icon={ShoppingCart} label="Fila do Supply" count={data?.supplyQueue ?? 0} to="/dashboard" search={{ section: "queue" }} /> : null}
                 {(data?.userDeletions ?? 0) > 0 ? <PendingLink icon={ShieldCheck} label="Exclusões de usuários aguardando decisão" count={data?.userDeletions ?? 0} to="/dashboard" search={{ section: "admin", subsection: "usuarios" }} /> : null}
                 {(data?.codeItems ?? []).map((ticket) => <PendingLink key={ticket.ticketId} icon={CodeXml} label={`#${ticket.ticketNumber} · ${ticket.reason === "responder" ? "Responder ao Admin" : ticket.reason === "aceitar" ? "Confirmar atendimento" : "Ticket aguardando atendimento"}`} count={1} to="/development" search={{ ticket: ticket.ticketId }} />)}
-                {(data?.supportCallItems ?? []).map((call) => <PendingLink key={call.callId} icon={Phone} label={`#${call.callNumber} · ${call.title}`} count={1} to="/chamados" search={{ chamado: call.callId }} />)}
+                {(data?.supportCallItems ?? []).map((call) => <PendingLink key={call.callId} icon={Phone} label={`#${call.callNumber} · ${call.reason === "confirmar" ? "Confirmar conclusão" : call.title}`} count={1} to="/chamados" search={{ chamado: call.callId }} />)}
               </div>
             ) : null}
             {(data?.approvals ?? 0) > 0 ? <section id="approvals"><PendingForMe /></section> : null}

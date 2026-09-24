@@ -299,7 +299,7 @@ function PortalPage() {
                   {(pendingActions?.supplyQueue ?? 0) > 0 ? <PendingRow icon={ShoppingCart} label="Fila do Supply" count={pendingActions?.supplyQueue ?? 0} to="/dashboard" search={{ section: "queue" }} /> : null}
                   {(pendingActions?.userDeletions ?? 0) > 0 ? <PendingRow icon={ShieldCheck} label="Exclusões de usuários aguardando decisão" count={pendingActions?.userDeletions ?? 0} to="/dashboard" search={{ section: "admin", subsection: "usuarios" }} /> : null}
                   {(pendingActions?.codeItems ?? []).map((ticket) => <PendingRow key={ticket.ticketId} icon={CodeXml} label={`#${ticket.ticketNumber} · ${ticket.reason === "responder" ? "Responder ao Admin" : ticket.reason === "aceitar" ? "Confirmar atendimento" : "Ticket aguardando atendimento"}`} count={1} to="/development" search={{ ticket: ticket.ticketId }} />)}
-                   {(pendingActions?.supportCallItems ?? []).map((call) => <PendingRow key={call.callId} icon={Phone} label={`#${call.callNumber} · ${call.title}`} count={1} to="/chamados" search={{ chamado: call.callId }} />)}
+                   {(pendingActions?.supportCallItems ?? []).map((call) => <PendingRow key={call.callId} icon={Phone} label={`#${call.callNumber} · ${call.reason === "confirmar" ? "Confirmar conclusão" : call.title}`} count={1} to="/chamados" search={{ chamado: call.callId }} />)}
                 </div>
               </section>
             ) : null}

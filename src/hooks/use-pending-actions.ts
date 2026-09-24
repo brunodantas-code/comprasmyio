@@ -95,7 +95,7 @@ export function usePendingActions() {
         .filter((call) => currentUser?.isCustomerSupportAnalyst
           ? ["aberto", "em_atendimento", "aguardando"].includes(call.status)
           : call.reporter_id === userId && call.status === "resolvido")
-        .map((call) => ({ callId: call.id, callNumber: call.call_number ?? "—", title: call.title, status: call.status }));
+        .map((call) => ({ callId: call.id, callNumber: call.call_number ?? "—", title: call.title, status: call.status, reason: call.status === "resolvido" ? "confirmar" as const : "atender" as const }));
       const supportCalls = supportCallItems.length;
 
       return {
