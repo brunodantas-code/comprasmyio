@@ -714,4 +714,6 @@
 
 - [x] Site Survey — refletir a pendência geral da Loja/LUC na Etapa 7 até a conclusão da visita da loja.
 
-- [ ] OpDesk — verificar e recuperar o histórico do chamado vinculado à OS 202609230001 e validar o link direto.
+- [x] OpDesk — verificar e recuperar o histórico do chamado vinculado à OS 202609230001 e validar o link direto.
+
+- [x] Site Survey — reapresentar corretamente as respostas salvas das etapas 1, 2 e 3 após refresh.
