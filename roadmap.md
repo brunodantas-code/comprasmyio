@@ -657,4 +657,4 @@
 
 - [x] Site Survey — alinhar “Perguntas” e todos os marcadores de ordem pela mesma margem esquerda.
 
-- [ ] Site Survey — reorganizar cadastro/lista de modelos, ampliar a área de seções e aplicar linhas e ícones compactos em modelos e novas seções.
+- [x] Site Survey — reorganizar cadastro/lista de modelos, ampliar a área de seções e aplicar linhas e ícones compactos em modelos e novas seções.
