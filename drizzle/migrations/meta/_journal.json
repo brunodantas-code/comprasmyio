@@ -421,6 +421,13 @@
       "when": 1790209739107,
       "tag": "0059_add_no_additional_material_to_site_survey",
       "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "7",
+      "when": 1790209764404,
+      "tag": "0060_create_site_survey_material_decisions",
+      "breakpoints": true
     }
   ]
 }
