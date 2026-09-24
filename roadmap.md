@@ -645,10 +645,10 @@
 - [x] Manter confirmação obrigatória antes do cancelamento.
 - [x] Validar a nova organização em computador e celular.
 
-- [ ] Site Survey — alinhar pelo topo os campos e controles das perguntas e igualar a altura do marcador numérico à altura dos campos.
+- [x] Site Survey — alinhar pelo topo os campos e controles das perguntas e igualar a altura do marcador numérico à altura dos campos.
 
-- [ ] Site Survey — posicionar o título “Seção” acima do marcador numérico, alinhado à esquerda e sem repetir a numeração.
+- [x] Site Survey — posicionar o título “Seção” acima do marcador numérico, alinhado à esquerda e sem repetir a numeração.
 
-- [ ] Site Survey — alinhar o título “Perguntas” à mesma margem esquerda do título “Seção”.
+- [x] Site Survey — alinhar o título “Perguntas” à mesma margem esquerda do título “Seção”.
 
-- [ ] Site Survey — aplicar nas perguntas o mesmo eixo visual do título e marcador numérico usado nas seções.
+- [x] Site Survey — aplicar nas perguntas o mesmo eixo visual do título e marcador numérico usado nas seções.
