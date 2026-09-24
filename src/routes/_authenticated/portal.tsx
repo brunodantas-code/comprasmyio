@@ -1,16 +1,17 @@
 import { useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Bell, CheckCircle2, CodeXml, DollarSign, FileSignature, Home, Phone, Search, Settings, Settings2, ShieldCheck, ShoppingCart, UserRound, UsersRound, LogOut } from "lucide-react";
+import { Bell, CheckCircle2, ChevronRight, CodeXml, DollarSign, FileSignature, Home, Menu, Moon, Phone, Search, Settings, Settings2, ShieldCheck, ShoppingCart, UserRound, UsersRound, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { MyioPlatformLogo } from "@/components/myio-platform-logo";
 import { ErpAppAccessAdmin } from "@/components/erp-app-access-admin";
 import { CrmFunnelIcon } from "@/components/crm-funnel-icon";
 import { usePendingActions } from "@/hooks/use-pending-actions";
-import { ThemeMenuItem } from "@/components/theme-toggle";
+import { ThemeMenuItem, ThemeToggle } from "@/components/theme-toggle";
 
 export const Route = createFileRoute("/_authenticated/portal")({
   component: PortalPage,
@@ -30,6 +31,7 @@ function PortalPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [activeView, setActiveView] = useState<"apps" | "users">("apps");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { data: pendingActions } = usePendingActions();
   const { data, isLoading } = useQuery({
     queryKey: ["my-erp-access"],
@@ -60,6 +62,8 @@ function PortalPage() {
 
   if (isLoading || !data) return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Carregando...</div>;
 
+  const firstName = data.name.trim().split(/\s+/)[0] || "Usuário";
+
   const apps = [
     { key: "supply", name: "Supply", description: ["Solicitações", "e Estoque"], to: "/dashboard" as const },
     { key: "cash_flow", name: "Cash Flow", description: ["Gestão financeira"], to: "/cash-flow" as const },
@@ -73,10 +77,61 @@ function PortalPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-40 border-b border-border bg-card">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
-          <MyioPlatformLogo className="h-9 sm:h-10" />
-          <div className="flex min-w-0 items-center gap-2">
+      <header className="sticky top-0 z-40 bg-accent text-accent-foreground sm:border-b sm:border-border sm:bg-card sm:text-foreground">
+        <div className="mx-auto max-w-6xl px-5 pb-9 pt-5 sm:flex sm:items-center sm:justify-between sm:gap-3 sm:px-6 sm:py-4">
+          <div className="flex items-start justify-between gap-4 sm:block">
+            <MyioPlatformLogo tone="light" className="h-10 sm:hidden" />
+            <MyioPlatformLogo className="hidden h-10 sm:inline-flex" />
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="shrink-0 text-accent-foreground hover:bg-accent-foreground/10 hover:text-accent-foreground sm:hidden" aria-label="Abrir menu">
+                  <Menu className="h-7 w-7" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="bottom" className="max-h-[78vh] overflow-y-auto rounded-t-3xl border-x-0 border-b-0 px-5 pb-8 pt-5 sm:hidden">
+                <SheetHeader className="mb-5 text-center">
+                  <SheetTitle>Menu</SheetTitle>
+                </SheetHeader>
+                <nav aria-label="Menu do portal" className="divide-y divide-border">
+                  <Button asChild variant="ghost" className="h-14 w-full justify-start rounded-none px-1 text-base">
+                    <Link to="/pendentes" onClick={() => setMobileMenuOpen(false)}>
+                      <Bell className="h-5 w-5 shrink-0" />
+                      <span className="min-w-0 flex-1 text-left">Central de Pendências</span>
+                      {(pendingActions?.total ?? 0) > 0 ? <span className="flex h-7 min-w-7 items-center justify-center rounded-full bg-status px-2 text-xs font-bold text-status-foreground">{(pendingActions?.total ?? 0) > 99 ? "99+" : pendingActions?.total}</span> : null}
+                      <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    </Link>
+                  </Button>
+                  {data.isErpAdmin ? (
+                    <Button variant="ghost" className="h-14 w-full justify-start rounded-none px-1 text-base" onClick={() => { setActiveView("users"); setMobileMenuOpen(false); }}>
+                      <Settings2 className="h-5 w-5 shrink-0" />
+                      <span className="min-w-0 flex-1 text-left">Acessos</span>
+                      <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    </Button>
+                  ) : null}
+                  <div className="grid min-h-14 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-1">
+                    <div className="flex min-w-0 items-center gap-2 text-base font-medium">
+                      <Moon className="h-5 w-5 shrink-0" />
+                      <span>Tema</span>
+                    </div>
+                    <ThemeToggle />
+                  </div>
+                  <Button variant="ghost" className="h-14 w-full justify-start rounded-none px-1 text-base text-destructive hover:text-destructive" onClick={handleSignOut}>
+                    <LogOut className="h-5 w-5 shrink-0" />
+                    <span className="min-w-0 flex-1 text-left">Sair</span>
+                  </Button>
+                </nav>
+                <div className="mt-6 rounded-xl bg-muted px-4 py-3">
+                  <p className="truncate text-sm font-semibold">{data.name}</p>
+                  <p className="text-xs text-muted-foreground">Menu do usuário</p>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+          <div className="mt-8 sm:hidden">
+            <p className="text-xl font-bold text-accent-foreground">Olá, {firstName}</p>
+            <p className="mt-1 text-sm text-accent-foreground/80">Plataforma ERP</p>
+          </div>
+          <div className="hidden min-w-0 items-center gap-2 sm:flex">
             <div className="min-w-0 text-right">
               <p className="truncate text-sm font-semibold">{data.name}</p>
               <p className="text-xs text-muted-foreground">Plataforma ERP</p>
@@ -116,7 +171,7 @@ function PortalPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
+      <main className="relative z-10 -mt-3 min-h-[calc(100vh-10rem)] rounded-t-2xl bg-background px-4 py-10 sm:mx-auto sm:mt-0 sm:min-h-0 sm:max-w-6xl sm:rounded-none sm:px-6 sm:py-14">
         <Tabs value={activeView} onValueChange={(value) => setActiveView(value as "apps" | "users")}>
           <TabsContent value="apps">
             {apps.length ? (
