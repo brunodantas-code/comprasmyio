@@ -1,5 +1,7 @@
 # Aplicativo Site Survey
 
+- [x] Página inicial — manter “Gestão inteligente”, reduzir “em um só ecossistema” para uma linha e ampliar o respiro dos aplicativos em grupos de três no desktop.
+
 - [x] OpDesk — remover o nome repetido do conteúdo, mantendo ícone monocromático e texto explicativo.
 - [x] OpDesk — notificar Analistas de Suporte ao Cliente sobre chamados ativos na Central de Pendências e no ícone do aplicativo.
 - [x] OpDesk — permitir mensagens entre solicitante e suporte, manter histórico cronológico desde a abertura e reservar a conclusão ao solicitante após atendimento.

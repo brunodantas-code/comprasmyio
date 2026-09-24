@@ -167,26 +167,25 @@ export function Landing() {
           <MyioPlatformLogo tone="light" className="mb-4 h-10 sm:h-11" />
 
           <h1 className="max-w-3xl text-4xl font-extrabold leading-[1.02] text-erp-landing-foreground sm:text-5xl lg:text-6xl">
-            Gestão inteligente
-            <br />
-            <span className="font-light text-erp-landing-muted">em um só ecossistema</span>
+            <span className="block">Gestão inteligente</span>
+            <span className="block whitespace-nowrap text-[1.65rem] font-light leading-tight text-erp-landing-muted sm:text-4xl lg:text-5xl">em um só ecossistema</span>
           </h1>
           <p className="mt-3 max-w-xl text-base leading-snug text-erp-landing-muted sm:text-lg">
             A plataforma ERP completa para escalar o negócio.
           </p>
 
-          <div className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-4 min-[960px]:gap-2 lg:gap-2.5">
+          <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 min-[960px]:gap-3">
             {MODULES.map(({ icon: Icon, title, body, available }) => (
               <div
                 key={title}
-                className={`flex h-24 min-w-0 items-center gap-2 rounded-lg border border-erp-landing-border bg-erp-landing-panel p-2 transition-colors hover:border-primary/50 sm:h-[4.75rem] lg:p-2.5 ${available ? "" : "opacity-60"}`}
+                className={`flex h-28 min-w-0 items-center gap-3 rounded-lg border border-erp-landing-border bg-erp-landing-panel p-3 transition-colors hover:border-primary/50 sm:h-24 sm:p-3 ${available ? "" : "opacity-60"}`}
               >
                 <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-md ${available ? "bg-primary text-primary-foreground" : "bg-erp-landing-border text-erp-landing-muted"}`}>
                   <Icon className="h-5 w-5" />
                 </span>
-                <span className="min-w-0">
+                 <span className="min-w-0">
                    <strong className="block text-sm leading-tight text-erp-landing-foreground">{title}</strong>
-                   <span className="block text-xs leading-tight text-erp-landing-muted">{body}</span>
+                    <span className="mt-1.5 block text-xs leading-snug text-erp-landing-muted">{body}</span>
                 </span>
               </div>
             ))}
