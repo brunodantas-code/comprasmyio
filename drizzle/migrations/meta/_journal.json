@@ -477,6 +477,13 @@
       "when": 1790272608314,
       "tag": "0067_enforce_internal_call_completion_workflow",
       "breakpoints": true
+    },
+    {
+      "idx": 68,
+      "version": "7",
+      "when": 1790280892054,
+      "tag": "0068_create_site_survey_custom_catalogs",
+      "breakpoints": true
     }
   ]
 }

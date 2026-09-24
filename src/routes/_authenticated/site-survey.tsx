@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -84,6 +85,8 @@ type Question = { id: string; section_id: string; question_key: string | null; c
 type SurveyAction = Named & { description: string | null; active: boolean; position: number };
 type QuestionAction = { id: string; question_id: string; action_id: string; trigger_value: string; active: boolean };
 type CatalogItem = Named & { category: "material" | "equipamento"; active: boolean; position: number };
+type CustomCatalogItem = Named & { catalog_id: string; active: boolean; position: number };
+type CustomCatalog = Named & { active: boolean; position: number; site_survey_custom_catalog_items: CustomCatalogItem[] };
 
 const sortByPosition = <T extends { position: number; id: string }>(items: T[]) =>
   [...items].sort((left, right) => left.position - right.position || left.id.localeCompare(right.id));
@@ -127,7 +130,7 @@ function SiteSurveyPage() {
     queryFn: async () => {
       const { data: auth } = await supabase.auth.getUser();
       if (!auth.user) throw new Error("Sessão não encontrada");
-      const [{ data: visits, error }, { data: clients }, { data: clientCategories }, { data: projects }, { data: units }, { data: technicians }, { data: templates }, { data: sections }, { data: questions }, { data: surveyProfile }, { data: surveyPermissions }, { data: erpAdmin }, { data: catalog }, { data: screwdriverTypes }, { data: wrenchSizes }, { data: actionCatalog }, { data: questionActions }] = await Promise.all([
+      const [{ data: visits, error }, { data: clients }, { data: clientCategories }, { data: projects }, { data: units }, { data: technicians }, { data: templates }, { data: sections }, { data: questions }, { data: surveyProfile }, { data: surveyPermissions }, { data: erpAdmin }, { data: catalog }, { data: screwdriverTypes }, { data: wrenchSizes }, { data: actionCatalog }, { data: questionActions }, { data: customCatalogs }] = await Promise.all([
         supabase.from("site_survey_visits").select("*").order("scheduled_start", { ascending: false }),
         supabase.from("clients").select("id,name,category_id").order("name"),
         supabase.from("client_categories").select("id,name").eq("active", true).order("position"),
@@ -145,11 +148,12 @@ function SiteSurveyPage() {
         supabase.from("site_survey_wrench_sizes").select("id,name").eq("active", true).order("position").order("name"),
         supabase.from("site_survey_action_catalog").select("id,name,description,active,position").order("position").order("name"),
         supabase.from("site_survey_question_actions").select("id,question_id,action_id,trigger_value,active").eq("active", true),
+        supabase.from("site_survey_custom_catalogs").select("id,name,active,position,site_survey_custom_catalog_items(id,catalog_id,name,active,position)").eq("active", true).order("position").order("name"),
       ]);
       if (error) throw error;
       const profile = surveyProfile as unknown as { profile_code: string; is_customized: boolean; site_survey_access_profiles: { name: string; site_survey_profile_permissions: Array<{ permission_key: string; allowed: boolean }> } | null } | null;
       const permissions = new Set<string>(Boolean(erpAdmin) ? PERMISSIONS.map(([key]) => key) : profile?.is_customized ? (surveyPermissions ?? []).filter((item) => item.allowed).map((item) => item.permission_key) : (profile?.site_survey_access_profiles?.site_survey_profile_permissions ?? []).filter((item) => item.allowed).map((item) => item.permission_key));
-      return { userId: auth.user.id, visits: (visits ?? []) as Visit[], clients: (clients ?? []) as ClientOption[], clientCategories: (clientCategories ?? []) as ClientCategory[], projects: (projects ?? []) as ProjectOption[], units: (units ?? []) as Array<Named & { client_id: string }>, technicians: (technicians ?? []) as Profile[], templates: (templates ?? []) as Template[], sections: (sections ?? []) as Section[], questions: (questions ?? []) as Question[], catalog: (catalog ?? []) as CatalogItem[], screwdriverTypes: (screwdriverTypes ?? []) as Named[], wrenchSizes: (wrenchSizes ?? []) as Named[], actionCatalog: (actionCatalog ?? []) as SurveyAction[], questionActions: (questionActions ?? []) as QuestionAction[], permissions, profileName: profile?.site_survey_access_profiles?.name ?? "Sem perfil", isErpAdmin: Boolean(erpAdmin) };
+      return { userId: auth.user.id, visits: (visits ?? []) as Visit[], clients: (clients ?? []) as ClientOption[], clientCategories: (clientCategories ?? []) as ClientCategory[], projects: (projects ?? []) as ProjectOption[], units: (units ?? []) as Array<Named & { client_id: string }>, technicians: (technicians ?? []) as Profile[], templates: (templates ?? []) as Template[], sections: (sections ?? []) as Section[], questions: (questions ?? []) as Question[], catalog: (catalog ?? []) as CatalogItem[], screwdriverTypes: (screwdriverTypes ?? []) as Named[], wrenchSizes: (wrenchSizes ?? []) as Named[], actionCatalog: (actionCatalog ?? []) as SurveyAction[], questionActions: (questionActions ?? []) as QuestionAction[], customCatalogs: (customCatalogs ?? []) as CustomCatalog[], permissions, profileName: profile?.site_survey_access_profiles?.name ?? "Sem perfil", isErpAdmin: Boolean(erpAdmin) };
     },
   });
   const can = (permission: string) => data?.permissions.has(permission) ?? false;
@@ -570,14 +574,46 @@ function OrderHandle({ order, label, compact = false }: { order: number; label: 
 }
 
 function SurveyCatalogAdmin({ data, onChanged }: { data: NonNullable<ReturnType<typeof useSurveyDataShape>>; onChanged: () => void }) {
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [itemDialog, setItemDialog] = useState<string | null>(null);
+  const [newCatalogOpen, setNewCatalogOpen] = useState(false);
   const lists = [
     { key: "catalog", title: "Materiais e equipamentos", table: "site_survey_material_catalog", items: data.catalog },
     { key: "screwdriver", title: "Tipos de chave de fenda", table: "site_survey_screwdriver_types", items: data.screwdriverTypes },
     { key: "wrench", title: "Bitolas de chave de grifo", table: "site_survey_wrench_sizes", items: data.wrenchSizes },
     { key: "actions", title: "Ações para chamados", table: "site_survey_action_catalog", items: data.actionCatalog },
-  ] as const;
-  const add = async (form: HTMLFormElement, table: string, key: string) => { const values = new FormData(form); const name = String(values.get("name") ?? "").trim(); if (!name || name.length > 120) return toast.error("Informe um nome com até 120 caracteres."); const payload = table === "site_survey_material_catalog" ? { name, category: String(values.get("category")) } : table === "site_survey_action_catalog" ? { name, description: String(values.get("description") ?? "").trim() || null } : { name }; const { error } = await supabase.from(table as "site_survey_material_catalog").insert(payload as never); if (error) return toast.error(error.message); toast.success("Cadastro adicionado"); form.reset(); onChanged(); };
-  return <div className="space-y-5"><div><h2 className="text-xl font-bold">Cadastro</h2><p className="text-sm text-muted-foreground">Diversos</p></div><div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-4">{lists.map((list) => <Card key={list.key}><CardHeader><CardTitle className="text-base">{list.title}</CardTitle></CardHeader><CardContent className="space-y-4"><form onSubmit={(event) => { event.preventDefault(); void add(event.currentTarget, list.table, list.key); }} className="space-y-3"><LabeledInput name="name" label="Nome" required />{list.key === "actions" ? <LabeledInput name="description" label="Descrição" /> : null}{list.key === "catalog" ? <div className="space-y-2"><Label>Categoria</Label><Select name="category" defaultValue="equipamento"><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="material">Material</SelectItem><SelectItem value="equipamento">Equipamento</SelectItem></SelectContent></Select></div> : null}<Button type="submit" size="sm"><Plus className="h-4 w-4" />Adicionar</Button></form><div className="divide-y rounded-md border">{list.items.map((item) => <div key={item.id} className="flex items-center justify-between gap-2 p-3 text-sm"><span>{item.name}</span><ConfirmDeleteButton title={`Excluir ${item.name}?`} description="A exclusão será bloqueada se o cadastro já estiver vinculado a uma OS." onConfirm={async () => { const { error } = await supabase.from(list.table as "site_survey_material_catalog").delete().eq("id", item.id); if (error) return toast.error(error.message); toast.success("Cadastro excluído"); onChanged(); }} /></div>)}</div></CardContent></Card>)}</div></div>;
+    ...data.customCatalogs.map((catalog) => ({ key: `custom:${catalog.id}`, title: catalog.name, table: "site_survey_custom_catalog_items", items: catalog.site_survey_custom_catalog_items.filter((item) => item.active).sort((left, right) => left.position - right.position || left.name.localeCompare(right.name, "pt-BR")), customCatalogId: catalog.id })),
+  ];
+  const toggle = (key: string) => setExpanded((current) => { const next = new Set(current); if (next.has(key)) next.delete(key); else next.add(key); return next; });
+  const addItem = async (form: HTMLFormElement, list: (typeof lists)[number]) => {
+    const values = new FormData(form);
+    const name = String(values.get("name") ?? "").trim();
+    if (!name || name.length > 120) return toast.error("Informe um nome com até 120 caracteres.");
+    const payload = list.table === "site_survey_material_catalog" ? { name, category: String(values.get("category")) } : list.table === "site_survey_action_catalog" ? { name, description: String(values.get("description") ?? "").trim() || null } : list.table === "site_survey_custom_catalog_items" ? { name, catalog_id: "customCatalogId" in list ? list.customCatalogId : "" } : { name };
+    const { error } = await supabase.from(list.table as "site_survey_material_catalog").insert(payload as never);
+    if (error) return toast.error(error.code === "23505" ? "Este item já está cadastrado." : error.message);
+    toast.success("Item adicionado"); setItemDialog(null); onChanged();
+  };
+  const addCatalog = async (form: HTMLFormElement) => {
+    const name = String(new FormData(form).get("name") ?? "").trim();
+    if (name.length < 2 || name.length > 120) return toast.error("Informe um nome entre 2 e 120 caracteres.");
+    const { error } = await supabase.from("site_survey_custom_catalogs").insert({ name, created_by: data.userId });
+    if (error) return toast.error(error.code === "23505" ? "Este cadastro já existe." : error.message);
+    toast.success("Cadastro criado"); setNewCatalogOpen(false); onChanged();
+  };
+  return <div className="space-y-5">
+    <div><h2 className="text-xl font-bold">Cadastro</h2><p className="text-sm text-muted-foreground">Diversos</p></div>
+    <Card><CardHeader className="py-4"><div className="flex items-center justify-between gap-3"><CardTitle className="text-base">Novo cadastro</CardTitle><Button type="button" size="compactIcon" variant="ghost" aria-label="Criar novo cadastro" title="Criar novo cadastro" onClick={() => setNewCatalogOpen(true)}><Plus strokeWidth={2.5} /></Button></div></CardHeader></Card>
+    <Dialog open={newCatalogOpen} onOpenChange={setNewCatalogOpen}><DialogContent><DialogHeader><DialogTitle>Novo cadastro</DialogTitle><DialogDescription>Crie uma nova lista para o Site Survey.</DialogDescription></DialogHeader><form className="space-y-4" onSubmit={(event) => { event.preventDefault(); void addCatalog(event.currentTarget); }}><LabeledInput name="name" label="Nome do cadastro" required /><DialogFooter><Button type="submit">Salvar</Button></DialogFooter></form></DialogContent></Dialog>
+    <div className="grid gap-4 lg:grid-cols-2">{lists.map((list) => {
+      const open = expanded.has(list.key);
+      return <Collapsible key={list.key} open={open} onOpenChange={() => toggle(list.key)} asChild><Card>
+        <CardHeader className="py-4"><div className="flex items-center justify-between gap-3"><CardTitle className="min-w-0 text-base">{list.title}</CardTitle><div className="flex shrink-0 items-center gap-2"><Button type="button" size="compactIcon" variant="ghost" aria-label={`Adicionar item em ${list.title}`} title="Adicionar item" onClick={(event) => { event.stopPropagation(); setItemDialog(list.key); }}><Plus strokeWidth={2.5} /></Button><CollapsibleTrigger asChild><Button type="button" size="compactIcon" variant="ghost" aria-label={open ? `Recolher ${list.title}` : `Exibir ${list.title}`} title={open ? "Recolher" : "Exibir"}>{open ? <ChevronDown className="rotate-180" /> : <ChevronDown />}</Button></CollapsibleTrigger></div></div></CardHeader>
+        <CollapsibleContent><CardContent className="pb-4"><div className="divide-y rounded-md border">{list.items.map((item) => <div key={item.id} className="flex items-center justify-between gap-2 p-3 text-sm"><span>{item.name}</span><ConfirmDeleteButton title={`Excluir ${item.name}?`} description="A exclusão será bloqueada se o cadastro já estiver vinculado a uma OS." onConfirm={async () => { const { error } = await supabase.from(list.table as "site_survey_material_catalog").delete().eq("id", item.id); if (error) return toast.error(error.message); toast.success("Item excluído"); onChanged(); }} /></div>)}{list.items.length === 0 ? <p className="p-4 text-sm text-muted-foreground">Nenhum item cadastrado.</p> : null}</div>{"customCatalogId" in list ? <div className="mt-4 flex justify-end"><ConfirmDeleteButton title={`Excluir o cadastro ${list.title}?`} description="Esta ação excluirá o cadastro e todos os seus itens." ariaLabel={`Excluir cadastro ${list.title}`} confirmLabel="Excluir" onConfirm={async () => { const { error } = await supabase.from("site_survey_custom_catalogs").delete().eq("id", list.customCatalogId); if (error) return toast.error(error.message); toast.success("Cadastro excluído"); onChanged(); }} /></div> : null}</CardContent></CollapsibleContent>
+        <Dialog open={itemDialog === list.key} onOpenChange={(next) => setItemDialog(next ? list.key : null)}><DialogContent><DialogHeader><DialogTitle>Adicionar em {list.title}</DialogTitle><DialogDescription>Informe os dados do novo item.</DialogDescription></DialogHeader><form className="space-y-4" onSubmit={(event) => { event.preventDefault(); void addItem(event.currentTarget, list); }}><LabeledInput name="name" label="Nome" required />{list.key === "actions" ? <LabeledInput name="description" label="Descrição" /> : null}{list.key === "catalog" ? <div className="space-y-2"><Label>Categoria</Label><Select name="category" defaultValue="equipamento"><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="material">Material</SelectItem><SelectItem value="equipamento">Equipamento</SelectItem></SelectContent></Select></div> : null}<DialogFooter><Button type="submit">Salvar</Button></DialogFooter></form></DialogContent></Dialog>
+      </Card></Collapsible>;
+    })}</div>
+  </div>;
 }
 
 function SurveyUsersAdmin() {
@@ -725,4 +761,4 @@ function DateTimeInput({ name, label, defaultValue = "", required = false }: { n
 }
 function LabeledControlled({ label, value, onChange, type = "text" }: { label: string; value: string; onChange: (value: string) => void; type?: string }) { return <div className="space-y-2"><Label>{label}</Label><Input type={type} min={type === "number" ? "0.01" : undefined} step={type === "number" ? "0.01" : undefined} value={value} onChange={(event) => onChange(event.target.value)} /></div>; }
 function Info({ label, value }: { label: string; value: string }) { return <div className="border-l-2 border-primary pl-3"><p className="text-xs text-muted-foreground">{label}</p><p className="text-sm font-medium">{value}</p></div>; }
-function useSurveyDataShape() { return undefined as unknown as { userId: string; visits: Visit[]; clients: ClientOption[]; clientCategories: ClientCategory[]; projects: ProjectOption[]; units: Array<Named & { client_id: string }>; technicians: Profile[]; templates: Template[]; sections: Section[]; questions: Question[]; catalog: CatalogItem[]; screwdriverTypes: Named[]; wrenchSizes: Named[]; actionCatalog: SurveyAction[]; questionActions: QuestionAction[]; permissions: Set<string>; profileName: string; isErpAdmin: boolean } | undefined; }
+function useSurveyDataShape() { return undefined as unknown as { userId: string; visits: Visit[]; clients: ClientOption[]; clientCategories: ClientCategory[]; projects: ProjectOption[]; units: Array<Named & { client_id: string }>; technicians: Profile[]; templates: Template[]; sections: Section[]; questions: Question[]; catalog: CatalogItem[]; screwdriverTypes: Named[]; wrenchSizes: Named[]; actionCatalog: SurveyAction[]; questionActions: QuestionAction[]; customCatalogs: CustomCatalog[]; permissions: Set<string>; profileName: string; isErpAdmin: boolean } | undefined; }
