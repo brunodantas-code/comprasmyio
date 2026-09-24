@@ -74,10 +74,34 @@ function PortalPage() {
     { key: "chamados", name: "OpDesk", description: ["Suporte ao cliente", "e operação"], to: "/chamados" as const },
     { key: "development", name: "Code", description: ["Melhorias e Bugs"], to: "/development" as const },
   ].filter((app) => data.appKeys.has(app.key));
+  const mobileAppPages = Array.from({ length: Math.ceil(apps.length / 6) }, (_, pageIndex) => apps.slice(pageIndex * 6, pageIndex * 6 + 6));
+
+  const renderApp = ({ key, name, description, to }: (typeof apps)[number]) => (
+    <div key={key} className="flex w-24 min-w-0 justify-self-center flex-col items-center text-center sm:w-28 sm:justify-self-start">
+      <Link
+        to={to}
+        aria-label={`Acessar ${name}`}
+        title={`Acessar ${name}`}
+        className="group relative flex h-24 w-24 flex-col items-center justify-between rounded-3xl border-2 border-primary bg-primary px-2 pb-2 pt-1.5 text-primary-foreground outline-none transition-transform hover:scale-105 hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 sm:h-28 sm:w-28"
+      >
+        {key === "supply" && (pendingActions?.supply ?? 0) > 0 ? <PendingBadge count={pendingActions?.supply ?? 0} label="pendências no Supply" /> : null}
+        {key === "development" && (pendingActions?.codeTickets ?? 0) > 0 ? <PendingBadge count={pendingActions?.codeTickets ?? 0} label="tickets pendentes no Code" /> : null}
+        {key === "supply" ? <><span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true"><Settings className="h-14 w-14 stroke-[1.7] sm:h-16 sm:w-16" /></span><span className="text-sm font-normal leading-none">{name}</span></>
+          : key === "cash_flow" ? <><span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true"><DollarSign className="h-14 w-14 stroke-[3.5] sm:h-16 sm:w-16" /></span><span className="text-sm font-normal leading-none">{name}</span></>
+          : key === "crm" ? <><span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true"><CrmFunnelIcon className="h-14 w-14 stroke-[3] sm:h-16 sm:w-16" /></span><span className="text-sm font-normal leading-none">{name}</span></>
+          : key === "legal" ? <><span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true"><FileSignature className="h-14 w-14 stroke-[1.8] sm:h-16 sm:w-16" /></span><span className="text-sm font-normal leading-none">{name}</span></>
+          : key === "rh" ? <><span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true"><UsersRound className="h-14 w-14 stroke-[1.8] sm:h-16 sm:w-16" /></span><span className="text-sm font-normal leading-none">{name}</span></>
+          : key === "site_survey" ? <><span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true"><Search className="h-14 w-14 stroke-[2.8] sm:h-16 sm:w-16" /></span><span className="text-xs font-normal leading-none">{name}</span></>
+          : key === "chamados" ? <><span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true"><Phone className="h-14 w-14 stroke-[2.4] sm:h-16 sm:w-16" /></span><span className="text-xs font-normal leading-none">{name}</span></>
+          : <><span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true"><CodeXml className="h-14 w-14 stroke-[2.8] sm:h-16 sm:w-16" /></span><span className="text-[0.7rem] font-normal leading-none sm:text-xs">{name}</span></>}
+      </Link>
+      <p className="mt-3 w-24 max-w-full break-words text-center text-xs leading-4 text-muted-foreground sm:w-28 sm:text-sm sm:leading-5">{description.map((line) => <span key={line} className="block">{line}</span>)}</p>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-40 bg-accent text-accent-foreground sm:border-b sm:border-border sm:bg-card sm:text-foreground">
+    <div className="flex h-dvh flex-col overflow-hidden bg-background sm:block sm:h-auto sm:min-h-screen sm:overflow-visible">
+      <header className="sticky top-0 z-40 shrink-0 bg-accent text-accent-foreground sm:border-b sm:border-border sm:bg-card sm:text-foreground">
         <div className="mx-auto max-w-6xl px-5 pb-9 pt-5 sm:flex sm:items-center sm:justify-between sm:gap-3 sm:px-6 sm:py-4">
           <div className="flex items-start justify-between gap-4 sm:block">
             <MyioPlatformLogo tone="light" className="h-10 sm:hidden" />
@@ -93,7 +117,7 @@ function PortalPage() {
                   <SheetTitle>Menu</SheetTitle>
                 </SheetHeader>
                 <nav aria-label="Menu do portal" className="divide-y divide-border">
-                  <Button asChild variant="ghost" className="h-14 w-full justify-start rounded-none px-1 text-base">
+                  <Button asChild variant="ghost" className="h-14 w-full justify-start rounded-none px-1 text-base !bg-transparent !text-foreground hover:!bg-muted hover:!text-foreground">
                     <Link to="/pendentes" onClick={() => setMobileMenuOpen(false)}>
                       <Bell className="h-5 w-5 shrink-0" />
                       <span className="min-w-0 flex-1 text-left">Central de Pendências</span>
@@ -102,20 +126,20 @@ function PortalPage() {
                     </Link>
                   </Button>
                   {data.isErpAdmin ? (
-                    <Button variant="ghost" className="h-14 w-full justify-start rounded-none px-1 text-base" onClick={() => { setActiveView("users"); setMobileMenuOpen(false); }}>
+                    <Button variant="ghost" className="h-14 w-full justify-start rounded-none px-1 text-base !bg-transparent !text-foreground hover:!bg-muted hover:!text-foreground" onClick={() => { setActiveView("users"); setMobileMenuOpen(false); }}>
                       <Settings2 className="h-5 w-5 shrink-0" />
                       <span className="min-w-0 flex-1 text-left">Acessos</span>
                       <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
                     </Button>
                   ) : null}
-                  <div className="grid min-h-14 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-1">
+                  <div className="grid min-h-14 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-1 [&_button]:!bg-transparent [&_button]:!text-foreground [&_button:hover]:!bg-muted">
                     <div className="flex min-w-0 items-center gap-2 text-base font-medium">
                       <Moon className="h-5 w-5 shrink-0" />
                       <span>Tema</span>
                     </div>
                     <ThemeToggle />
                   </div>
-                  <Button variant="ghost" className="h-14 w-full justify-start rounded-none px-1 text-base text-destructive hover:text-destructive" onClick={handleSignOut}>
+                  <Button variant="ghost" className="h-14 w-full justify-start rounded-none px-1 text-base !bg-transparent !text-destructive hover:!bg-muted hover:!text-destructive" onClick={handleSignOut}>
                     <LogOut className="h-5 w-5 shrink-0" />
                     <span className="min-w-0 flex-1 text-left">Sair</span>
                   </Button>
@@ -171,13 +195,17 @@ function PortalPage() {
         </div>
       </header>
 
-      <main className="relative z-10 -mt-3 min-h-[calc(100vh-10rem)] rounded-t-2xl bg-background px-4 py-10 sm:mx-auto sm:mt-0 sm:min-h-0 sm:max-w-6xl sm:rounded-none sm:px-6 sm:py-14">
+      <main className="no-scrollbar relative z-10 -mt-3 min-h-0 flex-1 overflow-y-auto rounded-t-2xl bg-background px-4 py-10 sm:mx-auto sm:mt-0 sm:min-h-0 sm:max-w-6xl sm:overflow-visible sm:rounded-none sm:px-6 sm:py-14">
         <Tabs value={activeView} onValueChange={(value) => setActiveView(value as "apps" | "users")}>
           <TabsContent value="apps">
             {apps.length ? (
-               <div className="grid grid-cols-3 gap-x-3 gap-y-8 lg:grid-cols-6 lg:gap-x-4">
-                 {apps.map(({ key, name, description, to }) => (
-                    <div key={key} className="flex w-24 min-w-0 justify-self-start flex-col items-center text-center sm:w-28">
+               <>
+                 <div className="no-scrollbar -mx-4 flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain px-4 pb-2 sm:hidden">
+                   {mobileAppPages.map((pageApps, pageIndex) => <div key={pageIndex} className="grid w-full shrink-0 snap-start grid-cols-3 gap-x-3 gap-y-8">{pageApps.map(renderApp)}</div>)}
+                 </div>
+                 <div className="hidden grid-cols-3 gap-x-3 gap-y-8 sm:grid lg:grid-cols-6 lg:gap-x-4">
+                  {apps.map(({ key, name, description, to }) => (
+                     <div key={key} className="flex w-24 min-w-0 snap-start justify-self-center flex-col items-center text-center sm:w-28 sm:justify-self-start">
                       <Link
                         to={to}
                         aria-label={`Acessar ${name}`}
@@ -247,9 +275,10 @@ function PortalPage() {
                       <p className="mt-3 w-24 max-w-full break-words text-center text-xs leading-4 text-muted-foreground sm:w-28 sm:text-sm sm:leading-5">
                         {description.map((line) => <span key={line} className="block">{line}</span>)}
                       </p>
-                   </div>
-                ))}
-              </div>
+                     </div>
+                   ))}
+                 </div>
+               </>
             ) : (
               <div className="rounded-md border border-dashed border-border bg-card p-8 text-center">
                 <h2 className="text-xl font-bold">Nenhum aplicativo liberado</h2>
