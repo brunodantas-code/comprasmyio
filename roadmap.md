@@ -727,3 +727,5 @@
 - [x] Site Survey — remover o campo duplicado de condição da saída pulsada e manter somente a pergunta específica com Operante/Inoperante.
 
 - [x] Site Survey — incluir lixeira em Usuários com confirmação para remover somente o acesso ao aplicativo.
+
+- [ ] Site Survey — ao salvar progresso nas etapas 4 a 7, manter a Loja/LUC selecionada, recolher somente a etapa salva e preservar as demais visíveis.
