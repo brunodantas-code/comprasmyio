@@ -315,9 +315,10 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
         sectionQuestions.filter((question) => question.id !== gateQuestion.id).forEach((question) => hiddenHydrometerQuestionIds.add(question.id));
       }
     }
+    const formAnswers = new Map<string, unknown>(questions.map((question) => [question.id, question.question_type === "multiselect" ? values.getAll(question.id).map(String) : question.question_type === "checkbox" ? values.get(question.id) === "on" : String(values.get(question.id) ?? "")]));
     const visibleQuestions = questions.filter((question) => phase === "pre_visit"
       ? generalQuestionIds.has(question.id)
-      : !generalQuestionIds.has(question.id) && !hiddenHydrometerQuestionIds.has(question.id));
+      : !generalQuestionIds.has(question.id) && !hiddenHydrometerQuestionIds.has(question.id)).filter((question) => isQuestionVisible(question, formAnswers));
     const rows = visibleQuestions.map((question) => {
       const config = asQuestionConfig(question.configuration);
       const value = question.question_key === "shopping_maintenance_companions" ? visitTechnicians.map((item) => item.technician_id) : question.question_type === "multiselect" ? values.getAll(question.id).map(String) : question.question_type === "checkbox" ? values.get(question.id) === "on" : String(values.get(question.id) ?? "");
@@ -347,6 +348,23 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
       const { error } = await responseDelete; if (error) throw error;
     }
     if (rows.length) { const { error } = await supabase.from("site_survey_responses").insert(rows); if (error) throw error; }
+    const configuredActions = data.questionActions.filter((rule) => visibleQuestions.some((question) => question.id === rule.question_id));
+    if (configuredActions.length) {
+      const questionIds = configuredActions.map((rule) => rule.question_id);
+      let responseQuery = supabase.from("site_survey_responses").select("id,question_id,answer").eq("visit_id", visit.id).in("question_id", questionIds);
+      responseQuery = phase === "pre_visit" ? responseQuery.is("visit_luc_id", null).is("visit_environment_id", null) : pointKind === "luc" ? responseQuery.eq("visit_luc_id", pointId) : responseQuery.eq("visit_environment_id", pointId);
+      const { data: savedResponses, error: responseError } = await responseQuery; if (responseError) throw responseError;
+      for (const rule of configuredActions) {
+        const response = savedResponses?.find((item) => item.question_id === rule.question_id);
+        const responseValue = response ? answerParts(response.answer).value : undefined;
+        const triggered = answerMatches(responseValue, rule.trigger_value);
+        let openCalls = supabase.from("site_survey_generated_calls").select("id").eq("visit_id", visit.id).eq("question_action_id", rule.id).eq("status", "aberto");
+        openCalls = phase === "pre_visit" ? openCalls.is("visit_luc_id", null).is("visit_environment_id", null) : pointKind === "luc" ? openCalls.eq("visit_luc_id", pointId) : openCalls.eq("visit_environment_id", pointId);
+        const { data: existingCalls } = await openCalls;
+        if (triggered && !existingCalls?.length) { const { error } = await supabase.from("site_survey_generated_calls").insert({ visit_id: visit.id, question_action_id: rule.id, question_id: rule.question_id, visit_luc_id: phase === "point" && pointKind === "luc" ? pointId : null, visit_environment_id: phase === "point" && pointKind === "environment" ? pointId : null, trigger_value: rule.trigger_value, created_by: data.userId }); if (error) throw error; }
+        if (!triggered && existingCalls?.length) { const { error } = await supabase.from("site_survey_generated_calls").update({ status: "cancelado" }).in("id", existingCalls.map((item) => item.id)); if (error) throw error; }
+      }
+    }
     if (phase === "pre_visit") {
       const { error: clearTechniciansError } = await supabase.from("site_survey_visit_technicians").delete().eq("visit_id", visit.id).is("visit_luc_id", null).is("visit_environment_id", null); if (clearTechniciansError) throw clearTechniciansError;
        const techniciansToSave = visitTechnicians.filter((item) => item.technician_id && phonePattern.test(item.mobile_phone.trim()));
@@ -370,7 +388,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
     const sectionQuestions = questions.filter((question) => question.section_id === section.id);
     const gateQuestion = isWaterHydrometerSection(section.title) ? sectionQuestions.find(isHydrometerPresenceQuestion) : undefined;
     const gateValue = gateQuestion ? String(answerParts(answers.get(gateQuestion.id)).value ?? "").toLocaleLowerCase("pt-BR") : "";
-    const applicableQuestions = gateQuestion && gateValue !== "sim" ? [gateQuestion] : sectionQuestions;
+    const applicableQuestions = (gateQuestion && gateValue !== "sim" ? [gateQuestion] : sectionQuestions).filter((question) => isQuestionVisible(question, answers));
     const scopedAttachments = detail?.attachments ?? [];
     return applicableQuestions.some((question) => !isStoredQuestionComplete(question, answers, scopedAttachments, general ? (item) => !item.visit_luc_id && !item.visit_environment_id : matchesPoint));
   };
@@ -385,7 +403,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
        const sectionQuestions = questions.filter((question) => question.section_id === section.id);
        const gateQuestion = isWaterHydrometerSection(section.title) ? sectionQuestions.find(isHydrometerPresenceQuestion) : undefined;
        const gateValue = gateQuestion ? String(answerParts(pointAnswers.get(gateQuestion.id)).value ?? "").toLocaleLowerCase("pt-BR") : "";
-       const applicable = gateQuestion && gateValue !== "sim" ? [gateQuestion] : sectionQuestions;
+        const applicable = (gateQuestion && gateValue !== "sim" ? [gateQuestion] : sectionQuestions).filter((question) => isQuestionVisible(question, pointAnswers));
        return applicable.every((question) => isStoredQuestionComplete(question, pointAnswers, detail?.attachments ?? [], pointMatches));
      });
      const hasMaterialDecision = (detail?.materialDecisions ?? []).some((item) => pointMatches(item) && item.no_additional_material) || (detail?.visitMaterials ?? []).some(pointMatches);
@@ -395,7 +413,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
   const renderMaterials = <div className="space-y-3"><label className="flex items-center gap-2 text-sm font-medium"><Checkbox checked={noAdditionalMaterial} onCheckedChange={(checked) => { const selected = checked === true; setNoAdditionalMaterial(selected); if (selected) setMaterialRows([]); }} />Não é necessário material adicional</label><div className="flex items-center justify-between gap-3"><p className="text-sm text-muted-foreground">Selecione todos os itens necessários.</p><Button type="button" size="sm" variant="outline" disabled={noAdditionalMaterial} onClick={() => { setNoAdditionalMaterial(false); setMaterialRows((current) => [...current, { catalog_item_id: "", quantity: "1", notes: "", screwdriver_type_id: "none", wrench_size_id: "none" }]); }}><Plus className="h-4 w-4" />Item</Button></div>{materialRows.map((row, index) => { const item = data.catalog.find((entry) => entry.id === row.catalog_item_id); return <div key={`${row.catalog_item_id}-${index}`} className="grid gap-3 sm:grid-cols-[1.4fr_100px_1fr_auto]"><FormSelect name={`material-${index}`} label="Material ou equipamento" value={row.catalog_item_id || undefined} onChange={(value) => setMaterialRows((current) => current.map((entry, itemIndex) => itemIndex === index ? { ...entry, catalog_item_id: value } : entry))} options={data.catalog.filter((entry) => entry.active)} /><LabeledControlled label="Quantidade" type="number" value={row.quantity} onChange={(value) => setMaterialRows((current) => current.map((entry, itemIndex) => itemIndex === index ? { ...entry, quantity: value } : entry))} />{item?.name === "Chave de fenda" ? <FormSelect name={`screwdriver-${index}`} label="Tipo" value={row.screwdriver_type_id} onChange={(value) => setMaterialRows((current) => current.map((entry, itemIndex) => itemIndex === index ? { ...entry, screwdriver_type_id: value } : entry))} options={data.screwdriverTypes} optional /> : item?.name === "Chave de grifo" ? <FormSelect name={`wrench-${index}`} label="Bitola" value={row.wrench_size_id} onChange={(value) => setMaterialRows((current) => current.map((entry, itemIndex) => itemIndex === index ? { ...entry, wrench_size_id: value } : entry))} options={data.wrenchSizes} optional /> : <LabeledControlled label="Observação" value={row.notes} onChange={(value) => setMaterialRows((current) => current.map((entry, itemIndex) => itemIndex === index ? { ...entry, notes: value } : entry))} />}<ConfirmDeleteButton title="Remover item?" description="O item será retirado desta OS." onConfirm={async () => setMaterialRows((current) => current.filter((_, itemIndex) => itemIndex !== index))} /></div>; })}{materialRows.length === 0 && !noAdditionalMaterial ? <p className="text-sm text-muted-foreground">Nenhum material ou equipamento selecionado.</p> : null}</div>;
   const phaseForm = !preVisitSaved ? (
     <form onSubmit={(event) => { event.preventDefault(); void saveAnswers(event.currentTarget, "pre_visit").catch((error: unknown) => toast.error(error instanceof Error ? error.message : "Não foi possível salvar o checklist pré-visita.")); }} className="space-y-5">
-      {generalSections.map((section, index) => <ChecklistSection key={section.id} section={section} order={index + 1} open={openSectionId === section.id} pending={sectionPending(section, true)} onToggle={() => setOpenSectionId((current) => current === section.id ? null : section.id)}>{questions.filter((question) => question.section_id === section.id).map((question) => question.question_key === "shopping_maintenance_companions" ? <TechnicianSelector key={question.id} technicians={data.technicians} rows={visitTechnicians} onChange={setVisitTechnicians} /> : <QuestionField key={`general-${question.id}`} question={question} answer={answers.get(question.id)} hasPhoto={(detail?.attachments ?? []).some((item) => item.question_id === question.id && !item.visit_luc_id && !item.visit_environment_id)} />)}</ChecklistSection>)}
+      {generalSections.map((section, index) => <ChecklistSection key={section.id} section={section} order={index + 1} open={openSectionId === section.id} pending={sectionPending(section, true)} onToggle={() => setOpenSectionId((current) => current === section.id ? null : section.id)}><ConditionalSectionQuestions sectionTitle={section.title} questions={questions.filter((question) => question.section_id === section.id)} answers={answers} attachments={detail?.attachments ?? []} matchesPoint={(item) => !item.visit_luc_id && !item.visit_environment_id} selectedPoint="general" technicians={data.technicians} visitTechnicians={visitTechnicians} onTechniciansChange={setVisitTechnicians} /></ChecklistSection>)}
        <Button type="submit"><ClipboardCheck className="h-4 w-4" />Salvar progresso</Button>
     </form>
   ) : (
