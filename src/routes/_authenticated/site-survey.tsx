@@ -89,6 +89,10 @@ const STATUS: Record<VisitStatus, string> = { agendada: "Agendada", em_andamento
 const STATUS_ORDER: VisitStatus[] = ["agendada", "em_andamento", "em_revisao", "concluida", "cancelada"];
 const GENERAL_CHECKLIST_SECTIONS = new Set(["Preparação pré-visita", "Chegada e responsáveis", "Condições e perfil do local"]);
 const questionRequiresPhoto = (question: Question) => Boolean((question.configuration as QuestionConfig | null)?.photo?.required);
+const isOtherOption = (value: string) => {
+  const normalized = value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLocaleLowerCase("pt-BR");
+  return normalized === "outro" || normalized === "outros";
+};
 
 export const Route = createFileRoute("/_authenticated/site-survey")({
   beforeLoad: async ({ context }) => {
@@ -313,7 +317,8 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
       const subdetail = String(values.get(`${question.id}__subdetail`) ?? "").trim();
       const detailValue = subdetail ? `${baseDetail} | ${subdetail}` : baseDetail;
       const applies = config.condition?.value === undefined || (Array.isArray(value) ? value.includes(config.condition.value) : value === config.condition.value);
-      const otherApplies = config.other_detail === true && (Array.isArray(value) ? value.includes("Outros") : value === "Outros");
+       const hasOtherOption = Array.isArray(question.options) && question.options.some((option) => typeof option === "string" && isOtherOption(option));
+       const otherApplies = (config.other_detail === true || hasOtherOption) && (Array.isArray(value) ? value.some((item) => isOtherOption(String(item))) : isOtherOption(String(value)));
       if (!config.photo_only && question.required && (Array.isArray(value) ? value.length === 0 : value === "" || value === false)) throw new Error(`Responda: ${question.prompt}`);
       if (applies && config.detail?.required && !detailValue) throw new Error(`Preencha: ${config.detail.label ?? question.prompt}`);
       if (otherApplies && !detailValue) throw new Error(`Especifique: ${question.prompt}`);
@@ -326,7 +331,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
     if (phase === "pre_visit" && new Set(visitTechnicians.map((item) => item.technician_id)).size !== visitTechnicians.length) throw new Error("O mesmo técnico não pode ser selecionado duas vezes.");
     for (const question of visibleQuestions.filter((item) => item.question_key !== "shopping_maintenance_companions")) {
       const config = asQuestionConfig(question.configuration);
-      const value = question.question_type === "multiselect" ? values.getAll(question.id).map(String) : String(values.get(question.id) ?? "");
+     const value = question.question_type === "multiselect" ? values.getAll(question.id).map(String) : String(values.get(question.id) ?? "");
       const applies = config.condition?.value === undefined || (Array.isArray(value) ? value.includes(config.condition.value) : value === config.condition.value);
       const photo = values.get(`${question.id}__photo`);
       const isGeneralQuestion = phase === "pre_visit";
@@ -488,7 +493,8 @@ function QuestionField({ question, answer, hasPhoto, onAnswerChange }: { questio
   const normalizedPrompt = question.prompt.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR");
   const showRequiredMark = normalizedPrompt.includes("os ja foi previamente cadastrada");
   const conditionApplies = config.condition?.value === undefined || selectedValue === config.condition.value || selectedValues.includes(config.condition.value);
-  const showOtherDetail = config.other_detail === true && (selectedValue === "Outros" || selectedValues.includes("Outros"));
+   const hasOtherOption = options.some(isOtherOption);
+   const showOtherDetail = (config.other_detail === true || hasOtherOption) && (isOtherOption(selectedValue) || selectedValues.some(isOtherOption));
   const showDetail = (Boolean(config.detail) && conditionApplies) || showOtherDetail;
   const setAnswer = (value: string) => { setSelectedValue(value); onAnswerChange?.(value); };
   return <div className={`grid gap-3 py-1 ${showDetail || (config.photo && conditionApplies) ? "lg:grid-cols-[minmax(0,1.35fr)_minmax(260px,0.65fr)] lg:items-start lg:gap-5" : ""}`}>
