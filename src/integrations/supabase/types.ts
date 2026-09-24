@@ -4263,35 +4263,57 @@ export type Database = {
       site_survey_visit_environments: {
         Row: {
           active: boolean
+          completed_at: string | null
+          completed_by: string | null
+          completion_status: string
           created_at: string
           created_by: string | null
           id: string
+          last_progress_at: string | null
           name: string
+          pending_fields: Json
           updated_at: string
           updated_by: string | null
           visit_id: string
         }
         Insert: {
           active?: boolean
+          completed_at?: string | null
+          completed_by?: string | null
+          completion_status?: string
           created_at?: string
           created_by?: string | null
           id?: string
+          last_progress_at?: string | null
           name: string
+          pending_fields?: Json
           updated_at?: string
           updated_by?: string | null
           visit_id: string
         }
         Update: {
           active?: boolean
+          completed_at?: string | null
+          completed_by?: string | null
+          completion_status?: string
           created_at?: string
           created_by?: string | null
           id?: string
+          last_progress_at?: string | null
           name?: string
+          pending_fields?: Json
           updated_at?: string
           updated_by?: string | null
           visit_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "site_survey_visit_environments_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "site_survey_visit_environments_created_by_fkey"
             columns: ["created_by"]
@@ -4376,11 +4398,16 @@ export type Database = {
       site_survey_visit_lucs: {
         Row: {
           active: boolean
+          completed_at: string | null
+          completed_by: string | null
+          completion_status: string
           created_at: string
           created_by: string | null
           id: string
+          last_progress_at: string | null
           location: string | null
           luc_number: string
+          pending_fields: Json
           shop_name: string
           updated_at: string
           updated_by: string | null
@@ -4388,11 +4415,16 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          completed_at?: string | null
+          completed_by?: string | null
+          completion_status?: string
           created_at?: string
           created_by?: string | null
           id?: string
+          last_progress_at?: string | null
           location?: string | null
           luc_number: string
+          pending_fields?: Json
           shop_name: string
           updated_at?: string
           updated_by?: string | null
@@ -4400,17 +4432,29 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          completed_at?: string | null
+          completed_by?: string | null
+          completion_status?: string
           created_at?: string
           created_by?: string | null
           id?: string
+          last_progress_at?: string | null
           location?: string | null
           luc_number?: string
+          pending_fields?: Json
           shop_name?: string
           updated_at?: string
           updated_by?: string | null
           visit_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "site_survey_visit_lucs_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "site_survey_visit_lucs_created_by_fkey"
             columns: ["created_by"]

@@ -484,6 +484,13 @@
       "when": 1790280892054,
       "tag": "0068_create_site_survey_custom_catalogs",
       "breakpoints": true
+    },
+    {
+      "idx": 69,
+      "version": "7",
+      "when": 1790286122307,
+      "tag": "0069_track_site_survey_point_completion",
+      "breakpoints": true
     }
   ]
 }
