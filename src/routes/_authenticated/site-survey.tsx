@@ -543,11 +543,14 @@ function ConditionalSectionQuestions({ sectionTitle, questions, answers, attachm
   const initialAnswer = gateQuestion ? answerParts(answers.get(gateQuestion.id)).value : "";
   const [firstAnswer, setFirstAnswer] = useState(typeof initialAnswer === "string" ? initialAnswer : "");
   const [liveAnswers, setLiveAnswers] = useState<Map<string, unknown>>(() => new Map(answers));
-  useEffect(() => setLiveAnswers(new Map(answers)), [answers, selectedPoint]);
+  useEffect(() => {
+    setLiveAnswers(new Map(answers));
+    setFirstAnswer(typeof initialAnswer === "string" ? initialAnswer : "");
+  }, [answers, initialAnswer, selectedPoint]);
   const isConditionalSection = isWaterHydrometerSection(sectionTitle) && Boolean(gateQuestion);
   const hydrometerQuestions = isConditionalSection && firstAnswer.toLocaleLowerCase("pt-BR") !== "sim" ? orderedQuestions.slice(0, 1) : orderedQuestions;
   const visibleQuestions = hydrometerQuestions.filter((question) => isQuestionVisible(question, liveAnswers));
-  return <>{visibleQuestions.map((question) => question.question_key === "shopping_maintenance_companions" && technicians && visitTechnicians && onTechniciansChange ? <TechnicianSelector key={question.id} technicians={technicians} rows={visitTechnicians} onChange={onTechniciansChange} /> : <QuestionField key={`${selectedPoint}-${question.id}`} question={question} answer={answers.get(question.id)} hasPhoto={attachments.some((item) => item.question_id === question.id && matchesPoint(item))} call={calls.get(question.id)} onAnswerChange={(value) => { setLiveAnswers((current) => new Map(current).set(question.id, value)); if (question.id === gateQuestion?.id) setFirstAnswer(String(value)); onQuestionAnswerChange(question, value); }} />)}</>;
+  return <>{visibleQuestions.map((question) => question.question_key === "shopping_maintenance_companions" && technicians && visitTechnicians && onTechniciansChange ? <TechnicianSelector key={question.id} technicians={technicians} rows={visitTechnicians} onChange={onTechniciansChange} /> : <QuestionField key={`${selectedPoint}-${question.id}-${JSON.stringify(answers.get(question.id))}`} question={question} answer={answers.get(question.id)} hasPhoto={attachments.some((item) => item.question_id === question.id && matchesPoint(item))} call={calls.get(question.id)} onAnswerChange={(value) => { setLiveAnswers((current) => new Map(current).set(question.id, value)); if (question.id === gateQuestion?.id) setFirstAnswer(String(value)); onQuestionAnswerChange(question, value); }} />)}</>;
 }
 
 function TechnicianSelector({ technicians, rows, onChange }: { technicians: Profile[]; rows: VisitTechnician[]; onChange: (rows: VisitTechnician[]) => void }) {
