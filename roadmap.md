@@ -720,4 +720,4 @@
 
 - [x] Site Survey — reapresentar corretamente as respostas salvas das etapas 1, 2 e 3 após refresh.
 
-- [ ] Site Survey — usar no desktop a mesma barra inferior fixa do mobile, incluindo submenus ascendentes.
+- [x] Site Survey — usar no desktop a mesma barra inferior fixa do mobile, incluindo submenus ascendentes.
