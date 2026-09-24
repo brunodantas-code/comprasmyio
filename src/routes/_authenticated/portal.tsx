@@ -93,7 +93,7 @@ function PortalPage() {
                   <SheetTitle>Menu</SheetTitle>
                 </SheetHeader>
                 <nav aria-label="Menu do portal" className="divide-y divide-border">
-                  <Button asChild variant="ghost" className="h-14 w-full justify-start rounded-none px-1 text-base">
+                  <Button asChild variant="ghost" className="h-14 w-full justify-start rounded-none px-1 text-base !bg-transparent !text-foreground hover:!bg-muted hover:!text-foreground">
                     <Link to="/pendentes" onClick={() => setMobileMenuOpen(false)}>
                       <Bell className="h-5 w-5 shrink-0" />
                       <span className="min-w-0 flex-1 text-left">Central de Pendências</span>
@@ -102,20 +102,20 @@ function PortalPage() {
                     </Link>
                   </Button>
                   {data.isErpAdmin ? (
-                    <Button variant="ghost" className="h-14 w-full justify-start rounded-none px-1 text-base" onClick={() => { setActiveView("users"); setMobileMenuOpen(false); }}>
+                    <Button variant="ghost" className="h-14 w-full justify-start rounded-none px-1 text-base !bg-transparent !text-foreground hover:!bg-muted hover:!text-foreground" onClick={() => { setActiveView("users"); setMobileMenuOpen(false); }}>
                       <Settings2 className="h-5 w-5 shrink-0" />
                       <span className="min-w-0 flex-1 text-left">Acessos</span>
                       <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
                     </Button>
                   ) : null}
-                  <div className="grid min-h-14 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-1">
+                  <div className="grid min-h-14 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-1 [&_button]:!bg-transparent [&_button]:!text-foreground [&_button:hover]:!bg-muted">
                     <div className="flex min-w-0 items-center gap-2 text-base font-medium">
                       <Moon className="h-5 w-5 shrink-0" />
                       <span>Tema</span>
                     </div>
                     <ThemeToggle />
                   </div>
-                  <Button variant="ghost" className="h-14 w-full justify-start rounded-none px-1 text-base text-destructive hover:text-destructive" onClick={handleSignOut}>
+                  <Button variant="ghost" className="h-14 w-full justify-start rounded-none px-1 text-base !bg-transparent !text-destructive hover:!bg-muted hover:!text-destructive" onClick={handleSignOut}>
                     <LogOut className="h-5 w-5 shrink-0" />
                     <span className="min-w-0 flex-1 text-left">Sair</span>
                   </Button>
