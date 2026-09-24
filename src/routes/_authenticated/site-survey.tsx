@@ -499,7 +499,7 @@ function isStoredQuestionComplete(question: Question, answers: Map<string, unkno
   const options = Array.isArray(question.options) ? question.options.filter((option): option is string => typeof option === "string") : [];
   const otherApplies = (config.other_detail === true || options.some(isOtherOption)) && (Array.isArray(value) ? value.some((item) => isOtherOption(String(item))) : isOtherOption(String(value)));
   const [detail, subdetail] = stored.detail.split(" | ");
-  if (!config.photo_only && question.required && !hasValue) return false;
+  if (!config.photo_only && !hasValue) return false;
   if (applies && config.detail?.required && !detail?.trim()) return false;
   if (otherApplies && !detail?.trim()) return false;
   if (applies && detail && config.detail?.suboptions?.[detail]?.length && !subdetail?.trim()) return false;
