@@ -48,9 +48,7 @@ export function usePendingActions() {
               .eq("approval_status", "aprovado")
               .in("status", ["pendente", "comprado_aguardando", "recebido_problema"])
           : Promise.resolve({ count: 0, error: null }),
-        currentUser?.isCustomerSupportAnalyst
-          ? supabase.from("internal_calls").select("id, call_number, title, status").in("status", ["aberto", "em_atendimento", "aguardando"]).order("created_at", { ascending: false })
-          : Promise.resolve({ data: [], error: null }),
+        supabase.from("internal_calls").select("id, call_number, title, status, reporter_id").order("created_at", { ascending: false }),
       ]);
 
       if (stepsResult.error) throw stepsResult.error;
@@ -93,7 +91,11 @@ export function usePendingActions() {
       const pendingCodeItems = [...codeItems.values()];
       const pendingCodeTickets = pendingCodeItems.length;
       const pendingSupplyQueue = supplyQueueResult.count ?? 0;
-      const supportCallItems = (supportCallsResult.data ?? []).map((call) => ({ callId: call.id, callNumber: call.call_number ?? "—", title: call.title, status: call.status }));
+      const supportCallItems = (supportCallsResult.data ?? [])
+        .filter((call) => currentUser?.isCustomerSupportAnalyst
+          ? ["aberto", "em_atendimento", "aguardando"].includes(call.status)
+          : call.reporter_id === userId && call.status === "resolvido")
+        .map((call) => ({ callId: call.id, callNumber: call.call_number ?? "—", title: call.title, status: call.status }));
       const supportCalls = supportCallItems.length;
 
       return {
