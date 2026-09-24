@@ -1893,6 +1893,261 @@ export type Database = {
         }
         Relationships: []
       }
+      internal_call_attachments: {
+        Row: {
+          call_id: string
+          content_type: string
+          created_at: string
+          file_name: string
+          file_size: number
+          id: string
+          storage_path: string
+          uploaded_by: string
+        }
+        Insert: {
+          call_id: string
+          content_type: string
+          created_at?: string
+          file_name: string
+          file_size: number
+          id?: string
+          storage_path: string
+          uploaded_by: string
+        }
+        Update: {
+          call_id?: string
+          content_type?: string
+          created_at?: string
+          file_name?: string
+          file_size?: number
+          id?: string
+          storage_path?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "internal_call_attachments_call_id_fkey"
+            columns: ["call_id"]
+            isOneToOne: false
+            referencedRelation: "internal_calls"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "internal_call_attachments_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      internal_call_logs: {
+        Row: {
+          call_id: string
+          changed_by: string | null
+          created_at: string
+          id: string
+          new_assignee_id: string | null
+          new_status: string | null
+          note: string | null
+          previous_assignee_id: string | null
+          previous_status: string | null
+        }
+        Insert: {
+          call_id: string
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_assignee_id?: string | null
+          new_status?: string | null
+          note?: string | null
+          previous_assignee_id?: string | null
+          previous_status?: string | null
+        }
+        Update: {
+          call_id?: string
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_assignee_id?: string | null
+          new_status?: string | null
+          note?: string | null
+          previous_assignee_id?: string | null
+          previous_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "internal_call_logs_call_id_fkey"
+            columns: ["call_id"]
+            isOneToOne: false
+            referencedRelation: "internal_calls"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "internal_call_logs_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "internal_call_logs_new_assignee_id_fkey"
+            columns: ["new_assignee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "internal_call_logs_previous_assignee_id_fkey"
+            columns: ["previous_assignee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      internal_call_messages: {
+        Row: {
+          author_id: string
+          call_id: string
+          created_at: string
+          id: string
+          message: string
+        }
+        Insert: {
+          author_id: string
+          call_id: string
+          created_at?: string
+          id?: string
+          message: string
+        }
+        Update: {
+          author_id?: string
+          call_id?: string
+          created_at?: string
+          id?: string
+          message?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "internal_call_messages_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "internal_call_messages_call_id_fkey"
+            columns: ["call_id"]
+            isOneToOne: false
+            referencedRelation: "internal_calls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      internal_calls: {
+        Row: {
+          assignee_id: string | null
+          call_number: string | null
+          category: string
+          created_at: string
+          description: string
+          id: string
+          internal_notes: string | null
+          priority: string
+          reporter_id: string
+          site_survey_question_id: string | null
+          site_survey_visit_environment_id: string | null
+          site_survey_visit_id: string | null
+          site_survey_visit_luc_id: string | null
+          source: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assignee_id?: string | null
+          call_number?: string | null
+          category: string
+          created_at?: string
+          description: string
+          id?: string
+          internal_notes?: string | null
+          priority?: string
+          reporter_id: string
+          site_survey_question_id?: string | null
+          site_survey_visit_environment_id?: string | null
+          site_survey_visit_id?: string | null
+          site_survey_visit_luc_id?: string | null
+          source?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assignee_id?: string | null
+          call_number?: string | null
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          internal_notes?: string | null
+          priority?: string
+          reporter_id?: string
+          site_survey_question_id?: string | null
+          site_survey_visit_environment_id?: string | null
+          site_survey_visit_id?: string | null
+          site_survey_visit_luc_id?: string | null
+          source?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "internal_calls_assignee_id_fkey"
+            columns: ["assignee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "internal_calls_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "internal_calls_site_survey_question_id_fkey"
+            columns: ["site_survey_question_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "internal_calls_site_survey_visit_environment_id_fkey"
+            columns: ["site_survey_visit_environment_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_visit_environments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "internal_calls_site_survey_visit_id_fkey"
+            columns: ["site_survey_visit_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_visits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "internal_calls_site_survey_visit_luc_id_fkey"
+            columns: ["site_survey_visit_luc_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_visit_lucs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_title_hierarchy: {
         Row: {
           approver_job_title_id: string | null
@@ -3277,6 +3532,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          internal_call_id: string | null
           question_action_id: string
           question_id: string
           status: string
@@ -3290,6 +3546,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          internal_call_id?: string | null
           question_action_id: string
           question_id: string
           status?: string
@@ -3303,6 +3560,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          internal_call_id?: string | null
           question_action_id?: string
           question_id?: string
           status?: string
@@ -3313,6 +3571,13 @@ export type Database = {
           visit_luc_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "site_survey_generated_calls_internal_call_id_fkey"
+            columns: ["internal_call_id"]
+            isOneToOne: false
+            referencedRelation: "internal_calls"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "site_survey_generated_calls_question_action_id_fkey"
             columns: ["question_action_id"]
