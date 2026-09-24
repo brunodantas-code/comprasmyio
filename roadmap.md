@@ -648,3 +648,5 @@
 - [ ] Site Survey — alinhar pelo topo os campos e controles das perguntas e igualar a altura do marcador numérico à altura dos campos.
 
 - [ ] Site Survey — posicionar o título “Seção” acima do marcador numérico, alinhado à esquerda e sem repetir a numeração.
+
+- [ ] Site Survey — alinhar o título “Perguntas” à mesma margem esquerda do título “Seção”.
