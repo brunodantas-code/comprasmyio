@@ -359,10 +359,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
         if (equipmentAnswer === "sim" && !materialRows.some((item) => item.catalog_item_id && Number(item.quantity) > 0)) pending.push(`${section.title}: informe ao menos uma ferramenta prevista`);
         continue;
       }
-      const sectionQuestions = questions.filter((question) => question.section_id === section.id);
-      const gateQuestion = isWaterHydrometerSection(section.title) ? sectionQuestions.find(isHydrometerPresenceQuestion) : undefined;
-      const gateValue = gateQuestion ? String(answerParts(formAnswers.get(gateQuestion.id)).value ?? "").toLocaleLowerCase("pt-BR") : "";
-      const applicable = (gateQuestion && gateValue !== "sim" ? [gateQuestion] : sectionQuestions).filter((question) => isQuestionVisible(question, formAnswers));
+      const applicable = questions.filter((question) => question.section_id === section.id).filter((question) => isQuestionVisible(question, formAnswers));
       for (const question of applicable) {
         const hasExistingPhoto = (detail?.attachments ?? []).some((item) => item.question_id === question.id && matchesPoint(item));
         const photo = values.get(`${question.id}__photo`);
@@ -376,18 +373,10 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
     if (phase === "point" && !pointId) throw new Error("Selecione a loja ou ambiente deste checklist.");
     const values = new FormData(form);
     const scope = pointKind === "luc" ? { visit_luc_id: pointId, visit_environment_id: null } : { visit_luc_id: null, visit_environment_id: pointId };
-    const hiddenHydrometerQuestionIds = new Set<string>();
-    for (const section of pointSections.filter((item) => isWaterHydrometerSection(item.title))) {
-      const sectionQuestions = questions.filter((question) => question.section_id === section.id);
-      const gateQuestion = sectionQuestions.find(isHydrometerPresenceQuestion);
-      if (gateQuestion && String(values.get(gateQuestion.id) ?? "").toLocaleLowerCase("pt-BR") === "não") {
-        sectionQuestions.filter((question) => question.id !== gateQuestion.id).forEach((question) => hiddenHydrometerQuestionIds.add(question.id));
-      }
-    }
     const formAnswers = new Map<string, unknown>(questions.map((question) => [question.id, question.question_type === "multiselect" ? values.getAll(question.id).map(String) : question.question_type === "checkbox" ? values.get(question.id) === "on" : String(values.get(question.id) ?? "")]));
     const visibleQuestions = questions.filter((question) => phase === "pre_visit"
       ? generalQuestionIds.has(question.id)
-      : !generalQuestionIds.has(question.id) && !hiddenHydrometerQuestionIds.has(question.id)).filter((question) => isQuestionVisible(question, formAnswers));
+      : !generalQuestionIds.has(question.id)).filter((question) => isQuestionVisible(question, formAnswers));
     const rows = visibleQuestions.map((question) => {
       const config = asQuestionConfig(question.configuration);
       const value = question.question_key === "shopping_maintenance_companions" ? visitTechnicians.map((item) => item.technician_id) : question.question_type === "multiselect" ? values.getAll(question.id).map(String) : question.question_type === "checkbox" ? values.get(question.id) === "on" : String(values.get(question.id) ?? "");
@@ -483,10 +472,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
   const needsSpecialEquipment = (specialEquipmentAnswer || storedSpecialEquipmentAnswer).toLocaleLowerCase("pt-BR") === "sim";
   const sectionPendingCount = (section: Section, general: boolean) => {
     if (section.title === "Materiais necessários" && !general) return needsSpecialEquipment && materialRows.length === 0 ? 1 : 0;
-    const sectionQuestions = questions.filter((question) => question.section_id === section.id);
-    const gateQuestion = isWaterHydrometerSection(section.title) ? sectionQuestions.find(isHydrometerPresenceQuestion) : undefined;
-    const gateValue = gateQuestion ? String(answerParts(answers.get(gateQuestion.id)).value ?? "").toLocaleLowerCase("pt-BR") : "";
-    const applicableQuestions = (gateQuestion && gateValue !== "sim" ? [gateQuestion] : sectionQuestions).filter((question) => isQuestionVisible(question, answers));
+    const applicableQuestions = questions.filter((question) => question.section_id === section.id).filter((question) => isQuestionVisible(question, answers));
     const scopedAttachments = detail?.attachments ?? [];
     return applicableQuestions.filter((question) => !isStoredQuestionComplete(question, answers, scopedAttachments, general ? (item) => !item.visit_luc_id && !item.visit_environment_id : matchesPoint)).length;
   };
@@ -508,10 +494,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
      const pointAnswers = new Map((detail?.responses ?? []).filter(pointMatches).map((response) => [response.question_id, response.answer]));
      const questionsComplete = pointSections.every((section) => {
        if (section.title === "Materiais necessários") return true;
-       const sectionQuestions = questions.filter((question) => question.section_id === section.id);
-       const gateQuestion = isWaterHydrometerSection(section.title) ? sectionQuestions.find(isHydrometerPresenceQuestion) : undefined;
-       const gateValue = gateQuestion ? String(answerParts(pointAnswers.get(gateQuestion.id)).value ?? "").toLocaleLowerCase("pt-BR") : "";
-        const applicable = (gateQuestion && gateValue !== "sim" ? [gateQuestion] : sectionQuestions).filter((question) => isQuestionVisible(question, pointAnswers));
+         const applicable = questions.filter((question) => question.section_id === section.id).filter((question) => isQuestionVisible(question, pointAnswers));
        return applicable.every((question) => isStoredQuestionComplete(question, pointAnswers, detail?.attachments ?? [], pointMatches));
      });
      const hasMaterialDecision = (detail?.materialDecisions ?? []).some((item) => pointMatches(item) && item.no_additional_material) || (detail?.visitMaterials ?? []).some(pointMatches);
@@ -541,30 +524,13 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
   return <section className="mt-5 space-y-5 rounded-md border border-border bg-card p-4 shadow-sm sm:p-6" aria-label={`Detalhes da visita ${String(visit.survey_number).padStart(12, "0")}`}><header className="border-b border-border pb-4"><h2 className="text-lg font-bold">Site Survey #{String(visit.survey_number).padStart(12, "0")}</h2><p className="mt-1 text-sm text-muted-foreground"><MapPin className="mr-1 inline h-3.5 w-3.5" />{visit.address}</p></header><div className="grid gap-3 sm:grid-cols-3"><Info label="Situação" value={STATUS[visit.status]} /><Info label="Agendamento" value={new Date(visit.scheduled_start).toLocaleString("pt-BR")} /><Info label="Técnico" value={data.technicians.find((item) => item.id === visit.technician_id)?.full_name ?? "—"} /></div>{isShoppingVisit ? <SiteSurveyLucManager visitId={visit.id} userId={data.userId} canImport={data.permissions.has("site_survey_agendar") || data.permissions.has("site_survey_editar")} canEdit={data.permissions.has("site_survey_agendar") || data.permissions.has("site_survey_editar") || data.permissions.has("site_survey_executar")} onChanged={() => void refetchDetail()} /> : <SiteSurveyEnvironmentManager visitId={visit.id} userId={data.userId} canEdit={data.permissions.has("site_survey_agendar") || data.permissions.has("site_survey_editar") || data.permissions.has("site_survey_executar")} onChanged={() => void refetchDetail()} />}{(detail?.lucHistory.length ?? 0) > 0 ? <section className="space-y-2 border-t pt-5"><h3 className="font-bold">Histórico anterior do LUC</h3><div className="divide-y rounded-md border">{detail?.lucHistory.map((entry) => <div key={entry.id} className="grid gap-1 p-3 text-sm sm:grid-cols-[120px_1fr_180px]"><span className="font-medium">LUC {entry.luc_number}</span><span>{entry.shop_name}</span><span className="text-muted-foreground">{new Date(entry.valid_from).toLocaleString("pt-BR")}</span></div>)}</div></section> : null}<div className="flex flex-wrap gap-2">{visit.status === "agendada" && data.permissions.has("site_survey_executar") ? <Button size="sm" onClick={() => updateStatus("em_andamento")}><Check className="h-4 w-4" />Iniciar visita</Button> : null}</div>{visit.status === "em_andamento" && data.permissions.has("site_survey_executar") ? phaseForm : null}<AlertDialog open={Boolean(pendingPointSave)} onOpenChange={(open) => { if (!open) setPendingPointSave(null); }}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Existem campos pendentes</AlertDialogTitle><AlertDialogDescription>Preencha os itens abaixo para concluir esta loja. Se preferir, salve agora e continue depois.</AlertDialogDescription></AlertDialogHeader><div className="max-h-64 overflow-y-auto rounded-md border p-3"><ul className="space-y-1 text-sm text-destructive">{pendingPointSave?.fields.map((field) => <li key={field}>• {field}</li>)}</ul></div><AlertDialogFooter><AlertDialogAction onClick={() => { const pending = pendingPointSave; setPendingPointSave(null); if (pending) void saveAnswers(pending.form, "point", false, pending.fields).catch((error: unknown) => toast.error(error instanceof Error ? error.message : "Não foi possível salvar as pendências.")); }}>Salvar com pendências</AlertDialogAction><AlertDialogCancel>Continuar preenchendo</AlertDialogCancel></AlertDialogFooter></AlertDialogContent></AlertDialog><AlertDialog open={Boolean(pendingAction)} onOpenChange={(open) => { if (!open && pendingAction) { setDeclinedActionKeys((current) => new Set(current).add(pendingAction.key)); setPendingAction(null); } }}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Abrir chamado para o suporte?</AlertDialogTitle><AlertDialogDescription>A resposta selecionada gera a ação “{pendingAction?.actionName}”. Confirme para abrir o chamado ao salvar o andamento.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={() => { if (!pendingAction) return; setApprovedActionKeys((current) => new Set(current).add(pendingAction.key)); setPendingAction(null); }}>Confirmar</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>{(detail?.attachments.length ?? 0) > 0 ? <section className="space-y-2 border-t pt-5"><h3 className="font-bold">Anexos</h3>{detail?.attachments.filter(matchesPoint).map((attachment) => <Button key={attachment.id} variant="outline" size="sm" onClick={async () => { const { data: signed } = await supabase.storage.from("site-survey-attachments").createSignedUrl(attachment.storage_path, 600); if (signed?.signedUrl) window.open(signed.signedUrl, "_blank", "noopener,noreferrer"); }}><FileText className="h-4 w-4" />{attachment.file_name}</Button>)}</section> : null}{visit.status === "em_revisao" && data.permissions.has("site_survey_revisar") ? <section className="space-y-3 border-t pt-5"><Label htmlFor="review-notes">Observações da revisão</Label><Textarea id="review-notes" value={reviewNotes} onChange={(event) => setReviewNotes(event.target.value)} /><div className="flex flex-wrap gap-2"><Button disabled={!allRequiredComplete} onClick={() => updateStatus("concluida")}><Check className="h-4 w-4" />Concluir</Button><Button variant="outline" onClick={() => updateStatus("em_andamento")}><Pencil className="h-4 w-4" />Solicitar ajustes</Button></div>{!allRequiredComplete ? <p className="text-sm text-destructive">A conclusão será liberada quando todas as lojas estiverem concluídas.</p> : null}</section> : null}{visit.status === "concluida" && data.permissions.has("site_survey_revisar") ? <Button variant="outline" onClick={() => updateStatus("em_andamento")}><Pencil className="h-4 w-4" />Reabrir visita</Button> : null}</section>;
 }
 
-function isWaterHydrometerSection(title: string) {
-  const normalized = title.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR");
-  return normalized.includes("agua") && normalized.includes("hidrometro");
-}
-
-function isHydrometerPresenceQuestion(question: Question) {
-  const normalized = question.prompt.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR");
-  return normalized.includes("existe hidrometro");
-}
-
 function ConditionalSectionQuestions({ sectionTitle, questions, answers, attachments, matchesPoint, selectedPoint, calls, onQuestionAnswerChange, technicians, visitTechnicians, onTechniciansChange }: { sectionTitle: string; questions: Question[]; answers: Map<string, unknown>; attachments: Array<{ question_id: string | null; visit_luc_id?: string | null; visit_environment_id?: string | null }>; matchesPoint: (item: { visit_luc_id?: string | null; visit_environment_id?: string | null }) => boolean; selectedPoint: string; calls: Map<string, { id: string | null; number: string | null }>; onQuestionAnswerChange: (question: Question, value: unknown) => void; technicians?: Profile[]; visitTechnicians?: VisitTechnician[]; onTechniciansChange?: (rows: VisitTechnician[]) => void }) {
-  const gateQuestion = questions.find(isHydrometerPresenceQuestion);
-  const orderedQuestions = gateQuestion ? [gateQuestion, ...questions.filter((question) => question.id !== gateQuestion.id)] : questions;
-  const initialAnswer = gateQuestion ? answerParts(answers.get(gateQuestion.id)).value : "";
-  const [firstAnswer, setFirstAnswer] = useState(typeof initialAnswer === "string" ? initialAnswer : "");
   const [liveAnswers, setLiveAnswers] = useState<Map<string, unknown>>(() => new Map(answers));
   useEffect(() => {
     setLiveAnswers(new Map(answers));
-    setFirstAnswer(typeof initialAnswer === "string" ? initialAnswer : "");
-  }, [answers, initialAnswer, selectedPoint]);
-  const isConditionalSection = isWaterHydrometerSection(sectionTitle) && Boolean(gateQuestion);
-  const hydrometerQuestions = isConditionalSection && firstAnswer.toLocaleLowerCase("pt-BR") !== "sim" ? orderedQuestions.slice(0, 1) : orderedQuestions;
-  const visibleQuestions = hydrometerQuestions.filter((question) => isQuestionVisible(question, liveAnswers));
-  return <>{visibleQuestions.map((question) => question.question_key === "shopping_maintenance_companions" && technicians && visitTechnicians && onTechniciansChange ? <TechnicianSelector key={question.id} technicians={technicians} rows={visitTechnicians} onChange={onTechniciansChange} /> : <QuestionField key={`${selectedPoint}-${question.id}-${JSON.stringify(answers.get(question.id))}`} question={question} answer={answers.get(question.id)} hasPhoto={attachments.some((item) => item.question_id === question.id && matchesPoint(item))} call={calls.get(question.id)} onAnswerChange={(value) => { setLiveAnswers((current) => new Map(current).set(question.id, value)); if (question.id === gateQuestion?.id) setFirstAnswer(String(value)); onQuestionAnswerChange(question, value); }} />)}</>;
+  }, [answers, selectedPoint]);
+  const visibleQuestions = questions.filter((question) => isQuestionVisible(question, liveAnswers));
+  return <>{visibleQuestions.map((question) => question.question_key === "shopping_maintenance_companions" && technicians && visitTechnicians && onTechniciansChange ? <TechnicianSelector key={question.id} technicians={technicians} rows={visitTechnicians} onChange={onTechniciansChange} /> : <QuestionField key={`${selectedPoint}-${question.id}-${JSON.stringify(answers.get(question.id))}`} question={question} answer={answers.get(question.id)} hasPhoto={attachments.some((item) => item.question_id === question.id && matchesPoint(item))} call={calls.get(question.id)} onAnswerChange={(value) => { setLiveAnswers((current) => new Map(current).set(question.id, value)); onQuestionAnswerChange(question, value); }} />)}</>;
 }
 
 function TechnicianSelector({ technicians, rows, onChange }: { technicians: Profile[]; rows: VisitTechnician[]; onChange: (rows: VisitTechnician[]) => void }) {
