@@ -711,3 +711,5 @@
 - [x] Site Survey — iniciar Checklists sem modelo selecionado e exibir seções/perguntas somente após a seleção em Editar modelo.
 
 - [x] Site Survey — remover asteriscos visíveis das perguntas e abrir o histórico do OpDesk pelo número do chamado.
+
+- [x] Site Survey — refletir a pendência geral da Loja/LUC na Etapa 7 até a conclusão da visita da loja.
