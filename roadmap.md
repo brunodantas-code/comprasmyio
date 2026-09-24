@@ -1,5 +1,5 @@
-- [ ] Site Survey — confirmar antes de gerar ação, exibir o número do chamado e respeitar o escopo geral ou da loja/ambiente.
-- [ ] Site Survey — posicionar Loja/LUC após o bloco 3 e permitir escolher a próxima loja ao salvar o andamento.
+- [x] Site Survey — confirmar antes de gerar ação, exibir o número do chamado e respeitar o escopo geral ou da loja/ambiente.
+- [x] Site Survey — posicionar Loja/LUC após o bloco 3 e permitir escolher a próxima loja ao salvar o andamento.
 - [x] Compactar os blocos das seções do checklist no mobile, mantendo o desktop inalterado.
 # Aplicativo Site Survey
 
