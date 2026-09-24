@@ -495,7 +495,7 @@ function ChecklistAdmin({ data, onChanged }: { data: NonNullable<ReturnType<type
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
   const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
   const [collapsedSectionIds, setCollapsedSectionIds] = useState<Set<string>>(() => new Set());
-  const [collapsedAdminBlocks, setCollapsedAdminBlocks] = useState<Set<"new" | "edit" | "sections">>(() => new Set());
+  const [collapsedAdminBlocks, setCollapsedAdminBlocks] = useState<Set<"new" | "edit" | "sections">>(() => new Set(["new", "edit", "sections"]));
   const toggleAdminBlock = (block: "new" | "edit" | "sections") => setCollapsedAdminBlocks((current) => { const next = new Set(current); if (next.has(block)) next.delete(block); else next.add(block); return next; });
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }), useSensor(TouchSensor, { activationConstraint: { delay: 180, tolerance: 8 } }), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }));
   useEffect(() => {
