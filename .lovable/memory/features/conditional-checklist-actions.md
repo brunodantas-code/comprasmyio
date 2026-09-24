@@ -1,6 +1,6 @@
 ---
 name: Condicionamento e ações do checklist
-summary: Perguntas podem depender de respostas anteriores e gerar imediatamente chamados configuráveis no futuro app Chamados.
+description: Perguntas podem depender de respostas anteriores e gerar imediatamente chamados configuráveis no futuro app Chamados.
 type: feature
 ---
 No cadastro de perguntas do Site Survey, uma pergunta pode ser condicionada à resposta de uma pergunta anterior da mesma seção. Quando a condição não for atendida, a pergunta não é exibida nem considerada pendente ou obrigatória.
