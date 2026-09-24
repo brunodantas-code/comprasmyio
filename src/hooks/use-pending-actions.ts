@@ -19,14 +19,14 @@ export function usePendingActions() {
   const { data: currentUser } = useCurrentUser();
 
   return useQuery({
-    queryKey: ["pending-actions", currentUser?.id, currentUser?.isAdmin, currentUser?.isComprador],
+    queryKey: ["pending-actions", currentUser?.id, currentUser?.isAdmin, currentUser?.isComprador, currentUser?.isCustomerSupportAnalyst],
     enabled: Boolean(currentUser),
     queryFn: async () => {
       const { data: authData, error: authError } = await supabase.auth.getUser();
       if (authError || !authData.user) throw authError ?? new Error("Sessão não encontrada");
       const userId = authData.user.id;
 
-      const [stepsResult, deletionsResult, codeResult, codeMessagesResult, supplyQueueResult] = await Promise.all([
+      const [stepsResult, deletionsResult, codeResult, codeMessagesResult, supplyQueueResult, supportCallsResult] = await Promise.all([
         supabase
           .from("approval_steps")
           .select("order_id, step_index, approver_id, status, purchase_orders(requester_id)")
@@ -48,6 +48,9 @@ export function usePendingActions() {
               .eq("approval_status", "aprovado")
               .in("status", ["pendente", "comprado_aguardando", "recebido_problema"])
           : Promise.resolve({ count: 0, error: null }),
+        currentUser?.isCustomerSupportAnalyst
+          ? supabase.from("internal_calls").select("id, call_number, title, status").in("status", ["aberto", "em_atendimento", "aguardando"]).order("created_at", { ascending: false })
+          : Promise.resolve({ data: [], error: null }),
       ]);
 
       if (stepsResult.error) throw stepsResult.error;
@@ -55,6 +58,7 @@ export function usePendingActions() {
       if (codeResult.error) throw codeResult.error;
       if (codeMessagesResult.error) throw codeMessagesResult.error;
       if (supplyQueueResult.error) throw supplyQueueResult.error;
+      if (supportCallsResult.error) throw supportCallsResult.error;
 
       const isAdmin = currentUser?.isAdmin ?? false;
       const steps = (stepsResult.data ?? []) as ApprovalStep[];
@@ -89,6 +93,8 @@ export function usePendingActions() {
       const pendingCodeItems = [...codeItems.values()];
       const pendingCodeTickets = pendingCodeItems.length;
       const pendingSupplyQueue = supplyQueueResult.count ?? 0;
+      const supportCallItems = (supportCallsResult.data ?? []).map((call) => ({ callId: call.id, callNumber: call.call_number ?? "—", title: call.title, status: call.status }));
+      const supportCalls = supportCallItems.length;
 
       return {
         approvals: pendingApprovals,
@@ -96,8 +102,11 @@ export function usePendingActions() {
         codeTickets: pendingCodeTickets,
         codeItems: pendingCodeItems,
         supplyQueue: pendingSupplyQueue,
+        supportCalls,
+        supportCallItems,
+        isCustomerSupportAnalyst: currentUser?.isCustomerSupportAnalyst ?? false,
         supply: pendingApprovals + pendingUserDeletions + pendingSupplyQueue,
-        total: pendingApprovals + pendingUserDeletions + pendingCodeTickets + pendingSupplyQueue,
+        total: pendingApprovals + pendingUserDeletions + pendingCodeTickets + pendingSupplyQueue + supportCalls,
       };
     },
     staleTime: 30_000,

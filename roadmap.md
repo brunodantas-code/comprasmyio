@@ -1,6 +1,7 @@
 # Aplicativo Site Survey
 
 - [x] OpDesk — remover o nome repetido do conteúdo, mantendo ícone monocromático e texto explicativo.
+- [x] OpDesk — notificar Analistas de Suporte ao Cliente sobre chamados ativos na Central de Pendências e no ícone do aplicativo.
 
 - [x] Acesso — unificar `/auth` com a tela inicial da plataforma, eliminando o segundo padrão visual de login.
 

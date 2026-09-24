@@ -70,6 +70,7 @@ export function useCurrentUser() {
       const individualTypes = new Set((individualRequestTypes ?? []).map((item) => item.request_type_code));
       const profileTypes = new Set((definition?.access_profile_request_types ?? []).map((item) => item.request_type_code));
       const isSupply = titleKeys.some((title) => title.includes("supply"));
+      const isCustomerSupportAnalyst = titleKeys.includes("analista de suporte ao cliente");
       const canAccess = (menu: MenuKey) => {
         if (accessProfileBase === "admin") return true;
         if (menu === "usuarios" || menu.startsWith("usuarios_")) return false;
@@ -91,6 +92,7 @@ export function useCurrentUser() {
         canRequestType,
         isAdmin: accessProfileBase === "admin",
         isComprador: isSupply,
+        isCustomerSupportAnalyst,
         isFabrica: titleKeys.includes("fabrica"),
         isEstoquista: titleKeys.includes("estoquista"),
         isFinanceiro: titleKeys.includes("financeiro"),
