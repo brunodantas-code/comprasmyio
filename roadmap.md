@@ -1,6 +1,7 @@
 # Aplicativo Site Survey
 
 - [x] Site Survey — alinhar pela base os controles das perguntas, padronizar Salvar e Excluir, usar pergunta em linha com limite e contador de 50 caracteres e permitir editar o tipo de resposta.
+- [x] Site Survey — aplicar linhas finas aos demais campos, manter verde somente em edição e alinhar seções, obrigatoriedade e ações pela base.
 - [x] Página inicial — subir o bloco do logo aos aplicativos, reduzir a largura dos blocos para manter duas linhas, adicionar o Site Survey e evitar sobreposição do CRM com o elemento lilás.
 - [x] Acesso — deslocar o bloco “Acesse sua conta” para a esquerda, evitando sobreposição com a rede mesh.
 - [x] Página inicial — retirar o texto “Em desenvolvimento” dos aplicativos indisponíveis.
