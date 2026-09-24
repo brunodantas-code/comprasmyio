@@ -275,10 +275,10 @@ function PortalPage() {
                       <p className="mt-3 w-24 max-w-full break-words text-center text-xs leading-4 text-muted-foreground sm:w-28 sm:text-sm sm:leading-5">
                         {description.map((line) => <span key={line} className="block">{line}</span>)}
                       </p>
+                     </div>
+                   ))}
                  </div>
                </>
-                ))}
-              </div>
             ) : (
               <div className="rounded-md border border-dashed border-border bg-card p-8 text-center">
                 <h2 className="text-xl font-bold">Nenhum aplicativo liberado</h2>
