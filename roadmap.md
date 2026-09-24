@@ -652,3 +652,5 @@
 - [x] Site Survey — alinhar o título “Perguntas” à mesma margem esquerda do título “Seção”.
 
 - [x] Site Survey — aplicar nas perguntas o mesmo eixo visual do título e marcador numérico usado nas seções.
+
+- [x] Site Survey — alinhar “Perguntas” e todos os marcadores de ordem pela mesma margem esquerda.
