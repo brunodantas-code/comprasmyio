@@ -33,7 +33,14 @@ export const Route = createFileRoute("/_authenticated/chamados")({
     if (!data) throw redirect({ to: "/portal" });
   },
   component: CallsPage,
-  head: () => ({ meta: [{ title: "Chamados | myio ERP" }, { name: "description", content: "Abertura e acompanhamento de chamados internos." }] }),
+  head: () => ({ meta: [
+    { title: "Chamados | myio ERP" },
+    { name: "description", content: "Abertura e acompanhamento de chamados internos." },
+    { property: "og:title", content: "Chamados | myio ERP" },
+    { property: "og:description", content: "Abertura e acompanhamento de chamados internos." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
 });
 
 function CallsPage() {
