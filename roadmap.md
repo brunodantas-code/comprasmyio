@@ -1,3 +1,4 @@
+- [ ] Site Survey — substituir a tag Pendente por contador vermelho sobre o número da etapa, somente após salvar progresso, removendo-o ao concluir a etapa.
 - [x] Site Survey — preservar respostas já salvas ao concluir ou salvar uma Loja/LUC, sem apagar o histórico anterior.
 - [x] Site Survey — permitir que condições com várias respostas separadas por ponto e vírgula sejam acionadas por qualquer opção selecionada.
 - [x] Site Survey — ao responder “Sim” para equipamento ou ferramenta especial, exibir “+” e permitir selecionar ferramentas cadastradas.
