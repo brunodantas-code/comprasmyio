@@ -1,5 +1,7 @@
 # Aplicativo Site Survey
 
+- [ ] Cadastro > Diversos — recolher todos os cadastros por padrão, usar “+” no título para incluir itens e permitir criar novos cadastros dinâmicos.
+
 - [x] Página inicial — manter “Gestão inteligente”, reduzir “em um só ecossistema” para uma linha e ampliar o respiro dos aplicativos em grupos de três no desktop.
 
 - [x] OpDesk — remover o nome repetido do conteúdo, mantendo ícone monocromático e texto explicativo.
