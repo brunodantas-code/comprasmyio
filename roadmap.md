@@ -656,3 +656,5 @@
 - [x] Site Survey — aplicar nas perguntas o mesmo eixo visual do título e marcador numérico usado nas seções.
 
 - [x] Site Survey — alinhar “Perguntas” e todos os marcadores de ordem pela mesma margem esquerda.
+
+- [ ] Site Survey — reorganizar cadastro/lista de modelos, ampliar a área de seções e aplicar linhas e ícones compactos em modelos e novas seções.
