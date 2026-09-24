@@ -73,7 +73,7 @@ function PortalPage() {
     { key: "site_survey", name: "Site Survey", description: ["Visitas técnicas"], to: "/site-survey" as const },
     { key: "chamados", name: "OpDesk", description: ["Suporte ao cliente", "e operação"], to: "/chamados" as const },
     { key: "development", name: "Code", description: ["Melhorias e Bugs"], to: "/development" as const },
-  ].filter((app) => data.appKeys.has(app.key));
+  ].filter((app) => data.appKeys.has(app.key) || (app.key === "chamados" && pendingActions?.isCustomerSupportAnalyst));
   const mobileAppPages = Array.from({ length: Math.ceil(apps.length / 8) }, (_, pageIndex) => apps.slice(pageIndex * 8, pageIndex * 8 + 8));
 
   const renderApp = ({ key, name, description, to }: (typeof apps)[number]) => (
@@ -86,6 +86,7 @@ function PortalPage() {
       >
         {key === "supply" && (pendingActions?.supply ?? 0) > 0 ? <PendingBadge count={pendingActions?.supply ?? 0} label="pendências no Supply" /> : null}
         {key === "development" && (pendingActions?.codeTickets ?? 0) > 0 ? <PendingBadge count={pendingActions?.codeTickets ?? 0} label="tickets pendentes no Code" /> : null}
+        {key === "chamados" && (pendingActions?.supportCalls ?? 0) > 0 ? <PendingBadge count={pendingActions?.supportCalls ?? 0} label="chamados pendentes no OpDesk" /> : null}
         {key === "supply" ? <><span className="flex h-11 w-full translate-y-0.5 items-center justify-center sm:h-16 sm:translate-y-1" aria-hidden="true"><Settings className="h-11 w-11 stroke-[1.7] sm:h-16 sm:w-16" /></span><span className="text-xs font-normal leading-none sm:text-sm">{name}</span></>
           : key === "cash_flow" ? <><span className="flex h-11 w-full translate-y-0.5 items-center justify-center sm:h-16 sm:translate-y-1" aria-hidden="true"><DollarSign className="h-11 w-11 stroke-[3.5] sm:h-16 sm:w-16" /></span><span className="text-xs font-normal leading-none sm:text-sm">{name}</span></>
           : key === "crm" ? <><span className="flex h-11 w-full translate-y-0.5 items-center justify-center sm:h-16 sm:translate-y-1" aria-hidden="true"><CrmFunnelIcon className="h-11 w-11 stroke-[3] sm:h-16 sm:w-16" /></span><span className="text-xs font-normal leading-none sm:text-sm">{name}</span></>
@@ -214,6 +215,7 @@ function PortalPage() {
                       >
                          {key === "supply" && (pendingActions?.supply ?? 0) > 0 ? <PendingBadge count={pendingActions?.supply ?? 0} label="pendências no Supply" /> : null}
                           {key === "development" && (pendingActions?.codeTickets ?? 0) > 0 ? <PendingBadge count={pendingActions?.codeTickets ?? 0} label="tickets pendentes no Code" /> : null}
+                           {key === "chamados" && (pendingActions?.supportCalls ?? 0) > 0 ? <PendingBadge count={pendingActions?.supportCalls ?? 0} label="chamados pendentes no OpDesk" /> : null}
                         {key === "supply" ? (
                           <>
                             <span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true">
@@ -297,6 +299,7 @@ function PortalPage() {
                   {(pendingActions?.supplyQueue ?? 0) > 0 ? <PendingRow icon={ShoppingCart} label="Fila do Supply" count={pendingActions?.supplyQueue ?? 0} to="/dashboard" search={{ section: "queue" }} /> : null}
                   {(pendingActions?.userDeletions ?? 0) > 0 ? <PendingRow icon={ShieldCheck} label="Exclusões de usuários aguardando decisão" count={pendingActions?.userDeletions ?? 0} to="/dashboard" search={{ section: "admin", subsection: "usuarios" }} /> : null}
                   {(pendingActions?.codeItems ?? []).map((ticket) => <PendingRow key={ticket.ticketId} icon={CodeXml} label={`#${ticket.ticketNumber} · ${ticket.reason === "responder" ? "Responder ao Admin" : ticket.reason === "aceitar" ? "Confirmar atendimento" : "Ticket aguardando atendimento"}`} count={1} to="/development" search={{ ticket: ticket.ticketId }} />)}
+                   {(pendingActions?.supportCallItems ?? []).map((call) => <PendingRow key={call.callId} icon={Phone} label={`#${call.callNumber} · ${call.reason === "confirmar" ? "Confirmar conclusão" : call.title}`} count={1} to="/chamados" search={{ chamado: call.callId }} />)}
                 </div>
               </section>
             ) : null}
@@ -312,10 +315,11 @@ function PendingBadge({ count, label }: { count: number; label: string }) {
   return <span className="absolute -right-2 -top-2 flex h-8 min-w-8 items-center justify-center rounded-full bg-destructive px-2 text-sm font-bold text-destructive-foreground shadow-md" aria-label={`${count} ${label}`}>{count > 99 ? "99+" : count}</span>;
 }
 
-function PendingRow({ icon: Icon, label, count, to, search }: { icon: typeof Bell; label: string; count: number; to: "/pendentes" | "/dashboard" | "/development"; search?: { section: "admin"; subsection: "usuarios" } | { section: "queue" } | { ticket: string } }) {
+function PendingRow({ icon: Icon, label, count, to, search }: { icon: typeof Bell; label: string; count: number; to: "/pendentes" | "/dashboard" | "/development" | "/chamados"; search?: { section: "admin"; subsection: "usuarios" } | { section: "queue" } | { ticket: string } | { chamado: string } }) {
   const content = <><Icon className="h-5 w-5 shrink-0" /><span className="min-w-0 flex-1 text-sm font-medium">{label}</span><span className="flex h-7 min-w-7 items-center justify-center rounded-full bg-destructive px-2 text-xs font-bold text-destructive-foreground">{count > 99 ? "99+" : count}</span></>;
   if (to === "/pendentes") return <Link to="/pendentes" className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10">{content}</Link>;
   if (to === "/development") return <Link to="/development" search={(search && "ticket" in search) ? search : { ticket: undefined }} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10">{content}</Link>;
+  if (to === "/chamados") return <Link to="/chamados" search={(search && "chamado" in search) ? search : { chamado: undefined }} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10">{content}</Link>;
   return (
     <Link to="/dashboard" search={search && "section" in search ? { section: search.section, subsection: "subsection" in search ? search.subsection : undefined } : { section: "queue", subsection: undefined }} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10">{content}</Link>
   );

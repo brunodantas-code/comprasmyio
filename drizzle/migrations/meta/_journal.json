@@ -456,6 +456,27 @@
       "when": 1790265695108,
       "tag": "0064_grant_new_users_internal_calls_access",
       "breakpoints": true
+    },
+    {
+      "idx": 65,
+      "version": "7",
+      "when": 1790272317598,
+      "tag": "0065_allow_support_analysts_manage_internal_calls",
+      "breakpoints": true
+    },
+    {
+      "idx": 66,
+      "version": "7",
+      "when": 1790272439485,
+      "tag": "0066_allow_support_analysts_view_call_participants",
+      "breakpoints": true
+    },
+    {
+      "idx": 67,
+      "version": "7",
+      "when": 1790272608314,
+      "tag": "0067_enforce_internal_call_completion_workflow",
+      "breakpoints": true
     }
   ]
 }
