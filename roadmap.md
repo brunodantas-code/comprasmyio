@@ -703,3 +703,4 @@
 - [x] Renomear Chamados para OpDesk e manter o Code na última posição dos aplicativos.
 - [x] Site Survey — remover a divisória e aproximar Condicionar/Gerar ação, alinhando Condicionar com Obrigatória.
 - [x] Site Survey — alinhar Condicionar e Gerar ação à direita nas perguntas no mobile, preservando o desktop.
+- [x] Site Survey — iniciar Checklists sem modelo selecionado e exibir seções/perguntas somente após a seleção em Editar modelo.
