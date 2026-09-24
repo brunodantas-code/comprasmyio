@@ -5,6 +5,7 @@
 - [x] Site Survey — concluir cada Loja/LUC separadamente, registrar pendências na etapa 7 e concluir a visita geral apenas após todos os pontos.
 - [x] Site Survey — confirmar antes de gerar ação, exibir o número do chamado e respeitar o escopo geral ou da loja/ambiente.
 - [x] Site Survey — posicionar Loja/LUC após o bloco 3 e permitir escolher a próxima loja ao salvar o andamento.
+- [ ] Todos os apps — manter a navegação inferior atual e adaptar somente o menu das três linhas no desktop, com apresentação compacta e conteúdo adequado.
 - [x] Compactar os blocos das seções do checklist no mobile, mantendo o desktop inalterado.
 # Aplicativo Site Survey
 
