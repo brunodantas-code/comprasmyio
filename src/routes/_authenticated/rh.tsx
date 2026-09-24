@@ -1,6 +1,6 @@
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Home, Mail, Minus, Phone, Plus, Search, UserRound } from "lucide-react";
+import { Mail, Minus, Phone, Plus, Search, UserRound } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MyioAppLogo } from "@/components/myio-app-logo";
+import { AppHeader } from "@/components/app-header";
 
 export const Route = createFileRoute("/_authenticated/rh")({
   beforeLoad: async ({ context }) => {
@@ -44,12 +45,7 @@ function RhPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
-          <Link to="/portal"><MyioAppLogo appName="RH" className="text-xl sm:text-2xl" /></Link>
-          <div className="flex items-center gap-1"><Button asChild variant="outline" size="icon" title="Início"><Link to="/portal" aria-label="Início"><Home className="h-4 w-4" /></Link></Button></div>
-        </div>
-      </header>
+      <AppHeader logo={<MyioAppLogo appName="RH" className="text-xl sm:text-2xl" />} />
       <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
         <div className="mb-5 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4">
           <div className="min-w-0"><h1 className="text-2xl font-bold">Técnicos</h1><p className="mt-1 text-sm text-muted-foreground">Ficha básica dos técnicos cadastrados no Supply.</p></div>

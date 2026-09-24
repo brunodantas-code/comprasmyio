@@ -1,7 +1,7 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { History, Home, MessageCircle, Paperclip, Phone, Plus, Send } from "lucide-react";
+import { History, MessageCircle, Paperclip, Phone, Plus, Send } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { AppHeader } from "@/components/app-header";
 
 type CallStatus = "aberto" | "em_atendimento" | "aguardando" | "resolvido" | "cancelado";
 type CallPriority = "baixa" | "media" | "alta" | "critica";
@@ -74,7 +75,7 @@ function CallsPage() {
   useEffect(() => { const call = data?.calls.find((item) => item.id === routeSearch.chamado); if (call) setSelected(call); }, [data?.calls, routeSearch.chamado]);
   const refresh = () => qc.invalidateQueries({ queryKey: ["internal-calls"] });
   return <div className="min-h-screen bg-background">
-    <header className="border-b bg-card"><div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6"><Link to="/portal"><MyioAppLogo appName="OpDesk" className="text-base sm:text-2xl" /></Link><Button asChild variant="outline" size="icon"><Link to="/portal" aria-label="Início"><Home className="h-4 w-4" /></Link></Button></div></header>
+    <AppHeader logo={<MyioAppLogo appName="OpDesk" className="text-base sm:text-2xl" />} />
     <main className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6">
       <div className="flex items-end justify-between gap-4"><div><h1 className="flex items-center gap-2 text-3xl font-extrabold"><Phone className="h-8 w-8" />OpDesk</h1><p className="mt-1 text-muted-foreground">Problemas em campo, reclamações e assuntos internos.</p></div><NewCallDialog open={newOpen} onOpenChange={setNewOpen} userId={data?.userId} onCreated={refresh} /></div>
       <Card><CardHeader><CardTitle>Acompanhamento</CardTitle><CardDescription>{data?.isAdmin ? "Chamados internos da plataforma." : "Chamados abertos por você ou atribuídos a você."}</CardDescription></CardHeader><CardContent>
