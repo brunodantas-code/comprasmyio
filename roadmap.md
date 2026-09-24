@@ -1,3 +1,4 @@
+- [x] Site Survey — exibir o botão “+” e a seleção de ferramentas na etapa 6 ao marcar “Sim”, independentemente do título da seção.
 - [x] Site Survey — remover a regra antiga fixa de exibição das perguntas de hidrômetro e usar somente as condições configuradas.
 - [x] Site Survey — substituir a tag Pendente por contador vermelho sobre o número da etapa, somente após salvar progresso, removendo-o ao concluir a etapa.
 - [x] Site Survey — preservar respostas já salvas ao concluir ou salvar uma Loja/LUC, sem apagar o histórico anterior.
