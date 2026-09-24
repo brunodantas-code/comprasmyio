@@ -726,4 +726,4 @@
 
 - [x] Site Survey — remover o campo duplicado de condição da saída pulsada e manter somente a pergunta específica com Operante/Inoperante.
 
-- [ ] Site Survey — incluir lixeira em Usuários com confirmação para remover somente o acesso ao aplicativo.
+- [x] Site Survey — incluir lixeira em Usuários com confirmação para remover somente o acesso ao aplicativo.
