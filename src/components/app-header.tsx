@@ -1,0 +1,70 @@
+import type { ReactNode } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ArrowLeft, Home, LogOut, Menu } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+
+export function AppHeader({ logo, children }: { logo: ReactNode; children?: ReactNode }) {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { data: userName = "Usuário" } = useQuery({
+    queryKey: ["app-header-user"],
+    queryFn: async () => {
+      const { data: auth } = await supabase.auth.getUser();
+      if (!auth.user) return "Usuário";
+      const { data: profile } = await supabase.from("profiles").select("full_name,email").eq("id", auth.user.id).maybeSingle();
+      return profile?.full_name || profile?.email || auth.user.email || "Usuário";
+    },
+  });
+
+  async function signOut() {
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    await supabase.auth.signOut();
+    navigate({ to: "/auth", replace: true });
+  }
+
+  const iconButton = "shrink-0 !bg-transparent !text-foreground shadow-none hover:!bg-muted hover:!text-foreground";
+
+  return (
+    <header className="sticky top-0 z-50 border-b border-border bg-card">
+      <div className="mx-auto max-w-7xl px-4 pb-4 pt-5 sm:flex sm:min-h-[73px] sm:items-center sm:justify-between sm:gap-4 sm:px-6 sm:py-4">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+          <Link to="/portal" className="flex min-w-0 items-center" title="Voltar aos aplicativos">{logo}</Link>
+          <div className="flex shrink-0 items-center gap-1 sm:hidden">
+            <Button asChild variant="ghost" size="icon" className={iconButton} title="Início"><Link to="/portal" aria-label="Início"><Home className="h-5 w-5" /></Link></Button>
+            <Button variant="ghost" size="icon" className={iconButton} title="Voltar" aria-label="Voltar" onClick={() => window.history.back()}><ArrowLeft className="h-5 w-5" /></Button>
+            <HeaderMenu userName={userName} onSignOut={signOut} buttonClass={iconButton} />
+          </div>
+        </div>
+        <div className="mt-5 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:mt-0 sm:flex sm:min-w-0 sm:justify-end">
+          <p className="min-w-0 truncate text-sm font-semibold">{userName}</p>
+          {children}
+          <div className="hidden shrink-0 items-center gap-1 sm:flex">
+            <Button asChild variant="ghost" size="icon" className={iconButton} title="Início"><Link to="/portal" aria-label="Início"><Home className="h-4 w-4" /></Link></Button>
+            <Button variant="ghost" size="icon" className={iconButton} title="Voltar" aria-label="Voltar" onClick={() => window.history.back()}><ArrowLeft className="h-4 w-4" /></Button>
+            <HeaderMenu userName={userName} onSignOut={signOut} buttonClass={iconButton} />
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function HeaderMenu({ userName, onSignOut, buttonClass }: { userName: string; onSignOut: () => void; buttonClass: string }) {
+  return (
+    <Sheet>
+      <SheetTrigger asChild><Button variant="ghost" size="icon" className={buttonClass} aria-label="Abrir menu"><Menu className="!h-6 !w-6" /></Button></SheetTrigger>
+      <SheetContent side="bottom" className="rounded-t-2xl px-5 pb-8">
+        <SheetHeader><SheetTitle className="truncate text-left">{userName}</SheetTitle></SheetHeader>
+        <nav className="mt-5 divide-y divide-border" aria-label="Menu do aplicativo">
+          <Button asChild variant="ghost" className="h-12 w-full justify-start rounded-none !bg-transparent !text-foreground hover:!bg-muted"><Link to="/portal"><Home className="h-5 w-5" />Início</Link></Button>
+          <Button variant="ghost" className="h-12 w-full justify-start rounded-none !bg-transparent !text-foreground hover:!bg-muted" onClick={() => window.history.back()}><ArrowLeft className="h-5 w-5" />Voltar</Button>
+          <Button variant="ghost" className="h-12 w-full justify-start rounded-none !bg-transparent !text-destructive hover:!bg-muted hover:!text-destructive" onClick={onSignOut}><LogOut className="h-5 w-5" />Sair</Button>
+        </nav>
+      </SheetContent>
+    </Sheet>
+  );
+}

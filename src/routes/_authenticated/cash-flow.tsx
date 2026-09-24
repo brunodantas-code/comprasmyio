@@ -1,6 +1,5 @@
-import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
-import { useQueryClient } from "@tanstack/react-query";
-import { Home, ListTree, LogOut, ReceiptText, WalletCards } from "lucide-react";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { ListTree, ReceiptText, WalletCards } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,6 +7,7 @@ import { MyioCashFlowLogo } from "@/components/myio-cash-flow-logo";
 import { PayablesTab } from "@/components/cash-flow/payables-tab";
 import { ChartOfAccountsTab } from "@/components/cash-flow/chart-of-accounts-tab";
 import { CashRegisterTab } from "@/components/cash-flow/cash-register-tab";
+import { AppHeader } from "@/components/app-header";
 
 export const Route = createFileRoute("/_authenticated/cash-flow")({
   beforeLoad: async ({ context }) => {
@@ -29,22 +29,9 @@ export const Route = createFileRoute("/_authenticated/cash-flow")({
 
 function CashFlowPage() {
   const user = Route.useRouteContext().user;
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  async function signOut() {
-    await queryClient.cancelQueries();
-    queryClient.clear();
-    await supabase.auth.signOut();
-    navigate({ to: "/auth", replace: true });
-  }
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
-        <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-3 px-4 py-4 sm:px-6">
-          <Link to="/portal" className="flex min-w-0 items-center" title="Voltar aos aplicativos"><MyioCashFlowLogo className="text-xl sm:text-2xl" /></Link>
-          <div className="flex items-center gap-1"><Button asChild variant="outline" size="icon" title="Início"><Link to="/portal" aria-label="Início"><Home className="h-4 w-4" /></Link></Button><Button variant="ghost" size="icon" onClick={signOut} title="Sair" aria-label="Sair"><LogOut className="h-4 w-4" /></Button></div>
-        </div>
-      </header>
+      <AppHeader logo={<MyioCashFlowLogo className="text-xl sm:text-2xl" />} />
       <main className="mx-auto max-w-[1500px] px-4 py-6 sm:px-6">
         <p className="mb-6 text-muted-foreground">Planejamento, pagamentos e posição bancária em um só lugar.</p>
         <Tabs defaultValue="payables" className="space-y-5">

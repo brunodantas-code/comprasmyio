@@ -1,10 +1,10 @@
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { DndContext, KeyboardSensor, PointerSensor, TouchSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { CalendarDays, Camera, Check, ChevronDown, ClipboardCheck, FileText, GripVertical, History, Home, MapPin, Minus, Package, Pencil, Plus, Search, ShieldCheck, UsersRound, Save, X } from "lucide-react";
+import { CalendarDays, Camera, Check, ChevronDown, ClipboardCheck, FileText, GripVertical, History, MapPin, Minus, Package, Pencil, Plus, Search, ShieldCheck, UsersRound, Save, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +28,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { AppHeader } from "@/components/app-header";
 
 const PERMISSIONS = [
   ["site_survey_visitas_minhas", "Minhas visitas"],
@@ -182,7 +183,7 @@ function SiteSurveyPage() {
   ].filter((item) => item.allowed);
 
   return <div className="min-h-screen bg-background">
-    <header className="sticky top-0 z-40 border-b border-border bg-card"><div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:px-6"><Link to="/portal"><MyioAppLogo appName="Site Survey" className="text-base sm:text-2xl" /></Link><div className="flex items-center gap-2"><Badge variant="outline">{data.profileName}</Badge><Button asChild variant="outline" size="icon" title="Início"><Link to="/portal" aria-label="Início"><Home className="h-4 w-4" /></Link></Button></div></div></header>
+    <AppHeader logo={<MyioAppLogo appName="Site Survey" className="text-base sm:text-2xl" />}><Badge variant="outline">{data.profileName}</Badge></AppHeader>
     <main className="mx-auto max-w-7xl px-4 pb-28 pt-8 sm:px-6 sm:pb-8">
       <Tabs value={section} onValueChange={setSection}>
         <TabsList className="no-scrollbar mb-6 hidden h-auto w-full justify-start overflow-x-auto bg-transparent p-0 sm:flex">{tabs.map(({ value, label, icon: Icon }) => <TabsTrigger key={value} value={value} className="shrink-0"><Icon className="mr-2 h-4 w-4" />{label}</TabsTrigger>)}</TabsList>

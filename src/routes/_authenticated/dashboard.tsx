@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -25,7 +25,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Checkbox } from "@/components/ui/checkbox";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { toast } from "sonner";
-import { ArrowLeft, Home, LogOut, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Boxes, Building2, Plane, Landmark, Briefcase, Layers3, ArrowUpDown } from "lucide-react";
+import { ArrowLeft, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Boxes, Building2, Plane, Landmark, Briefcase, Layers3, ArrowUpDown } from "lucide-react";
 import { Trash2, Paperclip, Loader2, DatabaseBackup, CheckCircle2, XCircle, RotateCcw, Pencil, Bell, ShieldCheck, AlertTriangle } from "lucide-react";
 import { ApprovalWorkflow, MyApprovalFlows, PendingApprovalsByRole, PendingForMe, type ApprovalListOrder } from "@/components/approval-workflow";
 import { z } from "zod";
@@ -49,6 +49,7 @@ import { ImportBatchesSection, NewImportDialog } from "@/components/import-batch
 import { AddressAutocomplete } from "@/components/address-autocomplete";
 import { LinkedRecordDeletionDialog } from "@/components/linked-record-deletion-dialog";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
+import { AppHeader } from "@/components/app-header";
 
 
 
@@ -417,17 +418,9 @@ function DeliveredFilter({
 }
 
 function Dashboard() {
-  const navigate = useNavigate();
   const qc = useQueryClient();
   const search = Route.useSearch();
   const { data: me, isLoading: meLoading } = useCurrentUser();
-
-  async function handleSignOut() {
-    await qc.cancelQueries();
-    qc.clear();
-    await supabase.auth.signOut();
-    navigate({ to: "/auth", replace: true });
-  }
 
   if (meLoading || !me) {
     return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Carregando...</div>;
@@ -466,32 +459,12 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 border-b border-border bg-card">
-        <div className="mx-auto grid max-w-7xl sm:flex sm:items-center sm:justify-between sm:px-6 sm:py-4">
-          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 sm:contents">
-            <Link to="/portal" className="flex min-w-0 items-center font-semibold" title="Voltar aos aplicativos">
-              <MyioLogo className="text-xl sm:text-2xl" />
-            </Link>
-            <div className="flex shrink-0 items-center gap-2 sm:order-3 sm:gap-3">
-            <Button asChild variant="outline" size="icon" className="shrink-0" title="Início">
-              <Link to="/portal" aria-label="Início"><Home className="h-4 w-4" /></Link>
-            </Button>
-            <Button variant="ghost" size="icon" className="shrink-0" onClick={handleSignOut} title="Sair">
-              <LogOut className="h-4 w-4" />
-            </Button>
-            </div>
-          </div>
-          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-t border-border bg-muted/50 px-4 py-2.5 sm:order-2 sm:flex sm:border-0 sm:bg-transparent sm:p-0">
-            <div className="min-w-0 sm:text-right">
-              <div className="truncate text-xs font-medium sm:text-sm">{me.full_name || me.email}</div>
-            </div>
-            <div className="flex shrink-0 flex-wrap justify-end gap-1">
-              <Badge variant="outline" className="text-[10px] uppercase">{me.accessProfileName}</Badge>
-              {me.jobTitle ? <Badge variant="outline" className="text-[10px] uppercase">{me.jobTitle.name}</Badge> : null}
-            </div>
-          </div>
+      <AppHeader logo={<MyioLogo className="text-xl sm:text-2xl" />}>
+        <div className="flex shrink-0 flex-wrap justify-end gap-1">
+          <Badge variant="outline" className="text-[10px] uppercase">{me.accessProfileName}</Badge>
+          {me.jobTitle ? <Badge variant="outline" className="text-[10px] uppercase">{me.jobTitle.name}</Badge> : null}
         </div>
-      </header>
+      </AppHeader>
 
       <main className="mx-auto max-w-7xl px-3 py-5 sm:px-6 sm:py-8">
         <Tabs defaultValue={search.section ?? defaultTab}>
