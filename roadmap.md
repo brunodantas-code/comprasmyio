@@ -1,6 +1,6 @@
 # Aplicativo Site Survey
 
-- [ ] Site Survey — compactar o bloco de perguntas, subindo os três campos da condição para reduzir o espaço vertical.
+- [x] Site Survey — compactar o bloco de perguntas, subindo os três campos da condição para reduzir o espaço vertical.
 
 - [x] Portal mobile — apresentar prévia e aplicar o novo topo lilás, logo branco/verde, saudação pelo primeiro nome e menu consolidado aprovado.
 
