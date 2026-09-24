@@ -659,5 +659,5 @@
 
 - [x] Site Survey — reorganizar cadastro/lista de modelos, ampliar a área de seções e aplicar linhas e ícones compactos em modelos e novas seções.
 
-- [ ] Site Survey — compactar Novo modelo, Editar modelo e Seções do checklist; limitar descrições a 100 caracteres com contador; trocar botões de modelos por busca em lista suspensa.
-- [ ] Site Survey — aplicar a mesma compactação e contador de 100 caracteres às seções existentes de cada modelo.
+- [x] Site Survey — compactar Novo modelo, Editar modelo e Seções do checklist; limitar descrições a 100 caracteres com contador; trocar botões de modelos por busca em lista suspensa.
+- [x] Site Survey — aplicar a mesma compactação e contador de 100 caracteres às seções existentes de cada modelo.
