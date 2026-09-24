@@ -128,7 +128,7 @@ function Landing() {
   }
 
   return (
-    <main className="relative flex min-h-screen w-full items-start overflow-hidden bg-erp-landing px-5 py-6 text-erp-landing-foreground sm:px-8 md:px-10 md:py-8 lg:px-12 lg:py-10">
+    <main className="relative flex min-h-screen w-full items-start overflow-hidden rounded-2xl bg-erp-landing px-5 pb-6 pt-10 text-erp-landing-foreground sm:rounded-none sm:px-8 sm:py-8 md:px-10 md:py-8 lg:px-12 lg:py-10">
       <div className="pointer-events-none absolute -left-28 -top-36 h-96 w-96 rounded-full bg-erp-landing-soft/50 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-44 -right-24 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-36 -left-36 h-80 w-80 rounded-full bg-myio-purple/50 sm:-bottom-48 sm:-left-48 sm:h-[28rem] sm:w-[28rem]" />
