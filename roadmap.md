@@ -658,3 +658,5 @@
 - [x] Site Survey — alinhar “Perguntas” e todos os marcadores de ordem pela mesma margem esquerda.
 
 - [x] Site Survey — reorganizar cadastro/lista de modelos, ampliar a área de seções e aplicar linhas e ícones compactos em modelos e novas seções.
+
+- [ ] Site Survey — compactar Novo modelo, Editar modelo e Seções do checklist; limitar descrições a 100 caracteres com contador; trocar botões de modelos por busca em lista suspensa.
