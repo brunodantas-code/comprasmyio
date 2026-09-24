@@ -1,4 +1,5 @@
 - [x] Site Survey — preservar respostas já salvas ao concluir ou salvar uma Loja/LUC, sem apagar o histórico anterior.
+- [x] Site Survey — permitir que condições com várias respostas separadas por ponto e vírgula sejam acionadas por qualquer opção selecionada.
 - [x] Site Survey — exibir uma lista pesquisável visível de Loja/LUC, com seta, opções e situação de cada loja.
 - [x] Site Survey — concluir cada Loja/LUC separadamente, registrar pendências na etapa 7 e concluir a visita geral apenas após todos os pontos.
 - [x] Site Survey — confirmar antes de gerar ação, exibir o número do chamado e respeitar o escopo geral ou da loja/ambiente.
