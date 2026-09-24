@@ -470,6 +470,13 @@
       "when": 1790272439485,
       "tag": "0066_allow_support_analysts_view_call_participants",
       "breakpoints": true
+    },
+    {
+      "idx": 67,
+      "version": "7",
+      "when": 1790272608314,
+      "tag": "0067_enforce_internal_call_completion_workflow",
+      "breakpoints": true
     }
   ]
 }
