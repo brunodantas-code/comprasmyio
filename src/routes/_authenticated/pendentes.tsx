@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PendingForMe } from "@/components/approval-workflow";
-import { Button } from "@/components/ui/button";
 import { MyioLogo } from "@/components/myio-logo";
-import { Bell, CheckCircle2, CodeXml, Home, ShieldCheck, ShoppingCart } from "lucide-react";
+import { Bell, CheckCircle2, CodeXml, ShieldCheck, ShoppingCart } from "lucide-react";
 import { usePendingActions } from "@/hooks/use-pending-actions";
+import { AppHeader } from "@/components/app-header";
 
 export const Route = createFileRoute("/_authenticated/pendentes")({
   component: PendentesPage,
@@ -23,18 +23,7 @@ function PendentesPage() {
   const { data, isLoading } = usePendingActions();
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 border-b border-border bg-card">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
-          <Link to="/portal" className="flex min-w-0 items-center font-semibold">
-            <MyioLogo className="text-xl sm:text-2xl" />
-          </Link>
-          <div className="flex items-center gap-1">
-            <Button asChild variant="outline" size="icon" title="Início">
-              <Link to="/portal" aria-label="Início"><Home className="h-4 w-4" /></Link>
-            </Button>
-          </div>
-        </div>
-      </header>
+      <AppHeader logo={<MyioLogo className="text-xl sm:text-2xl" />} />
       <main className="mx-auto max-w-7xl px-3 py-5 sm:px-6 sm:py-8">
         <div className="mb-6">
           <h1 className="flex items-center gap-2 text-2xl font-bold"><Bell className="h-6 w-6" />Central de Pendências</h1>
