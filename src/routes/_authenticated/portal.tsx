@@ -74,6 +74,30 @@ function PortalPage() {
     { key: "chamados", name: "OpDesk", description: ["Suporte ao cliente", "e operação"], to: "/chamados" as const },
     { key: "development", name: "Code", description: ["Melhorias e Bugs"], to: "/development" as const },
   ].filter((app) => data.appKeys.has(app.key));
+  const mobileAppPages = Array.from({ length: Math.ceil(apps.length / 6) }, (_, pageIndex) => apps.slice(pageIndex * 6, pageIndex * 6 + 6));
+
+  const renderApp = ({ key, name, description, to }: (typeof apps)[number]) => (
+    <div key={key} className="flex w-24 min-w-0 justify-self-center flex-col items-center text-center sm:w-28 sm:justify-self-start">
+      <Link
+        to={to}
+        aria-label={`Acessar ${name}`}
+        title={`Acessar ${name}`}
+        className="group relative flex h-24 w-24 flex-col items-center justify-between rounded-3xl border-2 border-primary bg-primary px-2 pb-2 pt-1.5 text-primary-foreground outline-none transition-transform hover:scale-105 hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 sm:h-28 sm:w-28"
+      >
+        {key === "supply" && (pendingActions?.supply ?? 0) > 0 ? <PendingBadge count={pendingActions?.supply ?? 0} label="pendências no Supply" /> : null}
+        {key === "development" && (pendingActions?.codeTickets ?? 0) > 0 ? <PendingBadge count={pendingActions?.codeTickets ?? 0} label="tickets pendentes no Code" /> : null}
+        {key === "supply" ? <><span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true"><Settings className="h-14 w-14 stroke-[1.7] sm:h-16 sm:w-16" /></span><span className="text-sm font-normal leading-none">{name}</span></>
+          : key === "cash_flow" ? <><span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true"><DollarSign className="h-14 w-14 stroke-[3.5] sm:h-16 sm:w-16" /></span><span className="text-sm font-normal leading-none">{name}</span></>
+          : key === "crm" ? <><span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true"><CrmFunnelIcon className="h-14 w-14 stroke-[3] sm:h-16 sm:w-16" /></span><span className="text-sm font-normal leading-none">{name}</span></>
+          : key === "legal" ? <><span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true"><FileSignature className="h-14 w-14 stroke-[1.8] sm:h-16 sm:w-16" /></span><span className="text-sm font-normal leading-none">{name}</span></>
+          : key === "rh" ? <><span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true"><UsersRound className="h-14 w-14 stroke-[1.8] sm:h-16 sm:w-16" /></span><span className="text-sm font-normal leading-none">{name}</span></>
+          : key === "site_survey" ? <><span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true"><Search className="h-14 w-14 stroke-[2.8] sm:h-16 sm:w-16" /></span><span className="text-xs font-normal leading-none">{name}</span></>
+          : key === "chamados" ? <><span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true"><Phone className="h-14 w-14 stroke-[2.4] sm:h-16 sm:w-16" /></span><span className="text-xs font-normal leading-none">{name}</span></>
+          : <><span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true"><CodeXml className="h-14 w-14 stroke-[2.8] sm:h-16 sm:w-16" /></span><span className="text-[0.7rem] font-normal leading-none sm:text-xs">{name}</span></>}
+      </Link>
+      <p className="mt-3 w-24 max-w-full break-words text-center text-xs leading-4 text-muted-foreground sm:w-28 sm:text-sm sm:leading-5">{description.map((line) => <span key={line} className="block">{line}</span>)}</p>
+    </div>
+  );
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-background sm:block sm:h-auto sm:min-h-screen sm:overflow-visible">
@@ -175,8 +199,12 @@ function PortalPage() {
         <Tabs value={activeView} onValueChange={(value) => setActiveView(value as "apps" | "users")}>
           <TabsContent value="apps">
             {apps.length ? (
-               <div className="no-scrollbar grid snap-x snap-mandatory grid-flow-col grid-rows-2 gap-x-3 gap-y-8 overflow-x-auto overscroll-x-contain pb-2 [grid-auto-columns:calc((100%-1.5rem)/3)] sm:grid-flow-row sm:grid-rows-none sm:grid-cols-3 sm:overflow-visible sm:pb-0 lg:grid-cols-6 lg:gap-x-4">
-                 {apps.map(({ key, name, description, to }) => (
+               <>
+                 <div className="no-scrollbar -mx-4 flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain px-4 pb-2 sm:hidden">
+                   {mobileAppPages.map((pageApps, pageIndex) => <div key={pageIndex} className="grid w-full shrink-0 snap-start grid-cols-3 gap-x-3 gap-y-8">{pageApps.map(renderApp)}</div>)}
+                 </div>
+                 <div className="hidden grid-cols-3 gap-x-3 gap-y-8 sm:grid lg:grid-cols-6 lg:gap-x-4">
+                  {apps.map(({ key, name, description, to }) => (
                      <div key={key} className="flex w-24 min-w-0 snap-start justify-self-center flex-col items-center text-center sm:w-28 sm:justify-self-start">
                       <Link
                         to={to}
@@ -247,7 +275,8 @@ function PortalPage() {
                       <p className="mt-3 w-24 max-w-full break-words text-center text-xs leading-4 text-muted-foreground sm:w-28 sm:text-sm sm:leading-5">
                         {description.map((line) => <span key={line} className="block">{line}</span>)}
                       </p>
-                   </div>
+                 </div>
+               </>
                 ))}
               </div>
             ) : (
