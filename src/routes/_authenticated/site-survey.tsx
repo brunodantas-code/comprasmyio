@@ -490,6 +490,22 @@ function SurveyLogs({ names }: { names: { clients: Map<string, string>; projects
 
 function asQuestionConfig(value: unknown): QuestionConfig { return value && typeof value === "object" ? value as QuestionConfig : {}; }
 function answerParts(answer: unknown): { value: unknown; detail: string } { if (answer && typeof answer === "object" && !Array.isArray(answer) && "value" in answer) { const stored = answer as { value: unknown; detail?: unknown }; return { value: stored.value, detail: typeof stored.detail === "string" ? stored.detail : "" }; } return { value: answer, detail: "" }; }
+function isStoredQuestionComplete(question: Question, answers: Map<string, unknown>, attachments: Array<{ question_id: string | null; visit_luc_id?: string | null; visit_environment_id?: string | null }>, matchesScope: (item: { visit_luc_id?: string | null; visit_environment_id?: string | null }) => boolean) {
+  const config = asQuestionConfig(question.configuration);
+  const stored = answerParts(answers.get(question.id));
+  const value = stored.value;
+  const hasValue = Array.isArray(value) ? value.length > 0 : value !== undefined && value !== null && value !== "" && value !== false;
+  const applies = config.condition?.value === undefined || (Array.isArray(value) ? value.includes(config.condition.value) : value === config.condition.value);
+  const options = Array.isArray(question.options) ? question.options.filter((option): option is string => typeof option === "string") : [];
+  const otherApplies = (config.other_detail === true || options.some(isOtherOption)) && (Array.isArray(value) ? value.some((item) => isOtherOption(String(item))) : isOtherOption(String(value)));
+  const [detail, subdetail] = stored.detail.split(" | ");
+  if (!config.photo_only && question.required && !hasValue) return false;
+  if (applies && config.detail?.required && !detail?.trim()) return false;
+  if (otherApplies && !detail?.trim()) return false;
+  if (applies && detail && config.detail?.suboptions?.[detail]?.length && !subdetail?.trim()) return false;
+  if (applies && config.photo?.required && !attachments.some((item) => item.question_id === question.id && matchesScope(item))) return false;
+  return true;
+}
 function QuestionField({ question, answer, hasPhoto, onAnswerChange }: { question: Question; answer: unknown; hasPhoto: boolean; onAnswerChange?: (value: string) => void }) {
   const options = Array.isArray(question.options) ? question.options.filter((item): item is string => typeof item === "string") : [];
   const config = asQuestionConfig(question.configuration); const stored = answerParts(answer); const storedValues = Array.isArray(stored.value) ? stored.value.map(String) : [];
