@@ -14,7 +14,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-export function ConfirmDeleteButton({ title, description, onConfirm, pending = false, ariaLabel = "Excluir", confirmLabel = "Excluir definitivamente", pendingLabel = "Excluindo...", trigger }: {
+export function ConfirmDeleteButton({ title, description, onConfirm, pending = false, ariaLabel = "Excluir", confirmLabel = "Excluir definitivamente", pendingLabel = "Excluindo...", equalActions = false, trigger }: {
   title: string;
   description: ReactNode;
   onConfirm: () => void;
@@ -22,6 +22,7 @@ export function ConfirmDeleteButton({ title, description, onConfirm, pending = f
   ariaLabel?: string;
   confirmLabel?: string;
   pendingLabel?: string;
+  equalActions?: boolean;
   trigger?: ReactNode;
 }) {
   return (
@@ -38,9 +39,9 @@ export function ConfirmDeleteButton({ title, description, onConfirm, pending = f
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction disabled={pending} onClick={onConfirm}>
+        <AlertDialogFooter className={equalActions ? "grid grid-cols-2 gap-3 space-x-0" : undefined}>
+          <AlertDialogCancel className={equalActions ? "mt-0 w-full" : undefined}>Cancelar</AlertDialogCancel>
+          <AlertDialogAction className={equalActions ? "w-full" : undefined} disabled={pending} onClick={onConfirm}>
             {pending ? pendingLabel : confirmLabel}
           </AlertDialogAction>
         </AlertDialogFooter>
