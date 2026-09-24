@@ -13,6 +13,7 @@
 - [x] Simplificar a abertura da OS para somente dados gerais; cadastrar ou importar todas as lojas, LUCs e ambientes dentro da OS já salva, antes dos checklists.
 - [x] Incluir Localização opcional no cadastro, edição, listagem e importação de lojas/LUCs; aceitar os cabeçalhos Localização, Piso, Andar ou Local e manter o campo vazio quando não informado.
 - [x] Manter Preparação pré-visita, Chegada e responsáveis e Condições e perfil do local como etapas únicas da OS, antes da seleção pesquisável da loja/ambiente.
+- [x] Dividir o preenchimento em duas fases: salvar uma única vez o checklist pré-visita das etapas 1 a 3 e, somente depois, exibir a seleção da loja/ambiente e as etapas 4 a 7.
 - [x] Exibir campos complementares somente quando a resposta condicionante for selecionada, posicionando-os ao lado da pergunta e mantendo asterisco apenas na pergunta de cadastro prévio da OS.
 - [x] Manter histórico individual de alterações do nome de cada loja por LUC e permitir correção manual ou por análise da foto da fachada.
 - [ ] Checklist prévio à visita técnica — confirmar, com seleção única “Sim” ou “Não”, se o celular está com 100% de bateria.
