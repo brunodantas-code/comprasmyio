@@ -534,7 +534,7 @@ function QuestionRuleFields({ question, priorQuestions, actions, questionAction,
   const [conditioned, setConditioned] = useState(Boolean(question?.conditioned_on_question_id));
   const [generateAction, setGenerateAction] = useState(Boolean(questionAction));
   return <div className="col-span-full -mt-2 grid gap-1 sm:-mt-5 lg:grid-cols-[40px_minmax(220px,1.3fr)_minmax(160px,.7fr)_minmax(200px,1fr)_auto]">
-    <div className="flex flex-wrap items-center justify-start gap-x-6 gap-y-2 lg:col-start-5">
+    <div className="flex w-full flex-wrap items-center justify-end gap-x-6 gap-y-2 lg:col-start-5">
       <label className="flex items-center gap-2 text-sm font-medium"><Checkbox name="conditioned" checked={conditioned} disabled={disabled || priorQuestions.length === 0} onCheckedChange={(checked) => setConditioned(checked === true)} />Condicionar</label>
       <label className="flex items-center gap-2 text-sm font-medium"><Checkbox name="generate_action" checked={generateAction} disabled={disabled || actions.length === 0} onCheckedChange={(checked) => setGenerateAction(checked === true)} />Gerar ação</label>
     </div>
