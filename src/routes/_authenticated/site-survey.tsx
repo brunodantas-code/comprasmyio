@@ -438,14 +438,17 @@ function isHydrometerPresenceQuestion(question: Question) {
   return normalized.includes("existe hidrometro");
 }
 
-function ConditionalSectionQuestions({ sectionTitle, questions, answers, attachments, matchesPoint, selectedPoint }: { sectionTitle: string; questions: Question[]; answers: Map<string, unknown>; attachments: Array<{ question_id: string | null; visit_luc_id?: string | null; visit_environment_id?: string | null }>; matchesPoint: (item: { visit_luc_id?: string | null; visit_environment_id?: string | null }) => boolean; selectedPoint: string }) {
+function ConditionalSectionQuestions({ sectionTitle, questions, answers, attachments, matchesPoint, selectedPoint, technicians, visitTechnicians, onTechniciansChange }: { sectionTitle: string; questions: Question[]; answers: Map<string, unknown>; attachments: Array<{ question_id: string | null; visit_luc_id?: string | null; visit_environment_id?: string | null }>; matchesPoint: (item: { visit_luc_id?: string | null; visit_environment_id?: string | null }) => boolean; selectedPoint: string; technicians?: Profile[]; visitTechnicians?: VisitTechnician[]; onTechniciansChange?: (rows: VisitTechnician[]) => void }) {
   const gateQuestion = questions.find(isHydrometerPresenceQuestion);
   const orderedQuestions = gateQuestion ? [gateQuestion, ...questions.filter((question) => question.id !== gateQuestion.id)] : questions;
   const initialAnswer = gateQuestion ? answerParts(answers.get(gateQuestion.id)).value : "";
   const [firstAnswer, setFirstAnswer] = useState(typeof initialAnswer === "string" ? initialAnswer : "");
+  const [liveAnswers, setLiveAnswers] = useState<Map<string, unknown>>(() => new Map(answers));
+  useEffect(() => setLiveAnswers(new Map(answers)), [answers, selectedPoint]);
   const isConditionalSection = isWaterHydrometerSection(sectionTitle) && Boolean(gateQuestion);
-  const visibleQuestions = isConditionalSection && firstAnswer.toLocaleLowerCase("pt-BR") !== "sim" ? orderedQuestions.slice(0, 1) : orderedQuestions;
-  return <>{visibleQuestions.map((question) => <QuestionField key={`${selectedPoint}-${question.id}`} question={question} answer={answers.get(question.id)} hasPhoto={attachments.some((item) => item.question_id === question.id && matchesPoint(item))} onAnswerChange={question.id === gateQuestion?.id ? setFirstAnswer : undefined} />)}</>;
+  const hydrometerQuestions = isConditionalSection && firstAnswer.toLocaleLowerCase("pt-BR") !== "sim" ? orderedQuestions.slice(0, 1) : orderedQuestions;
+  const visibleQuestions = hydrometerQuestions.filter((question) => isQuestionVisible(question, liveAnswers));
+  return <>{visibleQuestions.map((question) => question.question_key === "shopping_maintenance_companions" && technicians && visitTechnicians && onTechniciansChange ? <TechnicianSelector key={question.id} technicians={technicians} rows={visitTechnicians} onChange={onTechniciansChange} /> : <QuestionField key={`${selectedPoint}-${question.id}`} question={question} answer={answers.get(question.id)} hasPhoto={attachments.some((item) => item.question_id === question.id && matchesPoint(item))} onAnswerChange={(value) => { setLiveAnswers((current) => new Map(current).set(question.id, value)); if (question.id === gateQuestion?.id) setFirstAnswer(String(value)); }} />)}</>;
 }
 
 function TechnicianSelector({ technicians, rows, onChange }: { technicians: Profile[]; rows: VisitTechnician[]; onChange: (rows: VisitTechnician[]) => void }) {
@@ -559,6 +562,12 @@ function SurveyLogs({ names }: { names: { clients: Map<string, string>; projects
 
 function asQuestionConfig(value: unknown): QuestionConfig { return value && typeof value === "object" ? value as QuestionConfig : {}; }
 function answerParts(answer: unknown): { value: unknown; detail: string } { if (answer && typeof answer === "object" && !Array.isArray(answer) && "value" in answer) { const stored = answer as { value: unknown; detail?: unknown }; return { value: stored.value, detail: typeof stored.detail === "string" ? stored.detail : "" }; } return { value: answer, detail: "" }; }
+function answerMatches(value: unknown, expected: string) { return Array.isArray(value) ? value.map(String).includes(expected) : String(value ?? "").toLocaleLowerCase("pt-BR") === expected.toLocaleLowerCase("pt-BR"); }
+function isQuestionVisible(question: Question, answers: Map<string, unknown>) {
+  if (!question.conditioned_on_question_id || !question.conditioned_value) return true;
+  const matches = answerMatches(answerParts(answers.get(question.conditioned_on_question_id)).value, question.conditioned_value);
+  return question.conditioned_operator === "not_equals" ? !matches : matches;
+}
 function isStoredQuestionComplete(question: Question, answers: Map<string, unknown>, attachments: Array<{ question_id: string | null; visit_luc_id?: string | null; visit_environment_id?: string | null }>, matchesScope: (item: { visit_luc_id?: string | null; visit_environment_id?: string | null }) => boolean) {
   const config = asQuestionConfig(question.configuration);
   const stored = answerParts(answers.get(question.id));
@@ -577,7 +586,7 @@ function isStoredQuestionComplete(question: Question, answers: Map<string, unkno
   if (applies && config.photo?.required && !hasRequiredPhoto) return false;
   return true;
 }
-function QuestionField({ question, answer, hasPhoto, onAnswerChange }: { question: Question; answer: unknown; hasPhoto: boolean; onAnswerChange?: (value: string) => void }) {
+function QuestionField({ question, answer, hasPhoto, onAnswerChange }: { question: Question; answer: unknown; hasPhoto: boolean; onAnswerChange?: (value: unknown) => void }) {
   const options = Array.isArray(question.options) ? question.options.filter((item): item is string => typeof item === "string") : [];
   const config = asQuestionConfig(question.configuration); const stored = answerParts(answer); const storedValues = Array.isArray(stored.value) ? stored.value.map(String) : [];
   const [storedDetail, storedSubdetail] = stored.detail.split(" | ");
@@ -596,12 +605,12 @@ function QuestionField({ question, answer, hasPhoto, onAnswerChange }: { questio
     <div className="min-w-0 space-y-2">
       <Label className="block text-sm font-semibold">{question.prompt}{showRequiredMark ? " *" : ""}</Label>
        {!config.photo_only ? <div className="flex min-w-0 flex-wrap items-center gap-x-5 gap-y-2">
-      {question.question_type === "checkbox" ? <label className="flex items-center gap-2 text-sm"><Checkbox name={question.id} defaultChecked={stored.value === true} />Sim</label> : null}
+      {question.question_type === "checkbox" ? <label className="flex items-center gap-2 text-sm"><Checkbox name={question.id} defaultChecked={stored.value === true} onCheckedChange={(checked) => onAnswerChange?.(checked === true)} />Sim</label> : null}
       {question.question_type === "radio" ? <RadioGroup name={question.id} value={selectedValue || undefined} onValueChange={setAnswer} className="flex min-h-9 flex-wrap items-center gap-x-6 gap-y-2">{options.map((option) => <label key={option} className="flex shrink-0 items-center gap-2 text-sm"><RadioGroupItem value={option} />{option}</label>)}</RadioGroup> : null}
-      {question.question_type === "multiselect" ? <div className="flex min-h-9 flex-wrap items-center gap-x-6 gap-y-2">{options.map((option) => <label key={option} className="flex shrink-0 items-center gap-2 text-sm"><Checkbox name={question.id} value={option} checked={selectedValues.includes(option)} onCheckedChange={(checked) => setSelectedValues((current) => checked ? [...current, option] : current.filter((item) => item !== option))} />{option}</label>)}</div> : null}
+      {question.question_type === "multiselect" ? <div className="flex min-h-9 flex-wrap items-center gap-x-6 gap-y-2">{options.map((option) => <label key={option} className="flex shrink-0 items-center gap-2 text-sm"><Checkbox name={question.id} value={option} checked={selectedValues.includes(option)} onCheckedChange={(checked) => setSelectedValues((current) => { const next = checked ? [...current, option] : current.filter((item) => item !== option); onAnswerChange?.(next); return next; })} />{option}</label>)}</div> : null}
       {question.question_type === "select" ? <Select name={question.id} value={selectedValue || undefined} onValueChange={setAnswer}><SelectTrigger className="w-full sm:w-64"><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent>{options.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent></Select> : null}
-      {question.question_type === "textarea" ? <Textarea name={question.id} defaultValue={typeof stored.value === "string" ? stored.value : ""} className="min-w-64 flex-1" rows={2} /> : null}
-      {question.question_type === "text" || question.question_type === "number" ? <Input name={question.id} type={question.question_type === "number" ? "number" : "text"} defaultValue={typeof stored.value === "string" || typeof stored.value === "number" ? String(stored.value) : ""} className="min-w-56 flex-1" /> : null}
+      {question.question_type === "textarea" ? <Textarea name={question.id} defaultValue={typeof stored.value === "string" ? stored.value : ""} onChange={(event) => onAnswerChange?.(event.target.value)} className="min-w-64 flex-1" rows={2} /> : null}
+      {question.question_type === "text" || question.question_type === "number" ? <Input name={question.id} type={question.question_type === "number" ? "number" : "text"} defaultValue={typeof stored.value === "string" || typeof stored.value === "number" ? String(stored.value) : ""} onChange={(event) => onAnswerChange?.(event.target.value)} className="min-w-56 flex-1" /> : null}
        </div> : null}
     </div>
     {showDetail || (config.photo && conditionApplies) ? <div className="min-w-0 space-y-3">
