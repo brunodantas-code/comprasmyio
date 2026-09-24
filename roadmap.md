@@ -1,5 +1,7 @@
 # Aplicativo Site Survey
 
+- [x] Portal mobile — reorganizar os aplicativos em quatro colunas e arredondar levemente a transição entre o cabeçalho lilás e o fundo branco.
+
 - [x] Portal mobile — retirar os fundos verdes dos itens do menu do usuário.
 
 - [x] Portal mobile — ocultar a barra lateral, manter o cabeçalho fixo e permitir deslizar horizontalmente os aplicativos excedentes.
