@@ -1,5 +1,7 @@
 # Aplicativo Site Survey
 
+- [ ] Portal mobile — apresentar prévia para aprovação do novo topo lilás, logo branco/verde, saudação pelo primeiro nome e menu consolidado antes de implementar.
+
 - [x] Site Survey — remover o botão “Exibir” da lista de visitas e abrir os detalhes ao clicar no número da visita.
 
 - [x] Site Survey — remover a divisória abaixo do seletor de modelos e alinhar “Condicionar” e “Gerar ação” abaixo das ações da pergunta, no canto direito.
