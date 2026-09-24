@@ -709,3 +709,5 @@
 - [x] Site Survey — remover a divisória e aproximar Condicionar/Gerar ação, alinhando Condicionar com Obrigatória.
 - [x] Site Survey — alinhar Condicionar e Gerar ação à direita nas perguntas no mobile, preservando o desktop.
 - [x] Site Survey — iniciar Checklists sem modelo selecionado e exibir seções/perguntas somente após a seleção em Editar modelo.
+
+- [x] Site Survey — remover asteriscos visíveis das perguntas e abrir o histórico do OpDesk pelo número do chamado.
