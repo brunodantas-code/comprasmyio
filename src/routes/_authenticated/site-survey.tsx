@@ -543,9 +543,10 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
 
 function ConditionalSectionQuestions({ sectionTitle, questions, answers, attachments, matchesPoint, selectedPoint, calls, onQuestionAnswerChange, technicians, visitTechnicians, onTechniciansChange }: { sectionTitle: string; questions: Question[]; answers: Map<string, unknown>; attachments: Array<{ question_id: string | null; visit_luc_id?: string | null; visit_environment_id?: string | null }>; matchesPoint: (item: { visit_luc_id?: string | null; visit_environment_id?: string | null }) => boolean; selectedPoint: string; calls: Map<string, { id: string | null; number: string | null }>; onQuestionAnswerChange: (question: Question, value: unknown) => void; technicians?: Profile[]; visitTechnicians?: VisitTechnician[]; onTechniciansChange?: (rows: VisitTechnician[]) => void }) {
   const [liveAnswers, setLiveAnswers] = useState<Map<string, unknown>>(() => new Map(answers));
+  const savedAnswersSignature = JSON.stringify([...answers.entries()]);
   useEffect(() => {
     setLiveAnswers(new Map(answers));
-  }, [answers, selectedPoint]);
+  }, [savedAnswersSignature, selectedPoint]);
   const visibleQuestions = questions.filter((question) => isQuestionVisible(question, liveAnswers));
   return <>{visibleQuestions.map((question) => question.question_key === "shopping_maintenance_companions" && technicians && visitTechnicians && onTechniciansChange ? <TechnicianSelector key={question.id} technicians={technicians} rows={visitTechnicians} onChange={onTechniciansChange} /> : <QuestionField key={`${selectedPoint}-${question.id}-${JSON.stringify(answers.get(question.id))}`} question={question} answer={answers.get(question.id)} hasPhoto={attachments.some((item) => item.question_id === question.id && matchesPoint(item))} call={calls.get(question.id)} onAnswerChange={(value) => { setLiveAnswers((current) => new Map(current).set(question.id, value)); onQuestionAnswerChange(question, value); }} />)}</>;
 }
