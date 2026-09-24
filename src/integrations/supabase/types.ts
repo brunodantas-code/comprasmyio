@@ -3362,6 +3362,61 @@ export type Database = {
         }
         Relationships: []
       }
+      site_survey_material_decisions: {
+        Row: {
+          created_at: string
+          id: string
+          no_additional_material: boolean
+          recorded_by: string
+          updated_at: string
+          visit_environment_id: string | null
+          visit_id: string
+          visit_luc_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          no_additional_material?: boolean
+          recorded_by: string
+          updated_at?: string
+          visit_environment_id?: string | null
+          visit_id: string
+          visit_luc_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          no_additional_material?: boolean
+          recorded_by?: string
+          updated_at?: string
+          visit_environment_id?: string | null
+          visit_id?: string
+          visit_luc_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_survey_material_decisions_visit_environment_id_fkey"
+            columns: ["visit_environment_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_visit_environments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_material_decisions_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_visits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_material_decisions_visit_luc_id_fkey"
+            columns: ["visit_luc_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_visit_lucs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_survey_profile_permissions: {
         Row: {
           allowed: boolean
@@ -3882,6 +3937,7 @@ export type Database = {
           catalog_item_id: string
           created_at: string
           id: string
+          no_additional_material: boolean
           notes: string | null
           quantity: number
           recorded_by: string
@@ -3896,6 +3952,7 @@ export type Database = {
           catalog_item_id: string
           created_at?: string
           id?: string
+          no_additional_material?: boolean
           notes?: string | null
           quantity?: number
           recorded_by: string
@@ -3910,6 +3967,7 @@ export type Database = {
           catalog_item_id?: string
           created_at?: string
           id?: string
+          no_additional_material?: boolean
           notes?: string | null
           quantity?: number
           recorded_by?: string
