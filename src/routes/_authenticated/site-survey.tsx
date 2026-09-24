@@ -474,6 +474,21 @@ function QuestionTypeOptions() {
   return <><SelectItem value="checkbox">Caixa de seleção</SelectItem><SelectItem value="radio">Escolha única</SelectItem><SelectItem value="multiselect">Múltipla escolha</SelectItem><SelectItem value="text">Texto curto</SelectItem><SelectItem value="textarea">Texto longo</SelectItem><SelectItem value="number">Número</SelectItem><SelectItem value="select">Lista de opções</SelectItem></>;
 }
 
+function QuestionRuleFields({ question, priorQuestions, actions, questionAction, disabled = false }: { question?: Question; priorQuestions: Question[]; actions: SurveyAction[]; questionAction?: QuestionAction; disabled?: boolean }) {
+  const [conditioned, setConditioned] = useState(Boolean(question?.conditioned_on_question_id));
+  const [generateAction, setGenerateAction] = useState(Boolean(questionAction));
+  return <div className="col-span-full grid gap-3 border-t border-border pt-3 sm:grid-cols-2">
+    <div className="space-y-3">
+      <label className="flex items-center gap-2 text-sm font-medium"><Checkbox name="conditioned" checked={conditioned} disabled={disabled || priorQuestions.length === 0} onCheckedChange={(checked) => setConditioned(checked === true)} />Condicionada</label>
+      {conditioned ? <div className="grid gap-3 sm:grid-cols-3"><div className="space-y-2"><Label>Pergunta anterior</Label><Select name="condition_question" defaultValue={question?.conditioned_on_question_id ?? undefined} disabled={disabled}><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent>{priorQuestions.map((item) => <SelectItem key={item.id} value={item.id}>{item.prompt}</SelectItem>)}</SelectContent></Select></div><div className="space-y-2"><Label>Condição</Label><Select name="condition_operator" defaultValue={question?.conditioned_operator ?? "equals"} disabled={disabled}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="equals">Exibir quando for</SelectItem><SelectItem value="not_equals">Exibir quando não for</SelectItem></SelectContent></Select></div><LabeledInput name="condition_value" label="Resposta" defaultValue={question?.conditioned_value ?? ""} required={!disabled} /></div> : null}
+    </div>
+    <div className="space-y-3">
+      <label className="flex items-center gap-2 text-sm font-medium"><Checkbox name="generate_action" checked={generateAction} disabled={disabled || actions.length === 0} onCheckedChange={(checked) => setGenerateAction(checked === true)} />Gerar ação</label>
+      {generateAction ? <div className="grid gap-3 sm:grid-cols-2"><div className="space-y-2"><Label>Ação</Label><Select name="action_id" defaultValue={questionAction?.action_id} disabled={disabled}><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent>{actions.map((action) => <SelectItem key={action.id} value={action.id}>{action.name}</SelectItem>)}</SelectContent></Select></div><LabeledInput name="action_trigger" label="Quando a resposta for" defaultValue={questionAction?.trigger_value ?? ""} required={!disabled} /></div> : null}
+    </div>
+  </div>;
+}
+
 function QuestionPromptLine({ name, defaultValue = "", label, editing = false, ariaLabel }: { name: string; defaultValue?: string; label?: string; editing?: boolean; ariaLabel?: string }) {
   const [value, setValue] = useState(defaultValue.slice(0, 50));
   return <div className="min-w-0 space-y-1">{label ? <Label>{label}</Label> : null}<Input name={name} value={value} onChange={(event) => setValue(event.target.value.slice(0, 50))} maxLength={50} required readOnly={!editing} aria-label={ariaLabel ?? label ?? "Texto da pergunta"} placeholder="Digite a pergunta" className={`h-10 min-w-0 rounded-none border-0 border-b bg-transparent px-0 shadow-none focus-visible:ring-0 ${editing ? "border-myio-green focus-visible:border-myio-green" : "border-border"}`} /><div className="flex min-h-8 items-start justify-between gap-2 text-[11px] leading-tight text-muted-foreground"><span>Redija a pergunta ou frase do check List.</span><span className="shrink-0 tabular-nums">{value.length}/50</span></div></div>;
