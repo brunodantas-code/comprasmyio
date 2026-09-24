@@ -55,12 +55,6 @@ const MODULES = [
     available: true,
   },
   {
-    icon: CodeXml,
-    title: "Code",
-    body: "Tickets e melhorias",
-    available: true,
-  },
-  {
     icon: Search,
     title: "Site Survey",
     body: "Visitas técnicas",
@@ -68,7 +62,7 @@ const MODULES = [
   },
   {
     icon: Phone,
-    title: "Chamados",
+    title: "OpDesk",
     body: "Atendimento interno",
     available: true,
   },
@@ -89,6 +83,12 @@ const MODULES = [
     title: "RH",
     body: "Pessoas e cultura",
     available: false,
+  },
+  {
+    icon: CodeXml,
+    title: "Code",
+    body: "Tickets e melhorias",
+    available: true,
   },
 ];
 

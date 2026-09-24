@@ -34,9 +34,9 @@ export const Route = createFileRoute("/_authenticated/chamados")({
   },
   component: CallsPage,
   head: () => ({ meta: [
-    { title: "Chamados | myio ERP" },
+    { title: "OpDesk | myio ERP" },
     { name: "description", content: "Abertura e acompanhamento de chamados internos." },
-    { property: "og:title", content: "Chamados | myio ERP" },
+    { property: "og:title", content: "OpDesk | myio ERP" },
     { property: "og:description", content: "Abertura e acompanhamento de chamados internos." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary" },
@@ -74,9 +74,9 @@ function CallsPage() {
   useEffect(() => { const call = data?.calls.find((item) => item.id === routeSearch.chamado); if (call) setSelected(call); }, [data?.calls, routeSearch.chamado]);
   const refresh = () => qc.invalidateQueries({ queryKey: ["internal-calls"] });
   return <div className="min-h-screen bg-background">
-    <header className="border-b bg-card"><div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6"><Link to="/portal"><MyioAppLogo appName="Chamados" className="text-base sm:text-2xl" /></Link><Button asChild variant="outline" size="icon"><Link to="/portal" aria-label="Início"><Home className="h-4 w-4" /></Link></Button></div></header>
+    <header className="border-b bg-card"><div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6"><Link to="/portal"><MyioAppLogo appName="OpDesk" className="text-base sm:text-2xl" /></Link><Button asChild variant="outline" size="icon"><Link to="/portal" aria-label="Início"><Home className="h-4 w-4" /></Link></Button></div></header>
     <main className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6">
-      <div className="flex items-end justify-between gap-4"><div><h1 className="flex items-center gap-2 text-3xl font-extrabold"><Phone className="h-8 w-8" />Chamados</h1><p className="mt-1 text-muted-foreground">Problemas em campo, reclamações e assuntos internos.</p></div><NewCallDialog open={newOpen} onOpenChange={setNewOpen} userId={data?.userId} onCreated={refresh} /></div>
+      <div className="flex items-end justify-between gap-4"><div><h1 className="flex items-center gap-2 text-3xl font-extrabold"><Phone className="h-8 w-8" />OpDesk</h1><p className="mt-1 text-muted-foreground">Problemas em campo, reclamações e assuntos internos.</p></div><NewCallDialog open={newOpen} onOpenChange={setNewOpen} userId={data?.userId} onCreated={refresh} /></div>
       <Card><CardHeader><CardTitle>Acompanhamento</CardTitle><CardDescription>{data?.isAdmin ? "Chamados internos da plataforma." : "Chamados abertos por você ou atribuídos a você."}</CardDescription></CardHeader><CardContent>
         <div className="mb-4 grid gap-2 sm:grid-cols-3"><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar por número ou título" /><Filter value={category} onChange={setCategory} options={CATEGORIES} /><Filter value={status} onChange={setStatus} options={STATUSES} /></div>
         {isLoading ? <p className="py-8 text-center text-muted-foreground">Carregando chamados...</p> : <div className="overflow-x-auto"><Table><TableHeader><TableRow className="bg-primary/20"><TableHead>Nº</TableHead><TableHead>Solicitante</TableHead><TableHead>Categoria</TableHead><TableHead>Título</TableHead><TableHead>Prioridade</TableHead><TableHead>Situação</TableHead><TableHead>Data</TableHead></TableRow></TableHeader><TableBody>{filtered.map((call) => <TableRow key={call.id} className="cursor-pointer" onClick={() => setSelected(call)}><TableCell className="font-semibold">#{call.call_number}</TableCell><TableCell>{names.get(call.reporter_id)}</TableCell><TableCell>{CATEGORIES[call.category]}</TableCell><TableCell className="max-w-xs truncate font-medium">{call.title}</TableCell><TableCell>{PRIORITIES[call.priority]}</TableCell><TableCell><Badge variant="status">{STATUSES[call.status]}</Badge></TableCell><TableCell>{new Date(call.created_at).toLocaleDateString("pt-BR")}</TableCell></TableRow>)}{!filtered.length ? <TableRow><TableCell colSpan={7} className="h-24 text-center text-muted-foreground">Nenhum chamado encontrado.</TableCell></TableRow> : null}</TableBody></Table></div>}

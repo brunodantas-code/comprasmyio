@@ -67,7 +67,7 @@ function PortalPage() {
     { key: "legal", name: "Legal", description: ["Contratos e", "Jurídico"], to: "/legal" as const },
     { key: "rh", name: "RH", description: ["Gestão de Pessoas"], to: "/rh" as const },
     { key: "site_survey", name: "Site Survey", description: ["Visitas técnicas"], to: "/site-survey" as const },
-    { key: "chamados", name: "Chamados", description: ["Atendimento interno"], to: "/chamados" as const },
+    { key: "chamados", name: "OpDesk", description: ["Atendimento interno"], to: "/chamados" as const },
     { key: "development", name: "Code", description: ["Melhorias e Bugs"], to: "/development" as const },
   ].filter((app) => data.appKeys.has(app.key));
 
