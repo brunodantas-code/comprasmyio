@@ -86,7 +86,7 @@ type Question = { id: string; section_id: string; question_key: string | null; c
 type SurveyAction = Named & { description: string | null; active: boolean; position: number };
 type QuestionAction = { id: string; question_id: string; action_id: string; trigger_value: string; active: boolean };
 type GeneratedCall = { id: string; question_action_id: string; question_id: string; visit_luc_id: string | null; visit_environment_id: string | null; status: string; internal_call_id: string | null; internal_calls: { call_number: string | null } | null };
-type SurveyAttachment = { id: string; question_id: string | null; visit_luc_id: string | null; visit_environment_id: string | null; file_name: string; storage_path: string };
+type SurveyAttachment = { id: string; question_id: string | null; visit_luc_id: string | null; visit_environment_id: string | null; file_name: string; storage_path: string; content_type: string | null };
 type SurveyPoint = { value: string; label: string; completionStatus: "pendente" | "concluida" };
 type CatalogItem = Named & { category: "material" | "equipamento"; active: boolean; position: number };
 type CustomCatalogItem = Named & { catalog_id: string; active: boolean; position: number };
@@ -745,6 +745,23 @@ function isStoredQuestionComplete(question: Question, answers: Map<string, unkno
   if (applies && config.photo?.required && !hasRequiredPhoto) return false;
   return true;
 }
+function AttachmentThumbnail({ attachment }: { attachment: SurveyAttachment }) {
+  const { data: signedUrl } = useQuery({
+    queryKey: ["site-survey-attachment-preview", attachment.storage_path],
+    staleTime: 50 * 60 * 1000,
+    queryFn: async () => {
+      const { data, error } = await supabase.storage.from("site-survey-attachments").createSignedUrl(attachment.storage_path, 3600);
+      if (error) throw error;
+      return data.signedUrl;
+    },
+  });
+  const isImage = attachment.content_type?.startsWith("image/") ?? /\.(jpe?g|png|webp|gif|heic)$/i.test(attachment.file_name);
+  if (!isImage) return <Button type="button" variant="ghost" size="sm" className="h-auto max-w-full justify-start px-0 text-xs text-myio-green" disabled={!signedUrl} onClick={() => signedUrl && window.open(signedUrl, "_blank", "noopener,noreferrer")}><FileText className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{attachment.file_name}</span></Button>;
+  return <Button type="button" variant="ghost" className="group relative h-24 w-24 overflow-hidden p-0 sm:h-28 sm:w-28" disabled={!signedUrl} aria-label={`Abrir foto ${attachment.file_name}`} title={attachment.file_name} onClick={() => signedUrl && window.open(signedUrl, "_blank", "noopener,noreferrer")}>
+    {signedUrl ? <img src={signedUrl} alt={attachment.file_name} loading="lazy" className="h-full w-full object-cover transition-transform group-hover:scale-105" /> : <Camera className="h-6 w-6 text-muted-foreground" />}
+  </Button>;
+}
+
 function QuestionField({ question, answer, attachments, call, onAnswerChange }: { question: Question; answer: unknown; attachments: SurveyAttachment[]; call?: { id: string | null; number: string | null }; onAnswerChange?: (value: unknown) => void }) {
   const options = Array.isArray(question.options) ? question.options.filter((item): item is string => typeof item === "string") : [];
   const config = asQuestionConfig(question.configuration); const stored = answerParts(answer); const storedValues = Array.isArray(stored.value) ? stored.value.map(String) : [];
@@ -773,7 +790,7 @@ function QuestionField({ question, answer, attachments, call, onAnswerChange }: 
     </div>
     {showDetail || (config.photo && conditionApplies) ? <div className="min-w-0 space-y-3">
        {showDetail ? <div className="min-w-64 flex-1 space-y-2"><Label className="text-xs text-muted-foreground">{showOtherDetail ? "Especifique" : config.detail?.label ?? "Detalhes"}</Label>{config.detail?.options?.length && !showOtherDetail ? <Select name={`${question.id}__detail`} value={selectedDetail || undefined} onValueChange={setSelectedDetail}><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent>{config.detail.options.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent></Select> : <Textarea name={`${question.id}__detail`} defaultValue={stored.detail} rows={2} maxLength={500} required={showOtherDetail || config.detail?.required === true} />}{suboptions.length ? <div className="space-y-2"><Label className="text-xs text-muted-foreground">Localização da tomada</Label><Select name={`${question.id}__subdetail`} defaultValue={storedSubdetail || undefined}><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent>{suboptions.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent></Select></div> : null}</div> : null}
-       {config.photo && conditionApplies ? <div className="min-w-64 flex-1 space-y-2"><Label htmlFor={`${question.id}__photo`} className="flex items-center gap-2 text-xs text-muted-foreground"><Camera className="h-4 w-4" />Foto{config.photo.required ? " obrigatória" : " opcional"}{hasPhoto ? " · anexada" : ""}</Label><Input id={`${question.id}__photo`} name={`${question.id}__photo`} type="file" accept="image/*" capture="environment" />{attachments.map((attachment) => <Button key={attachment.id} type="button" variant="ghost" size="sm" className="h-auto max-w-full justify-start px-0 text-xs text-myio-green" onClick={async () => { const { data: signed } = await supabase.storage.from("site-survey-attachments").createSignedUrl(attachment.storage_path, 600); if (signed?.signedUrl) window.open(signed.signedUrl, "_blank", "noopener,noreferrer"); }}><FileText className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{attachment.file_name}</span></Button>)}</div> : null}
+       {config.photo && conditionApplies ? <div className="min-w-64 flex-1 space-y-2"><Label htmlFor={`${question.id}__photo`} className="flex items-center gap-2 text-xs text-muted-foreground"><Camera className="h-4 w-4" />Foto{config.photo.required ? " obrigatória" : " opcional"}{hasPhoto ? " · anexada" : ""}</Label><Input id={`${question.id}__photo`} name={`${question.id}__photo`} type="file" accept="image/*" capture="environment" />{hasPhoto ? <div className="flex flex-wrap gap-2" aria-label="Fotos anexadas">{attachments.map((attachment) => <AttachmentThumbnail key={attachment.id} attachment={attachment} />)}</div> : null}</div> : null}
     </div> : null}
   </div>;
 }
