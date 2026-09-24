@@ -1,5 +1,7 @@
 # Aplicativo Site Survey
 
+- [x] Acesso — unificar `/auth` com a tela inicial da plataforma, eliminando o segundo padrão visual de login.
+
 - [x] Todos os apps — ampliar o cabeçalho móvel, mostrar usuário e menu, e retirar o fundo verde dos botões Início e Voltar.
 
 - [x] Portal mobile — reorganizar os aplicativos em quatro colunas e arredondar levemente a transição entre o cabeçalho lilás e o fundo branco.

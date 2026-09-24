@@ -97,7 +97,7 @@ const signInSchema = z.object({
   password: z.string().min(6, "Mínimo 6 caracteres").max(72),
 });
 
-function Landing() {
+export function Landing() {
   const [signedIn, setSignedIn] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
