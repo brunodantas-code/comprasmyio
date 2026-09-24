@@ -3882,6 +3882,7 @@ export type Database = {
           catalog_item_id: string
           created_at: string
           id: string
+          no_additional_material: boolean
           notes: string | null
           quantity: number
           recorded_by: string
@@ -3896,6 +3897,7 @@ export type Database = {
           catalog_item_id: string
           created_at?: string
           id?: string
+          no_additional_material?: boolean
           notes?: string | null
           quantity?: number
           recorded_by: string
@@ -3910,6 +3912,7 @@ export type Database = {
           catalog_item_id?: string
           created_at?: string
           id?: string
+          no_additional_material?: boolean
           notes?: string | null
           quantity?: number
           recorded_by?: string

@@ -414,6 +414,13 @@
       "when": 1790205785378,
       "tag": "0058_add_technician_mobile_phone_to_profiles",
       "breakpoints": true
+    },
+    {
+      "idx": 59,
+      "version": "7",
+      "when": 1790209739107,
+      "tag": "0059_add_no_additional_material_to_site_survey",
+      "breakpoints": true
     }
   ]
 }
