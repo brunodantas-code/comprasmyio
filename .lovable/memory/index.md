@@ -26,3 +26,4 @@ Botões de ação sempre com fundo verde e ícones/textos pretos; lilás somente
 
 - [Categorias de clientes](mem://features/client-categories) — Cadastro administrável com Shoppings e Lojas e classificação inicial automática
 - [Campos da nova visita](design/site-survey-form-fields.md) — Na nova visita, somente campos com lista suspensa usam fundo verde-claro; demais campos ficam brancos
+- [Condicionamento e ações do checklist](features/conditional-checklist-actions.md) — Perguntas condicionais e geração imediata de chamados configuráveis.
