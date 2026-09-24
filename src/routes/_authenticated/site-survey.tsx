@@ -472,7 +472,8 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
        } else {
          toast.success(finishPoint ? "Visita desta loja concluída" : pendingFields.length ? "Progresso salvo com pendências registradas" : "Progresso salvo");
        }
-       setFiles([]); setSelectedPoint(""); setPointFilter(""); setOpenSectionId(null);
+        setFiles([]); setOpenSectionId(null);
+        if (finishPoint) { setSelectedPoint(""); setPointFilter(""); }
     }
     await refetchDetail();
   };
