@@ -34,8 +34,6 @@ export function AppHeader({ logo, children }: { logo: ReactNode; children?: Reac
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
           <Link to="/portal" className="flex min-w-0 items-center" title="Voltar aos aplicativos">{logo}</Link>
           <div className="flex shrink-0 items-center gap-1 sm:hidden">
-            <Button asChild variant="ghost" size="icon" className={iconButton} title="Início"><Link to="/portal" aria-label="Início"><Home className="h-5 w-5" /></Link></Button>
-            <Button variant="ghost" size="icon" className={iconButton} title="Voltar" aria-label="Voltar" onClick={() => window.history.back()}><ArrowLeft className="h-5 w-5" /></Button>
             <HeaderMenu userName={userName} onSignOut={signOut} buttonClass={iconButton} />
           </div>
         </div>
@@ -43,8 +41,6 @@ export function AppHeader({ logo, children }: { logo: ReactNode; children?: Reac
           <p className="min-w-0 truncate text-sm font-semibold">{userName}</p>
           {children}
           <div className="hidden shrink-0 items-center gap-1 sm:flex">
-            <Button asChild variant="ghost" size="icon" className={iconButton} title="Início"><Link to="/portal" aria-label="Início"><Home className="h-4 w-4" /></Link></Button>
-            <Button variant="ghost" size="icon" className={iconButton} title="Voltar" aria-label="Voltar" onClick={() => window.history.back()}><ArrowLeft className="h-4 w-4" /></Button>
             <HeaderMenu userName={userName} onSignOut={signOut} buttonClass={iconButton} />
           </div>
         </div>
