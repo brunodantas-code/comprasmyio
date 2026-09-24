@@ -13,6 +13,7 @@ import {
   CodeXml,
   DollarSign,
   FileSignature,
+  Phone,
   Search,
   Settings,
   UsersRound,
@@ -63,6 +64,12 @@ const MODULES = [
     icon: Search,
     title: "Site Survey",
     body: "Visitas técnicas",
+    available: true,
+  },
+  {
+    icon: Phone,
+    title: "Chamados",
+    body: "Atendimento interno",
     available: true,
   },
   {

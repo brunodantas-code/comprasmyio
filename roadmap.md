@@ -1,5 +1,9 @@
 # Aplicativo Site Survey
 
+- [x] Site Survey — remover o botão “Exibir” da lista de visitas e abrir os detalhes ao clicar no número da visita.
+
+- [x] Site Survey — remover a divisória abaixo do seletor de modelos e alinhar “Condicionar” e “Gerar ação” abaixo das ações da pergunta, no canto direito.
+
 - [x] Site Survey — limitar nomes de modelos e seções a 50 caracteres, compactar o seletor, alinhar ações e recolher os três blocos administrativos.
 
 - [x] Site Survey — alinhar pela base os controles das perguntas, padronizar Salvar e Excluir, usar pergunta em linha com limite e contador de 50 caracteres e permitir editar o tipo de resposta.

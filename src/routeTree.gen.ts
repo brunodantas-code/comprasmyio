@@ -21,6 +21,7 @@ import { Route as AuthenticatedLegalRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedDevelopmentRouteImport } from './routes/_authenticated/development'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedCrmRouteImport } from './routes/_authenticated/crm'
+import { Route as AuthenticatedChamadosRouteImport } from './routes/_authenticated/chamados'
 import { Route as AuthenticatedCashFlowRouteImport } from './routes/_authenticated/cash-flow'
 import { Route as ApiPublicHooksSyncProductStatusRouteImport } from './routes/api/public/hooks/sync-product-status'
 
@@ -84,6 +85,11 @@ const AuthenticatedCrmRoute = AuthenticatedCrmRouteImport.update({
   path: '/crm',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedChamadosRoute = AuthenticatedChamadosRouteImport.update({
+  id: '/chamados',
+  path: '/chamados',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedCashFlowRoute = AuthenticatedCashFlowRouteImport.update({
   id: '/cash-flow',
   path: '/cash-flow',
@@ -101,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/cash-flow': typeof AuthenticatedCashFlowRoute
+  '/chamados': typeof AuthenticatedChamadosRoute
   '/crm': typeof AuthenticatedCrmRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/development': typeof AuthenticatedDevelopmentRoute
@@ -116,6 +123,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/cash-flow': typeof AuthenticatedCashFlowRoute
+  '/chamados': typeof AuthenticatedChamadosRoute
   '/crm': typeof AuthenticatedCrmRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/development': typeof AuthenticatedDevelopmentRoute
@@ -133,6 +141,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/cash-flow': typeof AuthenticatedCashFlowRoute
+  '/_authenticated/chamados': typeof AuthenticatedChamadosRoute
   '/_authenticated/crm': typeof AuthenticatedCrmRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/development': typeof AuthenticatedDevelopmentRoute
@@ -150,6 +159,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/cash-flow'
+    | '/chamados'
     | '/crm'
     | '/dashboard'
     | '/development'
@@ -165,6 +175,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/cash-flow'
+    | '/chamados'
     | '/crm'
     | '/dashboard'
     | '/development'
@@ -181,6 +192,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/_authenticated/cash-flow'
+    | '/_authenticated/chamados'
     | '/_authenticated/crm'
     | '/_authenticated/dashboard'
     | '/_authenticated/development'
@@ -286,6 +298,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCrmRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/chamados': {
+      id: '/_authenticated/chamados'
+      path: '/chamados'
+      fullPath: '/chamados'
+      preLoaderRoute: typeof AuthenticatedChamadosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/cash-flow': {
       id: '/_authenticated/cash-flow'
       path: '/cash-flow'
@@ -305,6 +324,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedCashFlowRoute: typeof AuthenticatedCashFlowRoute
+  AuthenticatedChamadosRoute: typeof AuthenticatedChamadosRoute
   AuthenticatedCrmRoute: typeof AuthenticatedCrmRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDevelopmentRoute: typeof AuthenticatedDevelopmentRoute
@@ -317,6 +337,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCashFlowRoute: AuthenticatedCashFlowRoute,
+  AuthenticatedChamadosRoute: AuthenticatedChamadosRoute,
   AuthenticatedCrmRoute: AuthenticatedCrmRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDevelopmentRoute: AuthenticatedDevelopmentRoute,

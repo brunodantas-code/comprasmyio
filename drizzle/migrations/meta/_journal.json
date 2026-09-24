@@ -435,6 +435,27 @@
       "when": 1790264564482,
       "tag": "0061_create_site_survey_conditional_questions_and_actions",
       "breakpoints": true
+    },
+    {
+      "idx": 62,
+      "version": "7",
+      "when": 1790265238608,
+      "tag": "0062_create_internal_calls_app",
+      "breakpoints": true
+    },
+    {
+      "idx": 63,
+      "version": "7",
+      "when": 1790265286142,
+      "tag": "0063_secure_internal_call_attachments",
+      "breakpoints": true
+    },
+    {
+      "idx": 64,
+      "version": "7",
+      "when": 1790265695108,
+      "tag": "0064_grant_new_users_internal_calls_access",
+      "breakpoints": true
     }
   ]
 }
