@@ -3164,6 +3164,36 @@ export type Database = {
         }
         Relationships: []
       }
+      site_survey_action_catalog: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          position: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          position?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          position?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       site_survey_attachments: {
         Row: {
           content_type: string | null
@@ -3235,6 +3265,84 @@ export type Database = {
           },
           {
             foreignKeyName: "site_survey_attachments_visit_luc_id_fkey"
+            columns: ["visit_luc_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_visit_lucs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      site_survey_generated_calls: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          question_action_id: string
+          question_id: string
+          status: string
+          trigger_value: string
+          updated_at: string
+          visit_environment_id: string | null
+          visit_id: string
+          visit_luc_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          question_action_id: string
+          question_id: string
+          status?: string
+          trigger_value: string
+          updated_at?: string
+          visit_environment_id?: string | null
+          visit_id: string
+          visit_luc_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          question_action_id?: string
+          question_id?: string
+          status?: string
+          trigger_value?: string
+          updated_at?: string
+          visit_environment_id?: string | null
+          visit_id?: string
+          visit_luc_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_survey_generated_calls_question_action_id_fkey"
+            columns: ["question_action_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_question_actions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_generated_calls_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_generated_calls_visit_environment_id_fkey"
+            columns: ["visit_environment_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_visit_environments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_generated_calls_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_visits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_generated_calls_visit_luc_id_fkey"
             columns: ["visit_luc_id"]
             isOneToOne: false
             referencedRelation: "site_survey_visit_lucs"
@@ -3446,9 +3554,57 @@ export type Database = {
           },
         ]
       }
+      site_survey_question_actions: {
+        Row: {
+          action_id: string
+          active: boolean
+          created_at: string
+          id: string
+          question_id: string
+          trigger_value: string
+          updated_at: string
+        }
+        Insert: {
+          action_id: string
+          active?: boolean
+          created_at?: string
+          id?: string
+          question_id: string
+          trigger_value: string
+          updated_at?: string
+        }
+        Update: {
+          action_id?: string
+          active?: boolean
+          created_at?: string
+          id?: string
+          question_id?: string
+          trigger_value?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_survey_question_actions_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_action_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_question_actions_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_survey_questions: {
         Row: {
           active: boolean
+          conditioned_on_question_id: string | null
+          conditioned_operator: string
+          conditioned_value: string | null
           configuration: Json
           created_at: string
           id: string
@@ -3463,6 +3619,9 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          conditioned_on_question_id?: string | null
+          conditioned_operator?: string
+          conditioned_value?: string | null
           configuration?: Json
           created_at?: string
           id?: string
@@ -3477,6 +3636,9 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          conditioned_on_question_id?: string | null
+          conditioned_operator?: string
+          conditioned_value?: string | null
           configuration?: Json
           created_at?: string
           id?: string
@@ -3490,6 +3652,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "site_survey_questions_conditioned_on_question_id_fkey"
+            columns: ["conditioned_on_question_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_questions"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "site_survey_questions_section_id_fkey"
             columns: ["section_id"]
