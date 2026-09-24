@@ -1,5 +1,7 @@
 # Aplicativo Site Survey
 
+- [x] Portal mobile — ocultar a barra lateral, manter o cabeçalho fixo e permitir deslizar horizontalmente os aplicativos excedentes.
+
 - [x] Site Survey mobile — mover a navegação principal para uma barra inferior fixa, destacar a opção ativa e abrir submenus para cima.
 
 - [x] Site Survey — compactar o bloco de perguntas, subindo os três campos da condição para reduzir o espaço vertical.

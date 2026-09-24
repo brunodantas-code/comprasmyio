@@ -76,8 +76,8 @@ function PortalPage() {
   ].filter((app) => data.appKeys.has(app.key));
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-40 bg-accent text-accent-foreground sm:border-b sm:border-border sm:bg-card sm:text-foreground">
+    <div className="flex h-dvh flex-col overflow-hidden bg-background sm:block sm:h-auto sm:min-h-screen sm:overflow-visible">
+      <header className="sticky top-0 z-40 shrink-0 bg-accent text-accent-foreground sm:border-b sm:border-border sm:bg-card sm:text-foreground">
         <div className="mx-auto max-w-6xl px-5 pb-9 pt-5 sm:flex sm:items-center sm:justify-between sm:gap-3 sm:px-6 sm:py-4">
           <div className="flex items-start justify-between gap-4 sm:block">
             <MyioPlatformLogo tone="light" className="h-10 sm:hidden" />
@@ -171,13 +171,13 @@ function PortalPage() {
         </div>
       </header>
 
-      <main className="relative z-10 -mt-3 min-h-[calc(100vh-10rem)] rounded-t-2xl bg-background px-4 py-10 sm:mx-auto sm:mt-0 sm:min-h-0 sm:max-w-6xl sm:rounded-none sm:px-6 sm:py-14">
+      <main className="no-scrollbar relative z-10 -mt-3 min-h-0 flex-1 overflow-y-auto rounded-t-2xl bg-background px-4 py-10 sm:mx-auto sm:mt-0 sm:min-h-0 sm:max-w-6xl sm:overflow-visible sm:rounded-none sm:px-6 sm:py-14">
         <Tabs value={activeView} onValueChange={(value) => setActiveView(value as "apps" | "users")}>
           <TabsContent value="apps">
             {apps.length ? (
-               <div className="grid grid-cols-3 gap-x-3 gap-y-8 lg:grid-cols-6 lg:gap-x-4">
+               <div className="no-scrollbar grid snap-x snap-mandatory grid-flow-col grid-rows-2 gap-x-3 gap-y-8 overflow-x-auto overscroll-x-contain pb-2 [grid-auto-columns:calc((100%-1.5rem)/3)] sm:grid-flow-row sm:grid-rows-none sm:grid-cols-3 sm:overflow-visible sm:pb-0 lg:grid-cols-6 lg:gap-x-4">
                  {apps.map(({ key, name, description, to }) => (
-                    <div key={key} className="flex w-24 min-w-0 justify-self-start flex-col items-center text-center sm:w-28">
+                     <div key={key} className="flex w-24 min-w-0 snap-start justify-self-center flex-col items-center text-center sm:w-28 sm:justify-self-start">
                       <Link
                         to={to}
                         aria-label={`Acessar ${name}`}
