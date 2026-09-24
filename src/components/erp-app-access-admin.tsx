@@ -14,7 +14,7 @@ const APPS = [
   { key: "legal", label: "Legal" },
   { key: "rh", label: "RH" },
   { key: "site_survey", label: "Site Survey" },
-  { key: "chamados", label: "Chamados" },
+  { key: "chamados", label: "OpDesk" },
   { key: "development", label: "Code" },
 ] as const;
 
