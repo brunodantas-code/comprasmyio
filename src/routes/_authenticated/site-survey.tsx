@@ -410,10 +410,9 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
       : matchesPoint(response));
     await Promise.all(rows.map(async (row) => {
       const existing = existingResponses.find((response) => response.question_id === row.question_id);
-      const query = existing
-        ? supabase.from("site_survey_responses").update({ answer: row.answer, answered_by: row.answered_by, question_snapshot: row.question_snapshot }).eq("id", existing.id)
-        : supabase.from("site_survey_responses").insert(row);
-      const { error } = await query;
+      const { error } = existing
+        ? await supabase.from("site_survey_responses").update({ answer: row.answer, answered_by: row.answered_by, question_snapshot: row.question_snapshot }).eq("id", existing.id)
+        : await supabase.from("site_survey_responses").insert(row as never);
       if (error) throw error;
     }));
     const configuredActions = data.questionActions.filter((rule) => visibleQuestions.some((question) => question.id === rule.question_id));
