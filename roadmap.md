@@ -1,4 +1,6 @@
-[x] Compactar os blocos das seções do checklist no mobile, mantendo o desktop inalterado.
+- [ ] Site Survey — confirmar antes de gerar ação, exibir o número do chamado e respeitar o escopo geral ou da loja/ambiente.
+- [ ] Site Survey — posicionar Loja/LUC após o bloco 3 e permitir escolher a próxima loja ao salvar o andamento.
+- [x] Compactar os blocos das seções do checklist no mobile, mantendo o desktop inalterado.
 # Aplicativo Site Survey
 
 - [x] Todos os apps — remover o contorno preto dos ícones sobre fundo branco ou transparente e mantê-lo nos botões com fundo verde.
