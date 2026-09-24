@@ -456,6 +456,13 @@
       "when": 1790265695108,
       "tag": "0064_grant_new_users_internal_calls_access",
       "breakpoints": true
+    },
+    {
+      "idx": 65,
+      "version": "7",
+      "when": 1790272317598,
+      "tag": "0065_allow_support_analysts_manage_internal_calls",
+      "breakpoints": true
     }
   ]
 }
