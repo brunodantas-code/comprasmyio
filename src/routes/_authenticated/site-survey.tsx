@@ -20,6 +20,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Checkbox } from "@/components/ui/checkbox";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -116,6 +117,7 @@ function SiteSurveyPage() {
   const qc = useQueryClient();
   const [section, setSection] = useState("visitas");
   const [visitsSection, setVisitsSection] = useState("minhas");
+  const [userSection, setUserSection] = useState("lista");
   const [statusFilter, setStatusFilter] = useState("todos");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Visit | null>(null);
@@ -181,12 +183,12 @@ function SiteSurveyPage() {
 
   return <div className="min-h-screen bg-background">
     <header className="sticky top-0 z-40 border-b border-border bg-card"><div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:px-6"><Link to="/portal"><MyioAppLogo appName="Site Survey" className="text-base sm:text-2xl" /></Link><div className="flex items-center gap-2"><Badge variant="outline">{data.profileName}</Badge><Button asChild variant="outline" size="icon" title="Início"><Link to="/portal" aria-label="Início"><Home className="h-4 w-4" /></Link></Button></div></div></header>
-    <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+    <main className="mx-auto max-w-7xl px-4 pb-28 pt-8 sm:px-6 sm:pb-8">
       <Tabs value={section} onValueChange={setSection}>
-        <TabsList className="no-scrollbar mb-6 flex h-auto w-full justify-start overflow-x-auto bg-transparent p-0">{tabs.map(({ value, label, icon: Icon }) => <TabsTrigger key={value} value={value} className="shrink-0"><Icon className="mr-2 h-4 w-4" />{label}</TabsTrigger>)}</TabsList>
+        <TabsList className="no-scrollbar mb-6 hidden h-auto w-full justify-start overflow-x-auto bg-transparent p-0 sm:flex">{tabs.map(({ value, label, icon: Icon }) => <TabsTrigger key={value} value={value} className="shrink-0"><Icon className="mr-2 h-4 w-4" />{label}</TabsTrigger>)}</TabsList>
         <TabsContent value="visitas">
           <Tabs value={visitsSection} onValueChange={setVisitsSection}>
-            <TabsList className="mb-4 grid h-auto w-fit grid-cols-2">
+            <TabsList className="mb-4 hidden h-auto w-fit grid-cols-2 sm:grid">
               <TabsTrigger value="minhas" className="w-44"><CalendarDays className="mr-2 h-4 w-4" />Minhas Visitas</TabsTrigger>
               {can("site_survey_agendar") ? <TabsTrigger value="nova" className="w-44"><Plus className="mr-2 h-4 w-4" />Nova Visita</TabsTrigger> : null}
             </TabsList>
@@ -223,8 +225,8 @@ function SiteSurveyPage() {
         <TabsContent value="checklists"><ChecklistAdmin data={data} onChanged={invalidate} /></TabsContent>
         <TabsContent value="cadastro"><SurveyCatalogAdmin data={data} onChanged={invalidate} /></TabsContent>
         <TabsContent value="usuarios">
-          <Tabs defaultValue={userTabs[0]?.value}>
-            <TabsList className="no-scrollbar mb-4 flex h-auto w-full justify-start overflow-x-auto">
+          <Tabs value={userSection} onValueChange={setUserSection}>
+            <TabsList className="no-scrollbar mb-4 hidden h-auto w-full justify-start overflow-x-auto sm:flex">
               {userTabs.map(({ value, label, icon: Icon }) => <TabsTrigger key={value} value={value} className="shrink-0"><Icon className="mr-2 h-4 w-4" />{label}</TabsTrigger>)}
             </TabsList>
             {can("site_survey_usuarios") ? <TabsContent value="lista"><SurveyUsersAdmin /></TabsContent> : null}
@@ -234,6 +236,22 @@ function SiteSurveyPage() {
         </TabsContent>
       </Tabs>
     </main>
+    <nav className="fixed inset-x-3 bottom-3 z-50 sm:hidden" aria-label="Navegação do Site Survey">
+      <div className="mx-auto grid max-w-md grid-cols-4 items-stretch rounded-[1.75rem] border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/90">
+        {tabs.map(({ value, label, icon: Icon }) => {
+          const active = section === value;
+          const hasSubmenu = value === "visitas" || value === "usuarios";
+          const selectSection = () => setSection(value);
+          const item = <span className="flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 px-1"><Icon className="h-5 w-5 shrink-0" /><span className="max-w-full truncate text-[10px] font-semibold leading-none">{label}</span></span>;
+          const itemClassName = `h-auto min-w-0 rounded-[1.35rem] p-0 shadow-none ${active ? "!bg-primary/15 !text-primary hover:!bg-primary/20 hover:!text-primary" : "!bg-transparent !text-muted-foreground hover:!bg-muted hover:!text-foreground"}`;
+          if (!hasSubmenu) return <Button key={value} type="button" variant="ghost" className={itemClassName} onClick={selectSection} aria-current={active ? "page" : undefined}>{item}</Button>;
+          const submenuItems = value === "visitas"
+            ? [{ value: "minhas", label: "Minhas visitas", icon: CalendarDays }, ...(can("site_survey_agendar") ? [{ value: "nova", label: "Nova visita", icon: Plus }] : [])]
+            : userTabs;
+          return <DropdownMenu key={value}><DropdownMenuTrigger asChild><Button type="button" variant="ghost" className={itemClassName} onClick={selectSection} aria-current={active ? "page" : undefined}>{item}</Button></DropdownMenuTrigger><DropdownMenuContent side="top" align="center" sideOffset={10} className="w-56 rounded-lg p-1.5 shadow-xl"><DropdownMenuLabel>{label}</DropdownMenuLabel><DropdownMenuSeparator />{submenuItems.map(({ value: subValue, label: subLabel, icon: SubIcon }) => { const subActive = value === "visitas" ? visitsSection === subValue : userSection === subValue; return <DropdownMenuItem key={subValue} className="min-h-11 rounded-md" onSelect={() => { selectSection(); if (value === "visitas") setVisitsSection(subValue); else setUserSection(subValue); }}><SubIcon className="h-4 w-4" /><span className="flex-1">{subLabel}</span>{subActive ? <Check className="h-4 w-4 text-primary" /> : null}</DropdownMenuItem>; })}</DropdownMenuContent></DropdownMenu>;
+        })}
+      </div>
+    </nav>
   </div>;
 }
 
