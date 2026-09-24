@@ -667,3 +667,4 @@
 - [x] Site Survey — mover o botão de adicionar pergunta ao cabeçalho, usar o padrão das visitas e tornar a tag Pendente verde.
 
 - [x] Perguntas condicionais por resposta anterior, cadastro de ações e geração de chamados por resposta.
+- [ ] Criar app Chamados internos com portal, numeração, abertura, acompanhamento e integração ao Site Survey
