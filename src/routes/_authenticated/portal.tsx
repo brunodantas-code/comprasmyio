@@ -108,8 +108,8 @@ function PortalPage() {
             <MyioPlatformLogo className="hidden h-10 sm:inline-flex" />
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="shrink-0 text-accent-foreground hover:bg-accent-foreground/10 hover:text-accent-foreground sm:hidden" aria-label="Abrir menu">
-                  <Menu className="h-7 w-7" />
+                <Button variant="ghost" size="icon" className="shrink-0 !bg-transparent !p-0 !text-accent-foreground shadow-none hover:!bg-transparent hover:!text-accent-foreground sm:hidden" aria-label="Abrir menu">
+                  <Menu className="!h-8 !w-8 stroke-[2]" />
                 </Button>
               </SheetTrigger>
               <SheetContent side="bottom" className="max-h-[78vh] overflow-y-auto rounded-t-3xl border-x-0 border-b-0 px-5 pb-8 pt-5 sm:hidden">
