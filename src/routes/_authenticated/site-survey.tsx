@@ -490,18 +490,22 @@ function QuestionField({ question, answer, hasPhoto, onAnswerChange }: { questio
   const showOtherDetail = config.other_detail === true && (selectedValue === "Outros" || selectedValues.includes("Outros"));
   const showDetail = (Boolean(config.detail) && conditionApplies) || showOtherDetail;
   const setAnswer = (value: string) => { setSelectedValue(value); onAnswerChange?.(value); };
-  return <div className="grid gap-2 py-1 lg:grid-cols-[minmax(220px,0.8fr)_minmax(0,1.8fr)] lg:items-start lg:gap-5">
-    <Label className="pt-1 text-sm font-semibold">{question.prompt}{showRequiredMark ? " *" : ""}</Label>
-    <div className="flex min-w-0 flex-wrap items-start gap-x-5 gap-y-2">
+  return <div className={`grid gap-3 py-1 ${showDetail || (config.photo && conditionApplies) ? "lg:grid-cols-[minmax(0,1.35fr)_minmax(260px,0.65fr)] lg:items-start lg:gap-5" : ""}`}>
+    <div className="min-w-0 space-y-2">
+      <Label className="block text-sm font-semibold">{question.prompt}{showRequiredMark ? " *" : ""}</Label>
+      <div className="flex min-w-0 flex-wrap items-center gap-x-5 gap-y-2">
       {question.question_type === "checkbox" ? <label className="flex items-center gap-2 text-sm"><Checkbox name={question.id} defaultChecked={stored.value === true} />Sim</label> : null}
       {question.question_type === "radio" ? <RadioGroup name={question.id} value={selectedValue || undefined} onValueChange={setAnswer} className="flex min-h-9 flex-wrap items-center gap-x-6 gap-y-2">{options.map((option) => <label key={option} className="flex shrink-0 items-center gap-2 text-sm"><RadioGroupItem value={option} />{option}</label>)}</RadioGroup> : null}
       {question.question_type === "multiselect" ? <div className="flex min-h-9 flex-wrap items-center gap-x-6 gap-y-2">{options.map((option) => <label key={option} className="flex shrink-0 items-center gap-2 text-sm"><Checkbox name={question.id} value={option} checked={selectedValues.includes(option)} onCheckedChange={(checked) => setSelectedValues((current) => checked ? [...current, option] : current.filter((item) => item !== option))} />{option}</label>)}</div> : null}
       {question.question_type === "select" ? <Select name={question.id} value={selectedValue || undefined} onValueChange={setAnswer}><SelectTrigger className="w-full sm:w-64"><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent>{options.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent></Select> : null}
       {question.question_type === "textarea" ? <Textarea name={question.id} defaultValue={typeof stored.value === "string" ? stored.value : ""} className="min-w-64 flex-1" rows={2} /> : null}
       {question.question_type === "text" || question.question_type === "number" ? <Input name={question.id} type={question.question_type === "number" ? "number" : "text"} defaultValue={typeof stored.value === "string" || typeof stored.value === "number" ? String(stored.value) : ""} className="min-w-56 flex-1" /> : null}
+      </div>
+    </div>
+    {showDetail || (config.photo && conditionApplies) ? <div className="min-w-0 space-y-3">
       {showDetail ? <div className="min-w-64 flex-1 space-y-2"><Label className="text-xs text-muted-foreground">{showOtherDetail ? "Especifique" : config.detail?.label ?? "Detalhes"}</Label>{config.detail?.options?.length ? <Select name={`${question.id}__detail`} value={selectedDetail || undefined} onValueChange={setSelectedDetail}><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent>{config.detail.options.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent></Select> : <Textarea name={`${question.id}__detail`} defaultValue={stored.detail} rows={2} />}{suboptions.length ? <div className="space-y-2"><Label className="text-xs text-muted-foreground">Localização da tomada</Label><Select name={`${question.id}__subdetail`} defaultValue={storedSubdetail || undefined}><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent>{suboptions.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent></Select></div> : null}</div> : null}
       {config.photo && conditionApplies ? <div className="min-w-64 flex-1 space-y-2"><Label htmlFor={`${question.id}__photo`} className="flex items-center gap-2 text-xs text-muted-foreground"><Camera className="h-4 w-4" />Foto{config.photo.required ? " obrigatória" : " opcional"}{hasPhoto ? " · anexada" : ""}</Label><Input id={`${question.id}__photo`} name={`${question.id}__photo`} type="file" accept="image/*" capture="environment" /></div> : null}
-    </div>
+    </div> : null}
   </div>;
 }
 
