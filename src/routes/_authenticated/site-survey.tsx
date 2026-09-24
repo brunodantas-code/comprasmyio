@@ -491,7 +491,7 @@ function TechnicianSelector({ technicians, rows, onChange }: { technicians: Prof
 
 function ChecklistAdmin({ data, onChanged }: { data: NonNullable<ReturnType<typeof useSurveyDataShape>>; onChanged: () => void }) {
   const activeTemplates = data.templates.filter((item) => item.active);
-  const [selected, setSelected] = useState(activeTemplates[0]?.id ?? "");
+  const [selected, setSelected] = useState("");
   const [templatePickerOpen, setTemplatePickerOpen] = useState(false);
   const [sectionOrder, setSectionOrder] = useState<string[]>([]);
   const [questionOrders, setQuestionOrders] = useState<Record<string, string[]>>({});
@@ -503,7 +503,7 @@ function ChecklistAdmin({ data, onChanged }: { data: NonNullable<ReturnType<type
   const toggleAdminBlock = (block: "new" | "edit" | "sections") => setCollapsedAdminBlocks((current) => { const next = new Set(current); if (next.has(block)) next.delete(block); else next.add(block); return next; });
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }), useSensor(TouchSensor, { activationConstraint: { delay: 180, tolerance: 8 } }), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }));
   useEffect(() => {
-    if (!activeTemplates.some((item) => item.id === selected)) setSelected(activeTemplates[0]?.id ?? "");
+    if (selected && !activeTemplates.some((item) => item.id === selected)) setSelected("");
   }, [activeTemplates, selected]);
   useEffect(() => {
     const sections = sortByPosition(data.sections.filter((item) => item.active && item.template_id === selected));
