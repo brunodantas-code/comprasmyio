@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import { DndContext, KeyboardSensor, PointerSensor, TouchSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { CalendarDays, Camera, Check, ChevronDown, ClipboardCheck, FileText, GripVertical, History, MapPin, Minus, Package, Pencil, Plus, Search, ShieldCheck, UsersRound, Save, X } from "lucide-react";
+import { CalendarDays, Camera, Check, ChevronDown, ChevronsUpDown, ClipboardCheck, FileText, GripVertical, History, MapPin, Minus, Package, Pencil, Plus, Search, ShieldCheck, UsersRound, Save, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -303,6 +303,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
   const [visitTechnicians, setVisitTechnicians] = useState<VisitTechnician[]>([{ technician_id: "", mobile_phone: "" }]);
   const [selectedPoint, setSelectedPoint] = useState("");
   const [pointFilter, setPointFilter] = useState("");
+  const [pointPickerOpen, setPointPickerOpen] = useState(false);
   const [openSectionId, setOpenSectionId] = useState<string | null>(null);
   const [approvedActionKeys, setApprovedActionKeys] = useState<Set<string>>(() => new Set());
   const [declinedActionKeys, setDeclinedActionKeys] = useState<Set<string>>(() => new Set());
@@ -404,15 +405,16 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
         const { error } = await supabase.from("site_survey_attachments").insert({ visit_id: visit.id, ...attachmentScope, question_id: question.id, uploaded_by: data.userId, file_name: photo.name, storage_path: path, content_type: photo.type, file_size: photo.size }); if (error) throw error;
       }
     }
-    if (phase === "pre_visit") {
-      const generalQuestionIdList = Array.from(generalQuestionIds);
-      if (generalQuestionIdList.length) { const { error } = await supabase.from("site_survey_responses").delete().eq("visit_id", visit.id).in("question_id", generalQuestionIdList); if (error) throw error; }
-    } else {
-      let responseDelete = supabase.from("site_survey_responses").delete().eq("visit_id", visit.id);
-      responseDelete = pointKind === "luc" ? responseDelete.eq("visit_luc_id", pointId) : responseDelete.eq("visit_environment_id", pointId);
-      const { error } = await responseDelete; if (error) throw error;
-    }
-    if (rows.length) { const { error } = await supabase.from("site_survey_responses").insert(rows); if (error) throw error; }
+    const existingResponses = (detail?.responses ?? []).filter((response) => phase === "pre_visit"
+      ? generalQuestionIds.has(response.question_id) && !response.visit_luc_id && !response.visit_environment_id
+      : matchesPoint(response));
+    await Promise.all(rows.map(async (row) => {
+      const existing = existingResponses.find((response) => response.question_id === row.question_id);
+      const { error } = existing
+        ? await supabase.from("site_survey_responses").update({ answer: row.answer, answered_by: row.answered_by, question_snapshot: row.question_snapshot }).eq("id", existing.id)
+        : await supabase.from("site_survey_responses").insert(row as never);
+      if (error) throw error;
+    }));
     const configuredActions = data.questionActions.filter((rule) => visibleQuestions.some((question) => question.id === rule.question_id));
     if (configuredActions.length) {
       const questionIds = configuredActions.map((rule) => rule.question_id);
@@ -510,7 +512,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
     </form>
     {preVisitSaved ? (
     <form onSubmit={(event) => { event.preventDefault(); void saveAnswers(event.currentTarget, "point").catch((error: unknown) => toast.error(error instanceof Error ? error.message : "Não foi possível salvar a vistoria.")); }} className="space-y-5">
-      <div className="space-y-2 border-t pt-5"><Label htmlFor="point-filter">Loja ou ambiente deste checklist</Label><Input id="point-filter" list="site-survey-points" value={pointFilter} onChange={(event) => { const label = event.target.value; setPointFilter(label); const point = points.find((item) => item.label === label); setSelectedPoint(point?.value ?? ""); setOpenSectionId(null); }} placeholder="Digite o LUC ou nome da loja para filtrar" autoComplete="off" /><datalist id="site-survey-points">{points.map((point) => <option key={point.value} value={point.label}>{point.completionStatus === "concluida" ? "Concluída" : "Pendente"}</option>)}</datalist>{selectedPoint ? <Badge variant="outline" className="w-fit">{points.find((point) => point.value === selectedPoint)?.completionStatus === "concluida" ? "Loja concluída" : "Loja pendente"}</Badge> : null}{!points.length ? <p className="text-sm text-destructive">Cadastre ao menos uma loja ou ambiente antes de preencher o checklist.</p> : null}</div>
+       <div className="space-y-2 border-t pt-5"><Label>Loja ou ambiente deste checklist</Label><Popover open={pointPickerOpen} onOpenChange={setPointPickerOpen}><PopoverTrigger asChild><Button type="button" variant="outline" role="combobox" aria-expanded={pointPickerOpen} aria-label="Selecionar Loja ou ambiente deste checklist" className="h-11 w-full justify-between px-3 font-normal"> <span className={selectedPoint ? "truncate" : "truncate text-muted-foreground"}>{selectedPoint ? points.find((point) => point.value === selectedPoint)?.label : "Selecione ou pesquise o LUC ou nome da loja"}</span><ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-60" /></Button></PopoverTrigger><PopoverContent align="start" className="w-(--radix-popover-trigger-width) p-0"><Command><CommandInput value={pointFilter} onValueChange={setPointFilter} placeholder="Digite o LUC ou nome da loja" /><CommandList><CommandEmpty>Nenhuma loja encontrada.</CommandEmpty><CommandGroup>{points.map((point) => <CommandItem key={point.value} value={point.label} onSelect={() => { setSelectedPoint(point.value); setPointFilter(""); setPointPickerOpen(false); setOpenSectionId(null); }}><Check className={`h-4 w-4 ${selectedPoint === point.value ? "opacity-100" : "opacity-0"}`} /><span className="min-w-0 flex-1 truncate">{point.label}</span><Badge variant="outline" className="shrink-0">{point.completionStatus === "concluida" ? "Concluída" : "Pendente"}</Badge></CommandItem>)}</CommandGroup></CommandList></Command></PopoverContent></Popover>{selectedPoint ? <Badge variant="outline" className="w-fit">{points.find((point) => point.value === selectedPoint)?.completionStatus === "concluida" ? "Loja concluída" : "Loja pendente"}</Badge> : null}{!points.length ? <p className="text-sm text-destructive">Cadastre ao menos uma loja ou ambiente antes de preencher o checklist.</p> : null}</div>
       {selectedPoint ? pointSections.map((section, index) => <ChecklistSection key={`${selectedPoint}-${section.id}`} section={section} order={generalSections.length + index + 1} open={openSectionId === section.id} pending={sectionPending(section, false)} onToggle={() => setOpenSectionId((current) => current === section.id ? null : section.id)}><ConditionalSectionQuestions sectionTitle={section.title} questions={questions.filter((question) => question.section_id === section.id)} answers={answers} attachments={detail?.attachments ?? []} matchesPoint={matchesPoint} selectedPoint={selectedPoint} callNumbers={pointCallNumbers} onQuestionAnswerChange={(question, value) => handleQuestionAnswerChange(question, value, "point")} />{section.title === "Materiais necessários" ? renderMaterials : null}</ChecklistSection>) : null}
       {questions.length === 0 ? <div className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">O checklist será disponibilizado quando as perguntas forem cadastradas.</div> : null}
       <div className="space-y-2"><Label htmlFor="survey-files" className="flex items-center gap-2"><Camera className="h-4 w-4" />Fotos e anexos deste ambiente</Label><Input id="survey-files" type="file" accept="image/*,application/pdf" multiple onChange={(event) => setFiles(Array.from(event.target.files ?? []))} /></div>
