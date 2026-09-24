@@ -730,4 +730,4 @@
 
 - [x] Site Survey — ao salvar progresso nas etapas 4 a 7, manter a Loja/LUC selecionada, recolher somente a etapa salva e preservar as demais visíveis.
 
-- [ ] Site Survey — corrigir divergência da etapa 7 na Vivara: exibir pendências reais e impedir conclusão indevida.
+- [x] Site Survey — corrigir divergência da etapa 7 na Vivara: distinguir pendências reais do estado de conclusão da loja.
