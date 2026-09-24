@@ -702,3 +702,4 @@
 - [x] Criar app Chamados internos com portal, numeração, abertura, acompanhamento e integração ao Site Survey.
 - [x] Renomear Chamados para OpDesk e manter o Code na última posição dos aplicativos.
 - [x] Site Survey — remover a divisória e aproximar Condicionar/Gerar ação, alinhando Condicionar com Obrigatória.
+- [x] Site Survey — alinhar Condicionar e Gerar ação à direita nas perguntas no mobile, preservando o desktop.
