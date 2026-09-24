@@ -665,3 +665,5 @@
 - [x] Site Survey — aplicar a mesma compactação e contador de 100 caracteres às seções existentes de cada modelo.
 - [x] Site Survey — alinhar campos, checkbox e botão da criação de pergunta ao padrão das perguntas existentes.
 - [x] Site Survey — mover o botão de adicionar pergunta ao cabeçalho, usar o padrão das visitas e tornar a tag Pendente verde.
+
+- [x] Perguntas condicionais por resposta anterior, cadastro de ações e geração de chamados por resposta.
