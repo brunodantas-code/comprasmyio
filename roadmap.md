@@ -743,4 +743,4 @@
 - [ ] Site Survey — cancelar uma Loja/LUC com motivo administrável, status Cancelada e sem bloquear a conclusão geral.
 
 - [x] Site Survey — cancelar individualmente uma visita de Loja/LUC com motivo administrável, preservando registros e sem bloquear a conclusão geral.
-- [ ] Padronizar em todo o aplicativo os botões antigos de salvar com o novo disquete verde.
+- [x] Padronizar em todo o aplicativo os botões antigos de salvar com o novo disquete verde.
