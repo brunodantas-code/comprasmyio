@@ -81,7 +81,7 @@ type ClientCategory = Named;
 type Profile = { id: string; full_name: string; email: string | null; mobile_phone: string | null };
 type Template = { id: string; name: string; description: string | null; active: boolean; client_category_id: string | null; is_default: boolean };
 type Section = { id: string; template_id: string; title: string; description: string | null; position: number; active: boolean };
-type QuestionConfig = { condition?: { value?: string }; detail?: { label?: string; required?: boolean; options?: string[]; repeatable?: boolean; suboptions?: Record<string, string[]> }; photo?: { required?: boolean }; photo_only?: boolean; create_ticket?: boolean; weather_required?: boolean; classification?: boolean; other_detail?: boolean };
+type QuestionConfig = { condition?: { value?: string }; detail?: { label?: string; required?: boolean; options?: string[]; repeatable?: boolean; suboptions?: Record<string, string[]> }; photo?: { required?: boolean; required_when?: string }; photo_only?: boolean; create_ticket?: boolean; weather_required?: boolean; classification?: boolean; other_detail?: boolean };
 type Question = { id: string; section_id: string; question_key: string | null; conditioned_on_question_id: string | null; conditioned_operator: "equals" | "not_equals"; conditioned_value: string | null; prompt: string; question_type: "checkbox" | "text" | "textarea" | "number" | "select" | "radio" | "multiselect"; required: boolean; options: unknown; configuration: unknown; position: number; active: boolean };
 type SurveyAction = Named & { description: string | null; active: boolean; position: number };
 type QuestionAction = { id: string; question_id: string; action_id: string; trigger_value: string; active: boolean };
@@ -98,7 +98,11 @@ type VisitTechnician = { technician_id: string; mobile_phone: string };
 
 const STATUS: Record<VisitStatus, string> = { agendada: "Agendada", em_andamento: "Em andamento", em_revisao: "Em revisão", concluida: "Concluída", cancelada: "Cancelada" };
 const STATUS_ORDER: VisitStatus[] = ["agendada", "em_andamento", "em_revisao", "concluida", "cancelada"];
-const questionRequiresPhoto = (question: Question) => Boolean((question.configuration as QuestionConfig | null)?.photo?.required);
+const questionRequiresPhoto = (question: Question, answer?: unknown) => {
+  const photo = (question.configuration as QuestionConfig | null)?.photo;
+  if (!photo?.required) return false;
+  return !photo.required_when || answerMatches(answerParts(answer).value, photo.required_when);
+};
 const isOtherOption = (value: string) => {
   const normalized = value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLocaleLowerCase("pt-BR");
   return normalized === "outro" || normalized === "outros";
