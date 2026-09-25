@@ -378,7 +378,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
   const updateStatus = async (status: VisitStatus) => { if ((status === "em_revisao" || status === "concluida") && !allRequiredComplete) return toast.error("Preencha todos os campos obrigatórios antes de concluir."); const stamps: Record<string, string> = {}; if (status === "em_andamento") stamps.started_at = new Date().toISOString(); if (status === "em_revisao") stamps.submitted_at = new Date().toISOString(); if (status === "concluida") stamps.completed_at = new Date().toISOString(); if (status === "cancelada") stamps.cancelled_at = new Date().toISOString(); const { error } = await supabase.from("site_survey_visits").update({ status, review_notes: reviewNotes || visit.review_notes, ...stamps }).eq("id", visit.id); if (error) return toast.error(error.message); toast.success(`Visita ${STATUS[status].toLocaleLowerCase("pt-BR")}`); onChanged(); };
   const pointPendingFields = (form: HTMLFormElement, sectionIds?: Set<string>) => {
     const values = new FormData(form);
-    const formAnswers = new Map<string, unknown>(questions.map((question) => [question.id, question.question_type === "multiselect" ? values.getAll(question.id).map(String) : question.question_type === "checkbox" ? values.get(question.id) === "on" : { value: String(values.get(question.id) ?? ""), detail: [String(values.get(`${question.id}__detail`) ?? "").trim(), String(values.get(`${question.id}__subdetail`) ?? "").trim()].filter(Boolean).join(" | ") }]));
+    const formAnswers = new Map<string, unknown>(questions.map((question) => [question.id, question.question_type === "multiselect" ? values.getAll(question.id).map(String) : question.question_type === "checkbox" ? checkboxUsesOptions(question) ? String(values.get(question.id) ?? "") : values.get(question.id) === "on" : { value: String(values.get(question.id) ?? ""), detail: [String(values.get(`${question.id}__detail`) ?? "").trim(), String(values.get(`${question.id}__subdetail`) ?? "").trim()].filter(Boolean).join(" | ") }]));
     const pending: string[] = [];
     for (const section of pointSections.filter((item) => !sectionIds || sectionIds.has(item.id))) {
       const equipmentQuestion = questions.find((question) => question.section_id === section.id && isSpecialEquipmentQuestion(question));
@@ -401,13 +401,13 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
     if (phase === "point" && !pointId) throw new Error("Selecione a loja ou ambiente deste checklist.");
     const values = new FormData(form);
     const scope = pointKind === "luc" ? { visit_luc_id: pointId, visit_environment_id: null } : { visit_luc_id: null, visit_environment_id: pointId };
-    const formAnswers = new Map<string, unknown>(questions.map((question) => [question.id, question.question_type === "multiselect" ? values.getAll(question.id).map(String) : question.question_type === "checkbox" ? values.get(question.id) === "on" : String(values.get(question.id) ?? "")]));
+    const formAnswers = new Map<string, unknown>(questions.map((question) => [question.id, question.question_type === "multiselect" ? values.getAll(question.id).map(String) : question.question_type === "checkbox" ? checkboxUsesOptions(question) ? String(values.get(question.id) ?? "") : values.get(question.id) === "on" : String(values.get(question.id) ?? "")]));
     const visibleQuestions = questions.filter((question) => phase === "pre_visit"
       ? generalQuestionIds.has(question.id)
       : !generalQuestionIds.has(question.id)).filter((question) => isQuestionVisible(question, formAnswers));
     const rows = visibleQuestions.map((question) => {
       const config = asQuestionConfig(question.configuration);
-      const value = question.question_key === "shopping_maintenance_companions" ? visitTechnicians.map((item) => item.technician_id) : question.question_type === "multiselect" ? values.getAll(question.id).map(String) : question.question_type === "checkbox" ? values.get(question.id) === "on" : String(values.get(question.id) ?? "");
+      const value = question.question_key === "shopping_maintenance_companions" ? visitTechnicians.map((item) => item.technician_id) : question.question_type === "multiselect" ? values.getAll(question.id).map(String) : question.question_type === "checkbox" ? checkboxUsesOptions(question) ? String(values.get(question.id) ?? "") : values.get(question.id) === "on" : String(values.get(question.id) ?? "");
       const baseDetail = String(values.get(`${question.id}__detail`) ?? "").trim();
       const subdetail = String(values.get(`${question.id}__subdetail`) ?? "").trim();
       const detailValue = subdetail ? `${baseDetail} | ${subdetail}` : baseDetail;
@@ -745,6 +745,8 @@ function SurveyLogs({ names }: { names: { clients: Map<string, string>; projects
 }
 
 function asQuestionConfig(value: unknown): QuestionConfig { return value && typeof value === "object" ? value as QuestionConfig : {}; }
+function questionOptions(question: Question) { return Array.isArray(question.options) ? question.options.filter((item): item is string => typeof item === "string") : []; }
+function checkboxUsesOptions(question: Question) { return question.question_type === "checkbox" && questionOptions(question).length > 1; }
 function answerParts(answer: unknown): { value: unknown; detail: string } { if (answer && typeof answer === "object" && !Array.isArray(answer) && "value" in answer) { const stored = answer as { value: unknown; detail?: unknown }; return { value: stored.value, detail: typeof stored.detail === "string" ? stored.detail : "" }; } return { value: answer, detail: "" }; }
 function hasMeaningfulAnswer(answer: unknown) {
   const { value, detail } = answerParts(answer);
@@ -807,16 +809,16 @@ function AttachmentThumbnail({ attachment }: { attachment: SurveyAttachment }) {
 }
 
 function QuestionField({ question, answer, attachments, pending = false, call, onAnswerChange }: { question: Question; answer: unknown; attachments: SurveyAttachment[]; pending?: boolean; call?: { id: string | null; number: string | null }; onAnswerChange?: (value: unknown) => void }) {
-  const options = Array.isArray(question.options) ? question.options.filter((item): item is string => typeof item === "string") : [];
+  const options = questionOptions(question);
   const config = asQuestionConfig(question.configuration); const stored = answerParts(answer); const storedValues = Array.isArray(stored.value) ? stored.value.map(String) : [];
   const [storedDetail, storedSubdetail] = stored.detail.split(" | ");
   const [selectedDetail, setSelectedDetail] = useState(storedDetail ?? "");
-  const [selectedValue, setSelectedValue] = useState(typeof stored.value === "string" ? stored.value : "");
+  const [selectedValue, setSelectedValue] = useState(typeof stored.value === "string" ? stored.value : stored.value === true ? options.find((option) => option.toLocaleLowerCase("pt-BR") === "sim") ?? "" : "");
   const [selectedValues, setSelectedValues] = useState(storedValues);
   const suboptions = config.detail?.suboptions?.[selectedDetail] ?? [];
   const hasPhoto = attachments.length > 0;
   const conditionApplies = config.condition?.value === undefined || selectedValue === config.condition.value || selectedValues.includes(config.condition.value);
-  const currentAnswer = question.question_type === "multiselect" ? selectedValues : question.question_type === "checkbox" ? stored.value : selectedValue;
+  const currentAnswer = question.question_type === "multiselect" ? selectedValues : checkboxUsesOptions(question) ? selectedValue : question.question_type === "checkbox" ? stored.value : selectedValue;
   const photoRequired = questionRequiresPhoto(question, currentAnswer);
    const hasOtherOption = options.some(isOtherOption);
    const showOtherDetail = (config.other_detail === true || hasOtherOption) && (isOtherOption(selectedValue) || selectedValues.some(isOtherOption));
@@ -826,7 +828,8 @@ function QuestionField({ question, answer, attachments, pending = false, call, o
     <div className="min-w-0 space-y-2">
       <div className="flex min-w-0 flex-wrap items-center gap-2"><Label className={`text-sm font-semibold ${pending ? "text-destructive" : ""}`}>{question.prompt.replace(/\s*\*\s*$/, "")}</Label>{call?.id && call.number ? <Link to="/chamados" search={{ chamado: call.id }} aria-label={`Abrir histórico do chamado ${call.number}`}><Badge variant="outline" className="cursor-pointer border-myio-green/30 bg-myio-green/10 text-myio-green hover:bg-myio-green/20">Chamado #{call.number}</Badge></Link> : null}</div>
        {!config.photo_only ? <div className="flex min-w-0 flex-wrap items-center gap-x-5 gap-y-2">
-      {question.question_type === "checkbox" ? <label className="flex items-center gap-2 text-sm"><Checkbox name={question.id} defaultChecked={stored.value === true} onCheckedChange={(checked) => onAnswerChange?.(checked === true)} />Sim</label> : null}
+      {question.question_type === "checkbox" && checkboxUsesOptions(question) ? <RadioGroup name={question.id} value={selectedValue || undefined} onValueChange={setAnswer} className="flex min-h-9 flex-wrap items-center gap-x-6 gap-y-2">{options.map((option) => <label key={option} className="flex shrink-0 items-center gap-2 text-sm"><RadioGroupItem value={option} />{option}</label>)}</RadioGroup> : null}
+      {question.question_type === "checkbox" && !checkboxUsesOptions(question) ? <label className="flex items-center gap-2 text-sm"><Checkbox name={question.id} defaultChecked={stored.value === true} onCheckedChange={(checked) => onAnswerChange?.(checked === true)} />Sim</label> : null}
       {question.question_type === "radio" ? <RadioGroup name={question.id} value={selectedValue || undefined} onValueChange={setAnswer} className="flex min-h-9 flex-wrap items-center gap-x-6 gap-y-2">{options.map((option) => <label key={option} className="flex shrink-0 items-center gap-2 text-sm"><RadioGroupItem value={option} />{option}</label>)}</RadioGroup> : null}
       {question.question_type === "multiselect" ? <div className="flex min-h-9 flex-wrap items-center gap-x-6 gap-y-2">{options.map((option) => <label key={option} className="flex shrink-0 items-center gap-2 text-sm"><Checkbox name={question.id} value={option} checked={selectedValues.includes(option)} onCheckedChange={(checked) => setSelectedValues((current) => { const next = checked ? [...current, option] : current.filter((item) => item !== option); onAnswerChange?.(next); return next; })} />{option}</label>)}</div> : null}
       {question.question_type === "select" ? <Select name={question.id} value={selectedValue || undefined} onValueChange={setAnswer}><SelectTrigger className="w-full sm:w-64"><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent>{options.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent></Select> : null}
