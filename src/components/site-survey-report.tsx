@@ -17,7 +17,7 @@ type Section = { id: string; title: string; position: number };
 type Profile = { id: string; full_name: string };
 type Point = { id: string; label: string; started_at: string | null; completed_at: string | null; completion_status: string; kind: "luc" | "environment" };
 
-const valueText = (answer: unknown) => {
+const valueText = (answer: unknown): string => {
   if (answer && typeof answer === "object" && !Array.isArray(answer) && "value" in answer) { const item = answer as { value: unknown; detail?: unknown }; return [valueText(item.value), typeof item.detail === "string" ? item.detail : ""].filter(Boolean).join(" — "); }
   return Array.isArray(answer) ? answer.join(", ") : String(answer ?? "");
 };
@@ -44,7 +44,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     const points = data?.points.filter((point) => point.completion_status !== "cancelada") ?? [];
     const responses = data?.responses ?? [];
     const breakdown = assumptions.map((assumption) => {
-      const occurrences = assumption.question_id ? responses.filter((response) => response.question_id === assumption.question_id && (!assumption.answer_value || valueText(response.answer).toLocaleLowerCase("pt-BR").split(/[,;—]/).map((value) => value.trim()).includes(assumption.answer_value.toLocaleLowerCase("pt-BR")))).length : points.length;
+      const occurrences = assumption.question_id ? responses.filter((response) => response.question_id === assumption.question_id && (!assumption.answer_value || valueText(response.answer).toLocaleLowerCase("pt-BR").split(/[,;—]/).map((value: string) => value.trim()).includes(assumption.answer_value.toLocaleLowerCase("pt-BR")))).length : points.length;
       return { ...assumption, occurrences, total: occurrences * assumption.minutes };
     }).filter((item) => item.occurrences > 0);
     const estimated = breakdown.reduce((total, item) => total + item.total, 0);
