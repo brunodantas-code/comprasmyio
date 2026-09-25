@@ -605,7 +605,7 @@ function ConditionalSectionQuestions({ sectionTitle, questions, answers, attachm
     setLiveAnswers(new Map(answers));
   }, [savedAnswersSignature, selectedPoint]);
   const visibleQuestions = questions.filter((question) => isQuestionVisible(question, liveAnswers));
-  return <>{visibleQuestions.map((question) => question.question_key === "shopping_maintenance_companions" && technicians && visitTechnicians && onTechniciansChange ? <TechnicianSelector key={question.id} technicians={technicians} rows={visitTechnicians} onChange={onTechniciansChange} /> : <QuestionField key={`${selectedPoint}-${question.id}-${JSON.stringify(answers.get(question.id))}`} question={question} answer={answers.get(question.id)} attachments={attachments.filter((item) => item.question_id === question.id && matchesPoint(item))} pending={pendingFields.includes(`${sectionTitle}: ${question.prompt}`)} call={calls.get(question.id)} onAnswerChange={(value) => { setLiveAnswers((current) => new Map(current).set(question.id, value)); onQuestionAnswerChange(question, value); }} />)}</>;
+  return <div className="space-y-4">{visibleQuestions.map((question, questionIndex) => question.question_key === "shopping_maintenance_companions" && technicians && visitTechnicians && onTechniciansChange ? <TechnicianSelector key={question.id} technicians={technicians} rows={visitTechnicians} onChange={onTechniciansChange} /> : <QuestionField key={`${selectedPoint}-${question.id}-${JSON.stringify(answers.get(question.id))}`} number={questionIndex + 1} question={question} answer={answers.get(question.id)} attachments={attachments.filter((item) => item.question_id === question.id && matchesPoint(item))} pending={pendingFields.includes(`${sectionTitle}: ${question.prompt}`)} call={calls.get(question.id)} onAnswerChange={(value) => { setLiveAnswers((current) => new Map(current).set(question.id, value)); onQuestionAnswerChange(question, value); }} />)}</div>;
 }
 
 function TechnicianSelector({ technicians, rows, onChange }: { technicians: Profile[]; rows: VisitTechnician[]; onChange: (rows: VisitTechnician[]) => void }) {
@@ -839,7 +839,7 @@ function AttachmentThumbnail({ attachment }: { attachment: SurveyAttachment }) {
   </>;
 }
 
-function QuestionField({ question, answer, attachments, pending = false, call, onAnswerChange }: { question: Question; answer: unknown; attachments: SurveyAttachment[]; pending?: boolean; call?: { id: string | null; number: string | null }; onAnswerChange?: (value: unknown) => void }) {
+function QuestionField({ number, question, answer, attachments, pending = false, call, onAnswerChange }: { number: number; question: Question; answer: unknown; attachments: SurveyAttachment[]; pending?: boolean; call?: { id: string | null; number: string | null }; onAnswerChange?: (value: unknown) => void }) {
   const options = questionOptions(question);
   const config = asQuestionConfig(question.configuration); const stored = answerParts(answer); const storedValues = Array.isArray(stored.value) ? stored.value.map(String) : [];
   const [storedDetail, storedSubdetail] = stored.detail.split(" | ");
@@ -855,7 +855,8 @@ function QuestionField({ question, answer, attachments, pending = false, call, o
    const showOtherDetail = (config.other_detail === true || hasOtherOption) && (isOtherOption(selectedValue) || selectedValues.some(isOtherOption));
   const showDetail = (Boolean(config.detail) && conditionApplies) || showOtherDetail;
   const setAnswer = (value: string) => { setSelectedValue(value); onAnswerChange?.(value); };
-  return <div className={`grid gap-3 py-1 ${showDetail || (config.photo && conditionApplies) ? "lg:grid-cols-[minmax(0,1.35fr)_minmax(260px,0.65fr)] lg:items-start lg:gap-5" : ""}`}>
+  return <div className={`relative grid gap-3 rounded-md border border-myio-green/20 bg-myio-green/10 px-4 pb-4 pt-5 shadow-sm transition-shadow focus-within:border-myio-green/50 focus-within:shadow-md sm:px-5 sm:pb-5 sm:pt-6 ${showDetail || (config.photo && conditionApplies) ? "lg:grid-cols-[minmax(0,1.35fr)_minmax(260px,0.65fr)] lg:items-start lg:gap-5" : ""}`}>
+    <span className="absolute -left-2.5 -top-2.5 grid h-7 w-7 place-items-center rounded-md border-2 border-card bg-myio-green/10 text-xs font-bold tabular-nums text-myio-green shadow-sm" aria-hidden="true">{number}</span>
     <div className="min-w-0 space-y-2">
       <div className="flex min-w-0 flex-wrap items-center gap-2"><Label className={`text-sm font-semibold ${pending ? "text-destructive" : ""}`}>{question.prompt.replace(/\s*\*\s*$/, "")}</Label>{call?.id && call.number ? <Link to="/chamados" search={{ chamado: call.id }} aria-label={`Abrir histórico do chamado ${call.number}`}><Badge variant="outline" className="cursor-pointer border-myio-green/30 bg-myio-green/10 text-myio-green hover:bg-myio-green/20">Chamado #{call.number}</Badge></Link> : null}</div>
        {!config.photo_only ? <div className="flex min-w-0 flex-wrap items-center gap-x-5 gap-y-2">
