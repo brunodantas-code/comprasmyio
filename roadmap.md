@@ -756,5 +756,6 @@
 - [x] Padronizar em todo o aplicativo os botões antigos de salvar com o novo disquete verde.
 - [x] Site Survey — gerar relatório técnico colorido ou P&B com dados, Etapa 7, totalizadores, chamados, fotos e resumo por ponto.
 - [x] Site Survey — refinar o PDF com capa em maiúsculas e minúsculas, dados horizontais, títulos lilás sem fundo, totalizadores agrupados, contagem de chamados, espaçamento 1,15 e motivo de cancelamento no relatório e na seleção de lojas.
+- [x] Site Survey — ajustar capa e paginação do PDF: dados próximos ao rodapé, título em linha única, divisória lilás fina, texto justificado e títulos inseparáveis dos respectivos textos.
 - [x] Site Survey — registrar início individual por Loja/LUC ou ambiente, exigindo foto de fachada para concluir o ponto.
 - [x] Site Survey — cadastrar premissas de tempo e calcular estimativa, horas extras, período noturno, dias e técnicos necessários.

@@ -225,19 +225,16 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
 
     // Capa técnica, inspirada no relatório institucional enviado.
     pdf.addImage(logoDataUrl, "PNG", 16, 18, 40, 13);
-    pdf.setDrawColor(...purple); pdf.setLineWidth(0.8); pdf.line(16, 52, 35, 52);
-    pdf.setFont("Nunito", "bold"); pdf.setFontSize(8); pdf.setTextColor(...purple); pdf.text("Relatório técnico", 40, 53.5);
-    pdf.setFont("Nunito", "extrabold"); pdf.setTextColor(...dark); pdf.setFontSize(31); pdf.text("Site", 16, 94); pdf.text("Survey", 16, 108);
-    pdf.setTextColor(...purple); pdf.text("Relatório", 16, 122);
-    pdf.setFont("Nunito", "normal"); pdf.setFontSize(13); pdf.setTextColor(85, 82, 94); pdf.text(unitName, 16, 135);
-    pdf.setDrawColor(...dark); pdf.setLineWidth(0.7); pdf.line(16, 190, 194, 190);
+    pdf.setFont("Nunito", "extrabold"); pdf.setTextColor(...dark); pdf.setFontSize(31); pdf.text("Site Survey", 16, 101);
+    pdf.setTextColor(...purple); pdf.text("Relatório", 16, 115);
+    pdf.setFont("Nunito", "normal"); pdf.setFontSize(13); pdf.setTextColor(85, 82, 94); pdf.text(unitName, 16, 128);
+    pdf.setDrawColor(...purple); pdf.setLineWidth(0.3); pdf.line(16, 218, 194, 218);
     const coverRows = [["Cliente", clientName], ["Data de emissão", issueDate], ["Unidade", unitName], ["Número da visita", `SS-${reportNumber}`]];
-    coverRows.forEach(([label, value], index) => { const rowY = 199 + index * 9; pdf.setFontSize(8); pdf.setFont("Nunito", "bold"); pdf.setTextColor(120, 116, 128); pdf.text(label, 16, rowY); pdf.setFontSize(11); pdf.setTextColor(...dark); pdf.text(value, 194, rowY, { align: "right", maxWidth: 122 }); });
+    coverRows.forEach(([label, value], index) => { const rowY = 228 + index * 10; pdf.setFontSize(8); pdf.setFont("Nunito", "bold"); pdf.setTextColor(120, 116, 128); pdf.text(label, 16, rowY); pdf.setFontSize(11); pdf.setTextColor(...dark); pdf.text(value, 194, rowY, { align: "right", maxWidth: 122 }); });
     pdf.setFontSize(7); pdf.setTextColor(145, 141, 151); pdf.text("myio Automação Ltda — Relatório de Site Survey", 16, 282); pdf.setFillColor(...green); pdf.rect(181, 280.5, 13, 1.3, "F");
 
     pdf.addPage();
     pdf.setFont("Nunito", "extrabold"); pdf.setTextColor(...purple); pdf.setFontSize(17); pdf.text("01", 14, 24); pdf.setFontSize(14); pdf.text("Visão geral", 28, 24);
-    pdf.setDrawColor(...purple); pdf.setLineWidth(0.45); pdf.line(14, 28, 196, 28);
     const tableHead = { fillColor: [255, 255, 255] as [number, number, number], textColor: purple, fontStyle: "bold" as const, lineColor: purple, lineWidth: { top: 0, right: 0, bottom: 0.35, left: 0 } };
     autoTable(pdf, { startY: 34, theme: "plain", styles: { font: "Nunito", fontSize: 8, textColor: dark, lineColor: soft, lineWidth: { bottom: 0.12 } }, headStyles: tableHead, head: [["Cliente", "Projeto", "Técnico", "Situação"]], body: [[clientName, projectName, technicianName, visit.status.replaceAll("_", " ")]] });
     let y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 11;
@@ -248,18 +245,32 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     autoTable(pdf, { startY: y, theme: "plain", styles: { font: "Nunito", fontSize: 8, textColor: dark, lineColor: soft, lineWidth: { bottom: 0.12 } }, headStyles: tableHead, columnStyles: { 0: { fontStyle: "bold", cellWidth: 55 }, 2: { halign: "center", cellWidth: 28 } }, head: [["Totalizadores técnicos", "Classificação", "Quantidade"]], body: totalsBody });
     y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 14;
     const drawRichParagraph = (parts: RichPart[], startY: number) => {
-      const left = 14; const right = 196; const lineHeight = 3.7; let cursorX = left; let cursorY = startY;
-      for (const part of parts) {
-        pdf.setFont("Nunito", part.bold ? "bold" : "normal");
-        for (const token of part.text.split(/(\s+)/).filter(Boolean)) {
-          const width = pdf.getTextWidth(token);
-          if (cursorX + width > right && token.trim()) { cursorX = left; cursorY += lineHeight; }
-          if (cursorY > 282) { pdf.addPage(); cursorY = 18; cursorX = left; }
-          pdf.text(token, cursorX, cursorY); cursorX += width;
-        }
+      const left = 14; const right = 196; const lineHeight = 3.7; const maxWidth = right - left;
+      const words = parts.flatMap((part) => part.text.trim().split(/\s+/).filter(Boolean).map((text) => ({ text, bold: Boolean(part.bold) })));
+      const lines: Array<Array<{ text: string; bold: boolean; width: number }>> = [];
+      let line: Array<{ text: string; bold: boolean; width: number }> = [];
+      let lineWidth = 0;
+      for (const word of words) {
+        pdf.setFont("Nunito", word.bold ? "bold" : "normal");
+        const width = pdf.getTextWidth(word.text);
+        pdf.setFont("Nunito", "normal");
+        const spaceWidth = pdf.getTextWidth(" ");
+        if (line.length && lineWidth + spaceWidth + width > maxWidth) { lines.push(line); line = []; lineWidth = 0; }
+        line.push({ ...word, width }); lineWidth += (line.length > 1 ? spaceWidth : 0) + width;
       }
+      if (line.length) lines.push(line);
+      let cursorY = startY;
+      lines.forEach((currentLine, index) => {
+        if (cursorY > 276) { pdf.addPage(); cursorY = 18; }
+        const wordsWidth = currentLine.reduce((total, word) => total + word.width, 0);
+        const isLastLine = index === lines.length - 1;
+        const gap = currentLine.length > 1 ? (isLastLine ? pdf.getTextWidth(" ") : (maxWidth - wordsWidth) / (currentLine.length - 1)) : 0;
+        let cursorX = left;
+        currentLine.forEach((word) => { pdf.setFont("Nunito", word.bold ? "bold" : "normal"); pdf.text(word.text, cursorX, cursorY); cursorX += word.width + gap; });
+        cursorY += lineHeight;
+      });
       pdf.setFont("Nunito", "normal");
-      return cursorY + lineHeight;
+      return cursorY;
     };
     for (const point of data.points) {
       if (y > 250) { pdf.addPage(); y = 18; }
@@ -270,11 +281,11 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
       pdf.setFont("Nunito", "normal"); pdf.setFontSize(9); pdf.text(`Início: ${point.started_at ? new Date(point.started_at).toLocaleString("pt-BR") : "não registrado"}  |  Conclusão: ${point.completed_at ? new Date(point.completed_at).toLocaleString("pt-BR") : "não registrada"}  |  Duração: ${formatMinutes(durationMinutes(point.started_at, point.completed_at))}`, 14, y); y += 6;
       if (point.completion_status === "cancelada") { pdf.setFont("Nunito", "bold"); pdf.setTextColor(...purple); pdf.text(`Cancelada — Motivo: ${point.cancellationReason ?? "não informado"}`, 14, y); pdf.setTextColor(...dark); y += 7; }
       for (const summary of pointSummaries(point)) {
-        if (y > 268) { pdf.addPage(); y = 18; }
+        if (y > 260) { pdf.addPage(); y = 18; }
         pdf.setFont("Nunito", "bold"); pdf.setFontSize(10); pdf.text(summary.title, 14, y); pdf.setFontSize(9); y = drawRichParagraph(summary.parts, y + 7) + 4;
       }
-      if (stageSeven) { pdf.setFont("Nunito", "bold"); pdf.text("Anotações da Etapa 7", 14, y); y = drawRichParagraph([{ text: stageSeven }], y + 5) + 2; }
-      if (calls) { pdf.setFont("Nunito", "bold"); pdf.text("Ações e chamados", 14, y); y = drawRichParagraph([{ text: calls }], y + 5) + 2; }
+      if (stageSeven) { if (y > 262) { pdf.addPage(); y = 18; } pdf.setFont("Nunito", "bold"); pdf.text("Anotações da Etapa 7", 14, y); y = drawRichParagraph([{ text: stageSeven }], y + 5) + 2; }
+      if (calls) { if (y > 262) { pdf.addPage(); y = 18; } pdf.setFont("Nunito", "bold"); pdf.text("Ações e chamados", 14, y); y = drawRichParagraph([{ text: calls }], y + 5) + 2; }
       const photos = data.attachments.filter((item) => item.content_type?.startsWith("image/") && (point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id));
       let photoColumn = 0;
       for (const photo of photos) { const { data: signed } = await supabase.storage.from("site-survey-attachments").createSignedUrl(photo.storage_path, 300); if (!signed?.signedUrl) continue; if (photoColumn === 0 && y > 245) { pdf.addPage(); y = 18; } try { pdf.addImage(await imageDataUrl(signed.signedUrl), "JPEG", 14 + photoColumn * 46, y, 42, 31, undefined, "FAST"); photoColumn += 1; if (photoColumn === 4) { photoColumn = 0; y += 35; } } catch { /* Mantém o PDF disponível caso uma foto falhe. */ } }
