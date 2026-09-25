@@ -1,3 +1,4 @@
+- [ ] Site Survey — escolher e aplicar novo layout em cards separados para melhorar a leitura das perguntas no mobile e desktop.
 - [x] Site Survey mobile — organizar os campos de data e hora em Nova Visita, eliminando desalinhamento e sobreposição.
 - [x] Site Survey mobile — limitar Início e Término previsto à tela e exibir calendário clicável no canto direito da data.
 - [x] Supply — remover os submenus superiores de Approvals e Armazém e exibi-los em listas ascendentes no menu inferior.
