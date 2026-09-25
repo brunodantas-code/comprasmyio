@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState, type R
 import { DndContext, KeyboardSensor, PointerSensor, TouchSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { ChevronUp, CalendarDays, Camera, Check, ChevronDown, ChevronsUpDown, ClipboardCheck, FileText, GripVertical, History, MapPin, Package, Pencil, Plus, Search, ShieldCheck, Trash2, UsersRound, Save, X } from "lucide-react";
+import { ChevronUp, CalendarDays, Camera, Check, ChevronDown, ChevronsUpDown, ClipboardCheck, FileText, GripVertical, History, MapPin, Package, Pencil, Play, Plus, Search, ShieldCheck, Trash2, UsersRound, Save, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -14,6 +14,8 @@ import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { SiteSurveyEnvironmentManager } from "@/components/site-survey-environment-manager";
 import { SiteSurveyLucManager } from "@/components/site-survey-luc-manager";
 import { SiteSurveyProfilesAdmin } from "@/components/site-survey-profiles-admin";
+import { SiteSurveyReportButton } from "@/components/site-survey-report";
+import { SiteSurveyTimeAssumptions, type TimeAssumption } from "@/components/site-survey-time-assumptions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -86,8 +88,8 @@ type Question = { id: string; section_id: string; question_key: string | null; c
 type SurveyAction = Named & { description: string | null; active: boolean; position: number };
 type QuestionAction = { id: string; question_id: string; action_id: string; trigger_value: string; active: boolean };
 type GeneratedCall = { id: string; question_action_id: string; question_id: string; visit_luc_id: string | null; visit_environment_id: string | null; status: string; internal_call_id: string | null; internal_calls: { call_number: string | null } | null };
-type SurveyAttachment = { id: string; question_id: string | null; visit_luc_id: string | null; visit_environment_id: string | null; file_name: string; storage_path: string; content_type: string | null };
-type SurveyPoint = { value: string; label: string; completionStatus: "pendente" | "concluida" | "cancelada"; templateId: string | null };
+type SurveyAttachment = { id: string; question_id: string | null; visit_luc_id: string | null; visit_environment_id: string | null; file_name: string; storage_path: string; content_type: string | null; attachment_kind?: string };
+type SurveyPoint = { value: string; label: string; completionStatus: "pendente" | "concluida" | "cancelada"; templateId: string | null; startedAt: string | null };
 type CatalogItem = Named & { category: "material" | "equipamento"; active: boolean; position: number };
 type CancellationReason = Named & { active: boolean; position: number };
 type CustomCatalogItem = Named & { catalog_id: string; active: boolean; position: number };
@@ -152,7 +154,7 @@ function SiteSurveyPage() {
     queryFn: async () => {
       const { data: auth } = await supabase.auth.getUser();
       if (!auth.user) throw new Error("Sessão não encontrada");
-      const [{ data: visits, error }, { data: clients }, { data: clientCategories }, { data: projects }, { data: units }, { data: technicians }, { data: templates }, { data: sections }, { data: questions }, { data: surveyProfile }, { data: surveyPermissions }, { data: erpAdmin }, { data: catalog }, { data: screwdriverTypes }, { data: wrenchSizes }, { data: actionCatalog }, { data: questionActions }, { data: customCatalogs }, { data: cancellationReasons }] = await Promise.all([
+      const [{ data: visits, error }, { data: clients }, { data: clientCategories }, { data: projects }, { data: units }, { data: technicians }, { data: templates }, { data: sections }, { data: questions }, { data: surveyProfile }, { data: surveyPermissions }, { data: erpAdmin }, { data: catalog }, { data: screwdriverTypes }, { data: wrenchSizes }, { data: actionCatalog }, { data: questionActions }, { data: customCatalogs }, { data: cancellationReasons }, { data: timeAssumptions }] = await Promise.all([
         supabase.from("site_survey_visits").select("*").order("scheduled_start", { ascending: false }),
         supabase.from("clients").select("id,name,category_id").order("name"),
         supabase.from("client_categories").select("id,name").eq("active", true).order("position"),
@@ -172,11 +174,12 @@ function SiteSurveyPage() {
         supabase.from("site_survey_question_actions").select("id,question_id,action_id,trigger_value,active").eq("active", true),
         supabase.from("site_survey_custom_catalogs").select("id,name,active,position,site_survey_custom_catalog_items(id,catalog_id,name,active,position)").eq("active", true).order("position").order("name"),
         supabase.from("site_survey_cancellation_reasons").select("id,name,active,position").eq("active", true).order("position").order("name"),
+        supabase.from("site_survey_time_assumptions").select("id,name,question_id,answer_value,minutes,active,position").eq("active", true).order("position").order("name"),
       ]);
       if (error) throw error;
       const profile = surveyProfile as unknown as { profile_code: string; is_customized: boolean; site_survey_access_profiles: { name: string; site_survey_profile_permissions: Array<{ permission_key: string; allowed: boolean }> } | null } | null;
       const permissions = new Set<string>(Boolean(erpAdmin) ? PERMISSIONS.map(([key]) => key) : profile?.is_customized ? (surveyPermissions ?? []).filter((item) => item.allowed).map((item) => item.permission_key) : (profile?.site_survey_access_profiles?.site_survey_profile_permissions ?? []).filter((item) => item.allowed).map((item) => item.permission_key));
-      return { userId: auth.user.id, visits: (visits ?? []) as Visit[], clients: (clients ?? []) as ClientOption[], clientCategories: (clientCategories ?? []) as ClientCategory[], projects: (projects ?? []) as ProjectOption[], units: (units ?? []) as Array<Named & { client_id: string }>, technicians: (technicians ?? []) as Profile[], templates: (templates ?? []) as Template[], sections: (sections ?? []) as Section[], questions: (questions ?? []) as Question[], catalog: (catalog ?? []) as CatalogItem[], screwdriverTypes: (screwdriverTypes ?? []) as Named[], wrenchSizes: (wrenchSizes ?? []) as Named[], actionCatalog: (actionCatalog ?? []) as SurveyAction[], questionActions: (questionActions ?? []) as QuestionAction[], customCatalogs: (customCatalogs ?? []) as CustomCatalog[], cancellationReasons: (cancellationReasons ?? []) as CancellationReason[], permissions, profileName: profile?.site_survey_access_profiles?.name ?? "Sem perfil", isErpAdmin: Boolean(erpAdmin) };
+      return { userId: auth.user.id, visits: (visits ?? []) as Visit[], clients: (clients ?? []) as ClientOption[], clientCategories: (clientCategories ?? []) as ClientCategory[], projects: (projects ?? []) as ProjectOption[], units: (units ?? []) as Array<Named & { client_id: string }>, technicians: (technicians ?? []) as Profile[], templates: (templates ?? []) as Template[], sections: (sections ?? []) as Section[], questions: (questions ?? []) as Question[], catalog: (catalog ?? []) as CatalogItem[], screwdriverTypes: (screwdriverTypes ?? []) as Named[], wrenchSizes: (wrenchSizes ?? []) as Named[], actionCatalog: (actionCatalog ?? []) as SurveyAction[], questionActions: (questionActions ?? []) as QuestionAction[], customCatalogs: (customCatalogs ?? []) as CustomCatalog[], cancellationReasons: (cancellationReasons ?? []) as CancellationReason[], timeAssumptions: (timeAssumptions ?? []) as TimeAssumption[], permissions, profileName: profile?.site_survey_access_profiles?.name ?? "Sem perfil", isErpAdmin: Boolean(erpAdmin) };
     },
   });
   const can = (permission: string) => data?.permissions.has(permission) ?? false;
@@ -244,7 +247,7 @@ function SiteSurveyPage() {
                  {filtered.map((visit) => {
                    const visitExpanded = expandedVisitIds.has(visit.id);
                    return <div key={visit.id} className={`${visitsListOpen ? "" : "lg:hidden"} grid gap-3 border-b border-border px-4 py-3 last:border-0 lg:grid-cols-[250px_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_150px_70px] lg:items-center lg:py-4`}>
-                      <div className="flex items-center justify-between gap-3 lg:block"><button type="button" className={`w-fit whitespace-nowrap text-left text-sm font-semibold transition-colors hover:text-myio-green focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${selected?.id === visit.id ? "text-myio-green" : "text-foreground"}`} aria-pressed={selected?.id === visit.id} aria-label={`Exibir visita ${String(visit.survey_number).padStart(12, "0")}`} onClick={() => setSelected((current) => current?.id === visit.id ? null : visit)}>{String(visit.survey_number).padStart(12, "0")}</button><Button type="button" size="compactIcon" variant="ghost" className="lg:hidden" aria-label={visitExpanded ? `Recolher informações da visita ${visit.survey_number}` : `Exibir informações da visita ${visit.survey_number}`} title={visitExpanded ? "Recolher" : "Exibir"} onClick={() => setExpandedVisitIds((current) => { const next = new Set(current); if (next.has(visit.id)) next.delete(visit.id); else next.add(visit.id); return next; })}><ChevronDown className={`h-5 w-5 transition-transform ${visitExpanded ? "rotate-180" : ""}`} /></Button></div>
+                      <div className="flex items-center justify-between gap-2"><button type="button" className={`w-fit whitespace-nowrap text-left text-sm font-semibold transition-colors hover:text-myio-green focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${selected?.id === visit.id ? "text-myio-green" : "text-foreground"}`} aria-pressed={selected?.id === visit.id} aria-label={`Exibir visita ${String(visit.survey_number).padStart(12, "0")}`} onClick={() => setSelected((current) => current?.id === visit.id ? null : visit)}>{String(visit.survey_number).padStart(12, "0")}</button><div className="flex items-center gap-1"><SiteSurveyReportButton visit={visit} clients={data.clients} units={data.units} projects={data.projects} technicians={data.technicians} questions={data.questions} sections={data.sections} assumptions={data.timeAssumptions} /><Button type="button" size="compactIcon" variant="ghost" className="lg:hidden" aria-label={visitExpanded ? `Recolher informações da visita ${visit.survey_number}` : `Exibir informações da visita ${visit.survey_number}`} title={visitExpanded ? "Recolher" : "Exibir"} onClick={() => setExpandedVisitIds((current) => { const next = new Set(current); if (next.has(visit.id)) next.delete(visit.id); else next.add(visit.id); return next; })}><ChevronDown className={`h-5 w-5 transition-transform ${visitExpanded ? "rotate-180" : ""}`} /></Button></div></div>
                      <div className={`${visitExpanded ? "" : "hidden"} min-w-0 lg:block`}><p className="truncate text-sm font-medium">{names.clients.get(visit.client_id ?? "") ?? names.projects.get(visit.project_id ?? "") ?? "—"}</p>{visit.client_id && visit.project_id ? <p className="truncate text-xs text-muted-foreground">{names.projects.get(visit.project_id)}</p> : null}</div>
                      <span className={`${visitExpanded ? "" : "hidden"} truncate text-sm lg:block`}>{names.technicians.get(visit.technician_id) ?? "—"}</span>
                      <div className={`${visitExpanded ? "" : "hidden"} text-sm lg:block`}><p>{new Date(visit.scheduled_start).toLocaleDateString("pt-BR")}</p><p className="text-xs text-muted-foreground">{new Date(visit.scheduled_start).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</p></div>
