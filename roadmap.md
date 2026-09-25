@@ -1,5 +1,6 @@
 - [x] Site Survey — escolher e aplicar novo layout em cards separados para melhorar a leitura das perguntas no mobile e desktop.
 - [ ] Site Survey — gerar relatório completo com prévia e PDF colorido/P&B, fotos por ponto, totalizadores, ações, estimativa detalhada e apuração de horas extras/noturnas.
+- [x] Site Survey — substituir tabelas extensas por resumos textuais padronizados por tema, com respostas em negrito e fotos em grade compacta.
 - [ ] Site Survey — registrar início individual de cada loja/ambiente pelo primeiro evento entre botão de início e foto obrigatória da fachada.
 - [ ] Site Survey — cadastrar premissas detalhadas de tempo por resposta técnica e calcular a duração estimada da instalação.
 - [ ] Site Survey — calcular dias sem horas extras/noturnas para os técnicos da OS ou técnicos necessários para um prazo informado.
