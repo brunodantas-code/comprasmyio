@@ -738,3 +738,5 @@
 - [x] Site Survey — ao salvar progresso nas etapas 4 a 7, manter a Loja/LUC selecionada, recolher somente a etapa salva e preservar as demais visíveis.
 
 - [x] Site Survey — corrigir divergência da etapa 7 na Vivara: distinguir pendências reais do estado de conclusão da loja.
+
+- [ ] Site Survey — cancelar uma Loja/LUC com motivo administrável, status Cancelada e sem bloquear a conclusão geral.
