@@ -759,5 +759,6 @@
 - [x] Site Survey — ajustar capa e paginação do PDF: dados próximos ao rodapé, título em linha única, divisória lilás fina, texto justificado e títulos inseparáveis dos respectivos textos.
 - [x] Site Survey — ordenar a redação do relatório conforme o checklist, incluir todas as posições do hidrômetro, ferramentas e observações da Etapa 7.
 - [x] Site Survey — tornar a redação hidráulica fluida, corrigir espaços antes da pontuação e usar logomarca preta no PDF P&B.
+- [x] Site Survey — oferecer “Incluir fotos” antes dos botões PDF, permitindo exportar relatório sintético sem imagens.
 - [x] Site Survey — registrar início individual por Loja/LUC ou ambiente, exigindo foto de fachada para concluir o ponto.
 - [x] Site Survey — cadastrar premissas de tempo e calcular estimativa, horas extras, período noturno, dias e técnicos necessários.
