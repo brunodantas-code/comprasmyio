@@ -31,55 +31,91 @@ const valueText = (answer: unknown): string => {
 const durationMinutes = (start: string | null, end: string | null) => start && end ? Math.max(0, Math.round((new Date(end).getTime() - new Date(start).getTime()) / 60000)) : null;
 const formatMinutes = (minutes: number | null) => minutes === null ? "Incompleto" : `${Math.floor(minutes / 60)}h ${String(minutes % 60).padStart(2, "0")}min`;
 const normalize = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR");
-const ensurePeriod = (value: string) => /[.!?]$/.test(value.trim()) ? value.trim() : `${value.trim()}.`;
-const findAnswer = (responses: ReportResponse[], questions: Question[], terms: string[]) => {
-  const response = responses.find((item) => { const prompt = normalize(questions.find((question) => question.id === item.question_id)?.prompt ?? ""); return terms.some((term) => prompt.includes(term)); });
+const findAnswer = (responses: ReportResponse[], questions: Question[], terms: string[], sections?: Section[], sectionTerms?: string[]) => {
+  const response = responses.find((item) => {
+    const question = questions.find((candidate) => candidate.id === item.question_id);
+    const prompt = normalize(question?.prompt ?? "");
+    const section = normalize(sections?.find((candidate) => candidate.id === question?.section_id)?.title ?? "");
+    return terms.some((term) => prompt.includes(term)) && (!sectionTerms?.length || sectionTerms.some((term) => section.includes(term)));
+  });
   return response ? { id: response.question_id, value: valueText(response.answer).trim() } : null;
 };
 const buildPointSummaries = (responses: ReportResponse[], questions: Question[], sections: Section[]): PointSummary[] => {
   const summaries: PointSummary[] = [];
-  const used = new Set<string>();
-  const addKnown = (title: string, definitions: Array<{ terms: string[]; before: string; after?: string; format?: (value: string) => string }>) => {
-    const parts: RichPart[] = [];
-    const ids = new Set<string>();
-    for (const definition of definitions) {
-      const found = findAnswer(responses, questions, definition.terms);
-      if (!found?.value) continue;
-      parts.push({ text: definition.before }, { text: definition.format ? definition.format(found.value) : found.value, bold: true }, { text: definition.after ?? ". " });
-      ids.add(found.id); used.add(found.id);
-    }
-    if (parts.length) summaries.push({ title, parts, questionIds: ids });
+  const hydraulicSections = ["agua", "hidrometro", "hidraulica"];
+  const electricalSections = ["eletrica", "eletrico"];
+  const get = (terms: string[], sectionTerms?: string[]) => findAnswer(responses, questions, terms, sections, sectionTerms);
+  const clean = (value: string) => value.replace(/[.!?]+$/, "").trim();
+  const lower = (value: string) => clean(value).toLocaleLowerCase("pt-BR");
+  const statusOnly = (value: string) => lower((value.split("—").at(-1) ?? value).trim());
+  const detailOnly = (value: string) => clean((value.split("—").at(-1) ?? value).trim());
+  const placePhrase = (value: string) => {
+    const place = lower(value);
+    if (/^(loja|sobreloja|parede|galeria|cozinha|subestacao)/.test(place)) return `na ${place}`;
+    if (/^(armario|quadro|busway)/.test(place)) return `no ${place}`;
+    return `em ${place}`;
   };
-  addKnown("Hidráulica", [
-    { terms: ["localizacao do hidrometro"], before: "O hidrômetro encontra-se em ", after: ", " },
-    { terms: ["dificuldade de acesso"], before: "O hidrômetro possui acesso ", after: ". ", format: (value) => value.toLocaleLowerCase("pt-BR") },
-    { terms: ["saida pulsada"], before: "A saída pulsada está ", after: " e ", format: (value) => (value.split("—").at(-1) ?? value).trim().toLocaleLowerCase("pt-BR") },
-    { terms: ["vazao nominal"], before: "a vazão nominal é de ", after: ". " },
-    { terms: ["sentido do fluxo"], before: "O sentido do fluxo de água foi classificado como ", after: ". " },
-    { terms: ["tipo de flange"], before: "O flange é do tipo ", after: ". " },
-    { terms: ["tipo de registro existente"], before: "O registro existente é do tipo ", after: ". " },
-    { terms: ["condicao do registro"], before: "O registro encontra-se ", after: ". " },
-    { terms: ["complexidade dessa instalacao", "complexidade da instalacao"], before: "A instalação é de complexidade ", after: "." },
-  ]);
-  addKnown("Elétrica", [
-    { terms: ["localizacao do quadro eletrico", "localizacao do ponto eletrico"], before: "O quadro ou ponto elétrico encontra-se em ", after: ". " },
-    { terms: ["ponto eletrico proximo"], before: "A disponibilidade de ponto elétrico próximo foi informada como ", after: ". " },
-    { terms: ["bitola do cabo"], before: "A bitola do cabo de alimentação de entrada é ", after: ". " },
-    { terms: ["amperagem do disjuntor"], before: "A amperagem do disjuntor de entrada é ", after: ". " },
-    { terms: ["encaminhamento eletrico"], before: "O encaminhamento elétrico previsto é ", after: ". " },
-    { terms: ["complexidade eletrica"], before: "A instalação elétrica é de complexidade ", after: "." },
-  ]);
-  const remaining = responses.filter((response) => !used.has(response.question_id) && valueText(response.answer).trim());
-  for (const section of [...sections].sort((left, right) => left.position - right.position)) {
-    const entries = remaining.filter((response) => questions.find((question) => question.id === response.question_id)?.section_id === section.id);
-    if (!entries.length) continue;
-    const parts: RichPart[] = [];
-    for (const entry of entries) {
-      const prompt = questions.find((question) => question.id === entry.question_id)?.prompt ?? "Informação";
-      parts.push({ text: `${ensurePeriod(prompt).replace(/[.!?]$/, "")}: ` }, { text: ensurePeriod(valueText(entry.answer)), bold: true }, { text: " " });
-    }
-    summaries.push({ title: section.title, parts, questionIds: new Set(entries.map((entry) => entry.question_id)) });
+  const add = (parts: RichPart[], before: string, answer: ReturnType<typeof get>, after = "") => {
+    if (!answer?.value) return false;
+    parts.push({ text: before }, { text: clean(answer.value), bold: true }, { text: after });
+    return true;
+  };
+
+  const hydraulic: RichPart[] = [];
+  const hydraulicIds = new Set<string>();
+  const hydraulicAnswer = (terms: string[]) => {
+    const answer = get(terms, hydraulicSections) ?? get(terms);
+    if (answer) hydraulicIds.add(answer.id);
+    return answer;
+  };
+  const location = hydraulicAnswer(["localizacao do hidrometro", "posicao do hidrometro"]);
+  const locationDetail = hydraulicAnswer(["detalhar para facilitar", "facilitar sua localizacao"]);
+  const access = hydraulicAnswer(["dificuldade de acesso", "acesso ao hidrometro"]);
+  if (location) {
+    hydraulic.push({ text: "O hidrômetro encontra-se " }, { text: placePhrase(location.value), bold: true });
+    if (locationDetail) hydraulic.push({ text: ", " }, { text: lower(locationDetail.value), bold: true });
+    if (access) hydraulic.push({ text: ", de " }, { text: lower(access.value), bold: true }, { text: " acesso. " }); else hydraulic.push({ text: ". " });
   }
+  const pulse = hydraulicAnswer(["condicao da saida pulsada", "saida pulsada"]);
+  const flowRate = hydraulicAnswer(["vazao nominal", "vazao do hidrometro"]);
+  if (pulse) hydraulic.push({ text: "A saída pulsada está " }, { text: statusOnly(pulse.value), bold: true }, { text: flowRate ? " e a vazão nominal é de " : ". " });
+  if (flowRate) hydraulic.push({ text: pulse ? "" : "A vazão nominal é de " }, { text: clean(flowRate.value), bold: true }, { text: ". " });
+  const flow = hydraulicAnswer(["sentido do fluxo"]);
+  if (flow) hydraulic.push({ text: "O sentido do fluxo de água foi classificado como " }, { text: normalize(flow.value).includes("desacordo") || normalize(flow.value).includes("incorret") ? "incorreto" : normalize(flow.value).includes("acordo") || normalize(flow.value).includes("corret") ? "correto" : lower(flow.value), bold: true }, { text: ". " });
+  const flange = hydraulicAnswer(["tipo de flange"]);
+  if (flange) hydraulic.push({ text: "O flange é do tipo " }, { text: lower(flange.value), bold: true }, { text: ". " });
+  const registerType = hydraulicAnswer(["tipo de registro existente"]);
+  const registerCondition = hydraulicAnswer(["condicao do registro"]);
+  if (registerType) hydraulic.push({ text: "O registro existente é do tipo " }, { text: lower(registerType.value), bold: true }, { text: registerCondition ? " e encontra-se " : ". " });
+  if (registerCondition) hydraulic.push({ text: registerType ? "" : "O registro encontra-se " }, { text: lower(registerCondition.value), bold: true }, { text: ". " });
+  add(hydraulic, "O diâmetro da tubulação de água é de ", hydraulicAnswer(["diametro da tubulacao"]), ". ");
+  const nearbyPower = hydraulicAnswer(["ponto de eletrica proximo", "ponto eletrico proximo"]);
+  if (nearbyPower) hydraulic.push({ text: lower(nearbyPower.value).startsWith("sim") ? "Existe ponto de elétrica próximo ao hidrômetro" : "Não existe ponto de elétrica próximo ao hidrômetro", bold: true }, { text: ". " });
+  add(hydraulic, "O encaminhamento deve ser realizado por meio de ", hydraulicAnswer(["encaminhamento da eletrica", "encaminhamento eletrico"]), ". ");
+  const hydraulicComplexity = hydraulicAnswer(["complexidade dessa instalacao", "complexidade da instalacao"]);
+  if (hydraulicComplexity) hydraulic.push({ text: "A instalação é de complexidade " }, { text: lower(hydraulicComplexity.value), bold: true }, { text: ". " });
+  const consumptionLevel = hydraulicAnswer(["classificacao do perfil de consumo", "perfil de consumo classificado"]);
+  const consumptionProfile = hydraulicAnswer(["perfil de consumo da loja"]);
+  if (consumptionLevel) hydraulic.push({ text: "O perfil de consumo da loja é " }, { text: lower(consumptionLevel.value), bold: true }, { text: consumptionProfile ? ", contemplando " : "." });
+  if (consumptionProfile) hydraulic.push({ text: consumptionLevel ? "" : "O perfil de consumo da loja contempla " }, { text: lower(consumptionProfile.value), bold: true }, { text: "." });
+  if (hydraulic.length) summaries.push({ title: "Hidráulica", parts: hydraulic, questionIds: hydraulicIds });
+
+  const electrical: RichPart[] = [];
+  const electricalIds = new Set<string>();
+  const electricalAnswer = (terms: string[]) => {
+    const answer = get(terms, electricalSections) ?? get(terms);
+    if (answer) electricalIds.add(answer.id);
+    return answer;
+  };
+  const cable = electricalAnswer(["bitola do cabo"]);
+  const breaker = electricalAnswer(["amperagem do disjuntor"]);
+  if (cable) add(electrical, "A bitola do cabo de alimentação de entrada é de ", cable, breaker ? " e a amperagem do disjuntor de entrada é de " : ". ");
+  if (breaker) electrical.push({ text: cable ? "" : "A amperagem do disjuntor de entrada é de " }, { text: detailOnly(breaker.value), bold: true }, { text: ". " });
+  const panelLocation = electricalAnswer(["localizacao do quadro eletrico", "onde se encontra o quadro eletrico"]);
+  if (panelLocation) electrical.push({ text: "O quadro elétrico se encontra " }, { text: placePhrase(panelLocation.value), bold: true }, { text: ". " });
+  const electricalComplexity = electricalAnswer(["complexidade eletrica", "complexidade dessa instalacao", "complexidade da instalacao"]);
+  if (electricalComplexity) electrical.push({ text: "A instalação elétrica é de complexidade " }, { text: lower(electricalComplexity.value), bold: true }, { text: "." });
+  if (electrical.length) summaries.push({ title: "Elétrica", parts: electrical, questionIds: electricalIds });
   return summaries;
 };
 const imageDataUrl = async (url: string) => new Promise<string>((resolve, reject) => {
