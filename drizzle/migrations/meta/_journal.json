@@ -512,6 +512,13 @@
       "when": 1790335124849,
       "tag": "0072_add_checklist_to_site_survey_environment",
       "breakpoints": true
+    },
+    {
+      "idx": 73,
+      "version": "7",
+      "when": 1790342147730,
+      "tag": "0073_add_site_survey_reports_and_point_timing",
+      "breakpoints": true
     }
   ]
 }
