@@ -87,7 +87,7 @@ type SurveyAction = Named & { description: string | null; active: boolean; posit
 type QuestionAction = { id: string; question_id: string; action_id: string; trigger_value: string; active: boolean };
 type GeneratedCall = { id: string; question_action_id: string; question_id: string; visit_luc_id: string | null; visit_environment_id: string | null; status: string; internal_call_id: string | null; internal_calls: { call_number: string | null } | null };
 type SurveyAttachment = { id: string; question_id: string | null; visit_luc_id: string | null; visit_environment_id: string | null; file_name: string; storage_path: string; content_type: string | null };
-type SurveyPoint = { value: string; label: string; completionStatus: "pendente" | "concluida" };
+type SurveyPoint = { value: string; label: string; completionStatus: "pendente" | "concluida" | "cancelada" };
 type CatalogItem = Named & { category: "material" | "equipamento"; active: boolean; position: number };
 type CancellationReason = Named & { active: boolean; position: number };
 type CustomCatalogItem = Named & { catalog_id: string; active: boolean; position: number };
@@ -710,6 +710,7 @@ function SurveyCatalogAdmin({ data, onChanged }: { data: NonNullable<ReturnType<
     { key: "screwdriver", title: "Tipos de chave de fenda", table: "site_survey_screwdriver_types", items: data.screwdriverTypes },
     { key: "wrench", title: "Bitolas de chave de grifo", table: "site_survey_wrench_sizes", items: data.wrenchSizes },
     { key: "actions", title: "Ações para chamados", table: "site_survey_action_catalog", items: data.actionCatalog },
+    { key: "cancellation-reasons", title: "Motivos de cancelamento de Loja/LUC", table: "site_survey_cancellation_reasons", items: data.cancellationReasons },
     ...data.customCatalogs.map((catalog) => ({ key: `custom:${catalog.id}`, title: catalog.name, table: "site_survey_custom_catalog_items", items: catalog.site_survey_custom_catalog_items.filter((item) => item.active).sort((left, right) => left.position - right.position || left.name.localeCompare(right.name, "pt-BR")), customCatalogId: catalog.id })),
   ];
   const toggle = (key: string) => setExpanded((current) => { const next = new Set(current); if (next.has(key)) next.delete(key); else next.add(key); return next; });
