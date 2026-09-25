@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Minus, Pencil, Plus } from "lucide-react";
+import { ChevronUp, ChevronDown, Pencil, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -103,7 +103,7 @@ export function StockDestinationsTab() {
           trigger={<Button size="compactIcon" aria-label="Criar destino de estoque" title="Criar destino"><Plus className="h-3.5 w-3.5" /></Button>}
           open={createOpen}
           onOpenChange={setCreateOpen}
-        /></CollapsibleContent><CollapsibleTrigger asChild><Button size="compactIcon" variant="ghost" aria-label={expanded ? "Recolher Destinos de Estoque" : "Expandir Destinos de Estoque"} title={expanded ? "Recolher" : "Expandir"}>{expanded ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}</Button></CollapsibleTrigger></div>
+        /></CollapsibleContent><CollapsibleTrigger asChild><Button size="compactIcon" variant="ghost" aria-label={expanded ? "Recolher Destinos de Estoque" : "Expandir Destinos de Estoque"} title={expanded ? "Recolher" : "Expandir"}>{expanded ? <ChevronUp className="h-3.5 w-3.5"  /> : <ChevronDown className="h-3.5 w-3.5"  />}</Button></CollapsibleTrigger></div>
       </CardHeader>
       <CollapsibleContent asChild><CardContent>
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : (

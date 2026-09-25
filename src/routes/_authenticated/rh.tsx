@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Mail, Minus, Phone, Plus, Search, UserRound } from "lucide-react";
+import { ChevronUp, ChevronDown, Mail, Phone, Search, UserRound } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -83,7 +83,7 @@ function TechnicianRecord({ technician, expanded, onToggle, onSaved }: { technic
   return <article className="border-b border-border last:border-0">
     <Button type="button" variant="ghost" className="grid h-auto w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-none px-4 py-3 text-left !bg-card hover:!bg-muted/40" onClick={onToggle} aria-expanded={expanded}>
       <span className="flex min-w-0 items-center gap-3"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-myio-green/10 text-myio-green"><UserRound className="h-4 w-4" /></span><span className="min-w-0"><span className="block truncate text-sm font-semibold">{technician.full_name}</span><span className="block truncate text-xs text-muted-foreground">{technician.mobile_phone || "Celular não cadastrado"}</span></span></span>
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center text-muted-foreground">{expanded ? <Minus className="h-4 w-4" /> : <Plus className="h-4 w-4" />}</span>
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center text-muted-foreground">{expanded ? <ChevronUp className="h-4 w-4"  /> : <ChevronDown className="h-4 w-4"  />}</span>
     </Button>
     {expanded ? <form onSubmit={(event) => { event.preventDefault(); save.mutate(); }} className="grid gap-4 border-t border-border px-4 py-4 sm:grid-cols-[minmax(0,1fr)_280px_auto] sm:items-end">
       <div className="min-w-0 space-y-1.5"><Label>Nome e e-mail</Label><p className="truncate text-sm font-medium">{technician.full_name}</p><p className="flex items-center gap-1.5 truncate text-xs text-muted-foreground"><Mail className="h-3.5 w-3.5 shrink-0" />{technician.email || "E-mail não informado"}</p></div>

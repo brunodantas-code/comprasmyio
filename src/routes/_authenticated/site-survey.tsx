@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState, type R
 import { DndContext, KeyboardSensor, PointerSensor, TouchSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { CalendarDays, Camera, Check, ChevronDown, ChevronsUpDown, ClipboardCheck, FileText, GripVertical, History, MapPin, Minus, Package, Pencil, Plus, Search, ShieldCheck, Trash2, UsersRound, Save, X } from "lucide-react";
+import { ChevronUp, CalendarDays, Camera, Check, ChevronDown, ChevronsUpDown, ClipboardCheck, FileText, GripVertical, History, MapPin, Package, Pencil, Plus, Search, ShieldCheck, Trash2, UsersRound, Save, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -317,7 +317,7 @@ function ChecklistSection({ section, order, open, pendingCount, onToggle, childr
   return <section className="overflow-hidden rounded-md border border-border bg-card transition-colors">
     <Button type="button" variant="ghost" className="h-auto w-full justify-between rounded-none !bg-card px-4 py-3 text-left !text-foreground hover:!bg-muted/50 hover:!text-foreground" onClick={onToggle} aria-expanded={open}>
       <span className="flex min-w-0 items-center gap-3"><span className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-sm bg-myio-green/10 text-sm font-bold text-myio-green">{order}{pendingCount > 0 ? <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground ring-2 ring-card" aria-label={`${pendingCount} ${pendingCount === 1 ? "pendência" : "pendências"}`}>{pendingCount > 99 ? "99+" : pendingCount}</span> : null}</span><span className="min-w-0"><span className="block truncate text-sm font-semibold text-foreground">{section.title}</span>{section.description ? <span className="block truncate text-xs text-muted-foreground">{section.description}</span> : null}</span></span>
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center text-myio-green" aria-hidden="true">{open ? <Minus className="h-5 w-5" strokeWidth={3} /> : <Plus className="h-5 w-5" strokeWidth={3} />}</span>
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center text-myio-green" aria-hidden="true">{open ? <ChevronUp className="h-5 w-5" strokeWidth={3}  /> : <ChevronDown className="h-5 w-5" strokeWidth={3}  />}</span>
     </Button>
     <div className={`${open ? "block" : "hidden"} space-y-3 border-t border-border p-3 sm:p-4`}>{children}</div>
   </section>;

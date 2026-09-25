@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Minus, Plus, Search, ShieldCheck } from "lucide-react";
+import { ChevronUp, ChevronDown, Search, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -135,7 +135,7 @@ export function AccessProfilesTab() {
         {filteredUsers?.map((user) => (
           <div key={user.id} className="rounded-md border border-border">
             <div className="flex items-center gap-3 p-3">
-              <Button type="button" size="compactIcon" variant="ghost" aria-label={expandedUserId === user.id ? `Recolher ${user.full_name || "usuário"}` : `Exibir ${user.full_name || "usuário"}`} onClick={() => setExpandedUserId((current) => current === user.id ? null : user.id)}>{expandedUserId === user.id ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}</Button>
+              <Button type="button" size="compactIcon" variant="ghost" aria-label={expandedUserId === user.id ? `Recolher ${user.full_name || "usuário"}` : `Exibir ${user.full_name || "usuário"}`} onClick={() => setExpandedUserId((current) => current === user.id ? null : user.id)}>{expandedUserId === user.id ? <ChevronUp className="h-3.5 w-3.5"  /> : <ChevronDown className="h-3.5 w-3.5"  />}</Button>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                 <p className="truncate text-sm font-medium">{user.full_name || "—"}</p>

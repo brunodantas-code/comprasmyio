@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, ChevronsUpDown, Minus, Plus, Trash2 } from "lucide-react";
+import { ChevronUp, ChevronDown, Check, ChevronsUpDown, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -306,7 +306,7 @@ export function LinkedRecordDeletionDialog({
                   <p className="min-w-0 truncate text-sm font-medium">{record.label}</p>
                   <CollapsibleTrigger asChild>
                     <Button size="compactIcon" variant="ghost" aria-label={(expandedLinks[record.key] ?? false) ? `Recolher ${record.label}` : `Expandir ${record.label}`} title={(expandedLinks[record.key] ?? false) ? "Recolher" : "Expandir"}>
-                      {(expandedLinks[record.key] ?? false) ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                      {(expandedLinks[record.key] ?? false) ? <ChevronUp className="h-3.5 w-3.5"  /> : <ChevronDown className="h-3.5 w-3.5"  />}
                     </Button>
                   </CollapsibleTrigger>
                 </div>

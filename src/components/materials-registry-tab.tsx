@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Minus, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { ChevronUp, ChevronDown, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { MaterialDetailDialog } from "@/components/material-detail";
@@ -257,7 +257,7 @@ export function MaterialsRegistryTab({ canCreate = false }: { canCreate?: boolea
           {canCreate && <CollapsibleContent><AddMaterialDialog categories={activeCategories} /></CollapsibleContent>}
           <CollapsibleTrigger asChild>
             <Button size="compactIcon" variant="ghost" aria-label={expanded ? "Recolher Materiais" : "Expandir Materiais"} title={expanded ? "Recolher" : "Expandir"}>
-              {expanded ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+              {expanded ? <ChevronUp className="h-3.5 w-3.5"  /> : <ChevronDown className="h-3.5 w-3.5"  />}
             </Button>
           </CollapsibleTrigger>
         </div>
@@ -323,7 +323,7 @@ export function MyioDevicesRegistryTab() {
         </div>
         <CollapsibleTrigger asChild>
           <Button size="compactIcon" variant="ghost" aria-label={expanded ? "Recolher Dispositivos myio" : "Expandir Dispositivos myio"} title={expanded ? "Recolher" : "Expandir"}>
-            {expanded ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+            {expanded ? <ChevronUp className="h-3.5 w-3.5"  /> : <ChevronDown className="h-3.5 w-3.5"  />}
           </Button>
         </CollapsibleTrigger>
       </CardHeader>
