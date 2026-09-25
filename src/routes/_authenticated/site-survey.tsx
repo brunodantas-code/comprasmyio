@@ -944,9 +944,9 @@ function DateTimeInput({ name, label, defaultValue = "", required = false }: { n
   };
   return <div className="min-w-0 space-y-2">
     <Label htmlFor={`${name}-date`}>{label}</Label>
-    <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_7rem] gap-2">
-      <div className="relative min-w-0">
-        <Input ref={dateInputRef} id={`${name}-date`} className="min-w-0 max-w-full pr-10 [&::-webkit-calendar-picker-indicator]:opacity-0" type="date" value={date} onChange={(event) => setDate(event.target.value)} required={required} aria-label={`${label}: data`} />
+    <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_7rem] gap-2 overflow-hidden">
+      <div className="relative min-w-0 overflow-hidden rounded-md border border-input bg-background shadow-sm focus-within:ring-1 focus-within:ring-ring">
+        <Input ref={dateInputRef} id={`${name}-date`} className="w-full min-w-0 appearance-none border-0 bg-transparent pr-10 shadow-none focus-visible:ring-0 [&::-webkit-calendar-picker-indicator]:opacity-0" type="date" value={date} onChange={(event) => setDate(event.target.value)} required={required} aria-label={`${label}: data`} />
         <Button type="button" variant="ghost" size="compactIcon" className="absolute right-1 top-1/2 -translate-y-1/2 text-muted-foreground" onClick={openCalendar} aria-label={`Abrir calendário de ${label.toLocaleLowerCase("pt-BR")}`} title="Abrir calendário">
           <CalendarDays className="h-4 w-4" />
         </Button>
