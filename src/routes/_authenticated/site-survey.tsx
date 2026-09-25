@@ -346,7 +346,6 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
   const pointId = selectedPoint.split(":")[1] ?? "";
   const selectedPointRecord = pointKind === "luc" ? detail?.lucs.find((item) => item.id === pointId) : detail?.environments.find((item) => item.id === pointId);
   const savedPendingFields = Array.isArray(selectedPointRecord?.pending_fields) ? selectedPointRecord.pending_fields.filter((item): item is string => typeof item === "string") : [];
-  const displayedPendingFields = pendingPointSave?.fields ?? savedPendingFields;
   const matchesPoint = (item: { visit_luc_id?: string | null; visit_environment_id?: string | null }) => pointKind === "luc" ? item.visit_luc_id === pointId : item.visit_environment_id === pointId;
   const scopedMaterials = (detail?.visitMaterials ?? []).filter(matchesPoint);
   const scopedMaterialDecision = (detail?.materialDecisions ?? []).find(matchesPoint);

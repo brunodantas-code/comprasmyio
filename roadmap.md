@@ -1,4 +1,5 @@
-- [ ] Site Survey — impedir que perguntas de etapas não salvas fiquem vermelhas após salvar a etapa anterior.
+- [x] Site Survey — impedir que perguntas de etapas não salvas fiquem vermelhas após salvar a etapa anterior.
+- [x] Site Survey — permitir configurar foto obrigatória conforme respostas da própria pergunta, sem regra fixa no código.
 - [x] Site Survey — preservar respostas ainda não salvas e a etapa aberta ao confirmar a geração de chamado.
 - [x] Site Survey — retirar os fundos verdes dos anexos e manter fotos salvas como miniaturas nas perguntas.
 - [x] Site Survey — recolher cada visita no mobile, mantendo somente número e seta; recolher a relação completa no desktop.
