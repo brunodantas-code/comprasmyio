@@ -90,13 +90,31 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
   const access = hydraulicAnswer(["dificuldade de acesso", "acesso ao hidrometro"]);
   if (locations.length) {
     hydraulic.push({ text: "O hidrômetro encontra-se " });
-    locations.forEach((location, index) => hydraulic.push({ text: index === 0 ? placePhrase(location.value) : lower(location.value), bold: true }, ...(index < locations.length - 1 ? [{ text: ", " }] : [])));
-    if (locationDetail) hydraulic.push({ text: ", " }, { text: lower(locationDetail.value), bold: true });
+    hydraulic.push({ text: placePhrase(locations[0].value), bold: true });
+    const remainingLocations = locations.slice(1).map((location) => lower(location.value));
+    const detail = locationDetail ? lower(locationDetail.value) : "";
+    if (remainingLocations.length || detail) {
+      const location = remainingLocations[0] ?? "";
+      const detailAlreadyDescribesLocation = location && detail.startsWith(placePhrase(location));
+      const description = detailAlreadyDescribesLocation
+        ? detail
+        : [location ? placePhrase(location) : "", detail].filter(Boolean).join(" ");
+      hydraulic.push({ text: ", localizado " }, { text: description, bold: true });
+      for (const extraLocation of remainingLocations.slice(1)) hydraulic.push({ text: ", " }, { text: placePhrase(extraLocation), bold: true });
+    }
     if (access) hydraulic.push({ text: ", de " }, { text: lower(access.value), bold: true }, { text: " acesso. " }); else hydraulic.push({ text: ". " });
   }
   const pulse = hydraulicAnswer(["condicao da saida pulsada", "saida pulsada"]);
   const flowRate = hydraulicAnswer(["vazao nominal", "vazao do hidrometro"]);
-  if (pulse) hydraulic.push({ text: "A saída pulsada está " }, { text: statusOnly(pulse.value), bold: true }, { text: flowRate ? " e a vazão nominal é de " : ". " });
+  if (pulse) {
+    const pulseStatus = statusOnly(pulse.value);
+    const pulseWorks = /^(sim|operante|funcional|funcionando)/.test(pulseStatus);
+    hydraulic.push(
+      { text: pulseWorks ? "Possui saída pulsada " : "A saída pulsada encontra-se " },
+      { text: pulseWorks ? "funcional" : pulseStatus, bold: true },
+      { text: flowRate ? " e a vazão nominal é de " : ". " },
+    );
+  }
   if (flowRate) hydraulic.push({ text: pulse ? "" : "A vazão nominal é de " }, { text: clean(flowRate.value), bold: true }, { text: ". " });
   const flow = hydraulicAnswer(["sentido do fluxo"]);
   if (flow) hydraulic.push({ text: "O sentido do fluxo de água foi classificado como " }, { text: normalize(flow.value).includes("desacordo") || normalize(flow.value).includes("incorret") ? "incorreto" : normalize(flow.value).includes("acordo") || normalize(flow.value).includes("corret") ? "correto" : lower(flow.value), bold: true }, { text: ". " });
@@ -136,9 +154,9 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
   if (electrical.length) summaries.push({ title: "Elétrica", parts: electrical, questionIds: electricalIds });
   return summaries;
 };
-const imageDataUrl = async (url: string) => new Promise<string>((resolve, reject) => {
+const imageDataUrl = async (url: string, monochrome = false) => new Promise<string>((resolve, reject) => {
   const image = new Image(); image.crossOrigin = "anonymous";
-  image.onload = () => { const canvas = document.createElement("canvas"); const scale = Math.min(1, 900 / Math.max(image.naturalWidth, image.naturalHeight)); canvas.width = Math.max(1, Math.round(image.naturalWidth * scale)); canvas.height = Math.max(1, Math.round(image.naturalHeight * scale)); const context = canvas.getContext("2d"); if (!context) return reject(new Error("Não foi possível preparar a foto.")); context.fillStyle = "#ffffff"; context.fillRect(0, 0, canvas.width, canvas.height); context.drawImage(image, 0, 0, canvas.width, canvas.height); resolve(canvas.toDataURL("image/jpeg", 0.78)); };
+  image.onload = () => { const canvas = document.createElement("canvas"); const scale = Math.min(1, 900 / Math.max(image.naturalWidth, image.naturalHeight)); canvas.width = Math.max(1, Math.round(image.naturalWidth * scale)); canvas.height = Math.max(1, Math.round(image.naturalHeight * scale)); const context = canvas.getContext("2d"); if (!context) return reject(new Error("Não foi possível preparar a foto.")); context.fillStyle = "#ffffff"; context.fillRect(0, 0, canvas.width, canvas.height); context.drawImage(image, 0, 0, canvas.width, canvas.height); if (monochrome) { const pixels = context.getImageData(0, 0, canvas.width, canvas.height); for (let index = 0; index < pixels.data.length; index += 4) { const isBackground = pixels.data[index] > 245 && pixels.data[index + 1] > 245 && pixels.data[index + 2] > 245; const value = isBackground ? 255 : 0; pixels.data[index] = value; pixels.data[index + 1] = value; pixels.data[index + 2] = value; } context.putImageData(pixels, 0, 0); } resolve(canvas.toDataURL("image/jpeg", 0.9)); };
   image.onerror = () => reject(new Error("Não foi possível carregar uma foto do relatório.")); image.src = url;
 });
 const fileBase64 = async (url: string) => {
@@ -247,7 +265,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     const projectName = projects.find((item) => item.id === visit.project_id)?.name ?? "—";
     const technicianName = technicians.find((item) => item.id === visit.technician_id)?.full_name ?? "—";
     const issueDate = new Date(visit.completed_at ?? visit.scheduled_start).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
-    const [regularFont, boldFont, extraBoldFont, logoDataUrl] = await Promise.all([fileBase64(nunitoRegularUrl), fileBase64(nunitoBoldUrl), fileBase64(nunitoExtraBoldUrl), imageDataUrl(myioLogoUrl)]);
+    const [regularFont, boldFont, extraBoldFont, logoDataUrl] = await Promise.all([fileBase64(nunitoRegularUrl), fileBase64(nunitoBoldUrl), fileBase64(nunitoExtraBoldUrl), imageDataUrl(myioLogoUrl, blackAndWhite)]);
     pdf.addFileToVFS("Nunito-Regular.ttf", regularFont); pdf.addFont("Nunito-Regular.ttf", "Nunito", "normal");
     pdf.addFileToVFS("Nunito-Bold.ttf", boldFont); pdf.addFont("Nunito-Bold.ttf", "Nunito", "bold");
     pdf.addFileToVFS("Nunito-ExtraBold.ttf", extraBoldFont); pdf.addFont("Nunito-ExtraBold.ttf", "Nunito", "extrabold");
@@ -276,7 +294,11 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 14;
     const drawRichParagraph = (parts: RichPart[], startY: number) => {
       const left = 14; const right = 196; const lineHeight = 3.7; const maxWidth = right - left;
-      const words = parts.flatMap((part) => part.text.trim().split(/\s+/).filter(Boolean).map((text) => ({ text, bold: Boolean(part.bold) })));
+      const words = parts.flatMap((part) => part.text.trim().split(/\s+/).filter(Boolean).map((text) => ({ text, bold: Boolean(part.bold) }))).reduce<Array<{ text: string; bold: boolean }>>((tokens, token) => {
+        if (/^[,.;:!?]+$/.test(token.text) && tokens.length) tokens[tokens.length - 1].text += token.text;
+        else tokens.push(token);
+        return tokens;
+      }, []);
       const lines: Array<Array<{ text: string; bold: boolean; width: number }>> = [];
       let line: Array<{ text: string; bold: boolean; width: number }> = [];
       let lineWidth = 0;
