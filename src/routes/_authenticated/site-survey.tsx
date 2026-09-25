@@ -937,9 +937,9 @@ function DateTimeInput({ name, label, defaultValue = "", required = false }: { n
   const normalizedTime = /^([01]\d|2[0-3]):[0-5]\d$/.test(time) ? time : "";
   return <div className="space-y-2">
     <Label htmlFor={`${name}-date`}>{label}</Label>
-    <div className="grid grid-cols-[minmax(0,1fr)_7rem] gap-2">
-      <Input id={`${name}-date`} type="date" value={date} onChange={(event) => setDate(event.target.value)} required={required} aria-label={`${label}: data`} />
-      <Input type="text" inputMode="numeric" placeholder="hh:mm" value={time} onChange={(event) => setTime(formatTime(event.target.value))} pattern="(?:[01][0-9]|2[0-3]):[0-5][0-9]" maxLength={5} required={required} title="Informe o horário no formato hh:mm" aria-label={`${label}: hora e minutos`} />
+    <div className="grid min-w-0 grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_7rem]">
+      <Input id={`${name}-date`} className="min-w-0 max-w-full" type="date" value={date} onChange={(event) => setDate(event.target.value)} required={required} aria-label={`${label}: data`} />
+      <Input className="min-w-0 max-w-full" type="text" inputMode="numeric" placeholder="hh:mm" value={time} onChange={(event) => setTime(formatTime(event.target.value))} pattern="(?:[01][0-9]|2[0-3]):[0-5][0-9]" maxLength={5} required={required} title="Informe o horário no formato hh:mm" aria-label={`${label}: hora e minutos`} />
     </div>
     <input type="hidden" name={name} value={date && normalizedTime ? `${date}T${normalizedTime}` : ""} />
   </div>;
