@@ -746,6 +746,7 @@ function isStoredQuestionComplete(question: Question, answers: Map<string, unkno
   return true;
 }
 function AttachmentThumbnail({ attachment }: { attachment: SurveyAttachment }) {
+  const [previewOpen, setPreviewOpen] = useState(false);
   const { data: signedUrl } = useQuery({
     queryKey: ["site-survey-attachment-preview", attachment.storage_path],
     staleTime: 50 * 60 * 1000,
@@ -757,9 +758,17 @@ function AttachmentThumbnail({ attachment }: { attachment: SurveyAttachment }) {
   });
   const isImage = attachment.content_type?.startsWith("image/") ?? /\.(jpe?g|png|webp|gif|heic)$/i.test(attachment.file_name);
   if (!isImage) return <Button type="button" variant="ghost" size="sm" className="h-auto max-w-full justify-start !bg-transparent px-0 text-xs text-foreground hover:!bg-muted" disabled={!signedUrl} onClick={() => signedUrl && window.open(signedUrl, "_blank", "noopener,noreferrer")}><FileText className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{attachment.file_name}</span></Button>;
-  return <Button type="button" variant="ghost" className="group relative h-24 w-24 overflow-hidden !bg-transparent p-0 hover:!bg-muted sm:h-28 sm:w-28" disabled={!signedUrl} aria-label={`Abrir foto ${attachment.file_name}`} title={attachment.file_name} onClick={() => signedUrl && window.open(signedUrl, "_blank", "noopener,noreferrer")}>
-    {signedUrl ? <img src={signedUrl} alt={attachment.file_name} loading="lazy" className="h-full w-full object-cover transition-transform group-hover:scale-105" /> : <Camera className="h-6 w-6 text-muted-foreground" />}
-  </Button>;
+  return <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+    <DialogTrigger asChild>
+      <Button type="button" variant="ghost" className="group relative h-24 w-24 overflow-hidden !bg-transparent p-0 hover:!bg-muted sm:h-28 sm:w-28" disabled={!signedUrl} aria-label={`Ampliar foto ${attachment.file_name}`} title={attachment.file_name}>
+        {signedUrl ? <img src={signedUrl} alt={attachment.file_name} loading="lazy" className="h-full w-full object-cover transition-transform group-hover:scale-105" /> : <Camera className="h-6 w-6 text-muted-foreground" />}
+      </Button>
+    </DialogTrigger>
+    <DialogContent className="w-[calc(100vw-2rem)] max-w-4xl overflow-hidden p-3 sm:p-4">
+      <DialogTitle className="sr-only">{attachment.file_name}</DialogTitle>
+      {signedUrl ? <img src={signedUrl} alt={attachment.file_name} className="mx-auto max-h-[78dvh] w-auto max-w-full rounded-md object-contain" /> : null}
+    </DialogContent>
+  </Dialog>;
 }
 
 function QuestionField({ question, answer, attachments, pending = false, call, onAnswerChange }: { question: Question; answer: unknown; attachments: SurveyAttachment[]; pending?: boolean; call?: { id: string | null; number: string | null }; onAnswerChange?: (value: unknown) => void }) {
