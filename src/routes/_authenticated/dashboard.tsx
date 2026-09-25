@@ -215,7 +215,7 @@ function ExistingAttachments({ orderId, attachments, canRemove }: { orderId: str
           {canRemove && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button type="button" size="compactIcon" disabled={remove.isPending} aria-label="Excluir anexo" title="Excluir anexo">
+                <Button type="button" size="compactIcon" variant="ghost" disabled={remove.isPending} aria-label="Excluir anexo" title="Excluir anexo">
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
               </AlertDialogTrigger>
