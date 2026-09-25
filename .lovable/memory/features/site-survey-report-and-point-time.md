@@ -12,3 +12,5 @@ Cada loja ou ambiente terá início e conclusão próprios. O início é registr
 A estimativa de instalação usa premissas detalhadas administráveis no Cadastro, associadas às respostas técnicas (tipo/quantidade de hidrômetros, dificuldade de acesso, quadros elétricos, complexidade e outros fatores), somando a duração aplicável a todos os pontos ativos.
 
 Ao concluir a visita geral, calcular tempo realizado por loja/ambiente, horas noturnas na faixa fixa de 22h às 5h e horas extras acima de 8 horas trabalhadas no mesmo dia, preservando os intervalos reais registrados.
+
+Com base no tempo estimado, calcular a quantidade de dias úteis necessária para os técnicos designados concluírem o levantamento sem horas extras ou trabalho noturno. Quando o usuário informar um prazo em dias, calcular a quantidade mínima de técnicos necessária, usando jornada diurna de 8 horas por técnico/dia.
