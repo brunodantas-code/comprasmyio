@@ -3451,6 +3451,7 @@ export type Database = {
       }
       site_survey_attachments: {
         Row: {
+          attachment_kind: string
           content_type: string | null
           created_at: string
           file_name: string
@@ -3464,6 +3465,7 @@ export type Database = {
           visit_luc_id: string | null
         }
         Insert: {
+          attachment_kind?: string
           content_type?: string | null
           created_at?: string
           file_name: string
@@ -3477,6 +3479,7 @@ export type Database = {
           visit_luc_id?: string | null
         }
         Update: {
+          attachment_kind?: string
           content_type?: string | null
           created_at?: string
           file_name?: string
@@ -4233,6 +4236,60 @@ export type Database = {
           },
         ]
       }
+      site_survey_time_assumptions: {
+        Row: {
+          active: boolean
+          answer_value: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          minutes: number
+          name: string
+          position: number
+          question_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          answer_value?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          minutes?: number
+          name: string
+          position?: number
+          question_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          answer_value?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          minutes?: number
+          name?: string
+          position?: number
+          question_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_survey_time_assumptions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_time_assumptions_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_survey_user_permissions: {
         Row: {
           allowed: boolean
@@ -4310,6 +4367,8 @@ export type Database = {
           last_progress_at: string | null
           name: string
           pending_fields: Json
+          started_at: string | null
+          started_by: string | null
           template_id: string | null
           updated_at: string
           updated_by: string | null
@@ -4326,6 +4385,8 @@ export type Database = {
           last_progress_at?: string | null
           name: string
           pending_fields?: Json
+          started_at?: string | null
+          started_by?: string | null
           template_id?: string | null
           updated_at?: string
           updated_by?: string | null
@@ -4342,6 +4403,8 @@ export type Database = {
           last_progress_at?: string | null
           name?: string
           pending_fields?: Json
+          started_at?: string | null
+          started_by?: string | null
           template_id?: string | null
           updated_at?: string
           updated_by?: string | null
@@ -4358,6 +4421,13 @@ export type Database = {
           {
             foreignKeyName: "site_survey_visit_environments_created_by_fkey"
             columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_visit_environments_started_by_fkey"
+            columns: ["started_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -4476,6 +4546,8 @@ export type Database = {
           luc_number: string
           pending_fields: Json
           shop_name: string
+          started_at: string | null
+          started_by: string | null
           updated_at: string
           updated_by: string | null
           visit_id: string
@@ -4496,6 +4568,8 @@ export type Database = {
           luc_number: string
           pending_fields?: Json
           shop_name: string
+          started_at?: string | null
+          started_by?: string | null
           updated_at?: string
           updated_by?: string | null
           visit_id: string
@@ -4516,6 +4590,8 @@ export type Database = {
           luc_number?: string
           pending_fields?: Json
           shop_name?: string
+          started_at?: string | null
+          started_by?: string | null
           updated_at?: string
           updated_by?: string | null
           visit_id?: string
@@ -4545,6 +4621,13 @@ export type Database = {
           {
             foreignKeyName: "site_survey_visit_lucs_created_by_fkey"
             columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_visit_lucs_started_by_fkey"
+            columns: ["started_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -4744,6 +4827,8 @@ export type Database = {
           luc_number: string | null
           notes: string | null
           project_id: string | null
+          report_finalized_at: string | null
+          report_time_summary: Json | null
           review_notes: string | null
           scheduled_end: string | null
           scheduled_start: string
@@ -4771,6 +4856,8 @@ export type Database = {
           luc_number?: string | null
           notes?: string | null
           project_id?: string | null
+          report_finalized_at?: string | null
+          report_time_summary?: Json | null
           review_notes?: string | null
           scheduled_end?: string | null
           scheduled_start: string
@@ -4798,6 +4885,8 @@ export type Database = {
           luc_number?: string | null
           notes?: string | null
           project_id?: string | null
+          report_finalized_at?: string | null
+          report_time_summary?: Json | null
           review_notes?: string | null
           scheduled_end?: string | null
           scheduled_start?: string
