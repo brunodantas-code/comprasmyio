@@ -358,9 +358,9 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
   const pointSections = sortByPosition(data.sections.filter((section) => section.active && section.template_id === selectedPointTemplateId)).slice(hasOwnEnvironmentTemplate ? 0 : 3);
   const questions = sortByPosition(data.questions.filter((question) => question.active && (generalSections.some((section) => section.id === question.section_id) || pointSections.some((section) => section.id === question.section_id))));
   const selectedPointCancelled = pointKind === "luc" && selectedPointRecord?.completion_status === "cancelada";
-  const facadeAttachment = (detail?.attachments ?? []).find((item) => item.attachment_kind === "facade" && matchesPoint(item));
   const savedPendingFields = Array.isArray(selectedPointRecord?.pending_fields) ? selectedPointRecord.pending_fields.filter((item): item is string => typeof item === "string") : [];
   const matchesPoint = (item: { visit_luc_id?: string | null; visit_environment_id?: string | null }) => pointKind === "luc" ? item.visit_luc_id === pointId : item.visit_environment_id === pointId;
+  const facadeAttachment = (detail?.attachments ?? []).find((item) => item.attachment_kind === "facade" && matchesPoint(item));
   const scopedMaterials = (detail?.visitMaterials ?? []).filter(matchesPoint);
   const scopedMaterialDecision = (detail?.materialDecisions ?? []).find(matchesPoint);
   const scopedTechnicians = (detail?.technicians ?? []).filter((item) => !item.visit_luc_id && !item.visit_environment_id);
@@ -470,7 +470,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
         const safe = photo.name.replace(/[^a-zA-Z0-9._-]/g, "-"); const path = `${visit.id}/${isGeneralQuestion ? "geral" : pointId}/${crypto.randomUUID()}-${safe}`;
         const { error: uploadError } = await supabase.storage.from("site-survey-attachments").upload(path, photo); if (uploadError) throw uploadError;
         const attachmentScope = isGeneralQuestion ? { visit_luc_id: null, visit_environment_id: null } : scope;
-        const { error } = await supabase.from("site_survey_attachments").insert({ visit_id: visit.id, ...attachmentScope, question_id: question.id, uploaded_by: data.userId, file_name: photo.name, storage_path: path, content_type: photo.type, file_size: photo.size }); if (error) throw error;
+        const { error } = await supabase.from("site_survey_attachments").insert({ visit_id: visit.id, ...attachmentScope, question_id: question.id, attachment_kind: "question", uploaded_by: data.userId, file_name: photo.name, storage_path: path, content_type: photo.type, file_size: photo.size }); if (error) throw error;
       }
     }
     const existingResponses = (detail?.responses ?? []).filter((response) => phase === "pre_visit"
@@ -524,7 +524,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
        if (validMaterialRows.length) { const { error: materialError } = await supabase.from("site_survey_visit_materials").insert(validMaterialRows.map((item) => ({ visit_id: visit.id, ...scope, catalog_item_id: item.catalog_item_id, quantity: Number(item.quantity), notes: item.notes.trim() || null, screwdriver_type_id: item.screwdriver_type_id === "none" ? null : item.screwdriver_type_id, wrench_size_id: item.wrench_size_id === "none" ? null : item.wrench_size_id, recorded_by: data.userId }))); if (materialError) throw materialError; }
       let decisionDelete = supabase.from("site_survey_material_decisions").delete().eq("visit_id", visit.id); decisionDelete = pointKind === "luc" ? decisionDelete.eq("visit_luc_id", pointId) : decisionDelete.eq("visit_environment_id", pointId); const { error: decisionClearError } = await decisionDelete; if (decisionClearError) throw decisionClearError;
        const { error: decisionError } = await supabase.from("site_survey_material_decisions").insert({ visit_id: visit.id, ...scope, no_additional_material: !needsSpecialEquipment || noAdditionalMaterial, recorded_by: data.userId }); if (decisionError) throw decisionError;
-      for (const file of files) { const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "-"); const path = `${visit.id}/${pointId}/${crypto.randomUUID()}-${safe}`; const { error: uploadError } = await supabase.storage.from("site-survey-attachments").upload(path, file); if (uploadError) throw uploadError; const { error } = await supabase.from("site_survey_attachments").insert({ visit_id: visit.id, ...scope, uploaded_by: data.userId, file_name: file.name, storage_path: path, content_type: file.type, file_size: file.size }); if (error) throw error; }
+       for (const file of files) { const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "-"); const path = `${visit.id}/${pointId}/${crypto.randomUUID()}-${safe}`; const { error: uploadError } = await supabase.storage.from("site-survey-attachments").upload(path, file); if (uploadError) throw uploadError; const { error } = await supabase.from("site_survey_attachments").insert({ visit_id: visit.id, ...scope, attachment_kind: "general", uploaded_by: data.userId, file_name: file.name, storage_path: path, content_type: file.type, file_size: file.size }); if (error) throw error; }
        const activeSection = pointSections.find((section) => section.id === openSectionId);
        const activeSectionPending = activeSection ? pointPendingFields(form, new Set([activeSection.id])) : [];
        const previousOtherSectionPending = activeSection
