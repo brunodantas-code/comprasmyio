@@ -48,6 +48,13 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
   const clean = (value: string) => value.replace(/[.!?]+$/, "").trim();
   const lower = (value: string) => clean(value).toLocaleLowerCase("pt-BR");
   const statusOnly = (value: string) => lower((value.split("—").at(-1) ?? value).trim());
+  const detailOnly = (value: string) => clean((value.split("—").at(-1) ?? value).trim());
+  const placePhrase = (value: string) => {
+    const place = lower(value);
+    if (/^(loja|sobreloja|parede|galeria|cozinha|subestacao)/.test(place)) return `na ${place}`;
+    if (/^(armario|quadro|busway)/.test(place)) return `no ${place}`;
+    return `em ${place}`;
+  };
   const add = (parts: RichPart[], before: string, answer: ReturnType<typeof get>, after = "") => {
     if (!answer?.value) return false;
     parts.push({ text: before }, { text: clean(answer.value), bold: true }, { text: after });
@@ -65,28 +72,31 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
   const locationDetail = hydraulicAnswer(["detalhar para facilitar", "facilitar sua localizacao"]);
   const access = hydraulicAnswer(["dificuldade de acesso", "acesso ao hidrometro"]);
   if (location) {
-    add(hydraulic, "O hidrômetro encontra-se em ", location);
-    if (locationDetail) add(hydraulic, ", ", locationDetail);
+    hydraulic.push({ text: "O hidrômetro encontra-se " }, { text: placePhrase(location.value), bold: true });
+    if (locationDetail) hydraulic.push({ text: ", " }, { text: lower(locationDetail.value), bold: true });
     if (access) hydraulic.push({ text: ", de " }, { text: lower(access.value), bold: true }, { text: " acesso. " }); else hydraulic.push({ text: ". " });
   }
   const pulse = hydraulicAnswer(["condicao da saida pulsada", "saida pulsada"]);
   const flowRate = hydraulicAnswer(["vazao nominal", "vazao do hidrometro"]);
   if (pulse) hydraulic.push({ text: "A saída pulsada está " }, { text: statusOnly(pulse.value), bold: true }, { text: flowRate ? " e a vazão nominal é de " : ". " });
   if (flowRate) hydraulic.push({ text: pulse ? "" : "A vazão nominal é de " }, { text: clean(flowRate.value), bold: true }, { text: ". " });
-  add(hydraulic, "O sentido do fluxo de água foi classificado como ", hydraulicAnswer(["sentido do fluxo"]), ". ");
-  add(hydraulic, "O flange é do tipo ", hydraulicAnswer(["tipo de flange"]), ". ");
+  const flow = hydraulicAnswer(["sentido do fluxo"]);
+  if (flow) hydraulic.push({ text: "O sentido do fluxo de água foi classificado como " }, { text: normalize(flow.value).includes("desacordo") || normalize(flow.value).includes("incorret") ? "incorreto" : normalize(flow.value).includes("acordo") || normalize(flow.value).includes("corret") ? "correto" : lower(flow.value), bold: true }, { text: ". " });
+  const flange = hydraulicAnswer(["tipo de flange"]);
+  if (flange) hydraulic.push({ text: "O flange é do tipo " }, { text: lower(flange.value), bold: true }, { text: ". " });
   const registerType = hydraulicAnswer(["tipo de registro existente"]);
   const registerCondition = hydraulicAnswer(["condicao do registro"]);
-  if (registerType) add(hydraulic, "O registro existente é do tipo ", registerType, registerCondition ? " e encontra-se " : ". ");
+  if (registerType) hydraulic.push({ text: "O registro existente é do tipo " }, { text: lower(registerType.value), bold: true }, { text: registerCondition ? " e encontra-se " : ". " });
   if (registerCondition) hydraulic.push({ text: registerType ? "" : "O registro encontra-se " }, { text: lower(registerCondition.value), bold: true }, { text: ". " });
   add(hydraulic, "O diâmetro da tubulação de água é de ", hydraulicAnswer(["diametro da tubulacao"]), ". ");
   const nearbyPower = hydraulicAnswer(["ponto de eletrica proximo", "ponto eletrico proximo"]);
   if (nearbyPower) hydraulic.push({ text: lower(nearbyPower.value).startsWith("sim") ? "Existe ponto de elétrica próximo ao hidrômetro" : "Não existe ponto de elétrica próximo ao hidrômetro", bold: true }, { text: ". " });
   add(hydraulic, "O encaminhamento deve ser realizado por meio de ", hydraulicAnswer(["encaminhamento da eletrica", "encaminhamento eletrico"]), ". ");
-  add(hydraulic, "A instalação é de complexidade ", hydraulicAnswer(["complexidade dessa instalacao", "complexidade da instalacao"]), ". ");
+  const hydraulicComplexity = hydraulicAnswer(["complexidade dessa instalacao", "complexidade da instalacao"]);
+  if (hydraulicComplexity) hydraulic.push({ text: "A instalação é de complexidade " }, { text: lower(hydraulicComplexity.value), bold: true }, { text: ". " });
   const consumptionLevel = hydraulicAnswer(["classificacao do perfil de consumo", "perfil de consumo classificado"]);
   const consumptionProfile = hydraulicAnswer(["perfil de consumo da loja"]);
-  if (consumptionLevel) add(hydraulic, "O perfil de consumo da loja é ", consumptionLevel, consumptionProfile ? ", contemplando " : ".");
+  if (consumptionLevel) hydraulic.push({ text: "O perfil de consumo da loja é " }, { text: lower(consumptionLevel.value), bold: true }, { text: consumptionProfile ? ", contemplando " : "." });
   if (consumptionProfile) hydraulic.push({ text: consumptionLevel ? "" : "O perfil de consumo da loja contempla " }, { text: lower(consumptionProfile.value), bold: true }, { text: "." });
   if (hydraulic.length) summaries.push({ title: "Hidráulica", parts: hydraulic, questionIds: hydraulicIds });
 
@@ -100,9 +110,11 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
   const cable = electricalAnswer(["bitola do cabo"]);
   const breaker = electricalAnswer(["amperagem do disjuntor"]);
   if (cable) add(electrical, "A bitola do cabo de alimentação de entrada é de ", cable, breaker ? " e a amperagem do disjuntor de entrada é de " : ". ");
-  if (breaker) electrical.push({ text: cable ? "" : "A amperagem do disjuntor de entrada é de " }, { text: clean(breaker.value), bold: true }, { text: ". " });
-  add(electrical, "O quadro elétrico se encontra em ", electricalAnswer(["localizacao do quadro eletrico", "onde se encontra o quadro eletrico"]), ". ");
-  add(electrical, "A instalação elétrica é de complexidade ", electricalAnswer(["complexidade eletrica", "complexidade dessa instalacao", "complexidade da instalacao"]), ".");
+  if (breaker) electrical.push({ text: cable ? "" : "A amperagem do disjuntor de entrada é de " }, { text: detailOnly(breaker.value), bold: true }, { text: ". " });
+  const panelLocation = electricalAnswer(["localizacao do quadro eletrico", "onde se encontra o quadro eletrico"]);
+  if (panelLocation) electrical.push({ text: "O quadro elétrico se encontra " }, { text: placePhrase(panelLocation.value), bold: true }, { text: ". " });
+  const electricalComplexity = electricalAnswer(["complexidade eletrica", "complexidade dessa instalacao", "complexidade da instalacao"]);
+  if (electricalComplexity) electrical.push({ text: "A instalação elétrica é de complexidade " }, { text: lower(electricalComplexity.value), bold: true }, { text: "." });
   if (electrical.length) summaries.push({ title: "Elétrica", parts: electrical, questionIds: electricalIds });
   return summaries;
 };
