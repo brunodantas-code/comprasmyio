@@ -762,6 +762,7 @@ function SurveyCatalogAdmin({ data, onChanged }: { data: NonNullable<ReturnType<
   return <div className="space-y-5">
     <div><h2 className="text-xl font-bold">Cadastro</h2><p className="text-sm text-muted-foreground">Diversos</p></div>
     <Card><CardHeader className="py-4"><div className="flex items-center justify-between gap-3"><CardTitle className="text-base">Novo cadastro</CardTitle><Button type="button" size="compactIcon" variant="ghost" aria-label="Criar novo cadastro" title="Criar novo cadastro" onClick={() => setNewCatalogOpen(true)}><Plus strokeWidth={2.5} /></Button></div></CardHeader></Card>
+    <SiteSurveyTimeAssumptions items={data.timeAssumptions} questions={data.questions} userId={data.userId} onChanged={onChanged} />
     <Dialog open={newCatalogOpen} onOpenChange={setNewCatalogOpen}><DialogContent><DialogHeader><DialogTitle>Novo cadastro</DialogTitle><DialogDescription>Crie uma nova lista para o Site Survey.</DialogDescription></DialogHeader><form className="space-y-4" onSubmit={(event) => { event.preventDefault(); void addCatalog(event.currentTarget); }}><LabeledInput name="name" label="Nome do cadastro" required /><DialogFooter><Button type="submit">Salvar</Button></DialogFooter></form></DialogContent></Dialog>
     <div className="grid gap-4 lg:grid-cols-2">{lists.map((list) => {
       const open = expanded.has(list.key);
