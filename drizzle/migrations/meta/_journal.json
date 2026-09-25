@@ -505,6 +505,13 @@
       "when": 1790297157827,
       "tag": "0071_add_site_survey_luc_cancellation",
       "breakpoints": true
+    },
+    {
+      "idx": 72,
+      "version": "7",
+      "when": 1790335124849,
+      "tag": "0072_add_checklist_to_site_survey_environment",
+      "breakpoints": true
     }
   ]
 }

@@ -4310,6 +4310,7 @@ export type Database = {
           last_progress_at: string | null
           name: string
           pending_fields: Json
+          template_id: string | null
           updated_at: string
           updated_by: string | null
           visit_id: string
@@ -4325,6 +4326,7 @@ export type Database = {
           last_progress_at?: string | null
           name: string
           pending_fields?: Json
+          template_id?: string | null
           updated_at?: string
           updated_by?: string | null
           visit_id: string
@@ -4340,6 +4342,7 @@ export type Database = {
           last_progress_at?: string | null
           name?: string
           pending_fields?: Json
+          template_id?: string | null
           updated_at?: string
           updated_by?: string | null
           visit_id?: string
@@ -4357,6 +4360,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_visit_environments_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_templates"
             referencedColumns: ["id"]
           },
           {
