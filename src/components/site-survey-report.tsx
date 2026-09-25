@@ -9,6 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import type { TimeAssumption } from "@/components/site-survey-time-assumptions";
+import myioLogoUrl from "@/assets/myio-logo-light.svg?url";
+import nunitoRegularUrl from "@/assets/fonts/nunito-regular.ttf?url";
+import nunitoBoldUrl from "@/assets/fonts/nunito-bold.ttf?url";
+import nunitoExtraBoldUrl from "@/assets/fonts/nunito-extrabold.ttf?url";
 
 type Visit = { id: string; survey_number: number; client_id: string | null; client_unit_id: string | null; project_id: string | null; technician_id: string; status: string; scheduled_start: string; scheduled_end: string | null; address: string; contact_name: string | null; contact_phone: string | null; notes: string | null; started_at: string | null; completed_at: string | null };
 type Named = { id: string; name: string };
@@ -83,6 +87,12 @@ const imageDataUrl = async (url: string) => new Promise<string>((resolve, reject
   image.onload = () => { const canvas = document.createElement("canvas"); const scale = Math.min(1, 900 / Math.max(image.naturalWidth, image.naturalHeight)); canvas.width = Math.max(1, Math.round(image.naturalWidth * scale)); canvas.height = Math.max(1, Math.round(image.naturalHeight * scale)); const context = canvas.getContext("2d"); if (!context) return reject(new Error("Não foi possível preparar a foto.")); context.drawImage(image, 0, 0, canvas.width, canvas.height); resolve(canvas.toDataURL("image/jpeg", 0.78)); };
   image.onerror = () => reject(new Error("Não foi possível carregar uma foto do relatório.")); image.src = url;
 });
+const fileBase64 = async (url: string) => {
+  const bytes = new Uint8Array(await (await fetch(url)).arrayBuffer());
+  let binary = "";
+  for (let index = 0; index < bytes.length; index += 8192) binary += String.fromCharCode(...bytes.subarray(index, index + 8192));
+  return btoa(binary);
+};
 const calculateWorkedTime = (points: Point[]) => {
   const byDay = new Map<string, Array<[number, number]>>();
   for (const point of points) {
@@ -160,18 +170,47 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     const [{ jsPDF }, autoTableModule] = await Promise.all([import("jspdf"), import("jspdf-autotable")]);
     const autoTable = autoTableModule.default;
     const pdf = new jsPDF({ unit: "mm", format: "a4" });
-    const ink: [number, number, number] = blackAndWhite ? [25, 25, 25] : [18, 197, 138];
-    pdf.setFont("helvetica", "bold"); pdf.setFontSize(17); pdf.text(`Site Survey #${String(visit.survey_number).padStart(12, "0")}`, 14, 18);
-    pdf.setFont("helvetica", "normal"); pdf.setFontSize(10); pdf.text(visit.address, 14, 25);
-    autoTable(pdf, { startY: 31, theme: "grid", headStyles: { fillColor: ink }, head: [["Cliente", "Projeto", "Técnico", "Situação"]], body: [[clients.find((item) => item.id === visit.client_id)?.name ?? "—", projects.find((item) => item.id === visit.project_id)?.name ?? "—", technicians.find((item) => item.id === visit.technician_id)?.full_name ?? "—", visit.status.replaceAll("_", " ")]] });
+    const purple: [number, number, number] = blackAndWhite ? [28, 28, 28] : [103, 58, 182];
+    const green: [number, number, number] = blackAndWhite ? [95, 95, 95] : [15, 196, 130];
+    const dark: [number, number, number] = [11, 0, 35];
+    const soft: [number, number, number] = [238, 236, 243];
+    const reportNumber = String(visit.survey_number).padStart(12, "0");
+    const clientName = clients.find((item) => item.id === visit.client_id)?.name ?? "—";
+    const unitName = units.find((item) => item.id === visit.client_unit_id)?.name ?? "—";
+    const projectName = projects.find((item) => item.id === visit.project_id)?.name ?? "—";
+    const technicianName = technicians.find((item) => item.id === visit.technician_id)?.full_name ?? "—";
+    const issueDate = new Date(visit.completed_at ?? visit.scheduled_start).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
+    const [regularFont, boldFont, extraBoldFont, logoDataUrl] = await Promise.all([fileBase64(nunitoRegularUrl), fileBase64(nunitoBoldUrl), fileBase64(nunitoExtraBoldUrl), imageDataUrl(myioLogoUrl)]);
+    pdf.addFileToVFS("Nunito-Regular.ttf", regularFont); pdf.addFont("Nunito-Regular.ttf", "Nunito", "normal");
+    pdf.addFileToVFS("Nunito-Bold.ttf", boldFont); pdf.addFont("Nunito-Bold.ttf", "Nunito", "bold");
+    pdf.addFileToVFS("Nunito-ExtraBold.ttf", extraBoldFont); pdf.addFont("Nunito-ExtraBold.ttf", "Nunito", "extrabold");
+    pdf.setFont("Nunito", "normal");
+
+    // Capa técnica, inspirada no relatório institucional enviado.
+    pdf.addImage(logoDataUrl, "PNG", 16, 18, 40, 13);
+    pdf.setDrawColor(...purple); pdf.setLineWidth(0.8); pdf.line(16, 52, 35, 52);
+    pdf.setFont("Nunito", "bold"); pdf.setFontSize(8); pdf.setTextColor(...purple); pdf.text("RELATÓRIO TÉCNICO", 40, 53.5);
+    pdf.setFont("Nunito", "extrabold"); pdf.setTextColor(...dark); pdf.setFontSize(31); pdf.text("SITE", 16, 94); pdf.text("SURVEY", 16, 108);
+    pdf.setTextColor(...purple); pdf.text("RELATÓRIO", 16, 122);
+    pdf.setFont("Nunito", "normal"); pdf.setFontSize(13); pdf.setTextColor(85, 82, 94); pdf.text(unitName, 16, 135);
+    pdf.setDrawColor(...dark); pdf.setLineWidth(0.7); pdf.line(16, 190, 194, 190);
+    pdf.setFontSize(7); pdf.setFont("Nunito", "bold"); pdf.setTextColor(120, 116, 128); pdf.text("CLIENTE", 16, 199); pdf.text("DATA DE EMISSÃO", 112, 199);
+    pdf.setFontSize(12); pdf.setTextColor(...dark); pdf.text(clientName, 16, 207); pdf.text(issueDate, 112, 207);
+    pdf.setFont("Nunito", "normal"); pdf.setFontSize(9); pdf.setTextColor(100, 96, 108); pdf.text(unitName, 16, 214); pdf.text(`REF. SS-${reportNumber}`, 112, 214);
+    pdf.setFontSize(7); pdf.setTextColor(145, 141, 151); pdf.text("myio Automação Ltda — Relatório de Site Survey", 16, 282); pdf.setFillColor(...green); pdf.rect(181, 280.5, 13, 1.3, "F");
+
+    pdf.addPage();
+    pdf.setFont("Nunito", "extrabold"); pdf.setTextColor(...dark); pdf.setFontSize(17); pdf.text("01", 14, 24); pdf.setFontSize(14); pdf.text("VISÃO GERAL", 28, 24);
+    pdf.setDrawColor(...purple); pdf.setLineWidth(0.45); pdf.line(14, 28, 196, 28);
+    autoTable(pdf, { startY: 34, theme: "grid", styles: { font: "Nunito", fontSize: 8, textColor: dark, lineColor: soft }, headStyles: { fillColor: purple, textColor: [255, 255, 255], fontStyle: "bold" }, head: [["Cliente", "Projeto", "Técnico", "Situação"]], body: [[clientName, projectName, technicianName, visit.status.replaceAll("_", " ")]] });
     let y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 7;
-    autoTable(pdf, { startY: y, theme: "grid", headStyles: { fillColor: ink }, head: [["Planejamento", "Valor"]], body: [["Tempo estimado", formatMinutes(calculation.estimated)], ["Tempo realizado", formatMinutes(calculation.worked)], ["Horas extras", formatMinutes(calculation.overtime)], ["Horas noturnas (22h às 5h)", formatMinutes(calculation.night)], ["Dias com equipe designada", String(calculation.days)], [`Técnicos para ${deadlineDays} dia(s)`, String(calculation.techniciansNeeded)]] });
+    autoTable(pdf, { startY: y, theme: "grid", styles: { font: "Nunito", fontSize: 8, textColor: dark, lineColor: soft }, headStyles: { fillColor: purple, textColor: [255, 255, 255], fontStyle: "bold" }, head: [["Planejamento", "Valor"]], body: [["Tempo estimado", formatMinutes(calculation.estimated)], ["Tempo realizado", formatMinutes(calculation.worked)], ["Horas extras", formatMinutes(calculation.overtime)], ["Horas noturnas (22h às 5h)", formatMinutes(calculation.night)], ["Dias com equipe designada", String(calculation.days)], [`Técnicos para ${deadlineDays} dia(s)`, String(calculation.techniciansNeeded)]] });
     y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 8;
-    if (technicalTotals.length) { autoTable(pdf, { startY: y, theme: "grid", headStyles: { fillColor: ink }, head: [["Totalizadores técnicos", "Quantidade"]], body: technicalTotals.flatMap((group) => group.values.map(([value, count]) => [`${group.label}: ${value}`, String(count)])) }); y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 8; }
+    if (technicalTotals.length) { autoTable(pdf, { startY: y, theme: "grid", styles: { font: "Nunito", fontSize: 8, textColor: dark, lineColor: soft }, headStyles: { fillColor: purple, textColor: [255, 255, 255], fontStyle: "bold" }, head: [["Totalizadores técnicos", "Quantidade"]], body: technicalTotals.flatMap((group) => group.values.map(([value, count]) => [`${group.label}: ${value}`, String(count)])) }); y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 8; }
     const drawRichParagraph = (parts: RichPart[], startY: number) => {
       const left = 14; const right = 196; const lineHeight = 5; let cursorX = left; let cursorY = startY;
       for (const part of parts) {
-        pdf.setFont("helvetica", part.bold ? "bold" : "normal");
+        pdf.setFont("Nunito", part.bold ? "bold" : "normal");
         for (const token of part.text.split(/(\s+)/).filter(Boolean)) {
           const width = pdf.getTextWidth(token);
           if (cursorX + width > right && token.trim()) { cursorX = left; cursorY += lineHeight; }
@@ -179,26 +218,33 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
           pdf.text(token, cursorX, cursorY); cursorX += width;
         }
       }
-      pdf.setFont("helvetica", "normal");
+      pdf.setFont("Nunito", "normal");
       return cursorY + lineHeight;
     };
     for (const point of data.points) {
       if (y > 250) { pdf.addPage(); y = 18; }
-      pdf.setFont("helvetica", "bold"); pdf.setFontSize(12); pdf.setTextColor(...ink); pdf.text(point.label, 14, y); pdf.setTextColor(25, 25, 25); y += 5;
+      pdf.setFont("Nunito", "extrabold"); pdf.setFontSize(12); pdf.setTextColor(...purple); pdf.text(point.label, 14, y); pdf.setDrawColor(...green); pdf.line(14, y + 2, 196, y + 2); pdf.setTextColor(...dark); y += 7;
       const pointAnswers = pointResponses(point);
       const stageSeven = pointAnswers.filter((response) => stageSevenQuestionIds.has(response.question_id)).map((response) => valueText(response.answer)).filter(Boolean).join("; ");
       const calls = data.calls.filter((item) => point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id).map((call) => { const linked = call.internal_calls as unknown as { call_number?: string; title?: string; status?: string } | null; return linked ? `#${linked.call_number ?? "—"} ${linked.title ?? "Chamado"} (${linked.status ?? call.status})` : call.status; }).join("; ");
-      pdf.setFont("helvetica", "normal"); pdf.setFontSize(9); pdf.text(`Início: ${point.started_at ? new Date(point.started_at).toLocaleString("pt-BR") : "não registrado"}  |  Conclusão: ${point.completed_at ? new Date(point.completed_at).toLocaleString("pt-BR") : "não registrada"}  |  Duração: ${formatMinutes(durationMinutes(point.started_at, point.completed_at))}`, 14, y); y += 7;
+      pdf.setFont("Nunito", "normal"); pdf.setFontSize(9); pdf.text(`Início: ${point.started_at ? new Date(point.started_at).toLocaleString("pt-BR") : "não registrado"}  |  Conclusão: ${point.completed_at ? new Date(point.completed_at).toLocaleString("pt-BR") : "não registrada"}  |  Duração: ${formatMinutes(durationMinutes(point.started_at, point.completed_at))}`, 14, y); y += 7;
       for (const summary of pointSummaries(point)) {
         if (y > 268) { pdf.addPage(); y = 18; }
-        pdf.setFont("helvetica", "bold"); pdf.setFontSize(10); pdf.text(summary.title, 14, y); y = drawRichParagraph(summary.parts, y + 5) + 2;
+        pdf.setFont("Nunito", "bold"); pdf.setFontSize(10); pdf.text(summary.title, 14, y); y = drawRichParagraph(summary.parts, y + 5) + 2;
       }
-      if (stageSeven) { pdf.setFont("helvetica", "bold"); pdf.text("Anotações da Etapa 7", 14, y); y = drawRichParagraph([{ text: stageSeven }], y + 5) + 2; }
-      if (calls) { pdf.setFont("helvetica", "bold"); pdf.text("Ações e chamados", 14, y); y = drawRichParagraph([{ text: calls }], y + 5) + 2; }
+      if (stageSeven) { pdf.setFont("Nunito", "bold"); pdf.text("Anotações da Etapa 7", 14, y); y = drawRichParagraph([{ text: stageSeven }], y + 5) + 2; }
+      if (calls) { pdf.setFont("Nunito", "bold"); pdf.text("Ações e chamados", 14, y); y = drawRichParagraph([{ text: calls }], y + 5) + 2; }
       const photos = data.attachments.filter((item) => item.content_type?.startsWith("image/") && (point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id));
       let photoColumn = 0;
       for (const photo of photos) { const { data: signed } = await supabase.storage.from("site-survey-attachments").createSignedUrl(photo.storage_path, 300); if (!signed?.signedUrl) continue; if (photoColumn === 0 && y > 245) { pdf.addPage(); y = 18; } try { pdf.addImage(await imageDataUrl(signed.signedUrl), "JPEG", 14 + photoColumn * 46, y, 42, 31, undefined, "FAST"); photoColumn += 1; if (photoColumn === 4) { photoColumn = 0; y += 35; } } catch { /* Mantém o PDF disponível caso uma foto falhe. */ } }
       if (photoColumn > 0) y += 35;
+    }
+    const totalPages = pdf.getNumberOfPages();
+    for (let page = 2; page <= totalPages; page += 1) {
+      pdf.setPage(page); pdf.setDrawColor(...soft); pdf.setLineWidth(0.25); pdf.line(14, 12, 196, 12);
+      pdf.setFont("Nunito", "bold"); pdf.setFontSize(7); pdf.setTextColor(...purple); pdf.text(`SS-${reportNumber}`, 14, 9);
+      pdf.setFont("Nunito", "normal"); pdf.setTextColor(125, 121, 132); pdf.text(`${unitName} — Relatório de Site Survey`, 196, 9, { align: "right" });
+      pdf.line(14, 287, 196, 287); pdf.setFontSize(7); pdf.text("myio Automação Ltda", 14, 292); pdf.text(`Página ${page} de ${totalPages}`, 196, 292, { align: "right" });
     }
     pdf.save(`site-survey-${visit.survey_number}-${blackAndWhite ? "impressao" : "digital"}.pdf`);
   };
