@@ -2737,9 +2737,9 @@ function OrdersTable({
           return (
             <div key={o.id} className="rounded-lg border border-border bg-card p-3">
                <Row label="Approval">
-                 <div className="inline-flex flex-col items-start font-mono font-bold">
-                   <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} />
-                   <div className="mt-1 flex flex-wrap items-center gap-1">
+                 <div className="inline-flex max-w-full flex-col items-start font-mono font-bold">
+                    <div className="flex max-w-full items-center gap-1.5">
+                      <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} />
                      {me?.isAdmin && <AdminEditApprovalDialog order={o} items={(groupedOrderItems?.get(o.id) ?? []) as ApprovalEditItem[]} />}
                      {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
                      {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
@@ -2820,7 +2820,7 @@ function OrdersTable({
       <Table className="w-full table-fixed">
         <TableHeader className="[&_tr]:border-b">
           <TableRow className="border-t bg-primary/15 hover:bg-primary/15">
-            <TableHead className="w-[165px] text-left font-bold">Approval</TableHead>
+            <TableHead className="w-[200px] text-left font-bold">Approval</TableHead>
             <TableHead className="w-[180px] text-center font-bold">Itens da Solicitação</TableHead>
             <TableHead className="w-[105px] text-center font-bold">Tipo</TableHead>
             <TableHead className="w-[90px] text-center font-bold">Alocação</TableHead>
@@ -2878,9 +2878,9 @@ function OrdersTable({
           {visibleOrders.map((o) => (
             <TableRow key={o.id} className="align-top">
                <TableCell className="font-mono text-xs text-left">
-                 <div className="inline-flex flex-col items-start">
-                   <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} />
-                   <div className="mt-1 flex flex-wrap items-center gap-1">
+                  <div className="inline-flex max-w-full flex-col items-start">
+                    <div className="flex max-w-full items-center gap-1.5">
+                      <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} />
                      {me?.isAdmin && <AdminEditApprovalDialog order={o} items={(groupedOrderItems?.get(o.id) ?? []) as ApprovalEditItem[]} />}
                      {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
                      {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
@@ -3594,7 +3594,7 @@ function InternalDeleteOrderDialog({ order }: { order: Order }) {
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button type="button" size="compactIcon" aria-label="Excluir pedido" title="Excluir pedido">
+        <Button type="button" size="compactIcon" variant="ghost" aria-label="Excluir pedido" title="Excluir pedido">
           <Trash2 className="h-3.5 w-3.5" />
         </Button>
       </AlertDialogTrigger>
