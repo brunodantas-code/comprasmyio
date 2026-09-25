@@ -740,3 +740,5 @@
 - [x] Site Survey — corrigir divergência da etapa 7 na Vivara: distinguir pendências reais do estado de conclusão da loja.
 
 - [ ] Site Survey — cancelar uma Loja/LUC com motivo administrável, status Cancelada e sem bloquear a conclusão geral.
+
+- [x] Site Survey — cancelar individualmente uma visita de Loja/LUC com motivo administrável, preservando registros e sem bloquear a conclusão geral.
