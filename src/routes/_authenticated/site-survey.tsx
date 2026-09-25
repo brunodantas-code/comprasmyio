@@ -700,9 +700,12 @@ function SortableQuestionRow({ id, children }: { id: string; children: ReactNode
   return <div ref={sortable.setNodeRef} style={{ transform: CSS.Transform.toString(sortable.transform), transition: sortable.transition }} className={`border-t border-border first:border-t-0 ${sortable.isDragging ? "relative z-20 bg-card shadow-lg" : ""}`}><SortableHandleContext.Provider value={{ attributes: sortable.attributes, listeners: sortable.listeners }}>{children}</SortableHandleContext.Provider></div>;
 }
 
-function OrderHandle({ order, label, compact = false }: { order: number; label: string; compact?: boolean }) {
+function OrderHandle({ order, label, compact = false, variant = "section" }: { order: number; label: string; compact?: boolean; variant?: "section" | "question" }) {
   const sortable = useContext(SortableHandleContext);
-  return <div className={`flex w-10 flex-col items-start gap-1 ${compact ? "self-start" : "self-start sm:pt-7"}`}><Button type="button" variant="ghost" className="h-10 w-10 cursor-grab bg-myio-green/10 p-0 font-bold text-myio-green hover:bg-myio-green/20 hover:text-myio-green active:cursor-grabbing touch-none" aria-label={label} title="Arrastar" {...sortable?.attributes} {...sortable?.listeners}><span className="tabular-nums">{order}</span></Button><span className="w-16 text-left text-[10px] leading-tight text-muted-foreground">Arrastar</span></div>;
+  const markerClassName = variant === "question"
+    ? "bg-myio-green/10 text-myio-green hover:bg-myio-green/20 hover:text-myio-green"
+    : "bg-myio-green text-primary-foreground hover:bg-myio-green hover:text-primary-foreground";
+  return <div className={`flex w-10 flex-col items-start gap-1 ${compact ? "self-start" : "self-start sm:pt-7"}`}><Button type="button" variant="ghost" className={`h-10 w-10 cursor-grab p-0 font-bold active:cursor-grabbing touch-none ${markerClassName}`} aria-label={label} title="Arrastar" {...sortable?.attributes} {...sortable?.listeners}><span className="tabular-nums">{order}</span></Button><span className="w-16 text-left text-[10px] leading-tight text-muted-foreground">Arrastar</span></div>;
 }
 
 function SurveyCatalogAdmin({ data, onChanged }: { data: NonNullable<ReturnType<typeof useSurveyDataShape>>; onChanged: () => void }) {
