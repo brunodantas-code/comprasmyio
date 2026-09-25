@@ -366,11 +366,11 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
     }
   };
   const updateStatus = async (status: VisitStatus) => { if ((status === "em_revisao" || status === "concluida") && !allRequiredComplete) return toast.error("Preencha todos os campos obrigatórios antes de concluir."); const stamps: Record<string, string> = {}; if (status === "em_andamento") stamps.started_at = new Date().toISOString(); if (status === "em_revisao") stamps.submitted_at = new Date().toISOString(); if (status === "concluida") stamps.completed_at = new Date().toISOString(); if (status === "cancelada") stamps.cancelled_at = new Date().toISOString(); const { error } = await supabase.from("site_survey_visits").update({ status, review_notes: reviewNotes || visit.review_notes, ...stamps }).eq("id", visit.id); if (error) return toast.error(error.message); toast.success(`Visita ${STATUS[status].toLocaleLowerCase("pt-BR")}`); onChanged(); };
-  const pointPendingFields = (form: HTMLFormElement) => {
+  const pointPendingFields = (form: HTMLFormElement, sectionIds?: Set<string>) => {
     const values = new FormData(form);
     const formAnswers = new Map<string, unknown>(questions.map((question) => [question.id, question.question_type === "multiselect" ? values.getAll(question.id).map(String) : question.question_type === "checkbox" ? values.get(question.id) === "on" : { value: String(values.get(question.id) ?? ""), detail: [String(values.get(`${question.id}__detail`) ?? "").trim(), String(values.get(`${question.id}__subdetail`) ?? "").trim()].filter(Boolean).join(" | ") }]));
     const pending: string[] = [];
-    for (const section of pointSections) {
+    for (const section of pointSections.filter((item) => !sectionIds || sectionIds.has(item.id))) {
       const equipmentQuestion = questions.find((question) => question.section_id === section.id && isSpecialEquipmentQuestion(question));
       if (equipmentQuestion) {
         const equipmentAnswer = answerParts(formAnswers.get(equipmentQuestion.id)).value;
@@ -467,7 +467,18 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
       let decisionDelete = supabase.from("site_survey_material_decisions").delete().eq("visit_id", visit.id); decisionDelete = pointKind === "luc" ? decisionDelete.eq("visit_luc_id", pointId) : decisionDelete.eq("visit_environment_id", pointId); const { error: decisionClearError } = await decisionDelete; if (decisionClearError) throw decisionClearError;
        const { error: decisionError } = await supabase.from("site_survey_material_decisions").insert({ visit_id: visit.id, ...scope, no_additional_material: !needsSpecialEquipment || noAdditionalMaterial, recorded_by: data.userId }); if (decisionError) throw decisionError;
       for (const file of files) { const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "-"); const path = `${visit.id}/${pointId}/${crypto.randomUUID()}-${safe}`; const { error: uploadError } = await supabase.storage.from("site-survey-attachments").upload(path, file); if (uploadError) throw uploadError; const { error } = await supabase.from("site_survey_attachments").insert({ visit_id: visit.id, ...scope, uploaded_by: data.userId, file_name: file.name, storage_path: path, content_type: file.type, file_size: file.size }); if (error) throw error; }
-       const pendingFields = finishPoint ? [] : acceptedPendingFields.length ? acceptedPendingFields : pointPendingFields(form);
+       const activeSection = pointSections.find((section) => section.id === openSectionId);
+       const activeSectionPending = activeSection ? pointPendingFields(form, new Set([activeSection.id])) : [];
+       const previousOtherSectionPending = activeSection
+         ? savedPendingFields.filter((field) => !field.startsWith(`${activeSection.title}:`))
+         : savedPendingFields;
+       const pendingFields = finishPoint
+         ? []
+         : acceptedPendingFields.length
+           ? acceptedPendingFields
+           : activeSection
+             ? [...previousOtherSectionPending, ...activeSectionPending]
+             : savedPendingFields;
        const pointTable = pointKind === "luc" ? "site_survey_visit_lucs" : "site_survey_visit_environments";
        const completedAt = finishPoint ? new Date().toISOString() : null;
        const { error: pointError } = await supabase.from(pointTable).update({ completion_status: finishPoint ? "concluida" : "pendente", completed_at: completedAt, completed_by: finishPoint ? data.userId : null, pending_fields: pendingFields, last_progress_at: new Date().toISOString() }).eq("id", pointId); if (pointError) throw pointError;
