@@ -26,7 +26,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { toast } from "sonner";
 import { ArrowLeft, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Boxes, Building2, Plane, Landmark, Briefcase, Layers3, ArrowUpDown } from "lucide-react";
-import { Trash2, Paperclip, Loader2, DatabaseBackup, CheckCircle2, XCircle, RotateCcw, Pencil, Bell, ShieldCheck, AlertTriangle } from "lucide-react";
+import { Trash2, Paperclip, Loader2, DatabaseBackup, Check, CheckCircle2, XCircle, RotateCcw, Pencil, Bell, ShieldCheck, AlertTriangle } from "lucide-react";
 import { ApprovalWorkflow, MyApprovalFlows, PendingApprovalsByRole, PendingForMe, type ApprovalListOrder } from "@/components/approval-workflow";
 import { z } from "zod";
 import { StockTab } from "@/components/stock-tab";
@@ -50,6 +50,7 @@ import { AddressAutocomplete } from "@/components/address-autocomplete";
 import { LinkedRecordDeletionDialog } from "@/components/linked-record-deletion-dialog";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { AppHeader } from "@/components/app-header";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 
 
@@ -421,6 +422,10 @@ function Dashboard() {
   const qc = useQueryClient();
   const search = Route.useSearch();
   const { data: me, isLoading: meLoading } = useCurrentUser();
+  const [section, setSection] = useState(search.section);
+  const [requestSection, setRequestSection] = useState<string>();
+  const [registrationSection, setRegistrationSection] = useState(search.subsection);
+  const [administrationSection, setAdministrationSection] = useState(search.subsection);
 
   if (meLoading || !me) {
     return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Carregando...</div>;
@@ -455,6 +460,17 @@ function Dashboard() {
     { value: "backup", allowed: me.canAccess("usuarios_backup") },
   ].filter((tab) => tab.allowed);
   const defaultTab = canSeeRequests ? "pedidos" : canSeeQueue ? "queue" : canSeeStock ? "stock" : canSeeRegistration ? "projects" : canSeeAdministration ? "admin" : "pending";
+  const activeSection = section ?? defaultTab;
+  const activeRequestSection = requestSection ?? requestTabs[0]?.value;
+  const activeRegistrationSection = registrationSection ?? registrationTabs[0]?.value;
+  const activeAdministrationSection = administrationSection ?? administrationTabs[0]?.value;
+  const navigationTabs = [
+    { value: "pedidos", label: "Solicitações", icon: ClipboardList, allowed: canSeeRequests },
+    { value: "queue", label: "Approvals", icon: ShoppingCart, allowed: canSeeQueue },
+    { value: "stock", label: "Armazém", icon: Boxes, allowed: canSeeStock },
+    { value: "projects", label: "Cadastro", icon: FolderKanban, allowed: canSeeRegistration },
+    { value: "admin", label: "Usuários e logs", icon: Users, allowed: canSeeAdministration },
+  ].filter((item) => item.allowed);
 
 
   return (
@@ -466,28 +482,11 @@ function Dashboard() {
         </div>
       </AppHeader>
 
-      <main className="mx-auto max-w-7xl px-3 py-5 sm:px-6 sm:py-8">
-        <Tabs defaultValue={search.section ?? defaultTab}>
-          <div className="sticky top-[105px] z-40 -mx-3 mb-6 bg-background px-3 py-2 sm:top-[73px] sm:-mx-6 sm:px-6">
-          <TabsList>
-            {canSeeRequests && <TabsTrigger value="pedidos"><ClipboardList className="mr-2 h-4 w-4" />Solicitações</TabsTrigger>}
-            {canSeeQueue && (
-              <TabsTrigger value="queue"><ShoppingCart className="mr-2 h-4 w-4" />Approvals</TabsTrigger>
-            )}
-            {canSeeStock && <TabsTrigger value="stock"><Boxes className="mr-2 h-4 w-4" />Armazém</TabsTrigger>}
-            {canSeeRegistration && <TabsTrigger value="projects"><FolderKanban className="mr-2 h-4 w-4" />Cadastro</TabsTrigger>}
-            
-            
-            {canSeeAdministration && <TabsTrigger value="admin"><Users className="mr-2 h-4 w-4" />Usuários e logs</TabsTrigger>}
-          </TabsList>
-          </div>
+      <main className="mx-auto max-w-7xl px-3 pb-28 pt-5 sm:px-6 sm:pt-8">
+        <Tabs value={activeSection} onValueChange={setSection}>
 
           {canSeeRequests && <TabsContent value="pedidos">
-            <Tabs defaultValue={requestTabs[0]?.value}>
-              <TabsList className="mb-4">
-                {me.canAccess("solicitacoes_minhas") && <TabsTrigger value="mine"><ClipboardList className="mr-2 h-4 w-4" />Minhas Solicitações</TabsTrigger>}
-                {me.canAccess("solicitacoes_novas") && <TabsTrigger value="new"><Plus className="mr-2 h-4 w-4" />Novas Solicitações</TabsTrigger>}
-              </TabsList>
+            <Tabs value={activeRequestSection} onValueChange={setRequestSection}>
               {me.canAccess("solicitacoes_minhas") && <TabsContent value="mine"><MyOrders userId={me.id} canManageDevices={isAdmin} /></TabsContent>}
               {me.canAccess("solicitacoes_novas") && <TabsContent value="new"><NewOrder userId={me.id} canImport={canImport} canManageProducts={isAdmin || me.isComprador} canShowCostCenter={me.canAccess("solicitacoes_centro_custo")} canCreateNewItem={me.canAccess("solicitacoes_item_novo")} canAllocateProject={me.canAccess("solicitacoes_alocacao_projeto")} canAllocateClient={me.canAccess("solicitacoes_alocacao_cliente")} canAllocateStock={me.canAccess("solicitacoes_alocacao_estoque")} canAllocateInternal={me.canAccess("solicitacoes_alocacao_interna")} /></TabsContent>}
             </Tabs>
@@ -510,15 +509,7 @@ function Dashboard() {
           )}
           {canSeeRegistration && (
             <TabsContent value="projects">
-              <Tabs defaultValue={registrationTabs[0]?.value}>
-                <TabsList className="mb-4">
-                  {me.canAccess("cadastro_projetos") && <TabsTrigger value="projetos"><FolderKanban className="mr-2 h-4 w-4" />Projetos</TabsTrigger>}
-                  {me.canAccess("cadastro_clientes") && <TabsTrigger value="clientes"><Building2 className="mr-2 h-4 w-4" />Clientes</TabsTrigger>}
-                  {me.canAccess("cadastro_centros") && <TabsTrigger value="centros"><Landmark className="mr-2 h-4 w-4" />Centro de Custo</TabsTrigger>}
-                  {me.canAccess("cadastro_cargos") && <TabsTrigger value="cargos"><Briefcase className="mr-2 h-4 w-4" />Cargos</TabsTrigger>}
-                  {me.canAccess("cadastro_lembretes") && <TabsTrigger value="lembretes"><Bell className="mr-2 h-4 w-4" />Lembretes</TabsTrigger>}
-                  {me.canAccess("cadastro_diversos") && <TabsTrigger value="diversos"><Layers3 className="mr-2 h-4 w-4" />Diversos</TabsTrigger>}
-                </TabsList>
+              <Tabs value={activeRegistrationSection} onValueChange={setRegistrationSection}>
                 {me.canAccess("cadastro_projetos") && <TabsContent value="projetos"><ProjectsAdmin userId={me.id} /></TabsContent>}
                 {me.canAccess("cadastro_clientes") && <TabsContent value="clientes"><ClientsTab userId={me.id} /></TabsContent>}
                 {me.canAccess("cadastro_centros") && <TabsContent value="centros"><CostCentersTab userId={me.id} /></TabsContent>}
@@ -542,14 +533,7 @@ function Dashboard() {
           )}
           {canSeeAdministration && (
             <TabsContent value="admin">
-              <Tabs defaultValue={search.subsection ?? administrationTabs[0]?.value}>
-                <TabsList className="mb-4">
-                  {me.canAccess("usuarios_lista") && <TabsTrigger value="usuarios"><Users className="mr-2 h-4 w-4" />Usuários</TabsTrigger>}
-                  {me.canAccess("usuarios_acesso_restrito") && <TabsTrigger value="acesso-restrito"><ShieldCheck className="mr-2 h-4 w-4" />Perfis de acesso</TabsTrigger>}
-                  {me.canAccess("usuarios_workflow") && <TabsTrigger value="workflow"><CheckCircle2 className="mr-2 h-4 w-4" />Approval Workflow</TabsTrigger>}
-                  {me.canAccess("usuarios_logs") && <TabsTrigger value="logs"><ScrollText className="mr-2 h-4 w-4" />Logs</TabsTrigger>}
-                  {me.canAccess("usuarios_backup") && <TabsTrigger value="backup"><DatabaseBackup className="mr-2 h-4 w-4" />Backup</TabsTrigger>}
-                </TabsList>
+              <Tabs value={activeAdministrationSection} onValueChange={setAdministrationSection}>
                 {me.canAccess("usuarios_lista") && <TabsContent value="usuarios"><UsersAdmin /></TabsContent>}
                 {me.canAccess("usuarios_acesso_restrito") && <TabsContent value="acesso-restrito">
                   <div className="space-y-6">
@@ -583,6 +567,26 @@ function Dashboard() {
           </TabsContent>
         </Tabs>
       </main>
+      <nav className="fixed inset-x-3 bottom-3 z-50" aria-label="Navegação do Supply">
+        <div className="mx-auto grid max-w-2xl grid-cols-5 items-stretch rounded-[1.75rem] border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/90">
+          {navigationTabs.map(({ value, label, icon: Icon }) => {
+            const active = activeSection === value;
+            const submenuItems = value === "pedidos"
+              ? [{ value: "mine", label: "Minhas Solicitações", icon: ClipboardList, allowed: me.canAccess("solicitacoes_minhas") }, { value: "new", label: "Novas Solicitações", icon: Plus, allowed: me.canAccess("solicitacoes_novas") }].filter((item) => item.allowed)
+              : value === "projects"
+                ? [{ value: "projetos", label: "Projetos", icon: FolderKanban, allowed: me.canAccess("cadastro_projetos") }, { value: "clientes", label: "Clientes", icon: Building2, allowed: me.canAccess("cadastro_clientes") }, { value: "centros", label: "Centro de Custo", icon: Landmark, allowed: me.canAccess("cadastro_centros") }, { value: "cargos", label: "Cargos", icon: Briefcase, allowed: me.canAccess("cadastro_cargos") }, { value: "lembretes", label: "Lembretes", icon: Bell, allowed: me.canAccess("cadastro_lembretes") }, { value: "diversos", label: "Diversos", icon: Layers3, allowed: me.canAccess("cadastro_diversos") }].filter((item) => item.allowed)
+                : value === "admin"
+                  ? [{ value: "usuarios", label: "Usuários", icon: Users, allowed: me.canAccess("usuarios_lista") }, { value: "acesso-restrito", label: "Perfis de acesso", icon: ShieldCheck, allowed: me.canAccess("usuarios_acesso_restrito") }, { value: "workflow", label: "Approval Workflow", icon: CheckCircle2, allowed: me.canAccess("usuarios_workflow") }, { value: "logs", label: "Logs", icon: ScrollText, allowed: me.canAccess("usuarios_logs") }, { value: "backup", label: "Backup", icon: DatabaseBackup, allowed: me.canAccess("usuarios_backup") }].filter((item) => item.allowed)
+                  : [];
+            const selectedSubsection = value === "pedidos" ? activeRequestSection : value === "projects" ? activeRegistrationSection : activeAdministrationSection;
+            const selectMain = () => setSection(value);
+            const item = <span className="flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 px-1"><Icon className="h-5 w-5 shrink-0" /><span className="max-w-full truncate text-[10px] font-semibold leading-none">{label}</span></span>;
+            const itemClassName = `h-auto min-w-0 rounded-[1.35rem] p-0 shadow-none ${active ? "!bg-primary/15 !text-primary hover:!bg-primary/20 hover:!text-primary" : "!bg-transparent !text-muted-foreground hover:!bg-muted hover:!text-foreground"}`;
+            if (!submenuItems.length) return <Button key={value} type="button" variant="ghost" className={itemClassName} onClick={selectMain} aria-current={active ? "page" : undefined}>{item}</Button>;
+            return <DropdownMenu key={value}><DropdownMenuTrigger asChild><Button type="button" variant="ghost" className={itemClassName} onClick={selectMain} aria-current={active ? "page" : undefined}>{item}</Button></DropdownMenuTrigger><DropdownMenuContent side="top" align="center" sideOffset={10} className="w-60 rounded-lg p-1.5 shadow-xl"><DropdownMenuLabel>{label}</DropdownMenuLabel><DropdownMenuSeparator />{submenuItems.map(({ value: subValue, label: subLabel, icon: SubIcon }) => <DropdownMenuItem key={subValue} className="min-h-11 rounded-md" onSelect={() => { selectMain(); if (value === "pedidos") setRequestSection(subValue); else if (value === "projects") setRegistrationSection(subValue); else setAdministrationSection(subValue); }}><SubIcon className="h-4 w-4" /><span className="flex-1">{subLabel}</span>{selectedSubsection === subValue ? <Check className="h-4 w-4 text-primary" /> : null}</DropdownMenuItem>)}</DropdownMenuContent></DropdownMenu>;
+          })}
+        </div>
+      </nav>
     </div>
   );
 }
