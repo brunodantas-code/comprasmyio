@@ -1,4 +1,5 @@
 - [x] Site Survey — preservar respostas ainda não salvas e a etapa aberta ao confirmar a geração de chamado.
+- [ ] Site Survey — retirar os fundos verdes dos anexos e manter fotos salvas como miniaturas nas perguntas.
 - [x] Site Survey — recolher cada visita no mobile, mantendo somente número e seta; recolher a relação completa no desktop.
 - [x] Site Survey — exibir o botão “+” e a seleção de ferramentas na etapa 6 ao marcar “Sim”, independentemente do título da seção.
 - [x] Site Survey — remover a regra antiga fixa de exibição das perguntas de hidrômetro e usar somente as condições configuradas.
