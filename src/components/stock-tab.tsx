@@ -562,7 +562,7 @@ type StockPermissionKey =
   | "armazem_transporte" | "armazem_cliente" | "armazem_tecnico" | "armazem_perdido"
   | "armazem_itens_avariados" | "armazem_checar_qr" | "armazem_almoxarifado" | "armazem_ferramentas_ativos";
 
-export function StockTab({ userId, canDelete, onlyLocation, canAccessSection = () => true }: { userId: string; canDelete?: boolean; onlyLocation?: StockLocation; canAccessSection?: (permission: StockPermissionKey) => boolean }) {
+export function StockTab({ userId, canDelete, onlyLocation, canAccessSection = () => true, section, onSectionChange }: { userId: string; canDelete?: boolean; onlyLocation?: StockLocation; canAccessSection?: (permission: StockPermissionKey) => boolean; section?: string; onSectionChange?: (value: string) => void }) {
   const stockGroupPermissions: StockPermissionKey[] = [
     "armazem_estoque_myio",
     "armazem_checar_qr",
@@ -585,15 +585,11 @@ export function StockTab({ userId, canDelete, onlyLocation, canAccessSection = (
   ];
   const permittedTabs = topTabs.filter((tab) => tab.allowed);
   if (permittedTabs.length === 0) return null;
+  const [requestedGroup, requestedDetail] = section?.split(":") ?? [];
+  const activeGroup = permittedTabs.some((tab) => tab.value === requestedGroup) ? requestedGroup : permittedTabs[0]?.value;
+  const changeGroup = (value: string) => onSectionChange?.(value);
   return (
-    <Tabs defaultValue={permittedTabs[0]?.value} className="space-y-4">
-      <TabsList className="h-auto flex-wrap justify-start gap-y-1">
-        {permittedTabs.map((tab) => (
-          <TabsTrigger key={tab.value} value={tab.value}>
-            {tab.label}
-          </TabsTrigger>
-        ))}
-      </TabsList>
+    <Tabs value={activeGroup} onValueChange={changeGroup} className="space-y-4">
       {permittedTabs.some((tab) => tab.value === "fabrica") && (
         <TabsContent value="fabrica">
           <FabricaSection
@@ -601,12 +597,14 @@ export function StockTab({ userId, canDelete, onlyLocation, canAccessSection = (
             canDelete={canDelete}
             canAccessFactory={canAccessSection("armazem_fabrica")}
             canAccessHomologation={!onlyLocation && canAccessSection("armazem_homologacao")}
+            section={activeGroup === "fabrica" ? requestedDetail : undefined}
+            onSectionChange={(value) => onSectionChange?.(`fabrica:${value}`)}
           />
         </TabsContent>
       )}
       {permittedTabs.some((tab) => tab.value === "estoque") && (
         <TabsContent value="estoque">
-          <EstoqueMyioSection userId={userId} canDelete={canDelete} canAccessSection={canAccessSection} />
+          <EstoqueMyioSection userId={userId} canDelete={canDelete} canAccessSection={canAccessSection} section={activeGroup === "estoque" ? requestedDetail : undefined} onSectionChange={(value) => onSectionChange?.(`estoque:${value}`)} />
         </TabsContent>
       )}
       {permittedTabs.some((tab) => tab.value === "ferramentas") && (
@@ -1330,11 +1328,15 @@ function FabricaSection({
   canDelete,
   canAccessFactory = true,
   canAccessHomologation = false,
+  section,
+  onSectionChange,
 }: {
   userId: string;
   canDelete?: boolean;
   canAccessFactory?: boolean;
   canAccessHomologation?: boolean;
+  section?: string;
+  onSectionChange?: (value: string) => void;
 }) {
   const { data: stock, isLoading } = useStock();
   const { data: movements } = useMovements();
@@ -1373,14 +1375,10 @@ function FabricaSection({
   ].filter((tab) => tab.allowed);
 
   if (factoryTabs.length === 0) return null;
+  const activeSection = factoryTabs.some((tab) => tab.value === section) ? section : factoryTabs[0]?.value;
 
   return (
-    <Tabs defaultValue={factoryTabs[0]?.value} className="space-y-4">
-      <TabsList className="flex-wrap">
-        {factoryTabs.map((tab) => (
-          <TabsTrigger key={tab.value} value={tab.value}>{tab.label}</TabsTrigger>
-        ))}
-      </TabsList>
+    <Tabs value={activeSection} onValueChange={onSectionChange} className="space-y-4">
 
       {canAccessFactory && <TabsContent value="fila" className="space-y-6">
         <ProductionQueueCard balances={almoxarifadoBalances} />
@@ -2062,7 +2060,7 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
   );
 }
 
-function EstoqueMyioSection({ userId, canDelete, canAccessSection = () => true }: { userId: string; canDelete?: boolean; canAccessSection?: (permission: StockPermissionKey) => boolean }) {
+function EstoqueMyioSection({ userId, canDelete, canAccessSection = () => true, section, onSectionChange }: { userId: string; canDelete?: boolean; canAccessSection?: (permission: StockPermissionKey) => boolean; section?: string; onSectionChange?: (value: string) => void }) {
   const tabs = [
     { value: "dispositivos", label: "myio", permission: "armazem_estoque_myio" as const },
     { value: "cliente", label: "Clientes", permission: "armazem_cliente" as const },
@@ -2083,11 +2081,9 @@ function EstoqueMyioSection({ userId, canDelete, canAccessSection = () => true }
     return canAccessSection(tab.permission);
   });
 
+  const activeSection = tabs.some((tab) => tab.value === section) ? section : tabs[0]?.value;
   return (
-    <Tabs defaultValue={tabs[0]?.value} className="space-y-4">
-      <TabsList className="h-auto flex-wrap justify-start gap-y-1">
-        {tabs.map((tab) => <TabsTrigger key={tab.value} value={tab.value}>{tab.label}</TabsTrigger>)}
-      </TabsList>
+    <Tabs value={activeSection} onValueChange={onSectionChange} className="space-y-4">
       {canAccessSection("armazem_estoque_myio") && <TabsContent value="ordens"><MyioOrdersStockSection /></TabsContent>}
       {(canAccessSection("armazem_estoque_myio") || canAccessSection("armazem_perdido") || canAccessSection("armazem_itens_avariados")) && (
         <TabsContent value="dispositivos">
