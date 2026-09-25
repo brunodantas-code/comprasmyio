@@ -424,6 +424,8 @@ function Dashboard() {
   const { data: me, isLoading: meLoading } = useCurrentUser();
   const [section, setSection] = useState(search.section);
   const [requestSection, setRequestSection] = useState<string>();
+  const [approvalSection, setApprovalSection] = useState<string>();
+  const [stockSection, setStockSection] = useState<string>();
   const [registrationSection, setRegistrationSection] = useState(search.subsection);
   const [administrationSection, setAdministrationSection] = useState(search.subsection);
 
@@ -464,6 +466,15 @@ function Dashboard() {
   const activeRequestSection = requestSection ?? requestTabs[0]?.value;
   const activeRegistrationSection = registrationSection ?? registrationTabs[0]?.value;
   const activeAdministrationSection = administrationSection ?? administrationTabs[0]?.value;
+  const approvalTabs = [
+    { value: "mine", label: "Aguardando minha aprovação", allowed: me.canAccess("approvals_pendentes") },
+    { value: "flow", label: "Meus em aprovação", allowed: me.canAccess("approvals_meus") },
+    { value: "mine-supply", label: "Meus com Supply", allowed: me.canAccess("approvals_meus") },
+    { value: "supply", label: "Fila do Supply", allowed: isAdmin || me.isComprador },
+    { value: "all", label: "Todos", allowed: me.canAccess("approvals_todos") },
+    { value: "roles", label: "Consolidado por Cargo", allowed: me.canAccess("approvals_consolidado") },
+  ].filter((tab) => tab.allowed);
+  const activeApprovalSection = approvalSection ?? approvalTabs[0]?.value;
   const navigationTabs = [
     { value: "pedidos", label: "Solicitações", icon: ClipboardList, allowed: canSeeRequests },
     { value: "queue", label: "Approvals", icon: ShoppingCart, allowed: canSeeQueue },
@@ -494,7 +505,7 @@ function Dashboard() {
           </TabsContent>}
           {canSeeQueue && (
             <TabsContent value="queue">
-              <ApprovalsCenter />
+              <ApprovalsCenter value={activeApprovalSection} onValueChange={setApprovalSection} />
             </TabsContent>
           )}
           {canSeeStock && (
@@ -504,6 +515,8 @@ function Dashboard() {
                 canDelete={isAdmin}
                 onlyLocation={fabricaOnly ? "fabrica" : estoquistaOnly ? "almoxarifado" : undefined}
                 canAccessSection={me.canAccess}
+                section={stockSection}
+                onSectionChange={setStockSection}
               />
             </TabsContent>
           )}
@@ -573,17 +586,35 @@ function Dashboard() {
             const active = activeSection === value;
             const submenuItems = value === "pedidos"
               ? [{ value: "mine", label: "Minhas Solicitações", icon: ClipboardList, allowed: me.canAccess("solicitacoes_minhas") }, { value: "new", label: "Novas Solicitações", icon: Plus, allowed: me.canAccess("solicitacoes_novas") }].filter((item) => item.allowed)
+              : value === "queue"
+                ? approvalTabs.map((tab) => ({ ...tab, icon: ShoppingCart }))
+              : value === "stock"
+                ? [
+                    { value: "fabrica:estoque", label: "Estoque de Componentes", icon: Boxes, allowed: me.canAccess("armazem_fabrica") },
+                    { value: "fabrica:fila", label: "Fila de Produção", icon: Boxes, allowed: me.canAccess("armazem_fabrica") },
+                    { value: "fabrica:liberados", label: "Dispositivos Liberados", icon: Boxes, allowed: me.canAccess("armazem_fabrica") },
+                    { value: "fabrica:homologacao", label: "Homologação", icon: Boxes, allowed: me.canAccess("armazem_homologacao") },
+                    { value: "estoque:dispositivos", label: "Estoque myio", icon: Boxes, allowed: me.canAccess("armazem_estoque_myio") || me.canAccess("armazem_perdido") || me.canAccess("armazem_itens_avariados") },
+                    { value: "estoque:cliente", label: "Clientes", icon: Boxes, allowed: me.canAccess("armazem_cliente") },
+                    { value: "estoque:tecnico", label: "Técnicos", icon: Boxes, allowed: me.canAccess("armazem_tecnico") },
+                    { value: "estoque:insumos", label: "Insumos de Instalação", icon: Boxes, allowed: me.canAccess("armazem_estoque_myio") },
+                    { value: "estoque:ordens", label: "Solicitações", icon: Boxes, allowed: me.canAccess("armazem_estoque_myio") },
+                    { value: "estoque:expedicao", label: "Expedição", icon: Boxes, allowed: me.canAccess("armazem_expedicao") || me.canAccess("armazem_transporte") },
+                    { value: "estoque:qr-check", label: "Checar QR Code", icon: Boxes, allowed: me.canAccess("armazem_checar_qr") },
+                    { value: "almoxarifado_geral", label: "Almoxarifado", icon: Boxes, allowed: me.canAccess("armazem_almoxarifado") },
+                    { value: "ferramentas", label: "Ferramentas/Ativos", icon: Boxes, allowed: me.canAccess("armazem_ferramentas_ativos") },
+                  ].filter((item) => item.allowed)
               : value === "projects"
                 ? [{ value: "projetos", label: "Projetos", icon: FolderKanban, allowed: me.canAccess("cadastro_projetos") }, { value: "clientes", label: "Clientes", icon: Building2, allowed: me.canAccess("cadastro_clientes") }, { value: "centros", label: "Centro de Custo", icon: Landmark, allowed: me.canAccess("cadastro_centros") }, { value: "cargos", label: "Cargos", icon: Briefcase, allowed: me.canAccess("cadastro_cargos") }, { value: "lembretes", label: "Lembretes", icon: Bell, allowed: me.canAccess("cadastro_lembretes") }, { value: "diversos", label: "Diversos", icon: Layers3, allowed: me.canAccess("cadastro_diversos") }].filter((item) => item.allowed)
                 : value === "admin"
                   ? [{ value: "usuarios", label: "Usuários", icon: Users, allowed: me.canAccess("usuarios_lista") }, { value: "acesso-restrito", label: "Perfis de acesso", icon: ShieldCheck, allowed: me.canAccess("usuarios_acesso_restrito") }, { value: "workflow", label: "Approval Workflow", icon: CheckCircle2, allowed: me.canAccess("usuarios_workflow") }, { value: "logs", label: "Logs", icon: ScrollText, allowed: me.canAccess("usuarios_logs") }, { value: "backup", label: "Backup", icon: DatabaseBackup, allowed: me.canAccess("usuarios_backup") }].filter((item) => item.allowed)
                   : [];
-            const selectedSubsection = value === "pedidos" ? activeRequestSection : value === "projects" ? activeRegistrationSection : activeAdministrationSection;
+            const selectedSubsection = value === "pedidos" ? activeRequestSection : value === "queue" ? activeApprovalSection : value === "stock" ? stockSection : value === "projects" ? activeRegistrationSection : activeAdministrationSection;
             const selectMain = () => setSection(value);
             const item = <span className="flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 px-1"><Icon className="h-5 w-5 shrink-0" /><span className="max-w-full truncate text-[10px] font-semibold leading-none">{label}</span></span>;
             const itemClassName = `h-auto min-w-0 rounded-[1.35rem] p-0 shadow-none ${active ? "!bg-primary/15 !text-primary hover:!bg-primary/20 hover:!text-primary" : "!bg-transparent !text-muted-foreground hover:!bg-muted hover:!text-foreground"}`;
             if (!submenuItems.length) return <Button key={value} type="button" variant="ghost" className={itemClassName} onClick={selectMain} aria-current={active ? "page" : undefined}>{item}</Button>;
-            return <DropdownMenu key={value}><DropdownMenuTrigger asChild><Button type="button" variant="ghost" className={itemClassName} onClick={selectMain} aria-current={active ? "page" : undefined}>{item}</Button></DropdownMenuTrigger><DropdownMenuContent side="top" align="center" sideOffset={10} className="w-60 rounded-lg p-1.5 shadow-xl"><DropdownMenuLabel>{label}</DropdownMenuLabel><DropdownMenuSeparator />{submenuItems.map(({ value: subValue, label: subLabel, icon: SubIcon }) => <DropdownMenuItem key={subValue} className="min-h-11 rounded-md" onSelect={() => { selectMain(); if (value === "pedidos") setRequestSection(subValue); else if (value === "projects") setRegistrationSection(subValue); else setAdministrationSection(subValue); }}><SubIcon className="h-4 w-4" /><span className="flex-1">{subLabel}</span>{selectedSubsection === subValue ? <Check className="h-4 w-4 text-primary" /> : null}</DropdownMenuItem>)}</DropdownMenuContent></DropdownMenu>;
+            return <DropdownMenu key={value}><DropdownMenuTrigger asChild><Button type="button" variant="ghost" className={itemClassName} onClick={selectMain} aria-current={active ? "page" : undefined}>{item}</Button></DropdownMenuTrigger><DropdownMenuContent side="top" align="center" sideOffset={10} className="max-h-[70vh] w-64 overflow-y-auto rounded-lg p-1.5 shadow-xl"><DropdownMenuLabel>{label}</DropdownMenuLabel><DropdownMenuSeparator />{submenuItems.map(({ value: subValue, label: subLabel, icon: SubIcon }) => <DropdownMenuItem key={subValue} className="min-h-11 rounded-md" onSelect={() => { selectMain(); if (value === "pedidos") setRequestSection(subValue); else if (value === "queue") setApprovalSection(subValue); else if (value === "stock") setStockSection(subValue); else if (value === "projects") setRegistrationSection(subValue); else setAdministrationSection(subValue); }}><SubIcon className="h-4 w-4" /><span className="flex-1">{subLabel}</span>{selectedSubsection === subValue ? <Check className="h-4 w-4 text-primary" /> : null}</DropdownMenuItem>)}</DropdownMenuContent></DropdownMenu>;
           })}
         </div>
       </nav>
@@ -2489,7 +2520,7 @@ function BuyerQueue({ mode = "all" }: { mode?: ApprovalListMode }) {
   );
 }
 
-function ApprovalsCenter() {
+function ApprovalsCenter({ value, onValueChange }: { value?: string; onValueChange?: (value: string) => void }) {
   const { data: me } = useCurrentUser();
   const canSeeMine = me?.canAccess("approvals_pendentes") ?? false;
   const canSeeFlow = me?.canAccess("approvals_meus") ?? false;
@@ -2513,20 +2544,7 @@ function ApprovalsCenter() {
     },
   });
   return (
-    <Tabs defaultValue={canSeeSupplyQueue ? "supply" : canSeeMine ? "mine" : canSeeFlow ? "flow" : canSeeAllPermission ? "all" : "roles"}>
-      <TabsList className="mb-4">
-        {canSeeMine && <TabsTrigger value="mine">Aguardando minha aprovação</TabsTrigger>}
-        {canSeeFlow && <TabsTrigger value="flow">Meus em aprovação</TabsTrigger>}
-        {canSeeFlow && <TabsTrigger value="mine-supply">Meus com Supply</TabsTrigger>}
-        {canSeeSupplyQueue && (
-          <TabsTrigger value="supply">
-            Fila do Supply
-            {supplyQueueCount > 0 && <Badge variant="status" className="ml-2">{supplyQueueCount}</Badge>}
-          </TabsTrigger>
-        )}
-        {canSeeAllPermission && <TabsTrigger value="all">Todos</TabsTrigger>}
-        {canSeeRolesPermission && <TabsTrigger value="roles">Consolidado por Cargo</TabsTrigger>}
-      </TabsList>
+    <Tabs value={value ?? (canSeeSupplyQueue ? "supply" : canSeeMine ? "mine" : canSeeFlow ? "flow" : canSeeAllPermission ? "all" : "roles")} onValueChange={onValueChange}>
       {canSeeMine && <TabsContent value="mine"><PendingForMe renderEditAction={renderAdminEdit} /></TabsContent>}
       {canSeeFlow && <TabsContent value="flow"><MyApprovalFlows renderEditAction={renderAdminEdit} /></TabsContent>}
       {canSeeFlow && <TabsContent value="mine-supply"><BuyerQueue mode="mine-supply" /></TabsContent>}

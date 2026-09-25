@@ -1,5 +1,5 @@
 - [x] Site Survey mobile — organizar os campos de data e hora em Nova Visita, eliminando desalinhamento e sobreposição.
-- [x] Supply e Cash Flow — substituir menus superiores pelo padrão inferior fixo do Site Survey, com submenus ascendentes.
+- [ ] Supply — remover os submenus superiores de Approvals e Armazém e exibi-los em listas ascendentes no menu inferior.
 - [x] Site Survey — alinhar à direita os botões de salvamento/conclusão e permitir adicionar ambiente imprevisto com nome e checklist cadastrado próprio.
 - [x] Site Survey — impedir que perguntas de etapas não salvas fiquem vermelhas após salvar a etapa anterior.
 - [x] Site Survey — permitir configurar foto obrigatória conforme respostas da própria pergunta, sem regra fixa no código.
