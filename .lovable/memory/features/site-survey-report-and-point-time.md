@@ -4,6 +4,7 @@ description: Relatório completo por OS, início por loja/ambiente, fachada obri
 type: feature
 ---
 O Site Survey deve oferecer, na linha do número da visita, um ícone de relatório que abre uma prévia e permite baixar PDF colorido ou próprio para impressão em preto e branco.
+Uma opção “Incluir fotos”, marcada inicialmente e posicionada antes dos botões PDF, permite omitir todas as fotos da prévia e das versões colorida e P&B para gerar um relatório mais sintético.
 
 O relatório deve consolidar dados do cliente, projeto/unidade, técnicos, horários, observações das Etapas 7, totalizadores técnicos, ações e intervenções, fotos em miniaturas e resumo textual por loja/ambiente.
 
