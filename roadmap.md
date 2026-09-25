@@ -748,7 +748,10 @@
 
 - [x] Site Survey — corrigir divergência da etapa 7 na Vivara: distinguir pendências reais do estado de conclusão da loja.
 
-- [ ] Site Survey — cancelar uma Loja/LUC com motivo administrável, status Cancelada e sem bloquear a conclusão geral.
+- [x] Site Survey — cancelar uma Loja/LUC com motivo administrável, status Cancelada e sem bloquear a conclusão geral.
 
 - [x] Site Survey — cancelar individualmente uma visita de Loja/LUC com motivo administrável, preservando registros e sem bloquear a conclusão geral.
 - [x] Padronizar em todo o aplicativo os botões antigos de salvar com o novo disquete verde.
+- [x] Site Survey — gerar relatório técnico colorido ou P&B com dados, Etapa 7, totalizadores, chamados, fotos e resumo por ponto.
+- [x] Site Survey — registrar início individual por Loja/LUC ou ambiente, exigindo foto de fachada para concluir o ponto.
+- [x] Site Survey — cadastrar premissas de tempo e calcular estimativa, horas extras, período noturno, dias e técnicos necessários.
