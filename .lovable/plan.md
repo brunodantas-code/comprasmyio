@@ -29,7 +29,7 @@ Criar um relatório completo de cada OS e registrar corretamente o tempo individ
 ## Cálculo de jornada
 - Somar somente os intervalos individuais com início e conclusão registrados.
 - Separar automaticamente o período noturno entre **22:00 e 05:00**, inclusive quando o intervalo atravessar a meia-noite.
-- Apurar como hora extra o que exceder **8 horas trabalhadas em cada dia**, evitando contar duas vezes períodos simultâneos.
+Apurar como hora extra o que exceder **8 horas trabalhadas em cada dia**, evitando contar duas vezes períodos simultâneos. Calcular também quantos dias úteis de jornada diurna serão necessários para o técnico designado, sem horas extras ou noturnas; permitir ao usuário informar um prazo em dias para obter a quantidade mínima de técnicos necessária, considerando a estimativa total e a jornada diária de 8 horas.
 - Exibir pontos sem início ou sem conclusão como dados incompletos, sem inventar duração.
 - Calcular e salvar o resumo final quando a visita geral for concluída, mantendo-o disponível no relatório após reabertura.
 
