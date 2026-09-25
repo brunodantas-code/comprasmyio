@@ -632,12 +632,17 @@ function QuestionTypeOptions() {
 function QuestionRuleFields({ question, priorQuestions, actions, questionAction, disabled = false }: { question?: Question; priorQuestions: Question[]; actions: SurveyAction[]; questionAction?: QuestionAction; disabled?: boolean }) {
   const [conditioned, setConditioned] = useState(Boolean(question?.conditioned_on_question_id));
   const [generateAction, setGenerateAction] = useState(Boolean(questionAction));
+  const existingPhoto = asQuestionConfig(question?.configuration).photo;
+  const [photoEnabled, setPhotoEnabled] = useState(Boolean(existingPhoto));
+  const [photoRequired, setPhotoRequired] = useState(Boolean(existingPhoto?.required));
   return <div className="col-span-full -mt-2 grid gap-1 sm:-mt-5 lg:grid-cols-[40px_minmax(220px,1.3fr)_minmax(160px,.7fr)_minmax(200px,1fr)_auto]">
     <div className="flex w-full flex-wrap items-center justify-end gap-x-6 gap-y-2 lg:col-start-5">
+      <label className="flex items-center gap-2 text-sm font-medium"><Checkbox name="photo_enabled" checked={photoEnabled} disabled={disabled} onCheckedChange={(checked) => { const enabled = checked === true; setPhotoEnabled(enabled); if (!enabled) setPhotoRequired(false); }} />Foto</label>
       <label className="flex items-center gap-2 text-sm font-medium"><Checkbox name="conditioned" checked={conditioned} disabled={disabled || priorQuestions.length === 0} onCheckedChange={(checked) => setConditioned(checked === true)} />Condicionar</label>
       <label className="flex items-center gap-2 text-sm font-medium"><Checkbox name="generate_action" checked={generateAction} disabled={disabled || actions.length === 0} onCheckedChange={(checked) => setGenerateAction(checked === true)} />Gerar ação</label>
     </div>
-    {conditioned || generateAction ? <div className="col-span-full grid w-full gap-2 pt-1 sm:grid-cols-2">
+    {photoEnabled || conditioned || generateAction ? <div className="col-span-full grid w-full gap-2 pt-1 sm:grid-cols-2">
+      {photoEnabled ? <div className="grid gap-2 sm:grid-cols-2"><label className="flex items-center gap-2 self-end pb-3 text-sm font-medium"><Checkbox name="photo_required" checked={photoRequired} disabled={disabled} onCheckedChange={(checked) => setPhotoRequired(checked === true)} />Foto obrigatória</label>{photoRequired ? <LabeledInput name="photo_required_when" label="Obrigatória quando a resposta for" defaultValue={existingPhoto?.required_when ?? ""} placeholder="Em branco: sempre; opções com ; significam ou" /> : <div />}</div> : <div />}
       {conditioned ? <div className="grid gap-2 sm:grid-cols-3"><div className="space-y-1"><Label>Pergunta anterior</Label><Select name="condition_question" defaultValue={question?.conditioned_on_question_id ?? undefined} disabled={disabled}><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent>{priorQuestions.map((item) => <SelectItem key={item.id} value={item.id}>{item.prompt}</SelectItem>)}</SelectContent></Select></div><div className="space-y-1"><Label>Condição</Label><Select name="condition_operator" defaultValue={question?.conditioned_operator ?? "equals"} disabled={disabled}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="equals">Exibir quando for</SelectItem><SelectItem value="not_equals">Exibir quando não for</SelectItem></SelectContent></Select></div><LabeledInput name="condition_value" label="Resposta" defaultValue={question?.conditioned_value ?? ""} required={!disabled} /></div> : <div />}
       {generateAction ? <div className="grid gap-3 sm:grid-cols-2"><div className="space-y-2"><Label>Ação</Label><Select name="action_id" defaultValue={questionAction?.action_id} disabled={disabled}><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent>{actions.map((action) => <SelectItem key={action.id} value={action.id}>{action.name}</SelectItem>)}</SelectContent></Select></div><LabeledInput name="action_trigger" label="Quando a resposta for" defaultValue={questionAction?.trigger_value ?? ""} required={!disabled} /></div> : null}
     </div> : null}
@@ -761,7 +766,8 @@ function isStoredQuestionComplete(question: Question, answers: Map<string, unkno
   const value = stored.value;
   const hasValue = Array.isArray(value) ? value.length > 0 : value !== undefined && value !== null && value !== "" && value !== false;
   const hasRequiredPhoto = attachments.some((item) => item.question_id === question.id && matchesScope(item));
-  if (config.photo_only) return config.photo?.required ? hasRequiredPhoto : true;
+  const photoRequired = questionRequiresPhoto(question, value);
+  if (config.photo_only) return photoRequired ? hasRequiredPhoto : true;
   if (!hasValue) return !question.required;
   const applies = config.condition?.value === undefined || (Array.isArray(value) ? value.includes(config.condition.value) : value === config.condition.value);
   const options = Array.isArray(question.options) ? question.options.filter((option): option is string => typeof option === "string") : [];
@@ -770,7 +776,7 @@ function isStoredQuestionComplete(question: Question, answers: Map<string, unkno
   if (applies && config.detail?.required && !detail?.trim()) return false;
   if (otherApplies && !detail?.trim()) return false;
   if (applies && detail && config.detail?.suboptions?.[detail]?.length && !subdetail?.trim()) return false;
-  if (applies && config.photo?.required && !hasRequiredPhoto) return false;
+  if (applies && photoRequired && !hasRequiredPhoto) return false;
   return true;
 }
 function AttachmentThumbnail({ attachment }: { attachment: SurveyAttachment }) {
@@ -809,6 +815,8 @@ function QuestionField({ question, answer, attachments, pending = false, call, o
   const suboptions = config.detail?.suboptions?.[selectedDetail] ?? [];
   const hasPhoto = attachments.length > 0;
   const conditionApplies = config.condition?.value === undefined || selectedValue === config.condition.value || selectedValues.includes(config.condition.value);
+  const currentAnswer = question.question_type === "multiselect" ? selectedValues : question.question_type === "checkbox" ? stored.value : selectedValue;
+  const photoRequired = questionRequiresPhoto(question, currentAnswer);
    const hasOtherOption = options.some(isOtherOption);
    const showOtherDetail = (config.other_detail === true || hasOtherOption) && (isOtherOption(selectedValue) || selectedValues.some(isOtherOption));
   const showDetail = (Boolean(config.detail) && conditionApplies) || showOtherDetail;
@@ -827,7 +835,7 @@ function QuestionField({ question, answer, attachments, pending = false, call, o
     </div>
     {showDetail || (config.photo && conditionApplies) ? <div className="min-w-0 space-y-3">
        {showDetail ? <div className="min-w-64 flex-1 space-y-2"><Label className="text-xs text-muted-foreground">{showOtherDetail ? "Especifique" : config.detail?.label ?? "Detalhes"}</Label>{config.detail?.options?.length && !showOtherDetail ? <Select name={`${question.id}__detail`} value={selectedDetail || undefined} onValueChange={setSelectedDetail}><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent>{config.detail.options.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent></Select> : <Textarea name={`${question.id}__detail`} defaultValue={stored.detail} rows={2} maxLength={500} required={showOtherDetail || config.detail?.required === true} />}{suboptions.length ? <div className="space-y-2"><Label className="text-xs text-muted-foreground">Localização da tomada</Label><Select name={`${question.id}__subdetail`} defaultValue={storedSubdetail || undefined}><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent>{suboptions.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent></Select></div> : null}</div> : null}
-       {config.photo && conditionApplies ? <div className="min-w-64 flex-1 space-y-2"><Label htmlFor={`${question.id}__photo`} className="flex items-center gap-2 text-xs text-muted-foreground"><Camera className="h-4 w-4" />Foto{config.photo.required ? " obrigatória" : " opcional"}{hasPhoto ? " · anexada" : ""}</Label><Input id={`${question.id}__photo`} name={`${question.id}__photo`} type="file" accept="image/*" capture="environment" />{hasPhoto ? <div className="flex flex-wrap gap-2" aria-label="Fotos anexadas">{attachments.map((attachment) => <AttachmentThumbnail key={attachment.id} attachment={attachment} />)}</div> : null}</div> : null}
+       {config.photo && conditionApplies ? <div className="min-w-64 flex-1 space-y-2"><Label htmlFor={`${question.id}__photo`} className="flex items-center gap-2 text-xs text-muted-foreground"><Camera className="h-4 w-4" />Foto{photoRequired ? " obrigatória" : " opcional"}{hasPhoto ? " · anexada" : ""}</Label><Input id={`${question.id}__photo`} name={`${question.id}__photo`} type="file" accept="image/*" capture="environment" />{hasPhoto ? <div className="flex flex-wrap gap-2" aria-label="Fotos anexadas">{attachments.map((attachment) => <AttachmentThumbnail key={attachment.id} attachment={attachment} />)}</div> : null}</div> : null}
     </div> : null}
   </div>;
 }
