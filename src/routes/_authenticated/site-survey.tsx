@@ -1,6 +1,6 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { DndContext, KeyboardSensor, PointerSensor, TouchSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -934,11 +934,23 @@ function formatTime(value: string) {
 function DateTimeInput({ name, label, defaultValue = "", required = false }: { name: string; label: string; defaultValue?: string; required?: boolean }) {
   const [date, setDate] = useState(defaultValue.slice(0, 10));
   const [time, setTime] = useState(() => formatTime(defaultValue.slice(11, 16)));
+  const dateInputRef = useRef<HTMLInputElement>(null);
   const normalizedTime = /^([01]\d|2[0-3]):[0-5]\d$/.test(time) ? time : "";
-  return <div className="space-y-2">
+  const openCalendar = () => {
+    const input = dateInputRef.current;
+    if (!input) return;
+    if (typeof input.showPicker === "function") input.showPicker();
+    else input.focus();
+  };
+  return <div className="min-w-0 space-y-2">
     <Label htmlFor={`${name}-date`}>{label}</Label>
-    <div className="grid min-w-0 grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_7rem]">
-      <Input id={`${name}-date`} className="min-w-0 max-w-full" type="date" value={date} onChange={(event) => setDate(event.target.value)} required={required} aria-label={`${label}: data`} />
+    <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_7rem] gap-2">
+      <div className="relative min-w-0">
+        <Input ref={dateInputRef} id={`${name}-date`} className="min-w-0 max-w-full pr-10 [&::-webkit-calendar-picker-indicator]:opacity-0" type="date" value={date} onChange={(event) => setDate(event.target.value)} required={required} aria-label={`${label}: data`} />
+        <Button type="button" variant="ghost" size="compactIcon" className="absolute right-1 top-1/2 -translate-y-1/2 text-muted-foreground" onClick={openCalendar} aria-label={`Abrir calendário de ${label.toLocaleLowerCase("pt-BR")}`} title="Abrir calendário">
+          <CalendarDays className="h-4 w-4" />
+        </Button>
+      </div>
       <Input className="min-w-0 max-w-full" type="text" inputMode="numeric" placeholder="hh:mm" value={time} onChange={(event) => setTime(formatTime(event.target.value))} pattern="(?:[01][0-9]|2[0-3]):[0-5][0-9]" maxLength={5} required={required} title="Informe o horário no formato hh:mm" aria-label={`${label}: hora e minutos`} />
     </div>
     <input type="hidden" name={name} value={date && normalizedTime ? `${date}T${normalizedTime}` : ""} />

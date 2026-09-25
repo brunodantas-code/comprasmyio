@@ -1,4 +1,5 @@
 - [x] Site Survey mobile — organizar os campos de data e hora em Nova Visita, eliminando desalinhamento e sobreposição.
+- [x] Site Survey mobile — limitar Início e Término previsto à tela e exibir calendário clicável no canto direito da data.
 - [x] Supply — remover os submenus superiores de Approvals e Armazém e exibi-los em listas ascendentes no menu inferior.
 - [x] Site Survey — alinhar à direita os botões de salvamento/conclusão e permitir adicionar ambiente imprevisto com nome e checklist cadastrado próprio.
 - [x] Site Survey — impedir que perguntas de etapas não salvas fiquem vermelhas após salvar a etapa anterior.
