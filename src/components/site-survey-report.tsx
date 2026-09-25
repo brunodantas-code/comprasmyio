@@ -23,6 +23,12 @@ const valueText = (answer: unknown): string => {
 };
 const durationMinutes = (start: string | null, end: string | null) => start && end ? Math.max(0, Math.round((new Date(end).getTime() - new Date(start).getTime()) / 60000)) : null;
 const formatMinutes = (minutes: number | null) => minutes === null ? "Incompleto" : `${Math.floor(minutes / 60)}h ${String(minutes % 60).padStart(2, "0")}min`;
+const normalize = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR");
+const imageDataUrl = async (url: string) => new Promise<string>((resolve, reject) => {
+  const image = new Image(); image.crossOrigin = "anonymous";
+  image.onload = () => { const canvas = document.createElement("canvas"); const scale = Math.min(1, 900 / Math.max(image.naturalWidth, image.naturalHeight)); canvas.width = Math.max(1, Math.round(image.naturalWidth * scale)); canvas.height = Math.max(1, Math.round(image.naturalHeight * scale)); const context = canvas.getContext("2d"); if (!context) return reject(new Error("Não foi possível preparar a foto.")); context.drawImage(image, 0, 0, canvas.width, canvas.height); resolve(canvas.toDataURL("image/jpeg", 0.78)); };
+  image.onerror = () => reject(new Error("Não foi possível carregar uma foto do relatório.")); image.src = url;
+});
 const calculateWorkedTime = (points: Point[]) => {
   const byDay = new Map<string, Array<[number, number]>>();
   for (const point of points) {
@@ -88,6 +94,12 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     return { breakdown, estimated, ...workedTime, assignedCount, days, techniciansNeeded };
   }, [assumptions, data, deadlineDays, visit.technician_id]);
   const pointResponses = (point: Point) => (data?.responses ?? []).filter((response) => point.kind === "luc" ? response.visit_luc_id === point.id : response.visit_environment_id === point.id);
+  const stageSevenSectionIds = new Set(sections.filter((section) => section.position === 6 || normalize(section.title).includes("revisao")).map((section) => section.id));
+  const stageSevenQuestionIds = new Set(questions.filter((question) => stageSevenSectionIds.has(question.section_id)).map((question) => question.id));
+  const technicalTotals = useMemo(() => {
+    const groups = [{ label: "Tipos de hidrômetro", terms: ["tipo de hidrometro", "tipo de registro"] }, { label: "Dificuldade de acesso", terms: ["dificuldade", "acesso ao hidrometro"] }, { label: "Quadros e pontos elétricos", terms: ["quadro eletrico", "ponto eletrico"] }, { label: "Complexidade", terms: ["complexidade"] }];
+    return groups.map((group) => { const counts = new Map<string, number>(); for (const response of data?.responses ?? []) { const question = questions.find((item) => item.id === response.question_id); if (!question || !group.terms.some((term) => normalize(question.prompt).includes(term))) continue; const value = valueText(response.answer).trim(); if (value) counts.set(value, (counts.get(value) ?? 0) + 1); } return { label: group.label, values: [...counts.entries()] }; }).filter((group) => group.values.length);
+  }, [data?.responses, questions]);
   const exportPdf = async (blackAndWhite: boolean) => {
     if (!data) return;
     const [{ jsPDF }, autoTableModule] = await Promise.all([import("jspdf"), import("jspdf-autotable")]);
@@ -100,12 +112,18 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     let y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 7;
     autoTable(pdf, { startY: y, theme: "grid", headStyles: { fillColor: ink }, head: [["Planejamento", "Valor"]], body: [["Tempo estimado", formatMinutes(calculation.estimated)], ["Tempo realizado", formatMinutes(calculation.worked)], ["Horas extras", formatMinutes(calculation.overtime)], ["Horas noturnas (22h às 5h)", formatMinutes(calculation.night)], ["Dias com equipe designada", String(calculation.days)], [`Técnicos para ${deadlineDays} dia(s)`, String(calculation.techniciansNeeded)]] });
     y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 8;
+    if (technicalTotals.length) { autoTable(pdf, { startY: y, theme: "grid", headStyles: { fillColor: ink }, head: [["Totalizadores técnicos", "Quantidade"]], body: technicalTotals.flatMap((group) => group.values.map(([value, count]) => [`${group.label}: ${value}`, String(count)])) }); y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 8; }
     for (const point of data.points) {
       if (y > 250) { pdf.addPage(); y = 18; }
       pdf.setFont("helvetica", "bold"); pdf.setFontSize(12); pdf.setTextColor(...ink); pdf.text(point.label, 14, y); pdf.setTextColor(25, 25, 25); y += 5;
-      const answers = pointResponses(point).map((response) => [questions.find((question) => question.id === response.question_id)?.prompt ?? "Pergunta", valueText(response.answer) || "—"]);
-      autoTable(pdf, { startY: y, theme: "striped", headStyles: { fillColor: ink }, head: [["Resumo", "Resposta"]], body: [["Início", point.started_at ? new Date(point.started_at).toLocaleString("pt-BR") : "Não registrado"], ["Conclusão", point.completed_at ? new Date(point.completed_at).toLocaleString("pt-BR") : "Não registrada"], ["Duração", formatMinutes(durationMinutes(point.started_at, point.completed_at))], ...answers] });
+      const pointAnswers = pointResponses(point);
+      const answers = pointAnswers.map((response) => [questions.find((question) => question.id === response.question_id)?.prompt ?? "Pergunta", valueText(response.answer) || "—"]);
+      const stageSeven = pointAnswers.filter((response) => stageSevenQuestionIds.has(response.question_id)).map((response) => valueText(response.answer)).filter(Boolean).join("; ");
+      const calls = data.calls.filter((item) => point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id).map((call) => { const linked = call.internal_calls as unknown as { call_number?: string; title?: string; status?: string } | null; return linked ? `#${linked.call_number ?? "—"} ${linked.title ?? "Chamado"} (${linked.status ?? call.status})` : call.status; }).join("; ");
+      autoTable(pdf, { startY: y, theme: "striped", headStyles: { fillColor: ink }, head: [["Resumo", "Resposta"]], body: [["Início", point.started_at ? new Date(point.started_at).toLocaleString("pt-BR") : "Não registrado"], ["Conclusão", point.completed_at ? new Date(point.completed_at).toLocaleString("pt-BR") : "Não registrada"], ["Duração", formatMinutes(durationMinutes(point.started_at, point.completed_at))], ...(stageSeven ? [["Anotações da Etapa 7", stageSeven]] : []), ...(calls ? [["Ações e chamados", calls]] : []), ...answers] });
       y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 8;
+      const photos = data.attachments.filter((item) => item.content_type?.startsWith("image/") && (point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id));
+      for (const photo of photos) { const { data: signed } = await supabase.storage.from("site-survey-attachments").createSignedUrl(photo.storage_path, 300); if (!signed?.signedUrl) continue; if (y > 245) { pdf.addPage(); y = 18; } try { pdf.addImage(await imageDataUrl(signed.signedUrl), "JPEG", 14, y, 42, 31, undefined, "FAST"); y += 35; } catch { /* Mantém o PDF disponível caso uma foto falhe. */ } }
     }
     pdf.save(`site-survey-${visit.survey_number}-${blackAndWhite ? "impressao" : "digital"}.pdf`);
   };
