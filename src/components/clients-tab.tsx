@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Download, Minus, Pencil, Plus, Trash2 } from "lucide-react";
+import { ChevronUp, ChevronDown, Download, Pencil, Plus, Trash2 } from "lucide-react";
 import { LinkedRecordDeletionDialog } from "@/components/linked-record-deletion-dialog";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { useClientCategories, type ClientCategory } from "@/components/client-categories-tab";
@@ -305,7 +305,7 @@ export function ClientsTab({ userId }: { userId: string }) {
                               title={expanded ? `Recolher unidades de ${c.name}` : `Exibir unidades de ${c.name}`}
                               aria-label={expanded ? `Recolher unidades de ${c.name}` : `Exibir unidades de ${c.name}`}
                             >
-                              {expanded ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                              {expanded ? <ChevronUp className="h-3.5 w-3.5"  /> : <ChevronDown className="h-3.5 w-3.5"  />}
                             </Button>
                           )}
                           <span>{c.name}</span>

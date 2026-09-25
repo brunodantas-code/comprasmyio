@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Minus, Pencil, Plus } from "lucide-react";
+import { ChevronUp, ChevronDown, Pencil, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -114,7 +114,7 @@ export function RequestTypesTab() {
         <div><CardTitle>Tipos de Solicitação</CardTitle>{expanded && <CardDescription>Crie tipos a partir de um modelo de formulário existente.</CardDescription>}</div>
         <div className="flex items-center gap-1">
           <CollapsibleContent><CreateRequestTypeDialog open={createOpen} onOpenChange={setCreateOpen} saving={create.isPending} onSave={(name, modelCode) => create.mutateAsync({ name, modelCode })} /></CollapsibleContent>
-          <CollapsibleTrigger asChild><Button size="compactIcon" variant="ghost" aria-label={expanded ? "Recolher Tipos de Solicitação" : "Expandir Tipos de Solicitação"} title={expanded ? "Recolher" : "Expandir"}>{expanded ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}</Button></CollapsibleTrigger>
+          <CollapsibleTrigger asChild><Button size="compactIcon" variant="ghost" aria-label={expanded ? "Recolher Tipos de Solicitação" : "Expandir Tipos de Solicitação"} title={expanded ? "Recolher" : "Expandir"}>{expanded ? <ChevronUp className="h-3.5 w-3.5"  /> : <ChevronDown className="h-3.5 w-3.5"  />}</Button></CollapsibleTrigger>
         </div>
       </CardHeader>
       <CollapsibleContent asChild><CardContent>
