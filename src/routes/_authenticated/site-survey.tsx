@@ -348,9 +348,10 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
   const points: SurveyPoint[] = [...(detail?.lucs ?? []).map((item) => ({ value: `luc:${item.id}`, label: `LUC ${item.luc_number} — ${item.shop_name}${item.location ? ` — ${item.location}` : ""}`, completionStatus: item.completion_status as "pendente" | "concluida" | "cancelada", templateId: visit?.template_id ?? null })), ...(detail?.environments ?? []).map((item) => ({ value: `environment:${item.id}`, label: item.name, completionStatus: item.completion_status as "pendente" | "concluida", templateId: item.template_id ?? visit?.template_id ?? null }))];
   const pointKind = selectedPoint.startsWith("luc:") ? "luc" : "environment";
   const pointId = selectedPoint.split(":")[1] ?? "";
-  const selectedPointRecord = pointKind === "luc" ? detail?.lucs.find((item) => item.id === pointId) : detail?.environments.find((item) => item.id === pointId);
+  const selectedEnvironment = detail?.environments.find((item) => item.id === pointId);
+  const selectedPointRecord = pointKind === "luc" ? detail?.lucs.find((item) => item.id === pointId) : selectedEnvironment;
   const selectedPointTemplateId = points.find((point) => point.value === selectedPoint)?.templateId ?? visit?.template_id ?? null;
-  const hasOwnEnvironmentTemplate = pointKind === "environment" && Boolean(selectedPointRecord?.template_id);
+  const hasOwnEnvironmentTemplate = pointKind === "environment" && Boolean(selectedEnvironment?.template_id);
   const pointSections = sortByPosition(data.sections.filter((section) => section.active && section.template_id === selectedPointTemplateId)).slice(hasOwnEnvironmentTemplate ? 0 : 3);
   const questions = sortByPosition(data.questions.filter((question) => question.active && (generalSections.some((section) => section.id === question.section_id) || pointSections.some((section) => section.id === question.section_id))));
   const selectedPointCancelled = pointKind === "luc" && selectedPointRecord?.completion_status === "cancelada";
