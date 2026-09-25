@@ -1,4 +1,5 @@
 - [x] Site Survey — escolher e aplicar novo layout em cards separados para melhorar a leitura das perguntas no mobile e desktop.
+- [x] Site Survey — informar a geração do PDF, impedir cliques repetidos e confirmar sucesso ou falha do download.
 - [ ] Site Survey — gerar relatório completo com prévia e PDF colorido/P&B, fotos por ponto, totalizadores, ações, estimativa detalhada e apuração de horas extras/noturnas.
 - [x] Site Survey — substituir tabelas extensas por resumos textuais padronizados por tema, com respostas em negrito e fotos em grade compacta.
 - [ ] Site Survey — registrar início individual de cada loja/ambiente pelo primeiro evento entre botão de início e foto obrigatória da fachada.
