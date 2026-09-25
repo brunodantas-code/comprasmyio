@@ -35,23 +35,23 @@ const findAnswer = (responses: ReportResponse[], questions: Question[], terms: s
 const buildPointSummaries = (responses: ReportResponse[], questions: Question[], sections: Section[]): PointSummary[] => {
   const summaries: PointSummary[] = [];
   const used = new Set<string>();
-  const addKnown = (title: string, definitions: Array<{ terms: string[]; before: string; after?: string }>) => {
+  const addKnown = (title: string, definitions: Array<{ terms: string[]; before: string; after?: string; format?: (value: string) => string }>) => {
     const parts: RichPart[] = [];
     const ids = new Set<string>();
     for (const definition of definitions) {
       const found = findAnswer(responses, questions, definition.terms);
       if (!found?.value) continue;
-      parts.push({ text: definition.before }, { text: found.value, bold: true }, { text: definition.after ?? ". " });
+      parts.push({ text: definition.before }, { text: definition.format ? definition.format(found.value) : found.value, bold: true }, { text: definition.after ?? ". " });
       ids.add(found.id); used.add(found.id);
     }
     if (parts.length) summaries.push({ title, parts, questionIds: ids });
   };
   addKnown("Hidráulica", [
     { terms: ["localizacao do hidrometro"], before: "O hidrômetro encontra-se em ", after: ", " },
-    { terms: ["dificuldade de acesso"], before: "com acesso ", after: ". " },
-    { terms: ["saida pulsada"], before: "A saída pulsada está ", after: " e " },
+    { terms: ["dificuldade de acesso"], before: "O hidrômetro possui acesso ", after: ". ", format: (value) => value.toLocaleLowerCase("pt-BR") },
+    { terms: ["saida pulsada"], before: "A saída pulsada está ", after: " e ", format: (value) => (value.split("—").at(-1) ?? value).trim().toLocaleLowerCase("pt-BR") },
     { terms: ["vazao nominal"], before: "a vazão nominal é de ", after: ". " },
-    { terms: ["sentido do fluxo"], before: "O sentido do fluxo de água está ", after: ". " },
+    { terms: ["sentido do fluxo"], before: "O sentido do fluxo de água foi classificado como ", after: ". " },
     { terms: ["tipo de flange"], before: "O flange é do tipo ", after: ". " },
     { terms: ["tipo de registro existente"], before: "O registro existente é do tipo ", after: ". " },
     { terms: ["condicao do registro"], before: "O registro encontra-se ", after: ". " },
@@ -154,7 +154,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     const groups = [{ label: "Tipos de hidrômetro", terms: ["tipo de hidrometro", "tipo de registro"] }, { label: "Dificuldade de acesso", terms: ["dificuldade", "acesso ao hidrometro"] }, { label: "Quadros e pontos elétricos", terms: ["quadro eletrico", "ponto eletrico"] }, { label: "Complexidade", terms: ["complexidade"] }];
     return groups.map((group) => { const counts = new Map<string, number>(); for (const response of data?.responses ?? []) { const question = questions.find((item) => item.id === response.question_id); if (!question || !group.terms.some((term) => normalize(question.prompt).includes(term))) continue; const value = valueText(response.answer).trim(); if (value) counts.set(value, (counts.get(value) ?? 0) + 1); } return { label: group.label, values: [...counts.entries()] }; }).filter((group) => group.values.length);
   }, [data?.responses, questions]);
-  const pointSummaries = (point: Point) => buildPointSummaries(pointResponses(point) as ReportResponse[], questions, sections);
+  const pointSummaries = (point: Point) => buildPointSummaries((pointResponses(point) as ReportResponse[]).filter((response) => !stageSevenQuestionIds.has(response.question_id)), questions, sections);
   const exportPdf = async (blackAndWhite: boolean) => {
     if (!data) return;
     const [{ jsPDF }, autoTableModule] = await Promise.all([import("jspdf"), import("jspdf-autotable")]);
