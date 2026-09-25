@@ -3527,6 +3527,44 @@ export type Database = {
           },
         ]
       }
+      site_survey_cancellation_reasons: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          position: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          position?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          position?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_survey_cancellation_reasons_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_survey_custom_catalog_items: {
         Row: {
           active: boolean
@@ -4339,7 +4377,10 @@ export type Database = {
       }
       site_survey_visit_luc_history: {
         Row: {
+          cancellation_reason_id: string | null
+          cancelled_at: string | null
           changed_by: string | null
+          completion_status: string
           created_at: string
           id: string
           luc_number: string
@@ -4350,7 +4391,10 @@ export type Database = {
           visit_luc_id: string
         }
         Insert: {
+          cancellation_reason_id?: string | null
+          cancelled_at?: string | null
           changed_by?: string | null
+          completion_status?: string
           created_at?: string
           id?: string
           luc_number: string
@@ -4361,7 +4405,10 @@ export type Database = {
           visit_luc_id: string
         }
         Update: {
+          cancellation_reason_id?: string | null
+          cancelled_at?: string | null
           changed_by?: string | null
+          completion_status?: string
           created_at?: string
           id?: string
           luc_number?: string
@@ -4372,6 +4419,13 @@ export type Database = {
           visit_luc_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "site_survey_visit_luc_history_cancellation_reason_id_fkey"
+            columns: ["cancellation_reason_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_cancellation_reasons"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "site_survey_visit_luc_history_changed_by_fkey"
             columns: ["changed_by"]
@@ -4398,6 +4452,9 @@ export type Database = {
       site_survey_visit_lucs: {
         Row: {
           active: boolean
+          cancellation_reason_id: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
           completed_at: string | null
           completed_by: string | null
           completion_status: string
@@ -4415,6 +4472,9 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          cancellation_reason_id?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
           completed_at?: string | null
           completed_by?: string | null
           completion_status?: string
@@ -4432,6 +4492,9 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          cancellation_reason_id?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
           completed_at?: string | null
           completed_by?: string | null
           completion_status?: string
@@ -4448,6 +4511,20 @@ export type Database = {
           visit_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "site_survey_visit_lucs_cancellation_reason_id_fkey"
+            columns: ["cancellation_reason_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_cancellation_reasons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_visit_lucs_cancelled_by_fkey"
+            columns: ["cancelled_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "site_survey_visit_lucs_completed_by_fkey"
             columns: ["completed_by"]

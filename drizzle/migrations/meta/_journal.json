@@ -498,6 +498,13 @@
       "when": 1790287287899,
       "tag": "0070_fix_site_survey_point_progress_log",
       "breakpoints": true
+    },
+    {
+      "idx": 71,
+      "version": "7",
+      "when": 1790297157827,
+      "tag": "0071_add_site_survey_luc_cancellation",
+      "breakpoints": true
     }
   ]
 }
