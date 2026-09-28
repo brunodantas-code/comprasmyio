@@ -784,3 +784,4 @@
 - [x] Portal ERP — atualizar o botão Casinha ao padrão de ícone verde sem fundo.
 - [x] Code — permitir anexar prints e fotos na criação e nas respostas dos chamados, exibindo cada anexo na conversa.
 - [x] Code — permitir novas perguntas e anexos em chamados abertos mesmo com pergunta anterior sem resposta; manter respostas vinculadas à pergunta escolhida.
+- [ ] Supply — permitir cadastro de Item novo a quem recebeu essa permissão, sem ampliar permissões de estoque.
