@@ -519,6 +519,13 @@
       "when": 1790342147730,
       "tag": "0073_add_site_survey_reports_and_point_timing",
       "breakpoints": true
+    },
+    {
+      "idx": 74,
+      "version": "7",
+      "when": 1790614647677,
+      "tag": "0074_add_site_survey_point_pauses",
+      "breakpoints": true
     }
   ]
 }
