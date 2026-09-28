@@ -582,6 +582,13 @@
       "when": 1790629725141,
       "tag": "0082_allow_followup_questions_in_code_tickets",
       "breakpoints": true
+    },
+    {
+      "idx": 83,
+      "version": "7",
+      "when": 1790630349043,
+      "tag": "0083_align_new_item_insert_with_supply_permission",
+      "breakpoints": true
     }
   ]
 }

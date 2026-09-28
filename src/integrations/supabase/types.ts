@@ -6042,6 +6042,10 @@ export type Database = {
         Args: { _changes: Json; _items: Json; _order_id: string }
         Returns: undefined
       }
+      can_create_supply_new_item: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
       can_manage_cash_flow: { Args: { _user_id: string }; Returns: boolean }
       can_manage_limits: { Args: { _user_id: string }; Returns: boolean }
       can_request_type: {
