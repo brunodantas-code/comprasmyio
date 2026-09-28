@@ -367,7 +367,6 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
   const pointSections = sortByPosition(data.sections.filter((section) => section.active && section.template_id === selectedPointTemplateId)).slice(hasOwnEnvironmentTemplate ? 0 : 3);
   const questions = sortByPosition(data.questions.filter((question) => question.active && (generalSections.some((section) => section.id === question.section_id) || pointSections.some((section) => section.id === question.section_id))));
   const selectedPointCancelled = pointKind === "luc" && selectedPointRecord?.completion_status === "cancelada";
-  const savedPendingFields = Array.isArray(selectedPointRecord?.pending_fields) ? selectedPointRecord.pending_fields.filter((item): item is string => typeof item === "string") : [];
   const matchesPoint = (item: { visit_luc_id?: string | null; visit_environment_id?: string | null }) => pointKind === "luc" ? item.visit_luc_id === pointId : item.visit_environment_id === pointId;
   const facadeAttachment = (detail?.attachments ?? []).find((item) => item.attachment_kind === "facade" && matchesPoint(item));
   const scopedMaterials = (detail?.visitMaterials ?? []).filter(matchesPoint);
@@ -554,16 +553,16 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
        for (const file of files) { const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "-"); const path = `${visit.id}/${pointId}/${crypto.randomUUID()}-${safe}`; const { error: uploadError } = await supabase.storage.from("site-survey-attachments").upload(path, file); if (uploadError) throw uploadError; const { error } = await supabase.from("site_survey_attachments").insert({ visit_id: visit.id, ...scope, attachment_kind: "general", uploaded_by: data.userId, file_name: file.name, storage_path: path, content_type: file.type, file_size: file.size }); if (error) throw error; }
        const activeSection = pointSections.find((section) => section.id === openSectionId);
        const activeSectionPending = activeSection ? pointPendingFields(form, new Set([activeSection.id])) : [];
-       const previousOtherSectionPending = activeSection
-         ? savedPendingFields.filter((field) => !field.startsWith(`${activeSection.title}:`))
-         : savedPendingFields;
+        const previousOtherSectionPending = activeSection
+          ? pointSections.filter((section) => section.id !== activeSection.id && sectionHasSavedData(section, false)).flatMap((section) => currentSectionPendingFields(section))
+          : pointSections.filter((section) => sectionHasSavedData(section, false)).flatMap((section) => currentSectionPendingFields(section));
        const pendingFields = finishPoint
          ? []
          : acceptedPendingFields.length
            ? acceptedPendingFields
            : activeSection
              ? [...previousOtherSectionPending, ...activeSectionPending]
-             : savedPendingFields;
+             : previousOtherSectionPending;
        const pointTable = pointKind === "luc" ? "site_survey_visit_lucs" : "site_survey_visit_environments";
        const completedAt = finishPoint ? new Date().toISOString() : null;
        const { error: pointError } = await supabase.from(pointTable).update({ completion_status: finishPoint ? "concluida" : "pendente", completed_at: completedAt, completed_by: finishPoint ? data.userId : null, pending_fields: pendingFields, last_progress_at: new Date().toISOString() }).eq("id", pointId); if (pointError) throw pointError;
@@ -584,12 +583,13 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
   const specialEquipmentQuestion = questions.find(isSpecialEquipmentQuestion);
   const storedSpecialEquipmentAnswer = specialEquipmentQuestion ? answerParts(answers.get(specialEquipmentQuestion.id)).value : undefined;
   const needsSpecialEquipment = isAffirmativeAnswer(specialEquipmentAnswer || storedSpecialEquipmentAnswer);
-  const sectionPendingCount = (section: Section, general: boolean) => {
+   const sectionPendingCount = (section: Section, general: boolean) => {
     if (!general && questions.some((question) => question.section_id === section.id && isSpecialEquipmentQuestion(question))) return needsSpecialEquipment && materialRows.length === 0 ? 1 : 0;
     const applicableQuestions = questions.filter((question) => question.section_id === section.id).filter((question) => isQuestionVisible(question, answers));
     const scopedAttachments = detail?.attachments ?? [];
     return applicableQuestions.filter((question) => !isStoredQuestionComplete(question, answers, scopedAttachments, general ? (item) => !item.visit_luc_id && !item.visit_environment_id : matchesPoint)).length;
   };
+   const currentSectionPendingFields = (section: Section) => questions.filter((question) => question.section_id === section.id && isQuestionVisible(question, answers) && !isStoredQuestionComplete(question, answers, detail?.attachments ?? [], matchesPoint)).map((question) => `${section.title}: ${question.prompt}`);
    const sectionHasSavedData = (section: Section, general: boolean) => {
      const questionIds = new Set(questions.filter((question) => question.section_id === section.id).map((question) => question.id));
      const responseSaved = (detail?.responses ?? []).some((response) => questionIds.has(response.question_id)
@@ -600,7 +600,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
      return responseSaved || photoSaved;
    };
    const sectionVisiblePendingCount = (section: Section, general: boolean) => sectionHasSavedData(section, general) ? sectionPendingCount(section, general) : 0;
-    const visibleSavedPendingFields = savedPendingFields.filter((field) => pointSections.some((section) => sectionHasSavedData(section, false) && field.startsWith(`${section.title}:`)));
+     const visibleSavedPendingFields = pointSections.filter((section) => sectionHasSavedData(section, false)).flatMap((section) => currentSectionPendingFields(section));
     const visibleDisplayedPendingFields = pendingPointSave?.fields ?? visibleSavedPendingFields;
     const groupedPendingFields = pointSections.map((section, index) => ({
       label: `Etapa ${generalSections.length + index + 1}`,
@@ -692,7 +692,40 @@ function ChecklistAdmin({ data, onChanged }: { data: NonNullable<ReturnType<type
   const createQuestion = async (form: HTMLFormElement, sectionId: string) => { const values = new FormData(form); const prompt = String(values.get("prompt")).trim(); if (!prompt || prompt.length > 50) return toast.error("A pergunta deve ter entre 1 e 50 caracteres."); const options = String(values.get("options") ?? "").split(/[;\n]/).map((item) => item.trim()).filter(Boolean); const conditioned = values.get("conditioned") === "on"; const actionEnabled = values.get("generate_action") === "on"; const result = await supabase.from("site_survey_questions").insert({ section_id: sectionId, prompt, question_type: String(values.get("question_type")), required: values.get("required") === "on", options, configuration: questionConfigurationFromForm(values), position: questionOrders[sectionId]?.length ?? 0, conditioned_on_question_id: conditioned ? String(values.get("condition_question") || "") || null : null, conditioned_operator: conditioned ? String(values.get("condition_operator") || "equals") : "equals", conditioned_value: conditioned ? String(values.get("condition_value") || "") || null : null }).select("id").single(); if (result.error) return toast.error(result.error.message); if (actionEnabled) { const actionId = String(values.get("action_id") || ""); const triggerValue = String(values.get("action_trigger") || "").trim(); if (actionId && triggerValue) { const { error } = await supabase.from("site_survey_question_actions").insert({ question_id: result.data.id, action_id: actionId, trigger_value: triggerValue }); if (error) return toast.error(error.message); } } toast.success("Pergunta adicionada"); form.reset(); setAddingQuestionSectionId(null); onChanged(); };
   const updateTemplate = async (form: HTMLFormElement, id: string) => { const values = new FormData(form); const name = String(values.get("name")).trim(); const description = String(values.get("description")).trim(); if (!name || name.length > 50) return toast.error("O nome do modelo deve ter entre 1 e 50 caracteres."); if (description.length > 100) return toast.error("A descrição deve ter no máximo 100 caracteres."); const { error } = await supabase.from("site_survey_templates").update({ name, description: description || null }).eq("id", id); if (error) return toast.error(error.message); toast.success("Modelo atualizado"); onChanged(); };
   const updateSection = async (form: HTMLFormElement, id: string) => { const values = new FormData(form); const title = String(values.get("title")).trim(); const description = String(values.get("description")).trim(); if (!title || title.length > 50) return toast.error("O título da seção deve ter entre 1 e 50 caracteres."); if (description.length > 100) return toast.error("A descrição deve ter no máximo 100 caracteres."); const { error } = await supabase.from("site_survey_sections").update({ title, description: description || null }).eq("id", id); if (error) return toast.error(error.message); toast.success("Seção atualizada"); setEditingSectionId(null); onChanged(); };
-  const updateQuestion = async (form: HTMLFormElement, question: Question) => { const values = new FormData(form); const prompt = String(values.get("prompt")).trim(); if (!prompt || prompt.length > 50) return toast.error("A pergunta deve ter entre 1 e 50 caracteres."); const options = String(values.get("options") ?? "").split(/[;\n]/).map((item) => item.trim()).filter(Boolean); const conditioned = values.get("conditioned") === "on"; const { error } = await supabase.from("site_survey_questions").update({ prompt, question_type: String(values.get("question_type")), required: values.get("required") === "on", options, configuration: questionConfigurationFromForm(values, asQuestionConfig(question.configuration)), conditioned_on_question_id: conditioned ? String(values.get("condition_question") || "") || null : null, conditioned_operator: conditioned ? String(values.get("condition_operator") || "equals") : "equals", conditioned_value: conditioned ? String(values.get("condition_value") || "") || null : null }).eq("id", question.id); if (error) return toast.error(error.message); await supabase.from("site_survey_question_actions").delete().eq("question_id", question.id); if (values.get("generate_action") === "on") { const actionId = String(values.get("action_id") || ""); const triggerValue = String(values.get("action_trigger") || "").trim(); if (actionId && triggerValue) { const actionResult = await supabase.from("site_survey_question_actions").insert({ question_id: question.id, action_id: actionId, trigger_value: triggerValue }); if (actionResult.error) return toast.error(actionResult.error.message); } } toast.success("Pergunta atualizada"); setEditingQuestionId(null); onChanged(); };
+   const updateQuestion = async (form: HTMLFormElement, question: Question) => {
+     const values = new FormData(form);
+     const prompt = String(values.get("prompt") ?? "").trim();
+     if (!prompt || prompt.length > 50) return toast.error("A pergunta deve ter entre 1 e 50 caracteres.");
+     const options = String(values.get("options") ?? "").split(/[;\n]/).map((item) => item.trim()).filter(Boolean);
+     const conditioned = values.get("conditioned") === "on";
+     const actionEnabled = values.get("generate_action") === "on";
+     const actionId = String(values.get("action_id") ?? "");
+     const triggerValue = String(values.get("action_trigger") ?? "").trim();
+     if (actionEnabled && (!actionId || !triggerValue)) return toast.error("Selecione a ação e a resposta que deve gerá-la.");
+     const { data: rules, error: rulesError } = await supabase.from("site_survey_question_actions").select("id,action_id,trigger_value,active").eq("question_id", question.id);
+     if (rulesError) return toast.error("Não foi possível consultar as ações desta pergunta. Tente novamente.");
+     const existing = rules ?? [];
+     // Keep referenced rule IDs: generated calls cannot release their foreign key on DELETE.
+     const matching = existing.find((rule) => rule.action_id === actionId && rule.trigger_value === triggerValue);
+     const chosen = matching ?? existing.find((rule) => rule.active) ?? existing[0];
+     if (actionEnabled) {
+       if (chosen) {
+         const { error } = await supabase.from("site_survey_question_actions").update({ action_id: actionId, trigger_value: triggerValue, active: true }).eq("id", chosen.id);
+         if (error) return toast.error("Não foi possível atualizar a ação desta pergunta. Tente novamente.");
+       } else {
+         const { error } = await supabase.from("site_survey_question_actions").insert({ question_id: question.id, action_id: actionId, trigger_value: triggerValue });
+         if (error) return toast.error("Não foi possível vincular a ação desta pergunta. Tente novamente.");
+       }
+     }
+     const otherIds = existing.filter((rule) => !actionEnabled || rule.id !== chosen?.id).filter((rule) => rule.active).map((rule) => rule.id);
+     if (otherIds.length) {
+       const { error } = await supabase.from("site_survey_question_actions").update({ active: false }).in("id", otherIds);
+       if (error) return toast.error("Não foi possível desativar as ações anteriores. Tente novamente.");
+     }
+     const { error } = await supabase.from("site_survey_questions").update({ prompt, question_type: String(values.get("question_type")), required: values.get("required") === "on", options, configuration: questionConfigurationFromForm(values, asQuestionConfig(question.configuration)), conditioned_on_question_id: conditioned ? String(values.get("condition_question") || "") || null : null, conditioned_operator: conditioned ? String(values.get("condition_operator") || "equals") : "equals", conditioned_value: conditioned ? String(values.get("condition_value") || "") || null : null }).eq("id", question.id);
+     if (error) return toast.error("Não foi possível salvar a pergunta. Tente novamente.");
+     toast.success("Pergunta atualizada"); setEditingQuestionId(null); onChanged();
+   };
   const persistOrder = async (table: "site_survey_sections" | "site_survey_questions", ids: string[]) => { const results = await Promise.all(ids.map((id, position) => supabase.from(table).update({ position }).eq("id", id))); const failed = results.find((result) => result.error); if (failed?.error) throw failed.error; };
   const reorderSections = async ({ active, over }: DragEndEvent) => { if (!over || active.id === over.id) return; const oldOrder = sectionOrder; const from = oldOrder.indexOf(String(active.id)); const to = oldOrder.indexOf(String(over.id)); if (from < 0 || to < 0) return; const next = arrayMove(oldOrder, from, to); setSectionOrder(next); try { await persistOrder("site_survey_sections", next); toast.success("Seções reordenadas"); onChanged(); } catch (error) { setSectionOrder(oldOrder); toast.error(error instanceof Error ? error.message : "Não foi possível reordenar as seções."); } };
   const reorderQuestions = async (sectionId: string, { active, over }: DragEndEvent) => { const dropZone = document.getElementById(`question-drop-zone-${sectionId}`); const translated = active.rect.current.translated; if (!over || active.id === over.id || !dropZone || !translated) return; const bounds = dropZone.getBoundingClientRect(); const centerX = translated.left + translated.width / 2; const centerY = translated.top + translated.height / 2; if (centerX < bounds.left || centerX > bounds.right || centerY < bounds.top || centerY > bounds.bottom) return; const oldOrder = questionOrders[sectionId] ?? []; const from = oldOrder.indexOf(String(active.id)); const to = oldOrder.indexOf(String(over.id)); if (from < 0 || to < 0) return; const next = arrayMove(oldOrder, from, to); setQuestionOrders((current) => ({ ...current, [sectionId]: next })); try { await persistOrder("site_survey_questions", next); toast.success("Perguntas reordenadas"); onChanged(); } catch (error) { setQuestionOrders((current) => ({ ...current, [sectionId]: oldOrder })); toast.error(error instanceof Error ? error.message : "Não foi possível reordenar as perguntas."); } };
