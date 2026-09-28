@@ -779,3 +779,5 @@
 - [x] OpDesk — mostrar número da visita vinculada como coluna no acompanhamento de chamados.
 - [x] Site Survey — corrigir o salvamento de perguntas com ação já utilizada em chamados, preservando o vínculo histórico e evitando duplicidade.
 - [x] Site Survey — verificar duas pendências sem destaque na seção 4 da loja Casas Bahia e corrigir contagem de perguntas excluídas, se for a causa.
+- [ ] Site Survey mobile — ao abrir as etapas 5 e 6, manter a próxima etapa visível sem saltar aos botões finais.
+- [ ] Site Survey — salvar automaticamente respostas e fotos ao avançar entre perguntas/etapas, mantendo Salvar progresso.
