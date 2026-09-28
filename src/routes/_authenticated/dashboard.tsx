@@ -1361,7 +1361,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
             order_id: data.id,
             position,
             item_name: row.item?.description || row.item?.name || "Material",
-            item_link: row.itemLink || row.item?.link || null,
+            item_link: row.itemLink.trim() || null,
             quantity: Number(row.quantity),
             estimated_unit_value: canManageProducts ? Number(row.estimatedValue || 0) : 0,
             material_id: row.item?.material_id ?? null,
