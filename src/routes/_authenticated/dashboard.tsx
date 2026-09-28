@@ -441,7 +441,7 @@ function Dashboard() {
   const fabricaOnly = me.isFabrica && !isAdmin;
   const estoquistaOnly = me.isEstoquista && !isAdmin && !me.isFabrica;
   const canSeeStock = me.canAccess("armazem");
-  const canSeeQueue = me.canAccess("approvals");
+  const canSeeQueue = true;
   const canImport = me.isComprador || isAdmin;
   const requestTabs = [
     { value: "mine", allowed: me.canAccess("solicitacoes_minhas") },
@@ -470,7 +470,7 @@ function Dashboard() {
   const approvalTabs = [
     { value: "mine", label: "Aguardando minha aprovação", allowed: me.canAccess("approvals_pendentes") },
     { value: "flow", label: "Meus em aprovação", allowed: me.canAccess("approvals_meus") },
-    { value: "mine-supply", label: "Meus com Supply", allowed: me.canAccess("approvals_meus") },
+    { value: "mine-supply", label: "Meus com Supply", allowed: true },
     { value: "supply", label: "Fila do Supply", allowed: isAdmin || me.isComprador },
     { value: "all", label: "Todos", allowed: me.canAccess("approvals_todos") },
     { value: "roles", label: "Consolidado por Cargo", allowed: me.canAccess("approvals_consolidado") },
@@ -2558,10 +2558,10 @@ function ApprovalsCenter({ value, onValueChange }: { value?: string; onValueChan
     },
   });
   return (
-    <Tabs value={value ?? (canSeeSupplyQueue ? "supply" : canSeeMine ? "mine" : canSeeFlow ? "flow" : canSeeAllPermission ? "all" : "roles")} onValueChange={onValueChange}>
+    <Tabs value={value ?? (canSeeSupplyQueue ? "supply" : canSeeMine ? "mine" : canSeeFlow ? "flow" : "mine-supply")} onValueChange={onValueChange}>
       {canSeeMine && <TabsContent value="mine"><PendingForMe renderEditAction={renderAdminEdit} /></TabsContent>}
       {canSeeFlow && <TabsContent value="flow"><MyApprovalFlows renderEditAction={renderAdminEdit} /></TabsContent>}
-      {canSeeFlow && <TabsContent value="mine-supply"><BuyerQueue mode="mine-supply" /></TabsContent>}
+      <TabsContent value="mine-supply"><BuyerQueue mode="mine-supply" /></TabsContent>
       {canSeeSupplyQueue && <TabsContent value="supply"><BuyerQueue mode="supply" /></TabsContent>}
       {canSeeAllPermission && <TabsContent value="all"><BuyerQueue /></TabsContent>}
       {canSeeRolesPermission && <TabsContent value="roles"><PendingApprovalsByRole renderEditAction={renderAdminEdit} /></TabsContent>}
