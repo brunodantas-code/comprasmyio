@@ -162,7 +162,7 @@ function PortalPage() {
               <p className="text-xs text-muted-foreground">Plataforma ERP</p>
             </div>
             {activeView === "users" ? (
-              <Button variant="ghost" size="icon" onClick={() => setActiveView("apps")} title="Início" aria-label="Voltar aos aplicativos">
+              <Button variant="ghost" size="icon" className="!bg-transparent !text-primary shadow-none hover:!bg-transparent hover:!text-primary" onClick={() => setActiveView("apps")} title="Início" aria-label="Voltar aos aplicativos">
                 <Home className="h-4 w-4" />
               </Button>
             ) : null}
