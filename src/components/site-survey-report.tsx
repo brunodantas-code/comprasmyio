@@ -21,6 +21,7 @@ type Question = { id: string; section_id: string; prompt: string; position?: num
 type Section = { id: string; title: string; position: number };
 type Profile = { id: string; full_name: string };
 type Point = { id: string; label: string; started_at: string | null; completed_at: string | null; completion_status: string; cancellationReason: string | null; kind: "luc" | "environment" };
+type PointPause = { id: string; visit_luc_id: string | null; visit_environment_id: string | null; reason_id: string; started_at: string; ended_at: string | null; site_survey_pause_reasons: { name: string } | null };
 type ReportResponse = { id: string; question_id: string; answer: unknown };
 type RichPart = { text: string; bold?: boolean };
 type PointSummary = { title: string; parts: RichPart[]; questionIds: Set<string> };
@@ -31,6 +32,8 @@ const valueText = (answer: unknown): string => {
   return Array.isArray(answer) ? answer.join(", ") : String(answer ?? "");
 };
 const durationMinutes = (start: string | null, end: string | null) => start && end ? Math.max(0, Math.round((new Date(end).getTime() - new Date(start).getTime()) / 60000)) : null;
+const pauseMinutes = (pauses: PointPause[], end: string | null = null) => Math.round(pauses.reduce((total, pause) => total + Math.max(0, new Date(pause.ended_at ?? end ?? new Date().toISOString()).getTime() - new Date(pause.started_at).getTime()), 0) / 60000);
+const pointDuration = (point: Point, pauses: PointPause[]) => { const total = durationMinutes(point.started_at, point.completed_at); return total === null ? null : Math.max(0, total - pauseMinutes(pauses, point.completed_at)); };
 const formatMinutes = (minutes: number | null) => minutes === null ? "Incompleto" : `${Math.floor(minutes / 60)}h ${String(minutes % 60).padStart(2, "0")}min`;
 const normalize = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR");
 const findAnswer = (responses: ReportResponse[], questions: Question[], terms: string[], sections?: Section[], sectionTerms?: string[]) => {
@@ -166,8 +169,9 @@ const fileBase64 = async (url: string) => {
   for (let index = 0; index < bytes.length; index += 8192) binary += String.fromCharCode(...bytes.subarray(index, index + 8192));
   return btoa(binary);
 };
-const calculateWorkedTime = (points: Point[]) => {
+const calculateWorkedTime = (points: Point[], pauses: PointPause[]) => {
   const byDay = new Map<string, Array<[number, number]>>();
+  const pausesByDay = new Map<string, Array<[number, number]>>();
   for (const point of points) {
     if (!point.started_at || !point.completed_at) continue;
     let cursor = new Date(point.started_at);
@@ -180,15 +184,34 @@ const calculateWorkedTime = (points: Point[]) => {
       cursor = segmentEnd;
     }
   }
-  let worked = 0; let overtime = 0; let night = 0;
-  for (const ranges of byDay.values()) {
+  for (const pause of pauses) {
+    const point = points.find((item) => item.id === (pause.visit_luc_id ?? pause.visit_environment_id) && item.kind === (pause.visit_luc_id ? "luc" : "environment"));
+    if (!point?.started_at || !point.completed_at) continue;
+    let cursor = new Date(Math.max(new Date(pause.started_at).getTime(), new Date(point.started_at).getTime()));
+    const end = new Date(Math.min(new Date(pause.ended_at ?? point.completed_at).getTime(), new Date(point.completed_at).getTime()));
+    while (cursor < end) {
+      const dayEnd = new Date(cursor); dayEnd.setHours(24, 0, 0, 0);
+      const segmentEnd = new Date(Math.min(dayEnd.getTime(), end.getTime()));
+      const key = `${cursor.getFullYear()}-${cursor.getMonth()}-${cursor.getDate()}`;
+      pausesByDay.set(key, [...(pausesByDay.get(key) ?? []), [cursor.getTime(), segmentEnd.getTime()]]);
+      cursor = segmentEnd;
+    }
+  }
+  const merge = (ranges: Array<[number, number]>) => {
     const merged: Array<[number, number]> = [];
     for (const range of ranges.sort((left, right) => left[0] - right[0])) {
       const previous = merged.at(-1);
       if (previous && range[0] <= previous[1]) previous[1] = Math.max(previous[1], range[1]); else merged.push([...range]);
     }
+    return merged;
+  };
+  let worked = 0; let paused = 0; let overtime = 0; let night = 0;
+  for (const [key, ranges] of byDay) {
+    const merged = merge(ranges);
+    const mergedPauses = merge(pausesByDay.get(key) ?? []);
     const daily = merged.reduce((total, [start, end]) => total + (end - start) / 60000, 0);
-    worked += daily; overtime += Math.max(0, daily - 480);
+    const dailyPaused = mergedPauses.reduce((total, [start, end]) => total + merged.reduce((overlap, [workStart, workEnd]) => overlap + Math.max(0, Math.min(end, workEnd) - Math.max(start, workStart)) / 60000, 0), 0);
+    worked += daily - dailyPaused; paused += dailyPaused; overtime += Math.max(0, daily - 480);
     for (const [start, end] of merged) {
       const date = new Date(start); const midnight = new Date(date); midnight.setHours(0, 0, 0, 0);
       const five = midnight.getTime() + 5 * 3600000; const twentyTwo = midnight.getTime() + 22 * 3600000;
@@ -196,7 +219,7 @@ const calculateWorkedTime = (points: Point[]) => {
       night += Math.max(0, end - Math.max(start, twentyTwo)) / 60000;
     }
   }
-  return { worked: Math.round(worked), overtime: Math.round(overtime), night: Math.round(night) };
+  return { worked: Math.round(worked), paused: Math.round(paused), useful: Math.round(worked + paused), overtime: Math.round(overtime), night: Math.round(night) };
 };
 
 export function SiteSurveyReportButton({ visit, clients, units, projects, technicians, questions, sections, assumptions, iconOnly = true }: { visit: Visit; clients: Named[]; units: Named[]; projects: Named[]; technicians: Profile[]; questions: Question[]; sections: Section[]; assumptions: TimeAssumption[]; iconOnly?: boolean }) {
@@ -205,7 +228,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
   const [includePhotos, setIncludePhotos] = useState(true);
   const [generatingPdf, setGeneratingPdf] = useState<"bw" | "color" | null>(null);
   const { data, isLoading } = useQuery({ queryKey: ["site-survey-report", visit.id], enabled: open, queryFn: async () => {
-    const [{ data: lucs, error: lucError }, { data: environments, error: envError }, { data: responses, error: responseError }, { data: attachments, error: attachmentError }, { data: calls, error: callError }, { data: visitTechs }, { data: materials, error: materialError }] = await Promise.all([
+    const [{ data: lucs, error: lucError }, { data: environments, error: envError }, { data: responses, error: responseError }, { data: attachments, error: attachmentError }, { data: calls, error: callError }, { data: visitTechs }, { data: materials, error: materialError }, { data: pauses, error: pauseError }] = await Promise.all([
       supabase.from("site_survey_visit_lucs").select("id,luc_number,shop_name,started_at,completed_at,completion_status,cancellation_reason_id,site_survey_cancellation_reasons(name)").eq("visit_id", visit.id).eq("active", true).order("luc_number"),
       supabase.from("site_survey_visit_environments").select("id,name,started_at,completed_at,completion_status").eq("visit_id", visit.id).eq("active", true).order("name"),
       supabase.from("site_survey_responses").select("id,question_id,visit_luc_id,visit_environment_id,answer").eq("visit_id", visit.id),
@@ -213,10 +236,11 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
       supabase.from("site_survey_generated_calls").select("id,visit_luc_id,visit_environment_id,status,internal_calls(call_number,title,description,status)").eq("visit_id", visit.id),
       supabase.from("site_survey_visit_technicians").select("technician_id").eq("visit_id", visit.id),
       supabase.from("site_survey_visit_materials").select("id,visit_luc_id,visit_environment_id,quantity,notes,site_survey_material_catalog(name),site_survey_screwdriver_types(name),site_survey_wrench_sizes(name)").eq("visit_id", visit.id).order("created_at"),
+      supabase.from("site_survey_point_pauses").select("id,visit_luc_id,visit_environment_id,reason_id,started_at,ended_at,site_survey_pause_reasons(name)").eq("visit_id", visit.id).order("started_at"),
     ]);
-    const error = lucError ?? envError ?? responseError ?? attachmentError ?? callError ?? materialError; if (error) throw error;
+    const error = lucError ?? envError ?? responseError ?? attachmentError ?? callError ?? materialError ?? pauseError; if (error) throw error;
     const points: Point[] = [...(lucs ?? []).map((item) => { const reason = item.site_survey_cancellation_reasons as unknown as { name?: string } | null; return { id: item.id, label: `LUC ${item.luc_number} — ${item.shop_name}`, started_at: item.started_at, completed_at: item.completed_at, completion_status: item.completion_status, cancellationReason: reason?.name ?? null, kind: "luc" as const }; }), ...(environments ?? []).map((item) => ({ id: item.id, label: item.name, started_at: item.started_at, completed_at: item.completed_at, completion_status: item.completion_status, cancellationReason: null, kind: "environment" as const }))];
-    return { points, responses: responses ?? [], attachments: attachments ?? [], calls: calls ?? [], visitTechs: visitTechs ?? [], materials: (materials ?? []) as unknown as VisitMaterial[] };
+    return { points, responses: responses ?? [], attachments: attachments ?? [], calls: calls ?? [], visitTechs: visitTechs ?? [], materials: (materials ?? []) as unknown as VisitMaterial[], pauses: (pauses ?? []) as PointPause[] };
   } });
   const calculation = useMemo(() => {
     const points = data?.points.filter((point) => point.completion_status !== "cancelada") ?? [];
@@ -226,7 +250,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
       return { ...assumption, occurrences, total: occurrences * assumption.minutes };
     }).filter((item) => item.occurrences > 0);
     const estimated = breakdown.reduce((total, item) => total + item.total, 0);
-    const workedTime = calculateWorkedTime(points);
+    const workedTime = calculateWorkedTime(points, data?.pauses ?? []);
     const assignedCount = Math.max(1, new Set([visit.technician_id, ...(data?.visitTechs.map((item) => item.technician_id) ?? [])]).size);
     const days = estimated ? Math.ceil(estimated / (480 * assignedCount)) : 0;
     const requestedDays = Math.max(1, Number(deadlineDays) || 1);
@@ -234,6 +258,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     return { breakdown, estimated, ...workedTime, assignedCount, days, techniciansNeeded };
   }, [assumptions, data, deadlineDays, visit.technician_id]);
   const pointResponses = (point: Point) => (data?.responses ?? []).filter((response) => point.kind === "luc" ? response.visit_luc_id === point.id : response.visit_environment_id === point.id);
+  const pausesForPoint = (point: Point) => (data?.pauses ?? []).filter((pause) => point.kind === "luc" ? pause.visit_luc_id === point.id : pause.visit_environment_id === point.id);
   const stageSevenSectionIds = new Set(sections.filter((section) => section.position === 6 || normalize(section.title).includes("revisao")).map((section) => section.id));
   const stageSevenQuestionIds = new Set(questions.filter((question) => stageSevenSectionIds.has(question.section_id)).map((question) => question.id));
   const technicalTotals = useMemo(() => {
@@ -288,7 +313,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     const tableHead = { fillColor: [255, 255, 255] as [number, number, number], textColor: purple, fontStyle: "bold" as const, lineColor: purple, lineWidth: { top: 0, right: 0, bottom: 0.35, left: 0 } };
     autoTable(pdf, { startY: 34, theme: "plain", styles: { font: "Nunito", fontSize: 8, textColor: dark, lineColor: soft, lineWidth: { bottom: 0.12 } }, headStyles: tableHead, head: [["Cliente", "Projeto", "Técnico", "Situação"]], body: [[clientName, projectName, technicianName, visit.status.replaceAll("_", " ")]] });
     let y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 11;
-    autoTable(pdf, { startY: y, theme: "plain", styles: { font: "Nunito", fontSize: 8, textColor: dark, lineColor: soft, lineWidth: { bottom: 0.12 } }, headStyles: tableHead, columnStyles: { 1: { halign: "center" } }, head: [["Planejamento", "Valor"]], body: [["Tempo estimado", formatMinutes(calculation.estimated)], ["Tempo realizado", formatMinutes(calculation.worked)], ["Horas extras", formatMinutes(calculation.overtime)], ["Horas noturnas (22h às 5h)", formatMinutes(calculation.night)], ["Dias com equipe designada", String(calculation.days)], [`Técnicos para ${deadlineDays} dia(s)`, String(calculation.techniciansNeeded)]] });
+    autoTable(pdf, { startY: y, theme: "plain", styles: { font: "Nunito", fontSize: 8, textColor: dark, lineColor: soft, lineWidth: { bottom: 0.12 } }, headStyles: tableHead, columnStyles: { 1: { halign: "center" } }, head: [["Planejamento", "Valor"]], body: [["Tempo estimado", formatMinutes(calculation.estimated)], ["Tempo em visita", formatMinutes(calculation.worked)], ["Pausas (horas úteis)", formatMinutes(calculation.paused)], ["Total de horas úteis", formatMinutes(calculation.useful)], ["Horas extras", formatMinutes(calculation.overtime)], ["Horas noturnas (22h às 5h)", formatMinutes(calculation.night)], ["Dias com equipe designada", String(calculation.days)], [`Técnicos para ${deadlineDays} dia(s)`, String(calculation.techniciansNeeded)]] });
     y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 11;
     const totalsBody = technicalTotals.flatMap((group) => group.values.map(([value, count], index) => [index === 0 ? group.label : "", value, String(count)]));
     totalsBody.push(["Chamados", "Total", String(data.calls.length)]);
@@ -333,7 +358,9 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
       const stageSeven = pointAnswers.filter((response) => stageSevenQuestionIds.has(response.question_id)).map((response) => valueText(response.answer)).filter(Boolean).join("; ");
       const tools = materialSentence(point);
       const calls = data.calls.filter((item) => point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id).map((call) => { const linked = call.internal_calls as unknown as { call_number?: string; title?: string; status?: string } | null; return linked ? `#${linked.call_number ?? "—"} ${linked.title ?? "Chamado"} (${linked.status ?? call.status})` : call.status; }).join("; ");
-      pdf.setFont("Nunito", "normal"); pdf.setFontSize(9); pdf.text(`Início: ${point.started_at ? new Date(point.started_at).toLocaleString("pt-BR") : "não registrado"}  |  Conclusão: ${point.completed_at ? new Date(point.completed_at).toLocaleString("pt-BR") : "não registrada"}  |  Duração: ${formatMinutes(durationMinutes(point.started_at, point.completed_at))}`, 14, y); y += 6;
+      pdf.setFont("Nunito", "normal"); pdf.setFontSize(9); pdf.text(`Início: ${point.started_at ? new Date(point.started_at).toLocaleString("pt-BR") : "não registrado"}  |  Conclusão: ${point.completed_at ? new Date(point.completed_at).toLocaleString("pt-BR") : "não registrada"}  |  Duração: ${formatMinutes(pointDuration(point, pausesForPoint(point)))}`, 14, y); y += 6;
+      const pointPauses = pausesForPoint(point);
+      if (pointPauses.length) { for (const pause of pointPauses) { if (y > 270) { pdf.addPage(); y = 18; } pdf.setFontSize(8); pdf.text(`Pausa: ${pause.site_survey_pause_reasons?.name ?? "Motivo registrado"} — ${formatMinutes(durationMinutes(pause.started_at, pause.ended_at))}${pause.ended_at ? "" : " (em andamento)"}`, 14, y); y += 5; } }
       if (point.completion_status === "cancelada") { pdf.setFont("Nunito", "bold"); pdf.setTextColor(...purple); pdf.text(`Cancelada — Motivo: ${point.cancellationReason ?? "não informado"}`, 14, y); pdf.setTextColor(...dark); y += 7; }
       for (const summary of pointSummaries(point)) {
         if (y > 260) { pdf.addPage(); y = 18; }
