@@ -8,5 +8,3 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
-
-- Registre pausas de Loja/LUC e ambiente como intervalos em `site_survey_point_pauses`; isso preserva auditoria e separa tempo de visita de horas úteis em pausa.
