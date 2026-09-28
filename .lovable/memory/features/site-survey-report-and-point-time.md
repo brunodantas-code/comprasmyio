@@ -18,4 +18,6 @@ A estimativa de instalação usa premissas detalhadas administráveis no Cadastr
 
 Ao concluir a visita geral, calcular tempo realizado por loja/ambiente, horas noturnas na faixa fixa de 22h às 5h e horas extras acima de 8 horas trabalhadas no mesmo dia, preservando os intervalos reais registrados.
 
+Uma visita individual iniciada pode ser pausada com motivo obrigatório e depois retomada. O intervalo suspende o tempo efetivo da visita, mas permanece como hora útil na categoria Pausas. Os motivos iniciais são Para refeição, Para descanso, Por solicitação do cliente e Por solicitação do inquilino, administráveis no Cadastro.
+
 Com base no tempo estimado, calcular a quantidade de dias úteis necessária para os técnicos designados concluírem o levantamento sem horas extras ou trabalho noturno. Quando o usuário informar um prazo em dias, calcular a quantidade mínima de técnicos necessária, usando jornada diurna de 8 horas por técnico/dia.

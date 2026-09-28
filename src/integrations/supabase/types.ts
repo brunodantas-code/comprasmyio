@@ -3899,6 +3899,120 @@ export type Database = {
           },
         ]
       }
+      site_survey_pause_reasons: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          position: number
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          position?: number
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          position?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_survey_pause_reasons_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      site_survey_point_pauses: {
+        Row: {
+          ended_at: string | null
+          ended_by: string | null
+          id: string
+          reason_id: string
+          started_at: string
+          started_by: string
+          visit_environment_id: string | null
+          visit_id: string
+          visit_luc_id: string | null
+        }
+        Insert: {
+          ended_at?: string | null
+          ended_by?: string | null
+          id?: string
+          reason_id: string
+          started_at?: string
+          started_by: string
+          visit_environment_id?: string | null
+          visit_id: string
+          visit_luc_id?: string | null
+        }
+        Update: {
+          ended_at?: string | null
+          ended_by?: string | null
+          id?: string
+          reason_id?: string
+          started_at?: string
+          started_by?: string
+          visit_environment_id?: string | null
+          visit_id?: string
+          visit_luc_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_survey_point_pauses_ended_by_fkey"
+            columns: ["ended_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_point_pauses_reason_id_fkey"
+            columns: ["reason_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_pause_reasons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_point_pauses_started_by_fkey"
+            columns: ["started_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_point_pauses_visit_environment_id_fkey"
+            columns: ["visit_environment_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_visit_environments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_point_pauses_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_visits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_point_pauses_visit_luc_id_fkey"
+            columns: ["visit_luc_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_visit_lucs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_survey_profile_permissions: {
         Row: {
           allowed: boolean
