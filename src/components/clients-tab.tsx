@@ -412,7 +412,7 @@ function ClientUnitsList({ client, userId }: { client: Client; userId: string })
       {!units?.length ? <p className="text-sm text-muted-foreground">Nenhuma unidade cadastrada.</p> : (
          <div className="min-w-0 overflow-hidden rounded-md border max-md:border-0">
           <Table>
-            <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Categoria</TableHead><TableHead>Cidade</TableHead><TableHead>UF</TableHead><TableHead>CNPJ</TableHead><TableHead>Status</TableHead><TableHead className="w-20" /></TableRow></TableHeader>
+             <TableHeader><TableRow><TableHead>Nome fantasia</TableHead><TableHead>Categoria</TableHead><TableHead>Cidade</TableHead><TableHead>UF</TableHead><TableHead>CNPJ</TableHead><TableHead>Status</TableHead><TableHead className="w-20" /></TableRow></TableHeader>
             <TableBody>
               {(units ?? []).map((unit) => (
                 <TableRow key={unit.id}>
