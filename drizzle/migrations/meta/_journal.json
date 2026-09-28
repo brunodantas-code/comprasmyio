@@ -561,6 +561,20 @@
       "when": 1790621581820,
       "tag": "0079_require_checked_site_survey_visit_deletion",
       "breakpoints": true
+    },
+    {
+      "idx": 80,
+      "version": "7",
+      "when": 1790628944958,
+      "tag": "0080_link_code_images_to_ticket_messages",
+      "breakpoints": true
+    },
+    {
+      "idx": 81,
+      "version": "7",
+      "when": 1790628987127,
+      "tag": "0081_validate_code_message_attachment_ownership",
+      "breakpoints": true
     }
   ]
 }

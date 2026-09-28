@@ -781,3 +781,5 @@
 - [x] Site Survey — verificar duas pendências sem destaque na seção 4 da loja Casas Bahia e corrigir contagem de perguntas excluídas, se for a causa.
 - [x] Site Survey mobile — ao abrir as etapas 5 e 6, manter a próxima etapa visível sem saltar aos botões finais.
 - [x] Site Survey — salvar automaticamente respostas e fotos ao avançar entre perguntas/etapas, mantendo Salvar progresso.
+- [x] Portal ERP — atualizar o botão Casinha ao padrão de ícone verde sem fundo.
+- [x] Code — permitir anexar prints e fotos na criação e nas respostas dos chamados, exibindo cada anexo na conversa.

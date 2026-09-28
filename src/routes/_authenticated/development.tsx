@@ -72,6 +72,27 @@ const ADMIN_STATUS_NAMES: Record<Exclude<TicketStatus, "concluido" | "excluido">
 };
 const PRIORITY_NAMES = { baixa: "Baixa", media: "Média", alta: "Alta", critica: "Crítica" } as const;
 
+function validateImages(files: File[]) {
+  if (files.some((file) => !file.type.startsWith("image/") || file.size === 0 || file.size > 10 * 1024 * 1024)) {
+    throw new Error("Selecione apenas imagens de até 10 MB cada.");
+  }
+}
+
+async function uploadTicketImages(ticketId: string, userId: string, files: File[], messageId?: string) {
+  validateImages(files);
+  for (const file of files) {
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
+    const storagePath = `${ticketId}/${crypto.randomUUID()}-${safeName}`;
+    const { error: uploadError } = await supabase.storage.from("development-ticket-attachments").upload(storagePath, file, { contentType: file.type });
+    if (uploadError) throw uploadError;
+    const { error: attachmentError } = await supabase.from("development_ticket_attachments").insert({ ticket_id: ticketId, uploaded_by: userId, file_name: file.name, storage_path: storagePath, content_type: file.type, file_size: file.size, message_id: messageId ?? null });
+    if (attachmentError) {
+      await supabase.storage.from("development-ticket-attachments").remove([storagePath]);
+      throw attachmentError;
+    }
+  }
+}
+
 export const Route = createFileRoute("/_authenticated/development")({
   validateSearch: (search: Record<string, unknown>) => ({
     ticket: typeof search.ticket === "string" ? search.ticket : undefined,
@@ -214,7 +235,8 @@ function HeaderFilterSelect({ value, onChange, label, options }: { value: string
 }
 
 function NewTicketDialog({ open, onOpenChange, userId, onCreated }: { open: boolean; onOpenChange: (open: boolean) => void; userId?: string; onCreated: () => void }) {
-  const [file, setFile] = useState<File | null>(null);
+   const [files, setFiles] = useState<File[]>([]);
+   const [fileInputKey, setFileInputKey] = useState(0);
   const [appKey, setAppKey] = useState("supply");
   const [menuName, setMenuName] = useState("none");
   const [submenuName, setSubmenuName] = useState("none");
@@ -232,23 +254,31 @@ function NewTicketDialog({ open, onOpenChange, userId, onCreated }: { open: bool
         priority: String(values.get("priority")), urgency: String(values.get("urgency")),
         expected_result: String(values.get("expected_result")).trim(),
       };
+       validateImages(files);
       const { data: ticket, error } = await supabase.from("development_tickets").insert(payload).select("id").single();
       if (error) throw error;
-      if (file) {
-        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
-        const storagePath = `${ticket.id}/${crypto.randomUUID()}-${safeName}`;
-        const { error: uploadError } = await supabase.storage.from("development-ticket-attachments").upload(storagePath, file);
-        if (uploadError) throw uploadError;
-        const { error: attachmentError } = await supabase.from("development_ticket_attachments").insert({ ticket_id: ticket.id, uploaded_by: userId, file_name: file.name, storage_path: storagePath, content_type: file.type || "application/octet-stream", file_size: file.size });
-        if (attachmentError) throw attachmentError;
-      }
+       if (files.length) {
+         try {
+           await uploadTicketImages(ticket.id, userId, files);
+         } catch (uploadError) {
+           throw new Error(`Ticket aberto, mas não foi possível anexar todas as imagens: ${uploadError instanceof Error ? uploadError.message : "erro no envio"}`);
+         }
+       }
     },
-    onSuccess: () => { toast.success("Ticket aberto com sucesso"); setFile(null); setAppKey("supply"); setMenuName("none"); setSubmenuName("none"); onOpenChange(false); onCreated(); },
-    onError: (error: Error) => toast.error(error.message),
+     onSuccess: () => { toast.success("Ticket aberto com sucesso"); setFiles([]); setFileInputKey((key) => key + 1); setAppKey("supply"); setMenuName("none"); setSubmenuName("none"); onOpenChange(false); onCreated(); },
+     onError: (error: Error) => {
+       toast.error(error.message);
+       if (error.message.startsWith("Ticket aberto")) {
+         setFiles([]);
+         setFileInputKey((key) => key + 1);
+         onOpenChange(false);
+         onCreated();
+       }
+     },
   });
   return <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogTrigger asChild><Button><Plus className="h-4 w-4" />Novo ticket</Button></DialogTrigger>
-    <DialogContent className="max-w-2xl">
+     <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
       <form onSubmit={(event) => { event.preventDefault(); createTicket.mutate(event.currentTarget); }} className="space-y-4">
         <DialogHeader><DialogTitle>Novo ticket</DialogTitle><DialogDescription>Registre uma melhoria ou um problema encontrado.</DialogDescription></DialogHeader>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -261,7 +291,7 @@ function NewTicketDialog({ open, onOpenChange, userId, onCreated }: { open: bool
           <FormSelect name="priority" label="Prioridade" options={Object.entries(PRIORITY_NAMES).map(([value, label]) => ({ value, label }))} />
           <FormSelect name="urgency" label="Urgência" options={[{ value: "normal", label: "Normal" }, { value: "urgente", label: "Urgente" }]} />
           <div className="sm:col-span-2"><Label htmlFor="ticket-result">Resultado esperado</Label><Textarea id="ticket-result" name="expected_result" minLength={5} maxLength={2000} required /></div>
-          <div className="sm:col-span-2"><Label htmlFor="ticket-file">Anexo opcional (até 10 MB)</Label><Input id="ticket-file" type="file" onChange={(event) => setFile(event.target.files?.[0] ?? null)} /></div>
+           <div className="sm:col-span-2"><Label htmlFor="ticket-file">Prints e fotos (até 10 MB por imagem)</Label><Input key={fileInputKey} id="ticket-file" type="file" accept="image/*" multiple onChange={(event) => setFiles(Array.from(event.target.files ?? []))} /></div>
         </div>
         <DialogFooter><Button type="submit" disabled={createTicket.isPending}>{createTicket.isPending ? "Salvando..." : "Abrir ticket"}</Button></DialogFooter>
       </form>
@@ -289,13 +319,18 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
   const [assignee, setAssignee] = useState("none");
   const [notes, setNotes] = useState("");
   const [message, setMessage] = useState("");
+   const [messageFiles, setMessageFiles] = useState<File[]>([]);
+   const [messageFileInputKey, setMessageFileInputKey] = useState(0);
   const [preview, setPreview] = useState<{ url: string; name: string; contentType: string } | null>(null);
   useEffect(() => {
     if (!ticket) return;
     setStatus(ticket.status);
     setAssignee(ticket.assignee_id ?? "none");
     setNotes(ticket.admin_notes ?? "");
-  }, [ticket]);
+     setMessage("");
+     setMessageFiles([]);
+     setMessageFileInputKey((key) => key + 1);
+   }, [ticket]);
   const details = useQuery({
     queryKey: ["development-ticket-details", ticket?.id], enabled: Boolean(ticket),
     queryFn: async () => {
@@ -320,22 +355,41 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
     mutationFn: async () => {
       if (!ticket || !data?.userId || !message.trim()) throw new Error("Digite uma mensagem");
       if (!canAsk && !canAnswer) throw new Error("Não há uma conversa pendente para responder");
-      const { error } = await supabase.from("development_ticket_messages").insert({
+       validateImages(messageFiles);
+       const { data: savedMessage, error } = await supabase.from("development_ticket_messages").insert({
         ticket_id: ticket.id,
         author_id: data.userId,
         message_type: canAnswer ? "answer" : "question",
         parent_message_id: canAnswer ? pendingQuestion?.id ?? null : null,
         message: message.trim(),
-      });
+       }).select("id").single();
       if (error) throw error;
+       if (messageFiles.length) {
+         try {
+           await uploadTicketImages(ticket.id, data.userId, messageFiles, savedMessage.id);
+         } catch (uploadError) {
+           throw new Error(`Mensagem enviada, mas não foi possível anexar todas as imagens: ${uploadError instanceof Error ? uploadError.message : "erro no envio"}`);
+         }
+       }
     },
     onSuccess: async () => {
       toast.success(canAnswer ? "Resposta enviada" : "Pergunta enviada ao solicitante");
       setMessage("");
+       setMessageFiles([]);
+       setMessageFileInputKey((key) => key + 1);
       await details.refetch();
       onUpdated();
     },
-    onError: (error: Error) => toast.error(error.message),
+     onError: (error: Error) => {
+       toast.error(error.message);
+       if (error.message.startsWith("Mensagem enviada")) {
+         setMessage("");
+         setMessageFiles([]);
+         setMessageFileInputKey((key) => key + 1);
+         void details.refetch();
+         onUpdated();
+       }
+     },
   });
   const update = useMutation({
     mutationFn: async () => {
@@ -382,8 +436,8 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
         {ticket.menu_name || ticket.submenu_name ? <div className="flex flex-wrap gap-2">{ticket.menu_name ? <Badge variant="outline">Menu: {ticket.menu_name}</Badge> : null}{ticket.submenu_name ? <Badge variant="outline">Submenu: {ticket.submenu_name}</Badge> : null}</div> : null}
         <div className="grid gap-4 sm:grid-cols-2"><div><p className="text-xs font-semibold text-muted-foreground">Descrição</p><p className="mt-1 whitespace-pre-wrap text-sm">{ticket.description}</p></div><div><p className="text-xs font-semibold text-muted-foreground">Resultado esperado</p><p className="mt-1 whitespace-pre-wrap text-sm">{ticket.expected_result}</p></div></div>
         <div className="flex flex-wrap gap-2"><Badge variant="status">{STATUS_NAMES[ticket.status]}</Badge><Badge variant="outline">Prioridade {PRIORITY_NAMES[ticket.priority]}</Badge>{ticket.urgency === "urgente" ? <Badge variant="destructive">Urgente</Badge> : null}</div>
-        {details.data?.attachments.length ? <div><p className="mb-2 flex items-center gap-2 text-sm font-semibold"><Paperclip className="h-4 w-4" />Anexos</p><div className="flex flex-wrap gap-2">{details.data.attachments.map((attachment) => <Button key={attachment.id} variant="outline" size="sm" onClick={() => openPreview(attachment.storage_path, attachment.file_name, attachment.content_type)}><Eye className="h-4 w-4" /><span className="max-w-64 truncate">{attachment.file_name}</span></Button>)}</div></div> : null}
-        {messages.length || canAsk || canAnswer ? <div className="space-y-3 border-t pt-4"><p className="flex items-center gap-2 text-sm font-semibold"><MessageCircleQuestion className="h-4 w-4" />Conversa</p>{messages.length ? <div className="space-y-2">{messages.map((entry) => <div key={entry.id} className={`rounded-md border p-3 text-sm ${entry.message_type === "question" ? "border-border bg-muted/50" : "border-primary/40 bg-primary/10"}`}><div className="mb-1 flex flex-wrap items-center justify-between gap-2"><span className="font-semibold">{entry.message_type === "question" ? "Admin" : "Solicitante"} · {data?.profiles.find((profile) => profile.id === entry.author_id)?.full_name || data?.profiles.find((profile) => profile.id === entry.author_id)?.email || "Usuário"}</span><span className="text-xs text-muted-foreground">{new Date(entry.created_at).toLocaleString("pt-BR")}</span></div><p className="whitespace-pre-wrap">{entry.message}</p>{entry.message_type === "question" && !answeredQuestionIds.has(entry.id) ? <Badge variant="destructive" className="mt-2">Aguardando resposta</Badge> : null}</div>)}</div> : <p className="text-sm text-muted-foreground">Nenhuma mensagem registrada.</p>}{canAsk || canAnswer ? <div><Label htmlFor="ticket-message">{canAnswer ? "Responder ao Admin" : "Pergunta ao solicitante"}</Label><Textarea id="ticket-message" value={message} onChange={(event) => setMessage(event.target.value)} maxLength={4000} className="mt-1 min-h-24" placeholder={canAnswer ? "Digite sua resposta" : "Digite a dúvida que precisa ser esclarecida"} /><div className="mt-2 flex justify-end"><Button onClick={() => sendMessage.mutate()} disabled={sendMessage.isPending || !message.trim()}><Send className="h-4 w-4" />{sendMessage.isPending ? "Enviando..." : canAnswer ? "Enviar resposta" : "Enviar pergunta"}</Button></div></div> : null}</div> : null}
+         {details.data?.attachments.some((attachment) => !attachment.message_id) ? <div><p className="mb-2 flex items-center gap-2 text-sm font-semibold"><Paperclip className="h-4 w-4" />Anexos da abertura</p><div className="flex flex-wrap gap-2">{details.data.attachments.filter((attachment) => !attachment.message_id).map((attachment) => <Button key={attachment.id} variant="outline" size="sm" onClick={() => openPreview(attachment.storage_path, attachment.file_name, attachment.content_type)}><Eye className="h-4 w-4" /><span className="max-w-64 truncate">{attachment.file_name}</span></Button>)}</div></div> : null}
+         {messages.length || canAsk || canAnswer ? <div className="space-y-3 border-t pt-4"><p className="flex items-center gap-2 text-sm font-semibold"><MessageCircleQuestion className="h-4 w-4" />Conversa</p>{messages.length ? <div className="space-y-2">{messages.map((entry) => <div key={entry.id} className={`rounded-md border p-3 text-sm ${entry.message_type === "question" ? "border-border bg-muted/50" : "border-primary/40 bg-primary/10"}`}><div className="mb-1 flex flex-wrap items-center justify-between gap-2"><span className="font-semibold">{entry.message_type === "question" ? "Admin" : "Solicitante"} · {data?.profiles.find((profile) => profile.id === entry.author_id)?.full_name || data?.profiles.find((profile) => profile.id === entry.author_id)?.email || "Usuário"}</span><span className="text-xs text-muted-foreground">{new Date(entry.created_at).toLocaleString("pt-BR")}</span></div><p className="whitespace-pre-wrap">{entry.message}</p>{details.data?.attachments.filter((attachment) => attachment.message_id === entry.id).map((attachment) => <Button key={attachment.id} variant="ghost" size="sm" className="mt-2 max-w-full !bg-transparent !text-primary shadow-none hover:!bg-transparent hover:!text-primary" onClick={() => openPreview(attachment.storage_path, attachment.file_name, attachment.content_type)}><Paperclip className="h-4 w-4" /><span className="truncate underline">{attachment.file_name}</span></Button>)}{entry.message_type === "question" && !answeredQuestionIds.has(entry.id) ? <Badge variant="destructive" className="mt-2">Aguardando resposta</Badge> : null}</div>)}</div> : <p className="text-sm text-muted-foreground">Nenhuma mensagem registrada.</p>}{canAsk || canAnswer ? <div><Label htmlFor="ticket-message">{canAnswer ? "Responder ao Admin" : "Pergunta ao solicitante"}</Label><Textarea id="ticket-message" value={message} onChange={(event) => setMessage(event.target.value)} maxLength={4000} className="mt-1 min-h-24" placeholder={canAnswer ? "Digite sua resposta" : "Digite a dúvida que precisa ser esclarecida"} /><Label htmlFor="ticket-message-images" className="mt-3 block">Prints e fotos (até 10 MB por imagem)</Label><Input key={messageFileInputKey} id="ticket-message-images" type="file" accept="image/*" multiple onChange={(event) => setMessageFiles(Array.from(event.target.files ?? []))} className="mt-1" /><div className="mt-2 flex justify-end"><Button onClick={() => sendMessage.mutate()} disabled={sendMessage.isPending || !message.trim()}><Send className="h-4 w-4" />{sendMessage.isPending ? "Enviando..." : canAnswer ? "Enviar resposta" : "Enviar pergunta"}</Button></div></div> : null}</div> : null}
         {data?.isAdmin && ticket.status !== "concluido" && ticket.status !== "excluido" ? <div className="space-y-3 border-t pt-4"><h3 className="font-semibold">Gestão do ticket</h3><div className="grid gap-3 sm:grid-cols-2"><div><Label>Situação</Label><FilterSelect value={status} onChange={(value) => setStatus(value as TicketStatus)} placeholder="Situação" options={Object.entries(ADMIN_STATUS_NAMES).map(([value, label]) => ({ value, label }))} firstOption={null} /></div><div><Label>Responsável pela execução</Label><FilterSelect value={assignee} onChange={setAssignee} placeholder="Responsável pela execução" options={(data.codeAdmins ?? []).map((profile) => ({ value: profile.id, label: profile.full_name || profile.email || "Usuário" }))} firstOption={{ value: "none", label: "Sem responsável" }} /></div></div><div><Label htmlFor="admin-notes">Observações</Label><Textarea id="admin-notes" value={notes} onChange={(event) => setNotes(event.target.value)} maxLength={4000} /></div><Button onClick={() => update.mutate()} disabled={update.isPending}>Salvar andamento</Button></div> : ticket.admin_notes ? <div><p className="text-sm font-semibold">Observações</p><p className="mt-1 whitespace-pre-wrap text-sm">{ticket.admin_notes}</p></div> : null}
         {ticket.status === "atendido" && ticket.reporter_id === data?.userId ? <div className="space-y-2 border-t pt-4"><p className="text-sm text-muted-foreground">Confirme se a correção ou melhoria foi entregue conforme esperado.</p><Button onClick={() => conclude.mutate()} disabled={conclude.isPending}>{conclude.isPending ? "Concluindo..." : "Marcar como concluído"}</Button></div> : null}
         {ticket.status === "aberto" && ticket.reporter_id === data?.userId ? <div className="flex justify-end border-t pt-4"><AlertDialog><AlertDialogTrigger asChild><Button variant="destructive"><Trash2 className="h-4 w-4" />Excluir ticket</Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Excluir este ticket?</AlertDialogTitle><AlertDialogDescription>Ele permanecerá no histórico com a situação “Excluído” e deixará de ser uma pendência para o executor.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={() => remove.mutate()} disabled={remove.isPending}>{remove.isPending ? "Excluindo..." : "Confirmar exclusão"}</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog></div> : null}

@@ -1,0 +1,3 @@
+ALTER TABLE public.development_ticket_attachments ADD COLUMN message_id uuid NULL REFERENCES public.development_ticket_messages(id) ON DELETE SET NULL;
+CREATE INDEX development_ticket_attachments_message_idx ON public.development_ticket_attachments(message_id) WHERE message_id IS NOT NULL;
+COMMENT ON COLUMN public.development_ticket_attachments.message_id IS 'Conversation message owning this attachment; null for files attached when opening the ticket.';
