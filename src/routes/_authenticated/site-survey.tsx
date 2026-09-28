@@ -338,6 +338,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
   const [pointFilter, setPointFilter] = useState("");
   const [pointPickerOpen, setPointPickerOpen] = useState(false);
   const [openSectionId, setOpenSectionId] = useState<string | null>(null);
+  const facadeScrollPosition = useRef<number | null>(null);
   const [approvedActionKeys, setApprovedActionKeys] = useState<Set<string>>(() => new Set());
   const [declinedActionKeys, setDeclinedActionKeys] = useState<Set<string>>(() => new Set());
   const [pendingAction, setPendingAction] = useState<{ key: string; actionName: string } | null>(null);
@@ -423,6 +424,11 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
   };
   const uploadFacade = async (file?: File) => {
     if (!file || !pointId) return;
+    const restorePosition = () => {
+      const position = facadeScrollPosition.current;
+      if (position !== null) window.requestAnimationFrame(() => window.scrollTo({ top: position, behavior: "instant" }));
+    };
+    restorePosition();
     if (!file.type.startsWith("image/")) return toast.error("Selecione uma imagem da fachada.");
     const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "-"); const path = `${visit.id}/${pointId}/facade-${crypto.randomUUID()}-${safe}`;
     const { error: uploadError } = await supabase.storage.from("site-survey-attachments").upload(path, file); if (uploadError) return toast.error(uploadError.message);
@@ -430,6 +436,8 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
     const { error } = await supabase.from("site_survey_attachments").insert({ visit_id: visit.id, ...scope, question_id: null, attachment_kind: "facade", uploaded_by: data.userId, file_name: file.name, storage_path: path, content_type: file.type, file_size: file.size }); if (error) return toast.error(error.message);
     if (!selectedPointRecord?.started_at) { const table = pointKind === "luc" ? "site_survey_visit_lucs" : "site_survey_visit_environments"; const { error: startError } = await supabase.from(table).update({ started_at: new Date().toISOString(), started_by: data.userId }).eq("id", pointId); if (startError) return toast.error(startError.message); }
     toast.success("Foto da fachada salva e início confirmado"); await refetchDetail();
+    restorePosition();
+    facadeScrollPosition.current = null;
   };
   const cancelPoint = async () => {
     if (pointKind !== "luc" || !pointId || !cancellationReasonId) return toast.error("Selecione o motivo do cancelamento.");
