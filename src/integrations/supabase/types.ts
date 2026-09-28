@@ -1275,6 +1275,7 @@ export type Database = {
           file_name: string
           file_size: number
           id: string
+          message_id: string | null
           storage_path: string
           ticket_id: string
           uploaded_by: string
@@ -1285,6 +1286,7 @@ export type Database = {
           file_name: string
           file_size: number
           id?: string
+          message_id?: string | null
           storage_path: string
           ticket_id: string
           uploaded_by: string
@@ -1295,11 +1297,19 @@ export type Database = {
           file_name?: string
           file_size?: number
           id?: string
+          message_id?: string | null
           storage_path?: string
           ticket_id?: string
           uploaded_by?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "development_ticket_attachments_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "development_ticket_messages"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "development_ticket_attachments_ticket_id_fkey"
             columns: ["ticket_id"]
