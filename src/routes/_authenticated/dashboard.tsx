@@ -1455,6 +1455,8 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
       if (!materialItems.length || materialItems.some((row) => !row.item || !(Number(row.quantity) > 0))) {
         return toast.error("Selecione cada material e informe uma quantidade válida.");
       }
+      const invalidLink = materialItems.findIndex((row) => row.itemLink.trim() && !/^https?:\/\//i.test(row.itemLink.trim()));
+      if (invalidLink !== -1) return toast.error(`Material ${invalidLink + 1}: informe um link válido iniciado por https:// ou http://.`);
       const selectedKeys = materialItems.map((row) => row.item?.key);
       if (new Set(selectedKeys).size !== selectedKeys.length) return toast.error("O mesmo material não pode ser incluído duas vezes.");
     } else if (isNewItem) {
@@ -1483,7 +1485,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
         : isRh
         ? `Contratação de RH — ${rhCargo}`
         : (!isMateriais || isNewItem ? newItemName : materialItems.map((row) => row.item?.description || row.item?.name).join("; ")),
-      item_link: isReembolso || isRh || isPagamento || (isMateriais && !canManageProducts) ? undefined : (itemLink || undefined),
+      item_link: isReembolso || isRh || isPagamento || (isMateriais && !isNewItem) ? undefined : (itemLink || undefined),
       quantity: isReembolso || isRh || isPagamento ? 1 : isMateriais && !isNewItem ? materialItems.reduce((sum, row) => sum + Number(row.quantity || 0), 0) : (Number(qty) || 1),
       estimated_value: isReembolso ? reembolsoTotal : isRh ? Number(rhRemuneracao || 0) : isPagamento ? Number(paymentValue) : isMateriais && !isNewItem ? materialItems.reduce((sum, row) => sum + Number(row.estimatedValue || 0) * Number(row.quantity || 0), 0) : (isMateriais && !canManageProducts ? 0 : (Number(estimatedValue) || 0)),
       recipient: isRh ? rhGestor : isPagamento ? "Financeiro" : recipient,
@@ -2019,7 +2021,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                       </div>
                       <div className="space-y-3">
                         {materialItems.map((row, index) => (
-                          <div key={row.id} className="grid items-end gap-3 rounded-md border p-3 sm:grid-cols-[minmax(0,1fr)_6rem_2rem]">
+                           <div key={row.id} className="grid items-end gap-3 rounded-md border p-3 sm:grid-cols-[minmax(0,1fr)_6rem_2rem]">
                             <div className="space-y-2">
                               <Label>Material {index + 1}</Label>
                               <PurchasableItemPicker
@@ -2048,6 +2050,10 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                               onConfirm={() => setMaterialItems((current) => current.filter((entry) => entry.id !== row.id))}
                               trigger={<Button type="button" size="compactIcon" variant="outline" aria-label={`Remover material ${index + 1}`} title="Remover material" disabled={materialItems.length === 1}><Trash2 className="h-4 w-4" /></Button>}
                             />
+                             <div className="min-w-0 space-y-2 sm:col-span-3">
+                               <Label htmlFor={`material-link-${row.id}`}>Link de referência <span className="text-muted-foreground">(opcional)</span></Label>
+                               <Input id={`material-link-${row.id}`} type="url" placeholder="https://..." value={row.itemLink} onChange={(event) => setMaterialItems((current) => current.map((entry) => entry.id === row.id ? { ...entry, itemLink: event.target.value } : entry))} />
+                             </div>
                           </div>
                         ))}
                         <Button type="button" size="compactIcon" variant="outline" aria-label="Adicionar material" title="Adicionar material" onClick={() => setMaterialItems((current) => [...current, emptyMaterialItem()])}>
@@ -2180,7 +2186,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                 </Select>
               </div>
             )}
-            {requestModel !== "reembolso" && requestModel !== "rh" && requestModel !== "pagamento" && (!isMaterialsRequest || canManageProducts) && (
+            {requestModel !== "reembolso" && requestModel !== "rh" && requestModel !== "pagamento" && (!isMaterialsRequest || isNewItem) && (
             <div className="space-y-2">
               <Label htmlFor="item_link">
                 Link de Referência <span className="text-muted-foreground">(opcional)</span>
@@ -2777,8 +2783,8 @@ function OrdersTable({
               </Row>
               <Row label="Itens da Solicitação">
                 {(groupedOrderItems?.get(o.id) ?? []).length ? (
-                  <ul className="space-y-1">{groupedOrderItems?.get(o.id)?.map((row) => <li key={row.id} className="text-sm"><span className="font-medium">{row.item_name}</span> <span className="text-xs text-muted-foreground">× {row.quantity}</span></li>)}</ul>
-                ) : <span className="text-sm break-words">{o.item_name || "—"}</span>}
+                   <ul className="space-y-1">{groupedOrderItems?.get(o.id)?.map((row) => <li key={row.id} className="text-sm"><span className="font-medium">{row.item_name}</span> <span className="text-xs text-muted-foreground">× {row.quantity}</span>{/^https?:\/\//i.test(row.item_link ?? "") && <a href={row.item_link ?? ""} target="_blank" rel="noopener noreferrer" className="flex w-fit items-center gap-1 text-primary hover:underline">Abrir link <ExternalLink className="h-3 w-3" /></a>}</li>)}</ul>
+                 ) : <span className="text-sm break-words">{o.item_name || "—"}{/^https?:\/\//i.test(o.item_link ?? "") && <a href={o.item_link ?? ""} target="_blank" rel="noopener noreferrer" className="flex w-fit items-center gap-1 text-primary hover:underline">Abrir link <ExternalLink className="h-3 w-3" /></a>}</span>}
               </Row>
               <Row label="Tipo">
                 <div className="font-medium">{requestTypeLabel(o, requestTypes)}</div>
@@ -2918,8 +2924,8 @@ function OrdersTable({
               </TableCell>
               <TableCell>
                 {(groupedOrderItems?.get(o.id) ?? []).length ? (
-                  <ul className="space-y-1">{groupedOrderItems?.get(o.id)?.map((row) => <li key={row.id} className="text-sm break-words"><span className="font-medium">{row.item_name}</span> <span className="text-xs text-muted-foreground">× {row.quantity}</span></li>)}</ul>
-                ) : <span className="text-sm break-words">{o.item_name || "—"}</span>}
+                   <ul className="space-y-1">{groupedOrderItems?.get(o.id)?.map((row) => <li key={row.id} className="text-sm break-words"><span className="font-medium">{row.item_name}</span> <span className="text-xs text-muted-foreground">× {row.quantity}</span>{/^https?:\/\//i.test(row.item_link ?? "") && <a href={row.item_link ?? ""} target="_blank" rel="noopener noreferrer" className="flex w-fit items-center gap-1 text-primary hover:underline">Abrir link <ExternalLink className="h-3 w-3" /></a>}</li>)}</ul>
+                 ) : <span className="text-sm break-words">{o.item_name || "—"}{/^https?:\/\//i.test(o.item_link ?? "") && <a href={o.item_link ?? ""} target="_blank" rel="noopener noreferrer" className="flex w-fit items-center gap-1 text-primary hover:underline">Abrir link <ExternalLink className="h-3 w-3" /></a>}</span>}
               </TableCell>
               <TableCell className="text-center">
                 <div className="line-clamp-4 font-medium break-words">{requestTypeLabel(o, requestTypes)}</div>
