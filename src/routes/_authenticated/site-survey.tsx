@@ -88,7 +88,7 @@ type Question = { id: string; section_id: string; question_key: string | null; c
 type SurveyAction = Named & { description: string | null; active: boolean; position: number };
 type QuestionAction = { id: string; question_id: string; action_id: string; trigger_value: string; active: boolean };
 type GeneratedCall = { id: string; question_action_id: string; question_id: string; visit_luc_id: string | null; visit_environment_id: string | null; status: string; internal_call_id: string | null; internal_calls: { call_number: string | null } | null };
-type SurveyAttachment = { id: string; question_id: string | null; visit_luc_id: string | null; visit_environment_id: string | null; file_name: string; storage_path: string; content_type: string | null; attachment_kind?: string; uploaded_by: string };
+type SurveyAttachment = { id: string; question_id: string | null; visit_luc_id: string | null; visit_environment_id: string | null; file_name: string; storage_path: string; content_type: string | null; attachment_kind?: string; uploaded_by: string | null };
 type SurveyPoint = { value: string; label: string; completionStatus: "pendente" | "concluida" | "cancelada"; templateId: string | null; startedAt: string | null; cancellationReason: string | null };
 type CatalogItem = Named & { category: "material" | "equipamento"; active: boolean; position: number };
 type CancellationReason = Named & { active: boolean; position: number };
@@ -892,11 +892,26 @@ function AttachmentDeleteControl({ attachments, userId, canDelete, canEditAttach
     <AlertDialog open={open} onOpenChange={(next) => { if (!deleting) { setOpen(next); if (!next) setSelected([]); } }}>
       <AlertDialogContent>
         <AlertDialogHeader><AlertDialogTitle>Excluir anexos</AlertDialogTitle><AlertDialogDescription>Selecione uma ou mais fotos ou arquivos. Esta ação não pode ser desfeita.</AlertDialogDescription></AlertDialogHeader>
-        <div className="max-h-72 space-y-2 overflow-y-auto" aria-label="Selecionar anexos para exclusão">{allowed.map((item) => <label key={item.id} className="flex cursor-pointer items-center gap-3 rounded-md border p-2 text-sm"><Checkbox checked={selected.includes(item.id)} onCheckedChange={(checked) => setSelected((current) => checked === true ? [...current, item.id] : current.filter((id) => id !== item.id))} aria-label={`Selecionar ${item.file_name}`} /><span className="min-w-0 break-all">{item.file_name}</span></label>)}</div>
+        <div className="max-h-72 space-y-2 overflow-y-auto" aria-label="Selecionar anexos para exclusão">{allowed.map((item) => <label key={item.id} className="flex cursor-pointer items-center gap-3 rounded-md border p-2 text-sm"><Checkbox checked={selected.includes(item.id)} onCheckedChange={(checked) => setSelected((current) => checked === true ? [...current, item.id] : current.filter((id) => id !== item.id))} aria-label={`Selecionar ${item.file_name}`} /><AttachmentSelectionPreview attachment={item} /><span className="min-w-0 break-all">{item.file_name}</span></label>)}</div>
         <AlertDialogFooter><AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" disabled={!selected.length || deleting} onClick={(event) => { event.preventDefault(); void remove(); }}>{deleting ? "Excluindo..." : `Excluir (${selected.length})`}</AlertDialogAction><AlertDialogCancel disabled={deleting}>Cancelar</AlertDialogCancel></AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
   </>;
+}
+
+function AttachmentSelectionPreview({ attachment }: { attachment: SurveyAttachment }) {
+  const { data: signedUrl } = useQuery({
+    queryKey: ["site-survey-attachment-preview", attachment.storage_path],
+    staleTime: 50 * 60 * 1000,
+    queryFn: async () => {
+      const { data, error } = await supabase.storage.from("site-survey-attachments").createSignedUrl(attachment.storage_path, 3600);
+      if (error) throw error;
+      return data.signedUrl;
+    },
+  });
+  return attachment.content_type?.startsWith("image/") && signedUrl
+    ? <img src={signedUrl} alt="" className="h-14 w-14 shrink-0 rounded-sm object-cover" />
+    : <FileText className="h-6 w-6 shrink-0 text-muted-foreground" />;
 }
 
 function AttachmentThumbnail({ attachment }: { attachment: SurveyAttachment }) {
