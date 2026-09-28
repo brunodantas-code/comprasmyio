@@ -2867,7 +2867,7 @@ function OrdersTable({
             {filterInput(fAloc, setFAloc, "Alocação")}
             {showRequester && filterInput(fReq, setFReq, "Solicitante")}
              <div className="relative min-w-0">
-               {!fDate && <span aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-2 z-10 flex items-center text-xs text-muted-foreground">Prazo ou previsão</span>}
+               {!fDate && <span aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-2 right-9 z-10 flex items-center bg-card text-xs text-muted-foreground">Prazo ou previsão</span>}
                <Input type="date" aria-label="Prazo ou previsão" value={fDate} onChange={(e) => setFDate(e.target.value)} className={`h-7 min-w-0 px-2 text-xs ${!fDate ? "date-filter-empty" : ""}`} />
              </div>
             <Select value={fStatus} onValueChange={setFStatus}>
