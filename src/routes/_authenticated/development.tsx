@@ -319,6 +319,7 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
   const [assignee, setAssignee] = useState("none");
   const [notes, setNotes] = useState("");
   const [message, setMessage] = useState("");
+  const [replyToId, setReplyToId] = useState("");
    const [messageFiles, setMessageFiles] = useState<File[]>([]);
    const [messageFileInputKey, setMessageFileInputKey] = useState(0);
   const [preview, setPreview] = useState<{ url: string; name: string; contentType: string } | null>(null);
@@ -328,6 +329,7 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
     setAssignee(ticket.assignee_id ?? "none");
     setNotes(ticket.admin_notes ?? "");
      setMessage("");
+     setReplyToId("");
      setMessageFiles([]);
      setMessageFileInputKey((key) => key + 1);
    }, [ticket]);
@@ -348,19 +350,26 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
   });
   const messages = details.data?.messages ?? [];
   const answeredQuestionIds = new Set(messages.filter((entry) => entry.message_type === "answer" && entry.parent_message_id).map((entry) => entry.parent_message_id));
-  const pendingQuestion = messages.find((entry) => entry.message_type === "question" && !answeredQuestionIds.has(entry.id));
-  const canAsk = Boolean(data?.isAdmin && ticket && !pendingQuestion && !["atendido", "concluido", "excluido"].includes(ticket.status));
-  const canAnswer = Boolean(ticket && ticket.reporter_id === data?.userId && pendingQuestion && !["concluido", "excluido"].includes(ticket.status));
+  const pendingQuestions = messages.filter((entry) => entry.message_type === "question" && !answeredQuestionIds.has(entry.id));
+  const canAsk = Boolean(data?.isAdmin && ticket && !["atendido", "concluido", "excluido"].includes(ticket.status));
+  const canAnswer = Boolean(ticket && ticket.reporter_id === data?.userId && pendingQuestions.length && !["concluido", "excluido"].includes(ticket.status));
+  const canAttach = Boolean(ticket && (canAsk || ticket.reporter_id === data?.userId) && !["concluido", "excluido"].includes(ticket.status));
   const sendMessage = useMutation({
     mutationFn: async () => {
-      if (!ticket || !data?.userId || !message.trim()) throw new Error("Digite uma mensagem");
-      if (!canAsk && !canAnswer) throw new Error("Não há uma conversa pendente para responder");
+      if (!ticket || !data?.userId || (!message.trim() && !messageFiles.length)) throw new Error("Digite uma mensagem ou selecione uma imagem");
+      if (!canAsk && !canAnswer && !canAttach) throw new Error("Não é possível enviar neste chamado");
        validateImages(messageFiles);
+      if (!message.trim()) {
+        await uploadTicketImages(ticket.id, data.userId, messageFiles);
+        return "attachments" as const;
+      }
+      if (!canAsk && !canAnswer) throw new Error("Selecione uma pergunta pendente para responder");
+      const parentId = canAnswer ? (pendingQuestions.some((entry) => entry.id === replyToId) ? replyToId : pendingQuestions[0]?.id) : null;
        const { data: savedMessage, error } = await supabase.from("development_ticket_messages").insert({
         ticket_id: ticket.id,
         author_id: data.userId,
         message_type: canAnswer ? "answer" : "question",
-        parent_message_id: canAnswer ? pendingQuestion?.id ?? null : null,
+        parent_message_id: parentId,
         message: message.trim(),
        }).select("id").single();
       if (error) throw error;
@@ -371,10 +380,12 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
            throw new Error(`Mensagem enviada, mas não foi possível anexar todas as imagens: ${uploadError instanceof Error ? uploadError.message : "erro no envio"}`);
          }
        }
+       return "message" as const;
     },
-    onSuccess: async () => {
-      toast.success(canAnswer ? "Resposta enviada" : "Pergunta enviada ao solicitante");
+    onSuccess: async (result) => {
+      toast.success(result === "attachments" ? "Imagens anexadas" : canAnswer ? "Resposta enviada" : "Pergunta enviada ao solicitante");
       setMessage("");
+      setReplyToId("");
        setMessageFiles([]);
        setMessageFileInputKey((key) => key + 1);
       await details.refetch();
