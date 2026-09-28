@@ -257,10 +257,24 @@ function NewTicketDialog({ open, onOpenChange, userId, onCreated }: { open: bool
        validateImages(files);
       const { data: ticket, error } = await supabase.from("development_tickets").insert(payload).select("id").single();
       if (error) throw error;
-       if (files.length) await uploadTicketImages(ticket.id, userId, files);
+       if (files.length) {
+         try {
+           await uploadTicketImages(ticket.id, userId, files);
+         } catch (uploadError) {
+           throw new Error(`Ticket aberto, mas não foi possível anexar todas as imagens: ${uploadError instanceof Error ? uploadError.message : "erro no envio"}`);
+         }
+       }
     },
      onSuccess: () => { toast.success("Ticket aberto com sucesso"); setFiles([]); setFileInputKey((key) => key + 1); setAppKey("supply"); setMenuName("none"); setSubmenuName("none"); onOpenChange(false); onCreated(); },
-    onError: (error: Error) => toast.error(error.message),
+     onError: (error: Error) => {
+       toast.error(error.message);
+       if (error.message.startsWith("Ticket aberto")) {
+         setFiles([]);
+         setFileInputKey((key) => key + 1);
+         onOpenChange(false);
+         onCreated();
+       }
+     },
   });
   return <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogTrigger asChild><Button><Plus className="h-4 w-4" />Novo ticket</Button></DialogTrigger>
