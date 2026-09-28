@@ -352,11 +352,12 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
   });
   const messages = details.data?.messages ?? [];
   const answeredQuestionIds = new Set(messages.filter((entry) => entry.message_type === "answer" && entry.parent_message_id).map((entry) => entry.parent_message_id));
-  const pendingQuestions = messages.filter((entry) => entry.message_type === "question" && entry.author_id !== ticket?.reporter_id && !answeredQuestionIds.has(entry.id));
+  const pendingQuestions = messages.filter((entry) => entry.message_type === "question" && entry.author_id !== data?.userId && !answeredQuestionIds.has(entry.id));
   const canAsk = Boolean(data?.isAdmin && ticket && !["atendido", "concluido", "excluido"].includes(ticket.status));
   const isReporter = Boolean(ticket && ticket.reporter_id === data?.userId && !["concluido", "excluido"].includes(ticket.status));
-  const canAnswer = Boolean(isReporter && pendingQuestions.length && reporterMode === "answer");
+  const canAnswer = Boolean((isReporter || canAsk) && pendingQuestions.length && reporterMode === "answer");
   const canAskReporter = Boolean(isReporter && (reporterMode === "question" || !pendingQuestions.length));
+  const shouldAnswer = Boolean(canAnswer && !canAskReporter);
   const canAttach = Boolean(ticket && (canAsk || isReporter) && !["concluido", "excluido"].includes(ticket.status));
   const sendMessage = useMutation({
     mutationFn: async () => {
@@ -368,11 +369,11 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
         return "attachments" as const;
       }
       if (!canAsk && !canAnswer && !canAskReporter) throw new Error("Não é possível enviar neste chamado");
-      const parentId = canAnswer ? (pendingQuestions.some((entry) => entry.id === replyToId) ? replyToId : pendingQuestions[0]?.id) : null;
+      const parentId = shouldAnswer ? (pendingQuestions.some((entry) => entry.id === replyToId) ? replyToId : pendingQuestions[0]?.id) : null;
        const { data: savedMessage, error } = await supabase.from("development_ticket_messages").insert({
         ticket_id: ticket.id,
         author_id: data.userId,
-        message_type: canAnswer ? "answer" : "question",
+        message_type: shouldAnswer ? "answer" : "question",
         parent_message_id: parentId,
         message: message.trim(),
        }).select("id").single();
@@ -387,7 +388,7 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
        return "message" as const;
     },
     onSuccess: async (result) => {
-      toast.success(result === "attachments" ? "Imagens anexadas" : canAnswer ? "Resposta enviada" : canAskReporter ? "Pergunta enviada" : "Pergunta enviada ao solicitante");
+      toast.success(result === "attachments" ? "Imagens anexadas" : shouldAnswer ? "Resposta enviada" : canAskReporter ? "Pergunta enviada" : "Pergunta enviada ao solicitante");
       setMessage("");
       setReplyToId("");
       setReporterMode("answer");
