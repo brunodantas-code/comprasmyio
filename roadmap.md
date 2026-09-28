@@ -773,4 +773,4 @@
 - [x] Supply — em Meus com Supply, consolidar Approvals em que o usuário é solicitante ou destinatário, com acesso seguro aos respectivos pedidos.
 
 - [x] Site Survey — gráfico de barras de visitas concluídas por dia/hora, consolidado ou filtrado por técnico, após anexos.
-- [ ] Cabeçalho ERP — aplicar aos três ícones verdes o padrão simples, sem fundo, do segundo print.
+- [x] Cabeçalho ERP — aplicar aos três ícones verdes o padrão simples, sem fundo, do segundo print.
