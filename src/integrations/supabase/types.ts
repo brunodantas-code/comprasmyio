@@ -2056,6 +2056,7 @@ export type Database = {
           internal_notes: string | null
           priority: string
           reporter_id: string
+          site_survey_number: number | null
           site_survey_question_id: string | null
           site_survey_visit_environment_id: string | null
           site_survey_visit_id: string | null
@@ -2075,6 +2076,7 @@ export type Database = {
           internal_notes?: string | null
           priority?: string
           reporter_id: string
+          site_survey_number?: number | null
           site_survey_question_id?: string | null
           site_survey_visit_environment_id?: string | null
           site_survey_visit_id?: string | null
@@ -2094,6 +2096,7 @@ export type Database = {
           internal_notes?: string | null
           priority?: string
           reporter_id?: string
+          site_survey_number?: number | null
           site_survey_question_id?: string | null
           site_survey_visit_environment_id?: string | null
           site_survey_visit_id?: string | null
@@ -6070,6 +6073,10 @@ export type Database = {
           target_user_id: string
         }[]
       }
+      delete_site_survey_visit: {
+        Args: { _delete_calls: boolean; _visit_id: string }
+        Returns: number
+      }
       get_client_deletion_links: {
         Args: { _client_id: string }
         Returns: {
@@ -6133,6 +6140,16 @@ export type Database = {
       is_erp_admin: { Args: { _user_id: string }; Returns: boolean }
       is_supply_member: { Args: { _user_id: string }; Returns: boolean }
       is_supply_technician: { Args: { _user_id: string }; Returns: boolean }
+      list_site_survey_visit_calls: {
+        Args: { _visit_id: string }
+        Returns: {
+          call_number: string
+          description: string
+          id: string
+          status: string
+          title: string
+        }[]
+      }
       primary_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]

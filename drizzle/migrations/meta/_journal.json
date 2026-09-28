@@ -540,6 +540,27 @@
       "when": 1790616040927,
       "tag": "0076_validate_purchase_order_recipient_identity",
       "breakpoints": true
+    },
+    {
+      "idx": 77,
+      "version": "7",
+      "when": 1790621425402,
+      "tag": "0077_site_survey_visit_calls_deletion_choice",
+      "breakpoints": true
+    },
+    {
+      "idx": 78,
+      "version": "7",
+      "when": 1790621473047,
+      "tag": "0078_remember_site_survey_number_on_opdesk_calls",
+      "breakpoints": true
+    },
+    {
+      "idx": 79,
+      "version": "7",
+      "when": 1790621581820,
+      "tag": "0079_require_checked_site_survey_visit_deletion",
+      "breakpoints": true
     }
   ]
 }

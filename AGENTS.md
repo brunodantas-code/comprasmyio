@@ -15,3 +15,4 @@
 - Mobile Supply attachments render PDFs inside the request dialog with a lazy-loaded PDF.js canvas, because mobile browsers may not display blob PDFs in embedded frames; desktop retains its new-tab behavior.
 - Supply pending links target a specific Approvals subsection: execution tasks open `supply`, while decisions remain in `mine`, because buyers must not land on an approval-only list.
 - Site Survey progress counts completed stores/environments from their completion timestamps and completing user, grouped by São Paulo day and hour; this measures actual completed work rather than scheduled visits.
+- Site Survey visit deletion inspects linked OpDesk calls before offering keep/delete choices; a permission-checked database function executes both actions atomically, and OpDesk retains the visit number even when the visit is removed.

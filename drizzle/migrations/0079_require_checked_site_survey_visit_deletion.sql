@@ -1,0 +1,1 @@
+ALTER POLICY "Site Survey visits can be deleted" ON public.site_survey_visits USING (false);
