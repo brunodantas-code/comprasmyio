@@ -774,5 +774,5 @@
 
 - [x] Site Survey — gráfico de barras de visitas concluídas por dia/hora, consolidado ou filtrado por técnico, após anexos.
 - [x] Cabeçalho ERP — aplicar aos três ícones verdes o padrão simples, sem fundo, do segundo print.
-- [ ] Site Survey — antes de excluir visita, listar chamados do OpDesk e permitir manter ou excluir junto em operação segura.
-- [ ] OpDesk — mostrar número da visita vinculada como coluna no acompanhamento de chamados.
+- [x] Site Survey — antes de excluir visita, listar chamados do OpDesk e permitir manter ou excluir junto em operação segura.
+- [x] OpDesk — mostrar número da visita vinculada como coluna no acompanhamento de chamados.
