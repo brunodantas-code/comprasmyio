@@ -776,3 +776,4 @@
 - [x] Cabeçalho ERP — aplicar aos três ícones verdes o padrão simples, sem fundo, do segundo print.
 - [x] Site Survey — antes de excluir visita, listar chamados do OpDesk e permitir manter ou excluir junto em operação segura.
 - [x] OpDesk — mostrar número da visita vinculada como coluna no acompanhamento de chamados.
+- [ ] Site Survey — corrigir o salvamento de perguntas com ação já utilizada em chamados, preservando o vínculo histórico e evitando duplicidade.
