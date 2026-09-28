@@ -194,7 +194,7 @@ function PdfAttachmentPreview({ url }: { url: string }) {
           const context = canvas.getContext("2d");
           if (!context || cancelled) break;
           containerRef.current?.appendChild(canvas);
-          await page.render({ canvas, canvasContext: context, viewport }).promise;
+          await page.render({ canvasContext: context, viewport }).promise;
         }
       } catch (cause) {
         console.error("PDF preview failed", cause);

@@ -1207,7 +1207,7 @@ function StockTableCard({
                 const meta = metaMap?.[r.material_id];
                 return (
                 <TableRow key={r.material_id}>
-                  <TableCell className="max-w-[50%] font-medium align-top">
+                   <TableCell className="max-w-none font-medium align-top md:max-w-[50%]">
                     <div className="flex flex-col gap-1">
                       {detail ? (
                         <MaterialDetailDialog
@@ -1977,7 +1977,7 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
                   const meta = metaMap?.[r.material_id];
                   return (
                   <TableRow key={r.material_id}>
-                    <TableCell className="max-w-[50%] font-medium align-top">
+                     <TableCell className="max-w-none font-medium align-top md:max-w-[50%]">
                       <div className="flex flex-col gap-1">
                         <MaterialDetailDialog
                           materialId={r.material_id}
