@@ -11,13 +11,15 @@ const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableE
       const el = innerRef.current;
       if (!el) return;
       const apply = () => {
-        const headRow = el.querySelector("thead tr");
+        const headRow = el.tHead?.rows[0];
         if (!headRow) return;
         const labels = Array.from(headRow.children).map((th) => (th.textContent || "").trim());
-        el.querySelectorAll("tbody tr").forEach((tr) => {
-          Array.from(tr.children).forEach((td, i) => {
-            const label = labels[i] ?? "";
-            if (td.getAttribute("data-label") !== label) td.setAttribute("data-label", label);
+        Array.from(el.tBodies).forEach((body) => {
+          Array.from(body.rows).forEach((tr) => {
+            Array.from(tr.cells).forEach((td, i) => {
+              const label = labels[i] ?? "";
+              if (td.getAttribute("data-label") !== label) td.setAttribute("data-label", label);
+            });
           });
         });
       };
