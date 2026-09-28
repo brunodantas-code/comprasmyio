@@ -265,7 +265,7 @@ function AttachmentLink({ attachment }: { attachment: Attachment }) {
   };
 
   return <>
-    <Button type="button" variant="link" className="h-auto min-w-0 justify-start truncate p-0 text-left text-primary" title={attachment.name} onClick={view}>
+    <Button type="button" variant="link" className="h-auto min-w-0 max-w-full justify-start truncate p-0 text-left !bg-transparent !text-primary underline hover:!bg-transparent hover:!text-primary" title={attachment.name} onClick={view}>
       {attachment.name}
     </Button>
     <Dialog open={open} onOpenChange={(next) => { if (!next) close(); }}>
