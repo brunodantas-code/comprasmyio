@@ -777,3 +777,4 @@
 - [x] Site Survey — antes de excluir visita, listar chamados do OpDesk e permitir manter ou excluir junto em operação segura.
 - [x] OpDesk — mostrar número da visita vinculada como coluna no acompanhamento de chamados.
 - [ ] Site Survey — corrigir o salvamento de perguntas com ação já utilizada em chamados, preservando o vínculo histórico e evitando duplicidade.
+- [ ] Site Survey — verificar duas pendências sem destaque na seção 4 da loja Casas Bahia e corrigir contagem de perguntas excluídas, se for a causa.
