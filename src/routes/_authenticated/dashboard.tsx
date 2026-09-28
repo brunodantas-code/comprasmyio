@@ -22,10 +22,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { ptBR } from "date-fns/locale";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { toast } from "sonner";
-import { ArrowLeft, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Boxes, Building2, Plane, Landmark, Briefcase, Layers3, ArrowUpDown } from "lucide-react";
+import { ArrowLeft, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Boxes, Building2, Plane, Landmark, Briefcase, Layers3, ArrowUpDown, CalendarDays } from "lucide-react";
 import { Trash2, Paperclip, Loader2, DatabaseBackup, Check, CheckCircle2, XCircle, RotateCcw, Pencil, Bell, ShieldCheck, AlertTriangle } from "lucide-react";
 import { ApprovalWorkflow, MyApprovalFlows, PendingApprovalsByRole, PendingForMe, type ApprovalListOrder } from "@/components/approval-workflow";
 import { z } from "zod";
@@ -2820,6 +2822,7 @@ function OrdersTable({
   const [fAloc, setFAloc] = useState("");
   const [fReq, setFReq] = useState("");
   const [fDate, setFDate] = useState("");
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [fStatus, setFStatus] = useState<string>("all");
 
   const norm = (s: string) => s.toLowerCase().trim();
@@ -2866,10 +2869,22 @@ function OrdersTable({
             {filterInput(fItem, setFItem, "Tipo")}
             {filterInput(fAloc, setFAloc, "Alocação")}
             {showRequester && filterInput(fReq, setFReq, "Solicitante")}
-             <div className="relative min-w-0">
-               {!fDate && <span aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-2 right-9 z-10 flex items-center bg-card text-xs text-muted-foreground">Prazo ou previsão</span>}
-               <Input type="date" aria-label="Prazo ou previsão" value={fDate} onChange={(e) => setFDate(e.target.value)} className={`h-7 min-w-0 px-2 text-xs ${!fDate ? "date-filter-empty" : ""}`} />
-             </div>
+             <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+               <PopoverTrigger asChild>
+                 <Button type="button" variant="ghost" aria-label="Prazo ou previsão: abrir calendário" className="h-7 w-full min-w-0 justify-between border border-input !bg-transparent px-2 text-xs !text-foreground shadow-sm hover:!bg-transparent hover:!text-foreground">
+                   <span className={`truncate ${fDate ? "" : "text-muted-foreground"}`}>{fDate ? fDate.split("-").reverse().join("/") : "Prazo ou previsão"}</span>
+                   <CalendarDays className="size-4 shrink-0" aria-hidden="true" />
+                 </Button>
+               </PopoverTrigger>
+               <PopoverContent align="start" className="w-auto max-w-[calc(100vw-2rem)] p-0 pointer-events-auto">
+                 <Calendar mode="single" locale={ptBR} classNames={{ day_button: "!bg-transparent !text-foreground hover:!bg-muted data-[selected-single=true]:!bg-primary data-[selected-single=true]:!text-primary-foreground" }} selected={fDate ? new Date(`${fDate}T12:00:00`) : undefined} onSelect={(date) => {
+                   if (!date) return;
+                   setFDate(`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`);
+                   setDatePickerOpen(false);
+                 }} />
+                 {fDate && <Button type="button" variant="link" className="mx-3 mb-2 h-7 !bg-transparent px-0 !text-primary hover:!bg-transparent hover:!text-primary" onClick={() => { setFDate(""); setDatePickerOpen(false); }}>Limpar data</Button>}
+               </PopoverContent>
+             </Popover>
             <Select value={fStatus} onValueChange={setFStatus}>
               <SelectTrigger className="h-7 text-xs"><SelectValue placeholder="Status" /></SelectTrigger>
               <SelectContent>
