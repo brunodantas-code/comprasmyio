@@ -784,3 +784,6 @@
 - [x] Portal ERP — atualizar o botão Casinha ao padrão de ícone verde sem fundo.
 - [x] Code — permitir anexar prints e fotos na criação e nas respostas dos chamados, exibindo cada anexo na conversa.
 - [x] Code — permitir novas perguntas e anexos em chamados abertos mesmo com pergunta anterior sem resposta; manter respostas vinculadas à pergunta escolhida.
+- [x] Supply — alinhar a inclusão dos itens de Fábrica, Terceiros e Ferramentas à permissão Item novo, sem ampliar edição, exclusão ou movimentação.
+- [ ] Supply — validar cadastro real de Item novo com a conta do Alan (bloqueio: sessão dessa conta indisponível para teste automatizado).
+- [x] Site Survey — verificar a causa da chave duplicada ao salvar ação de pergunta e orientar sobre o erro do print.
