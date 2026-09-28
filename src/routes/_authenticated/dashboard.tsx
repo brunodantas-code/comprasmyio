@@ -2763,7 +2763,7 @@ function OrdersTable({
                <Row label="Approval">
                  <div className="inline-flex max-w-full flex-col items-start font-mono font-bold">
                     <div className="flex max-w-full items-center gap-1.5">
-                      <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} />
+                      <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} items={groupedOrderItems?.get(o.id)} />
                      {me?.isAdmin && <AdminEditApprovalDialog order={o} items={(groupedOrderItems?.get(o.id) ?? []) as ApprovalEditItem[]} />}
                      {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
                      {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
@@ -2904,7 +2904,7 @@ function OrdersTable({
                <TableCell className="font-mono text-xs text-left">
                   <div className="inline-flex max-w-full flex-col items-start">
                     <div className="flex max-w-full items-center gap-1.5">
-                      <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} />
+                      <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} items={groupedOrderItems?.get(o.id)} />
                      {me?.isAdmin && <AdminEditApprovalDialog order={o} items={(groupedOrderItems?.get(o.id) ?? []) as ApprovalEditItem[]} />}
                      {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
                      {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
@@ -3061,11 +3061,12 @@ function fmtDateTime(v?: string | null) {
 }
 
 function OrderReportDialog({
-  order, projectName, requesterName,
+  order, projectName, requesterName, items = [],
 }: {
   order: Order;
   projectName: (id: string) => string;
   requesterName?: (id: string) => string;
+  items?: PurchaseOrderItem[];
 }) {
   const [open, setOpen] = useState(false);
   const { data: requestTypes } = useRequestTypes();
@@ -3179,9 +3180,7 @@ function OrderReportDialog({
               <Row key={related.id} label={`Criação — ${requestTypeLabel(related, requestTypes)}`} value={fmtDateTime(related.created_at)} />
             ))}
             <Row label="Última atualização" value={fmtDateTime(order.updated_at)} />
-            {order.item_link && (
-              <Row label="Link do item" value={<a href={order.item_link} target="_blank" rel="noreferrer" className="text-primary hover:underline">Abrir link</a>} />
-            )}
+            {items.length ? items.filter((item) => /^https?:\/\//i.test(item.item_link ?? "")).map((item) => <Row key={item.id} label={`Link — ${item.item_name}`} value={<a href={item.item_link ?? ""} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Abrir link</a>} />) : /^https?:\/\//i.test(order.item_link ?? "") && <Row label="Link do item" value={<a href={order.item_link ?? ""} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Abrir link</a>} />}
             {order.budget_exceeded && <Row label="Alerta de orçamento" value={<span className="font-semibold text-destructive">Orçamento excedido</span>} />}
             {order.budget_snapshot != null && <Row label="Orçamento do projeto" value={formatBRL(order.budget_snapshot)} />}
             {order.committed_before_snapshot != null && <Row label="Solicitado antes deste Approval" value={formatBRL(order.committed_before_snapshot)} />}
