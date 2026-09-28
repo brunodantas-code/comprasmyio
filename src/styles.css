@@ -268,10 +268,6 @@
 }
 
 /* Tabelas empilhadas no celular: rótulo à esquerda, informação à direita */
-input.date-filter-empty::-webkit-datetime-edit {
-  opacity: 0;
-}
-
 @media (max-width: 767px) {
   table[data-responsive="true"] {
     table-layout: auto !important;
