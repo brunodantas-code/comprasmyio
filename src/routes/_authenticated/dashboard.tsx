@@ -2578,6 +2578,7 @@ function BuyerQueue({ mode = "all" }: { mode?: ApprovalListMode }) {
   const filtered = (orders ?? []).filter((order) => {
     if (mode === "all") return true;
     if (order.approval_status !== "aprovado") return false;
+    if (order.request_type === "pagamento") return false;
     if (mode === "mine-supply" && order.requester_id !== me?.id && order.recipient_user_id !== me?.id) return false;
     return ["pendente", "comprado_aguardando", "recebido_problema"].includes(order.status);
   });
@@ -2668,6 +2669,7 @@ function ApprovalsCenter({ value, onValueChange }: { value?: string; onValueChan
         .from("purchase_orders")
         .select("id", { count: "exact", head: true })
         .eq("approval_status", "aprovado")
+        .neq("request_type", "pagamento")
         .in("status", ["pendente", "comprado_aguardando", "recebido_problema"]);
       if (error) throw error;
       return count ?? 0;

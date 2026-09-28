@@ -13,9 +13,9 @@
 - “Meus com Supply” unions requester/recipient IDs after RLS without duplicates; approver/buyer actions stay gated.
 - Approval Workflow's three views are selected in the Supply bottom navigation under Usuários e logs, not in a top tab strip, to keep navigation consistent across Supply.
 - Mobile Supply PDFs use lazy PDF.js canvas in the dialog; desktop opens a new tab.
-- Supply execution links open `supply`; approval decisions open `mine`.
+- Supply execution links open `supply`; decisions open `mine`. Payment approvals stay in Cash Flow, not Supply execution queues/counts; approval is not payment.
 - Supply “Item novo” authorizes catalog inserts for Fábrica, Terceiros and Ferramentas via effective profile/individual permission and authenticated owner; it does not grant stock editing or movement rights.
-- Site Survey progress counts completed stores/environments from their completion timestamps and completing user, grouped by São Paulo day and hour; this measures actual completed work rather than scheduled visits.
+- Site Survey progress counts completed stores/environments by completion timestamp and user, grouped by São Paulo day/hour, not scheduled visits.
 - Site Survey visit deletion inspects linked OpDesk calls before offering keep/delete choices; a permission-checked database function executes both actions atomically, and OpDesk retains the visit number even when the visit is removed.
 - Code conversation images reuse the private ticket attachment store: message-linked images stay with their reply, standalone additions stay in the ticket attachments. Open tickets permit follow-up questions before earlier ones are answered, and answers link to a specific pending admin question; this preserves the conversation and its permissions.
 - Site Survey question actions are updated or deactivated in place rather than deleted, preserving generated-call references; checklist pending labels derive from the same active, visible, incomplete questions as section counts so obsolete saved labels cannot hide live omissions.

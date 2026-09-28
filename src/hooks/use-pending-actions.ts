@@ -46,6 +46,7 @@ export function usePendingActions() {
               .from("purchase_orders")
               .select("id", { count: "exact", head: true })
               .eq("approval_status", "aprovado")
+              .neq("request_type", "pagamento")
               .in("status", ["pendente", "comprado_aguardando", "recebido_problema"])
           : Promise.resolve({ count: 0, error: null }),
         supabase.from("internal_calls").select("id, call_number, title, status, reporter_id").order("created_at", { ascending: false }),
