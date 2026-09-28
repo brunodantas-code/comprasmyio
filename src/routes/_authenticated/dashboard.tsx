@@ -538,7 +538,7 @@ function Dashboard() {
   const { data: me, isLoading: meLoading } = useCurrentUser();
   const [section, setSection] = useState(search.section);
   const [requestSection, setRequestSection] = useState<string>();
-  const [approvalSection, setApprovalSection] = useState<string>();
+  const [approvalSection, setApprovalSection] = useState(search.section === "queue" ? search.subsection : undefined);
   const [stockSection, setStockSection] = useState<string>();
   const [registrationSection, setRegistrationSection] = useState(search.subsection);
   const [administrationSection, setAdministrationSection] = useState(search.subsection);

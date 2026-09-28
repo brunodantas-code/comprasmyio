@@ -34,7 +34,7 @@ function PendentesPage() {
             {(data?.total ?? 0) > 0 ? (
               <div className="divide-y divide-border overflow-hidden rounded-md border border-border bg-card">
                 {(data?.approvals ?? 0) > 0 ? <PendingLink icon={CheckCircle2} label="Aguardando minha aprovação" count={data?.approvals ?? 0} to="/pendentes" /> : null}
-                {(data?.supplyQueue ?? 0) > 0 ? <PendingLink icon={ShoppingCart} label="Fila do Supply" count={data?.supplyQueue ?? 0} to="/dashboard" search={{ section: "queue" }} /> : null}
+                 {(data?.supplyQueue ?? 0) > 0 ? <PendingLink icon={ShoppingCart} label="Compras e serviços a executar · Fila do Supply" count={data?.supplyQueue ?? 0} to="/dashboard" search={{ section: "queue", subsection: "supply" }} /> : null}
                 {(data?.userDeletions ?? 0) > 0 ? <PendingLink icon={ShieldCheck} label="Exclusões de usuários aguardando decisão" count={data?.userDeletions ?? 0} to="/dashboard" search={{ section: "admin", subsection: "usuarios" }} /> : null}
                 {(data?.codeItems ?? []).map((ticket) => <PendingLink key={ticket.ticketId} icon={CodeXml} label={`#${ticket.ticketNumber} · ${ticket.reason === "responder" ? "Responder ao Admin" : ticket.reason === "aceitar" ? "Confirmar atendimento" : "Ticket aguardando atendimento"}`} count={1} to="/development" search={{ ticket: ticket.ticketId }} />)}
                 {(data?.supportCallItems ?? []).map((call) => <PendingLink key={call.callId} icon={Phone} label={`#${call.callNumber} · ${call.reason === "confirmar" ? "Confirmar conclusão" : call.title}`} count={1} to="/chamados" search={{ chamado: call.callId }} />)}
@@ -49,7 +49,7 @@ function PendentesPage() {
   );
 }
 
-function PendingLink({ icon: Icon, label, count, to, search }: { icon: typeof Bell; label: string; count: number; to: "/pendentes" | "/dashboard" | "/development" | "/chamados"; search?: { section: "admin"; subsection: "usuarios" } | { section: "queue" } | { ticket: string } | { chamado: string } }) {
+function PendingLink({ icon: Icon, label, count, to, search }: { icon: typeof Bell; label: string; count: number; to: "/pendentes" | "/dashboard" | "/development" | "/chamados"; search?: { section: "admin"; subsection: "usuarios" } | { section: "queue"; subsection?: "supply" } | { ticket: string } | { chamado: string } }) {
   const content = <><Icon className="h-5 w-5 shrink-0" /><span className="min-w-0 flex-1 text-sm font-medium">{label}</span><span className="flex h-7 min-w-7 items-center justify-center rounded-full bg-destructive px-2 text-xs font-bold text-destructive-foreground">{count > 99 ? "99+" : count}</span></>;
   if (to === "/pendentes") return <a href="#approvals" className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10">{content}</a>;
   if (to === "/development") return <Link to="/development" search={(search && "ticket" in search) ? search : { ticket: undefined }} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10">{content}</Link>;
