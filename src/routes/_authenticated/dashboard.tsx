@@ -93,6 +93,7 @@ type Order = {
   tool_asset_id?: string | null;
   quantity: number;
   recipient: string;
+  recipient_user_id?: string | null;
   requester_notes: string | null;
   delivery_point: string;
   status: "pendente" | "comprado_aguardando" | "entregue" | "cancelado" | "recebido_ok" | "recebido_problema";
@@ -1191,6 +1192,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
 
 
   const [recipient, setRecipient] = useState("");
+  const [recipientUserId, setRecipientUserId] = useState<string | null>(null);
   const { data: profiles } = useProfilesList();
   const { data: jobTitles } = useJobTitles();
   const { data: purchasables } = usePurchasableItems();
@@ -1246,6 +1248,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
     setNewItemName("");
     setNewItemDest("");
     setRecipient("");
+    setRecipientUserId(null);
     setCostCenterId("");
     setRhCargo("");
     setRhGestor("");
@@ -1335,6 +1338,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
           quantity: groupedItems ? groupedItems.reduce((sum, row) => sum + Number(row.quantity), 0) : buyQty,
           estimated_value: groupedItems ? Number(groupedItems.reduce((sum, row) => sum + Number(row.estimatedValue || 0) * Number(row.quantity), 0).toFixed(2)) : Number((values.estimated_value * buyQty).toFixed(2)),
           recipient: values.recipient,
+          recipient_user_id: requestModel === "materiais" ? recipientUserId : null,
           requester_notes: values.requester_notes ?? null,
           delivery_point: values.delivery_point ?? null,
           deadline_type: values.deadline_type,
@@ -2174,11 +2178,15 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
             {requestModel === "materiais" && (
               <div className="space-y-2">
                 <Label>Destinatário</Label>
-                <Select value={recipient} onValueChange={setRecipient}>
+                <Select value={recipientUserId ?? ""} onValueChange={(id) => {
+                  const selected = profiles?.find((profile) => profile.id === id);
+                  setRecipientUserId(selected?.id ?? null);
+                  setRecipient(selected?.full_name || selected?.email || "");
+                }}>
                   <SelectTrigger><SelectValue placeholder="Selecione o usuário" /></SelectTrigger>
                   <SelectContent>
                     {(profiles ?? []).map((p) => (
-                      <SelectItem key={p.id} value={p.full_name || p.email || p.id}>
+                      <SelectItem key={p.id} value={p.id}>
                         {p.full_name || p.email || p.id}
                       </SelectItem>
                     ))}
@@ -2454,7 +2462,7 @@ function BuyerQueue({ mode = "all" }: { mode?: ApprovalListMode }) {
   const filtered = (orders ?? []).filter((order) => {
     if (mode === "all") return true;
     if (order.approval_status !== "aprovado") return false;
-    if (mode === "mine-supply" && order.requester_id !== me?.id) return false;
+    if (mode === "mine-supply" && order.requester_id !== me?.id && order.recipient_user_id !== me?.id) return false;
     return ["pendente", "comprado_aguardando", "recebido_problema"].includes(order.status);
   });
   const projectName = (id: string) => (id === ESTOQUE_PROJECT_ID ? "Estoque" : projects?.find((p) => p.id === id)?.name ?? "—");
@@ -2496,7 +2504,7 @@ function BuyerQueue({ mode = "all" }: { mode?: ApprovalListMode }) {
             {mode === "supply"
               ? "Pedidos aprovados que aguardam atuação do Time de Supply."
               : mode === "mine-supply"
-                ? "Seus pedidos aprovados que estão em execução pelo Time de Supply."
+                ? "Pedidos aprovados solicitados por você ou destinados a você, em execução pelo Time de Supply."
                 : canManageOperationalStatus ? "Consulte e atualize o andamento das solicitações." : "Acompanhe o status e o andamento de cada solicitação."}
           </CardDescription>
         </div>
