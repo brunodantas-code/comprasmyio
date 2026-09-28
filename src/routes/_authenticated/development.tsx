@@ -320,6 +320,7 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
   const [notes, setNotes] = useState("");
   const [message, setMessage] = useState("");
   const [replyToId, setReplyToId] = useState("");
+  const [reporterMode, setReporterMode] = useState<"question" | "answer">("answer");
    const [messageFiles, setMessageFiles] = useState<File[]>([]);
    const [messageFileInputKey, setMessageFileInputKey] = useState(0);
   const [preview, setPreview] = useState<{ url: string; name: string; contentType: string } | null>(null);
@@ -330,6 +331,7 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
     setNotes(ticket.admin_notes ?? "");
      setMessage("");
      setReplyToId("");
+     setReporterMode("answer");
      setMessageFiles([]);
      setMessageFileInputKey((key) => key + 1);
    }, [ticket]);
@@ -352,8 +354,10 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
   const answeredQuestionIds = new Set(messages.filter((entry) => entry.message_type === "answer" && entry.parent_message_id).map((entry) => entry.parent_message_id));
   const pendingQuestions = messages.filter((entry) => entry.message_type === "question" && !answeredQuestionIds.has(entry.id));
   const canAsk = Boolean(data?.isAdmin && ticket && !["atendido", "concluido", "excluido"].includes(ticket.status));
-  const canAnswer = Boolean(ticket && ticket.reporter_id === data?.userId && pendingQuestions.length && !["concluido", "excluido"].includes(ticket.status));
-  const canAttach = Boolean(ticket && (canAsk || ticket.reporter_id === data?.userId) && !["concluido", "excluido"].includes(ticket.status));
+  const isReporter = Boolean(ticket && ticket.reporter_id === data?.userId && !["concluido", "excluido"].includes(ticket.status));
+  const canAnswer = Boolean(isReporter && pendingQuestions.length && reporterMode === "answer");
+  const canAskReporter = Boolean(isReporter && (reporterMode === "question" || !pendingQuestions.length));
+  const canAttach = Boolean(ticket && (canAsk || isReporter) && !["concluido", "excluido"].includes(ticket.status));
   const sendMessage = useMutation({
     mutationFn: async () => {
       if (!ticket || !data?.userId || (!message.trim() && !messageFiles.length)) throw new Error("Digite uma mensagem ou selecione uma imagem");
@@ -363,7 +367,7 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
         await uploadTicketImages(ticket.id, data.userId, messageFiles);
         return "attachments" as const;
       }
-      if (!canAsk && !canAnswer) throw new Error("Selecione uma pergunta pendente para responder");
+      if (!canAsk && !canAnswer && !canAskReporter) throw new Error("Não é possível enviar neste chamado");
       const parentId = canAnswer ? (pendingQuestions.some((entry) => entry.id === replyToId) ? replyToId : pendingQuestions[0]?.id) : null;
        const { data: savedMessage, error } = await supabase.from("development_ticket_messages").insert({
         ticket_id: ticket.id,
