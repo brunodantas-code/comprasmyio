@@ -1,4 +1,4 @@
-- [ ] Supply — separar pendências de aprovação e execução; abrir Fila do Supply ao selecionar pendências de compras.
+- [x] Supply — separar pendências de aprovação e execução; abrir Fila do Supply ao selecionar pendências de compras.
 - [x] Clientes mobile — expandir filiais à largura do cliente principal e alinhar rótulos sem quebras estreitas.
 - [x] Armazém mobile — permitir que as descrições de Estoque myio e Insumos de Instalação ocupem o espaço disponível, sem quebra por poucos caracteres.
 - [x] Supply mobile — abrir anexos e capturas de tela nas solicitações sem sair da página, preservando a nova janela no desktop.
