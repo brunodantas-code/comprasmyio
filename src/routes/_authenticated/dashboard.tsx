@@ -2877,7 +2877,7 @@ function OrdersTable({
                  </Button>
                </PopoverTrigger>
                <PopoverContent align="start" className="w-auto max-w-[calc(100vw-2rem)] p-0 pointer-events-auto">
-                 <Calendar mode="single" locale={ptBR} selected={fDate ? new Date(`${fDate}T12:00:00`) : undefined} onSelect={(date) => {
+                 <Calendar mode="single" locale={ptBR} classNames={{ day_button: "!bg-transparent !text-foreground hover:!bg-muted data-[selected-single=true]:!bg-primary data-[selected-single=true]:!text-primary-foreground" }} selected={fDate ? new Date(`${fDate}T12:00:00`) : undefined} onSelect={(date) => {
                    if (!date) return;
                    setFDate(`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`);
                    setDatePickerOpen(false);
