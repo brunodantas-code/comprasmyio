@@ -278,7 +278,7 @@ function NewTicketDialog({ open, onOpenChange, userId, onCreated }: { open: bool
   });
   return <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogTrigger asChild><Button><Plus className="h-4 w-4" />Novo ticket</Button></DialogTrigger>
-    <DialogContent className="max-w-2xl">
+     <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
       <form onSubmit={(event) => { event.preventDefault(); createTicket.mutate(event.currentTarget); }} className="space-y-4">
         <DialogHeader><DialogTitle>Novo ticket</DialogTitle><DialogDescription>Registre uma melhoria ou um problema encontrado.</DialogDescription></DialogHeader>
         <div className="grid gap-4 sm:grid-cols-2">
