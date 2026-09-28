@@ -787,4 +787,4 @@
 - [x] Supply — alinhar a inclusão dos itens de Fábrica, Terceiros e Ferramentas à permissão Item novo, sem ampliar edição, exclusão ou movimentação.
 - [ ] Supply — validar cadastro real de Item novo com a conta do Alan (bloqueio: sessão dessa conta indisponível para teste automatizado).
 - [x] Site Survey — verificar a causa da chave duplicada ao salvar ação de pergunta e orientar sobre o erro do print.
-- [ ] Supply — ativar Pagamento no cadastro, reclassificar o Approval 202609230001 sem duplicá-lo e excluir pagamentos das filas de execução, mantendo a conta no Cash Flow.
+- [x] Supply — ativar Pagamento no cadastro, reclassificar o Approval 202609230001 sem duplicá-lo e excluir pagamentos das filas de execução, mantendo a conta no Cash Flow.
