@@ -367,7 +367,6 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
   const pointSections = sortByPosition(data.sections.filter((section) => section.active && section.template_id === selectedPointTemplateId)).slice(hasOwnEnvironmentTemplate ? 0 : 3);
   const questions = sortByPosition(data.questions.filter((question) => question.active && (generalSections.some((section) => section.id === question.section_id) || pointSections.some((section) => section.id === question.section_id))));
   const selectedPointCancelled = pointKind === "luc" && selectedPointRecord?.completion_status === "cancelada";
-  const savedPendingFields = Array.isArray(selectedPointRecord?.pending_fields) ? selectedPointRecord.pending_fields.filter((item): item is string => typeof item === "string") : [];
   const matchesPoint = (item: { visit_luc_id?: string | null; visit_environment_id?: string | null }) => pointKind === "luc" ? item.visit_luc_id === pointId : item.visit_environment_id === pointId;
   const facadeAttachment = (detail?.attachments ?? []).find((item) => item.attachment_kind === "facade" && matchesPoint(item));
   const scopedMaterials = (detail?.visitMaterials ?? []).filter(matchesPoint);

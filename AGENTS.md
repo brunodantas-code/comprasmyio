@@ -16,3 +16,4 @@
 - Supply pending links target a specific Approvals subsection: execution tasks open `supply`, while decisions remain in `mine`, because buyers must not land on an approval-only list.
 - Site Survey progress counts completed stores/environments from their completion timestamps and completing user, grouped by São Paulo day and hour; this measures actual completed work rather than scheduled visits.
 - Site Survey visit deletion inspects linked OpDesk calls before offering keep/delete choices; a permission-checked database function executes both actions atomically, and OpDesk retains the visit number even when the visit is removed.
+- Site Survey question actions are updated or deactivated in place rather than deleted, preserving generated-call references; checklist pending labels derive from the same active, visible, incomplete questions as section counts so obsolete saved labels cannot hide live omissions.
