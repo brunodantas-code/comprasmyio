@@ -346,7 +346,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
   const [pauseOpen, setPauseOpen] = useState(false);
   const [pauseReasonId, setPauseReasonId] = useState("");
   const [savingPause, setSavingPause] = useState(false);
-  const canManageAttachments = visit.status === "em_andamento" && data.permissions.has("site_survey_executar");
+  const canManageAttachments = visit?.status === "em_andamento" && data.permissions.has("site_survey_executar");
   const canEditAttachments = data.permissions.has("site_survey_editar");
   const [specialEquipmentAnswer, setSpecialEquipmentAnswer] = useState("");
   const visitQuestions = sortByPosition(data.questions.filter((question) => question.active && data.sections.some((section) => section.active && section.id === question.section_id && section.template_id === visit?.template_id)));
