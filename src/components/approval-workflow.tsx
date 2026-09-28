@@ -24,7 +24,6 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useAdditionalStepTypes, type AdditionalStepType } from "@/components/additional-step-types-tab";
 import { requestTypeModel, requestTypeName, useRequestTypes, type RequestTypeRecord } from "@/components/request-types-tab";
@@ -1857,22 +1856,17 @@ function OrgChartAdmin() {
 }
 
 
-export function ApprovalWorkflow() {
+export function ApprovalWorkflow({ section = "organograma" }: { section?: string }) {
   return (
-    <Tabs defaultValue="organograma">
-      <TabsList className="mb-4">
-        <TabsTrigger value="organograma">Organograma de Aprovação</TabsTrigger>
-        <TabsTrigger value="padrao">Alçadas de Aprovação</TabsTrigger>
-        <TabsTrigger value="etapas-adicionais">Etapas Adicionais</TabsTrigger>
-      </TabsList>
-      <TabsContent value="organograma"><OrgChartAdmin /></TabsContent>
-      <TabsContent value="padrao">
+    <>
+      {section === "organograma" && <OrgChartAdmin />}
+      {section === "padrao" && (
         <div className="space-y-4">
           <DefaultChainAdmin />
           <DualApprovalSettings />
         </div>
-      </TabsContent>
-      <TabsContent value="etapas-adicionais"><RulesAdmin /></TabsContent>
-    </Tabs>
+      )}
+      {section === "etapas-adicionais" && <RulesAdmin />}
+    </>
   );
 }
