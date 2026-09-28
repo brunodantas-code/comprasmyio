@@ -40,7 +40,7 @@ export function usePendingActions() {
           .select("id, ticket_number, title, reporter_id, status"),
         supabase
           .from("development_ticket_messages")
-          .select("id, ticket_id, message_type, parent_message_id, development_tickets(ticket_number,title,reporter_id)"),
+          .select("id, ticket_id, author_id, message_type, parent_message_id, development_tickets(ticket_number,title,reporter_id)"),
         currentUser?.isComprador
           ? supabase
               .from("purchase_orders")
@@ -85,7 +85,7 @@ export function usePendingActions() {
       }
       for (const message of codeMessagesResult.data ?? []) {
         const relatedTicket = Array.isArray(message.development_tickets) ? message.development_tickets[0] : message.development_tickets;
-        if (message.message_type !== "question" || answeredQuestionIds.has(message.id) || relatedTicket?.reporter_id !== userId) continue;
+        if (message.message_type !== "question" || message.author_id === relatedTicket?.reporter_id || answeredQuestionIds.has(message.id) || relatedTicket?.reporter_id !== userId) continue;
         codeItems.set(message.ticket_id, { ticketId: message.ticket_id, ticketNumber: relatedTicket.ticket_number, title: relatedTicket.title, reason: "responder" });
       }
       const pendingCodeItems = [...codeItems.values()];

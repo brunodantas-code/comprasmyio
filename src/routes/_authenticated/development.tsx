@@ -352,7 +352,7 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
   });
   const messages = details.data?.messages ?? [];
   const answeredQuestionIds = new Set(messages.filter((entry) => entry.message_type === "answer" && entry.parent_message_id).map((entry) => entry.parent_message_id));
-  const pendingQuestions = messages.filter((entry) => entry.message_type === "question" && !answeredQuestionIds.has(entry.id));
+  const pendingQuestions = messages.filter((entry) => entry.message_type === "question" && entry.author_id !== ticket?.reporter_id && !answeredQuestionIds.has(entry.id));
   const canAsk = Boolean(data?.isAdmin && ticket && !["atendido", "concluido", "excluido"].includes(ticket.status));
   const isReporter = Boolean(ticket && ticket.reporter_id === data?.userId && !["concluido", "excluido"].includes(ticket.status));
   const canAnswer = Boolean(isReporter && pendingQuestions.length && reporterMode === "answer");
