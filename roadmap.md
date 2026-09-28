@@ -1,3 +1,5 @@
+- [x] Supply mobile — abrir anexos e capturas de tela nas solicitações sem sair da página, preservando a nova janela no desktop.
+- [x] Supply — identificar como Prazo ou previsão o campo de data nos filtros de Fila do Supply, Meus com Supply e Todos.
 - [x] Site Survey — escolher e aplicar novo layout em cards separados para melhorar a leitura das perguntas no mobile e desktop.
 - [x] Site Survey — informar a geração do PDF, impedir cliques repetidos e confirmar sucesso ou falha do download.
 - [ ] Site Survey — gerar relatório completo com prévia e PDF colorido/P&B, fotos por ponto, totalizadores, ações, estimativa detalhada e apuração de horas extras/noturnas.

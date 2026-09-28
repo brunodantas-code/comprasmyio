@@ -167,6 +167,121 @@ async function openAttachment(path: string) {
   previewWindow.location.replace(data.signedUrl);
 }
 
+function PdfAttachmentPreview({ url }: { url: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    let documentTask: { destroy: () => Promise<void> } | undefined;
+    const render = async () => {
+      try {
+        const pdfjs = await import("pdfjs-dist");
+        const worker = await import("pdfjs-dist/build/pdf.worker.min.mjs?url");
+        pdfjs.GlobalWorkerOptions.workerSrc = worker.default;
+        const task = pdfjs.getDocument({ url });
+        documentTask = task;
+        const pdf = await task.promise;
+        for (let index = 1; index <= pdf.numPages && !cancelled; index++) {
+          const page = await pdf.getPage(index);
+          const base = page.getViewport({ scale: 1 });
+          const scale = Math.min(2, 800 / base.width);
+          const viewport = page.getViewport({ scale });
+          const canvas = document.createElement("canvas");
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          canvas.className = "mb-3 h-auto w-full bg-card";
+          const context = canvas.getContext("2d");
+          if (!context || cancelled) break;
+          containerRef.current?.appendChild(canvas);
+          await page.render({ canvas, canvasContext: context, viewport }).promise;
+        }
+      } catch (cause) {
+        console.error("PDF preview failed", cause);
+        if (!cancelled) setError(true);
+      }
+    };
+    void render();
+    return () => {
+      cancelled = true;
+      void documentTask?.destroy();
+    };
+  }, [url]);
+
+  return <div className="min-h-40 flex-1 overflow-y-auto bg-muted/30 text-center text-sm text-muted-foreground">
+    {error && <p className="p-4">Não foi possível exibir este PDF. Use “Baixar arquivo”.</p>}
+    <div ref={containerRef} className="mx-auto max-w-[800px]" />
+  </div>;
+}
+
+function AttachmentLink({ attachment }: { attachment: Attachment }) {
+  const [open, setOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const requestId = useRef(0);
+  const isImage = attachment.type.startsWith("image/") || /\.(png|jpe?g|gif|webp|heic)$/i.test(attachment.name);
+  const isPdf = attachment.type === "application/pdf" || /\.pdf$/i.test(attachment.name);
+
+  useEffect(() => () => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+  }, [previewUrl]);
+
+  const close = () => {
+    requestId.current += 1;
+    setOpen(false);
+    setLoading(false);
+    setPreviewUrl(null);
+  };
+
+  const view = async (event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!window.matchMedia("(max-width: 767px)").matches) {
+      void openAttachment(attachment.path);
+      return;
+    }
+    const currentRequest = ++requestId.current;
+    setOpen(true);
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.storage.from(ATTACHMENTS_BUCKET).createSignedUrl(attachment.path, 600);
+      if (error || !data?.signedUrl) throw error ?? new Error("Não foi possível abrir o anexo.");
+      const response = await fetch(data.signedUrl);
+      if (!response.ok) throw new Error("Não foi possível carregar o anexo.");
+      const url = URL.createObjectURL(await response.blob());
+      if (currentRequest !== requestId.current) {
+        URL.revokeObjectURL(url);
+        return;
+      }
+      setPreviewUrl(url);
+    } catch (error) {
+      if (currentRequest === requestId.current) {
+        close();
+        toast.error(error instanceof Error ? error.message : "Falha ao abrir o anexo.");
+      }
+    } finally {
+      if (currentRequest === requestId.current) setLoading(false);
+    }
+  };
+
+  return <>
+    <Button type="button" variant="link" className="h-auto min-w-0 justify-start truncate p-0 text-left text-primary" title={attachment.name} onClick={view}>
+      {attachment.name}
+    </Button>
+    <Dialog open={open} onOpenChange={(next) => { if (!next) close(); }}>
+      <DialogContent className="flex max-h-[88dvh] w-[calc(100vw-1.5rem)] flex-col gap-3 overflow-hidden p-4">
+        <DialogHeader><DialogTitle className="truncate pr-6">{attachment.name}</DialogTitle></DialogHeader>
+        {loading ? <div className="flex min-h-40 items-center justify-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" />Abrindo anexo...</div> : previewUrl && <>
+          {isImage ? <img src={previewUrl} alt={attachment.name} className="max-h-[68dvh] max-w-full self-center object-contain" />
+            : isPdf ? <PdfAttachmentPreview url={previewUrl} />
+              : <p className="text-sm text-muted-foreground">Este arquivo está disponível para download.</p>}
+          <a href={previewUrl} download={attachment.name} className="self-end text-sm font-medium text-primary underline">Baixar arquivo</a>
+        </>}
+      </DialogContent>
+    </Dialog>
+  </>;
+}
+
 function FilePicker({ files, setFiles, label = "Anexar arquivos" }: { files: File[]; setFiles: (f: File[]) => void; label?: string }) {
   return (
     <div className="space-y-2">
@@ -236,9 +351,7 @@ function ExistingAttachments({ orderId, attachments, canRemove }: { orderId: str
               </AlertDialogContent>
             </AlertDialog>
           )}
-          <button type="button" onClick={() => openAttachment(a.path)} className="min-w-0 truncate text-left text-primary hover:underline" title={a.name}>
-            {a.name}
-          </button>
+          <AttachmentLink attachment={a} />
         </li>
       ))}
     </ul>
@@ -2753,7 +2866,10 @@ function OrdersTable({
             {filterInput(fItem, setFItem, "Tipo")}
             {filterInput(fAloc, setFAloc, "Alocação")}
             {showRequester && filterInput(fReq, setFReq, "Solicitante")}
-            <Input type="date" value={fDate} onChange={(e) => setFDate(e.target.value)} className="h-7 px-1 text-xs" />
+            <label className="flex min-w-0 flex-col gap-1 text-xs text-muted-foreground">
+              Prazo ou previsão
+              <Input type="date" value={fDate} onChange={(e) => setFDate(e.target.value)} className="h-7 min-w-0 px-1 text-xs" />
+            </label>
             <Select value={fStatus} onValueChange={setFStatus}>
               <SelectTrigger className="h-7 text-xs"><SelectValue placeholder="Status" /></SelectTrigger>
               <SelectContent>
@@ -2878,7 +2994,7 @@ function OrdersTable({
               <TableHead className="py-1" />
               <TableHead className="py-1" />
               <TableHead className="py-1">
-                <Input type="date" value={fDate} onChange={(e) => setFDate(e.target.value)} className="h-7 px-1 text-xs" />
+                <Input type="date" aria-label="Prazo ou previsão" title="Prazo ou previsão" value={fDate} onChange={(e) => setFDate(e.target.value)} className="h-7 px-1 text-xs" />
               </TableHead>
               <TableHead className="py-1">
                 <Select value={fStatus} onValueChange={setFStatus}>
@@ -3212,7 +3328,7 @@ function OrderReportDialog({
               <ul className="space-y-1 text-sm">
                 {(order.attachments ?? []).map((a) => (
                   <li key={a.path}>
-                    <button type="button" className="text-primary hover:underline" onClick={() => openAttachment(a.path)}>{a.name}</button>
+                    <AttachmentLink attachment={a} />
                   </li>
                 ))}
               </ul>
