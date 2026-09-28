@@ -166,7 +166,7 @@ function PendingApprovalDetails({ step, requestTypes }: { step: StepRow; request
         <DialogHeader><DialogTitle>Approval {order.approval_number}</DialogTitle><DialogDescription>Informações completas da solicitação e da aprovação.</DialogDescription></DialogHeader>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {fields.map(([label, value]) => <div key={label}><p className="text-xs text-muted-foreground">{label}</p><p className="whitespace-pre-line text-sm break-words">{value}</p></div>)}
-          {order.item_link && <div><p className="text-xs text-muted-foreground">Link</p><a href={order.item_link} target="_blank" rel="noreferrer" className="text-sm text-primary underline">Abrir link</a></div>}
+          {materialItems.length ? materialItems.filter((item) => /^https?:\/\//i.test(item.item_link ?? "")).map((item) => <div key={item.id}><p className="text-xs text-muted-foreground">Link — {item.item_name}</p><a href={item.item_link ?? ""} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">Abrir link</a></div>) : /^https?:\/\//i.test(order.item_link ?? "") && <div><p className="text-xs text-muted-foreground">Link</p><a href={order.item_link ?? ""} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">Abrir link</a></div>}
         </div>
         <section className="border-t pt-4"><h3 className="text-sm font-semibold">Anexos</h3><p className="text-sm text-muted-foreground">{Array.isArray(order.attachments) && order.attachments.length ? `${order.attachments.length} anexo(s)` : "Nenhum anexo."}</p></section>
         {order.budget_snapshot != null && (
