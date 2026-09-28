@@ -196,7 +196,8 @@ function PdfAttachmentPreview({ url }: { url: string }) {
           containerRef.current?.appendChild(canvas);
           await page.render({ canvas, canvasContext: context, viewport }).promise;
         }
-      } catch {
+      } catch (cause) {
+        console.error("PDF preview failed", cause);
         if (!cancelled) setError(true);
       }
     };
