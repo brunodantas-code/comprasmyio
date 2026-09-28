@@ -764,4 +764,4 @@
 - [x] Site Survey — cadastrar premissas de tempo e calcular estimativa, horas extras, período noturno, dias e técnicos necessários.
 - [x] Site Survey — pausar e retomar Loja/LUC ou ambiente com motivo obrigatório, cadastro administrável e horas úteis separadas em Pausas.
 
-- [ ] Supply — em Meus com Supply, consolidar Approvals em que o usuário é solicitante ou destinatário, com acesso seguro aos respectivos pedidos.
+- [x] Supply — em Meus com Supply, consolidar Approvals em que o usuário é solicitante ou destinatário, com acesso seguro aos respectivos pedidos.
