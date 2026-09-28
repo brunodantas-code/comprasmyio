@@ -93,6 +93,7 @@ type Order = {
   tool_asset_id?: string | null;
   quantity: number;
   recipient: string;
+  recipient_user_id?: string | null;
   requester_notes: string | null;
   delivery_point: string;
   status: "pendente" | "comprado_aguardando" | "entregue" | "cancelado" | "recebido_ok" | "recebido_problema";
@@ -440,7 +441,7 @@ function Dashboard() {
   const fabricaOnly = me.isFabrica && !isAdmin;
   const estoquistaOnly = me.isEstoquista && !isAdmin && !me.isFabrica;
   const canSeeStock = me.canAccess("armazem");
-  const canSeeQueue = me.canAccess("approvals");
+  const canSeeQueue = true;
   const canImport = me.isComprador || isAdmin;
   const requestTabs = [
     { value: "mine", allowed: me.canAccess("solicitacoes_minhas") },
@@ -469,7 +470,7 @@ function Dashboard() {
   const approvalTabs = [
     { value: "mine", label: "Aguardando minha aprovação", allowed: me.canAccess("approvals_pendentes") },
     { value: "flow", label: "Meus em aprovação", allowed: me.canAccess("approvals_meus") },
-    { value: "mine-supply", label: "Meus com Supply", allowed: me.canAccess("approvals_meus") },
+    { value: "mine-supply", label: "Meus com Supply", allowed: true },
     { value: "supply", label: "Fila do Supply", allowed: isAdmin || me.isComprador },
     { value: "all", label: "Todos", allowed: me.canAccess("approvals_todos") },
     { value: "roles", label: "Consolidado por Cargo", allowed: me.canAccess("approvals_consolidado") },
@@ -1191,6 +1192,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
 
 
   const [recipient, setRecipient] = useState("");
+  const [recipientUserId, setRecipientUserId] = useState<string | null>(null);
   const { data: profiles } = useProfilesList();
   const { data: jobTitles } = useJobTitles();
   const { data: purchasables } = usePurchasableItems();
@@ -1246,6 +1248,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
     setNewItemName("");
     setNewItemDest("");
     setRecipient("");
+    setRecipientUserId(null);
     setCostCenterId("");
     setRhCargo("");
     setRhGestor("");
@@ -1335,6 +1338,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
           quantity: groupedItems ? groupedItems.reduce((sum, row) => sum + Number(row.quantity), 0) : buyQty,
           estimated_value: groupedItems ? Number(groupedItems.reduce((sum, row) => sum + Number(row.estimatedValue || 0) * Number(row.quantity), 0).toFixed(2)) : Number((values.estimated_value * buyQty).toFixed(2)),
           recipient: values.recipient,
+          recipient_user_id: requestModel === "materiais" ? recipientUserId : null,
           requester_notes: values.requester_notes ?? null,
           delivery_point: values.delivery_point ?? null,
           deadline_type: values.deadline_type,
@@ -1361,7 +1365,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
             order_id: data.id,
             position,
             item_name: row.item?.description || row.item?.name || "Material",
-            item_link: row.itemLink || row.item?.link || null,
+            item_link: row.itemLink.trim() || null,
             quantity: Number(row.quantity),
             estimated_unit_value: canManageProducts ? Number(row.estimatedValue || 0) : 0,
             material_id: row.item?.material_id ?? null,
@@ -1455,6 +1459,8 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
       if (!materialItems.length || materialItems.some((row) => !row.item || !(Number(row.quantity) > 0))) {
         return toast.error("Selecione cada material e informe uma quantidade válida.");
       }
+      const invalidLink = materialItems.findIndex((row) => row.itemLink.trim() && !/^https?:\/\//i.test(row.itemLink.trim()));
+      if (invalidLink !== -1) return toast.error(`Material ${invalidLink + 1}: informe um link válido iniciado por https:// ou http://.`);
       const selectedKeys = materialItems.map((row) => row.item?.key);
       if (new Set(selectedKeys).size !== selectedKeys.length) return toast.error("O mesmo material não pode ser incluído duas vezes.");
     } else if (isNewItem) {
@@ -1483,7 +1489,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
         : isRh
         ? `Contratação de RH — ${rhCargo}`
         : (!isMateriais || isNewItem ? newItemName : materialItems.map((row) => row.item?.description || row.item?.name).join("; ")),
-      item_link: isReembolso || isRh || isPagamento || (isMateriais && !canManageProducts) ? undefined : (itemLink || undefined),
+      item_link: isReembolso || isRh || isPagamento || (isMateriais && !isNewItem) ? undefined : (itemLink || undefined),
       quantity: isReembolso || isRh || isPagamento ? 1 : isMateriais && !isNewItem ? materialItems.reduce((sum, row) => sum + Number(row.quantity || 0), 0) : (Number(qty) || 1),
       estimated_value: isReembolso ? reembolsoTotal : isRh ? Number(rhRemuneracao || 0) : isPagamento ? Number(paymentValue) : isMateriais && !isNewItem ? materialItems.reduce((sum, row) => sum + Number(row.estimatedValue || 0) * Number(row.quantity || 0), 0) : (isMateriais && !canManageProducts ? 0 : (Number(estimatedValue) || 0)),
       recipient: isRh ? rhGestor : isPagamento ? "Financeiro" : recipient,
@@ -2019,7 +2025,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                       </div>
                       <div className="space-y-3">
                         {materialItems.map((row, index) => (
-                          <div key={row.id} className="grid items-end gap-3 rounded-md border p-3 sm:grid-cols-[minmax(0,1fr)_6rem_2rem]">
+                           <div key={row.id} className="grid items-end gap-3 rounded-md border p-3 sm:grid-cols-[minmax(0,1fr)_6rem_2rem]">
                             <div className="space-y-2">
                               <Label>Material {index + 1}</Label>
                               <PurchasableItemPicker
@@ -2048,6 +2054,10 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                               onConfirm={() => setMaterialItems((current) => current.filter((entry) => entry.id !== row.id))}
                               trigger={<Button type="button" size="compactIcon" variant="outline" aria-label={`Remover material ${index + 1}`} title="Remover material" disabled={materialItems.length === 1}><Trash2 className="h-4 w-4" /></Button>}
                             />
+                             <div className="min-w-0 space-y-2 sm:col-span-3">
+                               <Label htmlFor={`material-link-${row.id}`}>Link de referência <span className="text-muted-foreground">(opcional)</span></Label>
+                               <Input id={`material-link-${row.id}`} type="url" placeholder="https://..." value={row.itemLink} onChange={(event) => setMaterialItems((current) => current.map((entry) => entry.id === row.id ? { ...entry, itemLink: event.target.value } : entry))} />
+                             </div>
                           </div>
                         ))}
                         <Button type="button" size="compactIcon" variant="outline" aria-label="Adicionar material" title="Adicionar material" onClick={() => setMaterialItems((current) => [...current, emptyMaterialItem()])}>
@@ -2168,11 +2178,15 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
             {requestModel === "materiais" && (
               <div className="space-y-2">
                 <Label>Destinatário</Label>
-                <Select value={recipient} onValueChange={setRecipient}>
+                <Select value={recipientUserId ?? ""} onValueChange={(id) => {
+                  const selected = profiles?.find((profile) => profile.id === id);
+                  setRecipientUserId(selected?.id ?? null);
+                  setRecipient(selected?.full_name || selected?.email || "");
+                }}>
                   <SelectTrigger><SelectValue placeholder="Selecione o usuário" /></SelectTrigger>
                   <SelectContent>
                     {(profiles ?? []).map((p) => (
-                      <SelectItem key={p.id} value={p.full_name || p.email || p.id}>
+                      <SelectItem key={p.id} value={p.id}>
                         {p.full_name || p.email || p.id}
                       </SelectItem>
                     ))}
@@ -2180,7 +2194,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                 </Select>
               </div>
             )}
-            {requestModel !== "reembolso" && requestModel !== "rh" && requestModel !== "pagamento" && (!isMaterialsRequest || canManageProducts) && (
+            {requestModel !== "reembolso" && requestModel !== "rh" && requestModel !== "pagamento" && (!isMaterialsRequest || isNewItem) && (
             <div className="space-y-2">
               <Label htmlFor="item_link">
                 Link de Referência <span className="text-muted-foreground">(opcional)</span>
@@ -2448,7 +2462,7 @@ function BuyerQueue({ mode = "all" }: { mode?: ApprovalListMode }) {
   const filtered = (orders ?? []).filter((order) => {
     if (mode === "all") return true;
     if (order.approval_status !== "aprovado") return false;
-    if (mode === "mine-supply" && order.requester_id !== me?.id) return false;
+    if (mode === "mine-supply" && order.requester_id !== me?.id && order.recipient_user_id !== me?.id) return false;
     return ["pendente", "comprado_aguardando", "recebido_problema"].includes(order.status);
   });
   const projectName = (id: string) => (id === ESTOQUE_PROJECT_ID ? "Estoque" : projects?.find((p) => p.id === id)?.name ?? "—");
@@ -2490,7 +2504,7 @@ function BuyerQueue({ mode = "all" }: { mode?: ApprovalListMode }) {
             {mode === "supply"
               ? "Pedidos aprovados que aguardam atuação do Time de Supply."
               : mode === "mine-supply"
-                ? "Seus pedidos aprovados que estão em execução pelo Time de Supply."
+                ? "Pedidos aprovados solicitados por você ou destinados a você, em execução pelo Time de Supply."
                 : canManageOperationalStatus ? "Consulte e atualize o andamento das solicitações." : "Acompanhe o status e o andamento de cada solicitação."}
           </CardDescription>
         </div>
@@ -2544,10 +2558,10 @@ function ApprovalsCenter({ value, onValueChange }: { value?: string; onValueChan
     },
   });
   return (
-    <Tabs value={value ?? (canSeeSupplyQueue ? "supply" : canSeeMine ? "mine" : canSeeFlow ? "flow" : canSeeAllPermission ? "all" : "roles")} onValueChange={onValueChange}>
+    <Tabs value={value ?? (canSeeSupplyQueue ? "supply" : canSeeMine ? "mine" : canSeeFlow ? "flow" : "mine-supply")} onValueChange={onValueChange}>
       {canSeeMine && <TabsContent value="mine"><PendingForMe renderEditAction={renderAdminEdit} /></TabsContent>}
       {canSeeFlow && <TabsContent value="flow"><MyApprovalFlows renderEditAction={renderAdminEdit} /></TabsContent>}
-      {canSeeFlow && <TabsContent value="mine-supply"><BuyerQueue mode="mine-supply" /></TabsContent>}
+      <TabsContent value="mine-supply"><BuyerQueue mode="mine-supply" /></TabsContent>
       {canSeeSupplyQueue && <TabsContent value="supply"><BuyerQueue mode="supply" /></TabsContent>}
       {canSeeAllPermission && <TabsContent value="all"><BuyerQueue /></TabsContent>}
       {canSeeRolesPermission && <TabsContent value="roles"><PendingApprovalsByRole renderEditAction={renderAdminEdit} /></TabsContent>}
@@ -2757,7 +2771,7 @@ function OrdersTable({
                <Row label="Approval">
                  <div className="inline-flex max-w-full flex-col items-start font-mono font-bold">
                     <div className="flex max-w-full items-center gap-1.5">
-                      <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} />
+                      <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} items={groupedOrderItems?.get(o.id)} />
                      {me?.isAdmin && <AdminEditApprovalDialog order={o} items={(groupedOrderItems?.get(o.id) ?? []) as ApprovalEditItem[]} />}
                      {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
                      {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
@@ -2777,8 +2791,8 @@ function OrdersTable({
               </Row>
               <Row label="Itens da Solicitação">
                 {(groupedOrderItems?.get(o.id) ?? []).length ? (
-                  <ul className="space-y-1">{groupedOrderItems?.get(o.id)?.map((row) => <li key={row.id} className="text-sm"><span className="font-medium">{row.item_name}</span> <span className="text-xs text-muted-foreground">× {row.quantity}</span></li>)}</ul>
-                ) : <span className="text-sm break-words">{o.item_name || "—"}</span>}
+                   <ul className="space-y-1">{groupedOrderItems?.get(o.id)?.map((row) => <li key={row.id} className="text-sm"><span className="font-medium">{row.item_name}</span> <span className="text-xs text-muted-foreground">× {row.quantity}</span>{/^https?:\/\//i.test(row.item_link ?? "") && <a href={row.item_link ?? ""} target="_blank" rel="noopener noreferrer" className="flex w-fit items-center gap-1 text-primary hover:underline">Abrir link <ExternalLink className="h-3 w-3" /></a>}</li>)}</ul>
+                 ) : <span className="text-sm break-words">{o.item_name || "—"}{/^https?:\/\//i.test(o.item_link ?? "") && <a href={o.item_link ?? ""} target="_blank" rel="noopener noreferrer" className="flex w-fit items-center gap-1 text-primary hover:underline">Abrir link <ExternalLink className="h-3 w-3" /></a>}</span>}
               </Row>
               <Row label="Tipo">
                 <div className="font-medium">{requestTypeLabel(o, requestTypes)}</div>
@@ -2898,7 +2912,7 @@ function OrdersTable({
                <TableCell className="font-mono text-xs text-left">
                   <div className="inline-flex max-w-full flex-col items-start">
                     <div className="flex max-w-full items-center gap-1.5">
-                      <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} />
+                      <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} items={groupedOrderItems?.get(o.id)} />
                      {me?.isAdmin && <AdminEditApprovalDialog order={o} items={(groupedOrderItems?.get(o.id) ?? []) as ApprovalEditItem[]} />}
                      {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
                      {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
@@ -2918,8 +2932,8 @@ function OrdersTable({
               </TableCell>
               <TableCell>
                 {(groupedOrderItems?.get(o.id) ?? []).length ? (
-                  <ul className="space-y-1">{groupedOrderItems?.get(o.id)?.map((row) => <li key={row.id} className="text-sm break-words"><span className="font-medium">{row.item_name}</span> <span className="text-xs text-muted-foreground">× {row.quantity}</span></li>)}</ul>
-                ) : <span className="text-sm break-words">{o.item_name || "—"}</span>}
+                   <ul className="space-y-1">{groupedOrderItems?.get(o.id)?.map((row) => <li key={row.id} className="text-sm break-words"><span className="font-medium">{row.item_name}</span> <span className="text-xs text-muted-foreground">× {row.quantity}</span>{/^https?:\/\//i.test(row.item_link ?? "") && <a href={row.item_link ?? ""} target="_blank" rel="noopener noreferrer" className="flex w-fit items-center gap-1 text-primary hover:underline">Abrir link <ExternalLink className="h-3 w-3" /></a>}</li>)}</ul>
+                 ) : <span className="text-sm break-words">{o.item_name || "—"}{/^https?:\/\//i.test(o.item_link ?? "") && <a href={o.item_link ?? ""} target="_blank" rel="noopener noreferrer" className="flex w-fit items-center gap-1 text-primary hover:underline">Abrir link <ExternalLink className="h-3 w-3" /></a>}</span>}
               </TableCell>
               <TableCell className="text-center">
                 <div className="line-clamp-4 font-medium break-words">{requestTypeLabel(o, requestTypes)}</div>
@@ -3055,11 +3069,12 @@ function fmtDateTime(v?: string | null) {
 }
 
 function OrderReportDialog({
-  order, projectName, requesterName,
+  order, projectName, requesterName, items = [],
 }: {
   order: Order;
   projectName: (id: string) => string;
   requesterName?: (id: string) => string;
+  items?: PurchaseOrderItem[];
 }) {
   const [open, setOpen] = useState(false);
   const { data: requestTypes } = useRequestTypes();
@@ -3173,9 +3188,7 @@ function OrderReportDialog({
               <Row key={related.id} label={`Criação — ${requestTypeLabel(related, requestTypes)}`} value={fmtDateTime(related.created_at)} />
             ))}
             <Row label="Última atualização" value={fmtDateTime(order.updated_at)} />
-            {order.item_link && (
-              <Row label="Link do item" value={<a href={order.item_link} target="_blank" rel="noreferrer" className="text-primary hover:underline">Abrir link</a>} />
-            )}
+            {items.length ? items.filter((item) => /^https?:\/\//i.test(item.item_link ?? "")).map((item) => <Row key={item.id} label={`Link — ${item.item_name}`} value={<a href={item.item_link ?? ""} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Abrir link</a>} />) : /^https?:\/\//i.test(order.item_link ?? "") && <Row label="Link do item" value={<a href={order.item_link ?? ""} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Abrir link</a>} />}
             {order.budget_exceeded && <Row label="Alerta de orçamento" value={<span className="font-semibold text-destructive">Orçamento excedido</span>} />}
             {order.budget_snapshot != null && <Row label="Orçamento do projeto" value={formatBRL(order.budget_snapshot)} />}
             {order.committed_before_snapshot != null && <Row label="Solicitado antes deste Approval" value={formatBRL(order.committed_before_snapshot)} />}

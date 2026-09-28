@@ -3076,6 +3076,7 @@ export type Database = {
           projected_committed_snapshot: number | null
           quantity: number
           recipient: string
+          recipient_user_id: string | null
           request_group_id: string | null
           request_model: string
           request_type: string
@@ -3123,6 +3124,7 @@ export type Database = {
           projected_committed_snapshot?: number | null
           quantity?: number
           recipient?: string
+          recipient_user_id?: string | null
           request_group_id?: string | null
           request_model?: string
           request_type?: string
@@ -3170,6 +3172,7 @@ export type Database = {
           projected_committed_snapshot?: number | null
           quantity?: number
           recipient?: string
+          recipient_user_id?: string | null
           request_group_id?: string | null
           request_model?: string
           request_type?: string

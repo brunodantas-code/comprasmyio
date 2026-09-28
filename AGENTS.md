@@ -8,3 +8,6 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Supply orders store `recipient_user_id` separately from the display name, resolved against a unique profile identity; RLS grants recipient reads so renamed accounts and shared names do not expose unrelated orders.
+- The “Meus com Supply” list unions requester and recipient order IDs on the client after RLS, without duplicating orders; approver and buyer actions remain permission-gated.
