@@ -339,6 +339,10 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
   const [pointPickerOpen, setPointPickerOpen] = useState(false);
   const [openSectionId, setOpenSectionId] = useState<string | null>(null);
   const facadeScrollPosition = useRef<number | null>(null);
+  const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const autosaveRunning = useRef(false);
+  const autosaveQueued = useRef(false);
+  const autosaveTask = useRef<(() => Promise<void>) | null>(null);
   const [approvedActionKeys, setApprovedActionKeys] = useState<Set<string>>(() => new Set());
   const [declinedActionKeys, setDeclinedActionKeys] = useState<Set<string>>(() => new Set());
   const [pendingAction, setPendingAction] = useState<{ key: string; actionName: string } | null>(null);
@@ -374,6 +378,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
   const scopedMaterialDecision = (detail?.materialDecisions ?? []).find(matchesPoint);
   const scopedTechnicians = (detail?.technicians ?? []).filter((item) => !item.visit_luc_id && !item.visit_environment_id);
   useEffect(() => { setOpenSectionId(null); }, [visit?.id]);
+  useEffect(() => () => { if (autosaveTimer.current) clearTimeout(autosaveTimer.current); }, []);
   useEffect(() => { setMaterialRows(scopedMaterials.map((item) => ({ catalog_item_id: item.catalog_item_id, quantity: String(item.quantity), notes: item.notes ?? "", screwdriver_type_id: item.screwdriver_type_id ?? "none", wrench_size_id: item.wrench_size_id ?? "none" }))); }, [selectedPoint, detail?.visitMaterials]);
   useEffect(() => { setNoAdditionalMaterial(Boolean(scopedMaterialDecision?.no_additional_material)); }, [selectedPoint, detail?.materialDecisions]);
   useEffect(() => { setSpecialEquipmentAnswer(""); }, [selectedPoint]);
@@ -477,7 +482,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
     }
     return pending;
   };
-  const saveAnswers = async (form: HTMLFormElement, phase: "pre_visit" | "point", finishPoint = false, acceptedPendingFields: string[] = []) => {
+  const saveAnswers = async (form: HTMLFormElement, phase: "pre_visit" | "point", finishPoint = false, acceptedPendingFields: string[] = [], automatic = false) => {
     if (phase === "point" && !pointId) throw new Error("Selecione a loja ou ambiente deste checklist.");
     if (phase === "point" && finishPoint && currentPause) throw new Error("Retome a visita antes de concluí-la.");
     if (phase === "point" && finishPoint && !facadeAttachment) throw new Error("Adicione a foto da fachada antes de concluir esta visita.");
@@ -505,6 +510,8 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
         const { error: uploadError } = await supabase.storage.from("site-survey-attachments").upload(path, photo); if (uploadError) throw uploadError;
         const attachmentScope = isGeneralQuestion ? { visit_luc_id: null, visit_environment_id: null } : scope;
         const { error } = await supabase.from("site_survey_attachments").insert({ visit_id: visit.id, ...attachmentScope, question_id: question.id, attachment_kind: "question", uploaded_by: data.userId, file_name: photo.name, storage_path: path, content_type: photo.type, file_size: photo.size }); if (error) throw error;
+         const photoInput = form.elements.namedItem(`${question.id}__photo`);
+         if (photoInput instanceof HTMLInputElement) photoInput.value = "";
       }
     }
     const existingResponses = (detail?.responses ?? []).filter((response) => phase === "pre_visit"
@@ -550,15 +557,15 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
       const { error: clearTechniciansError } = await supabase.from("site_survey_visit_technicians").delete().eq("visit_id", visit.id).is("visit_luc_id", null).is("visit_environment_id", null); if (clearTechniciansError) throw clearTechniciansError;
        const techniciansToSave = visitTechnicians.filter((item) => item.technician_id && phonePattern.test(item.mobile_phone.trim()));
        if (techniciansToSave.length) { const { error: techniciansError } = await supabase.from("site_survey_visit_technicians").insert(techniciansToSave.map((item) => ({ visit_id: visit.id, visit_luc_id: null, visit_environment_id: null, technician_id: item.technician_id, mobile_phone: item.mobile_phone.trim(), recorded_by: data.userId }))); if (techniciansError) throw techniciansError; }
-       toast.success("Progresso do checklist pré-visita salvo");
-      setOpenSectionId(null);
+        if (!automatic) { toast.success("Progresso do checklist pré-visita salvo"); setOpenSectionId(null); }
     } else {
        const validMaterialRows = materialRows.filter((item) => item.catalog_item_id && Number.isFinite(Number(item.quantity)) && Number(item.quantity) > 0);
       let materialDelete = supabase.from("site_survey_visit_materials").delete().eq("visit_id", visit.id); materialDelete = pointKind === "luc" ? materialDelete.eq("visit_luc_id", pointId) : materialDelete.eq("visit_environment_id", pointId); const { error: clearError } = await materialDelete; if (clearError) throw clearError;
        if (validMaterialRows.length) { const { error: materialError } = await supabase.from("site_survey_visit_materials").insert(validMaterialRows.map((item) => ({ visit_id: visit.id, ...scope, catalog_item_id: item.catalog_item_id, quantity: Number(item.quantity), notes: item.notes.trim() || null, screwdriver_type_id: item.screwdriver_type_id === "none" ? null : item.screwdriver_type_id, wrench_size_id: item.wrench_size_id === "none" ? null : item.wrench_size_id, recorded_by: data.userId }))); if (materialError) throw materialError; }
       let decisionDelete = supabase.from("site_survey_material_decisions").delete().eq("visit_id", visit.id); decisionDelete = pointKind === "luc" ? decisionDelete.eq("visit_luc_id", pointId) : decisionDelete.eq("visit_environment_id", pointId); const { error: decisionClearError } = await decisionDelete; if (decisionClearError) throw decisionClearError;
        const { error: decisionError } = await supabase.from("site_survey_material_decisions").insert({ visit_id: visit.id, ...scope, no_additional_material: !needsSpecialEquipment || noAdditionalMaterial, recorded_by: data.userId }); if (decisionError) throw decisionError;
-       for (const file of files) { const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "-"); const path = `${visit.id}/${pointId}/${crypto.randomUUID()}-${safe}`; const { error: uploadError } = await supabase.storage.from("site-survey-attachments").upload(path, file); if (uploadError) throw uploadError; const { error } = await supabase.from("site_survey_attachments").insert({ visit_id: visit.id, ...scope, attachment_kind: "general", uploaded_by: data.userId, file_name: file.name, storage_path: path, content_type: file.type, file_size: file.size }); if (error) throw error; }
+        for (const file of files) { const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "-"); const path = `${visit.id}/${pointId}/${crypto.randomUUID()}-${safe}`; const { error: uploadError } = await supabase.storage.from("site-survey-attachments").upload(path, file); if (uploadError) throw uploadError; const { error } = await supabase.from("site_survey_attachments").insert({ visit_id: visit.id, ...scope, attachment_kind: "general", uploaded_by: data.userId, file_name: file.name, storage_path: path, content_type: file.type, file_size: file.size }); if (error) throw error; }
+        if (files.length) { setFiles([]); const filesInput = form.elements.namedItem("survey-files"); if (filesInput instanceof HTMLInputElement) filesInput.value = ""; }
        const activeSection = pointSections.find((section) => section.id === openSectionId);
        const activeSectionPending = activeSection ? pointPendingFields(form, new Set([activeSection.id])) : [];
         const previousOtherSectionPending = activeSection
@@ -580,13 +587,44 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
          toast.success("Todas as lojas foram concluídas. A visita foi enviada para revisão.");
          onChanged();
        } else {
-         toast.success(finishPoint ? "Visita desta loja concluída" : pendingFields.length ? "Progresso salvo com pendências registradas" : "Progresso salvo");
+          if (!automatic) toast.success(finishPoint ? "Visita desta loja concluída" : pendingFields.length ? "Progresso salvo com pendências registradas" : "Progresso salvo");
        }
-        setFiles([]); setOpenSectionId(null);
+         if (!automatic) { setFiles([]); setOpenSectionId(null); }
         if (finishPoint) { setSelectedPoint(""); setPointFilter(""); }
     }
     await refetchDetail();
   };
+   const runAutosave = async () => {
+     if (autosaveRunning.current) { autosaveQueued.current = true; return; }
+     autosaveRunning.current = true;
+     try {
+       do {
+         autosaveQueued.current = false;
+         await autosaveTask.current?.();
+       } while (autosaveQueued.current);
+     } catch (error) {
+       toast.error(error instanceof Error ? `Não foi possível salvar automaticamente: ${error.message}` : "Não foi possível salvar automaticamente.");
+     } finally { autosaveRunning.current = false; }
+   };
+   const scheduleAutosave = (form: HTMLFormElement, phase: "pre_visit" | "point", immediate = false) => {
+     autosaveTask.current = () => saveAnswers(form, phase, false, [], true);
+     if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
+     autosaveTimer.current = setTimeout(() => { void runAutosave(); }, immediate ? 0 : 800);
+   };
+   const toggleChecklistSection = (sectionId: string, event: React.MouseEvent<HTMLButtonElement>, phase: "pre_visit" | "point") => {
+     const form = event.currentTarget.closest("form");
+     if (form && openSectionId) scheduleAutosave(form, phase, true);
+     setOpenSectionId((current) => current === sectionId ? null : sectionId);
+     if (window.matchMedia("(max-width: 767px)").matches) {
+       requestAnimationFrame(() => requestAnimationFrame(() => {
+         const heading = document.getElementById(`survey-section-${sectionId}`);
+         if (heading && heading.querySelector("button[aria-expanded=true]")) {
+           const headerHeight = document.querySelector("header.sticky")?.getBoundingClientRect().height ?? 0;
+           window.scrollTo({ top: window.scrollY + heading.getBoundingClientRect().top - headerHeight - 12, behavior: "instant" });
+         }
+       }));
+     }
+   };
   const answers = new Map((detail?.responses ?? []).filter((response) => generalQuestionIds.has(response.question_id) ? !response.visit_luc_id && !response.visit_environment_id : matchesPoint(response)).map((response) => [response.question_id, response.answer]));
   const specialEquipmentQuestion = questions.find(isSpecialEquipmentQuestion);
   const storedSpecialEquipmentAnswer = specialEquipmentQuestion ? answerParts(answers.get(specialEquipmentQuestion.id)).value : undefined;
@@ -636,8 +674,8 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
   const pointCalls = new Map(generatedCallsForScope("point").map((item) => [item.question_id, { id: item.internal_call_id, number: item.internal_calls?.call_number ?? null }]));
   const phaseForm = (
     <div className="space-y-5">
-    <form onSubmit={(event) => { event.preventDefault(); void saveAnswers(event.currentTarget, "pre_visit").catch((error: unknown) => toast.error(error instanceof Error ? error.message : "Não foi possível salvar o checklist pré-visita.")); }} className="space-y-5">
-      {generalSections.map((section, index) => <ChecklistSection key={section.id} section={section} order={index + 1} open={openSectionId === section.id} pendingCount={sectionVisiblePendingCount(section, true)} onToggle={() => setOpenSectionId((current) => current === section.id ? null : section.id)}><ConditionalSectionQuestions sectionTitle={section.title} questions={questions.filter((question) => question.section_id === section.id)} answers={answers} attachments={detail?.attachments ?? []} userId={data.userId} canDelete={canManageAttachments} canEditAttachments={canEditAttachments} onAttachmentsChanged={() => void refetchDetail()} matchesPoint={(item) => !item.visit_luc_id && !item.visit_environment_id} selectedPoint="general" pendingFields={[]} calls={generalCalls} onQuestionAnswerChange={(question, value) => handleQuestionAnswerChange(question, value, "pre_visit")} technicians={data.technicians} visitTechnicians={visitTechnicians} onTechniciansChange={setVisitTechnicians} /></ChecklistSection>)}
+     <form onChangeCapture={(event) => scheduleAutosave(event.currentTarget, "pre_visit", (event.target as HTMLInputElement).type === "file")} onBlurCapture={(event) => { if (["text", "number", "textarea"].includes((event.target as HTMLInputElement).type) || event.target instanceof HTMLTextAreaElement) scheduleAutosave(event.currentTarget, "pre_visit", true); }} onSubmit={(event) => { event.preventDefault(); void saveAnswers(event.currentTarget, "pre_visit").catch((error: unknown) => toast.error(error instanceof Error ? error.message : "Não foi possível salvar o checklist pré-visita.")); }} className="space-y-5">
+       {generalSections.map((section, index) => <div id={`survey-section-${section.id}`} key={section.id}><ChecklistSection section={section} order={index + 1} open={openSectionId === section.id} pendingCount={sectionVisiblePendingCount(section, true)} onToggle={() => toggleChecklistSection(section.id, event as never, "pre_visit")}><ConditionalSectionQuestions sectionTitle={section.title} questions={questions.filter((question) => question.section_id === section.id)} answers={answers} attachments={detail?.attachments ?? []} userId={data.userId} canDelete={canManageAttachments} canEditAttachments={canEditAttachments} onAttachmentsChanged={() => void refetchDetail()} matchesPoint={(item) => !item.visit_luc_id && !item.visit_environment_id} selectedPoint="general" pendingFields={[]} calls={generalCalls} onQuestionAnswerChange={(question, value) => handleQuestionAnswerChange(question, value, "pre_visit")} technicians={data.technicians} visitTechnicians={visitTechnicians} onTechniciansChange={setVisitTechnicians} /></ChecklistSection></div>)}
        <div className="flex justify-end"><Button type="submit"><ClipboardCheck className="h-4 w-4" />Salvar progresso</Button></div>
     </form>
     {preVisitSaved ? (
