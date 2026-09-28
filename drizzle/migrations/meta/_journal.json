@@ -575,6 +575,13 @@
       "when": 1790628987127,
       "tag": "0081_validate_code_message_attachment_ownership",
       "breakpoints": true
+    },
+    {
+      "idx": 82,
+      "version": "7",
+      "when": 1790629725141,
+      "tag": "0082_allow_followup_questions_in_code_tickets",
+      "breakpoints": true
     }
   ]
 }
