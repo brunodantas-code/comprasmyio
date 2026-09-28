@@ -2056,6 +2056,7 @@ export type Database = {
           internal_notes: string | null
           priority: string
           reporter_id: string
+          site_survey_number: number | null
           site_survey_question_id: string | null
           site_survey_visit_environment_id: string | null
           site_survey_visit_id: string | null
@@ -2075,6 +2076,7 @@ export type Database = {
           internal_notes?: string | null
           priority?: string
           reporter_id: string
+          site_survey_number?: number | null
           site_survey_question_id?: string | null
           site_survey_visit_environment_id?: string | null
           site_survey_visit_id?: string | null
@@ -2094,6 +2096,7 @@ export type Database = {
           internal_notes?: string | null
           priority?: string
           reporter_id?: string
+          site_survey_number?: number | null
           site_survey_question_id?: string | null
           site_survey_visit_environment_id?: string | null
           site_survey_visit_id?: string | null
