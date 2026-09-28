@@ -1696,8 +1696,8 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
   return (
     <div className="space-y-4">
       {requestTypeHeader}
-      <Card className="max-w-2xl">
-        <CardContent className="pt-6">
+      <Card className={requestModel === "pagamento" ? "max-w-2xl !mt-8" : "max-w-2xl"}>
+        <CardContent className={requestModel === "pagamento" ? "!pt-8" : "pt-6"}>
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando projetos...</p>
         ) : !projects?.length ? (
