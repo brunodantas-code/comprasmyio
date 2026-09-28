@@ -611,6 +611,12 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
      if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
      autosaveTimer.current = setTimeout(() => { void runAutosave(); }, immediate ? 0 : 800);
    };
+    const scheduleSectionAutosave = (sectionId: string, phase: "pre_visit" | "point") => {
+      requestAnimationFrame(() => {
+        const form = document.getElementById(`survey-section-${sectionId}`)?.closest("form");
+        if (form) scheduleAutosave(form, phase);
+      });
+    };
    const toggleChecklistSection = (sectionId: string, event: MouseEvent<HTMLButtonElement>, phase: "pre_visit" | "point") => {
      const form = event.currentTarget.closest("form");
      if (form && openSectionId) scheduleAutosave(form, phase, true);
