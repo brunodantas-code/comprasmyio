@@ -311,4 +311,11 @@
     font-weight: 600;
     color: var(--muted-foreground);
   }
+  table[data-responsive="true"] tbody td.client-units-cell {
+    display: block;
+    width: 100% !important;
+  }
+  table[data-responsive="true"] tbody td.client-units-cell::before {
+    content: none;
+  }
 }

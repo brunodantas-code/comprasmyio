@@ -344,7 +344,7 @@ export function ClientsTab({ userId }: { userId: string }) {
                         </div>
                       </TableCell>
                     </TableRow>
-                    {hasUnits && expanded && <TableRow key={`${c.id}-units`} className="hover:bg-transparent"><TableCell colSpan={7} className="px-3 py-4 sm:px-6"><ClientUnitsList client={c} userId={userId} /></TableCell></TableRow>}
+                     {hasUnits && expanded && <TableRow key={`${c.id}-units`} className="hover:bg-transparent max-md:!border-0 max-md:!p-0"><TableCell colSpan={7} className="client-units-cell px-3 py-4 max-md:px-0 sm:px-6"><ClientUnitsList client={c} userId={userId} /></TableCell></TableRow>}
                   </Fragment>
                 );})}
               </TableBody>
@@ -398,8 +398,8 @@ function ClientUnitsList({ client, userId }: { client: Client; userId: string })
   });
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between gap-3">
+     <div className="min-w-0 space-y-3">
+       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm font-semibold">Filiais ou unidades</p>
         <UnitDialog
           title={`Nova unidade de ${client.name}`}
@@ -410,7 +410,7 @@ function ClientUnitsList({ client, userId }: { client: Client; userId: string })
         />
       </div>
       {!units?.length ? <p className="text-sm text-muted-foreground">Nenhuma unidade cadastrada.</p> : (
-        <div className="overflow-hidden rounded-md border">
+         <div className="min-w-0 overflow-hidden rounded-md border max-md:border-0">
           <Table>
             <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Categoria</TableHead><TableHead>Cidade</TableHead><TableHead>UF</TableHead><TableHead>CNPJ</TableHead><TableHead>Status</TableHead><TableHead className="w-20" /></TableRow></TableHeader>
             <TableBody>
