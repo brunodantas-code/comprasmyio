@@ -1240,22 +1240,6 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
   const [paymentDescription, setPaymentDescription] = useState("");
   const [paymentValue, setPaymentValue] = useState("0");
   const [paymentDate, setPaymentDate] = useState("");
-  const [linkedApprovalId, setLinkedApprovalId] = useState("none");
-  const { data: approvedOrders } = useQuery({
-    queryKey: ["orders", "approved-for-payment"],
-    enabled: requestModel === "pagamento",
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("purchase_orders")
-        .select("id, approval_number, item_name, request_type, travel_type, created_at")
-        .eq("approval_status", "aprovado")
-        .neq("request_model", "pagamento")
-        .is("parent_order_id", null)
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
   const [item, setItem] = useState<PurchasableItem | null>(null);
   type MaterialRequestItem = { id: string; item: PurchasableItem | null; quantity: string; estimatedValue: string; itemLink: string };
   const emptyMaterialItem = (): MaterialRequestItem => ({ id: crypto.randomUUID(), item: null, quantity: "1", estimatedValue: "0", itemLink: "" });
@@ -1353,7 +1337,6 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
     setPaymentDescription("");
     setPaymentValue("0");
     setPaymentDate("");
-    setLinkedApprovalId("none");
     setItem(null);
     setMaterialItems([emptyMaterialItem()]);
     setMaterialCategories(["todas"]);
@@ -1441,7 +1424,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
             : (allocTarget === "cliente" ? (clientId || null) : null),
           client_unit_id: allocTarget === "cliente" && clientUnitId ? clientUnitId : null,
           cost_center_id: restrictedCc ? await resolveOperacaoCostCenterId() : (costCenterId || null),
-          parent_order_id: requestModel === "pagamento" && linkedApprovalId !== "none" ? linkedApprovalId : null,
+          parent_order_id: null,
           payment_date: requestModel === "pagamento" ? paymentDate : null,
 
           item_name: values.item_name,
@@ -1673,7 +1656,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
         <p className="text-xs text-muted-foreground">Reembolso de despesas incorridas pelo solicitante.</p>
       )}
       {requestModel === "pagamento" && (
-        <p className="text-xs text-muted-foreground">Solicitação única de pagamento, com vínculo opcional a um Approval já aprovado.</p>
+        <p className="text-xs text-muted-foreground">Para pagamentos sem cotação ou compra pelo Supply. Se já existe um Approval para esta despesa, não crie outro.</p>
       )}
       {requestModel === "importacao" && (
         <p className="text-xs text-muted-foreground">Pedidos de importação e acompanhamento de embarques.</p>
@@ -1819,20 +1802,6 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
 
             {requestModel === "pagamento" && (
               <div className="rounded-md border p-3 space-y-4">
-                <div className="space-y-2">
-                  <Label>Vincular Approval aprovado <span className="text-muted-foreground">(opcional)</span></Label>
-                  <Select value={linkedApprovalId} onValueChange={setLinkedApprovalId}>
-                    <SelectTrigger><SelectValue placeholder="Sem Approval vinculado" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Sem Approval vinculado</SelectItem>
-                      {(approvedOrders ?? []).map((o) => (
-                        <SelectItem key={o.id} value={o.id}>
-                          {o.approval_number ?? "Sem número"} — {requestTypeLabel(o)} — {o.item_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
                 <div className="grid gap-4 md:grid-cols-3 items-end">
                   <div className="space-y-2">
                     <Label htmlFor="payment_description">Descrição do pagamento</Label>
