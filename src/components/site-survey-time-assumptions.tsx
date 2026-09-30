@@ -31,10 +31,11 @@ export function SiteSurveyTimeAssumptions({ items, questions, userId, onChanged 
     if (!name || !Number.isInteger(minutes) || minutes <= 0) return toast.error("Informe uma descrição e uma duração válida.");
     const answer = (options.length ? answerValue : String(values.get("answer_value") ?? "")).trim() || null;
     const payload = { name, minutes, question_id: questionId === "none" ? null : questionId, answer_value: questionId === "none" ? null : answer };
-    const { error } = editing
-      ? await supabase.from("site_survey_time_assumptions").update(payload).eq("id", editing.id)
-      : await supabase.from("site_survey_time_assumptions").insert({ ...payload, created_by: userId, position: items.length });
+    const { data: saved, error } = editing
+      ? await supabase.from("site_survey_time_assumptions").update(payload).eq("id", editing.id).select("id")
+      : await supabase.from("site_survey_time_assumptions").insert({ ...payload, created_by: userId, position: items.length }).select("id");
     if (error) return toast.error(error.message);
+    if (!saved?.length) return toast.error("Não foi possível salvar a premissa. Verifique sua permissão.");
     toast.success(editing ? "Premissa de tempo atualizada" : "Premissa de tempo adicionada");
     setDialogOpen(false); setEditing(null); setQuestionId("none"); setAnswerValue(""); onChanged();
   };
