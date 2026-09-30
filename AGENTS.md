@@ -21,3 +21,5 @@
 - Site Survey question actions update/deactivate in place to preserve call references; pending labels follow active, visible, incomplete questions.
 - Manual visits start `concluida` with historical end; checklist edits autosave without timing. Shopping points share add dialog, not storage.
 - Question photo drops/pastes populate file inputs for autosave; block outside drops to prevent navigation and lost edits.
+
+- Site Survey stores skipped section IDs per store/environment; skip affects pending/completion without deleting earlier answers, and autosave flushes before marking.
