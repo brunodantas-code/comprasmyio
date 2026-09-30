@@ -175,7 +175,7 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
     }
   }
   if (hydraulicSection?.id && skipped.has(hydraulicSection.id)) summaries.push({ title: hydraulicSection.title, parts: [{ text: "Não realizada." }], questionIds: hydraulicIds });
-  else if (hydraulic.length) summaries.push({ title: `${hydraulicSection?.title ?? "Água e Hidrômetros"} - ${meterSpecification(flowRate?.value ?? null, meterMappings)}`, parts: hydraulic, questionIds: hydraulicIds });
+  else if (hydraulic.length) summaries.push({ title: `${hydraulicSection?.title.replace(/hidrômetros/i, "Hidrômetros") ?? "Água e Hidrômetros"} - ${meterSpecification(flowRate?.value ?? null, meterMappings)}`, parts: hydraulic, questionIds: hydraulicIds });
 
   const electrical: RichPart[] = [];
   const electricalIds = new Set<string>();
