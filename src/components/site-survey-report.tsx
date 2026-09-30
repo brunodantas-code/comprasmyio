@@ -40,6 +40,7 @@ const pauseMinutes = (pauses: PointPause[], end: string | null = null) => Math.r
 const pointDuration = (point: Point, pauses: PointPause[]) => { const total = durationMinutes(point.started_at, point.completed_at); return total === null ? null : Math.max(0, total - pauseMinutes(pauses, point.completed_at)); };
 const formatMinutes = (minutes: number | null) => minutes === null ? "Incompleto" : `${Math.floor(minutes / 60)}h ${String(minutes % 60).padStart(2, "0")}min`;
 const normalize = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR");
+const interventionQuestionLabel = (prompt: string) => normalize(prompt).includes("detalhar para facilitar sua localizacao") ? "Hidrômetro" : prompt;
 const findAnswer = (responses: ReportResponse[], questions: Question[], terms: string[], sections?: Section[], sectionTerms?: string[]) => {
   const response = responses.find((item) => {
     const question = questions.find((candidate) => candidate.id === item.question_id);
@@ -319,8 +320,10 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     const linked = call.internal_calls as unknown as { call_number?: string; status?: string } | null;
     if (linked?.status === "cancelado") return [];
     const point = data?.points.find((item) => item.kind === (call.visit_luc_id ? "luc" : "environment") && item.id === (call.visit_luc_id ?? call.visit_environment_id));
-    return [{ id: call.id, questionId: call.question_id, question: questions.find((item) => item.id === call.question_id)?.prompt ?? "Pergunta não disponível", action, answer: call.trigger_value, pointKey: point ? `${point.kind}-${point.id}` : null, pointLabel: point?.label ?? "Visita geral", callNumber: linked?.call_number ?? null }];
-  }), [data?.calls, data?.points, questions]);
+    const response = data?.responses.find((item) => item.question_id === call.question_id && item.visit_luc_id === call.visit_luc_id && item.visit_environment_id === call.visit_environment_id);
+    const prompt = questions.find((item) => item.id === call.question_id)?.prompt ?? "Pergunta não disponível";
+    return [{ id: call.id, questionId: call.question_id, question: interventionQuestionLabel(prompt), action, answer: response ? valueText(response.answer).trim() || "Resposta não disponível" : "Resposta não disponível", pointKey: point ? `${point.kind}-${point.id}` : null, pointLabel: point?.label ?? "Visita geral", callNumber: linked?.call_number ?? null }];
+  }), [data?.calls, data?.points, data?.responses, questions]);
   const interventionTotals = useMemo(() => {
     const groups = new Map<string, { action: string; question: string; answer: string; items: Intervention[] }>();
     for (const item of interventions) {
