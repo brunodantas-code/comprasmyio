@@ -142,7 +142,14 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
   const consumptionLevel = hydraulicAnswer(["classificacao do perfil de consumo", "perfil de consumo classificado"]);
   const consumptionProfile = hydraulicAnswer(["perfil de consumo da loja"]);
   if (consumptionLevel) hydraulic.push({ text: "O perfil de consumo da loja é " }, { text: lower(consumptionLevel.value), bold: true }, { text: consumptionProfile ? ", contemplando " : "." });
-  if (consumptionProfile) hydraulic.push({ text: consumptionLevel ? "" : "O perfil de consumo da loja contempla " }, { text: lower(consumptionProfile.value), bold: true }, { text: "." });
+  if (consumptionProfile) {
+    const profile = lower(consumptionProfile.value);
+    if (/^(nao informado|nao informada|sem informacao|nao foi informado)$/.test(normalize(profile))) {
+      hydraulic.push({ text: "O perfil de consumo da loja não foi informado." });
+    } else {
+      hydraulic.push({ text: consumptionLevel ? "" : "O perfil de consumo da loja contempla " }, { text: profile, bold: true }, { text: "." });
+    }
+  }
   if (hydraulicSection?.id && skipped.has(hydraulicSection.id)) summaries.push({ title: hydraulicSection.title, parts: [{ text: "Não realizada." }], questionIds: hydraulicIds });
   else if (hydraulic.length) summaries.push({ title: hydraulicSection?.title ?? "Água e hidrômetros", parts: hydraulic, questionIds: hydraulicIds });
 
@@ -165,9 +172,9 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
   else if (electrical.length) summaries.push({ title: electricalSection?.title ?? "Instalação elétrica", parts: electrical, questionIds: electricalIds });
   return summaries;
 };
-const imageDataUrl = async (url: string, monochrome = false) => new Promise<string>((resolve, reject) => {
+const imageDataUrl = async (url: string, monochrome = false, cropRatio?: number) => new Promise<string>((resolve, reject) => {
   const image = new Image(); image.crossOrigin = "anonymous";
-  image.onload = () => { const canvas = document.createElement("canvas"); const scale = Math.min(1, 900 / Math.max(image.naturalWidth, image.naturalHeight)); canvas.width = Math.max(1, Math.round(image.naturalWidth * scale)); canvas.height = Math.max(1, Math.round(image.naturalHeight * scale)); const context = canvas.getContext("2d"); if (!context) return reject(new Error("Não foi possível preparar a foto.")); context.fillStyle = "#ffffff"; context.fillRect(0, 0, canvas.width, canvas.height); context.drawImage(image, 0, 0, canvas.width, canvas.height); if (monochrome) { const pixels = context.getImageData(0, 0, canvas.width, canvas.height); for (let index = 0; index < pixels.data.length; index += 4) { const isBackground = pixels.data[index] > 245 && pixels.data[index + 1] > 245 && pixels.data[index + 2] > 245; const value = isBackground ? 255 : 0; pixels.data[index] = value; pixels.data[index + 1] = value; pixels.data[index + 2] = value; } context.putImageData(pixels, 0, 0); } resolve(canvas.toDataURL("image/jpeg", 0.9)); };
+  image.onload = () => { const canvas = document.createElement("canvas"); const scale = Math.min(1, 900 / Math.max(image.naturalWidth, image.naturalHeight)); canvas.width = cropRatio ? 840 : Math.max(1, Math.round(image.naturalWidth * scale)); canvas.height = cropRatio ? Math.round(840 / cropRatio) : Math.max(1, Math.round(image.naturalHeight * scale)); const context = canvas.getContext("2d"); if (!context) return reject(new Error("Não foi possível preparar a foto.")); context.fillStyle = "#ffffff"; context.fillRect(0, 0, canvas.width, canvas.height); if (cropRatio) { const sourceWidth = Math.min(image.naturalWidth, image.naturalHeight * cropRatio); const sourceHeight = sourceWidth / cropRatio; context.drawImage(image, (image.naturalWidth - sourceWidth) / 2, (image.naturalHeight - sourceHeight) / 2, sourceWidth, sourceHeight, 0, 0, canvas.width, canvas.height); } else context.drawImage(image, 0, 0, canvas.width, canvas.height); if (monochrome) { const pixels = context.getImageData(0, 0, canvas.width, canvas.height); for (let index = 0; index < pixels.data.length; index += 4) { const isBackground = pixels.data[index] > 245 && pixels.data[index + 1] > 245 && pixels.data[index + 2] > 245; const value = isBackground ? 255 : 0; pixels.data[index] = value; pixels.data[index + 1] = value; pixels.data[index + 2] = value; } context.putImageData(pixels, 0, 0); } resolve(canvas.toDataURL("image/jpeg", 0.9)); };
   image.onerror = () => reject(new Error("Não foi possível carregar uma foto do relatório.")); image.src = url;
 });
 const fileBase64 = async (url: string) => {
@@ -402,7 +409,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
       if (calls) { if (y > 262) { pdf.addPage(); y = 18; } pdf.setFont("Nunito", "bold"); pdf.text("Ações e chamados", 14, y); y = drawRichParagraph([{ text: calls }], y + 5) + 2; }
       const photos = withPhotos ? data.attachments.filter((item) => item.content_type?.startsWith("image/") && (point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id)) : [];
       let photoColumn = 0;
-      for (const photo of photos) { const { data: signed } = await supabase.storage.from("site-survey-attachments").createSignedUrl(photo.storage_path, 300); if (!signed?.signedUrl) continue; if (photoColumn === 0 && y > 245) { pdf.addPage(); y = 18; } try { pdf.addImage(await imageDataUrl(signed.signedUrl), "JPEG", 14 + photoColumn * 46, y, 42, 31, undefined, "FAST"); photoColumn += 1; if (photoColumn === 4) { photoColumn = 0; y += 35; } } catch { /* Mantém o PDF disponível caso uma foto falhe. */ } }
+      for (const photo of photos) { const { data: signed } = await supabase.storage.from("site-survey-attachments").createSignedUrl(photo.storage_path, 300); if (!signed?.signedUrl) continue; if (photoColumn === 0 && y > 245) { pdf.addPage(); y = 18; } try { pdf.addImage(await imageDataUrl(signed.signedUrl, false, 42 / 31), "JPEG", 14 + photoColumn * 46, y, 42, 31, undefined, "FAST"); photoColumn += 1; if (photoColumn === 4) { photoColumn = 0; y += 35; } } catch { /* Mantém o PDF disponível caso uma foto falhe. */ } }
       if (photoColumn > 0) y += 35;
       y += 10;
     }
