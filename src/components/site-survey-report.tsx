@@ -144,7 +144,8 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
   if (diameter) { const size = proseValue(diameter.value); hydraulic.push({ text: `O diâmetro da tubulação de água ${isUninformed(size) || !size ? "" : "é de "}` }, { text: isUninformed(size) || !size ? "não foi informado" : size, bold: true }, { text: ". " }); }
   const nearbyPower = hydraulicAnswer(["ponto de eletrica proximo", "ponto eletrico proximo"]);
   if (nearbyPower) hydraulic.push({ text: lower(nearbyPower.value).startsWith("sim") ? "Existe ponto de elétrica próximo ao hidrômetro" : "Não existe ponto de elétrica próximo ao hidrômetro", bold: true }, { text: ". " });
-  add(hydraulic, "O encaminhamento deve ser realizado por meio de ", hydraulicAnswer(["encaminhamento da eletrica", "encaminhamento eletrico"]), ". ");
+  const routing = hydraulicAnswer(["encaminhamento da eletrica", "encaminhamento eletrico"]);
+  if (routing) add(hydraulic, "O encaminhamento deve ser realizado por meio de ", { ...routing, value: lower(routing.value) }, ". ");
   const hydraulicComplexity = hydraulicAnswer(["complexidade dessa instalacao", "complexidade da instalacao"]);
   if (hydraulicComplexity) hydraulic.push({ text: "A instalação é de complexidade " }, { text: lower(hydraulicComplexity.value), bold: true }, { text: ". " });
   const consumptionLevel = hydraulicAnswer(["classificacao do perfil de consumo", "perfil de consumo classificado"]);
