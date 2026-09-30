@@ -720,7 +720,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
  const recordedPendingFields = (Array.isArray(selectedPointRecord?.pending_fields) ? selectedPointRecord.pending_fields : []).filter((field): field is string => typeof field === "string");
  const visibleSavedPendingFields = validatedPoints.has(selectedPoint) ? pointSections.flatMap((section) => currentSectionPendingFields(section)).filter((field) => recordedPendingFields.includes(field)) : [];
  const visibleDisplayedPendingFields = (pendingPointSave?.fields ?? visibleSavedPendingFields).filter((field) => !pointSections.some((section) => skippedSectionIds.has(section.id) && field.startsWith(`${section.title}:`)));
- const sectionVisiblePendingCount = (section: Section, general: boolean) => general ? (preVisitProgressSaved && sectionHasSavedData(section, true) ? sectionPendingCount(section, true) : 0) : visibleDisplayedPendingFields.filter((field) => field.startsWith(`${section.title}:`)).length;
+  const sectionVisiblePendingCount = (section: Section, general: boolean) => general ? (preVisitProgressSaved && sectionHasSavedData(section, true) ? sectionPendingCount(section, true) : 0) : visibleDisplayedPendingFields.filter((field) => field.startsWith(`${section.title}:`)).length;
     const groupedPendingFields = pointSections.map((section, index) => ({
        label: `Etapa ${(visit.is_manual_entry ? 0 : generalSections.length) + index + 1}`,
       fields: visibleDisplayedPendingFields

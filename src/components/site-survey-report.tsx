@@ -300,7 +300,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     return { breakdown, estimated, ...workedTime, pauseCount: data?.pauses.length ?? 0, assignedCount, days, techniciansNeeded };
   }, [assumptions, data, deadlineDays, visit.technician_id]);
   const sectionsForPoint = (point: Point) => sections.filter((section) => section.template_id === point.templateId);
-  const reviewSectionForPoint = (point: Point) => sectionsForPoint(point).find((section) => section.position === 6 || normalize(section.title).includes("revisao"));
+  const reviewSectionForPoint = (point: Point) => sectionsForPoint(point).find((section) => questions.some((question) => question.section_id === section.id && normalize(question.prompt).includes("observacoes finais da visita"))) ?? sectionsForPoint(point).find((section) => section.position === 6 || normalize(section.title).includes("revisao"));
   const pointResponses = (point: Point) => (data?.responses ?? []).filter((response) => point.kind === "luc" ? response.visit_luc_id === point.id : response.visit_environment_id === point.id);
   const pausesForPoint = (point: Point) => (data?.pauses ?? []).filter((pause) => point.kind === "luc" ? pause.visit_luc_id === point.id : pause.visit_environment_id === point.id);
   const technicianForPoint = (point: Point) => {
