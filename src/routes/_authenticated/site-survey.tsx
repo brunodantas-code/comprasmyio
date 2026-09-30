@@ -573,9 +573,14 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
           const question = questions.find((item) => item.id === rule.question_id);
           const action = data.actionCatalog.find((item) => item.id === rule.action_id);
           const pointLabel = phase === "point" ? points.find((item) => item.value === selectedPoint)?.label : null;
-          const { data: internalCall, error: callError } = await supabase.from("internal_calls").insert({ category: "problema_campo", title: action?.name ?? "Ação do Site Survey", description: [`Site Survey #${String(visit.survey_number).padStart(12, "0")}`, pointLabel, question?.prompt, `Resposta: ${String(responseValue ?? "")}`].filter(Boolean).join("\n"), priority: "media", reporter_id: data.userId, source: "site_survey", site_survey_visit_id: visit.id, site_survey_question_id: rule.question_id, site_survey_visit_luc_id: phase === "point" && pointKind === "luc" ? pointId : null, site_survey_visit_environment_id: phase === "point" && pointKind === "environment" ? pointId : null }).select("id,call_number").single();
-          if (callError) throw callError;
-          const { error } = await supabase.from("site_survey_generated_calls").insert({ visit_id: visit.id, question_action_id: rule.id, question_id: rule.question_id, visit_luc_id: phase === "point" && pointKind === "luc" ? pointId : null, visit_environment_id: phase === "point" && pointKind === "environment" ? pointId : null, trigger_value: rule.trigger_value, created_by: data.userId, internal_call_id: internalCall.id }); if (error) throw error;
+          const isClientIntervention = (action?.name ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR").includes("intervencao do cliente");
+          let internalCallId: string | null = null;
+          if (!isClientIntervention) {
+            const { data: internalCall, error: callError } = await supabase.from("internal_calls").insert({ category: "problema_campo", title: action?.name ?? "Ação do Site Survey", description: [`Site Survey #${String(visit.survey_number).padStart(12, "0")}`, pointLabel, question?.prompt, `Resposta: ${String(responseValue ?? "")}`].filter(Boolean).join("\n"), priority: "media", reporter_id: data.userId, source: "site_survey", site_survey_visit_id: visit.id, site_survey_question_id: rule.question_id, site_survey_visit_luc_id: phase === "point" && pointKind === "luc" ? pointId : null, site_survey_visit_environment_id: phase === "point" && pointKind === "environment" ? pointId : null }).select("id,call_number").single();
+            if (callError) throw callError;
+            internalCallId = internalCall.id;
+          }
+          const { error } = await supabase.from("site_survey_generated_calls").insert({ visit_id: visit.id, question_action_id: rule.id, question_id: rule.question_id, visit_luc_id: phase === "point" && pointKind === "luc" ? pointId : null, visit_environment_id: phase === "point" && pointKind === "environment" ? pointId : null, trigger_value: rule.trigger_value, created_by: data.userId, internal_call_id: internalCallId }); if (error) throw error;
         }
         if (!triggered && existingCalls?.length) {
           const { error } = await supabase.from("site_survey_generated_calls").update({ status: "cancelado" }).in("id", existingCalls.map((item) => item.id)); if (error) throw error;
