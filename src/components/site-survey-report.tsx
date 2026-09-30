@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import type { TimeAssumption } from "@/components/site-survey-time-assumptions";
 import myioLogoUrl from "@/assets/myio-logo-light.svg?url";
@@ -15,17 +16,18 @@ import nunitoRegularUrl from "@/assets/fonts/nunito-regular.ttf?url";
 import nunitoBoldUrl from "@/assets/fonts/nunito-bold.ttf?url";
 import nunitoExtraBoldUrl from "@/assets/fonts/nunito-extrabold.ttf?url";
 
-type Visit = { id: string; survey_number: number; client_id: string | null; client_unit_id: string | null; project_id: string | null; technician_id: string; status: string; scheduled_start: string; scheduled_end: string | null; address: string; contact_name: string | null; contact_phone: string | null; notes: string | null; started_at: string | null; completed_at: string | null; is_manual_entry: boolean };
+type Visit = { id: string; template_id: string | null; survey_number: number; client_id: string | null; client_unit_id: string | null; project_id: string | null; technician_id: string; status: string; scheduled_start: string; scheduled_end: string | null; address: string; contact_name: string | null; contact_phone: string | null; notes: string | null; started_at: string | null; completed_at: string | null; is_manual_entry: boolean };
 type Named = { id: string; name: string };
 type Question = { id: string; section_id: string; prompt: string; position?: number };
-type Section = { id: string; title: string; position: number };
+type Section = { id: string; template_id: string; title: string; position: number };
 type Profile = { id: string; full_name: string };
-type Point = { id: string; label: string; started_at: string | null; completed_at: string | null; completion_status: string; cancellationReason: string | null; kind: "luc" | "environment" };
+type Point = { id: string; label: string; created_at: string; started_at: string | null; completed_at: string | null; completion_status: string; cancellationReason: string | null; kind: "luc" | "environment"; skippedSectionIds: string[] };
 type PointPause = { id: string; visit_luc_id: string | null; visit_environment_id: string | null; reason_id: string; started_at: string; ended_at: string | null; site_survey_pause_reasons: { name: string } | null };
 type ReportResponse = { id: string; question_id: string; answer: unknown };
 type RichPart = { text: string; bold?: boolean };
 type PointSummary = { title: string; parts: RichPart[]; questionIds: Set<string> };
 type VisitMaterial = { id: string; visit_luc_id: string | null; visit_environment_id: string | null; quantity: number; notes: string | null; site_survey_material_catalog: { name?: string } | null; site_survey_screwdriver_types: { name?: string } | null; site_survey_wrench_sizes: { name?: string } | null };
+type SortKey = "type" | "created" | "technician";
 
 const valueText = (answer: unknown): string => {
   if (answer && typeof answer === "object" && !Array.isArray(answer) && "value" in answer) { const item = answer as { value: unknown; detail?: unknown }; return [valueText(item.value), typeof item.detail === "string" ? item.detail : ""].filter(Boolean).join(" — "); }
@@ -45,17 +47,19 @@ const findAnswer = (responses: ReportResponse[], questions: Question[], terms: s
   });
   return response ? { id: response.question_id, value: valueText(response.answer).trim() } : null;
 };
-const buildPointSummaries = (responses: ReportResponse[], questions: Question[], sections: Section[]): PointSummary[] => {
+const buildPointSummaries = (responses: ReportResponse[], questions: Question[], sections: Section[], skippedSectionIds: string[]): PointSummary[] => {
   const summaries: PointSummary[] = [];
+  const skipped = new Set(skippedSectionIds);
   const hydraulicSections = ["agua", "hidrometro", "hidraulica"];
   const electricalSections = ["eletrica", "eletrico"];
-  const get = (terms: string[], sectionTerms?: string[]) => findAnswer(responses, questions, terms, sections, sectionTerms);
+  const activeResponses = responses.filter((response) => !skipped.has(questions.find((question) => question.id === response.question_id)?.section_id ?? ""));
+  const get = (terms: string[], sectionTerms?: string[]) => findAnswer(activeResponses, questions, terms, sections, sectionTerms);
   const questionOrder = (questionId: string) => {
     const question = questions.find((item) => item.id === questionId);
     const section = sections.find((item) => item.id === question?.section_id);
     return (section?.position ?? 0) * 10000 + (question?.position ?? 0);
   };
-  const getAll = (terms: string[], sectionTerms?: string[]) => responses
+  const getAll = (terms: string[], sectionTerms?: string[]) => activeResponses
     .filter((response) => {
       const question = questions.find((item) => item.id === response.question_id);
       const prompt = normalize(question?.prompt ?? "");
@@ -81,10 +85,13 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
     return true;
   };
 
+  const sectionFor = (terms: string[]) => sections.find((section) => section.position >= 3 && terms.some((term) => normalize(section.title).includes(term)));
+  const hydraulicSection = sectionFor(hydraulicSections);
+  const electricalSection = sectionFor(electricalSections);
   const hydraulic: RichPart[] = [];
   const hydraulicIds = new Set<string>();
   const hydraulicAnswer = (terms: string[]) => {
-    const answer = get(terms, hydraulicSections) ?? get(terms);
+    const answer = get(terms, hydraulicSections);
     if (answer) hydraulicIds.add(answer.id);
     return answer;
   };
@@ -113,11 +120,9 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
   if (pulse) {
     const pulseStatus = statusOnly(pulse.value);
     const pulseWorks = /^(sim|operante|funcional|funcionando)/.test(pulseStatus);
-    hydraulic.push(
-      { text: pulseWorks ? "Possui saída pulsada " : "A saída pulsada encontra-se " },
-      { text: pulseWorks ? "funcional" : pulseStatus, bold: true },
-      { text: flowRate ? " e a vazão nominal é de " : ". " },
-    );
+    const pulseUnavailable = normalize(pulseStatus).includes("inoperante") || normalize(pulseStatus) === "nao";
+    if (pulseUnavailable) hydraulic.push({ text: "Não existe saída pulsada ou encontra-se inoperante", bold: true }, { text: flowRate ? " e a vazão nominal é de " : ". " });
+    else hydraulic.push({ text: pulseWorks ? "Possui saída pulsada " : "A saída pulsada encontra-se " }, { text: pulseWorks ? "funcional" : pulseStatus, bold: true }, { text: flowRate ? " e a vazão nominal é de " : ". " });
   }
   if (flowRate) hydraulic.push({ text: pulse ? "" : "A vazão nominal é de " }, { text: clean(flowRate.value), bold: true }, { text: ". " });
   const flow = hydraulicAnswer(["sentido do fluxo"]);
@@ -138,12 +143,13 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
   const consumptionProfile = hydraulicAnswer(["perfil de consumo da loja"]);
   if (consumptionLevel) hydraulic.push({ text: "O perfil de consumo da loja é " }, { text: lower(consumptionLevel.value), bold: true }, { text: consumptionProfile ? ", contemplando " : "." });
   if (consumptionProfile) hydraulic.push({ text: consumptionLevel ? "" : "O perfil de consumo da loja contempla " }, { text: lower(consumptionProfile.value), bold: true }, { text: "." });
-  if (hydraulic.length) summaries.push({ title: "Hidráulica", parts: hydraulic, questionIds: hydraulicIds });
+  if (hydraulicSection?.id && skipped.has(hydraulicSection.id)) summaries.push({ title: hydraulicSection.title, parts: [{ text: "Não realizada." }], questionIds: hydraulicIds });
+  else if (hydraulic.length) summaries.push({ title: hydraulicSection?.title ?? "Água e hidrômetros", parts: hydraulic, questionIds: hydraulicIds });
 
   const electrical: RichPart[] = [];
   const electricalIds = new Set<string>();
   const electricalAnswer = (terms: string[]) => {
-    const answer = get(terms, electricalSections) ?? get(terms);
+    const answer = get(terms, electricalSections);
     if (answer) electricalIds.add(answer.id);
     return answer;
   };
@@ -152,10 +158,11 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
   if (cable) add(electrical, "A bitola do cabo de alimentação de entrada é de ", cable, breaker ? " e a amperagem do disjuntor de entrada é de " : ". ");
   if (breaker) electrical.push({ text: cable ? "" : "A amperagem do disjuntor de entrada é de " }, { text: detailOnly(breaker.value), bold: true }, { text: ". " });
   const panelLocation = electricalAnswer(["localizacao do quadro eletrico", "onde se encontra o quadro eletrico"]);
-  if (panelLocation) electrical.push({ text: "O quadro elétrico se encontra " }, { text: placePhrase(panelLocation.value), bold: true }, { text: ". " });
+  if (panelLocation?.value && !/^[-.\s]+$/.test(panelLocation.value)) electrical.push({ text: "O quadro elétrico se encontra " }, { text: placePhrase(panelLocation.value), bold: true }, { text: ". " });
   const electricalComplexity = electricalAnswer(["complexidade eletrica", "complexidade dessa instalacao", "complexidade da instalacao"]);
-  if (electricalComplexity) electrical.push({ text: "A instalação elétrica é de complexidade " }, { text: lower(electricalComplexity.value), bold: true }, { text: "." });
-  if (electrical.length) summaries.push({ title: "Elétrica", parts: electrical, questionIds: electricalIds });
+  if (electricalComplexity?.value && !/^[-.\s]+$/.test(electricalComplexity.value)) electrical.push({ text: "A instalação elétrica é de complexidade " }, { text: lower(electricalComplexity.value), bold: true }, { text: "." });
+  if (electricalSection?.id && skipped.has(electricalSection.id)) summaries.push({ title: electricalSection.title, parts: [{ text: "Não realizada." }], questionIds: electricalIds });
+  else if (electrical.length) summaries.push({ title: electricalSection?.title ?? "Instalação elétrica", parts: electrical, questionIds: electricalIds });
   return summaries;
 };
 const imageDataUrl = async (url: string, monochrome = false) => new Promise<string>((resolve, reject) => {
@@ -226,20 +233,22 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
   const [open, setOpen] = useState(false);
   const [deadlineDays, setDeadlineDays] = useState("1");
   const [includePhotos, setIncludePhotos] = useState(true);
+  const [primarySort, setPrimarySort] = useState<SortKey>("created");
+  const [secondarySort, setSecondarySort] = useState<SortKey | "none">("none");
   const [generatingPdf, setGeneratingPdf] = useState<"bw" | "color" | null>(null);
   const { data, isLoading } = useQuery({ queryKey: ["site-survey-report", visit.id], enabled: open, queryFn: async () => {
     const [{ data: lucs, error: lucError }, { data: environments, error: envError }, { data: responses, error: responseError }, { data: attachments, error: attachmentError }, { data: calls, error: callError }, { data: visitTechs }, { data: materials, error: materialError }, { data: pauses, error: pauseError }] = await Promise.all([
-      supabase.from("site_survey_visit_lucs").select("id,luc_number,shop_name,started_at,completed_at,completion_status,cancellation_reason_id,site_survey_cancellation_reasons(name)").eq("visit_id", visit.id).eq("active", true).order("luc_number"),
-      supabase.from("site_survey_visit_environments").select("id,name,started_at,completed_at,completion_status").eq("visit_id", visit.id).eq("active", true).order("name"),
+       supabase.from("site_survey_visit_lucs").select("id,luc_number,shop_name,created_at,started_at,completed_at,completion_status,skipped_section_ids,cancellation_reason_id,site_survey_cancellation_reasons(name)").eq("visit_id", visit.id).eq("active", true).order("luc_number"),
+       supabase.from("site_survey_visit_environments").select("id,name,created_at,started_at,completed_at,completion_status,skipped_section_ids").eq("visit_id", visit.id).eq("active", true).order("name"),
       supabase.from("site_survey_responses").select("id,question_id,visit_luc_id,visit_environment_id,answer").eq("visit_id", visit.id),
       supabase.from("site_survey_attachments").select("id,visit_luc_id,visit_environment_id,file_name,storage_path,content_type,attachment_kind").eq("visit_id", visit.id).order("created_at"),
       supabase.from("site_survey_generated_calls").select("id,visit_luc_id,visit_environment_id,status,internal_calls(call_number,title,description,status)").eq("visit_id", visit.id),
-      supabase.from("site_survey_visit_technicians").select("technician_id").eq("visit_id", visit.id),
+      supabase.from("site_survey_visit_technicians").select("technician_id,visit_luc_id,visit_environment_id").eq("visit_id", visit.id),
       supabase.from("site_survey_visit_materials").select("id,visit_luc_id,visit_environment_id,quantity,notes,site_survey_material_catalog(name),site_survey_screwdriver_types(name),site_survey_wrench_sizes(name)").eq("visit_id", visit.id).order("created_at"),
       supabase.from("site_survey_point_pauses").select("id,visit_luc_id,visit_environment_id,reason_id,started_at,ended_at,site_survey_pause_reasons(name)").eq("visit_id", visit.id).order("started_at"),
     ]);
     const error = lucError ?? envError ?? responseError ?? attachmentError ?? callError ?? materialError ?? pauseError; if (error) throw error;
-    const points: Point[] = [...(lucs ?? []).map((item) => { const reason = item.site_survey_cancellation_reasons as unknown as { name?: string } | null; return { id: item.id, label: `LUC ${item.luc_number} — ${item.shop_name}`, started_at: item.started_at, completed_at: item.completed_at, completion_status: item.completion_status, cancellationReason: reason?.name ?? null, kind: "luc" as const }; }), ...(environments ?? []).map((item) => ({ id: item.id, label: item.name, started_at: item.started_at, completed_at: item.completed_at, completion_status: item.completion_status, cancellationReason: null, kind: "environment" as const }))];
+     const points: Point[] = [...(lucs ?? []).map((item) => { const reason = item.site_survey_cancellation_reasons as unknown as { name?: string } | null; return { id: item.id, label: `LUC ${item.luc_number} — ${item.shop_name}`, created_at: item.created_at, started_at: item.started_at, completed_at: item.completed_at, completion_status: item.completion_status, cancellationReason: reason?.name ?? null, kind: "luc" as const, skippedSectionIds: Array.isArray(item.skipped_section_ids) ? item.skipped_section_ids.filter((id): id is string => typeof id === "string") : [] }; }), ...(environments ?? []).map((item) => ({ id: item.id, label: item.name, created_at: item.created_at, started_at: item.started_at, completed_at: item.completed_at, completion_status: item.completion_status, cancellationReason: null, kind: "environment" as const, skippedSectionIds: Array.isArray(item.skipped_section_ids) ? item.skipped_section_ids.filter((id): id is string => typeof id === "string") : [] }))];
     return { points, responses: responses ?? [], attachments: attachments ?? [], calls: calls ?? [], visitTechs: visitTechs ?? [], materials: (materials ?? []) as unknown as VisitMaterial[], pauses: (pauses ?? []) as PointPause[] };
   } });
   const calculation = useMemo(() => {
@@ -257,19 +266,40 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     const techniciansNeeded = estimated ? Math.ceil(estimated / (480 * requestedDays)) : 0;
     return { breakdown, estimated, ...workedTime, pauseCount: data?.pauses.length ?? 0, assignedCount, days, techniciansNeeded };
   }, [assumptions, data, deadlineDays, visit.technician_id]);
+  const reportSections = sections.filter((section) => section.template_id === visit.template_id);
   const pointResponses = (point: Point) => (data?.responses ?? []).filter((response) => point.kind === "luc" ? response.visit_luc_id === point.id : response.visit_environment_id === point.id);
   const pausesForPoint = (point: Point) => (data?.pauses ?? []).filter((pause) => point.kind === "luc" ? pause.visit_luc_id === point.id : pause.visit_environment_id === point.id);
-  const stageSevenSectionIds = new Set(sections.filter((section) => section.position === 6 || normalize(section.title).includes("revisao")).map((section) => section.id));
+  const technicianForPoint = (point: Point) => {
+    const assigned = data?.visitTechs.filter((item) => point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id) ?? [];
+    const ids = assigned.length ? assigned.map((item) => item.technician_id) : [visit.technician_id, ...(data?.visitTechs.filter((item) => !item.visit_luc_id && !item.visit_environment_id).map((item) => item.technician_id) ?? [])];
+    return [...new Set(ids.map((id) => technicians.find((person) => person.id === id)?.full_name).filter((name): name is string => Boolean(name)))].sort((a, b) => a.localeCompare(b, "pt-BR")).join(", ") || "—";
+  };
+  const sortedPoints = useMemo(() => {
+    const compare = (a: Point, b: Point, key: SortKey) => key === "type" ? (a.kind === b.kind ? 0 : a.kind === "luc" ? -1 : 1) : key === "created" ? a.created_at.localeCompare(b.created_at) : technicianForPoint(a).localeCompare(technicianForPoint(b), "pt-BR");
+    return [...(data?.points ?? [])].sort((a, b) => compare(a, b, primarySort) || (secondarySort !== "none" ? compare(a, b, secondarySort) : 0) || a.created_at.localeCompare(b.created_at) || a.label.localeCompare(b.label, "pt-BR"));
+  }, [data?.points, data?.visitTechs, technicians, visit.technician_id, primarySort, secondarySort]);
+  const stageSevenSectionIds = new Set(reportSections.filter((section) => section.position === 6 || normalize(section.title).includes("revisao")).map((section) => section.id));
   const stageSevenQuestionIds = new Set(questions.filter((question) => stageSevenSectionIds.has(question.section_id)).map((question) => question.id));
+  const materialSectionTitle = reportSections.find((section) => section.position >= 3 && normalize(section.title).includes("materiais") && normalize(section.title).includes("equipamentos"))?.title ?? "Materiais e equipamentos";
+  const reviewSection = reportSections.find((section) => stageSevenSectionIds.has(section.id));
+  const reviewTitle = reviewSection?.title ?? "Revisão, pendências, fotos e encerramento";
+  const reviewSkipped = (point: Point) => Boolean(reviewSection && point.skippedSectionIds.includes(reviewSection.id));
+  const pointNotes = (point: Point) => reviewSection && point.skippedSectionIds.includes(reviewSection.id) ? "" : pointResponses(point).filter((response) => stageSevenQuestionIds.has(response.question_id)).map((response) => valueText(response.answer)).filter(Boolean).join("; ");
   const technicalTotals = useMemo(() => {
     const groups = [{ label: "Tipos de hidrômetro", terms: ["tipo de hidrometro", "tipo de registro"] }, { label: "Dificuldade de acesso", terms: ["dificuldade", "acesso ao hidrometro"] }, { label: "Quadros e pontos elétricos", terms: ["quadro eletrico", "ponto eletrico"] }, { label: "Complexidade", terms: ["complexidade"] }];
     return groups.map((group) => { const counts = new Map<string, number>(); for (const response of data?.responses ?? []) { const question = questions.find((item) => item.id === response.question_id); if (!question || !group.terms.some((term) => normalize(question.prompt).includes(term))) continue; const value = valueText(response.answer).trim(); if (value) counts.set(value, (counts.get(value) ?? 0) + 1); } return { label: group.label, values: [...counts.entries()] }; }).filter((group) => group.values.length);
   }, [data?.responses, questions]);
-  const pointSummaries = (point: Point) => buildPointSummaries((pointResponses(point) as ReportResponse[]).filter((response) => !stageSevenQuestionIds.has(response.question_id)), questions, sections);
+  const pointSummaries = (point: Point) => buildPointSummaries((pointResponses(point) as ReportResponse[]).filter((response) => !stageSevenQuestionIds.has(response.question_id)), questions, reportSections, point.skippedSectionIds);
   const pointMaterials = (point: Point) => (data?.materials ?? []).filter((item) => point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id);
   const materialSentence = (point: Point) => {
+    const materialSection = reportSections.find((section) => section.position >= 3 && normalize(section.title).includes("materiais") && normalize(section.title).includes("equipamentos"));
+    if (materialSection && point.skippedSectionIds.includes(materialSection.id)) return "Não realizada.";
     const materials = pointMaterials(point);
-    if (!materials.length) return "";
+    if (!materials.length) {
+      const specialQuestion = questions.find((question) => normalize(question.prompt).includes("equipamento") && normalize(question.prompt).includes("ferramenta especial") && (!materialSection || question.section_id === materialSection.id));
+      const answer = pointResponses(point).find((response) => response.question_id === specialQuestion?.id);
+      return answer && /^(nao|não)$/i.test(valueText(answer.answer).trim()) ? `Para a instalação ${point.kind === "luc" ? "nessa loja" : "nesse ambiente"}, não é necessário utilizar equipamento ou ferramenta especial.` : "";
+    }
     const descriptions = materials.map((item) => {
       const details = [item.site_survey_screwdriver_types?.name, item.site_survey_wrench_sizes?.name, item.notes].filter(Boolean).join(" — ");
       return `${item.quantity} × ${item.site_survey_material_catalog?.name ?? "ferramenta"}${details ? ` (${details})` : ""}`;
@@ -351,11 +381,11 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
       pdf.setFont("Nunito", "normal");
       return cursorY;
     };
-    for (const point of data.points) {
+    for (const point of sortedPoints) {
       if (y > 250) { pdf.addPage(); y = 18; }
       pdf.setFont("Nunito", "extrabold"); pdf.setFontSize(12); pdf.setTextColor(...purple); pdf.text(point.label, 14, y); pdf.setDrawColor(...purple); pdf.setLineWidth(0.35); pdf.line(14, y + 2, 196, y + 2); pdf.setTextColor(...dark); y += 8;
-      const pointAnswers = pointResponses(point);
-      const stageSeven = pointAnswers.filter((response) => stageSevenQuestionIds.has(response.question_id)).map((response) => valueText(response.answer)).filter(Boolean).join("; ");
+      pdf.setFont("Nunito", "normal"); pdf.setFontSize(9); for (const line of pdf.splitTextToSize(`Técnico(s): ${technicianForPoint(point)}`, 182)) { pdf.text(line, 14, y); y += 5; } y += 1;
+      const stageSeven = pointNotes(point);
       const tools = materialSentence(point);
       const calls = data.calls.filter((item) => point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id).map((call) => { const linked = call.internal_calls as unknown as { call_number?: string; title?: string; status?: string } | null; return linked ? `#${linked.call_number ?? "—"} ${linked.title ?? "Chamado"} (${linked.status ?? call.status})` : call.status; }).join("; ");
       if (!visit.is_manual_entry) { pdf.setFont("Nunito", "normal"); pdf.setFontSize(9); pdf.text(`Início: ${point.started_at ? new Date(point.started_at).toLocaleString("pt-BR") : "não registrado"}  |  Conclusão: ${point.completed_at ? new Date(point.completed_at).toLocaleString("pt-BR") : "não registrada"}  |  Duração: ${formatMinutes(pointDuration(point, pausesForPoint(point)))}`, 14, y); y += 6; }
@@ -366,8 +396,9 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
         if (y > 260) { pdf.addPage(); y = 18; }
         pdf.setFont("Nunito", "bold"); pdf.setFontSize(10); pdf.text(summary.title, 14, y); pdf.setFontSize(9); y = drawRichParagraph(summary.parts, y + 7) + 4;
       }
-      if (tools) { if (y > 262) { pdf.addPage(); y = 18; } pdf.setFont("Nunito", "bold"); pdf.text("Ferramentas", 14, y); y = drawRichParagraph([{ text: tools }], y + 5) + 2; }
-      if (stageSeven) { if (y > 262) { pdf.addPage(); y = 18; } pdf.setFont("Nunito", "bold"); pdf.text(`Anotações da Etapa ${visit.is_manual_entry ? 4 : 7}`, 14, y); y = drawRichParagraph([{ text: stageSeven }], y + 5) + 2; }
+      if (tools) { if (y > 262) { pdf.addPage(); y = 18; } pdf.setFont("Nunito", "bold"); pdf.text(materialSectionTitle, 14, y); y = drawRichParagraph([{ text: tools }], y + 5) + 2; }
+      if (reviewSkipped(point)) { if (y > 262) { pdf.addPage(); y = 18; } pdf.setFont("Nunito", "bold"); pdf.text(reviewTitle, 14, y); pdf.setFontSize(9); y = drawRichParagraph([{ text: "Não realizada." }], y + 5) + 2; }
+      if (stageSeven) { if (y > 262) { pdf.addPage(); y = 18; } pdf.setFont("Nunito", "bold"); pdf.text(reviewTitle, 14, y); y += 5; pdf.setFontSize(9); pdf.text("Observações finais da visita", 14, y); y = drawRichParagraph([{ text: stageSeven }], y + 5) + 2; }
       if (calls) { if (y > 262) { pdf.addPage(); y = 18; } pdf.setFont("Nunito", "bold"); pdf.text("Ações e chamados", 14, y); y = drawRichParagraph([{ text: calls }], y + 5) + 2; }
       const photos = withPhotos ? data.attachments.filter((item) => item.content_type?.startsWith("image/") && (point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id)) : [];
       let photoColumn = 0;
@@ -398,7 +429,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
       setGeneratingPdf(null);
     }
   };
-  return <><Button type="button" size={iconOnly ? "compactIcon" : "sm"} variant="ghost" aria-label={`Gerar relatório da visita ${visit.survey_number}`} title="Relatório da visita" onClick={() => setOpen(true)}><FileChartColumn className="h-4 w-4" />{iconOnly ? null : "Relatório"}</Button><Dialog open={open} onOpenChange={(nextOpen) => { if (!generatingPdf) setOpen(nextOpen); }}><DialogContent className="max-h-[92dvh] w-[calc(100vw-1.5rem)] max-w-5xl overflow-y-auto"><DialogHeader><DialogTitle>Relatório Site Survey #{String(visit.survey_number).padStart(12, "0")}</DialogTitle><DialogDescription>Prévia consolidada da OS, com respostas, ações e fotos.</DialogDescription></DialogHeader>{isLoading || !data ? <p className="py-10 text-center text-muted-foreground">Preparando relatório...</p> : <div className="space-y-6"><section className="grid gap-3 border-y py-4 sm:grid-cols-3"><ReportInfo label="Cliente" value={clients.find((item) => item.id === visit.client_id)?.name ?? "—"} /><ReportInfo label="Unidade" value={units.find((item) => item.id === visit.client_unit_id)?.name ?? "—"} /><ReportInfo label="Projeto" value={projects.find((item) => item.id === visit.project_id)?.name ?? "—"} /><ReportInfo label="Técnico" value={technicians.find((item) => item.id === visit.technician_id)?.full_name ?? "—"} /><ReportInfo label={visit.is_manual_entry ? "Data da visita" : "Agendamento"} value={new Date(visit.scheduled_start).toLocaleString("pt-BR")} /><ReportInfo label="Contato" value={[visit.contact_name, visit.contact_phone].filter(Boolean).join(" · ") || "—"} /></section>{!visit.is_manual_entry ? <section><h3 className="font-bold">Planejamento de capacidade</h3><div className="mt-3 grid gap-3 sm:grid-cols-3 lg:grid-cols-6"><ReportInfo label="Tempo estimado" value={formatMinutes(calculation.estimated)} /><ReportInfo label="Tempo em visita" value={formatMinutes(calculation.worked)} /><ReportInfo label="Quantidade de pausas" value={String(calculation.pauseCount)} /><ReportInfo label="Tempo de pausas" value={formatMinutes(calculation.paused)} /><ReportInfo label="Horas úteis" value={formatMinutes(calculation.useful)} /><ReportInfo label="Horas extras" value={formatMinutes(calculation.overtime)} /><ReportInfo label="Horas noturnas" value={formatMinutes(calculation.night)} /><ReportInfo label={`Dias com ${calculation.assignedCount} técnico(s)`} value={String(calculation.days)} /><ReportInfo label="Total de chamados" value={String(data.calls.length)} /><div className="space-y-1"><Label htmlFor={`deadline-${visit.id}`} className="text-xs text-muted-foreground">Prazo desejado em dias</Label><Input id={`deadline-${visit.id}`} type="number" min="1" value={deadlineDays} onChange={(event) => setDeadlineDays(event.target.value)} /><p className="text-sm font-semibold">{calculation.techniciansNeeded} técnico(s) necessário(s)</p></div></div>{calculation.breakdown.length ? <ul className="mt-3 space-y-1 text-sm text-muted-foreground">{calculation.breakdown.map((item) => <li key={item.id}>{item.name}: {item.occurrences} × {item.minutes} min = {item.total} min</li>)}</ul> : <p className="mt-3 text-sm text-muted-foreground">Cadastre premissas de tempo para calcular a estimativa.</p>}</section> : null}<section className="space-y-6"><h3 className="font-bold">Lojas e ambientes</h3>{data.points.map((point) => { const photos = data.attachments.filter((item) => (includePhotos || !item.content_type?.startsWith("image/")) && (point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id)); const calls = data.calls.filter((item) => point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id); const stageSeven = pointResponses(point).filter((response) => stageSevenQuestionIds.has(response.question_id)).map((response) => valueText(response.answer)).filter(Boolean).join("; "); const tools = materialSentence(point); return <article key={`${point.kind}-${point.id}`} className="border-b border-border pb-6"><div className="flex flex-wrap items-start justify-between gap-2"><div><h4 className="font-semibold text-accent">{point.label}</h4>{!visit.is_manual_entry ? <p className="text-xs text-muted-foreground">{point.started_at ? new Date(point.started_at).toLocaleString("pt-BR") : "Início não registrado"} · {formatMinutes(pointDuration(point, pausesForPoint(point)))}</p> : null}{!visit.is_manual_entry && pausesForPoint(point).length ? <p className="mt-1 text-xs text-muted-foreground">Pausas: {pausesForPoint(point).length} · {formatMinutes(pauseMinutes(pausesForPoint(point), point.completed_at))}</p> : null}{point.completion_status === "cancelada" ? <p className="mt-1 text-sm font-semibold text-accent">Motivo do cancelamento: {point.cancellationReason ?? "não informado"}</p> : null}</div><span className="text-sm capitalize">{point.completion_status}</span></div><div className="mt-5 space-y-5">{pointSummaries(point).map((summary, index) => <section key={`${summary.title}-${index}`}><h5 className="text-sm font-semibold">{summary.title}</h5><p className="mt-2 text-sm leading-[1.15]">{summary.parts.map((part, partIndex) => part.bold ? <strong key={partIndex}>{part.text}</strong> : <span key={partIndex}>{part.text}</span>)}</p></section>)}{tools ? <section><h5 className="text-sm font-semibold">Ferramentas</h5><p className="mt-2 text-sm leading-[1.15]">{tools}</p></section> : null}{stageSeven ? <section><h5 className="text-sm font-semibold">Anotações da Etapa 7</h5><p className="mt-2 text-sm leading-[1.15]">{stageSeven}</p></section> : null}</div>{calls.length ? <div className="mt-4 border-t pt-3 text-sm"><strong>Ações:</strong> {calls.map((call) => { const linked = call.internal_calls as unknown as { call_number?: string; title?: string; status?: string } | null; return linked ? `#${linked.call_number ?? "—"} ${linked.title ?? "Chamado"} (${linked.status ?? call.status})` : call.status; }).join("; ")}</div> : null}{photos.length > 0 ? <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">{photos.map((photo) => <ReportPhoto key={photo.id} path={photo.storage_path} name={photo.file_name} />)}</div> : null}</article>; })}</section>{generatingPdf ? <p className="flex items-center justify-end gap-2 text-sm font-semibold" role="status" aria-live="polite"><LoaderCircle className="h-4 w-4 animate-spin" />Relatório em elaboração. Aguarde…</p> : null}<div className="grid grid-cols-2 items-center gap-2 sm:flex sm:justify-end"><div className="col-span-2 flex items-center gap-2 sm:col-span-1 sm:mr-3"><Checkbox id={`report-photos-${visit.id}`} checked={includePhotos} disabled={Boolean(generatingPdf)} onCheckedChange={(checked) => setIncludePhotos(checked === true)} /><Label htmlFor={`report-photos-${visit.id}`} className="cursor-pointer text-sm font-medium">Incluir fotos</Label></div><Button type="button" variant="outline" disabled={Boolean(generatingPdf)} aria-busy={generatingPdf === "bw"} onClick={() => void handleExportPdf(true)}>{generatingPdf === "bw" ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Printer className="h-4 w-4" />}{generatingPdf === "bw" ? "Gerando…" : "PDF P&B"}</Button><Button type="button" disabled={Boolean(generatingPdf)} aria-busy={generatingPdf === "color"} onClick={() => void handleExportPdf(false)}>{generatingPdf === "color" ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}{generatingPdf === "color" ? "Gerando…" : "PDF colorido"}</Button></div></div>}</DialogContent></Dialog></>;
+  return <><Button type="button" size={iconOnly ? "compactIcon" : "sm"} variant="ghost" aria-label={`Gerar relatório da visita ${visit.survey_number}`} title="Relatório da visita" onClick={() => setOpen(true)}><FileChartColumn className="h-4 w-4" />{iconOnly ? null : "Relatório"}</Button><Dialog open={open} onOpenChange={(nextOpen) => { if (!generatingPdf) setOpen(nextOpen); }}><DialogContent className="max-h-[92dvh] w-[calc(100vw-1.5rem)] max-w-5xl overflow-y-auto"><DialogHeader><DialogTitle>Relatório Site Survey #{String(visit.survey_number).padStart(12, "0")}</DialogTitle><DialogDescription>Prévia consolidada da OS, com respostas, ações e fotos.</DialogDescription></DialogHeader>{isLoading || !data ? <p className="py-10 text-center text-muted-foreground">Preparando relatório...</p> : <div className="space-y-6"><section className="grid gap-3 border-y py-4 sm:grid-cols-3"><ReportInfo label="Cliente" value={clients.find((item) => item.id === visit.client_id)?.name ?? "—"} /><ReportInfo label="Unidade" value={units.find((item) => item.id === visit.client_unit_id)?.name ?? "—"} /><ReportInfo label="Projeto" value={projects.find((item) => item.id === visit.project_id)?.name ?? "—"} /><ReportInfo label="Técnico" value={technicians.find((item) => item.id === visit.technician_id)?.full_name ?? "—"} /><ReportInfo label={visit.is_manual_entry ? "Data da visita" : "Agendamento"} value={new Date(visit.scheduled_start).toLocaleString("pt-BR")} /><ReportInfo label="Contato" value={[visit.contact_name, visit.contact_phone].filter(Boolean).join(" · ") || "—"} /></section>{!visit.is_manual_entry ? <section><h3 className="font-bold">Planejamento de capacidade</h3><div className="mt-3 grid gap-3 sm:grid-cols-3 lg:grid-cols-6"><ReportInfo label="Tempo estimado" value={formatMinutes(calculation.estimated)} /><ReportInfo label="Tempo em visita" value={formatMinutes(calculation.worked)} /><ReportInfo label="Quantidade de pausas" value={String(calculation.pauseCount)} /><ReportInfo label="Tempo de pausas" value={formatMinutes(calculation.paused)} /><ReportInfo label="Horas úteis" value={formatMinutes(calculation.useful)} /><ReportInfo label="Horas extras" value={formatMinutes(calculation.overtime)} /><ReportInfo label="Horas noturnas" value={formatMinutes(calculation.night)} /><ReportInfo label={`Dias com ${calculation.assignedCount} técnico(s)`} value={String(calculation.days)} /><ReportInfo label="Total de chamados" value={String(data.calls.length)} /><div className="space-y-1"><Label htmlFor={`deadline-${visit.id}`} className="text-xs text-muted-foreground">Prazo desejado em dias</Label><Input id={`deadline-${visit.id}`} type="number" min="1" value={deadlineDays} onChange={(event) => setDeadlineDays(event.target.value)} /><p className="text-sm font-semibold">{calculation.techniciansNeeded} técnico(s) necessário(s)</p></div></div>{calculation.breakdown.length ? <ul className="mt-3 space-y-1 text-sm text-muted-foreground">{calculation.breakdown.map((item) => <li key={item.id}>{item.name}: {item.occurrences} × {item.minutes} min = {item.total} min</li>)}</ul> : <p className="mt-3 text-sm text-muted-foreground">Cadastre premissas de tempo para calcular a estimativa.</p>}</section> : null}<section className="space-y-6"><h3 className="font-bold">Lojas e ambientes</h3>{sortedPoints.map((point) => { const photos = data.attachments.filter((item) => (includePhotos || !item.content_type?.startsWith("image/")) && (point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id)); const calls = data.calls.filter((item) => point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id); const stageSeven = pointNotes(point); const tools = materialSentence(point); return <article key={`${point.kind}-${point.id}`} className="border-b border-border pb-6"><div className="flex flex-wrap items-start justify-between gap-2"><div><h4 className="font-semibold text-accent">{point.label}</h4><p className="text-xs text-muted-foreground">Técnico(s): {technicianForPoint(point)}</p>{!visit.is_manual_entry ? <p className="text-xs text-muted-foreground">{point.started_at ? new Date(point.started_at).toLocaleString("pt-BR") : "Início não registrado"} · {formatMinutes(pointDuration(point, pausesForPoint(point)))}</p> : null}{!visit.is_manual_entry && pausesForPoint(point).length ? <p className="mt-1 text-xs text-muted-foreground">Pausas: {pausesForPoint(point).length} · {formatMinutes(pauseMinutes(pausesForPoint(point), point.completed_at))}</p> : null}{point.completion_status === "cancelada" ? <p className="mt-1 text-sm font-semibold text-accent">Motivo do cancelamento: {point.cancellationReason ?? "não informado"}</p> : null}</div><span className="text-sm capitalize">{point.completion_status}</span></div><div className="mt-5 space-y-5">{pointSummaries(point).map((summary, index) => <section key={`${summary.title}-${index}`}><h5 className="text-sm font-semibold">{summary.title}</h5><p className="mt-2 text-sm leading-[1.15]">{summary.parts.map((part, partIndex) => part.bold ? <strong key={partIndex}>{part.text}</strong> : <span key={partIndex}>{part.text}</span>)}</p></section>)}{tools ? <section><h5 className="text-sm font-semibold">{materialSectionTitle}</h5><p className="mt-2 text-sm leading-[1.15]">{tools}</p></section> : null}{reviewSkipped(point) ? <section><h5 className="text-sm font-semibold">{reviewTitle}</h5><p className="mt-2 text-sm leading-[1.15]">Não realizada.</p></section> : null}{stageSeven ? <section><h5 className="text-sm font-semibold">{reviewTitle}</h5><p className="mt-2 text-sm font-semibold">Observações finais da visita</p><p className="mt-2 text-sm leading-[1.15]">{stageSeven}</p></section> : null}</div>{calls.length ? <div className="mt-4 border-t pt-3 text-sm"><strong>Ações:</strong> {calls.map((call) => { const linked = call.internal_calls as unknown as { call_number?: string; title?: string; status?: string } | null; return linked ? `#${linked.call_number ?? "—"} ${linked.title ?? "Chamado"} (${linked.status ?? call.status})` : call.status; }).join("; ")}</div> : null}{photos.length > 0 ? <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">{photos.map((photo) => <ReportPhoto key={photo.id} path={photo.storage_path} name={photo.file_name} />)}</div> : null}</article>; })}</section>{generatingPdf ? <p className="flex items-center justify-end gap-2 text-sm font-semibold" role="status" aria-live="polite"><LoaderCircle className="h-4 w-4 animate-spin" />Relatório em elaboração. Aguarde…</p> : null}<div className="grid gap-3 border-t pt-4 sm:grid-cols-2"><div className="space-y-1.5"><Label htmlFor={`sort-primary-${visit.id}`} className="text-sm">Ordenar PDF por</Label><Select value={primarySort} onValueChange={(value: SortKey) => { setPrimarySort(value); if (secondarySort === value) setSecondarySort("none"); }}><SelectTrigger id={`sort-primary-${visit.id}`}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="created">Horário / sequência do cadastro</SelectItem><SelectItem value="type">Tipo — lojas antes de ambientes</SelectItem><SelectItem value="technician">Técnico da visita</SelectItem></SelectContent></Select></div><div className="space-y-1.5"><Label htmlFor={`sort-secondary-${visit.id}`} className="text-sm">Depois, ordenar por</Label><Select value={secondarySort} onValueChange={(value: SortKey | "none") => setSecondarySort(value)}><SelectTrigger id={`sort-secondary-${visit.id}`}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="none">Sem segunda ordenação</SelectItem>{primarySort !== "created" ? <SelectItem value="created">Horário / sequência do cadastro</SelectItem> : null}{primarySort !== "type" ? <SelectItem value="type">Tipo — lojas antes de ambientes</SelectItem> : null}{primarySort !== "technician" ? <SelectItem value="technician">Técnico da visita</SelectItem> : null}</SelectContent></Select></div></div><div className="grid grid-cols-2 items-center gap-2 sm:flex sm:justify-end"><div className="col-span-2 flex items-center gap-2 sm:col-span-1 sm:mr-3"><Checkbox id={`report-photos-${visit.id}`} checked={includePhotos} disabled={Boolean(generatingPdf)} onCheckedChange={(checked) => setIncludePhotos(checked === true)} /><Label htmlFor={`report-photos-${visit.id}`} className="cursor-pointer text-sm font-medium">Incluir fotos</Label></div><Button type="button" variant="outline" disabled={Boolean(generatingPdf)} aria-busy={generatingPdf === "bw"} onClick={() => void handleExportPdf(true)}>{generatingPdf === "bw" ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Printer className="h-4 w-4" />}{generatingPdf === "bw" ? "Gerando…" : "PDF P&B"}</Button><Button type="button" disabled={Boolean(generatingPdf)} aria-busy={generatingPdf === "color"} onClick={() => void handleExportPdf(false)}>{generatingPdf === "color" ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}{generatingPdf === "color" ? "Gerando…" : "PDF colorido"}</Button></div></div>}</DialogContent></Dialog></>;
 }
 
 function ReportInfo({ label, value }: { label: string; value: string }) { return <div className="border-l-2 border-myio-green pl-3"><p className="text-xs text-muted-foreground">{label}</p><p className="font-medium">{value}</p></div>; }
