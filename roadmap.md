@@ -814,3 +814,5 @@
 
 - [x] Site Survey — permitir marcar etapas de loja/ambiente como Não realizada, preservando respostas e retirando pendências.
 - [x] Site Survey — mostrar a quantidade de anexos no título “Anexos - N” ao final da visita.
+- [x] Site Survey — apresentar ações de intervenção do cliente ao final de cada loja/ambiente e consolidar nos totalizadores por tipo, pergunta e locais, na prévia e nos PDFs.
+- [x] Site Survey — na última etapa (4 manual ou 7 regular), oferecer checkbox “Nenhuma observação adicional” para preencher o texto padrão, sem impedir a escrita personalizada nem o autosave.
