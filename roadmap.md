@@ -788,5 +788,5 @@
 - [ ] Supply — validar cadastro real de Item novo com a conta do Alan (bloqueio: sessão dessa conta indisponível para teste automatizado).
 - [x] Site Survey — verificar a causa da chave duplicada ao salvar ação de pergunta e orientar sobre o erro do print.
 - [x] Supply — ativar Pagamento no cadastro, reclassificar o Approval 202609230001 sem duplicá-lo e excluir pagamentos das filas de execução, mantendo a conta no Cash Flow.
-- [ ] Site Survey — permitir cadastrar visitas retroativas (inclusive Shopping Taboão) com término anterior a hoje, mantendo término após início.
-- [ ] Site Survey — preservar e conferir o salvamento automático do preenchimento durante a correção do cadastro retroativo.
+- [x] Site Survey — conferir cadastro retroativo (inclusive Shopping Taboão): datas anteriores a hoje são aceitas; validar término após início com mensagem clara. Se ainda falhar ao salvar, obter a mensagem exata para investigar outra causa.
+- [x] Site Survey — preservar e conferir o salvamento automático do preenchimento durante a correção do cadastro retroativo.
