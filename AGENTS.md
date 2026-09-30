@@ -19,6 +19,6 @@
 - Code images use private ticket attachments: message images stay with replies, standalone images with tickets. Open tickets allow new questions before answers; answers link to pending admin questions, preserving permissions.
 - Site Survey actions update/deactivate in place to preserve references; warnings use active visible questions only after explicit save, not autosave.
 - Manual visits start `concluida` with historical end; checklist autosaves without timing. Shopping points share add dialog, not storage.
-- Photo drops/pastes autosave; block outside drops. Stable keys and no scroll on text/detail input preserve focus.
+- Photo drops/pastes autosave; block outside drops. Serialize saves by point/question; flush before point/section switches.
 - Survey skips persist by point; skip removes pending requirements, keeps answers, flushes autosave.
 - Survey report/PDF share ordering and hydraulic DN from De-Para; missing flow has no specification. Photo reuse stores same-point attachment ID on response; deletion invalidates it.
