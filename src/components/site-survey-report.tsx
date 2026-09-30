@@ -70,11 +70,11 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
     .filter((answer) => answer.value)
     .sort((left, right) => questionOrder(left.id) - questionOrder(right.id));
   const clean = (value: string) => value.replace(/[.!?]+$/, "").trim();
-  const lower = (value: string) => clean(value).toLocaleLowerCase("pt-BR");
   const proseValue = (value: string) => {
     const text = clean(value);
     return /^(outro|outros)\s*(?:—|–|-)\s*/i.test(normalize(text)) ? text.replace(/^(outro|outros)\s*(?:—|–|-)\s*/i, "").trim() : /^(outro|outros)$/i.test(normalize(text)) ? "" : text;
   };
+  const lower = (value: string) => proseValue(value).toLocaleLowerCase("pt-BR");
   const isUninformed = (value: string) => /^(nao informad[oa]|nao foi informad[oa]|sem informacao)$/i.test(normalize(value));
   const statusOnly = (value: string) => lower((value.split("—").at(-1) ?? value).trim());
   const detailOnly = (value: string) => clean((value.split("—").at(-1) ?? value).trim());
