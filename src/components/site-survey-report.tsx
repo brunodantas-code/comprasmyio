@@ -20,7 +20,7 @@ type Named = { id: string; name: string };
 type Question = { id: string; section_id: string; prompt: string; position?: number };
 type Section = { id: string; title: string; position: number };
 type Profile = { id: string; full_name: string };
-type Point = { id: string; label: string; started_at: string | null; completed_at: string | null; completion_status: string; cancellationReason: string | null; kind: "luc" | "environment" };
+type Point = { id: string; label: string; started_at: string | null; completed_at: string | null; completion_status: string; cancellationReason: string | null; kind: "luc" | "environment"; skippedSectionIds: string[] };
 type PointPause = { id: string; visit_luc_id: string | null; visit_environment_id: string | null; reason_id: string; started_at: string; ended_at: string | null; site_survey_pause_reasons: { name: string } | null };
 type ReportResponse = { id: string; question_id: string; answer: unknown };
 type RichPart = { text: string; bold?: boolean };
@@ -45,17 +45,19 @@ const findAnswer = (responses: ReportResponse[], questions: Question[], terms: s
   });
   return response ? { id: response.question_id, value: valueText(response.answer).trim() } : null;
 };
-const buildPointSummaries = (responses: ReportResponse[], questions: Question[], sections: Section[]): PointSummary[] => {
+const buildPointSummaries = (responses: ReportResponse[], questions: Question[], sections: Section[], skippedSectionIds: string[]): PointSummary[] => {
   const summaries: PointSummary[] = [];
+  const skipped = new Set(skippedSectionIds);
   const hydraulicSections = ["agua", "hidrometro", "hidraulica"];
   const electricalSections = ["eletrica", "eletrico"];
-  const get = (terms: string[], sectionTerms?: string[]) => findAnswer(responses, questions, terms, sections, sectionTerms);
+  const activeResponses = responses.filter((response) => !skipped.has(questions.find((question) => question.id === response.question_id)?.section_id ?? ""));
+  const get = (terms: string[], sectionTerms?: string[]) => findAnswer(activeResponses, questions, terms, sections, sectionTerms);
   const questionOrder = (questionId: string) => {
     const question = questions.find((item) => item.id === questionId);
     const section = sections.find((item) => item.id === question?.section_id);
     return (section?.position ?? 0) * 10000 + (question?.position ?? 0);
   };
-  const getAll = (terms: string[], sectionTerms?: string[]) => responses
+  const getAll = (terms: string[], sectionTerms?: string[]) => activeResponses
     .filter((response) => {
       const question = questions.find((item) => item.id === response.question_id);
       const prompt = normalize(question?.prompt ?? "");
@@ -81,6 +83,9 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
     return true;
   };
 
+  const sectionFor = (terms: string[]) => sections.find((section) => terms.some((term) => normalize(section.title).includes(term)));
+  const hydraulicSection = sectionFor(hydraulicSections);
+  const electricalSection = sectionFor(electricalSections);
   const hydraulic: RichPart[] = [];
   const hydraulicIds = new Set<string>();
   const hydraulicAnswer = (terms: string[]) => {
@@ -113,11 +118,9 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
   if (pulse) {
     const pulseStatus = statusOnly(pulse.value);
     const pulseWorks = /^(sim|operante|funcional|funcionando)/.test(pulseStatus);
-    hydraulic.push(
-      { text: pulseWorks ? "Possui saída pulsada " : "A saída pulsada encontra-se " },
-      { text: pulseWorks ? "funcional" : pulseStatus, bold: true },
-      { text: flowRate ? " e a vazão nominal é de " : ". " },
-    );
+    const pulseUnavailable = normalize(pulseStatus).includes("inoperante") || normalize(pulseStatus) === "nao";
+    if (pulseUnavailable) hydraulic.push({ text: "Não existe saída pulsada ou encontra-se inoperante", bold: true }, { text: flowRate ? " e a vazão nominal é de " : ". " });
+    else hydraulic.push({ text: pulseWorks ? "Possui saída pulsada " : "A saída pulsada encontra-se " }, { text: pulseWorks ? "funcional" : pulseStatus, bold: true }, { text: flowRate ? " e a vazão nominal é de " : ". " });
   }
   if (flowRate) hydraulic.push({ text: pulse ? "" : "A vazão nominal é de " }, { text: clean(flowRate.value), bold: true }, { text: ". " });
   const flow = hydraulicAnswer(["sentido do fluxo"]);
@@ -138,7 +141,8 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
   const consumptionProfile = hydraulicAnswer(["perfil de consumo da loja"]);
   if (consumptionLevel) hydraulic.push({ text: "O perfil de consumo da loja é " }, { text: lower(consumptionLevel.value), bold: true }, { text: consumptionProfile ? ", contemplando " : "." });
   if (consumptionProfile) hydraulic.push({ text: consumptionLevel ? "" : "O perfil de consumo da loja contempla " }, { text: lower(consumptionProfile.value), bold: true }, { text: "." });
-  if (hydraulic.length) summaries.push({ title: "Hidráulica", parts: hydraulic, questionIds: hydraulicIds });
+  if (hydraulicSection?.id && skipped.has(hydraulicSection.id)) summaries.push({ title: hydraulicSection.title, parts: [{ text: "Não realizada." }], questionIds: hydraulicIds });
+  else if (hydraulic.length) summaries.push({ title: hydraulicSection?.title ?? "Água e hidrômetros", parts: hydraulic, questionIds: hydraulicIds });
 
   const electrical: RichPart[] = [];
   const electricalIds = new Set<string>();
@@ -152,10 +156,11 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
   if (cable) add(electrical, "A bitola do cabo de alimentação de entrada é de ", cable, breaker ? " e a amperagem do disjuntor de entrada é de " : ". ");
   if (breaker) electrical.push({ text: cable ? "" : "A amperagem do disjuntor de entrada é de " }, { text: detailOnly(breaker.value), bold: true }, { text: ". " });
   const panelLocation = electricalAnswer(["localizacao do quadro eletrico", "onde se encontra o quadro eletrico"]);
-  if (panelLocation) electrical.push({ text: "O quadro elétrico se encontra " }, { text: placePhrase(panelLocation.value), bold: true }, { text: ". " });
+  if (panelLocation?.value && !/^[-.\s]+$/.test(panelLocation.value)) electrical.push({ text: "O quadro elétrico se encontra " }, { text: placePhrase(panelLocation.value), bold: true }, { text: ". " });
   const electricalComplexity = electricalAnswer(["complexidade eletrica", "complexidade dessa instalacao", "complexidade da instalacao"]);
-  if (electricalComplexity) electrical.push({ text: "A instalação elétrica é de complexidade " }, { text: lower(electricalComplexity.value), bold: true }, { text: "." });
-  if (electrical.length) summaries.push({ title: "Elétrica", parts: electrical, questionIds: electricalIds });
+  if (electricalComplexity?.value && !/^[-.\s]+$/.test(electricalComplexity.value)) electrical.push({ text: "A instalação elétrica é de complexidade " }, { text: lower(electricalComplexity.value), bold: true }, { text: "." });
+  if (electricalSection?.id && skipped.has(electricalSection.id)) summaries.push({ title: electricalSection.title, parts: [{ text: "Não realizada." }], questionIds: electricalIds });
+  else if (electrical.length) summaries.push({ title: electricalSection?.title ?? "Instalação elétrica", parts: electrical, questionIds: electricalIds });
   return summaries;
 };
 const imageDataUrl = async (url: string, monochrome = false) => new Promise<string>((resolve, reject) => {
@@ -229,8 +234,8 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
   const [generatingPdf, setGeneratingPdf] = useState<"bw" | "color" | null>(null);
   const { data, isLoading } = useQuery({ queryKey: ["site-survey-report", visit.id], enabled: open, queryFn: async () => {
     const [{ data: lucs, error: lucError }, { data: environments, error: envError }, { data: responses, error: responseError }, { data: attachments, error: attachmentError }, { data: calls, error: callError }, { data: visitTechs }, { data: materials, error: materialError }, { data: pauses, error: pauseError }] = await Promise.all([
-      supabase.from("site_survey_visit_lucs").select("id,luc_number,shop_name,started_at,completed_at,completion_status,cancellation_reason_id,site_survey_cancellation_reasons(name)").eq("visit_id", visit.id).eq("active", true).order("luc_number"),
-      supabase.from("site_survey_visit_environments").select("id,name,started_at,completed_at,completion_status").eq("visit_id", visit.id).eq("active", true).order("name"),
+       supabase.from("site_survey_visit_lucs").select("id,luc_number,shop_name,started_at,completed_at,completion_status,skipped_section_ids,cancellation_reason_id,site_survey_cancellation_reasons(name)").eq("visit_id", visit.id).eq("active", true).order("luc_number"),
+       supabase.from("site_survey_visit_environments").select("id,name,started_at,completed_at,completion_status,skipped_section_ids").eq("visit_id", visit.id).eq("active", true).order("name"),
       supabase.from("site_survey_responses").select("id,question_id,visit_luc_id,visit_environment_id,answer").eq("visit_id", visit.id),
       supabase.from("site_survey_attachments").select("id,visit_luc_id,visit_environment_id,file_name,storage_path,content_type,attachment_kind").eq("visit_id", visit.id).order("created_at"),
       supabase.from("site_survey_generated_calls").select("id,visit_luc_id,visit_environment_id,status,internal_calls(call_number,title,description,status)").eq("visit_id", visit.id),
@@ -239,7 +244,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
       supabase.from("site_survey_point_pauses").select("id,visit_luc_id,visit_environment_id,reason_id,started_at,ended_at,site_survey_pause_reasons(name)").eq("visit_id", visit.id).order("started_at"),
     ]);
     const error = lucError ?? envError ?? responseError ?? attachmentError ?? callError ?? materialError ?? pauseError; if (error) throw error;
-    const points: Point[] = [...(lucs ?? []).map((item) => { const reason = item.site_survey_cancellation_reasons as unknown as { name?: string } | null; return { id: item.id, label: `LUC ${item.luc_number} — ${item.shop_name}`, started_at: item.started_at, completed_at: item.completed_at, completion_status: item.completion_status, cancellationReason: reason?.name ?? null, kind: "luc" as const }; }), ...(environments ?? []).map((item) => ({ id: item.id, label: item.name, started_at: item.started_at, completed_at: item.completed_at, completion_status: item.completion_status, cancellationReason: null, kind: "environment" as const }))];
+     const points: Point[] = [...(lucs ?? []).map((item) => { const reason = item.site_survey_cancellation_reasons as unknown as { name?: string } | null; return { id: item.id, label: `LUC ${item.luc_number} — ${item.shop_name}`, started_at: item.started_at, completed_at: item.completed_at, completion_status: item.completion_status, cancellationReason: reason?.name ?? null, kind: "luc" as const, skippedSectionIds: Array.isArray(item.skipped_section_ids) ? item.skipped_section_ids.filter((id): id is string => typeof id === "string") : [] }; }), ...(environments ?? []).map((item) => ({ id: item.id, label: item.name, started_at: item.started_at, completed_at: item.completed_at, completion_status: item.completion_status, cancellationReason: null, kind: "environment" as const, skippedSectionIds: Array.isArray(item.skipped_section_ids) ? item.skipped_section_ids.filter((id): id is string => typeof id === "string") : [] }))];
     return { points, responses: responses ?? [], attachments: attachments ?? [], calls: calls ?? [], visitTechs: visitTechs ?? [], materials: (materials ?? []) as unknown as VisitMaterial[], pauses: (pauses ?? []) as PointPause[] };
   } });
   const calculation = useMemo(() => {
@@ -265,11 +270,17 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     const groups = [{ label: "Tipos de hidrômetro", terms: ["tipo de hidrometro", "tipo de registro"] }, { label: "Dificuldade de acesso", terms: ["dificuldade", "acesso ao hidrometro"] }, { label: "Quadros e pontos elétricos", terms: ["quadro eletrico", "ponto eletrico"] }, { label: "Complexidade", terms: ["complexidade"] }];
     return groups.map((group) => { const counts = new Map<string, number>(); for (const response of data?.responses ?? []) { const question = questions.find((item) => item.id === response.question_id); if (!question || !group.terms.some((term) => normalize(question.prompt).includes(term))) continue; const value = valueText(response.answer).trim(); if (value) counts.set(value, (counts.get(value) ?? 0) + 1); } return { label: group.label, values: [...counts.entries()] }; }).filter((group) => group.values.length);
   }, [data?.responses, questions]);
-  const pointSummaries = (point: Point) => buildPointSummaries((pointResponses(point) as ReportResponse[]).filter((response) => !stageSevenQuestionIds.has(response.question_id)), questions, sections);
+  const pointSummaries = (point: Point) => buildPointSummaries((pointResponses(point) as ReportResponse[]).filter((response) => !stageSevenQuestionIds.has(response.question_id)), questions, sections, point.skippedSectionIds);
   const pointMaterials = (point: Point) => (data?.materials ?? []).filter((item) => point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id);
   const materialSentence = (point: Point) => {
+    const materialSection = sections.find((section) => normalize(section.title).includes("materiais") && normalize(section.title).includes("equipamentos"));
+    if (materialSection && point.skippedSectionIds.includes(materialSection.id)) return "Não realizada.";
     const materials = pointMaterials(point);
-    if (!materials.length) return "";
+    if (!materials.length) {
+      const specialQuestion = questions.find((question) => normalize(question.prompt).includes("equipamento") && normalize(question.prompt).includes("ferramenta especial") && (!materialSection || question.section_id === materialSection.id));
+      const answer = pointResponses(point).find((response) => response.question_id === specialQuestion?.id);
+      return answer && /^(nao|não)$/i.test(valueText(answer.answer).trim()) ? `Para a instalação ${point.kind === "luc" ? "nessa loja" : "nesse ambiente"}, não é necessário utilizar equipamento ou ferramenta especial.` : "";
+    }
     const descriptions = materials.map((item) => {
       const details = [item.site_survey_screwdriver_types?.name, item.site_survey_wrench_sizes?.name, item.notes].filter(Boolean).join(" — ");
       return `${item.quantity} × ${item.site_survey_material_catalog?.name ?? "ferramenta"}${details ? ` (${details})` : ""}`;
