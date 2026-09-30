@@ -311,7 +311,8 @@ function VisitDialog({ data, visit, onSaved, inline = false, manual = false }: {
     const startDate = new Date(startValue);
     const endDate = endValue ? new Date(endValue) : null;
     if (!startValue || Number.isNaN(startDate.getTime()) || (endDate && Number.isNaN(endDate.getTime()))) throw new Error("Informe datas e horários válidos para a visita.");
-    if (endDate && endDate < startDate) throw new Error("O término previsto deve ser posterior ao início da visita.");
+     if ((manual || visit?.is_manual_entry) && !endDate) throw new Error("Informe o término da visita realizada.");
+     if (endDate && endDate < startDate) throw new Error("O término da visita deve ser posterior ao início.");
     const selectedClientRecord = data.clients.find((item) => item.id === linkedClientId); const defaultTemplate = data.templates.find((item) => item.active && item.is_default && item.client_category_id === selectedClientRecord?.category_id);
     const selectedTemplate = isShopping ? defaultTemplate?.id : String(values.get("template_id")) === "none" ? null : String(values.get("template_id"));
     if (isShopping && !selectedTemplate) throw new Error("O checklist padrão de Shoppings não está disponível.");
