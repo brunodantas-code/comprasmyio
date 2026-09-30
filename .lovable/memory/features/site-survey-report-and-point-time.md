@@ -12,7 +12,7 @@ A redação fluida de cada ponto acompanha a ordem vigente das seções e pergun
 
 O PDF padrão usa Nunito, capa com “Site Survey” na mesma linha e “Relatório” abaixo, sem o texto “Relatório técnico”. Os dados de cliente, emissão, unidade e visita ficam próximos ao rodapé, abaixo de uma divisória lilás fina. “Visão geral” não possui linha inferior. Os textos fluidos são justificados, com entrelinha 1,15, e nenhum título pode ficar separado do respectivo texto por quebra de página.
 
-Cada loja ou ambiente terá início e conclusão próprios. O início é registrado no primeiro evento entre clicar em Iniciar visita e adicionar a foto da fachada. A foto da fachada é sempre obrigatória para conferir LUC e nome e para permitir a conclusão do ponto, inclusive quando ele foi pré-cadastrado pelo Suporte.
+Cada loja ou ambiente terá início e conclusão próprios. Nas visitas regulares, o início é registrado no primeiro evento entre clicar em Iniciar visita e adicionar a foto da fachada. Nessas visitas, a foto da fachada é obrigatória para conferir LUC e nome e concluir o ponto, inclusive quando ele foi pré-cadastrado pelo Suporte. Nas visitas já realizadas cadastradas manualmente, a foto da fachada é opcional e não bloqueia a conclusão do ponto.
 
 A estimativa de instalação usa premissas detalhadas administráveis no Cadastro, associadas às respostas técnicas (tipo/quantidade de hidrômetros, dificuldade de acesso, quadros elétricos, complexidade e outros fatores), somando a duração aplicável a todos os pontos ativos.
 
