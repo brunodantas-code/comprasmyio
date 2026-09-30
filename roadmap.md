@@ -790,3 +790,6 @@
 - [x] Supply — ativar Pagamento no cadastro, reclassificar o Approval 202609230001 sem duplicá-lo e excluir pagamentos das filas de execução, mantendo a conta no Cash Flow.
 - [x] Site Survey — conferir cadastro retroativo (inclusive Shopping Taboão): datas anteriores a hoje são aceitas; validar término após início com mensagem clara. Se ainda falhar ao salvar, obter a mensagem exata para investigar outra causa.
 - [x] Site Survey — preservar e conferir o salvamento automático do preenchimento durante a correção do cadastro retroativo.
+
+- [x] Site Survey — ao selecionar modelo de checklist, iniciar todas as seções e perguntas recolhidas.
+- [x] Site Survey — dar ao título das seções o destaque e tamanho de “Seções do checklist”.
