@@ -8,6 +8,7 @@
 - [ ] Site Survey — gerar relatório completo com prévia e PDF colorido/P&B, fotos por ponto, totalizadores, ações, estimativa detalhada e apuração de horas extras/noturnas.
 - [x] Site Survey — corrigir a redação e os títulos das etapas no relatório, respeitando “Não realizada”, respostas de ferramentas e numeração manual.
 - [x] Site Survey — corrigir a frase do perfil de consumo não informado e evitar distorção das fotos no PDF.
+- [x] Site Survey — omitir “Outros” da redação do relatório e resumir o detalhe da localização do hidrômetro, sem alterar respostas salvas.
 - [x] Site Survey — permitir editar os cadastros de Diversos e as premissas de tempo pelo lápis verde.
 - [x] Site Survey — dispensar foto da fachada na conclusão de lojas e ambientes de visitas já realizadas, mantendo a exigência nas visitas regulares.
 - [x] Site Survey — permitir ordenação simples ou dupla dos PDFs por tipo de ponto, sequência de cadastro e técnico da visita.
