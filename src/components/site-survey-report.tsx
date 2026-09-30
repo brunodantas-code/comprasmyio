@@ -83,7 +83,7 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
     return true;
   };
 
-  const sectionFor = (terms: string[]) => sections.find((section) => terms.some((term) => normalize(section.title).includes(term)));
+  const sectionFor = (terms: string[]) => sections.find((section) => section.position >= 3 && terms.some((term) => normalize(section.title).includes(term)));
   const hydraulicSection = sectionFor(hydraulicSections);
   const electricalSection = sectionFor(electricalSections);
   const hydraulic: RichPart[] = [];
@@ -266,7 +266,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
   const pausesForPoint = (point: Point) => (data?.pauses ?? []).filter((pause) => point.kind === "luc" ? pause.visit_luc_id === point.id : pause.visit_environment_id === point.id);
   const stageSevenSectionIds = new Set(sections.filter((section) => section.position === 6 || normalize(section.title).includes("revisao")).map((section) => section.id));
   const stageSevenQuestionIds = new Set(questions.filter((question) => stageSevenSectionIds.has(question.section_id)).map((question) => question.id));
-  const materialSectionTitle = sections.find((section) => normalize(section.title).includes("materiais") && normalize(section.title).includes("equipamentos"))?.title ?? "Materiais e equipamentos";
+  const materialSectionTitle = sections.find((section) => section.position >= 3 && normalize(section.title).includes("materiais") && normalize(section.title).includes("equipamentos"))?.title ?? "Materiais e equipamentos";
   const reviewSection = sections.find((section) => stageSevenSectionIds.has(section.id));
   const reviewTitle = reviewSection?.title ?? "Revisão, pendências, fotos e encerramento";
   const reviewSkipped = (point: Point) => Boolean(reviewSection && point.skippedSectionIds.includes(reviewSection.id));
@@ -278,7 +278,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
   const pointSummaries = (point: Point) => buildPointSummaries((pointResponses(point) as ReportResponse[]).filter((response) => !stageSevenQuestionIds.has(response.question_id)), questions, sections, point.skippedSectionIds);
   const pointMaterials = (point: Point) => (data?.materials ?? []).filter((item) => point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id);
   const materialSentence = (point: Point) => {
-    const materialSection = sections.find((section) => normalize(section.title).includes("materiais") && normalize(section.title).includes("equipamentos"));
+    const materialSection = sections.find((section) => section.position >= 3 && normalize(section.title).includes("materiais") && normalize(section.title).includes("equipamentos"));
     if (materialSection && point.skippedSectionIds.includes(materialSection.id)) return "Não realizada.";
     const materials = pointMaterials(point);
     if (!materials.length) {
