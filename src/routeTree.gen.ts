@@ -9,29 +9,25 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
-import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as AuthenticatedCashFlowRouteImport } from './routes/_authenticated/cash-flow'
-import { Route as AuthenticatedChamadosRouteImport } from './routes/_authenticated/chamados'
-import { Route as AuthenticatedCrmRouteImport } from './routes/_authenticated/crm'
-import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
-import { Route as AuthenticatedDevelopmentRouteImport } from './routes/_authenticated/development'
-import { Route as AuthenticatedLegalRouteImport } from './routes/_authenticated/legal'
-import { Route as AuthenticatedPendentesRouteImport } from './routes/_authenticated/pendentes'
-import { Route as AuthenticatedPortalRouteImport } from './routes/_authenticated/portal'
-import { Route as AuthenticatedRhRouteImport } from './routes/_authenticated/rh'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedSiteSurveyRouteImport } from './routes/_authenticated/site-survey'
+import { Route as AuthenticatedRhRouteImport } from './routes/_authenticated/rh'
+import { Route as AuthenticatedPortalRouteImport } from './routes/_authenticated/portal'
+import { Route as AuthenticatedPendentesRouteImport } from './routes/_authenticated/pendentes'
+import { Route as AuthenticatedLegalRouteImport } from './routes/_authenticated/legal'
+import { Route as AuthenticatedDevelopmentRouteImport } from './routes/_authenticated/development'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedCrmRouteImport } from './routes/_authenticated/crm'
+import { Route as AuthenticatedChamadosRouteImport } from './routes/_authenticated/chamados'
+import { Route as AuthenticatedCashFlowRouteImport } from './routes/_authenticated/cash-flow'
 import { Route as ApiPublicHooksSyncProductStatusRouteImport } from './routes/api/public/hooks/sync-product-status'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
-  id: '/_authenticated',
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -39,29 +35,38 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedCashFlowRoute = AuthenticatedCashFlowRouteImport.update({
-  id: '/cash-flow',
-  path: '/cash-flow',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedSiteSurveyRoute = AuthenticatedSiteSurveyRouteImport.update({
+  id: '/site-survey',
+  path: '/site-survey',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedChamadosRoute = AuthenticatedChamadosRouteImport.update({
-  id: '/chamados',
-  path: '/chamados',
+const AuthenticatedRhRoute = AuthenticatedRhRouteImport.update({
+  id: '/rh',
+  path: '/rh',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedCrmRoute = AuthenticatedCrmRouteImport.update({
-  id: '/crm',
-  path: '/crm',
+const AuthenticatedPortalRoute = AuthenticatedPortalRouteImport.update({
+  id: '/portal',
+  path: '/portal',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+const AuthenticatedPendentesRoute = AuthenticatedPendentesRouteImport.update({
+  id: '/pendentes',
+  path: '/pendentes',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedLegalRoute = AuthenticatedLegalRouteImport.update({
+  id: '/legal',
+  path: '/legal',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDevelopmentRoute =
@@ -70,29 +75,24 @@ const AuthenticatedDevelopmentRoute =
     path: '/development',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedLegalRoute = AuthenticatedLegalRouteImport.update({
-  id: '/legal',
-  path: '/legal',
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedPendentesRoute = AuthenticatedPendentesRouteImport.update({
-  id: '/pendentes',
-  path: '/pendentes',
+const AuthenticatedCrmRoute = AuthenticatedCrmRouteImport.update({
+  id: '/crm',
+  path: '/crm',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedPortalRoute = AuthenticatedPortalRouteImport.update({
-  id: '/portal',
-  path: '/portal',
+const AuthenticatedChamadosRoute = AuthenticatedChamadosRouteImport.update({
+  id: '/chamados',
+  path: '/chamados',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedRhRoute = AuthenticatedRhRouteImport.update({
-  id: '/rh',
-  path: '/rh',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedSiteSurveyRoute = AuthenticatedSiteSurveyRouteImport.update({
-  id: '/site-survey',
-  path: '/site-survey',
+const AuthenticatedCashFlowRoute = AuthenticatedCashFlowRouteImport.update({
+  id: '/cash-flow',
+  path: '/cash-flow',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const ApiPublicHooksSyncProductStatusRoute =
@@ -214,18 +214,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated': {
-      id: '/_authenticated'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -235,67 +228,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/cash-flow': {
-      id: '/_authenticated/cash-flow'
-      path: '/cash-flow'
-      fullPath: '/cash-flow'
-      preLoaderRoute: typeof AuthenticatedCashFlowRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/chamados': {
-      id: '/_authenticated/chamados'
-      path: '/chamados'
-      fullPath: '/chamados'
-      preLoaderRoute: typeof AuthenticatedChamadosRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/crm': {
-      id: '/_authenticated/crm'
-      path: '/crm'
-      fullPath: '/crm'
-      preLoaderRoute: typeof AuthenticatedCrmRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/dashboard': {
-      id: '/_authenticated/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/development': {
-      id: '/_authenticated/development'
-      path: '/development'
-      fullPath: '/development'
-      preLoaderRoute: typeof AuthenticatedDevelopmentRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/legal': {
-      id: '/_authenticated/legal'
-      path: '/legal'
-      fullPath: '/legal'
-      preLoaderRoute: typeof AuthenticatedLegalRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/pendentes': {
-      id: '/_authenticated/pendentes'
-      path: '/pendentes'
-      fullPath: '/pendentes'
-      preLoaderRoute: typeof AuthenticatedPendentesRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/portal': {
-      id: '/_authenticated/portal'
-      path: '/portal'
-      fullPath: '/portal'
-      preLoaderRoute: typeof AuthenticatedPortalRouteImport
+    '/_authenticated/site-survey': {
+      id: '/_authenticated/site-survey'
+      path: '/site-survey'
+      fullPath: '/site-survey'
+      preLoaderRoute: typeof AuthenticatedSiteSurveyRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/rh': {
@@ -305,11 +256,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRhRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/site-survey': {
-      id: '/_authenticated/site-survey'
-      path: '/site-survey'
-      fullPath: '/site-survey'
-      preLoaderRoute: typeof AuthenticatedSiteSurveyRouteImport
+    '/_authenticated/portal': {
+      id: '/_authenticated/portal'
+      path: '/portal'
+      fullPath: '/portal'
+      preLoaderRoute: typeof AuthenticatedPortalRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/pendentes': {
+      id: '/_authenticated/pendentes'
+      path: '/pendentes'
+      fullPath: '/pendentes'
+      preLoaderRoute: typeof AuthenticatedPendentesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/legal': {
+      id: '/_authenticated/legal'
+      path: '/legal'
+      fullPath: '/legal'
+      preLoaderRoute: typeof AuthenticatedLegalRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/development': {
+      id: '/_authenticated/development'
+      path: '/development'
+      fullPath: '/development'
+      preLoaderRoute: typeof AuthenticatedDevelopmentRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/crm': {
+      id: '/_authenticated/crm'
+      path: '/crm'
+      fullPath: '/crm'
+      preLoaderRoute: typeof AuthenticatedCrmRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/chamados': {
+      id: '/_authenticated/chamados'
+      path: '/chamados'
+      fullPath: '/chamados'
+      preLoaderRoute: typeof AuthenticatedChamadosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/cash-flow': {
+      id: '/_authenticated/cash-flow'
+      path: '/cash-flow'
+      fullPath: '/cash-flow'
+      preLoaderRoute: typeof AuthenticatedCashFlowRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/api/public/hooks/sync-product-status': {
