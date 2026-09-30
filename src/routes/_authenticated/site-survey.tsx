@@ -386,6 +386,18 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
   const scopedTechnicians = (detail?.technicians ?? []).filter((item) => !item.visit_luc_id && !item.visit_environment_id);
   useEffect(() => { setOpenSectionId(null); }, [visit?.id]);
   useEffect(() => () => { if (autosaveTimer.current) clearTimeout(autosaveTimer.current); }, []);
+  useEffect(() => {
+    // Dropping a file outside a question must never navigate away and discard the checklist.
+    const preventFileNavigation = (event: DragEvent) => {
+      if (!event.dataTransfer?.types.includes("Files")) return;
+      const target = event.target;
+      if (target instanceof Element && (target.closest("[data-survey-photo-drop]") || target.closest('input[type="file"]'))) return;
+      event.preventDefault();
+    };
+    document.addEventListener("dragover", preventFileNavigation);
+    document.addEventListener("drop", preventFileNavigation);
+    return () => { document.removeEventListener("dragover", preventFileNavigation); document.removeEventListener("drop", preventFileNavigation); };
+  }, []);
   useEffect(() => { setMaterialRows(scopedMaterials.map((item) => ({ catalog_item_id: item.catalog_item_id, quantity: String(item.quantity), notes: item.notes ?? "", screwdriver_type_id: item.screwdriver_type_id ?? "none", wrench_size_id: item.wrench_size_id ?? "none" }))); }, [selectedPoint, detail?.visitMaterials]);
   useEffect(() => { setNoAdditionalMaterial(Boolean(scopedMaterialDecision?.no_additional_material)); }, [selectedPoint, detail?.materialDecisions]);
   useEffect(() => { setSpecialEquipmentAnswer(""); }, [selectedPoint]);
@@ -1068,7 +1080,7 @@ function QuestionField({ number, question, answer, attachments, userId, canDelet
    const showOtherDetail = (config.other_detail === true || hasOtherOption) && (isOtherOption(selectedValue) || selectedValues.some(isOtherOption));
   const showDetail = (Boolean(config.detail) && conditionApplies) || showOtherDetail;
   const setAnswer = (value: string) => { setSelectedValue(value); onAnswerChange?.(value); };
-  return <div onDragOver={(event) => { if (config.photo && conditionApplies && event.dataTransfer.types.includes("Files")) { event.preventDefault(); event.dataTransfer.dropEffect = "copy"; } }} onDrop={(event) => { if (!config.photo || !conditionApplies || !event.dataTransfer.files.length) return; event.preventDefault(); acceptPhoto(event.dataTransfer.files[0]); }} onPaste={(event) => { const file = Array.from(event.clipboardData.files).find((item) => item.type.startsWith("image/")); if (config.photo && conditionApplies && file) { event.preventDefault(); acceptPhoto(file); } }} className={`relative grid gap-3 rounded-md border border-myio-green/20 bg-myio-green/10 px-4 pb-4 pt-12 shadow-sm transition-shadow focus-within:border-myio-green/50 focus-within:shadow-md sm:px-5 sm:pb-5 sm:pt-12 ${showDetail || (config.photo && conditionApplies) ? "lg:grid-cols-[minmax(0,1.35fr)_minmax(260px,0.65fr)] lg:items-start lg:gap-5" : ""}`}>
+  return <div data-survey-photo-drop={config.photo && conditionApplies ? "" : undefined} onDragOver={(event) => { if (config.photo && conditionApplies && event.dataTransfer.types.includes("Files")) { event.preventDefault(); event.dataTransfer.dropEffect = "copy"; } }} onDrop={(event) => { if (!config.photo || !conditionApplies || !event.dataTransfer.files.length) return; event.preventDefault(); acceptPhoto(event.dataTransfer.files[0]); }} onPaste={(event) => { const file = Array.from(event.clipboardData.files).find((item) => item.type.startsWith("image/")); if (config.photo && conditionApplies && file) { event.preventDefault(); acceptPhoto(file); } }} className={`relative grid gap-3 rounded-md border border-myio-green/20 bg-myio-green/10 px-4 pb-4 pt-12 shadow-sm transition-shadow focus-within:border-myio-green/50 focus-within:shadow-md sm:px-5 sm:pb-5 sm:pt-12 ${showDetail || (config.photo && conditionApplies) ? "lg:grid-cols-[minmax(0,1.35fr)_minmax(260px,0.65fr)] lg:items-start lg:gap-5" : ""}`}>
     <span className="absolute left-3 top-3 grid h-7 w-7 place-items-center rounded-sm bg-card text-xs font-bold tabular-nums text-myio-green shadow-sm ring-1 ring-myio-green/20" aria-hidden="true">{number}</span>
     <div className="min-w-0 space-y-2">
       <div className="flex min-w-0 flex-wrap items-center gap-2"><Label className={`text-sm font-semibold ${pending ? "text-destructive" : ""}`}>{question.prompt.replace(/\s*\*\s*$/, "")}</Label>{call?.id && call.number ? <Link to="/chamados" search={{ chamado: call.id }} aria-label={`Abrir histórico do chamado ${call.number}`}><Badge variant="outline" className="cursor-pointer border-myio-green/30 bg-myio-green/10 text-myio-green hover:bg-myio-green/20">Chamado #{call.number}</Badge></Link> : null}</div>
