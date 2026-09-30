@@ -563,11 +563,12 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
          if (photoInput instanceof HTMLInputElement) photoInput.value = "";
       }
     }
-    const existingResponses = (detail?.responses ?? []).filter((response) => phase === "pre_visit"
-      ? generalQuestionIds.has(response.question_id) && !response.visit_luc_id && !response.visit_environment_id
-      : matchesPoint(response));
+     let existingQuery = supabase.from("site_survey_responses").select("id,question_id").eq("visit_id", visit.id);
+     existingQuery = phase === "pre_visit" ? existingQuery.is("visit_luc_id", null).is("visit_environment_id", null) : pointKind === "luc" ? existingQuery.eq("visit_luc_id", pointId) : existingQuery.eq("visit_environment_id", pointId);
+     const { data: existingResponses, error: existingError } = await existingQuery;
+     if (existingError) throw existingError;
     await Promise.all(rows.map(async (row) => {
-      const existing = existingResponses.find((response) => response.question_id === row.question_id);
+       const existing = existingResponses?.find((response) => response.question_id === row.question_id);
       const { error } = existing
         ? await supabase.from("site_survey_responses").update({ answer: row.answer, answered_by: row.answered_by, question_snapshot: row.question_snapshot }).eq("id", existing.id)
         : await supabase.from("site_survey_responses").insert(row as never);
