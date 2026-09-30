@@ -28,6 +28,7 @@ type RichPart = { text: string; bold?: boolean };
 type PointSummary = { title: string; parts: RichPart[]; questionIds: Set<string> };
 type VisitMaterial = { id: string; visit_luc_id: string | null; visit_environment_id: string | null; quantity: number; notes: string | null; site_survey_material_catalog: { name?: string } | null; site_survey_screwdriver_types: { name?: string } | null; site_survey_wrench_sizes: { name?: string } | null };
 type SortKey = "type" | "created" | "technician";
+type MeterMapping = { name: string; position: number };
 
 const valueText = (answer: unknown): string => {
   if (answer && typeof answer === "object" && !Array.isArray(answer) && "value" in answer) { const item = answer as { value: unknown; detail?: unknown }; return [valueText(item.value), typeof item.detail === "string" ? item.detail : ""].filter(Boolean).join(" — "); }
@@ -47,7 +48,20 @@ const findAnswer = (responses: ReportResponse[], questions: Question[], terms: s
   });
   return response ? { id: response.question_id, value: valueText(response.answer).trim() } : null;
 };
-const buildPointSummaries = (responses: ReportResponse[], questions: Question[], sections: Section[], skippedSectionIds: string[]): PointSummary[] => {
+const meterSpecification = (flowRate: string | null, mappings: MeterMapping[]) => {
+  if (!flowRate || /nao (?:foi )?informad[oa]|sem informacao/i.test(normalize(flowRate))) return "Especificação do hidrômetro não informada";
+  const numbers = flowRate.match(/\d+(?:[,.]\d+)?/g)?.map((number) => Number(number.replace(",", "."))) ?? [];
+  const rate = numbers.at(-1);
+  if (rate === undefined) return "Especificação do hidrômetro não informada";
+  const mapping = [...mappings].sort((a, b) => a.position - b.position).find(({ name }) => {
+    const limits = name.split(/\s+-\s+/)[0].match(/\d+(?:[,.]\d+)?/g)?.map((number) => Number(number.replace(",", "."))) ?? [];
+    if (normalize(name).startsWith("entre") && limits.length >= 2) return rate > limits[0] && rate <= limits[1];
+    if (normalize(name).startsWith("ate") && limits.length) return rate <= limits[0];
+    return false;
+  });
+  return mapping?.name.match(/\bDN\s*\d+\b/i)?.[0]?.replace(/\s+/g, "") ?? "Especificação do hidrômetro não informada";
+};
+const buildPointSummaries = (responses: ReportResponse[], questions: Question[], sections: Section[], skippedSectionIds: string[], meterMappings: MeterMapping[]): PointSummary[] => {
   const summaries: PointSummary[] = [];
   const skipped = new Set(skippedSectionIds);
   const hydraulicSections = ["agua", "hidrometro", "hidraulica"];
@@ -161,7 +175,7 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
     }
   }
   if (hydraulicSection?.id && skipped.has(hydraulicSection.id)) summaries.push({ title: hydraulicSection.title, parts: [{ text: "Não realizada." }], questionIds: hydraulicIds });
-  else if (hydraulic.length) summaries.push({ title: hydraulicSection?.title ?? "Água e hidrômetros", parts: hydraulic, questionIds: hydraulicIds });
+  else if (hydraulic.length) summaries.push({ title: `${hydraulicSection?.title.replace(/hidrômetros/i, "Hidrômetros") ?? "Água e Hidrômetros"} - ${meterSpecification(flowRate?.value ?? null, meterMappings)}`, parts: hydraulic, questionIds: hydraulicIds });
 
   const electrical: RichPart[] = [];
   const electricalIds = new Set<string>();
@@ -254,7 +268,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
   const [secondarySort, setSecondarySort] = useState<SortKey | "none">("none");
   const [generatingPdf, setGeneratingPdf] = useState<"bw" | "color" | null>(null);
   const { data, isLoading } = useQuery({ queryKey: ["site-survey-report", visit.id], enabled: open, queryFn: async () => {
-    const [{ data: lucs, error: lucError }, { data: environments, error: envError }, { data: responses, error: responseError }, { data: attachments, error: attachmentError }, { data: calls, error: callError }, { data: visitTechs }, { data: materials, error: materialError }, { data: pauses, error: pauseError }] = await Promise.all([
+    const [{ data: lucs, error: lucError }, { data: environments, error: envError }, { data: responses, error: responseError }, { data: attachments, error: attachmentError }, { data: calls, error: callError }, { data: visitTechs }, { data: materials, error: materialError }, { data: pauses, error: pauseError }, { data: meterCatalogs, error: meterError }] = await Promise.all([
        supabase.from("site_survey_visit_lucs").select("id,luc_number,shop_name,created_at,started_at,completed_at,completion_status,skipped_section_ids,cancellation_reason_id,site_survey_cancellation_reasons(name)").eq("visit_id", visit.id).eq("active", true).order("luc_number"),
        supabase.from("site_survey_visit_environments").select("id,name,created_at,started_at,completed_at,completion_status,skipped_section_ids").eq("visit_id", visit.id).eq("active", true).order("name"),
       supabase.from("site_survey_responses").select("id,question_id,visit_luc_id,visit_environment_id,answer").eq("visit_id", visit.id),
@@ -263,10 +277,11 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
       supabase.from("site_survey_visit_technicians").select("technician_id,visit_luc_id,visit_environment_id").eq("visit_id", visit.id),
       supabase.from("site_survey_visit_materials").select("id,visit_luc_id,visit_environment_id,quantity,notes,site_survey_material_catalog(name),site_survey_screwdriver_types(name),site_survey_wrench_sizes(name)").eq("visit_id", visit.id).order("created_at"),
       supabase.from("site_survey_point_pauses").select("id,visit_luc_id,visit_environment_id,reason_id,started_at,ended_at,site_survey_pause_reasons(name)").eq("visit_id", visit.id).order("started_at"),
+       supabase.from("site_survey_custom_catalogs").select("name,site_survey_custom_catalog_items(name,position,active)").ilike("name", "De-Para de Hidrômetros").eq("active", true),
     ]);
-    const error = lucError ?? envError ?? responseError ?? attachmentError ?? callError ?? materialError ?? pauseError; if (error) throw error;
+    const error = lucError ?? envError ?? responseError ?? attachmentError ?? callError ?? materialError ?? pauseError ?? meterError; if (error) throw error;
      const points: Point[] = [...(lucs ?? []).map((item) => { const reason = item.site_survey_cancellation_reasons as unknown as { name?: string } | null; return { id: item.id, label: `LUC ${item.luc_number} — ${item.shop_name}`, created_at: item.created_at, started_at: item.started_at, completed_at: item.completed_at, completion_status: item.completion_status, cancellationReason: reason?.name ?? null, kind: "luc" as const, skippedSectionIds: Array.isArray(item.skipped_section_ids) ? item.skipped_section_ids.filter((id): id is string => typeof id === "string") : [] }; }), ...(environments ?? []).map((item) => ({ id: item.id, label: item.name, created_at: item.created_at, started_at: item.started_at, completed_at: item.completed_at, completion_status: item.completion_status, cancellationReason: null, kind: "environment" as const, skippedSectionIds: Array.isArray(item.skipped_section_ids) ? item.skipped_section_ids.filter((id): id is string => typeof id === "string") : [] }))];
-    return { points, responses: responses ?? [], attachments: attachments ?? [], calls: calls ?? [], visitTechs: visitTechs ?? [], materials: (materials ?? []) as unknown as VisitMaterial[], pauses: (pauses ?? []) as PointPause[] };
+    return { points, responses: responses ?? [], attachments: attachments ?? [], calls: calls ?? [], visitTechs: visitTechs ?? [], materials: (materials ?? []) as unknown as VisitMaterial[], pauses: (pauses ?? []) as PointPause[], meterMappings: (meterCatalogs ?? []).flatMap((catalog) => catalog.site_survey_custom_catalog_items.filter((item) => item.active).map((item) => ({ name: item.name, position: item.position }))) };
   } });
   const calculation = useMemo(() => {
     const points = data?.points.filter((point) => point.completion_status !== "cancelada") ?? [];
@@ -306,7 +321,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     const groups = [{ label: "Tipos de hidrômetro", terms: ["tipo de hidrometro", "tipo de registro"] }, { label: "Dificuldade de acesso", terms: ["dificuldade", "acesso ao hidrometro"] }, { label: "Quadros e pontos elétricos", terms: ["quadro eletrico", "ponto eletrico"] }, { label: "Complexidade", terms: ["complexidade"] }];
     return groups.map((group) => { const counts = new Map<string, number>(); for (const response of data?.responses ?? []) { const question = questions.find((item) => item.id === response.question_id); if (!question || !group.terms.some((term) => normalize(question.prompt).includes(term))) continue; const value = valueText(response.answer).trim(); if (value) counts.set(value, (counts.get(value) ?? 0) + 1); } return { label: group.label, values: [...counts.entries()] }; }).filter((group) => group.values.length);
   }, [data?.responses, questions]);
-  const pointSummaries = (point: Point) => buildPointSummaries((pointResponses(point) as ReportResponse[]).filter((response) => !stageSevenQuestionIds.has(response.question_id)), questions, reportSections, point.skippedSectionIds);
+  const pointSummaries = (point: Point) => buildPointSummaries((pointResponses(point) as ReportResponse[]).filter((response) => !stageSevenQuestionIds.has(response.question_id)), questions, reportSections, point.skippedSectionIds, data?.meterMappings ?? []);
   const pointMaterials = (point: Point) => (data?.materials ?? []).filter((item) => point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id);
   const materialSentence = (point: Point) => {
     const materialSection = reportSections.find((section) => section.position >= 3 && normalize(section.title).includes("materiais") && normalize(section.title).includes("equipamentos"));

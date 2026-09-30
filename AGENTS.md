@@ -21,4 +21,4 @@
 - Manual visits start `concluida` with historical end; checklist autosaves without timing. Shopping points share add dialog, not storage.
 - Photo drops/pastes populate file inputs for autosave; block outside drops to prevent lost edits.
 - Site Survey skips persist per store/environment; skip removes pending/completion requirements, preserves answers, and flushes autosave first.
-- Site Survey report preview and PDFs share point ordering: type, creation timestamp, and point-assigned technicians with visit-technician fallback, so export matches what users review.
+- Site Survey report preview/PDF share ordering and hydraulic DN from active De-Para by flow; missing flow shows no specification.
