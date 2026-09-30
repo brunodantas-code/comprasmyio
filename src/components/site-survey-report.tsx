@@ -367,7 +367,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
         pdf.setFont("Nunito", "bold"); pdf.setFontSize(10); pdf.text(summary.title, 14, y); pdf.setFontSize(9); y = drawRichParagraph(summary.parts, y + 7) + 4;
       }
       if (tools) { if (y > 262) { pdf.addPage(); y = 18; } pdf.setFont("Nunito", "bold"); pdf.text("Ferramentas", 14, y); y = drawRichParagraph([{ text: tools }], y + 5) + 2; }
-      if (stageSeven) { if (y > 262) { pdf.addPage(); y = 18; } pdf.setFont("Nunito", "bold"); pdf.text("Anotações da Etapa 7", 14, y); y = drawRichParagraph([{ text: stageSeven }], y + 5) + 2; }
+      if (stageSeven) { if (y > 262) { pdf.addPage(); y = 18; } pdf.setFont("Nunito", "bold"); pdf.text(`Anotações da Etapa ${visit.is_manual_entry ? 4 : 7}`, 14, y); y = drawRichParagraph([{ text: stageSeven }], y + 5) + 2; }
       if (calls) { if (y > 262) { pdf.addPage(); y = 18; } pdf.setFont("Nunito", "bold"); pdf.text("Ações e chamados", 14, y); y = drawRichParagraph([{ text: calls }], y + 5) + 2; }
       const photos = withPhotos ? data.attachments.filter((item) => item.content_type?.startsWith("image/") && (point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id)) : [];
       let photoColumn = 0;

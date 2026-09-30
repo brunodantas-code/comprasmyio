@@ -586,7 +586,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
              ? [...previousOtherSectionPending, ...activeSectionPending]
              : previousOtherSectionPending;
        const pointTable = pointKind === "luc" ? "site_survey_visit_lucs" : "site_survey_visit_environments";
-       const completedAt = finishPoint && !visit.is_manual_entry ? new Date().toISOString() : null;
+       const completedAt = finishPoint ? new Date().toISOString() : null;
        const { error: pointError } = await supabase.from(pointTable).update({ completion_status: finishPoint ? "concluida" : "pendente", completed_at: completedAt, completed_by: finishPoint ? data.userId : null, pending_fields: pendingFields, last_progress_at: new Date().toISOString() }).eq("id", pointId); if (pointError) throw pointError;
         const otherPointsComplete = points.filter((point) => point.value !== selectedPoint).every((point) => point.completionStatus === "concluida" || point.completionStatus === "cancelada");
        if (finishPoint && preVisitSaved && otherPointsComplete) {
