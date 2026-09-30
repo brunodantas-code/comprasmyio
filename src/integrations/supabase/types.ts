@@ -4497,6 +4497,7 @@ export type Database = {
           last_progress_at: string | null
           name: string
           pending_fields: Json
+          skipped_section_ids: Json
           started_at: string | null
           started_by: string | null
           template_id: string | null
@@ -4515,6 +4516,7 @@ export type Database = {
           last_progress_at?: string | null
           name: string
           pending_fields?: Json
+          skipped_section_ids?: Json
           started_at?: string | null
           started_by?: string | null
           template_id?: string | null
@@ -4533,6 +4535,7 @@ export type Database = {
           last_progress_at?: string | null
           name?: string
           pending_fields?: Json
+          skipped_section_ids?: Json
           started_at?: string | null
           started_by?: string | null
           template_id?: string | null
@@ -4676,6 +4679,7 @@ export type Database = {
           luc_number: string
           pending_fields: Json
           shop_name: string
+          skipped_section_ids: Json
           started_at: string | null
           started_by: string | null
           updated_at: string
@@ -4698,6 +4702,7 @@ export type Database = {
           luc_number: string
           pending_fields?: Json
           shop_name: string
+          skipped_section_ids?: Json
           started_at?: string | null
           started_by?: string | null
           updated_at?: string
@@ -4720,6 +4725,7 @@ export type Database = {
           luc_number?: string
           pending_fields?: Json
           shop_name?: string
+          skipped_section_ids?: Json
           started_at?: string | null
           started_by?: string | null
           updated_at?: string
