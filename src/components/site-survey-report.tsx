@@ -141,10 +141,11 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
   if (hydraulicComplexity) hydraulic.push({ text: "A instalação é de complexidade " }, { text: lower(hydraulicComplexity.value), bold: true }, { text: ". " });
   const consumptionLevel = hydraulicAnswer(["classificacao do perfil de consumo", "perfil de consumo classificado"]);
   const consumptionProfile = hydraulicAnswer(["perfil de consumo da loja"]);
-  if (consumptionLevel) hydraulic.push({ text: "O perfil de consumo da loja é " }, { text: lower(consumptionLevel.value), bold: true }, { text: consumptionProfile ? ", contemplando " : "." });
+  const profileNotInformed = consumptionProfile && /^(nao informado|nao informada|sem informacao|nao foi informado)$/.test(normalize(lower(consumptionProfile.value)));
+  if (consumptionLevel) hydraulic.push({ text: "O perfil de consumo da loja é " }, { text: lower(consumptionLevel.value), bold: true }, { text: consumptionProfile && !profileNotInformed ? ", contemplando " : ". " });
   if (consumptionProfile) {
     const profile = lower(consumptionProfile.value);
-    if (/^(nao informado|nao informada|sem informacao|nao foi informado)$/.test(normalize(profile))) {
+    if (profileNotInformed) {
       hydraulic.push({ text: "O perfil de consumo da loja não foi informado." });
     } else {
       hydraulic.push({ text: consumptionLevel ? "" : "O perfil de consumo da loja contempla " }, { text: profile, bold: true }, { text: "." });
