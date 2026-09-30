@@ -12,6 +12,7 @@
 - [x] Site Survey — mostrar no título de Água e Hidrômetros o DN do De-Para pela vazão, ou informar especificação ausente quando não houver vazão.
 - [x] Site Survey — permitir editar os cadastros de Diversos e as premissas de tempo pelo lápis verde.
 - [x] Site Survey — dispensar foto da fachada na conclusão de lojas e ambientes de visitas já realizadas, mantendo a exigência nas visitas regulares.
+- [x] Site Survey — manter a posição ao responder à primeira pergunta e destacar pendências somente após Salvar progresso, sem interromper o autosave.
 - [x] Site Survey — permitir ordenação simples ou dupla dos PDFs por tipo de ponto, sequência de cadastro e técnico da visita.
 - [x] Site Survey — substituir tabelas extensas por resumos textuais padronizados por tema, com respostas em negrito e fotos em grade compacta.
 - [ ] Site Survey — registrar início individual de cada loja/ambiente pelo primeiro evento entre botão de início e foto obrigatória da fachada.
