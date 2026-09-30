@@ -15,10 +15,10 @@ import nunitoRegularUrl from "@/assets/fonts/nunito-regular.ttf?url";
 import nunitoBoldUrl from "@/assets/fonts/nunito-bold.ttf?url";
 import nunitoExtraBoldUrl from "@/assets/fonts/nunito-extrabold.ttf?url";
 
-type Visit = { id: string; survey_number: number; client_id: string | null; client_unit_id: string | null; project_id: string | null; technician_id: string; status: string; scheduled_start: string; scheduled_end: string | null; address: string; contact_name: string | null; contact_phone: string | null; notes: string | null; started_at: string | null; completed_at: string | null; is_manual_entry: boolean };
+type Visit = { id: string; template_id: string | null; survey_number: number; client_id: string | null; client_unit_id: string | null; project_id: string | null; technician_id: string; status: string; scheduled_start: string; scheduled_end: string | null; address: string; contact_name: string | null; contact_phone: string | null; notes: string | null; started_at: string | null; completed_at: string | null; is_manual_entry: boolean };
 type Named = { id: string; name: string };
 type Question = { id: string; section_id: string; prompt: string; position?: number };
-type Section = { id: string; title: string; position: number };
+type Section = { id: string; template_id: string; title: string; position: number };
 type Profile = { id: string; full_name: string };
 type Point = { id: string; label: string; started_at: string | null; completed_at: string | null; completion_status: string; cancellationReason: string | null; kind: "luc" | "environment"; skippedSectionIds: string[] };
 type PointPause = { id: string; visit_luc_id: string | null; visit_environment_id: string | null; reason_id: string; started_at: string; ended_at: string | null; site_survey_pause_reasons: { name: string } | null };
@@ -262,12 +262,13 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     const techniciansNeeded = estimated ? Math.ceil(estimated / (480 * requestedDays)) : 0;
     return { breakdown, estimated, ...workedTime, pauseCount: data?.pauses.length ?? 0, assignedCount, days, techniciansNeeded };
   }, [assumptions, data, deadlineDays, visit.technician_id]);
+  const reportSections = sections.filter((section) => section.template_id === visit.template_id);
   const pointResponses = (point: Point) => (data?.responses ?? []).filter((response) => point.kind === "luc" ? response.visit_luc_id === point.id : response.visit_environment_id === point.id);
   const pausesForPoint = (point: Point) => (data?.pauses ?? []).filter((pause) => point.kind === "luc" ? pause.visit_luc_id === point.id : pause.visit_environment_id === point.id);
-  const stageSevenSectionIds = new Set(sections.filter((section) => section.position === 6 || normalize(section.title).includes("revisao")).map((section) => section.id));
+  const stageSevenSectionIds = new Set(reportSections.filter((section) => section.position === 6 || normalize(section.title).includes("revisao")).map((section) => section.id));
   const stageSevenQuestionIds = new Set(questions.filter((question) => stageSevenSectionIds.has(question.section_id)).map((question) => question.id));
-  const materialSectionTitle = sections.find((section) => section.position >= 3 && normalize(section.title).includes("materiais") && normalize(section.title).includes("equipamentos"))?.title ?? "Materiais e equipamentos";
-  const reviewSection = sections.find((section) => stageSevenSectionIds.has(section.id));
+  const materialSectionTitle = reportSections.find((section) => section.position >= 3 && normalize(section.title).includes("materiais") && normalize(section.title).includes("equipamentos"))?.title ?? "Materiais e equipamentos";
+  const reviewSection = reportSections.find((section) => stageSevenSectionIds.has(section.id));
   const reviewTitle = reviewSection?.title ?? "Revisão, pendências, fotos e encerramento";
   const reviewSkipped = (point: Point) => Boolean(reviewSection && point.skippedSectionIds.includes(reviewSection.id));
   const pointNotes = (point: Point) => reviewSection && point.skippedSectionIds.includes(reviewSection.id) ? "" : pointResponses(point).filter((response) => stageSevenQuestionIds.has(response.question_id)).map((response) => valueText(response.answer)).filter(Boolean).join("; ");
@@ -275,10 +276,10 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     const groups = [{ label: "Tipos de hidrômetro", terms: ["tipo de hidrometro", "tipo de registro"] }, { label: "Dificuldade de acesso", terms: ["dificuldade", "acesso ao hidrometro"] }, { label: "Quadros e pontos elétricos", terms: ["quadro eletrico", "ponto eletrico"] }, { label: "Complexidade", terms: ["complexidade"] }];
     return groups.map((group) => { const counts = new Map<string, number>(); for (const response of data?.responses ?? []) { const question = questions.find((item) => item.id === response.question_id); if (!question || !group.terms.some((term) => normalize(question.prompt).includes(term))) continue; const value = valueText(response.answer).trim(); if (value) counts.set(value, (counts.get(value) ?? 0) + 1); } return { label: group.label, values: [...counts.entries()] }; }).filter((group) => group.values.length);
   }, [data?.responses, questions]);
-  const pointSummaries = (point: Point) => buildPointSummaries((pointResponses(point) as ReportResponse[]).filter((response) => !stageSevenQuestionIds.has(response.question_id)), questions, sections, point.skippedSectionIds);
+  const pointSummaries = (point: Point) => buildPointSummaries((pointResponses(point) as ReportResponse[]).filter((response) => !stageSevenQuestionIds.has(response.question_id)), questions, reportSections, point.skippedSectionIds);
   const pointMaterials = (point: Point) => (data?.materials ?? []).filter((item) => point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id);
   const materialSentence = (point: Point) => {
-    const materialSection = sections.find((section) => section.position >= 3 && normalize(section.title).includes("materiais") && normalize(section.title).includes("equipamentos"));
+    const materialSection = reportSections.find((section) => section.position >= 3 && normalize(section.title).includes("materiais") && normalize(section.title).includes("equipamentos"));
     if (materialSection && point.skippedSectionIds.includes(materialSection.id)) return "Não realizada.";
     const materials = pointMaterials(point);
     if (!materials.length) {
