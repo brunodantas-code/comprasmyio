@@ -299,7 +299,6 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     const techniciansNeeded = estimated ? Math.ceil(estimated / (480 * requestedDays)) : 0;
     return { breakdown, estimated, ...workedTime, pauseCount: data?.pauses.length ?? 0, assignedCount, days, techniciansNeeded };
   }, [assumptions, data, deadlineDays, visit.technician_id]);
-  const reportSections = sections.filter((section) => section.template_id === visit.template_id);
   const sectionsForPoint = (point: Point) => sections.filter((section) => section.template_id === point.templateId);
   const reviewSectionForPoint = (point: Point) => sectionsForPoint(point).find((section) => section.position === 6 || normalize(section.title).includes("revisao"));
   const pointResponses = (point: Point) => (data?.responses ?? []).filter((response) => point.kind === "luc" ? response.visit_luc_id === point.id : response.visit_environment_id === point.id);
