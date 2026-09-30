@@ -538,7 +538,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
     const visibleQuestions = questions.filter((question) => phase === "pre_visit"
       ? generalQuestionIds.has(question.id)
       : !generalQuestionIds.has(question.id) && !skippedSectionIds.has(question.section_id)).filter((question) => isQuestionVisible(question, formAnswers));
-     const rows = visibleQuestions.filter((question) => values.has(question.id) || values.has(`${question.id}__detail`) || values.has(`${question.id}__photo`)).map((question) => {
+     const rows = visibleQuestions.filter((question) => question.section_id === openSectionId && (values.has(question.id) || values.has(`${question.id}__detail`) || values.has(`${question.id}__photo`) || question.question_type === "checkbox")).map((question) => {
       const config = asQuestionConfig(question.configuration);
       const value = question.question_key === "shopping_maintenance_companions" ? visitTechnicians.map((item) => item.technician_id) : question.question_type === "multiselect" ? values.getAll(question.id).map(String) : question.question_type === "checkbox" ? checkboxUsesOptions(question) ? String(values.get(question.id) ?? "") : values.get(question.id) === "on" : String(values.get(question.id) ?? "");
       const baseDetail = String(values.get(`${question.id}__detail`) ?? "").trim();
@@ -708,9 +708,13 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
       setOpenSectionId(null);
       setPendingPointSave(null);
     };
-   const toggleChecklistSection = (sectionId: string, event: MouseEvent<HTMLButtonElement>, phase: "pre_visit" | "point") => {
+    const toggleChecklistSection = async (sectionId: string, event: MouseEvent<HTMLButtonElement>, phase: "pre_visit" | "point") => {
      const form = event.currentTarget.closest("form");
-     if (form && openSectionId) scheduleAutosave(form, phase, true);
+      if (form && openSectionId) {
+        scheduleAutosave(form, phase, true);
+        if (autosaveTimer.current) { clearTimeout(autosaveTimer.current); autosaveTimer.current = null; }
+        if (!(await runAutosave())) return;
+      }
       const opening = openSectionId !== sectionId;
       setOpenSectionId(opening ? sectionId : null);
       if (opening) {
