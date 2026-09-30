@@ -104,9 +104,12 @@ type VisitTechnician = { technician_id: string; mobile_phone: string };
 const STATUS: Record<VisitStatus, string> = { agendada: "Agendada", em_andamento: "Em andamento", em_revisao: "Em revisão", concluida: "Concluída", cancelada: "Cancelada" };
 const STATUS_ORDER: VisitStatus[] = ["agendada", "em_andamento", "em_revisao", "concluida", "cancelada"];
 const questionRequiresPhoto = (question: Question, answer?: unknown) => {
-  const photo = (question.configuration as QuestionConfig | null)?.photo;
+  const config = asQuestionConfig(question.configuration);
+  const photo = config.photo;
   if (!photo?.required) return false;
-  return !photo.required_when || answerMatches(answerParts(answer).value, photo.required_when);
+  const value = answerParts(answer).value;
+  const conditionApplies = config.condition?.value === undefined || answerMatches(value, config.condition.value);
+  return conditionApplies && (!photo.required_when || answerMatches(value, photo.required_when));
 };
 const isOtherOption = (value: string) => {
   const normalized = value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLocaleLowerCase("pt-BR");
@@ -499,7 +502,11 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
   };
   const pointPendingFields = (form: HTMLFormElement, sectionIds?: Set<string>) => {
     const values = new FormData(form);
-    const formAnswers = new Map<string, unknown>(questions.map((question) => [question.id, question.question_type === "multiselect" ? values.getAll(question.id).map(String) : question.question_type === "checkbox" ? checkboxUsesOptions(question) ? String(values.get(question.id) ?? "") : values.get(question.id) === "on" : { value: String(values.get(question.id) ?? ""), detail: [String(values.get(`${question.id}__detail`) ?? "").trim(), String(values.get(`${question.id}__subdetail`) ?? "").trim()].filter(Boolean).join(" | ") }]));
+    const formAnswers = new Map<string, unknown>(questions.map((question) => {
+      const value = question.question_type === "multiselect" ? values.getAll(question.id).map(String) : question.question_type === "checkbox" && !checkboxUsesOptions(question) ? values.get(question.id) === "on" : String(values.get(question.id) ?? "");
+      const detail = [String(values.get(`${question.id}__detail`) ?? "").trim(), String(values.get(`${question.id}__subdetail`) ?? "").trim()].filter(Boolean).join(" | ");
+      return [question.id, { value, detail }];
+    }));
     const pending: string[] = [];
     for (const section of pointSections.filter((item) => !skippedSectionIds.has(item.id) && (!sectionIds || sectionIds.has(item.id)))) {
       const equipmentQuestion = questions.find((question) => question.section_id === section.id && isSpecialEquipmentQuestion(question));
@@ -1060,7 +1067,7 @@ function isStoredQuestionComplete(question: Question, answers: Map<string, unkno
   if (applies && config.detail?.required && !detail?.trim()) return false;
   if (otherApplies && !detail?.trim()) return false;
   if (applies && detail && config.detail?.suboptions?.[detail]?.length && !subdetail?.trim()) return false;
-  if (applies && photoRequired && !hasRequiredPhoto) return false;
+  if (photoRequired && !hasRequiredPhoto) return false;
   return true;
 }
 function AttachmentDeleteControl({ attachments, userId, canDelete, canEditAttachments, onDeleted }: { attachments: SurveyAttachment[]; userId: string; canDelete: boolean; canEditAttachments: boolean; onDeleted: () => void }) {
