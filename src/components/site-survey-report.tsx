@@ -384,6 +384,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     for (const point of sortedPoints) {
       if (y > 250) { pdf.addPage(); y = 18; }
       pdf.setFont("Nunito", "extrabold"); pdf.setFontSize(12); pdf.setTextColor(...purple); pdf.text(point.label, 14, y); pdf.setDrawColor(...purple); pdf.setLineWidth(0.35); pdf.line(14, y + 2, 196, y + 2); pdf.setTextColor(...dark); y += 8;
+      pdf.setFont("Nunito", "normal"); pdf.setFontSize(9); pdf.text(`Técnico(s): ${technicianForPoint(point)}`, 14, y); y += 6;
       const stageSeven = pointNotes(point);
       const tools = materialSentence(point);
       const calls = data.calls.filter((item) => point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id).map((call) => { const linked = call.internal_calls as unknown as { call_number?: string; title?: string; status?: string } | null; return linked ? `#${linked.call_number ?? "—"} ${linked.title ?? "Chamado"} (${linked.status ?? call.status})` : call.status; }).join("; ");
