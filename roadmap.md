@@ -817,3 +817,4 @@
 - [x] Site Survey — apresentar ações de intervenção do cliente ao final de cada loja/ambiente e consolidar nos totalizadores por tipo, pergunta e locais, na prévia e nos PDFs.
 - [x] Site Survey — na última etapa (4 manual ou 7 regular), oferecer checkbox “Nenhuma observação adicional” para preencher o texto padrão, sem impedir a escrita personalizada nem o autosave.
 - [x] Site Survey — reutilizar foto anterior da mesma loja ou ambiente para atender foto obrigatória sem duplicar arquivo; referência deixa de valer se a original for excluída.
+- [ ] Site Survey — solicitação de intervenção do cliente registra ação no relatório sem chamado no OpDesk; ajustar confirmação com o texto solicitado.
