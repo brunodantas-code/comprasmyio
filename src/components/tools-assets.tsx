@@ -410,7 +410,10 @@ function AddToolDialog({ userId }: { userId: string }) {
         photo_url,
         created_by: userId,
       } as never);
-      if (error) throw error;
+      if (error) {
+        if (photo_url) await supabase.storage.from("product-images").remove([photo_url]);
+        throw error;
+      }
     },
     onSuccess: () => {
       toast.success("Ferramenta adicionada");
@@ -421,7 +424,7 @@ function AddToolDialog({ userId }: { userId: string }) {
     },
     onError: (e: Error) =>
       toast.error(
-        e.message.includes("tool_assets_unique_name") ? "Já existe uma ferramenta com esse nome" : e.message,
+        e.message.includes("tool_assets_unique_name") ? "Já existe uma ferramenta com esse nome" : e.message.includes("row-level security") ? "Sem permissão para cadastrar ferramentas. Solicite acesso a Item novo ao administrador." : e.message,
       ),
   });
 
@@ -519,7 +522,7 @@ function AddToolDialog({ userId }: { userId: string }) {
   );
 }
 
-export function ToolAssetsSection({ userId, canDelete }: { userId: string; canDelete?: boolean }) {
+export function ToolAssetsSection({ userId, canDelete, canCreate = false }: { userId: string; canDelete?: boolean; canCreate?: boolean }) {
   const { data: rows, isLoading } = useToolStock();
   const { data: movements } = useToolMovements();
   const { data: profiles } = useToolProfiles();
@@ -554,9 +557,9 @@ export function ToolAssetsSection({ userId, canDelete }: { userId: string; canDe
               link de referência e configurações de compra.
             </CardDescription>
           </div>
-          <div className="w-full shrink-0 sm:w-auto">
+           {canCreate && <div className="w-full shrink-0 sm:w-auto">
             <AddToolDialog userId={userId} />
-          </div>
+           </div>}
         </CardHeader>
         <CardContent>
           {isLoading ? (

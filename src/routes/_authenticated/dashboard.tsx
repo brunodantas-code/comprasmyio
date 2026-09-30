@@ -630,6 +630,7 @@ function Dashboard() {
               <StockTab
                 userId={me.id}
                 canDelete={isAdmin}
+                canCreateNewItem={me.canAccess("solicitacoes_item_novo")}
                 onlyLocation={fabricaOnly ? "fabrica" : estoquistaOnly ? "almoxarifado" : undefined}
                 canAccessSection={me.canAccess}
                 section={stockSection}
@@ -648,7 +649,7 @@ function Dashboard() {
                 {me.canAccess("cadastro_diversos") && <TabsContent value="diversos">
                   <div className="space-y-6">
                     <ClientCategoriesTab />
-                    <MaterialsRegistryTab canCreate={isAdmin || me.isComprador} />
+                    <MaterialsRegistryTab canCreate={me.canAccess("solicitacoes_item_novo")} />
                      <MyioDevicesRegistryTab />
                     <RequestTypesTab />
                     <AdditionalStepTypesTab />

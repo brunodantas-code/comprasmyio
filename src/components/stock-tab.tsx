@@ -562,7 +562,7 @@ type StockPermissionKey =
   | "armazem_transporte" | "armazem_cliente" | "armazem_tecnico" | "armazem_perdido"
   | "armazem_itens_avariados" | "armazem_checar_qr" | "armazem_almoxarifado" | "armazem_ferramentas_ativos";
 
-export function StockTab({ userId, canDelete, onlyLocation, canAccessSection = () => true, section, onSectionChange }: { userId: string; canDelete?: boolean; onlyLocation?: StockLocation; canAccessSection?: (permission: StockPermissionKey) => boolean; section?: string; onSectionChange?: (value: string) => void }) {
+export function StockTab({ userId, canDelete, canCreateNewItem = false, onlyLocation, canAccessSection = () => true, section, onSectionChange }: { userId: string; canDelete?: boolean; canCreateNewItem?: boolean; onlyLocation?: StockLocation; canAccessSection?: (permission: StockPermissionKey) => boolean; section?: string; onSectionChange?: (value: string) => void }) {
   const stockGroupPermissions: StockPermissionKey[] = [
     "armazem_estoque_myio",
     "armazem_checar_qr",
@@ -609,7 +609,7 @@ export function StockTab({ userId, canDelete, onlyLocation, canAccessSection = (
       )}
       {permittedTabs.some((tab) => tab.value === "ferramentas") && (
         <TabsContent value="ferramentas">
-          <ToolAssetsSection userId={userId} canDelete={canDelete} />
+          <ToolAssetsSection userId={userId} canDelete={canDelete} canCreate={canCreateNewItem} />
         </TabsContent>
       )}
       {permittedTabs.some((tab) => tab.value === "almoxarifado_geral") && (

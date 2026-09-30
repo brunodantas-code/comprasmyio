@@ -165,7 +165,7 @@ function AddMaterialDialog({ categories }: { categories: MaterialStockType[] }) 
         queryClient.invalidateQueries({ queryKey: ["tool-stock"] }),
       ]);
     },
-    onError: (error: Error) => toast.error(error.message),
+    onError: (error: Error) => toast.error(error.message.includes("row-level security") ? "Sem permissão para cadastrar materiais. Solicite acesso a Item novo ao administrador." : error.message),
   });
 
   return <Dialog open={open} onOpenChange={(nextOpen) => { setOpen(nextOpen); if (!nextOpen) reset(); }}>
