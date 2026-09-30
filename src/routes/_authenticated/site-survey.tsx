@@ -306,10 +306,16 @@ function VisitDialog({ data, visit, onSaved, inline = false }: { data: NonNullab
   const save = useMutation({ mutationFn: async (form: HTMLFormElement) => {
     const values = new FormData(form); const projectId = String(values.get("project_id")); const selectedClient = String(values.get("client_id"));
     if (selectedClient === "none" && projectId === "none") throw new Error("Selecione um cliente e/ou projeto.");
+    const startValue = String(values.get("scheduled_start") ?? "");
+    const endValue = String(values.get("scheduled_end") ?? "");
+    const startDate = new Date(startValue);
+    const endDate = endValue ? new Date(endValue) : null;
+    if (!startValue || Number.isNaN(startDate.getTime()) || (endDate && Number.isNaN(endDate.getTime()))) throw new Error("Informe datas e horários válidos para a visita.");
+    if (endDate && endDate < startDate) throw new Error("O término previsto deve ser posterior ao início da visita.");
     const selectedClientRecord = data.clients.find((item) => item.id === linkedClientId); const defaultTemplate = data.templates.find((item) => item.active && item.is_default && item.client_category_id === selectedClientRecord?.category_id);
     const selectedTemplate = isShopping ? defaultTemplate?.id : String(values.get("template_id")) === "none" ? null : String(values.get("template_id"));
     if (isShopping && !selectedTemplate) throw new Error("O checklist padrão de Shoppings não está disponível.");
-    const payload = { client_id: selectedClient === "none" ? null : selectedClient, client_unit_id: String(values.get("client_unit_id")) === "none" ? null : String(values.get("client_unit_id")), project_id: projectId === "none" ? null : projectId, technician_id: String(values.get("technician_id")), template_id: selectedTemplate, scheduled_start: new Date(String(values.get("scheduled_start"))).toISOString(), scheduled_end: values.get("scheduled_end") ? new Date(String(values.get("scheduled_end"))).toISOString() : null, address: String(values.get("address")), contact_name: String(values.get("contact_name")) || null, contact_phone: String(values.get("contact_phone")) || null, notes: String(values.get("notes")) || null, luc_number: null, shop_name: null, environments: [] };
+    const payload = { client_id: selectedClient === "none" ? null : selectedClient, client_unit_id: String(values.get("client_unit_id")) === "none" ? null : String(values.get("client_unit_id")), project_id: projectId === "none" ? null : projectId, technician_id: String(values.get("technician_id")), template_id: selectedTemplate, scheduled_start: startDate.toISOString(), scheduled_end: endDate?.toISOString() ?? null, address: String(values.get("address")), contact_name: String(values.get("contact_name")) || null, contact_phone: String(values.get("contact_phone")) || null, notes: String(values.get("notes")) || null, luc_number: null, shop_name: null, environments: [] };
     const result = visit ? await supabase.from("site_survey_visits").update(payload).eq("id", visit.id).select("id").single() : await supabase.from("site_survey_visits").insert({ ...payload, created_by: data.userId }).select("id").single();
     if (result.error) throw result.error;
   }, onSuccess: () => { toast.success(visit ? "Visita atualizada" : "Visita agendada"); setOpen(false); onSaved(); }, onError: (error: Error) => toast.error(error.message) });
