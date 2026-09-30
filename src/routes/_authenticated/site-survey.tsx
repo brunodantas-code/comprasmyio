@@ -502,10 +502,11 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
       }
       const applicable = questions.filter((question) => question.section_id === section.id).filter((question) => isQuestionVisible(question, formAnswers));
       for (const question of applicable) {
-        const hasExistingPhoto = hasQuestionPhoto(question.id, formAnswers.get(question.id), detail?.attachments ?? [], matchesPoint, String(values.get(`${question.id}__photo_reference`) ?? ""));
         const photo = values.get(`${question.id}__photo`);
-        const attachments = hasExistingPhoto || (photo instanceof File && photo.size > 0) ? [{ question_id: question.id, visit_luc_id: pointKind === "luc" ? pointId : null, visit_environment_id: pointKind === "environment" ? pointId : null }] : [];
-        if (!isStoredQuestionComplete(question, formAnswers, attachments, matchesPoint)) pending.push(`${section.title}: ${question.prompt}`);
+        const reference = String(values.get(`${question.id}__photo_reference`) ?? "");
+        const answer = { value: answerParts(formAnswers.get(question.id)).value, photo_reference_id: reference };
+        const attachments = [...(detail?.attachments ?? []), ...(photo instanceof File && photo.size > 0 ? [{ question_id: question.id, visit_luc_id: pointKind === "luc" ? pointId : null, visit_environment_id: pointKind === "environment" ? pointId : null }] : [])];
+        if (!isStoredQuestionComplete(question, new Map(formAnswers).set(question.id, answer), attachments, matchesPoint)) pending.push(`${section.title}: ${question.prompt}`);
       }
     }
     return pending;
