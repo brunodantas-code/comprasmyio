@@ -357,6 +357,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
   const autosaveQueued = useRef(false);
   const autosaveTask = useRef<(() => Promise<void>) | null>(null);
   const [approvedActionKeys, setApprovedActionKeys] = useState<Set<string>>(() => new Set());
+  const approvedActionKeysRef = useRef<Set<string>>(new Set());
   const [declinedActionKeys, setDeclinedActionKeys] = useState<Set<string>>(() => new Set());
   const [pendingAction, setPendingAction] = useState<{ key: string; actionName: string } | null>(null);
   const [pendingPointSave, setPendingPointSave] = useState<{ form: HTMLFormElement; fields: string[] } | null>(null);
@@ -424,6 +425,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
       const alreadyGenerated = generatedCallsForScope(phase).some((item) => item.question_action_id === rule.id);
       if (!answerMatches(value, rule.trigger_value)) {
         setApprovedActionKeys((current) => { const next = new Set(current); next.delete(key); return next; });
+        approvedActionKeysRef.current.delete(key);
         setDeclinedActionKeys((current) => { const next = new Set(current); next.delete(key); return next; });
       } else if (!alreadyGenerated && !approvedActionKeys.has(key) && !declinedActionKeys.has(key)) {
         const actionName = data.actionCatalog.find((item) => item.id === rule.action_id)?.name ?? "Chamado para o suporte";
@@ -570,7 +572,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
         openCalls = phase === "pre_visit" ? openCalls.is("visit_luc_id", null).is("visit_environment_id", null) : pointKind === "luc" ? openCalls.eq("visit_luc_id", pointId) : openCalls.eq("visit_environment_id", pointId);
         const { data: existingCalls } = await openCalls;
         const actionKey = actionScopeKey(rule.id, phase);
-        if (triggered && !existingCalls?.length && approvedActionKeys.has(actionKey)) {
+        if (triggered && !existingCalls?.length && approvedActionKeysRef.current.has(actionKey)) {
           const question = questions.find((item) => item.id === rule.question_id);
           const action = data.actionCatalog.find((item) => item.id === rule.action_id);
           const pointLabel = phase === "point" ? points.find((item) => item.value === selectedPoint)?.label : null;
