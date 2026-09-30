@@ -1,0 +1,2 @@
+ALTER TABLE public.site_survey_visits ADD COLUMN is_manual_entry boolean NOT NULL DEFAULT false;
+COMMENT ON COLUMN public.site_survey_visits.is_manual_entry IS 'Visita realizada fora do aplicativo e cadastrada posteriormente; sem medição de tempo e pausas.';

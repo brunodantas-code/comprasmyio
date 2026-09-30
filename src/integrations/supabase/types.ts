@@ -4954,6 +4954,7 @@ export type Database = {
           created_by: string
           environments: Json
           id: string
+          is_manual_entry: boolean
           luc_number: string | null
           notes: string | null
           project_id: string | null
@@ -4983,6 +4984,7 @@ export type Database = {
           created_by: string
           environments?: Json
           id?: string
+          is_manual_entry?: boolean
           luc_number?: string | null
           notes?: string | null
           project_id?: string | null
@@ -5012,6 +5014,7 @@ export type Database = {
           created_by?: string
           environments?: Json
           id?: string
+          is_manual_entry?: boolean
           luc_number?: string | null
           notes?: string | null
           project_id?: string | null
