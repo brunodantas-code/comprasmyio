@@ -785,7 +785,6 @@
 - [x] Code — permitir anexar prints e fotos na criação e nas respostas dos chamados, exibindo cada anexo na conversa.
 - [x] Code — permitir novas perguntas e anexos em chamados abertos mesmo com pergunta anterior sem resposta; manter respostas vinculadas à pergunta escolhida.
 - [x] Supply — alinhar a inclusão dos itens de Fábrica, Terceiros e Ferramentas à permissão Item novo, sem ampliar edição, exclusão ou movimentação.
-- [ ] Supply — validar cadastro real de Item novo com a conta do Alan (bloqueio: sessão dessa conta indisponível para teste automatizado).
 - [x] Site Survey — verificar a causa da chave duplicada ao salvar ação de pergunta e orientar sobre o erro do print.
 - [x] Supply — ativar Pagamento no cadastro, reclassificar o Approval 202609230001 sem duplicá-lo e excluir pagamentos das filas de execução, mantendo a conta no Cash Flow.
 - [x] Site Survey — conferir cadastro retroativo (inclusive Shopping Taboão): datas anteriores a hoje são aceitas; validar término após início com mensagem clara. Se ainda falhar ao salvar, obter a mensagem exata para investigar outra causa.
@@ -793,3 +792,4 @@
 
 - [x] Site Survey — ao selecionar modelo de checklist, iniciar todas as seções e perguntas recolhidas.
 - [x] Site Survey — dar ao título das seções o destaque e tamanho de “Seções do checklist”.
+- [x] Site Survey — exibir “Título da seção” e “Descrição” abaixo dos respectivos campos, alinhados à esquerda e no estilo dos contadores.
