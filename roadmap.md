@@ -804,4 +804,4 @@
 - [x] Site Survey — ao abrir qualquer etapa do checklist, recolher a anterior e posicionar a primeira pergunta no início da área visível no computador e celular.
 
 - [x] Site Survey — permitir marcar etapas de loja/ambiente como Não realizada, preservando respostas e retirando pendências.
-- [ ] Site Survey — mostrar a quantidade de anexos no título “Anexos - N” ao final da visita.
+- [x] Site Survey — mostrar a quantidade de anexos no título “Anexos - N” ao final da visita.
