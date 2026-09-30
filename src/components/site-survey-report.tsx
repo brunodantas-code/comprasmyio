@@ -71,6 +71,11 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
     .sort((left, right) => questionOrder(left.id) - questionOrder(right.id));
   const clean = (value: string) => value.replace(/[.!?]+$/, "").trim();
   const lower = (value: string) => clean(value).toLocaleLowerCase("pt-BR");
+  const proseValue = (value: string) => {
+    const text = clean(value);
+    return /^(outro|outros)\s*(?:—|–|-)\s*/i.test(normalize(text)) ? text.replace(/^(outro|outros)\s*(?:—|–|-)\s*/i, "").trim() : /^(outro|outros)$/i.test(normalize(text)) ? "" : text;
+  };
+  const isUninformed = (value: string) => /^(nao informad[oa]|nao foi informad[oa]|sem informacao)$/i.test(normalize(value));
   const statusOnly = (value: string) => lower((value.split("—").at(-1) ?? value).trim());
   const detailOnly = (value: string) => clean((value.split("—").at(-1) ?? value).trim());
   const placePhrase = (value: string) => {
@@ -81,7 +86,9 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
   };
   const add = (parts: RichPart[], before: string, answer: ReturnType<typeof get>, after = "") => {
     if (!answer?.value) return false;
-    parts.push({ text: before }, { text: clean(answer.value), bold: true }, { text: after });
+    const content = proseValue(answer.value);
+    if (!content) return false;
+    parts.push({ text: before }, { text: content, bold: true }, { text: after });
     return true;
   };
 
@@ -102,8 +109,8 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
   if (locations.length) {
     hydraulic.push({ text: "O hidrômetro encontra-se " });
     hydraulic.push({ text: placePhrase(locations[0].value), bold: true });
-    const remainingLocations = locations.slice(1).map((location) => lower(location.value));
-    const detail = locationDetail ? lower(locationDetail.value) : "";
+    const remainingLocations = locations.slice(1).map((location) => lower(proseValue(location.value))).filter(Boolean);
+    const detail = locationDetail ? lower(proseValue(locationDetail.value)).replace(/^(?:localizad[oa]\s+)?(?:o\s+)?hidrometro\s+(?:fica|esta|encontra-se)?\s*/i, "").trim() : "";
     if (remainingLocations.length || detail) {
       const location = remainingLocations[0] ?? "";
       const detailAlreadyDescribesLocation = location && detail.startsWith(placePhrase(location));
@@ -121,10 +128,10 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
     const pulseStatus = statusOnly(pulse.value);
     const pulseWorks = /^(sim|operante|funcional|funcionando)/.test(pulseStatus);
     const pulseUnavailable = normalize(pulseStatus).includes("inoperante") || normalize(pulseStatus) === "nao";
-    if (pulseUnavailable) hydraulic.push({ text: "Não existe saída pulsada ou encontra-se inoperante", bold: true }, { text: flowRate ? " e a vazão nominal é de " : ". " });
-    else hydraulic.push({ text: pulseWorks ? "Possui saída pulsada " : "A saída pulsada encontra-se " }, { text: pulseWorks ? "funcional" : pulseStatus, bold: true }, { text: flowRate ? " e a vazão nominal é de " : ". " });
+    if (pulseUnavailable) hydraulic.push({ text: "Não existe saída pulsada ou encontra-se inoperante", bold: true }, { text: flowRate ? ` e a vazão nominal ${isUninformed(proseValue(flowRate.value)) ? "" : "é de "}` : ". " });
+    else hydraulic.push({ text: pulseWorks ? "Possui saída pulsada " : "A saída pulsada encontra-se " }, { text: pulseWorks ? "funcional" : pulseStatus, bold: true }, { text: flowRate ? ` e a vazão nominal ${isUninformed(proseValue(flowRate.value)) ? "" : "é de "}` : ". " });
   }
-  if (flowRate) hydraulic.push({ text: pulse ? "" : "A vazão nominal é de " }, { text: clean(flowRate.value), bold: true }, { text: ". " });
+  if (flowRate) { const rate = proseValue(flowRate.value); hydraulic.push({ text: pulse ? "" : `A vazão nominal ${isUninformed(rate) ? "" : "é de "}` }, { text: isUninformed(rate) || !rate ? "não foi informada" : rate, bold: true }, { text: ". " }); }
   const flow = hydraulicAnswer(["sentido do fluxo"]);
   if (flow) hydraulic.push({ text: "O sentido do fluxo de água foi classificado como " }, { text: normalize(flow.value).includes("desacordo") || normalize(flow.value).includes("incorret") ? "incorreto" : normalize(flow.value).includes("acordo") || normalize(flow.value).includes("corret") ? "correto" : lower(flow.value), bold: true }, { text: ". " });
   const flange = hydraulicAnswer(["tipo de flange"]);
@@ -133,7 +140,8 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
   const registerCondition = hydraulicAnswer(["condicao do registro"]);
   if (registerType) hydraulic.push({ text: "O registro existente é do tipo " }, { text: lower(registerType.value), bold: true }, { text: registerCondition ? " e encontra-se " : ". " });
   if (registerCondition) hydraulic.push({ text: registerType ? "" : "O registro encontra-se " }, { text: lower(registerCondition.value), bold: true }, { text: ". " });
-  add(hydraulic, "O diâmetro da tubulação de água é de ", hydraulicAnswer(["diametro da tubulacao"]), ". ");
+  const diameter = hydraulicAnswer(["diametro da tubulacao"]);
+  if (diameter) { const size = proseValue(diameter.value); hydraulic.push({ text: `O diâmetro da tubulação de água ${isUninformed(size) || !size ? "" : "é de "}` }, { text: isUninformed(size) || !size ? "não foi informado" : size, bold: true }, { text: ". " }); }
   const nearbyPower = hydraulicAnswer(["ponto de eletrica proximo", "ponto eletrico proximo"]);
   if (nearbyPower) hydraulic.push({ text: lower(nearbyPower.value).startsWith("sim") ? "Existe ponto de elétrica próximo ao hidrômetro" : "Não existe ponto de elétrica próximo ao hidrômetro", bold: true }, { text: ". " });
   add(hydraulic, "O encaminhamento deve ser realizado por meio de ", hydraulicAnswer(["encaminhamento da eletrica", "encaminhamento eletrico"]), ". ");
