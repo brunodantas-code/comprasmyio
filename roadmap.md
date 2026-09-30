@@ -821,3 +821,4 @@
 - [x] Site Survey — mostrar a resposta efetivamente salva nas intervenções do relatório e chamar “Detalhar para facilitar sua localização” de “Hidrômetro”.
 
 - [x] Site Survey — mostrar todos os materiais e equipamentos ativos do Cadastro na escolha da etapa, preservando itens já selecionados.
+- [x] Site Survey — manter linhas independentes ao adicionar materiais, sem reverter a segunda escolha após atualização automática do checklist.
