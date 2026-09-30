@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import type { TimeAssumption } from "@/components/site-survey-time-assumptions";
 import myioLogoUrl from "@/assets/myio-logo-light.svg?url";
@@ -20,12 +21,13 @@ type Named = { id: string; name: string };
 type Question = { id: string; section_id: string; prompt: string; position?: number };
 type Section = { id: string; template_id: string; title: string; position: number };
 type Profile = { id: string; full_name: string };
-type Point = { id: string; label: string; started_at: string | null; completed_at: string | null; completion_status: string; cancellationReason: string | null; kind: "luc" | "environment"; skippedSectionIds: string[] };
+type Point = { id: string; label: string; created_at: string; started_at: string | null; completed_at: string | null; completion_status: string; cancellationReason: string | null; kind: "luc" | "environment"; skippedSectionIds: string[] };
 type PointPause = { id: string; visit_luc_id: string | null; visit_environment_id: string | null; reason_id: string; started_at: string; ended_at: string | null; site_survey_pause_reasons: { name: string } | null };
 type ReportResponse = { id: string; question_id: string; answer: unknown };
 type RichPart = { text: string; bold?: boolean };
 type PointSummary = { title: string; parts: RichPart[]; questionIds: Set<string> };
 type VisitMaterial = { id: string; visit_luc_id: string | null; visit_environment_id: string | null; quantity: number; notes: string | null; site_survey_material_catalog: { name?: string } | null; site_survey_screwdriver_types: { name?: string } | null; site_survey_wrench_sizes: { name?: string } | null };
+type SortKey = "type" | "created" | "technician";
 
 const valueText = (answer: unknown): string => {
   if (answer && typeof answer === "object" && !Array.isArray(answer) && "value" in answer) { const item = answer as { value: unknown; detail?: unknown }; return [valueText(item.value), typeof item.detail === "string" ? item.detail : ""].filter(Boolean).join(" — "); }
@@ -231,20 +233,22 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
   const [open, setOpen] = useState(false);
   const [deadlineDays, setDeadlineDays] = useState("1");
   const [includePhotos, setIncludePhotos] = useState(true);
+  const [primarySort, setPrimarySort] = useState<SortKey>("created");
+  const [secondarySort, setSecondarySort] = useState<SortKey | "none">("none");
   const [generatingPdf, setGeneratingPdf] = useState<"bw" | "color" | null>(null);
   const { data, isLoading } = useQuery({ queryKey: ["site-survey-report", visit.id], enabled: open, queryFn: async () => {
     const [{ data: lucs, error: lucError }, { data: environments, error: envError }, { data: responses, error: responseError }, { data: attachments, error: attachmentError }, { data: calls, error: callError }, { data: visitTechs }, { data: materials, error: materialError }, { data: pauses, error: pauseError }] = await Promise.all([
-       supabase.from("site_survey_visit_lucs").select("id,luc_number,shop_name,started_at,completed_at,completion_status,skipped_section_ids,cancellation_reason_id,site_survey_cancellation_reasons(name)").eq("visit_id", visit.id).eq("active", true).order("luc_number"),
-       supabase.from("site_survey_visit_environments").select("id,name,started_at,completed_at,completion_status,skipped_section_ids").eq("visit_id", visit.id).eq("active", true).order("name"),
+       supabase.from("site_survey_visit_lucs").select("id,luc_number,shop_name,created_at,started_at,completed_at,completion_status,skipped_section_ids,cancellation_reason_id,site_survey_cancellation_reasons(name)").eq("visit_id", visit.id).eq("active", true).order("luc_number"),
+       supabase.from("site_survey_visit_environments").select("id,name,created_at,started_at,completed_at,completion_status,skipped_section_ids").eq("visit_id", visit.id).eq("active", true).order("name"),
       supabase.from("site_survey_responses").select("id,question_id,visit_luc_id,visit_environment_id,answer").eq("visit_id", visit.id),
       supabase.from("site_survey_attachments").select("id,visit_luc_id,visit_environment_id,file_name,storage_path,content_type,attachment_kind").eq("visit_id", visit.id).order("created_at"),
       supabase.from("site_survey_generated_calls").select("id,visit_luc_id,visit_environment_id,status,internal_calls(call_number,title,description,status)").eq("visit_id", visit.id),
-      supabase.from("site_survey_visit_technicians").select("technician_id").eq("visit_id", visit.id),
+      supabase.from("site_survey_visit_technicians").select("technician_id,visit_luc_id,visit_environment_id").eq("visit_id", visit.id),
       supabase.from("site_survey_visit_materials").select("id,visit_luc_id,visit_environment_id,quantity,notes,site_survey_material_catalog(name),site_survey_screwdriver_types(name),site_survey_wrench_sizes(name)").eq("visit_id", visit.id).order("created_at"),
       supabase.from("site_survey_point_pauses").select("id,visit_luc_id,visit_environment_id,reason_id,started_at,ended_at,site_survey_pause_reasons(name)").eq("visit_id", visit.id).order("started_at"),
     ]);
     const error = lucError ?? envError ?? responseError ?? attachmentError ?? callError ?? materialError ?? pauseError; if (error) throw error;
-     const points: Point[] = [...(lucs ?? []).map((item) => { const reason = item.site_survey_cancellation_reasons as unknown as { name?: string } | null; return { id: item.id, label: `LUC ${item.luc_number} — ${item.shop_name}`, started_at: item.started_at, completed_at: item.completed_at, completion_status: item.completion_status, cancellationReason: reason?.name ?? null, kind: "luc" as const, skippedSectionIds: Array.isArray(item.skipped_section_ids) ? item.skipped_section_ids.filter((id): id is string => typeof id === "string") : [] }; }), ...(environments ?? []).map((item) => ({ id: item.id, label: item.name, started_at: item.started_at, completed_at: item.completed_at, completion_status: item.completion_status, cancellationReason: null, kind: "environment" as const, skippedSectionIds: Array.isArray(item.skipped_section_ids) ? item.skipped_section_ids.filter((id): id is string => typeof id === "string") : [] }))];
+     const points: Point[] = [...(lucs ?? []).map((item) => { const reason = item.site_survey_cancellation_reasons as unknown as { name?: string } | null; return { id: item.id, label: `LUC ${item.luc_number} — ${item.shop_name}`, created_at: item.created_at, started_at: item.started_at, completed_at: item.completed_at, completion_status: item.completion_status, cancellationReason: reason?.name ?? null, kind: "luc" as const, skippedSectionIds: Array.isArray(item.skipped_section_ids) ? item.skipped_section_ids.filter((id): id is string => typeof id === "string") : [] }; }), ...(environments ?? []).map((item) => ({ id: item.id, label: item.name, created_at: item.created_at, started_at: item.started_at, completed_at: item.completed_at, completion_status: item.completion_status, cancellationReason: null, kind: "environment" as const, skippedSectionIds: Array.isArray(item.skipped_section_ids) ? item.skipped_section_ids.filter((id): id is string => typeof id === "string") : [] }))];
     return { points, responses: responses ?? [], attachments: attachments ?? [], calls: calls ?? [], visitTechs: visitTechs ?? [], materials: (materials ?? []) as unknown as VisitMaterial[], pauses: (pauses ?? []) as PointPause[] };
   } });
   const calculation = useMemo(() => {
@@ -265,6 +269,15 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
   const reportSections = sections.filter((section) => section.template_id === visit.template_id);
   const pointResponses = (point: Point) => (data?.responses ?? []).filter((response) => point.kind === "luc" ? response.visit_luc_id === point.id : response.visit_environment_id === point.id);
   const pausesForPoint = (point: Point) => (data?.pauses ?? []).filter((pause) => point.kind === "luc" ? pause.visit_luc_id === point.id : pause.visit_environment_id === point.id);
+  const technicianForPoint = (point: Point) => {
+    const assigned = data?.visitTechs.filter((item) => point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id) ?? [];
+    const ids = assigned.length ? assigned.map((item) => item.technician_id) : [visit.technician_id, ...(data?.visitTechs.filter((item) => !item.visit_luc_id && !item.visit_environment_id).map((item) => item.technician_id) ?? [])];
+    return [...new Set(ids.map((id) => technicians.find((person) => person.id === id)?.full_name).filter((name): name is string => Boolean(name)))].sort((a, b) => a.localeCompare(b, "pt-BR")).join(", ") || "—";
+  };
+  const sortedPoints = useMemo(() => {
+    const compare = (a: Point, b: Point, key: SortKey) => key === "type" ? (a.kind === b.kind ? 0 : a.kind === "luc" ? -1 : 1) : key === "created" ? a.created_at.localeCompare(b.created_at) : technicianForPoint(a).localeCompare(technicianForPoint(b), "pt-BR");
+    return [...(data?.points ?? [])].sort((a, b) => compare(a, b, primarySort) || (secondarySort !== "none" ? compare(a, b, secondarySort) : 0) || a.created_at.localeCompare(b.created_at) || a.label.localeCompare(b.label, "pt-BR"));
+  }, [data?.points, data?.visitTechs, technicians, visit.technician_id, primarySort, secondarySort]);
   const stageSevenSectionIds = new Set(reportSections.filter((section) => section.position === 6 || normalize(section.title).includes("revisao")).map((section) => section.id));
   const stageSevenQuestionIds = new Set(questions.filter((question) => stageSevenSectionIds.has(question.section_id)).map((question) => question.id));
   const materialSectionTitle = reportSections.find((section) => section.position >= 3 && normalize(section.title).includes("materiais") && normalize(section.title).includes("equipamentos"))?.title ?? "Materiais e equipamentos";
@@ -368,7 +381,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
       pdf.setFont("Nunito", "normal");
       return cursorY;
     };
-    for (const point of data.points) {
+    for (const point of sortedPoints) {
       if (y > 250) { pdf.addPage(); y = 18; }
       pdf.setFont("Nunito", "extrabold"); pdf.setFontSize(12); pdf.setTextColor(...purple); pdf.text(point.label, 14, y); pdf.setDrawColor(...purple); pdf.setLineWidth(0.35); pdf.line(14, y + 2, 196, y + 2); pdf.setTextColor(...dark); y += 8;
       const stageSeven = pointNotes(point);
