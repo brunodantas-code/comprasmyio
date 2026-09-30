@@ -801,3 +801,4 @@
 
 - [x] Site Survey — classificar visitas já realizadas como Concluída ao cadastrar e manter o checklist editável; reclassificar Taboão sem perder respostas.
 - [x] Site Survey — evitar aviso de salvamento sem loja selecionada ao reabrir a visita; aceitar fotos arrastadas ou coladas na pergunta sem sair da página e identificar a área de escolha.
+- [x] Site Survey — ao abrir qualquer etapa do checklist, recolher a anterior e posicionar a primeira pergunta no início da área visível no computador e celular.
