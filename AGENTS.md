@@ -17,8 +17,8 @@
 - Site Survey progress counts completed stores/environments by completion timestamp and user, grouped by São Paulo day/hour, not scheduled visits.
 - Site Survey deletion checks linked OpDesk calls, offers keep/delete, and uses an authorized atomic DB function; OpDesk retains visit number.
 - Code images use private ticket attachments: message images stay with replies, standalone images with tickets. Open tickets allow new questions before answers; answers link to pending admin questions, preserving permissions.
-- Site Survey question actions update/deactivate in place to preserve call references; pending labels follow active, visible, incomplete questions.
+- Site Survey actions update/deactivate in place to preserve references; warnings use active visible questions only after explicit save, not autosave.
 - Manual visits start `concluida` with historical end; checklist autosaves without timing. Shopping points share add dialog, not storage.
-- Photo drops/pastes populate file inputs for autosave; block outside drops to prevent lost edits.
+- Photo drops/pastes populate autosave inputs; block outside drops. Stable question keys preserve scroll on refresh.
 - Site Survey skips persist per store/environment; skip removes pending/completion requirements, preserves answers, and flushes autosave first.
 - Site Survey report preview/PDF share ordering and hydraulic DN from active De-Para by flow; missing flow shows no specification.
