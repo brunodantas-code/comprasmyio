@@ -589,6 +589,13 @@
       "when": 1790630349043,
       "tag": "0083_align_new_item_insert_with_supply_permission",
       "breakpoints": true
+    },
+    {
+      "idx": 84,
+      "version": "7",
+      "when": 1790781666843,
+      "tag": "0084_site_survey_manual_visit_mode",
+      "breakpoints": true
     }
   ]
 }
