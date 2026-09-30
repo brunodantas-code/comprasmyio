@@ -269,6 +269,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
   const materialSectionTitle = sections.find((section) => normalize(section.title).includes("materiais") && normalize(section.title).includes("equipamentos"))?.title ?? "Materiais e equipamentos";
   const reviewSection = sections.find((section) => stageSevenSectionIds.has(section.id));
   const reviewTitle = reviewSection?.title ?? "Revisão, pendências, fotos e encerramento";
+  const reviewSkipped = (point: Point) => Boolean(reviewSection && point.skippedSectionIds.includes(reviewSection.id));
   const pointNotes = (point: Point) => reviewSection && point.skippedSectionIds.includes(reviewSection.id) ? "" : pointResponses(point).filter((response) => stageSevenQuestionIds.has(response.question_id)).map((response) => valueText(response.answer)).filter(Boolean).join("; ");
   const technicalTotals = useMemo(() => {
     const groups = [{ label: "Tipos de hidrômetro", terms: ["tipo de hidrometro", "tipo de registro"] }, { label: "Dificuldade de acesso", terms: ["dificuldade", "acesso ao hidrometro"] }, { label: "Quadros e pontos elétricos", terms: ["quadro eletrico", "ponto eletrico"] }, { label: "Complexidade", terms: ["complexidade"] }];
@@ -369,7 +370,6 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     for (const point of data.points) {
       if (y > 250) { pdf.addPage(); y = 18; }
       pdf.setFont("Nunito", "extrabold"); pdf.setFontSize(12); pdf.setTextColor(...purple); pdf.text(point.label, 14, y); pdf.setDrawColor(...purple); pdf.setLineWidth(0.35); pdf.line(14, y + 2, 196, y + 2); pdf.setTextColor(...dark); y += 8;
-      const pointAnswers = pointResponses(point);
       const stageSeven = pointNotes(point);
       const tools = materialSentence(point);
       const calls = data.calls.filter((item) => point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id).map((call) => { const linked = call.internal_calls as unknown as { call_number?: string; title?: string; status?: string } | null; return linked ? `#${linked.call_number ?? "—"} ${linked.title ?? "Chamado"} (${linked.status ?? call.status})` : call.status; }).join("; ");
@@ -382,6 +382,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
         pdf.setFont("Nunito", "bold"); pdf.setFontSize(10); pdf.text(summary.title, 14, y); pdf.setFontSize(9); y = drawRichParagraph(summary.parts, y + 7) + 4;
       }
       if (tools) { if (y > 262) { pdf.addPage(); y = 18; } pdf.setFont("Nunito", "bold"); pdf.text(materialSectionTitle, 14, y); y = drawRichParagraph([{ text: tools }], y + 5) + 2; }
+      if (reviewSkipped(point)) { if (y > 262) { pdf.addPage(); y = 18; } pdf.setFont("Nunito", "bold"); pdf.text(reviewTitle, 14, y); pdf.setFontSize(9); y = drawRichParagraph([{ text: "Não realizada." }], y + 5) + 2; }
       if (stageSeven) { if (y > 262) { pdf.addPage(); y = 18; } pdf.setFont("Nunito", "bold"); pdf.text(reviewTitle, 14, y); y += 5; pdf.setFontSize(9); pdf.text("Observações finais da visita", 14, y); y = drawRichParagraph([{ text: stageSeven }], y + 5) + 2; }
       if (calls) { if (y > 262) { pdf.addPage(); y = 18; } pdf.setFont("Nunito", "bold"); pdf.text("Ações e chamados", 14, y); y = drawRichParagraph([{ text: calls }], y + 5) + 2; }
       const photos = withPhotos ? data.attachments.filter((item) => item.content_type?.startsWith("image/") && (point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id)) : [];
