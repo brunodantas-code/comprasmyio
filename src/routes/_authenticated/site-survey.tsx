@@ -504,7 +504,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
       for (const question of applicable) {
         const photo = values.get(`${question.id}__photo`);
         const reference = String(values.get(`${question.id}__photo_reference`) ?? "");
-        const answer = { value: answerParts(formAnswers.get(question.id)).value, photo_reference_id: reference };
+        const answer = { ...answerParts(formAnswers.get(question.id)), photo_reference_id: reference };
         const attachments = [...(detail?.attachments ?? []), ...(photo instanceof File && photo.size > 0 ? [{ question_id: question.id, visit_luc_id: pointKind === "luc" ? pointId : null, visit_environment_id: pointKind === "environment" ? pointId : null }] : [])];
         if (!isStoredQuestionComplete(question, new Map(formAnswers).set(question.id, answer), attachments, matchesPoint)) pending.push(`${section.title}: ${question.prompt}`);
       }
