@@ -18,4 +18,5 @@
 - Site Survey progress counts completed stores/environments by completion timestamp and user, grouped by São Paulo day/hour, not scheduled visits.
 - Site Survey visit deletion inspects linked OpDesk calls before offering keep/delete choices; a permission-checked database function executes both actions atomically, and OpDesk retains the visit number even when the visit is removed.
 - Code conversation images reuse the private ticket attachment store: message-linked images stay with their reply, standalone additions stay in the ticket attachments. Open tickets permit follow-up questions before earlier ones are answered, and answers link to a specific pending admin question; this preserves the conversation and its permissions.
-- Site Survey question actions are updated or deactivated in place rather than deleted, preserving generated-call references; checklist pending labels derive from the same active, visible, incomplete questions as section counts so obsolete saved labels cannot hide live omissions.
+- Site Survey question actions update/deactivate in place to preserve call references; pending labels follow active, visible, incomplete questions.
+- Manual Site Survey visits use `is_manual_entry`, start in checklist progress, retain autosave/photos and omit live start times, durations and pauses.
