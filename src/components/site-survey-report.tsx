@@ -21,7 +21,7 @@ type Named = { id: string; name: string };
 type Question = { id: string; section_id: string; prompt: string; position?: number };
 type Section = { id: string; template_id: string; title: string; position: number };
 type Profile = { id: string; full_name: string };
-type Point = { id: string; label: string; created_at: string; started_at: string | null; completed_at: string | null; completion_status: string; cancellationReason: string | null; kind: "luc" | "environment"; skippedSectionIds: string[] };
+type Point = { id: string; label: string; templateId: string | null; created_at: string; started_at: string | null; completed_at: string | null; completion_status: string; cancellationReason: string | null; kind: "luc" | "environment"; skippedSectionIds: string[] };
 type PointPause = { id: string; visit_luc_id: string | null; visit_environment_id: string | null; reason_id: string; started_at: string; ended_at: string | null; site_survey_pause_reasons: { name: string } | null };
 type ReportResponse = { id: string; question_id: string; answer: unknown };
 type RichPart = { text: string; bold?: boolean };
@@ -271,7 +271,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
   const { data, isLoading } = useQuery({ queryKey: ["site-survey-report", visit.id], enabled: open, queryFn: async () => {
     const [{ data: lucs, error: lucError }, { data: environments, error: envError }, { data: responses, error: responseError }, { data: attachments, error: attachmentError }, { data: calls, error: callError }, { data: visitTechs }, { data: materials, error: materialError }, { data: pauses, error: pauseError }, { data: meterCatalogs, error: meterError }] = await Promise.all([
        supabase.from("site_survey_visit_lucs").select("id,luc_number,shop_name,created_at,started_at,completed_at,completion_status,skipped_section_ids,cancellation_reason_id,site_survey_cancellation_reasons(name)").eq("visit_id", visit.id).eq("active", true).order("luc_number"),
-       supabase.from("site_survey_visit_environments").select("id,name,created_at,started_at,completed_at,completion_status,skipped_section_ids").eq("visit_id", visit.id).eq("active", true).order("name"),
+        supabase.from("site_survey_visit_environments").select("id,name,template_id,created_at,started_at,completed_at,completion_status,skipped_section_ids").eq("visit_id", visit.id).eq("active", true).order("name"),
       supabase.from("site_survey_responses").select("id,question_id,visit_luc_id,visit_environment_id,answer").eq("visit_id", visit.id),
       supabase.from("site_survey_attachments").select("id,visit_luc_id,visit_environment_id,file_name,storage_path,content_type,attachment_kind").eq("visit_id", visit.id).order("created_at"),
        supabase.from("site_survey_generated_calls").select("id,question_id,trigger_value,visit_luc_id,visit_environment_id,status,site_survey_question_actions(site_survey_action_catalog(name)),internal_calls(call_number,title,description,status)").eq("visit_id", visit.id),
@@ -281,7 +281,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
        supabase.from("site_survey_custom_catalogs").select("name,site_survey_custom_catalog_items(name,position,active)").ilike("name", "De-Para de Hidrômetros").eq("active", true),
     ]);
     const error = lucError ?? envError ?? responseError ?? attachmentError ?? callError ?? materialError ?? pauseError ?? meterError; if (error) throw error;
-     const points: Point[] = [...(lucs ?? []).map((item) => { const reason = item.site_survey_cancellation_reasons as unknown as { name?: string } | null; return { id: item.id, label: `LUC ${item.luc_number} — ${item.shop_name}`, created_at: item.created_at, started_at: item.started_at, completed_at: item.completed_at, completion_status: item.completion_status, cancellationReason: reason?.name ?? null, kind: "luc" as const, skippedSectionIds: Array.isArray(item.skipped_section_ids) ? item.skipped_section_ids.filter((id): id is string => typeof id === "string") : [] }; }), ...(environments ?? []).map((item) => ({ id: item.id, label: item.name, created_at: item.created_at, started_at: item.started_at, completed_at: item.completed_at, completion_status: item.completion_status, cancellationReason: null, kind: "environment" as const, skippedSectionIds: Array.isArray(item.skipped_section_ids) ? item.skipped_section_ids.filter((id): id is string => typeof id === "string") : [] }))];
+      const points: Point[] = [...(lucs ?? []).map((item) => { const reason = item.site_survey_cancellation_reasons as unknown as { name?: string } | null; return { id: item.id, label: `LUC ${item.luc_number} — ${item.shop_name}`, templateId: visit.template_id, created_at: item.created_at, started_at: item.started_at, completed_at: item.completed_at, completion_status: item.completion_status, cancellationReason: reason?.name ?? null, kind: "luc" as const, skippedSectionIds: Array.isArray(item.skipped_section_ids) ? item.skipped_section_ids.filter((id): id is string => typeof id === "string") : [] }; }), ...(environments ?? []).map((item) => ({ id: item.id, label: item.name, templateId: item.template_id ?? visit.template_id, created_at: item.created_at, started_at: item.started_at, completed_at: item.completed_at, completion_status: item.completion_status, cancellationReason: null, kind: "environment" as const, skippedSectionIds: Array.isArray(item.skipped_section_ids) ? item.skipped_section_ids.filter((id): id is string => typeof id === "string") : [] }))];
     return { points, responses: responses ?? [], attachments: attachments ?? [], calls: calls ?? [], visitTechs: visitTechs ?? [], materials: (materials ?? []) as unknown as VisitMaterial[], pauses: (pauses ?? []) as PointPause[], meterMappings: (meterCatalogs ?? []).flatMap((catalog) => catalog.site_survey_custom_catalog_items.filter((item) => item.active).map((item) => ({ name: item.name, position: item.position }))) };
   } });
   const calculation = useMemo(() => {
@@ -300,6 +300,8 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     return { breakdown, estimated, ...workedTime, pauseCount: data?.pauses.length ?? 0, assignedCount, days, techniciansNeeded };
   }, [assumptions, data, deadlineDays, visit.technician_id]);
   const reportSections = sections.filter((section) => section.template_id === visit.template_id);
+  const sectionsForPoint = (point: Point) => sections.filter((section) => section.template_id === point.templateId);
+  const reviewSectionForPoint = (point: Point) => sectionsForPoint(point).find((section) => section.position === 6 || normalize(section.title).includes("revisao"));
   const pointResponses = (point: Point) => (data?.responses ?? []).filter((response) => point.kind === "luc" ? response.visit_luc_id === point.id : response.visit_environment_id === point.id);
   const pausesForPoint = (point: Point) => (data?.pauses ?? []).filter((pause) => point.kind === "luc" ? pause.visit_luc_id === point.id : pause.visit_environment_id === point.id);
   const technicianForPoint = (point: Point) => {
@@ -330,21 +332,19 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     }
     return [...groups.values()].sort((a, b) => a.action.localeCompare(b.action, "pt-BR") || a.question.localeCompare(b.question, "pt-BR") || a.answer.localeCompare(b.answer, "pt-BR"));
   }, [interventions]);
-  const stageSevenSectionIds = new Set(reportSections.filter((section) => section.position === 6 || normalize(section.title).includes("revisao")).map((section) => section.id));
-  const stageSevenQuestionIds = new Set(questions.filter((question) => stageSevenSectionIds.has(question.section_id)).map((question) => question.id));
-  const materialSectionTitle = reportSections.find((section) => section.position >= 3 && normalize(section.title).includes("materiais") && normalize(section.title).includes("equipamentos"))?.title ?? "Materiais e equipamentos";
-  const reviewSection = reportSections.find((section) => stageSevenSectionIds.has(section.id));
-  const reviewTitle = reviewSection?.title ?? "Revisão, pendências, fotos e encerramento";
-  const reviewSkipped = (point: Point) => Boolean(reviewSection && point.skippedSectionIds.includes(reviewSection.id));
-  const pointNotes = (point: Point) => reviewSection && point.skippedSectionIds.includes(reviewSection.id) ? "" : pointResponses(point).filter((response) => stageSevenQuestionIds.has(response.question_id)).map((response) => valueText(response.answer)).filter(Boolean).join("; ");
+  const materialSectionForPoint = (point: Point) => sectionsForPoint(point).find((section) => section.position >= 3 && normalize(section.title).includes("materiais") && normalize(section.title).includes("equipamentos"));
+  const materialSectionTitle = (point: Point) => materialSectionForPoint(point)?.title ?? "Materiais e equipamentos";
+  const reviewTitle = (point: Point) => reviewSectionForPoint(point)?.title ?? "Revisão, pendências, fotos e encerramento";
+  const reviewSkipped = (point: Point) => { const section = reviewSectionForPoint(point); return Boolean(section && point.skippedSectionIds.includes(section.id)); };
+  const pointNotes = (point: Point) => { const section = reviewSectionForPoint(point); return section && !point.skippedSectionIds.includes(section.id) ? pointResponses(point).filter((response) => questions.some((question) => question.id === response.question_id && question.section_id === section.id)).map((response) => valueText(response.answer)).filter(Boolean).join("; ") : ""; };
   const technicalTotals = useMemo(() => {
     const groups = [{ label: "Tipos de hidrômetro", terms: ["tipo de hidrometro", "tipo de registro"] }, { label: "Dificuldade de acesso", terms: ["dificuldade", "acesso ao hidrometro"] }, { label: "Quadros e pontos elétricos", terms: ["quadro eletrico", "ponto eletrico"] }, { label: "Complexidade", terms: ["complexidade"] }];
     return groups.map((group) => { const counts = new Map<string, number>(); for (const response of data?.responses ?? []) { const question = questions.find((item) => item.id === response.question_id); if (!question || !group.terms.some((term) => normalize(question.prompt).includes(term))) continue; const value = valueText(response.answer).trim(); if (value) counts.set(value, (counts.get(value) ?? 0) + 1); } return { label: group.label, values: [...counts.entries()] }; }).filter((group) => group.values.length);
   }, [data?.responses, questions]);
-  const pointSummaries = (point: Point) => buildPointSummaries((pointResponses(point) as ReportResponse[]).filter((response) => !stageSevenQuestionIds.has(response.question_id)), questions, reportSections, point.skippedSectionIds, data?.meterMappings ?? []);
+  const pointSummaries = (point: Point) => { const pointSections = sectionsForPoint(point); const reviewId = reviewSectionForPoint(point)?.id; return buildPointSummaries((pointResponses(point) as ReportResponse[]).filter((response) => !reviewId || !questions.some((question) => question.id === response.question_id && question.section_id === reviewId)), questions, pointSections, point.skippedSectionIds, data?.meterMappings ?? []); };
   const pointMaterials = (point: Point) => (data?.materials ?? []).filter((item) => point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id);
   const materialSentence = (point: Point) => {
-    const materialSection = reportSections.find((section) => section.position >= 3 && normalize(section.title).includes("materiais") && normalize(section.title).includes("equipamentos"));
+    const materialSection = materialSectionForPoint(point);
     if (materialSection && point.skippedSectionIds.includes(materialSection.id)) return "Não realizada.";
     const materials = pointMaterials(point);
     if (!materials.length) {
@@ -452,9 +452,9 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
         if (y > 260) { pdf.addPage(); y = 18; }
         pdf.setFont("Nunito", "bold"); pdf.setFontSize(10); pdf.text(summary.title, 14, y); pdf.setFontSize(9); y = drawRichParagraph(summary.parts, y + 7) + 4;
       }
-      if (tools) { if (y > 262) { pdf.addPage(); y = 18; } pdf.setFont("Nunito", "bold"); pdf.text(materialSectionTitle, 14, y); y = drawRichParagraph([{ text: tools }], y + 5) + 2; }
-      if (reviewSkipped(point)) { if (y > 262) { pdf.addPage(); y = 18; } pdf.setFont("Nunito", "bold"); pdf.text(reviewTitle, 14, y); pdf.setFontSize(9); y = drawRichParagraph([{ text: "Não realizada." }], y + 5) + 2; }
-      if (stageSeven) { if (y > 262) { pdf.addPage(); y = 18; } pdf.setFont("Nunito", "bold"); pdf.text(reviewTitle, 14, y); y += 5; pdf.setFontSize(9); pdf.text("Observações finais da visita", 14, y); y = drawRichParagraph([{ text: stageSeven }], y + 5) + 2; }
+       if (tools) { if (y > 262) { pdf.addPage(); y = 18; } pdf.setFont("Nunito", "bold"); pdf.text(materialSectionTitle(point), 14, y); y = drawRichParagraph([{ text: tools }], y + 5) + 2; }
+       if (reviewSkipped(point)) { if (y > 262) { pdf.addPage(); y = 18; } pdf.setFont("Nunito", "bold"); pdf.text(reviewTitle(point), 14, y); pdf.setFontSize(9); y = drawRichParagraph([{ text: "Não realizada." }], y + 5) + 2; }
+       if (stageSeven) { if (y > 262) { pdf.addPage(); y = 18; } pdf.setFont("Nunito", "bold"); pdf.text(reviewTitle(point), 14, y); y += 5; pdf.setFontSize(9); pdf.text("Observações finais da visita", 14, y); y = drawRichParagraph([{ text: stageSeven }], y + 5) + 2; }
       if (calls) { if (y > 262) { pdf.addPage(); y = 18; } pdf.setFont("Nunito", "bold"); pdf.text("Ações e chamados", 14, y); y = drawRichParagraph([{ text: calls }], y + 5) + 2; }
       const photos = withPhotos ? data.attachments.filter((item) => item.content_type?.startsWith("image/") && (point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id)) : [];
       let photoColumn = 0;
