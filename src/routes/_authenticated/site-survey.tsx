@@ -614,6 +614,8 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
      } finally { autosaveRunning.current = false; }
    };
    const scheduleAutosave = (form: HTMLFormElement, phase: "pre_visit" | "point", immediate = false) => {
+     // The attachment picker is visible before a point is selected; it must not trigger a point save.
+     if (phase === "point" && !pointId) return;
      autosaveTask.current = () => saveAnswers(form, phase, false, [], true);
      if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
      autosaveTimer.current = setTimeout(() => { void runAutosave(); }, immediate ? 0 : 800);
@@ -1039,6 +1041,18 @@ function AttachmentThumbnail({ attachment }: { attachment: SurveyAttachment }) {
 }
 
 function QuestionField({ number, question, answer, attachments, userId, canDelete, canEditAttachments, onAttachmentsChanged, pending = false, call, onAnswerChange }: { number: number; question: Question; answer: unknown; attachments: SurveyAttachment[]; userId: string; canDelete: boolean; canEditAttachments: boolean; onAttachmentsChanged: () => void; pending?: boolean; call?: { id: string | null; number: string | null }; onAnswerChange?: (value: unknown) => void }) {
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const [photoFileName, setPhotoFileName] = useState("");
+  const acceptPhoto = (file: File) => {
+    const input = photoInputRef.current;
+    if (!input) return;
+    if (!file.type.startsWith("image/")) { toast.error("Selecione uma imagem para esta pergunta."); return; }
+    const transfer = new DataTransfer();
+    transfer.items.add(file);
+    input.files = transfer.files;
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+    setPhotoFileName(file.name);
+  };
   const options = questionOptions(question);
   const config = asQuestionConfig(question.configuration); const stored = answerParts(answer); const storedValues = Array.isArray(stored.value) ? stored.value.map(String) : [];
   const [storedDetail, storedSubdetail] = stored.detail.split(" | ");
@@ -1054,7 +1068,7 @@ function QuestionField({ number, question, answer, attachments, userId, canDelet
    const showOtherDetail = (config.other_detail === true || hasOtherOption) && (isOtherOption(selectedValue) || selectedValues.some(isOtherOption));
   const showDetail = (Boolean(config.detail) && conditionApplies) || showOtherDetail;
   const setAnswer = (value: string) => { setSelectedValue(value); onAnswerChange?.(value); };
-  return <div className={`relative grid gap-3 rounded-md border border-myio-green/20 bg-myio-green/10 px-4 pb-4 pt-12 shadow-sm transition-shadow focus-within:border-myio-green/50 focus-within:shadow-md sm:px-5 sm:pb-5 sm:pt-12 ${showDetail || (config.photo && conditionApplies) ? "lg:grid-cols-[minmax(0,1.35fr)_minmax(260px,0.65fr)] lg:items-start lg:gap-5" : ""}`}>
+  return <div onDragOver={(event) => { if (config.photo && conditionApplies && event.dataTransfer.types.includes("Files")) { event.preventDefault(); event.dataTransfer.dropEffect = "copy"; } }} onDrop={(event) => { if (!config.photo || !conditionApplies || !event.dataTransfer.files.length) return; event.preventDefault(); acceptPhoto(event.dataTransfer.files[0]); }} onPaste={(event) => { const file = Array.from(event.clipboardData.files).find((item) => item.type.startsWith("image/")); if (config.photo && conditionApplies && file) { event.preventDefault(); acceptPhoto(file); } }} className={`relative grid gap-3 rounded-md border border-myio-green/20 bg-myio-green/10 px-4 pb-4 pt-12 shadow-sm transition-shadow focus-within:border-myio-green/50 focus-within:shadow-md sm:px-5 sm:pb-5 sm:pt-12 ${showDetail || (config.photo && conditionApplies) ? "lg:grid-cols-[minmax(0,1.35fr)_minmax(260px,0.65fr)] lg:items-start lg:gap-5" : ""}`}>
     <span className="absolute left-3 top-3 grid h-7 w-7 place-items-center rounded-sm bg-card text-xs font-bold tabular-nums text-myio-green shadow-sm ring-1 ring-myio-green/20" aria-hidden="true">{number}</span>
     <div className="min-w-0 space-y-2">
       <div className="flex min-w-0 flex-wrap items-center gap-2"><Label className={`text-sm font-semibold ${pending ? "text-destructive" : ""}`}>{question.prompt.replace(/\s*\*\s*$/, "")}</Label>{call?.id && call.number ? <Link to="/chamados" search={{ chamado: call.id }} aria-label={`Abrir histórico do chamado ${call.number}`}><Badge variant="outline" className="cursor-pointer border-myio-green/30 bg-myio-green/10 text-myio-green hover:bg-myio-green/20">Chamado #{call.number}</Badge></Link> : null}</div>
@@ -1070,7 +1084,7 @@ function QuestionField({ number, question, answer, attachments, userId, canDelet
     </div>
     {showDetail || (config.photo && conditionApplies) ? <div className="min-w-0 space-y-3">
        {showDetail ? <div className="min-w-64 flex-1 space-y-2"><Label className="text-xs text-muted-foreground">{showOtherDetail ? "Especifique" : config.detail?.label ?? "Detalhes"}</Label>{config.detail?.options?.length && !showOtherDetail ? <Select name={`${question.id}__detail`} value={selectedDetail || undefined} onValueChange={setSelectedDetail}><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent>{config.detail.options.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent></Select> : <Textarea name={`${question.id}__detail`} defaultValue={stored.detail} rows={2} maxLength={500} required={showOtherDetail || config.detail?.required === true} />}{suboptions.length ? <div className="space-y-2"><Label className="text-xs text-muted-foreground">Localização da tomada</Label><Select name={`${question.id}__subdetail`} defaultValue={storedSubdetail || undefined}><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent>{suboptions.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent></Select></div> : null}</div> : null}
-       {config.photo && conditionApplies ? <div className="min-w-64 flex-1 space-y-2"><div className="flex items-center justify-between gap-2"><Label htmlFor={`${question.id}__photo`} className="flex items-center gap-2 text-xs text-muted-foreground"><Camera className="h-4 w-4" />Foto{photoRequired ? " obrigatória" : " opcional"}{hasPhoto ? " · anexada" : ""}</Label>{hasPhoto ? <AttachmentDeleteControl attachments={attachments} userId={userId} canDelete={canDelete} canEditAttachments={canEditAttachments} onDeleted={onAttachmentsChanged} /> : null}</div><Input id={`${question.id}__photo`} name={`${question.id}__photo`} type="file" accept="image/*" capture="environment" />{hasPhoto ? <div className="flex flex-wrap gap-2" aria-label="Fotos anexadas">{attachments.map((attachment) => <AttachmentThumbnail key={attachment.id} attachment={attachment} />)}</div> : null}</div> : null}
+       {config.photo && conditionApplies ? <div className="min-w-64 flex-1 space-y-2"><div className="flex items-center justify-between gap-2"><Label htmlFor={`${question.id}__photo`} className="flex items-center gap-2 text-xs text-muted-foreground"><Camera className="h-4 w-4" />Foto{photoRequired ? " obrigatória" : " opcional"}{hasPhoto ? " · anexada" : ""}</Label>{hasPhoto ? <AttachmentDeleteControl attachments={attachments} userId={userId} canDelete={canDelete} canEditAttachments={canEditAttachments} onDeleted={onAttachmentsChanged} /> : null}</div><input ref={photoInputRef} id={`${question.id}__photo`} name={`${question.id}__photo`} type="file" accept="image/*" className="sr-only" onChange={(event) => setPhotoFileName(event.target.files?.[0]?.name ?? "")} /><Button type="button" variant="outline" className="h-auto min-h-12 w-full justify-start whitespace-normal border-dashed px-3 py-2 text-left" onClick={() => photoInputRef.current?.click()}><Camera className="h-4 w-4 shrink-0" /><span className="min-w-0 break-all">{photoFileName || "Escolher ou arrastar arquivo"}</span></Button>{hasPhoto ? <div className="flex flex-wrap gap-2" aria-label="Fotos anexadas">{attachments.map((attachment) => <AttachmentThumbnail key={attachment.id} attachment={attachment} />)}</div> : null}</div> : null}
     </div> : null}
   </div>;
 }
