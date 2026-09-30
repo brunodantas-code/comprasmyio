@@ -511,7 +511,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
   const saveAnswers = async (form: HTMLFormElement, phase: "pre_visit" | "point", finishPoint = false, acceptedPendingFields: string[] = [], automatic = false) => {
     if (phase === "point" && !pointId) throw new Error("Selecione a loja ou ambiente deste checklist.");
     if (phase === "point" && finishPoint && !visit.is_manual_entry && currentPause) throw new Error("Retome a visita antes de concluí-la.");
-    if (phase === "point" && finishPoint && !facadeAttachment) throw new Error("Adicione a foto da fachada antes de concluir esta visita.");
+    if (phase === "point" && finishPoint && !visit.is_manual_entry && !facadeAttachment) throw new Error("Adicione a foto da fachada antes de concluir esta visita.");
     const values = new FormData(form);
     const scope = pointKind === "luc" ? { visit_luc_id: pointId, visit_environment_id: null } : { visit_luc_id: null, visit_environment_id: pointId };
     const formAnswers = new Map<string, unknown>(questions.map((question) => [question.id, question.question_type === "multiselect" ? values.getAll(question.id).map(String) : question.question_type === "checkbox" ? checkboxUsesOptions(question) ? String(values.get(question.id) ?? "") : values.get(question.id) === "on" : String(values.get(question.id) ?? "")]));
