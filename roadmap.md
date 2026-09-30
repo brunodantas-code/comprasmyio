@@ -793,3 +793,4 @@
 - [x] Site Survey — ao selecionar modelo de checklist, iniciar todas as seções e perguntas recolhidas.
 - [x] Site Survey — dar ao título das seções o destaque e tamanho de “Seções do checklist”.
 - [x] Site Survey — exibir “Título da seção” e “Descrição” abaixo dos respectivos campos, alinhados à esquerda e no estilo dos contadores.
+- [x] Site Survey — manter a visita aberta ao clicar em Iniciar visita, atualizando a situação sem retornar ao resumo.

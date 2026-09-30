@@ -260,7 +260,7 @@ function SiteSurveyPage() {
                  })}
                  {filtered.length === 0 ? <p className={`${visitsListOpen ? "" : "lg:hidden"} px-4 py-12 text-center text-sm text-muted-foreground`}>Nenhuma visita encontrada.</p> : null}
                </div>
-               <VisitDetails visit={selected} data={data} onClose={() => setSelected(null)} onChanged={() => { invalidate(); setSelected(null); }} />
+               <VisitDetails visit={selected} data={data} onClose={() => setSelected(null)} onChanged={(updatedVisit) => { void invalidate(); setSelected(updatedVisit ?? null); }} />
                       </TabsContent>
             {can("site_survey_agendar") ? <TabsContent value="nova"><VisitDialog data={data} inline onSaved={() => { invalidate(); setVisitsSection("minhas"); }} /></TabsContent> : null}
           </Tabs>
@@ -335,7 +335,7 @@ function ChecklistSection({ section, order, open, pendingCount, onToggle, childr
   </section>;
 }
 
-function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null; data: NonNullable<ReturnType<typeof useSurveyDataShape>>; onClose: () => void; onChanged: () => void }) {
+function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null; data: NonNullable<ReturnType<typeof useSurveyDataShape>>; onClose: () => void; onChanged: (updatedVisit?: Visit) => void }) {
   const [reviewNotes, setReviewNotes] = useState(""); const [files, setFiles] = useState<File[]>([]);
   const [materialRows, setMaterialRows] = useState<Array<{ catalog_item_id: string; quantity: string; notes: string; screwdriver_type_id: string; wrench_size_id: string }>>([]);
   const [noAdditionalMaterial, setNoAdditionalMaterial] = useState(false);
@@ -409,7 +409,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
       }
     }
   };
-  const updateStatus = async (status: VisitStatus) => { if ((status === "em_revisao" || status === "concluida") && !allRequiredComplete) return toast.error("Preencha todos os campos obrigatórios antes de concluir."); const stamps: Record<string, string> = {}; if (status === "em_andamento") stamps.started_at = new Date().toISOString(); if (status === "em_revisao") stamps.submitted_at = new Date().toISOString(); if (status === "concluida") stamps.completed_at = new Date().toISOString(); if (status === "cancelada") stamps.cancelled_at = new Date().toISOString(); const { error } = await supabase.from("site_survey_visits").update({ status, review_notes: reviewNotes || visit.review_notes, ...stamps }).eq("id", visit.id); if (error) return toast.error(error.message); toast.success(`Visita ${STATUS[status].toLocaleLowerCase("pt-BR")}`); onChanged(); };
+  const updateStatus = async (status: VisitStatus) => { if ((status === "em_revisao" || status === "concluida") && !allRequiredComplete) return toast.error("Preencha todos os campos obrigatórios antes de concluir."); const stamps: Record<string, string> = {}; if (status === "em_andamento") stamps.started_at = new Date().toISOString(); if (status === "em_revisao") stamps.submitted_at = new Date().toISOString(); if (status === "concluida") stamps.completed_at = new Date().toISOString(); if (status === "cancelada") stamps.cancelled_at = new Date().toISOString(); const { error } = await supabase.from("site_survey_visits").update({ status, review_notes: reviewNotes || visit.review_notes, ...stamps }).eq("id", visit.id); if (error) return toast.error(error.message); toast.success(`Visita ${STATUS[status].toLocaleLowerCase("pt-BR")}`); onChanged(status === "em_andamento" ? { ...visit, status, started_at: stamps.started_at } : undefined); };
   const startPoint = async () => {
     if (!pointId || selectedPointRecord?.started_at) return;
     const table = pointKind === "luc" ? "site_survey_visit_lucs" : "site_survey_visit_environments";
