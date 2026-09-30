@@ -641,13 +641,14 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
    const toggleChecklistSection = (sectionId: string, event: MouseEvent<HTMLButtonElement>, phase: "pre_visit" | "point") => {
      const form = event.currentTarget.closest("form");
      if (form && openSectionId) scheduleAutosave(form, phase, true);
-     setOpenSectionId((current) => current === sectionId ? null : sectionId);
-     if (window.matchMedia("(max-width: 767px)").matches) {
+      const opening = openSectionId !== sectionId;
+      setOpenSectionId(opening ? sectionId : null);
+      if (opening) {
        requestAnimationFrame(() => requestAnimationFrame(() => {
          const heading = document.getElementById(`survey-section-${sectionId}`);
          if (heading && heading.querySelector("button[aria-expanded=true]")) {
            const headerHeight = document.querySelector("header.sticky")?.getBoundingClientRect().height ?? 0;
-           window.scrollTo({ top: window.scrollY + heading.getBoundingClientRect().top - headerHeight - 12, behavior: "instant" });
+            window.scrollTo({ top: window.scrollY + heading.getBoundingClientRect().top - headerHeight - 12, behavior: "instant" });
          }
        }));
      }
@@ -700,7 +701,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
   const generalCalls = new Map(generatedCallsForScope("pre_visit").map((item) => [item.question_id, { id: item.internal_call_id, number: item.internal_calls?.call_number ?? null }]));
   const pointCalls = new Map(generatedCallsForScope("point").map((item) => [item.question_id, { id: item.internal_call_id, number: item.internal_calls?.call_number ?? null }]));
   const phaseForm = (
-    <div className="space-y-5">
+     <div className="space-y-5 [overflow-anchor:none]">
       {!visit.is_manual_entry ? <form onChangeCapture={(event) => { const type = (event.nativeEvent.target instanceof HTMLInputElement ? event.nativeEvent.target.type : ""); if (!(["text", "number", "textarea"].includes(type) || event.nativeEvent.target instanceof HTMLTextAreaElement)) scheduleAutosave(event.currentTarget, "pre_visit", type === "file"); }} onBlurCapture={(event) => { if (["text", "number"].includes((event.nativeEvent.target instanceof HTMLInputElement ? event.nativeEvent.target.type : "")) || event.nativeEvent.target instanceof HTMLTextAreaElement) scheduleAutosave(event.currentTarget, "pre_visit", true); }} onSubmit={(event) => { event.preventDefault(); void saveAnswers(event.currentTarget, "pre_visit").catch((error: unknown) => toast.error(error instanceof Error ? error.message : "Não foi possível salvar o checklist pré-visita.")); }} className="space-y-5">
        {generalSections.map((section, index) => <div id={`survey-section-${section.id}`} key={section.id}><ChecklistSection section={section} order={index + 1} open={openSectionId === section.id} pendingCount={sectionVisiblePendingCount(section, true)} onToggle={(event) => toggleChecklistSection(section.id, event, "pre_visit")}><ConditionalSectionQuestions sectionTitle={section.title} questions={questions.filter((question) => question.section_id === section.id)} answers={answers} attachments={detail?.attachments ?? []} userId={data.userId} canDelete={canManageAttachments} canEditAttachments={canEditAttachments} onAttachmentsChanged={() => void refetchDetail()} matchesPoint={(item) => !item.visit_luc_id && !item.visit_environment_id} selectedPoint="general" pendingFields={[]} calls={generalCalls} onQuestionAnswerChange={(question, value) => { handleQuestionAnswerChange(question, value, "pre_visit"); scheduleSectionAutosave(section.id, "pre_visit"); }} technicians={data.technicians} visitTechnicians={visitTechnicians} onTechniciansChange={(rows) => { setVisitTechnicians(rows); scheduleSectionAutosave(section.id, "pre_visit"); }} /></ChecklistSection></div>)}
        <div className="flex justify-end"><Button type="submit"><ClipboardCheck className="h-4 w-4" />Salvar progresso</Button></div>
