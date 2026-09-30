@@ -349,6 +349,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
   const [noAdditionalMaterial, setNoAdditionalMaterial] = useState(false);
   const [visitTechnicians, setVisitTechnicians] = useState<VisitTechnician[]>([{ technician_id: "", mobile_phone: "" }]);
   const [selectedPoint, setSelectedPoint] = useState("");
+  const selectedPointRef = useRef("");
   const [pointFilter, setPointFilter] = useState("");
   const [pointPickerOpen, setPointPickerOpen] = useState(false);
   const [openSectionId, setOpenSectionId] = useState<string | null>(null);
@@ -360,6 +361,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
   const autosaveRunning = useRef(false);
   const autosaveQueued = useRef(false);
   const autosaveTask = useRef<(() => Promise<void>) | null>(null);
+  const saveQueue = useRef<Promise<unknown>>(Promise.resolve());
   const [approvedActionKeys, setApprovedActionKeys] = useState<Set<string>>(() => new Set());
   const approvedActionKeysRef = useRef<Set<string>>(new Set());
   const [declinedActionKeys, setDeclinedActionKeys] = useState<Set<string>>(() => new Set());
@@ -526,17 +528,17 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
     }
     return pending;
   };
-  const saveAnswers = async (form: HTMLFormElement, phase: "pre_visit" | "point", finishPoint = false, acceptedPendingFields: string[] = [], automatic = false) => {
+  const persistAnswers = async (form: HTMLFormElement, phase: "pre_visit" | "point", finishPoint = false, acceptedPendingFields: string[] = [], automatic = false) => {
     if (phase === "point" && !pointId) throw new Error("Selecione a loja ou ambiente deste checklist.");
     if (phase === "point" && finishPoint && !visit.is_manual_entry && currentPause) throw new Error("Retome a visita antes de concluí-la.");
     if (phase === "point" && finishPoint && !visit.is_manual_entry && !facadeAttachment) throw new Error("Adicione a foto da fachada antes de concluir esta visita.");
     const values = new FormData(form);
     const scope = pointKind === "luc" ? { visit_luc_id: pointId, visit_environment_id: null } : { visit_luc_id: null, visit_environment_id: pointId };
-    const formAnswers = new Map<string, unknown>(questions.map((question) => [question.id, question.question_type === "multiselect" ? values.getAll(question.id).map(String) : question.question_type === "checkbox" ? checkboxUsesOptions(question) ? String(values.get(question.id) ?? "") : values.get(question.id) === "on" : String(values.get(question.id) ?? "")]));
+     const formAnswers = new Map<string, unknown>(questions.map((question) => [question.id, values.has(question.id) ? question.question_type === "multiselect" ? values.getAll(question.id).map(String) : question.question_type === "checkbox" ? checkboxUsesOptions(question) ? String(values.get(question.id) ?? "") : values.get(question.id) === "on" : String(values.get(question.id) ?? "") : answerParts((detail?.responses ?? []).find((response) => response.question_id === question.id && (phase === "pre_visit" ? !response.visit_luc_id && !response.visit_environment_id : matchesPoint(response)))?.answer).value]));
     const visibleQuestions = questions.filter((question) => phase === "pre_visit"
       ? generalQuestionIds.has(question.id)
       : !generalQuestionIds.has(question.id) && !skippedSectionIds.has(question.section_id)).filter((question) => isQuestionVisible(question, formAnswers));
-    const rows = visibleQuestions.map((question) => {
+     const rows = visibleQuestions.filter((question) => question.section_id === openSectionId && (values.has(question.id) || values.has(`${question.id}__detail`) || values.has(`${question.id}__photo`) || question.question_type === "checkbox")).map((question) => {
       const config = asQuestionConfig(question.configuration);
       const value = question.question_key === "shopping_maintenance_companions" ? visitTechnicians.map((item) => item.technician_id) : question.question_type === "multiselect" ? values.getAll(question.id).map(String) : question.question_type === "checkbox" ? checkboxUsesOptions(question) ? String(values.get(question.id) ?? "") : values.get(question.id) === "on" : String(values.get(question.id) ?? "");
       const baseDetail = String(values.get(`${question.id}__detail`) ?? "").trim();
@@ -561,11 +563,12 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
          if (photoInput instanceof HTMLInputElement) photoInput.value = "";
       }
     }
-    const existingResponses = (detail?.responses ?? []).filter((response) => phase === "pre_visit"
-      ? generalQuestionIds.has(response.question_id) && !response.visit_luc_id && !response.visit_environment_id
-      : matchesPoint(response));
+     let existingQuery = supabase.from("site_survey_responses").select("id,question_id").eq("visit_id", visit.id);
+     existingQuery = phase === "pre_visit" ? existingQuery.is("visit_luc_id", null).is("visit_environment_id", null) : pointKind === "luc" ? existingQuery.eq("visit_luc_id", pointId) : existingQuery.eq("visit_environment_id", pointId);
+     const { data: existingResponses, error: existingError } = await existingQuery;
+     if (existingError) throw existingError;
     await Promise.all(rows.map(async (row) => {
-      const existing = existingResponses.find((response) => response.question_id === row.question_id);
+       const existing = existingResponses?.find((response) => response.question_id === row.question_id);
       const { error } = existing
         ? await supabase.from("site_survey_responses").update({ answer: row.answer, answered_by: row.answered_by, question_snapshot: row.question_snapshot }).eq("id", existing.id)
         : await supabase.from("site_survey_responses").insert(row as never);
@@ -645,26 +648,45 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
           if (!automatic) toast.success(finishPoint ? "Visita desta loja concluída" : pendingFields.length ? "Progresso salvo com pendências registradas" : "Progresso salvo");
        }
          if (!automatic) { setFiles([]); setOpenSectionId(null); }
-        if (finishPoint) { setSelectedPoint(""); setPointFilter(""); }
+         if (finishPoint) { selectedPointRef.current = ""; setSelectedPoint(""); setPointFilter(""); }
     }
     await refetchDetail();
   };
-   const runAutosave = async () => {
-     if (autosaveRunning.current) { autosaveQueued.current = true; return; }
+  const saveAnswers = (form: HTMLFormElement, phase: "pre_visit" | "point", finishPoint = false, acceptedPendingFields: string[] = [], automatic = false) => {
+    const targetPoint = selectedPoint;
+    const next = saveQueue.current.catch(() => undefined).then(() => {
+      if (phase === "point" && selectedPointRef.current !== targetPoint) throw new Error("A loja mudou antes do salvamento. Selecione-a novamente.");
+      return persistAnswers(form, phase, finishPoint, acceptedPendingFields, automatic);
+    });
+    saveQueue.current = next;
+    return next;
+  };
+    const runAutosave = async (): Promise<boolean> => {
+      if (autosaveRunning.current) {
+        autosaveQueued.current = true;
+        while (autosaveRunning.current) await new Promise((resolve) => setTimeout(resolve, 40));
+        return !autosaveTask.current;
+      }
      autosaveRunning.current = true;
      try {
        do {
          autosaveQueued.current = false;
-         await autosaveTask.current?.();
-       } while (autosaveQueued.current);
+          const task = autosaveTask.current;
+          autosaveTask.current = null;
+          try { await task?.(); }
+          catch (error) { if (!autosaveTask.current) autosaveTask.current = task; throw error; }
+        } while (autosaveQueued.current || autosaveTask.current);
+        return true;
      } catch (error) {
        toast.error(error instanceof Error ? `Não foi possível salvar automaticamente: ${error.message}` : "Não foi possível salvar automaticamente.");
+        return false;
      } finally { autosaveRunning.current = false; }
    };
    const scheduleAutosave = (form: HTMLFormElement, phase: "pre_visit" | "point", immediate = false) => {
      // The attachment picker is visible before a point is selected; it must not trigger a point save.
      if (phase === "point" && !pointId) return;
-     autosaveTask.current = () => saveAnswers(form, phase, false, [], true);
+      const targetPoint = selectedPoint;
+      autosaveTask.current = () => phase === "point" && selectedPointRef.current !== targetPoint ? Promise.resolve() : saveAnswers(form, phase, false, [], true);
      if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
      autosaveTimer.current = setTimeout(() => { void runAutosave(); }, immediate ? 0 : 800);
    };
@@ -674,9 +696,25 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
         if (form) scheduleAutosave(form, phase);
       });
     };
-   const toggleChecklistSection = (sectionId: string, event: MouseEvent<HTMLButtonElement>, phase: "pre_visit" | "point") => {
+    const switchPoint = async (nextPoint: string) => {
+      if (nextPoint === selectedPointRef.current) { setPointPickerOpen(false); return; }
+      if (autosaveTimer.current) { clearTimeout(autosaveTimer.current); autosaveTimer.current = null; }
+      if (autosaveTask.current && !(await runAutosave())) return;
+      await saveQueue.current.catch(() => undefined);
+      selectedPointRef.current = nextPoint;
+      setSelectedPoint(nextPoint);
+      setPointFilter("");
+      setPointPickerOpen(false);
+      setOpenSectionId(null);
+      setPendingPointSave(null);
+    };
+    const toggleChecklistSection = async (sectionId: string, event: MouseEvent<HTMLButtonElement>, phase: "pre_visit" | "point") => {
      const form = event.currentTarget.closest("form");
-     if (form && openSectionId) scheduleAutosave(form, phase, true);
+      if (form && openSectionId) {
+        scheduleAutosave(form, phase, true);
+        if (autosaveTimer.current) { clearTimeout(autosaveTimer.current); autosaveTimer.current = null; }
+        if (!(await runAutosave())) return;
+      }
       const opening = openSectionId !== sectionId;
       setOpenSectionId(opening ? sectionId : null);
       if (opening) {
@@ -766,7 +804,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
      </form> : null}
     {preVisitSaved ? (
       <form onChangeCapture={(event) => { if (event.target instanceof Element && event.target.closest("[data-survey-skip]")) return; const type = (event.nativeEvent.target instanceof HTMLInputElement ? event.nativeEvent.target.type : ""); if (!(["text", "number", "textarea"].includes(type) || event.nativeEvent.target instanceof HTMLTextAreaElement)) scheduleAutosave(event.currentTarget, "point", type === "file"); }} onBlurCapture={(event) => { if (["text", "number"].includes((event.nativeEvent.target instanceof HTMLInputElement ? event.nativeEvent.target.type : "")) || event.nativeEvent.target instanceof HTMLTextAreaElement) scheduleAutosave(event.currentTarget, "point", true); }} onSubmit={(event) => { event.preventDefault(); void saveAnswers(event.currentTarget, "point").catch((error: unknown) => toast.error(error instanceof Error ? error.message : "Não foi possível salvar a vistoria.")); }} className="space-y-5">
-        <div className="space-y-2 border-t pt-5"><Label>Loja ou ambiente deste checklist</Label><Popover open={pointPickerOpen} onOpenChange={setPointPickerOpen}><PopoverTrigger asChild><Button type="button" variant="outline" role="combobox" aria-expanded={pointPickerOpen} aria-label="Selecionar Loja ou ambiente deste checklist" className="h-11 w-full justify-between !bg-background px-3 font-normal !text-foreground hover:!bg-muted hover:!text-foreground"> <span className={selectedPoint ? "truncate" : "truncate text-muted-foreground"}>{selectedPoint ? points.find((point) => point.value === selectedPoint)?.label : "Selecione ou pesquise o LUC ou nome da loja"}</span><ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-60" /></Button></PopoverTrigger><PopoverContent align="start" className="w-(--radix-popover-trigger-width) p-0"><Command><CommandInput value={pointFilter} onValueChange={setPointFilter} placeholder="Digite o LUC ou nome da loja" /><CommandList><CommandEmpty>Nenhuma loja encontrada.</CommandEmpty><CommandGroup>{points.map((point) => <CommandItem key={point.value} value={point.label} onSelect={() => { setSelectedPoint(point.value); setPointFilter(""); setPointPickerOpen(false); setOpenSectionId(null); }}><Check className={`h-4 w-4 ${selectedPoint === point.value ? "opacity-100" : "opacity-0"}`} /><span className="min-w-0 flex-1 truncate">{point.label}</span><Badge variant="outline" className="shrink-0">{point.completionStatus === "concluida" ? "Concluída" : point.completionStatus === "cancelada" ? `Cancelada${point.cancellationReason ? ` — ${point.cancellationReason}` : ""}` : "Não concluída"}</Badge></CommandItem>)}</CommandGroup></CommandList></Command></PopoverContent></Popover>{selectedPoint ? <div className="flex flex-wrap items-center justify-between gap-2"><div className="space-y-1"><Badge variant="outline" className="w-fit">{points.find((point) => point.value === selectedPoint)?.completionStatus === "concluida" ? "Loja concluída" : selectedPointCancelled ? "Loja cancelada" : currentPause ? "Visita pausada" : "Visita da loja não concluída"}</Badge>{selectedPointCancelled ? <p className="text-sm text-muted-foreground">Motivo: {points.find((point) => point.value === selectedPoint)?.cancellationReason ?? "não informado"}</p> : null}{currentPause ? <p className="text-sm text-muted-foreground">Pausa desde {new Date(currentPause.started_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })} · {data.pauseReasons.find((reason) => reason.id === currentPause.reason_id)?.name ?? "Motivo registrado"}</p> : null}</div>{!selectedPointCancelled ? <div className="flex flex-wrap items-center gap-2">{!visit.is_manual_entry ? <><Button type="button" size="sm" variant="outline" disabled={Boolean(selectedPointRecord?.started_at)} onClick={() => void startPoint()}><Play className="h-4 w-4" />{selectedPointRecord?.started_at ? `Iniciada ${new Date(selectedPointRecord.started_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}` : "Iniciar visita"}</Button>{selectedPointRecord?.completion_status === "pendente" ? <Button type="button" size="sm" variant="outline" disabled={!selectedPointRecord.started_at || savingPause} onClick={() => currentPause ? void resumePoint() : setPauseOpen(true)}>{currentPause ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}{currentPause ? "Retomar visita" : "Pausar visita"}</Button> : null}</> : null}<Label htmlFor="facade-photo" onClick={() => { if (window.matchMedia("(max-width: 767px)").matches) facadeScrollPosition.current = window.scrollY; }} className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-md border px-3 text-sm font-medium hover:bg-muted"><Camera className="h-4 w-4" />{facadeAttachment ? "Trocar fachada" : "Foto da fachada"}</Label><Input id="facade-photo" type="file" accept="image/*" capture="environment" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; void uploadFacade(file); }} /></div> : null}</div> : null}{!points.length ? <p className="text-sm text-destructive">Cadastre ao menos uma loja ou ambiente antes de preencher o checklist.</p> : null}</div>
+        <div className="space-y-2 border-t pt-5"><Label>Loja ou ambiente deste checklist</Label><Popover open={pointPickerOpen} onOpenChange={setPointPickerOpen}><PopoverTrigger asChild><Button type="button" variant="outline" role="combobox" aria-expanded={pointPickerOpen} aria-label="Selecionar Loja ou ambiente deste checklist" className="h-11 w-full justify-between !bg-background px-3 font-normal !text-foreground hover:!bg-muted hover:!text-foreground"> <span className={selectedPoint ? "truncate" : "truncate text-muted-foreground"}>{selectedPoint ? points.find((point) => point.value === selectedPoint)?.label : "Selecione ou pesquise o LUC ou nome da loja"}</span><ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-60" /></Button></PopoverTrigger><PopoverContent align="start" className="w-(--radix-popover-trigger-width) p-0"><Command><CommandInput value={pointFilter} onValueChange={setPointFilter} placeholder="Digite o LUC ou nome da loja" /><CommandList><CommandEmpty>Nenhuma loja encontrada.</CommandEmpty><CommandGroup>{points.map((point) => <CommandItem key={point.value} value={point.label} onSelect={() => { void switchPoint(point.value); }}><Check className={`h-4 w-4 ${selectedPoint === point.value ? "opacity-100" : "opacity-0"}`} /><span className="min-w-0 flex-1 truncate">{point.label}</span><Badge variant="outline" className="shrink-0">{point.completionStatus === "concluida" ? "Concluída" : point.completionStatus === "cancelada" ? `Cancelada${point.cancellationReason ? ` — ${point.cancellationReason}` : ""}` : "Não concluída"}</Badge></CommandItem>)}</CommandGroup></CommandList></Command></PopoverContent></Popover>{selectedPoint ? <div className="flex flex-wrap items-center justify-between gap-2"><div className="space-y-1"><Badge variant="outline" className="w-fit">{points.find((point) => point.value === selectedPoint)?.completionStatus === "concluida" ? "Loja concluída" : selectedPointCancelled ? "Loja cancelada" : currentPause ? "Visita pausada" : "Visita da loja não concluída"}</Badge>{selectedPointCancelled ? <p className="text-sm text-muted-foreground">Motivo: {points.find((point) => point.value === selectedPoint)?.cancellationReason ?? "não informado"}</p> : null}{currentPause ? <p className="text-sm text-muted-foreground">Pausa desde {new Date(currentPause.started_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })} · {data.pauseReasons.find((reason) => reason.id === currentPause.reason_id)?.name ?? "Motivo registrado"}</p> : null}</div>{!selectedPointCancelled ? <div className="flex flex-wrap items-center gap-2">{!visit.is_manual_entry ? <><Button type="button" size="sm" variant="outline" disabled={Boolean(selectedPointRecord?.started_at)} onClick={() => void startPoint()}><Play className="h-4 w-4" />{selectedPointRecord?.started_at ? `Iniciada ${new Date(selectedPointRecord.started_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}` : "Iniciar visita"}</Button>{selectedPointRecord?.completion_status === "pendente" ? <Button type="button" size="sm" variant="outline" disabled={!selectedPointRecord.started_at || savingPause} onClick={() => currentPause ? void resumePoint() : setPauseOpen(true)}>{currentPause ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}{currentPause ? "Retomar visita" : "Pausar visita"}</Button> : null}</> : null}<Label htmlFor="facade-photo" onClick={() => { if (window.matchMedia("(max-width: 767px)").matches) facadeScrollPosition.current = window.scrollY; }} className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-md border px-3 text-sm font-medium hover:bg-muted"><Camera className="h-4 w-4" />{facadeAttachment ? "Trocar fachada" : "Foto da fachada"}</Label><Input id="facade-photo" type="file" accept="image/*" capture="environment" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; void uploadFacade(file); }} /></div> : null}</div> : null}{!points.length ? <p className="text-sm text-destructive">Cadastre ao menos uma loja ou ambiente antes de preencher o checklist.</p> : null}</div>
              {selectedPoint && !selectedPointCancelled ? pointSections.map((section, index) => <div id={`survey-section-${section.id}`} key={`${selectedPoint}-${section.id}`}><ChecklistSection section={section} order={(visit.is_manual_entry ? 0 : generalSections.length) + index + 1} open={openSectionId === section.id} pendingCount={sectionVisiblePendingCount(section, false)} onToggle={(event) => toggleChecklistSection(section.id, event, "point")} skipped={skippedSectionIds.has(section.id)} onSkippedChange={(checked) => void changeSkippedSection(section, checked)}>{section.title.startsWith("Revisão") && visibleDisplayedPendingFields.length ? <div className="rounded-md border border-destructive/30 bg-destructive/5 p-3"><p className="text-sm font-semibold text-destructive">Pendências {pendingPointSave ? "encontradas" : "do último salvamento"}</p><div className="mt-3 space-y-3 text-sm text-destructive">{groupedPendingFields.map((group) => <div key={group.label}><p className="font-semibold">{group.label}</p><ul className="mt-1 space-y-1">{group.fields.map((field) => <li key={field}>• {field}</li>)}</ul></div>)}</div></div> : section.title.startsWith("Revisão") && validatedPoints.has(selectedPoint) && recordedPendingFields.length === 0 && selectedPointRecord?.last_progress_at ? <p className="text-sm text-muted-foreground">Nenhuma pendência de preenchimento registrada.</p> : null}<ConditionalSectionQuestions sectionTitle={section.title} finalObservations={section.id === pointSections.at(-1)?.id} questions={questions.filter((question) => question.section_id === section.id)} questionOrder={questionOrder} answers={answers} attachments={detail?.attachments ?? []} userId={data.userId} canDelete={canManageAttachments} canEditAttachments={canEditAttachments} onAttachmentsChanged={() => void refetchDetail()} matchesPoint={matchesPoint} selectedPoint={selectedPoint} pendingFields={visibleDisplayedPendingFields} calls={pointCalls} onPhotoReferenceChange={() => scheduleSectionAutosave(section.id, "point")} onQuestionAnswerChange={(question, value) => { if (isSpecialEquipmentQuestion(question)) { const affirmative = isAffirmativeAnswer(value); setSpecialEquipmentAnswer(affirmative ? "sim" : "não"); setNoAdditionalMaterial(!affirmative); if (!affirmative) setMaterialRows([]); } handleQuestionAnswerChange(question, value, "point"); scheduleSectionAutosave(section.id, "point"); }} />{questions.some((question) => question.section_id === section.id && isSpecialEquipmentQuestion(question)) ? renderMaterials : null}</ChecklistSection></div>) : null}
       {questions.length === 0 ? <div className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">O checklist será disponibilizado quando as perguntas forem cadastradas.</div> : null}
        {!selectedPointCancelled ? <div className="space-y-2"><Label htmlFor="survey-files" className="flex items-center gap-2"><Camera className="h-4 w-4" />Fotos e anexos deste ambiente</Label><Input id="survey-files" type="file" accept="image/*,application/pdf" multiple onChange={(event) => setFiles(Array.from(event.target.files ?? []))} /></div> : null}
