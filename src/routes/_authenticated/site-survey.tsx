@@ -349,6 +349,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
   const [noAdditionalMaterial, setNoAdditionalMaterial] = useState(false);
   const [visitTechnicians, setVisitTechnicians] = useState<VisitTechnician[]>([{ technician_id: "", mobile_phone: "" }]);
   const [selectedPoint, setSelectedPoint] = useState("");
+  const selectedPointRef = useRef("");
   const [pointFilter, setPointFilter] = useState("");
   const [pointPickerOpen, setPointPickerOpen] = useState(false);
   const [openSectionId, setOpenSectionId] = useState<string | null>(null);
@@ -360,6 +361,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
   const autosaveRunning = useRef(false);
   const autosaveQueued = useRef(false);
   const autosaveTask = useRef<(() => Promise<void>) | null>(null);
+  const saveQueue = useRef<Promise<unknown>>(Promise.resolve());
   const [approvedActionKeys, setApprovedActionKeys] = useState<Set<string>>(() => new Set());
   const approvedActionKeysRef = useRef<Set<string>>(new Set());
   const [declinedActionKeys, setDeclinedActionKeys] = useState<Set<string>>(() => new Set());
@@ -526,17 +528,17 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
     }
     return pending;
   };
-  const saveAnswers = async (form: HTMLFormElement, phase: "pre_visit" | "point", finishPoint = false, acceptedPendingFields: string[] = [], automatic = false) => {
+  const persistAnswers = async (form: HTMLFormElement, phase: "pre_visit" | "point", finishPoint = false, acceptedPendingFields: string[] = [], automatic = false) => {
     if (phase === "point" && !pointId) throw new Error("Selecione a loja ou ambiente deste checklist.");
     if (phase === "point" && finishPoint && !visit.is_manual_entry && currentPause) throw new Error("Retome a visita antes de concluí-la.");
     if (phase === "point" && finishPoint && !visit.is_manual_entry && !facadeAttachment) throw new Error("Adicione a foto da fachada antes de concluir esta visita.");
     const values = new FormData(form);
     const scope = pointKind === "luc" ? { visit_luc_id: pointId, visit_environment_id: null } : { visit_luc_id: null, visit_environment_id: pointId };
-    const formAnswers = new Map<string, unknown>(questions.map((question) => [question.id, question.question_type === "multiselect" ? values.getAll(question.id).map(String) : question.question_type === "checkbox" ? checkboxUsesOptions(question) ? String(values.get(question.id) ?? "") : values.get(question.id) === "on" : String(values.get(question.id) ?? "")]));
+     const formAnswers = new Map<string, unknown>(questions.map((question) => [question.id, values.has(question.id) ? question.question_type === "multiselect" ? values.getAll(question.id).map(String) : question.question_type === "checkbox" ? checkboxUsesOptions(question) ? String(values.get(question.id) ?? "") : values.get(question.id) === "on" : String(values.get(question.id) ?? "") : answerParts((detail?.responses ?? []).find((response) => response.question_id === question.id && (phase === "pre_visit" ? !response.visit_luc_id && !response.visit_environment_id : matchesPoint(response)))?.answer).value]));
     const visibleQuestions = questions.filter((question) => phase === "pre_visit"
       ? generalQuestionIds.has(question.id)
       : !generalQuestionIds.has(question.id) && !skippedSectionIds.has(question.section_id)).filter((question) => isQuestionVisible(question, formAnswers));
-    const rows = visibleQuestions.map((question) => {
+     const rows = visibleQuestions.filter((question) => values.has(question.id) || values.has(`${question.id}__detail`) || values.has(`${question.id}__photo`)).map((question) => {
       const config = asQuestionConfig(question.configuration);
       const value = question.question_key === "shopping_maintenance_companions" ? visitTechnicians.map((item) => item.technician_id) : question.question_type === "multiselect" ? values.getAll(question.id).map(String) : question.question_type === "checkbox" ? checkboxUsesOptions(question) ? String(values.get(question.id) ?? "") : values.get(question.id) === "on" : String(values.get(question.id) ?? "");
       const baseDetail = String(values.get(`${question.id}__detail`) ?? "").trim();
@@ -645,26 +647,45 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
           if (!automatic) toast.success(finishPoint ? "Visita desta loja concluída" : pendingFields.length ? "Progresso salvo com pendências registradas" : "Progresso salvo");
        }
          if (!automatic) { setFiles([]); setOpenSectionId(null); }
-        if (finishPoint) { setSelectedPoint(""); setPointFilter(""); }
+         if (finishPoint) { selectedPointRef.current = ""; setSelectedPoint(""); setPointFilter(""); }
     }
     await refetchDetail();
   };
-   const runAutosave = async () => {
-     if (autosaveRunning.current) { autosaveQueued.current = true; return; }
+  const saveAnswers = (form: HTMLFormElement, phase: "pre_visit" | "point", finishPoint = false, acceptedPendingFields: string[] = [], automatic = false) => {
+    const targetPoint = selectedPoint;
+    const next = saveQueue.current.catch(() => undefined).then(() => {
+      if (phase === "point" && selectedPointRef.current !== targetPoint) throw new Error("A loja mudou antes do salvamento. Selecione-a novamente.");
+      return persistAnswers(form, phase, finishPoint, acceptedPendingFields, automatic);
+    });
+    saveQueue.current = next;
+    return next;
+  };
+    const runAutosave = async (): Promise<boolean> => {
+      if (autosaveRunning.current) {
+        autosaveQueued.current = true;
+        while (autosaveRunning.current) await new Promise((resolve) => setTimeout(resolve, 40));
+        return !autosaveTask.current;
+      }
      autosaveRunning.current = true;
      try {
        do {
          autosaveQueued.current = false;
-         await autosaveTask.current?.();
-       } while (autosaveQueued.current);
+          const task = autosaveTask.current;
+          autosaveTask.current = null;
+          try { await task?.(); }
+          catch (error) { if (!autosaveTask.current) autosaveTask.current = task; throw error; }
+        } while (autosaveQueued.current || autosaveTask.current);
+        return true;
      } catch (error) {
        toast.error(error instanceof Error ? `Não foi possível salvar automaticamente: ${error.message}` : "Não foi possível salvar automaticamente.");
+        return false;
      } finally { autosaveRunning.current = false; }
    };
    const scheduleAutosave = (form: HTMLFormElement, phase: "pre_visit" | "point", immediate = false) => {
      // The attachment picker is visible before a point is selected; it must not trigger a point save.
      if (phase === "point" && !pointId) return;
-     autosaveTask.current = () => saveAnswers(form, phase, false, [], true);
+      const targetPoint = selectedPoint;
+      autosaveTask.current = () => phase === "point" && selectedPointRef.current !== targetPoint ? Promise.resolve() : saveAnswers(form, phase, false, [], true);
      if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
      autosaveTimer.current = setTimeout(() => { void runAutosave(); }, immediate ? 0 : 800);
    };
@@ -673,6 +694,18 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
         const form = document.getElementById(`survey-section-${sectionId}`)?.closest("form");
         if (form) scheduleAutosave(form, phase);
       });
+    };
+    const switchPoint = async (nextPoint: string) => {
+      if (nextPoint === selectedPointRef.current) { setPointPickerOpen(false); return; }
+      if (autosaveTimer.current) { clearTimeout(autosaveTimer.current); autosaveTimer.current = null; }
+      if (autosaveTask.current && !(await runAutosave())) return;
+      await saveQueue.current.catch(() => undefined);
+      selectedPointRef.current = nextPoint;
+      setSelectedPoint(nextPoint);
+      setPointFilter("");
+      setPointPickerOpen(false);
+      setOpenSectionId(null);
+      setPendingPointSave(null);
     };
    const toggleChecklistSection = (sectionId: string, event: MouseEvent<HTMLButtonElement>, phase: "pre_visit" | "point") => {
      const form = event.currentTarget.closest("form");
