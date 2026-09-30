@@ -100,6 +100,7 @@ const signInSchema = z.object({
 export function Landing() {
   const [signedIn, setSignedIn] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [recovering, setRecovering] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -125,6 +126,18 @@ export function Landing() {
       return;
     }
     navigate({ to: "/portal" });
+  }
+
+  async function handleRecovery(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const email = String(new FormData(event.currentTarget).get("email") ?? "").trim();
+    if (!z.string().email().safeParse(email).success) return toast.error("Informe um e-mail válido");
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` });
+    setLoading(false);
+    if (error) return toast.error("Não foi possível enviar o e-mail de recuperação. Tente novamente.");
+    toast.success("Se o e-mail estiver cadastrado, você receberá um link para redefinir a senha.");
+    setRecovering(false);
   }
 
   return (
@@ -205,6 +218,16 @@ export function Landing() {
                   Entrar na plataforma <ArrowRight className="h-5 w-5" />
                 </Link>
               </Button>
+            ) : recovering ? (
+              <form onSubmit={handleRecovery} className="space-y-4">
+                <p className="text-sm text-erp-landing-muted">Informe seu e-mail para receber o link de redefinição da senha.</p>
+                <div className="space-y-2">
+                  <Label htmlFor="recovery-email" className="text-erp-landing-foreground">E-mail</Label>
+                  <Input id="recovery-email" name="email" type="email" autoComplete="email" required className="h-12 border-erp-access-border bg-erp-access-field text-erp-landing-foreground" />
+                </div>
+                <Button type="submit" size="lg" className="h-12 w-full" disabled={loading}>{loading ? "Enviando..." : "Enviar link de recuperação"}</Button>
+                <Button type="button" variant="ghost" className="w-full text-erp-landing-foreground" onClick={() => setRecovering(false)}>Voltar ao login</Button>
+              </form>
             ) : (
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
@@ -214,9 +237,9 @@ export function Landing() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between gap-4">
                     <Label htmlFor="landing-password" className="text-erp-landing-foreground">Senha</Label>
-                    <Link to="/auth" className="text-xs font-bold text-erp-landing-foreground hover:text-primary">
+                     <button type="button" onClick={() => setRecovering(true)} className="text-xs font-bold text-erp-landing-foreground hover:text-primary">
                       Esqueci a senha
-                    </Link>
+                     </button>
                   </div>
                   <Input id="landing-password" name="password" type="password" autoComplete="current-password" required className="h-12 border-erp-access-border bg-erp-access-field text-erp-landing-foreground focus-visible:ring-primary" />
                 </div>
@@ -230,9 +253,7 @@ export function Landing() {
             {!signedIn && (
               <div className="mt-5 border-t border-erp-access-border pt-4 text-center">
                 <p className="text-sm text-erp-landing-muted">Ainda não possui acesso?</p>
-                <Link to="/auth" className="mt-2 inline-block text-sm font-bold text-erp-landing-foreground hover:text-primary">
-                  Criar conta
-                </Link>
+                 <p className="mt-2 text-sm text-erp-landing-foreground">Solicite acesso a um administrador.</p>
               </div>
             )}
           </div>
