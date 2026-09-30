@@ -108,9 +108,9 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
   const access = hydraulicAnswer(["dificuldade de acesso", "acesso ao hidrometro"]);
   if (locations.length) {
     hydraulic.push({ text: "O hidrômetro encontra-se " });
-    hydraulic.push({ text: placePhrase(locations[0].value), bold: true });
+    hydraulic.push({ text: placePhrase(proseValue(locations[0].value)), bold: true });
     const remainingLocations = locations.slice(1).map((location) => lower(proseValue(location.value))).filter(Boolean);
-    const detail = locationDetail ? lower(proseValue(locationDetail.value)).replace(/^(?:localizad[oa]\s+)?(?:o\s+)?hidrometro\s+(?:fica|esta|encontra-se)?\s*/i, "").trim() : "";
+    const detail = locationDetail ? lower(proseValue(locationDetail.value)).replace(/^(?:localizad[oa]\s+)?(?:o\s+)?hidr[oô]metro\s+(?:fica|est[aá]|encontra-se)?\s*/i, "").trim() : "";
     if (remainingLocations.length || detail) {
       const location = remainingLocations[0] ?? "";
       const detailAlreadyDescribesLocation = location && detail.startsWith(placePhrase(location));
