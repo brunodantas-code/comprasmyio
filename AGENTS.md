@@ -9,17 +9,15 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
-- Supply orders store `recipient_user_id` separately from display name, resolved uniquely; RLS grants recipient reads despite renames or shared names.
-- “Meus com Supply” unions requester/recipient IDs after RLS without duplicates; approver/buyer actions stay gated.
-- Approval Workflow's three views are selected in the Supply bottom navigation under Usuários e logs, not in a top tab strip, to keep navigation consistent across Supply.
+- Supply orders resolve/store `recipient_user_id` apart from names; RLS grants recipient reads despite renames/name collisions. “Meus com Supply” unions requester/recipient IDs without duplicates; approver/buyer actions stay gated.
+- Approval Workflow's three views belong in Supply bottom navigation under Usuários e logs, not top tabs, for consistency.
 - Mobile Supply PDFs use lazy PDF.js canvas in the dialog; desktop opens a new tab.
-- Supply execution links open `supply`; decisions open `mine`. Payment approvals stay in Cash Flow, not Supply execution queues/counts; approval is not payment.
+- Supply execution opens `supply`, decisions `mine`; payment approvals stay in Cash Flow, outside Supply execution queues/counts. Approval ≠ payment.
 - Supply “Item novo” authorizes catalog inserts for Fábrica, Terceiros and Ferramentas via effective profile/individual permission and authenticated owner; it does not grant stock editing or movement rights.
 - Site Survey progress counts completed stores/environments by completion timestamp and user, grouped by São Paulo day/hour, not scheduled visits.
-- Site Survey visit deletion inspects linked OpDesk calls before offering keep/delete choices; a permission-checked database function executes both actions atomically, and OpDesk retains the visit number even when the visit is removed.
-- Code conversation images reuse the private ticket attachment store: message-linked images stay with their reply, standalone additions stay in the ticket attachments. Open tickets permit follow-up questions before earlier ones are answered, and answers link to a specific pending admin question; this preserves the conversation and its permissions.
+- Site Survey deletion checks linked OpDesk calls, offers keep/delete, and uses an authorized atomic DB function; OpDesk retains visit number.
+- Code images use private ticket attachments: message images stay with replies, standalone images with tickets. Open tickets allow new questions before answers; answers link to pending admin questions, preserving permissions.
 - Site Survey question actions update/deactivate in place to preserve call references; pending labels follow active, visible, incomplete questions.
-- Manual visits start `concluida` with historical end; checklist edits autosave without timing. Shopping points share add dialog, not storage.
-- Question photo drops/pastes populate file inputs for autosave; block outside drops to prevent navigation and lost edits.
-
-- Site Survey stores skipped section IDs per store/environment; skip affects pending/completion without deleting earlier answers, and autosave flushes before marking.
+- Manual visits start `concluida` with historical end; checklist autosaves without timing. Shopping points share add dialog, not storage.
+- Photo drops/pastes populate file inputs for autosave; block outside drops to prevent lost edits.
+- Site Survey skips persist per store/environment; skip removes pending/completion requirements, preserves answers, and flushes autosave first.
