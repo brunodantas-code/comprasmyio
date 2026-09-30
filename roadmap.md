@@ -800,3 +800,4 @@
 - [x] Site Survey — reunir cadastro de loja e ambiente no botão Adicionar ambiente, com seleção exclusiva e campos correspondentes.
 
 - [x] Site Survey — classificar visitas já realizadas como Concluída ao cadastrar e manter o checklist editável; reclassificar Taboão sem perder respostas.
+- [x] Site Survey — evitar aviso de salvamento sem loja selecionada ao reabrir a visita; aceitar fotos arrastadas ou coladas na pergunta sem sair da página e identificar a área de escolha.
