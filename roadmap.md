@@ -794,3 +794,5 @@
 - [x] Site Survey — dar ao título das seções o destaque e tamanho de “Seções do checklist”.
 - [x] Site Survey — exibir “Título da seção” e “Descrição” abaixo dos respectivos campos, alinhados à esquerda e no estilo dos contadores.
 - [x] Site Survey — manter a visita aberta ao clicar em Iniciar visita, atualizando a situação sem retornar ao resumo.
+- [ ] Site Survey — cadastrar visita já realizada pelo menu Visitas sem início, pausas ou medição de duração; manter checklist, fotos e salvamento automático.
+- [ ] Site Survey — reclassificar somente a visita #202609300001 do Shopping Taboão para cadastro realizado, preservando o preenchimento.
