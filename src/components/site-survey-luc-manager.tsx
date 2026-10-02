@@ -145,17 +145,27 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
   const exportExcel = async () => {
     setExporting(true);
     try {
-      const fetchAll = async (table: "site_survey_visit_lucs" | "site_survey_visit_environments") => {
-        const result: Record<string, unknown>[] = [];
+      const fetchShops = async () => {
+        const result: { luc_number: string; shop_name: string; location: string | null }[] = [];
         for (let offset = 0; ; offset += 1000) {
-          const { data, error } = await supabase.from(table).select(table === "site_survey_visit_lucs" ? "luc_number,shop_name,location" : "name,template_id").eq("visit_id", visitId).eq("active", true).order("id").range(offset, offset + 999);
+          const { data, error } = await supabase.from("site_survey_visit_lucs").select("luc_number,shop_name,location").eq("visit_id", visitId).eq("active", true).order("id").range(offset, offset + 999);
           if (error) throw error;
           result.push(...(data ?? []));
           if ((data?.length ?? 0) < 1000) break;
         }
         return result;
       };
-      const [shops, environments] = await Promise.all([fetchAll("site_survey_visit_lucs"), fetchAll("site_survey_visit_environments")]);
+      const fetchEnvironments = async () => {
+        const result: { name: string; template_id: string | null }[] = [];
+        for (let offset = 0; ; offset += 1000) {
+          const { data, error } = await supabase.from("site_survey_visit_environments").select("name,template_id").eq("visit_id", visitId).eq("active", true).order("id").range(offset, offset + 999);
+          if (error) throw error;
+          result.push(...(data ?? []));
+          if ((data?.length ?? 0) < 1000) break;
+        }
+        return result;
+      };
+      const [shops, environments] = await Promise.all([fetchShops(), fetchEnvironments()]);
       if (!shops.length && !environments.length) return toast.error("Não há lojas ou ambientes para exportar.");
       const workbook = XLSX.utils.book_new();
       const orderedShops = [...shops].sort((a, b) => {
