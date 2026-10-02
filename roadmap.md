@@ -1,3 +1,4 @@
+- [ ] Site Survey — vincular lista de tipos a cada material/equipamento no Cadastro e oferecer Bitolas de chaves de boca no checklist e relatório.
 - [x] Site Survey — permitir editar os nomes de todos os cadastros de Diversos, inclusive os predefinidos, sem alterar os itens.
 - [x] Site Survey — exportar para Excel todas as lojas/LUCs e ambientes ativos da OS em uma única aba com colunas LUC, Nome e Localização.
 - [x] Site Survey — dispensar foto para “Inexistente” na pergunta sobre o tipo de registro, mantendo a exigência para os demais tipos no checklist e na visita.
