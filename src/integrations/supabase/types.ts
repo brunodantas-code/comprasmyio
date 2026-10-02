@@ -3856,6 +3856,8 @@ export type Database = {
           id: string
           name: string
           position: number
+          type_builtin: string | null
+          type_catalog_id: string | null
           updated_at: string
         }
         Insert: {
@@ -3865,6 +3867,8 @@ export type Database = {
           id?: string
           name: string
           position?: number
+          type_builtin?: string | null
+          type_catalog_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -3874,9 +3878,19 @@ export type Database = {
           id?: string
           name?: string
           position?: number
+          type_builtin?: string | null
+          type_catalog_id?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "site_survey_material_catalog_type_catalog_id_fkey"
+            columns: ["type_catalog_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_custom_catalogs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       site_survey_material_decisions: {
         Row: {
@@ -4806,6 +4820,7 @@ export type Database = {
         Row: {
           catalog_item_id: string
           created_at: string
+          custom_type_item_id: string | null
           id: string
           no_additional_material: boolean
           notes: string | null
@@ -4821,6 +4836,7 @@ export type Database = {
         Insert: {
           catalog_item_id: string
           created_at?: string
+          custom_type_item_id?: string | null
           id?: string
           no_additional_material?: boolean
           notes?: string | null
@@ -4836,6 +4852,7 @@ export type Database = {
         Update: {
           catalog_item_id?: string
           created_at?: string
+          custom_type_item_id?: string | null
           id?: string
           no_additional_material?: boolean
           notes?: string | null
@@ -4854,6 +4871,13 @@ export type Database = {
             columns: ["catalog_item_id"]
             isOneToOne: false
             referencedRelation: "site_survey_material_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_visit_materials_custom_type_item_id_fkey"
+            columns: ["custom_type_item_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_custom_catalog_items"
             referencedColumns: ["id"]
           },
           {

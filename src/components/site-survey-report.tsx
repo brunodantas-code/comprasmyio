@@ -26,7 +26,7 @@ type PointPause = { id: string; visit_luc_id: string | null; visit_environment_i
 type ReportResponse = { id: string; question_id: string; answer: unknown };
 type RichPart = { text: string; bold?: boolean };
 type PointSummary = { title: string; parts: RichPart[]; questionIds: Set<string> };
-type VisitMaterial = { id: string; visit_luc_id: string | null; visit_environment_id: string | null; quantity: number; notes: string | null; site_survey_material_catalog: { name?: string } | null; site_survey_screwdriver_types: { name?: string } | null; site_survey_wrench_sizes: { name?: string } | null };
+type VisitMaterial = { id: string; visit_luc_id: string | null; visit_environment_id: string | null; quantity: number; notes: string | null; site_survey_material_catalog: { name?: string } | null; site_survey_screwdriver_types: { name?: string } | null; site_survey_wrench_sizes: { name?: string } | null; site_survey_custom_catalog_items: { name?: string } | null };
 type SortKey = "type" | "created" | "technician";
 type MeterMapping = { name: string; position: number };
 type Intervention = { id: string; questionId: string; question: string; action: string; answer: string; pointKey: string | null; pointLabel: string; callNumber: string | null };
@@ -277,7 +277,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
       supabase.from("site_survey_attachments").select("id,visit_luc_id,visit_environment_id,file_name,storage_path,content_type,attachment_kind").eq("visit_id", visit.id).order("created_at"),
        supabase.from("site_survey_generated_calls").select("id,question_id,trigger_value,visit_luc_id,visit_environment_id,status,site_survey_question_actions(site_survey_action_catalog(name)),internal_calls(call_number,title,description,status)").eq("visit_id", visit.id),
       supabase.from("site_survey_visit_technicians").select("technician_id,visit_luc_id,visit_environment_id").eq("visit_id", visit.id),
-      supabase.from("site_survey_visit_materials").select("id,visit_luc_id,visit_environment_id,quantity,notes,site_survey_material_catalog(name),site_survey_screwdriver_types(name),site_survey_wrench_sizes(name)").eq("visit_id", visit.id).order("created_at"),
+       supabase.from("site_survey_visit_materials").select("id,visit_luc_id,visit_environment_id,quantity,notes,site_survey_material_catalog(name),site_survey_screwdriver_types(name),site_survey_wrench_sizes(name),site_survey_custom_catalog_items(name)").eq("visit_id", visit.id).order("created_at"),
       supabase.from("site_survey_point_pauses").select("id,visit_luc_id,visit_environment_id,reason_id,started_at,ended_at,site_survey_pause_reasons(name)").eq("visit_id", visit.id).order("started_at"),
        supabase.from("site_survey_custom_catalogs").select("name,site_survey_custom_catalog_items(name,position,active)").ilike("name", "De-Para de Hidrômetros").eq("active", true),
     ]);
@@ -355,7 +355,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
       return answer && /^(nao|não)$/i.test(valueText(answer.answer).trim()) ? `Para a instalação ${point.kind === "luc" ? "nessa loja" : "nesse ambiente"}, não é necessário utilizar equipamento ou ferramenta especial.` : "";
     }
     const descriptions = materials.map((item) => {
-      const details = [item.site_survey_screwdriver_types?.name, item.site_survey_wrench_sizes?.name, item.notes].filter(Boolean).join(" — ");
+       const details = [item.site_survey_screwdriver_types?.name, item.site_survey_wrench_sizes?.name, item.site_survey_custom_catalog_items?.name, item.notes].filter(Boolean).join(" — ");
       return `${item.quantity} × ${item.site_survey_material_catalog?.name ?? "ferramenta"}${details ? ` (${details})` : ""}`;
     });
     const list = descriptions.length === 1 ? descriptions[0] : `${descriptions.slice(0, -1).join(", ")} e ${descriptions.at(-1)}`;
