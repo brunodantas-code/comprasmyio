@@ -1,6 +1,6 @@
-- [ ] Approvals — mostrar o mesmo pagamento pendente em cada cargo aprovador simultâneo no Consolidado por Cargo, inclusive CEO.
-- [ ] Supply — permitir ao administrador trocar Tipo de Solicitação na edição do Approval com confirmação, preservando decisões e ajustando encaminhamento.
-- [ ] Supply — apresentar escolha explícita de Alocação para Pagamento, sem perder centro de custo, projeto ou cliente.
+- [x] Approvals — mostrar o mesmo pagamento pendente em cada cargo aprovador simultâneo no Consolidado por Cargo, inclusive CEO.
+- [x] Supply — permitir ao administrador trocar Tipo de Solicitação na edição do Approval com confirmação, preservando decisões e ajustando encaminhamento.
+- [x] Supply — apresentar escolha explícita de Alocação para Pagamento, sem perder centro de custo, projeto ou cliente.
 - [x] Cash Flow — aplicar aprovação conjunta aos pagamentos acima do limite; quando o CFO solicita, manter Financeiro e CEO pendentes, sem autoaprovação; ajustar o Approval 202610020001.
 - [x] Cash Flow — permitir solicitação de pagamento com aprovação pelo responsável financeiro ativo, sem depender do cargo inativo Financeiro.
 - [x] Site Survey — corrigir pendências indevidas em lojas com opção Outros e foto condicional; preservar exigências reais de resposta e foto ao concluir.
