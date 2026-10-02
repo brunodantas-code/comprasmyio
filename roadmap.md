@@ -1,3 +1,4 @@
+- [x] Site Survey — permitir editar os nomes de todos os cadastros de Diversos, inclusive os predefinidos, sem alterar os itens.
 - [x] Site Survey — exportar para Excel todas as lojas/LUCs e ambientes ativos da OS em uma única aba com colunas LUC, Nome e Localização.
 - [x] Site Survey — dispensar foto para “Inexistente” na pergunta sobre o tipo de registro, mantendo a exigência para os demais tipos no checklist e na visita.
 - [x] Site Survey — diferenciar correção de cadastro e alteração real de loja no histórico de nomes; ordenar lojas por LUC, nome ou localização.

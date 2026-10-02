@@ -3546,6 +3546,24 @@ export type Database = {
           },
         ]
       }
+      site_survey_builtin_catalog_names: {
+        Row: {
+          catalog_key: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          catalog_key: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          catalog_key?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       site_survey_cancellation_reasons: {
         Row: {
           active: boolean
