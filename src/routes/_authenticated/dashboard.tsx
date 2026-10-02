@@ -1420,7 +1420,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
           for_stock: forStock,
           allocation_type: forStock ? "estoque" : allocTarget,
           request_type: requestType,
-          client_id: requestModel === "rh" || requestModel === "pagamento"
+          client_id: requestModel === "rh"
             ? (clientId && clientId !== "none" ? clientId : null)
             : (allocTarget === "cliente" ? (clientId || null) : null),
           client_unit_id: allocTarget === "cliente" && clientUnitId ? clientUnitId : null,
@@ -1511,8 +1511,9 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
     const isReembolso = requestModel === "reembolso";
     const isRh = requestModel === "rh";
     const isPagamento = requestModel === "pagamento";
-    if (!isRh && !isPagamento && allocTarget === "projeto" && !canAllocateProject) return toast.error("Alocação em Projeto não permitida para este perfil.");
-    if (!isRh && !isPagamento && allocTarget === "cliente" && !canAllocateClient) return toast.error("Alocação em Cliente não permitida para este perfil.");
+    if (!isRh && allocTarget === "projeto" && !canAllocateProject) return toast.error("Alocação em Projeto não permitida para este perfil.");
+    if (!isRh && allocTarget === "cliente" && !canAllocateClient) return toast.error("Alocação em Cliente não permitida para este perfil.");
+    if (isPagamento && allocTarget === "interna" && !canAllocateInternal) return toast.error("Alocação Interna não permitida para este perfil.");
     if (!isRh && !isPagamento && forStock && !canAllocateStock) return toast.error("Alocação em Estoque não permitida para este perfil.");
     if (!isMateriais) {
       if (!isReembolso && !isRh && !isPagamento && newItemName.trim().length < 2) return toast.error("Descreva o serviço ou a viagem solicitada.");
@@ -1550,6 +1551,8 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
         }
       }
       if (isPagamento) {
+        if (allocTarget === "projeto" && !projectId) return toast.error("Selecione o projeto");
+        if (allocTarget === "cliente" && !clientId) return toast.error("Selecione o cliente");
         if (!costCenterId && !restrictedCc) return toast.error("Selecione o Centro de Custo");
         if (paymentDescription.trim().length < 2) return toast.error("Informe a descrição do pagamento");
         if (!(Number(paymentValue) > 0)) return toast.error("Informe um valor válido para o pagamento");
@@ -1581,7 +1584,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
 
     const fd = new FormData(e.currentTarget);
     const parsed = newOrderSchema.safeParse({
-      project_id: isRh || isPagamento ? (projectId || undefined) : (allocTarget === "projeto" && !forStock ? projectId : undefined),
+      project_id: isRh ? (projectId || undefined) : (allocTarget === "projeto" && !forStock ? projectId : undefined),
       item_name: isReembolso
         ? "Reembolso de Despesas"
         : isPagamento
@@ -1632,6 +1635,11 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
           if (model === "materiais") {
             setClientId("");
             setAllocTarget("projeto");
+          } else if (model === "pagamento") {
+            setAllocTarget(canAllocateInternal ? "interna" : canAllocateProject ? "projeto" : "cliente");
+            setProjectId("");
+            setClientId("");
+            setClientUnitId("");
           } else {
             setForStock(false);
             setIsNewItem(true);
