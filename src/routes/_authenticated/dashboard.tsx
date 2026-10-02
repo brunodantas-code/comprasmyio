@@ -2663,7 +2663,11 @@ function AdminEditApprovalDialog({ order, items }: { order: Order; items: Approv
   const { data: clients } = useClients();
   const { data: units } = useClientUnits();
   const { data: costCenters } = useCostCenters();
+  const { data: requestTypes } = useRequestTypes();
   const [open, setOpen] = useState(false);
+  const [confirmTypeChange, setConfirmTypeChange] = useState(false);
+  const [requestType, setRequestType] = useState(order.request_type);
+  const [paymentDate, setPaymentDate] = useState(order.payment_date ?? "");
   const [destinationOpen, setDestinationOpen] = useState(false);
   const [allocationType, setAllocationType] = useState(order.allocation_type ?? (order.for_stock ? "estoque" : "interna"));
   const [destinationId, setDestinationId] = useState(order.project_id ?? order.client_unit_id ?? order.client_id ?? "");
@@ -2692,6 +2696,9 @@ function AdminEditApprovalDialog({ order, items }: { order: Order; items: Approv
   const selectedDestination = destinations.find((destination) => destination.id === destinationId);
 
   function reset() {
+    setRequestType(order.request_type);
+    setPaymentDate(order.payment_date ?? "");
+    setConfirmTypeChange(false);
     setAllocationType(order.allocation_type ?? (order.for_stock ? "estoque" : "interna"));
     setDestinationId(order.project_id ?? order.client_unit_id ?? order.client_id ?? "");
     setCostCenterId(order.cost_center_id ?? "none");
@@ -2703,9 +2710,13 @@ function AdminEditApprovalDialog({ order, items }: { order: Order; items: Approv
 
   const save = useMutation({
     mutationFn: async () => {
+      if (requestTypeModel(requestType, requestTypes) === "pagamento" && !paymentDate) throw new Error("Informe a data do pagamento.");
+      if (requestTypeModel(requestType, requestTypes) === "pagamento" && costCenterId === "none") throw new Error("Selecione o Centro de Custo.");
       if ((allocationType === "projeto" || allocationType === "cliente") && !destinationId) throw new Error("Selecione o destino da alocação.");
       const unit = units?.find((candidate) => candidate.id === destinationId);
       const changes = {
+        request_type: requestType,
+        payment_date: requestTypeModel(requestType, requestTypes) === "pagamento" ? paymentDate : null,
         allocation_type: allocationType,
         project_id: allocationType === "projeto" ? destinationId : null,
         client_id: allocationType === "cliente" ? unit?.client_id ?? destinationId : null,
@@ -2722,8 +2733,9 @@ function AdminEditApprovalDialog({ order, items }: { order: Order; items: Approv
     },
     onSuccess: () => {
       toast.success("Approval atualizado");
+      setConfirmTypeChange(false);
       setOpen(false);
-      ["orders", "approval-steps", "cash-flow-payables", "project-budget-summaries", "order-report-logs"].forEach((key) => qc.invalidateQueries({ queryKey: [key] }));
+      ["orders", "approval-steps", "cash-flow-payables", "project-budget-summaries", "order-report-logs", "pending-actions"].forEach((key) => qc.invalidateQueries({ queryKey: [key] }));
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -2733,6 +2745,8 @@ function AdminEditApprovalDialog({ order, items }: { order: Order; items: Approv
     <DialogContent className="max-h-[92vh] max-w-3xl overflow-y-auto">
       <DialogHeader><DialogTitle>Editar Approval {order.approval_number}</DialogTitle><DialogDescription>As etapas e decisões de aprovação serão preservadas.</DialogDescription></DialogHeader>
       <div className="space-y-5">
+        <div className="space-y-2"><Label>Tipo de Solicitação</Label><Select value={requestType} onValueChange={setRequestType}><SelectTrigger><SelectValue placeholder="Selecione o tipo" /></SelectTrigger><SelectContent>{(requestTypes ?? []).filter((type) => type.active || type.code === order.request_type).map((type) => <SelectItem key={type.code} value={type.code}>{type.name}</SelectItem>)}</SelectContent></Select></div>
+        {requestTypeModel(requestType, requestTypes) === "pagamento" && <div className="space-y-2"><Label htmlFor={`payment-date-${order.id}`}>Data do pagamento</Label><Input id={`payment-date-${order.id}`} type="date" value={paymentDate} onChange={(event) => setPaymentDate(event.target.value)} /></div>}
         <section className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2"><Label>Alocação</Label><Select value={allocationType} onValueChange={(value) => { setAllocationType(value as typeof allocationType); setDestinationId(""); }}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="interna">Interna</SelectItem><SelectItem value="projeto">Projeto</SelectItem><SelectItem value="cliente">Cliente ou Unidade/Filial</SelectItem><SelectItem value="estoque">Estoque</SelectItem></SelectContent></Select></div>
           {(allocationType === "projeto" || allocationType === "cliente") && <div className="space-y-2"><Label>Destino</Label><Popover open={destinationOpen} onOpenChange={setDestinationOpen}><PopoverTrigger asChild><Button type="button" variant="outline" role="combobox" className="w-full justify-between font-normal"><span className="truncate">{selectedDestination?.label ?? "Digite ou selecione"}</span><ArrowUpDown className="h-4 w-4 opacity-50" /></Button></PopoverTrigger><PopoverContent className="w-(--radix-popover-trigger-width) p-0"><Command><CommandInput placeholder="Buscar destino..." /><CommandList><CommandEmpty>Nenhum destino encontrado.</CommandEmpty><CommandGroup>{destinations.map((destination) => <CommandItem key={destination.id} value={destination.label} onSelect={() => { setDestinationId(destination.id); setDestinationOpen(false); }}><CheckCircle2 className={destination.id === destinationId ? "opacity-100" : "opacity-0"} />{destination.label}</CommandItem>)}</CommandGroup></CommandList></Command></PopoverContent></Popover></div>}
@@ -2741,7 +2755,10 @@ function AdminEditApprovalDialog({ order, items }: { order: Order; items: Approv
         <section className="space-y-3 border-t pt-4"><h3 className="text-sm font-semibold">Itens e valores</h3>{editedItems.length ? editedItems.map((item, index) => <div key={item.id} className="grid gap-3 rounded-md border p-3 sm:grid-cols-[minmax(0,2fr)_6rem_9rem]"><div className="space-y-2"><Label>Item {index + 1}</Label><Input value={item.item_name} onChange={(event) => setEditedItems((current) => current.map((row) => row.id === item.id ? { ...row, item_name: event.target.value } : row))} /><Input value={item.item_link ?? ""} placeholder="Link de referência" onChange={(event) => setEditedItems((current) => current.map((row) => row.id === item.id ? { ...row, item_link: event.target.value } : row))} /></div><div className="space-y-2"><Label>Qtd.</Label><Input type="number" min={1} value={item.quantity} onChange={(event) => setEditedItems((current) => current.map((row) => row.id === item.id ? { ...row, quantity: event.target.value } : row))} /></div><div className="space-y-2"><Label>Valor unitário</Label><MoneyInput value={item.estimated_unit_value} onChange={(value) => setEditedItems((current) => current.map((row) => row.id === item.id ? { ...row, estimated_unit_value: value } : row))} /></div></div>) : <div className="grid gap-3 sm:grid-cols-2"><div className="space-y-2 sm:col-span-2"><Label>Item</Label><Input value={itemName} onChange={(event) => setItemName(event.target.value)} /></div><div className="space-y-2"><Label>Link de referência</Label><Input value={itemLink} onChange={(event) => setItemLink(event.target.value)} /></div><div className="space-y-2"><Label>Quantidade</Label><Input type="number" min={1} value={quantity} onChange={(event) => setQuantity(event.target.value)} /></div><div className="space-y-2"><Label>Valor total</Label><MoneyInput value={estimatedValue} onChange={setEstimatedValue} /></div></div>}</section>
         <section className="grid gap-4 border-t pt-4 sm:grid-cols-2"><div className="space-y-2"><Label>Destinatário</Label><Input value={recipient} onChange={(event) => setRecipient(event.target.value)} /></div><div className="space-y-2"><Label>Ponto ou endereço de entrega</Label><Input value={deliveryPoint} onChange={(event) => setDeliveryPoint(event.target.value)} /></div><div className="space-y-2"><Label>Prazo</Label><Select value={deadlineType} onValueChange={(value) => setDeadlineType(value as Order["deadline_type"])}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="urgente">Urgente</SelectItem><SelectItem value="esta_semana">Esta semana</SelectItem><SelectItem value="este_mes">Este mês</SelectItem><SelectItem value="customizado">Data específica</SelectItem></SelectContent></Select></div>{deadlineType === "customizado" && <div className="space-y-2"><Label>Data do prazo</Label><Input type="date" value={deadlineDate} onChange={(event) => setDeadlineDate(event.target.value)} /></div>}<div className="space-y-2"><Label>Previsão de entrega</Label><Input type="date" value={deliveryForecast} onChange={(event) => setDeliveryForecast(event.target.value)} /></div><div className="space-y-2"><Label>Observações do solicitante</Label><Textarea value={requesterNotes} onChange={(event) => setRequesterNotes(event.target.value)} /></div><div className="space-y-2 sm:col-span-2"><Label>Observações de Supply</Label><Textarea value={buyerNotes} onChange={(event) => setBuyerNotes(event.target.value)} /></div></section>
       </div>
-      <DialogFooter><Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button><Button type="button" onClick={() => save.mutate()} disabled={save.isPending}>{save.isPending ? "Salvando..." : "Salvar alterações"}</Button></DialogFooter>
+      <DialogFooter><Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button><Button type="button" onClick={() => requestType !== order.request_type ? setConfirmTypeChange(true) : save.mutate()} disabled={save.isPending}>{save.isPending ? "Salvando..." : "Salvar alterações"}</Button></DialogFooter>
+      <AlertDialog open={confirmTypeChange} onOpenChange={setConfirmTypeChange}>
+        <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Alterar Tipo de Solicitação?</AlertDialogTitle><AlertDialogDescription>O Approval passará de {requestTypeName(order.request_type, requestTypes)} para {requestTypeName(requestType, requestTypes)}. As decisões já registradas serão preservadas. Solicitações de Pagamento seguem para o Caixa; demais tipos seguem para o Supply após aprovação.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Voltar</AlertDialogCancel><AlertDialogAction onClick={(event) => { event.preventDefault(); save.mutate(); }} disabled={save.isPending}>{save.isPending ? "Salvando..." : "Confirmar alteração"}</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
+      </AlertDialog>
     </DialogContent>
   </Dialog>;
 }
