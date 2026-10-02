@@ -13,6 +13,7 @@
 - Approval Workflow's three views belong in Supply bottom navigation under Usuários e logs, not top tabs, for consistency.
 - Mobile Supply PDFs use lazy PDF.js canvas in the dialog; desktop opens a new tab.
 - Supply execution opens `supply`, decisions `mine`; payment approvals stay in Cash Flow, outside Supply execution queues/counts. Approval ≠ payment.
+- Payment approvals recognize the active finance role or finance job title; an inactive legacy title must not block requests.
 - Supply “Item novo” authorizes catalog inserts for Fábrica, Terceiros and Ferramentas via effective profile/individual permission and authenticated owner; it does not grant stock editing or movement rights.
 - Site Survey progress counts completed stores/environments by completion timestamp and user, grouped by São Paulo day/hour, not scheduled visits.
 - Site Survey deletion checks linked OpDesk calls, offers keep/delete, and uses an authorized atomic DB function; OpDesk retains visit number.
