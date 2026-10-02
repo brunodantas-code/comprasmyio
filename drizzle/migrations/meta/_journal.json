@@ -624,6 +624,20 @@
       "when": 1790970692335,
       "tag": "0088_apply_joint_approval_to_payment_requests",
       "breakpoints": true
+    },
+    {
+      "idx": 89,
+      "version": "7",
+      "when": 1790971340294,
+      "tag": "0089_allow_admin_approval_type_change_with_preserved_decisions",
+      "breakpoints": true
+    },
+    {
+      "idx": 90,
+      "version": "7",
+      "when": 1790971448858,
+      "tag": "0090_preserve_final_approval_on_type_edits",
+      "breakpoints": true
     }
   ]
 }
