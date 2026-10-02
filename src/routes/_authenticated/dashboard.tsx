@@ -1879,7 +1879,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
             <div className="space-y-2">
             </div>
 
-            {requestModel === "rh" || requestModel === "pagamento" ? (
+            {requestModel === "rh" ? (
               <>
                 {!restrictedCc && (
                   <div className="space-y-2">
@@ -1905,18 +1905,6 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                     </SelectContent>
                   </Select>
                 </div>}
-                {requestModel === "pagamento" && canAllocateProject && (
-                  <div className="space-y-2">
-                    <Label>Projeto <span className="text-muted-foreground">(opcional)</span></Label>
-                    <Select value={projectId || "none"} onValueChange={(v) => setProjectId(v === "none" ? "" : v)}>
-                      <SelectTrigger><SelectValue placeholder="Sem projeto definido" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">Sem projeto definido</SelectItem>
-                        {projects.filter((p) => !p.status || p.status === "active").map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
               </>
             ) : requestModel === "materiais" ? (
               <>
