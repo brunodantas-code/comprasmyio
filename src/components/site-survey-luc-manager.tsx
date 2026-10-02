@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Camera, ChevronDown, FileSpreadsheet, Images, Pencil, Plus, Sparkles } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, Camera, ChevronDown, FileSpreadsheet, Images, Pencil, Plus, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 
@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { suggestShopNameFromFacade } from "@/lib/site-survey-ai.functions";
@@ -40,6 +41,9 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
   const [environmentTemplateId, setEnvironmentTemplateId] = useState("");
   const [analyzing, setAnalyzing] = useState(false);
   const [listOpen, setListOpen] = useState(false);
+  const [editMode, setEditMode] = useState<"correction" | "name_change">("correction");
+  const [sortBy, setSortBy] = useState<"luc_number" | "shop_name" | "location">("luc_number");
+  const [sortAscending, setSortAscending] = useState(true);
 
   const load = async () => {
     const [{ data, error }, { data: historyRows, error: historyError }] = await Promise.all([
@@ -98,7 +102,7 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
     finally { setLoading(false); }
   };
 
-  const startEdit = (row?: LucRow) => { setEditing(row ?? { id: "", luc_number: "", shop_name: "", location: null }); setPointType(row ? "shop" : null); setDraftLuc(row?.luc_number ?? ""); setDraftName(row?.shop_name ?? ""); setDraftLocation(row?.location ?? ""); setEnvironmentName(""); setEnvironmentTemplateId(""); };
+  const startEdit = (row?: LucRow) => { setEditing(row ?? { id: "", luc_number: "", shop_name: "", location: null }); setEditMode("correction"); setPointType(row ? "shop" : null); setDraftLuc(row?.luc_number ?? ""); setDraftName(row?.shop_name ?? ""); setDraftLocation(row?.location ?? ""); setEnvironmentName(""); setEnvironmentTemplateId(""); };
   const saveEdit = async () => {
     if (!pointType) return toast.error("Selecione Loja ou Ambiente.");
     if (pointType === "environment" && !editing?.id) {
@@ -114,7 +118,9 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
     if (!lucNumber || !shopName) return toast.error("Informe o LUC e o nome da loja.");
     const payload = { visit_id: visitId, luc_number: lucNumber, shop_name: shopName, location: draftLocation.trim() || null, updated_by: userId, active: true };
     const result = editing?.id
-      ? await supabase.from("site_survey_visit_lucs").update(payload).eq("id", editing.id)
+      ? editMode === "correction"
+        ? await supabase.rpc("correct_site_survey_visit_luc", { _id: editing.id, _luc_number: lucNumber, _shop_name: shopName, _location: draftLocation.trim() })
+        : await supabase.from("site_survey_visit_lucs").update(payload).eq("id", editing.id)
       : await supabase.from("site_survey_visit_lucs").insert({ ...payload, created_by: userId });
     if (result.error) return toast.error(result.error.code === "23505" ? "Este LUC já está cadastrado nesta OS." : result.error.message);
     toast.success(editing?.id ? "Ambiente atualizado." : "Ambiente adicionado."); setEditing(null); await load(); onChanged?.();
@@ -130,10 +136,16 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
     finally { setAnalyzing(false); }
   };
   const currentByLuc = useMemo(() => new Set(rows.map((row) => row.luc_number.toLocaleLowerCase("pt-BR"))), [rows]);
+  const sortedRows = useMemo(() => [...rows].sort((a, b) => {
+    const comparison = (a[sortBy] ?? "").localeCompare(b[sortBy] ?? "", "pt-BR", { numeric: true, sensitivity: "base" });
+    return sortAscending ? comparison : -comparison;
+  }), [rows, sortBy, sortAscending]);
+  const sortColumn = (column: typeof sortBy) => { if (sortBy === column) setSortAscending((current) => !current); else { setSortBy(column); setSortAscending(true); } };
+  const sortHeader = (column: typeof sortBy, label: string) => <Button type="button" variant="ghost" size="sm" className="h-auto justify-start px-0 text-xs font-semibold" aria-label={`Ordenar por ${label}${sortBy === column ? sortAscending ? ", crescente" : ", decrescente" : ""}`} onClick={() => sortColumn(column)}>{label}{sortBy === column ? sortAscending ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" /> : <ArrowUpDown className="h-3 w-3" />}</Button>;
 
   return <Collapsible open={listOpen} onOpenChange={setListOpen} asChild><section className="space-y-3 border-t pt-5">
      <div className="flex flex-wrap items-start justify-between gap-3"><div><h3 className="font-bold">Lojas e LUCs da OS</h3><p className="text-sm text-muted-foreground">Cadastre individualmente ou importe a lista completa antes dos checklists.</p></div><div className="flex flex-wrap items-center gap-2">{canEdit ? <Button type="button" size="sm" variant="outline" onClick={() => startEdit()}><Plus className="h-4 w-4" />Adicionar ambiente</Button> : null}{canImport ? <><input ref={inputRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; if (file) void parseFile(file).catch((error: Error) => toast.error(error.message)); }} /><Button type="button" size="sm" onClick={() => inputRef.current?.click()}><FileSpreadsheet className="h-4 w-4" />Importar Excel</Button></> : null}<CollapsibleTrigger asChild><Button type="button" size="compactIcon" variant="ghost" aria-label={listOpen ? "Recolher lista de lojas e LUCs" : "Exibir lista de lojas e LUCs"} title={listOpen ? "Recolher lista" : "Exibir lista"}><ChevronDown className={`h-4 w-4 transition-transform ${listOpen ? "rotate-180" : ""}`} /></Button></CollapsibleTrigger></div></div>
-    <CollapsibleContent><div className="overflow-x-auto rounded-md border"><div className="grid min-w-[620px] grid-cols-[100px_1fr_1fr_72px] gap-3 bg-primary/20 px-3 py-2 text-xs font-semibold"><span>LUC</span><span>Nome da loja</span><span>Localização</span><span>Ações</span></div>{rows.map((row) => <div key={row.id} className="grid min-w-[620px] grid-cols-[100px_1fr_1fr_72px] items-center gap-3 border-t px-3 py-2 text-sm"><span className="font-medium">{row.luc_number}</span><span className="min-w-0 truncate">{row.shop_name}</span><span className="min-w-0 truncate text-muted-foreground">{row.location || "—"}</span><div className="flex gap-1">{canEdit ? <Button type="button" size="compactIcon" variant="ghost" title="Editar ambiente" onClick={() => startEdit(row)}><Pencil className="h-3.5 w-3.5" /></Button> : null}{canEdit ? <ConfirmDeleteButton title={`Excluir LUC ${row.luc_number}?`} description="O ambiente será removido desta OS, mantendo o histórico registrado." onConfirm={async () => { const { error } = await supabase.from("site_survey_visit_lucs").update({ active: false, updated_by: userId }).eq("id", row.id); if (error) return toast.error(error.message); toast.success("Ambiente removido da OS."); await load(); onChanged?.(); }} /> : null}</div></div>)}{!rows.length ? <p className="border-t p-4 text-sm text-muted-foreground">Nenhuma loja ou LUC cadastrado nesta OS.</p> : null}</div></CollapsibleContent>
+     <CollapsibleContent><div className="overflow-x-auto rounded-md border"><div className="grid min-w-[620px] grid-cols-[100px_1fr_1fr_72px] items-center gap-3 bg-primary/20 px-3 py-2 text-xs font-semibold">{sortHeader("luc_number", "LUC")}{sortHeader("shop_name", "Nome da loja")}{sortHeader("location", "Localização")}<span>Ações</span></div>{sortedRows.map((row) => <div key={row.id} className="grid min-w-[620px] grid-cols-[100px_1fr_1fr_72px] items-center gap-3 border-t px-3 py-2 text-sm"><span className="font-medium">{row.luc_number}</span><span className="min-w-0 truncate">{row.shop_name}</span><span className="min-w-0 truncate text-muted-foreground">{row.location || "—"}</span><div className="flex gap-1">{canEdit ? <Button type="button" size="compactIcon" variant="ghost" title="Editar ambiente" onClick={() => startEdit(row)}><Pencil className="h-3.5 w-3.5" /></Button> : null}{canEdit ? <ConfirmDeleteButton title={`Excluir LUC ${row.luc_number}?`} description="O ambiente será removido desta OS, mantendo o histórico registrado." onConfirm={async () => { const { error } = await supabase.from("site_survey_visit_lucs").update({ active: false, updated_by: userId }).eq("id", row.id); if (error) return toast.error(error.message); toast.success("Ambiente removido da OS."); await load(); onChanged?.(); }} /> : null}</div></div>)}{!rows.length ? <p className="border-t p-4 text-sm text-muted-foreground">Nenhuma loja ou LUC cadastrado nesta OS.</p> : null}</div></CollapsibleContent>
     {history.some((item) => item.valid_until) ? <details className="rounded-md border px-3 py-2"><summary className="cursor-pointer text-sm font-medium">Histórico de nomes</summary><div className="mt-2 divide-y">{history.filter((item) => item.valid_until).map((item) => <div key={item.id} className="grid gap-1 py-2 text-sm sm:grid-cols-[110px_1fr_170px]"><span>LUC {item.luc_number}</span><span>{item.shop_name}</span><span className="text-muted-foreground">até {new Date(item.valid_until ?? item.valid_from).toLocaleString("pt-BR")}</span></div>)}</div></details> : null}
      <Dialog open={Boolean(editing)} onOpenChange={(open) => !open && setEditing(null)}>
        <DialogContent>
@@ -144,6 +156,7 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
          </div> : null}
          {pointType === "shop" ? <>
            <div className="grid gap-4 sm:grid-cols-2"><div className="space-y-2"><Label htmlFor="luc-draft">LUC</Label><Input id="luc-draft" value={draftLuc} onChange={(event) => setDraftLuc(event.target.value)} /></div><div className="space-y-2"><Label htmlFor="shop-draft">Nome da loja</Label><Input id="shop-draft" value={draftName} onChange={(event) => setDraftName(event.target.value)} /></div><div className="space-y-2 sm:col-span-2"><Label htmlFor="location-draft">Localização (opcional)</Label><Input id="location-draft" value={draftLocation} onChange={(event) => setDraftLocation(event.target.value)} placeholder="Ex.: 3º andar" /></div></div>
+            {editing?.id ? <div className="space-y-2"><Label>Tipo de edição</Label><RadioGroup value={editMode} onValueChange={(value) => setEditMode(value as typeof editMode)} className="gap-2"><label className="flex cursor-pointer items-center gap-2 text-sm"><RadioGroupItem value="correction" />Corrigir cadastro — não registrar nome anterior no histórico</label><label className="flex cursor-pointer items-center gap-2 text-sm"><RadioGroupItem value="name_change" />Alteração de loja — manter nome anterior no histórico</label></RadioGroup></div> : null}
            <div className="space-y-2"><input ref={facadeCameraRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; void analyzeFacade(file); }} /><input ref={facadeGalleryRef} type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; void analyzeFacade(file); }} /><DropdownMenu><DropdownMenuTrigger asChild><Button type="button" variant="outline" disabled={analyzing}>{analyzing ? <Sparkles className="h-4 w-4" /> : <Camera className="h-4 w-4" />}{analyzing ? "Analisando fachada..." : "Identificar pela fachada"}</Button></DropdownMenuTrigger><DropdownMenuContent align="start" className="min-w-56"><DropdownMenuItem onSelect={() => facadeCameraRef.current?.click()}><Camera className="h-4 w-4" />Tirar foto</DropdownMenuItem><DropdownMenuItem onSelect={() => facadeGalleryRef.current?.click()}><Images className="h-4 w-4" />Escolher da galeria</DropdownMenuItem></DropdownMenuContent></DropdownMenu></div>
          </> : null}
          {pointType === "environment" ? <div className="space-y-4"><div className="space-y-2"><Label htmlFor="combined-environment-name">Nome do ambiente</Label><Input id="combined-environment-name" value={environmentName} onChange={(event) => setEnvironmentName(event.target.value)} placeholder="Ex.: Caixa d'água" /></div><div className="space-y-2"><Label htmlFor="combined-environment-template">Checklist</Label><Select value={environmentTemplateId || undefined} onValueChange={setEnvironmentTemplateId}><SelectTrigger id="combined-environment-template"><SelectValue placeholder="Selecione um checklist" /></SelectTrigger><SelectContent>{templates.filter((template) => template.active).map((template) => <SelectItem key={template.id} value={template.id}>{template.name}</SelectItem>)}</SelectContent></Select></div></div> : null}

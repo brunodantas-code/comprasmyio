@@ -6069,6 +6069,15 @@ export type Database = {
         Args: { _destination_client_id: string; _source_client_id: string }
         Returns: string
       }
+      correct_site_survey_visit_luc: {
+        Args: {
+          _id: string
+          _location: string
+          _luc_number: string
+          _shop_name: string
+        }
+        Returns: undefined
+      }
       create_myio_order_request: {
         Args: {
           _client_id: string
