@@ -532,9 +532,10 @@ export function PendingApprovalsByRole({ renderEditAction }: { renderEditAction?
       byOrder.set(step.order_id, orderSteps);
     });
 
-    return [...byOrder.values()]
-      .map((orderSteps) => orderSteps.sort((a, b) => a.step_index - b.step_index)[0])
-      .filter((step): step is StepRow => Boolean(step));
+    return [...byOrder.values()].flatMap((orderSteps) => {
+      const firstIndex = Math.min(...orderSteps.map((step) => step.step_index));
+      return orderSteps.filter((step) => step.step_index === firstIndex);
+    });
   }, [steps]);
 
   const groups = useMemo(() => {
@@ -545,15 +546,18 @@ export function PendingApprovalsByRole({ renderEditAction }: { renderEditAction?
       const key = jobTitle?.id ?? `unassigned:${step.role_label || "sem-cargo"}`;
       const title = jobTitle?.name ?? (step.role_label || "Sem cargo definido");
       const current = grouped.get(key) ?? { key, title, steps: [], value: 0 };
-      current.steps.push(step);
-      current.value += Number(step.purchase_orders?.estimated_value ?? 0);
+      if (!current.steps.some((existing) => existing.order_id === step.order_id)) {
+        current.steps.push(step);
+        current.value += Number(step.purchase_orders?.estimated_value ?? 0);
+      }
       grouped.set(key, current);
     });
     return [...grouped.values()].sort((a, b) => b.value - a.value || a.title.localeCompare(b.title));
   }, [currentSteps, profiles]);
 
-  const totalValue = groups.reduce((sum, group) => sum + group.value, 0);
-  const totalCount = currentSteps.length;
+  const uniqueOrders = new Map(currentSteps.map((step) => [step.order_id, step.purchase_orders]));
+  const totalValue = [...uniqueOrders.values()].reduce((sum, order) => sum + Number(order?.estimated_value ?? 0), 0);
+  const totalCount = uniqueOrders.size;
   const toggleGroup = (key: string) => {
     setOpenGroups((current) => {
       const next = new Set(current);
@@ -583,7 +587,7 @@ export function PendingApprovalsByRole({ renderEditAction }: { renderEditAction?
       <Card>
         <CardHeader>
           <CardTitle>Consolidado por Cargo</CardTitle>
-          <CardDescription>Cada approval aparece no cargo responsável pela etapa atual.</CardDescription>
+          <CardDescription>Approvals com aprovação simultânea aparecem em cada cargo responsável. O total geral conta cada approval uma vez.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           {isLoading ? (
