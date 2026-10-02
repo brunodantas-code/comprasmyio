@@ -1,3 +1,4 @@
+- [x] Site Survey — dispensar foto para “Inexistente” na pergunta sobre o tipo de registro, mantendo a exigência para os demais tipos no checklist e na visita.
 - [x] Site Survey — diferenciar correção de cadastro e alteração real de loja no histórico de nomes; ordenar lojas por LUC, nome ou localização.
 - [x] Site Survey — permitir reutilizar fotos anteriores também nas perguntas com foto opcional.
 - [x] Site Survey — não exibir o gráfico de avanço em visitas realizadas cadastradas retrospectivamente, pois ele usa horários de conclusão do checklist.
