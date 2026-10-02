@@ -26,3 +26,4 @@
 - Survey skips persist by point; skip removes pending requirements, keeps answers, flushes autosave.
 - Survey report/PDF share ordering and hydraulic DN from De-Para; missing flow has no specification. Photo reuse stores same-point attachment ID on response; deletion invalidates it.
 - Survey LUC corrections replace the current history entry; actual shop changes append a history entry, preserving genuine occupancy changes.
+- Site Survey built-in catalog title overrides live separately from catalog items; this preserves fixed catalog keys while allowing their displayed names to change.
