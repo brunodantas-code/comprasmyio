@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowDown, ArrowUp, ArrowUpDown, Camera, ChevronDown, FileSpreadsheet, Images, Pencil, Plus, Sparkles } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, Camera, ChevronDown, Download, FileSpreadsheet, Images, Pencil, Plus, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 
@@ -32,6 +32,7 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
   const [preview, setPreview] = useState<PreviewRow[]>([]);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [editing, setEditing] = useState<LucRow | null>(null);
   const [draftLuc, setDraftLuc] = useState("");
   const [draftName, setDraftName] = useState("");
@@ -141,10 +142,50 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
     return sortAscending ? comparison : -comparison;
   }), [rows, sortBy, sortAscending]);
   const sortColumn = (column: typeof sortBy) => { if (sortBy === column) setSortAscending((current) => !current); else { setSortBy(column); setSortAscending(true); } };
+  const exportExcel = async () => {
+    setExporting(true);
+    try {
+      const fetchShops = async () => {
+        const result: { luc_number: string; shop_name: string; location: string | null }[] = [];
+        for (let offset = 0; ; offset += 1000) {
+          const { data, error } = await supabase.from("site_survey_visit_lucs").select("luc_number,shop_name,location").eq("visit_id", visitId).eq("active", true).order("id").range(offset, offset + 999);
+          if (error) throw error;
+          result.push(...(data ?? []));
+          if ((data?.length ?? 0) < 1000) break;
+        }
+        return result;
+      };
+      const fetchEnvironments = async () => {
+        const result: { name: string; template_id: string | null }[] = [];
+        for (let offset = 0; ; offset += 1000) {
+          const { data, error } = await supabase.from("site_survey_visit_environments").select("name,template_id").eq("visit_id", visitId).eq("active", true).order("id").range(offset, offset + 999);
+          if (error) throw error;
+          result.push(...(data ?? []));
+          if ((data?.length ?? 0) < 1000) break;
+        }
+        return result;
+      };
+      const [shops, environments] = await Promise.all([fetchShops(), fetchEnvironments()]);
+      if (!shops.length && !environments.length) return toast.error("Não há lojas ou ambientes para exportar.");
+      const workbook = XLSX.utils.book_new();
+      const orderedShops = [...shops].sort((a, b) => {
+        const comparison = String(a[sortBy] ?? "").localeCompare(String(b[sortBy] ?? ""), "pt-BR", { numeric: true, sensitivity: "base" });
+        return sortAscending ? comparison : -comparison;
+      });
+      const shopSheet = XLSX.utils.json_to_sheet(orderedShops.map((row) => ({ LUC: String(row.luc_number ?? ""), "Nome da loja": String(row.shop_name ?? ""), "Localização": String(row.location ?? "") })), { header: ["LUC", "Nome da loja", "Localização"] });
+      shopSheet["!cols"] = [{ wch: 18 }, { wch: 42 }, { wch: 32 }];
+      XLSX.utils.book_append_sheet(workbook, shopSheet, "Lojas e LUCs");
+      const environmentSheet = XLSX.utils.json_to_sheet(environments.sort((a, b) => String(a.name ?? "").localeCompare(String(b.name ?? ""), "pt-BR", { numeric: true })).map((row) => ({ Ambiente: String(row.name ?? ""), Checklist: templates.find((template) => template.id === row.template_id)?.name ?? "Checklist da OS" })), { header: ["Ambiente", "Checklist"] });
+      environmentSheet["!cols"] = [{ wch: 42 }, { wch: 42 }];
+      XLSX.utils.book_append_sheet(workbook, environmentSheet, "Ambientes");
+      XLSX.writeFile(workbook, `lojas-ambientes-os-${visitId}.xlsx`);
+    } catch (error) { toast.error(error instanceof Error ? error.message : "Não foi possível exportar a lista."); }
+    finally { setExporting(false); }
+  };
    const sortHeader = (column: typeof sortBy, label: string) => <Button type="button" variant="ghost" size="sm" className="h-auto justify-start px-0 text-xs font-semibold !bg-transparent !text-foreground hover:!bg-transparent hover:!text-foreground" aria-label={`Ordenar por ${label}${sortBy === column ? sortAscending ? ", crescente" : ", decrescente" : ""}`} onClick={() => sortColumn(column)}>{label}{sortBy === column ? sortAscending ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" /> : <ArrowUpDown className="h-3 w-3" />}</Button>;
 
   return <Collapsible open={listOpen} onOpenChange={setListOpen} asChild><section className="space-y-3 border-t pt-5">
-     <div className="flex flex-wrap items-start justify-between gap-3"><div><h3 className="font-bold">Lojas e LUCs da OS</h3><p className="text-sm text-muted-foreground">Cadastre individualmente ou importe a lista completa antes dos checklists.</p></div><div className="flex flex-wrap items-center gap-2">{canEdit ? <Button type="button" size="sm" variant="outline" onClick={() => startEdit()}><Plus className="h-4 w-4" />Adicionar ambiente</Button> : null}{canImport ? <><input ref={inputRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; if (file) void parseFile(file).catch((error: Error) => toast.error(error.message)); }} /><Button type="button" size="sm" onClick={() => inputRef.current?.click()}><FileSpreadsheet className="h-4 w-4" />Importar Excel</Button></> : null}<CollapsibleTrigger asChild><Button type="button" size="compactIcon" variant="ghost" aria-label={listOpen ? "Recolher lista de lojas e LUCs" : "Exibir lista de lojas e LUCs"} title={listOpen ? "Recolher lista" : "Exibir lista"}><ChevronDown className={`h-4 w-4 transition-transform ${listOpen ? "rotate-180" : ""}`} /></Button></CollapsibleTrigger></div></div>
+     <div className="flex flex-wrap items-start justify-between gap-3"><div><h3 className="font-bold">Lojas e LUCs da OS</h3><p className="text-sm text-muted-foreground">Cadastre individualmente ou importe a lista completa antes dos checklists.</p></div><div className="flex flex-wrap items-center gap-2">{canEdit ? <Button type="button" size="sm" variant="outline" onClick={() => startEdit()}><Plus className="h-4 w-4" />Adicionar ambiente</Button> : null}{canImport ? <><input ref={inputRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; if (file) void parseFile(file).catch((error: Error) => toast.error(error.message)); }} /><Button type="button" size="sm" onClick={() => inputRef.current?.click()}><FileSpreadsheet className="h-4 w-4" />Importar Excel</Button></> : null}<Button type="button" size="sm" variant="outline" disabled={exporting} onClick={() => void exportExcel()}><Download className="h-4 w-4" />{exporting ? "Exportando..." : "Exportar Excel"}</Button><CollapsibleTrigger asChild><Button type="button" size="compactIcon" variant="ghost" aria-label={listOpen ? "Recolher lista de lojas e LUCs" : "Exibir lista de lojas e LUCs"} title={listOpen ? "Recolher lista" : "Exibir lista"}><ChevronDown className={`h-4 w-4 transition-transform ${listOpen ? "rotate-180" : ""}`} /></Button></CollapsibleTrigger></div></div>
       <CollapsibleContent><div className="overflow-x-auto rounded-md border"><div className="grid min-w-[620px] grid-cols-[100px_1fr_1fr_72px] items-center gap-3 px-3 py-2 text-xs font-semibold">{sortHeader("luc_number", "LUC")}{sortHeader("shop_name", "Nome da loja")}{sortHeader("location", "Localização")}<span>Ações</span></div>{sortedRows.map((row) => <div key={row.id} className="grid min-w-[620px] grid-cols-[100px_1fr_1fr_72px] items-center gap-3 border-t px-3 py-2 text-sm"><span className="font-medium">{row.luc_number}</span><span className="min-w-0 truncate">{row.shop_name}</span><span className="min-w-0 truncate text-muted-foreground">{row.location || "—"}</span><div className="flex gap-1">{canEdit ? <Button type="button" size="compactIcon" variant="ghost" title="Editar ambiente" onClick={() => startEdit(row)}><Pencil className="h-3.5 w-3.5" /></Button> : null}{canEdit ? <ConfirmDeleteButton title={`Excluir LUC ${row.luc_number}?`} description="O ambiente será removido desta OS, mantendo o histórico registrado." onConfirm={async () => { const { error } = await supabase.from("site_survey_visit_lucs").update({ active: false, updated_by: userId }).eq("id", row.id); if (error) return toast.error(error.message); toast.success("Ambiente removido da OS."); await load(); onChanged?.(); }} /> : null}</div></div>)}{!rows.length ? <p className="border-t p-4 text-sm text-muted-foreground">Nenhuma loja ou LUC cadastrado nesta OS.</p> : null}</div></CollapsibleContent>
     {history.some((item) => item.valid_until) ? <details className="rounded-md border px-3 py-2"><summary className="cursor-pointer text-sm font-medium">Histórico de nomes</summary><div className="mt-2 divide-y">{history.filter((item) => item.valid_until).map((item) => <div key={item.id} className="grid gap-1 py-2 text-sm sm:grid-cols-[110px_1fr_170px]"><span>LUC {item.luc_number}</span><span>{item.shop_name}</span><span className="text-muted-foreground">até {new Date(item.valid_until ?? item.valid_from).toLocaleString("pt-BR")}</span></div>)}</div></details> : null}
      <Dialog open={Boolean(editing)} onOpenChange={(open) => !open && setEditing(null)}>
