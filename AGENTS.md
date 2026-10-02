@@ -17,7 +17,7 @@
 - Payment requests above the configured joint-approval threshold include eligible joint approvers alongside finance; the requester never self-approves.
 - Admin Approval type edits keep prior decisions and log the change; pending chains re-evaluate when type changes, while payment allocation uses the standard exclusive destination choices.
 - Supply “Item novo” authorizes catalog inserts for Fábrica, Terceiros and Ferramentas via effective profile/individual permission and authenticated owner; it does not grant stock editing or movement rights.
-- Site Survey progress counts completed stores/environments by completion timestamp and user, grouped by São Paulo day/hour, not scheduled visits.
+- Site Survey progress counts completed stores/environments by completion timestamp and user, grouped by São Paulo day/hour; hide it for retrospective manual visits, whose checklist completion time is not visit time.
 - Site Survey deletion checks linked OpDesk calls, offers keep/delete, and uses an authorized atomic DB function; OpDesk retains visit number.
 - Code images use private ticket attachments: message images stay with replies, standalone images with tickets. Open tickets allow new questions before answers; answers link to pending admin questions, preserving permissions.
 - Site Survey actions update/deactivate in place to preserve references; warnings use active visible questions only after explicit save, not autosave.
