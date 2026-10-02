@@ -156,9 +156,9 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
         return result;
       };
       const fetchEnvironments = async () => {
-        const result: { name: string; template_id: string | null }[] = [];
+        const result: { name: string }[] = [];
         for (let offset = 0; ; offset += 1000) {
-          const { data, error } = await supabase.from("site_survey_visit_environments").select("name,template_id").eq("visit_id", visitId).eq("active", true).order("id").range(offset, offset + 999);
+          const { data, error } = await supabase.from("site_survey_visit_environments").select("name").eq("visit_id", visitId).eq("active", true).order("id").range(offset, offset + 999);
           if (error) throw error;
           result.push(...(data ?? []));
           if ((data?.length ?? 0) < 1000) break;
@@ -172,12 +172,13 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
         const comparison = String(a[sortBy] ?? "").localeCompare(String(b[sortBy] ?? ""), "pt-BR", { numeric: true, sensitivity: "base" });
         return sortAscending ? comparison : -comparison;
       });
-      const shopSheet = XLSX.utils.json_to_sheet(orderedShops.map((row) => ({ LUC: String(row.luc_number ?? ""), "Nome da loja": String(row.shop_name ?? ""), "Localização": String(row.location ?? "") })), { header: ["LUC", "Nome da loja", "Localização"] });
-      shopSheet["!cols"] = [{ wch: 18 }, { wch: 42 }, { wch: 32 }];
-      XLSX.utils.book_append_sheet(workbook, shopSheet, "Lojas e LUCs");
-      const environmentSheet = XLSX.utils.json_to_sheet(environments.sort((a, b) => String(a.name ?? "").localeCompare(String(b.name ?? ""), "pt-BR", { numeric: true })).map((row) => ({ Ambiente: String(row.name ?? ""), Checklist: templates.find((template) => template.id === row.template_id)?.name ?? "Checklist da OS" })), { header: ["Ambiente", "Checklist"] });
-      environmentSheet["!cols"] = [{ wch: 42 }, { wch: 42 }];
-      XLSX.utils.book_append_sheet(workbook, environmentSheet, "Ambientes");
+      const exportRows = [
+        ...orderedShops.map((row) => ({ LUC: String(row.luc_number ?? ""), Nome: String(row.shop_name ?? ""), "Localização": String(row.location ?? "") })),
+        ...environments.sort((a, b) => a.name.localeCompare(b.name, "pt-BR", { numeric: true })).map((row) => ({ LUC: "", Nome: row.name, "Localização": "" })),
+      ];
+      const sheet = XLSX.utils.json_to_sheet(exportRows, { header: ["LUC", "Nome", "Localização"] });
+      sheet["!cols"] = [{ wch: 18 }, { wch: 42 }, { wch: 32 }];
+      XLSX.utils.book_append_sheet(workbook, sheet, "Lojas e ambientes");
       XLSX.writeFile(workbook, `lojas-ambientes-os-${visitId}.xlsx`);
     } catch (error) { toast.error(error instanceof Error ? error.message : "Não foi possível exportar a lista."); }
     finally { setExporting(false); }
