@@ -1325,7 +1325,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
     setProjectId("");
     setForStock(false);
     setRequestType("");
-    setAllocTarget("projeto");
+    setAllocTarget(canAllocateProject ? "projeto" : canAllocateClient ? "cliente" : "interna");
     setClientId("");
     setClientUnitId("");
 
