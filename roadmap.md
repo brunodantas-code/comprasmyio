@@ -1,3 +1,4 @@
+- [x] Cash Flow — aplicar aprovação conjunta aos pagamentos acima do limite; quando o CFO solicita, manter Financeiro e CEO pendentes, sem autoaprovação; ajustar o Approval 202610020001.
 - [x] Cash Flow — permitir solicitação de pagamento com aprovação pelo responsável financeiro ativo, sem depender do cargo inativo Financeiro.
 - [x] Site Survey — corrigir pendências indevidas em lojas com opção Outros e foto condicional; preservar exigências reais de resposta e foto ao concluir.
 - [x] Site Survey — corrigir autosave entre lojas e garantir que cada detalhe “Outros” seja salvo na resposta da respectiva pergunta e loja/ambiente.

@@ -617,6 +617,13 @@
       "when": 1790970268618,
       "tag": "0087_align_payment_approval_with_active_finance_role",
       "breakpoints": true
+    },
+    {
+      "idx": 88,
+      "version": "7",
+      "when": 1790970692335,
+      "tag": "0088_apply_joint_approval_to_payment_requests",
+      "breakpoints": true
     }
   ]
 }
