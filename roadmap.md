@@ -1,3 +1,4 @@
+- [x] Site Survey — permitir reutilizar fotos anteriores também nas perguntas com foto opcional.
 - [x] Site Survey — não exibir o gráfico de avanço em visitas realizadas cadastradas retrospectivamente, pois ele usa horários de conclusão do checklist.
 - [x] Site Survey — impedir que observações de um LUC sejam salvas em outro ao trocar de loja; retirar da Montana Grill o texto indevidamente copiado do Subway.
 - [x] Approvals — mostrar o mesmo pagamento pendente em cada cargo aprovador simultâneo no Consolidado por Cargo, inclusive CEO.
