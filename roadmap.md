@@ -1,3 +1,4 @@
+- [x] Site Survey — adicionar Quiosque após Loja no cadastro de pontos, usando os mesmos campos de LUC, nome, localização e fachada.
 - [x] Site Survey — renomear os seletores das etapas de materiais e encerramento para indicar diretamente quando não há equipamento especial ou observação adicional.
 - [x] Site Survey — permitir LUC opcional e localização repetida; confirmar antes de cadastrar outra loja com um LUC já usado na OS.
 - [x] Site Survey — listar na etapa final as respostas “Não Informado” e a fachada pendente como complementos para instalação, sem bloquear a conclusão da loja/ambiente.

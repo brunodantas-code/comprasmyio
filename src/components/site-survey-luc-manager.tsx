@@ -17,7 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { suggestShopNameFromFacade } from "@/lib/site-survey-ai.functions";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
-type LucRow = { id: string; luc_number: string; shop_name: string; location: string | null };
+type LucRow = { id: string; luc_number: string; shop_name: string; location: string | null; point_type: string };
 type LucHistoryRow = { id: string; visit_luc_id: string; luc_number: string; shop_name: string; valid_from: string; valid_until: string | null };
 type PreviewRow = { lucNumber: string; shopName: string; location: string; issue?: string };
 type TemplateOption = { id: string; name: string; active: boolean };
@@ -38,7 +38,7 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
   const [draftLuc, setDraftLuc] = useState("");
   const [draftName, setDraftName] = useState("");
   const [draftLocation, setDraftLocation] = useState("");
-  const [pointType, setPointType] = useState<"shop" | "environment" | null>(null);
+  const [pointType, setPointType] = useState<"shop" | "kiosk" | "environment" | null>(null);
   const [environmentName, setEnvironmentName] = useState("");
   const [environmentTemplateId, setEnvironmentTemplateId] = useState("");
   const [analyzing, setAnalyzing] = useState(false);
@@ -50,7 +50,7 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
 
   const load = async () => {
     const [{ data, error }, { data: historyRows, error: historyError }] = await Promise.all([
-      supabase.from("site_survey_visit_lucs").select("id,luc_number,shop_name,location").eq("visit_id", visitId).eq("active", true).order("luc_number"),
+      supabase.from("site_survey_visit_lucs").select("id,luc_number,shop_name,location,point_type").eq("visit_id", visitId).eq("active", true).order("luc_number"),
       supabase.from("site_survey_visit_luc_history").select("id,visit_luc_id,luc_number,shop_name,valid_from,valid_until").eq("visit_id", visitId).order("valid_from", { ascending: false }),
     ]);
     if (error || historyError) return toast.error(error?.message ?? historyError?.message ?? "Não foi possível carregar os ambientes.");
@@ -97,7 +97,7 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
     setLoading(true);
     try {
       if (!validPreview.length) throw new Error("Não há linhas válidas para importar.");
-      const payload = validPreview.map((item) => ({ visit_id: visitId, luc_number: item.lucNumber, shop_name: item.shopName, location: item.location || null, created_by: userId, updated_by: userId }));
+      const payload = validPreview.map((item) => ({ visit_id: visitId, luc_number: item.lucNumber, shop_name: item.shopName, location: item.location || null, point_type: "shop", created_by: userId, updated_by: userId }));
       for (const item of payload) {
         const key = normalizeHeader(item.luc_number);
         const matches = key ? rows.filter((row) => normalizeHeader(row.luc_number) === key) : [];
@@ -118,9 +118,9 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
     finally { setLoading(false); }
   };
 
-  const startEdit = (row?: LucRow) => { setEditing(row ?? { id: "", luc_number: "", shop_name: "", location: null }); setEditMode("correction"); setPointType(row ? "shop" : null); setDraftLuc(row?.luc_number ?? ""); setDraftName(row?.shop_name ?? ""); setDraftLocation(row?.location ?? ""); setEnvironmentName(""); setEnvironmentTemplateId(""); };
+  const startEdit = (row?: LucRow) => { setEditing(row ?? { id: "", luc_number: "", shop_name: "", location: null, point_type: "shop" }); setEditMode("correction"); setPointType(row ? row.point_type === "kiosk" ? "kiosk" : "shop" : null); setDraftLuc(row?.luc_number ?? ""); setDraftName(row?.shop_name ?? ""); setDraftLocation(row?.location ?? ""); setEnvironmentName(""); setEnvironmentTemplateId(""); };
   const saveEdit = async (confirmed = false) => {
-    if (!pointType) return toast.error("Selecione Loja ou Ambiente.");
+    if (!pointType) return toast.error("Selecione Loja, Quiosque ou Ambiente.");
     if (pointType === "environment" && !editing?.id) {
       const name = environmentName.trim();
       if (!name) return toast.error("Informe o nome do ambiente.");
@@ -134,10 +134,10 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
     if (!shopName) return toast.error("Informe o nome da loja.");
     const duplicateRows = lucNumber ? rows.filter((row) => row.id !== editing?.id && normalizeHeader(row.luc_number) === normalizeHeader(lucNumber)) : [];
     if (duplicateRows.length && !confirmed) { setDuplicateConfirmation("edit"); return; }
-    const payload = { visit_id: visitId, luc_number: lucNumber, shop_name: shopName, location: draftLocation.trim() || null, updated_by: userId, active: true };
+    const payload = { visit_id: visitId, luc_number: lucNumber, shop_name: shopName, location: draftLocation.trim() || null, point_type: pointType, updated_by: userId, active: true };
     const result = editing?.id
       ? editMode === "correction"
-        ? await supabase.rpc("correct_site_survey_visit_luc", { _id: editing.id, _luc_number: lucNumber, _shop_name: shopName, _location: draftLocation.trim() })
+        ? await supabase.rpc("correct_site_survey_visit_luc", { _id: editing.id, _luc_number: lucNumber, _shop_name: shopName, _location: draftLocation.trim() }).then(async (correction) => correction.error ? correction : supabase.from("site_survey_visit_lucs").update({ point_type: pointType, updated_by: userId }).eq("id", editing.id))
         : await supabase.from("site_survey_visit_lucs").update(payload).eq("id", editing.id)
       : await supabase.from("site_survey_visit_lucs").insert({ ...payload, created_by: userId });
     if (result.error) return toast.error(result.error.code === "23505" ? "Este LUC já está cadastrado nesta OS." : result.error.message);
@@ -209,13 +209,14 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
     {history.some((item) => item.valid_until) ? <details className="rounded-md border px-3 py-2"><summary className="cursor-pointer text-sm font-medium">Histórico de nomes</summary><div className="mt-2 divide-y">{history.filter((item) => item.valid_until).map((item) => <div key={item.id} className="grid gap-1 py-2 text-sm sm:grid-cols-[110px_1fr_170px]"><span>{item.luc_number ? `LUC ${item.luc_number}` : "Sem LUC"}</span><span>{item.shop_name}</span><span className="text-muted-foreground">até {new Date(item.valid_until ?? item.valid_from).toLocaleString("pt-BR")}</span></div>)}</div></details> : null}
      <Dialog open={Boolean(editing)} onOpenChange={(open) => !open && setEditing(null)}>
        <DialogContent>
-          <DialogHeader><DialogTitle>{editing?.id ? "Editar ambiente" : "Adicionar ambiente"}</DialogTitle><DialogDescription>{pointType === "shop" ? "Informe o nome atual da loja e, se houver, seu LUC e sua localização." : pointType === "environment" ? "Informe o nome do ambiente e selecione seu checklist." : "Selecione se deseja cadastrar uma loja ou um ambiente."}</DialogDescription></DialogHeader>
+          <DialogHeader><DialogTitle>{editing?.id ? "Editar ambiente" : "Adicionar ambiente"}</DialogTitle><DialogDescription>{pointType === "shop" ? "Informe o nome atual da loja e, se houver, seu LUC e sua localização." : pointType === "kiosk" ? "Informe o nome atual do quiosque e, se houver, seu LUC e sua localização." : pointType === "environment" ? "Informe o nome do ambiente e selecione seu checklist." : "Selecione se deseja cadastrar uma loja, um quiosque ou um ambiente."}</DialogDescription></DialogHeader>
          {!editing?.id ? <div className="flex flex-wrap gap-5" role="group" aria-label="Tipo de adição">
            <div className="flex items-center gap-2"><Checkbox id="add-shop" checked={pointType === "shop"} onCheckedChange={() => setPointType(pointType === "shop" ? null : "shop")} /><Label htmlFor="add-shop" className="cursor-pointer">Loja</Label></div>
+            <div className="flex items-center gap-2"><Checkbox id="add-kiosk" checked={pointType === "kiosk"} onCheckedChange={() => setPointType(pointType === "kiosk" ? null : "kiosk")} /><Label htmlFor="add-kiosk" className="cursor-pointer">Quiosque</Label></div>
            <div className="flex items-center gap-2"><Checkbox id="add-environment" checked={pointType === "environment"} onCheckedChange={() => setPointType(pointType === "environment" ? null : "environment")} /><Label htmlFor="add-environment" className="cursor-pointer">Ambiente</Label></div>
          </div> : null}
-         {pointType === "shop" ? <>
-            <div className="grid gap-4 sm:grid-cols-2"><div className="space-y-2"><Label htmlFor="luc-draft">LUC (opcional)</Label><Input id="luc-draft" value={draftLuc} onChange={(event) => setDraftLuc(event.target.value)} /></div><div className="space-y-2"><Label htmlFor="shop-draft">Nome da loja</Label><Input id="shop-draft" value={draftName} onChange={(event) => setDraftName(event.target.value)} /></div><div className="space-y-2 sm:col-span-2"><Label htmlFor="location-draft">Localização (opcional)</Label><Input id="location-draft" value={draftLocation} onChange={(event) => setDraftLocation(event.target.value)} placeholder="Ex.: G1 – Deck" /></div></div>
+          {pointType === "shop" || pointType === "kiosk" ? <>
+             <div className="grid gap-4 sm:grid-cols-2"><div className="space-y-2"><Label htmlFor="luc-draft">LUC (opcional)</Label><Input id="luc-draft" value={draftLuc} onChange={(event) => setDraftLuc(event.target.value)} /></div><div className="space-y-2"><Label htmlFor="shop-draft">{pointType === "kiosk" ? "Nome do quiosque" : "Nome da loja"}</Label><Input id="shop-draft" value={draftName} onChange={(event) => setDraftName(event.target.value)} /></div><div className="space-y-2 sm:col-span-2"><Label htmlFor="location-draft">Localização (opcional)</Label><Input id="location-draft" value={draftLocation} onChange={(event) => setDraftLocation(event.target.value)} placeholder="Ex.: G1 – Deck" /></div></div>
             {editing?.id ? <div className="space-y-2"><Label>Tipo de edição</Label><RadioGroup value={editMode} onValueChange={(value) => setEditMode(value as typeof editMode)} className="gap-2"><label className="flex cursor-pointer items-center gap-2 text-sm"><RadioGroupItem value="correction" />Corrigir cadastro — não registrar nome anterior no histórico</label><label className="flex cursor-pointer items-center gap-2 text-sm"><RadioGroupItem value="name_change" />Alteração de loja — manter nome anterior no histórico</label></RadioGroup></div> : null}
            <div className="space-y-2"><input ref={facadeCameraRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; void analyzeFacade(file); }} /><input ref={facadeGalleryRef} type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; void analyzeFacade(file); }} /><DropdownMenu><DropdownMenuTrigger asChild><Button type="button" variant="outline" disabled={analyzing}>{analyzing ? <Sparkles className="h-4 w-4" /> : <Camera className="h-4 w-4" />}{analyzing ? "Analisando fachada..." : "Identificar pela fachada"}</Button></DropdownMenuTrigger><DropdownMenuContent align="start" className="min-w-56"><DropdownMenuItem onSelect={() => facadeCameraRef.current?.click()}><Camera className="h-4 w-4" />Tirar foto</DropdownMenuItem><DropdownMenuItem onSelect={() => facadeGalleryRef.current?.click()}><Images className="h-4 w-4" />Escolher da galeria</DropdownMenuItem></DropdownMenuContent></DropdownMenu></div>
          </> : null}
