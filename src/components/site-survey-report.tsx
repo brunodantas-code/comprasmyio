@@ -448,7 +448,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     // Capa técnica, inspirada no relatório institucional enviado.
     pdf.addImage(logoDataUrl, "PNG", 16, 18, 40, 13);
     pdf.setFont("Nunito", "extrabold"); pdf.setTextColor(...dark); pdf.setFontSize(31); pdf.text("Site Survey", 16, 101);
-    pdf.setTextColor(...purple); pdf.text("Relatório", 16, 115);
+    pdf.setTextColor(...purple); pdf.text(reportTitle, 16, 115);
     pdf.setFont("Nunito", "normal"); pdf.setFontSize(13); pdf.setTextColor(85, 82, 94); pdf.text(unitName, 16, 128);
     pdf.setDrawColor(...purple); pdf.setLineWidth(0.3); pdf.line(16, 218, 194, 218);
     const coverRows = [["Cliente", clientName], ["Data de emissão", issueDate], ["Unidade", unitName], ["Número da visita", `SS-${reportNumber}`]];
@@ -460,15 +460,22 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     const tableHead = { fillColor: [255, 255, 255] as [number, number, number], textColor: purple, fontStyle: "bold" as const, lineColor: purple, lineWidth: { top: 0, right: 0, bottom: 0.35, left: 0 } };
     autoTable(pdf, { startY: 34, theme: "plain", styles: { font: "Nunito", fontSize: 8, textColor: dark, lineColor: soft, lineWidth: { bottom: 0.12 } }, headStyles: tableHead, head: [["Cliente", "Projeto", "Técnico", "Situação"]], body: [[clientName, projectName, technicianName, visit.status.replaceAll("_", " ")]] });
     let y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 11;
-    if (includeTotals && !visit.is_manual_entry) autoTable(pdf, { startY: y, theme: "plain", styles: { font: "Nunito", fontSize: 8, textColor: dark, lineColor: soft, lineWidth: { bottom: 0.12 } }, headStyles: tableHead, columnStyles: { 1: { halign: "center" } }, head: [["Planejamento", "Valor"]], body: [["Tempo estimado", formatMinutes(calculation.estimated)], ["Tempo em visita", formatMinutes(calculation.worked)], ["Quantidade de pausas", String(calculation.pauseCount)], ["Tempo de pausas (horas úteis)", formatMinutes(calculation.paused)], ["Total de horas úteis", formatMinutes(calculation.useful)], ["Horas extras", formatMinutes(calculation.overtime)], ["Horas noturnas (22h às 5h)", formatMinutes(calculation.night)], ["Dias com equipe designada", String(calculation.days)], [`Técnicos para ${deadlineDays} dia(s)`, String(calculation.techniciansNeeded)]] });
-    if (includeTotals && !visit.is_manual_entry) y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 11;
-    if (includeTotals) {
+    if (reportType !== "complete") {
+      const head = reportType === "purchases" ? [["Item sugerido", "Qtd.", "Local de uso", "Motivo / especificação"]] : reportType === "equipment" ? [["Equipamento / ferramenta", "Qtd.", "Local de uso", "Especificação"]] : [["Local", "Problema encontrado", "Chamado"]];
+      const body = reportType === "purchases" ? purchaseDraftItems.map((item) => [item.suggestedName, String(item.quantity), item.pointLabels.join("; "), item.reason]) : reportType === "equipment" ? equipmentRows.map((item) => [item.name, String(item.quantity), item.pointLabel, item.details || "—"]) : interventions.map((item) => [item.pointLabel, item.answer, item.callNumber ? `#${item.callNumber}` : "—"]);
+      autoTable(pdf, { startY: y, theme: "plain", styles: { font: "Nunito", fontSize: 8, textColor: dark, lineColor: soft, lineWidth: { bottom: 0.12 }, overflow: "linebreak" }, headStyles: tableHead, head, body: body.length ? body : [["Nenhum item encontrado para os pontos selecionados."]] });
+      y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 8;
+      if (reportType === "interventions" && withPhotos) for (const item of interventions) for (const photo of interventionPhotos(item)) { const { data: signed } = await supabase.storage.from("site-survey-attachments").createSignedUrl(photo.storage_path, 300); if (!signed?.signedUrl) continue; if (y > 245) { pdf.addPage(); y = 18; } try { pdf.setFont("Nunito", "bold"); pdf.text(item.pointLabel, 14, y); y += 3; pdf.addImage(await imageDataUrl(signed.signedUrl, false, 42 / 31), "JPEG", 14, y, 42, 31, undefined, "FAST"); y += 36; } catch { /* Mantém o PDF disponível caso uma foto falhe. */ } }
+    }
+    if (reportType === "complete" && includeTotals && !visit.is_manual_entry) autoTable(pdf, { startY: y, theme: "plain", styles: { font: "Nunito", fontSize: 8, textColor: dark, lineColor: soft, lineWidth: { bottom: 0.12 } }, headStyles: tableHead, columnStyles: { 1: { halign: "center" } }, head: [["Planejamento", "Valor"]], body: [["Tempo estimado", formatMinutes(calculation.estimated)], ["Tempo em visita", formatMinutes(calculation.worked)], ["Quantidade de pausas", String(calculation.pauseCount)], ["Tempo de pausas (horas úteis)", formatMinutes(calculation.paused)], ["Total de horas úteis", formatMinutes(calculation.useful)], ["Horas extras", formatMinutes(calculation.overtime)], ["Horas noturnas (22h às 5h)", formatMinutes(calculation.night)], ["Dias com equipe designada", String(calculation.days)], [`Técnicos para ${deadlineDays} dia(s)`, String(calculation.techniciansNeeded)]] });
+    if (reportType === "complete" && includeTotals && !visit.is_manual_entry) y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 11;
+    if (reportType === "complete" && includeTotals) {
       const totalsBody = technicalTotals.flatMap((group) => group.values.map(([value, count], index) => [index === 0 ? group.label : "", value, String(count)]));
       totalsBody.push(["Chamados", "Total", String(data.calls.filter((item) => item.internal_calls && callIsIncluded(item)).length)]);
       autoTable(pdf, { startY: y, theme: "plain", styles: { font: "Nunito", fontSize: 8, textColor: dark, lineColor: soft, lineWidth: { bottom: 0.12 } }, headStyles: tableHead, columnStyles: { 0: { fontStyle: "bold", cellWidth: 55 }, 2: { halign: "center", cellWidth: 28 } }, head: [["Totalizadores técnicos", "Classificação", "Quantidade"]], body: totalsBody });
       y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 14;
     }
-    if (includeTotals && interventionTotals.length) {
+    if (reportType === "complete" && includeTotals && interventionTotals.length) {
       autoTable(pdf, { startY: y, theme: "plain", margin: { top: 18, bottom: 18, left: 14, right: 14 }, styles: { font: "Nunito", fontSize: 8, textColor: dark, lineColor: soft, lineWidth: { bottom: 0.12 }, overflow: "linebreak" }, headStyles: tableHead, columnStyles: { 1: { halign: "center", cellWidth: 21 } }, head: [["Intervenções do cliente", "Qtd.", "Lojas e ambientes"]], body: interventionTotals.map((group) => [group.answer, String(group.items.length), [...new Set(group.items.map((item) => item.pointLabel))].join("; ")]) });
       y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 14;
     }
@@ -504,7 +511,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
       pdf.setFont("Nunito", "normal");
       return cursorY;
     };
-    for (const point of sortedPoints) {
+    if (reportType === "complete") for (const point of sortedPoints) {
       if (y > 250) { pdf.addPage(); y = 18; }
       pdf.setFont("Nunito", "extrabold"); pdf.setFontSize(12); pdf.setTextColor(...purple); pdf.text(point.label, 14, y); pdf.setDrawColor(...purple); pdf.setLineWidth(0.35); pdf.line(14, y + 2, 196, y + 2); pdf.setTextColor(...dark); y += 8;
       pdf.setFont("Nunito", "normal"); pdf.setFontSize(9); for (const line of pdf.splitTextToSize(`Vistoria Técnica realizada por: ${technicianForPoint(point)}`, 182)) { pdf.text(line, 14, y); y += 5; } y += 1;
@@ -536,7 +543,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
       }
       y += 10;
     }
-    const generalInterventions = interventions.filter((item) => item.pointKey === null);
+    const generalInterventions = reportType === "complete" ? interventions.filter((item) => item.pointKey === null) : [];
     if (generalInterventions.length) {
       if (y > 255) { pdf.addPage(); y = 18; }
       pdf.setFont("Nunito", "bold"); pdf.setFontSize(10); pdf.text("Ações gerais — intervenção do cliente", 14, y); y += 6; pdf.setFontSize(9);
@@ -549,7 +556,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
       pdf.setFont("Nunito", "normal"); pdf.setTextColor(125, 121, 132); pdf.text(`${unitName} — Relatório de Site Survey`, 196, 9, { align: "right" });
       pdf.line(14, 287, 196, 287); pdf.setFontSize(7); pdf.text("myio Automação Ltda", 14, 292); pdf.text(`Página ${page} de ${totalPages}`, 196, 292, { align: "right" });
     }
-    pdf.save(`site-survey-${visit.survey_number}-${blackAndWhite ? "impressao" : "digital"}.pdf`);
+    pdf.save(`site-survey-${visit.survey_number}-${reportType}-${blackAndWhite ? "impressao" : "digital"}.pdf`);
   };
   const handleExportPdf = async (blackAndWhite: boolean) => {
     if (generatingPdf) return;
