@@ -11,6 +11,8 @@ const buttonVariants = cva(
       variant: {
         default: "!bg-primary !text-primary-foreground shadow hover:!bg-primary/90 hover:!text-primary-foreground",
         destructive: "!bg-primary !text-primary-foreground shadow-sm hover:!bg-primary/90 hover:!text-primary-foreground",
+        action:
+          "border border-primary !bg-transparent !text-primary shadow-sm hover:!bg-primary hover:!text-primary-foreground focus-visible:!bg-primary focus-visible:!text-primary-foreground active:!bg-primary active:!text-primary-foreground",
         outline:
           "border border-primary !bg-primary !text-primary-foreground shadow-sm hover:!bg-primary/90 hover:!text-primary-foreground",
         secondary: "!bg-primary !text-primary-foreground shadow-sm hover:!bg-primary/90 hover:!text-primary-foreground",
@@ -33,7 +35,7 @@ const buttonVariants = cva(
       },
       {
         size: "compactIcon",
-        variant: ["ghost", "outline"],
+        variant: ["ghost", "outline", "action"],
         className: "border-0 !bg-transparent !text-myio-green hover:!bg-muted hover:!text-myio-green",
       },
     ],
@@ -49,11 +51,22 @@ export interface ButtonProps
   asChild?: boolean;
 }
 
+const actionLabelPattern = /\b(salvar|salvando|salvo|excluir|excluindo|cancelar|cancelando|confirmar|confirmando|concluir|concluindo)\b/i;
+
+function buttonText(node: React.ReactNode): string {
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(buttonText).join(" ");
+  if (React.isValidElement<{ children?: React.ReactNode }>(node)) return buttonText(node.props.children);
+  return "";
+}
+
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, children, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
+    const accessibleLabel = [buttonText(children), props["aria-label"], props.title].filter(Boolean).join(" ");
+    const resolvedVariant = actionLabelPattern.test(accessibleLabel) ? "action" : variant;
     return (
-      <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />
+      <Comp className={cn(buttonVariants({ variant: resolvedVariant, size, className }))} ref={ref} {...props}>{children}</Comp>
     );
   },
 );
