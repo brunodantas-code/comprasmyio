@@ -1,4 +1,5 @@
 - [x] Site Survey — adicionar Quiosque após Loja no cadastro de pontos, usando os mesmos campos de LUC, nome, localização e fachada.
+- [x] Site Survey — permitir criar um modelo de checklist usando um modelo existente como base, duplicando suas seções e perguntas para edição independente.
 - [x] Site Survey — criar relatórios de compras, intervenções do cliente e equipamentos/ferramentas, com filtros por ponto, PDFs e rascunho revisável no Supply.
 - [x] Site Survey — renomear os seletores das etapas de materiais e encerramento para indicar diretamente quando não há equipamento especial ou observação adicional.
 - [x] Site Survey — permitir LUC opcional e localização repetida; confirmar antes de cadastrar outra loja com um LUC já usado na OS.
