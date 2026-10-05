@@ -673,6 +673,13 @@
       "when": 1791212372242,
       "tag": "0095_allow_optional_and_repeated_site_survey_lucs",
       "breakpoints": true
+    },
+    {
+      "idx": 96,
+      "version": "7",
+      "when": 1791214912446,
+      "tag": "0096_add_site_survey_kiosk_point_type",
+      "breakpoints": true
     }
   ]
 }

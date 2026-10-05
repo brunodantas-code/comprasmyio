@@ -4710,6 +4710,7 @@ export type Database = {
           location: string | null
           luc_number: string
           pending_fields: Json
+          point_type: string
           shop_name: string
           skipped_section_ids: Json
           started_at: string | null
@@ -4733,6 +4734,7 @@ export type Database = {
           location?: string | null
           luc_number: string
           pending_fields?: Json
+          point_type?: string
           shop_name: string
           skipped_section_ids?: Json
           started_at?: string | null
@@ -4756,6 +4758,7 @@ export type Database = {
           location?: string | null
           luc_number?: string
           pending_fields?: Json
+          point_type?: string
           shop_name?: string
           skipped_section_ids?: Json
           started_at?: string | null
