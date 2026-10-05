@@ -423,11 +423,13 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     let y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 11;
     if (!visit.is_manual_entry) autoTable(pdf, { startY: y, theme: "plain", styles: { font: "Nunito", fontSize: 8, textColor: dark, lineColor: soft, lineWidth: { bottom: 0.12 } }, headStyles: tableHead, columnStyles: { 1: { halign: "center" } }, head: [["Planejamento", "Valor"]], body: [["Tempo estimado", formatMinutes(calculation.estimated)], ["Tempo em visita", formatMinutes(calculation.worked)], ["Quantidade de pausas", String(calculation.pauseCount)], ["Tempo de pausas (horas úteis)", formatMinutes(calculation.paused)], ["Total de horas úteis", formatMinutes(calculation.useful)], ["Horas extras", formatMinutes(calculation.overtime)], ["Horas noturnas (22h às 5h)", formatMinutes(calculation.night)], ["Dias com equipe designada", String(calculation.days)], [`Técnicos para ${deadlineDays} dia(s)`, String(calculation.techniciansNeeded)]] });
     if (!visit.is_manual_entry) y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 11;
-    const totalsBody = technicalTotals.flatMap((group) => group.values.map(([value, count], index) => [index === 0 ? group.label : "", value, String(count)]));
-    totalsBody.push(["Chamados", "Total", String(data.calls.filter((item) => item.internal_calls).length)]);
-    autoTable(pdf, { startY: y, theme: "plain", styles: { font: "Nunito", fontSize: 8, textColor: dark, lineColor: soft, lineWidth: { bottom: 0.12 } }, headStyles: tableHead, columnStyles: { 0: { fontStyle: "bold", cellWidth: 55 }, 2: { halign: "center", cellWidth: 28 } }, head: [["Totalizadores técnicos", "Classificação", "Quantidade"]], body: totalsBody });
-    y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 14;
-    if (interventionTotals.length) {
+    if (includeTotals) {
+      const totalsBody = technicalTotals.flatMap((group) => group.values.map(([value, count], index) => [index === 0 ? group.label : "", value, String(count)]));
+      totalsBody.push(["Chamados", "Total", String(data.calls.filter((item) => item.internal_calls && callIsIncluded(item)).length)]);
+      autoTable(pdf, { startY: y, theme: "plain", styles: { font: "Nunito", fontSize: 8, textColor: dark, lineColor: soft, lineWidth: { bottom: 0.12 } }, headStyles: tableHead, columnStyles: { 0: { fontStyle: "bold", cellWidth: 55 }, 2: { halign: "center", cellWidth: 28 } }, head: [["Totalizadores técnicos", "Classificação", "Quantidade"]], body: totalsBody });
+      y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 14;
+    }
+    if (includeTotals && interventionTotals.length) {
       autoTable(pdf, { startY: y, theme: "plain", margin: { top: 18, bottom: 18, left: 14, right: 14 }, styles: { font: "Nunito", fontSize: 8, textColor: dark, lineColor: soft, lineWidth: { bottom: 0.12 }, overflow: "linebreak" }, headStyles: tableHead, columnStyles: { 1: { halign: "center", cellWidth: 21 } }, head: [["Intervenções do cliente", "Qtd.", "Lojas e ambientes"]], body: interventionTotals.map((group) => [group.answer, String(group.items.length), [...new Set(group.items.map((item) => item.pointLabel))].join("; ")]) });
       y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 14;
     }
