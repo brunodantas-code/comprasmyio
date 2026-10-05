@@ -846,3 +846,5 @@
 
 - [x] Site Survey — filtrar relatório por lojas, quiosques, ambientes ou pontos específicos e permitir omitir totalizadores.
 - [x] Site Survey — criar relatórios de compras, intervenções do cliente e equipamentos/ferramentas, com geração de solicitação de materiais após conferência do relatório de compras.
+- [ ] Site Survey — corrigir conclusão da LUC 118 para considerar respostas salvas em etapas recolhidas.
+- [ ] Site Survey — preservar a resposta controladora e as perguntas condicionais da LUC 129 após fechar a captura de foto.
