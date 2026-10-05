@@ -354,6 +354,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     const answer = response ? valueText(response.answer).trim() || "Resposta não disponível" : "Resposta não disponível";
     return [{ id: call.id, questionId: call.question_id, question: interventionQuestionLabel(prompt), action, answer: interventionAnswerLabel(prompt, answer), pointKey: point ? `${point.kind}-${point.id}` : null, pointLabel: point?.label ?? "Visita geral", callNumber: linked?.call_number ?? null }];
   }), [data?.calls, data?.points, data?.responses, questions, filteredPointKeys]);
+  const interventionPhotos = (item: Intervention) => (data?.attachments ?? []).filter((photo) => photo.attachment_kind === "question" && photo.question_id === item.questionId && photo.content_type?.startsWith("image/") && (item.pointKey === null || `${photo.visit_luc_id ? "luc" : "environment"}-${photo.visit_luc_id ?? photo.visit_environment_id}` === item.pointKey));
   const interventionTotals = useMemo(() => {
     const groups = new Map<string, { action: string; question: string; answer: string; items: Intervention[] }>();
     for (const item of interventions) {
@@ -378,6 +379,35 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
   }, [data?.responses, questions, filteredPointKeys]);
   const pointSummaries = (point: Point) => { const pointSections = sectionsForPoint(point); const reviewId = reviewSectionForPoint(point)?.id; return buildPointSummaries((pointResponses(point) as ReportResponse[]).filter((response) => !reviewId || !questions.some((question) => question.id === response.question_id && question.section_id === reviewId)), questions, pointSections, point.skippedSectionIds, data?.meterMappings ?? []); };
   const pointMaterials = (point: Point) => (data?.materials ?? []).filter((item) => point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id);
+  const equipmentRows = sortedPoints.flatMap((point) => pointMaterials(point).filter((item) => normalize(item.site_survey_material_catalog?.category ?? "") === "equipamento").map((item) => ({ ...item, pointLabel: point.label, name: item.site_survey_material_catalog?.name ?? "Equipamento ou ferramenta", details: [item.site_survey_screwdriver_types?.name, item.site_survey_wrench_sizes?.name, item.site_survey_custom_catalog_items?.name, item.notes].filter(Boolean).join(" — ") })));
+  const purchaseDraftItems = useMemo<SiteSurveyPurchaseDraftItem[]>(() => {
+    const rows: SiteSurveyPurchaseDraftItem[] = [];
+    for (const point of sortedPoints) {
+      const responses = pointResponses(point);
+      const pointSections = sectionsForPoint(point);
+      const pulse = findAnswer(responses, questions, ["condicao da saida pulsada", "saida pulsada"], pointSections, ["agua", "hidrometro", "hidraulica"]);
+      const pulseStatus = normalize(pulse?.value ?? "");
+      if (pulse && (pulseStatus === "nao" || pulseStatus.includes("inoperante") || pulseStatus.includes("inexistente") || pulseStatus.includes("nao funcional"))) {
+        const flow = findAnswer(responses, questions, ["vazao nominal", "vazao do hidrometro"], pointSections, ["agua", "hidrometro", "hidraulica"]);
+        const location = findAnswer(responses, questions, ["localizacao do hidrometro", "posicao do hidrometro", "detalhar para facilitar"], pointSections, ["agua", "hidrometro", "hidraulica"]);
+        const dn = meterSpecification(flow?.value ?? null, data?.meterMappings ?? []);
+        rows.push({ sourceKey: `meter:${pointKey(point)}`, suggestedName: dn.startsWith("DN") ? `Hidrômetro ${dn}` : "Hidrômetro", quantity: 1, pointLabels: [point.label], reason: [`Saída pulsada ${pulse.value}`, location?.value ? `Local: ${location.value}` : "", flow?.value ? `Vazão: ${flow.value}` : "", dn].filter(Boolean).join(" · ") });
+      }
+      for (const material of pointMaterials(point).filter((item) => normalize(item.site_survey_material_catalog?.category ?? "") !== "equipamento")) rows.push({ sourceKey: `material:${material.id}`, suggestedName: material.site_survey_material_catalog?.name ?? "Material da visita", quantity: Number(material.quantity), pointLabels: [point.label], reason: material.notes ?? "Material registrado na visita" });
+    }
+    const grouped = new Map<string, SiteSurveyPurchaseDraftItem>();
+    for (const row of rows) { const key = normalize(row.suggestedName); const current = grouped.get(key); if (current) { current.quantity += row.quantity; current.pointLabels = [...new Set([...current.pointLabels, ...row.pointLabels])]; current.reason = [...new Set([current.reason, row.reason])].join(" · "); } else grouped.set(key, { ...row }); }
+    return [...grouped.values()];
+  }, [sortedPoints, data?.responses, data?.materials, data?.meterMappings, questions, sections]);
+  const reportTitle = reportType === "purchases" ? "Relatório de compras" : reportType === "interventions" ? "Intervenções do cliente" : reportType === "equipment" ? "Equipamentos e ferramentas" : "Relatório completo";
+  const openMaterialRequest = async () => {
+    if (!purchaseDraftItems.length) return;
+    const { count, error } = await supabase.from("purchase_orders").select("id", { count: "exact", head: true }).eq("site_survey_visit_id", visit.id).neq("status", "cancelado");
+    if (error) return toast.error(error.message);
+    if ((count ?? 0) > 0 && !window.confirm("Já existe uma solicitação de materiais originada desta visita. Deseja criar outra?")) return;
+    saveSiteSurveyPurchaseDraft({ visitId: visit.id, surveyNumber: visit.survey_number, projectId: visit.project_id, clientId: visit.client_id, clientUnitId: visit.client_unit_id, items: purchaseDraftItems });
+    window.location.assign("/dashboard?section=pedidos&subsection=new");
+  };
   const materialSentence = (point: Point) => {
     const materialSection = materialSectionForPoint(point);
     if (materialSection && point.skippedSectionIds.includes(materialSection.id)) return "Não realizada.";
