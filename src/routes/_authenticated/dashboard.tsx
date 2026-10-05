@@ -540,7 +540,7 @@ function Dashboard() {
   const search = Route.useSearch();
   const { data: me, isLoading: meLoading } = useCurrentUser();
   const [section, setSection] = useState(search.section);
-  const [requestSection, setRequestSection] = useState<string>(search.section === "pedidos" ? search.subsection : undefined);
+  const [requestSection, setRequestSection] = useState<string | undefined>(search.section === "pedidos" ? search.subsection : undefined);
   const [approvalSection, setApprovalSection] = useState(search.section === "queue" ? search.subsection : undefined);
   const [stockSection, setStockSection] = useState<string>();
   const [registrationSection, setRegistrationSection] = useState(search.subsection);
