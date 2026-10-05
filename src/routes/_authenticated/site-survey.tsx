@@ -373,6 +373,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
   const [declinedActionKeys, setDeclinedActionKeys] = useState<Set<string>>(() => new Set());
   const [pendingAction, setPendingAction] = useState<{ key: string; actionName: string } | null>(null);
   const [pendingPointSave, setPendingPointSave] = useState<{ form: HTMLFormElement; fields: string[] } | null>(null);
+  const [finishingPoint, setFinishingPoint] = useState(false);
   const [cancelPointOpen, setCancelPointOpen] = useState(false);
   const [cancellationReasonId, setCancellationReasonId] = useState("");
   const [cancellingPoint, setCancellingPoint] = useState(false);
@@ -522,10 +523,10 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
     await refetchDetail();
     toast.success("Visita da loja cancelada");
   };
-  const pointPendingFields = (form: HTMLFormElement, sectionIds?: Set<string>) => {
+  const pointPendingFields = (form: HTMLFormElement, sectionIds?: Set<string>, freshDetail = detail) => {
     const values = new FormData(form);
     const formAnswers = new Map<string, unknown>(questions.map((question) => {
-      const savedAnswer = (detail?.responses ?? []).find((response) => response.question_id === question.id && matchesPoint(response))?.answer;
+      const savedAnswer = (freshDetail?.responses ?? []).find((response) => response.question_id === question.id && matchesPoint(response))?.answer;
       const useFormValue = question.section_id === openSectionId && values.has(question.id);
       const value = useFormValue
         ? question.question_type === "multiselect" ? values.getAll(question.id).map(String) : question.question_type === "checkbox" && !checkboxUsesOptions(question) ? values.get(question.id) === "on" : String(values.get(question.id) ?? "")
@@ -548,7 +549,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
         const photo = useCurrentSectionFields ? values.get(`${question.id}__photo`) : null;
         const reference = useCurrentSectionFields ? String(values.get(`${question.id}__photo_reference`) ?? "") : photoReferenceId(formAnswers.get(question.id));
         const answer = { ...answerParts(formAnswers.get(question.id)), ...(reference ? { photo_reference_id: reference } : {}) };
-        const attachments = [...(detail?.attachments ?? []), ...(photo instanceof File && photo.size > 0 ? [{ question_id: question.id, visit_luc_id: pointKind === "luc" ? pointId : null, visit_environment_id: pointKind === "environment" ? pointId : null }] : [])];
+        const attachments = [...(freshDetail?.attachments ?? []), ...(photo instanceof File && photo.size > 0 ? [{ question_id: question.id, visit_luc_id: pointKind === "luc" ? pointId : null, visit_environment_id: pointKind === "environment" ? pointId : null }] : [])];
         if (!isStoredQuestionComplete(question, new Map(formAnswers).set(question.id, answer), attachments, matchesPoint)) pending.push(`${section.title}: ${question.prompt}`);
       }
     }
@@ -729,6 +730,28 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
         if (form) scheduleAutosave(form, phase);
       });
     };
+    const concludePoint = async (form: HTMLFormElement) => {
+      if (finishingPoint) return;
+      setFinishingPoint(true);
+      try {
+        if (autosaveTimer.current) { clearTimeout(autosaveTimer.current); autosaveTimer.current = null; }
+        if (autosaveTask.current && !(await runAutosave())) return;
+        await saveQueue.current;
+        const refreshed = await refetchDetail();
+        const fields = pointPendingFields(form, undefined, refreshed.data);
+        if (fields.length) {
+          setValidatedPoints((current) => new Set(current).add(selectedPoint));
+          setOpenSectionId(pointSections.find((section) => section.title.startsWith("Revisão"))?.id ?? null);
+          setPendingPointSave({ form, fields });
+          return;
+        }
+        await saveAnswers(form, "point", true);
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Não foi possível concluir a visita desta loja.");
+      } finally {
+        setFinishingPoint(false);
+      }
+    };
     const switchPoint = async (nextPoint: string) => {
       if (nextPoint === selectedPointRef.current) { setPointPickerOpen(false); return; }
       if (autosaveTimer.current) { clearTimeout(autosaveTimer.current); autosaveTimer.current = null; }
@@ -860,7 +883,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
               {selectedPoint && !selectedPointCancelled ? pointSections.map((section, index) => { const isEquipmentSection = questions.some((question) => question.section_id === section.id && isSpecialEquipmentQuestion(question)); const isFinalSection = section.id === pointSections.at(-1)?.id; const skipLabel = isEquipmentSection ? "Não é necessário equipamento ou ferramenta especial" : isFinalSection ? "Nenhuma observação adicional" : "Não realizada"; return <div id={`survey-section-${section.id}`} key={`${selectedPoint}-${section.id}`}><ChecklistSection section={section} order={(visit.is_manual_entry ? 0 : generalSections.length) + index + 1} open={openSectionId === section.id} pendingCount={sectionVisiblePendingCount(section, false)} onToggle={(event) => toggleChecklistSection(section.id, event, "point")} skipped={skippedSectionIds.has(section.id)} skipLabel={skipLabel} onSkippedChange={(checked) => void changeSkippedSection(section, checked)}>{section.title.startsWith("Revisão") && visibleDisplayedPendingFields.length ? <div className="rounded-md border border-destructive/30 bg-destructive/5 p-3"><p className="text-sm font-semibold text-destructive">Pendências {pendingPointSave ? "encontradas" : "do último salvamento"}</p><div className="mt-3 space-y-3 text-sm text-destructive">{groupedPendingFields.map((group) => <div key={group.label}><p className="font-semibold">{group.label}</p><ul className="mt-1 space-y-1">{group.fields.map((field) => <li key={field}>• {field}</li>)}</ul></div>)}</div></div> : section.title.startsWith("Revisão") && validatedPoints.has(selectedPoint) && recordedPendingFields.length === 0 && selectedPointRecord?.last_progress_at && followUpFields.length === 0 ? <p className="text-sm text-muted-foreground">Nenhuma pendência de preenchimento registrada.</p> : null}{section.title.startsWith("Revisão") && followUpFields.length ? <div className="rounded-md border border-border bg-muted/40 p-3"><p className="text-sm font-semibold">Itens para completar na instalação/implantação</p><p className="mt-1 text-xs text-muted-foreground">Estas pendências não impedem a conclusão da visita.</p><ul className="mt-3 space-y-1 text-sm">{followUpFields.map((field) => <li key={field}>• {field}</li>)}</ul></div> : null}<ConditionalSectionQuestions sectionTitle={section.title} finalObservations={isFinalSection} questions={questions.filter((question) => question.section_id === section.id)} questionOrder={questionOrder} answers={answers} attachments={detail?.attachments ?? []} userId={data.userId} canDelete={canManageAttachments} canEditAttachments={canEditAttachments} onAttachmentsChanged={() => void refetchDetail()} matchesPoint={matchesPoint} selectedPoint={selectedPoint} pendingFields={visibleDisplayedPendingFields} calls={pointCalls} onPhotoReferenceChange={() => scheduleSectionAutosave(section.id, "point")} onQuestionAnswerChange={(question, value) => { if (isSpecialEquipmentQuestion(question)) { const affirmative = isAffirmativeAnswer(value); setSpecialEquipmentAnswer(affirmative ? "sim" : "não"); setNoAdditionalMaterial(!affirmative); if (!affirmative) setMaterialRows([]); } handleQuestionAnswerChange(question, value, "point"); scheduleSectionAutosave(section.id, "point"); }} />{isEquipmentSection ? renderMaterials : null}</ChecklistSection></div>; }) : null}
       {questions.length === 0 ? <div className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">O checklist será disponibilizado quando as perguntas forem cadastradas.</div> : null}
         {selectedPoint && !selectedPointCancelled ? <div className="space-y-2"><Label htmlFor="survey-files" className="flex items-center gap-2"><Camera className="h-4 w-4" />Fotos e anexos deste ambiente</Label><Input id="survey-files" type="file" accept="image/*,application/pdf" multiple onChange={(event) => setFiles(Array.from(event.target.files ?? []))} /></div> : null}
-           {selectedPoint && !selectedPointCancelled ? <div className="flex flex-wrap justify-end gap-2"><Button type="submit"><ClipboardCheck className="h-4 w-4" />Salvar progresso</Button><Button type="button" variant="outline" onClick={(event) => { const form = event.currentTarget.form; if (!form) return; const fields = pointPendingFields(form); if (fields.length) { setValidatedPoints((current) => new Set(current).add(selectedPoint)); setOpenSectionId(pointSections.find((section) => section.title.startsWith("Revisão"))?.id ?? null); setPendingPointSave({ form, fields }); } else void saveAnswers(form, "point", true).catch((error: unknown) => toast.error(error instanceof Error ? error.message : "Não foi possível concluir a visita desta loja.")); }}><Check className="h-4 w-4" />Concluir visita</Button>{pointKind === "luc" ? <Button type="button" variant="destructive" onClick={() => setCancelPointOpen(true)}><X className="h-4 w-4" />Cancelar visita</Button> : null}</div> : null}
+           {selectedPoint && !selectedPointCancelled ? <div className="flex flex-wrap justify-end gap-2"><Button type="submit" disabled={finishingPoint}><ClipboardCheck className="h-4 w-4" />Salvar progresso</Button><Button type="button" variant="outline" disabled={finishingPoint} onClick={(event) => { const form = event.currentTarget.form; if (form) void concludePoint(form); }}><Check className="h-4 w-4" />{finishingPoint ? "Conferindo..." : "Concluir visita"}</Button>{pointKind === "luc" ? <Button type="button" variant="destructive" disabled={finishingPoint} onClick={() => setCancelPointOpen(true)}><X className="h-4 w-4" />Cancelar visita</Button> : null}</div> : null}
     </form>
     ) : null}
       <AlertDialog open={cancelPointOpen} onOpenChange={(open) => { if (!cancellingPoint) { setCancelPointOpen(open); if (!open) setCancellationReasonId(""); } }}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Cancelar visita desta loja?</AlertDialogTitle><AlertDialogDescription>As respostas, fotos, anexos e o histórico já registrados serão preservados.</AlertDialogDescription></AlertDialogHeader><div className="space-y-2"><Label>Motivo do cancelamento</Label><Select value={cancellationReasonId || undefined} onValueChange={setCancellationReasonId}><SelectTrigger><SelectValue placeholder="Selecione o motivo" /></SelectTrigger><SelectContent>{data.cancellationReasons.map((reason) => <SelectItem key={reason.id} value={reason.id}>{reason.name}</SelectItem>)}</SelectContent></Select></div><AlertDialogFooter><AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" disabled={!cancellationReasonId || cancellingPoint} onClick={(event) => { event.preventDefault(); void cancelPoint(); }}>{cancellingPoint ? "Cancelando..." : "Confirmar cancelamento"}</AlertDialogAction><AlertDialogCancel disabled={cancellingPoint}>Voltar</AlertDialogCancel></AlertDialogFooter></AlertDialogContent></AlertDialog>
