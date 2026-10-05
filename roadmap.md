@@ -843,4 +843,4 @@
 - [x] Site Survey — mostrar todos os materiais e equipamentos ativos do Cadastro na escolha da etapa, preservando itens já selecionados.
 - [x] Site Survey — manter linhas independentes ao adicionar materiais, sem reverter a segunda escolha após atualização automática do checklist.
 
-- [ ] Site Survey — filtrar relatório por lojas, quiosques, ambientes ou pontos específicos e permitir omitir totalizadores.
+- [x] Site Survey — filtrar relatório por lojas, quiosques, ambientes ou pontos específicos e permitir omitir totalizadores.
