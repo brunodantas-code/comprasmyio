@@ -30,3 +30,4 @@
 - Site Survey material type sources are linked by catalog IDs, not material names; this survives catalog renames and keeps historical visit selections.
 - Site Survey stores shops by internal UUID; LUC is optional and may repeat after explicit confirmation, while location may always repeat.
 - Site Survey stores shops and kiosks in the same point table with `point_type`; both share LUC, location, checklist, and facade flows.
+- Site Survey purchase reports hand a review-only draft to Supply; only the normal Supply form submission creates the order and Approval.

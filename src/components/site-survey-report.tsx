@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Download, FileChartColumn, LoaderCircle, Printer } from "lucide-react";
+import { Download, FileChartColumn, LoaderCircle, Printer, ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import myioLogoUrl from "@/assets/myio-logo-light.svg?url";
 import nunitoRegularUrl from "@/assets/fonts/nunito-regular.ttf?url";
 import nunitoBoldUrl from "@/assets/fonts/nunito-bold.ttf?url";
 import nunitoExtraBoldUrl from "@/assets/fonts/nunito-extrabold.ttf?url";
+import { saveSiteSurveyPurchaseDraft, type SiteSurveyPurchaseDraftItem } from "@/lib/site-survey-purchase-draft";
 
 type Visit = { id: string; template_id: string | null; survey_number: number; client_id: string | null; client_unit_id: string | null; project_id: string | null; technician_id: string; status: string; scheduled_start: string; scheduled_end: string | null; address: string; contact_name: string | null; contact_phone: string | null; notes: string | null; started_at: string | null; completed_at: string | null; is_manual_entry: boolean };
 type Named = { id: string; name: string };
@@ -26,9 +27,10 @@ type PointPause = { id: string; visit_luc_id: string | null; visit_environment_i
 type ReportResponse = { id: string; question_id: string; visit_luc_id?: string | null; visit_environment_id?: string | null; answer: unknown };
 type RichPart = { text: string; bold?: boolean };
 type PointSummary = { title: string; parts: RichPart[]; questionIds: Set<string> };
-type VisitMaterial = { id: string; visit_luc_id: string | null; visit_environment_id: string | null; quantity: number; notes: string | null; site_survey_material_catalog: { name?: string } | null; site_survey_screwdriver_types: { name?: string } | null; site_survey_wrench_sizes: { name?: string } | null; site_survey_custom_catalog_items: { name?: string } | null };
+type VisitMaterial = { id: string; visit_luc_id: string | null; visit_environment_id: string | null; quantity: number; notes: string | null; site_survey_material_catalog: { name?: string; category?: string } | null; site_survey_screwdriver_types: { name?: string } | null; site_survey_wrench_sizes: { name?: string } | null; site_survey_custom_catalog_items: { name?: string } | null };
 type SortKey = "type" | "created" | "technician";
 type PointFilter = "all" | "shop" | "kiosk" | "environment" | "selected";
+type ReportType = "complete" | "purchases" | "interventions" | "equipment";
 type MeterMapping = { name: string; position: number };
 type Intervention = { id: string; questionId: string; question: string; action: string; answer: string; pointKey: string | null; pointLabel: string; callNumber: string | null };
 
@@ -275,6 +277,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
   const [deadlineDays, setDeadlineDays] = useState("1");
   const [includePhotos, setIncludePhotos] = useState(true);
   const [includeTotals, setIncludeTotals] = useState(true);
+  const [reportType, setReportType] = useState<ReportType>("complete");
   const [pointFilter, setPointFilter] = useState<PointFilter>("all");
   const [selectedPointKeys, setSelectedPointKeys] = useState<Set<string>>(new Set());
   const [pointSearch, setPointSearch] = useState("");
@@ -286,10 +289,10 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
        supabase.from("site_survey_visit_lucs").select("id,luc_number,shop_name,point_type,created_at,started_at,completed_at,completion_status,skipped_section_ids,cancellation_reason_id,site_survey_cancellation_reasons(name)").eq("visit_id", visit.id).eq("active", true).order("luc_number"),
         supabase.from("site_survey_visit_environments").select("id,name,template_id,created_at,started_at,completed_at,completion_status,skipped_section_ids").eq("visit_id", visit.id).eq("active", true).order("name"),
       supabase.from("site_survey_responses").select("id,question_id,visit_luc_id,visit_environment_id,answer").eq("visit_id", visit.id),
-      supabase.from("site_survey_attachments").select("id,visit_luc_id,visit_environment_id,file_name,storage_path,content_type,attachment_kind").eq("visit_id", visit.id).order("created_at"),
+      supabase.from("site_survey_attachments").select("id,question_id,visit_luc_id,visit_environment_id,file_name,storage_path,content_type,attachment_kind").eq("visit_id", visit.id).order("created_at"),
        supabase.from("site_survey_generated_calls").select("id,question_id,trigger_value,visit_luc_id,visit_environment_id,status,site_survey_question_actions(site_survey_action_catalog(name)),internal_calls(call_number,title,description,status)").eq("visit_id", visit.id),
       supabase.from("site_survey_visit_technicians").select("technician_id,visit_luc_id,visit_environment_id").eq("visit_id", visit.id),
-       supabase.from("site_survey_visit_materials").select("id,visit_luc_id,visit_environment_id,quantity,notes,site_survey_material_catalog(name),site_survey_screwdriver_types(name),site_survey_wrench_sizes(name),site_survey_custom_catalog_items(name)").eq("visit_id", visit.id).order("created_at"),
+       supabase.from("site_survey_visit_materials").select("id,visit_luc_id,visit_environment_id,quantity,notes,site_survey_material_catalog(name,category),site_survey_screwdriver_types(name),site_survey_wrench_sizes(name),site_survey_custom_catalog_items(name)").eq("visit_id", visit.id).order("created_at"),
       supabase.from("site_survey_point_pauses").select("id,visit_luc_id,visit_environment_id,reason_id,started_at,ended_at,site_survey_pause_reasons(name)").eq("visit_id", visit.id).order("started_at"),
        supabase.from("site_survey_custom_catalogs").select("name,site_survey_custom_catalog_items(name,position,active)").ilike("name", "De-Para de Hidrômetros").eq("active", true),
     ]);
@@ -351,6 +354,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     const answer = response ? valueText(response.answer).trim() || "Resposta não disponível" : "Resposta não disponível";
     return [{ id: call.id, questionId: call.question_id, question: interventionQuestionLabel(prompt), action, answer: interventionAnswerLabel(prompt, answer), pointKey: point ? `${point.kind}-${point.id}` : null, pointLabel: point?.label ?? "Visita geral", callNumber: linked?.call_number ?? null }];
   }), [data?.calls, data?.points, data?.responses, questions, filteredPointKeys]);
+  const interventionPhotos = (item: Intervention) => (data?.attachments ?? []).filter((photo) => photo.attachment_kind === "question" && photo.question_id === item.questionId && photo.content_type?.startsWith("image/") && (item.pointKey === null || `${photo.visit_luc_id ? "luc" : "environment"}-${photo.visit_luc_id ?? photo.visit_environment_id}` === item.pointKey));
   const interventionTotals = useMemo(() => {
     const groups = new Map<string, { action: string; question: string; answer: string; items: Intervention[] }>();
     for (const item of interventions) {
@@ -375,6 +379,35 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
   }, [data?.responses, questions, filteredPointKeys]);
   const pointSummaries = (point: Point) => { const pointSections = sectionsForPoint(point); const reviewId = reviewSectionForPoint(point)?.id; return buildPointSummaries((pointResponses(point) as ReportResponse[]).filter((response) => !reviewId || !questions.some((question) => question.id === response.question_id && question.section_id === reviewId)), questions, pointSections, point.skippedSectionIds, data?.meterMappings ?? []); };
   const pointMaterials = (point: Point) => (data?.materials ?? []).filter((item) => point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id);
+  const equipmentRows = sortedPoints.flatMap((point) => pointMaterials(point).filter((item) => normalize(item.site_survey_material_catalog?.category ?? "") === "equipamento").map((item) => ({ ...item, pointLabel: point.label, name: item.site_survey_material_catalog?.name ?? "Equipamento ou ferramenta", details: [item.site_survey_screwdriver_types?.name, item.site_survey_wrench_sizes?.name, item.site_survey_custom_catalog_items?.name, item.notes].filter(Boolean).join(" — ") })));
+  const purchaseDraftItems = useMemo<SiteSurveyPurchaseDraftItem[]>(() => {
+    const rows: SiteSurveyPurchaseDraftItem[] = [];
+    for (const point of sortedPoints) {
+      const responses = pointResponses(point);
+      const pointSections = sectionsForPoint(point);
+      const pulse = findAnswer(responses, questions, ["condicao da saida pulsada", "saida pulsada"], pointSections, ["agua", "hidrometro", "hidraulica"]);
+      const pulseStatus = normalize(pulse?.value ?? "");
+      if (pulse && (pulseStatus === "nao" || pulseStatus.includes("inoperante") || pulseStatus.includes("inexistente") || pulseStatus.includes("nao funcional"))) {
+        const flow = findAnswer(responses, questions, ["vazao nominal", "vazao do hidrometro"], pointSections, ["agua", "hidrometro", "hidraulica"]);
+        const location = findAnswer(responses, questions, ["localizacao do hidrometro", "posicao do hidrometro", "detalhar para facilitar"], pointSections, ["agua", "hidrometro", "hidraulica"]);
+        const dn = meterSpecification(flow?.value ?? null, data?.meterMappings ?? []);
+        rows.push({ sourceKey: `meter:${pointKey(point)}`, suggestedName: dn.startsWith("DN") ? `Hidrômetro ${dn}` : "Hidrômetro", quantity: 1, pointLabels: [point.label], reason: [`Saída pulsada ${pulse.value}`, location?.value ? `Local: ${location.value}` : "", flow?.value ? `Vazão: ${flow.value}` : "", dn].filter(Boolean).join(" · ") });
+      }
+      for (const material of pointMaterials(point).filter((item) => normalize(item.site_survey_material_catalog?.category ?? "") !== "equipamento")) rows.push({ sourceKey: `material:${material.id}`, suggestedName: material.site_survey_material_catalog?.name ?? "Material da visita", quantity: Number(material.quantity), pointLabels: [point.label], reason: material.notes ?? "Material registrado na visita" });
+    }
+    const grouped = new Map<string, SiteSurveyPurchaseDraftItem>();
+    for (const row of rows) { const key = normalize(row.suggestedName); const current = grouped.get(key); if (current) { current.quantity += row.quantity; current.pointLabels = [...new Set([...current.pointLabels, ...row.pointLabels])]; current.reason = [...new Set([current.reason, row.reason])].join(" · "); } else grouped.set(key, { ...row }); }
+    return [...grouped.values()];
+  }, [sortedPoints, data?.responses, data?.materials, data?.meterMappings, questions, sections]);
+  const reportTitle = reportType === "purchases" ? "Relatório de compras" : reportType === "interventions" ? "Intervenções do cliente" : reportType === "equipment" ? "Equipamentos e ferramentas" : "Relatório completo";
+  const openMaterialRequest = async () => {
+    if (!purchaseDraftItems.length) return;
+    const { count, error } = await supabase.from("purchase_orders").select("id", { count: "exact", head: true }).eq("site_survey_visit_id", visit.id).neq("status", "cancelado");
+    if (error) return toast.error(error.message);
+    if ((count ?? 0) > 0 && !window.confirm("Já existe uma solicitação de materiais originada desta visita. Deseja criar outra?")) return;
+    saveSiteSurveyPurchaseDraft({ visitId: visit.id, surveyNumber: visit.survey_number, projectId: visit.project_id, clientId: visit.client_id, clientUnitId: visit.client_unit_id, items: purchaseDraftItems });
+    window.location.assign("/dashboard?section=pedidos&subsection=new");
+  };
   const materialSentence = (point: Point) => {
     const materialSection = materialSectionForPoint(point);
     if (materialSection && point.skippedSectionIds.includes(materialSection.id)) return "Não realizada.";
@@ -415,7 +448,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     // Capa técnica, inspirada no relatório institucional enviado.
     pdf.addImage(logoDataUrl, "PNG", 16, 18, 40, 13);
     pdf.setFont("Nunito", "extrabold"); pdf.setTextColor(...dark); pdf.setFontSize(31); pdf.text("Site Survey", 16, 101);
-    pdf.setTextColor(...purple); pdf.text("Relatório", 16, 115);
+    pdf.setTextColor(...purple); pdf.text(reportTitle, 16, 115);
     pdf.setFont("Nunito", "normal"); pdf.setFontSize(13); pdf.setTextColor(85, 82, 94); pdf.text(unitName, 16, 128);
     pdf.setDrawColor(...purple); pdf.setLineWidth(0.3); pdf.line(16, 218, 194, 218);
     const coverRows = [["Cliente", clientName], ["Data de emissão", issueDate], ["Unidade", unitName], ["Número da visita", `SS-${reportNumber}`]];
@@ -427,15 +460,22 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     const tableHead = { fillColor: [255, 255, 255] as [number, number, number], textColor: purple, fontStyle: "bold" as const, lineColor: purple, lineWidth: { top: 0, right: 0, bottom: 0.35, left: 0 } };
     autoTable(pdf, { startY: 34, theme: "plain", styles: { font: "Nunito", fontSize: 8, textColor: dark, lineColor: soft, lineWidth: { bottom: 0.12 } }, headStyles: tableHead, head: [["Cliente", "Projeto", "Técnico", "Situação"]], body: [[clientName, projectName, technicianName, visit.status.replaceAll("_", " ")]] });
     let y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 11;
-    if (includeTotals && !visit.is_manual_entry) autoTable(pdf, { startY: y, theme: "plain", styles: { font: "Nunito", fontSize: 8, textColor: dark, lineColor: soft, lineWidth: { bottom: 0.12 } }, headStyles: tableHead, columnStyles: { 1: { halign: "center" } }, head: [["Planejamento", "Valor"]], body: [["Tempo estimado", formatMinutes(calculation.estimated)], ["Tempo em visita", formatMinutes(calculation.worked)], ["Quantidade de pausas", String(calculation.pauseCount)], ["Tempo de pausas (horas úteis)", formatMinutes(calculation.paused)], ["Total de horas úteis", formatMinutes(calculation.useful)], ["Horas extras", formatMinutes(calculation.overtime)], ["Horas noturnas (22h às 5h)", formatMinutes(calculation.night)], ["Dias com equipe designada", String(calculation.days)], [`Técnicos para ${deadlineDays} dia(s)`, String(calculation.techniciansNeeded)]] });
-    if (includeTotals && !visit.is_manual_entry) y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 11;
-    if (includeTotals) {
+    if (reportType !== "complete") {
+      const head = reportType === "purchases" ? [["Item sugerido", "Qtd.", "Local de uso", "Motivo / especificação"]] : reportType === "equipment" ? [["Equipamento / ferramenta", "Qtd.", "Local de uso", "Especificação"]] : [["Local", "Problema encontrado", "Chamado"]];
+      const body = reportType === "purchases" ? purchaseDraftItems.map((item) => [item.suggestedName, String(item.quantity), item.pointLabels.join("; "), item.reason]) : reportType === "equipment" ? equipmentRows.map((item) => [item.name, String(item.quantity), item.pointLabel, item.details || "—"]) : interventions.map((item) => [item.pointLabel, item.answer, item.callNumber ? `#${item.callNumber}` : "—"]);
+      autoTable(pdf, { startY: y, theme: "plain", styles: { font: "Nunito", fontSize: 8, textColor: dark, lineColor: soft, lineWidth: { bottom: 0.12 }, overflow: "linebreak" }, headStyles: tableHead, head, body: body.length ? body : [["Nenhum item encontrado para os pontos selecionados."]] });
+      y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 8;
+      if (reportType === "interventions" && withPhotos) for (const item of interventions) for (const photo of interventionPhotos(item)) { const { data: signed } = await supabase.storage.from("site-survey-attachments").createSignedUrl(photo.storage_path, 300); if (!signed?.signedUrl) continue; if (y > 245) { pdf.addPage(); y = 18; } try { pdf.setFont("Nunito", "bold"); pdf.text(item.pointLabel, 14, y); y += 3; pdf.addImage(await imageDataUrl(signed.signedUrl, false, 42 / 31), "JPEG", 14, y, 42, 31, undefined, "FAST"); y += 36; } catch { /* Mantém o PDF disponível caso uma foto falhe. */ } }
+    }
+    if (reportType === "complete" && includeTotals && !visit.is_manual_entry) autoTable(pdf, { startY: y, theme: "plain", styles: { font: "Nunito", fontSize: 8, textColor: dark, lineColor: soft, lineWidth: { bottom: 0.12 } }, headStyles: tableHead, columnStyles: { 1: { halign: "center" } }, head: [["Planejamento", "Valor"]], body: [["Tempo estimado", formatMinutes(calculation.estimated)], ["Tempo em visita", formatMinutes(calculation.worked)], ["Quantidade de pausas", String(calculation.pauseCount)], ["Tempo de pausas (horas úteis)", formatMinutes(calculation.paused)], ["Total de horas úteis", formatMinutes(calculation.useful)], ["Horas extras", formatMinutes(calculation.overtime)], ["Horas noturnas (22h às 5h)", formatMinutes(calculation.night)], ["Dias com equipe designada", String(calculation.days)], [`Técnicos para ${deadlineDays} dia(s)`, String(calculation.techniciansNeeded)]] });
+    if (reportType === "complete" && includeTotals && !visit.is_manual_entry) y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 11;
+    if (reportType === "complete" && includeTotals) {
       const totalsBody = technicalTotals.flatMap((group) => group.values.map(([value, count], index) => [index === 0 ? group.label : "", value, String(count)]));
       totalsBody.push(["Chamados", "Total", String(data.calls.filter((item) => item.internal_calls && callIsIncluded(item)).length)]);
       autoTable(pdf, { startY: y, theme: "plain", styles: { font: "Nunito", fontSize: 8, textColor: dark, lineColor: soft, lineWidth: { bottom: 0.12 } }, headStyles: tableHead, columnStyles: { 0: { fontStyle: "bold", cellWidth: 55 }, 2: { halign: "center", cellWidth: 28 } }, head: [["Totalizadores técnicos", "Classificação", "Quantidade"]], body: totalsBody });
       y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 14;
     }
-    if (includeTotals && interventionTotals.length) {
+    if (reportType === "complete" && includeTotals && interventionTotals.length) {
       autoTable(pdf, { startY: y, theme: "plain", margin: { top: 18, bottom: 18, left: 14, right: 14 }, styles: { font: "Nunito", fontSize: 8, textColor: dark, lineColor: soft, lineWidth: { bottom: 0.12 }, overflow: "linebreak" }, headStyles: tableHead, columnStyles: { 1: { halign: "center", cellWidth: 21 } }, head: [["Intervenções do cliente", "Qtd.", "Lojas e ambientes"]], body: interventionTotals.map((group) => [group.answer, String(group.items.length), [...new Set(group.items.map((item) => item.pointLabel))].join("; ")]) });
       y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 14;
     }
@@ -471,7 +511,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
       pdf.setFont("Nunito", "normal");
       return cursorY;
     };
-    for (const point of sortedPoints) {
+    if (reportType === "complete") for (const point of sortedPoints) {
       if (y > 250) { pdf.addPage(); y = 18; }
       pdf.setFont("Nunito", "extrabold"); pdf.setFontSize(12); pdf.setTextColor(...purple); pdf.text(point.label, 14, y); pdf.setDrawColor(...purple); pdf.setLineWidth(0.35); pdf.line(14, y + 2, 196, y + 2); pdf.setTextColor(...dark); y += 8;
       pdf.setFont("Nunito", "normal"); pdf.setFontSize(9); for (const line of pdf.splitTextToSize(`Vistoria Técnica realizada por: ${technicianForPoint(point)}`, 182)) { pdf.text(line, 14, y); y += 5; } y += 1;
@@ -503,7 +543,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
       }
       y += 10;
     }
-    const generalInterventions = interventions.filter((item) => item.pointKey === null);
+    const generalInterventions = reportType === "complete" ? interventions.filter((item) => item.pointKey === null) : [];
     if (generalInterventions.length) {
       if (y > 255) { pdf.addPage(); y = 18; }
       pdf.setFont("Nunito", "bold"); pdf.setFontSize(10); pdf.text("Ações gerais — intervenção do cliente", 14, y); y += 6; pdf.setFontSize(9);
@@ -516,7 +556,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
       pdf.setFont("Nunito", "normal"); pdf.setTextColor(125, 121, 132); pdf.text(`${unitName} — Relatório de Site Survey`, 196, 9, { align: "right" });
       pdf.line(14, 287, 196, 287); pdf.setFontSize(7); pdf.text("myio Automação Ltda", 14, 292); pdf.text(`Página ${page} de ${totalPages}`, 196, 292, { align: "right" });
     }
-    pdf.save(`site-survey-${visit.survey_number}-${blackAndWhite ? "impressao" : "digital"}.pdf`);
+    pdf.save(`site-survey-${visit.survey_number}-${reportType}-${blackAndWhite ? "impressao" : "digital"}.pdf`);
   };
   const handleExportPdf = async (blackAndWhite: boolean) => {
     if (generatingPdf) return;

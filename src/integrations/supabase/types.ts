@@ -3095,6 +3095,7 @@ export type Database = {
           request_type: string
           requester_id: string
           requester_notes: string | null
+          site_survey_visit_id: string | null
           status: Database["public"]["Enums"]["order_status"]
           terceiros_material_id: string | null
           tool_asset_id: string | null
@@ -3143,6 +3144,7 @@ export type Database = {
           request_type?: string
           requester_id: string
           requester_notes?: string | null
+          site_survey_visit_id?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           terceiros_material_id?: string | null
           tool_asset_id?: string | null
@@ -3191,6 +3193,7 @@ export type Database = {
           request_type?: string
           requester_id?: string
           requester_notes?: string | null
+          site_survey_visit_id?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           terceiros_material_id?: string | null
           tool_asset_id?: string | null
@@ -3257,6 +3260,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "request_types"
             referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "purchase_orders_site_survey_visit_id_fkey"
+            columns: ["site_survey_visit_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_visits"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "purchase_orders_terceiros_material_id_fkey"
