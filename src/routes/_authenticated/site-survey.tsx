@@ -515,8 +515,8 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
       const value = values.has(question.id)
         ? question.question_type === "multiselect" ? values.getAll(question.id).map(String) : question.question_type === "checkbox" && !checkboxUsesOptions(question) ? values.get(question.id) === "on" : String(values.get(question.id) ?? "")
         : answerParts(savedAnswer).value;
-      const detail = [String(values.get(`${question.id}__detail`) ?? "").trim(), String(values.get(`${question.id}__subdetail`) ?? "").trim()].filter(Boolean).join(" | ");
-      return [question.id, values.has(question.id) || values.has(`${question.id}__detail`) || values.has(`${question.id}__subdetail`) ? { value, detail } : savedAnswer];
+      const answerDetail = [String(values.get(`${question.id}__detail`) ?? "").trim(), String(values.get(`${question.id}__subdetail`) ?? "").trim()].filter(Boolean).join(" | ");
+      return [question.id, values.has(question.id) || values.has(`${question.id}__detail`) || values.has(`${question.id}__subdetail`) ? { value, detail: answerDetail } : savedAnswer];
     }));
     const pending: string[] = [];
     for (const section of pointSections.filter((item) => !skippedSectionIds.has(item.id) && (!sectionIds || sectionIds.has(item.id)))) {
