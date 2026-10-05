@@ -120,6 +120,10 @@ const isSpecialEquipmentQuestion = (question: Question) => {
   return normalized.includes("equipamento") && normalized.includes("ferramenta especial");
 };
 const isAffirmativeAnswer = (value: unknown) => value === true || String(value ?? "").trim().toLocaleLowerCase("pt-BR") === "sim";
+const isNotInformedAnswer = (value: unknown) => {
+  const normalize = (item: unknown) => String(item ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLocaleLowerCase("pt-BR");
+  return (Array.isArray(value) ? value : [value]).some((item) => ["nao informado", "nao informada"].includes(normalize(item)));
+};
 const questionConfigurationFromForm = (values: FormData, current: QuestionConfig = {}) => {
   const { photo: _photo, ...base } = current;
   if (values.get("photo_enabled") !== "on") return base;
@@ -538,7 +542,6 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
     }
     if (phase === "point" && !pointId) throw new Error("Selecione a loja ou ambiente deste checklist.");
     if (phase === "point" && finishPoint && !visit.is_manual_entry && currentPause) throw new Error("Retome a visita antes de concluí-la.");
-    if (phase === "point" && finishPoint && !visit.is_manual_entry && !facadeAttachment) throw new Error("Adicione a foto da fachada antes de concluir esta visita.");
     const values = new FormData(form);
     const scope = pointKind === "luc" ? { visit_luc_id: pointId, visit_environment_id: null } : { visit_luc_id: null, visit_environment_id: pointId };
      const formAnswers = new Map<string, unknown>(questions.map((question) => [question.id, values.has(question.id) ? question.question_type === "multiselect" ? values.getAll(question.id).map(String) : question.question_type === "checkbox" ? checkboxUsesOptions(question) ? String(values.get(question.id) ?? "") : values.get(question.id) === "on" : String(values.get(question.id) ?? "") : answerParts((detail?.responses ?? []).find((response) => response.question_id === question.id && (phase === "pre_visit" ? !response.visit_luc_id && !response.visit_environment_id : matchesPoint(response)))?.answer).value]));
@@ -634,7 +637,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
           ? pointSections.filter((section) => section.id !== activeSection.id && sectionHasSavedData(section, false)).flatMap((section) => currentSectionPendingFields(section))
           : pointSections.filter((section) => sectionHasSavedData(section, false)).flatMap((section) => currentSectionPendingFields(section));
         const pendingFields = finishPoint
-         ? []
+          ? pointFollowUpFields(form)
           : automatic
             ? (Array.isArray(selectedPointRecord?.pending_fields) ? selectedPointRecord.pending_fields : [])
          : acceptedPendingFields.length
@@ -788,6 +791,25 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
         .filter((field) => field.startsWith(`${section.title}:`))
         .map((field) => field.slice(section.title.length + 1).trim()),
     })).filter((group) => group.fields.length > 0);
+    const pointFollowUpFields = (form?: HTMLFormElement) => {
+      const values = form ? new FormData(form) : null;
+      const currentAnswers = new Map(answers);
+      if (values) {
+        for (const question of questions) {
+          if (!values.has(question.id)) continue;
+          const value = question.question_type === "multiselect" ? values.getAll(question.id).map(String) : question.question_type === "checkbox" && !checkboxUsesOptions(question) ? values.get(question.id) === "on" : String(values.get(question.id) ?? "");
+          currentAnswers.set(question.id, value);
+        }
+      }
+      const fields = pointSections
+        .filter((section) => !skippedSectionIds.has(section.id))
+        .flatMap((section) => questions
+          .filter((question) => question.section_id === section.id && isQuestionVisible(question, currentAnswers) && isNotInformedAnswer(answerParts(currentAnswers.get(question.id)).value))
+          .map((question) => `${section.title}: ${question.prompt}`));
+      if (!visit.is_manual_entry && !facadeAttachment) fields.push("Foto da fachada");
+      return fields;
+    };
+    const followUpFields = pointFollowUpFields();
    const generalChecklistComplete = generalSections.every((section) => sectionPendingCount(section, true) === 0) && visitTechnicians.every((item) => Boolean(item.technician_id) && phonePattern.test(item.mobile_phone.trim()));
     const preVisitSaved = visit.is_manual_entry || generalQuestionIds.size === 0 || generalChecklistComplete;
    const isPointComplete = (point: { value: string }) => {
