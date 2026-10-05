@@ -829,6 +829,7 @@
 - [x] Site Survey — reclassificar somente a visita #202609300001 do Shopping Taboão para cadastro realizado, preservando o preenchimento.
 - [x] Site Survey — no cadastro de visita realizada, ocultar etapas antigas 1–3 e renumerar a antiga etapa 4 como etapa 1, mantendo as seguintes em sequência.
 - [x] Site Survey — reunir cadastro de loja e ambiente no botão Adicionar ambiente, com seleção exclusiva e campos correspondentes.
+- [x] Site Survey — agrupar Importar/Exportar Excel e deixar as três ações vazadas em repouso, com borda/texto verdes e fundo verde na interação.
 
 - [x] Site Survey — classificar visitas já realizadas como Concluída ao cadastrar e manter o checklist editável; reclassificar Taboão sem perder respostas.
 - [x] Site Survey — evitar aviso de salvamento sem loja selecionada ao reabrir a visita; aceitar fotos arrastadas ou coladas na pergunta sem sair da página e identificar a área de escolha.
