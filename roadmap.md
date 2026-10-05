@@ -1,3 +1,4 @@
+- [x] Site Survey — permitir LUC opcional e localização repetida; confirmar antes de cadastrar outra loja com um LUC já usado na OS.
 - [x] Site Survey — listar na etapa final as respostas “Não Informado” e a fachada pendente como complementos para instalação, sem bloquear a conclusão da loja/ambiente.
 - [x] Site Survey — vincular lista de tipos a cada material/equipamento no Cadastro e oferecer Bitolas de chaves de boca no checklist e relatório.
 - [x] Site Survey — permitir editar os nomes de todos os cadastros de Diversos, inclusive os predefinidos, sem alterar os itens.

@@ -28,3 +28,4 @@
 - Survey LUC corrections replace the current history entry; actual shop changes append a history entry, preserving genuine occupancy changes.
 - Site Survey built-in catalog title overrides live separately from catalog items; this preserves fixed catalog keys while allowing their displayed names to change.
 - Site Survey material type sources are linked by catalog IDs, not material names; this survives catalog renames and keeps historical visit selections.
+- Site Survey stores shops by internal UUID; LUC is optional and may repeat after explicit confirmation, while location may always repeat.

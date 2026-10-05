@@ -15,6 +15,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { suggestShopNameFromFacade } from "@/lib/site-survey-ai.functions";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 type LucRow = { id: string; luc_number: string; shop_name: string; location: string | null };
 type LucHistoryRow = { id: string; visit_luc_id: string; luc_number: string; shop_name: string; valid_from: string; valid_until: string | null };
@@ -45,6 +46,7 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
   const [editMode, setEditMode] = useState<"correction" | "name_change">("correction");
   const [sortBy, setSortBy] = useState<"luc_number" | "shop_name" | "location">("luc_number");
   const [sortAscending, setSortAscending] = useState(true);
+  const [duplicateConfirmation, setDuplicateConfirmation] = useState<"edit" | "import" | null>(null);
 
   const load = async () => {
     const [{ data, error }, { data: historyRows, error: historyError }] = await Promise.all([
@@ -72,14 +74,11 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
     const nameIndex = headers.findIndex((header) => ["nome da loja", "loja", "nome loja"].includes(header));
     const locationIndex = headers.findIndex((header) => ["localizacao", "piso", "andar", "local"].includes(header));
     if (nameIndex < 0) throw new Error("Não encontrei a coluna Nome da loja.");
-    const seen = new Set<string>();
     const parsed = matrix.slice(headerIndex + 1).filter((line) => line.some((cell) => String(cell ?? "").trim())).map((line) => {
       const lucNumber = String(line[lucIndex] ?? "").trim();
       const shopName = String(line[nameIndex] ?? "").trim();
       const location = locationIndex >= 0 ? String(line[locationIndex] ?? "").trim() : "";
-      const key = lucNumber.toLocaleLowerCase("pt-BR");
-      const issue = !lucNumber || !shopName ? "Preencha LUC e Nome da loja" : seen.has(key) ? "LUC duplicado na planilha" : undefined;
-      if (lucNumber) seen.add(key);
+      const issue = !shopName ? "Preencha o Nome da loja" : undefined;
       return { lucNumber, shopName, location, issue };
     });
     if (!parsed.length) throw new Error("Nenhuma linha foi encontrada.");
@@ -87,13 +86,29 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
     setPreviewOpen(true);
   };
 
-  const importRows = async () => {
+  const importRows = async (confirmed = false) => {
+    const lucCounts = new Map<string, number>();
+    validPreview.forEach((item) => { const key = normalizeHeader(item.lucNumber); if (key) lucCounts.set(key, (lucCounts.get(key) ?? 0) + 1); });
+    const hasAmbiguousLuc = validPreview.some((item) => {
+      const key = normalizeHeader(item.lucNumber);
+      return Boolean(key && ((lucCounts.get(key) ?? 0) > 1 || rows.filter((row) => normalizeHeader(row.luc_number) === key).length > 1));
+    });
+    if (hasAmbiguousLuc && !confirmed) { setDuplicateConfirmation("import"); return; }
     setLoading(true);
     try {
       if (!validPreview.length) throw new Error("Não há linhas válidas para importar.");
       const payload = validPreview.map((item) => ({ visit_id: visitId, luc_number: item.lucNumber, shop_name: item.shopName, location: item.location || null, created_by: userId, updated_by: userId }));
-      const { error } = await supabase.from("site_survey_visit_lucs").upsert(payload.map((item) => ({ ...item, active: true })), { onConflict: "visit_id,luc_number" });
-      if (error) throw error;
+      for (const item of payload) {
+        const key = normalizeHeader(item.luc_number);
+        const matches = key ? rows.filter((row) => normalizeHeader(row.luc_number) === key) : [];
+        if (key && (lucCounts.get(key) ?? 0) === 1 && matches.length === 1) {
+          const { error } = await supabase.from("site_survey_visit_lucs").update({ shop_name: item.shop_name, location: item.location, updated_by: userId, active: true }).eq("id", matches[0].id);
+          if (error) throw error;
+        } else {
+          const { error } = await supabase.from("site_survey_visit_lucs").insert({ ...item, active: true });
+          if (error) throw error;
+        }
+      }
       toast.success(`${validPreview.length} ambiente(s) importado(s).`);
       setPreviewOpen(false);
       setPreview([]);
@@ -104,7 +119,7 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
   };
 
   const startEdit = (row?: LucRow) => { setEditing(row ?? { id: "", luc_number: "", shop_name: "", location: null }); setEditMode("correction"); setPointType(row ? "shop" : null); setDraftLuc(row?.luc_number ?? ""); setDraftName(row?.shop_name ?? ""); setDraftLocation(row?.location ?? ""); setEnvironmentName(""); setEnvironmentTemplateId(""); };
-  const saveEdit = async () => {
+  const saveEdit = async (confirmed = false) => {
     if (!pointType) return toast.error("Selecione Loja ou Ambiente.");
     if (pointType === "environment" && !editing?.id) {
       const name = environmentName.trim();
@@ -116,7 +131,9 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
       return;
     }
     const lucNumber = draftLuc.trim(); const shopName = draftName.trim();
-    if (!lucNumber || !shopName) return toast.error("Informe o LUC e o nome da loja.");
+    if (!shopName) return toast.error("Informe o nome da loja.");
+    const duplicateRows = lucNumber ? rows.filter((row) => row.id !== editing?.id && normalizeHeader(row.luc_number) === normalizeHeader(lucNumber)) : [];
+    if (duplicateRows.length && !confirmed) { setDuplicateConfirmation("edit"); return; }
     const payload = { visit_id: visitId, luc_number: lucNumber, shop_name: shopName, location: draftLocation.trim() || null, updated_by: userId, active: true };
     const result = editing?.id
       ? editMode === "correction"
@@ -136,7 +153,8 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
     } catch (error) { toast.error(error instanceof Error ? error.message : "Não foi possível analisar a fachada."); }
     finally { setAnalyzing(false); }
   };
-  const currentByLuc = useMemo(() => new Set(rows.map((row) => row.luc_number.toLocaleLowerCase("pt-BR"))), [rows]);
+  const currentByLuc = useMemo(() => new Set(rows.map((row) => normalizeHeader(row.luc_number)).filter(Boolean)), [rows]);
+  const duplicateNames = draftLuc.trim() ? rows.filter((row) => row.id !== editing?.id && normalizeHeader(row.luc_number) === normalizeHeader(draftLuc)).map((row) => row.shop_name) : [];
   const sortedRows = useMemo(() => [...rows].sort((a, b) => {
     const comparison = (a[sortBy] ?? "").localeCompare(b[sortBy] ?? "", "pt-BR", { numeric: true, sensitivity: "base" });
     return sortAscending ? comparison : -comparison;
@@ -187,17 +205,17 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
 
   return <Collapsible open={listOpen} onOpenChange={setListOpen} asChild><section className="space-y-3 border-t pt-5">
      <div className="flex flex-wrap items-start justify-between gap-3"><div><h3 className="font-bold">Lojas e LUCs da OS</h3><p className="text-sm text-muted-foreground">Cadastre individualmente ou importe a lista completa antes dos checklists.</p></div><div className="flex flex-wrap items-center gap-2">{canEdit ? <Button type="button" size="sm" variant="outline" onClick={() => startEdit()}><Plus className="h-4 w-4" />Adicionar ambiente</Button> : null}{canImport ? <><input ref={inputRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; if (file) void parseFile(file).catch((error: Error) => toast.error(error.message)); }} /><Button type="button" size="sm" onClick={() => inputRef.current?.click()}><FileSpreadsheet className="h-4 w-4" />Importar Excel</Button></> : null}<Button type="button" size="sm" variant="outline" disabled={exporting} onClick={() => void exportExcel()}><Download className="h-4 w-4" />{exporting ? "Exportando..." : "Exportar Excel"}</Button><CollapsibleTrigger asChild><Button type="button" size="compactIcon" variant="ghost" aria-label={listOpen ? "Recolher lista de lojas e LUCs" : "Exibir lista de lojas e LUCs"} title={listOpen ? "Recolher lista" : "Exibir lista"}><ChevronDown className={`h-4 w-4 transition-transform ${listOpen ? "rotate-180" : ""}`} /></Button></CollapsibleTrigger></div></div>
-      <CollapsibleContent><div className="overflow-x-auto rounded-md border"><div className="grid min-w-[620px] grid-cols-[100px_1fr_1fr_72px] items-center gap-3 px-3 py-2 text-xs font-semibold">{sortHeader("luc_number", "LUC")}{sortHeader("shop_name", "Nome da loja")}{sortHeader("location", "Localização")}<span>Ações</span></div>{sortedRows.map((row) => <div key={row.id} className="grid min-w-[620px] grid-cols-[100px_1fr_1fr_72px] items-center gap-3 border-t px-3 py-2 text-sm"><span className="font-medium">{row.luc_number}</span><span className="min-w-0 truncate">{row.shop_name}</span><span className="min-w-0 truncate text-muted-foreground">{row.location || "—"}</span><div className="flex gap-1">{canEdit ? <Button type="button" size="compactIcon" variant="ghost" title="Editar ambiente" onClick={() => startEdit(row)}><Pencil className="h-3.5 w-3.5" /></Button> : null}{canEdit ? <ConfirmDeleteButton title={`Excluir LUC ${row.luc_number}?`} description="O ambiente será removido desta OS, mantendo o histórico registrado." onConfirm={async () => { const { error } = await supabase.from("site_survey_visit_lucs").update({ active: false, updated_by: userId }).eq("id", row.id); if (error) return toast.error(error.message); toast.success("Ambiente removido da OS."); await load(); onChanged?.(); }} /> : null}</div></div>)}{!rows.length ? <p className="border-t p-4 text-sm text-muted-foreground">Nenhuma loja ou LUC cadastrado nesta OS.</p> : null}</div></CollapsibleContent>
-    {history.some((item) => item.valid_until) ? <details className="rounded-md border px-3 py-2"><summary className="cursor-pointer text-sm font-medium">Histórico de nomes</summary><div className="mt-2 divide-y">{history.filter((item) => item.valid_until).map((item) => <div key={item.id} className="grid gap-1 py-2 text-sm sm:grid-cols-[110px_1fr_170px]"><span>LUC {item.luc_number}</span><span>{item.shop_name}</span><span className="text-muted-foreground">até {new Date(item.valid_until ?? item.valid_from).toLocaleString("pt-BR")}</span></div>)}</div></details> : null}
+      <CollapsibleContent><div className="overflow-x-auto rounded-md border"><div className="grid min-w-[620px] grid-cols-[100px_1fr_1fr_72px] items-center gap-3 px-3 py-2 text-xs font-semibold">{sortHeader("luc_number", "LUC")}{sortHeader("shop_name", "Nome da loja")}{sortHeader("location", "Localização")}<span>Ações</span></div>{sortedRows.map((row) => <div key={row.id} className="grid min-w-[620px] grid-cols-[100px_1fr_1fr_72px] items-center gap-3 border-t px-3 py-2 text-sm"><span className="font-medium">{row.luc_number || "Sem LUC"}</span><span className="min-w-0 truncate">{row.shop_name}</span><span className="min-w-0 truncate text-muted-foreground">{row.location || "—"}</span><div className="flex gap-1">{canEdit ? <Button type="button" size="compactIcon" variant="ghost" title="Editar ambiente" onClick={() => startEdit(row)}><Pencil className="h-3.5 w-3.5" /></Button> : null}{canEdit ? <ConfirmDeleteButton title={`Excluir ${row.luc_number ? `LUC ${row.luc_number}` : row.shop_name}?`} description="O ambiente será removido desta OS, mantendo o histórico registrado." onConfirm={async () => { const { error } = await supabase.from("site_survey_visit_lucs").update({ active: false, updated_by: userId }).eq("id", row.id); if (error) return toast.error(error.message); toast.success("Ambiente removido da OS."); await load(); onChanged?.(); }} /> : null}</div></div>)}{!rows.length ? <p className="border-t p-4 text-sm text-muted-foreground">Nenhuma loja ou LUC cadastrado nesta OS.</p> : null}</div></CollapsibleContent>
+    {history.some((item) => item.valid_until) ? <details className="rounded-md border px-3 py-2"><summary className="cursor-pointer text-sm font-medium">Histórico de nomes</summary><div className="mt-2 divide-y">{history.filter((item) => item.valid_until).map((item) => <div key={item.id} className="grid gap-1 py-2 text-sm sm:grid-cols-[110px_1fr_170px]"><span>{item.luc_number ? `LUC ${item.luc_number}` : "Sem LUC"}</span><span>{item.shop_name}</span><span className="text-muted-foreground">até {new Date(item.valid_until ?? item.valid_from).toLocaleString("pt-BR")}</span></div>)}</div></details> : null}
      <Dialog open={Boolean(editing)} onOpenChange={(open) => !open && setEditing(null)}>
        <DialogContent>
-         <DialogHeader><DialogTitle>{editing?.id ? "Editar ambiente" : "Adicionar ambiente"}</DialogTitle><DialogDescription>{pointType === "shop" ? "Informe o LUC, o nome atual da loja e, se desejar, sua localização." : pointType === "environment" ? "Informe o nome do ambiente e selecione seu checklist." : "Selecione se deseja cadastrar uma loja ou um ambiente."}</DialogDescription></DialogHeader>
+          <DialogHeader><DialogTitle>{editing?.id ? "Editar ambiente" : "Adicionar ambiente"}</DialogTitle><DialogDescription>{pointType === "shop" ? "Informe o nome atual da loja e, se houver, seu LUC e sua localização." : pointType === "environment" ? "Informe o nome do ambiente e selecione seu checklist." : "Selecione se deseja cadastrar uma loja ou um ambiente."}</DialogDescription></DialogHeader>
          {!editing?.id ? <div className="flex flex-wrap gap-5" role="group" aria-label="Tipo de adição">
            <div className="flex items-center gap-2"><Checkbox id="add-shop" checked={pointType === "shop"} onCheckedChange={() => setPointType(pointType === "shop" ? null : "shop")} /><Label htmlFor="add-shop" className="cursor-pointer">Loja</Label></div>
            <div className="flex items-center gap-2"><Checkbox id="add-environment" checked={pointType === "environment"} onCheckedChange={() => setPointType(pointType === "environment" ? null : "environment")} /><Label htmlFor="add-environment" className="cursor-pointer">Ambiente</Label></div>
          </div> : null}
          {pointType === "shop" ? <>
-           <div className="grid gap-4 sm:grid-cols-2"><div className="space-y-2"><Label htmlFor="luc-draft">LUC</Label><Input id="luc-draft" value={draftLuc} onChange={(event) => setDraftLuc(event.target.value)} /></div><div className="space-y-2"><Label htmlFor="shop-draft">Nome da loja</Label><Input id="shop-draft" value={draftName} onChange={(event) => setDraftName(event.target.value)} /></div><div className="space-y-2 sm:col-span-2"><Label htmlFor="location-draft">Localização (opcional)</Label><Input id="location-draft" value={draftLocation} onChange={(event) => setDraftLocation(event.target.value)} placeholder="Ex.: 3º andar" /></div></div>
+            <div className="grid gap-4 sm:grid-cols-2"><div className="space-y-2"><Label htmlFor="luc-draft">LUC (opcional)</Label><Input id="luc-draft" value={draftLuc} onChange={(event) => setDraftLuc(event.target.value)} /></div><div className="space-y-2"><Label htmlFor="shop-draft">Nome da loja</Label><Input id="shop-draft" value={draftName} onChange={(event) => setDraftName(event.target.value)} /></div><div className="space-y-2 sm:col-span-2"><Label htmlFor="location-draft">Localização (opcional)</Label><Input id="location-draft" value={draftLocation} onChange={(event) => setDraftLocation(event.target.value)} placeholder="Ex.: G1 – Deck" /></div></div>
             {editing?.id ? <div className="space-y-2"><Label>Tipo de edição</Label><RadioGroup value={editMode} onValueChange={(value) => setEditMode(value as typeof editMode)} className="gap-2"><label className="flex cursor-pointer items-center gap-2 text-sm"><RadioGroupItem value="correction" />Corrigir cadastro — não registrar nome anterior no histórico</label><label className="flex cursor-pointer items-center gap-2 text-sm"><RadioGroupItem value="name_change" />Alteração de loja — manter nome anterior no histórico</label></RadioGroup></div> : null}
            <div className="space-y-2"><input ref={facadeCameraRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; void analyzeFacade(file); }} /><input ref={facadeGalleryRef} type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; void analyzeFacade(file); }} /><DropdownMenu><DropdownMenuTrigger asChild><Button type="button" variant="outline" disabled={analyzing}>{analyzing ? <Sparkles className="h-4 w-4" /> : <Camera className="h-4 w-4" />}{analyzing ? "Analisando fachada..." : "Identificar pela fachada"}</Button></DropdownMenuTrigger><DropdownMenuContent align="start" className="min-w-56"><DropdownMenuItem onSelect={() => facadeCameraRef.current?.click()}><Camera className="h-4 w-4" />Tirar foto</DropdownMenuItem><DropdownMenuItem onSelect={() => facadeGalleryRef.current?.click()}><Images className="h-4 w-4" />Escolher da galeria</DropdownMenuItem></DropdownMenuContent></DropdownMenu></div>
          </> : null}
@@ -205,6 +223,8 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
          <DialogFooter className="flex-row justify-end gap-2 sm:space-x-0"><Button type="button" variant="outline" onClick={() => setEditing(null)}>Cancelar</Button><Button type="button" disabled={!pointType} onClick={() => void saveEdit()}>Salvar</Button></DialogFooter>
        </DialogContent>
      </Dialog>
-    <Dialog open={previewOpen} onOpenChange={setPreviewOpen}><DialogContent className="max-h-[88vh] max-w-4xl overflow-y-auto"><DialogHeader><DialogTitle>Conferir importação</DialogTitle><DialogDescription>{validPreview.length} linha(s) válida(s) e {invalidCount} com pendência. LUCs já cadastrados terão nome e localização atualizados.</DialogDescription></DialogHeader><div className="overflow-x-auto rounded-md border"><div className="grid min-w-[720px] grid-cols-[100px_1fr_1fr_150px] gap-3 bg-primary/20 px-3 py-2 text-xs font-semibold"><span>LUC</span><span>Nome da loja</span><span>Localização</span><span>Resultado</span></div>{preview.map((item, index) => <div key={`${item.lucNumber}-${index}`} className="grid min-w-[720px] grid-cols-[100px_1fr_1fr_150px] gap-3 border-t px-3 py-2 text-sm"><span>{item.lucNumber || "—"}</span><span>{item.shopName || "—"}</span><span>{item.location || "—"}</span><span className={item.issue ? "text-destructive" : "text-muted-foreground"}>{item.issue ?? (currentByLuc.has(item.lucNumber.toLocaleLowerCase("pt-BR")) ? "Atualizar" : "Adicionar")}</span></div>)}</div><DialogFooter><Button type="button" variant="outline" onClick={() => setPreviewOpen(false)}>Cancelar</Button><Button type="button" disabled={loading || !validPreview.length} onClick={() => void importRows()}>{loading ? "Importando..." : `Importar ${validPreview.length} ambiente(s)`}</Button></DialogFooter></DialogContent></Dialog>
+     <Dialog open={previewOpen} onOpenChange={setPreviewOpen}><DialogContent className="max-h-[88vh] max-w-4xl overflow-y-auto"><DialogHeader><DialogTitle>Conferir importação</DialogTitle><DialogDescription>{validPreview.length} linha(s) válida(s) e {invalidCount} com pendência. LUCs únicos já cadastrados terão nome e localização atualizados; repetições serão confirmadas antes da inclusão.</DialogDescription></DialogHeader><div className="overflow-x-auto rounded-md border"><div className="grid min-w-[720px] grid-cols-[100px_1fr_1fr_150px] gap-3 bg-primary/20 px-3 py-2 text-xs font-semibold"><span>LUC</span><span>Nome da loja</span><span>Localização</span><span>Resultado</span></div>{preview.map((item, index) => <div key={`${item.lucNumber}-${index}`} className="grid min-w-[720px] grid-cols-[100px_1fr_1fr_150px] gap-3 border-t px-3 py-2 text-sm"><span>{item.lucNumber || "Sem LUC"}</span><span>{item.shopName || "—"}</span><span>{item.location || "—"}</span><span className={item.issue ? "text-destructive" : "text-muted-foreground"}>{item.issue ?? (item.lucNumber && currentByLuc.has(normalizeHeader(item.lucNumber)) ? "Atualizar ou confirmar" : "Adicionar")}</span></div>)}</div><DialogFooter><Button type="button" variant="outline" onClick={() => setPreviewOpen(false)}>Cancelar</Button><Button type="button" disabled={loading || !validPreview.length} onClick={() => void importRows()}>{loading ? "Importando..." : `Importar ${validPreview.length} ambiente(s)`}</Button></DialogFooter></DialogContent></Dialog>
+     <AlertDialog open={duplicateConfirmation === "edit"} onOpenChange={(open) => { if (!open) setDuplicateConfirmation(null); }}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Este LUC já está em uso</AlertDialogTitle><AlertDialogDescription>O LUC {draftLuc.trim()} já está cadastrado para {duplicateNames.join(", ")}. Deseja cadastrar esta nova loja no mesmo LUC?</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Voltar à edição</AlertDialogCancel><AlertDialogAction onClick={() => { setDuplicateConfirmation(null); void saveEdit(true); }}>Cadastrar mesmo assim</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
+     <AlertDialog open={duplicateConfirmation === "import"} onOpenChange={(open) => { if (!open) setDuplicateConfirmation(null); }}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>A planilha contém LUC repetido</AlertDialogTitle><AlertDialogDescription>Existem lojas com o mesmo LUC na planilha ou na OS. Deseja importar esses registros como novas lojas no mesmo LUC?</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Voltar à conferência</AlertDialogCancel><AlertDialogAction onClick={() => { setDuplicateConfirmation(null); void importRows(true); }}>Importar mesmo assim</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
   </section></Collapsible>;
 }

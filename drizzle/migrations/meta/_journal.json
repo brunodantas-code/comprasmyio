@@ -666,6 +666,13 @@
       "when": 1790982268630,
       "tag": "0094_link_survey_materials_to_type_catalogs",
       "breakpoints": true
+    },
+    {
+      "idx": 95,
+      "version": "7",
+      "when": 1791212372242,
+      "tag": "0095_allow_optional_and_repeated_site_survey_lucs",
+      "breakpoints": true
     }
   ]
 }
