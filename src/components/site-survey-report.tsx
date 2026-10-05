@@ -41,6 +41,13 @@ const pointDuration = (point: Point, pauses: PointPause[]) => { const total = du
 const formatMinutes = (minutes: number | null) => minutes === null ? "Incompleto" : `${Math.floor(minutes / 60)}h ${String(minutes % 60).padStart(2, "0")}min`;
 const normalize = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR");
 const interventionQuestionLabel = (prompt: string) => normalize(prompt).includes("detalhar para facilitar sua localizacao") ? "Hidrômetro" : prompt;
+const interventionAnswerLabel = (prompt: string, answer: string) => {
+  const normalizedPrompt = normalize(prompt);
+  const normalizedAnswer = normalize(answer);
+  if (normalizedPrompt.includes("condicao do registro") && normalizedAnswer.includes("inoperante")) return "Registro Inoperante";
+  if (normalizedPrompt.includes("posicao de instalacao do registro") && normalizedAnswer.includes("apos o hidrometro")) return "Instalação incorreta do registro após o Hidrômetro";
+  return answer;
+};
 const findAnswer = (responses: ReportResponse[], questions: Question[], terms: string[], sections?: Section[], sectionTerms?: string[]) => {
   const response = responses.find((item) => {
     const question = questions.find((candidate) => candidate.id === item.question_id);
@@ -322,7 +329,8 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     const point = data?.points.find((item) => item.kind === (call.visit_luc_id ? "luc" : "environment") && item.id === (call.visit_luc_id ?? call.visit_environment_id));
     const response = data?.responses.find((item) => item.question_id === call.question_id && item.visit_luc_id === call.visit_luc_id && item.visit_environment_id === call.visit_environment_id);
     const prompt = questions.find((item) => item.id === call.question_id)?.prompt ?? "Pergunta não disponível";
-    return [{ id: call.id, questionId: call.question_id, question: interventionQuestionLabel(prompt), action, answer: response ? valueText(response.answer).trim() || "Resposta não disponível" : "Resposta não disponível", pointKey: point ? `${point.kind}-${point.id}` : null, pointLabel: point?.label ?? "Visita geral", callNumber: linked?.call_number ?? null }];
+    const answer = response ? valueText(response.answer).trim() || "Resposta não disponível" : "Resposta não disponível";
+    return [{ id: call.id, questionId: call.question_id, question: interventionQuestionLabel(prompt), action, answer: interventionAnswerLabel(prompt, answer), pointKey: point ? `${point.kind}-${point.id}` : null, pointLabel: point?.label ?? "Visita geral", callNumber: linked?.call_number ?? null }];
   }), [data?.calls, data?.points, data?.responses, questions]);
   const interventionTotals = useMemo(() => {
     const groups = new Map<string, { action: string; question: string; answer: string; items: Intervention[] }>();
@@ -407,7 +415,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     autoTable(pdf, { startY: y, theme: "plain", styles: { font: "Nunito", fontSize: 8, textColor: dark, lineColor: soft, lineWidth: { bottom: 0.12 } }, headStyles: tableHead, columnStyles: { 0: { fontStyle: "bold", cellWidth: 55 }, 2: { halign: "center", cellWidth: 28 } }, head: [["Totalizadores técnicos", "Classificação", "Quantidade"]], body: totalsBody });
     y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 14;
     if (interventionTotals.length) {
-      autoTable(pdf, { startY: y, theme: "plain", margin: { top: 18, bottom: 18, left: 14, right: 14 }, styles: { font: "Nunito", fontSize: 8, textColor: dark, lineColor: soft, lineWidth: { bottom: 0.12 }, overflow: "linebreak" }, headStyles: tableHead, columnStyles: { 2: { halign: "center", cellWidth: 21 } }, head: [["Intervenções do cliente", "Pergunta / resposta", "Qtd.", "Lojas e ambientes"]], body: interventionTotals.map((group) => [group.action, `${group.question} — ${group.answer}`, String(group.items.length), [...new Set(group.items.map((item) => item.pointLabel))].join("; ")]) });
+      autoTable(pdf, { startY: y, theme: "plain", margin: { top: 18, bottom: 18, left: 14, right: 14 }, styles: { font: "Nunito", fontSize: 8, textColor: dark, lineColor: soft, lineWidth: { bottom: 0.12 }, overflow: "linebreak" }, headStyles: tableHead, columnStyles: { 1: { halign: "center", cellWidth: 21 } }, head: [["Intervenções do cliente", "Qtd.", "Lojas e ambientes"]], body: interventionTotals.map((group) => [group.answer, String(group.items.length), [...new Set(group.items.map((item) => item.pointLabel))].join("; ")]) });
       y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 14;
     }
     const drawRichParagraph = (parts: RichPart[], startY: number) => {
@@ -470,7 +478,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
         if (y > 255) { pdf.addPage(); y = 18; }
         pdf.setFont("Nunito", "bold"); pdf.setFontSize(10); pdf.text("Ações — intervenção do cliente", 14, y); y += 6;
         pdf.setFontSize(9);
-        for (const item of pointInterventions) y = drawRichParagraph([{ text: `${item.question} — ${item.answer}. ${item.action}${item.callNumber ? ` (chamado #${item.callNumber})` : ""}.` }], y + 1) + 2;
+        for (const item of pointInterventions) y = drawRichParagraph([{ text: `${item.answer}${item.callNumber ? ` (chamado #${item.callNumber})` : ""}.` }], y + 1) + 2;
       }
       y += 10;
     }
