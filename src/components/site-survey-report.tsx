@@ -456,7 +456,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     pdf.setFontSize(7); pdf.setTextColor(145, 141, 151); pdf.text("myio Automação Ltda — Relatório de Site Survey", 16, 282); pdf.setFillColor(...green); pdf.rect(181, 280.5, 13, 1.3, "F");
 
     pdf.addPage();
-    pdf.setFont("Nunito", "extrabold"); pdf.setTextColor(...purple); pdf.setFontSize(17); pdf.text("01", 14, 24); pdf.setFontSize(14); pdf.text("Visão geral", 28, 24);
+    pdf.setFont("Nunito", "extrabold"); pdf.setTextColor(...purple); pdf.setFontSize(17); pdf.text("01", 14, 24); pdf.setFontSize(14); pdf.text(reportType === "complete" ? "Visão geral" : reportTitle, 28, 24);
     const tableHead = { fillColor: [255, 255, 255] as [number, number, number], textColor: purple, fontStyle: "bold" as const, lineColor: purple, lineWidth: { top: 0, right: 0, bottom: 0.35, left: 0 } };
     autoTable(pdf, { startY: 34, theme: "plain", styles: { font: "Nunito", fontSize: 8, textColor: dark, lineColor: soft, lineWidth: { bottom: 0.12 } }, headStyles: tableHead, head: [["Cliente", "Projeto", "Técnico", "Situação"]], body: [[clientName, projectName, technicianName, visit.status.replaceAll("_", " ")]] });
     let y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 11;
