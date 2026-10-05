@@ -512,11 +512,13 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
     const values = new FormData(form);
     const formAnswers = new Map<string, unknown>(questions.map((question) => {
       const savedAnswer = (detail?.responses ?? []).find((response) => response.question_id === question.id && matchesPoint(response))?.answer;
-      const value = values.has(question.id)
+      const useFormValue = question.section_id === openSectionId && values.has(question.id);
+      const value = useFormValue
         ? question.question_type === "multiselect" ? values.getAll(question.id).map(String) : question.question_type === "checkbox" && !checkboxUsesOptions(question) ? values.get(question.id) === "on" : String(values.get(question.id) ?? "")
         : answerParts(savedAnswer).value;
       const answerDetail = [String(values.get(`${question.id}__detail`) ?? "").trim(), String(values.get(`${question.id}__subdetail`) ?? "").trim()].filter(Boolean).join(" | ");
-      return [question.id, values.has(question.id) || values.has(`${question.id}__detail`) || values.has(`${question.id}__subdetail`) ? { value, detail: answerDetail } : savedAnswer];
+      const useFormDetail = question.section_id === openSectionId && (values.has(`${question.id}__detail`) || values.has(`${question.id}__subdetail`));
+      return [question.id, useFormValue || useFormDetail ? { ...answerParts(savedAnswer), value, detail: useFormDetail ? answerDetail : answerParts(savedAnswer).detail, ...(photoReferenceId(savedAnswer) ? { photo_reference_id: photoReferenceId(savedAnswer) } : {}) } : savedAnswer];
     }));
     const pending: string[] = [];
     for (const section of pointSections.filter((item) => !skippedSectionIds.has(item.id) && (!sectionIds || sectionIds.has(item.id)))) {
@@ -528,9 +530,10 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
       }
       const applicable = questions.filter((question) => question.section_id === section.id).filter((question) => isQuestionVisible(question, formAnswers));
       for (const question of applicable) {
-        const photo = values.get(`${question.id}__photo`);
-        const reference = String(values.get(`${question.id}__photo_reference`) ?? "");
-        const answer = { ...answerParts(formAnswers.get(question.id)), photo_reference_id: reference };
+        const useCurrentSectionFields = question.section_id === openSectionId;
+        const photo = useCurrentSectionFields ? values.get(`${question.id}__photo`) : null;
+        const reference = useCurrentSectionFields ? String(values.get(`${question.id}__photo_reference`) ?? "") : photoReferenceId(formAnswers.get(question.id));
+        const answer = { ...answerParts(formAnswers.get(question.id)), ...(reference ? { photo_reference_id: reference } : {}) };
         const attachments = [...(detail?.attachments ?? []), ...(photo instanceof File && photo.size > 0 ? [{ question_id: question.id, visit_luc_id: pointKind === "luc" ? pointId : null, visit_environment_id: pointKind === "environment" ? pointId : null }] : [])];
         if (!isStoredQuestionComplete(question, new Map(formAnswers).set(question.id, answer), attachments, matchesPoint)) pending.push(`${section.title}: ${question.prompt}`);
       }
