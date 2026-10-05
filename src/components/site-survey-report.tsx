@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Download, FileChartColumn, LoaderCircle, Printer } from "lucide-react";
+import { Download, FileChartColumn, LoaderCircle, Printer, ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import myioLogoUrl from "@/assets/myio-logo-light.svg?url";
 import nunitoRegularUrl from "@/assets/fonts/nunito-regular.ttf?url";
 import nunitoBoldUrl from "@/assets/fonts/nunito-bold.ttf?url";
 import nunitoExtraBoldUrl from "@/assets/fonts/nunito-extrabold.ttf?url";
+import { saveSiteSurveyPurchaseDraft, type SiteSurveyPurchaseDraftItem } from "@/lib/site-survey-purchase-draft";
 
 type Visit = { id: string; template_id: string | null; survey_number: number; client_id: string | null; client_unit_id: string | null; project_id: string | null; technician_id: string; status: string; scheduled_start: string; scheduled_end: string | null; address: string; contact_name: string | null; contact_phone: string | null; notes: string | null; started_at: string | null; completed_at: string | null; is_manual_entry: boolean };
 type Named = { id: string; name: string };
@@ -26,9 +27,10 @@ type PointPause = { id: string; visit_luc_id: string | null; visit_environment_i
 type ReportResponse = { id: string; question_id: string; visit_luc_id?: string | null; visit_environment_id?: string | null; answer: unknown };
 type RichPart = { text: string; bold?: boolean };
 type PointSummary = { title: string; parts: RichPart[]; questionIds: Set<string> };
-type VisitMaterial = { id: string; visit_luc_id: string | null; visit_environment_id: string | null; quantity: number; notes: string | null; site_survey_material_catalog: { name?: string } | null; site_survey_screwdriver_types: { name?: string } | null; site_survey_wrench_sizes: { name?: string } | null; site_survey_custom_catalog_items: { name?: string } | null };
+type VisitMaterial = { id: string; visit_luc_id: string | null; visit_environment_id: string | null; quantity: number; notes: string | null; site_survey_material_catalog: { name?: string; category?: string } | null; site_survey_screwdriver_types: { name?: string } | null; site_survey_wrench_sizes: { name?: string } | null; site_survey_custom_catalog_items: { name?: string } | null };
 type SortKey = "type" | "created" | "technician";
 type PointFilter = "all" | "shop" | "kiosk" | "environment" | "selected";
+type ReportType = "complete" | "purchases" | "interventions" | "equipment";
 type MeterMapping = { name: string; position: number };
 type Intervention = { id: string; questionId: string; question: string; action: string; answer: string; pointKey: string | null; pointLabel: string; callNumber: string | null };
 
@@ -275,6 +277,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
   const [deadlineDays, setDeadlineDays] = useState("1");
   const [includePhotos, setIncludePhotos] = useState(true);
   const [includeTotals, setIncludeTotals] = useState(true);
+  const [reportType, setReportType] = useState<ReportType>("complete");
   const [pointFilter, setPointFilter] = useState<PointFilter>("all");
   const [selectedPointKeys, setSelectedPointKeys] = useState<Set<string>>(new Set());
   const [pointSearch, setPointSearch] = useState("");
@@ -286,10 +289,10 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
        supabase.from("site_survey_visit_lucs").select("id,luc_number,shop_name,point_type,created_at,started_at,completed_at,completion_status,skipped_section_ids,cancellation_reason_id,site_survey_cancellation_reasons(name)").eq("visit_id", visit.id).eq("active", true).order("luc_number"),
         supabase.from("site_survey_visit_environments").select("id,name,template_id,created_at,started_at,completed_at,completion_status,skipped_section_ids").eq("visit_id", visit.id).eq("active", true).order("name"),
       supabase.from("site_survey_responses").select("id,question_id,visit_luc_id,visit_environment_id,answer").eq("visit_id", visit.id),
-      supabase.from("site_survey_attachments").select("id,visit_luc_id,visit_environment_id,file_name,storage_path,content_type,attachment_kind").eq("visit_id", visit.id).order("created_at"),
+      supabase.from("site_survey_attachments").select("id,question_id,visit_luc_id,visit_environment_id,file_name,storage_path,content_type,attachment_kind").eq("visit_id", visit.id).order("created_at"),
        supabase.from("site_survey_generated_calls").select("id,question_id,trigger_value,visit_luc_id,visit_environment_id,status,site_survey_question_actions(site_survey_action_catalog(name)),internal_calls(call_number,title,description,status)").eq("visit_id", visit.id),
       supabase.from("site_survey_visit_technicians").select("technician_id,visit_luc_id,visit_environment_id").eq("visit_id", visit.id),
-       supabase.from("site_survey_visit_materials").select("id,visit_luc_id,visit_environment_id,quantity,notes,site_survey_material_catalog(name),site_survey_screwdriver_types(name),site_survey_wrench_sizes(name),site_survey_custom_catalog_items(name)").eq("visit_id", visit.id).order("created_at"),
+       supabase.from("site_survey_visit_materials").select("id,visit_luc_id,visit_environment_id,quantity,notes,site_survey_material_catalog(name,category),site_survey_screwdriver_types(name),site_survey_wrench_sizes(name),site_survey_custom_catalog_items(name)").eq("visit_id", visit.id).order("created_at"),
       supabase.from("site_survey_point_pauses").select("id,visit_luc_id,visit_environment_id,reason_id,started_at,ended_at,site_survey_pause_reasons(name)").eq("visit_id", visit.id).order("started_at"),
        supabase.from("site_survey_custom_catalogs").select("name,site_survey_custom_catalog_items(name,position,active)").ilike("name", "De-Para de Hidrômetros").eq("active", true),
     ]);
