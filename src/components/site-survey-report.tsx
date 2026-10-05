@@ -333,6 +333,12 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     const compare = (a: Point, b: Point, key: SortKey) => key === "type" ? typeOrder[a.pointType] - typeOrder[b.pointType] : key === "created" ? a.created_at.localeCompare(b.created_at) : technicianForPoint(a).localeCompare(technicianForPoint(b), "pt-BR");
     return [...filteredPoints].sort((a, b) => compare(a, b, primarySort) || (secondarySort !== "none" ? compare(a, b, secondarySort) : 0) || a.created_at.localeCompare(b.created_at) || a.label.localeCompare(b.label, "pt-BR"));
   }, [filteredPoints, data?.visitTechs, technicians, visit.technician_id, primarySort, secondarySort]);
+  const searchablePoints = useMemo(() => {
+    const search = normalize(pointSearch.trim());
+    return (data?.points ?? []).filter((point) => !search || normalize(point.label).includes(search));
+  }, [data?.points, pointSearch]);
+  const pointTypeLabel = (point: Point) => point.pointType === "shop" ? "Loja" : point.pointType === "kiosk" ? "Quiosque" : "Ambiente";
+  const reportPointsTitle = pointFilter === "shop" ? "Lojas" : pointFilter === "kiosk" ? "Quiosques" : pointFilter === "environment" ? "Ambientes" : "Lojas, quiosques e ambientes";
   const interventions = useMemo<Intervention[]>(() => (data?.calls ?? []).filter(callIsIncluded).flatMap((call) => {
     const actionRule = call.site_survey_question_actions as unknown as { site_survey_action_catalog: { name: string } | null } | null;
     const action = actionRule?.site_survey_action_catalog?.name ?? "";
@@ -386,7 +392,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     return `Para a instalação ${point.kind === "luc" ? "nessa loja" : "nesse ambiente"}, é necessário utilizar ${list}.`;
   };
   const exportPdf = async (blackAndWhite: boolean, withPhotos: boolean) => {
-    if (!data) return;
+    if (!data || !sortedPoints.length) return;
     const [{ jsPDF }, autoTableModule] = await Promise.all([import("jspdf"), import("jspdf-autotable")]);
     const autoTable = autoTableModule.default;
     const pdf = new jsPDF({ unit: "mm", format: "a4" });
@@ -514,6 +520,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
   };
   const handleExportPdf = async (blackAndWhite: boolean) => {
     if (generatingPdf) return;
+    if (!sortedPoints.length) { toast.error("Selecione ao menos uma loja, quiosque ou ambiente para gerar o relatório."); return; }
     const format = blackAndWhite ? "bw" : "color";
     setGeneratingPdf(format);
     const toastId = toast.loading("Relatório em elaboração. Aguarde…");
