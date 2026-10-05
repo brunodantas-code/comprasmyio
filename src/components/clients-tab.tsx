@@ -199,10 +199,10 @@ export function ClientsTab({ userId }: { userId: string }) {
         <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
           <CardTitle>Novo cliente</CardTitle>
           <div className="flex items-center gap-2">
-            <Button type="button" variant="outline" className="whitespace-nowrap" onClick={() => setNewUnits((current) => [...current, { name: "", city: "", state: "" }])}>
+            <Button type="button" variant="action" className="whitespace-nowrap" onClick={() => setNewUnits((current) => [...current, { name: "", city: "", state: "" }])}>
               <Plus className="mr-1 h-4 w-4" />Filial
             </Button>
-            <Button type="submit" form="new-client-form" className="whitespace-nowrap px-6" disabled={create.isPending}>Criar</Button>
+            <Button type="submit" form="new-client-form" variant="action" className="whitespace-nowrap px-6" disabled={create.isPending}>Criar</Button>
           </div>
         </CardHeader>
         <CardContent>

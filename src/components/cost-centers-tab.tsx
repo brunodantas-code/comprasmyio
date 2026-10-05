@@ -105,7 +105,7 @@ export function CostCentersTab({ userId }: { userId: string }) {
             <div className="min-w-0 space-y-2"><Label htmlFor="cc-name">Nome</Label><Input id="cc-name" name="name" required /></div>
             <div className="min-w-0 space-y-2"><Label htmlFor="cc-code">Código</Label><Input id="cc-code" name="code" placeholder="Ex.: CC-100" /></div>
             <div className="min-w-0 space-y-2"><Label htmlFor="cc-desc">Descrição</Label><Textarea id="cc-desc" name="description" rows={1} className="min-h-9 resize-none" /></div>
-            <Button type="submit" disabled={create.isPending} className="shrink-0">Criar</Button>
+            <Button type="submit" variant="action" disabled={create.isPending} className="shrink-0">Criar</Button>
           </form>
         </CardContent>
       </Card>

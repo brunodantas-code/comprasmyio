@@ -1,3 +1,7 @@
+# Padronização complementar dos botões de ação
+- [x] Aplicar o estilo vazado verde aos comandos destacados nos Apps do ERP.
+- [x] Ajustar o botão Adicionar de Materiais ao padrão compacto sem borda do Cadastro.
+
 - [x] Todos os apps — padronizar Salvar, Excluir, Cancelar, Confirmar e Concluir como ações vazadas verdes, inclusive em pop-ups, com preenchimento verde na interação.
 - [x] Site Survey — adicionar Quiosque após Loja no cadastro de pontos, usando os mesmos campos de LUC, nome, localização e fachada.
 - [x] Site Survey — permitir criar um modelo de checklist usando um modelo existente como base, duplicando suas seções e perguntas para edição independente.

@@ -123,7 +123,7 @@ export function AdditionalStepTypesTab() {
         <CardHeader className="flex flex-row items-start justify-between gap-4">
           <div><CardTitle>Tipos de Etapa Adicional</CardTitle>{expanded && <CardDescription>Os tipos ativos ficam disponíveis nas Etapas Adicionais.</CardDescription>}</div>
           <div className="flex items-center gap-1"><CollapsibleContent><Dialog open={createOpen} onOpenChange={(open) => { setCreateOpen(open); if (!open) setName(""); }}>
-            <DialogTrigger asChild><Button size="compactIcon" aria-label="Criar tipo de etapa adicional" title="Criar tipo"><Plus className="h-3.5 w-3.5" /></Button></DialogTrigger>
+            <DialogTrigger asChild><Button size="compactIcon" variant="ghost" aria-label="Criar tipo de etapa adicional" title="Criar tipo"><Plus className="h-3.5 w-3.5" /></Button></DialogTrigger>
             <DialogContent>
               <DialogHeader><DialogTitle>Novo tipo de etapa adicional</DialogTitle><DialogDescription>Cadastre um novo item para esta lista.</DialogDescription></DialogHeader>
               <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); const trimmedName = name.trim(); if (trimmedName.length < 2) return toast.error("Nome muito curto"); create.mutate(trimmedName); }}>

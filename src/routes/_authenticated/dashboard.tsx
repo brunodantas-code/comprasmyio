@@ -4795,7 +4795,7 @@ function BackupButton() {
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !loading && setOpen(nextOpen)}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
+        <Button variant="action" size="sm">
           <DatabaseBackup className="mr-2 h-4 w-4" />
           Gerar backup
         </Button>

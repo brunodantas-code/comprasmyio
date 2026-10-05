@@ -277,7 +277,7 @@ function NewTicketDialog({ open, onOpenChange, userId, onCreated }: { open: bool
      },
   });
   return <Dialog open={open} onOpenChange={onOpenChange}>
-    <DialogTrigger asChild><Button><Plus className="h-4 w-4" />Novo ticket</Button></DialogTrigger>
+    <DialogTrigger asChild><Button variant="action"><Plus className="h-4 w-4" />Novo ticket</Button></DialogTrigger>
      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
       <form onSubmit={(event) => { event.preventDefault(); createTicket.mutate(event.currentTarget); }} className="space-y-4">
         <DialogHeader><DialogTitle>Novo ticket</DialogTitle><DialogDescription>Registre uma melhoria ou um problema encontrado.</DialogDescription></DialogHeader>
@@ -293,7 +293,7 @@ function NewTicketDialog({ open, onOpenChange, userId, onCreated }: { open: bool
           <div className="sm:col-span-2"><Label htmlFor="ticket-result">Resultado esperado</Label><Textarea id="ticket-result" name="expected_result" minLength={5} maxLength={2000} required /></div>
            <div className="sm:col-span-2"><Label htmlFor="ticket-file">Prints e fotos (até 10 MB por imagem)</Label><Input key={fileInputKey} id="ticket-file" type="file" accept="image/*" multiple onChange={(event) => setFiles(Array.from(event.target.files ?? []))} /></div>
         </div>
-        <DialogFooter><Button type="submit" disabled={createTicket.isPending}>{createTicket.isPending ? "Salvando..." : "Abrir ticket"}</Button></DialogFooter>
+        <DialogFooter><Button type="submit" variant="action" disabled={createTicket.isPending}>{createTicket.isPending ? "Salvando..." : "Abrir ticket"}</Button></DialogFooter>
       </form>
     </DialogContent>
   </Dialog>;
