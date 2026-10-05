@@ -53,6 +53,7 @@ import { LinkedRecordDeletionDialog } from "@/components/linked-record-deletion-
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { AppHeader } from "@/components/app-header";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { takeSiteSurveyPurchaseDraft, type SiteSurveyPurchaseDraft } from "@/lib/site-survey-purchase-draft";
 
 
 
@@ -539,7 +540,7 @@ function Dashboard() {
   const search = Route.useSearch();
   const { data: me, isLoading: meLoading } = useCurrentUser();
   const [section, setSection] = useState(search.section);
-  const [requestSection, setRequestSection] = useState<string>();
+  const [requestSection, setRequestSection] = useState<string | undefined>(search.section === "pedidos" ? search.subsection : undefined);
   const [approvalSection, setApprovalSection] = useState(search.section === "queue" ? search.subsection : undefined);
   const [stockSection, setStockSection] = useState<string>();
   const [registrationSection, setRegistrationSection] = useState(search.subsection);
@@ -1242,9 +1243,11 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
   const [paymentValue, setPaymentValue] = useState("0");
   const [paymentDate, setPaymentDate] = useState("");
   const [item, setItem] = useState<PurchasableItem | null>(null);
-  type MaterialRequestItem = { id: string; item: PurchasableItem | null; quantity: string; estimatedValue: string; itemLink: string };
+  type MaterialRequestItem = { id: string; item: PurchasableItem | null; quantity: string; estimatedValue: string; itemLink: string; suggestion?: string; sourceNote?: string };
   const emptyMaterialItem = (): MaterialRequestItem => ({ id: crypto.randomUUID(), item: null, quantity: "1", estimatedValue: "0", itemLink: "" });
   const [materialItems, setMaterialItems] = useState<MaterialRequestItem[]>(() => [emptyMaterialItem()]);
+  const [siteSurveyDraft, setSiteSurveyDraft] = useState<SiteSurveyPurchaseDraft | null>(null);
+  const [requesterNotes, setRequesterNotes] = useState("");
   const [materialCategories, setMaterialCategories] = useState<string[]>(["todas"]);
   const [itemLink, setItemLink] = useState("");
   const [estimatedValue, setEstimatedValue] = useState("0");
@@ -1310,6 +1313,19 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
     buyQty: number;
   } | null>(null);
 
+  useEffect(() => {
+    const draft = takeSiteSurveyPurchaseDraft();
+    if (!draft) return;
+    setSiteSurveyDraft(draft);
+    setRequestType("materiais");
+    setForStock(false);
+    if (draft.projectId && canAllocateProject) { setAllocTarget("projeto"); setProjectId(draft.projectId); }
+    else if (draft.clientId && canAllocateClient) { setAllocTarget("cliente"); setClientId(draft.clientId); setClientUnitId(draft.clientUnitId ?? ""); }
+    setMaterialItems(draft.items.map((draftItem) => ({ id: crypto.randomUUID(), item: null, quantity: String(draftItem.quantity), estimatedValue: "0", itemLink: "", suggestion: draftItem.suggestedName, sourceNote: `${draftItem.pointLabels.join("; ")} — ${draftItem.reason}` })));
+    setRequesterNotes(`Materiais originados do Site Survey SS-${String(draft.surveyNumber).padStart(12, "0")}.`);
+    toast.info("Revise os itens sugeridos, selecione cada material no catálogo e complete a solicitação.");
+  }, [canAllocateClient, canAllocateProject]);
+
   const checkDuplicates = (text: string) => {
     if (!isNewItem) return false;
     if (normalizeText(text) === normalizeText(dismissedText)) return false;
@@ -1355,6 +1371,8 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
     setRhMotivo("");
     setRhTipo("");
     setRhRemuneracao("0");
+    setSiteSurveyDraft(null);
+    setRequesterNotes("");
 
   };
 
@@ -1427,6 +1445,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
           cost_center_id: restrictedCc ? await resolveOperacaoCostCenterId() : (costCenterId || null),
           parent_order_id: null,
           payment_date: requestModel === "pagamento" ? paymentDate : null,
+          site_survey_visit_id: siteSurveyDraft?.visitId ?? null,
 
           item_name: values.item_name,
           item_link: values.item_link ?? null,
@@ -1598,7 +1617,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
       recipient: isRh ? rhGestor : isPagamento ? "Financeiro" : recipient,
       requester_notes: isRh
         ? `${rhTipo === "reposicao" ? "Reposição" : "Nova Contratação"} — Motivo: ${rhMotivo.trim()}${fd.get("requester_notes") ? ` | ${fd.get("requester_notes")}` : ""}`
-        : (fd.get("requester_notes") || undefined),
+        : (requesterNotes || undefined),
       delivery_point: (fd.get("delivery_point") as string | null) || undefined,
       deadline_type: deadlineType,
       deadline_date: deadlineDate || undefined,
@@ -1713,6 +1732,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
           <p className="text-sm text-muted-foreground">Nenhum projeto disponível. Peça a um admin para criar um.</p>
         ) : (
           <form ref={formRef} onSubmit={onSubmit} className="space-y-4">
+            {siteSurveyDraft ? <div className="border-l-2 border-myio-green bg-muted/40 px-3 py-2 text-sm"><p className="font-semibold">Solicitação gerada a partir do Site Survey SS-{String(siteSurveyDraft.surveyNumber).padStart(12, "0")}</p><p className="text-muted-foreground">Selecione o item cadastrado correspondente a cada sugestão antes de enviar.</p></div> : null}
             {requestModel === "viagens" && (
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
@@ -2110,6 +2130,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                            <div key={row.id} className="grid items-end gap-3 rounded-md border p-3 sm:grid-cols-[minmax(0,1fr)_6rem_2rem]">
                             <div className="space-y-2">
                               <Label>Material {index + 1}</Label>
+                              {row.suggestion ? <div className="text-sm"><span className="font-semibold">Sugestão: {row.suggestion}</span>{row.sourceNote ? <p className="mt-1 text-xs text-muted-foreground">{row.sourceNote}</p> : null}</div> : null}
                               <PurchasableItemPicker
                                 value={row.item}
                                 categories={materialCategories}
@@ -2307,7 +2328,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
             )}
             <div className="space-y-2">
               <Label htmlFor="requester_notes">Observações <span className="text-muted-foreground">(opcional)</span></Label>
-              <Textarea id="requester_notes" name="requester_notes" placeholder="Detalhes adicionais para o time de supply" />
+              <Textarea id="requester_notes" name="requester_notes" value={requesterNotes} onChange={(event) => setRequesterNotes(event.target.value)} placeholder="Detalhes adicionais para o time de supply" />
             </div>
             <FilePicker files={files} setFiles={setFiles} />
             <Button type="submit" disabled={submit.isPending || checking}>
