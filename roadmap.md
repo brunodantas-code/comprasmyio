@@ -845,4 +845,4 @@
 - [x] Site Survey — manter linhas independentes ao adicionar materiais, sem reverter a segunda escolha após atualização automática do checklist.
 
 - [x] Site Survey — filtrar relatório por lojas, quiosques, ambientes ou pontos específicos e permitir omitir totalizadores.
-- [ ] Site Survey — criar relatórios de compras, intervenções do cliente e equipamentos/ferramentas, com geração de solicitação de materiais após conferência do relatório de compras.
+- [x] Site Survey — criar relatórios de compras, intervenções do cliente e equipamentos/ferramentas, com geração de solicitação de materiais após conferência do relatório de compras.
