@@ -21,7 +21,7 @@ Botões de ação sempre com fundo verde e ícones/textos pretos; lilás somente
 - [Recuperação de avariado carrega o QR](mem://features/damaged-recovery-qr) — Recuperar item da plataforma externa vincula o QR à movimentação de destino e empurra o novo local para a API; sem isso o sync desfaz a recuperação
 - [Estoque Ferramentas/Ativos](mem://features/tools-assets-stock) — Sub-aba ao lado de Almoxarifado com banco próprio; baixa exige destino (técnico ou local); disponível na solicitação de compras
 - [Conversão de projeto em cliente](mem://features/project-client-conversion) — Projeto só vira Cliente após implantação e contrato assinado; Novo Projeto não escolhe Cliente
-- [Cores dos botões de ação](mem://design/action-button-colors) — Fundo verde com ícones/textos pretos; lilás reservado a títulos solicitados
+- [Cores dos botões de ação](mem://design/action-button-colors) — Identidade verde; barra de lojas do Site Survey vazada e preenchida na interação
 - [Conversas nos tickets do Code](mem://features/code-ticket-conversations) — Admin pergunta, Solicitante responde, histórico imutável e pendência direcionada a quem deve agir
 
 - [Categorias de clientes](mem://features/client-categories) — Cadastro administrável com Shoppings e Lojas e classificação inicial automática
