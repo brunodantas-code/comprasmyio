@@ -35,8 +35,13 @@ const buttonVariants = cva(
       },
       {
         size: "compactIcon",
-        variant: ["ghost", "outline", "action"],
+        variant: ["ghost", "outline"],
         className: "border-0 !bg-transparent !text-myio-green hover:!bg-muted hover:!text-myio-green",
+      },
+      {
+        size: "compactIcon",
+        variant: "action",
+        className: "border border-primary !bg-transparent !text-primary hover:!bg-primary hover:!text-primary-foreground focus-visible:!bg-primary focus-visible:!text-primary-foreground active:!bg-primary active:!text-primary-foreground",
       },
     ],
     defaultVariants: {
