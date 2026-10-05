@@ -159,7 +159,7 @@ function CreateRequestTypeDialog({ open, onOpenChange, saving, onSave }: { open:
   const [name, setName] = useState("");
   const [modelCode, setModelCode] = useState("");
   return <Dialog open={open} onOpenChange={(next) => { onOpenChange(next); if (!next) { setName(""); setModelCode(""); } }}>
-    <DialogTrigger asChild><Button size="compactIcon" aria-label="Criar tipo de solicitação" title="Criar tipo"><Plus className="h-3.5 w-3.5" /></Button></DialogTrigger>
+    <DialogTrigger asChild><Button size="compactIcon" variant="ghost" aria-label="Criar tipo de solicitação" title="Criar tipo"><Plus className="h-3.5 w-3.5" /></Button></DialogTrigger>
     <DialogContent><DialogHeader><DialogTitle>Novo tipo de solicitação</DialogTitle><DialogDescription>Escolha o formulário e as regras que este tipo reutilizará.</DialogDescription></DialogHeader>
       <form className="space-y-4" onSubmit={async (event) => { event.preventDefault(); if (name.trim().length < 2) return toast.error("Nome muito curto"); if (!modelCode) return toast.error("Selecione um modelo"); try { await onSave(name.trim(), modelCode); } catch { /* A alteração exibe a mensagem. */ } }}>
         <div className="space-y-2"><Label htmlFor="new-request-type-name">Nome</Label><Input id="new-request-type-name" value={name} onChange={(event) => setName(event.target.value)} placeholder="Inserir nome" required /></div>

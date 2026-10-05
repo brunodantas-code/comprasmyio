@@ -1156,7 +1156,7 @@ export function RulesAdmin() {
               <RequestTypeCheckboxes values={requestTypes} onChange={setRequestTypes} types={requestTypesCatalog} />
             </div>
           </div>
-          <Button className="mt-4" onClick={() => create.mutate()} disabled={!name.trim() || !stepType || requestTypes.length === 0 || create.isPending}>
+          <Button variant="action" className="mt-4" onClick={() => create.mutate()} disabled={!name.trim() || !stepType || requestTypes.length === 0 || create.isPending}>
             <Plus className="mr-2 h-4 w-4" />
             Adicionar etapa
           </Button>

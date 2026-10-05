@@ -111,7 +111,7 @@ export function JobTitlesTab({ userId }: { userId: string }) {
             <div className="min-w-0 space-y-2"><Label htmlFor="jt-name">Nome</Label><Input id="jt-name" name="name" required /></div>
             <div className="min-w-0 space-y-2"><Label htmlFor="jt-short-name">Nome abreviado</Label><Input id="jt-short-name" name="short_name" maxLength={30} placeholder="Usado no organograma" /></div>
             <div className="min-w-0 space-y-2"><Label htmlFor="jt-desc">Descrição</Label><Textarea id="jt-desc" name="description" rows={1} className="min-h-9 resize-none" /></div>
-            <Button type="submit" disabled={create.isPending} className="shrink-0">Criar</Button>
+            <Button type="submit" variant="action" disabled={create.isPending} className="shrink-0">Criar</Button>
           </form>
         </CardContent>
       </Card>

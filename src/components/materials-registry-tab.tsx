@@ -170,7 +170,7 @@ function AddMaterialDialog({ categories }: { categories: MaterialStockType[] }) 
 
   return <Dialog open={open} onOpenChange={(nextOpen) => { setOpen(nextOpen); if (!nextOpen) reset(); }}>
     <DialogTrigger asChild>
-      <Button size="compactIcon" aria-label="Adicionar material" title="Adicionar material"><Plus className="h-3.5 w-3.5" /></Button>
+      <Button size="compactIcon" variant="ghost" aria-label="Adicionar material" title="Adicionar material"><Plus className="h-3.5 w-3.5" /></Button>
     </DialogTrigger>
     <DialogContent>
       <DialogHeader>

@@ -183,6 +183,7 @@ export function RemindersTab() {
               </Select>
             </div>
             <Button
+              variant="action"
               onClick={() => newUserId ? create.mutate(newUserId) : toast.error("Selecione o usuário")}
               disabled={create.isPending}
             >
