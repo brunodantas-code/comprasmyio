@@ -21,13 +21,14 @@ type Named = { id: string; name: string };
 type Question = { id: string; section_id: string; prompt: string; position?: number };
 type Section = { id: string; template_id: string; title: string; position: number };
 type Profile = { id: string; full_name: string };
-type Point = { id: string; label: string; templateId: string | null; created_at: string; started_at: string | null; completed_at: string | null; completion_status: string; cancellationReason: string | null; kind: "luc" | "environment"; skippedSectionIds: string[] };
+type Point = { id: string; label: string; templateId: string | null; created_at: string; started_at: string | null; completed_at: string | null; completion_status: string; cancellationReason: string | null; kind: "luc" | "environment"; pointType: "shop" | "kiosk" | "environment"; skippedSectionIds: string[] };
 type PointPause = { id: string; visit_luc_id: string | null; visit_environment_id: string | null; reason_id: string; started_at: string; ended_at: string | null; site_survey_pause_reasons: { name: string } | null };
-type ReportResponse = { id: string; question_id: string; answer: unknown };
+type ReportResponse = { id: string; question_id: string; visit_luc_id?: string | null; visit_environment_id?: string | null; answer: unknown };
 type RichPart = { text: string; bold?: boolean };
 type PointSummary = { title: string; parts: RichPart[]; questionIds: Set<string> };
 type VisitMaterial = { id: string; visit_luc_id: string | null; visit_environment_id: string | null; quantity: number; notes: string | null; site_survey_material_catalog: { name?: string } | null; site_survey_screwdriver_types: { name?: string } | null; site_survey_wrench_sizes: { name?: string } | null; site_survey_custom_catalog_items: { name?: string } | null };
 type SortKey = "type" | "created" | "technician";
+type PointFilter = "all" | "shop" | "kiosk" | "environment" | "selected";
 type MeterMapping = { name: string; position: number };
 type Intervention = { id: string; questionId: string; question: string; action: string; answer: string; pointKey: string | null; pointLabel: string; callNumber: string | null };
 
@@ -273,6 +274,10 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
   const [open, setOpen] = useState(false);
   const [deadlineDays, setDeadlineDays] = useState("1");
   const [includePhotos, setIncludePhotos] = useState(true);
+  const [includeTotals, setIncludeTotals] = useState(true);
+  const [pointFilter, setPointFilter] = useState<PointFilter>("all");
+  const [selectedPointKeys, setSelectedPointKeys] = useState<Set<string>>(new Set());
+  const [pointSearch, setPointSearch] = useState("");
   const [primarySort, setPrimarySort] = useState<SortKey>("created");
   const [secondarySort, setSecondarySort] = useState<SortKey | "none">("none");
   const [generatingPdf, setGeneratingPdf] = useState<"bw" | "color" | null>(null);
@@ -289,24 +294,31 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
        supabase.from("site_survey_custom_catalogs").select("name,site_survey_custom_catalog_items(name,position,active)").ilike("name", "De-Para de Hidrômetros").eq("active", true),
     ]);
     const error = lucError ?? envError ?? responseError ?? attachmentError ?? callError ?? materialError ?? pauseError ?? meterError; if (error) throw error;
-      const points: Point[] = [...(lucs ?? []).map((item) => { const reason = item.site_survey_cancellation_reasons as unknown as { name?: string } | null; return { id: item.id, label: `${item.point_type === "kiosk" ? "Quiosque — " : ""}${item.luc_number ? `LUC ${item.luc_number} — ` : ""}${item.shop_name}`, templateId: visit.template_id, created_at: item.created_at, started_at: item.started_at, completed_at: item.completed_at, completion_status: item.completion_status, cancellationReason: reason?.name ?? null, kind: "luc" as const, skippedSectionIds: Array.isArray(item.skipped_section_ids) ? item.skipped_section_ids.filter((id): id is string => typeof id === "string") : [] }; }), ...(environments ?? []).map((item) => ({ id: item.id, label: item.name, templateId: item.template_id ?? visit.template_id, created_at: item.created_at, started_at: item.started_at, completed_at: item.completed_at, completion_status: item.completion_status, cancellationReason: null, kind: "environment" as const, skippedSectionIds: Array.isArray(item.skipped_section_ids) ? item.skipped_section_ids.filter((id): id is string => typeof id === "string") : [] }))];
+      const points: Point[] = [...(lucs ?? []).map((item) => { const reason = item.site_survey_cancellation_reasons as unknown as { name?: string } | null; return { id: item.id, label: `${item.point_type === "kiosk" ? "Quiosque — " : ""}${item.luc_number ? `LUC ${item.luc_number} — ` : ""}${item.shop_name}`, templateId: visit.template_id, created_at: item.created_at, started_at: item.started_at, completed_at: item.completed_at, completion_status: item.completion_status, cancellationReason: reason?.name ?? null, kind: "luc" as const, pointType: item.point_type === "kiosk" ? "kiosk" as const : "shop" as const, skippedSectionIds: Array.isArray(item.skipped_section_ids) ? item.skipped_section_ids.filter((id): id is string => typeof id === "string") : [] }; }), ...(environments ?? []).map((item) => ({ id: item.id, label: item.name, templateId: item.template_id ?? visit.template_id, created_at: item.created_at, started_at: item.started_at, completed_at: item.completed_at, completion_status: item.completion_status, cancellationReason: null, kind: "environment" as const, pointType: "environment" as const, skippedSectionIds: Array.isArray(item.skipped_section_ids) ? item.skipped_section_ids.filter((id): id is string => typeof id === "string") : [] }))];
     return { points, responses: responses ?? [], attachments: attachments ?? [], calls: calls ?? [], visitTechs: visitTechs ?? [], materials: (materials ?? []) as unknown as VisitMaterial[], pauses: (pauses ?? []) as PointPause[], meterMappings: (meterCatalogs ?? []).flatMap((catalog) => catalog.site_survey_custom_catalog_items.filter((item) => item.active).map((item) => ({ name: item.name, position: item.position }))) };
   } });
+  const pointKey = (point: Pick<Point, "kind" | "id">) => `${point.kind}-${point.id}`;
+  const filteredPoints = useMemo(() => (data?.points ?? []).filter((point) => pointFilter === "all" || pointFilter === "selected" ? pointFilter === "all" || selectedPointKeys.has(pointKey(point)) : point.pointType === pointFilter), [data?.points, pointFilter, selectedPointKeys]);
+  const filteredPointKeys = useMemo(() => new Set(filteredPoints.map(pointKey)), [filteredPoints]);
+  const responseIsIncluded = (response: { visit_luc_id?: string | null; visit_environment_id?: string | null }) => response.visit_luc_id ? filteredPointKeys.has(`luc-${response.visit_luc_id}`) : response.visit_environment_id ? filteredPointKeys.has(`environment-${response.visit_environment_id}`) : false;
+  const callIsIncluded = (call: { visit_luc_id?: string | null; visit_environment_id?: string | null }) => call.visit_luc_id ? filteredPointKeys.has(`luc-${call.visit_luc_id}`) : call.visit_environment_id ? filteredPointKeys.has(`environment-${call.visit_environment_id}`) : true;
   const calculation = useMemo(() => {
-    const points = data?.points.filter((point) => point.completion_status !== "cancelada") ?? [];
-    const responses = data?.responses ?? [];
+    const points = filteredPoints.filter((point) => point.completion_status !== "cancelada");
+    const responses = (data?.responses ?? []).filter(responseIsIncluded);
     const breakdown = assumptions.map((assumption) => {
       const occurrences = assumption.question_id ? responses.filter((response) => response.question_id === assumption.question_id && (!assumption.answer_value || valueText(response.answer).toLocaleLowerCase("pt-BR").split(/[,;—]/).map((value: string) => value.trim()).includes(assumption.answer_value.toLocaleLowerCase("pt-BR")))).length : points.length;
       return { ...assumption, occurrences, total: occurrences * assumption.minutes };
     }).filter((item) => item.occurrences > 0);
     const estimated = breakdown.reduce((total, item) => total + item.total, 0);
-    const workedTime = calculateWorkedTime(points, data?.pauses ?? []);
-    const assignedCount = Math.max(1, new Set([visit.technician_id, ...(data?.visitTechs.map((item) => item.technician_id) ?? [])]).size);
+    const includedPauses = (data?.pauses ?? []).filter(responseIsIncluded);
+    const includedTechs = (data?.visitTechs ?? []).filter((item) => !item.visit_luc_id && !item.visit_environment_id || responseIsIncluded(item));
+    const workedTime = calculateWorkedTime(points, includedPauses);
+    const assignedCount = Math.max(1, new Set([visit.technician_id, ...includedTechs.map((item) => item.technician_id)]).size);
     const days = estimated ? Math.ceil(estimated / (480 * assignedCount)) : 0;
     const requestedDays = Math.max(1, Number(deadlineDays) || 1);
     const techniciansNeeded = estimated ? Math.ceil(estimated / (480 * requestedDays)) : 0;
-    return { breakdown, estimated, ...workedTime, pauseCount: data?.pauses.length ?? 0, assignedCount, days, techniciansNeeded };
-  }, [assumptions, data, deadlineDays, visit.technician_id]);
+    return { breakdown, estimated, ...workedTime, pauseCount: includedPauses.length, assignedCount, days, techniciansNeeded };
+  }, [assumptions, data, deadlineDays, visit.technician_id, filteredPoints, filteredPointKeys]);
   const sectionsForPoint = (point: Point) => sections.filter((section) => section.template_id === point.templateId);
   const reviewSectionForPoint = (point: Point) => sectionsForPoint(point).find((section) => questions.some((question) => question.section_id === section.id && normalize(question.prompt).includes("observacoes finais da visita"))) ?? sectionsForPoint(point).find((section) => section.position === 6 || normalize(section.title).includes("revisao"));
   const pointResponses = (point: Point) => (data?.responses ?? []).filter((response) => point.kind === "luc" ? response.visit_luc_id === point.id : response.visit_environment_id === point.id);
@@ -317,10 +329,11 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     return [...new Set(ids.map((id) => technicians.find((person) => person.id === id)?.full_name).filter((name): name is string => Boolean(name)))].sort((a, b) => a.localeCompare(b, "pt-BR")).join(", ") || "—";
   };
   const sortedPoints = useMemo(() => {
-    const compare = (a: Point, b: Point, key: SortKey) => key === "type" ? (a.kind === b.kind ? 0 : a.kind === "luc" ? -1 : 1) : key === "created" ? a.created_at.localeCompare(b.created_at) : technicianForPoint(a).localeCompare(technicianForPoint(b), "pt-BR");
-    return [...(data?.points ?? [])].sort((a, b) => compare(a, b, primarySort) || (secondarySort !== "none" ? compare(a, b, secondarySort) : 0) || a.created_at.localeCompare(b.created_at) || a.label.localeCompare(b.label, "pt-BR"));
-  }, [data?.points, data?.visitTechs, technicians, visit.technician_id, primarySort, secondarySort]);
-  const interventions = useMemo<Intervention[]>(() => (data?.calls ?? []).flatMap((call) => {
+    const typeOrder = { shop: 0, kiosk: 1, environment: 2 };
+    const compare = (a: Point, b: Point, key: SortKey) => key === "type" ? typeOrder[a.pointType] - typeOrder[b.pointType] : key === "created" ? a.created_at.localeCompare(b.created_at) : technicianForPoint(a).localeCompare(technicianForPoint(b), "pt-BR");
+    return [...filteredPoints].sort((a, b) => compare(a, b, primarySort) || (secondarySort !== "none" ? compare(a, b, secondarySort) : 0) || a.created_at.localeCompare(b.created_at) || a.label.localeCompare(b.label, "pt-BR"));
+  }, [filteredPoints, data?.visitTechs, technicians, visit.technician_id, primarySort, secondarySort]);
+  const interventions = useMemo<Intervention[]>(() => (data?.calls ?? []).filter(callIsIncluded).flatMap((call) => {
     const actionRule = call.site_survey_question_actions as unknown as { site_survey_action_catalog: { name: string } | null } | null;
     const action = actionRule?.site_survey_action_catalog?.name ?? "";
     if (!normalize(action).includes("intervencao do cliente") || call.status === "cancelado") return [];
@@ -331,7 +344,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     const prompt = questions.find((item) => item.id === call.question_id)?.prompt ?? "Pergunta não disponível";
     const answer = response ? valueText(response.answer).trim() || "Resposta não disponível" : "Resposta não disponível";
     return [{ id: call.id, questionId: call.question_id, question: interventionQuestionLabel(prompt), action, answer: interventionAnswerLabel(prompt, answer), pointKey: point ? `${point.kind}-${point.id}` : null, pointLabel: point?.label ?? "Visita geral", callNumber: linked?.call_number ?? null }];
-  }), [data?.calls, data?.points, data?.responses, questions]);
+  }), [data?.calls, data?.points, data?.responses, questions, filteredPointKeys]);
   const interventionTotals = useMemo(() => {
     const groups = new Map<string, { action: string; question: string; answer: string; items: Intervention[] }>();
     for (const item of interventions) {
@@ -349,11 +362,11 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
   const pointNotes = (point: Point) => { const section = reviewSectionForPoint(point); return section && !point.skippedSectionIds.includes(section.id) ? pointResponses(point).filter((response) => questions.some((question) => question.id === response.question_id && question.section_id === section.id)).map((response) => valueText(response.answer)).filter(Boolean).join("; ") : ""; };
   const technicalTotals = useMemo(() => {
     const groups = [{ label: "Tipos de hidrômetro", terms: ["tipo de hidrometro", "tipo de registro"] }, { label: "Dificuldade de acesso", terms: ["dificuldade", "acesso ao hidrometro"] }, { label: "Quadros e pontos elétricos", terms: ["quadro eletrico", "ponto eletrico"] }, { label: "Complexidade", terms: ["complexidade"] }];
-    return groups.map((group) => { const counts = new Map<string, number>(); for (const response of data?.responses ?? []) { const question = questions.find((item) => item.id === response.question_id); if (!question || !group.terms.some((term) => normalize(question.prompt).includes(term))) continue; const rawValue = valueText(response.answer).trim(); const normalizedValue = normalize(rawValue); const value = group.label === "Dificuldade de acesso"
+    return groups.map((group) => { const counts = new Map<string, number>(); for (const response of (data?.responses ?? []).filter(responseIsIncluded)) { const question = questions.find((item) => item.id === response.question_id); if (!question || !group.terms.some((term) => normalize(question.prompt).includes(term))) continue; const rawValue = valueText(response.answer).trim(); const normalizedValue = normalize(rawValue); const value = group.label === "Dificuldade de acesso"
       ? normalizedValue.startsWith("facil") ? "Fácil" : normalizedValue.startsWith("regular") ? "Regular" : normalizedValue.startsWith("dificil") ? "Difícil" : ""
       : rawValue;
       if (value) counts.set(value, (counts.get(value) ?? 0) + 1); } return { label: group.label, values: [...counts.entries()] }; }).filter((group) => group.values.length);
-  }, [data?.responses, questions]);
+  }, [data?.responses, questions, filteredPointKeys]);
   const pointSummaries = (point: Point) => { const pointSections = sectionsForPoint(point); const reviewId = reviewSectionForPoint(point)?.id; return buildPointSummaries((pointResponses(point) as ReportResponse[]).filter((response) => !reviewId || !questions.some((question) => question.id === response.question_id && question.section_id === reviewId)), questions, pointSections, point.skippedSectionIds, data?.meterMappings ?? []); };
   const pointMaterials = (point: Point) => (data?.materials ?? []).filter((item) => point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id);
   const materialSentence = (point: Point) => {
