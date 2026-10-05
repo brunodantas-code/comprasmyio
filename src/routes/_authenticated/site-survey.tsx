@@ -734,9 +734,13 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
       if (finishingPoint) return;
       setFinishingPoint(true);
       try {
+        // Let the latest field change enqueue its autosave before flushing it.
+        await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
         if (autosaveTimer.current) { clearTimeout(autosaveTimer.current); autosaveTimer.current = null; }
         if (autosaveTask.current && !(await runAutosave())) return;
         await saveQueue.current;
+        // Persist the currently open section even when its autosave had not been scheduled yet.
+        await saveAnswers(form, "point", false, [], true);
         const refreshed = await refetchDetail();
         const fields = pointPendingFields(form, undefined, refreshed.data);
         if (fields.length) {
