@@ -17,7 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { suggestShopNameFromFacade } from "@/lib/site-survey-ai.functions";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
-type LucRow = { id: string; luc_number: string; shop_name: string; location: string | null };
+type LucRow = { id: string; luc_number: string; shop_name: string; location: string | null; point_type: string };
 type LucHistoryRow = { id: string; visit_luc_id: string; luc_number: string; shop_name: string; valid_from: string; valid_until: string | null };
 type PreviewRow = { lucNumber: string; shopName: string; location: string; issue?: string };
 type TemplateOption = { id: string; name: string; active: boolean };
@@ -50,7 +50,7 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
 
   const load = async () => {
     const [{ data, error }, { data: historyRows, error: historyError }] = await Promise.all([
-      supabase.from("site_survey_visit_lucs").select("id,luc_number,shop_name,location").eq("visit_id", visitId).eq("active", true).order("luc_number"),
+      supabase.from("site_survey_visit_lucs").select("id,luc_number,shop_name,location,point_type").eq("visit_id", visitId).eq("active", true).order("luc_number"),
       supabase.from("site_survey_visit_luc_history").select("id,visit_luc_id,luc_number,shop_name,valid_from,valid_until").eq("visit_id", visitId).order("valid_from", { ascending: false }),
     ]);
     if (error || historyError) return toast.error(error?.message ?? historyError?.message ?? "Não foi possível carregar os ambientes.");
@@ -97,7 +97,7 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
     setLoading(true);
     try {
       if (!validPreview.length) throw new Error("Não há linhas válidas para importar.");
-      const payload = validPreview.map((item) => ({ visit_id: visitId, luc_number: item.lucNumber, shop_name: item.shopName, location: item.location || null, created_by: userId, updated_by: userId }));
+      const payload = validPreview.map((item) => ({ visit_id: visitId, luc_number: item.lucNumber, shop_name: item.shopName, location: item.location || null, point_type: "shop", created_by: userId, updated_by: userId }));
       for (const item of payload) {
         const key = normalizeHeader(item.luc_number);
         const matches = key ? rows.filter((row) => normalizeHeader(row.luc_number) === key) : [];
@@ -118,7 +118,7 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
     finally { setLoading(false); }
   };
 
-  const startEdit = (row?: LucRow) => { setEditing(row ?? { id: "", luc_number: "", shop_name: "", location: null }); setEditMode("correction"); setPointType(row ? "shop" : null); setDraftLuc(row?.luc_number ?? ""); setDraftName(row?.shop_name ?? ""); setDraftLocation(row?.location ?? ""); setEnvironmentName(""); setEnvironmentTemplateId(""); };
+  const startEdit = (row?: LucRow) => { setEditing(row ?? { id: "", luc_number: "", shop_name: "", location: null, point_type: "shop" }); setEditMode("correction"); setPointType(row ? row.point_type === "kiosk" ? "kiosk" : "shop" : null); setDraftLuc(row?.luc_number ?? ""); setDraftName(row?.shop_name ?? ""); setDraftLocation(row?.location ?? ""); setEnvironmentName(""); setEnvironmentTemplateId(""); };
   const saveEdit = async (confirmed = false) => {
     if (!pointType) return toast.error("Selecione Loja, Quiosque ou Ambiente.");
     if (pointType === "environment" && !editing?.id) {
@@ -134,10 +134,10 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
     if (!shopName) return toast.error("Informe o nome da loja.");
     const duplicateRows = lucNumber ? rows.filter((row) => row.id !== editing?.id && normalizeHeader(row.luc_number) === normalizeHeader(lucNumber)) : [];
     if (duplicateRows.length && !confirmed) { setDuplicateConfirmation("edit"); return; }
-    const payload = { visit_id: visitId, luc_number: lucNumber, shop_name: shopName, location: draftLocation.trim() || null, updated_by: userId, active: true };
+    const payload = { visit_id: visitId, luc_number: lucNumber, shop_name: shopName, location: draftLocation.trim() || null, point_type: pointType, updated_by: userId, active: true };
     const result = editing?.id
       ? editMode === "correction"
-        ? await supabase.rpc("correct_site_survey_visit_luc", { _id: editing.id, _luc_number: lucNumber, _shop_name: shopName, _location: draftLocation.trim() })
+        ? await supabase.rpc("correct_site_survey_visit_luc", { _id: editing.id, _luc_number: lucNumber, _shop_name: shopName, _location: draftLocation.trim() }).then(async (correction) => correction.error ? correction : supabase.from("site_survey_visit_lucs").update({ point_type: pointType, updated_by: userId }).eq("id", editing.id))
         : await supabase.from("site_survey_visit_lucs").update(payload).eq("id", editing.id)
       : await supabase.from("site_survey_visit_lucs").insert({ ...payload, created_by: userId });
     if (result.error) return toast.error(result.error.code === "23505" ? "Este LUC já está cadastrado nesta OS." : result.error.message);
