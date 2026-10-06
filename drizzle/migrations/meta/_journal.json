@@ -694,6 +694,13 @@
       "when": 1791247161603,
       "tag": "0098_create_site_survey_shop_catalog",
       "breakpoints": true
+    },
+    {
+      "idx": 99,
+      "version": "7",
+      "when": 1791330663092,
+      "tag": "0099_reopen_visit_on_new_point",
+      "breakpoints": true
     }
   ]
 }
