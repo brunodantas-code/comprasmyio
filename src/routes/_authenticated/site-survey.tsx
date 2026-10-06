@@ -161,6 +161,13 @@ function SiteSurveyPage() {
   const [selected, setSelected] = useState<Visit | null>(null);
   const [visitsListOpen, setVisitsListOpen] = useState(true);
   const [expandedVisitIds, setExpandedVisitIds] = useState<Set<string>>(() => new Set());
+  const visitsRef = useRef<Visit[]>([]);
+  useEffect(() => {
+    // Opening the on-screen registration report must select its visit so the details panel can render it.
+    const open = (event: Event) => { const id = (event as CustomEvent<{ visitId: string }>).detail?.visitId; const visit = visitsRef.current.find((item) => item.id === id); if (!visit) return; setSelected((current) => { if (current?.id !== id) setTimeout(() => window.dispatchEvent(new CustomEvent("site-survey-open-registration-pending", { detail: { visitId: id } })), 400); return current?.id === id ? current : visit; }); };
+    window.addEventListener("site-survey-open-registration-pending", open);
+    return () => window.removeEventListener("site-survey-open-registration-pending", open);
+  }, []);
   const { data, isLoading } = useQuery({
     queryKey: ["site-survey-data"],
     queryFn: async () => {
