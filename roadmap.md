@@ -862,3 +862,4 @@
 - [x] Site Survey — filtrar por digitação as colunas LUC, Nome da loja e Localização, preservando a ordenação pelas setas.
 - [x] Site Survey — salvar automaticamente cada foto ou anexo geral arrastado para a loja ou ambiente, sem exigir Salvar progresso.
 - [x] Site Survey — ordenar o relatório de compras com hidrômetros primeiro, em vazão crescente, e demais materiais depois.
+- [x] Site Survey — incluir no relatório de compras as fotos da pergunta de vazão nominal, vinculadas à respectiva loja, quiosque ou ambiente, na prévia e no PDF.
