@@ -868,3 +868,5 @@
 - [x] Site Survey — incluir no relatório de compras as fotos da pergunta de vazão nominal, vinculadas à respectiva loja, quiosque ou ambiente, na prévia e no PDF.
 - [x] Site Survey — manter a compra de hidrômetros condicionada à saída pulsada “Não” ou “Inoperante”, incluindo ausência/inexistência equivalente.
 - [x] Site Survey — incluir nos totalizadores do relatório as quantidades de pontos, hidrômetros registrados, sem hidrômetro, sem resposta e com saída pulsada Não/Inoperante.
+
+- [ ] Site Survey — aplicar o padrão vazado verde aos botões de solicitação de materiais e geração dos PDFs.
