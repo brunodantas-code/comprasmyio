@@ -107,7 +107,7 @@ export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections
   return <>
     <Button type="button" variant="action" size="sm" onClick={() => setOpen(true)}><FileText className="h-4 w-4" />Resumo da visita</Button>
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="h-[92dvh] w-[calc(100vw-1rem)] max-w-[96rem] gap-0 overflow-hidden p-0">
+      <DialogContent className="grid h-[92dvh] w-[calc(100vw-1rem)] max-w-[96rem] grid-rows-[auto_minmax(0,1fr)] gap-0 overflow-hidden p-0">
         <DialogHeader className="border-b px-4 py-4 pr-12 text-left sm:px-6">
           <DialogTitle>Resumo da Visita #{String(visitNumber).padStart(12, "0")}</DialogTitle>
           <DialogDescription>Todas as respostas e fotos organizadas por loja, quiosque ou ambiente.</DialogDescription>
