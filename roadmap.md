@@ -870,3 +870,6 @@
 - [x] Site Survey — incluir nos totalizadores do relatório as quantidades de pontos, hidrômetros registrados, sem hidrômetro, sem resposta e com saída pulsada Não/Inoperante.
 
 - [x] Site Survey — aplicar o padrão vazado verde aos botões de solicitação de materiais e geração dos PDFs.
+- [x] Site Survey — adicionar checkbox mestre com "Marcar todos" e "Desmarcar todos" na seleção de pontos do relatório, respeitando a busca digitada.
+- [x] Site Survey — renomear o título do seletor de pontos do checklist para "Cadastro completo de lojas, quiosques e ambientes".
+- [x] Site Survey — pendência de cadastro abre apenas a pergunta correspondente (dialog focado), sem exibir a seção inteira; priorizar mobile.
