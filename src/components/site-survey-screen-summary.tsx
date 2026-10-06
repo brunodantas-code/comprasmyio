@@ -21,7 +21,7 @@ type CustomCatalog = Named & { site_survey_custom_catalog_items: Named[] };
 
 const normalize = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLocaleLowerCase("pt-BR");
 
-function answerText(answer: unknown) {
+function answerText(answer: unknown): string {
   if (answer && typeof answer === "object" && !Array.isArray(answer) && "value" in answer) {
     const stored = answer as { value: unknown; detail?: unknown };
     return [answerText(stored.value), typeof stored.detail === "string" ? stored.detail : ""].filter(Boolean).join(" — ");
