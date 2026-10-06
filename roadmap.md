@@ -858,3 +858,4 @@
 - [x] Site Survey — criar relatórios de compras, intervenções do cliente e equipamentos/ferramentas, com geração de solicitação de materiais após conferência do relatório de compras.
 - [x] Site Survey — corrigir conclusão da LUC 118 para considerar respostas salvas em etapas recolhidas.
 - [x] Site Survey — preservar a resposta controladora e as perguntas condicionais da LUC 129 após fechar a captura de foto.
+- [x] Site Survey — filtrar por digitação as colunas LUC, Nome da loja e Localização, preservando a ordenação pelas setas.
