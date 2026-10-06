@@ -530,23 +530,23 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
       if (reportType === "purchases" && withPhotos && meterPhotoGroups.length) {
         if (y > 250) { pdf.addPage(); y = 18; }
         pdf.setFont("Nunito", "extrabold"); pdf.setFontSize(11); pdf.setTextColor(...purple); pdf.text("Fotos dos hidrômetros", 14, y); y += 7; pdf.setTextColor(...dark);
-        for (const group of meterPhotoGroups) {
-          if (y > 242) { pdf.addPage(); y = 18; }
-          pdf.setFont("Nunito", "bold"); pdf.setFontSize(9); pdf.text(group.point.label, 14, y); y += 5;
-          let photoColumn = 0;
-          for (const photo of group.photos) {
-            const { data: signed } = await supabase.storage.from("site-survey-attachments").createSignedUrl(photo.storage_path, 300);
-            if (!signed?.signedUrl) continue;
-            if (photoColumn === 0 && y > 245) { pdf.addPage(); y = 18; pdf.setFont("Nunito", "bold"); pdf.setFontSize(9); pdf.text(group.point.label, 14, y); y += 5; }
-            try {
-              pdf.addImage(await imageDataUrl(signed.signedUrl, false, 42 / 31), "JPEG", 14 + photoColumn * 46, y, 42, 31, undefined, "FAST");
-              photoColumn += 1;
-              if (photoColumn === 4) { photoColumn = 0; y += 35; }
-            } catch { /* Mantém o PDF disponível caso uma foto falhe. */ }
-          }
-          if (photoColumn > 0) y += 35;
-          y += 4;
+        const photoItems = meterPhotoGroups.flatMap((group) => group.photos.map((photo) => ({ group, photo })));
+        let photoColumn = 0;
+        for (const { group, photo } of photoItems) {
+          if (photoColumn === 0 && y > 235) { pdf.addPage(); y = 18; }
+          const { data: signed } = await supabase.storage.from("site-survey-attachments").createSignedUrl(photo.storage_path, 300);
+          if (!signed?.signedUrl) continue;
+          try {
+            const x = 14 + photoColumn * 46;
+            pdf.setFont("Nunito", "bold"); pdf.setFontSize(7);
+            const labelLines = pdf.splitTextToSize(`${group.point.label} - ${group.flowRate}`, 42).slice(0, 3) as string[];
+            pdf.text(labelLines, x, y);
+            pdf.addImage(await imageDataUrl(signed.signedUrl, false, 42 / 31), "JPEG", x, y + 11, 42, 31, undefined, "FAST");
+            photoColumn += 1;
+            if (photoColumn === 4) { photoColumn = 0; y += 47; }
+          } catch { /* Mantém o PDF disponível caso uma foto falhe. */ }
         }
+        if (photoColumn > 0) y += 47;
       }
     }
     if (reportType === "complete" && includeTotals && !visit.is_manual_entry) autoTable(pdf, { startY: y, theme: "plain", styles: { font: "Nunito", fontSize: 8, textColor: dark, lineColor: soft, lineWidth: { bottom: 0.12 } }, headStyles: tableHead, columnStyles: { 1: { halign: "center" } }, head: [["Planejamento", "Valor"]], body: [["Tempo estimado", formatMinutes(calculation.estimated)], ["Tempo em visita", formatMinutes(calculation.worked)], ["Quantidade de pausas", String(calculation.pauseCount)], ["Tempo de pausas (horas úteis)", formatMinutes(calculation.paused)], ["Total de horas úteis", formatMinutes(calculation.useful)], ["Horas extras", formatMinutes(calculation.overtime)], ["Horas noturnas (22h às 5h)", formatMinutes(calculation.night)], ["Dias com equipe designada", String(calculation.days)], [`Técnicos para ${deadlineDays} dia(s)`, String(calculation.techniciansNeeded)]] });
