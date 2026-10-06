@@ -440,6 +440,16 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     }
     return { totalPoints: sortedPoints.length, registered, withoutMeter, withoutExistenceAnswer, replacementRequired, withoutMeterPoints, withoutExistenceAnswerPoints };
   }, [sortedPoints, data?.responses, questions, sections]);
+  const purchaseReportRows = useMemo(() => {
+    const rows = purchaseDraftItems.map((item) => ({ key: item.sourceKey, label: item.suggestedName, quantity: item.quantity, points: item.pointLabels }));
+    let afterMeters = 0;
+    rows.forEach((row, index) => { if (row.key.startsWith("meter:")) afterMeters = index + 1; });
+    rows.splice(afterMeters, 0,
+      { key: "points-without-meter", label: "Pontos sem hidrômetro", quantity: meterTotals.withoutMeter, points: meterTotals.withoutMeterPoints },
+      { key: "points-without-existence-answer", label: "Pontos sem resposta sobre a existência", quantity: meterTotals.withoutExistenceAnswer, points: meterTotals.withoutExistenceAnswerPoints },
+    );
+    return rows;
+  }, [purchaseDraftItems, meterTotals]);
   const meterPhotoGroups = useMemo<MeterPhotoGroup[]>(() => {
     if (!data) return [];
     return sortedPoints.flatMap((point) => {
@@ -525,7 +535,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
         y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 8;
       }
       const head = reportType === "purchases" ? [["Item sugerido", "Qtd.", "Local de Instalação"]] : reportType === "equipment" ? [["Equipamento / ferramenta", "Especificação", "Qtd.", "Local de uso"]] : [["Local", "Problema encontrado", "Chamado"]];
-      const body = reportType === "purchases" ? [...purchaseDraftItems.map((item) => [item.suggestedName, String(item.quantity), item.pointLabels.join("; ")]), ["Pontos sem hidrômetro", String(meterTotals.withoutMeter), meterTotals.withoutMeterPoints.join("; ") || "—"], ["Pontos sem resposta sobre a existência", String(meterTotals.withoutExistenceAnswer), meterTotals.withoutExistenceAnswerPoints.join("; ") || "—"]] : reportType === "equipment" ? equipmentRows.map((item) => [item.name, item.details || "—", String(item.quantity), item.pointLabel]) : interventions.map((item) => [item.pointLabel, item.answer, item.callNumber ? `#${item.callNumber}` : "—"]);
+      const body = reportType === "purchases" ? purchaseReportRows.map((item) => [item.label, String(item.quantity), item.points.join("; ") || "—"]) : reportType === "equipment" ? equipmentRows.map((item) => [item.name, item.details || "—", String(item.quantity), item.pointLabel]) : interventions.map((item) => [item.pointLabel, item.answer, item.callNumber ? `#${item.callNumber}` : "—"]);
       autoTable(pdf, { startY: y, theme: "plain", styles: { font: "Nunito", fontSize: 8, textColor: dark, lineColor: soft, lineWidth: { bottom: 0.12 }, overflow: "linebreak" }, headStyles: tableHead, head, body: body.length ? body : [["Nenhum item encontrado para os pontos selecionados."]] });
       y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 8;
       if (reportType === "interventions" && withPhotos) for (const item of interventions) for (const photo of interventionPhotos(item)) { const { data: signed } = await supabase.storage.from("site-survey-attachments").createSignedUrl(photo.storage_path, 300); if (!signed?.signedUrl) continue; if (y > 245) { pdf.addPage(); y = 18; } try { pdf.setFont("Nunito", "bold"); pdf.text(item.pointLabel, 14, y); y += 3; pdf.addImage(await imageDataUrl(signed.signedUrl, false, 42 / 31), "JPEG", 14, y, 42, 31, undefined, "FAST"); y += 36; } catch { /* Mantém o PDF disponível caso uma foto falhe. */ } }
