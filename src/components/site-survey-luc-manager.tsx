@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowDown, ArrowUp, ArrowUpDown, Camera, ChevronDown, Download, FileSpreadsheet, Images, Pencil, Plus, Sparkles } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, Camera, Check, ChevronDown, ChevronsUpDown, Download, FileSpreadsheet, Images, Pencil, Plus, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 
@@ -7,10 +7,12 @@ import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,10 +23,11 @@ type LucRow = { id: string; luc_number: string; shop_name: string; location: str
 type LucHistoryRow = { id: string; visit_luc_id: string; luc_number: string; shop_name: string; valid_from: string; valid_until: string | null };
 type PreviewRow = { lucNumber: string; shopName: string; location: string; issue?: string };
 type TemplateOption = { id: string; name: string; active: boolean };
+export type ShopCatalogOption = { id: string; name: string; point_type: string; active: boolean };
 
 const normalizeHeader = (value: unknown) => String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLocaleLowerCase("pt-BR");
 
-export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, templates, onChanged }: { visitId: string; userId: string; canImport: boolean; canEdit: boolean; templates: TemplateOption[]; onChanged?: () => void }) {
+export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, templates, shopCatalog, onChanged }: { visitId: string; userId: string; canImport: boolean; canEdit: boolean; templates: TemplateOption[]; shopCatalog: ShopCatalogOption[]; onChanged?: () => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const facadeCameraRef = useRef<HTMLInputElement>(null);
   const facadeGalleryRef = useRef<HTMLInputElement>(null);
@@ -47,6 +50,7 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
   const [sortBy, setSortBy] = useState<"luc_number" | "shop_name" | "location">("luc_number");
   const [sortAscending, setSortAscending] = useState(true);
   const [duplicateConfirmation, setDuplicateConfirmation] = useState<"edit" | "import" | null>(null);
+  const [namePickerOpen, setNamePickerOpen] = useState(false);
 
   const load = async () => {
     const [{ data, error }, { data: historyRows, error: historyError }] = await Promise.all([
@@ -118,7 +122,7 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
     finally { setLoading(false); }
   };
 
-  const startEdit = (row?: LucRow) => { setEditing(row ?? { id: "", luc_number: "", shop_name: "", location: null, point_type: "shop" }); setEditMode("correction"); setPointType(row ? row.point_type === "kiosk" ? "kiosk" : "shop" : null); setDraftLuc(row?.luc_number ?? ""); setDraftName(row?.shop_name ?? ""); setDraftLocation(row?.location ?? ""); setEnvironmentName(""); setEnvironmentTemplateId(""); };
+  const startEdit = (row?: LucRow) => { setEditing(row ?? { id: "", luc_number: "", shop_name: "", location: null, point_type: "shop" }); setEditMode("correction"); setPointType(row ? row.point_type === "kiosk" ? "kiosk" : "shop" : null); setDraftLuc(row?.luc_number ?? ""); setDraftName(row?.shop_name ?? ""); setDraftLocation(row?.location ?? ""); setEnvironmentName(""); setEnvironmentTemplateId(""); setNamePickerOpen(false); };
   const saveEdit = async (confirmed = false) => {
     if (!pointType) return toast.error("Selecione Loja, Quiosque ou Ambiente.");
     if (pointType === "environment" && !editing?.id) {
@@ -155,6 +159,9 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
   };
   const currentByLuc = useMemo(() => new Set(rows.map((row) => normalizeHeader(row.luc_number)).filter(Boolean)), [rows]);
   const duplicateNames = draftLuc.trim() ? rows.filter((row) => row.id !== editing?.id && normalizeHeader(row.luc_number) === normalizeHeader(draftLuc)).map((row) => row.shop_name) : [];
+  const matchingCatalog = useMemo(() => shopCatalog
+    .filter((item) => item.active && item.point_type === pointType)
+    .sort((left, right) => left.name.localeCompare(right.name, "pt-BR", { sensitivity: "base" })), [pointType, shopCatalog]);
   const sortedRows = useMemo(() => [...rows].sort((a, b) => {
     const comparison = (a[sortBy] ?? "").localeCompare(b[sortBy] ?? "", "pt-BR", { numeric: true, sensitivity: "base" });
     return sortAscending ? comparison : -comparison;
@@ -216,7 +223,7 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
            <div className="flex items-center gap-2"><Checkbox id="add-environment" checked={pointType === "environment"} onCheckedChange={() => setPointType(pointType === "environment" ? null : "environment")} /><Label htmlFor="add-environment" className="cursor-pointer">Ambiente</Label></div>
          </div> : null}
           {pointType === "shop" || pointType === "kiosk" ? <>
-             <div className="grid gap-4 sm:grid-cols-2"><div className="space-y-2"><Label htmlFor="luc-draft">LUC (opcional)</Label><Input id="luc-draft" value={draftLuc} onChange={(event) => setDraftLuc(event.target.value)} /></div><div className="space-y-2"><Label htmlFor="shop-draft">{pointType === "kiosk" ? "Nome do quiosque" : "Nome da loja"}</Label><Input id="shop-draft" value={draftName} onChange={(event) => setDraftName(event.target.value)} /></div><div className="space-y-2 sm:col-span-2"><Label htmlFor="location-draft">Localização (opcional)</Label><Input id="location-draft" value={draftLocation} onChange={(event) => setDraftLocation(event.target.value)} placeholder="Ex.: G1 – Deck" /></div></div>
+             <div className="grid gap-4 sm:grid-cols-2"><div className="space-y-2"><Label htmlFor="luc-draft">LUC (opcional)</Label><Input id="luc-draft" value={draftLuc} onChange={(event) => setDraftLuc(event.target.value)} /></div><div className="space-y-2"><Label htmlFor="shop-draft">{pointType === "kiosk" ? "Nome do quiosque" : "Nome da loja"}</Label><Popover open={namePickerOpen} onOpenChange={setNamePickerOpen}><PopoverTrigger asChild><Button type="button" variant="outline" role="combobox" aria-expanded={namePickerOpen} aria-label={pointType === "kiosk" ? "Buscar ou informar nome do quiosque" : "Buscar ou informar nome da loja"} className="w-full justify-between !bg-myio-green/10 font-normal hover:!bg-myio-green/15"><span className={draftName ? "truncate" : "truncate text-muted-foreground"}>{draftName || "Digite ou selecione"}</span><ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" /></Button></PopoverTrigger><PopoverContent align="start" className="w-(--radix-popover-trigger-width) p-0"><Command shouldFilter><CommandInput id="shop-draft" value={draftName} onValueChange={setDraftName} placeholder={pointType === "kiosk" ? "Buscar ou digitar quiosque..." : "Buscar ou digitar loja..."} /><CommandList><CommandEmpty><span className="block px-3 py-2 text-left">Nome novo: <strong>{draftName.trim() || "digite para cadastrar"}</strong></span></CommandEmpty><CommandGroup>{matchingCatalog.map((item) => <CommandItem key={item.id} value={item.name} onSelect={() => { setDraftName(item.name); setNamePickerOpen(false); }}><Check className={normalizeHeader(draftName) === normalizeHeader(item.name) ? "opacity-100" : "opacity-0"} /><span className="truncate">{item.name}</span></CommandItem>)}</CommandGroup></CommandList></Command></PopoverContent></Popover><p className="text-xs text-muted-foreground">Pesquise um nome cadastrado ou digite um novo.</p></div><div className="space-y-2 sm:col-span-2"><Label htmlFor="location-draft">Localização (opcional)</Label><Input id="location-draft" value={draftLocation} onChange={(event) => setDraftLocation(event.target.value)} placeholder="Ex.: G1 – Deck" /></div></div>
             {editing?.id ? <div className="space-y-2"><Label>Tipo de edição</Label><RadioGroup value={editMode} onValueChange={(value) => setEditMode(value as typeof editMode)} className="gap-2"><label className="flex cursor-pointer items-center gap-2 text-sm"><RadioGroupItem value="correction" />Corrigir cadastro — não registrar nome anterior no histórico</label><label className="flex cursor-pointer items-center gap-2 text-sm"><RadioGroupItem value="name_change" />Alteração de loja — manter nome anterior no histórico</label></RadioGroup></div> : null}
             <div className="space-y-2"><input ref={facadeCameraRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; void analyzeFacade(file); }} /><input ref={facadeGalleryRef} type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; void analyzeFacade(file); }} /><DropdownMenu><DropdownMenuTrigger asChild><Button type="button" variant="action" disabled={analyzing}>{analyzing ? <Sparkles className="h-4 w-4" /> : <Camera className="h-4 w-4" />}{analyzing ? "Analisando fachada..." : "Identificar pela fachada"}</Button></DropdownMenuTrigger><DropdownMenuContent align="start" className="min-w-56"><DropdownMenuItem onSelect={() => facadeCameraRef.current?.click()}><Camera className="h-4 w-4" />Tirar foto</DropdownMenuItem><DropdownMenuItem onSelect={() => facadeGalleryRef.current?.click()}><Images className="h-4 w-4" />Escolher da galeria</DropdownMenuItem></DropdownMenuContent></DropdownMenu></div>
          </> : null}
