@@ -222,6 +222,7 @@ function SiteSurveyPage() {
     void invalidate();
   };
 
+  visitsRef.current = data?.visits ?? [];
   if (isLoading || !data) return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Carregando Site Survey...</div>;
   const tabs = [
     { value: "visitas", label: "Visitas", icon: CalendarDays, allowed: can("site_survey_visitas_minhas") || can("site_survey_visitas_todas") },
