@@ -859,3 +859,4 @@
 - [x] Site Survey — corrigir conclusão da LUC 118 para considerar respostas salvas em etapas recolhidas.
 - [x] Site Survey — preservar a resposta controladora e as perguntas condicionais da LUC 129 após fechar a captura de foto.
 - [x] Site Survey — filtrar por digitação as colunas LUC, Nome da loja e Localização, preservando a ordenação pelas setas.
+- [x] Site Survey — salvar automaticamente cada foto ou anexo geral arrastado para a loja ou ambiente, sem exigir Salvar progresso.
