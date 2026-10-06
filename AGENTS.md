@@ -24,7 +24,7 @@
 - Manual visits start `concluida` with historical end; checklist autosaves without timing. Shopping points share add dialog, not storage.
 - Photo drops/pastes autosave; block outside drops. Serialize saves by point/question; flush before point/section switches.
 - Survey skips persist by point; skip removes pending requirements, keeps answers, flushes autosave.
-- Survey report/PDF share ordering and hydraulic DN from De-Para; missing flow has no specification. Photo reuse stores same-point attachment ID on response; deletion invalidates it.
+- Survey report/PDF share ordering and hydraulic DN from De-Para; missing flow has no specification. Purchase-report photos come only from the meter-flow question and remain grouped by point. Photo reuse stores same-point attachment ID on response; deletion invalidates it.
 - Survey LUC corrections replace the current history entry; actual shop changes append a history entry, preserving genuine occupancy changes.
 - Site Survey built-in catalog title overrides live separately from catalog items; this preserves fixed catalog keys while allowing their displayed names to change.
 - Site Survey material type sources are linked by catalog IDs, not material names; this survives catalog renames and keeps historical visit selections.
