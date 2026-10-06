@@ -1,3 +1,4 @@
+- [x] Site Survey — criar resumo em tela de todas as lojas, quiosques e ambientes, com respostas agrupadas por natureza e fotos ampliáveis.
 # Padronização complementar dos botões de ação
 - [x] Site Survey — consolidar lojas e quiosques das visitas no Cadastro, sem duplicidades, e reutilizar a lista em um campo pesquisável e editável nas novas visitas.
 - [x] Aplicar o estilo vazado verde aos comandos destacados nos Apps do ERP.

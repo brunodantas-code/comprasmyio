@@ -33,3 +33,4 @@
 - Site Survey keeps a normalized global shop/kiosk catalog synchronized from visit points; new visits reuse it without rewriting visit history.
 - Site Survey purchase reports hand a review-only draft to Supply; only the normal Supply form submission creates the order and Approval.
 - Textual action commands use the shared outlined-green action style, including dialogs; compact add/edit controls use the borderless green icon pattern from Cadastro.
+- Site Survey's on-screen visit summary reuses loaded visit data, groups every saved answer by checklist nature, and keeps photos attached to their point; it never changes PDF output.
