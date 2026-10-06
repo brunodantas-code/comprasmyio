@@ -229,7 +229,7 @@ export function ClientsTab({ userId }: { userId: string }) {
                       />
                        <Input className="col-span-3 md:col-span-1 md:col-start-2 md:row-start-1" value={unit.city} onChange={(event) => setNewUnits((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, city: event.target.value } : item))} placeholder="Cidade" aria-label={`Cidade da unidade ${index + 1}`} />
                        <Select value={unit.state} onValueChange={(state) => setNewUnits((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, state } : item))}><SelectTrigger className="h-9" aria-label={`UF da unidade ${index + 1}`}><SelectValue placeholder="UF" /></SelectTrigger><SelectContent>{BRAZILIAN_STATES.map((state) => <SelectItem key={state} value={state}>{state}</SelectItem>)}</SelectContent></Select>
-                      <ConfirmDeleteButton title="Remover unidade?" description={`Confirma a remoção de “${unit.name || `Unidade ${index + 1}`}” deste cadastro?`} ariaLabel="Remover unidade" confirmLabel="Remover" onConfirm={() => setNewUnits((current) => current.filter((_, itemIndex) => itemIndex !== index))} trigger={<Button type="button" variant="ghost" size="compactIcon" className="text-destructive hover:text-destructive" aria-label="Remover unidade" title="Remover unidade"><Trash2 className="h-3.5 w-3.5" /></Button>} />
+                      <ConfirmDeleteButton title="Remover unidade?" description={`Confirma a remoção de “${unit.name || `Unidade ${index + 1}`}” deste cadastro?`} ariaLabel="Remover unidade" confirmLabel="Remover" onConfirm={() => setNewUnits((current) => current.filter((_, itemIndex) => itemIndex !== index))} trigger={<Button type="button" variant="action" size="compactIcon" aria-label="Remover unidade" title="Remover unidade"><Trash2 className="h-3.5 w-3.5" /></Button>} />
                     </div>
                   ))}
                 </div>
@@ -406,7 +406,7 @@ function ClientUnitsList({ client, userId }: { client: Client; userId: string })
           categories={categories ?? []}
           saving={create.isPending}
           onSave={(values) => create.mutateAsync(values)}
-          trigger={<Button type="button" size="sm"><Plus className="mr-1 h-4 w-4" />Adicionar unidade</Button>}
+          trigger={<Button type="button" variant="action" size="sm"><Plus className="mr-1 h-4 w-4" />Adicionar unidade</Button>}
         />
       </div>
       {!units?.length ? <p className="text-sm text-muted-foreground">Nenhuma unidade cadastrada.</p> : (
@@ -421,7 +421,7 @@ function ClientUnitsList({ client, userId }: { client: Client; userId: string })
                   <TableCell className="text-muted-foreground">{unit.city || "—"}</TableCell>
                   <TableCell className="text-muted-foreground">{unit.state || "—"}</TableCell>
                   <TableCell className="text-muted-foreground">{unit.cnpj || "—"}</TableCell>
-                  <TableCell><Button type="button" variant="outline" size="sm" disabled={toggle.isPending} onClick={() => toggle.mutate(unit)}>{unit.active ? "Ativa" : "Inativa"}</Button></TableCell>
+                  <TableCell><Button type="button" variant="action" size="sm" disabled={toggle.isPending} onClick={() => toggle.mutate(unit)}>{unit.active ? "Ativa" : "Inativa"}</Button></TableCell>
                   <TableCell className="text-right"><div className="flex items-center justify-end gap-1 whitespace-nowrap">
                     <UnitDialog
                       title={`Editar ${unit.name}`}
@@ -475,7 +475,7 @@ function UnitDialog({ title, unit, categories, saving, onSave, trigger }: { titl
            </div>
            <div className="space-y-2"><Label>Categoria</Label><Select name="category_id" defaultValue={unit?.category_id ?? "none"}><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent><SelectItem value="none">Sem categoria</SelectItem>{categories.map((category) => <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>)}</SelectContent></Select></div>
           <div className="space-y-2"><Label>CNPJ</Label><Input name="cnpj" defaultValue={unit?.cnpj ?? ""} placeholder="00.000.000/0000-00" /></div>
-          <DialogFooter><Button type="submit" disabled={saving}>Salvar</Button></DialogFooter>
+          <DialogFooter><Button type="submit" variant="action" disabled={saving}>Salvar</Button></DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
@@ -572,7 +572,7 @@ function ClientsReportDialog({ clients, units, categories }: { clients: Client[]
     <DialogContent>
       <DialogHeader><DialogTitle>Relatório de clientes</DialogTitle></DialogHeader>
       <div className="space-y-2"><Label>Ordenar por</Label><Select value={order} onValueChange={(value) => setOrder(value as ClientReportOrder)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="state">UF</SelectItem><SelectItem value="category">Categoria</SelectItem><SelectItem value="corporate">Cliente corporativo</SelectItem></SelectContent></Select></div>
-      <DialogFooter><Button type="button" onClick={() => void exportPdf()} disabled={exporting}><Download className="mr-2 h-4 w-4" />{exporting ? "Gerando..." : "Exportar PDF"}</Button></DialogFooter>
+      <DialogFooter><Button type="button" variant="action" onClick={() => void exportPdf()} disabled={exporting}><Download className="mr-2 h-4 w-4" />{exporting ? "Gerando..." : "Exportar PDF"}</Button></DialogFooter>
     </DialogContent>
   </Dialog>;
 }
@@ -660,7 +660,7 @@ function EditClientDialog({ client, clients, categories, saving, onSave, onConve
             </Select>
             <p className="text-xs text-muted-foreground">Selecione uma matriz para transformar este cliente em filial ou unidade.</p>
           </div>
-          <DialogFooter><Button type="submit" disabled={saving}>Salvar</Button></DialogFooter>
+          <DialogFooter><Button type="submit" variant="action" disabled={saving}>Salvar</Button></DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
