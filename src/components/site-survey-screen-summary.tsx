@@ -71,7 +71,7 @@ function PhotoThumbnail({ attachment }: { attachment: SummaryAttachment }) {
   </>;
 }
 
-export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections, questions, lucs, environments, responses, attachments, materials, catalog, screwdriverTypes, wrenchSizes, customCatalogs }: {
+export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections, questions, lucs, environments, responses, attachments, materials, catalog, screwdriverTypes, wrenchSizes, customCatalogs, onClose }: {
   visitNumber: number;
   visitTemplateId: string | null;
   sections: SummarySection[];
@@ -85,8 +85,8 @@ export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections
   screwdriverTypes: Named[];
   wrenchSizes: Named[];
   customCatalogs: CustomCatalog[];
+  onClose: () => void;
 }) {
-  const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [sort, setSort] = useState("luc");
@@ -104,15 +104,12 @@ export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections
   }), [points, search, typeFilter, sort]);
   const completedCount = points.filter((point) => point.completionStatus === "concluida").length;
 
-  return <>
-    <Button type="button" variant="action" size="sm" onClick={() => setOpen(true)}><FileText className="h-4 w-4" />Resumo da visita</Button>
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="grid h-[92dvh] w-[calc(100vw-1rem)] max-w-[96rem] grid-rows-[auto_minmax(0,1fr)] gap-0 overflow-hidden p-0">
-        <DialogHeader className="border-b px-4 py-4 pr-12 text-left sm:px-6">
-          <DialogTitle>Resumo da Visita #{String(visitNumber).padStart(12, "0")}</DialogTitle>
-          <DialogDescription>Todas as respostas e fotos organizadas por loja, quiosque ou ambiente.</DialogDescription>
-        </DialogHeader>
-        <div className="grid min-h-0 flex-1 grid-rows-[auto_1fr] overflow-hidden">
+  return <section id="visit-screen-summary" className="overflow-hidden rounded-md border border-border bg-background" aria-label="Resumo da visita">
+        <div className="flex flex-wrap items-start justify-between gap-3 border-b px-4 py-4 sm:px-6">
+          <div><h3 className="font-bold">Resumo da Visita #{String(visitNumber).padStart(12, "0")}</h3><p className="text-sm text-muted-foreground">Todas as respostas e fotos organizadas por loja, quiosque ou ambiente.</p></div>
+          <Button type="button" variant="action" size="sm" onClick={onClose}>Fechar</Button>
+        </div>
+        <div>
           <div className="border-b bg-muted/30 px-4 py-3 sm:px-6">
             <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem_12rem_auto] sm:items-center">
               <div className="relative min-w-0"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar por LUC, nome ou localização" className="pl-9" /></div>
@@ -121,7 +118,7 @@ export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections
               <span className="shrink-0 text-xs font-semibold text-muted-foreground">{completedCount}/{points.length} concluídos</span>
             </div>
           </div>
-          <div className="min-h-0 overflow-y-auto overscroll-contain">
+          <div>
             <div className="divide-y divide-border">
               {visiblePoints.map((point) => {
                 const pointResponses = responses.filter((item) => matchesPoint(point, item) && answerText(item.answer));
@@ -158,7 +155,5 @@ export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections
             </div>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
-  </>;
+  </section>;
 }
