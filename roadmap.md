@@ -1,4 +1,5 @@
 # Padronização complementar dos botões de ação
+- [ ] Site Survey — consolidar lojas e quiosques das visitas no Cadastro, sem duplicidades, e reutilizar a lista em um campo pesquisável e editável nas novas visitas.
 - [x] Aplicar o estilo vazado verde aos comandos destacados nos Apps do ERP.
 - [x] Ajustar o botão Adicionar de Materiais ao padrão compacto sem borda do Cadastro.
 - [x] Ajustar “Identificar pela fachada” ao padrão vazado verde dos botões de ação.
