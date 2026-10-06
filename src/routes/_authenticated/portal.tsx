@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Bell, CheckCircle2, ChevronRight, CodeXml, DollarSign, FileSignature, Home, Menu, Moon, Phone, Search, Settings, Settings2, ShieldCheck, ShoppingCart, UserRound, UsersRound, LogOut } from "lucide-react";
+import { Bell, CheckCircle2, ChevronRight, CodeXml, DollarSign, FileSignature, Home, Menu, Moon, Phone, Search, Settings, Settings2, ShieldCheck, ShoppingCart, UserRound, UsersRound, LogOut, KeyRound } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
@@ -11,6 +11,7 @@ import { MyioPlatformLogo } from "@/components/myio-platform-logo";
 import { ErpAppAccessAdmin } from "@/components/erp-app-access-admin";
 import { CrmFunnelIcon } from "@/components/crm-funnel-icon";
 import { usePendingActions } from "@/hooks/use-pending-actions";
+import { ChangePasswordDialog } from "@/components/change-password-dialog";
 import { ThemeMenuItem, ThemeToggle } from "@/components/theme-toggle";
 
 export const Route = createFileRoute("/_authenticated/portal")({
@@ -53,6 +54,7 @@ function PortalPage() {
     },
   });
 
+  const [passwordOpen, setPasswordOpen] = useState(false);
   async function handleSignOut() {
     await queryClient.cancelQueries();
     queryClient.clear();
@@ -140,6 +142,10 @@ function PortalPage() {
                     </div>
                     <ThemeToggle />
                   </div>
+                  <Button variant="ghost" className="h-14 w-full justify-start rounded-none px-1 text-base !bg-transparent !text-foreground hover:!bg-muted hover:!text-foreground" onClick={() => { setMobileMenuOpen(false); setPasswordOpen(true); }}>
+                    <KeyRound className="h-5 w-5 shrink-0" />
+                    <span className="min-w-0 flex-1 text-left">Alterar senha</span>
+                  </Button>
                   <Button variant="ghost" className="h-14 w-full justify-start rounded-none px-1 text-base !bg-transparent !text-destructive hover:!bg-muted hover:!text-destructive" onClick={handleSignOut}>
                     <LogOut className="h-5 w-5 shrink-0" />
                     <span className="min-w-0 flex-1 text-left">Sair</span>
@@ -187,11 +193,15 @@ function PortalPage() {
                 <DropdownMenuLabel className="truncate">{data.name}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <ThemeMenuItem />
+                <DropdownMenuItem onSelect={() => setPasswordOpen(true)}>
+                  <KeyRound />Alterar senha
+                </DropdownMenuItem>
                 <DropdownMenuItem onSelect={handleSignOut} className="text-destructive focus:text-destructive">
                   <LogOut />Sair
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            <ChangePasswordDialog open={passwordOpen} onOpenChange={setPasswordOpen} />
           </div>
         </div>
       </header>

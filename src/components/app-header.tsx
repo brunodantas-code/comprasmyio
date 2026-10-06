@@ -1,15 +1,17 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Home, LogOut, Menu } from "lucide-react";
+import { ArrowLeft, Home, KeyRound, LogOut, Menu } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ChangePasswordDialog } from "@/components/change-password-dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 export function AppHeader({ logo, children }: { logo: ReactNode; children?: ReactNode }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [passwordOpen, setPasswordOpen] = useState(false);
   const { data: userName = "Usuário" } = useQuery({
     queryKey: ["app-header-user"],
     queryFn: async () => {
@@ -35,24 +37,25 @@ export function AppHeader({ logo, children }: { logo: ReactNode; children?: Reac
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
           <Link to="/portal" className="flex min-w-0 items-center" title="Voltar aos aplicativos">{logo}</Link>
           <div className="flex shrink-0 items-center gap-1 sm:hidden">
-            <MobileHeaderMenu userName={userName} onSignOut={signOut} buttonClass={iconButton} />
+            <MobileHeaderMenu userName={userName} onSignOut={signOut} onChangePassword={() => setPasswordOpen(true)} buttonClass={iconButton} />
           </div>
         </div>
         <div className="mt-5 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:mt-0 sm:flex sm:min-w-0 sm:justify-end">
           <p className="min-w-0 truncate text-sm font-semibold">{userName}</p>
           {children}
           <div className="hidden shrink-0 items-center gap-1 sm:flex">
-            <DesktopHeaderMenu userName={userName} onSignOut={signOut} buttonClass={iconButton} />
+            <DesktopHeaderMenu userName={userName} onSignOut={signOut} onChangePassword={() => setPasswordOpen(true)} buttonClass={iconButton} />
           </div>
         </div>
       </div>
+      <ChangePasswordDialog open={passwordOpen} onOpenChange={setPasswordOpen} />
     </header>
   );
 }
 
-type HeaderMenuProps = { userName: string; onSignOut: () => void; buttonClass: string };
+type HeaderMenuProps = { userName: string; onSignOut: () => void; onChangePassword: () => void; buttonClass: string };
 
-function MobileHeaderMenu({ userName, onSignOut, buttonClass }: HeaderMenuProps) {
+function MobileHeaderMenu({ userName, onSignOut, onChangePassword, buttonClass }: HeaderMenuProps) {
   return (
     <Sheet>
       <SheetTrigger asChild><Button variant="ghost" size="icon" className={buttonClass} aria-label="Abrir menu"><Menu className="!h-6 !w-6" /></Button></SheetTrigger>
@@ -61,6 +64,7 @@ function MobileHeaderMenu({ userName, onSignOut, buttonClass }: HeaderMenuProps)
         <nav className="mt-5 divide-y divide-border" aria-label="Menu do aplicativo">
           <Button asChild variant="ghost" className="h-12 w-full justify-start rounded-none !bg-transparent !text-foreground hover:!bg-muted"><Link to="/portal"><Home className="h-5 w-5" />Início</Link></Button>
           <Button variant="ghost" className="h-12 w-full justify-start rounded-none !bg-transparent !text-foreground hover:!bg-muted" onClick={() => window.history.back()}><ArrowLeft className="h-5 w-5" />Voltar</Button>
+          <Button variant="ghost" className="h-12 w-full justify-start rounded-none !bg-transparent !text-foreground hover:!bg-muted" onClick={onChangePassword}><KeyRound className="h-5 w-5" />Alterar senha</Button>
           <Button variant="ghost" className="h-12 w-full justify-start rounded-none !bg-transparent !text-destructive hover:!bg-muted hover:!text-destructive" onClick={onSignOut}><LogOut className="h-5 w-5" />Sair</Button>
         </nav>
       </SheetContent>
@@ -68,7 +72,7 @@ function MobileHeaderMenu({ userName, onSignOut, buttonClass }: HeaderMenuProps)
   );
 }
 
-function DesktopHeaderMenu({ userName, onSignOut, buttonClass }: HeaderMenuProps) {
+function DesktopHeaderMenu({ userName, onSignOut, onChangePassword, buttonClass }: HeaderMenuProps) {
   const itemClass = "h-10 w-full justify-start rounded-none px-4 !bg-transparent !text-foreground hover:!bg-muted hover:!text-foreground";
 
   return (
@@ -88,6 +92,9 @@ function DesktopHeaderMenu({ userName, onSignOut, buttonClass }: HeaderMenuProps
           </Button>
           <Button variant="ghost" className={itemClass} onClick={() => window.history.back()}>
             <ArrowLeft className="h-5 w-5" />Voltar
+          </Button>
+          <Button variant="ghost" className={itemClass} onClick={onChangePassword}>
+            <KeyRound className="h-5 w-5" />Alterar senha
           </Button>
           <div className="my-1 border-t border-border" />
           <Button variant="ghost" className={`${itemClass} !text-destructive hover:!text-destructive`} onClick={onSignOut}>
