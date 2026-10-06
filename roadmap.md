@@ -863,3 +863,4 @@
 - [x] Site Survey — salvar automaticamente cada foto ou anexo geral arrastado para a loja ou ambiente, sem exigir Salvar progresso.
 - [x] Site Survey — ordenar o relatório de compras com hidrômetros primeiro, em vazão crescente, e demais materiais depois.
 - [x] Site Survey — incluir no relatório de compras as fotos da pergunta de vazão nominal, vinculadas à respectiva loja, quiosque ou ambiente, na prévia e no PDF.
+- [x] Site Survey — manter a compra de hidrômetros condicionada à saída pulsada “Não” ou “Inoperante”, incluindo ausência/inexistência equivalente.
