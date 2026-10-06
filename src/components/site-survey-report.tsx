@@ -392,12 +392,11 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     const rows: SiteSurveyPurchaseDraftItem[] = [];
     for (const point of sortedPoints) {
       const responses = pointResponses(point);
-      const pointSections = sectionsForPoint(point);
-      const pulse = findAnswer(responses, questions, ["condicao da saida pulsada", "saida pulsada"], pointSections, ["agua", "hidrometro", "hidraulica"]);
+      const pulse = findAnswer(responses, questions, ["condicao da saida pulsada", "saida pulsada"]);
       const pulseStatus = normalize(pulse?.value ?? "");
       if (pulse && (pulseStatus === "nao" || pulseStatus.includes("inoperante") || pulseStatus.includes("inexistente") || pulseStatus.includes("nao funcional"))) {
-        const flow = findAnswer(responses, questions, ["vazao nominal", "vazao do hidrometro"], pointSections, ["agua", "hidrometro", "hidraulica"]);
-        const location = findAnswer(responses, questions, ["localizacao do hidrometro", "posicao do hidrometro", "detalhar para facilitar"], pointSections, ["agua", "hidrometro", "hidraulica"]);
+        const flow = findAnswer(responses, questions, ["vazao nominal", "vazao do hidrometro"]);
+        const location = findAnswer(responses, questions, ["localizacao do hidrometro", "posicao do hidrometro", "detalhar para facilitar"]);
         const dn = meterSpecification(flow?.value ?? null, data?.meterMappings ?? []);
         rows.push({ sourceKey: `meter:${pointKey(point)}`, suggestedName: dn.startsWith("DN") ? `Hidrômetro ${dn}${flow?.value ? ` · Vazão: ${flow.value}` : ""}` : "Hidrômetro", quantity: 1, pointLabels: [point.label], reason: [`Saída pulsada ${pulse.value}`, location?.value ? `Local: ${location.value}` : "", flow?.value ? `Vazão: ${flow.value}` : "", dn].filter(Boolean).join(" · ") });
       }
@@ -424,14 +423,13 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     let replacementRequired = 0;
     for (const point of sortedPoints) {
       const responses = pointResponses(point);
-      const pointSections = sectionsForPoint(point);
-      const existence = findAnswer(responses, questions, ["existe hidrometro"], pointSections, ["agua", "hidrometro", "hidraulica"]);
+      const existence = findAnswer(responses, questions, ["existe hidrometro"]);
       const existenceStatus = normalize(existence?.value ?? "");
       if (!existenceStatus || /nao informad|sem informacao/.test(existenceStatus)) withoutExistenceAnswer += 1;
       else if (existenceStatus === "nao" || existenceStatus.startsWith("nao ") || existenceStatus.includes("inexistente")) withoutMeter += 1;
       else registered += 1;
 
-      const pulse = findAnswer(responses, questions, ["condicao da saida pulsada", "saida pulsada"], pointSections, ["agua", "hidrometro", "hidraulica"]);
+      const pulse = findAnswer(responses, questions, ["condicao da saida pulsada", "saida pulsada"]);
       const pulseStatus = normalize(pulse?.value ?? "");
       if (pulse && (pulseStatus === "nao" || pulseStatus.includes("inoperante") || pulseStatus.includes("inexistente") || pulseStatus.includes("nao funcional"))) replacementRequired += 1;
     }
@@ -441,13 +439,11 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     if (!data) return [];
     return sortedPoints.flatMap((point) => {
       const responses = pointResponses(point);
-      const pointSections = sectionsForPoint(point);
-      const pulse = findAnswer(responses, questions, ["condicao da saida pulsada", "saida pulsada"], pointSections, ["agua", "hidrometro", "hidraulica"]);
+      const pulse = findAnswer(responses, questions, ["condicao da saida pulsada", "saida pulsada"]);
       const pulseStatus = normalize(pulse?.value ?? "");
       if (!pulse || !(pulseStatus === "nao" || pulseStatus.includes("inoperante") || pulseStatus.includes("inexistente") || pulseStatus.includes("nao funcional"))) return [];
       const flowQuestionIds = new Set(questions
-        .filter((question) => pointSections.some((section) => section.id === question.section_id)
-          && (normalize(question.prompt).includes("vazao nominal") || normalize(question.prompt).includes("vazao do hidrometro")))
+        .filter((question) => normalize(question.prompt).includes("vazao nominal") || normalize(question.prompt).includes("vazao do hidrometro"))
         .map((question) => question.id));
       const photos = (data.attachments as ReportAttachment[]).filter((photo) => photo.attachment_kind === "question"
         && photo.content_type?.startsWith("image/")
