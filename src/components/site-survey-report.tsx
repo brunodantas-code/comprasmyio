@@ -401,7 +401,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
         const flow = findAnswer(responses, questions, ["vazao nominal", "vazao do hidrometro"]);
         const location = findAnswer(responses, questions, ["localizacao do hidrometro", "posicao do hidrometro", "detalhar para facilitar"]);
         const dn = meterSpecification(flow?.value ?? null, data?.meterMappings ?? []);
-        rows.push({ sourceKey: `meter:${pointKey(point)}`, suggestedName: dn.startsWith("DN") ? `Hidrômetro ${dn}${flow?.value ? ` · Vazão: ${flow.value}` : ""}` : "Hidrômetro", quantity: 1, pointLabels: [point.label], reason: [`Saída pulsada ${pulse.value}`, location?.value ? `Local: ${location.value}` : "", flow?.value ? `Vazão: ${flow.value}` : "", dn].filter(Boolean).join(" · ") });
+        rows.push({ sourceKey: `meter:${pointKey(point)}`, suggestedName: dn.startsWith("DN") ? `Hidrômetro ${dn}${flow?.value ? ` · Vazão: ${flow.value}` : ""}` : "Hidrômetro de outras vazões", quantity: 1, pointLabels: [point.label], reason: [`Saída pulsada ${pulse.value}`, location?.value ? `Local: ${location.value}` : "", flow?.value ? `Vazão: ${flow.value}` : "", dn].filter(Boolean).join(" · ") });
       }
       for (const material of pointMaterials(point).filter((item) => normalize(item.site_survey_material_catalog?.category ?? "") !== "equipamento")) rows.push({ sourceKey: `material:${material.id}`, suggestedName: material.site_survey_material_catalog?.name ?? "Material da visita", quantity: Number(material.quantity), pointLabels: [point.label], reason: material.notes ?? "Material registrado na visita" });
     }
@@ -424,19 +424,21 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     let withoutMeter = 0;
     let withoutExistenceAnswer = 0;
     let replacementRequired = 0;
+    const withoutMeterPoints: string[] = [];
+    const withoutExistenceAnswerPoints: string[] = [];
     for (const point of sortedPoints) {
       const responses = pointResponses(point);
       const existence = findAnswer(responses, questions, ["existe hidrometro"]);
       const existenceStatus = normalize(existence?.value ?? "");
-      if (!existenceStatus || /nao informad|sem informacao/.test(existenceStatus)) withoutExistenceAnswer += 1;
-      else if (existenceStatus === "nao" || existenceStatus.startsWith("nao ") || existenceStatus.includes("inexistente")) withoutMeter += 1;
+      if (!existenceStatus || /nao informad|sem informacao/.test(existenceStatus)) { withoutExistenceAnswer += 1; withoutExistenceAnswerPoints.push(point.label); }
+      else if (existenceStatus === "nao" || existenceStatus.startsWith("nao ") || existenceStatus.includes("inexistente")) { withoutMeter += 1; withoutMeterPoints.push(point.label); }
       else registered += 1;
 
       const pulse = findAnswer(responses, questions, ["condicao da saida pulsada", "saida pulsada"]);
       const pulseStatus = normalize(pulse?.value ?? "");
       if (pulse && (pulseStatus === "nao" || pulseStatus.includes("inoperante") || pulseStatus.includes("inexistente") || pulseStatus.includes("nao funcional"))) replacementRequired += 1;
     }
-    return { totalPoints: sortedPoints.length, registered, withoutMeter, withoutExistenceAnswer, replacementRequired };
+    return { totalPoints: sortedPoints.length, registered, withoutMeter, withoutExistenceAnswer, replacementRequired, withoutMeterPoints, withoutExistenceAnswerPoints };
   }, [sortedPoints, data?.responses, questions, sections]);
   const meterPhotoGroups = useMemo<MeterPhotoGroup[]>(() => {
     if (!data) return [];
