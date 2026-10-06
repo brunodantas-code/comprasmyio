@@ -18,11 +18,9 @@ export const suggestShopNameFromFacade = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => FacadeInput.parse(input))
   .handler(async ({ data, context }) => {
-    const { data: allowed } = await context.supabase.rpc("has_site_survey_permission", {
-      _user_id: context.userId,
-      _permission: "site_survey_agendar",
-    });
-    if (!allowed) throw new Error("Você não tem permissão para identificar fachadas.");
+    const checks = await Promise.all(["site_survey_agendar", "site_survey_editar", "site_survey_executar"].map((permission) =>
+      context.supabase.rpc("has_site_survey_permission", { _user_id: context.userId, _permission: permission })));
+    if (!checks.some((check) => check.data === true)) throw new Error("Você não tem permissão para identificar fachadas.");
 
     const apiKey = process.env["LOVABLE_API_KEY"];
     if (!apiKey) throw new Error("A identificação por foto não está disponível no momento.");
