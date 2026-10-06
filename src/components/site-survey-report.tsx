@@ -55,6 +55,7 @@ const interventionAnswerLabel = (prompt: string, answer: string) => {
 };
 const findAnswer = (responses: ReportResponse[], questions: Question[], terms: string[], sections?: Section[], sectionTerms?: string[]) => {
   const response = responses.find((item) => {
+    if (!valueText(item.answer).trim()) return false;
     const question = questions.find((candidate) => candidate.id === item.question_id);
     const prompt = normalize(question?.prompt ?? "");
     const section = normalize(sections?.find((candidate) => candidate.id === question?.section_id)?.title ?? "");
