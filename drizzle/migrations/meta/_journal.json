@@ -687,6 +687,13 @@
       "when": 1791221789376,
       "tag": "0097_link_purchase_orders_to_site_survey",
       "breakpoints": true
+    },
+    {
+      "idx": 98,
+      "version": "7",
+      "when": 1791247161603,
+      "tag": "0098_create_site_survey_shop_catalog",
+      "breakpoints": true
     }
   ]
 }
