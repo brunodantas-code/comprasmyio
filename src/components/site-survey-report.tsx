@@ -34,7 +34,7 @@ type ReportType = "complete" | "purchases" | "interventions" | "equipment";
 type MeterMapping = { name: string; position: number };
 type Intervention = { id: string; questionId: string; question: string; action: string; answer: string; pointKey: string | null; pointLabel: string; callNumber: string | null };
 type ReportAttachment = { id: string; question_id: string | null; visit_luc_id: string | null; visit_environment_id: string | null; file_name: string; storage_path: string; content_type: string | null; attachment_kind: string };
-type MeterPhotoGroup = { point: Point; photos: ReportAttachment[] };
+type MeterPhotoGroup = { point: Point; flowRate: string; photos: ReportAttachment[] };
 
 const valueText = (answer: unknown): string => {
   if (answer && typeof answer === "object" && !Array.isArray(answer) && "value" in answer) { const item = answer as { value: unknown; detail?: unknown }; return [valueText(item.value), typeof item.detail === "string" ? item.detail : ""].filter(Boolean).join(" — "); }
@@ -445,6 +445,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
       const pulse = findAnswer(responses, questions, ["condicao da saida pulsada", "saida pulsada"]);
       const pulseStatus = normalize(pulse?.value ?? "");
       if (!pulse || !(pulseStatus === "nao" || pulseStatus.includes("inoperante") || pulseStatus.includes("inexistente") || pulseStatus.includes("nao funcional"))) return [];
+      const flow = findAnswer(responses, questions, ["vazao nominal", "vazao do hidrometro"]);
       const flowQuestionIds = new Set(questions
         .filter((question) => normalize(question.prompt).includes("vazao nominal") || normalize(question.prompt).includes("vazao do hidrometro"))
         .map((question) => question.id));
@@ -452,7 +453,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
         && photo.content_type?.startsWith("image/")
         && Boolean(photo.question_id && flowQuestionIds.has(photo.question_id))
         && (point.kind === "luc" ? photo.visit_luc_id === point.id : photo.visit_environment_id === point.id));
-      return photos.length ? [{ point, photos }] : [];
+      return photos.length ? [{ point, flowRate: flow?.value ?? "Vazão não informada", photos }] : [];
     });
   }, [data, sortedPoints, questions, sections]);
   const reportTitle = reportType === "purchases" ? "Relatório de compras" : reportType === "interventions" ? "Intervenções do cliente" : reportType === "equipment" ? "Equipamentos e ferramentas" : "Relatório completo";
