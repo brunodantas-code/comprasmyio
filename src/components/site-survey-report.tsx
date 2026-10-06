@@ -403,7 +403,17 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     }
     const grouped = new Map<string, SiteSurveyPurchaseDraftItem>();
     for (const row of rows) { const key = normalize(row.suggestedName); const current = grouped.get(key); if (current) { current.quantity += row.quantity; current.pointLabels = [...new Set([...current.pointLabels, ...row.pointLabels])]; current.reason = [...new Set([current.reason, row.reason])].join(" · "); } else grouped.set(key, { ...row }); }
-    return [...grouped.values()];
+    return [...grouped.values()].sort((a, b) => {
+      const aIsMeter = a.sourceKey.startsWith("meter:");
+      const bIsMeter = b.sourceKey.startsWith("meter:");
+      if (aIsMeter !== bIsMeter) return aIsMeter ? -1 : 1;
+      if (!aIsMeter) return a.suggestedName.localeCompare(b.suggestedName, "pt-BR");
+      const flowRate = (item: SiteSurveyPurchaseDraftItem) => {
+        const value = item.suggestedName.match(/Vazão:\s*[^\d]*(\d+(?:[,.]\d+)?)/i)?.[1];
+        return value ? Number(value.replace(",", ".")) : Number.POSITIVE_INFINITY;
+      };
+      return flowRate(a) - flowRate(b) || a.suggestedName.localeCompare(b.suggestedName, "pt-BR");
+    });
   }, [sortedPoints, data?.responses, data?.materials, data?.meterMappings, questions, sections]);
   const reportTitle = reportType === "purchases" ? "Relatório de compras" : reportType === "interventions" ? "Intervenções do cliente" : reportType === "equipment" ? "Equipamentos e ferramentas" : "Relatório completo";
   const openMaterialRequest = async () => {
