@@ -73,6 +73,12 @@ const meterSpecification = (flowRate: string | null, mappings: MeterMapping[]) =
   });
   return mapping?.name.match(/\bDN\s*\d+\b/i)?.[0]?.replace(/\s+/g, "") ?? "Especificação do hidrômetro não informada";
 };
+const meterSpecificationLabel = (flowRate: string | null, mappings: MeterMapping[]) => {
+  const specification = meterSpecification(flowRate, mappings);
+  return flowRate && !/nao (?:foi )?informad[oa]|sem informacao/i.test(normalize(flowRate))
+    ? `${specification} · Vazão: ${flowRate}`
+    : specification;
+};
 const buildPointSummaries = (responses: ReportResponse[], questions: Question[], sections: Section[], skippedSectionIds: string[], meterMappings: MeterMapping[]): PointSummary[] => {
   const summaries: PointSummary[] = [];
   const skipped = new Set(skippedSectionIds);
@@ -187,7 +193,7 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
     }
   }
   if (hydraulicSection?.id && skipped.has(hydraulicSection.id)) summaries.push({ title: hydraulicSection.title, parts: [{ text: "Não realizada." }], questionIds: hydraulicIds });
-  else if (hydraulic.length) summaries.push({ title: `${hydraulicSection?.title.replace(/hidrômetros/i, "Hidrômetros") ?? "Água e Hidrômetros"} - ${meterSpecification(flowRate?.value ?? null, meterMappings)}`, parts: hydraulic, questionIds: hydraulicIds });
+  else if (hydraulic.length) summaries.push({ title: `${hydraulicSection?.title.replace(/hidrômetros/i, "Hidrômetros") ?? "Água e Hidrômetros"} - ${meterSpecificationLabel(flowRate?.value ?? null, meterMappings)}`, parts: hydraulic, questionIds: hydraulicIds });
 
   const electrical: RichPart[] = [];
   const electricalIds = new Set<string>();
@@ -391,7 +397,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
         const flow = findAnswer(responses, questions, ["vazao nominal", "vazao do hidrometro"], pointSections, ["agua", "hidrometro", "hidraulica"]);
         const location = findAnswer(responses, questions, ["localizacao do hidrometro", "posicao do hidrometro", "detalhar para facilitar"], pointSections, ["agua", "hidrometro", "hidraulica"]);
         const dn = meterSpecification(flow?.value ?? null, data?.meterMappings ?? []);
-        rows.push({ sourceKey: `meter:${pointKey(point)}`, suggestedName: dn.startsWith("DN") ? `Hidrômetro ${dn}` : "Hidrômetro", quantity: 1, pointLabels: [point.label], reason: [`Saída pulsada ${pulse.value}`, location?.value ? `Local: ${location.value}` : "", flow?.value ? `Vazão: ${flow.value}` : "", dn].filter(Boolean).join(" · ") });
+        rows.push({ sourceKey: `meter:${pointKey(point)}`, suggestedName: dn.startsWith("DN") ? `Hidrômetro ${dn}` : "Hidrômetro", quantity: 1, pointLabels: [`${point.label}${flow?.value ? ` · Vazão: ${flow.value}` : ""}`], reason: [`Saída pulsada ${pulse.value}`, location?.value ? `Local: ${location.value}` : "", flow?.value ? `Vazão: ${flow.value}` : "", dn].filter(Boolean).join(" · ") });
       }
       for (const material of pointMaterials(point).filter((item) => normalize(item.site_survey_material_catalog?.category ?? "") !== "equipamento")) rows.push({ sourceKey: `material:${material.id}`, suggestedName: material.site_survey_material_catalog?.name ?? "Material da visita", quantity: Number(material.quantity), pointLabels: [point.label], reason: material.notes ?? "Material registrado na visita" });
     }
@@ -461,8 +467,8 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     autoTable(pdf, { startY: 34, theme: "plain", styles: { font: "Nunito", fontSize: 8, textColor: dark, lineColor: soft, lineWidth: { bottom: 0.12 } }, headStyles: tableHead, head: [["Cliente", "Projeto", "Técnico", "Situação"]], body: [[clientName, projectName, technicianName, visit.status.replaceAll("_", " ")]] });
     let y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 11;
     if (reportType !== "complete") {
-      const head = reportType === "purchases" ? [["Item sugerido", "Qtd.", "Local de uso", "Motivo / especificação"]] : reportType === "equipment" ? [["Equipamento / ferramenta", "Qtd.", "Local de uso", "Especificação"]] : [["Local", "Problema encontrado", "Chamado"]];
-      const body = reportType === "purchases" ? purchaseDraftItems.map((item) => [item.suggestedName, String(item.quantity), item.pointLabels.join("; "), item.reason]) : reportType === "equipment" ? equipmentRows.map((item) => [item.name, String(item.quantity), item.pointLabel, item.details || "—"]) : interventions.map((item) => [item.pointLabel, item.answer, item.callNumber ? `#${item.callNumber}` : "—"]);
+      const head = reportType === "purchases" ? [["Item sugerido", "Qtd.", "Local de Instalação"]] : reportType === "equipment" ? [["Equipamento / ferramenta", "Qtd.", "Local de uso", "Especificação"]] : [["Local", "Problema encontrado", "Chamado"]];
+      const body = reportType === "purchases" ? purchaseDraftItems.map((item) => [item.suggestedName, String(item.quantity), item.pointLabels.join("; ")]) : reportType === "equipment" ? equipmentRows.map((item) => [item.name, String(item.quantity), item.pointLabel, item.details || "—"]) : interventions.map((item) => [item.pointLabel, item.answer, item.callNumber ? `#${item.callNumber}` : "—"]);
       autoTable(pdf, { startY: y, theme: "plain", styles: { font: "Nunito", fontSize: 8, textColor: dark, lineColor: soft, lineWidth: { bottom: 0.12 }, overflow: "linebreak" }, headStyles: tableHead, head, body: body.length ? body : [["Nenhum item encontrado para os pontos selecionados."]] });
       y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 8;
       if (reportType === "interventions" && withPhotos) for (const item of interventions) for (const photo of interventionPhotos(item)) { const { data: signed } = await supabase.storage.from("site-survey-attachments").createSignedUrl(photo.storage_path, 300); if (!signed?.signedUrl) continue; if (y > 245) { pdf.addPage(); y = 18; } try { pdf.setFont("Nunito", "bold"); pdf.text(item.pointLabel, 14, y); y += 3; pdf.addImage(await imageDataUrl(signed.signedUrl, false, 42 / 31), "JPEG", 14, y, 42, 31, undefined, "FAST"); y += 36; } catch { /* Mantém o PDF disponível caso uma foto falhe. */ } }
