@@ -743,6 +743,13 @@
       "when": 1791386828783,
       "tag": "0105_selected_supply_rls_permissions",
       "breakpoints": true
+    },
+    {
+      "idx": 106,
+      "version": "7",
+      "when": 1791386967717,
+      "tag": "0106_restore_out_of_scope_policies",
+      "breakpoints": true
     }
   ]
 }
