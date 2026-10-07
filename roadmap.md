@@ -874,5 +874,5 @@
 - [x] Site Survey — adicionar checkbox mestre com "Marcar todos" e "Desmarcar todos" na seleção de pontos do relatório, respeitando a busca digitada.
 - [x] Site Survey — renomear o título do seletor de pontos do checklist para "Cadastro completo de lojas, quiosques e ambientes".
 - [x] Site Survey — pendência de cadastro abre apenas a pergunta correspondente (dialog focado), sem exibir a seção inteira; priorizar mobile.
-- [ ] Site Survey — campo "Número do medidor" (energia e/ou água) no cadastro de loja, quiosque e ambiente.
-- [ ] Site Survey — garantir o cadastro de lojas/ambientes no celular Android (botão Salvar sempre visível, mensagens claras ao salvar).
+- [x] Site Survey — campo "Número do medidor" (energia e/ou água) no cadastro de loja, quiosque e ambiente.
+- [x] Site Survey — garantir o cadastro de lojas/ambientes no celular Android (botão Salvar sempre visível, mensagens claras ao salvar).
