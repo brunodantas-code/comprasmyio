@@ -39,3 +39,4 @@
 - Checklist and registration-pending facade uploads share a camera/gallery picker marked for exclusion from checklist autosave, keeping independent facade writes safe.
 - Facade attachment triggers only clear facade pending fields; guarded explicit starts and the first nonempty persisted checklist response register point start, excluding retrospective manual visits.
 - Ordinary point saves preserve completion timestamps; only explicit completion writes them, and progress logging distinguishes completion transitions from later edits.
+- RLS uses effective menus/app grants; shared files follow record access and uploads bind owners, preserving authorized collaboration.
