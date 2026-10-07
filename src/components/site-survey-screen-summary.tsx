@@ -115,6 +115,7 @@ export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections
               <Select value={typeFilter} onValueChange={setTypeFilter}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">Todos os tipos</SelectItem><SelectItem value="shop">Somente lojas</SelectItem><SelectItem value="kiosk">Somente quiosques</SelectItem><SelectItem value="environment">Somente ambientes</SelectItem></SelectContent></Select>
               <Select value={sort} onValueChange={setSort}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="luc">Ordenar por LUC</SelectItem><SelectItem value="name">Ordenar por nome</SelectItem><SelectItem value="location">Ordenar por localização</SelectItem></SelectContent></Select>
               <span className="shrink-0 text-xs font-semibold text-muted-foreground">{completedCount}/{points.length} concluídos</span>
+              <label className="flex w-fit cursor-pointer items-center gap-2 text-sm sm:col-span-4"><Checkbox aria-label="Somente sem foto de fachada" checked={missingFacadeOnly} onCheckedChange={(checked) => setMissingFacadeOnly(checked === true)} />Somente sem foto de fachada</label>
             </div>
           </div>
           <div>
