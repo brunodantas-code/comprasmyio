@@ -1,0 +1,53 @@
+CREATE OR REPLACE FUNCTION public.security_app_access(_apps text[])
+RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public
+AS $$ SELECT auth.uid() IS NOT NULL AND (public.is_erp_admin(auth.uid()) OR EXISTS (SELECT 1 FROM public.user_app_access a WHERE a.user_id=auth.uid() AND a.app_key=ANY(_apps))); $$;
+REVOKE ALL ON FUNCTION public.security_app_access(text[]) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.security_app_access(text[]) TO authenticated, service_role;
+
+ALTER POLICY projects_select_auth ON public.projects USING (public.security_app_access(ARRAY['supply','cash_flow','site_survey','chamados','crm']));
+ALTER POLICY clients_select_auth ON public.clients USING (public.security_app_access(ARRAY['supply','cash_flow','site_survey','chamados','crm']));
+ALTER POLICY client_units_select_auth ON public.client_units USING (public.security_app_access(ARRAY['supply','cash_flow','site_survey','chamados','crm']));
+ALTER POLICY cost_centers_select ON public.cost_centers USING (public.security_app_access(ARRAY['supply','cash_flow']));
+ALTER POLICY "Authenticated users view access profile definitions" ON public.access_profile_definitions USING (public.is_access_admin(auth.uid()) OR EXISTS (SELECT 1 FROM public.user_access_profiles a WHERE a.user_id=auth.uid() AND a.profile_definition_id=code));
+ALTER POLICY "Authenticated users view access profile permissions" ON public.access_profile_permissions USING (public.is_access_admin(auth.uid()) OR EXISTS (SELECT 1 FROM public.user_access_profiles a WHERE a.user_id=auth.uid() AND a.profile_definition_id=profile_code));
+ALTER POLICY "Authenticated users view profile request types" ON public.access_profile_request_types USING (public.is_access_admin(auth.uid()) OR EXISTS (SELECT 1 FROM public.user_access_profiles a WHERE a.user_id=auth.uid() AND a.profile_definition_id=profile_code));
+ALTER POLICY "Usuários autenticados leem estados externos" ON public.external_product_states USING (public.security_app_access(ARRAY['supply']));
+ALTER POLICY "Usuários autenticados leem estado da sincronização" ON public.external_sync_state USING (public.security_supply_menu_access(ARRAY['armazem_checar_qr']));
+ALTER POLICY "Authenticated can view shipments" ON public.myio_shipments USING (created_by=auth.uid() OR public.security_supply_menu_access(ARRAY['armazem_expedicao','armazem_transporte','armazem_estoque_myio']));
+ALTER POLICY assembly_releases_select_auth ON public.assembly_releases USING (created_by=auth.uid() OR public.security_supply_menu_access(ARRAY['armazem_fabrica','armazem_homologacao','armazem_estoque_myio','armazem_checar_qr']));
+ALTER POLICY import_batches_select ON public.import_batches USING (created_by=auth.uid() OR public.security_app_access(ARRAY['supply']));
+ALTER POLICY import_batch_items_select ON public.import_batch_items USING (EXISTS (SELECT 1 FROM public.import_batches b WHERE b.id=batch_id));
+ALTER POLICY product_boms_select_auth ON public.product_boms USING (public.security_app_access(ARRAY['supply']));
+ALTER POLICY request_types_select ON public.request_types USING (public.security_app_access(ARRAY['supply','cash_flow']));
+ALTER POLICY homologations_select_auth ON public.homologations USING (public.security_app_access(ARRAY['supply']));
+ALTER POLICY job_title_hierarchy_select ON public.job_title_hierarchy USING (public.security_app_access(ARRAY['supply','cash_flow','rh','site_survey','chamados']));
+ALTER POLICY "Authenticated can view job titles" ON public.job_titles USING (public.security_app_access(ARRAY['supply','cash_flow','rh','site_survey','chamados']));
+ALTER POLICY "Authenticated users can view materials" ON public.materials USING (public.security_app_access(ARRAY['supply','site_survey']));
+ALTER POLICY damage_reasons_select ON public.damage_reasons USING (public.security_app_access(ARRAY['supply']));
+ALTER POLICY material_stock_types_select ON public.material_stock_types USING (public.security_app_access(ARRAY['supply']));
+ALTER POLICY "auth read deliveries" ON public.myio_item_deliveries USING (created_by=auth.uid() OR public.security_app_access(ARRAY['supply']));
+ALTER POLICY additional_step_types_select ON public.additional_step_types USING (public.security_app_access(ARRAY['supply','cash_flow']));
+ALTER POLICY role_hierarchy_select ON public.role_hierarchy USING (public.security_app_access(ARRAY['supply','cash_flow']));
+ALTER POLICY approval_rules_select ON public.approval_rules USING (public.security_app_access(ARRAY['supply','cash_flow']));
+ALTER POLICY approval_settings_select ON public.approval_settings USING (public.security_app_access(ARRAY['supply','cash_flow']));
+ALTER POLICY approval_steps_select ON public.approval_steps USING (approver_id=auth.uid() OR EXISTS (SELECT 1 FROM public.purchase_orders p WHERE p.id=order_id));
+ALTER POLICY "auth read purchase_demands" ON public.purchase_demands USING (created_by=auth.uid() OR public.security_app_access(ARRAY['supply']));
+ALTER POLICY "auth read production_demands" ON public.production_demands USING (created_by=auth.uid() OR public.security_app_access(ARRAY['supply']));
+ALTER POLICY homologation_units_update_auth ON public.homologation_units USING (public.security_supply_menu_access(ARRAY['armazem_homologacao'])) WITH CHECK (public.security_supply_menu_access(ARRAY['armazem_homologacao']));
+ALTER POLICY technician_moves_select ON public.technician_moves USING (created_by=auth.uid() OR public.security_supply_menu_access(ARRAY['armazem_tecnico','armazem_cliente','armazem_almoxarifado','armazem_itens_avariados']));
+ALTER POLICY terceiros_mov_select_auth ON public.terceiros_movements USING (created_by=auth.uid() OR public.security_app_access(ARRAY['supply']));
+ALTER POLICY stock_destinations_select ON public.stock_destinations USING (public.security_app_access(ARRAY['supply']));
+ALTER POLICY tool_mov_select_auth ON public.tool_movements USING (created_by=auth.uid() OR public.security_app_access(ARRAY['supply']));
+ALTER POLICY myio_delivery_qrs_select ON public.myio_delivery_qrs USING (created_by=auth.uid() OR public.security_app_access(ARRAY['supply']));
+ALTER POLICY stock_select_auth ON public.stock_movements USING (created_by=auth.uid() OR public.security_app_access(ARRAY['supply']));
+ALTER POLICY "Authenticated users can view tool assets" ON public.tool_assets USING (public.security_app_access(ARRAY['supply','site_survey']));
+ALTER POLICY "Authenticated users can view terceiros materials" ON public.terceiros_materials USING (public.security_app_access(ARRAY['supply','site_survey']));
+ALTER POLICY product_images_select_auth ON public.myio_product_images USING (public.security_app_access(ARRAY['supply','site_survey']));
+ALTER POLICY "Autenticados podem ver lembretes" ON public.user_reminders USING (user_id=auth.uid());
+ALTER POLICY delivery_points_select ON public.delivery_points USING (public.security_app_access(ARRAY['supply']));
+ALTER POLICY "auth read stock_movement_qrs" ON public.stock_movement_qrs USING (created_by=auth.uid() OR public.security_app_access(ARRAY['supply']));
+
+ALTER POLICY "Authorized users can read order attachments" ON storage.objects USING (bucket_id='order-attachments' AND auth.uid() IS NOT NULL AND (EXISTS (SELECT 1 FROM public.purchase_orders p WHERE p.id::text=(storage.foldername(name))[1]) OR ((storage.foldername(name))[1]='imports' AND EXISTS (SELECT 1 FROM public.import_batches b WHERE b.id::text=(storage.foldername(objects.name))[2]))));
+ALTER POLICY "assembly photos read" ON storage.objects USING (bucket_id='assembly-photos' AND auth.uid() IS NOT NULL AND (owner_id=auth.uid()::text OR EXISTS (SELECT 1 FROM public.assembly_releases r WHERE r.photo_url=objects.name)));
+ALTER POLICY "assembly photos upload" ON storage.objects WITH CHECK (bucket_id='assembly-photos' AND owner_id=auth.uid()::text AND public.security_supply_menu_access(ARRAY['armazem_fabrica']));
+ALTER POLICY product_images_read ON storage.objects USING (bucket_id='product-images' AND auth.uid() IS NOT NULL AND public.security_app_access(ARRAY['supply','site_survey']));
