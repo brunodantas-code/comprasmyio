@@ -60,6 +60,6 @@ export const suggestShopNameFromFacade = createServerFn({ method: "POST" })
       }
     }
     const name = result.trim().replace(/^['"]|['"]$/g, "");
-    if (!name || name.toLocaleUpperCase("pt-BR").includes("NÃO IDENTIFICADO")) throw new Error("Não foi possível ler o nome pela foto. Digite o nome da loja e toque em Salvar.");
+    if (!name || name.toLocaleUpperCase("pt-BR").includes("NÃO IDENTIFICADO")) return { name: "" };
     return { name: name.slice(0, 160) };
   });
