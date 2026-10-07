@@ -1112,7 +1112,7 @@ function PurchasableItemPicker({ value, onPick, disabled, categories = ["todas"]
 
 const newOrderSchema = z.object({
   project_id: z.string().optional(),
-  item_name: z.string().trim().min(2).max(200),
+  item_name: z.string().trim().min(2, "Informe uma descrição com pelo menos 2 caracteres"),
   item_link: z.string().trim().max(2000).url("Link inválido").optional().or(z.literal("").transform(() => undefined)),
   quantity: z.coerce.number().int().positive("Quantidade inválida").max(100000),
   estimated_value: z.coerce.number().min(0, "Valor inválido").max(1000000000),
