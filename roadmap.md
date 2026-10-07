@@ -1,3 +1,5 @@
+- [x] Site Survey — Exibir/Recolher individual e geral no resumo; recolhido mostra apenas fachada/ícone e nome. Validado em computador e celular, mantendo a ampliação da foto.
+- [x] Site Survey — miniatura ampliável da fachada antes do LUC, linhas mais altas e foto ao lado do nome no resumo com ícone quando ausente.
 - [x] Site Survey — garantir início pelo botão ou primeira informação e conclusão explícita; conferidos 36 pontos de Leandro, corrigidos 3 inícios e preservadas as conclusões.
 - [x] Mogi — corrigir pontos iniciados pela fachada de Leonardo; preservar ou recuperar o início real de Leandro.
 - [x] Site Survey — permitir escolher a foto da fachada na galeria, além de tirar uma nova foto.

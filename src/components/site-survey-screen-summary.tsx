@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Camera, Droplets, FileText, ImageIcon, MapPin, Package, Search, Store, Wrench, Zap } from "lucide-react";
+import { Camera, ChevronDown, ChevronUp, Droplets, FileText, ImageIcon, MapPin, Package, Search, Wrench, Zap } from "lucide-react";
 
+import { SiteSurveyFacadeThumbnail } from "@/components/site-survey-facade-thumbnail";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -90,6 +91,7 @@ export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [sort, setSort] = useState("luc");
+  const [collapsedPoints, setCollapsedPoints] = useState<Set<string>>(() => new Set());
   const points = useMemo<SummaryPoint[]>(() => [
     ...lucs.map((point) => ({ id: point.id, kind: "luc" as const, pointType: point.point_type === "kiosk" ? "kiosk" as const : "shop" as const, name: point.shop_name, luc: point.luc_number, location: point.location ?? "", templateId: visitTemplateId, completionStatus: point.completion_status, skippedSectionIds: Array.isArray(point.skipped_section_ids) ? point.skipped_section_ids.filter((id): id is string => typeof id === "string") : [] })),
     ...environments.map((point) => ({ id: point.id, kind: "environment" as const, pointType: "environment" as const, name: point.name, luc: "", location: "", templateId: point.template_id ?? visitTemplateId, completionStatus: point.completion_status, skippedSectionIds: Array.isArray(point.skipped_section_ids) ? point.skipped_section_ids.filter((id): id is string => typeof id === "string") : [] })),
@@ -103,11 +105,15 @@ export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections
     return leftValue.localeCompare(rightValue, "pt-BR", { numeric: true, sensitivity: "base" }) || left.name.localeCompare(right.name, "pt-BR");
   }), [points, search, typeFilter, sort]);
   const completedCount = points.filter((point) => point.completionStatus === "concluida").length;
+  const allCollapsed = points.length > 0 && points.every((point) => collapsedPoints.has(`${point.kind}-${point.id}`));
 
   return <section id="visit-screen-summary" className="overflow-hidden rounded-md border border-border bg-background" aria-label="Resumo da visita">
         <div className="flex flex-wrap items-start justify-between gap-3 border-b px-4 py-4 sm:px-6">
           <div><h3 className="font-bold">Resumo da Visita #{String(visitNumber).padStart(12, "0")}</h3><p className="text-sm text-muted-foreground">Todas as respostas e fotos organizadas por loja, quiosque ou ambiente.</p></div>
-          <Button type="button" variant="action" size="sm" onClick={onClose}>Fechar</Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button type="button" variant="action" size="sm" disabled={!points.length} aria-expanded={!allCollapsed} onClick={() => setCollapsedPoints(allCollapsed ? new Set() : new Set(points.map((point) => `${point.kind}-${point.id}`)))}>{allCollapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}{allCollapsed ? "Exibir todos" : "Recolher todos"}</Button>
+            <Button type="button" variant="action" size="sm" onClick={onClose}>Fechar</Button>
+          </div>
         </div>
         <div>
           <div className="border-b bg-muted/30 px-4 py-3 sm:px-6">
@@ -133,14 +139,20 @@ export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections
                 const totalExpected = questions.filter((question) => question.active && availableSections.some((section) => section.id === question.section_id)).length;
                 const progress = point.completionStatus === "concluida" ? 100 : totalExpected ? Math.min(99, Math.round(pointResponses.length / totalExpected * 100)) : 0;
                 const typeLabel = point.pointType === "shop" ? "Loja" : point.pointType === "kiosk" ? "Quiosque" : "Ambiente";
+                const pointKey = `${point.kind}-${point.id}`;
+                const collapsed = collapsedPoints.has(pointKey);
+                const contentId = `summary-content-${pointKey}`;
                 return <article key={`${point.kind}-${point.id}`} className="px-4 py-3 transition-colors hover:bg-muted/20 sm:px-6">
                   <div className="min-w-0">
-                    <header className="grid min-w-0 gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(12rem,22rem)_auto] sm:items-center sm:gap-4">
-                      <div className="flex min-w-0 items-start gap-2"><span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary/15 text-primary"><Store className="h-4 w-4" /></span><div className="min-w-0"><div className="flex min-w-0 flex-wrap items-center gap-2"><h3 className="min-w-0 truncate font-bold">{point.name}</h3><Badge variant="outline" className="shrink-0">{point.luc ? `LUC ${point.luc}` : typeLabel}</Badge></div>{point.location ? <p className="flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="h-3 w-3 shrink-0" /><span className="truncate">{point.location}</span></p> : null}</div></div>
+                    <header className={collapsed ? "grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3" : "grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(8rem,18rem)_auto_auto] sm:gap-4"}>
+                      <div className="flex min-w-0 items-center gap-2"><SiteSurveyFacadeThumbnail name={point.name} attachment={facadePhotos[0]} /><div className="min-w-0"><div className="flex min-w-0 flex-wrap items-center gap-2"><h3 className="min-w-0 break-words font-bold">{point.name}</h3>{!collapsed ? <Badge variant="outline" className="shrink-0">{point.luc ? `LUC ${point.luc}` : typeLabel}</Badge> : null}</div>{!collapsed && point.location ? <p className="flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="h-3 w-3 shrink-0" /><span className="truncate">{point.location}</span></p> : null}</div></div>
+                      {!collapsed ? <>
                       <div className="min-w-0"><div className="mb-1 flex justify-between text-[10px] font-semibold text-muted-foreground"><span>PROGRESSO</span><span>{progress}%</span></div><div className="h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary" style={{ width: `${progress}%` }} /></div></div>
                       <Badge variant="status" className="justify-self-start sm:justify-self-end">{point.completionStatus === "concluida" ? "Concluída" : point.completionStatus === "cancelada" ? "Cancelada" : "Em preenchimento"}</Badge>
+                      </> : null}
+                      <Button type="button" variant="action" size="sm" className="col-start-2 row-start-1 sm:col-start-auto sm:row-start-auto" aria-label={`${collapsed ? "Exibir" : "Recolher"} ${point.name}`} aria-expanded={!collapsed} aria-controls={contentId} onClick={() => setCollapsedPoints((previous) => { const next = new Set(previous); if (next.has(pointKey)) next.delete(pointKey); else next.add(pointKey); return next; })}>{collapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}{collapsed ? "Exibir" : "Recolher"}</Button>
                     </header>
-                    <div className="mt-3 min-w-0 space-y-3">
+                    <div id={contentId} hidden={collapsed} className="mt-3 min-w-0 space-y-3">
                       {facadePhotos.length ? <div className="flex items-start gap-3 border-b border-border pb-3"><div className="flex min-w-24 items-center gap-2 text-xs font-bold uppercase text-muted-foreground"><ImageIcon className="h-4 w-4 text-primary" />Fachada</div><div className="flex min-w-0 flex-wrap gap-2">{facadePhotos.map((photo) => <PhotoThumbnail key={photo.id} attachment={photo} />)}</div></div> : null}
                       {grouped.map(({ section, nature, rows }) => { const Icon = nature.icon; const groupPhotos = pointAttachments.filter((attachment) => attachment.question_id && questions.find((question) => question.id === attachment.question_id)?.section_id === section.id); return <section key={section.id} className="min-w-0"><h4 className="mb-1.5 flex items-center gap-2 text-xs font-bold uppercase text-muted-foreground"><Icon className="h-4 w-4 shrink-0 text-primary" />{nature.label}</h4><dl className="grid gap-x-4 gap-y-1.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{rows.map((response, rowIndex) => { const question = questions.find((item) => item.id === response.question_id); return <div key={response.id} className="flex min-w-0 items-start gap-1.5 border-l-2 border-primary/35 pl-2"><span className="grid h-5 w-5 shrink-0 place-items-center rounded-md bg-primary/15 text-[10px] font-bold leading-none text-primary">{rowIndex + 1}</span><div className="min-w-0"><dt className="text-[11px] leading-tight text-muted-foreground">{question?.prompt ?? snapshotPrompt(response.question_snapshot)}</dt><dd className="break-words text-sm font-semibold leading-tight">{answerText(response.answer)}</dd></div></div>; })}</dl>{groupPhotos.length ? <div className="mt-2 flex flex-wrap gap-2">{groupPhotos.map((photo) => <PhotoThumbnail key={photo.id} attachment={photo} />)}</div> : null}</section>; })}
                       {unmatched.length ? <section className="min-w-0"><h4 className="mb-1.5 flex items-center gap-2 text-xs font-bold uppercase text-muted-foreground"><FileText className="h-4 w-4 text-primary" />Outras respostas</h4><dl className="grid gap-x-4 gap-y-1.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{unmatched.map((response, rowIndex) => { const question = questions.find((item) => item.id === response.question_id); return <div key={response.id} className="flex min-w-0 items-start gap-1.5 border-l-2 border-primary/35 pl-2"><span className="grid h-5 w-5 shrink-0 place-items-center rounded-md bg-primary/15 text-[10px] font-bold leading-none text-primary">{rowIndex + 1}</span><div className="min-w-0"><dt className="text-[11px] leading-tight text-muted-foreground">{question?.prompt ?? snapshotPrompt(response.question_snapshot)}</dt><dd className="break-words text-sm font-semibold leading-tight">{answerText(response.answer)}</dd></div></div>; })}</dl></section> : null}
