@@ -2,7 +2,7 @@
 - [x] Site Survey — filtrar lojas, quiosques e ambientes sem foto de fachada cadastrada; lista e resumo validados.
 - [x] Site Survey — usar somente seta verde sem borda ou texto nos controles Exibir/Recolher do resumo, conforme Editar modelo.
 - [x] Site Survey — posicionar foto abaixo de Fachada, alinhada à esquerda com as demais fotos do resumo; celular sem transbordamento.
-- [x] Site Survey — Exibir/Recolher individual e geral no resumo; recolhido mostra apenas fachada/ícone e nome. Validado em computador e celular, mantendo a ampliação da foto.
+- [x] Site Survey — Exibir/Recolher individual e geral no resumo; recolhido mantém fachada/ícone, nome, progresso e situação, mantendo a ampliação da foto.
 - [x] Site Survey — miniatura ampliável da fachada antes do LUC, linhas mais altas e foto ao lado do nome no resumo com ícone quando ausente.
 - [x] Site Survey — garantir início pelo botão ou primeira informação e conclusão explícita; conferidos 36 pontos de Leandro, corrigidos 3 inícios e preservadas as conclusões.
 - [x] Mogi — corrigir pontos iniciados pela fachada de Leonardo; preservar ou recuperar o início real de Leandro.

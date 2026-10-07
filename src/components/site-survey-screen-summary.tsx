@@ -138,12 +138,10 @@ export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections
                 const contentId = `summary-content-${pointKey}`;
                 return <article key={`${point.kind}-${point.id}`} className="px-4 py-3 transition-colors hover:bg-muted/20 sm:px-6">
                   <div className="min-w-0">
-                    <header className={collapsed ? "grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3" : "grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(8rem,18rem)_auto_auto] sm:gap-4"}>
+                    <header className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(8rem,18rem)_auto_auto] sm:gap-4">
                       <div className="flex min-w-0 items-center gap-2"><SiteSurveyFacadeThumbnail name={point.name} attachment={facadePhotos[0]} /><div className="min-w-0"><div className="flex min-w-0 flex-wrap items-center gap-2"><h3 className="min-w-0 break-words font-bold">{point.name}</h3>{!collapsed ? <Badge variant="outline" className="shrink-0">{point.luc ? `LUC ${point.luc}` : typeLabel}</Badge> : null}</div>{!collapsed && point.location ? <p className="flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="h-3 w-3 shrink-0" /><span className="truncate">{point.location}</span></p> : null}</div></div>
-                      {!collapsed ? <>
                       <div className="min-w-0"><div className="mb-1 flex justify-between text-[10px] font-semibold text-muted-foreground"><span>PROGRESSO</span><span>{progress}%</span></div><div className="h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary" style={{ width: `${progress}%` }} /></div></div>
                       <Badge variant="status" className="justify-self-start sm:justify-self-end">{point.completionStatus === "concluida" ? "Concluída" : point.completionStatus === "cancelada" ? "Cancelada" : "Em preenchimento"}</Badge>
-                      </> : null}
                       <Button type="button" variant="ghost" size="compactIcon" title={`${collapsed ? "Exibir" : "Recolher"} ${point.name}`} className="col-start-2 row-start-1 sm:col-start-auto sm:row-start-auto" aria-label={`${collapsed ? "Exibir" : "Recolher"} ${point.name}`} aria-expanded={!collapsed} aria-controls={contentId} onClick={() => setCollapsedPoints((previous) => { const next = new Set(previous); if (next.has(pointKey)) next.delete(pointKey); else next.add(pointKey); return next; })}>{collapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}</Button>
                     </header>
                     <div id={contentId} hidden={collapsed} className="mt-3 min-w-0 space-y-3">
