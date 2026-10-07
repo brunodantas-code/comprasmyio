@@ -4588,6 +4588,7 @@ export type Database = {
           created_by: string | null
           id: string
           last_progress_at: string | null
+          meter_number: string | null
           name: string
           pending_fields: Json
           skipped_section_ids: Json
@@ -4607,6 +4608,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           last_progress_at?: string | null
+          meter_number?: string | null
           name: string
           pending_fields?: Json
           skipped_section_ids?: Json
@@ -4626,6 +4628,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           last_progress_at?: string | null
+          meter_number?: string | null
           name?: string
           pending_fields?: Json
           skipped_section_ids?: Json
@@ -4770,6 +4773,7 @@ export type Database = {
           last_progress_at: string | null
           location: string | null
           luc_number: string
+          meter_number: string | null
           pending_fields: Json
           point_type: string
           shop_name: string
@@ -4794,6 +4798,7 @@ export type Database = {
           last_progress_at?: string | null
           location?: string | null
           luc_number: string
+          meter_number?: string | null
           pending_fields?: Json
           point_type?: string
           shop_name: string
@@ -4818,6 +4823,7 @@ export type Database = {
           last_progress_at?: string | null
           location?: string | null
           luc_number?: string
+          meter_number?: string | null
           pending_fields?: Json
           point_type?: string
           shop_name?: string
