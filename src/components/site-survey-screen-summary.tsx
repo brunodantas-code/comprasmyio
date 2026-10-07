@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Camera, Droplets, FileText, ImageIcon, MapPin, Package, Search, Store, Wrench, Zap } from "lucide-react";
+import { Camera, Droplets, FileText, ImageIcon, MapPin, Package, Search, Wrench, Zap } from "lucide-react";
 
+import { SiteSurveyFacadeThumbnail } from "@/components/site-survey-facade-thumbnail";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -136,7 +137,7 @@ export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections
                 return <article key={`${point.kind}-${point.id}`} className="px-4 py-3 transition-colors hover:bg-muted/20 sm:px-6">
                   <div className="min-w-0">
                     <header className="grid min-w-0 gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(12rem,22rem)_auto] sm:items-center sm:gap-4">
-                      <div className="flex min-w-0 items-start gap-2"><span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary/15 text-primary"><Store className="h-4 w-4" /></span><div className="min-w-0"><div className="flex min-w-0 flex-wrap items-center gap-2"><h3 className="min-w-0 truncate font-bold">{point.name}</h3><Badge variant="outline" className="shrink-0">{point.luc ? `LUC ${point.luc}` : typeLabel}</Badge></div>{point.location ? <p className="flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="h-3 w-3 shrink-0" /><span className="truncate">{point.location}</span></p> : null}</div></div>
+                      <div className="flex min-w-0 items-start gap-2"><SiteSurveyFacadeThumbnail name={point.name} attachment={facadePhotos[0]} /><div className="min-w-0"><div className="flex min-w-0 flex-wrap items-center gap-2"><h3 className="min-w-0 truncate font-bold">{point.name}</h3><Badge variant="outline" className="shrink-0">{point.luc ? `LUC ${point.luc}` : typeLabel}</Badge></div>{point.location ? <p className="flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="h-3 w-3 shrink-0" /><span className="truncate">{point.location}</span></p> : null}</div></div>
                       <div className="min-w-0"><div className="mb-1 flex justify-between text-[10px] font-semibold text-muted-foreground"><span>PROGRESSO</span><span>{progress}%</span></div><div className="h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary" style={{ width: `${progress}%` }} /></div></div>
                       <Badge variant="status" className="justify-self-start sm:justify-self-end">{point.completionStatus === "concluida" ? "Concluída" : point.completionStatus === "cancelada" ? "Cancelada" : "Em preenchimento"}</Badge>
                     </header>

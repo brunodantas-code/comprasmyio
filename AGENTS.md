@@ -40,3 +40,5 @@
 - Facade attachment triggers only clear facade pending fields; guarded explicit starts and the first nonempty persisted checklist response register point start, excluding retrospective manual visits.
 - Ordinary point saves preserve completion timestamps; only explicit completion writes them, and progress logging distinguishes completion transitions from later edits.
 - RLS uses effective menus/app grants; shared files follow record access and uploads bind owners, preserving authorized collaboration.
+
+- Site Survey facade identity thumbnails share a signed private-image viewer and reuse loaded visit attachments, keeping list and summary behavior consistent without changing access rules.
