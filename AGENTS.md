@@ -36,3 +36,5 @@
 - Site Survey's on-screen visit summary reuses loaded visit data, follows checklist section/question order, uses compact full-width response grids, and keeps photos attached to their point; it never changes PDF output.
 - Site Survey uses database-backed expiring per-point edit leases with guarded writes; facade inserts update only facade progress atomically, preventing concurrent checklist overwrites.
 - Facade recognition is an independent, time-bounded suggestion; draft revision and request guards preserve manual names and discard results after the dialog closes, so recognition never gates point saving.
+- Checklist and registration-pending facade uploads share a camera/gallery picker marked for exclusion from checklist autosave, keeping independent facade writes safe.
+- Facade attachment triggers only clear facade pending fields; starting a point requires an explicit user decision through the normal guarded point update, preserving registration-only uploads and editor leases.

@@ -715,6 +715,13 @@
       "when": 1791372888211,
       "tag": "0101_site_survey_exclusive_point_editing",
       "breakpoints": true
+    },
+    {
+      "idx": 102,
+      "version": "7",
+      "when": 1791382707976,
+      "tag": "0102_facade_registration_does_not_start_visit",
+      "breakpoints": true
     }
   ]
 }
