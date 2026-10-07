@@ -757,6 +757,13 @@
       "when": 1791386995252,
       "tag": "0107_selected_reference_and_workflow_access",
       "breakpoints": true
+    },
+    {
+      "idx": 108,
+      "version": "7",
+      "when": 1791387085968,
+      "tag": "0108_complete_selected_policy_groups",
+      "breakpoints": true
     }
   ]
 }
