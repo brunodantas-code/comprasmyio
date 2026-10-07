@@ -26,11 +26,9 @@
 - Survey skips persist by point; skip removes pending requirements, keeps answers, flushes autosave.
 - Survey report/PDF share ordering and hydraulic DN from De-Para; missing flow has no specification. Purchase-report photos come only from the meter-flow question and remain grouped by point. Photo reuse stores same-point attachment ID on response; deletion invalidates it.
 - Survey LUC corrections replace the current history entry; actual shop changes append a history entry, preserving genuine occupancy changes.
-- Site Survey built-in catalog title overrides live separately from catalog items; this preserves fixed catalog keys while allowing their displayed names to change.
-- Site Survey material type sources are linked by catalog IDs, not material names; this survives catalog renames and keeps historical visit selections.
-- Site Survey stores shops by internal UUID; LUC is optional and may repeat after explicit confirmation, while location may always repeat.
-- Site Survey stores shops and kiosks in the same point table with `point_type`; both share LUC, location, checklist, and facade flows.
-- Site Survey keeps a normalized global shop/kiosk catalog synchronized from visit points; new visits reuse it without rewriting visit history.
+- Survey catalog title overrides stay separate from items to preserve fixed keys; material types link by catalog IDs to survive renames.
+- Survey points use UUIDs and shared shop/kiosk storage with `point_type`; optional LUC repeats need confirmation, locations may repeat.
+- A normalized global shop/kiosk catalog syncs from visit points for reuse without rewriting visit history.
 - Site Survey purchase reports hand a review-only draft to Supply; only the normal Supply form submission creates the order and Approval.
 - Textual action commands use the shared outlined-green action style, including dialogs; compact add/edit controls use the borderless green icon pattern from Cadastro.
 - Site Survey's on-screen visit summary reuses loaded visit data, follows checklist section/question order, uses compact full-width response grids, and keeps photos attached to their point; it never changes PDF output.
@@ -41,4 +39,4 @@
 - Ordinary point saves preserve completion timestamps; only explicit completion writes them, and progress logging distinguishes completion transitions from later edits.
 - RLS uses effective menus/app grants; shared files follow record access and uploads bind owners, preserving authorized collaboration.
 
-- Site Survey facade identity thumbnails share a signed private-image viewer and reuse loaded visit attachments, keeping list and summary behavior consistent without changing access rules.
+- Survey facade thumbnails share a signed private-image viewer and loaded attachments for consistent list/summary behavior without access changes.
