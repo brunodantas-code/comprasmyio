@@ -39,7 +39,7 @@ const shrinkPhoto = (dataUrl: string) => new Promise<string>((resolve) => {
 
 type LucRow = { id: string; luc_number: string; shop_name: string; location: string | null; point_type: string; meter_number?: string | null };
 type LucHistoryRow = { id: string; visit_luc_id: string; luc_number: string; shop_name: string; valid_from: string; valid_until: string | null };
-type PreviewRow = { lucNumber: string; shopName: string; location: string; issue?: string };
+type PreviewRow = { lucNumber: string; shopName: string; location: string; meterNumber: string; issue?: string };
 type TemplateOption = { id: string; name: string; active: boolean };
 export type ShopCatalogOption = { id: string; name: string; point_type: string; active: boolean };
 
@@ -220,9 +220,9 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
     setExporting(true);
     try {
       const fetchShops = async () => {
-        const result: { luc_number: string; shop_name: string; location: string | null }[] = [];
+        const result: { luc_number: string; shop_name: string; location: string | null; meter_number: string | null }[] = [];
         for (let offset = 0; ; offset += 1000) {
-          const { data, error } = await supabase.from("site_survey_visit_lucs").select("luc_number,shop_name,location").eq("visit_id", visitId).eq("active", true).order("id").range(offset, offset + 999);
+          const { data, error } = await supabase.from("site_survey_visit_lucs").select("luc_number,shop_name,location,meter_number").eq("visit_id", visitId).eq("active", true).order("id").range(offset, offset + 999);
           if (error) throw error;
           result.push(...(data ?? []));
           if ((data?.length ?? 0) < 1000) break;
@@ -247,11 +247,11 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
         return sortAscending ? comparison : -comparison;
       });
       const exportRows = [
-        ...orderedShops.map((row) => ({ LUC: String(row.luc_number ?? ""), Nome: String(row.shop_name ?? ""), "Localização": String(row.location ?? "") })),
-        ...environments.sort((a, b) => a.name.localeCompare(b.name, "pt-BR", { numeric: true })).map((row) => ({ LUC: "", Nome: row.name, "Localização": "" })),
+        ...orderedShops.map((row) => ({ LUC: String(row.luc_number ?? ""), Nome: String(row.shop_name ?? ""), "Localização": String(row.location ?? ""), Medidor: String(row.meter_number ?? "") })),
+        ...environments.sort((a, b) => a.name.localeCompare(b.name, "pt-BR", { numeric: true })).map((row) => ({ LUC: "", Nome: row.name, "Localização": "", Medidor: "" })),
       ];
-      const sheet = XLSX.utils.json_to_sheet(exportRows, { header: ["LUC", "Nome", "Localização"] });
-      sheet["!cols"] = [{ wch: 18 }, { wch: 42 }, { wch: 32 }];
+      const sheet = XLSX.utils.json_to_sheet(exportRows, { header: ["LUC", "Nome", "Localização", "Medidor"] });
+      sheet["!cols"] = [{ wch: 18 }, { wch: 42 }, { wch: 32 }, { wch: 18 }];
       XLSX.utils.book_append_sheet(workbook, sheet, "Lojas e ambientes");
       XLSX.writeFile(workbook, `lojas-ambientes-os-${visitId}.xlsx`);
     } catch (error) { toast.error(error instanceof Error ? error.message : "Não foi possível exportar a lista."); }
