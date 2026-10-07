@@ -41,4 +41,4 @@
 
 - Survey facade thumbnails and summary photos share cached private-image previews with lazy browser-only HEIC decoding, serialized to bound memory; originals and access stay unchanged.
 
-- Registration-pending cards group existing pending items by checklist section ID; the section dialog delegates answers and facade uploads to the existing focused editor to preserve save and lease protections.
+- Registration-pending cards group by section ID; dialogs reuse the focused editor to preserve saves and edit leases.
