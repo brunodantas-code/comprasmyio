@@ -736,6 +736,13 @@
       "when": 1791383325985,
       "tag": "0104_survey_include_start_in_progress_audit",
       "breakpoints": true
+    },
+    {
+      "idx": 105,
+      "version": "7",
+      "when": 1791386828783,
+      "tag": "0105_selected_supply_rls_permissions",
+      "breakpoints": true
     }
   ]
 }

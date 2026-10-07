@@ -6375,6 +6375,10 @@ export type Database = {
         Args: { _target_user_id: string }
         Returns: string
       }
+      security_supply_menu_access: {
+        Args: { _keys: string[] }
+        Returns: boolean
+      }
       set_technician_mobile_phone: {
         Args: { _mobile_phone: string; _technician_id: string }
         Returns: undefined
