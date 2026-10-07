@@ -40,3 +40,5 @@
 - RLS uses effective menus/app grants; shared files follow record access and uploads bind owners, preserving authorized collaboration.
 
 - Survey facade thumbnails and summary photos share cached private-image previews with lazy browser-only HEIC decoding, serialized to bound memory; originals and access stay unchanged.
+
+- Registration-pending cards group by section ID; dialogs reuse the focused editor to preserve saves and edit leases.
