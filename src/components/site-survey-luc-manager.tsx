@@ -112,13 +112,15 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
     const lucIndex = headers.findIndex((header) => ["luc", "n do luc", "nº do luc", "numero do luc"].includes(header));
     const nameIndex = headers.findIndex((header) => ["nome da loja", "loja", "nome loja"].includes(header));
     const locationIndex = headers.findIndex((header) => ["localizacao", "piso", "andar", "local"].includes(header));
+    const meterIndex = headers.findIndex((header) => ["medidor", "n do medidor", "nº do medidor", "numero do medidor", "numero medidor"].includes(header));
     if (nameIndex < 0) throw new Error("Não encontrei a coluna Nome da loja.");
     const parsed = matrix.slice(headerIndex + 1).filter((line) => line.some((cell) => String(cell ?? "").trim())).map((line) => {
       const lucNumber = String(line[lucIndex] ?? "").trim();
       const shopName = String(line[nameIndex] ?? "").trim();
       const location = locationIndex >= 0 ? String(line[locationIndex] ?? "").trim() : "";
+      const meterNumber = meterIndex >= 0 ? String(line[meterIndex] ?? "").trim() : "";
       const issue = !shopName ? "Preencha o Nome da loja" : undefined;
-      return { lucNumber, shopName, location, issue };
+      return { lucNumber, shopName, location, meterNumber, issue };
     });
     if (!parsed.length) throw new Error("Nenhuma linha foi encontrada.");
     setPreview(parsed);
@@ -136,12 +138,12 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
     setLoading(true);
     try {
       if (!validPreview.length) throw new Error("Não há linhas válidas para importar.");
-      const payload = validPreview.map((item) => ({ visit_id: visitId, luc_number: item.lucNumber, shop_name: item.shopName, location: item.location || null, point_type: "shop", created_by: userId, updated_by: userId }));
+      const payload = validPreview.map((item) => ({ visit_id: visitId, luc_number: item.lucNumber, shop_name: item.shopName, location: item.location || null, meter_number: item.meterNumber || null, point_type: "shop", created_by: userId, updated_by: userId }));
       for (const item of payload) {
         const key = normalizeHeader(item.luc_number);
         const matches = key ? rows.filter((row) => normalizeHeader(row.luc_number) === key) : [];
         if (key && (lucCounts.get(key) ?? 0) === 1 && matches.length === 1) {
-          const { error } = await supabase.from("site_survey_visit_lucs").update({ shop_name: item.shop_name, location: item.location, updated_by: userId, active: true }).eq("id", matches[0].id);
+          const { error } = await supabase.from("site_survey_visit_lucs").update({ shop_name: item.shop_name, location: item.location, meter_number: item.meter_number, updated_by: userId, active: true }).eq("id", matches[0].id);
           if (error) throw error;
         } else {
           const { error } = await supabase.from("site_survey_visit_lucs").insert({ ...item, active: true });
@@ -278,7 +280,7 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
          <DialogFooter className="flex-row justify-end gap-2 sm:space-x-0"><Button type="button" variant="outline" onClick={() => setEditing(null)}>Cancelar</Button><Button type="submit" disabled={!pointType || saving}>{saving ? "Salvando..." : "Salvar"}</Button></DialogFooter>
        </form></DialogContent>
      </Dialog>
-     <Dialog open={previewOpen} onOpenChange={setPreviewOpen}><DialogContent className="max-h-[88vh] max-w-4xl overflow-y-auto"><DialogHeader><DialogTitle>Conferir importação</DialogTitle><DialogDescription>{validPreview.length} linha(s) válida(s) e {invalidCount} com pendência. LUCs únicos já cadastrados terão nome e localização atualizados; repetições serão confirmadas antes da inclusão.</DialogDescription></DialogHeader><div className="overflow-x-auto rounded-md border"><div className="grid min-w-[720px] grid-cols-[100px_1fr_1fr_150px] gap-3 bg-primary/20 px-3 py-2 text-xs font-semibold"><span>LUC</span><span>Nome da loja</span><span>Localização</span><span>Resultado</span></div>{preview.map((item, index) => <div key={`${item.lucNumber}-${index}`} className="grid min-w-[720px] grid-cols-[100px_1fr_1fr_150px] gap-3 border-t px-3 py-2 text-sm"><span>{item.lucNumber || "Sem LUC"}</span><span>{item.shopName || "—"}</span><span>{item.location || "—"}</span><span className={item.issue ? "text-destructive" : "text-muted-foreground"}>{item.issue ?? (item.lucNumber && currentByLuc.has(normalizeHeader(item.lucNumber)) ? "Atualizar ou confirmar" : "Adicionar")}</span></div>)}</div><DialogFooter><Button type="button" variant="outline" onClick={() => setPreviewOpen(false)}>Cancelar</Button><Button type="button" disabled={loading || !validPreview.length} onClick={() => void importRows()}>{loading ? "Importando..." : `Importar ${validPreview.length} ambiente(s)`}</Button></DialogFooter></DialogContent></Dialog>
+     <Dialog open={previewOpen} onOpenChange={setPreviewOpen}><DialogContent className="max-h-[88vh] max-w-4xl overflow-y-auto"><DialogHeader><DialogTitle>Conferir importação</DialogTitle><DialogDescription>{validPreview.length} linha(s) válida(s) e {invalidCount} com pendência. LUCs únicos já cadastrados terão nome e localização atualizados; repetições serão confirmadas antes da inclusão.</DialogDescription></DialogHeader><div className="overflow-x-auto rounded-md border"><div className="grid min-w-[720px] grid-cols-[100px_1fr_1fr_130px_150px] gap-3 bg-primary/20 px-3 py-2 text-xs font-semibold"><span>LUC</span><span>Nome da loja</span><span>Localização</span><span>Medidor</span><span>Resultado</span></div>{preview.map((item, index) => <div key={`${item.lucNumber}-${index}`} className="grid min-w-[720px] grid-cols-[100px_1fr_1fr_130px_150px] gap-3 border-t px-3 py-2 text-sm"><span>{item.lucNumber || "Sem LUC"}</span><span>{item.shopName || "—"}</span><span>{item.location || "—"}</span><span>{item.meterNumber || "—"}</span><span className={item.issue ? "text-destructive" : "text-muted-foreground"}>{item.issue ?? (item.lucNumber && currentByLuc.has(normalizeHeader(item.lucNumber)) ? "Atualizar ou confirmar" : "Adicionar")}</span></div>)}</div><DialogFooter><Button type="button" variant="outline" onClick={() => setPreviewOpen(false)}>Cancelar</Button><Button type="button" disabled={loading || !validPreview.length} onClick={() => void importRows()}>{loading ? "Importando..." : `Importar ${validPreview.length} ambiente(s)`}</Button></DialogFooter></DialogContent></Dialog>
      <AlertDialog open={duplicateConfirmation === "edit"} onOpenChange={(open) => { if (!open) setDuplicateConfirmation(null); }}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Este LUC já está em uso</AlertDialogTitle><AlertDialogDescription>O LUC {draftLuc.trim()} já está cadastrado para {duplicateNames.join(", ")}. Deseja cadastrar esta nova loja no mesmo LUC?</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Voltar à edição</AlertDialogCancel><AlertDialogAction onClick={() => { setDuplicateConfirmation(null); void saveEdit(true); }}>Cadastrar mesmo assim</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
      <AlertDialog open={duplicateConfirmation === "import"} onOpenChange={(open) => { if (!open) setDuplicateConfirmation(null); }}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>A planilha contém LUC repetido</AlertDialogTitle><AlertDialogDescription>Existem lojas com o mesmo LUC na planilha ou na OS. Deseja importar esses registros como novas lojas no mesmo LUC?</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Voltar à conferência</AlertDialogCancel><AlertDialogAction onClick={() => { setDuplicateConfirmation(null); void importRows(true); }}>Importar mesmo assim</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
   </section></Collapsible>;
