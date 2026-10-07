@@ -1,4 +1,4 @@
-- [ ] Mogi — corrigir pontos iniciados pela fachada de Leonardo; preservar ou recuperar o início real de Leandro.
+- [x] Mogi — corrigir pontos iniciados pela fachada de Leonardo; preservar ou recuperar o início real de Leandro.
 - [x] Site Survey — permitir escolher a foto da fachada na galeria, além de tirar uma nova foto.
 - [x] Site Survey — ao enviar fachada de ponto não iniciado, perguntar se deseja iniciar a visita ou somente completar o cadastro.
 - [x] Site Survey — agrupar as três etapas iniciais já respondidas com Exibir/Recolher para liberar espaço durante o checklist.
