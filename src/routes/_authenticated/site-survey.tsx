@@ -403,6 +403,7 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
   const [registrationPendingOpen, setRegistrationPendingOpen] = useState(false);
   const [registrationSearch, setRegistrationSearch] = useState("");
   const [initialStepsExpanded, setInitialStepsExpanded] = useState<boolean | null>(null);
+  const [pendingGroup, setPendingGroup] = useState<{ pointValue: string; key: string } | null>(null);
   const [pendingFocus, setPendingFocus] = useState<{ pointValue: string; itemKey: string } | null>(null);
   const pendingFocusFormRef = useRef<HTMLFormElement | null>(null);
   useEffect(() => {
@@ -969,7 +970,17 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
         if (skipped.has(section.id)) continue;
         for (const question of sortByPosition(data.questions.filter((item) => item.active && item.section_id === section.id))) if (isQuestionVisible(question, answers) && isNotInformedAnswer(answerParts(answers.get(question.id)).value)) items.push({ key: question.id, label: `${section.title}: ${question.prompt}`, sectionId: section.id });
       }
-      return { point, luc, items };
+      const groups: { key: string; label: string; items: typeof items }[] = [];
+      for (const item of items) {
+        const key = item.sectionId ?? item.key;
+        const existing = groups.find((group) => group.key === key);
+        if (existing) existing.items.push(item);
+        else {
+          const title = item.sectionId ? data.sections.find((section) => section.id === item.sectionId)?.title ?? "Checklist" : item.label;
+          groups.push({ key, label: /^instalação elétrica$/i.test(title.trim()) ? "Elétrica" : title, items: [item] });
+        }
+      }
+      return { point, luc, items, groups };
     }).filter((row) => row.items.length && (!registrationSearch.trim() || row.point.label.toLocaleLowerCase("pt-BR").includes(registrationSearch.trim().toLocaleLowerCase("pt-BR"))));
   })();
   const canFillRegistration = data.permissions.has("site_survey_executar") || data.permissions.has("site_survey_editar");
@@ -988,7 +999,19 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
     toast.success("Localização salva");
     void refetchDetail();
   };
-  const pendingPanel = registrationPendingOpen ? <section id="registration-pending" className="space-y-3 border-t pt-5" aria-label="Pendências de cadastro"><div className="flex flex-wrap items-center justify-between gap-2"><div><h3 className="font-bold">Pendências de cadastro</h3><p className="text-sm text-muted-foreground">{registrationPending.length} ponto(s) com informações a completar na próxima visita.</p></div><div className="flex items-center gap-2"><Input value={registrationSearch} onChange={(event) => setRegistrationSearch(event.target.value)} placeholder="Filtrar loja, LUC ou ambiente" className="h-9 w-56" aria-label="Filtrar pendências de cadastro" /><Button type="button" size="sm" variant="action" onClick={() => setRegistrationPendingOpen(false)}>Fechar</Button></div></div>{registrationPending.length ? <div className="grid grid-cols-2 items-start gap-2 sm:grid-cols-3 lg:grid-cols-4">{registrationPending.map(({ point, luc, items }) => <div key={point.value} className="flex min-w-0 flex-col gap-2 rounded-md border border-border/70 bg-background p-2.5"><div className="min-w-0"><p className="line-clamp-2 text-xs font-semibold leading-tight">{point.label}</p><p className="mt-0.5 text-[11px] text-muted-foreground">{items.length} pendência(s)</p></div><div className="flex flex-col gap-1.5">{items.map((item) => item.key === "location" && luc && canFillRegistration ? <Input key={item.key} placeholder="Localização (andar)" className="h-7 w-full text-xs" aria-label={`Localização de ${point.label}`} onBlur={(event) => void saveLocation(luc.id, event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") event.currentTarget.blur(); }} /> : <Button key={item.key} type="button" size="sm" variant="action" className="h-auto w-full justify-start whitespace-normal px-2 py-1 text-left text-[11px] leading-tight" disabled={!canFillRegistration} onClick={() => void openPendingFocus(point.value, item.key)}>{item.key === "facade" ? <Camera /> : null}{item.label}</Button>)}</div></div>)}</div> : <p className="text-sm text-muted-foreground">Nenhuma pendência de cadastro encontrada.</p>}</section> : null;
+  const activePendingRow = registrationPending.find((row) => row.point.value === pendingGroup?.pointValue);
+  const activePendingGroup = activePendingRow?.groups.find((group) => group.key === pendingGroup?.key);
+  const pendingPanel = registrationPendingOpen ? <section id="registration-pending" className="space-y-3 border-t pt-5" aria-label="Pendências de cadastro">
+    <div className="flex flex-wrap items-center justify-between gap-2"><div><h3 className="font-bold">Pendências de cadastro</h3><p className="text-sm text-muted-foreground">{registrationPending.length} ponto(s) com informações a completar na próxima visita.</p></div><div className="flex flex-wrap items-center gap-2"><Input value={registrationSearch} onChange={(event) => setRegistrationSearch(event.target.value)} placeholder="Filtrar loja, LUC ou ambiente" className="h-9 w-full sm:w-56" aria-label="Filtrar pendências de cadastro" /><Button type="button" size="sm" variant="action" onClick={() => setRegistrationPendingOpen(false)}>Fechar</Button></div></div>
+    {registrationPending.length ? <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{registrationPending.map(({ point, items, groups }) => <article key={point.value} aria-label={`Pendências de ${point.label}`} className="min-w-0 rounded-md border border-border bg-background p-3">
+      <header className="mb-3 space-y-1"><h4 className="break-words text-sm font-semibold leading-snug">{point.label}</h4><p className="text-xs text-muted-foreground">{items.length} {items.length === 1 ? "pendência" : "pendências"}</p></header>
+      <div className="flex flex-col gap-2">{groups.map((group) => <Button key={group.key} type="button" size="sm" variant="action" className="h-auto min-h-9 w-full justify-between gap-3 whitespace-normal px-3 py-2 text-left text-xs" aria-label={`${group.label}: ${group.items.length} pendências de ${point.label}`} onClick={() => setPendingGroup({ pointValue: point.value, key: group.key })}><span className="min-w-0 break-words">{group.label}</span><span className="shrink-0 font-semibold tabular-nums">{group.items.length}</span></Button>)}</div>
+    </article>)}</div> : <p className="text-sm text-muted-foreground">Nenhuma pendência de cadastro encontrada.</p>}
+    <Dialog open={Boolean(pendingGroup && !pendingFocus)} onOpenChange={(open) => { if (!open) setPendingGroup(null); }}><DialogContent className="max-h-[88vh] overflow-y-auto sm:max-w-xl"><DialogHeader><DialogTitle>{activePendingGroup?.label ?? "Pendências concluídas"}</DialogTitle><DialogDescription>{activePendingRow?.point.label ?? points.find((point) => point.value === pendingGroup?.pointValue)?.label}</DialogDescription></DialogHeader>
+      <div className="space-y-3">{activePendingGroup?.items.map((item) => item.key === "location" && activePendingRow?.luc ? <div key={item.key} className="space-y-2"><Label htmlFor="pending-location">Localização (andar)</Label><Input id="pending-location" placeholder="Localização (andar)" disabled={!canFillRegistration} onBlur={(event) => { if (activePendingRow.luc) void saveLocation(activePendingRow.luc.id, event.target.value); }} onKeyDown={(event) => { if (event.key === "Enter") event.currentTarget.blur(); }} /></div> : <Button key={item.key} type="button" variant="action" className="h-auto min-h-10 w-full justify-start whitespace-normal text-left text-sm" disabled={!canFillRegistration} onClick={() => { if (activePendingRow) void openPendingFocus(activePendingRow.point.value, item.key); }}>{item.key === "facade" ? <Camera className="shrink-0" /> : null}{item.sectionId ? data.questions.find((question) => question.id === item.key)?.prompt ?? item.label : item.label}</Button>)}{!activePendingGroup ? <p className="text-sm text-muted-foreground">Nenhuma pendência restante nesta etapa.</p> : null}</div>
+      <DialogFooter><Button type="button" size="sm" variant="action" onClick={() => setPendingGroup(null)}>Fechar</Button></DialogFooter>
+    </DialogContent></Dialog>
+  </section> : null;
   const pendingFocusQuestion = pendingFocus && pendingFocus.itemKey !== "facade" ? data.questions.find((item) => item.id === pendingFocus.itemKey) ?? null : null;
   const pendingFocusSection = pendingFocusQuestion ? data.sections.find((item) => item.id === pendingFocusQuestion.section_id) ?? null : null;
   const pendingFocusLabel = pendingFocus ? points.find((item) => item.value === pendingFocus.pointValue)?.label ?? "" : "";
