@@ -39,4 +39,4 @@
 - Ordinary point saves preserve completion timestamps; only explicit completion writes them, and progress logging distinguishes completion transitions from later edits.
 - RLS uses effective menus/app grants; shared files follow record access and uploads bind owners, preserving authorized collaboration.
 
-- Survey facade thumbnails share a signed private-image viewer and loaded attachments for consistent list/summary behavior without access changes.
+- Survey facade thumbnails and summary photos share cached private-image previews with lazy browser-only HEIC decoding, serialized to bound memory; originals and access stay unchanged.

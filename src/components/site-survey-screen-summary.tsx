@@ -1,14 +1,14 @@
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Camera, ChevronDown, ChevronUp, Droplets, FileText, ImageIcon, MapPin, Package, Search, Wrench, Zap } from "lucide-react";
 
 import { SiteSurveyFacadeThumbnail } from "@/components/site-survey-facade-thumbnail";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { supabase } from "@/integrations/supabase/client";
+import { useSurveyImage } from "@/hooks/use-survey-image";
 
 type SummaryQuestion = { id: string; section_id: string; prompt: string; position: number; active: boolean };
 type SummarySection = { id: string; template_id: string; title: string; position: number; active: boolean };
@@ -53,15 +53,7 @@ function matchesPoint(point: SummaryPoint, item: { visit_luc_id?: string | null;
 
 function PhotoThumbnail({ attachment }: { attachment: SummaryAttachment }) {
   const [open, setOpen] = useState(false);
-  const { data: signedUrl } = useQuery({
-    queryKey: ["site-survey-screen-summary-photo", attachment.storage_path],
-    staleTime: 50 * 60 * 1000,
-    queryFn: async () => {
-      const { data, error } = await supabase.storage.from("site-survey-attachments").createSignedUrl(attachment.storage_path, 3600);
-      if (error) throw error;
-      return data.signedUrl;
-    },
-  });
+  const { url: signedUrl } = useSurveyImage(attachment);
   const isImage = attachment.content_type?.startsWith("image/") ?? /\.(jpe?g|png|webp|gif|heic)$/i.test(attachment.file_name);
   if (!isImage) return <Button type="button" variant="ghost" size="sm" className="h-14 max-w-36 justify-start whitespace-normal !bg-muted/50 px-2 text-xs !text-foreground hover:!bg-muted" disabled={!signedUrl} onClick={() => signedUrl && window.open(signedUrl, "_blank", "noopener,noreferrer")}><FileText className="h-4 w-4" /><span className="line-clamp-2">{attachment.file_name}</span></Button>;
   return <>
@@ -90,6 +82,7 @@ export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections
 }) {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [missingFacadeOnly, setMissingFacadeOnly] = useState(false);
   const [sort, setSort] = useState("luc");
   const [collapsedPoints, setCollapsedPoints] = useState<Set<string>>(() => new Set());
   const points = useMemo<SummaryPoint[]>(() => [
@@ -98,12 +91,12 @@ export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections
   ], [lucs, environments, visitTemplateId]);
   const visiblePoints = useMemo(() => points.filter((point) => {
     const term = normalize(search);
-    return (typeFilter === "all" || point.pointType === typeFilter) && (!term || normalize([point.luc, point.name, point.location].join(" ")).includes(term));
+    return (!missingFacadeOnly || !attachments.some((item) => item.attachment_kind === "facade" && matchesPoint(point, item))) && (typeFilter === "all" || point.pointType === typeFilter) && (!term || normalize([point.luc, point.name, point.location].join(" ")).includes(term));
   }).sort((left, right) => {
     const leftValue = sort === "name" ? left.name : sort === "location" ? left.location : left.luc;
     const rightValue = sort === "name" ? right.name : sort === "location" ? right.location : right.luc;
     return leftValue.localeCompare(rightValue, "pt-BR", { numeric: true, sensitivity: "base" }) || left.name.localeCompare(right.name, "pt-BR");
-  }), [points, search, typeFilter, sort]);
+  }), [points, search, typeFilter, sort, missingFacadeOnly, attachments]);
   const completedCount = points.filter((point) => point.completionStatus === "concluida").length;
   const allCollapsed = points.length > 0 && points.every((point) => collapsedPoints.has(`${point.kind}-${point.id}`));
 
@@ -111,7 +104,7 @@ export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections
         <div className="flex flex-wrap items-start justify-between gap-3 border-b px-4 py-4 sm:px-6">
           <div><h3 className="font-bold">Resumo da Visita #{String(visitNumber).padStart(12, "0")}</h3><p className="text-sm text-muted-foreground">Todas as respostas e fotos organizadas por loja, quiosque ou ambiente.</p></div>
           <div className="flex flex-wrap items-center gap-2">
-            <Button type="button" variant="action" size="sm" disabled={!points.length} aria-expanded={!allCollapsed} onClick={() => setCollapsedPoints(allCollapsed ? new Set() : new Set(points.map((point) => `${point.kind}-${point.id}`)))}>{allCollapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}{allCollapsed ? "Exibir todos" : "Recolher todos"}</Button>
+            <Button type="button" variant="ghost" size="compactIcon" disabled={!points.length} aria-label={allCollapsed ? "Exibir todos" : "Recolher todos"} title={allCollapsed ? "Exibir todos" : "Recolher todos"} aria-expanded={!allCollapsed} onClick={() => setCollapsedPoints(allCollapsed ? new Set() : new Set(points.map((point) => `${point.kind}-${point.id}`)))}>{allCollapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}</Button>
             <Button type="button" variant="action" size="sm" onClick={onClose}>Fechar</Button>
           </div>
         </div>
@@ -150,7 +143,7 @@ export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections
                       <div className="min-w-0"><div className="mb-1 flex justify-between text-[10px] font-semibold text-muted-foreground"><span>PROGRESSO</span><span>{progress}%</span></div><div className="h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary" style={{ width: `${progress}%` }} /></div></div>
                       <Badge variant="status" className="justify-self-start sm:justify-self-end">{point.completionStatus === "concluida" ? "Concluída" : point.completionStatus === "cancelada" ? "Cancelada" : "Em preenchimento"}</Badge>
                       </> : null}
-                      <Button type="button" variant="action" size="sm" className="col-start-2 row-start-1 sm:col-start-auto sm:row-start-auto" aria-label={`${collapsed ? "Exibir" : "Recolher"} ${point.name}`} aria-expanded={!collapsed} aria-controls={contentId} onClick={() => setCollapsedPoints((previous) => { const next = new Set(previous); if (next.has(pointKey)) next.delete(pointKey); else next.add(pointKey); return next; })}>{collapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}{collapsed ? "Exibir" : "Recolher"}</Button>
+                      <Button type="button" variant="ghost" size="compactIcon" title={`${collapsed ? "Exibir" : "Recolher"} ${point.name}`} className="col-start-2 row-start-1 sm:col-start-auto sm:row-start-auto" aria-label={`${collapsed ? "Exibir" : "Recolher"} ${point.name}`} aria-expanded={!collapsed} aria-controls={contentId} onClick={() => setCollapsedPoints((previous) => { const next = new Set(previous); if (next.has(pointKey)) next.delete(pointKey); else next.add(pointKey); return next; })}>{collapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}</Button>
                     </header>
                     <div id={contentId} hidden={collapsed} className="mt-3 min-w-0 space-y-3">
                       {facadePhotos.length ? <div className="flex items-start gap-3 border-b border-border pb-3"><div className="flex min-w-24 items-center gap-2 text-xs font-bold uppercase text-muted-foreground"><ImageIcon className="h-4 w-4 text-primary" />Fachada</div><div className="flex min-w-0 flex-wrap gap-2">{facadePhotos.map((photo) => <PhotoThumbnail key={photo.id} attachment={photo} />)}</div></div> : null}
