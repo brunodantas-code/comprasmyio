@@ -701,6 +701,13 @@
       "when": 1791330663092,
       "tag": "0099_reopen_visit_on_new_point",
       "breakpoints": true
+    },
+    {
+      "idx": 100,
+      "version": "7",
+      "when": 1791333056934,
+      "tag": "0100_add_meter_number_to_visit_points",
+      "breakpoints": true
     }
   ]
 }
