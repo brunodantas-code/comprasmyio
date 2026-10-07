@@ -729,6 +729,13 @@
       "when": 1791383288962,
       "tag": "0103_survey_first_answer_start_and_explicit_completion_logs",
       "breakpoints": true
+    },
+    {
+      "idx": 104,
+      "version": "7",
+      "when": 1791383325985,
+      "tag": "0104_survey_include_start_in_progress_audit",
+      "breakpoints": true
     }
   ]
 }

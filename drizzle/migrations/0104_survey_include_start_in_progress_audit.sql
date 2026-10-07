@@ -1,0 +1,4 @@
+DROP TRIGGER site_survey_visit_lucs_progress_log ON public.site_survey_visit_lucs;
+CREATE TRIGGER site_survey_visit_lucs_progress_log AFTER UPDATE OF started_at, completion_status, completed_at, pending_fields, last_progress_at ON public.site_survey_visit_lucs FOR EACH ROW EXECUTE FUNCTION public.log_site_survey_point_progress();
+DROP TRIGGER site_survey_visit_environments_progress_log ON public.site_survey_visit_environments;
+CREATE TRIGGER site_survey_visit_environments_progress_log AFTER UPDATE OF started_at, completion_status, completed_at, pending_fields, last_progress_at ON public.site_survey_visit_environments FOR EACH ROW EXECUTE FUNCTION public.log_site_survey_point_progress();
