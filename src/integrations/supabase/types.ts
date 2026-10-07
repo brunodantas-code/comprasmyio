@@ -6375,6 +6375,7 @@ export type Database = {
         Args: { _target_user_id: string }
         Returns: string
       }
+      security_app_access: { Args: { _apps: string[] }; Returns: boolean }
       security_supply_menu_access: {
         Args: { _keys: string[] }
         Returns: boolean
