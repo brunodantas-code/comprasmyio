@@ -1,4 +1,4 @@
-- [ ] Site Survey — agrupar pendências por etapa e quantidade nos cards, exibindo perguntas somente no pop-up.
+- [x] Site Survey — agrupar pendências por etapa e quantidade nos cards, exibindo perguntas somente no pop-up; verificados 117 cards, editor existente e celular sem transbordamento.
 - [x] Site Survey — alinhar pela esquerda as barras de progresso e os tags de situação entre as linhas do resumo; validado em 178 pontos recolhidos.
 - [x] Site Survey — corrigir visualização de fachadas HEIC e usar miniaturas redondas do mesmo tamanho dos ícones verdes; foto real e ampliação validadas.
 - [x] Site Survey — filtrar lojas, quiosques e ambientes sem foto de fachada cadastrada; lista e resumo validados.
