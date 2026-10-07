@@ -499,7 +499,8 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
   const startPoint = async () => {
     if (!pointId || selectedPointRecord?.started_at) return;
     const table = pointKind === "luc" ? "site_survey_visit_lucs" : "site_survey_visit_environments";
-    const { error } = await supabase.from(table).update({ started_at: new Date().toISOString(), started_by: data.userId }).eq("id", pointId);
+    await pointEdit.ensureEditable();
+    const { error } = await supabase.from(table).update({ started_at: new Date().toISOString(), started_by: data.userId }).eq("id", pointId).is("started_at", null);
     if (error) return toast.error(error.message);
     toast.success("Início desta visita registrado"); await refetchDetail();
   };
@@ -738,8 +739,9 @@ function VisitDetails({ visit, data, onClose, onChanged }: { visit: Visit | null
              ? [...previousOtherSectionPending, ...activeSectionPending]
              : previousOtherSectionPending;
        const pointTable = pointKind === "luc" ? "site_survey_visit_lucs" : "site_survey_visit_environments";
-       const completedAt = finishPoint ? new Date().toISOString() : null;
-       const { error: pointError } = await supabase.from(pointTable).update({ completion_status: finishPoint ? "concluida" : "pendente", completed_at: completedAt, completed_by: finishPoint ? data.userId : null, pending_fields: pendingFields, last_progress_at: new Date().toISOString() }).eq("id", pointId); if (pointError) throw pointError;
+        // Ordinary saves never erase or move an explicit completion timestamp.
+        const completion = finishPoint ? { completion_status: "concluida", completed_at: new Date().toISOString(), completed_by: data.userId } : {};
+        const { error: pointError } = await supabase.from(pointTable).update({ ...completion, pending_fields: pendingFields, last_progress_at: new Date().toISOString() }).eq("id", pointId); if (pointError) throw pointError;
         if (!automatic) setValidatedPoints((current) => new Set(current).add(selectedPoint));
         const otherPointsComplete = points.filter((point) => point.value !== selectedPoint).every((point) => point.completionStatus === "concluida" || point.completionStatus === "cancelada");
        if (finishPoint && !visit.is_manual_entry && preVisitSaved && otherPointsComplete) {

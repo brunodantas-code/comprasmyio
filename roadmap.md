@@ -1,3 +1,4 @@
+- [x] Site Survey — garantir início pelo botão ou primeira informação e conclusão explícita; conferidos 36 pontos de Leandro, corrigidos 3 inícios e preservadas as conclusões.
 - [x] Mogi — corrigir pontos iniciados pela fachada de Leonardo; preservar ou recuperar o início real de Leandro.
 - [x] Site Survey — permitir escolher a foto da fachada na galeria, além de tirar uma nova foto.
 - [x] Site Survey — ao enviar fachada de ponto não iniciado, perguntar se deseja iniciar a visita ou somente completar o cadastro.
@@ -56,7 +57,7 @@
 - [x] Site Survey — não deslocar a tela ao preencher textos ou selecionar Outros com campo Especifique; manter o autosave e o foco na resposta.
 - [x] Site Survey — permitir ordenação simples ou dupla dos PDFs por tipo de ponto, sequência de cadastro e técnico da visita.
 - [x] Site Survey — substituir tabelas extensas por resumos textuais padronizados por tema, com respostas em negrito e fotos em grade compacta.
-- [ ] Site Survey — registrar início individual de cada loja/ambiente pelo primeiro evento entre botão de início e foto obrigatória da fachada.
+- [x] Site Survey — fachada de cadastro não inicia a visita; início explícito pela escolha de iniciar no envio da foto.
 - [ ] Site Survey — cadastrar premissas detalhadas de tempo por resposta técnica e calcular a duração estimada da instalação.
 - [ ] Site Survey — calcular dias sem horas extras/noturnas para os técnicos da OS ou técnicos necessários para um prazo informado.
 - [x] Site Survey mobile — organizar os campos de data e hora em Nova Visita, eliminando desalinhamento e sobreposição.
