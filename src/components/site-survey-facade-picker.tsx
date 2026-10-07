@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 export function SiteSurveyFacadePicker({ id, hasPhoto, onFile, onOpen, askToStart = false, canStart = true }: {
   id: string;
   hasPhoto: boolean;
-  onFile: (file: File, startVisit: boolean) => Promise<void>;
+  onFile: (file: File, startVisit: boolean) => Promise<unknown>;
   onOpen?: () => void;
   askToStart?: boolean;
   canStart?: boolean;
