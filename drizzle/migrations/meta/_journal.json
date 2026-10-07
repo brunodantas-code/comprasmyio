@@ -722,6 +722,13 @@
       "when": 1791382707976,
       "tag": "0102_facade_registration_does_not_start_visit",
       "breakpoints": true
+    },
+    {
+      "idx": 103,
+      "version": "7",
+      "when": 1791383288962,
+      "tag": "0103_survey_first_answer_start_and_explicit_completion_logs",
+      "breakpoints": true
     }
   ]
 }
