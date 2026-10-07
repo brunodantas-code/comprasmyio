@@ -1,4 +1,4 @@
-- [ ] Supply — corrigir erro de descrição ao salvar solicitação de compra com vários materiais.
+- [x] Supply — corrigir erro de descrição ao salvar solicitação de compra com vários materiais.
 - [x] Site Survey — proteger o preenchimento simultâneo por loja/ambiente, identificar o editor e permitir somente a fachada concomitante.
 - [x] Site Survey — criar resumo em tela de todas as lojas, quiosques e ambientes, com respostas agrupadas por natureza e fotos ampliáveis.
 - [x] Site Survey — ordenar o resumo conforme o checklist e compactar cada ponto com progresso no cabeçalho e respostas em até quatro colunas.
