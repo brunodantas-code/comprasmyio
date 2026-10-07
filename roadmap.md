@@ -1,3 +1,4 @@
+- [ ] Site Survey — alinhar pela esquerda as barras de progresso e os tags de situação entre as linhas do resumo.
 - [x] Site Survey — corrigir visualização de fachadas HEIC e usar miniaturas redondas do mesmo tamanho dos ícones verdes; foto real e ampliação validadas.
 - [x] Site Survey — filtrar lojas, quiosques e ambientes sem foto de fachada cadastrada; lista e resumo validados.
 - [x] Site Survey — usar somente seta verde sem borda ou texto nos controles Exibir/Recolher do resumo, conforme Editar modelo.
