@@ -34,3 +34,4 @@
 - Site Survey purchase reports hand a review-only draft to Supply; only the normal Supply form submission creates the order and Approval.
 - Textual action commands use the shared outlined-green action style, including dialogs; compact add/edit controls use the borderless green icon pattern from Cadastro.
 - Site Survey's on-screen visit summary reuses loaded visit data, follows checklist section/question order, uses compact full-width response grids, and keeps photos attached to their point; it never changes PDF output.
+- Site Survey uses database-backed expiring per-point edit leases with guarded writes; facade inserts update only facade progress atomically, preventing concurrent checklist overwrites.

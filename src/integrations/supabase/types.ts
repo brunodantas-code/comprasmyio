@@ -3992,6 +3992,48 @@ export type Database = {
           },
         ]
       }
+      site_survey_point_edit_locks: {
+        Row: {
+          expires_at: string
+          point_id: string
+          point_kind: string
+          session_id: string
+          user_id: string
+          visit_id: string
+        }
+        Insert: {
+          expires_at?: string
+          point_id: string
+          point_kind: string
+          session_id: string
+          user_id: string
+          visit_id: string
+        }
+        Update: {
+          expires_at?: string
+          point_id?: string
+          point_kind?: string
+          session_id?: string
+          user_id?: string
+          visit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_survey_point_edit_locks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_point_edit_locks_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_visits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_survey_point_pauses: {
         Row: {
           ended_at: string | null
@@ -6343,6 +6385,16 @@ export type Database = {
           _target_user_id: string
         }
         Returns: undefined
+      }
+      survey_point_edit_lease: {
+        Args: {
+          _acquire?: boolean
+          _point_id: string
+          _point_kind: string
+          _release?: boolean
+          _session_id: string
+        }
+        Returns: Json
       }
     }
     Enums: {
