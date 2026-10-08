@@ -1,3 +1,4 @@
+- [ ] Site Survey — comprimir novas fotos antes do envio, buscando até 500 KB; cobrir fachadas, perguntas e anexos, preservar fotos antigas e validar redução.
 - [x] Site Survey — concluir pontos com pendências mediante confirmação, preservando horários, avisos vermelhos e consulta de pendências; fluxo validado com gravações simuladas, sem alterar visitas reais.
 - [x] Site Survey — separar Realizar Visita de Resumo de Visitas, preservando permissões, inclusão de ambientes e gráfico; validado no computador e celular, sem erros.
 - [x] Site Survey — mover Resumo de Visitas para o último submenu de Visitas, retirando-o de Minhas visitas e do preenchimento; menu, contagens e retorno conferidos.
