@@ -1181,7 +1181,7 @@ function QuestionRuleFields({ question, priorQuestions, actions, questionAction,
   const [photoRequired, setPhotoRequired] = useState(Boolean(existingPhoto?.required));
   const [observationEnabled, setObservationEnabled] = useState(asQuestionConfig(question?.configuration).observation === true);
   return <div className="col-span-full -mt-2 grid gap-1 sm:-mt-5 lg:grid-cols-[40px_minmax(220px,1.3fr)_minmax(160px,.7fr)_minmax(200px,1fr)_auto]">
-    <div className="flex w-full flex-wrap items-center justify-end gap-x-6 gap-y-2 lg:col-start-5">
+    <div className="col-span-full flex w-full flex-wrap items-center justify-end gap-x-6 gap-y-2">
       <label className="flex items-center gap-2 text-sm font-medium"><Checkbox name="observation_enabled" checked={observationEnabled} disabled={disabled} onCheckedChange={(checked) => setObservationEnabled(checked === true)} />Campo de Observação</label>
       <div className="flex flex-wrap items-center gap-3 sm:gap-6">
         {photoEnabled ? <label className="flex items-center gap-2 text-sm font-medium"><Checkbox name="photo_required" checked={photoRequired} disabled={disabled} onCheckedChange={(checked) => setPhotoRequired(checked === true)} />Foto obrigatória</label> : null}
