@@ -18,6 +18,7 @@ import { SiteSurveyProfilesAdmin } from "@/components/site-survey-profiles-admin
 import { SiteSurveyReportButton } from "@/components/site-survey-report";
 import { SiteSurveyScreenSummary } from "@/components/site-survey-screen-summary";
 import { useSurveyImage } from "@/hooks/use-survey-image";
+import { prepareSurveyPhoto } from "@/lib/site-survey-photo";
 import { useSurveyPointEdit } from "@/hooks/use-survey-point-edit";
 import { SiteSurveyFacadePicker } from "@/components/site-survey-facade-picker";
 import { SiteSurveyProgressChart } from "@/components/site-survey-progress-chart";
@@ -527,14 +528,15 @@ function VisitDetails({ visit, data, onClose, onChanged, view = "execution" }: {
     if (error) return toast.error(error.message);
     await refetchDetail(); toast.success("Visita retomada");
   };
-  const uploadFacade = async (file: File, startVisit: boolean) => {
-    if (!file || !pointId) return;
+  const uploadFacade = async (original: File, startVisit: boolean) => {
+    if (!original || !pointId) return;
     const restorePosition = () => {
       const position = facadeScrollPosition.current;
       if (position !== null) window.requestAnimationFrame(() => window.scrollTo({ top: position, behavior: "instant" }));
     };
     restorePosition();
-    if (!file.type.startsWith("image/")) return toast.error("Selecione uma imagem da fachada.");
+    if (!original.type.startsWith("image/") && !/\.(heic|heif)$/i.test(original.name)) return toast.error("Selecione uma imagem da fachada.");
+    const file = await prepareSurveyPhoto(original);
     if (startVisit && !selectedPointRecord?.started_at) {
       try { await pointEdit.ensureEditable(); } catch (error) { toast.error(error instanceof Error ? error.message : "Não foi possível iniciar a visita."); return; }
       const table = pointKind === "luc" ? "site_survey_visit_lucs" : "site_survey_visit_environments";
@@ -557,7 +559,8 @@ function VisitDetails({ visit, data, onClose, onChanged, view = "execution" }: {
     const scope = pointKind === "luc" ? { visit_luc_id: targetPointId, visit_environment_id: null } : { visit_luc_id: null, visit_environment_id: targetPointId };
     setUploadingGeneralAttachments(true);
     try {
-      for (const file of selectedFiles) {
+      for (const original of selectedFiles) {
+        const file = await prepareSurveyPhoto(original);
         if (selectedPointRef.current !== targetPoint) throw new Error("A loja ou ambiente mudou durante o envio.");
         const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
         const path = `${visit.id}/${targetPointId}/${crypto.randomUUID()}-${safe}`;
@@ -658,10 +661,11 @@ function VisitDetails({ visit, data, onClose, onChanged, view = "execution" }: {
       const photo = values.get(`${question.id}__photo`);
       const isGeneralQuestion = phase === "pre_visit";
       if (photo instanceof File && photo.size > 0) {
-        const safe = photo.name.replace(/[^a-zA-Z0-9._-]/g, "-"); const path = `${visit.id}/${isGeneralQuestion ? "geral" : pointId}/${crypto.randomUUID()}-${safe}`;
-        const { error: uploadError } = await supabase.storage.from("site-survey-attachments").upload(path, photo); if (uploadError) throw uploadError;
+        const file = await prepareSurveyPhoto(photo);
+        const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "-"); const path = `${visit.id}/${isGeneralQuestion ? "geral" : pointId}/${crypto.randomUUID()}-${safe}`;
+        const { error: uploadError } = await supabase.storage.from("site-survey-attachments").upload(path, file); if (uploadError) throw uploadError;
         const attachmentScope = isGeneralQuestion ? { visit_luc_id: null, visit_environment_id: null } : scope;
-        const { error } = await supabase.from("site_survey_attachments").insert({ visit_id: visit.id, ...attachmentScope, question_id: question.id, attachment_kind: "question", uploaded_by: data.userId, file_name: photo.name, storage_path: path, content_type: photo.type, file_size: photo.size }); if (error) throw error;
+        const { error } = await supabase.from("site_survey_attachments").insert({ visit_id: visit.id, ...attachmentScope, question_id: question.id, attachment_kind: "question", uploaded_by: data.userId, file_name: file.name, storage_path: path, content_type: file.type, file_size: file.size }); if (error) throw error;
          const photoInput = form.elements.namedItem(`${question.id}__photo`);
          if (photoInput instanceof HTMLInputElement) photoInput.value = "";
       }
