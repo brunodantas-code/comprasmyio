@@ -1,3 +1,4 @@
+- [ ] Site Survey — mover Resumo de Visitas para o último submenu de Visitas, retirando-o de Minhas visitas e do preenchimento.
 - [x] Site Survey — alinhar Campo de Observação à esquerda dos demais checkboxes na mesma linha; alinhamento visual conferido.
 - [x] Site Survey — incluir Campo de Observação em todas as perguntas, independente da resposta, com salvamento e resumo; checkbox conferido no editor e regras opcionais validadas.
 - [x] Site Survey — agrupar pendências por etapa e quantidade nos cards, exibindo perguntas somente no pop-up; verificados 117 cards, editor existente e celular sem transbordamento.
