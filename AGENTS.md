@@ -39,7 +39,7 @@
 - Ordinary saves preserve completion timestamps; explicit completion records time and persists required/installation pending fields, with warnings retained after completion.
 - RLS uses effective menus/app grants; shared files follow record access and uploads bind owners, preserving authorized collaboration.
 
-- Survey photo previews load on visibility, share cached private images and serialize browser-only HEIC decoding to bound memory; originals and access stay unchanged.
+- Survey previews lazy-load/cache private images. Uploads share lazy browser compression, a serial queue and retry cache; metadata follows the prepared file to bound memory.
 
 - Pending cards group by section ID and reuse the guarded focused editor.
 - Question JSON enables optional answer.observation, separate from required details to preserve validation.
