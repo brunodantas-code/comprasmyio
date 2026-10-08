@@ -13,6 +13,7 @@ export function useSurveyImage(attachment?: SurveyImage) {
     queryKey: ["site-survey-browser-image", attachment?.storage_path],
     enabled: Boolean(attachment),
     staleTime: 50 * 60 * 1000,
+    notifyOnChangeProps: ["data", "error"],
     retry: 1,
     queryFn: async () => {
       if (!attachment) return null;
