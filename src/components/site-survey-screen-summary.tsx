@@ -53,11 +53,11 @@ function matchesPoint(point: SummaryPoint, item: { visit_luc_id?: string | null;
 
 function PhotoThumbnail({ attachment }: { attachment: SummaryAttachment }) {
   const [open, setOpen] = useState(false);
-  const { url: signedUrl } = useSurveyImage(attachment);
+  const { url: signedUrl, ref } = useSurveyImage(attachment, true);
   const isImage = attachment.content_type?.startsWith("image/") ?? /\.(jpe?g|png|webp|gif|heic)$/i.test(attachment.file_name);
-  if (!isImage) return <Button type="button" variant="ghost" size="sm" className="h-14 max-w-36 justify-start whitespace-normal !bg-muted/50 px-2 text-xs !text-foreground hover:!bg-muted" disabled={!signedUrl} onClick={() => signedUrl && window.open(signedUrl, "_blank", "noopener,noreferrer")}><FileText className="h-4 w-4" /><span className="line-clamp-2">{attachment.file_name}</span></Button>;
+  if (!isImage) return <Button ref={ref} type="button" variant="ghost" size="sm" className="h-14 max-w-36 justify-start whitespace-normal !bg-muted/50 px-2 text-xs !text-foreground hover:!bg-muted" disabled={!signedUrl} onClick={() => signedUrl && window.open(signedUrl, "_blank", "noopener,noreferrer")}><FileText className="h-4 w-4" /><span className="line-clamp-2">{attachment.file_name}</span></Button>;
   return <>
-    <Button type="button" variant="ghost" className="group relative h-16 w-16 shrink-0 overflow-hidden rounded-md !bg-muted p-0 hover:!bg-muted sm:h-20 sm:w-20" disabled={!signedUrl} aria-label={`Ampliar foto ${attachment.file_name}`} onClick={() => setOpen(true)}>
+    <Button ref={ref} type="button" variant="ghost" className="group relative h-16 w-16 shrink-0 overflow-hidden rounded-md !bg-muted p-0 hover:!bg-muted sm:h-20 sm:w-20" disabled={!signedUrl} aria-label={`Ampliar foto ${attachment.file_name}`} onClick={() => setOpen(true)}>
       {signedUrl ? <img src={signedUrl} alt={attachment.file_name} loading="lazy" className="h-full w-full object-cover transition-transform group-hover:scale-105" /> : <Camera className="h-5 w-5 text-muted-foreground" />}
     </Button>
     <Dialog open={open} onOpenChange={setOpen}><DialogContent className="max-h-[88dvh] w-[calc(100vw-2rem)] max-w-5xl overflow-hidden p-3 sm:p-4"><DialogTitle className="sr-only">{attachment.file_name}</DialogTitle>{signedUrl ? <img src={signedUrl} alt={attachment.file_name} className="mx-auto max-h-[80dvh] w-auto max-w-full rounded-md object-contain" /> : null}</DialogContent></Dialog>

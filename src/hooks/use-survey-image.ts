@@ -7,11 +7,21 @@ type SurveyImage = { storage_path: string; file_name: string; content_type?: str
 // Decode one image at a time to bound the decoder's memory on phones.
 let decoding: Promise<unknown> = Promise.resolve();
 
-export function useSurveyImage(attachment?: SurveyImage) {
+export function useSurveyImage(attachment?: SurveyImage, lazy = false) {
+  const [element, setElement] = useState<HTMLElement | null>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    if (!lazy || !element) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry?.isIntersecting) { setVisible(true); observer.disconnect(); }
+    }, { rootMargin: "200px" });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [element, lazy]);
   const [objectUrl, setObjectUrl] = useState<{ blob: Blob; url: string } | null>(null);
   const query = useQuery({
     queryKey: ["site-survey-browser-image", attachment?.storage_path],
-    enabled: Boolean(attachment),
+    enabled: Boolean(attachment) && (!lazy || visible),
     staleTime: 50 * 60 * 1000,
     notifyOnChangeProps: ["data", "error"],
     retry: 1,
@@ -40,5 +50,5 @@ export function useSurveyImage(attachment?: SurveyImage) {
     setObjectUrl({ blob, url });
     return () => URL.revokeObjectURL(url);
   }, [blob]);
-  return { ...query, url: query.data?.url ?? (blob && objectUrl?.blob === blob ? objectUrl.url : null) };
+  return { ref: setElement, url: query.data?.url ?? (blob && objectUrl?.blob === blob ? objectUrl.url : null) };
 }
