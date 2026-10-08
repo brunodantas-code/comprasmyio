@@ -36,7 +36,7 @@
 - Facade recognition is an independent, time-bounded suggestion; draft revision and request guards preserve manual names and discard results after the dialog closes, so recognition never gates point saving.
 - Checklist and registration-pending facade uploads share a camera/gallery picker marked for exclusion from checklist autosave, keeping independent facade writes safe.
 - Facade attachment triggers only clear facade pending fields; guarded explicit starts and the first nonempty persisted checklist response register point start, excluding retrospective manual visits.
-- Ordinary point saves preserve completion timestamps; only explicit completion writes them, and progress logging distinguishes completion transitions from later edits.
+- Ordinary saves preserve completion timestamps; explicit completion records time and persists required/installation pending fields, with warnings retained after completion.
 - RLS uses effective menus/app grants; shared files follow record access and uploads bind owners, preserving authorized collaboration.
 
 - Survey photo previews load on visibility, share cached private images and serialize browser-only HEIC decoding to bound memory; originals and access stay unchanged.
