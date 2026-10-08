@@ -24,8 +24,8 @@ const normalize = (value: string) => value.normalize("NFD").replace(/[\u0300-\u0
 
 function answerText(answer: unknown): string {
   if (answer && typeof answer === "object" && !Array.isArray(answer) && "value" in answer) {
-    const stored = answer as { value: unknown; detail?: unknown };
-    return [answerText(stored.value), typeof stored.detail === "string" ? stored.detail : ""].filter(Boolean).join(" — ");
+    const stored = answer as { value: unknown; detail?: unknown; observation?: unknown };
+    return [answerText(stored.value), typeof stored.detail === "string" ? stored.detail : "", typeof stored.observation === "string" && stored.observation.trim() ? `Observações: ${stored.observation}` : ""].filter(Boolean).join(" — ");
   }
   if (Array.isArray(answer)) return answer.map(String).filter(Boolean).join(", ");
   if (answer === true) return "Sim";
