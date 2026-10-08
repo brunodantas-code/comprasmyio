@@ -39,7 +39,7 @@
 - Ordinary point saves preserve completion timestamps; only explicit completion writes them, and progress logging distinguishes completion transitions from later edits.
 - RLS uses effective menus/app grants; shared files follow record access and uploads bind owners, preserving authorized collaboration.
 
-- Survey facade thumbnails and summary photos share cached private-image previews with lazy browser-only HEIC decoding, serialized to bound memory; originals and access stay unchanged.
+- Survey photo previews load on visibility, share cached private images and serialize browser-only HEIC decoding to bound memory; originals and access stay unchanged.
 
 - Pending cards group by section ID and reuse the guarded focused editor.
 - Question JSON enables optional answer.observation, separate from required details to preserve validation.
