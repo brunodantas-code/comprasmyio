@@ -31,7 +31,7 @@
 - A normalized global shop/kiosk catalog syncs from visit points for reuse without rewriting visit history.
 - Site Survey purchase reports hand a review-only draft to Supply; only the normal Supply form submission creates the order and Approval.
 - Textual action commands use the shared outlined-green action style, including dialogs; compact add/edit controls use the borderless green icon pattern from Cadastro.
-- Site Survey's on-screen visit summary reuses loaded visit data, follows checklist section/question order, uses compact full-width response grids, and keeps photos attached to their point; it never changes PDF output.
+- Survey screen summary reuses loaded visit data, follows checklist order, uses compact full-width response grids and point-linked photos; PDF output stays unchanged.
 - Site Survey uses database-backed expiring per-point edit leases with guarded writes; facade inserts update only facade progress atomically, preventing concurrent checklist overwrites.
 - Facade recognition is an independent, time-bounded suggestion; draft revision and request guards preserve manual names and discard results after the dialog closes, so recognition never gates point saving.
 - Checklist and registration-pending facade uploads share a camera/gallery picker marked for exclusion from checklist autosave, keeping independent facade writes safe.
@@ -42,4 +42,4 @@
 - Survey facade thumbnails and summary photos share cached private-image previews with lazy browser-only HEIC decoding, serialized to bound memory; originals and access stay unchanged.
 
 - Pending cards group by section ID and reuse the guarded focused editor.
-- Question JSON config enables optional answer.observation, separate from required details to preserve validation.
+- Question JSON enables optional answer.observation, separate from required details to preserve validation.
