@@ -1,3 +1,4 @@
+- [x] Site Survey — separar Realizar Visita de Resumo de Visitas, preservando permissões, inclusão de ambientes e gráfico; validado no computador e celular, sem erros.
 - [x] Site Survey — mover Resumo de Visitas para o último submenu de Visitas, retirando-o de Minhas visitas e do preenchimento; menu, contagens e retorno conferidos.
 - [x] Site Survey — alinhar Campo de Observação à esquerda dos demais checkboxes na mesma linha; alinhamento visual conferido.
 - [x] Site Survey — incluir Campo de Observação em todas as perguntas, independente da resposta, com salvamento e resumo; checkbox conferido no editor e regras opcionais validadas.
