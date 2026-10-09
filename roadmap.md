@@ -1,3 +1,4 @@
+- [ ] Site Survey — retirar o bloco repetido de situação, agendamento e técnico dos detalhes, mantendo as informações na lista de visitas.
 - [x] Site Survey — filtro de situação removido de Realizar Visita; mantido no Resumo e sem afetar a execução, validado em tela.
 - [x] Site Survey — 21 nomes de ambientes removidos do catálogo com exclusão persistente do sync; 246 lojas/quiosques disponíveis; pontos, respostas e fotos preservados e tela conferida.
 - [x] Site Survey — comprimir novas fotos antes do envio, buscando até 500 KB; fachadas, perguntas e anexos cobertos. JPEG/PNG/WebP de 12 MP reduzidos para cerca de 400–429 KB; cache, anexos não fotográficos e fallback conferidos. Fotos antigas preservadas.
