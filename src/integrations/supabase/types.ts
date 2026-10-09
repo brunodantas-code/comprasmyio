@@ -4404,6 +4404,7 @@ export type Database = {
           active: boolean
           created_at: string
           created_by: string | null
+          excluded_from_sync: boolean
           id: string
           name: string
           normalized_name: string
@@ -4415,6 +4416,7 @@ export type Database = {
           active?: boolean
           created_at?: string
           created_by?: string | null
+          excluded_from_sync?: boolean
           id?: string
           name: string
           normalized_name: string
@@ -4426,6 +4428,7 @@ export type Database = {
           active?: boolean
           created_at?: string
           created_by?: string | null
+          excluded_from_sync?: boolean
           id?: string
           name?: string
           normalized_name?: string

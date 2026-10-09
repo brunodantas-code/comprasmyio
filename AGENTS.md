@@ -28,7 +28,7 @@
 - Survey LUC corrections replace the current history entry; actual shop changes append a history entry, preserving genuine occupancy changes.
 - Survey catalog title overrides stay separate from items to preserve fixed keys; material types link by catalog IDs to survive renames.
 - Survey points use UUIDs and shared shop/kiosk storage with `point_type`; optional LUC repeats need confirmation, locations may repeat.
-- A normalized global shop/kiosk catalog syncs from visit points for reuse without rewriting visit history.
+- Shop/kiosk catalog sync preserves visit history; inactive exclusion tombstones prevent removed names returning.
 - Site Survey purchase reports hand a review-only draft to Supply; only the normal Supply form submission creates the order and Approval.
 - Textual action commands use the shared outlined-green action style, including dialogs; compact add/edit controls use the borderless green icon pattern from Cadastro.
 - Survey summary reuses loaded data, checklist order, compact grids and point photos; PDFs stay unchanged. VisitDetails modes and add-only managers separate execution from management without changing writes.
@@ -39,7 +39,7 @@
 - Ordinary saves preserve completion timestamps; explicit completion records time and persists required/installation pending fields, with warnings retained after completion.
 - RLS uses effective menus/app grants; shared files follow record access and uploads bind owners, preserving authorized collaboration.
 
-- Survey previews lazy-load/cache private images. Uploads share lazy browser compression, a serial queue and retry cache; metadata follows the prepared file to bound memory.
+- Survey previews lazy-load/cache private images; uploads use lazy compression, a serial queue and retry cache with prepared-file metadata to bound memory.
 
 - Pending cards group by section ID and reuse the guarded focused editor.
 - Question JSON enables optional answer.observation, separate from required details to preserve validation.

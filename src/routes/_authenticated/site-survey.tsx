@@ -216,7 +216,7 @@ function SiteSurveyPage() {
   }), [data]);
   const filtered = (data?.visits ?? []).filter((visit) => {
     const haystack = [visit.survey_number, names.clients.get(visit.client_id ?? ""), names.projects.get(visit.project_id ?? ""), names.technicians.get(visit.technician_id), visit.address].join(" ").toLocaleLowerCase("pt-BR");
-    return (visitsSection === "resumo" || !visit.is_manual_entry && (data?.isErpAdmin || visit.technician_id === data?.userId)) && (statusFilter === "todos" || visit.status === statusFilter) && haystack.includes(search.toLocaleLowerCase("pt-BR"));
+    return (visitsSection === "resumo" || !visit.is_manual_entry && (data?.isErpAdmin || visit.technician_id === data?.userId)) && (visitsSection !== "resumo" || statusFilter === "todos" || visit.status === statusFilter) && haystack.includes(search.toLocaleLowerCase("pt-BR"));
   });
   const invalidate = () => qc.invalidateQueries({ queryKey: ["site-survey-data"] });
   const cancelVisit = async (visit: Visit) => {
@@ -272,7 +272,7 @@ function SiteSurveyPage() {
               </section>
             </TabsContent>
             {visitsSection === "minhas" || visitsSection === "resumo" ? <div aria-label={visitsSection === "resumo" ? "Consulta das visitas" : "Realizar Visita"}>
-<div className="mb-4 flex flex-col gap-3 sm:flex-row"><div className="relative flex-1"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar visita, cliente, projeto ou técnico" className="pl-9" /></div><Select value={statusFilter} onValueChange={setStatusFilter}><SelectTrigger className="sm:w-52"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="todos">Todas as situações</SelectItem>{STATUS_ORDER.map((status) => <SelectItem key={status} value={status}>{STATUS[status]}</SelectItem>)}</SelectContent></Select></div>
+<div className="mb-4 flex flex-col gap-3 sm:flex-row"><div className="relative flex-1"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar visita, cliente, projeto ou técnico" className="pl-9" /></div>{visitsSection === "resumo" ? <Select value={statusFilter} onValueChange={setStatusFilter}><SelectTrigger className="sm:w-52"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="todos">Todas as situações</SelectItem>{STATUS_ORDER.map((status) => <SelectItem key={status} value={status}>{STATUS[status]}</SelectItem>)}</SelectContent></Select> : null}</div>
                <div className="overflow-hidden rounded-md border border-border bg-card">
                  <div className="hidden grid-cols-[250px_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_150px_max-content] items-center gap-3 border-b bg-primary/20 px-4 py-3 text-sm font-semibold lg:grid"><span>Nº / Abrir</span><span>Cliente / Projeto</span><span>Técnico</span><span>Agendamento</span><span>Situação</span><span className="flex items-center justify-between gap-2">Ações<Button type="button" size="compactIcon" variant="ghost" aria-label={visitsListOpen ? "Recolher relação de visitas" : "Exibir relação de visitas"} title={visitsListOpen ? "Recolher" : "Exibir"} onClick={() => setVisitsListOpen((current) => !current)}><ChevronDown className={`h-5 w-5 transition-transform ${visitsListOpen ? "rotate-180" : ""}`} /></Button></span></div>
                  {filtered.map((visit) => {

@@ -764,6 +764,13 @@
       "when": 1791387085968,
       "tag": "0108_complete_selected_policy_groups",
       "breakpoints": true
+    },
+    {
+      "idx": 109,
+      "version": "7",
+      "when": 1791585578685,
+      "tag": "0109_prevent_excluded_survey_catalog_sync",
+      "breakpoints": true
     }
   ]
 }
