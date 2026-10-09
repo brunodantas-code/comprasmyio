@@ -17,7 +17,7 @@
 - Payment requests above the configured joint-approval threshold include eligible joint approvers alongside finance; the requester never self-approves.
 - Admin Approval type edits keep prior decisions and log the change; pending chains re-evaluate when type changes, while payment allocation uses the standard exclusive destination choices.
 - Supply “Item novo” authorizes catalog inserts for Fábrica, Terceiros and Ferramentas via effective profile/individual permission and authenticated owner; it does not grant stock editing or movement rights.
-- Site Survey progress counts completed stores/environments by completion timestamp and user, grouped by São Paulo day/hour; hide it for retrospective manual visits, whose checklist completion time is not visit time.
+- Survey progress groups point completions by timestamp/user and São Paulo day/hour; hide for retrospective visits because checklist time is not visit time.
 - Site Survey deletion checks linked OpDesk calls, offers keep/delete, and uses an authorized atomic DB function; OpDesk retains visit number.
 - Code images use private ticket attachments: message images stay with replies, standalone images with tickets. Open tickets allow new questions before answers; answers link to pending admin questions, preserving permissions.
 - Site Survey actions update/deactivate in place to preserve references; warnings use active visible questions only after explicit save, not autosave.
@@ -25,7 +25,7 @@
 - Photo drops/pastes autosave; block outside drops. Serialize saves by point/question; flush before point/section switches and card closing; reset point selection on visit changes to prevent stale editors.
 - Survey skips persist by point; skip removes pending requirements, keeps answers, flushes autosave.
 - Survey report/PDF share ordering and hydraulic DN from De-Para; missing flow has no specification. Purchase-report photos come only from the meter-flow question and remain grouped by point. Photo reuse stores same-point attachment ID on response; deletion invalidates it.
-- Survey LUC corrections replace the current history entry; actual shop changes append a history entry, preserving genuine occupancy changes.
+- LUC corrections replace current history; actual shop changes append to preserve occupancy history.
 - Survey catalog title overrides stay separate from items to preserve fixed keys; material types link by catalog IDs to survive renames.
 - Survey points use UUIDs and shared shop/kiosk storage with `point_type`; optional LUC repeats need confirmation, locations may repeat.
 - Shop/kiosk catalog sync preserves visit history; inactive exclusion tombstones prevent removed names returning.
