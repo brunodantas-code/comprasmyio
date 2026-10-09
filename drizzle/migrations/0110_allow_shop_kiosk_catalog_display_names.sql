@@ -1,0 +1,2 @@
+ALTER TABLE public.site_survey_builtin_catalog_names DROP CONSTRAINT site_survey_builtin_catalog_names_catalog_key_check;
+ALTER TABLE public.site_survey_builtin_catalog_names ADD CONSTRAINT site_survey_builtin_catalog_names_catalog_key_check CHECK (catalog_key IN ('catalog', 'screwdriver', 'wrench', 'actions', 'cancellation-reasons', 'pause-reasons', 'time-assumptions', 'shops', 'kiosks'));

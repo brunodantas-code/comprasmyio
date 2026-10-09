@@ -771,6 +771,13 @@
       "when": 1791585578685,
       "tag": "0109_prevent_excluded_survey_catalog_sync",
       "breakpoints": true
+    },
+    {
+      "idx": 110,
+      "version": "7",
+      "when": 1791586050007,
+      "tag": "0110_allow_shop_kiosk_catalog_display_names",
+      "breakpoints": true
     }
   ]
 }
