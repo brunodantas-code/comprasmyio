@@ -1,3 +1,4 @@
+- [ ] Site Survey — remover filtro de situação somente de Realizar Visita.
 - [ ] Site Survey — retirar nomes de ambientes do catálogo de Lojas/Quiosques, impedir retorno automático e preservar visitas.
 - [x] Site Survey — comprimir novas fotos antes do envio, buscando até 500 KB; fachadas, perguntas e anexos cobertos. JPEG/PNG/WebP de 12 MP reduzidos para cerca de 400–429 KB; cache, anexos não fotográficos e fallback conferidos. Fotos antigas preservadas.
 - [x] Site Survey — concluir pontos com pendências mediante confirmação, preservando horários, avisos vermelhos e consulta de pendências; fluxo validado com gravações simuladas, sem alterar visitas reais.
