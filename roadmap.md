@@ -1,3 +1,4 @@
+- [x] Site Survey — números pretos, setas de recolher também no conteúdo aberto e seleção de loja/ambiente limpa ao recolher, preservando respostas; fechamento e reabertura conferidos no computador e celular.
 - [x] Site Survey — permitir renomear os títulos Lojas e Quiosques pelo lápis verde, preservando itens e histórico; abertura e salvamento simulados conferidos no computador e celular.
 - [x] Site Survey — retirar o bloco repetido de situação, agendamento e técnico dos detalhes, mantendo as informações na lista de visitas; conferido no computador e celular, sem erros.
 - [x] Site Survey — filtro de situação removido de Realizar Visita; mantido no Resumo e sem afetar a execução, validado em tela.
