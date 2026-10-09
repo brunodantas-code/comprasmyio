@@ -1,4 +1,4 @@
-- [ ] Site Survey — permitir renomear os títulos Lojas e Quiosques pelo lápis verde, preservando itens e histórico.
+- [x] Site Survey — permitir renomear os títulos Lojas e Quiosques pelo lápis verde, preservando itens e histórico; abertura e salvamento simulados conferidos no computador e celular.
 - [x] Site Survey — retirar o bloco repetido de situação, agendamento e técnico dos detalhes, mantendo as informações na lista de visitas; conferido no computador e celular, sem erros.
 - [x] Site Survey — filtro de situação removido de Realizar Visita; mantido no Resumo e sem afetar a execução, validado em tela.
 - [x] Site Survey — 21 nomes de ambientes removidos do catálogo com exclusão persistente do sync; 246 lojas/quiosques disponíveis; pontos, respostas e fotos preservados e tela conferida.
