@@ -28,7 +28,7 @@
 - Survey LUC corrections replace the current history entry; actual shop changes append a history entry, preserving genuine occupancy changes.
 - Survey catalog title overrides stay separate from items to preserve fixed keys; material types link by catalog IDs to survive renames.
 - Survey points use UUIDs and shared shop/kiosk storage with `point_type`; optional LUC repeats need confirmation, locations may repeat.
-- A normalized global shop/kiosk catalog syncs from visit points for reuse without rewriting visit history.
+- A normalized shop/kiosk catalog syncs from visit points; excluded names retain inactive tombstones to prevent historical edits reintroducing them without changing visits.
 - Site Survey purchase reports hand a review-only draft to Supply; only the normal Supply form submission creates the order and Approval.
 - Textual action commands use the shared outlined-green action style, including dialogs; compact add/edit controls use the borderless green icon pattern from Cadastro.
 - Survey summary reuses loaded data, checklist order, compact grids and point photos; PDFs stay unchanged. VisitDetails modes and add-only managers separate execution from management without changing writes.
