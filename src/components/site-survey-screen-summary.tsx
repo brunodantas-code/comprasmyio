@@ -101,7 +101,7 @@ export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections
   const completedCount = points.filter((point) => point.completionStatus === "concluida").length;
   const allCollapsed = points.length > 0 && points.every((point) => collapsedPoints.has(`${point.kind}-${point.id}`));
 
-  return <section id="visit-screen-summary" className="overflow-hidden rounded-md border border-border bg-background" aria-label="Resumo da visita">
+  return <section id="visit-screen-summary" className="overflow-hidden rounded-md border border-border bg-background shadow-sm" aria-label="Resumo da visita">
         <div className="flex flex-wrap items-start justify-between gap-3 border-b px-4 py-4 sm:px-6">
           <div><h3 className="font-bold">Resumo da Visita #{String(visitNumber).padStart(12, "0")}</h3><p className="text-sm text-muted-foreground">Todas as respostas e fotos organizadas por loja, quiosque ou ambiente.</p></div>
           <div className="flex flex-wrap items-center gap-2">
