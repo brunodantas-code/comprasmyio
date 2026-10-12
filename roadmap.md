@@ -1,3 +1,5 @@
+- [ ] Site Survey — filtro de Tipo (Somente lojas, Somente quiosques, Somente ambientes) no Cadastro completo de lojas, quiosques e ambientes; conferir na prévia em computador e celular.
+- [ ] Site Survey — retirar o botão de foto de fachada dos Ambientes, que não possuem fachada; conferir no cadastro, no resumo e na execução.
 - [x] Site Survey — números pretos, setas de recolher também no conteúdo aberto e seleção de loja/ambiente limpa ao recolher, preservando respostas; fechamento e reabertura conferidos no computador e celular.
 - [x] Site Survey — permitir renomear os títulos Lojas e Quiosques pelo lápis verde, preservando itens e histórico; abertura e salvamento simulados conferidos no computador e celular.
 - [x] Site Survey — retirar o bloco repetido de situação, agendamento e técnico dos detalhes, mantendo as informações na lista de visitas; conferido no computador e celular, sem erros.
