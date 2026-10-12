@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { MyioPlatformLogo } from "@/components/myio-platform-logo";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
@@ -72,11 +72,11 @@ function ResetPasswordPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="password">Nova senha</Label>
-                <Input id="password" name="password" type="password" required disabled={!ready} />
+                <PasswordInput id="password" name="password" autoComplete="new-password" required disabled={!ready} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirm">Confirmar nova senha</Label>
-                <Input id="confirm" name="confirm" type="password" required disabled={!ready} />
+                <PasswordInput id="confirm" name="confirm" autoComplete="new-password" required disabled={!ready} />
               </div>
               <Button type="submit" className="w-full" disabled={loading || !ready}>
                 {loading ? "Salvando..." : "Salvar nova senha"}

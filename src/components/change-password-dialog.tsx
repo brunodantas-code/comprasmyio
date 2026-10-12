@@ -2,7 +2,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -45,9 +45,9 @@ export function ChangePasswordDialog({ open, onOpenChange }: { open: boolean; on
       <DialogContent className="sm:max-w-md">
         <DialogHeader><DialogTitle>Alterar senha</DialogTitle></DialogHeader>
         <form onSubmit={submit} className="space-y-4">
-          <div className="space-y-1.5"><Label htmlFor="pw-current">Senha atual</Label><Input id="pw-current" type="password" autoComplete="current-password" value={current} onChange={(e) => setCurrent(e.target.value)} required /></div>
-          <div className="space-y-1.5"><Label htmlFor="pw-next">Nova senha</Label><Input id="pw-next" type="password" autoComplete="new-password" value={next} onChange={(e) => setNext(e.target.value)} required minLength={8} /></div>
-          <div className="space-y-1.5"><Label htmlFor="pw-confirm">Confirmar nova senha</Label><Input id="pw-confirm" type="password" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required /></div>
+          <div className="space-y-1.5"><Label htmlFor="pw-current">Senha atual</Label><PasswordInput id="pw-current" autoComplete="current-password" value={current} onChange={(e) => setCurrent(e.target.value)} required /></div>
+          <div className="space-y-1.5"><Label htmlFor="pw-next">Nova senha</Label><PasswordInput id="pw-next" autoComplete="new-password" value={next} onChange={(e) => setNext(e.target.value)} required minLength={8} /></div>
+          <div className="space-y-1.5"><Label htmlFor="pw-confirm">Confirmar nova senha</Label><PasswordInput id="pw-confirm" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required /></div>
           <DialogFooter className="flex-row justify-end gap-2">
             <Button type="button" variant="action" onClick={() => close(false)} disabled={saving}>Cancelar</Button>
             <Button type="submit" variant="action" disabled={saving}>{saving ? "Salvando..." : "Salvar"}</Button>
