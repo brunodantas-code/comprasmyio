@@ -4636,6 +4636,7 @@ export type Database = {
           meter_number: string | null
           name: string
           pending_fields: Json
+          point_type: string
           skipped_section_ids: Json
           started_at: string | null
           started_by: string | null
@@ -4656,6 +4657,7 @@ export type Database = {
           meter_number?: string | null
           name: string
           pending_fields?: Json
+          point_type?: string
           skipped_section_ids?: Json
           started_at?: string | null
           started_by?: string | null
@@ -4676,6 +4678,7 @@ export type Database = {
           meter_number?: string | null
           name?: string
           pending_fields?: Json
+          point_type?: string
           skipped_section_ids?: Json
           started_at?: string | null
           started_by?: string | null
@@ -4809,6 +4812,7 @@ export type Database = {
           cancellation_reason_id: string | null
           cancelled_at: string | null
           cancelled_by: string | null
+          classification_type: string | null
           completed_at: string | null
           completed_by: string | null
           completion_status: string
@@ -4834,6 +4838,7 @@ export type Database = {
           cancellation_reason_id?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
+          classification_type?: string | null
           completed_at?: string | null
           completed_by?: string | null
           completion_status?: string
@@ -4859,6 +4864,7 @@ export type Database = {
           cancellation_reason_id?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
+          classification_type?: string | null
           completed_at?: string | null
           completed_by?: string | null
           completion_status?: string

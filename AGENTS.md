@@ -27,7 +27,7 @@
 - Survey report/PDF share ordering and hydraulic DN from De-Para; missing flow has no specification. Purchase-report photos come only from the meter-flow question and remain grouped by point. Photo reuse stores same-point attachment ID on response; deletion invalidates it.
 - LUC corrections replace current history; actual shop changes append to preserve occupancy history.
 - Survey catalog title overrides stay separate from items to preserve fixed keys; material types link by catalog IDs to survive renames.
-- Survey points use UUIDs and shared shop/kiosk storage with `point_type`; optional LUC repeats need confirmation, locations may repeat.
+- Survey reclassification uses effective type, not storage kind; retain UUIDs, checklists and links. LUC repeats need confirmation.
 - Shop/kiosk catalog sync preserves visit history; inactive exclusion tombstones prevent removed names returning.
 - Site Survey purchase reports hand a review-only draft to Supply; only the normal Supply form submission creates the order and Approval.
 - Textual action commands use the shared outlined-green action style, including dialogs; compact add/edit controls use the borderless green icon pattern from Cadastro.

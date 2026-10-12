@@ -903,3 +903,5 @@
 - [x] Site Survey — pendência de cadastro abre apenas a pergunta correspondente (dialog focado), sem exibir a seção inteira; priorizar mobile.
 - [x] Site Survey — campo "Número do medidor" (energia e/ou água) no cadastro de loja, quiosque e ambiente.
 - [x] Site Survey — garantir o cadastro de lojas/ambientes no celular Android (botão Salvar sempre visível, mensagens claras ao salvar).
+
+- [x] Site Survey — coluna Tipo, reclassificação preservando pontos e fachada pendente apenas para Lojas/Quiosques.
