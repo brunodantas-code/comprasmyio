@@ -24,15 +24,10 @@
 - Survey catalog title overrides stay separate from items to preserve fixed keys; material types link by catalog IDs to survive renames. Shop/kiosk catalog sync preserves visit history; inactive exclusion tombstones prevent removed names returning.
 - LUC corrections replace current history; actual shop changes append to preserve occupancy history. Reclassification uses effective type, not storage kind; retain UUIDs, checklists and links; LUC repeats need confirmation.
 - Site Survey purchase reports hand a review-only draft to Supply; only the normal Supply form submission creates the order and Approval.
-- Textual action commands use the shared outlined-green action style, including dialogs; compact add/edit controls use the borderless green icon pattern from Cadastro.
 - Survey summary reuses loaded data, checklist order, compact grids and point photos; PDFs stay unchanged. VisitDetails modes and add-only managers separate execution from management without changing writes.
-- Site Survey uses database-backed expiring per-point edit leases with guarded writes; facade inserts update only facade progress atomically, preventing concurrent checklist overwrites.
-- Facade recognition is an independent, time-bounded suggestion; draft revision and request guards preserve manual names and discard results after the dialog closes, so recognition never gates point saving.
-- Checklist and registration-pending facade uploads share a camera/gallery picker marked for exclusion from checklist autosave, keeping independent facade writes safe.
+- Site Survey uses database-backed expiring per-point edit leases with guarded writes; facade inserts update only facade progress atomically, preventing concurrent checklist overwrites. Ordinary saves preserve completion timestamps; explicit completion records time and persists required/installation pending fields, warnings retained.
+- Facade uploads (checklist and registration-pending) share a camera/gallery picker excluded from checklist autosave, keeping independent writes safe. Recognition is a time-bounded suggestion whose guards preserve manual names and discard results after the dialog closes, so it never gates point saving.
 - Facade attachment triggers only clear facade pending fields; guarded explicit starts and the first nonempty persisted checklist response register point start, excluding retrospective manual visits.
-- Ordinary saves preserve completion timestamps; explicit completion records time and persists required/installation pending fields, with warnings retained after completion.
-- RLS uses effective menus/app grants; shared files follow record access and uploads bind owners, preserving authorized collaboration.
-
-- Survey previews lazy-load/cache private images; uploads use lazy compression, a serial queue and retry cache with prepared-file metadata to bound memory.
+- RLS uses effective menus/app grants; shared files follow record access and uploads bind owners, preserving authorized collaboration. Survey previews lazy-load/cache private images; uploads use lazy compression, a serial queue and retry cache with prepared-file metadata to bound memory.
 
 - Pending cards group by section ID and reuse the guarded focused editor; question JSON enables optional answer.observation, separate from required details to preserve validation.
