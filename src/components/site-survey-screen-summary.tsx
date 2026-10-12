@@ -1,3 +1,4 @@
+import { surveyPointType } from "@/lib/site-survey-point-type";
 import { useMemo, useState } from "react";
 import { Camera, ChevronDown, ChevronUp, Droplets, FileText, ImageIcon, MapPin, Package, Search, Wrench, Zap } from "lucide-react";
 
@@ -69,8 +70,8 @@ export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections
   visitTemplateId: string | null;
   sections: SummarySection[];
   questions: SummaryQuestion[];
-  lucs: Array<{ id: string; luc_number: string; shop_name: string; location: string | null; point_type: string; completion_status: string; skipped_section_ids: unknown }>;
-  environments: Array<{ id: string; name: string; template_id: string | null; completion_status: string; skipped_section_ids: unknown }>;
+  lucs: Array<{ id: string; luc_number: string; shop_name: string; location: string | null; point_type: string; classification_type?: string | null; completion_status: string; skipped_section_ids: unknown }>;
+  environments: Array<{ id: string; name: string; template_id: string | null; point_type?: string; completion_status: string; skipped_section_ids: unknown }>;
   responses: SummaryResponse[];
   attachments: SummaryAttachment[];
   materials: SummaryMaterial[];
@@ -86,8 +87,8 @@ export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections
   const [sort, setSort] = useState("luc");
   const [collapsedPoints, setCollapsedPoints] = useState<Set<string>>(() => new Set());
   const points = useMemo<SummaryPoint[]>(() => [
-    ...lucs.map((point) => ({ id: point.id, kind: "luc" as const, pointType: point.point_type === "kiosk" ? "kiosk" as const : "shop" as const, name: point.shop_name, luc: point.luc_number, location: point.location ?? "", templateId: visitTemplateId, completionStatus: point.completion_status, skippedSectionIds: Array.isArray(point.skipped_section_ids) ? point.skipped_section_ids.filter((id): id is string => typeof id === "string") : [] })),
-    ...environments.map((point) => ({ id: point.id, kind: "environment" as const, pointType: "environment" as const, name: point.name, luc: "", location: "", templateId: point.template_id ?? visitTemplateId, completionStatus: point.completion_status, skippedSectionIds: Array.isArray(point.skipped_section_ids) ? point.skipped_section_ids.filter((id): id is string => typeof id === "string") : [] })),
+    ...lucs.map((point) => ({ id: point.id, kind: "luc" as const, pointType: surveyPointType(point), name: point.shop_name, luc: point.luc_number, location: point.location ?? "", templateId: visitTemplateId, completionStatus: point.completion_status, skippedSectionIds: Array.isArray(point.skipped_section_ids) ? point.skipped_section_ids.filter((id): id is string => typeof id === "string") : [] })),
+    ...environments.map((point) => ({ id: point.id, kind: "environment" as const, pointType: surveyPointType(point, "environment"), name: point.name, luc: "", location: "", templateId: point.template_id ?? visitTemplateId, completionStatus: point.completion_status, skippedSectionIds: Array.isArray(point.skipped_section_ids) ? point.skipped_section_ids.filter((id): id is string => typeof id === "string") : [] })),
   ], [lucs, environments, visitTemplateId]);
   const visiblePoints = useMemo(() => points.filter((point) => {
     const term = normalize(search);
