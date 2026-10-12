@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { MyioPlatformLogo } from "@/components/myio-platform-logo";
 import { CrmFunnelIcon } from "@/components/crm-funnel-icon";
@@ -241,7 +242,7 @@ export function Landing() {
                       Esqueci a senha
                      </button>
                   </div>
-                  <Input id="landing-password" name="password" type="password" autoComplete="current-password" required className="h-12 border-erp-access-border bg-erp-access-field text-erp-landing-foreground focus-visible:ring-primary" />
+                  <PasswordInput id="landing-password" name="password" autoComplete="current-password" required className="h-12 border-erp-access-border bg-erp-access-field text-erp-landing-foreground focus-visible:ring-primary" toggleClassName="text-erp-landing-muted hover:text-erp-landing-foreground" />
                 </div>
                 <Button type="submit" size="lg" className="h-12 w-full" disabled={loading}>
                   {loading ? "Entrando..." : "Entrar na plataforma"}
