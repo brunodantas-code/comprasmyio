@@ -904,4 +904,4 @@
 - [x] Site Survey — campo "Número do medidor" (energia e/ou água) no cadastro de loja, quiosque e ambiente.
 - [x] Site Survey — garantir o cadastro de lojas/ambientes no celular Android (botão Salvar sempre visível, mensagens claras ao salvar).
 
-- [ ] Site Survey — coluna Tipo, reclassificação preservando pontos e fachada pendente apenas para Lojas/Quiosques.
+- [x] Site Survey — coluna Tipo, reclassificação preservando pontos e fachada pendente apenas para Lojas/Quiosques.
