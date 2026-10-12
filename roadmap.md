@@ -907,4 +907,4 @@
 - [x] Site Survey — coluna Tipo, reclassificação preservando pontos e fachada pendente apenas para Lojas/Quiosques.
 
 ## Aberta
-- [ ] Verificar a tela com a lista de lojas/ambientes/quiosques com miniatura redonda (Resumo da Visita) — usuário relata que sumiu; confirmar acesso e lápis de edição.
+- [x] Lista com miniatura redonda e lápis confirmada: continua em Resumo de Visitas > abrir visita (Cadastro completo e Resumo da visita); no Realizar Visita ficou só o seletor de ponto (por design). Aguardando decisão se volta também na execução.
