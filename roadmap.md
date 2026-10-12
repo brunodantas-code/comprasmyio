@@ -905,3 +905,6 @@
 - [x] Site Survey — garantir o cadastro de lojas/ambientes no celular Android (botão Salvar sempre visível, mensagens claras ao salvar).
 
 - [x] Site Survey — coluna Tipo, reclassificação preservando pontos e fachada pendente apenas para Lojas/Quiosques.
+
+## Aberta
+- [x] Lista com miniatura redonda e lápis confirmada: continua em Resumo de Visitas > abrir visita (Cadastro completo e Resumo da visita); no Realizar Visita ficou só o seletor de ponto (por design). Aguardando decisão se volta também na execução.
