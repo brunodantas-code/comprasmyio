@@ -22,13 +22,11 @@
 - Code images use private ticket attachments: message images stay with replies, standalone images with tickets. Open tickets allow new questions before answers; answers link to pending admin questions, preserving permissions.
 - Site Survey actions update/deactivate in place to preserve references; warnings use active visible questions only after explicit save, not autosave.
 - Manual visits start `concluida` with historical end; checklist autosaves without timing. Shopping points share add dialog, not storage.
-- Photo drops/pastes autosave; block outside drops. Serialize saves by point/question; flush before point/section switches and card closing; reset point selection on visit changes to prevent stale editors.
-- Survey skips persist by point; skip removes pending requirements, keeps answers, flushes autosave.
+- Photo drops/pastes autosave; block outside drops. Serialize saves by point/question; flush before point/section switches and card closing; reset point selection on visit changes to prevent stale editors. Skips persist by point, remove pending requirements, keep answers, flush autosave.
 - Survey report/PDF share ordering and hydraulic DN from De-Para; missing flow has no specification. Purchase-report photos come only from the meter-flow question and remain grouped by point. Photo reuse stores same-point attachment ID on response; deletion invalidates it.
 - LUC corrections replace current history; actual shop changes append to preserve occupancy history.
-- Survey catalog title overrides stay separate from items to preserve fixed keys; material types link by catalog IDs to survive renames.
-- Survey reclassification uses effective type, not storage kind; retain UUIDs, checklists and links. LUC repeats need confirmation.
-- Shop/kiosk catalog sync preserves visit history; inactive exclusion tombstones prevent removed names returning.
+- Survey catalog title overrides stay separate from items to preserve fixed keys; material types link by catalog IDs to survive renames. Shop/kiosk catalog sync preserves visit history; inactive exclusion tombstones prevent removed names returning.
+- LUC corrections replace current history; actual shop changes append to preserve occupancy history. Reclassification uses effective type, not storage kind; retain UUIDs, checklists and links; LUC repeats need confirmation.
 - Site Survey purchase reports hand a review-only draft to Supply; only the normal Supply form submission creates the order and Approval.
 - Textual action commands use the shared outlined-green action style, including dialogs; compact add/edit controls use the borderless green icon pattern from Cadastro.
 - Survey summary reuses loaded data, checklist order, compact grids and point photos; PDFs stay unchanged. VisitDetails modes and add-only managers separate execution from management without changing writes.
@@ -41,5 +39,4 @@
 
 - Survey previews lazy-load/cache private images; uploads use lazy compression, a serial queue and retry cache with prepared-file metadata to bound memory.
 
-- Pending cards group by section ID and reuse the guarded focused editor.
-- Question JSON enables optional answer.observation, separate from required details to preserve validation.
+- Pending cards group by section ID and reuse the guarded focused editor; question JSON enables optional answer.observation, separate from required details to preserve validation.
