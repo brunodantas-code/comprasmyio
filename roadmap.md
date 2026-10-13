@@ -921,3 +921,6 @@
 - [x] Site Survey — excluir perguntas individuais adicionadas em "Perguntas para o cliente" (lixeira com confirmação; visível quando há mais de uma pergunta).
 - [x] Site Survey — botão + nos cards de Pendências de cadastro adiciona pergunta para o cliente, salva na Seção 7 do ponto e exibida no card.
 - [x] Site Survey — pergunta adicionada permanece como pendência até ser marcada como respondida (check no card e no pop-up da etapa).
+- [ ] Site Survey — checkbox de "Marcar como respondida" desmarcado por padrão (quadrado vazio) e confirmação antes de remover a pendência do card; validação em andamento.
+- [ ] Site Survey — investigar por que alguns cards de pendências não têm o botão + de adicionar pergunta ao cliente.
+- [ ] Site Survey — incluir lápis de edição e lixeira de exclusão nas perguntas do cliente exibidas nos cards.
