@@ -32,7 +32,7 @@ export function numberedCustomerQuestions(answer: unknown): string[] {
 
 export function answeredCustomerQuestions(answer: unknown): string[] {
   if (answer && typeof answer === "object" && !Array.isArray(answer) && Array.isArray(answer.customer_questions_answered)) {
-    return answer.customer_questions_answered.filter((value): value is string => typeof value === "string");
+    return (answer as { customer_questions_answered: unknown[] }).customer_questions_answered.filter((value): value is string => typeof value === "string");
   }
   return [];
 }
