@@ -4256,6 +4256,47 @@ export type Database = {
           },
         ]
       }
+      site_survey_report_texts: {
+        Row: {
+          answer_value: string
+          created_at: string
+          created_by: string
+          id: string
+          name: string
+          question_id: string
+          report_answer: string
+          report_question: string
+        }
+        Insert: {
+          answer_value?: string
+          created_at?: string
+          created_by: string
+          id?: string
+          name: string
+          question_id: string
+          report_answer?: string
+          report_question?: string
+        }
+        Update: {
+          answer_value?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          name?: string
+          question_id?: string
+          report_answer?: string
+          report_question?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_survey_report_texts_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_survey_responses: {
         Row: {
           answer: Json
