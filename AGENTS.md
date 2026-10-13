@@ -32,3 +32,5 @@
 
 - Pending cards reuse the guarded editor by section; optional answer.observation stays separate from required details.
 - Checklist categories map legacy types without rewriting unchanged storage, preserving boolean conditions; customer questions use answer.customer_questions plus a compatible value and the existing guarded autosave, shared by editor, summary and reports.
+
+- Missing registration LUC is derived from effective point classification and corrected through the existing history-preserving RPC; duplicate LUCs use the full editor confirmation to preserve established safeguards.
