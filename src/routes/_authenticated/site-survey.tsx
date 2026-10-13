@@ -296,7 +296,7 @@ function SiteSurveyPage() {
                  })}
                  {filtered.length === 0 ? <p className={`${visitsListOpen ? "" : "lg:hidden"} px-4 py-12 text-center text-sm text-muted-foreground`}>Nenhuma visita encontrada.</p> : null}
                </div>
-               <VisitDetails closeGuardRef={visitCloseGuard} view={visitsSection === "resumo" ? "summary" : "execution"} visit={filtered.find((visit) => visit.id === selected?.id) ?? null} data={data} onClose={() => setSelected(null)} onChanged={(updatedVisit) => { void invalidate(); setSelected(updatedVisit ?? null); }} />
+               <VisitDetails closeGuardRef={visitCloseGuard} view={visitsSection === "resumo" ? "summary" : "execution"} visit={filtered.find((visit) => visit.id === selected?.id) ?? null} data={data} onClose={() => setSelected(null)} onChanged={(updatedVisit) => { void invalidate(); setSelected(updatedVisit ?? null); }} executionPointFocus={executionPointFocus} onExecutionPointFocusConsumed={() => setExecutionPointFocus(null)} onGoToExecution={(pointValue) => { setExecutionPointFocus(pointValue); setVisitsSection("minhas"); }} />
             </div> : null}
             {can("site_survey_agendar") ? <><TabsContent value="nova"><VisitDialog data={data} inline onSaved={() => { invalidate(); setVisitsSection("minhas"); }} /></TabsContent><TabsContent value="realizada"><VisitDialog data={data} inline manual onSaved={() => { invalidate(); setVisitsSection("resumo"); }} /></TabsContent></> : null}
           </Tabs>
@@ -869,6 +869,13 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
       setPendingPointSave(null);
       return true;
     };
+    useEffect(() => {
+      if (view !== "execution" || !executionPointFocus || !visit) return;
+      onExecutionPointFocusConsumed?.();
+      void switchPoint(executionPointFocus).then((switched) => {
+        if (switched) setTimeout(() => document.querySelector(`[data-survey-point="${executionPointFocus}"]`)?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
+      });
+    }, [view, executionPointFocus, visit?.id]);
     closeGuardRef.current = async () => {
       await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
       if (!(await switchPoint(""))) return false;
