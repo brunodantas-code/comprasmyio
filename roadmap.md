@@ -1,4 +1,4 @@
-- [ ] Site Survey — PDF de pendências para o cliente com perguntas não respondidas e chamados gerados nos checklists; botão à direita de Fechar.
+- [ ] Site Survey — PDF de pendências para o cliente com perguntas não respondidas e chamados gerados nos checklists; botão à direita de Fechar; manter Intervenções do Cliente como relatório independente.
 - [x] Site Survey — incluir LUC ausente nas Pendências de Cadastro somente para lojas/quiosques, preservando Não identificado e sem bloquear conclusão.
 - [x] Site Survey — simplificar tipos de resposta para Escolha única, Múltipla escolha, Texto e Número, preservando respostas e condições.
 - [x] Site Survey — perguntas individuais para o cliente com + no preenchimento e relatório numerado por ponto.
