@@ -928,3 +928,4 @@
 
 ## Conclusão técnica e complementos — 13/10/2026
 - [ ] Remover gráficos e preservar datas originais nas conclusões posteriores; verificar visita encerrada em 07/10.
+- [ ] Exibir número do medidor à direita do LUC e reduzir Localização na lista de pontos.
