@@ -1590,7 +1590,7 @@ function AttachmentThumbnail({ attachment, photoNumber, gallery }: { attachment:
       {signedUrl ? <img src={signedUrl} alt={attachment.file_name} loading="lazy" draggable={false} className="pointer-events-none h-full w-full select-none object-cover transition-transform group-hover:scale-105" /> : <Camera className="h-6 w-6 text-muted-foreground" />}
      </Button>{photoNumber ? <span className="text-[11px] text-muted-foreground tabular-nums">Foto {photoNumber}</span> : null}</div>
     <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-      <DialogContent className="relative max-h-[88dvh] w-[calc(100vw-2rem)] max-w-4xl overflow-hidden p-3 sm:p-4" onKeyDown={(event) => surveyPhotoKeydown(event, hasGallery ? siblings!.length : 0, prevPhoto, nextPhoto)}>
+      <DialogContent className="max-h-[88dvh] w-[calc(100vw-2rem)] max-w-4xl overflow-hidden p-3 sm:p-4" onKeyDown={(event) => surveyPhotoKeydown(event, hasGallery ? siblings!.length : 0, prevPhoto, nextPhoto)}>
         <DialogTitle className="sr-only">{viewerTarget.file_name}</DialogTitle>
         {viewerUrl ? <img src={viewerUrl} alt={viewerTarget.file_name} draggable={false} className="mx-auto max-h-[78dvh] w-auto max-w-full select-none rounded-md object-contain" /> : null}
         <SurveyPhotoNav position={position} total={hasGallery ? siblings!.length : 0} onPrev={prevPhoto} onNext={nextPhoto} />
