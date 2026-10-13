@@ -15,7 +15,7 @@
 - Payment approvals recognize the active finance role or job title (an inactive legacy title must not block); above the joint-approval threshold, eligible joint approvers join finance and the requester never self-approves.
 - Personal approval lists/counts filter by assigned approver, never Admin access, to avoid treating parallel steps as duplicate personal tasks. Admin edits preserve decisions/logs; type changes re-evaluate pending chains; payment allocation uses exclusive destinations.
 - Supply “Item novo” authorizes catalog inserts for Fábrica, Terceiros and Ferramentas via effective profile/individual permission and authenticated owner; it does not grant stock editing or movement rights.
-- Survey progress groups point completions by timestamp/user and São Paulo day/hour; hide for retrospective visits because checklist time is not visit time.
+- Site Survey completion writes preserve original point/visit timestamps and never time later remediation as field execution; daily completion charts are not rendered because checklist updates are not technical visits.
 - Site Survey deletion checks linked OpDesk calls, offers keep/delete, and uses an authorized atomic DB function; OpDesk retains visit number.
 - Code images use private ticket attachments: message images stay with replies, standalone images with tickets. Open tickets allow new questions before answers; answers link to pending admin questions, preserving permissions.
 - Site Survey actions update/deactivate in place to preserve references; warnings use active visible questions only after explicit save, not autosave. Manual visits start `concluida` with historical end, autosave without timing; shopping points share the add dialog, not storage.
