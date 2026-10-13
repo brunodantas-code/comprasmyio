@@ -1568,19 +1568,31 @@ function AttachmentSelectionPreview({ attachment }: { attachment: SurveyAttachme
     : <FileText className="h-6 w-6 shrink-0 text-muted-foreground" />;
 }
 
-function AttachmentThumbnail({ attachment, photoNumber }: { attachment: SurveyAttachment; photoNumber?: number }) {
+function AttachmentThumbnail({ attachment, photoNumber, gallery }: { attachment: SurveyAttachment; photoNumber?: number; gallery?: SurveyAttachment[] }) {
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [position, setPosition] = useState(0);
   const { url: signedUrl } = useSurveyImage(attachment);
-  const isImage = attachment.content_type?.startsWith("image/") ?? /\.(jpe?g|png|webp|gif|heic)$/i.test(attachment.file_name);
+  const isImage = isSurveyImageFile(attachment);
+  const siblings = isImage && gallery ? gallery.filter(isSurveyImageFile) : undefined;
+  const hasGallery = Boolean(siblings && siblings.length > 1);
+  const viewerTarget = previewOpen && hasGallery ? siblings![position] ?? attachment : attachment;
+  const { url: viewerUrl } = useSurveyImage(viewerTarget);
   if (!isImage) return <Button type="button" variant="ghost" size="sm" className="h-auto max-w-full justify-start !bg-transparent px-0 text-xs text-foreground hover:!bg-muted" disabled={!signedUrl} onClick={() => signedUrl && window.open(signedUrl, "_blank", "noopener,noreferrer")}><FileText className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{attachment.file_name}</span></Button>;
+  const openPreview = () => {
+    if (hasGallery) setPosition(Math.max(0, siblings!.findIndex((item) => item.id === attachment.id)));
+    setPreviewOpen(true);
+  };
+  const prevPhoto = () => setPosition((current) => (current - 1 + siblings!.length) % siblings!.length);
+  const nextPhoto = () => setPosition((current) => (current + 1) % siblings!.length);
   return <>
-     <div className="flex w-24 flex-col gap-1 sm:w-28"><Button type="button" variant="ghost" className="group relative h-24 w-24 overflow-hidden !bg-transparent p-0 hover:!bg-muted sm:h-28 sm:w-28" disabled={!signedUrl} aria-label={`Ampliar ${photoNumber ? `foto ${photoNumber}` : "foto"} ${attachment.file_name}`} title={attachment.file_name} onClick={(event) => { event.preventDefault(); event.stopPropagation(); setPreviewOpen(true); }}>
+     <div className="flex w-24 flex-col gap-1 sm:w-28"><Button type="button" variant="ghost" className="group relative h-24 w-24 overflow-hidden !bg-transparent p-0 hover:!bg-muted sm:h-28 sm:w-28" disabled={!signedUrl} aria-label={`Ampliar ${photoNumber ? `foto ${photoNumber}` : "foto"} ${attachment.file_name}`} title={attachment.file_name} onClick={(event) => { event.preventDefault(); event.stopPropagation(); openPreview(); }}>
       {signedUrl ? <img src={signedUrl} alt={attachment.file_name} loading="lazy" draggable={false} className="pointer-events-none h-full w-full select-none object-cover transition-transform group-hover:scale-105" /> : <Camera className="h-6 w-6 text-muted-foreground" />}
      </Button>{photoNumber ? <span className="text-[11px] text-muted-foreground tabular-nums">Foto {photoNumber}</span> : null}</div>
     <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-      <DialogContent className="max-h-[88dvh] w-[calc(100vw-2rem)] max-w-4xl overflow-hidden p-3 sm:p-4">
-        <DialogTitle className="sr-only">{attachment.file_name}</DialogTitle>
-        {signedUrl ? <img src={signedUrl} alt={attachment.file_name} draggable={false} className="mx-auto max-h-[78dvh] w-auto max-w-full select-none rounded-md object-contain" /> : null}
+      <DialogContent className="relative max-h-[88dvh] w-[calc(100vw-2rem)] max-w-4xl overflow-hidden p-3 sm:p-4" onKeyDown={(event) => surveyPhotoKeydown(event, hasGallery ? siblings!.length : 0, prevPhoto, nextPhoto)}>
+        <DialogTitle className="sr-only">{viewerTarget.file_name}</DialogTitle>
+        {viewerUrl ? <img src={viewerUrl} alt={viewerTarget.file_name} draggable={false} className="mx-auto max-h-[78dvh] w-auto max-w-full select-none rounded-md object-contain" /> : null}
+        <SurveyPhotoNav position={position} total={hasGallery ? siblings!.length : 0} onPrev={prevPhoto} onNext={nextPhoto} />
       </DialogContent>
     </Dialog>
   </>;
