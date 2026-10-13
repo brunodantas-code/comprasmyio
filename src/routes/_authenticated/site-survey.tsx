@@ -173,6 +173,7 @@ function SiteSurveyPage() {
     setSelected((current) => current?.id === visit.id ? null : visit);
   };
   const [visitsListOpen, setVisitsListOpen] = useState(true);
+  const [executionPointFocus, setExecutionPointFocus] = useState<string | null>(null);
   const visitsRef = useRef<Visit[]>([]);
   useEffect(() => {
     // Opening the on-screen registration report must select its visit so the details panel can render it.
@@ -374,7 +375,7 @@ function ChecklistSection({ section, order, open, pendingCount, onToggle, skippe
   </section>;
 }
 
-function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "execution" }: { closeGuardRef: { current: (() => Promise<boolean>) | null }; view?: "execution" | "summary"; visit: Visit | null; data: NonNullable<ReturnType<typeof useSurveyDataShape>>; onClose: () => void; onChanged: (updatedVisit?: Visit) => void }) {
+function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "execution", executionPointFocus = null, onExecutionPointFocusConsumed, onGoToExecution }: { closeGuardRef: { current: (() => Promise<boolean>) | null }; view?: "execution" | "summary"; visit: Visit | null; data: NonNullable<ReturnType<typeof useSurveyDataShape>>; onClose: () => void; onChanged: (updatedVisit?: Visit) => void; executionPointFocus?: string | null; onExecutionPointFocusConsumed?: () => void; onGoToExecution?: (pointValue: string) => void }) {
   const queryClient = useQueryClient();
   const [reviewNotes, setReviewNotes] = useState("");
   const [uploadingGeneralAttachments, setUploadingGeneralAttachments] = useState(false);
