@@ -13,7 +13,7 @@
 - Approval Workflow's three views belong in Supply bottom navigation under Usuários e logs, not top tabs. Supply execution opens `supply`, decisions `mine`; payment approvals stay in Cash Flow, outside Supply execution queues/counts; approval ≠ payment.
 - Mobile Supply PDFs use lazy PDF.js canvas in the dialog; desktop opens a new tab.
 - Payment approvals recognize the active finance role or job title (an inactive legacy title must not block); above the joint-approval threshold, eligible joint approvers join finance and the requester never self-approves.
-- Admin Approval type edits keep prior decisions and log the change; pending chains re-evaluate when type changes, while payment allocation uses the standard exclusive destination choices.
+- Personal approval lists/counts filter by assigned approver, never Admin access, to avoid treating parallel steps as duplicate personal tasks. Admin edits preserve decisions/logs; type changes re-evaluate pending chains; payment allocation uses exclusive destinations.
 - Supply “Item novo” authorizes catalog inserts for Fábrica, Terceiros and Ferramentas via effective profile/individual permission and authenticated owner; it does not grant stock editing or movement rights.
 - Survey progress groups point completions by timestamp/user and São Paulo day/hour; hide for retrospective visits because checklist time is not visit time.
 - Site Survey deletion checks linked OpDesk calls, offers keep/delete, and uses an authorized atomic DB function; OpDesk retains visit number.
