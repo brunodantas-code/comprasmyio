@@ -990,6 +990,7 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
       const items: { key: string; label: string; sectionId?: string }[] = [];
       if (requiresSurveyFacade(point.pointType) && !detail.attachments.some((item) => item.attachment_kind === "facade" && scope(item))) items.push({ key: "facade", label: "Foto da fachada" });
       const luc = kind === "luc" ? detail.lucs.find((item) => item.id === id) : null;
+      if (luc && point.pointType !== "environment" && !luc.luc_number?.trim()) items.push({ key: "luc", label: "Número do LUC" });
       if (luc && !luc.location?.trim()) items.push({ key: "location", label: "Localização (andar)" });
       for (const section of sectionsFor(point.templateId ?? visit.template_id, own)) {
         if (skipped.has(section.id)) continue;
@@ -1017,6 +1018,18 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
     await switchPoint(pointValue);
     setPendingFocus({ pointValue, itemKey });
   };
+  const savePendingLuc = async (form: HTMLFormElement, luc: NonNullable<(typeof registrationPending)[number]["luc"]>) => {
+    const value = String(new FormData(form).get("luc_number") ?? "").trim();
+    if (!value) return;
+    if (detail?.lucs.some((row) => row.id !== luc.id && row.luc_number.trim().toLocaleLowerCase("pt-BR") === value.toLocaleLowerCase("pt-BR"))) {
+      toast.error("Este LUC já está cadastrado. Use o lápis no Cadastro completo para confirmar a repetição.");
+      return;
+    }
+    const { error } = await supabase.rpc("correct_site_survey_visit_luc", { _id: luc.id, _luc_number: value, _shop_name: luc.shop_name, _location: luc.location ?? "" });
+    if (error) return toast.error(error.message);
+    toast.success("LUC salvo");
+    await refetchDetail();
+  };
   const saveLocation = async (lucId: string, value: string) => {
     if (!value.trim()) return;
     const { error } = await supabase.from("site_survey_visit_lucs").update({ location: value.trim() }).eq("id", lucId);
@@ -1033,7 +1046,7 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
       <div className="flex flex-col gap-2">{groups.map((group) => <Button key={group.key} type="button" size="sm" variant="action" className="h-auto min-h-9 w-full justify-between gap-3 whitespace-normal px-3 py-2 text-left text-xs" aria-label={`${group.label}: ${group.items.length} pendências de ${point.label}`} onClick={() => setPendingGroup({ pointValue: point.value, key: group.key })}><span className="min-w-0 break-words">{group.label}</span><span className="shrink-0 font-semibold tabular-nums">{group.items.length}</span></Button>)}</div>
     </article>)}</div> : <p className="text-sm text-muted-foreground">Nenhuma pendência de cadastro encontrada.</p>}
     <Dialog open={Boolean(pendingGroup && !pendingFocus)} onOpenChange={(open) => { if (!open) setPendingGroup(null); }}><DialogContent className="max-h-[88vh] overflow-y-auto sm:max-w-xl"><DialogHeader><DialogTitle>{activePendingGroup?.label ?? "Pendências concluídas"}</DialogTitle><DialogDescription>{activePendingRow?.point.label ?? points.find((point) => point.value === pendingGroup?.pointValue)?.label}</DialogDescription></DialogHeader>
-      <div className="space-y-3">{activePendingGroup?.items.map((item) => item.key === "location" && activePendingRow?.luc ? <div key={item.key} className="space-y-2"><Label htmlFor="pending-location">Localização (andar)</Label><Input id="pending-location" placeholder="Localização (andar)" disabled={!canFillRegistration} onBlur={(event) => { if (activePendingRow.luc) void saveLocation(activePendingRow.luc.id, event.target.value); }} onKeyDown={(event) => { if (event.key === "Enter") event.currentTarget.blur(); }} /></div> : <Button key={item.key} type="button" variant="action" className="h-auto min-h-10 w-full justify-start whitespace-normal text-left text-sm" disabled={!canFillRegistration} onClick={() => { if (activePendingRow) void openPendingFocus(activePendingRow.point.value, item.key); }}>{item.key === "facade" ? <Camera className="shrink-0" /> : null}{item.sectionId ? data.questions.find((question) => question.id === item.key)?.prompt ?? item.label : item.label}</Button>)}{!activePendingGroup ? <p className="text-sm text-muted-foreground">Nenhuma pendência restante nesta etapa.</p> : null}</div>
+      <div className="space-y-3">{activePendingGroup?.items.map((item) => item.key === "luc" && activePendingRow?.luc ? <form key={item.key} className="space-y-3" onSubmit={(event) => { event.preventDefault(); if (activePendingRow.luc) void savePendingLuc(event.currentTarget, activePendingRow.luc); }}><Label htmlFor="pending-luc">Número do LUC</Label><Input id="pending-luc" name="luc_number" disabled={!canFillRegistration} required /><Button type="submit" variant="action" size="sm" disabled={!canFillRegistration}><Save className="h-4 w-4" />Salvar</Button></form> : item.key === "location" && activePendingRow?.luc ? <div key={item.key} className="space-y-2"><Label htmlFor="pending-location">Localização (andar)</Label><Input id="pending-location" placeholder="Localização (andar)" disabled={!canFillRegistration} onBlur={(event) => { if (activePendingRow.luc) void saveLocation(activePendingRow.luc.id, event.target.value); }} onKeyDown={(event) => { if (event.key === "Enter") event.currentTarget.blur(); }} /></div> : <Button key={item.key} type="button" variant="action" className="h-auto min-h-10 w-full justify-start whitespace-normal text-left text-sm" disabled={!canFillRegistration} onClick={() => { if (activePendingRow) void openPendingFocus(activePendingRow.point.value, item.key); }}>{item.key === "facade" ? <Camera className="shrink-0" /> : null}{item.sectionId ? data.questions.find((question) => question.id === item.key)?.prompt ?? item.label : item.label}</Button>)}{!activePendingGroup ? <p className="text-sm text-muted-foreground">Nenhuma pendência restante nesta etapa.</p> : null}</div>
       <DialogFooter><Button type="button" size="sm" variant="action" onClick={() => setPendingGroup(null)}>Fechar</Button></DialogFooter>
     </DialogContent></Dialog>
   </section> : null;
