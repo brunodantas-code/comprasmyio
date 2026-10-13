@@ -5,6 +5,7 @@ import { DndContext, KeyboardSensor, PointerSensor, TouchSensor, closestCenter, 
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { ChevronUp, CalendarDays, Camera, Check, ChevronDown, ChevronsUpDown, ClipboardCheck, FileText, GripVertical, History, MapPin, Package, Pencil, Play, Pause, Plus, Search, ShieldCheck, Square, Trash2, UsersRound, Save, X } from "lucide-react";
+import { SurveyPhotoNav, surveyPhotoKeydown, isSurveyImageFile } from "@/components/site-survey-photo-viewer";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
