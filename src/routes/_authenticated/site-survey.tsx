@@ -988,7 +988,7 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
       const skipped = new Set(Array.isArray(record?.skipped_section_ids) ? record.skipped_section_ids.filter((item): item is string => typeof item === "string") : []);
       const scope = (item: { visit_luc_id?: string | null; visit_environment_id?: string | null }) => kind === "luc" ? item.visit_luc_id === id : item.visit_environment_id === id;
       const answers = new Map<string, unknown>(detail.responses.filter(scope).map((item) => [item.question_id, item.answer]));
-      const items: { key: string; label: string; sectionId?: string }[] = [];
+      const items: { key: string; label: string; sectionId?: string; groupKey?: string; groupLabel?: string; customer?: boolean }[] = [];
       if (requiresSurveyFacade(point.pointType) && !detail.attachments.some((item) => item.attachment_kind === "facade" && scope(item))) items.push({ key: "facade", label: "Foto da fachada" });
       const luc = kind === "luc" ? detail.lucs.find((item) => item.id === id) : null;
       if (luc && point.pointType !== "environment" && !luc.luc_number?.trim()) items.push({ key: "luc", label: "Número do LUC" });
@@ -997,17 +997,19 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
         if (skipped.has(section.id)) continue;
         for (const question of sortByPosition(data.questions.filter((item) => item.active && item.section_id === section.id))) if (isQuestionVisible(question, answers) && isNotInformedAnswer(answerParts(answers.get(question.id)).value)) items.push({ key: question.id, label: `${section.title}: ${question.prompt}`, sectionId: section.id });
       }
+      const customerQuestion = sectionsFor(point.templateId ?? visit.template_id, own).filter((section) => !skipped.has(section.id)).flatMap((section) => data.questions.filter((question) => question.active && question.section_id === section.id && isCustomerQuestion(question)))[0];
+      if (customerQuestion) for (const text of pendingCustomerQuestions(answers.get(customerQuestion.id))) items.push({ key: `customer:${customerQuestion.id}:${text}`, label: text, groupKey: `customer:${customerQuestion.id}`, groupLabel: "Perguntas para o cliente", customer: true });
       const groups: { key: string; label: string; items: typeof items }[] = [];
       for (const item of items) {
-        const key = item.sectionId ?? item.key;
+        const key = item.groupLabel ? item.groupKey ?? item.groupLabel : item.sectionId ?? item.key;
         const existing = groups.find((group) => group.key === key);
         if (existing) existing.items.push(item);
         else {
-          const title = item.sectionId ? data.sections.find((section) => section.id === item.sectionId)?.title ?? "Checklist" : item.label;
+          const title = item.groupLabel ?? (item.sectionId ? data.sections.find((section) => section.id === item.sectionId)?.title ?? "Checklist" : item.label);
           groups.push({ key, label: /^instalação elétrica$/i.test(title.trim()) ? "Elétrica" : title, items: [item] });
         }
       }
-      return { point, luc, items, groups };
+      return { point, luc, items, groups, customerQuestion };
     }).filter((row) => row.items.length && (!registrationSearch.trim() || row.point.label.toLocaleLowerCase("pt-BR").includes(registrationSearch.trim().toLocaleLowerCase("pt-BR"))));
   })();
   const canFillRegistration = data.permissions.has("site_survey_executar") || data.permissions.has("site_survey_editar");
