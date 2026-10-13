@@ -31,7 +31,8 @@ export function numberedCustomerQuestions(answer: unknown): string[] {
 }
 
 export function answeredCustomerQuestions(answer: unknown): string[] {
-  if (answer && typeof answer === "object" && !Array.isArray(answer) && Array.isArray(answer.customer_questions_answered)) {
+  const answered = (answer && typeof answer === "object" && !Array.isArray(answer) ? (answer as { customer_questions_answered?: unknown }).customer_questions_answered : null);
+  if (Array.isArray(answered)) {
     return (answer as { customer_questions_answered: unknown[] }).customer_questions_answered.filter((value): value is string => typeof value === "string");
   }
   return [];
