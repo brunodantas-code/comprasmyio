@@ -659,6 +659,7 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
       const detailValue = subdetail ? `${baseDetail} | ${subdetail}` : baseDetail;
       const savedAnswer = (detail?.responses ?? []).find((response) => response.question_id === question.id && (phase === "pre_visit" ? !response.visit_luc_id && !response.visit_environment_id : matchesPoint(response)))?.answer;
       const customerRows = isCustomerQuestion(question) ? values.getAll(`${question.id}__customer_question`).map(String).map((value) => value.trim()).filter(Boolean) : null;
+      const customerAnswered = customerRows && savedAnswer && typeof savedAnswer === "object" && !Array.isArray(savedAnswer) && Array.isArray(savedAnswer.customer_questions_answered) ? savedAnswer.customer_questions_answered.filter((value): value is string => typeof value === "string" && (customerRows ?? []).includes(value)) : null;
       const observation = values.has(`${question.id}__observation`) ? String(values.get(`${question.id}__observation`) ?? "").trim() : questionObservation(savedAnswer);
        const hasOtherOption = Array.isArray(question.options) && question.options.some((option) => typeof option === "string" && isOtherOption(option));
       const questionScope = phase === "pre_visit" ? { visit_luc_id: null, visit_environment_id: null } : scope;
