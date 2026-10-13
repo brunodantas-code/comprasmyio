@@ -33,7 +33,7 @@ export function numberedCustomerQuestions(answer: unknown): string[] {
 export function answeredCustomerQuestions(answer: unknown): string[] {
   const answered = (answer && typeof answer === "object" && !Array.isArray(answer) ? (answer as { customer_questions_answered?: unknown }).customer_questions_answered : null);
   if (Array.isArray(answered)) {
-    return (answer as { customer_questions_answered: unknown[] }).customer_questions_answered.filter((value): value is string => typeof value === "string");
+    return answered.filter((value): value is string => typeof value === "string");
   }
   return [];
 }
