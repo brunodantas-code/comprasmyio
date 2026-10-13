@@ -1,4 +1,4 @@
-- [ ] Site Survey — verificar se LUC ausente em lojas/quiosques aparece nas Pendências de Cadastro e esclarecer regra dos ambientes.
+- [ ] Site Survey — incluir LUC ausente nas Pendências de Cadastro somente para lojas/quiosques, preservando Não identificado e sem bloquear conclusão.
 - [ ] Site Survey — simplificar tipos de resposta para Escolha única, Múltipla escolha, Texto e Número, preservando respostas e condições.
 - [ ] Site Survey — perguntas individuais para o cliente com + no preenchimento e relatório numerado por ponto.
 - [x] Approvals — pendências pessoais e contadores filtram pelo aprovador designado, sem incluir etapas alheias por Perfil Admin; sete verificações passaram e o solicitante vê Financeiro/CEO preservados. Conferência direta na sessão do CEO indisponível por permissão.
