@@ -1040,6 +1040,48 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
     toast.success("Localização salva");
     void refetchDetail();
   };
+  const customerQuestionTarget = (pointValue: string) => {
+    const row = registrationPending.find((item) => item.point.value === pointValue);
+    if (!row?.customerQuestion) return null;
+    const [kind, id = ""] = pointValue.split(":");
+    const matches = (item: { visit_luc_id?: string | null; visit_environment_id?: string | null }) => kind === "luc" ? item.visit_luc_id === id : item.visit_environment_id === id;
+    const response = detail?.responses.find((item) => matches(item) && item.question_id === row.customerQuestion!.id) ?? null;
+    return { row, matches, response };
+  };
+  const addPendingCustomerQuestion = async (pointValue: string, text: string) => {
+    const clean = text.trim();
+    if (!clean) return;
+    const target = customerQuestionTarget(pointValue);
+    if (!target) return;
+    const question = target.row.customerQuestion!;
+    const rows = customerQuestions(target.response?.answer);
+    if (rows.some((item) => item === clean)) return toast.error("Esta pergunta já está cadastrada neste ponto.");
+    const base = target.response?.answer && typeof target.response.answer === "object" && !Array.isArray(target.response.answer) ? target.response.answer : { value: rows.join("\n") };
+    const answer = { ...base, value: [...rows, clean].join("\n"), customer_questions: [...rows, clean] };
+    const [kind, id = ""] = pointValue.split(":");
+    const scope = kind === "luc" ? { visit_luc_id: id, visit_environment_id: null } : { visit_luc_id: null, visit_environment_id: id };
+    const { error } = target.response
+      ? await supabase.from("site_survey_responses").update({ answer, answered_by: data.userId }).eq("id", target.response.id)
+      : await supabase.from("site_survey_responses").insert({ visit_id: visit.id, ...scope, question_id: question.id, answered_by: data.userId, answer, question_snapshot: JSON.parse(JSON.stringify({ prompt: question.prompt, options: question.options, configuration: question.configuration })) } as never);
+    if (error) return toast.error(error.message);
+    toast.success("Pergunta adicionada");
+    setCustomerDraft(null);
+    await refetchDetail();
+  };
+  const markCustomerQuestionAnswered = async (pointValue: string, text: string) => {
+    const target = customerQuestionTarget(pointValue);
+    if (!target?.response) return;
+    const existing = target.response.answer;
+    const rows = customerQuestions(existing);
+    const answered = answeredCustomerQuestions(existing);
+    if (answered.includes(text)) return;
+    const base = existing && typeof existing === "object" && !Array.isArray(existing) ? existing : { value: rows.join("\n") };
+    const answer = { ...base, value: rows.join("\n"), customer_questions: rows, customer_questions_answered: [...answered, text] };
+    const { error } = await supabase.from("site_survey_responses").update({ answer, answered_by: data.userId }).eq("id", target.response.id);
+    if (error) return toast.error(error.message);
+    toast.success("Pergunta marcada como respondida");
+    await refetchDetail();
+  };
   const activePendingRow = registrationPending.find((row) => row.point.value === pendingGroup?.pointValue);
   const activePendingGroup = activePendingRow?.groups.find((group) => group.key === pendingGroup?.key);
   const pendingPanel = registrationPendingOpen ? <section id="registration-pending" className="space-y-3 border-t pt-5" aria-label="Pendências de cadastro">
