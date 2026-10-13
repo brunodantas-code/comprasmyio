@@ -1,0 +1,25 @@
+import { useState } from "react";
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { customerQuestions } from "@/lib/site-survey-questions";
+
+export function SiteSurveyCustomerQuestions({ questionId, answer, onChange }: { questionId: string; answer: unknown; onChange?: (value: string) => void }) {
+  const [rows, setRows] = useState(() => {
+    const existing = customerQuestions(answer);
+    return existing.length ? existing : [""];
+  });
+  return <div className="w-full min-w-0 space-y-3">
+    <input type="hidden" name={questionId} value={rows.map((row) => row.trim()).filter(Boolean).join("\n")} />
+    {rows.map((row, index) => <div key={index} className="min-w-0 space-y-1">
+      <Label htmlFor={`${questionId}-customer-${index}`}>Pergunta {index + 1}</Label>
+      <Textarea id={`${questionId}-customer-${index}`} name={`${questionId}__customer_question`} value={row} rows={2} onChange={(event) => {
+        const next = rows.map((value, position) => position === index ? event.target.value : value);
+        setRows(next);
+        onChange?.(next.map((value) => value.trim()).filter(Boolean).join("\n"));
+      }} />
+    </div>)}
+    <Button type="button" size="compactIcon" variant="ghost" aria-label="Adicionar pergunta para o cliente" title="Adicionar pergunta para o cliente" onClick={() => setRows((current) => [...current, ""])}><Plus className="h-5 w-5" /></Button>
+  </div>;
+}
