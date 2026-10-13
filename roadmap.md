@@ -930,3 +930,5 @@
 ## Conclusão técnica e complementos — 13/10/2026
 - [x] Gráficos removidos; conclusão técnica de 07/10 registrada; datas protegidas contra alterações posteriores e histórico distingue complementos/saneamento. Verificado na visita real, sem erros e com 63 cards preservados.
 - [x] Número do medidor à direita do LUC, com Localização reduzida; coluna validada no navegador.
+
+- [x] Nome da loja/quiosque/ambiente nos cards de Pendências de Cadastro virou link verde que abre o Realizar Visita com o ponto já selecionado no checklist (estado executionPointFocus no pai + efeito no VisitDetails antes do retorno antecipado; validado no navegador com Stúdio sobrancelhas — Mall).
