@@ -1,5 +1,6 @@
 import { numberedCustomerQuestions } from "@/lib/site-survey-questions";
 import { surveyPointType } from "@/lib/site-survey-point-type";
+import { SurveyPhotoNav, surveyPhotoKeydown, isSurveyImageFile } from "@/components/site-survey-photo-viewer";
 import { useMemo, useState } from "react";
 import { Camera, ChevronDown, ChevronUp, Droplets, FileText, ImageIcon, MapPin, Package, Search, Wrench, Zap } from "lucide-react";
 
