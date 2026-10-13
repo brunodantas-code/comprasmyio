@@ -414,6 +414,7 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
   const [screenSummaryOpen, setScreenSummaryOpen] = useState(false);
   const [registrationPendingOpen, setRegistrationPendingOpen] = useState(false);
   const [registrationSearch, setRegistrationSearch] = useState("");
+  const [customerQuestionsOnly, setCustomerQuestionsOnly] = useState(false);
   const [initialStepsExpanded, setInitialStepsExpanded] = useState<boolean | null>(null);
   const [pendingGroup, setPendingGroup] = useState<{ pointValue: string; key: string } | null>(null);
   const [pendingFocus, setPendingFocus] = useState<{ pointValue: string; itemKey: string } | null>(null);
@@ -1012,7 +1013,7 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
         }
       }
       return { point, luc, items, groups, customerQuestion };
-    }).filter((row) => row.items.length && (!registrationSearch.trim() || row.point.label.toLocaleLowerCase("pt-BR").includes(registrationSearch.trim().toLocaleLowerCase("pt-BR"))));
+    }).filter((row) => row.items.length && (!customerQuestionsOnly || row.items.some((item) => item.customer)) && (!registrationSearch.trim() || row.point.label.toLocaleLowerCase("pt-BR").includes(registrationSearch.trim().toLocaleLowerCase("pt-BR"))));
   })();
   const canFillRegistration = data.permissions.has("site_survey_executar") || data.permissions.has("site_survey_editar");
   const goToPending = async (pointValue: string, sectionId?: string) => {
@@ -1123,7 +1124,7 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
   const activePendingRow = registrationPending.find((row) => row.point.value === pendingGroup?.pointValue);
   const activePendingGroup = activePendingRow?.groups.find((group) => group.key === pendingGroup?.key);
   const pendingPanel = registrationPendingOpen ? <section id="registration-pending" className="space-y-3 border-t pt-5" aria-label="Pendências de cadastro">
-    <div className="flex flex-wrap items-center justify-between gap-2"><div><h3 className="font-bold">Pendências de cadastro</h3><p className="text-sm text-muted-foreground">{registrationPending.length} ponto(s) com informações a completar na próxima visita.</p></div><div className="flex flex-wrap items-center gap-2"><Input value={registrationSearch} onChange={(event) => setRegistrationSearch(event.target.value)} placeholder="Filtrar loja, LUC ou ambiente" className="h-9 w-full sm:w-56" aria-label="Filtrar pendências de cadastro" /><Button type="button" size="sm" variant="action" onClick={() => setRegistrationPendingOpen(false)}>Fechar</Button></div></div>
+    <div className="flex flex-wrap items-center justify-between gap-2"><div><h3 className="font-bold">Pendências de cadastro</h3><p className="text-sm text-muted-foreground">{registrationPending.length} ponto(s) com informações a completar na próxima visita.</p></div><div className="flex flex-wrap items-center gap-2"><label className="flex h-9 cursor-pointer items-center gap-2 whitespace-nowrap text-xs"><Checkbox aria-label="Somente com perguntas para o cliente" checked={customerQuestionsOnly} onCheckedChange={(checked) => setCustomerQuestionsOnly(checked === true)} />Com perguntas para o cliente</label><Input value={registrationSearch} onChange={(event) => setRegistrationSearch(event.target.value)} placeholder="Filtrar loja, LUC ou ambiente" className="h-9 w-full sm:w-56" aria-label="Filtrar pendências de cadastro" /><Button type="button" size="sm" variant="action" onClick={() => setRegistrationPendingOpen(false)}>Fechar</Button></div></div>
     {registrationPending.length ? <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{registrationPending.map(({ point, items, groups, customerQuestion }) => <article key={point.value} aria-label={`Pendências de ${point.label}`} className="min-w-0 rounded-md border border-border bg-background p-3">
       <header className="mb-3 flex items-start justify-between gap-2"><div className="min-w-0 space-y-1"><h4 className="break-words text-sm font-semibold leading-snug">{point.label}</h4><p className="text-xs text-muted-foreground">{items.length} {items.length === 1 ? "pendência" : "pendências"}</p></div>{canFillRegistration && customerQuestion ? <Button type="button" size="compactIcon" variant="action" aria-label="Adicionar pergunta para o cliente" title="Adicionar pergunta para o cliente" onClick={() => setCustomerDraft({ pointValue: point.value, text: "" })}><Plus className="h-3.5 w-3.5" /></Button> : null}</header>
       <div className="flex flex-col gap-2">{groups.map((group) => <Button key={group.key} type="button" size="sm" variant="action" className="h-auto min-h-9 w-full justify-between gap-3 whitespace-normal px-3 py-2 text-left text-xs" aria-label={`${group.label}: ${group.items.length} pendências de ${point.label}`} onClick={() => setPendingGroup({ pointValue: point.value, key: group.key })}><span className="min-w-0 break-words">{group.label}</span><span className="shrink-0 font-semibold tabular-nums">{group.items.length}</span></Button>)}</div>
