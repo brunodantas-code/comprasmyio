@@ -933,3 +933,4 @@
 - [x] Número do medidor à direita do LUC, com Localização reduzida; coluna validada no navegador.
 
 - [x] Nome da loja/quiosque/ambiente nos cards de Pendências de Cadastro virou link verde que abre o Realizar Visita com o ponto já selecionado no checklist (estado executionPointFocus no pai + efeito no VisitDetails antes do retorno antecipado; validado no navegador com Stúdio sobrancelhas — Mall).
+- [x] Nome do ponto nos cards de Pendências de Cadastro fica preto em repouso e só fica verde (com sublinhado) quando o cursor passa por cima; clique segue abrindo o Realizar Visita com o ponto selecionado. Cores medidas no navegador: repouso rgb(11,0,35), cursor em cima rgb(15,196,130).
