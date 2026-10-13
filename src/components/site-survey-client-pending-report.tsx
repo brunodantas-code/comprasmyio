@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { buildClientPendingGroups, type ClientPendingPoint, type ClientPendingResponse } from "@/lib/site-survey-client-pending";
 import nunitoRegularUrl from "@/assets/fonts/nunito-regular.ttf?url";
 import nunitoBoldUrl from "@/assets/fonts/nunito-bold.ttf?url";
+import { surveyPointType } from "@/lib/site-survey-point-type";
 
 type Props = {
   visit: { id: string; survey_number: number; completed_at: string | null; scheduled_start: string };
@@ -48,9 +49,25 @@ export function SiteSurveyClientPendingReport({ visit, client, unit, project, po
           if ((result.data?.length ?? 0) < 1000) return rows;
         }
       };
-      const [responses, calls, { jsPDF }, { default: autoTable }] = await Promise.all([loadResponses(), loadCalls(), import("jspdf"), import("jspdf-autotable")]);
+      const loadPoints = async () => {
+        const fresh: ClientPendingPoint[] = [];
+        for (let from = 0; ; from += 1000) {
+          const result = await supabase.from("site_survey_visit_lucs").select("id,luc_number,shop_name,location,point_type,classification_type").eq("visit_id", visit.id).order("id").range(from, from + 999);
+          if (result.error) throw new Error(result.error.message);
+          fresh.push(...(result.data ?? []).map((point) => ({ value: `luc:${point.id}`, label: [point.luc_number ? `LUC ${point.luc_number}` : "", point.shop_name, point.location].filter(Boolean).join(" — "), pointType: surveyPointType(point) })));
+          if ((result.data?.length ?? 0) < 1000) break;
+        }
+        for (let from = 0; ; from += 1000) {
+          const result = await supabase.from("site_survey_visit_environments").select("id,name,point_type").eq("visit_id", visit.id).order("id").range(from, from + 999);
+          if (result.error) throw new Error(result.error.message);
+          fresh.push(...(result.data ?? []).map((point) => ({ value: `environment:${point.id}`, label: point.name, pointType: surveyPointType(point, "environment") })));
+          if ((result.data?.length ?? 0) < 1000) break;
+        }
+        return fresh;
+      };
+      const [responses, calls, freshPoints, { jsPDF }, { default: autoTable }] = await Promise.all([loadResponses(), loadCalls(), loadPoints(), import("jspdf"), import("jspdf-autotable")]);
       if (calls.some((call) => call.internal_call_id && !call.internal_calls)) throw new Error("Não foi possível consultar todos os chamados vinculados. Verifique seu acesso aos chamados antes de gerar o relatório.");
-      const groups = buildClientPendingGroups(points, responses, questions, calls);
+      const groups = buildClientPendingGroups(freshPoints.length ? freshPoints : points, responses, questions, calls);
       const pdf = new jsPDF({ unit: "mm", format: "a4" });
       const loadFont = async (url: string) => {
         const response = await fetch(url);
