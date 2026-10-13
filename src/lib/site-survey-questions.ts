@@ -29,3 +29,17 @@ export function customerQuestions(answer: unknown): string[] {
 export function numberedCustomerQuestions(answer: unknown): string[] {
   return customerQuestions(answer).map((value) => value.trim()).filter(Boolean).map((value, index) => `${index + 1}. ${value}`);
 }
+
+export function answeredCustomerQuestions(answer: unknown): string[] {
+  const answered = (answer && typeof answer === "object" && !Array.isArray(answer) ? (answer as { customer_questions_answered?: unknown }).customer_questions_answered : null);
+  if (Array.isArray(answered)) {
+    return answered.filter((value): value is string => typeof value === "string");
+  }
+  return [];
+}
+
+// Registered questions stay pending until someone marks them as answered.
+export function pendingCustomerQuestions(answer: unknown): string[] {
+  const answered = new Set(answeredCustomerQuestions(answer));
+  return customerQuestions(answer).filter((value) => !answered.has(value));
+}

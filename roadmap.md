@@ -916,3 +916,8 @@
 
 ## Aberta
 - [x] Lista com miniatura redonda e lápis confirmada: continua em Resumo de Visitas > abrir visita (Cadastro completo e Resumo da visita); no Realizar Visita ficou só o seletor de ponto (por design). Aguardando decisão se volta também na execução.
+
+## Pendências de cadastro — perguntas para o cliente (13/10/2026)
+- [x] Site Survey — excluir perguntas individuais adicionadas em "Perguntas para o cliente" (lixeira com confirmação; visível quando há mais de uma pergunta).
+- [x] Site Survey — botão + nos cards de Pendências de cadastro adiciona pergunta para o cliente, salva na Seção 7 do ponto e exibida no card.
+- [x] Site Survey — pergunta adicionada permanece como pendência até ser marcada como respondida (check no card e no pop-up da etapa).

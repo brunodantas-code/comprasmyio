@@ -20,7 +20,7 @@ import { SiteSurveyScreenSummary } from "@/components/site-survey-screen-summary
 import { useSurveyImage } from "@/hooks/use-survey-image";
 import { surveyPointType, requiresSurveyFacade, type SurveyPointType } from "@/lib/site-survey-point-type";
 import { SiteSurveyCustomerQuestions } from "@/components/site-survey-customer-questions";
-import { isCustomerQuestion, simplifiedAnswerType, persistedAnswerType } from "@/lib/site-survey-questions";
+import { answeredCustomerQuestions, customerQuestions, isCustomerQuestion, pendingCustomerQuestions, simplifiedAnswerType, persistedAnswerType } from "@/lib/site-survey-questions";
 import { prepareSurveyPhoto } from "@/lib/site-survey-photo";
 import { useSurveyPointEdit } from "@/hooks/use-survey-point-edit";
 import { SiteSurveyFacadePicker } from "@/components/site-survey-facade-picker";
@@ -417,6 +417,7 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
   const [initialStepsExpanded, setInitialStepsExpanded] = useState<boolean | null>(null);
   const [pendingGroup, setPendingGroup] = useState<{ pointValue: string; key: string } | null>(null);
   const [pendingFocus, setPendingFocus] = useState<{ pointValue: string; itemKey: string } | null>(null);
+  const [customerDraft, setCustomerDraft] = useState<{ pointValue: string; text: string } | null>(null);
   const pendingFocusFormRef = useRef<HTMLFormElement | null>(null);
   useEffect(() => {
     const open = (event: Event) => { if ((event as CustomEvent<{ visitId: string }>).detail?.visitId !== visit?.id) return; setScreenSummaryOpen(false); setRegistrationPendingOpen(true); setTimeout(() => document.getElementById("registration-pending")?.scrollIntoView({ behavior: "smooth", block: "start" }), 150); };
@@ -658,13 +659,15 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
       const detailValue = subdetail ? `${baseDetail} | ${subdetail}` : baseDetail;
       const savedAnswer = (detail?.responses ?? []).find((response) => response.question_id === question.id && (phase === "pre_visit" ? !response.visit_luc_id && !response.visit_environment_id : matchesPoint(response)))?.answer;
       const customerRows = isCustomerQuestion(question) ? values.getAll(`${question.id}__customer_question`).map(String).map((value) => value.trim()).filter(Boolean) : null;
+      const savedCustomerAnswered = savedAnswer && typeof savedAnswer === "object" && !Array.isArray(savedAnswer) ? (savedAnswer as { customer_questions_answered?: unknown }).customer_questions_answered : null;
+      const customerAnswered = customerRows && Array.isArray(savedCustomerAnswered) ? savedCustomerAnswered.filter((value): value is string => typeof value === "string" && (customerRows ?? []).includes(value)) : null;
       const observation = values.has(`${question.id}__observation`) ? String(values.get(`${question.id}__observation`) ?? "").trim() : questionObservation(savedAnswer);
        const hasOtherOption = Array.isArray(question.options) && question.options.some((option) => typeof option === "string" && isOtherOption(option));
       const questionScope = phase === "pre_visit" ? { visit_luc_id: null, visit_environment_id: null } : scope;
        const photoReference = String(values.get(`${question.id}__photo_reference`) ?? "");
        const priorQuestionIds = new Set(questionOrder.slice(0, questionOrder.findIndex((item) => item.question.id === question.id)).map((item) => item.question.id));
        const validReference = (detail?.attachments ?? []).some((item) => item.id === photoReference && Boolean(item.question_id && priorQuestionIds.has(item.question_id)) && item.content_type?.startsWith("image/") && (phase === "pre_visit" ? !item.visit_luc_id && !item.visit_environment_id : matchesPoint(item)));
-       return { visit_id: visit.id, ...questionScope, question_id: question.id, answered_by: data.userId, answer: customerRows || config.detail || config.other_detail || hasOtherOption || validReference || config.observation || observation ? { value, ...(customerRows ? { customer_questions: customerRows } : {}), ...(config.detail || config.other_detail || hasOtherOption ? { detail: detailValue || null } : {}), ...(config.observation || observation ? { observation: observation || null } : {}), ...(validReference ? { photo_reference_id: photoReference } : {}) } : value, question_snapshot: JSON.parse(JSON.stringify({ prompt: question.prompt, options: question.options, configuration: question.configuration })) };
+       return { visit_id: visit.id, ...questionScope, question_id: question.id, answered_by: data.userId, answer: customerRows || config.detail || config.other_detail || hasOtherOption || validReference || config.observation || observation ? { value, ...(customerRows ? { customer_questions: customerRows } : {}), ...(customerAnswered?.length ? { customer_questions_answered: customerAnswered } : {}), ...(config.detail || config.other_detail || hasOtherOption ? { detail: detailValue || null } : {}), ...(config.observation || observation ? { observation: observation || null } : {}), ...(validReference ? { photo_reference_id: photoReference } : {}) } : value, question_snapshot: JSON.parse(JSON.stringify({ prompt: question.prompt, options: question.options, configuration: question.configuration })) };
     });
     for (const question of visibleQuestions.filter((item) => item.question_key !== "shopping_maintenance_companions")) {
       const photo = values.get(`${question.id}__photo`);
@@ -977,9 +980,9 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
    const renderMaterials = needsSpecialEquipment ? <div className="space-y-3"><div className="flex items-center justify-between gap-3"><p className="text-sm font-medium">Materiais e equipamentos previstos</p><Button type="button" size="compactIcon" variant="ghost" aria-label="Adicionar material ou equipamento" title="Adicionar material ou equipamento" onClick={() => { setNoAdditionalMaterial(false); setMaterialRows((current) => [...current, { rowKey: crypto.randomUUID(), catalog_item_id: "", quantity: "1", notes: "", screwdriver_type_id: "none", wrench_size_id: "none", custom_type_item_id: "none" }]); }}><Plus className="h-5 w-5" strokeWidth={2.5} /></Button></div>{materialRows.map((row, index) => { const item = data.catalog.find((entry) => entry.id === row.catalog_item_id); return <div key={row.rowKey} className="grid gap-3 sm:grid-cols-[1.4fr_100px_1fr_auto]"><FormSelect name={`material-${index}`} label="Material ou equipamento" value={row.catalog_item_id} onChange={(value) => setMaterialRows((current) => current.map((entry) => entry.rowKey === row.rowKey ? { ...entry, catalog_item_id: value, screwdriver_type_id: "none", wrench_size_id: "none", custom_type_item_id: "none" } : entry))} options={data.catalog.filter((entry) => entry.active || entry.id === row.catalog_item_id)} /><LabeledControlled label="Quantidade" type="number" value={row.quantity} onChange={(value) => setMaterialRows((current) => current.map((entry) => entry.rowKey === row.rowKey ? { ...entry, quantity: value } : entry))} />{item?.type_builtin === "screwdriver" ? <FormSelect name={`screwdriver-${index}`} label="Tipo" value={row.screwdriver_type_id} onChange={(value) => setMaterialRows((current) => current.map((entry) => entry.rowKey === row.rowKey ? { ...entry, screwdriver_type_id: value } : entry))} options={data.screwdriverTypes} optional /> : item?.type_builtin === "wrench" ? <FormSelect name={`wrench-${index}`} label="Bitola" value={row.wrench_size_id} onChange={(value) => setMaterialRows((current) => current.map((entry) => entry.rowKey === row.rowKey ? { ...entry, wrench_size_id: value } : entry))} options={data.wrenchSizes} optional /> : item?.type_catalog_id ? <FormSelect name={`custom-type-${index}`} label="Tipo" value={row.custom_type_item_id} onChange={(value) => setMaterialRows((current) => current.map((entry) => entry.rowKey === row.rowKey ? { ...entry, custom_type_item_id: value } : entry))} options={data.customCatalogs.find((catalog) => catalog.id === item.type_catalog_id)?.site_survey_custom_catalog_items.filter((option) => option.active || option.id === row.custom_type_item_id) ?? []} optional /> : <LabeledControlled label="Observação" value={row.notes} onChange={(value) => setMaterialRows((current) => current.map((entry) => entry.rowKey === row.rowKey ? { ...entry, notes: value } : entry))} />}<ConfirmDeleteButton title="Remover material ou equipamento?" description="O item será retirado desta OS." onConfirm={async () => setMaterialRows((current) => current.filter((entry) => entry.rowKey !== row.rowKey))} /></div>; })}{materialRows.length === 0 ? <p className="text-sm text-muted-foreground">Nenhum material ou equipamento selecionado.</p> : null}</div> : null;
   const generalCalls = new Map(generatedCallsForScope("pre_visit").map((item) => [item.question_id, { id: item.internal_call_id, number: item.internal_calls?.call_number ?? null }]));
   const pointCalls = new Map(generatedCallsForScope("point").map((item) => [item.question_id, { id: item.internal_call_id, number: item.internal_calls?.call_number ?? null }]));
+  const sectionsFor = (templateId: string | null, ownTemplate: boolean) => sortByPosition(data.sections.filter((section) => section.active && section.template_id === templateId)).slice(ownTemplate ? 0 : 3);
   const registrationPending = (() => {
     if (!registrationPendingOpen || !detail) return [];
-    const sectionsFor = (templateId: string | null, ownTemplate: boolean) => sortByPosition(data.sections.filter((section) => section.active && section.template_id === templateId)).slice(ownTemplate ? 0 : 3);
     return points.filter((point) => point.completionStatus !== "cancelada").map((point) => {
       const [kind, id] = point.value.split(":");
       const record = kind === "luc" ? detail.lucs.find((item) => item.id === id) : detail.environments.find((item) => item.id === id);
@@ -987,7 +990,7 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
       const skipped = new Set(Array.isArray(record?.skipped_section_ids) ? record.skipped_section_ids.filter((item): item is string => typeof item === "string") : []);
       const scope = (item: { visit_luc_id?: string | null; visit_environment_id?: string | null }) => kind === "luc" ? item.visit_luc_id === id : item.visit_environment_id === id;
       const answers = new Map<string, unknown>(detail.responses.filter(scope).map((item) => [item.question_id, item.answer]));
-      const items: { key: string; label: string; sectionId?: string }[] = [];
+      const items: { key: string; label: string; sectionId?: string; groupKey?: string; groupLabel?: string; customer?: boolean }[] = [];
       if (requiresSurveyFacade(point.pointType) && !detail.attachments.some((item) => item.attachment_kind === "facade" && scope(item))) items.push({ key: "facade", label: "Foto da fachada" });
       const luc = kind === "luc" ? detail.lucs.find((item) => item.id === id) : null;
       if (luc && point.pointType !== "environment" && !luc.luc_number?.trim()) items.push({ key: "luc", label: "Número do LUC" });
@@ -996,17 +999,19 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
         if (skipped.has(section.id)) continue;
         for (const question of sortByPosition(data.questions.filter((item) => item.active && item.section_id === section.id))) if (isQuestionVisible(question, answers) && isNotInformedAnswer(answerParts(answers.get(question.id)).value)) items.push({ key: question.id, label: `${section.title}: ${question.prompt}`, sectionId: section.id });
       }
+      const customerQuestion = sectionsFor(point.templateId ?? visit.template_id, own).filter((section) => !skipped.has(section.id)).flatMap((section) => data.questions.filter((question) => question.active && question.section_id === section.id && isCustomerQuestion(question)))[0];
+      if (customerQuestion) for (const text of pendingCustomerQuestions(answers.get(customerQuestion.id))) items.push({ key: `customer:${customerQuestion.id}:${text}`, label: text, groupKey: `customer:${customerQuestion.id}`, groupLabel: "Perguntas para o cliente", customer: true });
       const groups: { key: string; label: string; items: typeof items }[] = [];
       for (const item of items) {
-        const key = item.sectionId ?? item.key;
+        const key = item.groupLabel ? item.groupKey ?? item.groupLabel : item.sectionId ?? item.key;
         const existing = groups.find((group) => group.key === key);
         if (existing) existing.items.push(item);
         else {
-          const title = item.sectionId ? data.sections.find((section) => section.id === item.sectionId)?.title ?? "Checklist" : item.label;
+          const title = item.groupLabel ?? (item.sectionId ? data.sections.find((section) => section.id === item.sectionId)?.title ?? "Checklist" : item.label);
           groups.push({ key, label: /^instalação elétrica$/i.test(title.trim()) ? "Elétrica" : title, items: [item] });
         }
       }
-      return { point, luc, items, groups };
+      return { point, luc, items, groups, customerQuestion };
     }).filter((row) => row.items.length && (!registrationSearch.trim() || row.point.label.toLocaleLowerCase("pt-BR").includes(registrationSearch.trim().toLocaleLowerCase("pt-BR"))));
   })();
   const canFillRegistration = data.permissions.has("site_survey_executar") || data.permissions.has("site_survey_editar");
@@ -1037,17 +1042,67 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
     toast.success("Localização salva");
     void refetchDetail();
   };
+  const customerQuestionTarget = (pointValue: string) => {
+    const row = registrationPending.find((item) => item.point.value === pointValue);
+    if (!row?.customerQuestion) return null;
+    const [kind, id = ""] = pointValue.split(":");
+    const matches = (item: { visit_luc_id?: string | null; visit_environment_id?: string | null }) => kind === "luc" ? item.visit_luc_id === id : item.visit_environment_id === id;
+    const response = detail?.responses.find((item) => matches(item) && item.question_id === row.customerQuestion!.id) ?? null;
+    return { row, matches, response };
+  };
+  const addPendingCustomerQuestion = async (pointValue: string, text: string) => {
+    const clean = text.trim();
+    if (!clean) return;
+    const target = customerQuestionTarget(pointValue);
+    if (!target) return;
+    const question = target.row.customerQuestion!;
+    const rows = customerQuestions(target.response?.answer);
+    if (rows.some((item) => item === clean)) return toast.error("Esta pergunta já está cadastrada neste ponto.");
+    const base = target.response?.answer && typeof target.response.answer === "object" && !Array.isArray(target.response.answer) ? target.response.answer : { value: rows.join("\n") };
+    const answer = { ...base, value: [...rows, clean].join("\n"), customer_questions: [...rows, clean] };
+    const [kind, id = ""] = pointValue.split(":");
+    const scope = kind === "luc" ? { visit_luc_id: id, visit_environment_id: null } : { visit_luc_id: null, visit_environment_id: id };
+    const { error } = target.response
+      ? await supabase.from("site_survey_responses").update({ answer, answered_by: data.userId }).eq("id", target.response.id)
+      : await supabase.from("site_survey_responses").insert({ visit_id: visit.id, ...scope, question_id: question.id, answered_by: data.userId, answer, question_snapshot: JSON.parse(JSON.stringify({ prompt: question.prompt, options: question.options, configuration: question.configuration })) } as never);
+    if (error) return toast.error(error.message);
+    toast.success("Pergunta adicionada");
+    setCustomerDraft(null);
+    await refetchDetail();
+  };
+  const markCustomerQuestionAnswered = async (pointValue: string, text: string) => {
+    const target = customerQuestionTarget(pointValue);
+    if (!target?.response) return;
+    const existing = target.response.answer;
+    const rows = customerQuestions(existing);
+    const answered = answeredCustomerQuestions(existing);
+    if (answered.includes(text)) return;
+    const base = existing && typeof existing === "object" && !Array.isArray(existing) ? existing : { value: rows.join("\n") };
+    const answer = { ...base, value: rows.join("\n"), customer_questions: rows, customer_questions_answered: [...answered, text] };
+    const { error } = await supabase.from("site_survey_responses").update({ answer, answered_by: data.userId }).eq("id", target.response.id);
+    if (error) return toast.error(error.message);
+    toast.success("Pergunta marcada como respondida");
+    await refetchDetail();
+  };
   const activePendingRow = registrationPending.find((row) => row.point.value === pendingGroup?.pointValue);
   const activePendingGroup = activePendingRow?.groups.find((group) => group.key === pendingGroup?.key);
   const pendingPanel = registrationPendingOpen ? <section id="registration-pending" className="space-y-3 border-t pt-5" aria-label="Pendências de cadastro">
     <div className="flex flex-wrap items-center justify-between gap-2"><div><h3 className="font-bold">Pendências de cadastro</h3><p className="text-sm text-muted-foreground">{registrationPending.length} ponto(s) com informações a completar na próxima visita.</p></div><div className="flex flex-wrap items-center gap-2"><Input value={registrationSearch} onChange={(event) => setRegistrationSearch(event.target.value)} placeholder="Filtrar loja, LUC ou ambiente" className="h-9 w-full sm:w-56" aria-label="Filtrar pendências de cadastro" /><Button type="button" size="sm" variant="action" onClick={() => setRegistrationPendingOpen(false)}>Fechar</Button></div></div>
-    {registrationPending.length ? <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{registrationPending.map(({ point, items, groups }) => <article key={point.value} aria-label={`Pendências de ${point.label}`} className="min-w-0 rounded-md border border-border bg-background p-3">
-      <header className="mb-3 space-y-1"><h4 className="break-words text-sm font-semibold leading-snug">{point.label}</h4><p className="text-xs text-muted-foreground">{items.length} {items.length === 1 ? "pendência" : "pendências"}</p></header>
+    {registrationPending.length ? <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{registrationPending.map(({ point, items, groups, customerQuestion }) => <article key={point.value} aria-label={`Pendências de ${point.label}`} className="min-w-0 rounded-md border border-border bg-background p-3">
+      <header className="mb-3 flex items-start justify-between gap-2"><div className="min-w-0 space-y-1"><h4 className="break-words text-sm font-semibold leading-snug">{point.label}</h4><p className="text-xs text-muted-foreground">{items.length} {items.length === 1 ? "pendência" : "pendências"}</p></div>{canFillRegistration && customerQuestion ? <Button type="button" size="compactIcon" variant="action" aria-label="Adicionar pergunta para o cliente" title="Adicionar pergunta para o cliente" onClick={() => setCustomerDraft({ pointValue: point.value, text: "" })}><Plus className="h-3.5 w-3.5" /></Button> : null}</header>
       <div className="flex flex-col gap-2">{groups.map((group) => <Button key={group.key} type="button" size="sm" variant="action" className="h-auto min-h-9 w-full justify-between gap-3 whitespace-normal px-3 py-2 text-left text-xs" aria-label={`${group.label}: ${group.items.length} pendências de ${point.label}`} onClick={() => setPendingGroup({ pointValue: point.value, key: group.key })}><span className="min-w-0 break-words">{group.label}</span><span className="shrink-0 font-semibold tabular-nums">{group.items.length}</span></Button>)}</div>
+      {customerQuestion && groups.some((group) => group.items.some((item) => item.customer)) ? <div className="mt-2 space-y-2">{groups.flatMap((group) => group.items).filter((item) => item.customer).map((item) => <div key={item.key} className="flex items-start justify-between gap-2 rounded-md border border-border bg-muted/40 p-2"><span className="min-w-0 whitespace-pre-wrap break-words text-xs leading-snug">{item.label}</span><Button type="button" size="compactIcon" variant="action" aria-label={`Marcar como respondida: ${item.label}`} title="Marcar como respondida" onClick={() => void markCustomerQuestionAnswered(point.value, item.label)}><Check className="h-3.5 w-3.5" /></Button></div>)}</div> : null}
     </article>)}</div> : <p className="text-sm text-muted-foreground">Nenhuma pendência de cadastro encontrada.</p>}
     <Dialog open={Boolean(pendingGroup && !pendingFocus)} onOpenChange={(open) => { if (!open) setPendingGroup(null); }}><DialogContent className="max-h-[88vh] overflow-y-auto sm:max-w-xl"><DialogHeader><DialogTitle>{activePendingGroup?.label ?? "Pendências concluídas"}</DialogTitle><DialogDescription>{activePendingRow?.point.label ?? points.find((point) => point.value === pendingGroup?.pointValue)?.label}</DialogDescription></DialogHeader>
-      <div className="space-y-3">{activePendingGroup?.items.map((item) => item.key === "luc" && activePendingRow?.luc ? <form key={item.key} className="space-y-3" onSubmit={(event) => { event.preventDefault(); if (activePendingRow.luc) void savePendingLuc(event.currentTarget, activePendingRow.luc); }}><Label htmlFor="pending-luc">Número do LUC</Label><Input id="pending-luc" name="luc_number" disabled={!canFillRegistration} required /><Button type="submit" variant="action" size="sm" disabled={!canFillRegistration}><Save className="h-4 w-4" />Salvar</Button></form> : item.key === "location" && activePendingRow?.luc ? <div key={item.key} className="space-y-2"><Label htmlFor="pending-location">Localização (andar)</Label><Input id="pending-location" placeholder="Localização (andar)" disabled={!canFillRegistration} onBlur={(event) => { if (activePendingRow.luc) void saveLocation(activePendingRow.luc.id, event.target.value); }} onKeyDown={(event) => { if (event.key === "Enter") event.currentTarget.blur(); }} /></div> : <Button key={item.key} type="button" variant="action" className="h-auto min-h-10 w-full justify-start whitespace-normal text-left text-sm" disabled={!canFillRegistration} onClick={() => { if (activePendingRow) void openPendingFocus(activePendingRow.point.value, item.key); }}>{item.key === "facade" ? <Camera className="shrink-0" /> : null}{item.sectionId ? data.questions.find((question) => question.id === item.key)?.prompt ?? item.label : item.label}</Button>)}{!activePendingGroup ? <p className="text-sm text-muted-foreground">Nenhuma pendência restante nesta etapa.</p> : null}</div>
+      <div className="space-y-3">{activePendingGroup?.items.map((item) => item.key === "luc" && activePendingRow?.luc ? <form key={item.key} className="space-y-3" onSubmit={(event) => { event.preventDefault(); if (activePendingRow.luc) void savePendingLuc(event.currentTarget, activePendingRow.luc); }}><Label htmlFor="pending-luc">Número do LUC</Label><Input id="pending-luc" name="luc_number" disabled={!canFillRegistration} required /><Button type="submit" variant="action" size="sm" disabled={!canFillRegistration}><Save className="h-4 w-4" />Salvar</Button></form> : item.key === "location" && activePendingRow?.luc ? <div key={item.key} className="space-y-2"><Label htmlFor="pending-location">Localização (andar)</Label><Input id="pending-location" placeholder="Localização (andar)" disabled={!canFillRegistration} onBlur={(event) => { if (activePendingRow.luc) void saveLocation(activePendingRow.luc.id, event.target.value); }} onKeyDown={(event) => { if (event.key === "Enter") event.currentTarget.blur(); }} /></div> : item.customer ? <div key={item.key} className="flex items-start justify-between gap-2 rounded-md border border-border p-2"><span className="min-w-0 whitespace-pre-wrap break-words text-sm">{item.label}</span><Button type="button" size="compactIcon" variant="action" aria-label={`Marcar como respondida: ${item.label}`} title="Marcar como respondida" disabled={!canFillRegistration} onClick={() => { if (activePendingRow) void markCustomerQuestionAnswered(activePendingRow.point.value, item.label); }}><Check className="h-3.5 w-3.5" /></Button></div> : <Button key={item.key} type="button" variant="action" className="h-auto min-h-10 w-full justify-start whitespace-normal text-left text-sm" disabled={!canFillRegistration} onClick={() => { if (activePendingRow) void openPendingFocus(activePendingRow.point.value, item.key); }}>{item.key === "facade" ? <Camera className="shrink-0" /> : null}{item.sectionId ? data.questions.find((question) => question.id === item.key)?.prompt ?? item.label : item.label}</Button>)}{!activePendingGroup ? <p className="text-sm text-muted-foreground">Nenhuma pendência restante nesta etapa.</p> : null}</div>
       <DialogFooter><Button type="button" size="sm" variant="action" onClick={() => setPendingGroup(null)}>Fechar</Button></DialogFooter>
+    </DialogContent></Dialog>
+    <Dialog open={Boolean(customerDraft)} onOpenChange={(open) => { if (!open) setCustomerDraft(null); }}><DialogContent className="sm:max-w-md"><DialogHeader><DialogTitle>Adicionar pergunta para o cliente</DialogTitle><DialogDescription>{points.find((point) => point.value === customerDraft?.pointValue)?.label ?? ""}</DialogDescription></DialogHeader>
+      <form className="space-y-3" onSubmit={(event) => { event.preventDefault(); if (customerDraft) void addPendingCustomerQuestion(customerDraft.pointValue, customerDraft.text); }}>
+        <Label htmlFor="pending-customer-question">Pergunta</Label>
+        <Textarea id="pending-customer-question" value={customerDraft?.text ?? ""} rows={3} required onChange={(event) => setCustomerDraft((current) => current ? { ...current, text: event.target.value } : current)} />
+        <div className="flex justify-end gap-2"><Button type="button" size="sm" variant="action" onClick={() => setCustomerDraft(null)}>Cancelar</Button><Button type="submit" size="sm" variant="action"><Save className="h-4 w-4" />Salvar</Button></div>
+      </form>
     </DialogContent></Dialog>
   </section> : null;
   const pendingFocusQuestion = pendingFocus && pendingFocus.itemKey !== "facade" ? data.questions.find((item) => item.id === pendingFocus.itemKey) ?? null : null;
