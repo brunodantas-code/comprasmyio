@@ -17,6 +17,7 @@ import { SiteSurveyLucManager, type ShopCatalogOption } from "@/components/site-
 import { SiteSurveyProfilesAdmin } from "@/components/site-survey-profiles-admin";
 import { SiteSurveyReportButton } from "@/components/site-survey-report";
 import { SiteSurveyClientPendingReport } from "@/components/site-survey-client-pending-report";
+import { SiteSurveyReportTexts } from "@/components/site-survey-report-texts";
 import { SiteSurveyScreenSummary } from "@/components/site-survey-screen-summary";
 import { useSurveyImage } from "@/hooks/use-survey-image";
 import { surveyPointType, requiresSurveyFacade, type SurveyPointType } from "@/lib/site-survey-point-type";
@@ -1437,6 +1438,7 @@ function SurveyCatalogAdmin({ data, onChanged }: { data: NonNullable<ReturnType<
     <div><h2 className="text-xl font-bold">Cadastro</h2><p className="text-sm text-muted-foreground">Diversos</p></div>
     <Card><CardHeader className="py-4"><div className="flex items-center justify-between gap-3"><CardTitle className="text-base">Novo cadastro</CardTitle><Button type="button" size="compactIcon" variant="ghost" aria-label="Criar novo cadastro" title="Criar novo cadastro" onClick={() => setNewCatalogOpen(true)}><Plus strokeWidth={2.5} /></Button></div></CardHeader></Card>
     <SiteSurveyTimeAssumptions items={data.timeAssumptions} questions={data.questions} userId={data.userId} onChanged={onChanged} title={data.builtinCatalogNames["time-assumptions"] ?? "Premissas de tempo"} onEditTitle={() => setEditingCatalog({ id: "time-assumptions", name: data.builtinCatalogNames["time-assumptions"] ?? "Premissas de tempo", builtin: true })} />
+    {data.permissions.has("site_survey_cadastro") ? <SiteSurveyReportTexts questions={data.questions} sections={data.sections} templates={data.templates} userId={data.userId} title={data.builtinCatalogNames["report-texts"] ?? "Textos do relatório para o cliente"} onEditTitle={() => setEditingCatalog({ id: "report-texts", name: data.builtinCatalogNames["report-texts"] ?? "Textos do relatório para o cliente", builtin: true })} /> : null}
     <Dialog open={newCatalogOpen} onOpenChange={setNewCatalogOpen}><DialogContent><DialogHeader><DialogTitle>Novo cadastro</DialogTitle><DialogDescription>Crie uma nova lista para o Site Survey.</DialogDescription></DialogHeader><form className="space-y-4" onSubmit={(event) => { event.preventDefault(); void addCatalog(event.currentTarget); }}><LabeledInput name="name" label="Nome do cadastro" required /><DialogFooter><Button type="submit">Salvar</Button></DialogFooter></form></DialogContent></Dialog>
     <div className="grid gap-4 lg:grid-cols-2">{lists.map((list) => {
       const open = expanded.has(list.key);
