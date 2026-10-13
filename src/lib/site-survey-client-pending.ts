@@ -59,5 +59,19 @@ export function buildClientPendingGroups(points: ClientPendingPoint[], responses
       groupFor(keyFor(call)).calls.push({ call_number: null, title: action, description, status: call.status ?? "aberto" });
     }
   }
-  return [...groups.values()].filter((group) => group.questions.length || group.calls.length);
+  const lucOrder = (group: { value: string; label: string }) => {
+    const match = /^LUC (\d+)/.exec(group.label);
+    if (group.value.startsWith("luc:") && match) return { bucket: 0, num: Number(match[1]) };
+    if (group.value.startsWith("luc:")) return { bucket: 1, num: 0 };
+    if (group.value.startsWith("environment:")) return { bucket: 2, num: 0 };
+    return { bucket: 3, num: 0 };
+  };
+  return [...groups.values()]
+    .filter((group) => group.questions.length || group.calls.length)
+    .sort((a, b) => {
+      const orderA = lucOrder(a), orderB = lucOrder(b);
+      if (orderA.bucket !== orderB.bucket) return orderA.bucket - orderB.bucket;
+      if (orderA.num !== orderB.num) return orderA.num - orderB.num;
+      return a.label.localeCompare(b.label, "pt-BR");
+    });
 }
