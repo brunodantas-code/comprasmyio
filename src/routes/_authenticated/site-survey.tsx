@@ -417,6 +417,7 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
   const [initialStepsExpanded, setInitialStepsExpanded] = useState<boolean | null>(null);
   const [pendingGroup, setPendingGroup] = useState<{ pointValue: string; key: string } | null>(null);
   const [pendingFocus, setPendingFocus] = useState<{ pointValue: string; itemKey: string } | null>(null);
+  const [customerDraft, setCustomerDraft] = useState<{ pointValue: string; text: string } | null>(null);
   const pendingFocusFormRef = useRef<HTMLFormElement | null>(null);
   useEffect(() => {
     const open = (event: Event) => { if ((event as CustomEvent<{ visitId: string }>).detail?.visitId !== visit?.id) return; setScreenSummaryOpen(false); setRegistrationPendingOpen(true); setTimeout(() => document.getElementById("registration-pending")?.scrollIntoView({ behavior: "smooth", block: "start" }), 150); };
