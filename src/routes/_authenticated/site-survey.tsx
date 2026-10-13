@@ -20,7 +20,7 @@ import { SiteSurveyScreenSummary } from "@/components/site-survey-screen-summary
 import { useSurveyImage } from "@/hooks/use-survey-image";
 import { surveyPointType, requiresSurveyFacade, type SurveyPointType } from "@/lib/site-survey-point-type";
 import { SiteSurveyCustomerQuestions } from "@/components/site-survey-customer-questions";
-import { isCustomerQuestion, simplifiedAnswerType, persistedAnswerType } from "@/lib/site-survey-questions";
+import { answeredCustomerQuestions, customerQuestions, isCustomerQuestion, pendingCustomerQuestions, simplifiedAnswerType, persistedAnswerType } from "@/lib/site-survey-questions";
 import { prepareSurveyPhoto } from "@/lib/site-survey-photo";
 import { useSurveyPointEdit } from "@/hooks/use-survey-point-edit";
 import { SiteSurveyFacadePicker } from "@/components/site-survey-facade-picker";
