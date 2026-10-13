@@ -1,4 +1,4 @@
-- [ ] Approvals — corrigir duplicidade nas pendências pessoais do CEO/Admin e nos contadores, preservando etapas do Financeiro e aprovação conjunta.
+- [x] Approvals — pendências pessoais e contadores filtram pelo aprovador designado, sem incluir etapas alheias por Perfil Admin; sete verificações passaram e o solicitante vê Financeiro/CEO preservados. Conferência direta na sessão do CEO indisponível por permissão.
 - [x] Site Survey — alinhar Foto, LUC, Tipo, Nome, Localização e Ações na mesma linha do cabeçalho e mover o filtro de fachada para a caixa "Sem" abaixo de Foto; alinhamento conferido no computador e celular.
 - [x] Site Survey — usar "Sem LUC" apenas em Lojas e Quiosques e exibir traço horizontal na meia altura nos Ambientes, onde a numeração não se aplica; 21 ambientes com traço, 3 lojas sem numeração, conferido no computador e celular.
 - [x] Site Survey — filtro de Tipo (Somente lojas, Somente quiosques, Somente ambientes) no Cadastro completo de lojas, quiosques e ambientes; filtros, contagens e celular conferidos.
