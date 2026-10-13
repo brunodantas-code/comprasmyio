@@ -1,3 +1,4 @@
+- [x] Site Survey — simplificar títulos do PDF e cadastrar textos padronizados para perguntas/respostas dos relatórios sem alterar checklists. Cadastro salva e relê textos; PDF real conferido sem subtítulo de perguntas, com “Intervenção” e resposta padrão de registro inexistente; relatório anterior preservado, sem erros em tela.
 - [x] Site Survey — PDF de pendências para o cliente com perguntas não respondidas e chamados/intervenções dos checklists; botão à direita de Fechar; Intervenções do Cliente mantido. Download real e quatro páginas conferidos (17 perguntas, seis intervenções), corrigidos nomes e quebra entre páginas; filtros não omitem conteúdo e data de 07/10 preservada.
 - [x] Site Survey — incluir LUC ausente nas Pendências de Cadastro somente para lojas/quiosques, preservando Não identificado e sem bloquear conclusão.
 - [x] Site Survey — simplificar tipos de resposta para Escolha única, Múltipla escolha, Texto e Número, preservando respostas e condições.
