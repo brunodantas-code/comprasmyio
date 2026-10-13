@@ -493,6 +493,13 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
   useEffect(() => { setNoAdditionalMaterial(Boolean(scopedMaterialDecision?.no_additional_material)); }, [selectedPoint, detail?.materialDecisions]);
   useEffect(() => { setSpecialEquipmentAnswer(""); }, [selectedPoint]);
   useEffect(() => { setVisitTechnicians(scopedTechnicians.length ? scopedTechnicians.map((item) => ({ technician_id: item.technician_id, mobile_phone: data.technicians.find((technician) => technician.id === item.technician_id)?.mobile_phone ?? item.mobile_phone })) : [{ technician_id: "", mobile_phone: "" }]); }, [selectedPoint, detail?.technicians, data.technicians]);
+  useEffect(() => {
+    if (view !== "execution" || !executionPointFocus || !visit) return;
+    onExecutionPointFocusConsumed?.();
+    void switchPoint(executionPointFocus).then((switched) => {
+      if (switched) setTimeout(() => document.querySelector(`[data-survey-point="${executionPointFocus}"]`)?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
+    });
+  }, [view, executionPointFocus, visit?.id]);
   if (!visit) { closeGuardRef.current = null; return null; }
   const visitClientId = visit.client_id ?? data.projects.find((project) => project.id === visit.project_id)?.client_id ?? null;
   const visitCategory = data.clientCategories.find((category) => category.id === data.clients.find((client) => client.id === visitClientId)?.category_id);
@@ -869,13 +876,6 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
       setPendingPointSave(null);
       return true;
     };
-    useEffect(() => {
-      if (view !== "execution" || !executionPointFocus || !visit) return;
-      onExecutionPointFocusConsumed?.();
-      void switchPoint(executionPointFocus).then((switched) => {
-        if (switched) setTimeout(() => document.querySelector(`[data-survey-point="${executionPointFocus}"]`)?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
-      });
-    }, [view, executionPointFocus, visit?.id]);
     closeGuardRef.current = async () => {
       await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
       if (!(await switchPoint(""))) return false;
