@@ -55,16 +55,27 @@ function matchesPoint(point: SummaryPoint, item: { visit_luc_id?: string | null;
   return point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id;
 }
 
-function PhotoThumbnail({ attachment }: { attachment: SummaryAttachment }) {
+function PhotoThumbnail({ attachment, gallery }: { attachment: SummaryAttachment; gallery?: SummaryAttachment[] }) {
   const [open, setOpen] = useState(false);
+  const [position, setPosition] = useState(0);
+  const isImage = isSurveyImageFile(attachment);
+  const siblings = isImage && gallery ? gallery.filter(isSurveyImageFile) : undefined;
+  const hasGallery = Boolean(siblings && siblings.length > 1);
+  const viewerTarget = open && hasGallery ? siblings![position] ?? attachment : attachment;
   const { url: signedUrl, ref } = useSurveyImage(attachment, true);
-  const isImage = attachment.content_type?.startsWith("image/") ?? /\.(jpe?g|png|webp|gif|heic)$/i.test(attachment.file_name);
+  const { url: viewerUrl, ref: viewerRef } = useSurveyImage(viewerTarget, true);
   if (!isImage) return <Button ref={ref} type="button" variant="ghost" size="sm" className="h-14 max-w-36 justify-start whitespace-normal !bg-muted/50 px-2 text-xs !text-foreground hover:!bg-muted" disabled={!signedUrl} onClick={() => signedUrl && window.open(signedUrl, "_blank", "noopener,noreferrer")}><FileText className="h-4 w-4" /><span className="line-clamp-2">{attachment.file_name}</span></Button>;
+  const openViewer = () => {
+    if (hasGallery) setPosition(Math.max(0, siblings!.findIndex((item) => item.id === attachment.id)));
+    setOpen(true);
+  };
+  const prevPhoto = () => setPosition((current) => (current - 1 + siblings!.length) % siblings!.length);
+  const nextPhoto = () => setPosition((current) => (current + 1) % siblings!.length);
   return <>
-    <Button ref={ref} type="button" variant="ghost" className="group relative h-16 w-16 shrink-0 overflow-hidden rounded-md !bg-muted p-0 hover:!bg-muted sm:h-20 sm:w-20" disabled={!signedUrl} aria-label={`Ampliar foto ${attachment.file_name}`} onClick={() => setOpen(true)}>
+    <Button ref={ref} type="button" variant="ghost" className="group relative h-16 w-16 shrink-0 overflow-hidden rounded-md !bg-muted p-0 hover:!bg-muted sm:h-20 sm:w-20" disabled={!signedUrl} aria-label={`Ampliar foto ${attachment.file_name}`} onClick={(event) => { event.stopPropagation(); openViewer(); }}>
       {signedUrl ? <img src={signedUrl} alt={attachment.file_name} loading="lazy" className="h-full w-full object-cover transition-transform group-hover:scale-105" /> : <Camera className="h-5 w-5 text-muted-foreground" />}
     </Button>
-    <Dialog open={open} onOpenChange={setOpen}><DialogContent className="max-h-[88dvh] w-[calc(100vw-2rem)] max-w-5xl overflow-hidden p-3 sm:p-4"><DialogTitle className="sr-only">{attachment.file_name}</DialogTitle>{signedUrl ? <img src={signedUrl} alt={attachment.file_name} className="mx-auto max-h-[80dvh] w-auto max-w-full rounded-md object-contain" /> : null}</DialogContent></Dialog>
+    <Dialog open={open} onOpenChange={setOpen}><DialogContent className="relative max-h-[88dvh] w-[calc(100vw-2rem)] max-w-5xl overflow-hidden p-3 sm:p-4" onKeyDown={(event) => surveyPhotoKeydown(event, hasGallery ? siblings!.length : 0, prevPhoto, nextPhoto)}><DialogTitle className="sr-only">{viewerTarget.file_name}</DialogTitle><div ref={viewerRef}>{viewerUrl ? <img src={viewerUrl} alt={viewerTarget.file_name} className="mx-auto max-h-[80dvh] w-auto max-w-full rounded-md object-contain" /> : null}</div><SurveyPhotoNav position={position} total={hasGallery ? siblings!.length : 0} onPrev={prevPhoto} onNext={nextPhoto} /></DialogContent></Dialog>
   </>;
 }
 
