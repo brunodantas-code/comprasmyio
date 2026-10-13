@@ -927,5 +927,5 @@
 - [x] Site Survey — checkbox "Com perguntas para o cliente" nos filtros de Pendências de cadastro: marcando, só aparecem os pontos com perguntas do cliente; combinado com a busca por nome e desmarcado tudo volta (63 → 7 cards validado no navegador).
 
 ## Conclusão técnica e complementos — 13/10/2026
-- [ ] Remover gráficos e preservar datas originais nas conclusões posteriores; verificar visita encerrada em 07/10.
-- [ ] Exibir número do medidor à direita do LUC e reduzir Localização na lista de pontos.
+- [x] Gráficos removidos; conclusão técnica de 07/10 registrada; datas protegidas contra alterações posteriores e histórico distingue complementos/saneamento. Verificado na visita real, sem erros e com 63 cards preservados.
+- [x] Número do medidor à direita do LUC, com Localização reduzida; coluna validada no navegador.
