@@ -63,7 +63,7 @@ export function usePendingActions() {
       const steps = (stepsResult.data ?? []) as ApprovalStep[];
       const pendingApprovals = steps.filter((step) => {
         if (requesterId(step) === userId) return false;
-        if (step.approver_id !== userId && !isAdmin) return false;
+        if (step.approver_id !== userId) return false;
         return !steps.some(
           (earlier) => earlier.order_id === step.order_id && earlier.step_index < step.step_index,
         );
