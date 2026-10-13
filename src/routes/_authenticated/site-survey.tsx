@@ -417,7 +417,7 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
   const [initialStepsExpanded, setInitialStepsExpanded] = useState<boolean | null>(null);
   const [pendingGroup, setPendingGroup] = useState<{ pointValue: string; key: string } | null>(null);
   const [pendingFocus, setPendingFocus] = useState<{ pointValue: string; itemKey: string } | null>(null);
-  const [customerDraft, setCustomerDraft] = useState<{ pointValue: string; text: string } | null>(null);
+  const [customerDraft, setCustomerDraft] = useState<{ pointValue: string; text: string; edit?: string } | null>(null);
   const pendingFocusFormRef = useRef<HTMLFormElement | null>(null);
   useEffect(() => {
     const open = (event: Event) => { if ((event as CustomEvent<{ visitId: string }>).detail?.visitId !== visit?.id) return; setScreenSummaryOpen(false); setRegistrationPendingOpen(true); setTimeout(() => document.getElementById("registration-pending")?.scrollIntoView({ behavior: "smooth", block: "start" }), 150); };
@@ -999,7 +999,7 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
         if (skipped.has(section.id)) continue;
         for (const question of sortByPosition(data.questions.filter((item) => item.active && item.section_id === section.id))) if (isQuestionVisible(question, answers) && isNotInformedAnswer(answerParts(answers.get(question.id)).value)) items.push({ key: question.id, label: `${section.title}: ${question.prompt}`, sectionId: section.id });
       }
-      const customerQuestion = sectionsFor(point.templateId ?? visit.template_id, own).filter((section) => !skipped.has(section.id)).flatMap((section) => data.questions.filter((question) => question.active && question.section_id === section.id && isCustomerQuestion(question)))[0];
+      const customerQuestion = sectionsFor(point.templateId ?? visit.template_id, own).flatMap((section) => data.questions.filter((question) => question.active && question.section_id === section.id && isCustomerQuestion(question)))[0];
       if (customerQuestion) for (const text of pendingCustomerQuestions(answers.get(customerQuestion.id))) items.push({ key: `customer:${customerQuestion.id}:${text}`, label: text, groupKey: `customer:${customerQuestion.id}`, groupLabel: "Perguntas para o cliente", customer: true });
       const groups: { key: string; label: string; items: typeof items }[] = [];
       for (const item of items) {
@@ -1068,6 +1068,42 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
     if (error) return toast.error(error.message);
     toast.success("Pergunta adicionada");
     setCustomerDraft(null);
+    await refetchDetail();
+  };
+  const updatePendingCustomerQuestion = async (pointValue: string, text: string, previous: string) => {
+    const clean = text.trim();
+    if (!clean || clean === previous) return;
+    const target = customerQuestionTarget(pointValue);
+    if (!target?.response) return;
+    const existing = target.response.answer;
+    const rows = customerQuestions(existing);
+    if (!rows.includes(previous)) return;
+    if (rows.some((item) => item === clean)) return toast.error("Esta pergunta já está cadastrada neste ponto.");
+    const answered = answeredCustomerQuestions(existing);
+    const nextRows = rows.map((item) => (item === previous ? clean : item));
+    const nextAnswered = answered.map((item) => (item === previous ? clean : item));
+    const base = existing && typeof existing === "object" && !Array.isArray(existing) ? existing : { value: rows.join("\n") };
+    const answer = { ...base, value: nextRows.join("\n"), customer_questions: nextRows, customer_questions_answered: nextAnswered };
+    const { error } = await supabase.from("site_survey_responses").update({ answer, answered_by: data.userId }).eq("id", target.response.id);
+    if (error) return toast.error(error.message);
+    toast.success("Pergunta atualizada");
+    setCustomerDraft(null);
+    await refetchDetail();
+  };
+  const deletePendingCustomerQuestion = async (pointValue: string, text: string) => {
+    const target = customerQuestionTarget(pointValue);
+    if (!target?.response) return;
+    const existing = target.response.answer;
+    const rows = customerQuestions(existing);
+    if (!rows.includes(text)) return;
+    const answered = answeredCustomerQuestions(existing);
+    const nextRows = rows.filter((item) => item !== text);
+    const nextAnswered = answered.filter((item) => item !== text);
+    const base = existing && typeof existing === "object" && !Array.isArray(existing) ? existing : { value: rows.join("\n") };
+    const answer = { ...base, value: nextRows.join("\n"), customer_questions: nextRows, customer_questions_answered: nextAnswered };
+    const { error } = await supabase.from("site_survey_responses").update({ answer, answered_by: data.userId }).eq("id", target.response.id);
+    if (error) return toast.error(error.message);
+    toast.success("Pergunta excluída");
     await refetchDetail();
   };
   const markCustomerQuestionAnswered = async (pointValue: string, text: string) => {
