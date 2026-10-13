@@ -65,9 +65,18 @@ export function SiteSurveyClientPendingReport({ visit, client, unit, project, po
         }
         return fresh;
       };
-      const [responses, calls, freshPoints, { jsPDF }, { default: autoTable }] = await Promise.all([loadResponses(), loadCalls(), loadPoints(), import("jspdf"), import("jspdf-autotable")]);
+      const loadTexts = async () => {
+        const rows = [];
+        for (let from = 0; ; from += 1000) {
+          const result = await supabase.from("site_survey_report_texts").select("id,name,question_id,answer_value,report_question,report_answer").order("id").range(from, from + 999);
+          if (result.error) throw new Error(result.error.message);
+          rows.push(...(result.data ?? []));
+          if ((result.data?.length ?? 0) < 1000) return rows;
+        }
+      };
+      const [responses, calls, freshPoints, texts, { jsPDF }, { default: autoTable }] = await Promise.all([loadResponses(), loadCalls(), loadPoints(), loadTexts(), import("jspdf"), import("jspdf-autotable")]);
       if (calls.some((call) => call.internal_call_id && !call.internal_calls)) throw new Error("Não foi possível consultar todos os chamados vinculados. Verifique seu acesso aos chamados antes de gerar o relatório.");
-      const groups = buildClientPendingGroups(freshPoints.length ? freshPoints : points, responses, questions, calls);
+      const groups = buildClientPendingGroups(freshPoints.length ? freshPoints : points, responses, questions, calls, texts);
       const pdf = new jsPDF({ unit: "mm", format: "a4" });
       const loadFont = async (url: string) => {
         const response = await fetch(url);
@@ -104,8 +113,8 @@ export function SiteSurveyClientPendingReport({ visit, client, unit, project, po
       for (const group of groups) {
         const kind = ({ shop: "Loja", kiosk: "Quiosque", environment: "Ambiente", general: "Geral" } as Record<string, string>)[group.pointType] ?? "Ponto";
         y = table(y, [`${kind} — ${group.label}`], [
-          ...(group.questions.length ? [["Perguntas para o cliente"], ...group.questions.map((text, index) => [`${index + 1}. ${text}`])] : []),
-          ...(group.calls.length ? [["Chamados e intervenções gerados durante o checklist"], ...group.calls.map((call) => [`${call.call_number ? `Chamado #${call.call_number} — ` : "Intervenção — "}${call.title}\nSituação: ${statusLabel(call.status)}${call.description?.trim() ? `\n${call.description.trim()}` : ""}`])] : []),
+          ...group.questions.map((text, index) => [`${index + 1}. ${text}`]),
+          ...(group.calls.length ? [["Chamados e intervenções gerados durante o checklist"], ...group.calls.map((call) => [`${call.call_number ? `Chamado #${call.call_number} — ${call.title}` : "Intervenção"}\nSituação: ${statusLabel(call.status)}${call.description?.trim() ? `\n${call.description.trim()}` : ""}`])] : []),
         ]);
       }
       const pages = pdf.getNumberOfPages();
