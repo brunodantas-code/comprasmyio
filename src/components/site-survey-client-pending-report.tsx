@@ -43,7 +43,7 @@ export function SiteSurveyClientPendingReport({ visit, client, unit, project, po
       const loadCalls = async () => {
         const rows = [];
         for (let from = 0; ; from += 1000) {
-          const result = await supabase.from("site_survey_generated_calls").select("internal_call_id,visit_luc_id,visit_environment_id,internal_calls(call_number,title,description,status)").eq("visit_id", visit.id).order("created_at").order("id").range(from, from + 999);
+          const result = await supabase.from("site_survey_generated_calls").select("internal_call_id,question_id,status,trigger_value,visit_luc_id,visit_environment_id,site_survey_question_actions(site_survey_action_catalog(name)),internal_calls(call_number,title,description,status)").eq("visit_id", visit.id).order("created_at").order("id").range(from, from + 999);
           if (result.error) throw new Error(result.error.message);
           rows.push(...(result.data ?? []));
           if ((result.data?.length ?? 0) < 1000) return rows;
@@ -95,17 +95,17 @@ export function SiteSurveyClientPendingReport({ visit, client, unit, project, po
       pdf.setFontSize(15); pdf.setTextColor(...ink); pdf.text("Pendências para o cliente", 14, 32);
       pdf.setDrawColor(...green); pdf.line(14, 37, 196, 37);
       const table = (startY: number, head: string[], body: string[][]) => {
-        autoTable(pdf, { startY, theme: "plain", margin: { top: 20, bottom: 20, left: 14, right: 14 }, styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: 3, overflow: "linebreak" }, headStyles: { fontStyle: "bold", textColor: accent, lineWidth: { bottom: 0.3 }, lineColor: green }, head: [head], body, rowPageBreak: "avoid" });
+        autoTable(pdf, { startY, theme: "plain", pageBreak: "avoid", margin: { top: 20, bottom: 20, left: 14, right: 14 }, styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: 3, overflow: "linebreak" }, headStyles: { fontStyle: "bold", textColor: accent, lineWidth: { bottom: 0.3 }, lineColor: green }, head: [head], body, rowPageBreak: "avoid" });
         return (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 8;
       };
       let y = table(42, ["Visita", "Cliente / unidade", "Projeto"], [[`SS-${number}\nData da visita: ${date(visit.completed_at ?? visit.scheduled_start)}\nEmissão: ${date(new Date().toISOString())}`, [client, unit].filter(Boolean).join("\n") || "—", project || "—"]]);
-      pdf.setFont("Nunito", "normal"); pdf.setFontSize(10); pdf.text(`${questionCount} pergunta(s) aguardando resposta · ${callCount} chamado(s) gerado(s)`, 14, y); y += 10;
+      pdf.setFont("Nunito", "normal"); pdf.setFontSize(10); pdf.text(`${questionCount} pergunta(s) aguardando resposta · ${callCount} chamado(s) / intervenção(ões)`, 14, y); y += 10;
       if (!groups.length) pdf.text("Nenhuma pergunta pendente ou chamado gerado nesta visita.", 14, y);
       for (const group of groups) {
         const kind = ({ shop: "Loja", kiosk: "Quiosque", environment: "Ambiente", general: "Geral" } as Record<string, string>)[group.pointType] ?? "Ponto";
         y = table(y, [`${kind} — ${group.label}`], [
           ...(group.questions.length ? [["Perguntas para o cliente"], ...group.questions.map((text, index) => [`${index + 1}. ${text}`])] : []),
-          ...(group.calls.length ? [["Chamados gerados durante o checklist"], ...group.calls.map((call) => [`Chamado #${call.call_number ?? "—"} — ${call.title}\nSituação: ${statusLabel(call.status)}${call.description?.trim() ? `\n${call.description.trim()}` : ""}`])] : []),
+          ...(group.calls.length ? [["Chamados e intervenções gerados durante o checklist"], ...group.calls.map((call) => [`${call.call_number ? `Chamado #${call.call_number} — ` : "Intervenção — "}${call.title}\nSituação: ${statusLabel(call.status)}${call.description?.trim() ? `\n${call.description.trim()}` : ""}`])] : []),
         ]);
       }
       const pages = pdf.getNumberOfPages();

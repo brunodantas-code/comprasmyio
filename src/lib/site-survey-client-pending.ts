@@ -2,7 +2,7 @@ import { isCustomerQuestion, pendingCustomerQuestions } from "@/lib/site-survey-
 
 export type ClientPendingPoint = { value: string; label: string; pointType: string };
 export type ClientPendingResponse = { question_id: string; visit_luc_id: string | null; visit_environment_id: string | null; answer: unknown; question_snapshot?: unknown };
-export type ClientPendingCall = { internal_call_id: string | null; visit_luc_id: string | null; visit_environment_id: string | null; internal_calls: { call_number: string | null; title: string; description: string; status: string } | null };
+export type ClientPendingCall = { internal_call_id: string | null; visit_luc_id: string | null; visit_environment_id: string | null; question_id?: string; status?: string; trigger_value?: string; site_survey_question_actions?: { site_survey_action_catalog: { name: string } | null } | null; internal_calls: { call_number: string | null; title: string; description: string; status: string } | null };
 
 export function buildClientPendingGroups(points: ClientPendingPoint[], responses: ClientPendingResponse[], questions: { id: string; prompt: string; question_key?: string | null }[], calls: ClientPendingCall[]) {
   const customerIds = new Set(questions.filter(isCustomerQuestion).map((question) => question.id));
@@ -27,9 +27,20 @@ export function buildClientPendingGroups(points: ClientPendingPoint[], responses
   }
   const seen = new Set<string>();
   for (const call of calls) {
-    if (!call.internal_call_id || !call.internal_calls || seen.has(call.internal_call_id)) continue;
-    seen.add(call.internal_call_id);
-    groupFor(keyFor(call)).calls.push(call.internal_calls);
+    if (call.internal_call_id && call.internal_calls) {
+      if (seen.has(call.internal_call_id)) continue;
+      seen.add(call.internal_call_id);
+      groupFor(keyFor(call)).calls.push(call.internal_calls);
+    } else {
+      const action = call.site_survey_question_actions?.site_survey_action_catalog?.name ?? "";
+      if (!action.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().includes("intervencao do cliente") || call.status === "cancelado") continue;
+      const response = responses.find((row) => row.question_id === call.question_id && keyFor(row) === keyFor(call));
+      const answer = response?.answer;
+      const value = answer && typeof answer === "object" && "value" in answer ? answer.value : answer;
+      const detail = answer && typeof answer === "object" && "detail" in answer && typeof answer.detail === "string" ? answer.detail : "";
+      const prompt = questions.find((question) => question.id === call.question_id)?.prompt ?? "";
+      groupFor(keyFor(call)).calls.push({ call_number: null, title: action, description: [prompt, Array.isArray(value) ? value.join(", ") : typeof value === "string" ? value : call.trigger_value, detail].filter(Boolean).join(" — "), status: call.status ?? "aberto" });
+    }
   }
   return [...groups.values()].filter((group) => group.questions.length || group.calls.length);
 }
