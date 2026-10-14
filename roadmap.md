@@ -1,4 +1,4 @@
-- [ ] Site Survey — incluir no Relatório Completo todo o histórico de perguntas e respostas do cliente registrado na Seção 7 e nas Pendências de Cadastro.
+- [x] Site Survey — incluir no Relatório Completo todo o histórico de perguntas e respostas do cliente registrado na Seção 7 e nas Pendências de Cadastro.
 - [x] Site Survey — remover “Pergunta no PDF” do cadastro de textos e do PDF para o cliente; usar somente a Resposta no PDF vinculada à pergunta do checklist, preservando o dado antigo.
 - [x] Site Survey — em Textos dos relatórios, selecionar primeiro o checklist e listar sem duplicidade somente perguntas com Gerar Ação configurado como Intervenção do Cliente.
 - [x] Site Survey — no PDF de pendências, omitir “Situação: Em aberto” das intervenções sem chamado e não listar intervenção de pergunta condicional oculta pela resposta da pergunta-base.
