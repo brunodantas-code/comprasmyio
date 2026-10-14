@@ -31,5 +31,5 @@
 - RLS uses effective menus/app grants; shared files follow record access and uploads bind owners, preserving authorized collaboration. Survey previews lazy-load/cache private images; uploads use lazy compression, a serial queue and retry cache with prepared-file metadata to bound memory.
 
 - Pending cards reuse the guarded editor by section; optional answer.observation stays separate from required details.
-- Completed surveys stay out of execution; Summary unifies registration, pending items and history per point without changing technical dates. Section 7 guards customer Q&A; models copy independently.
+- Completed surveys stay out of execution and can never be reopened; History allows authorized registration remediation without changing visit status or technical dates. Section 7 guards customer Q&A; models copy independently.
 
