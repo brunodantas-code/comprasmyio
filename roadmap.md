@@ -1,4 +1,4 @@
-- [ ] Site Survey — em Textos dos relatórios, selecionar primeiro o checklist e listar sem duplicidade somente perguntas com Gerar Ação configurado como Intervenção do Cliente.
+- [x] Site Survey — em Textos dos relatórios, selecionar primeiro o checklist e listar sem duplicidade somente perguntas com Gerar Ação configurado como Intervenção do Cliente.
 - [x] Site Survey — no PDF de pendências, omitir “Situação: Em aberto” das intervenções sem chamado e não listar intervenção de pergunta condicional oculta pela resposta da pergunta-base.
 - [x] Site Survey — rótulo "Pergunta N" numerado acima da caixa da pergunta e botões de editar/excluir/confirmar realocados para a linha do rótulo, no mesmo padrão da resposta do cliente; sequência conferida com duas perguntas e pergunta de teste removida.
 - [x] Site Survey — incluir resposta do cliente vinculada à pergunta na Seção 7 e nos cards de Pendências de Cadastro, com fundo verde-claro e baixa somente pelo checkbox manual; preservar os textos atuais para realocação manual.
