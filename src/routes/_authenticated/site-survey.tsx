@@ -1053,7 +1053,7 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
     setTimeout(() => { if (sectionId) setOpenSectionId(sectionId); document.querySelector(`[data-survey-point="${pointValue}"]`)?.scrollIntoView({ behavior: "smooth", block: "start" }); if (sectionId) setTimeout(() => document.getElementById(`survey-section-${sectionId}`)?.scrollIntoView({ behavior: "smooth", block: "start" }), 250); }, 150);
   };
   const openPendingFocus = async (pointValue: string, itemKey: string) => {
-    await switchPoint(pointValue);
+    if (!(await switchPoint(pointValue))) return;
     setPendingFocus({ pointValue, itemKey });
   };
   const savePendingLuc = async (form: HTMLFormElement, luc: NonNullable<(typeof registrationPending)[number]["luc"]>) => {
