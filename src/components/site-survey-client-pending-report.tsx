@@ -68,7 +68,7 @@ export function SiteSurveyClientPendingReport({ visit, client, unit, project, po
       const loadTexts = async () => {
         const rows = [];
         for (let from = 0; ; from += 1000) {
-          const result = await supabase.from("site_survey_report_texts").select("id,name,question_id,answer_value,report_question,report_answer").order("id").range(from, from + 999);
+          const result = await supabase.from("site_survey_report_texts").select("id,name,question_id,answer_value,report_answer").order("id").range(from, from + 999);
           if (result.error) throw new Error(result.error.message);
           rows.push(...(result.data ?? []));
           if ((result.data?.length ?? 0) < 1000) return rows;
