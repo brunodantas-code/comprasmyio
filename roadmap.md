@@ -1,5 +1,5 @@
-- [ ] Site Survey — perguntas e respostas do cliente usam a mesma fonte e tamanho dos antigos cards de Pendências de Cadastro.
-- [ ] Site Survey — mover seta para Ações, mostrar zero sem pendências e incluir filtro Com/Sem pendências.
+- [x] Site Survey — perguntas e respostas do cliente usam a mesma fonte e tamanho dos antigos cards de Pendências de Cadastro.
+- [x] Site Survey — mover seta para Ações, mostrar zero sem pendências e incluir filtro Com/Sem pendências.
 - [x] Site Survey — editar respostas históricas pelo número da pergunta, exibindo somente a pergunta da seção; restaurar pergunta com borda cinza e resposta verde-clara, ambas numeradas.
 - [x] Site Survey — unificar ambientes antigos e ambientes com checklist próprio no mesmo cadastro, preservando os vínculos e históricos originais.
 - [x] Site Survey — remover “Reabrir visita”; conclusão técnica é definitiva e complementos/correções no Histórico não alteram o status.
