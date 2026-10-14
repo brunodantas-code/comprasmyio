@@ -426,7 +426,7 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
   const [pauseReasonId, setPauseReasonId] = useState("");
   const [savingPause, setSavingPause] = useState(false);
   const [screenSummaryOpen, setScreenSummaryOpen] = useState(false);
-  const [registrationPendingOpen, setRegistrationPendingOpen] = useState(false);
+  const [registrationPendingOpen, setRegistrationPendingOpen] = useState(true);
   const [registrationSearch, setRegistrationSearch] = useState("");
   const [customerQuestionsOnly, setCustomerQuestionsOnly] = useState(false);
   const [expandedRegistrationRows, setExpandedRegistrationRows] = useState<Set<string>>(() => new Set());
@@ -1013,7 +1013,7 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
   const pointCalls = new Map(generatedCallsForScope("point").map((item) => [item.question_id, { id: item.internal_call_id, number: item.internal_calls?.call_number ?? null }]));
   const sectionsFor = (templateId: string | null, ownTemplate: boolean) => sortByPosition(data.sections.filter((section) => section.active && section.template_id === templateId)).slice(ownTemplate ? 0 : 3);
   const registrationPending = (() => {
-    if (!registrationPendingOpen || !detail) return [];
+    if (!detail) return [];
     return points.filter((point) => point.completionStatus !== "cancelada").map((point) => {
       const [kind, id] = point.value.split(":");
       const record = kind === "luc" ? detail.lucs.find((item) => item.id === id) : detail.environments.find((item) => item.id === id);
