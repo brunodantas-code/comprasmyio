@@ -427,9 +427,7 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
   const [savingPause, setSavingPause] = useState(false);
   const [screenSummaryOpen, setScreenSummaryOpen] = useState(false);
   const [registrationPendingOpen, setRegistrationPendingOpen] = useState(true);
-  const [registrationSearch, setRegistrationSearch] = useState("");
   const [customerQuestionsOnly, setCustomerQuestionsOnly] = useState(false);
-  const [expandedRegistrationRows, setExpandedRegistrationRows] = useState<Set<string>>(() => new Set());
   const [initialStepsExpanded, setInitialStepsExpanded] = useState<boolean | null>(null);
   const [pendingGroup, setPendingGroup] = useState<{ pointValue: string; key: string } | null>(null);
   const [pendingFocus, setPendingFocus] = useState<{ pointValue: string; itemKey: string } | null>(null);
@@ -1047,7 +1045,7 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
         }
       }
       return { point, luc, items, groups, customerQuestion };
-    }).filter((row) => (!customerQuestionsOnly || row.items.some((item) => item.customer)) && (!registrationSearch.trim() || row.point.label.toLocaleLowerCase("pt-BR").includes(registrationSearch.trim().toLocaleLowerCase("pt-BR"))));
+    }).filter((row) => !customerQuestionsOnly || row.items.some((item) => item.customer));
   })();
   const canFillRegistration = data.permissions.has("site_survey_executar") || data.permissions.has("site_survey_editar");
   const goToPending = async (pointValue: string, sectionId?: string) => {
