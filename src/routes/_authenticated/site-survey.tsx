@@ -1018,7 +1018,7 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
       const [kind, id] = point.value.split(":");
       const record = kind === "luc" ? detail.lucs.find((item) => item.id === id) : detail.environments.find((item) => item.id === id);
       const own = kind !== "luc" && Boolean((record as { template_id?: string | null } | undefined)?.template_id);
-      const skipped = new Set(Array.isArray(record?.skipped_section_ids) ? record.skipped_section_ids.filter((item): item is string => typeof item === "string") : []);
+      const skipped = sectionDispositionSets(Array.isArray(record?.skipped_section_ids) ? record.skipped_section_ids.filter((item): item is string => typeof item === "string") : []).excluded;
       const scope = (item: { visit_luc_id?: string | null; visit_environment_id?: string | null }) => kind === "luc" ? item.visit_luc_id === id : item.visit_environment_id === id;
       const answers = new Map<string, unknown>(detail.responses.filter(scope).map((item) => [item.question_id, item.answer]));
       const items: { key: string; label: string; sectionId?: string; groupKey?: string; groupLabel?: string; customer?: boolean; customerResponse?: string }[] = [];
