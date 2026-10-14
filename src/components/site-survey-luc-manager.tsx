@@ -69,7 +69,7 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
   const [analyzing, setAnalyzing] = useState(false);
   const [draftMeter, setDraftMeter] = useState("");
   const [saving, setSaving] = useState(false);
-  const [listOpen, setListOpen] = useState(false);
+  const [listOpen, setListOpen] = useState(true);
   const [editMode, setEditMode] = useState<"correction" | "name_change">("correction");
   const [sortBy, setSortBy] = useState<"luc_number" | "shop_name" | "location">("luc_number");
   const [sortAscending, setSortAscending] = useState(true);
