@@ -50,6 +50,10 @@ export function SiteSurveyReportTexts({ questions, sections, templates, question
   const sectionIds = new Set(sections.filter(item => item.template_id === templateId).map(item => item.id));
   return questions.filter(item => sectionIds.has(item.section_id) && interventionQuestionIds.has(item.id));
  }, [interventionQuestionIds, questions, sections, templateId]);
+ const selectedOptions = useMemo(() => {
+  const question = questions.find(item => item.id === draft?.question_id);
+  return Array.isArray(question?.options) ? question.options.filter((option): option is string => typeof option === 'string' && option.trim().length > 0) : [];
+ }, [draft?.question_id, questions]);
  const openDraft = (item: typeof blank & { id?: string }) => {
   const question = questions.find(questionItem => questionItem.id === item.question_id);
   const section = sections.find(sectionItem => sectionItem.id === question?.section_id);
