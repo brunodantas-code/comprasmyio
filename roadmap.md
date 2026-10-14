@@ -1,3 +1,4 @@
+- [x] Site Survey — excluir o modelo de teste “Hidrômetros” e manter “Quadros Elétricos” e “Água e Hidrômetros” somente com as respectivas seções copiadas do padrão Shoppings.
 - [x] Site Survey — impedir envio duplicado ao criar modelo com base em outro checklist e substituir o erro técnico de nome repetido por orientação em português.
 - [x] Site Survey — incluir no Relatório Completo todo o histórico de perguntas e respostas do cliente registrado na Seção 7 e nas Pendências de Cadastro.
 - [x] Site Survey — remover “Pergunta no PDF” do cadastro de textos e do PDF para o cliente; usar somente a Resposta no PDF vinculada à pergunta do checklist, preservando o dado antigo.
