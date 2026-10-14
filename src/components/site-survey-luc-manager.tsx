@@ -179,9 +179,14 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
       const name = environmentName.trim();
       if (!name) return toast.error("Informe o nome do ambiente.");
       if (!environmentTemplateId) return toast.error("Selecione o checklist do ambiente.");
-      const { error } = await supabase.from("site_survey_visit_environments").insert({ visit_id: visitId, name, template_id: environmentTemplateId, meter_number: draftMeter.trim() || null, created_by: userId, updated_by: userId, active: true });
-      if (error) return toast.error(error.code === "23505" ? "Este ambiente já está cadastrado nesta OS." : error.message);
-      toast.success("Ambiente adicionado."); closeEdit(); onChanged?.();
+      const { data: existing, error: lookupError } = await supabase.from("site_survey_visit_environments").select("id,active").eq("visit_id", visitId).eq("name", name).maybeSingle();
+      if (lookupError) return toast.error(lookupError.message);
+      if (existing?.active) return toast.error("Este ambiente já está cadastrado nesta OS.");
+      const result = existing
+        ? await supabase.from("site_survey_visit_environments").update({ template_id: environmentTemplateId, meter_number: draftMeter.trim() || null, updated_by: userId, active: true }).eq("id", existing.id)
+        : await supabase.from("site_survey_visit_environments").insert({ visit_id: visitId, name, template_id: environmentTemplateId, meter_number: draftMeter.trim() || null, created_by: userId, updated_by: userId, active: true });
+      if (result.error) return toast.error(result.error.code === "23505" ? "Este ambiente já está cadastrado nesta OS." : result.error.message);
+      toast.success(existing ? "Ambiente reativado com o checklist selecionado." : "Ambiente adicionado."); closeEdit(); onChanged?.();
       return;
     }
     const lucNumber = pointType === "environment" ? "" : draftLuc.trim(); const shopName = draftName.trim();

@@ -57,11 +57,18 @@ export function SiteSurveyEnvironmentManager({ visitId, userId, canEdit, templat
     if (!name) return toast.error("Informe o nome do ambiente.");
     if (!draftTemplateId) return toast.error("Selecione o checklist do ambiente.");
     const payload = { visit_id: visitId, name, point_type: draftType, template_id: draftTemplateId, updated_by: userId, active: true };
+    const { data: existing, error: lookupError } = editing?.id
+      ? { data: null, error: null }
+      : await supabase.from("site_survey_visit_environments").select("id,active").eq("visit_id", visitId).eq("name", name).maybeSingle();
+    if (lookupError) return toast.error(lookupError.message);
+    if (existing?.active) return toast.error("Este ambiente já está cadastrado nesta OS.");
     const result = editing?.id
       ? await supabase.from("site_survey_visit_environments").update(payload).eq("id", editing.id)
-      : await supabase.from("site_survey_visit_environments").insert({ ...payload, created_by: userId });
+      : existing
+        ? await supabase.from("site_survey_visit_environments").update(payload).eq("id", existing.id)
+        : await supabase.from("site_survey_visit_environments").insert({ ...payload, created_by: userId });
     if (result.error) return toast.error(result.error.code === "23505" ? "Este ambiente já está cadastrado nesta OS." : result.error.message);
-    toast.success(editing?.id ? "Ambiente atualizado." : "Ambiente adicionado.");
+    toast.success(editing?.id ? "Ambiente atualizado." : existing ? "Ambiente reativado com o checklist selecionado." : "Ambiente adicionado.");
     setEditing(null);
     await load();
     onChanged?.();

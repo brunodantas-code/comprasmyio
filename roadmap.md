@@ -1,3 +1,5 @@
+- [x] Site Survey — permitir recriar ambiente excluído reativando o cadastro histórico com o checklist correto, sem erro de nome duplicado.
+
 - [x] Site Survey — excluir o modelo de teste “Hidrômetros” e manter “Quadros Elétricos” e “Água e Hidrômetros” somente com as respectivas seções copiadas do padrão Shoppings.
 - [x] Site Survey — impedir envio duplicado ao criar modelo com base em outro checklist e substituir o erro técnico de nome repetido por orientação em português.
 - [x] Site Survey — incluir no Relatório Completo todo o histórico de perguntas e respostas do cliente registrado na Seção 7 e nas Pendências de Cadastro.
