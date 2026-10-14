@@ -1,3 +1,4 @@
+- [x] Site Survey — retirar visitas concluídas de Realizar Visita e consolidar, no Resumo de Visitas, cadastro, pendências e histórico completo do checklist em expansão por ponto, preservando a data técnica original.
 - [x] Site Survey — incluir “Não se aplica” por etapa, à esquerda de “Não realizada”, preservando respostas e excluindo a etapa do Resumo da Visita e das pendências.
 - [x] Site Survey — incorporar pendências na tabela original de Cadastro completo, com quantidade e seta por linha, preservando miniaturas, edição, exclusão e filtros; remover botão e tela duplicados.
 - [x] Site Survey — criar modelo copiando um modelo inteiro ou selecionando Seções padrão 1 a 7 de Shoppings como cópias independentes.

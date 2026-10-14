@@ -1047,7 +1047,7 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
       return { point, luc, items, groups, customerQuestion };
     }).filter((row) => !customerQuestionsOnly || row.items.some((item) => item.customer));
   })();
-  const canFillRegistration = data.permissions.has("site_survey_executar") || data.permissions.has("site_survey_editar");
+  const canFillRegistration = view === "summary" ? data.permissions.has("site_survey_editar") : data.permissions.has("site_survey_executar") || data.permissions.has("site_survey_editar");
   const goToPending = async (pointValue: string, sectionId?: string) => {
     await switchPoint(pointValue);
     setTimeout(() => { if (sectionId) setOpenSectionId(sectionId); document.querySelector(`[data-survey-point="${pointValue}"]`)?.scrollIntoView({ behavior: "smooth", block: "start" }); if (sectionId) setTimeout(() => document.getElementById(`survey-section-${sectionId}`)?.scrollIntoView({ behavior: "smooth", block: "start" }), 250); }, 150);
