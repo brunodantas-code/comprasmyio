@@ -1241,6 +1241,7 @@ function EmptyTemplatePicker({ templates, open, collapsed, onOpenChange, onSelec
 function ChecklistAdmin({ data, onChanged }: { data: NonNullable<ReturnType<typeof useSurveyDataShape>>; onChanged: () => void }) {
   const activeTemplates = data.templates.filter((item) => item.active);
   const [selected, setSelected] = useState("");
+  const [creatingTemplate, setCreatingTemplate] = useState(false);
   const [templatePickerOpen, setTemplatePickerOpen] = useState(false);
   const [sectionOrder, setSectionOrder] = useState<string[]>([]);
   const [questionOrders, setQuestionOrders] = useState<Record<string, string[]>>({});
@@ -1263,10 +1264,21 @@ function ChecklistAdmin({ data, onChanged }: { data: NonNullable<ReturnType<type
     const values = new FormData(form); const name = String(values.get("name")).trim(); const description = String(values.get("description")).trim(); const sourceTemplateId = String(values.get("source_template_id") ?? "none");
     if (!name || name.length > 50) return toast.error("O nome do modelo deve ter entre 1 e 50 caracteres.");
     if (description.length > 100) return toast.error("A descrição deve ter no máximo 100 caracteres.");
-    const { data: createdTemplate, error } = await supabase.from("site_survey_templates").insert({ name, description: description || null, created_by: data.userId }).select("id").single();
-    if (error || !createdTemplate) return toast.error(error?.message ?? "Não foi possível criar o modelo.");
-    if (sourceTemplateId !== "none") {
-      try {
+    if (creatingTemplate) return;
+    const existingTemplate = data.templates.find((template) => template.name.trim().toLocaleLowerCase("pt-BR") === name.toLocaleLowerCase("pt-BR"));
+    if (existingTemplate) {
+      if (existingTemplate.active) setSelected(existingTemplate.id);
+      return toast.error(existingTemplate.active ? "Já existe um modelo com este nome. O modelo existente foi selecionado para edição." : "Já existe um modelo inativo com este nome.");
+    }
+    setCreatingTemplate(true);
+    try {
+      const { data: createdTemplate, error } = await supabase.from("site_survey_templates").insert({ name, description: description || null, created_by: data.userId }).select("id").single();
+      if (error || !createdTemplate) {
+        if (error?.code === "23505") return toast.error("Já existe um modelo com este nome. Atualize a lista e selecione o modelo existente.");
+        return toast.error(error?.message ?? "Não foi possível criar o modelo.");
+      }
+      if (sourceTemplateId !== "none") {
+        try {
         const questionIdMap = new Map<string, string>(); const pendingConditions: Array<{ id: string; sourceId: string }> = [];
         for (const sourceSection of sortByPosition(data.sections.filter((section) => section.active && section.template_id === sourceTemplateId))) {
           const { data: createdSection, error: sectionError } = await supabase.from("site_survey_sections").insert({ template_id: createdTemplate.id, title: sourceSection.title, description: sourceSection.description, position: sourceSection.position }).select("id").single();
@@ -1281,12 +1293,15 @@ function ChecklistAdmin({ data, onChanged }: { data: NonNullable<ReturnType<type
           }
         }
         for (const condition of pendingConditions) { const conditionId = questionIdMap.get(condition.sourceId); if (conditionId) { const { error: conditionError } = await supabase.from("site_survey_questions").update({ conditioned_on_question_id: conditionId }).eq("id", condition.id); if (conditionError) throw conditionError; } }
-      } catch (copyError) {
-        await supabase.from("site_survey_templates").update({ active: false }).eq("id", createdTemplate.id);
-        return toast.error(copyError instanceof Error ? copyError.message : "Não foi possível duplicar o modelo.");
+        } catch (copyError) {
+          await supabase.from("site_survey_templates").update({ active: false }).eq("id", createdTemplate.id);
+          return toast.error(copyError instanceof Error ? copyError.message : "Não foi possível duplicar o modelo.");
+        }
       }
+      toast.success(sourceTemplateId === "none" ? "Modelo criado" : "Modelo duplicado para edição"); form.reset(); setSelected(createdTemplate.id); onChanged();
+    } finally {
+      setCreatingTemplate(false);
     }
-    toast.success(sourceTemplateId === "none" ? "Modelo criado" : "Modelo duplicado para edição"); form.reset(); setSelected(createdTemplate.id); onChanged();
   };
   const createSection = async (form: HTMLFormElement) => { if (!selected) return; const values = new FormData(form); const title = String(values.get("title")).trim(); const description = String(values.get("description")).trim(); if (!title || title.length > 50) return toast.error("O título da seção deve ter entre 1 e 50 caracteres."); if (description.length > 100) return toast.error("A descrição deve ter no máximo 100 caracteres."); const { error } = await supabase.from("site_survey_sections").insert({ template_id: selected, title, description: description || null, position: sectionOrder.length }); if (error) return toast.error(error.message); toast.success("Seção adicionada"); form.reset(); onChanged(); };
   const createQuestion = async (form: HTMLFormElement, sectionId: string) => { const values = new FormData(form); const prompt = String(values.get("prompt")).trim(); if (!prompt || prompt.length > 50) return toast.error("A pergunta deve ter entre 1 e 50 caracteres."); const options = String(values.get("options") ?? "").split(/[;\n]/).map((item) => item.trim()).filter(Boolean); const conditioned = values.get("conditioned") === "on"; const actionEnabled = values.get("generate_action") === "on"; const result = await supabase.from("site_survey_questions").insert({ section_id: sectionId, prompt, question_type: String(values.get("question_type")), required: values.get("required") === "on", options, configuration: questionConfigurationFromForm(values), position: questionOrders[sectionId]?.length ?? 0, conditioned_on_question_id: conditioned ? String(values.get("condition_question") || "") || null : null, conditioned_operator: conditioned ? String(values.get("condition_operator") || "equals") : "equals", conditioned_value: conditioned ? String(values.get("condition_value") || "") || null : null }).select("id").single(); if (result.error) return toast.error(result.error.message); if (actionEnabled) { const actionId = String(values.get("action_id") || ""); const triggerValue = String(values.get("action_trigger") || "").trim(); if (actionId && triggerValue) { const { error } = await supabase.from("site_survey_question_actions").insert({ question_id: result.data.id, action_id: actionId, trigger_value: triggerValue }); if (error) return toast.error(error.message); } } toast.success("Pergunta adicionada"); form.reset(); setAddingQuestionSectionId(null); onChanged(); };
