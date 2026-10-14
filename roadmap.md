@@ -957,3 +957,7 @@
 - [x] Site Survey — setas de navegação esquerda/direita no pop-up quando houver mais de uma foto, com contador e navegação circular, nos anexos do preenchimento, fotos por pergunta e grupos do Resumo da visita; corrigido o pop-up descentralizado e validado no computador e celular (Leonardo Roedel).
 
 - [x] Cards de Pendências de Cadastro e pop-up da etapa: pergunta em caixa com borda cinza, botões de editar/excluir/confirmar em linha própria abaixo e resposta do cliente com o mesmo tamanho e fonte da pergunta (12px nos cards, 14px no pop-up, Nunito nos dois); validado no computador e no celular, sem corte nem sobreposição.
+- [ ] Responder: ao editar resposta de "Não" para "Sim" no histórico, perguntas condicionais devem aparecer no pop-up para preenchimento
+- [ ] Pendências: alinhar resposta à esquerda com a pergunta; remover texto "Pergunta N", manter ícone com o número
+- [ ] Responder: perguntas condicionais ao editar "Não"→"Sim" no histórico
+- [ ] Avaliar: PDF do cadastro em lista corrida com thumbnails (LUCs não identificados) ou incluir no PDF para cliente — responder recomendação

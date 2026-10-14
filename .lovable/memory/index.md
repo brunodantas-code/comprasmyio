@@ -29,4 +29,4 @@ Botões de ação sempre com fundo verde e ícones/textos pretos; lilás somente
 - [Condicionamento e ações do checklist](features/conditional-checklist-actions.md) — Perguntas condicionais e geração imediata de chamados configuráveis.
 - [Relatório e tempos do Site Survey](features/site-survey-report-and-point-time.md) — Prévia/PDF, fachada obrigatória, início individual, premissas de duração e horas CLT
 
-- [Caixa da pergunta nos cards de pendências](mem://design/site-survey-pending-question-box) — Rótulo "Pergunta N" numerado, botões na linha do rótulo acima da caixa e resposta com a mesma fonte da pergunta
+- [Caixa da pergunta nos cards de pendências](mem://design/site-survey-pending-question-box) — Ícone numerado sem texto "Pergunta N", botões na linha acima da caixa, resposta alinhada à esquerda com a pergunta e resposta com a mesma fonte da pergunta
