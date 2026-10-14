@@ -1,3 +1,4 @@
+- [x] Site Survey — remover “Pergunta no PDF” do cadastro de textos e do PDF para o cliente; usar somente a Resposta no PDF vinculada à pergunta do checklist, preservando o dado antigo.
 - [x] Site Survey — em Textos dos relatórios, selecionar primeiro o checklist e listar sem duplicidade somente perguntas com Gerar Ação configurado como Intervenção do Cliente.
 - [x] Site Survey — no PDF de pendências, omitir “Situação: Em aberto” das intervenções sem chamado e não listar intervenção de pergunta condicional oculta pela resposta da pergunta-base.
 - [x] Site Survey — rótulo "Pergunta N" numerado acima da caixa da pergunta e botões de editar/excluir/confirmar realocados para a linha do rótulo, no mesmo padrão da resposta do cliente; sequência conferida com duas perguntas e pergunta de teste removida.
