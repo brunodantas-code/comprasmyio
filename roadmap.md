@@ -960,3 +960,4 @@
 - [ ] Responder: ao editar resposta de "Não" para "Sim" no histórico, perguntas condicionais devem aparecer no pop-up para preenchimento
 - [ ] Pendências: alinhar resposta à esquerda com a pergunta; remover texto "Pergunta N", manter ícone com o número
 - [ ] Responder: perguntas condicionais ao editar "Não"→"Sim" no histórico
+- [ ] Avaliar: PDF do cadastro em lista corrida com thumbnails (LUCs não identificados) ou incluir no PDF para cliente — responder recomendação
