@@ -1238,9 +1238,20 @@ function EmptyTemplatePicker({ templates, open, collapsed, onOpenChange, onSelec
   return <Card><CardHeader className="pb-2"><div className="flex items-start justify-between gap-3"><div className="space-y-1"><CardTitle>Editar modelo</CardTitle><CardDescription>Selecione e atualize um roteiro existente.</CardDescription></div><Button type="button" size="compactIcon" variant="ghost" className="text-myio-green hover:text-myio-green" aria-label={collapsed ? "Exibir edição de modelo" : "Recolher edição de modelo"} title={collapsed ? "Exibir" : "Recolher"} onClick={onToggle}>{collapsed ? <ChevronDown className="h-5 w-5" strokeWidth={2.5} /> : <ChevronUp className="h-5 w-5" strokeWidth={2.5} />}</Button></div></CardHeader>{collapsed ? null : <CardContent className="pb-3"><Popover open={open} onOpenChange={onOpenChange}><PopoverTrigger asChild><Button type="button" variant="outline" role="combobox" aria-expanded={open} className="w-full justify-between !bg-card text-foreground hover:!bg-muted sm:w-56"><span className="truncate text-muted-foreground">Selecione um modelo</span><ChevronDown className="h-4 w-4 shrink-0 opacity-60" /></Button></PopoverTrigger><PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start"><Command><CommandInput placeholder="Buscar modelo..." /><CommandList><CommandEmpty>Nenhum modelo encontrado.</CommandEmpty><CommandGroup>{templates.map((template) => <CommandItem key={template.id} value={template.name} onSelect={() => onSelect(template.id)} className="flex justify-between gap-3"><span>{template.name}</span>{template.is_default ? <Badge>Padrão</Badge> : null}</CommandItem>)}</CommandGroup></CommandList></Command></PopoverContent></Popover></CardContent>}</Card>;
 }
 
+function StandardSectionPicker({ sections, selectedIds, onChange, disabled }: { sections: Section[]; selectedIds: string[]; onChange: (ids: string[]) => void; disabled: boolean }) {
+  const [open, setOpen] = useState(false);
+  const selected = new Set(selectedIds);
+  const label = selectedIds.length === 0 ? "Não se aplica" : selectedIds.length === 1 ? sections.find((section) => section.id === selectedIds[0])?.title ?? "1 seção selecionada" : `${selectedIds.length} seções selecionadas`;
+  return <div className="space-y-2"><Label>Seções padrão</Label><Popover open={open && !disabled} onOpenChange={(next) => setOpen(disabled ? false : next)}><PopoverTrigger asChild><Button type="button" variant="outline" role="combobox" aria-expanded={open} disabled={disabled} className="w-full justify-between !bg-myio-green/10 font-normal hover:!bg-myio-green/15"><span className="truncate">{disabled ? "Disponível sem modelo base" : label}</span><ChevronDown className="h-4 w-4 shrink-0 opacity-50" /></Button></PopoverTrigger><PopoverContent className="w-(--radix-popover-trigger-width) p-0" align="start"><Command><CommandInput placeholder="Buscar seção padrão..." /><CommandList><CommandEmpty>Nenhuma seção encontrada.</CommandEmpty><CommandGroup>{sections.map((section, index) => <CommandItem key={section.id} value={`${index + 1} ${section.title}`} onSelect={() => onChange(selected.has(section.id) ? selectedIds.filter((id) => id !== section.id) : [...selectedIds, section.id])}><Checkbox checked={selected.has(section.id)} className="pointer-events-none" /><span className="truncate">{index + 1}. {section.title}</span></CommandItem>)}</CommandGroup></CommandList></Command></PopoverContent></Popover></div>;
+}
+
 function ChecklistAdmin({ data, onChanged }: { data: NonNullable<ReturnType<typeof useSurveyDataShape>>; onChanged: () => void }) {
   const activeTemplates = data.templates.filter((item) => item.active);
+  const shoppingTemplate = activeTemplates.find((item) => item.is_default) ?? activeTemplates.find((item) => normalizeCatalogName(item.name) === "shoppings");
+  const standardSections = shoppingTemplate ? sortByPosition(data.sections.filter((section) => section.active && section.template_id === shoppingTemplate.id)).slice(0, 7) : [];
   const [selected, setSelected] = useState("");
+  const [sourceTemplateId, setSourceTemplateId] = useState("none");
+  const [standardSectionIds, setStandardSectionIds] = useState<string[]>([]);
   const [creatingTemplate, setCreatingTemplate] = useState(false);
   const creatingTemplateRef = useRef(false);
   const [templatePickerOpen, setTemplatePickerOpen] = useState(false);
@@ -1262,7 +1273,7 @@ function ChecklistAdmin({ data, onChanged }: { data: NonNullable<ReturnType<type
     setQuestionOrders(Object.fromEntries(sections.map((section) => [section.id, sortByPosition(data.questions.filter((item) => item.active && item.section_id === section.id)).map((item) => item.id)])));
   }, [data.sections, data.questions, selected]);
   const createTemplate = async (form: HTMLFormElement) => {
-    const values = new FormData(form); const name = String(values.get("name")).trim(); const description = String(values.get("description")).trim(); const sourceTemplateId = String(values.get("source_template_id") ?? "none");
+    const values = new FormData(form); const name = String(values.get("name")).trim(); const description = String(values.get("description")).trim();
     if (!name || name.length > 50) return toast.error("O nome do modelo deve ter entre 1 e 50 caracteres.");
     if (description.length > 100) return toast.error("A descrição deve ter no máximo 100 caracteres.");
     if (creatingTemplateRef.current) return;
@@ -1279,11 +1290,12 @@ function ChecklistAdmin({ data, onChanged }: { data: NonNullable<ReturnType<type
         if (error?.code === "23505") return toast.error("Já existe um modelo com este nome. Atualize a lista e selecione o modelo existente.");
         return toast.error(error?.message ?? "Não foi possível criar o modelo.");
       }
-      if (sourceTemplateId !== "none") {
+      const sourceSections = sourceTemplateId !== "none" ? sortByPosition(data.sections.filter((section) => section.active && section.template_id === sourceTemplateId)) : standardSections.filter((section) => standardSectionIds.includes(section.id));
+      if (sourceSections.length > 0) {
         try {
         const questionIdMap = new Map<string, string>(); const pendingConditions: Array<{ id: string; sourceId: string }> = [];
-        for (const sourceSection of sortByPosition(data.sections.filter((section) => section.active && section.template_id === sourceTemplateId))) {
-          const { data: createdSection, error: sectionError } = await supabase.from("site_survey_sections").insert({ template_id: createdTemplate.id, title: sourceSection.title, description: sourceSection.description, position: sourceSection.position }).select("id").single();
+        for (const [sectionIndex, sourceSection] of sourceSections.entries()) {
+          const { data: createdSection, error: sectionError } = await supabase.from("site_survey_sections").insert({ template_id: createdTemplate.id, title: sourceSection.title, description: sourceSection.description, position: sectionIndex }).select("id").single();
           if (sectionError || !createdSection) throw sectionError ?? new Error("Não foi possível duplicar uma seção.");
           for (const sourceQuestion of sortByPosition(data.questions.filter((question) => question.active && question.section_id === sourceSection.id))) {
             const { data: createdQuestion, error: questionError } = await supabase.from("site_survey_questions").insert({ section_id: createdSection.id, question_key: null, prompt: sourceQuestion.prompt, question_type: sourceQuestion.question_type, required: sourceQuestion.required, options: JSON.parse(JSON.stringify(sourceQuestion.options)), configuration: JSON.parse(JSON.stringify(sourceQuestion.configuration)), position: sourceQuestion.position, conditioned_on_question_id: null, conditioned_operator: sourceQuestion.conditioned_operator, conditioned_value: sourceQuestion.conditioned_value }).select("id").single();
@@ -1300,7 +1312,7 @@ function ChecklistAdmin({ data, onChanged }: { data: NonNullable<ReturnType<type
           return toast.error(copyError instanceof Error ? copyError.message : "Não foi possível duplicar o modelo.");
         }
       }
-      toast.success(sourceTemplateId === "none" ? "Modelo criado" : "Modelo duplicado para edição"); form.reset(); setSelected(createdTemplate.id); onChanged();
+      toast.success(sourceTemplateId !== "none" ? "Modelo duplicado para edição" : sourceSections.length ? "Modelo criado com as seções padrão selecionadas" : "Modelo criado"); form.reset(); setSourceTemplateId("none"); setStandardSectionIds([]); setSelected(createdTemplate.id); onChanged();
     } finally {
       creatingTemplateRef.current = false;
       setCreatingTemplate(false);
