@@ -646,7 +646,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
       const customerLines = pointCustomerQuestions(point);
       if (customerLines.length) {
         if (y > 262) { pdf.addPage(); y = 18; }
-        pdf.setFont("Nunito", "bold"); pdf.setFontSize(10); pdf.text("Perguntas para o cliente", 14, y); y += 5;
+        pdf.setFont("Nunito", "bold"); pdf.setFontSize(10); pdf.text("Perguntas e respostas do cliente", 14, y); y += 5;
         for (const item of customerLines) {
           pdf.setFontSize(9);
           y = drawRichParagraph([{ text: `${item.number}. ${item.question}`, bold: true }], y + 1) + 1;
