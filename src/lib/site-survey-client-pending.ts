@@ -12,7 +12,9 @@ export function reportResponseText(questionId: string | undefined, prompt: strin
   return [rule?.report_question.trim() || prompt, rule?.report_answer.trim() || value].filter(Boolean).join(" — ");
 }
 
-export function buildClientPendingGroups(points: ClientPendingPoint[], responses: ClientPendingResponse[], questions: { id: string; prompt: string; question_key?: string | null }[], calls: ClientPendingCall[], texts: SurveyReportText[] = []) {
+type ClientPendingQuestion = { id: string; prompt: string; question_key?: string | null; conditioned_on_question_id?: string | null; conditioned_operator?: string | null; conditioned_value?: string | null };
+
+export function buildClientPendingGroups(points: ClientPendingPoint[], responses: ClientPendingResponse[], questions: ClientPendingQuestion[], calls: ClientPendingCall[], texts: SurveyReportText[] = []) {
   const customerIds = new Set(questions.filter(isCustomerQuestion).map((question) => question.id));
   const keyFor = (row: { visit_luc_id: string | null; visit_environment_id: string | null }) => row.visit_luc_id ? `luc:${row.visit_luc_id}` : row.visit_environment_id ? `environment:${row.visit_environment_id}` : "general";
   const groups = new Map(points.map((point) => [point.value, { ...point, questions: [] as string[], calls: [] as NonNullable<ClientPendingCall["internal_calls"]>[] }]));
@@ -25,6 +27,19 @@ export function buildClientPendingGroups(points: ClientPendingPoint[], responses
       groups.set(key, group);
     }
     return group;
+  };
+  const answerMatches = (value: unknown, expected: string) => {
+    const expectedValues = expected.split(";").map((item) => item.trim().toLocaleLowerCase("pt-BR")).filter(Boolean);
+    const actualValue = value && typeof value === "object" && !Array.isArray(value) && "value" in value ? value.value : value;
+    const actualValues = (Array.isArray(actualValue) ? actualValue : [actualValue]).map((item) => String(item ?? "").trim().toLocaleLowerCase("pt-BR"));
+    return expectedValues.some((item) => actualValues.includes(item));
+  };
+  const isQuestionVisible = (questionId: string | undefined, scopeKey: string) => {
+    const question = questions.find((item) => item.id === questionId);
+    if (!question?.conditioned_on_question_id || !question.conditioned_value) return true;
+    const parent = responses.find((row) => row.question_id === question.conditioned_on_question_id && keyFor(row) === scopeKey);
+    const matches = answerMatches(parent?.answer, question.conditioned_value);
+    return question.conditioned_operator === "not_equals" ? !matches : matches;
   };
   for (const response of responses) {
     if (!isActiveScope(keyFor(response))) continue;
@@ -42,6 +57,7 @@ export function buildClientPendingGroups(points: ClientPendingPoint[], responses
   const seen = new Set<string>();
   for (const call of calls) {
     if (!isActiveScope(keyFor(call))) continue;
+    if (!isQuestionVisible(call.question_id, keyFor(call))) continue;
     if (call.internal_call_id && call.internal_calls) {
       if (seen.has(call.internal_call_id)) continue;
       seen.add(call.internal_call_id);

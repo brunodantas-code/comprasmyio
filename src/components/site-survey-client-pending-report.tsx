@@ -11,7 +11,7 @@ import { surveyPointType } from "@/lib/site-survey-point-type";
 type Props = {
   visit: { id: string; survey_number: number; completed_at: string | null; scheduled_start: string };
   client: string; unit: string; project: string; points: ClientPendingPoint[];
-  questions: { id: string; prompt: string; question_key?: string | null }[];
+  questions: { id: string; prompt: string; question_key?: string | null; conditioned_on_question_id?: string | null; conditioned_operator?: string | null; conditioned_value?: string | null }[];
 };
 const statusLabel = (status: string) => ({ aberto: "Em aberto", em_andamento: "Em andamento", atendido: "Atendido", concluido: "Concluído", cancelado: "Cancelado" } as Record<string, string>)[status] ?? status.replaceAll("_", " ");
 
