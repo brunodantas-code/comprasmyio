@@ -52,13 +52,13 @@ export function SiteSurveyClientPendingReport({ visit, client, unit, project, po
       const loadPoints = async () => {
         const fresh: ClientPendingPoint[] = [];
         for (let from = 0; ; from += 1000) {
-          const result = await supabase.from("site_survey_visit_lucs").select("id,luc_number,shop_name,location,point_type,classification_type").eq("visit_id", visit.id).order("id").range(from, from + 999);
+          const result = await supabase.from("site_survey_visit_lucs").select("id,luc_number,shop_name,location,point_type,classification_type").eq("visit_id", visit.id).eq("active", true).order("id").range(from, from + 999);
           if (result.error) throw new Error(result.error.message);
           fresh.push(...(result.data ?? []).map((point) => ({ value: `luc:${point.id}`, label: [point.luc_number ? `LUC ${point.luc_number}` : "", point.shop_name, point.location].filter(Boolean).join(" — "), pointType: surveyPointType(point) })));
           if ((result.data?.length ?? 0) < 1000) break;
         }
         for (let from = 0; ; from += 1000) {
-          const result = await supabase.from("site_survey_visit_environments").select("id,name,point_type").eq("visit_id", visit.id).order("id").range(from, from + 999);
+          const result = await supabase.from("site_survey_visit_environments").select("id,name,point_type").eq("visit_id", visit.id).eq("active", true).order("id").range(from, from + 999);
           if (result.error) throw new Error(result.error.message);
           fresh.push(...(result.data ?? []).map((point) => ({ value: `environment:${point.id}`, label: point.name, pointType: surveyPointType(point, "environment") })));
           if ((result.data?.length ?? 0) < 1000) break;
