@@ -258,9 +258,9 @@ function SiteSurveyPage() {
         <TabsContent value="visitas">
           <Tabs value={visitsSection} onValueChange={setVisitsSection}>
             <TabsContent value="resumo">
-              <section className="mb-5 overflow-hidden rounded-md border border-border bg-card shadow-sm" aria-label="Resumo de visitas">
+              <section className="mb-5 overflow-hidden rounded-md border border-border bg-card shadow-sm" aria-label="Histórico de visitas">
                 <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-border px-4 py-3">
-                  <h2 className="truncate text-xs font-bold uppercase text-muted-foreground">Resumo de visitas</h2>
+                  <h2 className="truncate text-xs font-bold uppercase text-muted-foreground">Histórico de visitas</h2>
                   <span className="shrink-0 rounded-full bg-myio-green/10 px-2 py-1 text-[10px] font-semibold text-myio-green">Atualizado</span>
                 </header>
                 <div className="divide-y divide-border p-2 lg:grid lg:grid-cols-5 lg:divide-x lg:divide-y-0">
@@ -324,7 +324,7 @@ function SiteSurveyPage() {
           const itemClassName = `h-auto min-w-0 rounded-[1.35rem] p-0 shadow-none ${active ? "!bg-primary/15 !text-primary hover:!bg-primary/20 hover:!text-primary" : "!bg-transparent !text-muted-foreground hover:!bg-muted hover:!text-foreground"}`;
           if (!hasSubmenu) return <Button key={value} type="button" variant="ghost" className={itemClassName} onClick={selectSection} aria-current={active ? "page" : undefined}>{item}</Button>;
           const submenuItems = value === "visitas"
-            ? [{ value: "minhas", label: "Realizar Visita", icon: CalendarDays }, ...(can("site_survey_agendar") ? [{ value: "realizada", label: "Cadastrar visita realizada", icon: ClipboardCheck }, { value: "nova", label: "Nova visita", icon: Plus }] : []), { value: "resumo", label: "Resumo de Visitas", icon: FileText }]
+            ? [{ value: "minhas", label: "Realizar Visita", icon: CalendarDays }, ...(can("site_survey_agendar") ? [{ value: "realizada", label: "Cadastrar visita realizada", icon: ClipboardCheck }, { value: "nova", label: "Nova visita", icon: Plus }] : []), { value: "resumo", label: "Histórico de Visitas", icon: FileText }]
             : userTabs;
           return <DropdownMenu key={value}><DropdownMenuTrigger asChild><Button type="button" variant="ghost" className={itemClassName} onClick={selectSection} aria-current={active ? "page" : undefined}>{item}</Button></DropdownMenuTrigger><DropdownMenuContent side="top" align="center" sideOffset={10} className="w-56 rounded-lg p-1.5 shadow-xl"><DropdownMenuLabel>{label}</DropdownMenuLabel><DropdownMenuSeparator />{submenuItems.map(({ value: subValue, label: subLabel, icon: SubIcon }) => { const subActive = value === "visitas" ? visitsSection === subValue : userSection === subValue; return <DropdownMenuItem key={subValue} className="min-h-11 rounded-md" onSelect={() => { selectSection(); if (value === "visitas") setVisitsSection(subValue); else setUserSection(subValue); }}><SubIcon className="h-4 w-4" /><span className="flex-1">{subLabel}</span>{subActive ? <Check className="h-4 w-4 text-primary" /> : null}</DropdownMenuItem>; })}</DropdownMenuContent></DropdownMenu>;
         })}
