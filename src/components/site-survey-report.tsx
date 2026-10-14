@@ -1,4 +1,4 @@
-import { isCustomerQuestion, numberedCustomerQuestions } from "@/lib/site-survey-questions";
+import { customerQuestionResponses, customerQuestions, isCustomerQuestion, numberedCustomerQuestions } from "@/lib/site-survey-questions";
 import { surveyPointType } from "@/lib/site-survey-point-type";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -393,7 +393,13 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
   const materialSectionTitle = (point: Point) => materialSectionForPoint(point)?.title ?? "Materiais e equipamentos";
   const reviewTitle = (point: Point) => reviewSectionForPoint(point)?.title ?? "Revisão, pendências, fotos e encerramento";
   const reviewSkipped = (point: Point) => { const section = reviewSectionForPoint(point); return Boolean(section && point.skippedSectionIds.includes(section.id)); };
-  const pointCustomerQuestions = (point: Point) => pointResponses(point).filter((response) => questions.some((question) => question.id === response.question_id && isCustomerQuestion(question) && !point.skippedSectionIds.includes(question.section_id))).flatMap((response) => numberedCustomerQuestions(response.answer).map((line) => line.replace(/^\d+\. /, ""))).map((line, index) => `${index + 1}. ${line}`);
+  const pointCustomerQuestions = (point: Point) => pointResponses(point)
+    .filter((response) => questions.some((question) => question.id === response.question_id && isCustomerQuestion(question)))
+    .flatMap((response) => {
+      const answers = customerQuestionResponses(response.answer);
+      return customerQuestions(response.answer).map((question) => ({ question, answer: answers[question]?.trim() ?? "" }));
+    })
+    .map((item, index) => ({ ...item, number: index + 1 }));
   const pointNotes = (point: Point) => { const section = reviewSectionForPoint(point); return section && !point.skippedSectionIds.includes(section.id) ? pointResponses(point).filter((response) => questions.some((question) => question.id === response.question_id && question.section_id === section.id && !isCustomerQuestion(question))).map((response) => valueText(response.answer)).filter(Boolean).join("; ") : ""; };
   const technicalTotals = useMemo(() => {
     const groups = [{ label: "Tipos de hidrômetro", terms: ["tipo de hidrometro", "tipo de registro"] }, { label: "Dificuldade de acesso", terms: ["dificuldade", "acesso ao hidrometro"] }, { label: "Quadros e pontos elétricos", terms: ["quadro eletrico", "ponto eletrico"] }, { label: "Complexidade", terms: ["complexidade"] }];
@@ -641,7 +647,11 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
       if (customerLines.length) {
         if (y > 262) { pdf.addPage(); y = 18; }
         pdf.setFont("Nunito", "bold"); pdf.setFontSize(10); pdf.text("Perguntas para o cliente", 14, y); y += 5;
-        for (const line of customerLines) { pdf.setFontSize(9); y = drawRichParagraph([{ text: line }], y + 1) + 2; }
+        for (const item of customerLines) {
+          pdf.setFontSize(9);
+          y = drawRichParagraph([{ text: `${item.number}. ${item.question}`, bold: true }], y + 1) + 1;
+          y = drawRichParagraph([{ text: `Resposta do cliente: ${item.answer || "Não respondida"}` }], y + 1) + 2;
+        }
       }
       if (calls) { if (y > 262) { pdf.addPage(); y = 18; } pdf.setFont("Nunito", "bold"); pdf.text("Ações e chamados", 14, y); y = drawRichParagraph([{ text: calls }], y + 5) + 2; }
       const photos = withPhotos ? data.attachments.filter((item) => item.content_type?.startsWith("image/") && (point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id)) : [];
