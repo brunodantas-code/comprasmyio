@@ -1,4 +1,4 @@
-import { customerQuestionResponses, customerQuestions } from "@/lib/site-survey-questions";
+import { customerQuestionResponses, customerQuestions, numberedCustomerQuestions } from "@/lib/site-survey-questions";
 import { surveyPointType } from "@/lib/site-survey-point-type";
 import { SurveyPhotoNav, surveyPhotoKeydown, isSurveyImageFile } from "@/components/site-survey-photo-viewer";
 import { useMemo, useState } from "react";
