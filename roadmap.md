@@ -1,3 +1,4 @@
+- [x] Site Survey — unificar ambientes antigos e ambientes com checklist próprio no mesmo cadastro, preservando os vínculos e históricos originais.
 - [x] Site Survey — remover “Reabrir visita”; conclusão técnica é definitiva e complementos/correções no Histórico não alteram o status.
 - [x] Site Survey — renomear o submenu e o cabeçalho “Resumo de Visitas” para “Histórico de Visitas”.
 - [x] Site Survey — retirar visitas concluídas de Realizar Visita e consolidar, no Resumo de Visitas, cadastro, pendências e histórico completo do checklist em expansão por ponto, preservando a data técnica original.
