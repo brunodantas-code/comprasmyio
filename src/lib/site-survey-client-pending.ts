@@ -17,6 +17,7 @@ export function buildClientPendingGroups(points: ClientPendingPoint[], responses
   const keyFor = (row: { visit_luc_id: string | null; visit_environment_id: string | null }) => row.visit_luc_id ? `luc:${row.visit_luc_id}` : row.visit_environment_id ? `environment:${row.visit_environment_id}` : "general";
   const groups = new Map(points.map((point) => [point.value, { ...point, questions: [] as string[], calls: [] as NonNullable<ClientPendingCall["internal_calls"]>[] }]));
   groups.set("general", { value: "general", label: "Pendências gerais da visita", pointType: "general", questions: [], calls: [] });
+  const isActiveScope = (key: string) => key === "general" || groups.has(key);
   const groupFor = (key: string) => {
     let group = groups.get(key);
     if (!group) {
@@ -26,6 +27,7 @@ export function buildClientPendingGroups(points: ClientPendingPoint[], responses
     return group;
   };
   for (const response of responses) {
+    if (!isActiveScope(keyFor(response))) continue;
     const snapshot = response.question_snapshot;
     const prompt = snapshot && typeof snapshot === "object" && "prompt" in snapshot && typeof snapshot.prompt === "string" ? snapshot.prompt : "";
     const hasCustomerArray = response.answer && typeof response.answer === "object" && "customer_questions" in response.answer;
@@ -39,6 +41,7 @@ export function buildClientPendingGroups(points: ClientPendingPoint[], responses
   }
   const seen = new Set<string>();
   for (const call of calls) {
+    if (!isActiveScope(keyFor(call))) continue;
     if (call.internal_call_id && call.internal_calls) {
       if (seen.has(call.internal_call_id)) continue;
       seen.add(call.internal_call_id);

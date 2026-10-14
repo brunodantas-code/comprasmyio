@@ -114,7 +114,9 @@ export function SiteSurveyClientPendingReport({ visit, client, unit, project, po
         const kind = ({ shop: "Loja", kiosk: "Quiosque", environment: "Ambiente", general: "Geral" } as Record<string, string>)[group.pointType] ?? "Ponto";
         y = table(y, [`${kind} — ${group.label}`], [
           ...group.questions.map((text, index) => [`${index + 1}. ${text}`]),
-          ...(group.calls.length ? [["Chamados e intervenções gerados durante o checklist"], ...group.calls.map((call) => [`${call.call_number ? `Chamado #${call.call_number} — ${call.title}` : "Intervenção"}\nSituação: ${statusLabel(call.status)}${call.description?.trim() ? `\n${call.description.trim()}` : ""}`])] : []),
+          ...(group.calls.length ? [["Chamados e intervenções gerados durante o checklist"], ...group.calls.map((call) => [call.call_number
+            ? `Chamado #${call.call_number} — ${call.title}\nSituação: ${statusLabel(call.status)}${call.description?.trim() ? `\n${call.description.trim()}` : ""}`
+            : `Intervenção${call.description?.trim() ? `\n${call.description.trim()}` : ""}`])] : []),
         ]);
       }
       const pages = pdf.getNumberOfPages();
