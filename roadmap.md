@@ -958,3 +958,5 @@
 
 - [x] Cards de Pendências de Cadastro e pop-up da etapa: pergunta em caixa com borda cinza, botões de editar/excluir/confirmar em linha própria abaixo e resposta do cliente com o mesmo tamanho e fonte da pergunta (12px nos cards, 14px no pop-up, Nunito nos dois); validado no computador e no celular, sem corte nem sobreposição.
 - [ ] Responder: ao editar resposta de "Não" para "Sim" no histórico, perguntas condicionais devem aparecer no pop-up para preenchimento
+- [ ] Pendências: alinhar resposta à esquerda com a pergunta; remover texto "Pergunta N", manter ícone com o número
+- [ ] Responder: perguntas condicionais ao editar "Não"→"Sim" no histórico
