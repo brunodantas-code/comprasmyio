@@ -11,7 +11,7 @@ import { surveyPointType } from "@/lib/site-survey-point-type";
 type Props = {
   visit: { id: string; survey_number: number; completed_at: string | null; scheduled_start: string };
   client: string; unit: string; project: string; points: ClientPendingPoint[];
-  questions: { id: string; prompt: string; question_key?: string | null }[];
+  questions: { id: string; prompt: string; question_key?: string | null; conditioned_on_question_id?: string | null; conditioned_operator?: string | null; conditioned_value?: string | null }[];
 };
 const statusLabel = (status: string) => ({ aberto: "Em aberto", em_andamento: "Em andamento", atendido: "Atendido", concluido: "Concluído", cancelado: "Cancelado" } as Record<string, string>)[status] ?? status.replaceAll("_", " ");
 
@@ -52,13 +52,13 @@ export function SiteSurveyClientPendingReport({ visit, client, unit, project, po
       const loadPoints = async () => {
         const fresh: ClientPendingPoint[] = [];
         for (let from = 0; ; from += 1000) {
-          const result = await supabase.from("site_survey_visit_lucs").select("id,luc_number,shop_name,location,point_type,classification_type").eq("visit_id", visit.id).order("id").range(from, from + 999);
+          const result = await supabase.from("site_survey_visit_lucs").select("id,luc_number,shop_name,location,point_type,classification_type").eq("visit_id", visit.id).eq("active", true).order("id").range(from, from + 999);
           if (result.error) throw new Error(result.error.message);
           fresh.push(...(result.data ?? []).map((point) => ({ value: `luc:${point.id}`, label: [point.luc_number ? `LUC ${point.luc_number}` : "", point.shop_name, point.location].filter(Boolean).join(" — "), pointType: surveyPointType(point) })));
           if ((result.data?.length ?? 0) < 1000) break;
         }
         for (let from = 0; ; from += 1000) {
-          const result = await supabase.from("site_survey_visit_environments").select("id,name,point_type").eq("visit_id", visit.id).order("id").range(from, from + 999);
+          const result = await supabase.from("site_survey_visit_environments").select("id,name,point_type").eq("visit_id", visit.id).eq("active", true).order("id").range(from, from + 999);
           if (result.error) throw new Error(result.error.message);
           fresh.push(...(result.data ?? []).map((point) => ({ value: `environment:${point.id}`, label: point.name, pointType: surveyPointType(point, "environment") })));
           if ((result.data?.length ?? 0) < 1000) break;
@@ -114,7 +114,9 @@ export function SiteSurveyClientPendingReport({ visit, client, unit, project, po
         const kind = ({ shop: "Loja", kiosk: "Quiosque", environment: "Ambiente", general: "Geral" } as Record<string, string>)[group.pointType] ?? "Ponto";
         y = table(y, [`${kind} — ${group.label}`], [
           ...group.questions.map((text, index) => [`${index + 1}. ${text}`]),
-          ...(group.calls.length ? [["Chamados e intervenções gerados durante o checklist"], ...group.calls.map((call) => [`${call.call_number ? `Chamado #${call.call_number} — ${call.title}` : "Intervenção"}\nSituação: ${statusLabel(call.status)}${call.description?.trim() ? `\n${call.description.trim()}` : ""}`])] : []),
+          ...(group.calls.length ? [["Chamados e intervenções gerados durante o checklist"], ...group.calls.map((call) => [call.call_number
+            ? `Chamado #${call.call_number} — ${call.title}\nSituação: ${statusLabel(call.status)}${call.description?.trim() ? `\n${call.description.trim()}` : ""}`
+            : `Intervenção${call.description?.trim() ? `\n${call.description.trim()}` : ""}`])] : []),
         ]);
       }
       const pages = pdf.getNumberOfPages();
