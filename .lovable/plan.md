@@ -1,21 +1,23 @@
-# Resumo em tela da visita
+# Respostas do cliente nas pendências
 
 ## Objetivo
-Criar, dentro dos detalhes da visita, uma visão corrida e pesquisável de todas as lojas, quiosques e ambientes, sem depender da abertura das etapas ou da geração de PDF.
+Permitir registrar a resposta de cada pergunta ao cliente no próprio card de Pendências de Cadastro ou na Seção 7 do checklist, mantendo um único histórico por loja, quiosque ou ambiente.
 
 ## Implementação
-- Adicionar um botão “Resumo da visita” junto às informações da visita.
-- Exibir os pontos em linhas contínuas e mais compactas, com identificação, localização, situação e progresso alinhados no cabeçalho.
-- Posicionar a barra de progresso à direita do nome da loja, quiosque ou ambiente, liberando toda a largura inferior para o conteúdo.
-- Exibir seções, perguntas e respostas exatamente na ordem configurada no checklist.
-- Distribuir as perguntas e respostas desde o canto esquerdo em até quatro colunas no desktop, reduzindo espaços vazios e a altura de cada ponto.
-- Mostrar fotos de fachada, perguntas e anexos como miniaturas vinculadas ao respectivo ponto e grupo.
-- Abrir a foto em tamanho maior ao clicar.
-- Permitir busca por LUC, nome e localização, filtro por tipo e ordenação.
-- Reutilizar os dados já carregados da visita, sem alterar checklist, salvamento ou PDFs.
+- Guardar cada resposta junto da respectiva pergunta, sem alterar ou tentar separar automaticamente os textos existentes.
+- Na Seção 7, exibir um campo de resposta abaixo de cada pergunta e salvar pergunta, resposta e situação no mesmo registro do checklist.
+- No card de pendências, exibir o mesmo campo abaixo da pergunta com fundo verde-claro; alterações feitas ali aparecem também na Seção 7.
+- Manter edição e exclusão atuais e preservar respostas ao editar o texto da pergunta.
+- Não baixar a pendência ao preencher a resposta. A baixa continuará exigindo a seleção e confirmação manual do checkbox.
+- Após a baixa, manter pergunta e resposta no histórico da Seção 7 e retirar apenas a pendência do card; esconder o card quando não restarem outras pendências.
+
+## Detalhes técnicos
+- Estender o conteúdo já salvo da resposta da Seção 7 com respostas vinculadas pelo texto da pergunta, preservando compatibilidade com registros antigos.
+- Atualizar em conjunto os fluxos de inclusão, edição, exclusão, salvamento do checklist e baixa manual para não perder respostas nem marcações existentes.
+- Não criar estrutura nova no banco; o histórico continuará no registro atual do checklist.
 
 ## Validação
-- Conferir o resumo com uma visita real no desktop e no celular.
-- Confirmar que respostas antigas, fotos e ambientes aparecem no ponto correto.
-- Confirmar a sequência do checklist, a grade de até quatro colunas e a compactação entre pontos.
-- Confirmar ausência de erros na prévia.
+- Conferir inclusão e edição da resposta pelos dois locais e releitura após atualizar a página.
+- Confirmar que preencher a resposta não remove a pendência e que somente o checkbox confirmado a remove.
+- Confirmar que pergunta e resposta baixadas continuam na Seção 7 e que o card desaparece quando fica sem pendências.
+- Conferir o resultado no computador e no celular, sem alterar os textos atuais.
