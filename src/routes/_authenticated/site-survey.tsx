@@ -1242,6 +1242,7 @@ function ChecklistAdmin({ data, onChanged }: { data: NonNullable<ReturnType<type
   const activeTemplates = data.templates.filter((item) => item.active);
   const [selected, setSelected] = useState("");
   const [creatingTemplate, setCreatingTemplate] = useState(false);
+  const creatingTemplateRef = useRef(false);
   const [templatePickerOpen, setTemplatePickerOpen] = useState(false);
   const [sectionOrder, setSectionOrder] = useState<string[]>([]);
   const [questionOrders, setQuestionOrders] = useState<Record<string, string[]>>({});
@@ -1264,12 +1265,13 @@ function ChecklistAdmin({ data, onChanged }: { data: NonNullable<ReturnType<type
     const values = new FormData(form); const name = String(values.get("name")).trim(); const description = String(values.get("description")).trim(); const sourceTemplateId = String(values.get("source_template_id") ?? "none");
     if (!name || name.length > 50) return toast.error("O nome do modelo deve ter entre 1 e 50 caracteres.");
     if (description.length > 100) return toast.error("A descrição deve ter no máximo 100 caracteres.");
-    if (creatingTemplate) return;
+    if (creatingTemplateRef.current) return;
     const existingTemplate = data.templates.find((template) => template.name.trim().toLocaleLowerCase("pt-BR") === name.toLocaleLowerCase("pt-BR"));
     if (existingTemplate) {
       if (existingTemplate.active) setSelected(existingTemplate.id);
       return toast.error(existingTemplate.active ? "Já existe um modelo com este nome. O modelo existente foi selecionado para edição." : "Já existe um modelo inativo com este nome.");
     }
+    creatingTemplateRef.current = true;
     setCreatingTemplate(true);
     try {
       const { data: createdTemplate, error } = await supabase.from("site_survey_templates").insert({ name, description: description || null, created_by: data.userId }).select("id").single();
@@ -1300,6 +1302,7 @@ function ChecklistAdmin({ data, onChanged }: { data: NonNullable<ReturnType<type
       }
       toast.success(sourceTemplateId === "none" ? "Modelo criado" : "Modelo duplicado para edição"); form.reset(); setSelected(createdTemplate.id); onChanged();
     } finally {
+      creatingTemplateRef.current = false;
       setCreatingTemplate(false);
     }
   };
