@@ -14,7 +14,7 @@ import { ConfirmDeleteButton } from '@/components/confirm-delete-button';
 import type { SurveyReportText } from '@/lib/site-survey-client-pending';
 
 type Props = {
- questions: { id: string; prompt: string; section_id: string }[];
+ questions: { id: string; prompt: string; section_id: string; options?: unknown }[];
  sections: { id: string; template_id: string }[];
  templates: { id: string; name: string }[];
  questionActions: { question_id: string; action_id: string; active: boolean }[];
