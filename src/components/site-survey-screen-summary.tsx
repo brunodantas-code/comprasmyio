@@ -81,7 +81,7 @@ function PhotoThumbnail({ attachment, gallery }: { attachment: SummaryAttachment
   </>;
 }
 
-export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections, questions, lucs, environments, responses, attachments, materials, catalog, screwdriverTypes, wrenchSizes, customCatalogs, onClose }: {
+export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections, questions, lucs, environments, responses, attachments, materials, catalog, screwdriverTypes, wrenchSizes, customCatalogs, onClose, pointValue, embedded = false }: {
   visitNumber: number;
   visitTemplateId: string | null;
   sections: SummarySection[];
@@ -95,7 +95,9 @@ export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections
   screwdriverTypes: Named[];
   wrenchSizes: Named[];
   customCatalogs: CustomCatalog[];
-  onClose: () => void;
+  onClose?: () => void;
+  pointValue?: string;
+  embedded?: boolean;
 }) {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
@@ -108,25 +110,26 @@ export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections
   ], [lucs, environments, visitTemplateId]);
   const visiblePoints = useMemo(() => points.filter((point) => {
     const term = normalize(search);
-    return (!missingFacadeOnly || !attachments.some((item) => item.attachment_kind === "facade" && matchesPoint(point, item))) && (typeFilter === "all" || point.pointType === typeFilter) && (!term || normalize([point.luc, point.name, point.location].join(" ")).includes(term));
+    const value = `${point.kind === "luc" ? "luc" : "environment"}:${point.id}`;
+    return (!pointValue || value === pointValue) && (!missingFacadeOnly || !attachments.some((item) => item.attachment_kind === "facade" && matchesPoint(point, item))) && (typeFilter === "all" || point.pointType === typeFilter) && (!term || normalize([point.luc, point.name, point.location].join(" ")).includes(term));
   }).sort((left, right) => {
     const leftValue = sort === "name" ? left.name : sort === "location" ? left.location : left.luc;
     const rightValue = sort === "name" ? right.name : sort === "location" ? right.location : right.luc;
     return leftValue.localeCompare(rightValue, "pt-BR", { numeric: true, sensitivity: "base" }) || left.name.localeCompare(right.name, "pt-BR");
-  }), [points, search, typeFilter, sort, missingFacadeOnly, attachments]);
+  }), [points, search, typeFilter, sort, missingFacadeOnly, attachments, pointValue]);
   const completedCount = points.filter((point) => point.completionStatus === "concluida").length;
   const allCollapsed = points.length > 0 && points.every((point) => collapsedPoints.has(`${point.kind}-${point.id}`));
 
-  return <section id="visit-screen-summary" className="overflow-hidden rounded-md border border-border bg-background shadow-sm" aria-label="Resumo da visita">
-        <div className="flex flex-wrap items-start justify-between gap-3 border-b px-4 py-4 sm:px-6">
+  return <section id={embedded ? undefined : "visit-screen-summary"} className={embedded ? "min-w-0" : "overflow-hidden rounded-md border border-border bg-background shadow-sm"} aria-label={embedded ? "Histórico do checklist" : "Resumo da visita"}>
+        {!embedded ? <div className="flex flex-wrap items-start justify-between gap-3 border-b px-4 py-4 sm:px-6">
           <div><h3 className="font-bold">Resumo da Visita #{String(visitNumber).padStart(12, "0")}</h3><p className="text-sm text-muted-foreground">Todas as respostas e fotos organizadas por loja, quiosque ou ambiente.</p></div>
           <div className="flex flex-wrap items-center gap-2">
             <Button type="button" variant="ghost" size="compactIcon" disabled={!points.length} aria-label={allCollapsed ? "Exibir todos" : "Recolher todos"} title={allCollapsed ? "Exibir todos" : "Recolher todos"} aria-expanded={!allCollapsed} onClick={() => setCollapsedPoints(allCollapsed ? new Set() : new Set(points.map((point) => `${point.kind}-${point.id}`)))}>{allCollapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}</Button>
-            <Button type="button" variant="action" size="sm" onClick={onClose}>Fechar</Button>
+            {onClose ? <Button type="button" variant="action" size="sm" onClick={onClose}>Fechar</Button> : null}
           </div>
-        </div>
+        </div> : null}
         <div>
-          <div className="border-b bg-muted/30 px-4 py-3 sm:px-6">
+          {!embedded ? <div className="border-b bg-muted/30 px-4 py-3 sm:px-6">
             <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem_12rem_auto] sm:items-center">
               <div className="relative min-w-0"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar por LUC, nome ou localização" className="pl-9" /></div>
               <Select value={typeFilter} onValueChange={setTypeFilter}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">Todos os tipos</SelectItem><SelectItem value="shop">Somente lojas</SelectItem><SelectItem value="kiosk">Somente quiosques</SelectItem><SelectItem value="environment">Somente ambientes</SelectItem></SelectContent></Select>
@@ -134,7 +137,7 @@ export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections
               <span className="shrink-0 text-xs font-semibold text-muted-foreground">{completedCount}/{points.length} concluídos</span>
               <label className="flex w-fit cursor-pointer items-center gap-2 text-sm sm:col-span-4"><Checkbox aria-label="Somente sem foto de fachada" checked={missingFacadeOnly} onCheckedChange={(checked) => setMissingFacadeOnly(checked === true)} />Somente sem foto de fachada</label>
             </div>
-          </div>
+          </div> : null}
           <div>
             <div className="divide-y divide-border">
               {visiblePoints.map((point) => {
@@ -155,15 +158,15 @@ export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections
                 const pointKey = `${point.kind}-${point.id}`;
                 const collapsed = collapsedPoints.has(pointKey);
                 const contentId = `summary-content-${pointKey}`;
-                return <article key={`${point.kind}-${point.id}`} className="px-4 py-3 transition-colors hover:bg-muted/20 sm:px-6">
+                return <article key={`${point.kind}-${point.id}`} className={embedded ? "py-2" : "px-4 py-3 transition-colors hover:bg-muted/20 sm:px-6"}>
                   <div className="min-w-0">
-                    <header className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(8rem,18rem)_11rem_auto] sm:gap-4">
+                    {!embedded ? <header className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(8rem,18rem)_11rem_auto] sm:gap-4">
                       <div className="flex min-w-0 items-center gap-2"><SiteSurveyFacadeThumbnail name={point.name} attachment={facadePhotos[0]} /><div className="min-w-0"><div className="flex min-w-0 flex-wrap items-center gap-2"><h3 className="min-w-0 break-words font-bold">{point.name}</h3>{!collapsed ? <Badge variant="outline" className="shrink-0">{point.luc ? `LUC ${point.luc}` : typeLabel}</Badge> : null}</div>{!collapsed && point.location ? <p className="flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="h-3 w-3 shrink-0" /><span className="truncate">{point.location}</span></p> : null}</div></div>
                       <div className="min-w-0"><div className="mb-1 flex justify-between text-[10px] font-semibold text-muted-foreground"><span>PROGRESSO</span><span>{progress}%</span></div><div className="h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary" style={{ width: `${progress}%` }} /></div></div>
                       <Badge variant="status" className="justify-self-start">{point.completionStatus === "concluida" ? "Concluída" : point.completionStatus === "cancelada" ? "Cancelada" : "Em preenchimento"}</Badge>
                       <Button type="button" variant="ghost" size="compactIcon" title={`${collapsed ? "Exibir" : "Recolher"} ${point.name}`} className="col-start-2 row-start-1 sm:col-start-auto sm:row-start-auto" aria-label={`${collapsed ? "Exibir" : "Recolher"} ${point.name}`} aria-expanded={!collapsed} aria-controls={contentId} onClick={() => setCollapsedPoints((previous) => { const next = new Set(previous); if (next.has(pointKey)) next.delete(pointKey); else next.add(pointKey); return next; })}>{collapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}</Button>
-                    </header>
-                    <div id={contentId} hidden={collapsed} className="mt-3 min-w-0 space-y-3">
+                    </header> : <h4 className="mb-3 text-xs font-bold uppercase text-muted-foreground">Histórico do checklist</h4>}
+                    <div id={contentId} hidden={!embedded && collapsed} className={`${embedded ? "" : "mt-3"} min-w-0 space-y-3`}>
                       {facadePhotos.length ? <div className="space-y-2 border-b border-border pb-3"><div className="flex min-w-24 items-center gap-2 text-xs font-bold uppercase text-muted-foreground"><ImageIcon className="h-4 w-4 text-primary" />Fachada</div><div className="flex min-w-0 flex-wrap gap-2">{facadePhotos.map((photo) => <PhotoThumbnail key={photo.id} attachment={photo} gallery={facadePhotos} />)}</div></div> : null}
                       {grouped.map(({ section, nature, rows }) => { const Icon = nature.icon; const groupPhotos = pointAttachments.filter((attachment) => attachment.question_id && questions.find((question) => question.id === attachment.question_id)?.section_id === section.id); return <section key={section.id} className="min-w-0"><h4 className="mb-1.5 flex items-center gap-2 text-xs font-bold uppercase text-muted-foreground"><Icon className="h-4 w-4 shrink-0 text-primary" />{nature.label}</h4><dl className="grid gap-x-4 gap-y-1.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{rows.map((response, rowIndex) => { const question = questions.find((item) => item.id === response.question_id); return <div key={response.id} className="flex min-w-0 items-start gap-1.5 border-l-2 border-primary/35 pl-2"><span className="grid h-5 w-5 shrink-0 place-items-center rounded-md bg-primary/15 text-[10px] font-bold leading-none text-primary">{rowIndex + 1}</span><div className="min-w-0"><dt className="text-[11px] leading-tight text-muted-foreground">{question?.prompt ?? snapshotPrompt(response.question_snapshot)}</dt><dd className="whitespace-pre-wrap break-words text-sm font-semibold leading-tight">{answerText(response.answer)}</dd></div></div>; })}</dl>{groupPhotos.length ? <div className="mt-2 flex flex-wrap gap-2">{groupPhotos.map((photo) => <PhotoThumbnail key={photo.id} attachment={photo} gallery={groupPhotos} />)}</div> : null}</section>; })}
                       {unmatched.length ? <section className="min-w-0"><h4 className="mb-1.5 flex items-center gap-2 text-xs font-bold uppercase text-muted-foreground"><FileText className="h-4 w-4 text-primary" />Outras respostas</h4><dl className="grid gap-x-4 gap-y-1.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{unmatched.map((response, rowIndex) => { const question = questions.find((item) => item.id === response.question_id); return <div key={response.id} className="flex min-w-0 items-start gap-1.5 border-l-2 border-primary/35 pl-2"><span className="grid h-5 w-5 shrink-0 place-items-center rounded-md bg-primary/15 text-[10px] font-bold leading-none text-primary">{rowIndex + 1}</span><div className="min-w-0"><dt className="text-[11px] leading-tight text-muted-foreground">{question?.prompt ?? snapshotPrompt(response.question_snapshot)}</dt><dd className="whitespace-pre-wrap break-words text-sm font-semibold leading-tight">{answerText(response.answer)}</dd></div></div>; })}</dl></section> : null}
