@@ -1,3 +1,4 @@
+- [x] Site Survey — criar modelo copiando um modelo inteiro ou selecionando Seções padrão 1 a 7 de Shoppings como cópias independentes.
 - [x] Site Survey — permitir recriar ambiente excluído reativando o cadastro histórico com o checklist correto, sem erro de nome duplicado.
 
 - [x] Site Survey — excluir o modelo de teste “Hidrômetros” e manter “Quadros Elétricos” e “Água e Hidrômetros” somente com as respectivas seções copiadas do padrão Shoppings.

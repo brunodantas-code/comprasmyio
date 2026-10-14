@@ -31,5 +31,5 @@
 - RLS uses effective menus/app grants; shared files follow record access and uploads bind owners, preserving authorized collaboration. Survey previews lazy-load/cache private images; uploads use lazy compression, a serial queue and retry cache with prepared-file metadata to bound memory.
 
 - Pending cards reuse the guarded editor by section; optional answer.observation stays separate from required details.
-- Checklist categories preserve legacy storage and boolean conditions; customer questions, keyed responses and manual completion share one guarded Section 7/pending-card record.
+- Checklist categories preserve legacy data and conditions; Section 7 guards customer Q&A. New models independently copy a full model or selected standard sections.
 
