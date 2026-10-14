@@ -40,6 +40,8 @@ const shrinkPhoto = (dataUrl: string) => new Promise<string>((resolve) => {
 });
 
 type LucRow = { id: string; luc_number: string; shop_name: string; location: string | null; point_type: string; classification_type?: string | null; meter_number?: string | null };
+type EnvironmentRow = { id: string; name: string; template_id: string | null; point_type: string; meter_number?: string | null };
+type DisplayRow = { id: string; source: "luc" | "environment"; luc_number: string; shop_name: string; location: string | null; point_type: string; classification_type?: string | null; meter_number?: string | null; template_id: string | null };
 type LucHistoryRow = { id: string; visit_luc_id: string; luc_number: string; shop_name: string; valid_from: string; valid_until: string | null };
 type PreviewRow = { lucNumber: string; shopName: string; location: string; meterNumber: string; issue?: string };
 type TemplateOption = { id: string; name: string; active: boolean };
@@ -54,12 +56,14 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
   const facadeRequest = useRef(0);
   const nameRevision = useRef(0);
   const [rows, setRows] = useState<LucRow[]>([]);
+  const [environmentRows, setEnvironmentRows] = useState<EnvironmentRow[]>([]);
   const [history, setHistory] = useState<LucHistoryRow[]>([]);
   const [preview, setPreview] = useState<PreviewRow[]>([]);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [editing, setEditing] = useState<LucRow | null>(null);
+  const [editingEnvironmentId, setEditingEnvironmentId] = useState<string | null>(null);
   const [draftLuc, setDraftLuc] = useState("");
   const [draftName, setDraftName] = useState("");
   const [draftLocation, setDraftLocation] = useState("");
@@ -81,12 +85,14 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
   const [expandedPending, setExpandedPending] = useState<Set<string>>(() => new Set());
 
   const load = async () => {
-    const [{ data, error }, { data: historyRows, error: historyError }] = await Promise.all([
+    const [{ data, error }, { data: environmentsData, error: environmentsError }, { data: historyRows, error: historyError }] = await Promise.all([
       supabase.from("site_survey_visit_lucs").select("id,luc_number,shop_name,location,point_type,classification_type,meter_number").eq("visit_id", visitId).eq("active", true).order("luc_number"),
+      supabase.from("site_survey_visit_environments").select("id,name,template_id,point_type,meter_number").eq("visit_id", visitId).eq("active", true).order("name"),
       supabase.from("site_survey_visit_luc_history").select("id,visit_luc_id,luc_number,shop_name,valid_from,valid_until").eq("visit_id", visitId).order("valid_from", { ascending: false }),
     ]);
-    if (error || historyError) return toast.error(error?.message ?? historyError?.message ?? "Não foi possível carregar os ambientes.");
+    if (error || environmentsError || historyError) return toast.error(error?.message ?? environmentsError?.message ?? historyError?.message ?? "Não foi possível carregar os ambientes.");
     setRows((data ?? []) as LucRow[]);
+    setEnvironmentRows((environmentsData ?? []) as EnvironmentRow[]);
     setHistory((historyRows ?? []) as LucHistoryRow[]);
   };
   useEffect(() => { void load(); }, [visitId]);
@@ -165,9 +171,10 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
   };
 
   const changeShopName = (name: string) => { nameRevision.current += 1; setDraftName(name); };
-  const closeEdit = () => { facadeRequest.current += 1; setAnalyzing(false); setEditing(null); };
+  const closeEdit = () => { facadeRequest.current += 1; setAnalyzing(false); setEditing(null); setEditingEnvironmentId(null); };
   useEffect(() => () => { facadeRequest.current += 1; }, []);
-  const startEdit = (row?: LucRow) => { facadeRequest.current += 1; setAnalyzing(false); setEditing(row ?? { id: "", luc_number: "", shop_name: "", location: null, point_type: "shop" }); setEditMode("correction"); setPointType(row ? surveyPointType(row) : null); setDraftLuc(row?.luc_number ?? ""); changeShopName(row?.shop_name ?? ""); setDraftLocation(row?.location ?? ""); setDraftMeter(row?.meter_number ?? ""); setEnvironmentName(""); setEnvironmentTemplateId(""); setNamePickerOpen(false); };
+  const startEdit = (row?: LucRow) => { facadeRequest.current += 1; setAnalyzing(false); setEditingEnvironmentId(null); setEditing(row ?? { id: "", luc_number: "", shop_name: "", location: null, point_type: "shop" }); setEditMode("correction"); setPointType(row ? surveyPointType(row) : null); setDraftLuc(row?.luc_number ?? ""); changeShopName(row?.shop_name ?? ""); setDraftLocation(row?.location ?? ""); setDraftMeter(row?.meter_number ?? ""); setEnvironmentName(""); setEnvironmentTemplateId(""); setNamePickerOpen(false); };
+  const startEnvironmentEdit = (row: EnvironmentRow) => { facadeRequest.current += 1; setAnalyzing(false); setEditingEnvironmentId(row.id); setEditing({ id: row.id, luc_number: "", shop_name: row.name, location: null, point_type: "environment", classification_type: "environment", meter_number: row.meter_number }); setPointType("environment"); setDraftLuc(""); changeShopName(row.name); setDraftLocation(""); setDraftMeter(row.meter_number ?? ""); setEnvironmentName(row.name); setEnvironmentTemplateId(row.template_id ?? ""); setNamePickerOpen(false); };
   const saveEdit = async (confirmed = false) => {
     if (!canEdit || (addOnly && editing?.id)) return;
     if (saving) return;
@@ -176,6 +183,15 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
   };
   const saveEditInner = async (confirmed = false) => {
     if (!pointType) return toast.error("Selecione Loja, Quiosque ou Ambiente.");
+    if (pointType === "environment" && editingEnvironmentId) {
+      const name = environmentName.trim();
+      if (!name) return toast.error("Informe o nome do ambiente.");
+      if (!environmentTemplateId) return toast.error("Selecione o checklist do ambiente.");
+      const { error } = await supabase.from("site_survey_visit_environments").update({ name, template_id: environmentTemplateId, meter_number: draftMeter.trim() || null, updated_by: userId }).eq("id", editingEnvironmentId);
+      if (error) return toast.error(error.code === "23505" ? "Este ambiente já está cadastrado nesta OS." : error.message);
+      toast.success("Ambiente atualizado."); closeEdit(); await load(); onChanged?.();
+      return;
+    }
     if (pointType === "environment" && !editing?.id) {
       const name = environmentName.trim();
       if (!name) return toast.error("Informe o nome do ambiente.");
@@ -236,16 +252,22 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
   const matchingCatalog = useMemo(() => shopCatalog
     .filter((item) => item.active && item.point_type === pointType)
     .sort((left, right) => left.name.localeCompare(right.name, "pt-BR", { sensitivity: "base" })), [pointType, shopCatalog]);
-  const sortedRows = useMemo(() => rows.filter((row) => {
+  const displayRows = useMemo<DisplayRow[]>(() => [
+    ...rows.map((row) => ({ ...row, source: "luc" as const, template_id: null })),
+    ...environmentRows.map((row) => ({ id: row.id, source: "environment" as const, luc_number: "", shop_name: row.name, location: null, point_type: row.point_type, classification_type: "environment", meter_number: row.meter_number, template_id: row.template_id })),
+  ], [rows, environmentRows]);
+  const sortedRows = useMemo(() => displayRows.filter((row) => {
     const matchesLuc = normalizeHeader(row.luc_number).includes(normalizeHeader(lucFilter));
     const matchesName = normalizeHeader(row.shop_name).includes(normalizeHeader(shopNameFilter));
     const matchesLocation = normalizeHeader(row.location).includes(normalizeHeader(locationFilter));
     const matchesType = typeFilter === "all" || surveyPointType(row) === typeFilter;
-    return matchesLuc && matchesName && matchesLocation && matchesType && (!missingFacadeOnly || !attachments.some((item) => item.attachment_kind === "facade" && item.visit_luc_id === row.id)) && (isPointVisible?.(`luc:${row.id}`) ?? true);
+    const pointValue = `${row.source}:${row.id}`;
+    const hasFacade = attachments.some((item) => item.attachment_kind === "facade" && (row.source === "luc" ? item.visit_luc_id === row.id : item.visit_environment_id === row.id));
+    return matchesLuc && matchesName && matchesLocation && matchesType && (!missingFacadeOnly || !hasFacade) && (isPointVisible?.(pointValue) ?? true);
   }).sort((a, b) => {
     const comparison = (a[sortBy] ?? "").localeCompare(b[sortBy] ?? "", "pt-BR", { numeric: true, sensitivity: "base" });
     return sortAscending ? comparison : -comparison;
-  }), [rows, sortBy, sortAscending, lucFilter, shopNameFilter, locationFilter, typeFilter, missingFacadeOnly, attachments, isPointVisible]);
+  }), [displayRows, sortBy, sortAscending, lucFilter, shopNameFilter, locationFilter, typeFilter, missingFacadeOnly, attachments, isPointVisible]);
   const sortColumn = (column: typeof sortBy) => { if (sortBy === column) setSortAscending((current) => !current); else { setSortBy(column); setSortAscending(true); } };
   const exportExcel = async () => {
     setExporting(true);
@@ -307,7 +329,7 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
             {editing?.id ? <div className="space-y-2"><Label>Tipo de edição</Label><RadioGroup value={editMode} onValueChange={(value) => setEditMode(value as typeof editMode)} className="gap-2"><label className="flex cursor-pointer items-center gap-2 text-sm"><RadioGroupItem value="correction" />Corrigir cadastro — não registrar nome anterior no histórico</label><label className="flex cursor-pointer items-center gap-2 text-sm"><RadioGroupItem value="name_change" />Alteração de loja — manter nome anterior no histórico</label></RadioGroup></div> : null}
             {pointType !== "environment" ? <div className="space-y-2"><input ref={facadeCameraRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; void analyzeFacade(file); }} /><input ref={facadeGalleryRef} type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; void analyzeFacade(file); }} /><DropdownMenu><DropdownMenuTrigger asChild><Button type="button" variant="action" disabled={analyzing}>{analyzing ? <Sparkles className="h-4 w-4" /> : <Camera className="h-4 w-4" />}{analyzing ? "Analisando fachada..." : "Identificar pela fachada"}</Button></DropdownMenuTrigger><DropdownMenuContent align="start" className="min-w-56"><DropdownMenuItem onSelect={() => facadeCameraRef.current?.click()}><Camera className="h-4 w-4" />Tirar foto</DropdownMenuItem><DropdownMenuItem onSelect={() => facadeGalleryRef.current?.click()}><Images className="h-4 w-4" />Escolher da galeria</DropdownMenuItem></DropdownMenuContent></DropdownMenu></div> : null}
          </> : null}
-         {pointType === "environment" && !editing?.id ? <div className="space-y-4"><div className="space-y-2"><Label htmlFor="combined-environment-name">Nome do ambiente</Label><Input id="combined-environment-name" value={environmentName} onChange={(event) => setEnvironmentName(event.target.value)} placeholder="Ex.: Caixa d'água" /></div><div className="space-y-2"><Label htmlFor="environment-meter-draft">Número do medidor (opcional)</Label><Input id="environment-meter-draft" value={draftMeter} onChange={(event) => setDraftMeter(event.target.value)} placeholder="Energia e/ou água" /></div><div className="space-y-2"><Label htmlFor="combined-environment-template">Checklist</Label><Select value={environmentTemplateId || undefined} onValueChange={setEnvironmentTemplateId}><SelectTrigger id="combined-environment-template"><SelectValue placeholder="Selecione um checklist" /></SelectTrigger><SelectContent>{templates.filter((template) => template.active).map((template) => <SelectItem key={template.id} value={template.id}>{template.name}</SelectItem>)}</SelectContent></Select></div></div> : null}
+          {pointType === "environment" && (!editing?.id || editingEnvironmentId) ? <div className="space-y-4"><div className="space-y-2"><Label htmlFor="combined-environment-name">Nome do ambiente</Label><Input id="combined-environment-name" value={environmentName} onChange={(event) => setEnvironmentName(event.target.value)} placeholder="Ex.: Caixa d'água" /></div><div className="space-y-2"><Label htmlFor="environment-meter-draft">Número do medidor (opcional)</Label><Input id="environment-meter-draft" value={draftMeter} onChange={(event) => setDraftMeter(event.target.value)} placeholder="Energia e/ou água" /></div><div className="space-y-2"><Label htmlFor="combined-environment-template">Checklist</Label><Select value={environmentTemplateId || undefined} onValueChange={setEnvironmentTemplateId}><SelectTrigger id="combined-environment-template"><SelectValue placeholder="Selecione um checklist" /></SelectTrigger><SelectContent>{templates.filter((template) => template.active).map((template) => <SelectItem key={template.id} value={template.id}>{template.name}</SelectItem>)}</SelectContent></Select></div></div> : null}
          <DialogFooter className="flex-row justify-end gap-2 sm:space-x-0"><Button type="button" variant="outline" onClick={closeEdit}>Cancelar</Button><Button type="submit" disabled={!pointType || saving}>{saving ? "Salvando..." : "Salvar"}</Button></DialogFooter>
        </form></DialogContent>
      </Dialog>
