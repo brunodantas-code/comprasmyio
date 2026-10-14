@@ -16,7 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { supabase } from "@/integrations/supabase/client";
 
 const PERMISSION_GROUPS: ReadonlyArray<{ label: string; children: ReadonlyArray<readonly [string, string]> }> = [
-  { label: "Visitas", children: [["site_survey_visitas_minhas", "Minhas visitas"], ["site_survey_visitas_todas", "Todas as visitas"], ["site_survey_agendar", "Criar e agendar"], ["site_survey_editar", "Editar agendamentos"], ["site_survey_executar", "Executar e preencher"], ["site_survey_revisar", "Revisar e reabrir"], ["site_survey_excluir", "Excluir visitas"]] },
+  { label: "Visitas", children: [["site_survey_visitas_minhas", "Minhas visitas"], ["site_survey_visitas_todas", "Todas as visitas"], ["site_survey_agendar", "Criar e agendar"], ["site_survey_editar", "Editar agendamentos"], ["site_survey_executar", "Executar e preencher"], ["site_survey_revisar", "Revisar"], ["site_survey_excluir", "Excluir visitas"]] },
   { label: "Checklists", children: [["site_survey_configuracoes", "Modelos de checklist"]] },
   { label: "Cadastro", children: [["site_survey_cadastro", "Cadastro e Diversos"]] },
   { label: "Usuários", children: [["site_survey_usuarios", "Usuários"], ["site_survey_perfis", "Perfis de acesso"], ["site_survey_logs", "Logs"]] },
