@@ -1,3 +1,4 @@
+- [x] Site Survey — incluir “Não se aplica” por etapa, à esquerda de “Não realizada”, preservando respostas e excluindo a etapa do Resumo da Visita e das pendências.
 - [x] Site Survey — unificar Cadastro completo e Pendências de Cadastro em uma única lista, com quantidade e seta por linha, conteúdo expandido e filtros preservados.
 - [x] Site Survey — criar modelo copiando um modelo inteiro ou selecionando Seções padrão 1 a 7 de Shoppings como cópias independentes.
 - [x] Site Survey — permitir recriar ambiente excluído reativando o cadastro histórico com o checklist correto, sem erro de nome duplicado.

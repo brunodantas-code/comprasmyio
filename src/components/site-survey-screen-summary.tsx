@@ -24,6 +24,8 @@ type CatalogItem = Named & { category: string; type_builtin: string | null };
 type CustomCatalog = Named & { site_survey_custom_catalog_items: Named[] };
 
 const normalize = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLocaleLowerCase("pt-BR");
+const NOT_APPLICABLE_SECTION_PREFIX = "not-applicable:";
+const excludedSectionIds = (values: string[]) => new Set(values.map((value) => value.startsWith(NOT_APPLICABLE_SECTION_PREFIX) ? value.slice(NOT_APPLICABLE_SECTION_PREFIX.length) : value));
 
 function answerText(answer: unknown): string {
   if (answer && typeof answer === "object" && "customer_questions" in answer) return numberedCustomerQuestions(answer).join("\n");
@@ -139,9 +141,11 @@ export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections
                 const pointResponses = responses.filter((item) => matchesPoint(point, item) && answerText(item.answer));
                 const pointAttachments = attachments.filter((item) => matchesPoint(point, item));
                 const pointMaterials = materials.filter((item) => matchesPoint(point, item));
-                const availableSections = sections.filter((section) => section.active && section.template_id === point.templateId && !point.skippedSectionIds.includes(section.id)).sort((left, right) => left.position - right.position);
+                const excludedSections = excludedSectionIds(point.skippedSectionIds);
+                const availableSections = sections.filter((section) => section.active && section.template_id === point.templateId && !excludedSections.has(section.id)).sort((left, right) => left.position - right.position);
                 const grouped = availableSections.map((section) => ({ section, nature: sectionNature(section.title), rows: pointResponses.filter((response) => questions.find((question) => question.id === response.question_id)?.section_id === section.id).sort((left, right) => (questions.find((question) => question.id === left.question_id)?.position ?? Number.MAX_SAFE_INTEGER) - (questions.find((question) => question.id === right.question_id)?.position ?? Number.MAX_SAFE_INTEGER)) })).filter((group) => group.rows.length || pointAttachments.some((attachment) => attachment.question_id && questions.find((question) => question.id === attachment.question_id)?.section_id === group.section.id));
-                const knownResponseIds = new Set(grouped.flatMap((group) => group.rows.map((row) => row.id)));
+                const knownResponseIds = new Set(pointResponses.filter((response) => { const sectionId = questions.find((question) => question.id === response.question_id)?.section_id; return Boolean(sectionId && excludedSections.has(sectionId)); }).map((response) => response.id));
+                for (const response of grouped.flatMap((group) => group.rows)) knownResponseIds.add(response.id);
                 const unmatched = pointResponses.filter((response) => !knownResponseIds.has(response.id));
                 const facadePhotos = pointAttachments.filter((item) => item.attachment_kind === "facade");
                 const looseAttachments = pointAttachments.filter((item) => !item.question_id && item.attachment_kind !== "facade");
