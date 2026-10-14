@@ -38,6 +38,14 @@ export function answeredCustomerQuestions(answer: unknown): string[] {
   return [];
 }
 
+export function customerQuestionResponses(answer: unknown): Record<string, string> {
+  const responses = answer && typeof answer === "object" && !Array.isArray(answer)
+    ? (answer as { customer_question_responses?: unknown }).customer_question_responses
+    : null;
+  if (!responses || typeof responses !== "object" || Array.isArray(responses)) return {};
+  return Object.fromEntries(Object.entries(responses).filter((entry): entry is [string, string] => typeof entry[1] === "string"));
+}
+
 // Registered questions stay pending until someone marks them as answered.
 export function pendingCustomerQuestions(answer: unknown): string[] {
   const answered = new Set(answeredCustomerQuestions(answer));
