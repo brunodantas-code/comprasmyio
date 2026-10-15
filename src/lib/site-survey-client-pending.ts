@@ -1,6 +1,13 @@
 import { isCustomerQuestion, pendingCustomerQuestions } from "@/lib/site-survey-questions";
 
-export type ClientPendingPoint = { value: string; label: string; pointType: string };
+export type ClientPendingPoint = { value: string; label: string; pointType: string; lucNumber?: string; name?: string; location?: string | null; meterNumber?: string | null };
+export function unidentifiedLucPoints(points: ClientPendingPoint[]) {
+  return points.filter((point) => {
+    if (point.pointType !== "shop" && point.pointType !== "kiosk") return false;
+    const luc = (point.lucNumber ?? "").trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR");
+    return !luc || luc === "sem luc" || luc === "nao identificado";
+  }).sort((a, b) => (a.name ?? a.label).localeCompare(b.name ?? b.label, "pt-BR", { numeric: true }));
+}
 export type ClientPendingResponse = { question_id: string; visit_luc_id: string | null; visit_environment_id: string | null; answer: unknown; question_snapshot?: unknown };
 export type ClientPendingCall = { internal_call_id: string | null; visit_luc_id: string | null; visit_environment_id: string | null; question_id?: string; status?: string; trigger_value?: string; site_survey_question_actions?: { site_survey_action_catalog: { name: string } | null } | null; internal_calls: { call_number: string | null; title: string; description: string; status: string } | null };
 
