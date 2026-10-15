@@ -1,6 +1,6 @@
-- [ ] Monitoramento Site Survey — verificar os alertas 1, 2 e 5 contra permissões atuais e edição autorizada no Histórico.
-- [ ] Monitoramento Site Survey — atualizar a lista ao adicionar/reativar ambiente e validar.
-- [ ] Monitoramento Site Survey — recuperar a edição após suspensão sem perder respostas nem substituir outro editor; validar.
+- [x] Monitoramento Site Survey — alertas 1, 2 e 5 superados: permissão atual e salvamento autorizado no Histórico confirmados em visita concluída.
+- [x] Monitoramento Site Survey — lista atualizada ao adicionar/reativar ambiente; inclusão real lida sem recarregar e registro temporário removido.
+- [x] Monitoramento Site Survey — retorno de visibilidade renova edição e salvamento readquire bloqueio atomicamente; confirmado após 95 segundos sem renovação, preservando resposta e conclusão.
 - [x] Site Survey — perguntas e respostas do cliente usam a mesma fonte e tamanho dos antigos cards de Pendências de Cadastro.
 - [x] Site Survey — mover seta para Ações, mostrar zero sem pendências e incluir filtro Com/Sem pendências.
 - [x] Site Survey — editar respostas históricas pelo número da pergunta, exibindo somente a pergunta da seção; restaurar pergunta com borda cinza e resposta verde-clara, ambas numeradas.
