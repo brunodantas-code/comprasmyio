@@ -313,6 +313,31 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
     } catch (error) { toast.error(error instanceof Error ? error.message : "Não foi possível exportar a lista."); }
     finally { setExporting(false); }
   };
+  const [exportingPdf, setExportingPdf] = useState(false);
+  const exportPdf = async () => {
+    setExportingPdf(true);
+    const toastId = toast.loading("Gerando PDF do cadastro…");
+    try {
+      const { buildRegistrationPdf } = await import("@/lib/site-survey-registration-pdf");
+      const blob = await buildRegistrationPdf(sortedRows.map((row) => {
+        const type = surveyPointType(row);
+        return {
+          luc: type === "environment" ? "–" : row.luc_number || "Sem LUC",
+          meter: row.meter_number || "—",
+          type: surveyPointTypeLabel(type),
+          name: row.shop_name,
+          location: row.source === "environment" ? templates.find((template) => template.id === row.template_id)?.name ?? "Checklist da OS" : row.location || "—",
+          facade: attachments.find((item) => item.attachment_kind === "facade" && (row.source === "luc" ? item.visit_luc_id === row.id : item.visit_environment_id === row.id)),
+        };
+      }));
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a"); a.href = url; a.download = `cadastro-os-${visitId}.pdf`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 30_000);
+      toast.success("PDF do cadastro gerado.", { id: toastId });
+    } catch (error) { toast.error(error instanceof Error ? error.message : "Não foi possível gerar o PDF.", { id: toastId }); }
+    finally { setExportingPdf(false); }
+  };
    const sortHeader = (column: typeof sortBy, label: string) => <Button type="button" variant="ghost" size="sm" className="h-8 w-full items-center justify-start px-0 text-xs font-semibold !bg-transparent !text-foreground hover:!bg-transparent hover:!text-foreground" aria-label={`Ordenar por ${label}${sortBy === column ? sortAscending ? ", crescente" : ", decrescente" : ""}`} onClick={() => sortColumn(column)}>{label}{sortBy === column ? sortAscending ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" /> : <ArrowUpDown className="h-3 w-3" />}</Button>;
 
   return <Collapsible open={listOpen} onOpenChange={setListOpen} asChild><section className="space-y-3 border-t pt-5">
