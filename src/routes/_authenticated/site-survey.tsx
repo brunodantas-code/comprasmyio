@@ -1054,8 +1054,12 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
     setPendingFocus({ pointValue, itemKey });
   };
   const openChecklist = async (pointValue: string) => {
-    if (!(await switchPoint(pointValue))) return;
+    console.log("[dbg] openChecklist", pointValue);
+    const ok = await switchPoint(pointValue);
+    console.log("[dbg] switchPoint", ok);
+    if (!ok) return;
     setChecklistDialogOpen(true);
+    console.log("[dbg] dialog open set");
   };
   const savePendingLuc = async (form: HTMLFormElement, luc: NonNullable<(typeof registrationPending)[number]["luc"]>) => {
     const value = String(new FormData(form).get("luc_number") ?? "").trim();
