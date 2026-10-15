@@ -3,7 +3,7 @@ import { Download, LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { buildClientPendingGroups, type ClientPendingPoint, type ClientPendingResponse } from "@/lib/site-survey-client-pending";
+import { buildClientPendingGroups, unidentifiedLucPoints, type ClientPendingPoint, type ClientPendingResponse } from "@/lib/site-survey-client-pending";
 import nunitoRegularUrl from "@/assets/fonts/nunito-regular.ttf?url";
 import nunitoBoldUrl from "@/assets/fonts/nunito-bold.ttf?url";
 import { surveyPointType } from "@/lib/site-survey-point-type";
@@ -52,9 +52,9 @@ export function SiteSurveyClientPendingReport({ visit, client, unit, project, po
       const loadPoints = async () => {
         const fresh: ClientPendingPoint[] = [];
         for (let from = 0; ; from += 1000) {
-          const result = await supabase.from("site_survey_visit_lucs").select("id,luc_number,shop_name,location,point_type,classification_type").eq("visit_id", visit.id).eq("active", true).order("id").range(from, from + 999);
+          const result = await supabase.from("site_survey_visit_lucs").select("id,luc_number,shop_name,location,meter_number,point_type,classification_type").eq("visit_id", visit.id).eq("active", true).order("id").range(from, from + 999);
           if (result.error) throw new Error(result.error.message);
-          fresh.push(...(result.data ?? []).map((point) => ({ value: `luc:${point.id}`, label: [point.luc_number ? `LUC ${point.luc_number}` : "", point.shop_name, point.location].filter(Boolean).join(" — "), pointType: surveyPointType(point) })));
+          fresh.push(...(result.data ?? []).map((point) => ({ value: `luc:${point.id}`, label: [point.luc_number ? `LUC ${point.luc_number}` : "", point.shop_name, point.location].filter(Boolean).join(" — "), pointType: surveyPointType(point), lucNumber: point.luc_number, name: point.shop_name, location: point.location, meterNumber: point.meter_number })));
           if ((result.data?.length ?? 0) < 1000) break;
         }
         for (let from = 0; ; from += 1000) {
@@ -74,7 +74,16 @@ export function SiteSurveyClientPendingReport({ visit, client, unit, project, po
           if ((result.data?.length ?? 0) < 1000) return rows;
         }
       };
-      const [responses, calls, freshPoints, texts, { jsPDF }, { default: autoTable }] = await Promise.all([loadResponses(), loadCalls(), loadPoints(), loadTexts(), import("jspdf"), import("jspdf-autotable")]);
+      const loadFacades = async () => {
+        const rows = [];
+        for (let from = 0; ; from += 1000) {
+          const result = await supabase.from("site_survey_attachments").select("visit_luc_id,visit_environment_id,storage_path,file_name,content_type").eq("visit_id", visit.id).eq("attachment_kind", "facade").order("created_at").order("id").range(from, from + 999);
+          if (result.error) throw new Error(result.error.message);
+          rows.push(...(result.data ?? []));
+          if ((result.data?.length ?? 0) < 1000) return rows;
+        }
+      };
+      const [responses, calls, freshPoints, texts, facades, { jsPDF }, { default: autoTable }] = await Promise.all([loadResponses(), loadCalls(), loadPoints(), loadTexts(), loadFacades(), import("jspdf"), import("jspdf-autotable")]);
       if (calls.some((call) => call.internal_call_id && !call.internal_calls)) throw new Error("Não foi possível consultar todos os chamados vinculados. Verifique seu acesso aos chamados antes de gerar o relatório.");
       const groups = buildClientPendingGroups(freshPoints.length ? freshPoints : points, responses, questions, calls, texts);
       const pdf = new jsPDF({ unit: "mm", format: "a4" });
@@ -118,6 +127,52 @@ export function SiteSurveyClientPendingReport({ visit, client, unit, project, po
             ? `Chamado #${call.call_number} — ${call.title}\nSituação: ${statusLabel(call.status)}${call.description?.trim() ? `\n${call.description.trim()}` : ""}`
             : `Intervenção${call.description?.trim() ? `\n${call.description.trim()}` : ""}`])] : []),
         ]);
+      }
+      const missingLucs = unidentifiedLucPoints(freshPoints);
+      if (missingLucs.length) {
+        const thumbnails = new Map<string, string>();
+        // Serial decoding bounds memory even when originals are large.
+        for (const point of missingLucs) {
+          const attachment = facades.find((item) => point.value === (item.visit_luc_id ? `luc:${item.visit_luc_id}` : `environment:${item.visit_environment_id}`));
+          if (!attachment) continue;
+          const { data: original, error } = await supabase.storage.from("site-survey-attachments").download(attachment.storage_path);
+          if (error || !original) throw new Error(`Não foi possível carregar a fachada de ${point.name ?? point.label}. Tente gerar o relatório novamente.`);
+          let blob = original;
+          if (/\.(heic|heif)$/i.test(attachment.file_name) || /image\/hei[cf]/i.test(attachment.content_type ?? "")) {
+            const { heicTo } = await import("heic-to/csp");
+            blob = await heicTo({ blob, type: "image/jpeg", quality: 0.85 });
+          }
+          const url = URL.createObjectURL(blob);
+          try {
+            const image = new Image(); image.src = url; await image.decode();
+            const canvas = document.createElement("canvas"); canvas.width = 240; canvas.height = 240;
+            const context = canvas.getContext("2d");
+            if (!context) throw new Error("Não foi possível preparar as fotos do relatório.");
+            const side = Math.min(image.naturalWidth, image.naturalHeight);
+            context.beginPath(); context.arc(120, 120, 120, 0, Math.PI * 2); context.clip();
+            context.drawImage(image, (image.naturalWidth - side) / 2, (image.naturalHeight - side) / 2, side, side, 0, 0, 240, 240);
+            thumbnails.set(point.value, canvas.toDataURL("image/png"));
+          } finally { URL.revokeObjectURL(url); }
+        }
+        pdf.addPage(); pdf.setFont("Nunito", "bold"); pdf.setFontSize(15); pdf.setTextColor(...accent);
+        pdf.text("Lojas e quiosques com LUC não identificado", 14, 25);
+        pdf.setFont("Nunito", "normal"); pdf.setFontSize(10); pdf.setTextColor(...ink);
+        pdf.text(`${missingLucs.length} ponto(s) para identificação do LUC`, 14, 33);
+        autoTable(pdf, {
+          startY: 39, theme: "plain", margin: { top: 20, bottom: 20, left: 14, right: 14 },
+          styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: 3, overflow: "linebreak", valign: "middle" },
+          headStyles: { fontStyle: "bold", textColor: accent, lineWidth: { bottom: 0.3 }, lineColor: green },
+          bodyStyles: { minCellHeight: 24 }, rowPageBreak: "avoid", showHead: "everyPage",
+          columnStyles: { 0: { cellWidth: 24 }, 1: { cellWidth: 28 }, 2: { cellWidth: 28 }, 3: { cellWidth: 20 }, 4: { cellWidth: 46 }, 5: { cellWidth: 36 } },
+          head: [["Foto", "LUC", "Nº do medidor", "Tipo", "Nome da loja", "Localização"]],
+          body: missingLucs.map((point) => [thumbnails.has(point.value) ? "" : "Sem foto", point.lucNumber?.trim() || "Sem LUC", point.meterNumber || "—", point.pointType === "kiosk" ? "Quiosque" : "Loja", point.name ?? point.label, point.location || "—"]),
+          didDrawCell: (cell) => {
+            if (cell.section !== "body" || cell.column.index !== 0) return;
+            const point = missingLucs[cell.row.index];
+            const thumbnail = point ? thumbnails.get(point.value) : undefined;
+            if (thumbnail) pdf.addImage(thumbnail, "PNG", cell.cell.x + 3, cell.cell.y + (cell.cell.height - 18) / 2, 18, 18);
+          },
+        });
       }
       const pages = pdf.getNumberOfPages();
       for (let page = 1; page <= pages; page++) {
