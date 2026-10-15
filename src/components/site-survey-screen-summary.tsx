@@ -81,7 +81,7 @@ function PhotoThumbnail({ attachment, gallery }: { attachment: SummaryAttachment
   </>;
 }
 
-export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections, questions, lucs, environments, responses, attachments, materials, catalog, screwdriverTypes, wrenchSizes, customCatalogs, onClose, onQuestionClick, pointValue, embedded = false }: {
+export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections, questions, lucs, environments, responses, attachments, materials, catalog, screwdriverTypes, wrenchSizes, customCatalogs, onClose, onQuestionClick, onOpenChecklist, pointValue, embedded = false }: {
   visitNumber: number;
   visitTemplateId: string | null;
   sections: SummarySection[];
