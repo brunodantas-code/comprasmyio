@@ -346,7 +346,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     return [...new Set(ids.map((id) => technicians.find((person) => person.id === id)?.full_name).filter((name): name is string => Boolean(name)))].sort((a, b) => a.localeCompare(b, "pt-BR")).join(", ") || "—";
   };
   const sortedPoints = useMemo(() => {
-    const typeOrder = { shop: 0, kiosk: 1, environment: 2 };
+    const typeOrder = { shop: 0, kiosk: 1, environment: 2, vacant: 1 };
     const compare = (a: Point, b: Point, key: SortKey) => key === "type" ? typeOrder[a.pointType] - typeOrder[b.pointType] : key === "created" ? a.created_at.localeCompare(b.created_at) : technicianForPoint(a).localeCompare(technicianForPoint(b), "pt-BR");
     return [...filteredPoints].sort((a, b) => compare(a, b, primarySort) || (secondarySort !== "none" ? compare(a, b, secondarySort) : 0) || a.created_at.localeCompare(b.created_at) || a.label.localeCompare(b.label, "pt-BR"));
   }, [filteredPoints, data?.visitTechs, technicians, visit.technician_id, primarySort, secondarySort]);
