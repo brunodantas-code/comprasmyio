@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { ArrowDown, ArrowUp, ArrowUpDown, Camera, Check, ChevronDown, ChevronsUpDown, Download, FileSpreadsheet, Images, Pencil, Plus, Sparkles } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, Camera, Check, ChevronDown, ChevronsUpDown, Download, FileSpreadsheet, FileText, Images, Pencil, Plus, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 
