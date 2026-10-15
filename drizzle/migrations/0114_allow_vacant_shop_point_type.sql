@@ -1,0 +1,5 @@
+ALTER TABLE public.site_survey_visit_lucs DROP CONSTRAINT site_survey_visit_lucs_classification_type_check;
+ALTER TABLE public.site_survey_visit_lucs ADD CONSTRAINT site_survey_visit_lucs_classification_type_check CHECK (classification_type = ANY (ARRAY['shop'::text, 'kiosk'::text, 'environment'::text, 'vacant'::text]));
+ALTER TABLE public.site_survey_visit_lucs DROP CONSTRAINT site_survey_visit_lucs_point_type_check;
+ALTER TABLE public.site_survey_visit_lucs ADD CONSTRAINT site_survey_visit_lucs_point_type_check CHECK (point_type = ANY (ARRAY['shop'::text, 'kiosk'::text, 'vacant'::text]));
+COMMENT ON CONSTRAINT site_survey_visit_lucs_classification_type_check ON public.site_survey_visit_lucs IS 'vacant = Loja Vaga: sem LUC e sem foto de fachada obrigatórias; respostas de inspeção preservadas';

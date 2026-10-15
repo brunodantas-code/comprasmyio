@@ -799,6 +799,13 @@
       "when": 1791926016792,
       "tag": "0113_site_survey_report_texts",
       "breakpoints": true
+    },
+    {
+      "idx": 114,
+      "version": "7",
+      "when": 1792106757743,
+      "tag": "0114_allow_vacant_shop_point_type",
+      "breakpoints": true
     }
   ]
 }
