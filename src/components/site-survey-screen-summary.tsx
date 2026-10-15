@@ -18,7 +18,7 @@ type SummarySection = { id: string; template_id: string; title: string; position
 type SummaryAttachment = { id: string; question_id: string | null; visit_luc_id: string | null; visit_environment_id: string | null; file_name: string; storage_path: string; content_type: string | null; attachment_kind?: string };
 type SummaryResponse = { id: string; question_id: string; visit_luc_id: string | null; visit_environment_id: string | null; answer: unknown; question_snapshot?: unknown };
 type SummaryMaterial = { id: string; visit_luc_id: string | null; visit_environment_id: string | null; catalog_item_id: string; quantity: number; notes: string | null; screwdriver_type_id?: string | null; wrench_size_id?: string | null; custom_type_item_id?: string | null };
-type SummaryPoint = { id: string; kind: "luc" | "environment"; pointType: "shop" | "kiosk" | "environment"; name: string; luc: string; location: string; templateId: string | null; completionStatus: string; skippedSectionIds: string[] };
+type SummaryPoint = { id: string; kind: "luc" | "environment"; pointType: "shop" | "kiosk" | "environment" | "vacant"; name: string; luc: string; location: string; templateId: string | null; completionStatus: string; skippedSectionIds: string[] };
 type Named = { id: string; name: string };
 type CatalogItem = Named & { category: string; type_builtin: string | null };
 type CustomCatalog = Named & { site_survey_custom_catalog_items: Named[] };
@@ -156,7 +156,7 @@ export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections
                 const looseAttachments = pointAttachments.filter((item) => !item.question_id && item.attachment_kind !== "facade");
                 const totalExpected = questions.filter((question) => question.active && availableSections.some((section) => section.id === question.section_id)).length;
                 const progress = point.completionStatus === "concluida" ? 100 : totalExpected ? Math.min(99, Math.round(pointResponses.length / totalExpected * 100)) : 0;
-                const typeLabel = point.pointType === "shop" ? "Loja" : point.pointType === "kiosk" ? "Quiosque" : "Ambiente";
+                const typeLabel = point.pointType === "shop" ? "Loja" : point.pointType === "kiosk" ? "Quiosque" : point.pointType === "vacant" ? "Loja vaga" : "Ambiente";
                 const pointKey = `${point.kind}-${point.id}`;
                 const collapsed = collapsedPoints.has(pointKey);
                 const contentId = `summary-content-${pointKey}`;

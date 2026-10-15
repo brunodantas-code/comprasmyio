@@ -965,3 +965,12 @@
 - [x] Responder: perguntas condicionais ao editar "Não"→"Sim" no histórico.
 - [x] PDF para cliente — incluir lista final de lojas/quiosques com LUC vazio ou Não identificado e miniaturas das fachadas; download real de Mogi e cinco páginas inspecionadas, 22 pontos, sem cortes ou sobreposição.
 - [x] PDF para cliente — miniaturas da lista de LUCs não identificados em formato quadrado com bordas arredondadas, igual às fachadas do Histórico; download real de Mogi e páginas 4 e 5 conferidas.
+
+## Pop-up Abrir Checklist no Histórico — 15/10/2026
+- [x] Botão "Abrir checklist" abre pop-up direto no ponto selecionado, sem droplist de seleção e sem filtro Concluída/Não concluída; fachada acessível dentro do pop-up.
+- [ ] Pendências ao salvar pelo pop-up: salvamento manual deve registrar perguntas obrigatórias não respondidas de todas as etapas do ponto (correção aplicada; validar no navegador com Ar Condicionado 01).
+- [ ] Loja descontinuada: baixa da fachada e do LUC preservando o registro de elétrica/hidráulica para a próxima loja (proposta pendente de aprovação do Leonardo).
+- [ ] Pendências na linha do Histórico: perguntas obrigatórias visíveis não respondidas devem contar (igual ao badge do checklist); medir impacto nas outras visitas.
+- [ ] Criar categoria "Loja Vaga": sem fachada, sem LUC e sem pendências de cadastro; preservar respostas de elétrica/hidráulica para a próxima loja.
+- Pendências da linha do Histórico passam a contar perguntas obrigatórias visíveis não respondidas (isStoredQuestionComplete), além de "Não Informado"; concluído 15/10. Verificar impacto nos demais pontos.
+- Loja Vaga: tipo novo no cadastro de pontos (sem fachada, LUC ou pendências; preserva respostas); conferir fluxo completo no browser (criar/editar/filtros/PDF).
