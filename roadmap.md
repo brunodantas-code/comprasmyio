@@ -972,3 +972,5 @@
 - [ ] Loja descontinuada: baixa da fachada e do LUC preservando o registro de elétrica/hidráulica para a próxima loja (proposta pendente de aprovação do Leonardo).
 - [ ] Pendências na linha do Histórico: perguntas obrigatórias visíveis não respondidas devem contar (igual ao badge do checklist); medir impacto nas outras visitas.
 - [ ] Criar categoria "Loja Vaga": sem fachada, sem LUC e sem pendências de cadastro; preservar respostas de elétrica/hidráulica para a próxima loja.
+- Pendências da linha do Histórico passam a contar perguntas obrigatórias visíveis não respondidas (isStoredQuestionComplete), além de "Não Informado"; concluído 15/10. Verificar impacto nos demais pontos.
+- Loja Vaga: tipo novo no cadastro de pontos (sem fachada, LUC ou pendências; preserva respostas); conferir fluxo completo no browser (criar/editar/filtros/PDF).
