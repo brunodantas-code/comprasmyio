@@ -120,7 +120,7 @@ export function SiteSurveyClientPendingReport({ visit, client, unit, project, po
       pdf.setFont("Nunito", "normal"); pdf.setFontSize(10); pdf.text(`${questionCount} pergunta(s) aguardando resposta · ${callCount} chamado(s) / intervenção(ões)`, 14, y); y += 10;
       if (!groups.length) pdf.text("Nenhuma pergunta pendente ou chamado gerado nesta visita.", 14, y);
       for (const group of groups) {
-        const kind = ({ shop: "Loja", kiosk: "Quiosque", environment: "Ambiente", general: "Geral" } as Record<string, string>)[group.pointType] ?? "Ponto";
+        const kind = ({ shop: "Loja", kiosk: "Quiosque", environment: "Ambiente", vacant: "Loja vaga", general: "Geral" } as Record<string, string>)[group.pointType] ?? "Ponto";
         y = table(y, [`${kind} — ${group.label}`], [
           ...group.questions.map((text, index) => [`${index + 1}. ${text}`]),
           ...(group.calls.length ? [["Chamados e intervenções gerados durante o checklist"], ...group.calls.map((call) => [call.call_number
