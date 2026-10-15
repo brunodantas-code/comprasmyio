@@ -204,7 +204,7 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
         ? await supabase.from("site_survey_visit_environments").update({ template_id: environmentTemplateId, meter_number: draftMeter.trim() || null, updated_by: userId, active: true }).eq("id", existing.id)
         : await supabase.from("site_survey_visit_environments").insert({ visit_id: visitId, name, template_id: environmentTemplateId, meter_number: draftMeter.trim() || null, created_by: userId, updated_by: userId, active: true });
       if (result.error) return toast.error(result.error.code === "23505" ? "Este ambiente já está cadastrado nesta OS." : result.error.message);
-      toast.success(existing ? "Ambiente reativado com o checklist selecionado." : "Ambiente adicionado."); closeEdit(); onChanged?.();
+      toast.success(existing ? "Ambiente reativado com o checklist selecionado." : "Ambiente adicionado."); closeEdit(); await load(); onChanged?.();
       return;
     }
     const lucNumber = pointType === "environment" ? "" : draftLuc.trim(); const shopName = draftName.trim();

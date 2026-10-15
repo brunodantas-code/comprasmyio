@@ -40,11 +40,14 @@ export function useSurveyPointEdit(pointId: string, pointKind: string, enabled: 
     void check();
     const interval = setInterval(() => void check(), 20000);
     const focus = () => void check();
+    const visible = () => { if (document.visibilityState === "visible") void check(); };
     window.addEventListener("focus", focus);
+    document.addEventListener("visibilitychange", visible);
     return () => {
       alive = false;
       clearInterval(interval);
       window.removeEventListener("focus", focus);
+      document.removeEventListener("visibilitychange", visible);
       // If acquisition was still in flight, release only after that request finishes.
       const release = async () => {
         while (running) await new Promise((resolve) => setTimeout(resolve, 25));
@@ -55,11 +58,12 @@ export function useSurveyPointEdit(pointId: string, pointKind: string, enabled: 
   }, [pointId, request]);
   const ensureEditable = async () => {
     if (!pointId || !editableRef.current) throw new Error("Checklist somente para visualização. A foto da fachada continua liberada.");
-    const lease = await request(false, false);
+    // Reacquire an expired lease without overriding another session's live lock.
+    const lease = await request(false, true);
     if (!lease.editable) {
       editableRef.current = false;
       setState((old) => ({ ...old, ...lease, editable: false, checked: true }));
-      throw new Error(`Este checklist está sendo editado por ${lease.editor}.`);
+      throw new Error(lease.occupied ? `Este checklist está sendo editado por ${lease.editor}.` : "Checklist somente para visualização. A foto da fachada continua liberada.");
     }
   };
   return { ...state, editable: state.pointId === pointId && state.editable, ensureEditable };
