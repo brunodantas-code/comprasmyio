@@ -156,7 +156,7 @@ export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections
                 const looseAttachments = pointAttachments.filter((item) => !item.question_id && item.attachment_kind !== "facade");
                 const totalExpected = questions.filter((question) => question.active && availableSections.some((section) => section.id === question.section_id)).length;
                 const progress = point.completionStatus === "concluida" ? 100 : totalExpected ? Math.min(99, Math.round(pointResponses.length / totalExpected * 100)) : 0;
-                const typeLabel = point.pointType === "shop" ? "Loja" : point.pointType === "kiosk" ? "Quiosque" : "Ambiente";
+                const typeLabel = point.pointType === "shop" ? "Loja" : point.pointType === "kiosk" ? "Quiosque" : point.pointType === "vacant" ? "Loja vaga" : "Ambiente";
                 const pointKey = `${point.kind}-${point.id}`;
                 const collapsed = collapsedPoints.has(pointKey);
                 const contentId = `summary-content-${pointKey}`;
