@@ -1014,7 +1014,8 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
       const items: { key: string; label: string; sectionId?: string; groupKey?: string; groupLabel?: string; customer?: boolean; customerResponse?: string }[] = [];
       if (requiresSurveyFacade(point.pointType) && !detail.attachments.some((item) => item.attachment_kind === "facade" && scope(item))) items.push({ key: "facade", label: "Foto da fachada" });
       const luc = kind === "luc" ? detail.lucs.find((item) => item.id === id) : null;
-      if (luc && point.pointType !== "environment" && !luc.luc_number?.trim()) items.push({ key: "luc", label: "Número do LUC" });
+      // Loja vaga: fachada, LUC, localização e pendências de cadastro são dispensados.
+      if (point.pointType === "vacant") return { point, luc, items: [], groups: [], customerQuestion: undefined };
       if (luc && !luc.location?.trim()) items.push({ key: "location", label: "Localização (andar)" });
       for (const section of sectionsFor(point.templateId ?? visit.template_id, own)) {
         if (skipped.has(section.id)) continue;
