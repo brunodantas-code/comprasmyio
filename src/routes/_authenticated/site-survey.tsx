@@ -857,7 +857,7 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
         // Persist the currently open section even when its autosave had not been scheduled yet.
         await saveAnswers(form, "point", false, [], true);
         const refreshed = await refetchDetail();
-        const fields = pointPendingFields(form, undefined, refreshed.data);
+        const fields = points.find((point) => point.value === selectedPoint)?.pointType === "vacant" ? [] : pointPendingFields(form, undefined, refreshed.data);
         if (fields.length) {
           setValidatedPoints((current) => new Set(current).add(selectedPoint));
           setOpenSectionId(pointSections.find((section) => section.title.startsWith("Revisão"))?.id ?? null);
@@ -962,6 +962,8 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
         .map((field) => field.slice(section.title.length + 1).trim()),
     })).filter((group) => group.fields.length > 0);
     const pointFollowUpFields = (form?: HTMLFormElement) => {
+      // Loja vaga não gera follow-up de conclusão.
+      if (points.find((point) => point.value === selectedPoint)?.pointType === "vacant") return [];
       const values = form ? new FormData(form) : null;
       const currentAnswers = new Map(answers);
       if (values) {
@@ -1019,7 +1021,7 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
       if (luc && !luc.location?.trim()) items.push({ key: "location", label: "Localização (andar)" });
       for (const section of sectionsFor(point.templateId ?? visit.template_id, own)) {
         if (skipped.has(section.id)) continue;
-        for (const question of sortByPosition(data.questions.filter((item) => item.active && item.section_id === section.id))) if (isQuestionVisible(question, answers) && isNotInformedAnswer(answerParts(answers.get(question.id)).value)) items.push({ key: question.id, label: `${section.title}: ${question.prompt}`, sectionId: section.id });
+        for (const question of sortByPosition(data.questions.filter((item) => item.active && item.section_id === section.id))) if (isQuestionVisible(question, answers) && (isNotInformedAnswer(answerParts(answers.get(question.id)).value) || !isStoredQuestionComplete(question, answers, detail.attachments, scope))) items.push({ key: question.id, label: `${section.title}: ${question.prompt}`, sectionId: section.id });
       }
       const customerQuestion = sectionsFor(point.templateId ?? visit.template_id, own).flatMap((section) => data.questions.filter((question) => question.active && question.section_id === section.id && isCustomerQuestion(question)))[0];
       if (customerQuestion) {
