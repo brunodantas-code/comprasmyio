@@ -969,3 +969,4 @@
 ## Pop-up Abrir Checklist no Histórico — 15/10/2026
 - [x] Botão "Abrir checklist" abre pop-up direto no ponto selecionado, sem droplist de seleção e sem filtro Concluída/Não concluída; fachada acessível dentro do pop-up.
 - [ ] Pendências ao salvar pelo pop-up: salvamento manual deve registrar perguntas obrigatórias não respondidas de todas as etapas do ponto (correção aplicada; validar no navegador com Ar Condicionado 01).
+- [ ] Loja descontinuada: baixa da fachada e do LUC preservando o registro de elétrica/hidráulica para a próxima loja (proposta pendente de aprovação do Leonardo).
