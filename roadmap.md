@@ -961,3 +961,4 @@
 - [x] Pendências: alinhar resposta à esquerda com a pergunta; remover texto "Pergunta N", manter ícone com o número — verificado no turno anterior.
 - [x] Responder: perguntas condicionais ao editar "Não"→"Sim" no histórico.
 - [x] PDF para cliente — incluir lista final de lojas/quiosques com LUC vazio ou Não identificado e miniaturas das fachadas; download real de Mogi e cinco páginas inspecionadas, 22 pontos, sem cortes ou sobreposição.
+- [x] PDF para cliente — miniaturas da lista de LUCs não identificados em formato quadrado com bordas arredondadas, igual às fachadas do Histórico; download real de Mogi e páginas 4 e 5 conferidas.

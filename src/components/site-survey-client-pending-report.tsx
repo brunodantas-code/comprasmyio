@@ -148,8 +148,16 @@ export function SiteSurveyClientPendingReport({ visit, client, unit, project, po
             const canvas = document.createElement("canvas"); canvas.width = 240; canvas.height = 240;
             const context = canvas.getContext("2d");
             if (!context) throw new Error("Não foi possível preparar as fotos do relatório.");
+            // Quadrado com bordas arredondadas, como nas fachadas do Histórico.
+            const radius = 32;
+            context.beginPath();
+            context.moveTo(radius, 0);
+            context.arcTo(240, 0, 240, 240, radius);
+            context.arcTo(240, 240, 0, 240, radius);
+            context.arcTo(0, 240, 0, 0, radius);
+            context.arcTo(0, 0, 240, 0, radius);
+            context.closePath(); context.clip();
             const side = Math.min(image.naturalWidth, image.naturalHeight);
-            context.beginPath(); context.arc(120, 120, 120, 0, Math.PI * 2); context.clip();
             context.drawImage(image, (image.naturalWidth - side) / 2, (image.naturalHeight - side) / 2, side, side, 0, 0, 240, 240);
             thumbnails.set(point.value, canvas.toDataURL("image/png"));
           } finally { URL.revokeObjectURL(url); }
