@@ -67,7 +67,7 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
   const [draftLuc, setDraftLuc] = useState("");
   const [draftName, setDraftName] = useState("");
   const [draftLocation, setDraftLocation] = useState("");
-  const [pointType, setPointType] = useState<"shop" | "kiosk" | "environment" | null>(null);
+  const [pointType, setPointType] = useState<"shop" | "kiosk" | "environment" | "vacant" | null>(null);
   const [environmentName, setEnvironmentName] = useState("");
   const [environmentTemplateId, setEnvironmentTemplateId] = useState("");
   const [analyzing, setAnalyzing] = useState(false);
@@ -183,7 +183,7 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
     try { await saveEditInner(confirmed); } catch (error) { toast.error(error instanceof Error ? error.message : "Não foi possível salvar. Verifique a conexão e tente novamente."); } finally { setSaving(false); }
   };
   const saveEditInner = async (confirmed = false) => {
-    if (!pointType) return toast.error("Selecione Loja, Quiosque ou Ambiente.");
+    if (!pointType) return toast.error("Selecione Loja, Quiosque, Ambiente ou Loja vaga.");
     if (pointType === "environment" && editingEnvironmentId) {
       const name = environmentName.trim();
       if (!name) return toast.error("Informe o nome do ambiente.");
@@ -207,11 +207,11 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, temp
       toast.success(existing ? "Ambiente reativado com o checklist selecionado." : "Ambiente adicionado."); closeEdit(); await load(); onChanged?.();
       return;
     }
-    const lucNumber = pointType === "environment" ? "" : draftLuc.trim(); const shopName = draftName.trim();
+    const lucNumber = pointType === "environment" || pointType === "vacant" ? "" : draftLuc.trim(); const shopName = draftName.trim();
     if (!shopName) return toast.error("Informe o nome do ponto.");
     const duplicateRows = lucNumber ? rows.filter((row) => row.id !== editing?.id && normalizeHeader(row.luc_number) === normalizeHeader(lucNumber)) : [];
     if (duplicateRows.length && !confirmed) { setDuplicateConfirmation("edit"); return; }
-    const payload = { visit_id: visitId, luc_number: lucNumber, shop_name: shopName, location: draftLocation.trim() || null, meter_number: draftMeter.trim() || null, point_type: pointType === "kiosk" ? "kiosk" : "shop", classification_type: pointType, updated_by: userId, active: true };
+    const payload = { visit_id: visitId, luc_number: lucNumber, shop_name: shopName, location: draftLocation.trim() || null, meter_number: draftMeter.trim() || null, point_type: pointType === "kiosk" ? "kiosk" : pointType === "vacant" ? "vacant" : "shop", classification_type: pointType, updated_by: userId, active: true };
     const result = editing?.id
       ? editMode === "correction"
         ? await supabase.rpc("correct_site_survey_visit_luc", { _id: editing.id, _luc_number: lucNumber, _shop_name: shopName, _location: draftLocation.trim() }).then(async (correction) => correction.error ? correction : supabase.from("site_survey_visit_lucs").update({ classification_type: pointType, meter_number: draftMeter.trim() || null, updated_by: userId }).eq("id", editing.id))
