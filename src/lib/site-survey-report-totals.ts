@@ -1,7 +1,8 @@
 /** Totalizadores com ordem fixa: do mais fácil para o mais difícil, como Baixa, Média e Alta. */
 export const TOTAL_ORDERS: Record<string, string[]> = {
   "Dificuldade de acesso": ["Fácil", "Regular", "Difícil"],
-  "Complexidade": ["Baixa", "Média", "Alta"],
+  "Complexidade hidráulica": ["Baixa", "Média", "Alta"],
+  "Complexidade elétrica": ["Baixa", "Média", "Alta"],
 };
 
 const orderRank = (label: string, value: string) => {

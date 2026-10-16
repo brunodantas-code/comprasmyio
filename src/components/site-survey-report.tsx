@@ -1,6 +1,7 @@
 import { customerQuestionResponses, customerQuestions, isCustomerQuestion, numberedCustomerQuestions } from "@/lib/site-survey-questions";
 import { surveyPointType } from "@/lib/site-survey-point-type";
 import { reviewNoteText, sortTotalValues } from "@/lib/site-survey-report-totals";
+import { lowerLeadingPreposition } from "@/lib/site-survey-report-prose";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Download, FileChartColumn, LoaderCircle, Printer, ShoppingCart } from "lucide-react";
@@ -172,7 +173,7 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
     if (pulseUnavailable) hydraulic.push({ text: "Não existe saída pulsada ou encontra-se inoperante", bold: true }, { text: flowRate ? ` e a vazão nominal ${isUninformed(proseValue(flowRate.value)) ? "" : "é de "}` : ". " });
     else hydraulic.push({ text: pulseWorks ? "Possui saída pulsada " : "A saída pulsada encontra-se " }, { text: pulseWorks ? "funcional" : pulseStatus, bold: true }, { text: flowRate ? ` e a vazão nominal ${isUninformed(proseValue(flowRate.value)) ? "" : "é de "}` : ". " });
   }
-  if (flowRate) { const rate = proseValue(flowRate.value).replace(/^Até\b/, "até"); hydraulic.push({ text: pulse ? "" : `A vazão nominal ${isUninformed(rate) ? "" : "é de "}` }, { text: isUninformed(rate) || !rate ? "não foi informada" : rate, bold: true }, { text: ". " }); }
+  if (flowRate) { const rate = lowerLeadingPreposition(proseValue(flowRate.value)); hydraulic.push({ text: pulse ? "" : `A vazão nominal ${isUninformed(rate) ? "" : "é de "}` }, { text: isUninformed(rate) || !rate ? "não foi informada" : rate, bold: true }, { text: ". " }); }
   const flow = hydraulicAnswer(["sentido do fluxo"]);
   if (flow) hydraulic.push({ text: "O sentido do fluxo de água foi classificado como " }, { text: normalize(flow.value).includes("desacordo") || normalize(flow.value).includes("incorret") ? "incorreto" : normalize(flow.value).includes("acordo") || normalize(flow.value).includes("corret") ? "correto" : lower(flow.value), bold: true }, { text: ". " });
   const flange = hydraulicAnswer(["tipo de flange"]);
@@ -416,14 +417,23 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
   const pointNotes = (point: Point) => { const section = reviewSectionForPoint(point); return section && !point.skippedSectionIds.includes(section.id) ? pointResponses(point).filter((response) => questions.some((question) => question.id === response.question_id && question.section_id === section.id && !isCustomerQuestion(question))).map((response) => valueText(response.answer)).filter(Boolean).join("; ") : ""; };
   const reviewNotes = (point: Point) => reviewNoteText(pointNotes(point));
   const technicalTotals = useMemo(() => {
-    const groups = [{ label: "Tipos de registro", terms: ["tipo de hidrometro", "tipo de registro"] }, { label: "Dificuldade de acesso", terms: ["dificuldade", "acesso ao hidrometro"] }, { label: "Quadros e pontos elétricos", terms: ["quadro eletrico", "ponto eletrico"] }, { label: "Complexidade", terms: ["complexidade"] }];
-    return groups.map((group) => { const counts = new Map<string, number>(); const countedPoints = new Set<string>(); for (const response of (data?.responses ?? []).filter(responseIsIncluded)) { const question = questions.find((item) => item.id === response.question_id); if (!question || !group.terms.some((term) => normalize(question.prompt).includes(term))) continue; const rawValue = valueText(response.answer).trim(); const normalizedValue = normalize(rawValue); const value = group.label === "Dificuldade de acesso"
+    // Complexidade é perguntada na etapa de água e na etapa elétrica: cada uma soma em seu próprio totalizador.
+    const groups: { label: string; terms: string[]; sectionTerms?: string[] }[] = [
+      { label: "Tipos de registro", terms: ["tipo de hidrometro", "tipo de registro"] },
+      { label: "Dificuldade de acesso", terms: ["dificuldade", "acesso ao hidrometro"] },
+      { label: "Quadros e pontos elétricos", terms: ["quadro eletrico", "ponto eletrico"] },
+      { label: "Complexidade hidráulica", terms: ["complexidade"], sectionTerms: ["agua", "hidrometro", "hidraulica"] },
+      { label: "Complexidade elétrica", terms: ["complexidade"], sectionTerms: ["eletrica", "eletrico"] },
+    ];
+    return groups.map((group) => { const counts = new Map<string, number>(); const countedPoints = new Set<string>(); for (const response of (data?.responses ?? []).filter(responseIsIncluded)) { const question = questions.find((item) => item.id === response.question_id); if (!question || !group.terms.some((term) => normalize(question.prompt).includes(term))) continue;
+      if (group.sectionTerms && !group.sectionTerms.some((term) => normalize(sections.find((section) => section.id === question.section_id)?.title ?? "").includes(term))) continue;
+      const rawValue = valueText(response.answer).trim(); const normalizedValue = normalize(rawValue); const value = group.label === "Dificuldade de acesso"
       ? normalizedValue.startsWith("facil") ? "Fácil" : normalizedValue.startsWith("regular") ? "Regular" : normalizedValue.startsWith("dificil") ? "Difícil" : ""
       : rawValue;
       const pointId = response.visit_luc_id ? `luc-${response.visit_luc_id}` : `environment-${response.visit_environment_id}`;
       // Um ponto conta uma única vez por totalizador, mesmo que a pergunta exista em mais de uma seção.
       if (value && !countedPoints.has(pointId)) { countedPoints.add(pointId); counts.set(value, (counts.get(value) ?? 0) + 1); } } return { label: group.label, values: sortTotalValues(group.label, [...counts.entries()]) }; }).filter((group) => group.values.length);
-  }, [data?.responses, questions, filteredPointKeys]);
+  }, [data?.responses, questions, sections, filteredPointKeys]);
   const pointSummaries = (point: Point) => { const pointSections = sectionsForPoint(point); const reviewId = reviewSectionForPoint(point)?.id; return buildPointSummaries((pointResponses(point) as ReportResponse[]).filter((response) => !reviewId || !questions.some((question) => question.id === response.question_id && question.section_id === reviewId)), questions, pointSections, point.skippedSectionIds, data?.meterMappings ?? []); };
   const pointMaterials = (point: Point) => (data?.materials ?? []).filter((item) => point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id);
   const equipmentRows = sortedPoints.flatMap((point) => pointMaterials(point).filter((item) => normalize(item.site_survey_material_catalog?.category ?? "") === "equipamento").map((item) => ({ ...item, pointLabel: point.label, name: item.site_survey_material_catalog?.name ?? "Equipamento ou ferramenta", details: [item.site_survey_screwdriver_types?.name, item.site_survey_wrench_sizes?.name, item.site_survey_custom_catalog_items?.name, item.notes].filter(Boolean).join(" — ") })));
