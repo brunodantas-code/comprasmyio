@@ -176,7 +176,8 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
       const text = participle.test(fragment) ? fragment : /^(loja|sobreloja|parede|galeria|cozinha|subestacao|armario|quadro|busway)/.test(normalize(fragment)) ? placePhrase(fragment) : fragment;
       hydraulic.push({ text: ", " }, { text, bold: true });
     }
-    if (access && accessSplit?.base) hydraulic.push({ text: ", de " }, { text: accessSplit.base, bold: true }, { text: " acesso. " }); else hydraulic.push({ text: ". " });
+    if (access && accessSplit?.base && isUninformed(accessSplit.base)) hydraulic.push({ text: ". A dificuldade de acesso " }, { text: "não foi informada", bold: true }, { text: ". " });
+    else if (access && accessSplit?.base) hydraulic.push({ text: ", de " }, { text: accessSplit.base, bold: true }, { text: " acesso. " }); else hydraulic.push({ text: ". " });
   }
   const pulse = hydraulicAnswer(["condicao da saida pulsada", "saida pulsada"]);
   const flowRate = hydraulicAnswer(["vazao nominal", "vazao do hidrometro"]);
@@ -189,13 +190,16 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
   }
   if (flowRate) { const rate = lowerLeadingPreposition(proseValue(flowRate.value)); hydraulic.push({ text: pulse ? "" : `A vazão nominal ${isUninformed(rate) ? "" : "é de "}` }, { text: isUninformed(rate) || !rate ? "não foi informada" : rate, bold: true }, { text: ". " }); }
   const flow = hydraulicAnswer(["sentido do fluxo"]);
-  if (flow) hydraulic.push({ text: "O sentido do fluxo de água foi classificado como " }, { text: normalize(flow.value).includes("desacordo") || normalize(flow.value).includes("incorret") ? "incorreto" : normalize(flow.value).includes("acordo") || normalize(flow.value).includes("corret") ? "correto" : lower(flow.value), bold: true }, { text: ". " });
+  if (flow && isUninformed(lower(flow.value))) hydraulic.push({ text: "O sentido do fluxo de água " }, { text: "não foi informado", bold: true }, { text: ". " });
+  else if (flow) hydraulic.push({ text: "O sentido do fluxo de água foi classificado como " }, { text: normalize(flow.value).includes("desacordo") || normalize(flow.value).includes("incorret") ? "incorreto" : normalize(flow.value).includes("acordo") || normalize(flow.value).includes("corret") ? "correto" : lower(flow.value), bold: true }, { text: ". " });
   const flange = hydraulicAnswer(["tipo de flange"]);
-  if (flange) hydraulic.push({ text: "O flange é do tipo " }, { text: lower(flange.value), bold: true }, { text: ". " });
+  if (flange) hydraulic.push(...(isUninformed(lower(flange.value)) ? [{ text: "O tipo de flange " }, { text: "não foi informado", bold: true }, { text: ". " }] : [{ text: "O flange é do tipo " }, { text: lower(flange.value), bold: true }, { text: ". " }]));
   const registerType = hydraulicAnswer(["tipo de registro existente"]);
   const registerCondition = hydraulicAnswer(["condicao do registro"]);
-  if (registerType) hydraulic.push({ text: "O registro existente é do tipo " }, { text: lower(registerType.value), bold: true }, { text: registerCondition ? " e encontra-se " : ". " });
-  if (registerCondition) hydraulic.push({ text: registerType ? "" : "O registro encontra-se " }, { text: lower(registerCondition.value), bold: true }, { text: ". " });
+  const typeUnknown = registerType && isUninformed(lower(registerType.value));
+  const conditionUnknown = registerCondition && isUninformed(lower(registerCondition.value));
+  if (registerType) hydraulic.push(...(typeUnknown ? [{ text: "O tipo de registro existente " }, { text: "não foi informado", bold: true }, { text: ". " }] : [{ text: "O registro existente é do tipo " }, { text: lower(registerType.value), bold: true }, { text: registerCondition && !conditionUnknown ? " e encontra-se " : ". " }]));
+  if (registerCondition) hydraulic.push(...(conditionUnknown ? [{ text: "A condição do registro " }, { text: "não foi informada", bold: true }, { text: ". " }] : [{ text: registerType && !typeUnknown ? "" : "O registro encontra-se " }, { text: lower(registerCondition.value), bold: true }, { text: ". " }]));
   const diameter = hydraulicAnswer(["diametro da tubulacao"]);
   if (diameter) { const size = proseValue(diameter.value); hydraulic.push({ text: `O diâmetro da tubulação de água ${isUninformed(size) || !size ? "" : "é de "}` }, { text: isUninformed(size) || !size ? "não foi informado" : size, bold: true }, { text: ". " }); }
   const nearbyPower = hydraulicAnswer(["ponto de eletrica proximo", "ponto eletrico proximo"]);
@@ -203,11 +207,12 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
   const routing = hydraulicAnswer(["encaminhamento da eletrica", "encaminhamento eletrico"]);
   if (routing) add(hydraulic, "O encaminhamento deve ser realizado por meio de ", { ...routing, value: lower(routing.value) }, ". ");
   const hydraulicComplexity = hydraulicAnswer(["complexidade dessa instalacao", "complexidade da instalacao"]);
-  if (hydraulicComplexity) hydraulic.push({ text: "A instalação é de complexidade " }, { text: lower(hydraulicComplexity.value), bold: true }, { text: ". " });
+  if (hydraulicComplexity) hydraulic.push(...(isUninformed(lower(hydraulicComplexity.value)) ? [{ text: "A complexidade da instalação " }, { text: "não foi informada", bold: true }, { text: ". " }] : [{ text: "A instalação é de complexidade " }, { text: lower(hydraulicComplexity.value), bold: true }, { text: ". " }]));
   const consumptionLevel = hydraulicAnswer(["classificacao do perfil de consumo", "perfil de consumo classificado"]);
   const consumptionProfile = hydraulicAnswer(["perfil de consumo da loja"]);
   const profileNotInformed = consumptionProfile && /^(nao informado|nao informada|sem informacao|nao foi informado)$/.test(normalize(lower(consumptionProfile.value)));
-  if (consumptionLevel) hydraulic.push({ text: "O perfil de consumo da loja é " }, { text: lower(consumptionLevel.value), bold: true }, { text: consumptionProfile && !profileNotInformed ? ", contemplando " : ". " });
+  if (consumptionLevel && isUninformed(lower(consumptionLevel.value))) hydraulic.push({ text: "A classificação do perfil de consumo " }, { text: "não foi informada", bold: true }, { text: ". " });
+  else if (consumptionLevel) hydraulic.push({ text: "O perfil de consumo da loja é " }, { text: lower(consumptionLevel.value), bold: true }, { text: consumptionProfile && !profileNotInformed ? ", contemplando " : ". " });
   if (consumptionProfile) {
     const profile = lower(consumptionProfile.value);
     if (profileNotInformed) {
@@ -233,7 +238,8 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
   const panelLocation = electricalAnswer(["localizacao do quadro eletrico", "onde se encontra o quadro eletrico"]);
   if (panelLocation?.value && !/^[-.\s]+$/.test(panelLocation.value)) electrical.push({ text: "O quadro elétrico se encontra " }, { text: placePhrase(panelLocation.value), bold: true }, { text: ". " });
   const electricalComplexity = electricalAnswer(["complexidade eletrica", "complexidade dessa instalacao", "complexidade da instalacao"]);
-  if (electricalComplexity?.value && !/^[-.\s]+$/.test(electricalComplexity.value)) electrical.push({ text: "A instalação elétrica é de complexidade " }, { text: lower(electricalComplexity.value), bold: true }, { text: "." });
+  if (electricalComplexity?.value && isUninformed(lower(electricalComplexity.value))) electrical.push({ text: "A complexidade da instalação elétrica " }, { text: "não foi informada", bold: true }, { text: "." });
+  else if (electricalComplexity?.value && !/^[-.\s]+$/.test(electricalComplexity.value)) electrical.push({ text: "A instalação elétrica é de complexidade " }, { text: lower(electricalComplexity.value), bold: true }, { text: "." });
   if (electricalSection?.id && skipped.has(electricalSection.id)) summaries.push({ title: electricalSection.title, parts: [{ text: "Não realizada." }], questionIds: electricalIds });
   else if (electrical.length) summaries.push({ title: electricalSection?.title ?? "Instalação elétrica", parts: electrical, questionIds: electricalIds });
   return summaries;
