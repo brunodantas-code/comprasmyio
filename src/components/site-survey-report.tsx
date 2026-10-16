@@ -151,8 +151,12 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
   const locationDetail = hydraulicAnswer(["detalhar para facilitar", "facilitar sua localizacao"]);
   const access = hydraulicAnswer(["dificuldade de acesso", "acesso ao hidrometro"]);
   if (locations.length) {
-    hydraulic.push({ text: "O hidrômetro encontra-se " });
-    hydraulic.push({ text: placePhrase(proseValue(locations[0].value)), bold: true });
+    const placeUninformed = isUninformed(proseValue(locations[0].value));
+    if (placeUninformed) hydraulic.push({ text: "Não foi informada a localização exata do hidrômetro" });
+    else {
+      hydraulic.push({ text: "O hidrômetro encontra-se " });
+      hydraulic.push({ text: placePhrase(proseValue(locations[0].value)), bold: true });
+    }
     // Respostas "Outros"/observações não entram literalmente: separam-se do valor base,
     // removem-se repetições e ajusta-se a concordância antes de compor a frase.
     const splitObservation = (value: string) => {
