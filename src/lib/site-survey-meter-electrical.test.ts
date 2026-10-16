@@ -1,5 +1,6 @@
-/// <reference types="bun" />
-import { describe, expect, test } from "bun:test";
+import { describe, test } from "node:test";
+import { strict as assert } from "node:assert";
+const expect = (actual: unknown) => ({ toEqual: (expected: unknown) => assert.deepEqual(actual, expected), toBe: (expected: unknown) => assert.equal(actual, expected), toHaveLength: (length: number) => assert.equal((actual as unknown[]).length, length) });
 import { meterElectricalItemsForPoint, validCatalogQuantity } from "./site-survey-meter-electrical";
 const questions = [{ id: "nearby", section_id: "water", prompt: "Existe ponto de elétrica próximo ao hidrômetro?" }];
 const items = [
