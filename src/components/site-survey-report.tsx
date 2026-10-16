@@ -1,5 +1,6 @@
 import { customerQuestionResponses, customerQuestions, isCustomerQuestion, numberedCustomerQuestions } from "@/lib/site-survey-questions";
 import { surveyPointType } from "@/lib/site-survey-point-type";
+import { reviewNoteText, sortTotalValues } from "@/lib/site-survey-report-totals";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Download, FileChartColumn, LoaderCircle, Printer, ShoppingCart } from "lucide-react";
@@ -50,9 +51,6 @@ const pauseMinutes = (pauses: PointPause[], end: string | null = null) => Math.r
 const pointDuration = (point: Point, pauses: PointPause[]) => { const total = durationMinutes(point.started_at, point.completed_at); return total === null ? null : Math.max(0, total - pauseMinutes(pauses, point.completed_at)); };
 const formatMinutes = (minutes: number | null) => minutes === null ? "Incompleto" : `${Math.floor(minutes / 60)}h ${String(minutes % 60).padStart(2, "0")}min`;
 const normalize = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR");
-// Totalizadores com ordem fixa: do mais fácil para o mais difícil, como Baixa, Média e Alta.
-const TOTAL_ORDERS: Record<string, string[]> = { "Dificuldade de acesso": ["Fácil", "Regular", "Difícil"], "Complexidade": ["Baixa", "Média", "Alta"] };
-const totalOrderRank = (label: string, value: string) => { const order = TOTAL_ORDERS[label]; if (!order) return 0; const index = order.indexOf(value); return index < 0 ? order.length : index; };
 const interventionQuestionLabel = (prompt: string) => normalize(prompt).includes("detalhar para facilitar sua localizacao") ? "Hidrômetro" : prompt;
 const interventionAnswerLabel = (prompt: string, answer: string) => {
   const normalizedPrompt = normalize(prompt);
@@ -416,13 +414,13 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     })
     .map((item, index) => ({ ...item, number: index + 1 }));
   const pointNotes = (point: Point) => { const section = reviewSectionForPoint(point); return section && !point.skippedSectionIds.includes(section.id) ? pointResponses(point).filter((response) => questions.some((question) => question.id === response.question_id && question.section_id === section.id && !isCustomerQuestion(question))).map((response) => valueText(response.answer)).filter(Boolean).join("; ") : ""; };
-  const reviewNotes = (point: Point) => { const text = pointNotes(point); return normalize(text) === normalize("Nenhuma observação adicional") ? "" : text; };
+  const reviewNotes = (point: Point) => reviewNoteText(pointNotes(point));
   const technicalTotals = useMemo(() => {
     const groups = [{ label: "Tipos de hidrômetro", terms: ["tipo de hidrometro", "tipo de registro"] }, { label: "Dificuldade de acesso", terms: ["dificuldade", "acesso ao hidrometro"] }, { label: "Quadros e pontos elétricos", terms: ["quadro eletrico", "ponto eletrico"] }, { label: "Complexidade", terms: ["complexidade"] }];
     return groups.map((group) => { const counts = new Map<string, number>(); for (const response of (data?.responses ?? []).filter(responseIsIncluded)) { const question = questions.find((item) => item.id === response.question_id); if (!question || !group.terms.some((term) => normalize(question.prompt).includes(term))) continue; const rawValue = valueText(response.answer).trim(); const normalizedValue = normalize(rawValue); const value = group.label === "Dificuldade de acesso"
       ? normalizedValue.startsWith("facil") ? "Fácil" : normalizedValue.startsWith("regular") ? "Regular" : normalizedValue.startsWith("dificil") ? "Difícil" : ""
       : rawValue;
-      if (value) counts.set(value, (counts.get(value) ?? 0) + 1); } return { label: group.label, values: [...counts.entries()].sort((a, b) => totalOrderRank(group.label, a[0]) - totalOrderRank(group.label, b[0])) }; }).filter((group) => group.values.length);
+      if (value) counts.set(value, (counts.get(value) ?? 0) + 1); } return { label: group.label, values: sortTotalValues(group.label, [...counts.entries()]) }; }).filter((group) => group.values.length);
   }, [data?.responses, questions, filteredPointKeys]);
   const pointSummaries = (point: Point) => { const pointSections = sectionsForPoint(point); const reviewId = reviewSectionForPoint(point)?.id; return buildPointSummaries((pointResponses(point) as ReportResponse[]).filter((response) => !reviewId || !questions.some((question) => question.id === response.question_id && question.section_id === reviewId)), questions, pointSections, point.skippedSectionIds, data?.meterMappings ?? []); };
   const pointMaterials = (point: Point) => (data?.materials ?? []).filter((item) => point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id);
