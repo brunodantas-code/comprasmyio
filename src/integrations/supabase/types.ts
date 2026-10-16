@@ -3612,6 +3612,41 @@ export type Database = {
           },
         ]
       }
+      site_survey_contracted_scope: {
+        Row: {
+          electrical: number | null
+          hydraulic_general: number | null
+          hydraulic_shops: number | null
+          updated_at: string
+          updated_by: string | null
+          visit_id: string
+        }
+        Insert: {
+          electrical?: number | null
+          hydraulic_general?: number | null
+          hydraulic_shops?: number | null
+          updated_at?: string
+          updated_by?: string | null
+          visit_id: string
+        }
+        Update: {
+          electrical?: number | null
+          hydraulic_general?: number | null
+          hydraulic_shops?: number | null
+          updated_at?: string
+          updated_by?: string | null
+          visit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_survey_contracted_scope_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: true
+            referencedRelation: "site_survey_visits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_survey_custom_catalog_items: {
         Row: {
           active: boolean
@@ -3773,6 +3808,44 @@ export type Database = {
             columns: ["visit_luc_id"]
             isOneToOne: false
             referencedRelation: "site_survey_visit_lucs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      site_survey_installation_approvals: {
+        Row: {
+          electrical_approved: boolean
+          hydraulic_approved: boolean
+          point_id: string
+          point_kind: string
+          updated_at: string
+          updated_by: string | null
+          visit_id: string
+        }
+        Insert: {
+          electrical_approved?: boolean
+          hydraulic_approved?: boolean
+          point_id: string
+          point_kind: string
+          updated_at?: string
+          updated_by?: string | null
+          visit_id: string
+        }
+        Update: {
+          electrical_approved?: boolean
+          hydraulic_approved?: boolean
+          point_id?: string
+          point_kind?: string
+          updated_at?: string
+          updated_by?: string | null
+          visit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_survey_installation_approvals_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_visits"
             referencedColumns: ["id"]
           },
         ]

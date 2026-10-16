@@ -23,3 +23,14 @@ export function validCatalogQuantity(quantity: number, unit: string) {
 export function formatPurchaseQuantity(quantity: number, unit?: string): string {
   return `${quantity.toLocaleString("pt-BR", { maximumFractionDigits: 4 })}${unit ? ` ${unit}` : ""}`;
 }
+
+type PurchaseReportRow = { key: string; label: string; quantity: number; unit?: string; points: string[] };
+/** Presentation-only grouping; individual purchase request items are preserved. */
+export function groupMeterElectricalReportRows(rows: PurchaseReportRow[]) {
+  const items = rows.filter((row) => row.key.startsWith("meter-electrical:"));
+  return {
+    otherRows: rows.filter((row) => !row.key.startsWith("meter-electrical:")),
+    items,
+    points: [...new Set(items.flatMap((row) => row.points))],
+  };
+}
