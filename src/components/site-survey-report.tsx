@@ -116,7 +116,9 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
     const text = clean(value);
     return /^(outro|outros)\s*(?:—|–|-)\s*/i.test(normalize(text)) ? text.replace(/^(outro|outros)\s*(?:—|–|-)\s*/i, "").trim() : /^(outro|outros)$/i.test(normalize(text)) ? "" : text;
   };
-  const lower = (value: string) => proseValue(value).toLocaleLowerCase("pt-BR");
+  // Minúsculas no texto corrido, preservando siglas/termos escritos propositalmente em maiúsculas (ex.: AC, DN20, LUC).
+  const softLower = (text: string) => text.replace(/[\p{L}\p{N}]+/gu, (word) => (/^\p{Lu}[\p{Ll}\p{N}]*$/u.test(word) ? word.toLocaleLowerCase("pt-BR") : word));
+  const lower = (value: string) => softLower(proseValue(value));
   const isUninformed = (value: string) => /^(nao informad[oa]|nao foi informad[oa]|sem informacao)$/i.test(normalize(value));
   const statusOnly = (value: string) => lower((value.split("—").at(-1) ?? value).trim());
   const detailOnly = (value: string) => clean((value.split("—").at(-1) ?? value).trim());
@@ -155,7 +157,7 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
     // removem-se repetições e ajusta-se a concordância antes de compor a frase.
     const splitObservation = (value: string) => {
       const parts = proseValue(value).split(/\s+[—–]\s+/).map((part) => part.trim()).filter(Boolean);
-      return { base: (parts[0] ?? "").toLocaleLowerCase("pt-BR"), notes: parts.slice(1).map((part) => part.toLocaleLowerCase("pt-BR")) };
+      return { base: softLower(parts[0] ?? ""), notes: parts.slice(1).map((part) => softLower(part)) };
     };
     const accessSplit = access ? splitObservation(access.value) : null;
     const remainingLocations = locations.slice(1).flatMap((location) => { const split = splitObservation(location.value); return [split.base, ...split.notes]; }).filter(Boolean);
