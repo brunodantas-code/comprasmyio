@@ -4,6 +4,22 @@ export const SURVEY_PHOTO_MAX_BYTES = 500 * 1024;
 const prepared = new WeakMap<File, Promise<File>>();
 let processing: Promise<unknown> = Promise.resolve();
 
+/** Same soft corner used by every report thumbnail: radius 32 on a 240px square. */
+export const SURVEY_PHOTO_CORNER_RATIO = 32 / 240;
+
+/** Clips a canvas to a rounded rectangle so photos keep the thumbnail corner in PDFs. */
+export function clipRoundedPhoto(context: CanvasRenderingContext2D, width: number, height: number) {
+  const radius = Math.max(1, Math.round(Math.min(width, height) * SURVEY_PHOTO_CORNER_RATIO));
+  context.beginPath();
+  context.moveTo(radius, 0);
+  context.arcTo(width, 0, width, height, radius);
+  context.arcTo(width, height, 0, height, radius);
+  context.arcTo(0, height, 0, 0, radius);
+  context.arcTo(0, 0, width, 0, radius);
+  context.closePath();
+  context.clip();
+}
+
 /** Browser-only work, cached for retries and serialized to bound phone memory. */
 export function prepareSurveyPhoto(file: File): Promise<File> {
   const cached = prepared.get(file);

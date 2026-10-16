@@ -2,6 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import nunitoRegularUrl from "@/assets/fonts/nunito-regular.ttf?url";
 import nunitoBoldUrl from "@/assets/fonts/nunito-bold.ttf?url";
 import type { FacadeThumbnailAttachment } from "@/components/site-survey-facade-thumbnail";
+import { clipRoundedPhoto } from "@/lib/site-survey-photo";
 
 export type RegistrationPdfRow = { luc: string; meter: string; type: string; name: string; location: string; facade?: FacadeThumbnailAttachment };
 
@@ -36,11 +37,7 @@ async function thumbnail(attachment: FacadeThumbnailAttachment) {
     const canvas = document.createElement("canvas"); canvas.width = 240; canvas.height = 240;
     const context = canvas.getContext("2d");
     if (!context) return undefined;
-    const r = 32;
-    context.beginPath(); context.moveTo(r, 0);
-    context.arcTo(240, 0, 240, 240, r); context.arcTo(240, 240, 0, 240, r);
-    context.arcTo(0, 240, 0, 0, r); context.arcTo(0, 0, 240, 0, r);
-    context.closePath(); context.clip();
+    clipRoundedPhoto(context, 240, 240);
     const side = Math.min(image.naturalWidth, image.naturalHeight);
     context.drawImage(image, (image.naturalWidth - side) / 2, (image.naturalHeight - side) / 2, side, side, 0, 0, 240, 240);
     return canvas.toDataURL("image/png");

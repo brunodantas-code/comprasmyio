@@ -7,6 +7,7 @@ import { buildClientPendingGroups, unidentifiedLucPoints, type ClientPendingPoin
 import nunitoRegularUrl from "@/assets/fonts/nunito-regular.ttf?url";
 import nunitoBoldUrl from "@/assets/fonts/nunito-bold.ttf?url";
 import { surveyPointType } from "@/lib/site-survey-point-type";
+import { clipRoundedPhoto } from "@/lib/site-survey-photo";
 
 type Props = {
   visit: { id: string; survey_number: number; completed_at: string | null; scheduled_start: string };
@@ -149,14 +150,7 @@ export function SiteSurveyClientPendingReport({ visit, client, unit, project, po
             const context = canvas.getContext("2d");
             if (!context) throw new Error("Não foi possível preparar as fotos do relatório.");
             // Quadrado com bordas arredondadas, como nas fachadas do Histórico.
-            const radius = 32;
-            context.beginPath();
-            context.moveTo(radius, 0);
-            context.arcTo(240, 0, 240, 240, radius);
-            context.arcTo(240, 240, 0, 240, radius);
-            context.arcTo(0, 240, 0, 0, radius);
-            context.arcTo(0, 0, 240, 0, radius);
-            context.closePath(); context.clip();
+            clipRoundedPhoto(context, 240, 240);
             const side = Math.min(image.naturalWidth, image.naturalHeight);
             context.drawImage(image, (image.naturalWidth - side) / 2, (image.naturalHeight - side) / 2, side, side, 0, 0, 240, 240);
             thumbnails.set(point.value, canvas.toDataURL("image/png"));
