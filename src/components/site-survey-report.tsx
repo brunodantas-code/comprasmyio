@@ -220,14 +220,16 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
   }
   const pulse = hydraulicAnswer(["condicao da saida pulsada", "saida pulsada"]);
   const flowRate = hydraulicAnswer(["vazao nominal", "vazao do hidrometro"]);
+  // "Não informado e não legível" (e variantes ilegíveis) também significa vazão não informada.
+  const rateUninformed = (value: string) => isUninformed(value) || /nao legivel|ilegivel|nao identificado/.test(normalize(value));
   if (pulse) {
     const pulseStatus = statusOnly(pulse.value);
     const pulseWorks = /^(sim|operante|funcional|funcionando)/.test(pulseStatus);
     const pulseUnavailable = normalize(pulseStatus).includes("inoperante") || normalize(pulseStatus) === "nao";
-    if (pulseUnavailable) hydraulic.push({ text: "Não existe saída pulsada ou encontra-se inoperante", bold: true }, { text: flowRate ? ` e a vazão nominal ${isUninformed(proseValue(flowRate.value)) ? "" : "é de "}` : ". " });
-    else hydraulic.push({ text: pulseWorks ? "Possui saída pulsada " : "A saída pulsada encontra-se " }, { text: pulseWorks ? "funcional" : pulseStatus, bold: true }, { text: flowRate ? ` e a vazão nominal ${isUninformed(proseValue(flowRate.value)) ? "" : "é de "}` : ". " });
+    if (pulseUnavailable) hydraulic.push({ text: "Não existe saída pulsada ou encontra-se inoperante", bold: true }, { text: flowRate ? ` e a vazão nominal ${rateUninformed(proseValue(flowRate.value)) ? "" : "é de "}` : ". " });
+    else hydraulic.push({ text: pulseWorks ? "Possui saída pulsada " : "A saída pulsada encontra-se " }, { text: pulseWorks ? "funcional" : pulseStatus, bold: true }, { text: flowRate ? ` e a vazão nominal ${rateUninformed(proseValue(flowRate.value)) ? "" : "é de "}` : ". " });
   }
-  if (flowRate) { const rate = lowerLeadingPreposition(proseValue(flowRate.value)); hydraulic.push({ text: pulse ? "" : `A vazão nominal ${isUninformed(rate) ? "" : "é de "}` }, { text: isUninformed(rate) || !rate ? "não foi informada" : rate, bold: true }, { text: ". " }); }
+  if (flowRate) { const rate = lowerLeadingPreposition(proseValue(flowRate.value)); hydraulic.push({ text: pulse ? "" : `A vazão nominal ${rateUninformed(rate) ? "" : "é de "}` }, { text: rateUninformed(rate) || !rate ? "não foi informada" : rate, bold: true }, { text: ". " }); }
   const flow = hydraulicAnswer(["sentido do fluxo"]);
   if (flow && isUninformed(lower(flow.value))) hydraulic.push({ text: "O sentido do fluxo de água " }, { text: "não foi informado", bold: true }, { text: ". " });
   else if (flow) hydraulic.push({ text: "O sentido do fluxo de água foi classificado como " }, { text: normalize(flow.value).includes("desacordo") || normalize(flow.value).includes("incorret") ? "incorreto" : normalize(flow.value).includes("acordo") || normalize(flow.value).includes("corret") ? "correto" : lower(flow.value), bold: true }, { text: ". " });
