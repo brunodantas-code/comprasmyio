@@ -157,8 +157,6 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
   if (locations.length) {
     const placeUninformed = isUninformed(proseValue(locations[0].value));
     if (placeUninformed) hydraulic.push({ text: "Não foi informada a localização exata do hidrômetro" });
-    // Sem local nem detalhe: frase curta, sem "exata" e sem dificuldade de acesso.
-    const noLocationInfo = placeUninformed && !locationDetailInformed();
     else {
       hydraulic.push({ text: "O hidrômetro encontra-se " });
       hydraulic.push({ text: placePhrase(proseValue(locations[0].value)), bold: true });
@@ -223,7 +221,9 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
     // Quando o técnico descreve o próprio acesso ("acesso bastante complicado"), essa descrição substitui "de difícil acesso".
     const accessLead = accessRaw.find((note) => /^acesso\s+/i.test(note) && !/^acesso\s+(ruim|dif[ií]cil|complicado|restrito)\b/i.test(note));
     const accessNotes = accessRaw.filter((note) => note !== accessLead).map((note) => dropRepeated(note.replace(/^acesso\s+(ruim|dif[ií]cil|complicado|restrito)\s*,?\s*/i, "").trim())).filter(Boolean);
-    if (access && accessSplit?.base && isUninformed(accessSplit.base)) hydraulic.push({ text: ". A dificuldade de acesso " }, { text: "não foi informada", bold: true }, { text: ". " });
+    // Sem local nem detalhe: frase curta, sem "exata" e sem dificuldade de acesso.
+    if (placeUninformed && !fragments.length) { const lead = hydraulic.find((part) => part.text === "Não foi informada a localização exata do hidrômetro"); if (lead) lead.text = "Não foi informada a localização do hidrômetro"; hydraulic.push({ text: ". " }); }
+    else if (access && accessSplit?.base && isUninformed(accessSplit.base)) hydraulic.push({ text: ". A dificuldade de acesso " }, { text: "não foi informada", bold: true }, { text: ". " });
     else if (access && accessLead) { hydraulic.push({ text: ", de " }, { text: accessLead, bold: true }); for (const note of accessNotes) hydraulic.push({ text: ", " }, { text: note, bold: true }); hydraulic.push({ text: ". " }); }
     else if (access && accessSplit?.base) { hydraulic.push({ text: ", de " }, { text: accessSplit.base, bold: true }, { text: " acesso" }); for (const note of accessNotes) hydraulic.push({ text: ", " }, { text: note, bold: true }); hydraulic.push({ text: ". " }); } else hydraulic.push({ text: ". " });
   }
@@ -257,6 +257,7 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
   const conditionUnknown = registerCondition && isUninformed(lower(registerCondition.value));
   const typeMissing = registerType && /^(inexistente|nao existe|sem registro)/.test(normalize(lower(registerType.value)));
   if (typeMissing) hydraulic.push({ text: "Registro inexistente", bold: true }, { text: ", sendo necessária instalação antes da implantação do novo hidrômetro. " });
+  else if (registerType && typeUnknown && !registerCondition) hydraulic.push({ text: "Inexiste registro", bold: true }, { text: ". " });
   else if (registerType && typeUnknown) hydraulic.push(...(registerCondition && !conditionUnknown ? [{ text: "O tipo de registro existente " }, { text: "não foi informado", bold: true }, { text: ", mas encontra-se " }, { text: lower(registerCondition.value), bold: true }, { text: ". " }] : conditionUnknown ? [{ text: "O tipo e a condição do registro " }, { text: "não foram informados", bold: true }, { text: ". " }] : [{ text: "O tipo de registro existente " }, { text: "não foi informado", bold: true }, { text: ". " }]));
   else if (registerType) hydraulic.push({ text: "O registro existente é do tipo " }, { text: lower(registerType.value), bold: true }, { text: registerCondition && !conditionUnknown ? " e encontra-se " : ". " });
   if (registerCondition && !typeMissing && !(registerType && typeUnknown)) hydraulic.push(...(conditionUnknown ? [{ text: "A condição do registro " }, { text: "não foi informada", bold: true }, { text: ". " }] : [{ text: registerType && !typeUnknown ? "" : "O registro encontra-se " }, { text: lower(registerCondition.value), bold: true }, { text: ". " }]));
