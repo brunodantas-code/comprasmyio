@@ -24,7 +24,7 @@ import { SiteSurveyScreenSummary } from "@/components/site-survey-screen-summary
 import { useSurveyImage } from "@/hooks/use-survey-image";
 import { surveyPointType, requiresSurveyFacade, type SurveyPointType } from "@/lib/site-survey-point-type";
 import { SiteSurveyCustomerQuestions } from "@/components/site-survey-customer-questions";
-import { answeredCustomerQuestions, customerQuestionResponses, customerQuestions, isCustomerQuestion, pendingCustomerQuestions, simplifiedAnswerType, persistedAnswerType } from "@/lib/site-survey-questions";
+import { answeredCustomerQuestions, customerQuestionResponses, customerQuestions, isCustomerQuestion, pendingCustomerQuestions, showsCustomerQuestions, simplifiedAnswerType, persistedAnswerType } from "@/lib/site-survey-questions";
 import { prepareSurveyPhoto } from "@/lib/site-survey-photo";
 import { useSurveyPointEdit } from "@/hooks/use-survey-point-edit";
 import { SiteSurveyFacadePicker } from "@/components/site-survey-facade-picker";
@@ -1045,7 +1045,7 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
         if (skipped.has(section.id)) continue;
         for (const question of sortByPosition(data.questions.filter((item) => item.active && item.section_id === section.id))) if (isQuestionVisible(question, answers) && (isNotInformedAnswer(answerParts(answers.get(question.id)).value) || !isStoredQuestionComplete(question, answers, detail.attachments, scope))) items.push({ key: question.id, label: `${section.title}: ${question.prompt}`, sectionId: section.id });
       }
-      const customerQuestion = sectionsFor(point.templateId ?? visit.template_id, own).flatMap((section) => data.questions.filter((question) => question.active && question.section_id === section.id && isCustomerQuestion(question)))[0];
+      const customerQuestion = showsCustomerQuestions(view) ? sectionsFor(point.templateId ?? visit.template_id, own).flatMap((section) => data.questions.filter((question) => question.active && question.section_id === section.id && isCustomerQuestion(question)))[0] : undefined;
       if (customerQuestion) {
         const storedCustomerAnswer = answers.get(customerQuestion.id);
         const customerResponses = customerQuestionResponses(storedCustomerAnswer);
