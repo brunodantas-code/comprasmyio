@@ -162,7 +162,7 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
     const accessSplit = access ? splitObservation(access.value) : null;
     const remainingLocations = locations.slice(1).flatMap((location) => { const split = splitObservation(location.value); return [split.base, ...split.notes]; }).filter(Boolean);
     const detail = locationDetail ? lower(proseValue(locationDetail.value)).replace(/^(?:localizad[oa]\s+)?(?:o\s+)?hidr[oô]metro\s+(?:fica|est[aá]|encontra-se)?\s*/i, "").trim() : "";
-    const candidates = [...remainingLocations, detail, ...(accessSplit?.notes ?? [])].map((item) => item.replace(/[.;,]+$/, "").trim()).filter(Boolean);
+    const candidates = [...remainingLocations, detail].map((item) => item.replace(/[.;,]+$/, "").trim()).filter(Boolean);
     const firstPlace = normalize(lower(proseValue(locations[0].value)));
     const fragments: string[] = [];
     for (const item of candidates) {
@@ -174,12 +174,15 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
       fragments.push(item);
     }
     const participle = /^(embutid|instalad|fixad|localizad|posicionad|sob\b|sobre\b|atr[aá]s|acima|abaixo|ao lado|junto|pr[oó]xim|dentro|entre|no\b|na\b|nos\b|nas\b|em\b)/;
-    for (const fragment of fragments) {
-      const text = participle.test(fragment) ? fragment : /^(loja|sobreloja|parede|galeria|cozinha|subestacao|armario|quadro|busway)/.test(normalize(fragment)) ? placePhrase(fragment) : fragment;
+    fragments.forEach((fragment, index) => {
+      const needsLocated = index === 0 && /^(pr[oó]xim|acima|abaixo|ao lado|junto|atr[aá]s|dentro|entre|sob\b|sobre\b)/.test(fragment);
+      const text = needsLocated ? `localizado ${fragment}` : participle.test(fragment) ? fragment : /^(loja|sobreloja|parede|galeria|cozinha|subestacao|armario|quadro|busway)/.test(normalize(fragment)) ? placePhrase(fragment) : fragment;
       hydraulic.push({ text: ", " }, { text, bold: true });
-    }
+    });
+    // Observação da dificuldade de acesso vem depois de "de ... acesso", sem repetir a palavra "acesso".
+    const accessNotes = (accessSplit?.notes ?? []).map((note) => note.replace(/^acesso\s+(ruim|dif[ií]cil|complicado|restrito)\s*,?\s*/i, "").replace(/[.;,]+$/, "").trim()).filter(Boolean);
     if (access && accessSplit?.base && isUninformed(accessSplit.base)) hydraulic.push({ text: ". A dificuldade de acesso " }, { text: "não foi informada", bold: true }, { text: ". " });
-    else if (access && accessSplit?.base) hydraulic.push({ text: ", de " }, { text: accessSplit.base, bold: true }, { text: " acesso. " }); else hydraulic.push({ text: ". " });
+    else if (access && accessSplit?.base) { hydraulic.push({ text: ", de " }, { text: accessSplit.base, bold: true }, { text: " acesso" }); for (const note of accessNotes) hydraulic.push({ text: ", " }, { text: note, bold: true }); hydraulic.push({ text: ". " }); } else hydraulic.push({ text: ". " });
   }
   const pulse = hydraulicAnswer(["condicao da saida pulsada", "saida pulsada"]);
   const flowRate = hydraulicAnswer(["vazao nominal", "vazao do hidrometro"]);
