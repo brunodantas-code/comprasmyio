@@ -47,3 +47,10 @@ export const flowRateStatus = (value: string): "informed" | "uninformed" | "unve
   if (!text || /nao (?:foi )?informad[oa]|sem informacao|nao legivel|ilegivel|nao identificado/i.test(text)) return "uninformed";
   return "informed";
 };
+
+export const meterFlowTitleData = (value: string | null, specification: string | null) => {
+  const flow = (value ?? "").replace(/^outros?\s*[—–-]\s*/i, "").trim();
+  return flowRateStatus(flow) === "informed"
+    ? { flow, specification }
+    : { flow: null, specification: null };
+};

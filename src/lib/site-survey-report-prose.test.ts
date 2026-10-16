@@ -1,6 +1,6 @@
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
-import { flowRateStatus, isUninformedLocation, lowerLeadingPreposition, uninformedRegisterSentences } from "./site-survey-report-prose";
+import { flowRateStatus, isUninformedLocation, lowerLeadingPreposition, meterFlowTitleData, uninformedRegisterSentences } from "./site-survey-report-prose";
 
 const joined = (parts: { text: string }[]) => parts.map((part) => part.text).join("");
 
@@ -42,6 +42,11 @@ describe("lowerLeadingPreposition", () => {
 
 
 describe("missing technical values", () => {
+  test("unmapped 30 m³/h has a flow but no DN; mapped flow keeps its DN", () => {
+    assert.deepEqual(meterFlowTitleData("Outros — 30 m³/h", null), { flow: "30 m³/h", specification: null });
+    assert.deepEqual(meterFlowTitleData("Até 5 m³/h", "DN25"), { flow: "Até 5 m³/h", specification: "DN25" });
+    assert.deepEqual(meterFlowTitleData("Outros — Não é possível verificar", null), { flow: null, specification: null });
+  });
   test("CEMA location markers are not physical places", () => {
     assert.equal(isUninformedLocation("Não informado"), true);
     assert.equal(isUninformedLocation("sem informação sobre a localização"), true);

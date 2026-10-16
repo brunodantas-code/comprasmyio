@@ -2,7 +2,7 @@ import { METER_ELECTRICAL_CATALOG_PURPOSE, meterElectricalItemsForPoint, formatP
 import { customerQuestionResponses, customerQuestions, isCustomerQuestion, numberedCustomerQuestions } from "@/lib/site-survey-questions";
 import { surveyPointType } from "@/lib/site-survey-point-type";
 import { reviewNoteText, sortTotalValues } from "@/lib/site-survey-report-totals";
-import { flowRateStatus, isUninformedLocation, lowerLeadingPreposition, uninformedRegisterSentences } from "@/lib/site-survey-report-prose";
+import { flowRateStatus, isUninformedLocation, lowerLeadingPreposition, meterFlowTitleData, uninformedRegisterSentences } from "@/lib/site-survey-report-prose";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Download, FileChartColumn, LoaderCircle, Printer, ShoppingCart } from "lucide-react";
@@ -89,9 +89,10 @@ const meterSpecification = (flowRate: string | null, mappings: MeterMapping[]) =
 };
 const meterSpecificationLabel = (flowRate: string | null, mappings: MeterMapping[]) => {
   const specification = meterSpecification(flowRate, mappings);
-  return flowRate && flowRateStatus(flowRate) === "informed"
-    ? `${specification} · Vazão: ${flowRate}`
-    : specification;
+  const title = meterFlowTitleData(flowRate, /^DN\d+$/i.test(specification) ? specification : null);
+  return title.flow
+    ? `${title.specification ? `${title.specification} · ` : ""}Vazão: ${title.flow}`
+    : "Especificação do hidrômetro não informada";
 };
 const buildPointSummaries = (responses: ReportResponse[], questions: Question[], sections: Section[], skippedSectionIds: string[], meterMappings: MeterMapping[]): PointSummary[] => {
   const summaries: PointSummary[] = [];
