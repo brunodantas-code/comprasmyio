@@ -209,8 +209,13 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
       const key = normalize(piece).replace(/^localizad[oa]\s+/, "").trim();
       return key && !mentioned.some((place) => place.includes(key));
     }).join(", ");
-    const accessNotes = (accessSplit?.notes ?? []).map((note) => dropRepeated(note.replace(/^acesso\s+(ruim|dif[ií]cil|complicado|restrito)\s*,?\s*/i, "").replace(/[.;,]+$/, "").trim())).filter(Boolean);
+    // "acesso" repetido no meio da observação vira continuação da frase (". acesso somente..." → ", somente...").
+    const accessRaw = (accessSplit?.notes ?? []).map((note) => note.replace(/^(.+?)[.;]\s*acesso\s+/i, "$1, ").replace(/[.;,]+$/, "").trim());
+    // Quando o técnico descreve o próprio acesso ("acesso bastante complicado"), essa descrição substitui "de difícil acesso".
+    const accessLead = accessRaw.find((note) => /^acesso\s+/i.test(note) && !/^acesso\s+(ruim|dif[ií]cil|complicado|restrito)\b/i.test(note));
+    const accessNotes = accessRaw.filter((note) => note !== accessLead).map((note) => dropRepeated(note.replace(/^acesso\s+(ruim|dif[ií]cil|complicado|restrito)\s*,?\s*/i, "").trim())).filter(Boolean);
     if (access && accessSplit?.base && isUninformed(accessSplit.base)) hydraulic.push({ text: ". A dificuldade de acesso " }, { text: "não foi informada", bold: true }, { text: ". " });
+    else if (access && accessLead) { hydraulic.push({ text: ", de " }, { text: accessLead, bold: true }); for (const note of accessNotes) hydraulic.push({ text: ", " }, { text: note, bold: true }); hydraulic.push({ text: ". " }); }
     else if (access && accessSplit?.base) { hydraulic.push({ text: ", de " }, { text: accessSplit.base, bold: true }, { text: " acesso" }); for (const note of accessNotes) hydraulic.push({ text: ", " }, { text: note, bold: true }); hydraulic.push({ text: ". " }); } else hydraulic.push({ text: ". " });
   }
   const pulse = hydraulicAnswer(["condicao da saida pulsada", "saida pulsada"]);
