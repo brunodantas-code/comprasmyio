@@ -157,6 +157,8 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
   if (locations.length) {
     const placeUninformed = isUninformed(proseValue(locations[0].value));
     if (placeUninformed) hydraulic.push({ text: "Não foi informada a localização exata do hidrômetro" });
+    // Sem local nem detalhe: frase curta, sem "exata" e sem dificuldade de acesso.
+    const noLocationInfo = placeUninformed && !locationDetailInformed();
     else {
       hydraulic.push({ text: "O hidrômetro encontra-se " });
       hydraulic.push({ text: placePhrase(proseValue(locations[0].value)), bold: true });
@@ -170,7 +172,7 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
     const accessSplit = access ? splitObservation(access.value) : null;
     const remainingLocations = locations.slice(1).flatMap((location) => { const split = splitObservation(location.value); return [split.base, ...split.notes]; }).filter(Boolean);
     const detail = locationDetail ? lower(proseValue(locationDetail.value)).replace(/^(?:localizad[oa]\s+)?(?:o\s+)?hidr[oô]metro\s+(?:fica|est[aá]|encontra-se)?\s*/i, "").trim() : "";
-    const candidates = [...remainingLocations, detail].map((item) => item.replace(/[.;,]+$/, "").trim()).filter(Boolean);
+    const candidates = [...remainingLocations, detail].map((item) => item.replace(/[.;,]+$/, "").trim()).filter((item) => item && !isUninformed(item) && !/^outros?$/i.test(item));
     const firstPlace = normalize(lower(proseValue(locations[0].value)));
     // O detalhe não repete o local já citado: "nos fundos da loja" vira "nos fundos".
     const firstPlaceWords = new Set(firstPlace.split(/[^a-z0-9]+/).filter(Boolean));
