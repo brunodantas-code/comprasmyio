@@ -448,17 +448,19 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
   const interventions = useMemo<Intervention[]>(() => (data?.calls ?? []).filter(callIsIncluded).flatMap((call) => {
     const actionRule = call.site_survey_question_actions as unknown as { site_survey_action_catalog: { name: string } | null } | null;
     const action = actionRule?.site_survey_action_catalog?.name ?? "";
-    if (!normalize(action).includes("intervencao do cliente") || call.status === "cancelado") return [];
+    if (!normalize(action).includes("intervencao do cliente")) return [];
     const linked = call.internal_calls as unknown as { call_number?: string; status?: string } | null;
-    if (linked?.status === "cancelado") return [];
     const point = data?.points.find((item) => item.kind === (call.visit_luc_id ? "luc" : "environment") && item.id === (call.visit_luc_id ?? call.visit_environment_id));
     const response = data?.responses.find((item) => item.question_id === call.question_id && item.visit_luc_id === call.visit_luc_id && item.visit_environment_id === call.visit_environment_id);
+    // Conta pela resposta do checklist: intervenção cancelada continua valendo enquanto a resposta mantiver o gatilho.
+    const cancelled = call.status === "cancelado" || linked?.status === "cancelado";
+    if (cancelled && (!response || !call.trigger_value || !normalize(valueText(response.answer)).includes(normalize(String(call.trigger_value))))) return [];
     const prompt = questions.find((item) => item.id === call.question_id)?.prompt ?? "Pergunta não disponível";
     const answer = response ? valueText(response.answer).trim() || "Resposta não disponível" : "Resposta não disponível";
     // O rótulo vem do cadastro de Textos do relatório para o cliente; sem texto cadastrado, mantém a resposta.
     const registered = reportResponseText(call.question_id, answer, data?.texts ?? []);
-    return [{ id: call.id, questionId: call.question_id, question: interventionQuestionLabel(prompt), action, answer: registered !== answer ? registered : interventionAnswerLabel(prompt, answer), pointKey: point ? `${point.kind}-${point.id}` : null, pointLabel: point?.label ?? "Visita geral", callNumber: linked?.call_number ?? null }];
-  }), [data?.calls, data?.points, data?.responses, data?.texts, questions, filteredPointKeys]);
+    return [{ id: call.id, questionId: call.question_id, question: interventionQuestionLabel(prompt), action, answer: registered !== answer ? registered : interventionAnswerLabel(prompt, answer), pointKey: point ? `${point.kind}-${point.id}` : null, pointLabel: point?.label ?? "Visita geral", callNumber: cancelled ? null : linked?.call_number ?? null }];
+  }).filter((item, index, all) => all.findIndex((other) => other.pointKey === item.pointKey && other.questionId === item.questionId) === index), [data?.calls, data?.points, data?.responses, data?.texts, questions, filteredPointKeys]);
   const interventionPhotos = (item: Intervention) => (data?.attachments ?? []).filter((photo) => photo.attachment_kind === "question" && photo.question_id === item.questionId && photo.content_type?.startsWith("image/") && (item.pointKey === null || `${photo.visit_luc_id ? "luc" : "environment"}-${photo.visit_luc_id ?? photo.visit_environment_id}` === item.pointKey));
   const interventionTotals = useMemo(() => {
     const groups = new Map<string, { action: string; question: string; answer: string; items: Intervention[] }>();
