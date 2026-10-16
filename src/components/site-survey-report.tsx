@@ -765,7 +765,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
       for (let page = pdf.getNumberOfPages(); page >= scratch; page -= 1) pdf.deletePage(page);
       pdf.setPage(pdf.getNumberOfPages());
       const height = endY - 18;
-      if (y + height > 278) { pdf.addPage(); y = 18; }
+      if (y + height - 10 > 278) { pdf.addPage(); y = 18; }
       suppressBreaks = fitsOnePage;
       y = await drawPoint(point, y);
       suppressBreaks = false;
