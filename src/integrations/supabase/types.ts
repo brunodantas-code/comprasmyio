@@ -3620,6 +3620,8 @@ export type Database = {
           id: string
           name: string
           position: number
+          quantity: number
+          unit: string
           updated_at: string
         }
         Insert: {
@@ -3629,6 +3631,8 @@ export type Database = {
           id?: string
           name: string
           position?: number
+          quantity?: number
+          unit?: string
           updated_at?: string
         }
         Update: {
@@ -3638,6 +3642,8 @@ export type Database = {
           id?: string
           name?: string
           position?: number
+          quantity?: number
+          unit?: string
           updated_at?: string
         }
         Relationships: [
@@ -3658,6 +3664,7 @@ export type Database = {
           id: string
           name: string
           position: number
+          purpose: string | null
           updated_at: string
         }
         Insert: {
@@ -3667,6 +3674,7 @@ export type Database = {
           id?: string
           name: string
           position?: number
+          purpose?: string | null
           updated_at?: string
         }
         Update: {
@@ -3676,6 +3684,7 @@ export type Database = {
           id?: string
           name?: string
           position?: number
+          purpose?: string | null
           updated_at?: string
         }
         Relationships: []

@@ -1,3 +1,4 @@
+- [x] Site Survey — quantidade por item em Elétrica do Hidrômetro: 2 m canaleta, 2 m cabo PP e 1 rabicho fêmea por ponto com elétrica próxima; somente em Compras. Cadastro salvo e relido; PDF Taboão conferido com 150 m / 150 m / 75 un; 7 testes passaram; Relatório Completo sem os materiais automáticos.
 - [x] Site Survey — totalizadores: complexidade de instalação separada em hidráulica e elétrica, cada uma contada por ponto; conferido no relatório da visita 202609300001 (hidráulica Baixa 45 · Média 32 · Alta 4 = 81; elétrica Baixa 1).
 - [x] Site Survey — relatórios: preposição inicial de qualquer vazão ("Até", "De", "Entre", "Acima de"…) sai em minúscula no texto corrido; a opção do checklist mantém a maiúscula.
 - [x] Site Survey — relatórios: não exibir "Observações finais e fotos adicionais" quando não houver observação nem foto adicional.

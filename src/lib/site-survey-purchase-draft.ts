@@ -4,6 +4,7 @@ export type SiteSurveyPurchaseDraftItem = {
   sourceKey: string;
   suggestedName: string;
   quantity: number;
+  unit?: string;
   pointLabels: string[];
   reason: string;
 };
