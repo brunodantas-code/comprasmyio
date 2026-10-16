@@ -1,7 +1,7 @@
 import { describe, test } from "node:test";
 import { strict as assert } from "node:assert";
 const expect = (actual: unknown) => ({ toEqual: (expected: unknown) => assert.deepEqual(actual, expected), toBe: (expected: unknown) => assert.equal(actual, expected), toHaveLength: (length: number) => assert.equal((actual as unknown[]).length, length) });
-import { meterElectricalItemsForPoint, validCatalogQuantity } from "./site-survey-meter-electrical";
+import { groupMeterElectricalReportRows, meterElectricalItemsForPoint, validCatalogQuantity } from "./site-survey-meter-electrical";
 const questions = [{ id: "nearby", section_id: "water", prompt: "Existe ponto de elétrica próximo ao hidrômetro?" }];
 const items = [
   { id: "canaleta", name: "Canaleta", quantity: 2, unit: "m", active: true },
@@ -10,6 +10,17 @@ const items = [
 ];
 const materials = (answer: unknown, skips: string[] = [], status = "concluida", catalog = items) => meterElectricalItemsForPoint([{ question_id: "nearby", answer }], questions, skips, status, catalog);
 describe("Materiais elétricos para compras", () => {
+  test("agrupa itens elétricos mantendo totais individuais e uma relação única de lojas, inclusive com dez itens", () => {
+    const rows = items.map((item) => ({ key: `meter-electrical:${item.id}`, label: item.name, quantity: item.quantity * 75, unit: item.unit, points: ["LUC 71 — Habib's", "LUC 74 — Vivendas do camarão"] }));
+    const meter = { key: "meter:1", label: "Hidrômetro DN25", quantity: 1, points: ["LUC 56 — Cine Taboão"] };
+    const group = groupMeterElectricalReportRows([meter, ...rows]);
+    expect(group.items.map((item) => [item.label, item.quantity, item.unit])).toEqual([["Canaleta", 150, "m"], ["Cabo PP", 150, "m"], ["Rabicho fêmea", 75, "un"]]);
+    expect(group.points).toEqual(["LUC 71 — Habib's", "LUC 74 — Vivendas do camarão"]);
+    expect(group.otherRows).toEqual([meter]);
+    const tenItems = Array.from({ length: 10 }, (_, index) => ({ ...rows[0], key: `meter-electrical:${index}` }));
+    expect(groupMeterElectricalReportRows(tenItems).items).toHaveLength(10);
+    expect(groupMeterElectricalReportRows(tenItems).points).toHaveLength(2);
+  });
   test("Sim gera 2 m canaleta, 2 m cabo PP e 1 rabicho por ponto", () => {
     expect(materials({ value: "Sim", detail: "Tomada" }).map(({ quantity, unit }) => [quantity, unit])).toEqual([[2, "m"], [2, "m"], [1, "un"]]);
   });

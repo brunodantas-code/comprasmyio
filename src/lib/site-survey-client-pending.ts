@@ -16,7 +16,11 @@ export type SurveyReportText = { id: string; name: string; question_id: string; 
 export function reportResponseText(questionId: string | undefined, value: string, texts: SurveyReportText[]) {
   const rule = texts.find((text) => text.question_id === questionId && text.answer_value === value)
     ?? texts.find((text) => text.question_id === questionId && text.answer_value === "");
-  return rule?.report_answer.trim() || value;
+  const result = rule?.report_answer.trim() || value;
+  const normalized = result.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase().replace(/\.$/, "");
+  if (normalized === "muito rigido") return "Registro muito rígido. Risco de quebra.";
+  if (normalized === "sem manopla") return "Registro sem manopla.";
+  return result;
 }
 
 type ClientPendingQuestion = { id: string; prompt: string; question_key?: string | null; conditioned_on_question_id?: string | null; conditioned_operator?: string | null; conditioned_value?: string | null };
