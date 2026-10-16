@@ -248,6 +248,12 @@
   }
 }
 
+/* Fotos de relatório: mesmo arredondamento suave dos thumbnails (raio 32 em 240).
+   Como a caixa da foto é 4:3, o raio circular vira 10% da largura e 13,333% da altura. */
+@utility rounded-photo {
+  border-radius: 10% / 13.333%;
+}
+
 /* Organograma: cartões uniformes dimensionados pela largura disponível. */
 .org-chart {
   container-type: inline-size;
