@@ -1,4 +1,4 @@
-- [ ] Site Survey — totalizadores: segregar complexidade de instalação elétrica e hidráulica em totalizadores separados.
+- [x] Site Survey — totalizadores: complexidade de instalação separada em hidráulica e elétrica, cada uma contada por ponto; conferido no relatório da visita 202609300001 (hidráulica Baixa 45 · Média 32 · Alta 4 = 81; elétrica Baixa 1).
 - [x] Site Survey — relatórios: preposição inicial de qualquer vazão ("Até", "De", "Entre", "Acima de"…) sai em minúscula no texto corrido; a opção do checklist mantém a maiúscula.
 - [x] Site Survey — relatórios: não exibir "Observações finais e fotos adicionais" quando não houver observação nem foto adicional.
 - [x] Site Survey — totalizadores: ordenar dificuldade de acesso como Fácil, Regular e Difícil, no padrão Baixa, Média e Alta.
