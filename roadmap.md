@@ -1,5 +1,5 @@
-- [ ] Site Survey — relatórios: não exibir "Observações finais e fotos adicionais" quando não houver observação nem foto adicional.
-- [ ] Site Survey — totalizadores: ordenar dificuldade de acesso como Fácil, Regular e Difícil, no padrão Baixa, Média e Alta.
+- [x] Site Survey — relatórios: não exibir "Observações finais e fotos adicionais" quando não houver observação nem foto adicional.
+- [x] Site Survey — totalizadores: ordenar dificuldade de acesso como Fácil, Regular e Difícil, no padrão Baixa, Média e Alta.
 - [x] Site Survey — relatórios: fotos com cantos arredondados no mesmo padrão dos thumbnails (prévia em tela, PDF completo, compras, intervenções, equipamentos, PDF do cliente e PDF de cadastro).
 - [x] Site Survey — Relatório Completo: rótulos de intervenção passam a usar a Resposta no PDF cadastrada em Cadastro > Diversos > Textos do relatório para o cliente (ex.: "Não" do ponto de elétrica).
 - [x] Monitoramento Site Survey — alertas 1, 2 e 5 superados: permissão atual e salvamento autorizado no Histórico confirmados em visita concluída.
