@@ -270,8 +270,17 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
   };
   const cable = electricalAnswer(["bitola do cabo"]);
   const breaker = electricalAnswer(["amperagem do disjuntor"]);
-  if (cable) add(electrical, "A bitola do cabo de alimentação de entrada é de ", cable, breaker ? " e a amperagem do disjuntor de entrada é de " : ". ");
-  if (breaker) electrical.push({ text: cable ? "" : "A amperagem do disjuntor de entrada é de " }, { text: detailOnly(breaker.value), bold: true }, { text: ". " });
+  // Mesmo padrão da parte de água: "Não informado" vira frase própria, nunca entra como valor.
+  const cableUnknown = !!cable && isUninformed(lower(detailOnly(cable.value)));
+  const breakerUnknown = !!breaker && isUninformed(lower(detailOnly(breaker.value)));
+  if (cable) {
+    if (cableUnknown) electrical.push({ text: "A bitola do cabo de alimentação de entrada " }, { text: "não foi informada", bold: true }, { text: ". " });
+    else add(electrical, "A bitola do cabo de alimentação de entrada é de ", cable, breaker && !breakerUnknown ? " e a amperagem do disjuntor de entrada é de " : ". ");
+  }
+  if (breaker) {
+    if (breakerUnknown) electrical.push({ text: "A amperagem do disjuntor de entrada " }, { text: "não foi informada", bold: true }, { text: ". " });
+    else electrical.push({ text: cable && !cableUnknown ? "" : "A amperagem do disjuntor de entrada é de " }, { text: detailOnly(breaker.value), bold: true }, { text: ". " });
+  }
   const panelLocation = electricalAnswer(["localizacao do quadro eletrico", "onde se encontra o quadro eletrico"]);
   if (panelLocation?.value && !/^[-.\s]+$/.test(panelLocation.value)) electrical.push({ text: "O quadro elétrico se encontra " }, { text: placePhrase(panelLocation.value), bold: true }, { text: ". " });
   const electricalComplexity = electricalAnswer(["complexidade eletrica", "complexidade dessa instalacao", "complexidade da instalacao"]);
