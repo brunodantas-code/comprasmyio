@@ -2,7 +2,7 @@ import { METER_ELECTRICAL_CATALOG_PURPOSE, meterElectricalItemsForPoint, formatP
 import { customerQuestionResponses, customerQuestions, isCustomerQuestion, numberedCustomerQuestions } from "@/lib/site-survey-questions";
 import { surveyPointType } from "@/lib/site-survey-point-type";
 import { reviewNoteText, sortTotalValues } from "@/lib/site-survey-report-totals";
-import { lowerLeadingPreposition, uninformedRegisterSentences } from "@/lib/site-survey-report-prose";
+import { flowRateStatus, isUninformedLocation, lowerLeadingPreposition, meterFlowTitleData, uninformedRegisterSentences } from "@/lib/site-survey-report-prose";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Download, FileChartColumn, LoaderCircle, Printer, ShoppingCart } from "lucide-react";
@@ -89,9 +89,10 @@ const meterSpecification = (flowRate: string | null, mappings: MeterMapping[]) =
 };
 const meterSpecificationLabel = (flowRate: string | null, mappings: MeterMapping[]) => {
   const specification = meterSpecification(flowRate, mappings);
-  return flowRate && !/nao (?:foi )?informad[oa]|sem informacao/i.test(normalize(flowRate))
-    ? `${specification} · Vazão: ${flowRate}`
-    : specification;
+  const title = meterFlowTitleData(flowRate, /^DN\d+$/i.test(specification) ? specification : null);
+  return title.flow
+    ? `${title.specification ? `${title.specification} · ` : ""}Vazão: ${title.flow}`
+    : "Especificação do hidrômetro não informada";
 };
 const buildPointSummaries = (responses: ReportResponse[], questions: Question[], sections: Section[], skippedSectionIds: string[], meterMappings: MeterMapping[]): PointSummary[] => {
   const summaries: PointSummary[] = [];
@@ -155,7 +156,7 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
   const locationDetail = hydraulicAnswer(["detalhar para facilitar", "facilitar sua localizacao"]);
   const access = hydraulicAnswer(["dificuldade de acesso", "acesso ao hidrometro"]);
   if (locations.length) {
-    const placeUninformed = isUninformed(proseValue(locations[0].value));
+    const placeUninformed = isUninformedLocation(proseValue(locations[0].value).split(/\s+[—–]\s+/)[0] ?? "");
     if (placeUninformed) hydraulic.push({ text: "Não foi informada a localização exata do hidrômetro" });
     else {
       hydraulic.push({ text: "O hidrômetro encontra-se " });
@@ -170,7 +171,7 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
     const accessSplit = access ? splitObservation(access.value) : null;
     const remainingLocations = locations.slice(1).flatMap((location) => { const split = splitObservation(location.value); return [split.base, ...split.notes]; }).filter(Boolean);
     const detail = locationDetail ? lower(proseValue(locationDetail.value)).replace(/^(?:localizad[oa]\s+)?(?:o\s+)?hidr[oô]metro\s+(?:fica|est[aá]|encontra-se)?\s*/i, "").trim() : "";
-    const candidates = [...remainingLocations, detail].map((item) => item.replace(/[.;,]+$/, "").trim()).filter((item) => item && !isUninformed(item) && !/^outros?$/i.test(item));
+    const candidates = [...remainingLocations, detail].map((item) => item.replace(/[.;,]+$/, "").trim()).filter((item) => item && !isUninformedLocation(item) && !/^outros?$/i.test(item));
     const firstPlace = normalize(lower(proseValue(locations[0].value)));
     // O detalhe não repete o local já citado: "nos fundos da loja" vira "nos fundos".
     const firstPlaceWords = new Set(firstPlace.split(/[^a-z0-9]+/).filter(Boolean));
@@ -229,11 +230,10 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
   }
   const pulse = hydraulicAnswer(["condicao da saida pulsada", "saida pulsada"]);
   const flowRate = hydraulicAnswer(["vazao nominal", "vazao do hidrometro"]);
-  // "Não informado e não legível" (e variantes ilegíveis) também significa vazão não informada.
-  const rateUninformed = (value: string) => isUninformed(value) || /nao legivel|ilegivel|nao identificado/.test(normalize(value));
   // O detalhe da resposta (ex.: "Tubulação de bitola larga.") não entra na frase da vazão: vira frase própria.
-  const rate = flowRate ? lowerLeadingPreposition(proseValue(flowRate.detail ? flowRate.base : flowRate.value)) : "";
-  const rateMissing = !rate || rateUninformed(rate);
+  const rate = flowRate ? lowerLeadingPreposition(proseValue(flowRate.detail && !/^outros?$/i.test(flowRate.base) ? flowRate.base : flowRate.value)) : "";
+  const rateStatus = flowRateStatus(rate);
+  const rateMissing = rateStatus !== "informed";
   if (pulse) {
     const pulseStatus = statusOnly(pulse.value);
     const pulseWorks = /^(sim|operante|funcional|funcionando)/.test(pulseStatus);
@@ -242,9 +242,9 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
     else hydraulic.push({ text: pulseWorks ? "Possui saída pulsada " : "A saída pulsada encontra-se " }, { text: pulseWorks ? "funcional" : pulseStatus, bold: true }, { text: flowRate ? ` e a vazão nominal ${rateMissing ? "" : "é de "}` : ". " });
   }
   if (flowRate) {
-    hydraulic.push({ text: pulse ? "" : rateMissing ? "A vazão nominal " : "A vazão nominal é de " }, { text: rateMissing ? "não foi informada" : rate, bold: true }, { text: ". " });
+    hydraulic.push({ text: pulse ? "" : rateMissing ? "A vazão nominal " : "A vazão nominal é de " }, { text: rateStatus === "unverifiable" ? "não pôde ser verificada" : rateMissing ? "não foi informada" : rate, bold: true }, { text: ". " });
     const flowDetail = flowRate.detail.replace(/[.!?]+\s*$/, "").trim();
-    if (flowDetail) hydraulic.push({ text: flowDetail, bold: true }, { text: ". " });
+    if (flowDetail && flowRateStatus(flowDetail) === "informed" && flowDetail !== rate) hydraulic.push({ text: flowDetail, bold: true }, { text: ". " });
   }
   const flow = hydraulicAnswer(["sentido do fluxo"]);
   if (flow && isUninformed(lower(flow.value))) hydraulic.push({ text: "O sentido do fluxo de água " }, { text: "não foi informado", bold: true }, { text: ". " });
