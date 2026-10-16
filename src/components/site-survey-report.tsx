@@ -151,8 +151,12 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
   const locationDetail = hydraulicAnswer(["detalhar para facilitar", "facilitar sua localizacao"]);
   const access = hydraulicAnswer(["dificuldade de acesso", "acesso ao hidrometro"]);
   if (locations.length) {
-    hydraulic.push({ text: "O hidrômetro encontra-se " });
-    hydraulic.push({ text: placePhrase(proseValue(locations[0].value)), bold: true });
+    const placeUninformed = isUninformed(proseValue(locations[0].value));
+    if (placeUninformed) hydraulic.push({ text: "Não foi informada a localização exata do hidrômetro" });
+    else {
+      hydraulic.push({ text: "O hidrômetro encontra-se " });
+      hydraulic.push({ text: placePhrase(proseValue(locations[0].value)), bold: true });
+    }
     // Respostas "Outros"/observações não entram literalmente: separam-se do valor base,
     // removem-se repetições e ajusta-se a concordância antes de compor a frase.
     const splitObservation = (value: string) => {
@@ -175,6 +179,12 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
     }
     const participle = /^(embutid|instalad|fixad|localizad|posicionad|sob\b|sobre\b|atr[aá]s|acima|abaixo|ao lado|junto|pr[oó]xim|dentro|entre|no\b|na\b|nos\b|nas\b|em\b)/;
     fragments.forEach((fragment, index) => {
+      // Local não informado: o primeiro detalhe vira "mas encontra-se em uma parede", sem "localizado".
+      if (placeUninformed && index === 0) {
+        const generic = fragment.replace(/^na\s+/i, "em uma ").replace(/^no\s+/i, "em um ");
+        hydraulic.push({ text: ", mas encontra-se " }, { text: generic, bold: true });
+        return;
+      }
       const needsLocated = index === 0 && /^(pr[oó]xim|acima|abaixo|ao lado|junto|atr[aá]s|dentro|entre|sob\b|sobre\b)/.test(fragment);
       const text = needsLocated ? `localizado ${fragment}` : participle.test(fragment) ? fragment : /^(loja|sobreloja|parede|galeria|cozinha|subestacao|armario|quadro|busway)/.test(normalize(fragment)) ? placePhrase(fragment) : fragment;
       hydraulic.push({ text: ", " }, { text, bold: true });
