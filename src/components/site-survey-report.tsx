@@ -68,7 +68,10 @@ const findAnswer = (responses: ReportResponse[], questions: Question[], terms: s
     const section = normalize(sections?.find((candidate) => candidate.id === question?.section_id)?.title ?? "");
     return terms.some((term) => prompt.includes(term)) && (!sectionTerms?.length || sectionTerms.some((term) => section.includes(term)));
   });
-  return response ? { id: response.question_id, value: valueText(response.answer).trim() } : null;
+  if (!response) return null;
+  // "base" é o valor sem o detalhe; "detail" é o texto complementar digitado pelo técnico.
+  const item = response.answer && typeof response.answer === "object" && !Array.isArray(response.answer) && "value" in response.answer ? response.answer as { value: unknown; detail?: unknown } : null;
+  return { id: response.question_id, value: valueText(response.answer).trim(), base: item ? valueText(item.value).trim() : "", detail: item && typeof item.detail === "string" ? item.detail.trim() : "" };
 };
 const meterSpecification = (flowRate: string | null, mappings: MeterMapping[]) => {
   if (!flowRate || /nao (?:foi )?informad[oa]|sem informacao/i.test(normalize(flowRate))) return "Especificação do hidrômetro não informada";
