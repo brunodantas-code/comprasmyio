@@ -203,7 +203,10 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
         return;
       }
       const needsLocated = index === 0 && /^(pr[oó]xim|acima|abaixo|ao lado|junto|atr[aá]s|dentro|entre|sob\b|sobre\b)/.test(fragment);
-      const text = needsLocated ? `localizado ${fragment}` : participle.test(fragment) ? fragment : /^(loja|sobreloja|parede|galeria|cozinha|subestacao|armario|quadro|busway)/.test(normalize(fragment)) ? placePhrase(fragment) : fragment;
+      // Substantivo solto ("quarto dos fundos") ganha "localizado no/na" para manter a concordância.
+      const bareNoun = !needsLocated && !participle.test(fragment) && !/^(loja|sobreloja|parede|galeria|cozinha|subestacao|armario|quadro|busway)/.test(normalize(fragment)) && /^[a-zà-ú]+(\s|$)/i.test(fragment) && !/^(de|com|sem|mas|porem|muito|pouco|bem|f[aá]cil|dif[ií]cil)\b/i.test(fragment);
+      const article = /a$/i.test(fragment.split(/\s+/)[0]) ? "na" : "no";
+      const text = needsLocated ? `localizado ${fragment}` : bareNoun ? `localizado ${article} ${fragment}` : participle.test(fragment) ? fragment : /^(loja|sobreloja|parede|galeria|cozinha|subestacao|armario|quadro|busway)/.test(normalize(fragment)) ? placePhrase(fragment) : fragment;
       hydraulic.push({ text: ", " }, { text, bold: true });
     });
     // Observação da dificuldade de acesso vem depois de "de ... acesso", sem repetir a palavra "acesso".
