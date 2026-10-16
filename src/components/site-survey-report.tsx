@@ -179,6 +179,12 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
     }
     const participle = /^(embutid|instalad|fixad|localizad|posicionad|sob\b|sobre\b|atr[aá]s|acima|abaixo|ao lado|junto|pr[oó]xim|dentro|entre|no\b|na\b|nos\b|nas\b|em\b)/;
     fragments.forEach((fragment, index) => {
+      // Local não informado: o primeiro detalhe vira "mas encontra-se em uma parede", sem "localizado".
+      if (placeUninformed && index === 0) {
+        const generic = fragment.replace(/^na\s+/i, "em uma ").replace(/^no\s+/i, "em um ");
+        hydraulic.push({ text: ", mas encontra-se " }, { text: generic, bold: true });
+        return;
+      }
       const needsLocated = index === 0 && /^(pr[oó]xim|acima|abaixo|ao lado|junto|atr[aá]s|dentro|entre|sob\b|sobre\b)/.test(fragment);
       const text = needsLocated ? `localizado ${fragment}` : participle.test(fragment) ? fragment : /^(loja|sobreloja|parede|galeria|cozinha|subestacao|armario|quadro|busway)/.test(normalize(fragment)) ? placePhrase(fragment) : fragment;
       hydraulic.push({ text: ", " }, { text, bold: true });
