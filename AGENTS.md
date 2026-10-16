@@ -11,7 +11,7 @@
 
 - Supply orders resolve/store `recipient_user_id` apart from names; RLS grants recipient reads despite renames/name collisions. “Meus com Supply” unions requester/recipient IDs without duplicates; approver/buyer actions stay gated.
 - Approval Workflow's three views belong in Supply bottom navigation under Usuários e logs, not top tabs. Supply execution opens `supply`, decisions `mine`; payment approvals stay in Cash Flow, outside Supply execution queues/counts; approval ≠ payment.
-- Mobile Supply PDFs use lazy PDF.js canvas in the dialog; desktop opens a new tab.
+- Supply PDFs: lazy PDF.js dialog on mobile, new tab on desktop.
 - Payment approvals recognize the active finance role or job title (an inactive legacy title must not block); above the joint-approval threshold, eligible joint approvers join finance and the requester never self-approves.
 - Personal approval lists/counts filter by assigned approver, never Admin access, to avoid treating parallel steps as duplicate personal tasks. Admin edits preserve decisions/logs; type changes re-evaluate pending chains; payment allocation uses exclusive destinations.
 - Supply “Item novo” authorizes catalog inserts for Fábrica, Terceiros and Ferramentas via effective profile/individual permission and authenticated owner; it does not grant stock editing or movement rights.
@@ -20,7 +20,7 @@
 - Code images use private ticket attachments: message images stay with replies, standalone images with tickets. Open tickets allow new questions before answers; answers link to pending admin questions, preserving permissions.
 - Site Survey actions update/deactivate in place to preserve references; recreating a deleted environment reactivates its row with the selected checklist. Warnings use active visible questions only after explicit save, not autosave; manual visits start `concluida` with historical end.
 - Photo drops/pastes autosave; block outside drops. Serialize saves by point/question and flush before switches/closing. Reset stale point selection. Section skips are exclusive, keep answers, remove pending requirements and flush; not-applicable sections stay out of screen summaries.
-- Survey report/PDF share ordering and hydraulic DN from De-Para; missing flow has no specification. Purchase-report photos come only from the meter-flow question and remain grouped by point. Photo reuse stores same-point attachment ID on response; deletion invalidates it.
+- Survey report/PDF share ordering and DN from De-Para. Shared prose classifiers distinguish missing location and unverifiable flow; missing flow has no specification. Purchase-report photos come only from the meter-flow question and remain grouped by point. Photo reuse stores same-point attachment ID on response; deletion invalidates it.
 - Survey catalog title overrides stay separate from items to preserve fixed keys; material types link by catalog IDs to survive renames. Shop/kiosk catalog sync preserves visit history; inactive exclusion tombstones prevent removed names returning.
 - LUC corrections use the history-preserving RPC; shop changes append occupancy history. Reclassification and missing-LUC pendencies use effective type, not storage kind; retain UUIDs, checklists and links. Duplicate LUCs require full-editor confirmation.
 - Survey purchase drafts require Supply submission for orders/Approval. Electrical kits use purpose keys and pure eligibility; never visit rows, to keep client reports clean.

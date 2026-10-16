@@ -33,3 +33,17 @@ export const uninformedRegisterSentences = (
   if (isUninformedAnswer(condition)) return [{ text: "O tipo e a condição do registro " }, { text: "não foram informados", bold: true }, { text: ". " }];
   return [{ text: "O tipo de registro existente " }, { text: "não foi informado", bold: true }, { text: ", mas encontra-se " }, { text: condition, bold: true }, { text: ". " }];
 };
+
+/** Absence markers are not physical locations. */
+export const isUninformedLocation = (value: string) => {
+  const text = withoutAccents(value).trim().replace(/[.!?]+$/, "");
+  return /^(?:nao (?:foi )?informad[oa]|sem informacao)(?:\s+(?:sobre|da|do|de|a|o)\b.*)?$/i.test(text);
+};
+
+/** Unverifiable flow differs from a rate that was simply not informed. */
+export const flowRateStatus = (value: string): "informed" | "uninformed" | "unverifiable" => {
+  const text = withoutAccents(value).trim();
+  if (/nao (?:e |foi )?possivel (?:verificar|identificar|ler)|nao (?:foi possivel )?verificad[oa]|impossivel verificar/i.test(text)) return "unverifiable";
+  if (!text || /nao (?:foi )?informad[oa]|sem informacao|nao legivel|ilegivel|nao identificado/i.test(text)) return "uninformed";
+  return "informed";
+};
