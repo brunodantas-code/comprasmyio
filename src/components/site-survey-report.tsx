@@ -454,7 +454,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
       if (group.sectionTerms && !group.sectionTerms.some((term) => normalize(sections.find((section) => section.id === question.section_id)?.title ?? "").includes(term))) continue;
       const rawValue = valueText(response.answer).trim(); const normalizedValue = normalize(rawValue); const value = group.label === "Dificuldade de acesso"
       ? normalizedValue.startsWith("facil") ? "Fácil" : normalizedValue.startsWith("regular") ? "Regular" : normalizedValue.startsWith("dificil") ? "Difícil" : ""
-      : rawValue;
+      : group.label === "Tipos de registro" && /^(inexistente|nao existe|sem registro)/.test(normalizedValue) ? "Registro inexistente" : rawValue;
       const pointId = response.visit_luc_id ? `luc-${response.visit_luc_id}` : `environment-${response.visit_environment_id}`;
       // Um ponto conta uma única vez por totalizador, mesmo que a pergunta exista em mais de uma seção.
       if (value && !countedPoints.has(pointId)) { countedPoints.add(pointId); counts.set(value, (counts.get(value) ?? 0) + 1); } } return { label: group.label, values: sortTotalValues(group.label, [...counts.entries()]) }; }).filter((group) => group.values.length);
