@@ -2,7 +2,7 @@ import { METER_ELECTRICAL_CATALOG_PURPOSE, meterElectricalItemsForPoint, formatP
 import { customerQuestionResponses, customerQuestions, isCustomerQuestion, numberedCustomerQuestions } from "@/lib/site-survey-questions";
 import { surveyPointType } from "@/lib/site-survey-point-type";
 import { reviewNoteText, sortTotalValues } from "@/lib/site-survey-report-totals";
-import { lowerLeadingPreposition } from "@/lib/site-survey-report-prose";
+import { lowerLeadingPreposition, uninformedRegisterSentences } from "@/lib/site-survey-report-prose";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Download, FileChartColumn, LoaderCircle, Printer, ShoppingCart } from "lucide-react";
@@ -256,9 +256,9 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
   const typeUnknown = registerType && isUninformed(lower(registerType.value));
   const conditionUnknown = registerCondition && isUninformed(lower(registerCondition.value));
   const typeMissing = registerType && /^(inexistente|nao existe|sem registro)/.test(normalize(lower(registerType.value)));
+  const registerParts = uninformedRegisterSentences(registerType ? lower(registerType.value) : null, registerCondition ? lower(registerCondition.value) : null);
   if (typeMissing) hydraulic.push({ text: "Registro inexistente", bold: true }, { text: ", sendo necessária instalação antes da implantação do novo hidrômetro. " });
-  else if (registerType && typeUnknown && !registerCondition) hydraulic.push({ text: "Não foi informado o tipo de registro existente", bold: true }, { text: ". " });
-  else if (registerType && typeUnknown) hydraulic.push(...(registerCondition && !conditionUnknown ? [{ text: "O tipo de registro existente " }, { text: "não foi informado", bold: true }, { text: ", mas encontra-se " }, { text: lower(registerCondition.value), bold: true }, { text: ". " }] : conditionUnknown ? [{ text: "O tipo e a condição do registro " }, { text: "não foram informados", bold: true }, { text: ". " }] : [{ text: "O tipo de registro existente " }, { text: "não foi informado", bold: true }, { text: ". " }]));
+  else if (registerParts.length) hydraulic.push(...registerParts);
   else if (registerType) hydraulic.push({ text: "O registro existente é do tipo " }, { text: lower(registerType.value), bold: true }, { text: registerCondition && !conditionUnknown ? " e encontra-se " : ". " });
   if (registerCondition && !typeMissing && !(registerType && typeUnknown)) hydraulic.push(...(conditionUnknown ? [{ text: "A condição do registro " }, { text: "não foi informada", bold: true }, { text: ". " }] : [{ text: registerType && !typeUnknown ? "" : "O registro encontra-se " }, { text: lower(registerCondition.value), bold: true }, { text: ". " }]));
   const diameter = hydraulicAnswer(["diametro da tubulacao"]);
