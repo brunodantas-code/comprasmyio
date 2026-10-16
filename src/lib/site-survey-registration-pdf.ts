@@ -2,6 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import nunitoRegularUrl from "@/assets/fonts/nunito-regular.ttf?url";
 import nunitoBoldUrl from "@/assets/fonts/nunito-bold.ttf?url";
 import type { FacadeThumbnailAttachment } from "@/components/site-survey-facade-thumbnail";
+import { clipRoundedPhoto } from "@/lib/site-survey-photo";
 
 export type RegistrationPdfRow = { luc: string; meter: string; type: string; name: string; location: string; facade?: FacadeThumbnailAttachment };
 

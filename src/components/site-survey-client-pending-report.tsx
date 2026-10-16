@@ -7,6 +7,7 @@ import { buildClientPendingGroups, unidentifiedLucPoints, type ClientPendingPoin
 import nunitoRegularUrl from "@/assets/fonts/nunito-regular.ttf?url";
 import nunitoBoldUrl from "@/assets/fonts/nunito-bold.ttf?url";
 import { surveyPointType } from "@/lib/site-survey-point-type";
+import { clipRoundedPhoto } from "@/lib/site-survey-photo";
 
 type Props = {
   visit: { id: string; survey_number: number; completed_at: string | null; scheduled_start: string };
