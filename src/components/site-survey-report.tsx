@@ -697,7 +697,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
       if (line.length) lines.push(line);
       let cursorY = startY;
       lines.forEach((currentLine, index) => {
-        if (cursorY > 276) { pdf.addPage(); cursorY = 18; }
+        if (cursorY > 276 && !suppressBreaks) { pdf.addPage(); cursorY = 18; }
         const wordsWidth = currentLine.reduce((total, word) => total + word.width, 0);
         const isLastLine = index === lines.length - 1;
         const gap = currentLine.length > 1 ? (isLastLine ? pdf.getTextWidth(" ") : (maxWidth - wordsWidth) / (currentLine.length - 1)) : 0;
@@ -708,8 +708,14 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
       pdf.setFont("Nunito", "normal");
       return cursorY;
     };
-    if (reportType === "complete") for (const point of sortedPoints) {
-      if (y > 250) { pdf.addPage(); y = 18; }
+    // Cada loja/quiosque/ambiente começa e termina na mesma página: desenha em página de rascunho para medir.
+    let suppressBreaks = false;
+    const photoCache = new Map<string, string | null>();
+    const signedCache = new Map<string, { signedUrl: string } | null>();
+    const signedPhoto = async (path: string) => { if (!signedCache.has(path)) { const { data: s } = await supabase.storage.from("site-survey-attachments").createSignedUrl(path, 300); signedCache.set(path, s?.signedUrl ? { signedUrl: s.signedUrl } : null); } return signedCache.get(path) ?? null; };
+    const cachedPhoto = async (path: string, url: string) => { if (!photoCache.has(path)) { try { photoCache.set(path, await imageDataUrl(url, false, 42 / 31, true)); } catch { photoCache.set(path, null); } } const v = photoCache.get(path); if (!v) throw new Error("photo"); return v; };
+    const drawPoint = async (point: (typeof sortedPoints)[number], startY: number) => {
+      let y = startY;
       pdf.setFont("Nunito", "extrabold"); pdf.setFontSize(12); pdf.setTextColor(...purple); pdf.text(point.label, 14, y); pdf.setDrawColor(...purple); pdf.setLineWidth(0.35); pdf.line(14, y + 2, 196, y + 2); pdf.setTextColor(...dark); y += 8;
       pdf.setFont("Nunito", "normal"); pdf.setFontSize(9); for (const line of pdf.splitTextToSize(`Vistoria Técnica realizada por: ${technicianForPoint(point)}`, 182)) { pdf.text(line, 14, y); y += 5; } y += 1;
       const stageSeven = reviewNotes(point);
@@ -717,18 +723,18 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
       const calls = data.calls.filter((item) => Boolean(item.internal_calls) && (point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id)).map((call) => { const linked = call.internal_calls as unknown as { call_number?: string; title?: string; status?: string } | null; return linked ? `#${linked.call_number ?? "—"} ${linked.title ?? "Chamado"} (${linked.status ?? call.status})` : call.status; }).join("; ");
       if (!visit.is_manual_entry) { pdf.setFont("Nunito", "normal"); pdf.setFontSize(9); pdf.text(`Início: ${point.started_at ? new Date(point.started_at).toLocaleString("pt-BR") : "não registrado"}  |  Conclusão: ${point.completed_at ? new Date(point.completed_at).toLocaleString("pt-BR") : "não registrada"}  |  Duração: ${formatMinutes(pointDuration(point, pausesForPoint(point)))}`, 14, y); y += 6; }
       const pointPauses = pausesForPoint(point);
-      if (!visit.is_manual_entry && pointPauses.length) { for (const pause of pointPauses) { if (y > 270) { pdf.addPage(); y = 18; } pdf.setFontSize(8); pdf.text(`Pausa: ${pause.site_survey_pause_reasons?.name ?? "Motivo registrado"} — ${formatMinutes(durationMinutes(pause.started_at, pause.ended_at))}${pause.ended_at ? "" : " (em andamento)"}`, 14, y); y += 5; } }
+      if (!visit.is_manual_entry && pointPauses.length) { for (const pause of pointPauses) { if (y > 270) { if (!suppressBreaks) { pdf.addPage(); y = 18; } } pdf.setFontSize(8); pdf.text(`Pausa: ${pause.site_survey_pause_reasons?.name ?? "Motivo registrado"} — ${formatMinutes(durationMinutes(pause.started_at, pause.ended_at))}${pause.ended_at ? "" : " (em andamento)"}`, 14, y); y += 5; } }
       if (point.completion_status === "cancelada") { pdf.setFont("Nunito", "bold"); pdf.setTextColor(...purple); pdf.text(`Cancelada — Motivo: ${point.cancellationReason ?? "não informado"}`, 14, y); pdf.setTextColor(...dark); y += 7; }
       for (const summary of pointSummaries(point)) {
-        if (y > 260) { pdf.addPage(); y = 18; }
+        if (y > 260) { if (!suppressBreaks) { pdf.addPage(); y = 18; } }
         pdf.setFont("Nunito", "bold"); pdf.setFontSize(10); pdf.text(summary.title, 14, y); pdf.setFontSize(9); y = drawRichParagraph(summary.parts, y + 7) + 4;
       }
-       if (tools) { if (y > 262) { pdf.addPage(); y = 18; } pdf.setFont("Nunito", "bold"); pdf.text(materialSectionTitle(point), 14, y); y = drawRichParagraph([{ text: tools }], y + 5) + 2; }
-       if (reviewSkipped(point)) { if (y > 262) { pdf.addPage(); y = 18; } pdf.setFont("Nunito", "bold"); pdf.text(reviewTitle(point), 14, y); pdf.setFontSize(9); y = drawRichParagraph([{ text: "Não realizada." }], y + 5) + 2; }
-       if (stageSeven) { if (y > 262) { pdf.addPage(); y = 18; } pdf.setFont("Nunito", "bold"); pdf.text(reviewTitle(point), 14, y); y += 5; pdf.setFontSize(9); pdf.text("Observações finais da visita", 14, y); y = drawRichParagraph([{ text: stageSeven }], y + 5) + 2; }
+       if (tools) { if (y > 262) { if (!suppressBreaks) { pdf.addPage(); y = 18; } } pdf.setFont("Nunito", "bold"); pdf.text(materialSectionTitle(point), 14, y); y = drawRichParagraph([{ text: tools }], y + 5) + 2; }
+       if (reviewSkipped(point)) { if (y > 262) { if (!suppressBreaks) { pdf.addPage(); y = 18; } } pdf.setFont("Nunito", "bold"); pdf.text(reviewTitle(point), 14, y); pdf.setFontSize(9); y = drawRichParagraph([{ text: "Não realizada." }], y + 5) + 2; }
+       if (stageSeven) { if (y > 262) { if (!suppressBreaks) { pdf.addPage(); y = 18; } } pdf.setFont("Nunito", "bold"); pdf.text(reviewTitle(point), 14, y); y += 5; pdf.setFontSize(9); pdf.text("Observações finais da visita", 14, y); y = drawRichParagraph([{ text: stageSeven }], y + 5) + 2; }
       const customerLines = pointCustomerQuestions(point);
       if (customerLines.length) {
-        if (y > 262) { pdf.addPage(); y = 18; }
+        if (y > 262) { if (!suppressBreaks) { pdf.addPage(); y = 18; } }
         pdf.setFont("Nunito", "bold"); pdf.setFontSize(10); pdf.text("Perguntas e respostas do cliente", 14, y); y += 5;
         for (const item of customerLines) {
           pdf.setFontSize(9);
@@ -736,19 +742,33 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
           y = drawRichParagraph([{ text: `Resposta do cliente: ${item.answer || "Não respondida"}` }], y + 1) + 2;
         }
       }
-      if (calls) { if (y > 262) { pdf.addPage(); y = 18; } pdf.setFont("Nunito", "bold"); pdf.text("Ações e chamados", 14, y); y = drawRichParagraph([{ text: calls }], y + 5) + 2; }
+      if (calls) { if (y > 262) { if (!suppressBreaks) { pdf.addPage(); y = 18; } } pdf.setFont("Nunito", "bold"); pdf.text("Ações e chamados", 14, y); y = drawRichParagraph([{ text: calls }], y + 5) + 2; }
       const photos = withPhotos ? data.attachments.filter((item) => item.content_type?.startsWith("image/") && (point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id)) : [];
       let photoColumn = 0;
-      for (const photo of photos) { const { data: signed } = await supabase.storage.from("site-survey-attachments").createSignedUrl(photo.storage_path, 300); if (!signed?.signedUrl) continue; if (photoColumn === 0 && y > 245) { pdf.addPage(); y = 18; } try { pdf.addImage(await imageDataUrl(signed.signedUrl, false, 42 / 31, true), "JPEG", 14 + photoColumn * 46, y, 42, 31, undefined, "FAST"); photoColumn += 1; if (photoColumn === 4) { photoColumn = 0; y += 35; } } catch { /* Mantém o PDF disponível caso uma foto falhe. */ } }
+      for (const photo of photos) { const signed = await signedPhoto(photo.storage_path); if (!signed) continue; if (photoColumn === 0 && y > 245) { if (!suppressBreaks) { pdf.addPage(); y = 18; } } try { pdf.addImage(await cachedPhoto(photo.storage_path, signed.signedUrl), "JPEG", 14 + photoColumn * 46, y, 42, 31, undefined, "FAST"); photoColumn += 1; if (photoColumn === 4) { photoColumn = 0; y += 35; } } catch { /* Mantém o PDF disponível caso uma foto falhe. */ } }
       if (photoColumn > 0) y += 35;
       const pointInterventions = interventions.filter((item) => item.pointKey === `${point.kind}-${point.id}`);
       if (pointInterventions.length) {
-        if (y > 255) { pdf.addPage(); y = 18; }
+        if (y > 255) { if (!suppressBreaks) { pdf.addPage(); y = 18; } }
         pdf.setFont("Nunito", "bold"); pdf.setFontSize(10); pdf.text("Ações — intervenção do cliente", 14, y); y += 6;
         pdf.setFontSize(9);
         for (const item of pointInterventions) y = drawRichParagraph([{ text: `${item.answer}${item.callNumber ? ` (chamado #${item.callNumber})` : ""}.` }], y + 1) + 2;
       }
       y += 10;
+      return y;
+    };
+    if (reportType === "complete") for (const point of sortedPoints) {
+      const scratch = pdf.getNumberOfPages() + 1; pdf.addPage();
+      suppressBreaks = false;
+      const endY = await drawPoint(point, 18);
+      const fitsOnePage = pdf.getNumberOfPages() === scratch;
+      for (let page = pdf.getNumberOfPages(); page >= scratch; page -= 1) pdf.deletePage(page);
+      pdf.setPage(pdf.getNumberOfPages());
+      const height = endY - 18;
+      if (y + height > 278) { pdf.addPage(); y = 18; }
+      suppressBreaks = fitsOnePage;
+      y = await drawPoint(point, y);
+      suppressBreaks = false;
     }
     const generalInterventions = reportType === "complete" ? interventions.filter((item) => item.pointKey === null) : [];
     if (generalInterventions.length) {
