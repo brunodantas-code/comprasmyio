@@ -15,6 +15,14 @@ export function isCustomerQuestion(question: { prompt: string; question_key?: st
   return question.question_key === "shopping_customer_questions" || prompt === "perguntas para o cliente";
 }
 
+/**
+ * Client questions are answered in the checklist history and published in the reports.
+ * The "Sanar Pendências" screen must neither list them nor allow adding new ones.
+ */
+export function showsCustomerQuestions(view: "execution" | "summary" | "pending"): boolean {
+  return view !== "pending";
+}
+
 export function customerQuestions(answer: unknown): string[] {
   if (answer && typeof answer === "object" && !Array.isArray(answer)) {
     if ("customer_questions" in answer && Array.isArray(answer.customer_questions)) {

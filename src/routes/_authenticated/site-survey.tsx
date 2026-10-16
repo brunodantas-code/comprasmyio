@@ -24,7 +24,7 @@ import { SiteSurveyScreenSummary } from "@/components/site-survey-screen-summary
 import { useSurveyImage } from "@/hooks/use-survey-image";
 import { surveyPointType, requiresSurveyFacade, type SurveyPointType } from "@/lib/site-survey-point-type";
 import { SiteSurveyCustomerQuestions } from "@/components/site-survey-customer-questions";
-import { answeredCustomerQuestions, customerQuestionResponses, customerQuestions, isCustomerQuestion, pendingCustomerQuestions, simplifiedAnswerType, persistedAnswerType } from "@/lib/site-survey-questions";
+import { answeredCustomerQuestions, customerQuestionResponses, customerQuestions, isCustomerQuestion, pendingCustomerQuestions, showsCustomerQuestions, simplifiedAnswerType, persistedAnswerType } from "@/lib/site-survey-questions";
 import { prepareSurveyPhoto } from "@/lib/site-survey-photo";
 import { useSurveyPointEdit } from "@/hooks/use-survey-point-edit";
 import { SiteSurveyFacadePicker } from "@/components/site-survey-facade-picker";
@@ -345,7 +345,7 @@ function SiteSurveyPage() {
           const itemClassName = `h-auto min-w-0 rounded-[1.35rem] p-0 shadow-none ${active ? "!bg-primary/15 !text-primary hover:!bg-primary/20 hover:!text-primary" : "!bg-transparent !text-muted-foreground hover:!bg-muted hover:!text-foreground"}`;
           if (!hasSubmenu) return <Button key={value} type="button" variant="ghost" className={itemClassName} onClick={selectSection} aria-current={active ? "page" : undefined}>{item}</Button>;
           const submenuItems = value === "visitas"
-            ? [{ value: "minhas", label: "Realizar Visita", icon: CalendarDays }, { value: "pendencias", label: "Sanar Pendências", icon: ClipboardCheck }, ...(can("site_survey_agendar") ? [{ value: "realizada", label: "Cadastrar visita realizada", icon: ClipboardCheck }, { value: "nova", label: "Nova visita", icon: Plus }] : []), { value: "resumo", label: "Histórico de Visitas", icon: FileText }]
+            ? [...(can("site_survey_agendar") ? [{ value: "nova", label: "Nova visita", icon: Plus }] : []), { value: "minhas", label: "Realizar Visita", icon: CalendarDays }, { value: "pendencias", label: "Sanar Pendências", icon: ClipboardCheck }, ...(can("site_survey_agendar") ? [{ value: "realizada", label: "Cadastrar visita realizada", icon: ClipboardCheck }] : []), { value: "resumo", label: "Histórico de Visitas", icon: FileText }]
             : userTabs;
           return <DropdownMenu key={value}><DropdownMenuTrigger asChild><Button type="button" variant="ghost" className={itemClassName} onClick={selectSection} aria-current={active ? "page" : undefined}>{item}</Button></DropdownMenuTrigger><DropdownMenuContent side="top" align="center" sideOffset={10} className="w-56 rounded-lg p-1.5 shadow-xl"><DropdownMenuLabel>{label}</DropdownMenuLabel><DropdownMenuSeparator />{submenuItems.map(({ value: subValue, label: subLabel, icon: SubIcon }) => { const subActive = value === "visitas" ? visitsSection === subValue : userSection === subValue; return <DropdownMenuItem key={subValue} className="min-h-11 rounded-md" onSelect={() => { selectSection(); if (value === "visitas") setVisitsSection(subValue); else setUserSection(subValue); }}><SubIcon className="h-4 w-4" /><span className="flex-1">{subLabel}</span>{subActive ? <Check className="h-4 w-4 text-primary" /> : null}</DropdownMenuItem>; })}</DropdownMenuContent></DropdownMenu>;
         })}
@@ -1045,7 +1045,7 @@ function VisitDetails({ visit, data, onClose, onChanged, closeGuardRef, view = "
         if (skipped.has(section.id)) continue;
         for (const question of sortByPosition(data.questions.filter((item) => item.active && item.section_id === section.id))) if (isQuestionVisible(question, answers) && (isNotInformedAnswer(answerParts(answers.get(question.id)).value) || !isStoredQuestionComplete(question, answers, detail.attachments, scope))) items.push({ key: question.id, label: `${section.title}: ${question.prompt}`, sectionId: section.id });
       }
-      const customerQuestion = sectionsFor(point.templateId ?? visit.template_id, own).flatMap((section) => data.questions.filter((question) => question.active && question.section_id === section.id && isCustomerQuestion(question)))[0];
+      const customerQuestion = showsCustomerQuestions(view) ? sectionsFor(point.templateId ?? visit.template_id, own).flatMap((section) => data.questions.filter((question) => question.active && question.section_id === section.id && isCustomerQuestion(question)))[0] : undefined;
       if (customerQuestion) {
         const storedCustomerAnswer = answers.get(customerQuestion.id);
         const customerResponses = customerQuestionResponses(storedCustomerAnswer);
