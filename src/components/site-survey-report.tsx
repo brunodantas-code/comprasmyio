@@ -18,6 +18,7 @@ import nunitoRegularUrl from "@/assets/fonts/nunito-regular.ttf?url";
 import nunitoBoldUrl from "@/assets/fonts/nunito-bold.ttf?url";
 import nunitoExtraBoldUrl from "@/assets/fonts/nunito-extrabold.ttf?url";
 import { saveSiteSurveyPurchaseDraft, type SiteSurveyPurchaseDraftItem } from "@/lib/site-survey-purchase-draft";
+import { clipRoundedPhoto } from "@/lib/site-survey-photo";
 
 type Visit = { id: string; template_id: string | null; survey_number: number; client_id: string | null; client_unit_id: string | null; project_id: string | null; technician_id: string; status: string; scheduled_start: string; scheduled_end: string | null; address: string; contact_name: string | null; contact_phone: string | null; notes: string | null; started_at: string | null; completed_at: string | null; is_manual_entry: boolean };
 type Named = { id: string; name: string };
@@ -220,9 +221,16 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
   else if (electrical.length) summaries.push({ title: electricalSection?.title ?? "Instalação elétrica", parts: electrical, questionIds: electricalIds });
   return summaries;
 };
-const imageDataUrl = async (url: string, monochrome = false, cropRatio?: number) => new Promise<string>((resolve, reject) => {
+const imageDataUrl = async (url: string, monochrome = false, cropRatio?: number, rounded = false) => new Promise<string>((resolve, reject) => {
   const image = new Image(); image.crossOrigin = "anonymous";
-  image.onload = () => { const canvas = document.createElement("canvas"); const scale = Math.min(1, 900 / Math.max(image.naturalWidth, image.naturalHeight)); canvas.width = cropRatio ? 840 : Math.max(1, Math.round(image.naturalWidth * scale)); canvas.height = cropRatio ? Math.round(840 / cropRatio) : Math.max(1, Math.round(image.naturalHeight * scale)); const context = canvas.getContext("2d"); if (!context) return reject(new Error("Não foi possível preparar a foto.")); context.fillStyle = "#ffffff"; context.fillRect(0, 0, canvas.width, canvas.height); if (cropRatio) { const sourceWidth = Math.min(image.naturalWidth, image.naturalHeight * cropRatio); const sourceHeight = sourceWidth / cropRatio; context.drawImage(image, (image.naturalWidth - sourceWidth) / 2, (image.naturalHeight - sourceHeight) / 2, sourceWidth, sourceHeight, 0, 0, canvas.width, canvas.height); } else context.drawImage(image, 0, 0, canvas.width, canvas.height); if (monochrome) { const pixels = context.getImageData(0, 0, canvas.width, canvas.height); for (let index = 0; index < pixels.data.length; index += 4) { const isBackground = pixels.data[index] > 245 && pixels.data[index + 1] > 245 && pixels.data[index + 2] > 245; const value = isBackground ? 255 : 0; pixels.data[index] = value; pixels.data[index + 1] = value; pixels.data[index + 2] = value; } context.putImageData(pixels, 0, 0); } resolve(canvas.toDataURL("image/jpeg", 0.9)); };
+  image.onload = () => { const canvas = document.createElement("canvas"); const scale = Math.min(1, 900 / Math.max(image.naturalWidth, image.naturalHeight)); canvas.width = cropRatio ? 840 : Math.max(1, Math.round(image.naturalWidth * scale)); canvas.height = cropRatio ? Math.round(840 / cropRatio) : Math.max(1, Math.round(image.naturalHeight * scale)); const context = canvas.getContext("2d"); if (!context) return reject(new Error("Não foi possível preparar a foto.")); context.fillStyle = "#ffffff"; context.fillRect(0, 0, canvas.width, canvas.height); if (cropRatio) { const sourceWidth = Math.min(image.naturalWidth, image.naturalHeight * cropRatio); const sourceHeight = sourceWidth / cropRatio; context.drawImage(image, (image.naturalWidth - sourceWidth) / 2, (image.naturalHeight - sourceHeight) / 2, sourceWidth, sourceHeight, 0, 0, canvas.width, canvas.height); } else context.drawImage(image, 0, 0, canvas.width, canvas.height); if (monochrome) { const pixels = context.getImageData(0, 0, canvas.width, canvas.height); for (let index = 0; index < pixels.data.length; index += 4) { const isBackground = pixels.data[index] > 245 && pixels.data[index + 1] > 245 && pixels.data[index + 2] > 245; const value = isBackground ? 255 : 0; pixels.data[index] = value; pixels.data[index + 1] = value; pixels.data[index + 2] = value; } context.putImageData(pixels, 0, 0); }
+    // Soft corners, same proportion as the report thumbnails: the page is white, so white corners read as rounded.
+    if (!rounded) return resolve(canvas.toDataURL("image/jpeg", 0.9));
+    const output = document.createElement("canvas"); output.width = canvas.width; output.height = canvas.height;
+    const outputContext = output.getContext("2d"); if (!outputContext) return reject(new Error("Não foi possível preparar a foto."));
+    outputContext.fillStyle = "#ffffff"; outputContext.fillRect(0, 0, output.width, output.height);
+    outputContext.save(); clipRoundedPhoto(outputContext, output.width, output.height); outputContext.drawImage(canvas, 0, 0); outputContext.restore();
+    resolve(output.toDataURL("image/jpeg", 0.9)); };
   image.onerror = () => reject(new Error("Não foi possível carregar uma foto do relatório.")); image.src = url;
 });
 const fileBase64 = async (url: string) => {
