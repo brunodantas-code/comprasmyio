@@ -68,7 +68,10 @@ const findAnswer = (responses: ReportResponse[], questions: Question[], terms: s
     const section = normalize(sections?.find((candidate) => candidate.id === question?.section_id)?.title ?? "");
     return terms.some((term) => prompt.includes(term)) && (!sectionTerms?.length || sectionTerms.some((term) => section.includes(term)));
   });
-  return response ? { id: response.question_id, value: valueText(response.answer).trim() } : null;
+  if (!response) return null;
+  // "base" é o valor sem o detalhe; "detail" é o texto complementar digitado pelo técnico.
+  const item = response.answer && typeof response.answer === "object" && !Array.isArray(response.answer) && "value" in response.answer ? response.answer as { value: unknown; detail?: unknown } : null;
+  return { id: response.question_id, value: valueText(response.answer).trim(), base: item ? valueText(item.value).trim() : "", detail: item && typeof item.detail === "string" ? item.detail.trim() : "" };
 };
 const meterSpecification = (flowRate: string | null, mappings: MeterMapping[]) => {
   if (!flowRate || /nao (?:foi )?informad[oa]|sem informacao/i.test(normalize(flowRate))) return "Especificação do hidrômetro não informada";
@@ -220,14 +223,23 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
   }
   const pulse = hydraulicAnswer(["condicao da saida pulsada", "saida pulsada"]);
   const flowRate = hydraulicAnswer(["vazao nominal", "vazao do hidrometro"]);
+  // "Não informado e não legível" (e variantes ilegíveis) também significa vazão não informada.
+  const rateUninformed = (value: string) => isUninformed(value) || /nao legivel|ilegivel|nao identificado/.test(normalize(value));
+  // O detalhe da resposta (ex.: "Tubulação de bitola larga.") não entra na frase da vazão: vira frase própria.
+  const rate = flowRate ? lowerLeadingPreposition(proseValue(flowRate.detail ? flowRate.base : flowRate.value)) : "";
+  const rateMissing = !rate || rateUninformed(rate);
   if (pulse) {
     const pulseStatus = statusOnly(pulse.value);
     const pulseWorks = /^(sim|operante|funcional|funcionando)/.test(pulseStatus);
     const pulseUnavailable = normalize(pulseStatus).includes("inoperante") || normalize(pulseStatus) === "nao";
-    if (pulseUnavailable) hydraulic.push({ text: "Não existe saída pulsada ou encontra-se inoperante", bold: true }, { text: flowRate ? ` e a vazão nominal ${isUninformed(proseValue(flowRate.value)) ? "" : "é de "}` : ". " });
-    else hydraulic.push({ text: pulseWorks ? "Possui saída pulsada " : "A saída pulsada encontra-se " }, { text: pulseWorks ? "funcional" : pulseStatus, bold: true }, { text: flowRate ? ` e a vazão nominal ${isUninformed(proseValue(flowRate.value)) ? "" : "é de "}` : ". " });
+    if (pulseUnavailable) hydraulic.push({ text: "Não existe saída pulsada ou encontra-se inoperante", bold: true }, { text: flowRate ? ` e a vazão nominal ${rateMissing ? "" : "é de "}` : ". " });
+    else hydraulic.push({ text: pulseWorks ? "Possui saída pulsada " : "A saída pulsada encontra-se " }, { text: pulseWorks ? "funcional" : pulseStatus, bold: true }, { text: flowRate ? ` e a vazão nominal ${rateMissing ? "" : "é de "}` : ". " });
   }
-  if (flowRate) { const rate = lowerLeadingPreposition(proseValue(flowRate.value)); hydraulic.push({ text: pulse ? "" : `A vazão nominal ${isUninformed(rate) ? "" : "é de "}` }, { text: isUninformed(rate) || !rate ? "não foi informada" : rate, bold: true }, { text: ". " }); }
+  if (flowRate) {
+    hydraulic.push({ text: pulse ? "" : rateMissing ? "A vazão nominal " : "A vazão nominal é de " }, { text: rateMissing ? "não foi informada" : rate, bold: true }, { text: ". " });
+    const flowDetail = flowRate.detail.replace(/[.!?]+\s*$/, "").trim();
+    if (flowDetail) hydraulic.push({ text: flowDetail, bold: true }, { text: ". " });
+  }
   const flow = hydraulicAnswer(["sentido do fluxo"]);
   if (flow && isUninformed(lower(flow.value))) hydraulic.push({ text: "O sentido do fluxo de água " }, { text: "não foi informado", bold: true }, { text: ". " });
   else if (flow) hydraulic.push({ text: "O sentido do fluxo de água foi classificado como " }, { text: normalize(flow.value).includes("desacordo") || normalize(flow.value).includes("incorret") ? "incorreto" : normalize(flow.value).includes("acordo") || normalize(flow.value).includes("corret") ? "correto" : lower(flow.value), bold: true }, { text: ". " });
