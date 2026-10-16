@@ -180,7 +180,13 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
       hydraulic.push({ text: ", " }, { text, bold: true });
     });
     // Observação da dificuldade de acesso vem depois de "de ... acesso", sem repetir a palavra "acesso".
-    const accessNotes = (accessSplit?.notes ?? []).map((note) => note.replace(/^acesso\s+(ruim|dif[ií]cil|complicado|restrito)\s*,?\s*/i, "").replace(/[.;,]+$/, "").trim()).filter(Boolean);
+    // Trechos da observação que repetem a localização já descrita (ex.: "e localizado no alto") são descartados.
+    const mentioned = [firstPlace, ...fragments.map((fragment) => normalize(fragment))];
+    const dropRepeated = (note: string) => note.split(/\s*,\s*|\s+e\s+/).map((piece) => piece.trim()).filter((piece) => {
+      const key = normalize(piece).replace(/^localizad[oa]\s+/, "").trim();
+      return key && !mentioned.some((place) => place.includes(key));
+    }).join(", ");
+    const accessNotes = (accessSplit?.notes ?? []).map((note) => dropRepeated(note.replace(/^acesso\s+(ruim|dif[ií]cil|complicado|restrito)\s*,?\s*/i, "").replace(/[.;,]+$/, "").trim())).filter(Boolean);
     if (access && accessSplit?.base && isUninformed(accessSplit.base)) hydraulic.push({ text: ". A dificuldade de acesso " }, { text: "não foi informada", bold: true }, { text: ". " });
     else if (access && accessSplit?.base) { hydraulic.push({ text: ", de " }, { text: accessSplit.base, bold: true }, { text: " acesso" }); for (const note of accessNotes) hydraulic.push({ text: ", " }, { text: note, bold: true }); hydraulic.push({ text: ". " }); } else hydraulic.push({ text: ". " });
   }
