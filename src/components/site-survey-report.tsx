@@ -1,6 +1,7 @@
 import { customerQuestionResponses, customerQuestions, isCustomerQuestion, numberedCustomerQuestions } from "@/lib/site-survey-questions";
 import { surveyPointType } from "@/lib/site-survey-point-type";
 import { reviewNoteText, sortTotalValues } from "@/lib/site-survey-report-totals";
+import { lowerLeadingPreposition } from "@/lib/site-survey-report-prose";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Download, FileChartColumn, LoaderCircle, Printer, ShoppingCart } from "lucide-react";
@@ -172,7 +173,7 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
     if (pulseUnavailable) hydraulic.push({ text: "Não existe saída pulsada ou encontra-se inoperante", bold: true }, { text: flowRate ? ` e a vazão nominal ${isUninformed(proseValue(flowRate.value)) ? "" : "é de "}` : ". " });
     else hydraulic.push({ text: pulseWorks ? "Possui saída pulsada " : "A saída pulsada encontra-se " }, { text: pulseWorks ? "funcional" : pulseStatus, bold: true }, { text: flowRate ? ` e a vazão nominal ${isUninformed(proseValue(flowRate.value)) ? "" : "é de "}` : ". " });
   }
-  if (flowRate) { const rate = proseValue(flowRate.value).replace(/^Até\b/, "até"); hydraulic.push({ text: pulse ? "" : `A vazão nominal ${isUninformed(rate) ? "" : "é de "}` }, { text: isUninformed(rate) || !rate ? "não foi informada" : rate, bold: true }, { text: ". " }); }
+  if (flowRate) { const rate = lowerLeadingPreposition(proseValue(flowRate.value)); hydraulic.push({ text: pulse ? "" : `A vazão nominal ${isUninformed(rate) ? "" : "é de "}` }, { text: isUninformed(rate) || !rate ? "não foi informada" : rate, bold: true }, { text: ". " }); }
   const flow = hydraulicAnswer(["sentido do fluxo"]);
   if (flow) hydraulic.push({ text: "O sentido do fluxo de água foi classificado como " }, { text: normalize(flow.value).includes("desacordo") || normalize(flow.value).includes("incorret") ? "incorreto" : normalize(flow.value).includes("acordo") || normalize(flow.value).includes("corret") ? "correto" : lower(flow.value), bold: true }, { text: ". " });
   const flange = hydraulicAnswer(["tipo de flange"]);
