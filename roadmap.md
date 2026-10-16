@@ -1,5 +1,5 @@
-- [ ] Site Survey — relatórios: fotos com cantos arredondados no mesmo padrão dos thumbnails (prévia em tela, PDF completo, compras, intervenções, equipamentos, PDF do cliente e PDF de cadastro).
-- [ ] Site Survey — Relatório Completo: substituir rótulos secos de intervenção (ex.: "Não") pela Resposta no PDF cadastrada em Cadastro > Diversos > Textos do relatório para o cliente.
+- [x] Site Survey — relatórios: fotos com cantos arredondados no mesmo padrão dos thumbnails (prévia em tela, PDF completo, compras, intervenções, equipamentos, PDF do cliente e PDF de cadastro).
+- [x] Site Survey — Relatório Completo: rótulos de intervenção passam a usar a Resposta no PDF cadastrada em Cadastro > Diversos > Textos do relatório para o cliente (ex.: "Não" do ponto de elétrica).
 - [x] Monitoramento Site Survey — alertas 1, 2 e 5 superados: permissão atual e salvamento autorizado no Histórico confirmados em visita concluída.
 - [x] Monitoramento Site Survey — lista atualizada ao adicionar/reativar ambiente; inclusão real lida sem recarregar e registro temporário removido.
 - [x] Monitoramento Site Survey — retorno de visibilidade renova edição e salvamento readquire bloqueio atomicamente; confirmado após 95 segundos sem renovação, preservando resposta e conclusão.
