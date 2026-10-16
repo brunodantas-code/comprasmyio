@@ -1,4 +1,4 @@
-const LEADING_PREPOSITION = /^(até|de|do|da|dos|das|em|entre|acima|abaixo|mais|menos|cerca|aproximadamente)\b/i;
+const LEADING_PREPOSITION = /^(até|de|do|da|dos|das|em|entre|acima|abaixo|mais|menos|cerca|aproximadamente)(?!\p{L})/iu;
 
 /**
  * In the flowing report text a value is written after a linking verb ("é de"), so a
