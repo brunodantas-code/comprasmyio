@@ -1,9 +1,9 @@
-- [ ] Site Survey — investigar fotos ausentes no relatório de intervenções (somente Borelli).
-- [ ] Site Survey — intervenções: remover coluna Chamado e usar “Registro sem manopla.”.
-- [ ] Site Survey — intervenções: alterar “Muito rígido” para “Registro muito rígido. Risco de quebra.”.
-- [ ] Site Survey — escopo contratado versus levantado: implantar aprovação elétrica/hidráulica independente por ponto, totais de levantados/contratados/aprovados e compras só dos pontos aprovados; autorização recebida.
-- [ ] Site Survey — compras: mencionar entre parênteses a vazão de cada loja na relação de instalação dos hidrômetros.
-- [ ] Site Survey — compras: agrupar itens de Elétrica do Hidrômetro com totais individuais e relação de lojas exibida uma única vez na prévia e no PDF.
+- [x] Site Survey — investigar fotos ausentes no relatório de intervenções (somente Borelli). Confirmado: só Borelli tem foto vinculada à pergunta da intervenção; sem reutilizar fotos de outros pontos.
+- [x] Site Survey — intervenções: remover coluna Chamado e usar “Registro sem manopla.”.
+- [x] Site Survey — intervenções: alterar “Muito rígido” para “Registro muito rígido. Risco de quebra.”.
+- [x] Site Survey — escopo contratado versus levantado: implantar aprovação elétrica/hidráulica independente por ponto, totais de levantados/contratados/aprovados e compras só dos pontos aprovados; autorização recebida.
+- [x] Site Survey — compras: mencionar entre parênteses a vazão de cada loja na relação de instalação dos hidrômetros.
+- [x] Site Survey — compras: agrupar itens de Elétrica do Hidrômetro com totais individuais e relação de lojas exibida uma única vez na prévia e no PDF.
 - [x] Site Survey — título hidráulico: sem correspondência no De-Para, mostrar somente a vazão informada (30 m³/h), sem especificação DN; oito testes passaram e Cine Taboão conferido na prévia real.
 - [x] Site Survey — Ótica CEMA: localização sem informação e vazão impossível de verificar corrigidas; sete testes passaram e texto conferido na prévia real do Taboão, sem alterar respostas do checklist.
 - [x] Site Survey — relatórios: textos de "Registro inexistente" e "Não informado" confirmados como distintos em todos os pontos do relatório (prosa por ponto, Ações/intervenções e totalizadores); conferência no código e no banco de textos cadastrados — nenhum texto unifica as duas respostas.
