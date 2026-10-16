@@ -168,8 +168,21 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
     const detail = locationDetail ? lower(proseValue(locationDetail.value)).replace(/^(?:localizad[oa]\s+)?(?:o\s+)?hidr[oô]metro\s+(?:fica|est[aá]|encontra-se)?\s*/i, "").trim() : "";
     const candidates = [...remainingLocations, detail].map((item) => item.replace(/[.;,]+$/, "").trim()).filter(Boolean);
     const firstPlace = normalize(lower(proseValue(locations[0].value)));
+    // O detalhe não repete o local já citado: "nos fundos da loja" vira "nos fundos".
+    const firstPlaceWords = new Set(firstPlace.split(/[^a-z0-9]+/).filter(Boolean));
+    const trimRepeatedTail = (fragment: string) => {
+      const words = fragment.split(/\s+/);
+      for (let i = words.length - 1; i >= 1; i--) {
+        const tail = words.slice(i).map((word) => normalize(word)).filter((word) => word && !/^(d[ao]s?|de|em|na|no|nos|nas|que|e|a|o)$/.test(word));
+        if (tail.length && tail.every((word) => firstPlaceWords.has(word))) {
+          const kept = words.slice(0, i).join(" ").replace(/\s+(?:d[ao]s?|de|na|no|nos|nas|em|e)\s*$/i, "").replace(/[.,;]+$/, "").trim();
+          if (kept && normalize(kept).split(/[^a-z0-9]+/).filter(Boolean).some((word) => !firstPlaceWords.has(word))) return kept;
+        }
+      }
+      return fragment;
+    };
     const fragments: string[] = [];
-    for (const item of candidates) {
+    for (const item of candidates.map(trimRepeatedTail)) {
       const key = normalize(item);
       if (!key || key === firstPlace || firstPlace.endsWith(key)) continue;
       const containedIdx = fragments.findIndex((existing) => key.startsWith(normalize(existing)) || key.includes(normalize(existing)));
