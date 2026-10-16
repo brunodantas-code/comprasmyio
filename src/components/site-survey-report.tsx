@@ -566,7 +566,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
       const body = reportType === "purchases" ? purchaseReportRows.map((item) => [item.label, String(item.quantity), item.points.join("; ") || "—"]) : reportType === "equipment" ? equipmentRows.map((item) => [item.name, item.details || "—", String(item.quantity), item.pointLabel]) : interventions.map((item) => [item.pointLabel, item.answer, item.callNumber ? `#${item.callNumber}` : "—"]);
       autoTable(pdf, { startY: y, theme: "plain", styles: { font: "Nunito", fontSize: 8, textColor: dark, lineColor: soft, lineWidth: { bottom: 0.12 }, overflow: "linebreak" }, headStyles: tableHead, head, body: body.length ? body : [["Nenhum item encontrado para os pontos selecionados."]] });
       y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 8;
-      if (reportType === "interventions" && withPhotos) for (const item of interventions) for (const photo of interventionPhotos(item)) { const { data: signed } = await supabase.storage.from("site-survey-attachments").createSignedUrl(photo.storage_path, 300); if (!signed?.signedUrl) continue; if (y > 245) { pdf.addPage(); y = 18; } try { pdf.setFont("Nunito", "bold"); pdf.text(item.pointLabel, 14, y); y += 3; pdf.addImage(await imageDataUrl(signed.signedUrl, false, 42 / 31), "JPEG", 14, y, 42, 31, undefined, "FAST"); y += 36; } catch { /* Mantém o PDF disponível caso uma foto falhe. */ } }
+      if (reportType === "interventions" && withPhotos) for (const item of interventions) for (const photo of interventionPhotos(item)) { const { data: signed } = await supabase.storage.from("site-survey-attachments").createSignedUrl(photo.storage_path, 300); if (!signed?.signedUrl) continue; if (y > 245) { pdf.addPage(); y = 18; } try { pdf.setFont("Nunito", "bold"); pdf.text(item.pointLabel, 14, y); y += 3; pdf.addImage(await imageDataUrl(signed.signedUrl, false, 42 / 31, true), "JPEG", 14, y, 42, 31, undefined, "FAST"); y += 36; } catch { /* Mantém o PDF disponível caso uma foto falhe. */ } }
       if (reportType === "purchases" && withPhotos && meterPhotoGroups.length) {
         if (y > 250) { pdf.addPage(); y = 18; }
         pdf.setFont("Nunito", "extrabold"); pdf.setFontSize(11); pdf.setTextColor(...purple); pdf.text("Fotos dos hidrômetros", 14, y); y += 7; pdf.setTextColor(...dark);
@@ -578,7 +578,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
           if (!signed?.signedUrl) continue;
           try {
             const x = 14 + photoColumn * 46;
-            pdf.addImage(await imageDataUrl(signed.signedUrl, false, 42 / 31), "JPEG", x, y, 42, 31, undefined, "FAST");
+            pdf.addImage(await imageDataUrl(signed.signedUrl, false, 42 / 31, true), "JPEG", x, y, 42, 31, undefined, "FAST");
             pdf.setFont("Nunito", "bold"); pdf.setFontSize(7);
             const labelLines = pdf.splitTextToSize(`${group.point.label} - ${group.flowRate}`, 42).slice(0, 3) as string[];
             pdf.text(labelLines, x, y + 35);
@@ -664,7 +664,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
       if (calls) { if (y > 262) { pdf.addPage(); y = 18; } pdf.setFont("Nunito", "bold"); pdf.text("Ações e chamados", 14, y); y = drawRichParagraph([{ text: calls }], y + 5) + 2; }
       const photos = withPhotos ? data.attachments.filter((item) => item.content_type?.startsWith("image/") && (point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id)) : [];
       let photoColumn = 0;
-      for (const photo of photos) { const { data: signed } = await supabase.storage.from("site-survey-attachments").createSignedUrl(photo.storage_path, 300); if (!signed?.signedUrl) continue; if (photoColumn === 0 && y > 245) { pdf.addPage(); y = 18; } try { pdf.addImage(await imageDataUrl(signed.signedUrl, false, 42 / 31), "JPEG", 14 + photoColumn * 46, y, 42, 31, undefined, "FAST"); photoColumn += 1; if (photoColumn === 4) { photoColumn = 0; y += 35; } } catch { /* Mantém o PDF disponível caso uma foto falhe. */ } }
+      for (const photo of photos) { const { data: signed } = await supabase.storage.from("site-survey-attachments").createSignedUrl(photo.storage_path, 300); if (!signed?.signedUrl) continue; if (photoColumn === 0 && y > 245) { pdf.addPage(); y = 18; } try { pdf.addImage(await imageDataUrl(signed.signedUrl, false, 42 / 31, true), "JPEG", 14 + photoColumn * 46, y, 42, 31, undefined, "FAST"); photoColumn += 1; if (photoColumn === 4) { photoColumn = 0; y += 35; } } catch { /* Mantém o PDF disponível caso uma foto falhe. */ } }
       if (photoColumn > 0) y += 35;
       const pointInterventions = interventions.filter((item) => item.pointKey === `${point.kind}-${point.id}`);
       if (pointInterventions.length) {
@@ -711,4 +711,4 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
 }
 
 function ReportInfo({ label, value }: { label: string; value: string }) { return <div className="border-l-2 border-myio-green pl-3"><p className="text-xs text-muted-foreground">{label}</p><p className="font-medium">{value}</p></div>; }
-function ReportPhoto({ path, name }: { path: string; name: string }) { const { data } = useQuery({ queryKey: ["site-survey-report-photo", path], queryFn: async () => { const { data, error } = await supabase.storage.from("site-survey-attachments").createSignedUrl(path, 3600); if (error) throw error; return data.signedUrl; } }); return data ? <img src={data} alt={name} className="aspect-[4/3] w-full rounded-sm border object-cover" /> : <div className="aspect-[4/3] w-full animate-pulse rounded-sm bg-muted" />; }
+function ReportPhoto({ path, name }: { path: string; name: string }) { const { data } = useQuery({ queryKey: ["site-survey-report-photo", path], queryFn: async () => { const { data, error } = await supabase.storage.from("site-survey-attachments").createSignedUrl(path, 3600); if (error) throw error; return data.signedUrl; } }); return data ? <img src={data} alt={name} className="aspect-[4/3] w-full rounded-photo border object-cover" /> : <div className="aspect-[4/3] w-full animate-pulse rounded-photo bg-muted" />; }
