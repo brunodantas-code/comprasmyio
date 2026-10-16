@@ -151,18 +151,32 @@ const buildPointSummaries = (responses: ReportResponse[], questions: Question[],
   if (locations.length) {
     hydraulic.push({ text: "O hidrômetro encontra-se " });
     hydraulic.push({ text: placePhrase(proseValue(locations[0].value)), bold: true });
-    const remainingLocations = locations.slice(1).map((location) => lower(proseValue(location.value))).filter(Boolean);
+    // Respostas "Outros"/observações não entram literalmente: separam-se do valor base,
+    // removem-se repetições e ajusta-se a concordância antes de compor a frase.
+    const splitObservation = (value: string) => {
+      const parts = proseValue(value).split(/\s+[—–]\s+/).map((part) => part.trim()).filter(Boolean);
+      return { base: (parts[0] ?? "").toLocaleLowerCase("pt-BR"), notes: parts.slice(1).map((part) => part.toLocaleLowerCase("pt-BR")) };
+    };
+    const accessSplit = access ? splitObservation(access.value) : null;
+    const remainingLocations = locations.slice(1).flatMap((location) => { const split = splitObservation(location.value); return [split.base, ...split.notes]; }).filter(Boolean);
     const detail = locationDetail ? lower(proseValue(locationDetail.value)).replace(/^(?:localizad[oa]\s+)?(?:o\s+)?hidr[oô]metro\s+(?:fica|est[aá]|encontra-se)?\s*/i, "").trim() : "";
-    if (remainingLocations.length || detail) {
-      const location = remainingLocations[0] ?? "";
-      const detailAlreadyDescribesLocation = location && detail.startsWith(placePhrase(location));
-      const description = detailAlreadyDescribesLocation
-        ? detail
-        : [location ? placePhrase(location) : "", detail].filter(Boolean).join(" ");
-      hydraulic.push({ text: ", localizado " }, { text: description, bold: true });
-      for (const extraLocation of remainingLocations.slice(1)) hydraulic.push({ text: ", " }, { text: placePhrase(extraLocation), bold: true });
+    const candidates = [...remainingLocations, detail, ...(accessSplit?.notes ?? [])].map((item) => item.replace(/[.;,]+$/, "").trim()).filter(Boolean);
+    const firstPlace = normalize(lower(proseValue(locations[0].value)));
+    const fragments: string[] = [];
+    for (const item of candidates) {
+      const key = normalize(item);
+      if (!key || key === firstPlace || firstPlace.endsWith(key)) continue;
+      const containedIdx = fragments.findIndex((existing) => key.startsWith(normalize(existing)) || key.includes(normalize(existing)));
+      if (fragments.some((existing) => normalize(existing).includes(key))) continue;
+      if (containedIdx >= 0) { fragments[containedIdx] = item; continue; }
+      fragments.push(item);
     }
-    if (access) hydraulic.push({ text: ", de " }, { text: lower(access.value), bold: true }, { text: " acesso. " }); else hydraulic.push({ text: ". " });
+    const participle = /^(embutid|instalad|fixad|localizad|posicionad|sob\b|sobre\b|atr[aá]s|acima|abaixo|ao lado|junto|pr[oó]xim|dentro|entre|no\b|na\b|nos\b|nas\b|em\b)/;
+    for (const fragment of fragments) {
+      const text = participle.test(fragment) ? fragment : /^(loja|sobreloja|parede|galeria|cozinha|subestacao|armario|quadro|busway)/.test(normalize(fragment)) ? placePhrase(fragment) : fragment;
+      hydraulic.push({ text: ", " }, { text, bold: true });
+    }
+    if (access && accessSplit?.base) hydraulic.push({ text: ", de " }, { text: accessSplit.base, bold: true }, { text: " acesso. " }); else hydraulic.push({ text: ". " });
   }
   const pulse = hydraulicAnswer(["condicao da saida pulsada", "saida pulsada"]);
   const flowRate = hydraulicAnswer(["vazao nominal", "vazao do hidrometro"]);
