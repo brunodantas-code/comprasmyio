@@ -73,7 +73,7 @@ const SERVICE_TOTALS_SECONDARY: { key: keyof EnergyWaterTotals; label: string }[
 
 function TotalChip({ label, count }: { label: string; count: number }) {
   const isActive = count > 0;
-  return <div className={`flex items-center gap-2 rounded-sm px-2.5 py-1.5 ${isActive ? "bg-myio-green/5" : ""}`}>
+  return <div className={`flex items-center gap-2 rounded-sm px-2.5 py-1.5 sm:w-44 ${isActive ? "bg-myio-green/5" : ""}`}>
     <span className={`h-5 w-1.5 shrink-0 rounded-full ${isActive ? "bg-myio-green" : "bg-muted-foreground/25"}`} aria-hidden="true" />
     <span className={`text-xs font-medium ${isActive ? "text-foreground" : "text-muted-foreground"}`}>{label}</span>
     <strong className={`text-base leading-none tabular-nums ${isActive ? "text-foreground" : "text-muted-foreground/70"}`}>{count}</strong>
