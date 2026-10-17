@@ -57,9 +57,12 @@ const POINT_TOTALS: { key: SurveyPointType; label: string }[] = [
   { key: "vacant", label: "Lojas vagas" },
 ];
 
-const SERVICE_TOTALS: { key: keyof EnergyWaterTotals; label: string }[] = [
+const SERVICE_TOTALS_PRIMARY: { key: keyof EnergyWaterTotals; label: string }[] = [
   { key: "energyAll", label: "Energia" },
   { key: "waterAll", label: "Água" },
+];
+
+const SERVICE_TOTALS_SECONDARY: { key: keyof EnergyWaterTotals; label: string }[] = [
   { key: "energy", label: "Só Energia" },
   { key: "water", label: "Só Água" },
   { key: "both", label: "Água + Energia" },
@@ -75,9 +78,12 @@ function TotalChip({ label, count }: { label: string; count: number }) {
 }
 
 function PointTypeTotals({ totals, serviceTotals }: { totals: Record<SurveyPointType, number>; serviceTotals?: EnergyWaterTotals }) {
+  const grandTotal = totals.shop + totals.kiosk + totals.environment + totals.vacant;
   return <div className="flex flex-wrap items-center gap-2" aria-label="Quantidade de lojas, quiosques e ambientes">
+    <TotalChip label="Total geral" count={grandTotal} />
+    {serviceTotals ? SERVICE_TOTALS_PRIMARY.map((item) => <TotalChip key={item.key} label={item.label} count={serviceTotals[item.key]} />) : null}
     {POINT_TOTALS.filter((item) => item.key !== "vacant" || totals.vacant > 0).map((item) => <TotalChip key={item.key} label={item.label} count={totals[item.key]} />)}
-    {serviceTotals ? SERVICE_TOTALS.map((item) => <TotalChip key={item.key} label={item.label} count={serviceTotals[item.key]} />) : null}
+    {serviceTotals ? SERVICE_TOTALS_SECONDARY.map((item) => <TotalChip key={item.key} label={item.label} count={serviceTotals[item.key]} />) : null}
   </div>;
 }
 
