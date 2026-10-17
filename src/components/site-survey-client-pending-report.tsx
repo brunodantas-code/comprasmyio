@@ -192,6 +192,22 @@ export function SiteSurveyClientPendingReport({ visit, client, unit, project, po
           body: duplicated.flatMap((group) => group.map((point) => [point.name ?? point.label, point.lucNumber?.trim() || "Sem LUC", point.meterNumber || "—", point.pointType === "kiosk" ? "Quiosque" : point.pointType === "vacant" ? "Loja vaga" : "Loja", point.location || "—"])),
         });
       }
+      const vacant = vacantShopPoints(freshPoints.length ? freshPoints : points);
+      if (vacant.length) {
+        pdf.addPage(); pdf.setFont("Nunito", "bold"); pdf.setFontSize(15); pdf.setTextColor(...accent);
+        pdf.text("Lojas vagas cadastradas", 14, 25);
+        pdf.setFont("Nunito", "normal"); pdf.setFontSize(10); pdf.setTextColor(...ink);
+        pdf.text(`Confirme as ${vacant.length} loja(s) vaga(s) abaixo, cadastradas para futura implantação.`, 14, 33, { maxWidth: 182 });
+        autoTable(pdf, {
+          startY: 41, theme: "plain", margin: { top: 20, bottom: 20, left: 14, right: 14 },
+          styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: 3, overflow: "linebreak", valign: "middle" },
+          headStyles: { fontStyle: "bold", textColor: accent, lineWidth: { bottom: 0.3 }, lineColor: green },
+          rowPageBreak: "avoid", showHead: "everyPage",
+          columnStyles: { 0: { cellWidth: 28 }, 1: { cellWidth: 28 }, 2: { cellWidth: 46 }, 3: { cellWidth: 80 } },
+          head: [["LUC", "Nº do medidor", "Nome da loja", "Localização"]],
+          body: vacant.map((point) => [point.lucNumber?.trim() || "Sem LUC", point.meterNumber || "—", point.name ?? point.label, point.location || "—"]),
+        });
+      }
       const pages = pdf.getNumberOfPages();
       for (let page = 1; page <= pages; page++) {
         pdf.setPage(page); pdf.setFont("Nunito", "normal"); pdf.setFontSize(8); pdf.setTextColor(...ink);
