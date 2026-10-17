@@ -79,10 +79,13 @@ function TotalChip({ label, count }: { label: string; count: number }) {
 
 function PointTypeTotals({ totals, serviceTotals }: { totals: Record<SurveyPointType, number>; serviceTotals?: EnergyWaterTotals }) {
   const grandTotal = totals.shop + totals.kiosk + totals.environment + totals.vacant;
-  return <div className="flex flex-wrap items-center gap-2" aria-label="Quantidade de lojas, quiosques e ambientes">
-    <TotalChip label="Total geral" count={grandTotal} />
-    {POINT_TOTALS.filter((item) => item.key !== "vacant" || totals.vacant > 0).map((item) => <TotalChip key={item.key} label={item.label} count={totals[item.key]} />)}
-    {serviceTotals ? [...SERVICE_TOTALS_PRIMARY, ...SERVICE_TOTALS_SECONDARY].map((item) => <TotalChip key={item.key} label={item.label} count={serviceTotals[item.key]} />) : null}
+  // Na desktop, a 1ª linha traz as quantidades de pontos (até Lojas vagas) e a 2ª, as de água/energia.
+  return <div className="flex flex-col gap-1" aria-label="Quantidade de lojas, quiosques e ambientes">
+    <div className="flex flex-wrap items-center gap-2">
+      <TotalChip label="Total geral" count={grandTotal} />
+      {POINT_TOTALS.filter((item) => item.key !== "vacant" || totals.vacant > 0).map((item) => <TotalChip key={item.key} label={item.label} count={totals[item.key]} />)}
+    </div>
+    {serviceTotals ? <div className="flex flex-wrap items-center gap-2">{[...SERVICE_TOTALS_PRIMARY, ...SERVICE_TOTALS_SECONDARY].map((item) => <TotalChip key={item.key} label={item.label} count={serviceTotals[item.key]} />)}</div> : null}
   </div>;
 }
 
