@@ -309,12 +309,7 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, canA
     ...environmentRows.map((row) => ({ id: row.id, source: "environment" as const, luc_number: "", shop_name: row.name, location: null, point_type: row.point_type, classification_type: "environment", meter_number: row.meter_number, template_id: row.template_id })),
   ], [rows, environmentRows]);
   const typeTotals = useMemo(() => surveyPointTotals(displayRows), [displayRows]);
-  const environmentTotals = useMemo(() => {
-    const disciplines = new Map(environmentTypes.map((type) => [type.id, type.discipline]));
-    const totals = { hydraulic: 0, electrical: 0 };
-    for (const row of environmentRows) { const discipline = row.environment_type_id ? disciplines.get(row.environment_type_id) : undefined; if (discipline === "hydraulic") totals.hydraulic += 1; else if (discipline === "electrical") totals.electrical += 1; }
-    return totals;
-  }, [environmentRows, environmentTypes]);
+  const environmentTotals = useMemo(() => environmentDisciplineTotals(environmentRows, environmentTypes), [environmentRows, environmentTypes]);
   const approvalTotals = useMemo(() => approvalEnergyWaterTotals(scope.approvals, new Set(displayRows.map((row) => `${row.source}:${row.id}`))), [scope.approvals, displayRows]);
   const sortedRows = useMemo(() => displayRows.filter((row) => {
     const matchesLuc = normalizeHeader(row.luc_number).includes(normalizeHeader(lucFilter));
