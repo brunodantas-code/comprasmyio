@@ -820,6 +820,20 @@
       "when": 1792187498040,
       "tag": "0116_site_survey_installation_scope",
       "breakpoints": true
+    },
+    {
+      "idx": 117,
+      "version": "7",
+      "when": 1792273330441,
+      "tag": "0117_site_survey_commercial_proposals",
+      "breakpoints": true
+    },
+    {
+      "idx": 118,
+      "version": "7",
+      "when": 1792273424706,
+      "tag": "0118_proposal_derived_contracted_scope",
+      "breakpoints": true
     }
   ]
 }

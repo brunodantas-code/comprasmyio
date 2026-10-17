@@ -1,7 +1,14 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { surveyPointTotals } from "./site-survey-point-type";
+import { surveyPointTotals, requiresSurveyLuc, requiresSurveyFacade } from "./site-survey-point-type";
+
+test("Loja Vaga exige LUC, mas não exige fachada; loja comum mantém LUC opcional", () => {
+  assert.equal(requiresSurveyLuc("vacant"), true);
+  assert.equal(requiresSurveyFacade("vacant"), false);
+  assert.equal(requiresSurveyLuc("shop"), false);
+  assert.equal(requiresSurveyLuc("environment"), false);
+});
 
 test("Totaliza lojas, quiosques e ambientes pela classificação efetiva", () => {
   const totals = surveyPointTotals([

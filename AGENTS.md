@@ -32,4 +32,6 @@
 
 - Pending cards reuse the guarded editor by section; optional answer.observation stays separate from required details.
 - Completed surveys stay out of execution and can never be reopened; History allows authorized registration remediation without changing visit status or technical dates. Section 7 guards customer Q&A; models copy independently.
+- Registration PDF/Excel share filtered rows and freshly authorized installation approvals; PDF uses pdf-lib AcroForm after jsPDF layout and Excel native OOXML cell controls so client file edits remain independent of ERP records.
+- Commercial proposals use a separate private bucket and visit-keyed metadata, avoiding checklist attachments; authenticated PDF extraction updates contracted quantities atomically via a trigger, retaining unknown quantities as null.
 

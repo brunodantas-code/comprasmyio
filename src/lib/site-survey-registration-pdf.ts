@@ -3,8 +3,9 @@ import nunitoRegularUrl from "@/assets/fonts/nunito-regular.ttf?url";
 import nunitoBoldUrl from "@/assets/fonts/nunito-bold.ttf?url";
 import type { FacadeThumbnailAttachment } from "@/components/site-survey-facade-thumbnail";
 import { clipRoundedPhoto } from "@/lib/site-survey-photo";
+import type { RegistrationExportRow } from "./site-survey-registration-export";
 
-export type RegistrationPdfRow = { luc: string; meter: string; type: string; name: string; location: string; facade?: FacadeThumbnailAttachment };
+export type RegistrationPdfRow = RegistrationExportRow & { facade?: FacadeThumbnailAttachment };
 
 const loadFont = async (url: string) => {
   const response = await fetch(url);
@@ -45,7 +46,8 @@ async function thumbnail(attachment: FacadeThumbnailAttachment) {
 }
 
 export async function buildRegistrationPdf(rows: RegistrationPdfRow[], clientName?: string) {
-  const [{ jsPDF }, { default: autoTable }, regular, bold] = await Promise.all([import("jspdf"), import("jspdf-autotable"), loadFont(nunitoRegularUrl), loadFont(nunitoBoldUrl)]);
+  const [{ jsPDF }, { default: autoTable }, { PDFDocument }, regular, bold] = await Promise.all([import("jspdf"), import("jspdf-autotable"), import("pdf-lib"), loadFont(nunitoRegularUrl), loadFont(nunitoBoldUrl)]);
+  const fields: { page: number; x: number; y: number; checked: boolean; name: string }[] = [];
   // Serial decoding bounds memory even when originals are large.
   const thumbs: (string | undefined)[] = [];
   for (const row of rows) thumbs.push(row.facade ? await thumbnail(row.facade) : undefined);
@@ -71,13 +73,21 @@ export async function buildRegistrationPdf(rows: RegistrationPdfRow[], clientNam
     styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: 3, overflow: "linebreak", valign: "middle" },
     headStyles: { fontStyle: "bold", textColor: accent, lineWidth: { bottom: 0.3 }, lineColor: green },
     bodyStyles: { minCellHeight: 24 }, rowPageBreak: "avoid", showHead: "everyPage",
-    columnStyles: { 0: { cellWidth: 24 }, 1: { cellWidth: 24 }, 2: { cellWidth: 34 }, 3: { cellWidth: 22 }, 4: { cellWidth: 40 }, 5: { cellWidth: 38 } },
-    head: [["Foto", "LUC", "Nº do medidor", "Tipo", "Nome", "Localização"]],
-    body: rows.map((row, i) => [thumbs[i] ? "" : "Sem foto", row.luc, row.meter, row.type, row.name, row.location]),
+    columnStyles: { 0: { cellWidth: 22 }, 1: { cellWidth: 19 }, 2: { cellWidth: 25 }, 3: { cellWidth: 21 }, 4: { cellWidth: 30 }, 5: { cellWidth: 32 }, 6: { cellWidth: 14, halign: "center" }, 7: { cellWidth: 19, halign: "center" } },
+    head: [["Foto", "LUC", "Nº do medidor", "Tipo", "Nome", "Localização", "Água", "Energia"]],
+    body: rows.map((row, i) => [thumbs[i] ? "" : "Sem foto", row.luc, row.meter, row.type, row.name, row.location, "", ""]),
     didDrawCell: (cell) => {
-      if (cell.section !== "body" || cell.column.index !== 0) return;
-      const t = thumbs[cell.row.index];
-      if (t) pdf.addImage(t, "PNG", cell.cell.x + 3, cell.cell.y + (cell.cell.height - 18) / 2, 18, 18);
+      if (cell.section !== "body") return;
+      if (cell.column.index === 0) {
+        const t = thumbs[cell.row.index];
+        if (t) pdf.addImage(t, "PNG", cell.cell.x + 2, cell.cell.y + (cell.cell.height - 18) / 2, 18, 18);
+      }
+      if (cell.column.index === 6 || cell.column.index === 7) {
+        const row = rows[cell.row.index];
+        if (!row) return;
+        const service = cell.column.index === 6 ? "water" : "energy";
+        fields.push({ page: pdf.getCurrentPageInfo().pageNumber, x: cell.cell.x + (cell.cell.width - 5) / 2, y: cell.cell.y + (cell.cell.height - 5) / 2, checked: row[service], name: `${service}_${cell.row.index + 1}` });
+      }
     },
   });
   const pages = pdf.getNumberOfPages();
@@ -89,5 +99,15 @@ export async function buildRegistrationPdf(rows: RegistrationPdfRow[], clientNam
     if (hasClient) pdf.text(String(clientName), 105, 287, { align: "center" });
     pdf.text(`Página ${page} de ${pages}`, 196, 287, { align: "right" });
   }
-  return pdf.output("blob");
+  const document = await PDFDocument.load(pdf.output("arraybuffer"));
+  const form = document.getForm();
+  const mm = 72 / 25.4;
+  for (const field of fields) {
+    const page = document.getPages()[field.page - 1];
+    if (!page) continue;
+    const checkbox = form.createCheckBox(field.name);
+    checkbox.addToPage(page, { x: field.x * mm, y: page.getHeight() - (field.y + 5) * mm, width: 5 * mm, height: 5 * mm, borderWidth: 0.7 });
+    if (field.checked) checkbox.check();
+  }
+  return new Blob([new Uint8Array(await document.save())], { type: "application/pdf" });
 }
