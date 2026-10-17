@@ -1,3 +1,5 @@
+- [ ] Site Survey — Histórico de Visitas: excluir a segunda linha cinza abaixo do cabeçalho da visita (duplicada).
+- [ ] Site Survey — igualar a altura do botão Salvar aos demais botões de ação do bloco.
 - [x] Site Survey — Histórico do Checklist: subir os botões de pendências e perguntas ao cliente para a linha das fotos no desktop, reduzindo o Card.
 - [x] Site Survey — intervenção do cliente: no pop-up de confirmação, perguntar se deseja vincular foto para aparecer no relatório do cliente.
 - [x] Site Survey — ícone da fachada: bolinha vermelha com a quantidade de intervenções nas lojas/ambientes/quiosques que necessitam intervenção (cadastro completo e Histórico do Checklist; só intervenções abertas).
