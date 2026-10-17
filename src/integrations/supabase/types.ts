@@ -3612,6 +3612,41 @@ export type Database = {
           },
         ]
       }
+      site_survey_commercial_proposals: {
+        Row: {
+          file_name: string
+          file_size: number
+          storage_path: string
+          updated_at: string
+          uploaded_by: string
+          visit_id: string
+        }
+        Insert: {
+          file_name: string
+          file_size: number
+          storage_path: string
+          updated_at?: string
+          uploaded_by: string
+          visit_id: string
+        }
+        Update: {
+          file_name?: string
+          file_size?: number
+          storage_path?: string
+          updated_at?: string
+          uploaded_by?: string
+          visit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_survey_commercial_proposals_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: true
+            referencedRelation: "site_survey_visits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_survey_contracted_scope: {
         Row: {
           electrical: number | null
