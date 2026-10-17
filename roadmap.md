@@ -1,3 +1,4 @@
+- [ ] Site Survey — incluir Localização na criação/edição de ambientes e deixar de exibir o checklist como localização.
 - [x] Site Survey — alinhar os totalizadores de quantidade com o título do Cadastro completo; conferido em 1280/1073 px e celular sem transbordamento.
 - [x] Site Survey — proposta do Taboão: Água 50 lojas/quiosques, 1 entrada da concessionária e saldo 6 nos demais ambientes; Energia 185 lojas/quiosques e saldo 42 nos demais ambientes. Dados reais e cinco testes conferidos.
 - [x] Site Survey — Cadastro em PDF e Excel: Água e Energia editáveis por ponto, inicialmente conforme aprovações cadastradas; downloads, campos PDF, aparência em 16 páginas e fórmulas Excel conferidos (zero erros). Controles Excel requerem Excel moderno.
