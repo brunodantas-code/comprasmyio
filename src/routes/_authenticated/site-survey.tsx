@@ -23,7 +23,7 @@ import { SiteSurveyClientPendingReport } from "@/components/site-survey-client-p
 import { SiteSurveyReportTexts } from "@/components/site-survey-report-texts";
 import { SiteSurveyScreenSummary } from "@/components/site-survey-screen-summary";
 import { useSurveyImage } from "@/hooks/use-survey-image";
-import { surveyPointType, requiresSurveyFacade, type SurveyPointType } from "@/lib/site-survey-point-type";
+import { surveyPointType, requiresSurveyFacade, requiresSurveyLuc, type SurveyPointType } from "@/lib/site-survey-point-type";
 import { energyWaterTotals as surveyEnergyWaterTotals } from "@/lib/site-survey-energy-water";
 import { visitSearchHaystack } from "@/lib/site-survey-visit-search";
 import { SiteSurveyCustomerQuestions } from "@/components/site-survey-customer-questions";
@@ -245,7 +245,7 @@ function SiteSurveyPage() {
         all((from) => supabase.from("site_survey_attachments").select("visit_luc_id").eq("attachment_kind", "facade").not("visit_luc_id", "is", null).order("id").range(from, from + 999)),
       ]);
       const withFacade = new Set(facades.map((row) => row.visit_luc_id));
-      for (const row of lucs) { const type = surveyPointType(row); if ((Array.isArray(row.pending_fields) && row.pending_fields.length) || (requiresSurveyFacade(type) && (!withFacade.has(row.id) || !row.luc_number?.trim()))) ids.add(row.visit_id); }
+      for (const row of lucs) { const type = surveyPointType(row); if ((Array.isArray(row.pending_fields) && row.pending_fields.length) || (requiresSurveyFacade(type) && (!withFacade.has(row.id) || !row.luc_number?.trim())) || (requiresSurveyLuc(type) && !row.luc_number?.trim())) ids.add(row.visit_id); }
       for (const row of envs) if (Array.isArray(row.pending_fields) && row.pending_fields.length) ids.add(row.visit_id);
       return ids;
     },
@@ -998,8 +998,11 @@ function VisitDetails({ pointSearch = "", visit, data, onClose, onChanged, close
         .map((field) => field.slice(section.title.length + 1).trim()),
     })).filter((group) => group.fields.length > 0);
     const pointFollowUpFields = (form?: HTMLFormElement) => {
-      // Loja vaga não gera follow-up de conclusão.
-      if (points.find((point) => point.value === selectedPoint)?.pointType === "vacant") return [];
+      // Loja vaga dispensa fachada, mas deve manter seu LUC.
+      if (points.find((point) => point.value === selectedPoint)?.pointType === "vacant") {
+        const luc = detail.lucs.find((point) => `luc:${point.id}` === selectedPoint);
+        return luc?.luc_number?.trim() ? [] : ["LUC não informado"];
+      }
       const values = form ? new FormData(form) : null;
       const currentAnswers = new Map(answers);
       if (values) {
@@ -1052,8 +1055,11 @@ function VisitDetails({ pointSearch = "", visit, data, onClose, onChanged, close
       const items: { key: string; label: string; sectionId?: string; groupKey?: string; groupLabel?: string; customer?: boolean; customerResponse?: string }[] = [];
       if (requiresSurveyFacade(point.pointType) && !detail.attachments.some((item) => item.attachment_kind === "facade" && scope(item))) items.push({ key: "facade", label: "Foto da fachada" });
       const luc = kind === "luc" ? detail.lucs.find((item) => item.id === id) : null;
-      // Loja vaga: fachada, LUC, localização e pendências de cadastro são dispensados.
-      if (point.pointType === "vacant") return { point, luc, items: [], groups: [], customerQuestion: undefined };
+      // Loja vaga exige LUC, sem exigir foto de fachada ou localização.
+      if (point.pointType === "vacant") {
+        if (!luc?.luc_number?.trim()) items.push({ key: "luc", label: "LUC não informado" });
+        return { point, luc, items, groups: items.length ? [{ key: "luc", label: "LUC não informado", items }] : [], customerQuestion: undefined };
+      }
       if (luc && !luc.location?.trim()) items.push({ key: "location", label: "Localização (andar)" });
       for (const section of sectionsFor(point.templateId ?? visit.template_id, own)) {
         if (skipped.has(section.id)) continue;

@@ -3,7 +3,7 @@ import { isCustomerQuestion, pendingCustomerQuestions } from "@/lib/site-survey-
 export type ClientPendingPoint = { value: string; label: string; pointType: string; lucNumber?: string; name?: string; location?: string | null; meterNumber?: string | null };
 export function unidentifiedLucPoints(points: ClientPendingPoint[]) {
   return points.filter((point) => {
-    if (point.pointType !== "shop" && point.pointType !== "kiosk") return false;
+    if (point.pointType !== "shop" && point.pointType !== "kiosk" && point.pointType !== "vacant") return false;
     const luc = (point.lucNumber ?? "").trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR");
     return !luc || luc === "sem luc" || luc === "nao identificado";
   }).sort((a, b) => (a.name ?? a.label).localeCompare(b.name ?? b.label, "pt-BR", { numeric: true }));

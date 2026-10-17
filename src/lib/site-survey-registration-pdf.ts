@@ -72,7 +72,7 @@ export async function buildRegistrationPdf(rows: RegistrationPdfRow[], clientNam
     styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: 3, overflow: "linebreak", valign: "middle" },
     headStyles: { fontStyle: "bold", textColor: accent, lineWidth: { bottom: 0.3 }, lineColor: green },
     bodyStyles: { minCellHeight: 24 }, rowPageBreak: "avoid", showHead: "everyPage",
-    columnStyles: { 0: { cellWidth: 22 }, 1: { cellWidth: 19 }, 2: { cellWidth: 25 }, 3: { cellWidth: 18 }, 4: { cellWidth: 32 }, 5: { cellWidth: 36 }, 6: { cellWidth: 14, halign: "center" }, 7: { cellWidth: 16, halign: "center" } },
+    columnStyles: { 0: { cellWidth: 22 }, 1: { cellWidth: 19 }, 2: { cellWidth: 25 }, 3: { cellWidth: 21 }, 4: { cellWidth: 30 }, 5: { cellWidth: 32 }, 6: { cellWidth: 14, halign: "center" }, 7: { cellWidth: 19, halign: "center" } },
     head: [["Foto", "LUC", "Nº do medidor", "Tipo", "Nome", "Localização", "Água", "Energia"]],
     body: rows.map((row, i) => [thumbs[i] ? "" : "Sem foto", row.luc, row.meter, row.type, row.name, row.location, "", ""]),
     didDrawCell: (cell) => {
@@ -91,6 +91,10 @@ export async function buildRegistrationPdf(rows: RegistrationPdfRow[], clientNam
         checkbox.y = cell.cell.y + (cell.cell.height - 5) / 2;
         checkbox.width = 5;
         checkbox.height = 5;
+        // jsPDF omits the normal Off appearance; keep its editable widget visible.
+        pdf.setDrawColor(...ink);
+        pdf.setLineWidth(0.25);
+        pdf.rect(checkbox.x, checkbox.y, checkbox.width, checkbox.height);
         checkbox.value = row[service] ? "On" : "Off";
         checkbox.appearanceState = row[service] ? "On" : "Off";
         checkbox.readOnly = false;
