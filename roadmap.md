@@ -1,3 +1,4 @@
+- [x] Site Survey — Cadastro completo: totalizadores à direita do título com a quantidade de lojas, quiosques e ambientes (lojas vagas à parte), no mesmo padrão das situações de visita; conferido no Taboão (76 lojas, 8 quiosques, 4 ambientes, 4 vagas) e com testes em src/lib/site-survey-point-type.test.ts.
 - [x] Site Survey — Histórico de Visitas: excluir a segunda linha cinza abaixo do cabeçalho da visita (duplicada).
 - [x] Site Survey — igualar a altura do botão Salvar aos demais botões de ação do bloco.
 - [x] Site Survey — Sanar Pendências: filtro por tipo de pendência ao lado do filtro de LUC/nome, com tipos únicos (agrupados por rótulo) e cards filtrados; conferido na prévia (115 pontos sem filtro, 32 com "Foto da fachada").
