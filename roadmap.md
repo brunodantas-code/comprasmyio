@@ -1,3 +1,4 @@
+- [ ] Site Survey — totalizadores do cadastro: incluir Total geral (lojas + quiosques + ambientes, incluindo vagas) como primeiro totalizador, seguido de Energia e Água (somatório das aprovações de instalação), antes dos totalizadores atuais.
 - [x] Site Survey — busca de visitas: incluir os nomes de lojas, quiosques e ambientes para localizar em quais shoppings está presente uma rede; conferido na prévia com "burger king" (2 shoppings listados, Mogi e Taboão) e testes em src/lib/site-survey-visit-search.test.ts.
 - [x] Site Survey — Cadastro completo: totalizadores à direita do título com a quantidade de lojas, quiosques e ambientes (lojas vagas à parte), no mesmo padrão das situações de visita; conferido no Taboão (76 lojas, 8 quiosques, 4 ambientes, 4 vagas) e com testes em src/lib/site-survey-point-type.test.ts.
 - [x] Site Survey — Histórico de Visitas: excluir a segunda linha cinza abaixo do cabeçalho da visita (duplicada).
