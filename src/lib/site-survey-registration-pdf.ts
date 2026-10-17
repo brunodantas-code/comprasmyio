@@ -85,7 +85,9 @@ export async function buildRegistrationPdf(rows: RegistrationPdfRow[], clientNam
     pdf.setPage(page); pdf.setFont("Nunito", "normal"); pdf.setFontSize(8); pdf.setTextColor(...ink);
     if (page > 1) pdf.text("myio · Cadastro de lojas, quiosques e ambientes", 14, 12);
     pdf.setDrawColor(...green); pdf.line(14, 280, 196, 280);
-    pdf.text("myio Automação Ltda", 14, 287); pdf.text(`Página ${page} de ${pages}`, 196, 287, { align: "right" });
+    pdf.text("myio Automação Ltda", 14, 287);
+    if (hasClient) pdf.text(String(clientName), 105, 287, { align: "center" });
+    pdf.text(`Página ${page} de ${pages}`, 196, 287, { align: "right" });
   }
   return pdf.output("blob");
 }
