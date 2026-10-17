@@ -136,6 +136,7 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, canA
   const [duplicateConfirmation, setDuplicateConfirmation] = useState<"edit" | "import" | null>(null);
   const [namePickerOpen, setNamePickerOpen] = useState(false);
   const [pendingFilter, setPendingFilter] = useState("all");
+  const [approvalFilter, setApprovalFilter] = useState<"all" | "water" | "energy" | "both" | "none">("all");
   const [expandedPending, setExpandedPending] = useState<Set<string>>(() => new Set());
 
   const load = async () => {
@@ -341,7 +342,9 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, canA
     const hasFacade = attachments.some((item) => item.attachment_kind === "facade" && (row.source === "luc" ? item.visit_luc_id === row.id : item.visit_environment_id === row.id));
     const count = pendingCount?.(pointValue) ?? 0;
     const matchesPending = pendingFilter === "all" || (pendingFilter === "with" ? count > 0 : count === 0);
-    return matchesPending && matchesLuc && matchesName && matchesLocation && matchesType && (!missingFacadeOnly || !hasFacade || surveyPointType(row) === "vacant") && (isPointVisible?.(pointValue) ?? true);
+    const approval = scope.approvals.find((item) => item.point_kind === row.source && item.point_id === row.id);
+    const matchesApproval = approvalFilter === "all" || (approvalFilter === "water" ? !!approval?.hydraulic_approved : approvalFilter === "energy" ? !!approval?.electrical_approved : approvalFilter === "both" ? !!approval?.hydraulic_approved && !!approval?.electrical_approved : !approval?.hydraulic_approved && !approval?.electrical_approved);
+    return matchesApproval && matchesPending && matchesLuc && matchesName && matchesLocation && matchesType && (!missingFacadeOnly || !hasFacade || surveyPointType(row) === "vacant") && (isPointVisible?.(pointValue) ?? true);
   }).sort((a, b) => {
     const comparison = (a[sortBy] ?? "").localeCompare(b[sortBy] ?? "", "pt-BR", { numeric: true, sensitivity: "base" });
     return sortAscending ? comparison : -comparison;
