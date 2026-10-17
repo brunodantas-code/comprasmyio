@@ -855,6 +855,13 @@
       "when": 1792278081270,
       "tag": "0121_site_survey_proposal_group_breakdown",
       "breakpoints": true
+    },
+    {
+      "idx": 122,
+      "version": "7",
+      "when": 1792278173102,
+      "tag": "0122_proposal_scope_sync_quantity_columns",
+      "breakpoints": true
     }
   ]
 }

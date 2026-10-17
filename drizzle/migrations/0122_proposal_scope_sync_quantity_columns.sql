@@ -1,0 +1,2 @@
+DROP TRIGGER proposal_sync_scope ON public.site_survey_commercial_proposals;
+CREATE TRIGGER proposal_sync_scope AFTER INSERT OR UPDATE OF hydraulic_shops, hydraulic_general, electrical, storage_path ON public.site_survey_commercial_proposals FOR EACH ROW EXECUTE FUNCTION public.sync_proposal_contracted_scope();
