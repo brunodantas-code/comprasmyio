@@ -3,8 +3,9 @@ import nunitoRegularUrl from "@/assets/fonts/nunito-regular.ttf?url";
 import nunitoBoldUrl from "@/assets/fonts/nunito-bold.ttf?url";
 import type { FacadeThumbnailAttachment } from "@/components/site-survey-facade-thumbnail";
 import { clipRoundedPhoto } from "@/lib/site-survey-photo";
+import type { RegistrationExportRow } from "./site-survey-registration-export";
 
-export type RegistrationPdfRow = { luc: string; meter: string; type: string; name: string; location: string; facade?: FacadeThumbnailAttachment };
+export type RegistrationPdfRow = RegistrationExportRow & { facade?: FacadeThumbnailAttachment };
 
 const loadFont = async (url: string) => {
   const response = await fetch(url);
@@ -45,7 +46,7 @@ async function thumbnail(attachment: FacadeThumbnailAttachment) {
 }
 
 export async function buildRegistrationPdf(rows: RegistrationPdfRow[], clientName?: string) {
-  const [{ jsPDF }, { default: autoTable }, regular, bold] = await Promise.all([import("jspdf"), import("jspdf-autotable"), loadFont(nunitoRegularUrl), loadFont(nunitoBoldUrl)]);
+  const [{ jsPDF, AcroFormCheckBox }, { default: autoTable }, regular, bold] = await Promise.all([import("jspdf"), import("jspdf-autotable"), loadFont(nunitoRegularUrl), loadFont(nunitoBoldUrl)]);
   // Serial decoding bounds memory even when originals are large.
   const thumbs: (string | undefined)[] = [];
   for (const row of rows) thumbs.push(row.facade ? await thumbnail(row.facade) : undefined);
@@ -71,13 +72,27 @@ export async function buildRegistrationPdf(rows: RegistrationPdfRow[], clientNam
     styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: 3, overflow: "linebreak", valign: "middle" },
     headStyles: { fontStyle: "bold", textColor: accent, lineWidth: { bottom: 0.3 }, lineColor: green },
     bodyStyles: { minCellHeight: 24 }, rowPageBreak: "avoid", showHead: "everyPage",
-    columnStyles: { 0: { cellWidth: 24 }, 1: { cellWidth: 24 }, 2: { cellWidth: 34 }, 3: { cellWidth: 22 }, 4: { cellWidth: 40 }, 5: { cellWidth: 38 } },
-    head: [["Foto", "LUC", "Nº do medidor", "Tipo", "Nome", "Localização"]],
-    body: rows.map((row, i) => [thumbs[i] ? "" : "Sem foto", row.luc, row.meter, row.type, row.name, row.location]),
+    columnStyles: { 0: { cellWidth: 22 }, 1: { cellWidth: 19 }, 2: { cellWidth: 25 }, 3: { cellWidth: 18 }, 4: { cellWidth: 32 }, 5: { cellWidth: 36 }, 6: { cellWidth: 14, halign: "center" }, 7: { cellWidth: 16, halign: "center" } },
+    head: [["Foto", "LUC", "Nº do medidor", "Tipo", "Nome", "Localização", "Água", "Energia"]],
+    body: rows.map((row, i) => [thumbs[i] ? "" : "Sem foto", row.luc, row.meter, row.type, row.name, row.location, "", ""]),
     didDrawCell: (cell) => {
-      if (cell.section !== "body" || cell.column.index !== 0) return;
-      const t = thumbs[cell.row.index];
-      if (t) pdf.addImage(t, "PNG", cell.cell.x + 3, cell.cell.y + (cell.cell.height - 18) / 2, 18, 18);
+      if (cell.section !== "body") return;
+      if (cell.column.index === 0) {
+        const t = thumbs[cell.row.index];
+        if (t) pdf.addImage(t, "PNG", cell.cell.x + 2, cell.cell.y + (cell.cell.height - 18) / 2, 18, 18);
+      }
+      if (cell.column.index === 6 || cell.column.index === 7) {
+        const row = rows[cell.row.index];
+        if (!row) return;
+        const service = cell.column.index === 6 ? "water" : "energy";
+        const checkbox = new AcroFormCheckBox();
+        checkbox.fieldName = `${service}_${cell.row.index + 1}`;
+        checkbox.Rect = [cell.cell.x + (cell.cell.width - 5) / 2, cell.cell.y + (cell.cell.height - 5) / 2, 5, 5];
+        checkbox.value = row[service] ? "On" : "Off";
+        checkbox.appearanceState = row[service] ? "On" : "Off";
+        checkbox.readOnly = false;
+        pdf.addField(checkbox);
+      }
     },
   });
   const pages = pdf.getNumberOfPages();
