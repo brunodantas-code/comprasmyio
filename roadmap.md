@@ -1,6 +1,6 @@
 - [x] Site Survey — Histórico do Checklist: subir os botões de pendências e perguntas ao cliente para a linha das fotos no desktop, reduzindo o Card.
-- [ ] Site Survey — intervenção do cliente: no pop-up de confirmação, perguntar se deseja vincular foto para aparecer no relatório do cliente.
-- [ ] Site Survey — ícone da fachada: bolinha vermelha com a quantidade de intervenções nas lojas/ambientes/quiosques que necessitam intervenção.
+- [x] Site Survey — intervenção do cliente: no pop-up de confirmação, perguntar se deseja vincular foto para aparecer no relatório do cliente.
+- [x] Site Survey — ícone da fachada: bolinha vermelha com a quantidade de intervenções nas lojas/ambientes/quiosques que necessitam intervenção (cadastro completo e Histórico do Checklist; só intervenções abertas).
 - [ ] Site Survey — Localização: investigar por que 1º e 2º andar informados pelo usuário não aparecem na coluna Localização.
 - [x] Site Survey — investigar fotos ausentes no relatório de intervenções (somente Borelli). Confirmado: só Borelli tem foto vinculada à pergunta da intervenção; sem reutilizar fotos de outros pontos.
 - [x] Site Survey — intervenções: remover coluna Chamado e usar “Registro sem manopla.”.
