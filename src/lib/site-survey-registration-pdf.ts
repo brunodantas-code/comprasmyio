@@ -87,7 +87,10 @@ export async function buildRegistrationPdf(rows: RegistrationPdfRow[], clientNam
         const service = cell.column.index === 6 ? "water" : "energy";
         const checkbox = new AcroFormCheckBox();
         checkbox.fieldName = `${service}_${cell.row.index + 1}`;
-        checkbox.Rect = [cell.cell.x + (cell.cell.width - 5) / 2, cell.cell.y + (cell.cell.height - 5) / 2, 5, 5];
+        checkbox.x = cell.cell.x + (cell.cell.width - 5) / 2;
+        checkbox.y = cell.cell.y + (cell.cell.height - 5) / 2;
+        checkbox.width = 5;
+        checkbox.height = 5;
         checkbox.value = row[service] ? "On" : "Off";
         checkbox.appearanceState = row[service] ? "On" : "Off";
         checkbox.readOnly = false;
