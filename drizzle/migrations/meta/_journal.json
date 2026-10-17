@@ -827,6 +827,13 @@
       "when": 1792273330441,
       "tag": "0117_site_survey_commercial_proposals",
       "breakpoints": true
+    },
+    {
+      "idx": 118,
+      "version": "7",
+      "when": 1792273424706,
+      "tag": "0118_proposal_derived_contracted_scope",
+      "breakpoints": true
     }
   ]
 }

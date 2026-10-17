@@ -3614,24 +3614,36 @@ export type Database = {
       }
       site_survey_commercial_proposals: {
         Row: {
+          electrical: number | null
+          evidence: string | null
           file_name: string
           file_size: number
+          hydraulic_general: number | null
+          hydraulic_shops: number | null
           storage_path: string
           updated_at: string
           uploaded_by: string
           visit_id: string
         }
         Insert: {
+          electrical?: number | null
+          evidence?: string | null
           file_name: string
           file_size: number
+          hydraulic_general?: number | null
+          hydraulic_shops?: number | null
           storage_path: string
           updated_at?: string
           uploaded_by: string
           visit_id: string
         }
         Update: {
+          electrical?: number | null
+          evidence?: string | null
           file_name?: string
           file_size?: number
+          hydraulic_general?: number | null
+          hydraulic_shops?: number | null
           storage_path?: string
           updated_at?: string
           uploaded_by?: string
@@ -3652,6 +3664,7 @@ export type Database = {
           electrical: number | null
           hydraulic_general: number | null
           hydraulic_shops: number | null
+          proposal_storage_path: string | null
           updated_at: string
           updated_by: string | null
           visit_id: string
@@ -3660,6 +3673,7 @@ export type Database = {
           electrical?: number | null
           hydraulic_general?: number | null
           hydraulic_shops?: number | null
+          proposal_storage_path?: string | null
           updated_at?: string
           updated_by?: string | null
           visit_id: string
@@ -3668,6 +3682,7 @@ export type Database = {
           electrical?: number | null
           hydraulic_general?: number | null
           hydraulic_shops?: number | null
+          proposal_storage_path?: string | null
           updated_at?: string
           updated_by?: string | null
           visit_id?: string
