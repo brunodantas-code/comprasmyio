@@ -32,3 +32,15 @@ export function energyWaterTotals(points: { kind: string; id: string; pointType:
   }
   return totals;
 }
+
+// Totals from the "Instalação aprovada" checkboxes: hydraulic = água, electrical = energia.
+export function approvalEnergyWaterTotals(approvals: Array<{ point_kind: string; point_id: string; hydraulic_approved: boolean; electrical_approved: boolean }>, pointKeys: Set<string>): EnergyWaterTotals {
+  const totals = { water: 0, energy: 0, both: 0 };
+  for (const a of approvals) {
+    if (!pointKeys.has(`${a.point_kind}:${a.point_id}`)) continue;
+    if (a.hydraulic_approved && a.electrical_approved) totals.both++;
+    else if (a.hydraulic_approved) totals.water++;
+    else if (a.electrical_approved) totals.energy++;
+  }
+  return totals;
+}

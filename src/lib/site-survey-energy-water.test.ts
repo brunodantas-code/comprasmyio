@@ -40,3 +40,15 @@ test("Lojas vagas e pontos cancelados ficam fora dos totalizadores", () => {
   ];
   assert.deepEqual(energyWaterTotals(points, responses, questions), { water: 0, energy: 1, both: 1 });
 });
+
+test("approval totals use installation checkboxes", async () => {
+  const { approvalEnergyWaterTotals } = await import("./site-survey-energy-water");
+  const r = approvalEnergyWaterTotals([
+    { point_kind: "luc", point_id: "1", hydraulic_approved: true, electrical_approved: true },
+    { point_kind: "luc", point_id: "2", hydraulic_approved: true, electrical_approved: false },
+    { point_kind: "luc", point_id: "3", hydraulic_approved: false, electrical_approved: true },
+    { point_kind: "luc", point_id: "4", hydraulic_approved: false, electrical_approved: false },
+    { point_kind: "luc", point_id: "9", hydraulic_approved: true, electrical_approved: true },
+  ], new Set(["luc:1", "luc:2", "luc:3", "luc:4"]));
+  assert.deepEqual(r, { water: 1, energy: 1, both: 1 });
+});
