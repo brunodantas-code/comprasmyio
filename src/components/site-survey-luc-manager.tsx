@@ -18,6 +18,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { surveyPointType, surveyPointTypeLabel, surveyPointTotals, type SurveyPointType } from "@/lib/site-survey-point-type";
+import { type EnergyWaterTotals } from "@/lib/site-survey-energy-water";
 import { supabase } from "@/integrations/supabase/client";
 import { suggestShopNameFromFacade } from "@/lib/site-survey-ai.functions";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
