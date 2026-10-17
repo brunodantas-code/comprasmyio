@@ -5035,6 +5035,7 @@ export type Database = {
           completed_at: string | null
           completed_by: string | null
           completion_status: string
+          contract_name: string | null
           created_at: string
           created_by: string | null
           id: string
@@ -5061,6 +5062,7 @@ export type Database = {
           completed_at?: string | null
           completed_by?: string | null
           completion_status?: string
+          contract_name?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
@@ -5087,6 +5089,7 @@ export type Database = {
           completed_at?: string | null
           completed_by?: string | null
           completion_status?: string
+          contract_name?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
