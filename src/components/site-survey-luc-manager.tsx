@@ -17,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { surveyPointType, surveyPointTypeLabel, type SurveyPointType } from "@/lib/site-survey-point-type";
+import { surveyPointType, surveyPointTypeLabel, surveyPointTotals, type SurveyPointType } from "@/lib/site-survey-point-type";
 import { supabase } from "@/integrations/supabase/client";
 import { suggestShopNameFromFacade } from "@/lib/site-survey-ai.functions";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -281,11 +281,7 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, canA
     ...rows.map((row) => ({ ...row, source: "luc" as const, template_id: null })),
     ...environmentRows.map((row) => ({ id: row.id, source: "environment" as const, luc_number: "", shop_name: row.name, location: null, point_type: row.point_type, classification_type: "environment", meter_number: row.meter_number, template_id: row.template_id })),
   ], [rows, environmentRows]);
-  const typeTotals = useMemo(() => {
-    const totals: Record<SurveyPointType, number> = { shop: 0, kiosk: 0, environment: 0, vacant: 0 };
-    for (const row of displayRows) totals[surveyPointType(row)] += 1;
-    return totals;
-  }, [displayRows]);
+  const typeTotals = useMemo(() => surveyPointTotals(displayRows), [displayRows]);
   const sortedRows = useMemo(() => displayRows.filter((row) => {
     const matchesLuc = normalizeHeader(row.luc_number).includes(normalizeHeader(lucFilter));
     const matchesName = normalizeHeader(row.shop_name).includes(normalizeHeader(shopNameFilter));
