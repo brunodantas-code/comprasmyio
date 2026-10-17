@@ -190,7 +190,7 @@ function SiteSurveyPage() {
     queryFn: async () => {
       const { data: auth } = await supabase.auth.getUser();
       if (!auth.user) throw new Error("Sessão não encontrada");
-      const [{ data: visits, error }, { data: clients }, { data: clientCategories }, { data: projects }, { data: units }, { data: technicians }, { data: templates }, { data: sections }, { data: questions }, { data: surveyProfile }, { data: surveyPermissions }, { data: erpAdmin }, { data: catalog }, { data: screwdriverTypes }, { data: wrenchSizes }, { data: actionCatalog }, { data: questionActions }, { data: customCatalogs }, { data: cancellationReasons }, { data: pauseReasons }, { data: timeAssumptions }, { data: shopCatalog }, { data: builtinCatalogNames, error: catalogNamesError }] = await Promise.all([
+      const [{ data: visits, error }, { data: clients }, { data: clientCategories }, { data: projects }, { data: units }, { data: technicians }, { data: templates }, { data: sections }, { data: questions }, { data: surveyProfile }, { data: surveyPermissions }, { data: erpAdmin }, { data: catalog }, { data: screwdriverTypes }, { data: wrenchSizes }, { data: actionCatalog }, { data: questionActions }, { data: customCatalogs }, { data: cancellationReasons }, { data: pauseReasons }, { data: timeAssumptions }, { data: shopCatalog }, { data: builtinCatalogNames, error: catalogNamesError }, { data: visitLucNames }, { data: visitEnvNames }] = await Promise.all([
         supabase.from("site_survey_visits").select("*").order("scheduled_start", { ascending: false }),
         supabase.from("clients").select("id,name,category_id").order("name"),
         supabase.from("client_categories").select("id,name").eq("active", true).order("position"),
@@ -214,6 +214,8 @@ function SiteSurveyPage() {
         supabase.from("site_survey_time_assumptions").select("id,name,question_id,answer_value,minutes,active,position").eq("active", true).order("position").order("name"),
         supabase.from("site_survey_shop_catalog").select("id,name,normalized_name,point_type,active").eq("active", true).order("name"),
         supabase.from("site_survey_builtin_catalog_names").select("catalog_key,name"),
+        supabase.from("site_survey_visit_lucs").select("visit_id,luc_number,shop_name").eq("active", true),
+        supabase.from("site_survey_visit_environments").select("visit_id,name").eq("active", true),
       ]);
       if (error) throw error;
       if (catalogNamesError) throw catalogNamesError;
