@@ -315,7 +315,23 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, canA
   ], [rows, environmentRows]);
   const typeTotals = useMemo(() => surveyPointTotals(displayRows), [displayRows]);
   const environmentTotals = useMemo(() => environmentDisciplineTotals(environmentRows, environmentTypes), [environmentRows, environmentTypes]);
-  const approvalTotals = useMemo(() => approvalEnergyWaterTotals(scope.approvals, new Set(displayRows.map((row) => `${row.source}:${row.id}`))), [scope.approvals, displayRows]);
+  // Totalizadores de aprovação separados: Lojas/Quiosques, Entrada da Concessionária e demais ambientes (consolidados).
+  const approvalGroupTotals = useMemo(() => {
+    const shopKeys = new Set(rows.filter((row) => surveyPointType(row) !== "vacant").map((row) => `luc:${row.id}`));
+    const concessionariaKeys = new Set<string>();
+    const otherKeys = new Set<string>();
+    for (const env of environmentRows) {
+      const type = environmentTypes.find((item) => item.id === env.environment_type_id);
+      (type && normalizeHeader(type.name) === "hidrometro da entrada da concessionaria" ? concessionariaKeys : otherKeys).add(`environment:${env.id}`);
+    }
+    return {
+      shops: approvalEnergyWaterTotals(scope.approvals, shopKeys),
+      concessionaria: approvalEnergyWaterTotals(scope.approvals, concessionariaKeys),
+      others: approvalEnergyWaterTotals(scope.approvals, otherKeys),
+      hasConcessionaria: concessionariaKeys.size > 0,
+      hasOthers: otherKeys.size > 0,
+    };
+  }, [scope.approvals, rows, environmentRows, environmentTypes]);
   const sortedRows = useMemo(() => displayRows.filter((row) => {
     const matchesLuc = normalizeHeader(row.luc_number).includes(normalizeHeader(lucFilter));
     const matchesName = normalizeHeader(row.shop_name).includes(normalizeHeader(shopNameFilter));
