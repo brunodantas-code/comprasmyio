@@ -44,7 +44,7 @@ async function thumbnail(attachment: FacadeThumbnailAttachment) {
   } catch { return undefined; } finally { URL.revokeObjectURL(url); }
 }
 
-export async function buildRegistrationPdf(rows: RegistrationPdfRow[]) {
+export async function buildRegistrationPdf(rows: RegistrationPdfRow[], clientName?: string) {
   const [{ jsPDF }, { default: autoTable }, regular, bold] = await Promise.all([import("jspdf"), import("jspdf-autotable"), loadFont(nunitoRegularUrl), loadFont(nunitoBoldUrl)]);
   // Serial decoding bounds memory even when originals are large.
   const thumbs: (string | undefined)[] = [];
@@ -53,17 +53,25 @@ export async function buildRegistrationPdf(rows: RegistrationPdfRow[]) {
   pdf.addFileToVFS("Nunito-Regular.ttf", regular); pdf.addFont("Nunito-Regular.ttf", "Nunito", "normal");
   pdf.addFileToVFS("Nunito-Bold.ttf", bold); pdf.addFont("Nunito-Bold.ttf", "Nunito", "bold");
   const ink = token("--myio-dark"), accent = token("--myio-purple"), green = token("--myio-green");
-  pdf.setFont("Nunito", "bold"); pdf.setFontSize(20); pdf.setTextColor(...accent); pdf.text("myio | Site Survey", 14, 22);
-  pdf.setFontSize(15); pdf.setTextColor(...ink); pdf.text("Cadastro de lojas, quiosques e ambientes", 14, 32);
-  pdf.setDrawColor(...green); pdf.line(14, 37, 196, 37);
+  const titleTop = 22, hasClient = Boolean(clientName);
+  pdf.setFont("Nunito", "bold"); pdf.setFontSize(20); pdf.setTextColor(...accent); pdf.text("myio | Site Survey", 14, titleTop);
+  if (hasClient) {
+    pdf.setFontSize(15); pdf.setTextColor(...ink); pdf.text(String(clientName), 14, titleTop + 10);
+    pdf.setFontSize(11); pdf.text("Cadastro de lojas, quiosques e ambientes", 14, titleTop + 17);
+  } else {
+    pdf.setFontSize(15); pdf.setTextColor(...ink); pdf.text("Cadastro de lojas, quiosques e ambientes", 14, titleTop + 10);
+  }
+  const ruleY = hasClient ? titleTop + 22 : titleTop + 15;
+  const infoY = hasClient ? titleTop + 29 : titleTop + 22;
+  pdf.setDrawColor(...green); pdf.line(14, ruleY, 196, ruleY);
   pdf.setFont("Nunito", "normal"); pdf.setFontSize(10);
-  pdf.text(`${rows.length} ponto(s) · Emissão: ${new Date().toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" })}`, 14, 44);
+  pdf.text(`${rows.length} ponto(s) · Emissão: ${new Date().toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" })}`, 14, infoY);
   autoTable(pdf, {
-    startY: 49, theme: "plain", margin: { top: 20, bottom: 20, left: 14, right: 14 },
+    startY: infoY + 5, theme: "plain", margin: { top: 20, bottom: 20, left: 14, right: 14 },
     styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: 3, overflow: "linebreak", valign: "middle" },
     headStyles: { fontStyle: "bold", textColor: accent, lineWidth: { bottom: 0.3 }, lineColor: green },
     bodyStyles: { minCellHeight: 24 }, rowPageBreak: "avoid", showHead: "everyPage",
-    columnStyles: { 0: { cellWidth: 24 }, 1: { cellWidth: 24 }, 2: { cellWidth: 28 }, 3: { cellWidth: 22 }, 4: { cellWidth: 46 }, 5: { cellWidth: 38 } },
+    columnStyles: { 0: { cellWidth: 24 }, 1: { cellWidth: 24 }, 2: { cellWidth: 34 }, 3: { cellWidth: 22 }, 4: { cellWidth: 40 }, 5: { cellWidth: 38 } },
     head: [["Foto", "LUC", "Nº do medidor", "Tipo", "Nome", "Localização"]],
     body: rows.map((row, i) => [thumbs[i] ? "" : "Sem foto", row.luc, row.meter, row.type, row.name, row.location]),
     didDrawCell: (cell) => {
