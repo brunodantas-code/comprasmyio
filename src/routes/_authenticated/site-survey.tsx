@@ -1000,7 +1000,7 @@ function VisitDetails({ pointSearch = "", visit, data, onClose, onChanged, close
     const pointFollowUpFields = (form?: HTMLFormElement) => {
       // Loja vaga dispensa fachada, mas deve manter seu LUC.
       if (points.find((point) => point.value === selectedPoint)?.pointType === "vacant") {
-        const luc = detail.lucs.find((point) => `luc:${point.id}` === selectedPoint);
+        const luc = detail?.lucs.find((point) => `luc:${point.id}` === selectedPoint);
         return luc?.luc_number?.trim() ? [] : ["LUC não informado"];
       }
       const values = form ? new FormData(form) : null;
