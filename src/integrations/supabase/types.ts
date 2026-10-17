@@ -3774,6 +3774,42 @@ export type Database = {
         }
         Relationships: []
       }
+      site_survey_environment_types: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          discipline: string
+          id: string
+          name: string
+          normalized_name: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          discipline: string
+          id?: string
+          name: string
+          normalized_name: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          discipline?: string
+          id?: string
+          name?: string
+          normalized_name?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       site_survey_generated_calls: {
         Row: {
           created_at: string
@@ -4804,6 +4840,7 @@ export type Database = {
           completion_status: string
           created_at: string
           created_by: string | null
+          environment_type_id: string | null
           id: string
           last_progress_at: string | null
           meter_number: string | null
@@ -4825,6 +4862,7 @@ export type Database = {
           completion_status?: string
           created_at?: string
           created_by?: string | null
+          environment_type_id?: string | null
           id?: string
           last_progress_at?: string | null
           meter_number?: string | null
@@ -4846,6 +4884,7 @@ export type Database = {
           completion_status?: string
           created_at?: string
           created_by?: string | null
+          environment_type_id?: string | null
           id?: string
           last_progress_at?: string | null
           meter_number?: string | null
@@ -4873,6 +4912,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_visit_environments_environment_type_id_fkey"
+            columns: ["environment_type_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_environment_types"
             referencedColumns: ["id"]
           },
           {
