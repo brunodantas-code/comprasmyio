@@ -3,7 +3,7 @@ import { Download, LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { buildClientPendingGroups, duplicateNamePoints, unidentifiedLucPoints, type ClientPendingPoint, type ClientPendingResponse } from "@/lib/site-survey-client-pending";
+import { buildClientPendingGroups, duplicateNamePoints, unidentifiedLucPoints, vacantShopPoints, type ClientPendingPoint, type ClientPendingResponse } from "@/lib/site-survey-client-pending";
 import nunitoRegularUrl from "@/assets/fonts/nunito-regular.ttf?url";
 import nunitoBoldUrl from "@/assets/fonts/nunito-bold.ttf?url";
 import { surveyPointType } from "@/lib/site-survey-point-type";
