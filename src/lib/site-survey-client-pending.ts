@@ -8,7 +8,20 @@ export function unidentifiedLucPoints(points: ClientPendingPoint[]) {
     return !luc || luc === "sem luc" || luc === "nao identificado";
   }).sort((a, b) => (a.name ?? a.label).localeCompare(b.name ?? b.label, "pt-BR", { numeric: true }));
 }
-export type ClientPendingResponse = { question_id: string; visit_luc_id: string | null; visit_environment_id: string | null; answer: unknown; question_snapshot?: unknown };
+export function duplicateNamePoints(points: ClientPendingPoint[]) {
+  const byName = new Map<string, ClientPendingPoint[]>();
+  for (const point of points) {
+    if (point.pointType !== "shop" && point.pointType !== "kiosk" && point.pointType !== "vacant") continue;
+    const name = (point.name ?? point.label).trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR");
+    if (!name) continue;
+    byName.set(name, [...(byName.get(name) ?? []), point]);
+  }
+  return [...byName.values()]
+    .map((group) => group.filter((point, index, list) => list.findIndex((item) => (item.lucNumber ?? "").trim() === (point.lucNumber ?? "").trim()) === index))
+    .filter((group) => group.length > 1)
+    .sort((a, b) => (a[0].name ?? a[0].label).localeCompare(b[0].name ?? b[0].label, "pt-BR", { numeric: true }));
+}
+export type ClientPendingResponse =  { question_id: string; visit_luc_id: string | null; visit_environment_id: string | null; answer: unknown; question_snapshot?: unknown };
 export type ClientPendingCall = { internal_call_id: string | null; visit_luc_id: string | null; visit_environment_id: string | null; question_id?: string; status?: string; trigger_value?: string; site_survey_question_actions?: { site_survey_action_catalog: { name: string } | null } | null; internal_calls: { call_number: string | null; title: string; description: string; status: string } | null };
 
 export type SurveyReportText = { id: string; name: string; question_id: string; answer_value: string; report_answer: string };
