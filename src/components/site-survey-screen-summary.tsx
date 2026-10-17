@@ -81,7 +81,7 @@ function PhotoThumbnail({ attachment, gallery }: { attachment: SummaryAttachment
   </>;
 }
 
-export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections, questions, lucs, environments, responses, attachments, materials, catalog, screwdriverTypes, wrenchSizes, customCatalogs, onClose, onQuestionClick, onOpenChecklist, pointValue, embedded = false, sidePanel }: {
+export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections, questions, lucs, environments, responses, attachments, materials, catalog, screwdriverTypes, wrenchSizes, customCatalogs, onClose, onQuestionClick, onOpenChecklist, pointValue, embedded = false, sidePanel, interventionCount }: {
   visitNumber: number;
   visitTemplateId: string | null;
   sections: SummarySection[];
@@ -101,6 +101,7 @@ export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections
   pointValue?: string;
   embedded?: boolean;
   sidePanel?: ReactNode;
+  interventionCount?: (pointValue: string) => number;
 }) {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
