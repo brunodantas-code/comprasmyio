@@ -834,6 +834,13 @@
       "when": 1792273424706,
       "tag": "0118_proposal_derived_contracted_scope",
       "breakpoints": true
+    },
+    {
+      "idx": 119,
+      "version": "7",
+      "when": 1792275253909,
+      "tag": "0119_site_survey_environment_types",
+      "breakpoints": true
     }
   ]
 }
