@@ -23,3 +23,13 @@ test("duplicateNamePoints agrupa mesmo nome com LUCs diferentes", async () => {
   assert.equal(groups.length, 1);
   assert.deepEqual(groups[0].map((point) => point.value), ["a", "b"]);
 });
+test("vacantShopPoints lista apenas lojas vagas, na ordem alfabética", async () => {
+  const { vacantShopPoints } = await import("@/lib/site-survey-client-pending");
+  const points = [
+    { value: "a", label: "Vaga 02", pointType: "vacant", name: "Vaga 02" },
+    { value: "b", label: "Vivara", pointType: "shop", name: "Vivara" },
+    { value: "c", label: "Vaga 10", pointType: "vacant", name: "Vaga 10" },
+    { value: "d", label: "Ambiente", pointType: "environment", name: "Vaga 01" },
+  ];
+  assert.deepEqual(vacantShopPoints(points).map((point) => point.value), ["a", "c"]);
+});
