@@ -17,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { surveyPointType, surveyPointTypeLabel, surveyPointTotals, type SurveyPointType } from "@/lib/site-survey-point-type";
+import { surveyPointType, surveyPointTypeLabel, surveyPointTotals, requiresSurveyLuc, type SurveyPointType } from "@/lib/site-survey-point-type";
 import { approvalEnergyWaterTotals, type EnergyWaterTotals } from "@/lib/site-survey-energy-water";
 import { registrationServices } from "@/lib/site-survey-registration-export";
 import { supabase } from "@/integrations/supabase/client";
@@ -251,7 +251,8 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, canA
       toast.success(existing ? "Ambiente reativado com o checklist selecionado." : "Ambiente adicionado."); closeEdit(); await load(); onChanged?.();
       return;
     }
-    const lucNumber = pointType === "environment" || pointType === "vacant" ? "" : draftLuc.trim(); const shopName = draftName.trim();
+    const lucNumber = pointType === "environment" ? "" : draftLuc.trim(); const shopName = draftName.trim();
+    if (pointType && requiresSurveyLuc(pointType) && !lucNumber) return toast.error("Informe o LUC da loja vaga.");
     if (!shopName) return toast.error("Informe o nome do ponto.");
     const duplicateRows = lucNumber ? rows.filter((row) => row.id !== editing?.id && normalizeHeader(row.luc_number) === normalizeHeader(lucNumber)) : [];
     if (duplicateRows.length && !confirmed) { setDuplicateConfirmation("edit"); return; }

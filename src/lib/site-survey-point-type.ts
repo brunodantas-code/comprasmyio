@@ -7,6 +7,7 @@ export function surveyPointType(point: { classification_type?: string | null; po
 
 export const surveyPointTypeLabel = (type: SurveyPointType) => type === "environment" ? "Ambiente" : type === "kiosk" ? "Quiosque" : type === "vacant" ? "Loja vaga" : "Loja";
 export const requiresSurveyFacade = (type: SurveyPointType) => type !== "environment" && type !== "vacant";
+export const requiresSurveyLuc = (type: SurveyPointType) => type === "vacant";
 
 export type SurveyPointTotals = Record<SurveyPointType, number>;
 
