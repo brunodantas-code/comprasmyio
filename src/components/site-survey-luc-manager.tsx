@@ -333,7 +333,7 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, canA
           location: row.source === "environment" ? templates.find((template) => template.id === row.template_id)?.name ?? "Checklist da OS" : row.location || "—",
           facade: attachments.find((item) => item.attachment_kind === "facade" && (row.source === "luc" ? item.visit_luc_id === row.id : item.visit_environment_id === row.id)),
         };
-      }));
+      }, clientName));
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a"); a.href = url; a.download = `cadastro-os-${visitId}.pdf`;
       document.body.appendChild(a); a.click(); a.remove();

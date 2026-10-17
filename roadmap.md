@@ -1003,3 +1003,4 @@
 
 - [x] Sanar Pendências: submenu com cards de pendências e filtro LUC/nome
 - [x] Cadastro: abrir item não deve esticar card vizinho em branco
+- [ ] Site Survey — PDF do cadastro: nome do cliente no título da primeira página e no rodapé centralizado; Nº do medidor sem quebra (coluna alargada).
