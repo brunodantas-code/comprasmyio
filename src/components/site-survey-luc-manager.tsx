@@ -19,6 +19,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { surveyPointType, surveyPointTypeLabel, surveyPointTotals, requiresSurveyLuc, type SurveyPointType } from "@/lib/site-survey-point-type";
 import { approvalEnergyWaterTotals, type EnergyWaterTotals } from "@/lib/site-survey-energy-water";
+import { environmentDisciplineTotals } from "@/lib/site-survey-environment-totals";
 import { registrationServices } from "@/lib/site-survey-registration-export";
 import { supabase } from "@/integrations/supabase/client";
 import { suggestShopNameFromFacade } from "@/lib/site-survey-ai.functions";
