@@ -189,5 +189,5 @@ export function SiteSurveyClientPendingReport({ visit, client, unit, project, po
     } catch (error) { toast.error(error instanceof Error ? error.message : "Não foi possível gerar o relatório.", { id: toastId }); }
     finally { setBusy(false); }
   };
-  return <Button type="button" size="sm" variant="action" disabled={busy} aria-busy={busy} onClick={() => void exportReport()} aria-label={prepared ? "Baixar PDF de pendências para o cliente" : "PDF de pendências para o cliente"}>{busy ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}{busy ? "Gerando…" : prepared ? "Baixar PDF" : "PDF para o cliente"}</Button>;
+  return <Button type="button" size="sm" variant="action" disabled={busy} aria-busy={busy} onClick={() => void exportReport()} aria-label={prepared ? "Baixar PDF de pendências para o cliente" : "Pendências para o cliente"}>{busy ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}{busy ? "Gerando…" : prepared ? "Baixar PDF" : "Pendências para o cliente"}</Button>;
 }
