@@ -46,7 +46,8 @@ async function thumbnail(attachment: FacadeThumbnailAttachment) {
 }
 
 export async function buildRegistrationPdf(rows: RegistrationPdfRow[], clientName?: string) {
-  const [{ jsPDF, AcroFormCheckBox }, { default: autoTable }, regular, bold] = await Promise.all([import("jspdf"), import("jspdf-autotable"), loadFont(nunitoRegularUrl), loadFont(nunitoBoldUrl)]);
+  const [{ jsPDF }, { default: autoTable }, { PDFDocument }, regular, bold] = await Promise.all([import("jspdf"), import("jspdf-autotable"), import("pdf-lib"), loadFont(nunitoRegularUrl), loadFont(nunitoBoldUrl)]);
+  const fields: { page: number; x: number; y: number; checked: boolean; name: string }[] = [];
   // Serial decoding bounds memory even when originals are large.
   const thumbs: (string | undefined)[] = [];
   for (const row of rows) thumbs.push(row.facade ? await thumbnail(row.facade) : undefined);
@@ -85,20 +86,7 @@ export async function buildRegistrationPdf(rows: RegistrationPdfRow[], clientNam
         const row = rows[cell.row.index];
         if (!row) return;
         const service = cell.column.index === 6 ? "water" : "energy";
-        const checkbox = new AcroFormCheckBox();
-        checkbox.fieldName = `${service}_${cell.row.index + 1}`;
-        checkbox.x = cell.cell.x + (cell.cell.width - 5) / 2;
-        checkbox.y = cell.cell.y + (cell.cell.height - 5) / 2;
-        checkbox.width = 5;
-        checkbox.height = 5;
-        // jsPDF omits the normal Off appearance; keep its editable widget visible.
-        pdf.setDrawColor(...ink);
-        pdf.setLineWidth(0.25);
-        pdf.rect(checkbox.x, checkbox.y, checkbox.width, checkbox.height);
-        checkbox.value = row[service] ? "On" : "Off";
-        checkbox.appearanceState = row[service] ? "On" : "Off";
-        checkbox.readOnly = false;
-        pdf.addField(checkbox);
+        fields.push({ page: pdf.getCurrentPageInfo().pageNumber, x: cell.cell.x + (cell.cell.width - 5) / 2, y: cell.cell.y + (cell.cell.height - 5) / 2, checked: row[service], name: `${service}_${cell.row.index + 1}` });
       }
     },
   });
@@ -111,5 +99,15 @@ export async function buildRegistrationPdf(rows: RegistrationPdfRow[], clientNam
     if (hasClient) pdf.text(String(clientName), 105, 287, { align: "center" });
     pdf.text(`Página ${page} de ${pages}`, 196, 287, { align: "right" });
   }
-  return pdf.output("blob");
+  const document = await PDFDocument.load(pdf.output("arraybuffer"));
+  const form = document.getForm();
+  const mm = 72 / 25.4;
+  for (const field of fields) {
+    const page = document.getPages()[field.page - 1];
+    if (!page) continue;
+    const checkbox = form.createCheckBox(field.name);
+    checkbox.addToPage(page, { x: field.x * mm, y: page.getHeight() - (field.y + 5) * mm, width: 5 * mm, height: 5 * mm, borderWidth: 0.7 });
+    if (field.checked) checkbox.check();
+  }
+  return new Blob([new Uint8Array(await document.save())], { type: "application/pdf" });
 }
