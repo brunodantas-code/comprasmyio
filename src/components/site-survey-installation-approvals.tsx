@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { installationApproved, type InstallationApproval } from "@/lib/site-survey-installation-scope";
 
 type Point = { id: string; source: string; shop_name: string; luc_number: string };
