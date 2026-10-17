@@ -114,6 +114,7 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, canA
   const [editingEnvironmentId, setEditingEnvironmentId] = useState<string | null>(null);
   const [draftLuc, setDraftLuc] = useState("");
   const [draftName, setDraftName] = useState("");
+  const [draftContractName, setDraftContractName] = useState("");
   const [draftLocation, setDraftLocation] = useState("");
   const [pointType, setPointType] = useState<"shop" | "kiosk" | "environment" | "vacant" | null>(null);
   const [environmentName, setEnvironmentName] = useState("");
@@ -225,8 +226,8 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, canA
   const changeShopName = (name: string) => { nameRevision.current += 1; setDraftName(name); };
   const closeEdit = () => { facadeRequest.current += 1; setAnalyzing(false); setEditing(null); setEditingEnvironmentId(null); };
   useEffect(() => () => { facadeRequest.current += 1; }, []);
-  const startEdit = (row?: LucRow) => { facadeRequest.current += 1; setAnalyzing(false); setEditingEnvironmentId(null); setEditing(row ?? { id: "", luc_number: "", shop_name: "", location: null, point_type: "shop" }); setEditMode("correction"); setPointType(row ? surveyPointType(row) : null); setDraftLuc(row?.luc_number ?? ""); changeShopName(row?.shop_name ?? ""); setDraftLocation(row?.location ?? ""); setDraftMeter(row?.meter_number ?? ""); setEnvironmentName(""); setEnvironmentTemplateId(""); setEnvironmentTypeId(""); setNamePickerOpen(false); };
-  const startEnvironmentEdit = (row: EnvironmentRow) => { facadeRequest.current += 1; setAnalyzing(false); setEditingEnvironmentId(row.id); setEditing({ id: row.id, luc_number: "", shop_name: row.name, location: null, point_type: "environment", classification_type: "environment", meter_number: row.meter_number }); setPointType("environment"); setDraftLuc(""); changeShopName(row.name); setDraftLocation(""); setDraftMeter(row.meter_number ?? ""); setEnvironmentName(row.name); setEnvironmentTemplateId(row.template_id ?? ""); setEnvironmentTypeId(row.environment_type_id ?? ""); setNamePickerOpen(false); };
+  const startEdit = (row?: LucRow) => { facadeRequest.current += 1; setAnalyzing(false); setEditingEnvironmentId(null); setEditing(row ?? { id: "", luc_number: "", shop_name: "", location: null, point_type: "shop" }); setEditMode("correction"); setPointType(row ? surveyPointType(row) : null); setDraftLuc(row?.luc_number ?? ""); changeShopName(row?.shop_name ?? ""); setDraftContractName(row?.contract_name ?? row?.shop_name ?? ""); setDraftLocation(row?.location ?? ""); setDraftMeter(row?.meter_number ?? ""); setEnvironmentName(""); setEnvironmentTemplateId(""); setEnvironmentTypeId(""); setNamePickerOpen(false); };
+  const startEnvironmentEdit = (row: EnvironmentRow) => { facadeRequest.current += 1; setAnalyzing(false); setEditingEnvironmentId(row.id); setEditing({ id: row.id, luc_number: "", shop_name: row.name, location: null, point_type: "environment", classification_type: "environment", meter_number: row.meter_number }); setPointType("environment"); setDraftLuc(""); changeShopName(row.name); setDraftContractName(""); setDraftLocation(""); setDraftMeter(row.meter_number ?? ""); setEnvironmentName(row.name); setEnvironmentTemplateId(row.template_id ?? ""); setEnvironmentTypeId(row.environment_type_id ?? ""); setNamePickerOpen(false); };
   const saveEdit = async (confirmed = false) => {
     if (!canEdit || (addOnly && editing?.id)) return;
     if (saving) return;
@@ -263,10 +264,10 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, canA
     if (!shopName) return toast.error("Informe o nome do ponto.");
     const duplicateRows = lucNumber ? rows.filter((row) => row.id !== editing?.id && normalizeHeader(row.luc_number) === normalizeHeader(lucNumber)) : [];
     if (duplicateRows.length && !confirmed) { setDuplicateConfirmation("edit"); return; }
-    const payload = { visit_id: visitId, luc_number: lucNumber, shop_name: shopName, location: draftLocation.trim() || null, meter_number: draftMeter.trim() || null, point_type: pointType === "kiosk" ? "kiosk" : pointType === "vacant" ? "vacant" : "shop", classification_type: pointType, updated_by: userId, active: true };
+    const payload = { visit_id: visitId, luc_number: lucNumber, shop_name: shopName, contract_name: draftContractName.trim() || null, location: draftLocation.trim() || null, meter_number: draftMeter.trim() || null, point_type: pointType === "kiosk" ? "kiosk" : pointType === "vacant" ? "vacant" : "shop", classification_type: pointType, updated_by: userId, active: true };
     const result = editing?.id
       ? editMode === "correction"
-        ? await supabase.rpc("correct_site_survey_visit_luc", { _id: editing.id, _luc_number: lucNumber, _shop_name: shopName, _location: draftLocation.trim() }).then(async (correction) => correction.error ? correction : supabase.from("site_survey_visit_lucs").update({ classification_type: pointType, meter_number: draftMeter.trim() || null, updated_by: userId }).eq("id", editing.id))
+        ? await supabase.rpc("correct_site_survey_visit_luc", { _id: editing.id, _luc_number: lucNumber, _shop_name: shopName, _location: draftLocation.trim() }).then(async (correction) => correction.error ? correction : supabase.from("site_survey_visit_lucs").update({ classification_type: pointType, contract_name: draftContractName.trim() || null, meter_number: draftMeter.trim() || null, updated_by: userId }).eq("id", editing.id))
         : await supabase.from("site_survey_visit_lucs").update(payload).eq("id", editing.id)
       : await supabase.from("site_survey_visit_lucs").insert({ ...payload, created_by: userId });
     if (result.error) return toast.error(result.error.code === "23505" ? "Este LUC já está cadastrado nesta OS." : result.error.message);
