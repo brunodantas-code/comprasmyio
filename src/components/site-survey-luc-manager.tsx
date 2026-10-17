@@ -223,8 +223,8 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, canA
   const changeShopName = (name: string) => { nameRevision.current += 1; setDraftName(name); };
   const closeEdit = () => { facadeRequest.current += 1; setAnalyzing(false); setEditing(null); setEditingEnvironmentId(null); };
   useEffect(() => () => { facadeRequest.current += 1; }, []);
-  const startEdit = (row?: LucRow) => { facadeRequest.current += 1; setAnalyzing(false); setEditingEnvironmentId(null); setEditing(row ?? { id: "", luc_number: "", shop_name: "", location: null, point_type: "shop" }); setEditMode("correction"); setPointType(row ? surveyPointType(row) : null); setDraftLuc(row?.luc_number ?? ""); changeShopName(row?.shop_name ?? ""); setDraftLocation(row?.location ?? ""); setDraftMeter(row?.meter_number ?? ""); setEnvironmentName(""); setEnvironmentTemplateId(""); setNamePickerOpen(false); };
-  const startEnvironmentEdit = (row: EnvironmentRow) => { facadeRequest.current += 1; setAnalyzing(false); setEditingEnvironmentId(row.id); setEditing({ id: row.id, luc_number: "", shop_name: row.name, location: null, point_type: "environment", classification_type: "environment", meter_number: row.meter_number }); setPointType("environment"); setDraftLuc(""); changeShopName(row.name); setDraftLocation(""); setDraftMeter(row.meter_number ?? ""); setEnvironmentName(row.name); setEnvironmentTemplateId(row.template_id ?? ""); setNamePickerOpen(false); };
+  const startEdit = (row?: LucRow) => { facadeRequest.current += 1; setAnalyzing(false); setEditingEnvironmentId(null); setEditing(row ?? { id: "", luc_number: "", shop_name: "", location: null, point_type: "shop" }); setEditMode("correction"); setPointType(row ? surveyPointType(row) : null); setDraftLuc(row?.luc_number ?? ""); changeShopName(row?.shop_name ?? ""); setDraftLocation(row?.location ?? ""); setDraftMeter(row?.meter_number ?? ""); setEnvironmentName(""); setEnvironmentTemplateId(""); setEnvironmentTypeId(""); setNamePickerOpen(false); };
+  const startEnvironmentEdit = (row: EnvironmentRow) => { facadeRequest.current += 1; setAnalyzing(false); setEditingEnvironmentId(row.id); setEditing({ id: row.id, luc_number: "", shop_name: row.name, location: null, point_type: "environment", classification_type: "environment", meter_number: row.meter_number }); setPointType("environment"); setDraftLuc(""); changeShopName(row.name); setDraftLocation(""); setDraftMeter(row.meter_number ?? ""); setEnvironmentName(row.name); setEnvironmentTemplateId(row.template_id ?? ""); setEnvironmentTypeId(row.environment_type_id ?? ""); setNamePickerOpen(false); };
   const saveEdit = async (confirmed = false) => {
     if (!canEdit || (addOnly && editing?.id)) return;
     if (saving) return;
@@ -237,7 +237,7 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, canA
       const name = environmentName.trim();
       if (!name) return toast.error("Informe o nome do ambiente.");
       if (!environmentTemplateId) return toast.error("Selecione o checklist do ambiente.");
-      const { error } = await supabase.from("site_survey_visit_environments").update({ name, template_id: environmentTemplateId, meter_number: draftMeter.trim() || null, updated_by: userId }).eq("id", editingEnvironmentId);
+      const { error } = await supabase.from("site_survey_visit_environments").update({ name, template_id: environmentTemplateId, meter_number: draftMeter.trim() || null, environment_type_id: environmentTypeId || null, updated_by: userId }).eq("id", editingEnvironmentId);
       if (error) return toast.error(error.code === "23505" ? "Este ambiente já está cadastrado nesta OS." : error.message);
       toast.success("Ambiente atualizado."); closeEdit(); await load(); onChanged?.();
       return;
@@ -250,8 +250,8 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, canA
       if (lookupError) return toast.error(lookupError.message);
       if (existing?.active) return toast.error("Este ambiente já está cadastrado nesta OS.");
       const result = existing
-        ? await supabase.from("site_survey_visit_environments").update({ template_id: environmentTemplateId, meter_number: draftMeter.trim() || null, updated_by: userId, active: true }).eq("id", existing.id)
-        : await supabase.from("site_survey_visit_environments").insert({ visit_id: visitId, name, template_id: environmentTemplateId, meter_number: draftMeter.trim() || null, created_by: userId, updated_by: userId, active: true });
+        ? await supabase.from("site_survey_visit_environments").update({ template_id: environmentTemplateId, meter_number: draftMeter.trim() || null, environment_type_id: environmentTypeId || null, updated_by: userId, active: true }).eq("id", existing.id)
+        : await supabase.from("site_survey_visit_environments").insert({ visit_id: visitId, name, template_id: environmentTemplateId, meter_number: draftMeter.trim() || null, environment_type_id: environmentTypeId || null, created_by: userId, updated_by: userId, active: true });
       if (result.error) return toast.error(result.error.code === "23505" ? "Este ambiente já está cadastrado nesta OS." : result.error.message);
       toast.success(existing ? "Ambiente reativado com o checklist selecionado." : "Ambiente adicionado."); closeEdit(); await load(); onChanged?.();
       return;
