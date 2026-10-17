@@ -1,5 +1,6 @@
 - [ ] Site Survey — Cadastro em PDF e Excel: Água e Energia editáveis por ponto, inicialmente conforme aprovações cadastradas, para conferência do cliente.
 - [ ] Site Survey — ícone Proposta Comercial junto ao Relatório: enviar PDF em pop-up, abrir documento existente e substituir versão atual; integração CRM futura.
+- [ ] Site Survey — Pontos contratados passam a vir da proposta comercial aprovada, sem entrada manual.
 - [x] Site Survey — totalizadores do cadastro: Total geral primeiro (113 no Taboão), seguido de Energia (67 = 23+44) e Água (47 = 3+44), somatório das aprovações de instalação; conferido na prévia na visita 202609300001 e testes em src/lib/site-survey-energy-water.test.ts.
 - [x] Site Survey — totalizadores do cadastro: na desktop, 1ª linha com Total geral, Lojas, Quiosques, Ambientes e Lojas vagas; 2ª linha com Energia, Água, Só Energia, Só Água e Água + Energia; conferido na prévia (Taboão 117/101/8/4/4 e 72/47/27/2/45).
 - [x] Site Survey — busca de visitas: incluir os nomes de lojas, quiosques e ambientes para localizar em quais shoppings está presente uma rede; conferido na prévia com "burger king" (2 shoppings listados, Mogi e Taboão) e testes em src/lib/site-survey-visit-search.test.ts.
