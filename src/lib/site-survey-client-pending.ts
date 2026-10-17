@@ -12,7 +12,7 @@ export function duplicateNamePoints(points: ClientPendingPoint[]) {
   const byName = new Map<string, ClientPendingPoint[]>();
   for (const point of points) {
     if (point.pointType !== "shop" && point.pointType !== "kiosk" && point.pointType !== "vacant") continue;
-    const name = (point.name ?? point.label).trim().normalize("NFD").replace(/[̀-ͯ]/g, "").toLocaleLowerCase("pt-BR");
+    const name = (point.name ?? point.label).trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR");
     if (!name) continue;
     byName.set(name, [...(byName.get(name) ?? []), point]);
   }
