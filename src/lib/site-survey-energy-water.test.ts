@@ -1,0 +1,42 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+
+import { classifyPointEnergyWater, energyWaterTotals } from "./site-survey-energy-water";
+
+const questions = [
+  { id: "q-water", prompt: "Existe hidrômetro na loja?" },
+  { id: "q-energy", prompt: "Existe ponto de elétrica próximo ao hidrômetro?" },
+  { id: "q-energy-plain", prompt: "Existe ponto de elétrica próximo?" },
+  { id: "q-other", prompt: "Condição do registro?" },
+];
+
+test("Ponto com hidrômetro e elétrica é classificado como Água + Energia", () => {
+  assert.equal(classifyPointEnergyWater(new Map([["q-water", "Sim"], ["q-energy", { value: "Sim" }]]), questions), "both");
+});
+
+test("Hidrômetro sem elétrica é Só Água; elétrica sem hidrômetro é Só Energia", () => {
+  assert.equal(classifyPointEnergyWater(new Map([["q-water", "sim"], ["q-energy", "Não"]]), questions), "water");
+  assert.equal(classifyPointEnergyWater(new Map([["q-water", "Não"], ["q-energy-plain", "Sim"]]), questions), "energy");
+});
+
+test("Respostas ausentes, 'não informado' e perguntas sem relação não classificam o ponto", () => {
+  assert.equal(classifyPointEnergyWater(new Map(), questions), null);
+  assert.equal(classifyPointEnergyWater(new Map([["q-water", "Não informado"], ["q-energy", "não"]]), questions), null);
+  assert.equal(classifyPointEnergyWater(new Map([["q-other", "Sim"]]), questions), null);
+});
+
+test("Lojas vagas e pontos cancelados ficam fora dos totalizadores", () => {
+  const responses = [
+    { visit_luc_id: "l1", question_id: "q-water", answer: "Sim" },
+    { visit_luc_id: "l1", question_id: "q-energy", answer: "Sim" },
+    { visit_luc_id: "l2", question_id: "q-water", answer: "Sim" },
+    { visit_environment_id: "e1", question_id: "q-energy-plain", answer: "Sim" },
+  ];
+  const points = [
+    { kind: "luc", id: "l1", pointType: "shop", completionStatus: "concluida" },
+    { kind: "luc", id: "l2", pointType: "shop", completionStatus: "cancelada" },
+    { kind: "luc", id: "l3", pointType: "vacant", completionStatus: "concluida" },
+    { kind: "environment", id: "e1", pointType: "environment", completionStatus: "pendente" },
+  ];
+  assert.deepEqual(energyWaterTotals(points, responses, questions), { water: 0, energy: 1, both: 1 });
+});
