@@ -3,7 +3,7 @@ import { Download, LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { buildClientPendingGroups, unidentifiedLucPoints, type ClientPendingPoint, type ClientPendingResponse } from "@/lib/site-survey-client-pending";
+import { buildClientPendingGroups, duplicateNamePoints, unidentifiedLucPoints, type ClientPendingPoint, type ClientPendingResponse } from "@/lib/site-survey-client-pending";
 import nunitoRegularUrl from "@/assets/fonts/nunito-regular.ttf?url";
 import nunitoBoldUrl from "@/assets/fonts/nunito-bold.ttf?url";
 import { surveyPointType } from "@/lib/site-survey-point-type";
@@ -174,6 +174,22 @@ export function SiteSurveyClientPendingReport({ visit, client, unit, project, po
             const thumbnail = point ? thumbnails.get(point.value) : undefined;
             if (thumbnail) pdf.addImage(thumbnail, "PNG", cell.cell.x + 3, cell.cell.y + (cell.cell.height - 18) / 2, 18, 18);
           },
+        });
+      }
+      const duplicated = duplicateNamePoints(freshPoints.length ? freshPoints : points);
+      if (duplicated.length) {
+        pdf.addPage(); pdf.setFont("Nunito", "bold"); pdf.setFontSize(15); pdf.setTextColor(...accent);
+        pdf.text("Lojas e quiosques com nomes repetidos", 14, 25);
+        pdf.setFont("Nunito", "normal"); pdf.setFontSize(10); pdf.setTextColor(...ink);
+        pdf.text("Confirme que os pontos abaixo, de mesmo nome e LUCs diferentes, existem de fato no shopping e não são erro de cadastro.", 14, 33, { maxWidth: 182 });
+        autoTable(pdf, {
+          startY: 41, theme: "plain", margin: { top: 20, bottom: 20, left: 14, right: 14 },
+          styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: 3, overflow: "linebreak", valign: "middle" },
+          headStyles: { fontStyle: "bold", textColor: accent, lineWidth: { bottom: 0.3 }, lineColor: green },
+          rowPageBreak: "avoid", showHead: "everyPage",
+          columnStyles: { 0: { cellWidth: 46 }, 1: { cellWidth: 28 }, 2: { cellWidth: 28 }, 3: { cellWidth: 20 }, 4: { cellWidth: 60 } },
+          head: [["Nome da loja", "LUC", "Nº do medidor", "Tipo", "Localização"]],
+          body: duplicated.flatMap((group) => group.map((point) => [point.name ?? point.label, point.lucNumber?.trim() || "Sem LUC", point.meterNumber || "—", point.pointType === "kiosk" ? "Quiosque" : point.pointType === "vacant" ? "Loja vaga" : "Loja", point.location || "—"])),
         });
       }
       const pages = pdf.getNumberOfPages();
