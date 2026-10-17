@@ -1,3 +1,6 @@
+- [x] Site Survey — Histórico de Visitas: excluir a segunda linha cinza abaixo do cabeçalho da visita (duplicada).
+- [x] Site Survey — igualar a altura do botão Salvar aos demais botões de ação do bloco.
+- [x] Site Survey — Sanar Pendências: filtro por tipo de pendência ao lado do filtro de LUC/nome, com tipos únicos (agrupados por rótulo) e cards filtrados; conferido na prévia (115 pontos sem filtro, 32 com "Foto da fachada").
 - [x] Site Survey — Histórico do Checklist: subir os botões de pendências e perguntas ao cliente para a linha das fotos no desktop, reduzindo o Card.
 - [x] Site Survey — intervenção do cliente: no pop-up de confirmação, perguntar se deseja vincular foto para aparecer no relatório do cliente.
 - [x] Site Survey — ícone da fachada: bolinha vermelha com a quantidade de intervenções nas lojas/ambientes/quiosques que necessitam intervenção (cadastro completo e Histórico do Checklist; só intervenções abertas).
