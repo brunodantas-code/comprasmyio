@@ -1015,3 +1015,4 @@
 - [x] Site Survey — cadastro: renomear botões (PDF para o cliente→Pendências para o cliente, Exportar PDF→Cadastro em PDF, Exportar Excel→Cadastro em Excel, Importar Excel→Importar Cadastro) e reordenar: Adicionar Ambiente, | , Importar Cadastro, Cadastro em PDF, Cadastro em Excel, Pendências para o cliente.
 - [x] Site Survey — cadastro: totalizadores Só Energia, Só Água e Água + Energia ao lado dos tipos, classificando cada ponto pelo checklist (hidrômetro presente / ponto de elétrica próximo).
 - [ ] Alinhar checkboxes Água/Energia à direita, ao lado do lápis de edição (tela de cadastro de pontos)
+- [ ] Separar totalizadores de instalação: Lojas/Quiosques separados dos demais ambientes (água e energia); demais ambientes consolidados, exceto Entrada da Concessionária
