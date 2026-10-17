@@ -1018,3 +1018,5 @@
 - [x] Separar totalizadores: Lojas/Quiosques separados; Entrada da Concessionária própria; demais ambientes consolidados
 - [x] Filtro por tipo de instalação aprovada (Água/Energia/Água+Energia/Sem aprovação)
 - [x] Campo Nome do Contrato nos pontos (cópia automática do nome da loja)
+- [x] Site Survey — barras verticais dos totalizadores alinhadas entre linhas (largura fixa dos chips no desktop) e mesma barra verde/cinza nos números da Proposta aprovada; conferido na prévia.
+- [x] Site Survey — filtro de instalação aprovada movido da coluna Pendências para a coluna Ações, alinhado com os demais filtros; seleção "Aprovada: Água" testada na prévia (lista filtra corretamente).
