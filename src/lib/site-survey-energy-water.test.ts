@@ -11,7 +11,7 @@ const questions = [
 ];
 
 test("Ponto com hidrômetro e elétrica é classificado como Água + Energia", () => {
-  assert.equal(classifyPointEnergyWater(new Map([["q-water", "Sim"], ["q-energy", { value: "Sim" }]]), questions), "both");
+  assert.equal(classifyPointEnergyWater(new Map<string, unknown>([["q-water", "Sim"], ["q-energy", { value: "Sim" }]]), questions), "both");
 });
 
 test("Hidrômetro sem elétrica é Só Água; elétrica sem hidrômetro é Só Energia", () => {
