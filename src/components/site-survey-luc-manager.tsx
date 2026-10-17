@@ -79,7 +79,7 @@ function TotalChip({ label, count }: { label: string; count: number }) {
   </div>;
 }
 
-function PointTypeTotals({ totals, serviceTotals }: { totals: Record<SurveyPointType, number>; serviceTotals?: EnergyWaterTotals }) {
+function PointTypeTotals({ totals, serviceTotals, environmentTotals }: { totals: Record<SurveyPointType, number>; serviceTotals?: EnergyWaterTotals; environmentTotals?: { hydraulic: number; electrical: number } }) {
   const grandTotal = totals.shop + totals.kiosk + totals.environment + totals.vacant;
   // Na desktop, a 1ª linha traz as quantidades de pontos (até Lojas vagas) e a 2ª, as de água/energia.
   return <div className="flex flex-col gap-1" aria-label="Quantidade de lojas, quiosques e ambientes">
@@ -88,6 +88,7 @@ function PointTypeTotals({ totals, serviceTotals }: { totals: Record<SurveyPoint
       {POINT_TOTALS.filter((item) => item.key !== "vacant" || totals.vacant > 0).map((item) => <TotalChip key={item.key} label={item.label} count={totals[item.key]} />)}
     </div>
     {serviceTotals ? <div className="flex flex-wrap items-center gap-2">{[...SERVICE_TOTALS_PRIMARY, ...SERVICE_TOTALS_SECONDARY].map((item) => <TotalChip key={item.key} label={item.label} count={serviceTotals[item.key]} />)}</div> : null}
+    {environmentTotals && (environmentTotals.hydraulic > 0 || environmentTotals.electrical > 0) ? <div className="flex flex-wrap items-center gap-2" aria-label="Ambientes por disciplina"><TotalChip label="Hidrômetros" count={environmentTotals.hydraulic} /><TotalChip label="Medições elétricas" count={environmentTotals.electrical} /></div> : null}
   </div>;
 }
 
