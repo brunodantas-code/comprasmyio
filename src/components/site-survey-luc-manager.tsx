@@ -321,6 +321,8 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, canA
     const toastId = toast.loading("Gerando PDF do cadastro…");
     try {
       const { buildRegistrationPdf } = await import("@/lib/site-survey-registration-pdf");
+      const { data: visitRow } = await supabase.from("site_survey_visits").select("client_id, clients(name)").eq("id", visitId).single();
+      const clientName = ((visitRow as { clients?: { name?: string } | null } | null)?.clients?.name) || undefined;
       const blob = await buildRegistrationPdf(sortedRows.map((row) => {
         const type = surveyPointType(row);
         return {
