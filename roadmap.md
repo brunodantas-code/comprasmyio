@@ -1,3 +1,5 @@
+- [ ] Site Survey — alinhar os totalizadores de quantidade com o título do Cadastro completo.
+- [ ] Site Survey — proposta do Taboão: Água 50 lojas/quiosques, 1 entrada da concessionária e saldo nos demais ambientes; Energia 185 lojas/quiosques e saldo nos demais ambientes.
 - [x] Site Survey — Cadastro em PDF e Excel: Água e Energia editáveis por ponto, inicialmente conforme aprovações cadastradas; downloads, campos PDF, aparência em 16 páginas e fórmulas Excel conferidos (zero erros). Controles Excel requerem Excel moderno.
 - [x] Site Survey — ícone Proposta Comercial junto ao Relatório: enviar PDF em pop-up, abrir documento existente e substituir versão atual; teste temporário salvo, substituído, reaberto e removido. Integração CRM futura.
 - [x] Site Survey — Pontos contratados vêm da proposta aprovada, sem entrada manual; extração real conferida com 50/1/185 e dados de teste removidos.
