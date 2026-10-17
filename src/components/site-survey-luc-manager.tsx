@@ -19,6 +19,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { surveyPointType, surveyPointTypeLabel, surveyPointTotals, type SurveyPointType } from "@/lib/site-survey-point-type";
 import { approvalEnergyWaterTotals, type EnergyWaterTotals } from "@/lib/site-survey-energy-water";
+import { registrationServices } from "@/lib/site-survey-registration-export";
 import { supabase } from "@/integrations/supabase/client";
 import { suggestShopNameFromFacade } from "@/lib/site-survey-ai.functions";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -317,44 +318,33 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, canA
     return sortAscending ? comparison : -comparison;
   }), [displayRows, sortBy, sortAscending, lucFilter, shopNameFilter, locationFilter, typeFilter, missingFacadeOnly, attachments, isPointVisible, pendingCount, pendingFilter]);
   const sortColumn = (column: typeof sortBy) => { if (sortBy === column) setSortAscending((current) => !current); else { setSortBy(column); setSortAscending(true); } };
+  const registrationRows = async () => {
+    const { data: approvals, error } = await supabase.from("site_survey_installation_approvals").select("point_kind,point_id,hydraulic_approved,electrical_approved").eq("visit_id", visitId);
+    if (error) throw error;
+    return sortedRows.map((row) => {
+      const type = surveyPointType(row);
+      return {
+        luc: type === "environment" ? "–" : row.luc_number || "Sem LUC",
+        meter: row.meter_number || "—",
+        type: surveyPointTypeLabel(type),
+        name: row.shop_name,
+        location: row.source === "environment" ? templates.find((template) => template.id === row.template_id)?.name ?? "Checklist da OS" : row.location || "—",
+        ...registrationServices(approvals ?? [], row.source, row.id),
+        facade: attachments.find((item) => item.attachment_kind === "facade" && (row.source === "luc" ? item.visit_luc_id === row.id : item.visit_environment_id === row.id)),
+      };
+    });
+  };
   const exportExcel = async () => {
     setExporting(true);
     try {
-      const fetchShops = async () => {
-        const result: { luc_number: string; shop_name: string; location: string | null; meter_number: string | null }[] = [];
-        for (let offset = 0; ; offset += 1000) {
-          const { data, error } = await supabase.from("site_survey_visit_lucs").select("luc_number,shop_name,location,meter_number").eq("visit_id", visitId).eq("active", true).order("id").range(offset, offset + 999);
-          if (error) throw error;
-          result.push(...(data ?? []));
-          if ((data?.length ?? 0) < 1000) break;
-        }
-        return result;
-      };
-      const fetchEnvironments = async () => {
-        const result: { name: string }[] = [];
-        for (let offset = 0; ; offset += 1000) {
-          const { data, error } = await supabase.from("site_survey_visit_environments").select("name").eq("visit_id", visitId).eq("active", true).order("id").range(offset, offset + 999);
-          if (error) throw error;
-          result.push(...(data ?? []));
-          if ((data?.length ?? 0) < 1000) break;
-        }
-        return result;
-      };
-      const [shops, environments] = await Promise.all([fetchShops(), fetchEnvironments()]);
-      if (!shops.length && !environments.length) return toast.error("Não há lojas ou ambientes para exportar.");
-      const workbook = XLSX.utils.book_new();
-      const orderedShops = [...shops].sort((a, b) => {
-        const comparison = String(a[sortBy] ?? "").localeCompare(String(b[sortBy] ?? ""), "pt-BR", { numeric: true, sensitivity: "base" });
-        return sortAscending ? comparison : -comparison;
-      });
-      const exportRows = [
-        ...orderedShops.map((row) => ({ LUC: String(row.luc_number ?? ""), Nome: String(row.shop_name ?? ""), "Localização": String(row.location ?? ""), Medidor: String(row.meter_number ?? "") })),
-        ...environments.sort((a, b) => a.name.localeCompare(b.name, "pt-BR", { numeric: true })).map((row) => ({ LUC: "", Nome: row.name, "Localização": "", Medidor: "" })),
-      ];
-      const sheet = XLSX.utils.json_to_sheet(exportRows, { header: ["LUC", "Nome", "Localização", "Medidor"] });
-      sheet["!cols"] = [{ wch: 18 }, { wch: 42 }, { wch: 32 }, { wch: 18 }];
-      XLSX.utils.book_append_sheet(workbook, sheet, "Lojas e ambientes");
-      XLSX.writeFile(workbook, `lojas-ambientes-os-${visitId}.xlsx`);
+      const rows = await registrationRows();
+      if (!rows.length) return toast.error("Não há lojas ou ambientes para exportar.");
+      const { buildRegistrationExcel } = await import("@/lib/site-survey-registration-excel");
+      const bytes = await buildRegistrationExcel(rows);
+      const url = URL.createObjectURL(new Blob([new Uint8Array(bytes)], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }));
+      const a = document.createElement("a"); a.href = url; a.download = `lojas-ambientes-os-${visitId}.xlsx`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 30_000);
     } catch (error) { toast.error(error instanceof Error ? error.message : "Não foi possível exportar a lista."); }
     finally { setExporting(false); }
   };
@@ -364,19 +354,10 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, canA
     const toastId = toast.loading("Gerando PDF do cadastro…");
     try {
       const { buildRegistrationPdf } = await import("@/lib/site-survey-registration-pdf");
-      const { data: visitRow } = await supabase.from("site_survey_visits").select("client_id, clients(name)").eq("id", visitId).single();
+      const { data: visitRow, error } = await supabase.from("site_survey_visits").select("client_id, clients(name)").eq("id", visitId).single();
+      if (error) throw error;
       const clientName = ((visitRow as { clients?: { name?: string } | null } | null)?.clients?.name) || undefined;
-      const blob = await buildRegistrationPdf(sortedRows.map((row) => {
-        const type = surveyPointType(row);
-        return {
-          luc: type === "environment" ? "–" : row.luc_number || "Sem LUC",
-          meter: row.meter_number || "—",
-          type: surveyPointTypeLabel(type),
-          name: row.shop_name,
-          location: row.source === "environment" ? templates.find((template) => template.id === row.template_id)?.name ?? "Checklist da OS" : row.location || "—",
-          facade: attachments.find((item) => item.attachment_kind === "facade" && (row.source === "luc" ? item.visit_luc_id === row.id : item.visit_environment_id === row.id)),
-        };
-      }, clientName));
+      const blob = await buildRegistrationPdf(await registrationRows(), clientName);
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a"); a.href = url; a.download = `cadastro-os-${visitId}.pdf`;
       document.body.appendChild(a); a.click(); a.remove();
