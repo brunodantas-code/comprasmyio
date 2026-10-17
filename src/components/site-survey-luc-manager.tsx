@@ -58,6 +58,8 @@ const POINT_TOTALS: { key: SurveyPointType; label: string }[] = [
 ];
 
 const SERVICE_TOTALS: { key: keyof EnergyWaterTotals; label: string }[] = [
+  { key: "energyAll", label: "Energia" },
+  { key: "waterAll", label: "Água" },
   { key: "energy", label: "Só Energia" },
   { key: "water", label: "Só Água" },
   { key: "both", label: "Água + Energia" },

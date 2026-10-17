@@ -38,10 +38,10 @@ test("Lojas vagas e pontos cancelados ficam fora dos totalizadores", () => {
     { kind: "luc", id: "l3", pointType: "vacant", completionStatus: "concluida" },
     { kind: "environment", id: "e1", pointType: "environment", completionStatus: "pendente" },
   ];
-  assert.deepEqual(energyWaterTotals(points, responses, questions), { water: 0, energy: 1, both: 1 });
+  assert.deepEqual(energyWaterTotals(points, responses, questions), { water: 0, energy: 1, both: 1, waterAll: 1, energyAll: 2 });
 });
 
-test("approval totals use installation checkboxes", async () => {
+test("Totais de aprovação: Energia 65 e Água 47 com 21 só energia, 3 só água e 44 dois aprovados", async () => {
   const { approvalEnergyWaterTotals } = await import("./site-survey-energy-water");
   const r = approvalEnergyWaterTotals([
     { point_kind: "luc", point_id: "1", hydraulic_approved: true, electrical_approved: true },
@@ -50,5 +50,20 @@ test("approval totals use installation checkboxes", async () => {
     { point_kind: "luc", point_id: "4", hydraulic_approved: false, electrical_approved: false },
     { point_kind: "luc", point_id: "9", hydraulic_approved: true, electrical_approved: true },
   ], new Set(["luc:1", "luc:2", "luc:3", "luc:4"]));
-  assert.deepEqual(r, { water: 1, energy: 1, both: 1 });
+  assert.deepEqual(r, { water: 1, energy: 1, both: 1, waterAll: 2, energyAll: 2 });
+});
+
+test("approval totals match user example: Energia 65, Água 47 with 21 só energia, 3 só água, 44 both", async () => {
+  const { approvalEnergyWaterTotals } = await import("./site-survey-energy-water");
+  const approvals = [
+    ...Array.from({ length: 21 }, (_, i) => ({ point_kind: "luc", point_id: `e${i}`, hydraulic_approved: false, electrical_approved: true })),
+    ...Array.from({ length: 3 }, (_, i) => ({ point_kind: "luc", point_id: `a${i}`, hydraulic_approved: true, electrical_approved: false })),
+    ...Array.from({ length: 44 }, (_, i) => ({ point_kind: "luc", point_id: `b${i}`, hydraulic_approved: true, electrical_approved: true })),
+  ];
+  const r = approvalEnergyWaterTotals(approvals, new Set(approvals.map((a) => `${a.point_kind}:${a.point_id}`)));
+  assert.equal(r.energy, 21);
+  assert.equal(r.water, 3);
+  assert.equal(r.both, 44);
+  assert.equal(r.energyAll, 65);
+  assert.equal(r.waterAll, 47);
 });
