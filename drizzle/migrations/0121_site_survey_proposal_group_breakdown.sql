@@ -1,0 +1,2 @@
+ALTER TABLE public.site_survey_commercial_proposals ADD COLUMN scope_breakdown jsonb;
+COMMENT ON COLUMN public.site_survey_commercial_proposals.scope_breakdown IS 'Proposal-derived breakdown: hydraulic_entry, electrical_shops, electrical_entry. Remaining environment quantities are derived from existing totals; unknown quantities remain null.';

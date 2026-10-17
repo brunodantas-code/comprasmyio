@@ -3620,6 +3620,7 @@ export type Database = {
           file_size: number
           hydraulic_general: number | null
           hydraulic_shops: number | null
+          scope_breakdown: Json | null
           storage_path: string
           updated_at: string
           uploaded_by: string
@@ -3632,6 +3633,7 @@ export type Database = {
           file_size: number
           hydraulic_general?: number | null
           hydraulic_shops?: number | null
+          scope_breakdown?: Json | null
           storage_path: string
           updated_at?: string
           uploaded_by: string
@@ -3644,6 +3646,7 @@ export type Database = {
           file_size?: number
           hydraulic_general?: number | null
           hydraulic_shops?: number | null
+          scope_breakdown?: Json | null
           storage_path?: string
           updated_at?: string
           uploaded_by?: string

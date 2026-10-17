@@ -848,6 +848,13 @@
       "when": 1792276350254,
       "tag": "0120_site_survey_luc_contract_name",
       "breakpoints": true
+    },
+    {
+      "idx": 121,
+      "version": "7",
+      "when": 1792278081270,
+      "tag": "0121_site_survey_proposal_group_breakdown",
+      "breakpoints": true
     }
   ]
 }
