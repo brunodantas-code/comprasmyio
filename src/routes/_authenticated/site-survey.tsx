@@ -26,6 +26,7 @@ import { surveyPointType, requiresSurveyFacade, type SurveyPointType } from "@/l
 import { SiteSurveyCustomerQuestions } from "@/components/site-survey-customer-questions";
 import { answeredCustomerQuestions, customerQuestionResponses, customerQuestions, isCustomerQuestion, pendingCustomerQuestions, showsCustomerQuestions, simplifiedAnswerType, persistedAnswerType } from "@/lib/site-survey-questions";
 import { prepareSurveyPhoto } from "@/lib/site-survey-photo";
+import { countPointInterventions } from "@/lib/site-survey-interventions";
 import { useSurveyPointEdit } from "@/hooks/use-survey-point-edit";
 import { SiteSurveyFacadePicker } from "@/components/site-survey-facade-picker";
 import { SiteSurveyTimeAssumptions, type TimeAssumption } from "@/components/site-survey-time-assumptions";
