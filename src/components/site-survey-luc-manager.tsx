@@ -133,14 +133,16 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, canA
   const [expandedPending, setExpandedPending] = useState<Set<string>>(() => new Set());
 
   const load = async () => {
-    const [{ data, error }, { data: environmentsData, error: environmentsError }, { data: historyRows, error: historyError }] = await Promise.all([
+    const [{ data, error }, { data: environmentsData, error: environmentsError }, { data: historyRows, error: historyError }, { data: environmentTypesData, error: environmentTypesError }] = await Promise.all([
       supabase.from("site_survey_visit_lucs").select("id,luc_number,shop_name,location,point_type,classification_type,meter_number").eq("visit_id", visitId).eq("active", true).order("luc_number"),
-      supabase.from("site_survey_visit_environments").select("id,name,template_id,point_type,meter_number").eq("visit_id", visitId).eq("active", true).order("name"),
+      supabase.from("site_survey_visit_environments").select("id,name,template_id,point_type,meter_number,environment_type_id").eq("visit_id", visitId).eq("active", true).order("name"),
       supabase.from("site_survey_visit_luc_history").select("id,visit_luc_id,luc_number,shop_name,valid_from,valid_until").eq("visit_id", visitId).order("valid_from", { ascending: false }),
+      supabase.from("site_survey_environment_types").select("id,name,discipline").eq("active", true).order("name"),
     ]);
-    if (error || environmentsError || historyError) return toast.error(error?.message ?? environmentsError?.message ?? historyError?.message ?? "Não foi possível carregar os ambientes.");
+    if (error || environmentsError || historyError || environmentTypesError) return toast.error(error?.message ?? environmentsError?.message ?? historyError?.message ?? environmentTypesError?.message ?? "Não foi possível carregar os ambientes.");
     setRows((data ?? []) as LucRow[]);
     setEnvironmentRows((environmentsData ?? []) as EnvironmentRow[]);
+    setEnvironmentTypes((environmentTypesData ?? []) as EnvironmentTypeOption[]);
     setHistory((historyRows ?? []) as LucHistoryRow[]);
   };
   useEffect(() => { void load(); }, [visitId]);
