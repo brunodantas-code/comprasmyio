@@ -23,6 +23,7 @@ import { SiteSurveyReportTexts } from "@/components/site-survey-report-texts";
 import { SiteSurveyScreenSummary } from "@/components/site-survey-screen-summary";
 import { useSurveyImage } from "@/hooks/use-survey-image";
 import { surveyPointType, requiresSurveyFacade, type SurveyPointType } from "@/lib/site-survey-point-type";
+import { energyWaterTotals as surveyEnergyWaterTotals } from "@/lib/site-survey-energy-water";
 import { visitSearchHaystack } from "@/lib/site-survey-visit-search";
 import { SiteSurveyCustomerQuestions } from "@/components/site-survey-customer-questions";
 import { answeredCustomerQuestions, customerQuestionResponses, customerQuestions, isCustomerQuestion, pendingCustomerQuestions, showsCustomerQuestions, simplifiedAnswerType, persistedAnswerType } from "@/lib/site-survey-questions";
