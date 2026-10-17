@@ -5,7 +5,7 @@ export type InterventionCallRow = {
   visit_environment_id: string | null;
   status?: string;
   internal_call_id?: string | null;
-  internal_calls?: { status?: string | null } | null;
+  internal_calls?: { call_number?: string | null; status?: string | null } | null;
   site_survey_question_actions?: { site_survey_action_catalog?: { name: string } | null } | null;
 };
 
