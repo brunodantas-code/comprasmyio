@@ -1,0 +1,2 @@
+ALTER TABLE public.site_survey_visit_environments ADD COLUMN location text;
+COMMENT ON COLUMN public.site_survey_visit_environments.location IS 'User-entered physical location, independent of checklist/template classification.';

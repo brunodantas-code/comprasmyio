@@ -1,3 +1,4 @@
+- [x] Site Survey — Localização na criação/edição de ambientes, independente do checklist; criação e reabertura com 2º andar verificadas, teste temporário removido, celular conferido e sete testes passaram.
 - [x] Site Survey — alinhar os totalizadores de quantidade com o título do Cadastro completo; conferido em 1280/1073 px e celular sem transbordamento.
 - [x] Site Survey — proposta do Taboão: Água 50 lojas/quiosques, 1 entrada da concessionária e saldo 6 nos demais ambientes; Energia 185 lojas/quiosques e saldo 42 nos demais ambientes. Dados reais e cinco testes conferidos.
 - [x] Site Survey — Cadastro em PDF e Excel: Água e Energia editáveis por ponto, inicialmente conforme aprovações cadastradas; downloads, campos PDF, aparência em 16 páginas e fórmulas Excel conferidos (zero erros). Controles Excel requerem Excel moderno.
@@ -14,7 +15,7 @@
 - [x] Site Survey — Histórico do Checklist: subir os botões de pendências e perguntas ao cliente para a linha das fotos no desktop, reduzindo o Card.
 - [x] Site Survey — intervenção do cliente: no pop-up de confirmação, perguntar se deseja vincular foto para aparecer no relatório do cliente.
 - [x] Site Survey — ícone da fachada: bolinha vermelha com a quantidade de intervenções nas lojas/ambientes/quiosques que necessitam intervenção (cadastro completo e Histórico do Checklist; só intervenções abertas).
-- [ ] Site Survey — Localização: investigar por que 1º e 2º andar informados pelo usuário não aparecem na coluna Localização.
+- [ ] Site Survey — Localizações antigas de 1º e 2º andar: aguarda identificação dos pontos; ambientes agora têm campo próprio e não exibem o checklist como localização.
 - [x] Site Survey — investigar fotos ausentes no relatório de intervenções (somente Borelli). Confirmado: só Borelli tem foto vinculada à pergunta da intervenção; sem reutilizar fotos de outros pontos.
 - [x] Site Survey — intervenções: remover coluna Chamado e usar “Registro sem manopla.”.
 - [x] Site Survey — intervenções: alterar “Muito rígido” para “Registro muito rígido. Risco de quebra.”.

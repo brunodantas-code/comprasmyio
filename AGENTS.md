@@ -15,7 +15,7 @@
 - Payment approvals recognize the active finance role or job title (an inactive legacy title must not block); above the joint-approval threshold, eligible joint approvers join finance and the requester never self-approves.
 - Personal approval lists/counts use assigned approver, not Admin access, avoiding duplicate parallel tasks. Admin edits preserve decisions/logs; type changes re-evaluate pending chains; payment allocation uses exclusive destinations.
 - Supply “Item novo” authorizes catalog inserts for Fábrica, Terceiros and Ferramentas via effective profile/individual permission and authenticated owner; it does not grant stock editing or movement rights.
-- Site Survey completion preserves original point/visit timestamps; remediation is not field execution. No daily completion charts: checklist updates are not technical visits.
+- Survey completion preserves technical timestamps; remediation is not execution. No daily completion charts.
 - Survey deletion atomically checks OpDesk links and offers keep/delete; OpDesk retains visit number.
 - Code images use private ticket attachments: message images stay with replies, standalone images with tickets. Open tickets allow new questions before answers; answers link to pending admin questions, preserving permissions.
 - Site Survey actions update/deactivate in place to preserve references; recreating a deleted environment reactivates its row with the selected checklist. Warnings use active visible questions only after explicit save, not autosave; manual visits start `concluida` with historical end.
@@ -24,7 +24,7 @@
 - Survey catalog title overrides stay separate from items to preserve fixed keys; material types link by catalog IDs to survive renames. Shop/kiosk catalog sync preserves visit history; inactive exclusion tombstones prevent removed names returning.
 - LUC corrections use the history-preserving RPC; shop changes append occupancy history. Reclassification and missing-LUC pendencies use effective type, not storage kind; retain UUIDs, checklists and links. Duplicate LUCs require full-editor confirmation.
 - Survey drafts require Supply submission. Purpose-keyed kits preserve individual items with shared point lists. Installation scope is visit/point-keyed in separate RLS tables, editor-only and audited; it never writes technical timing. Purchases use discipline approvals; meter kits follow hydraulic approval.
-- Summary uses numbered guarded editors and one registration list. Client PDF reads fresh authorized data, deduplicates calls and serially decodes private facades.
+- Summary uses numbered guarded editors and one registration list. Client PDF reads authorized fresh data, deduplicates calls and serially decodes facades. Environment location is stored independently of templates to preserve physical location.
 - Survey leases renew on visibility return and atomically reacquire before saving, without overriding peers. Facade writes affect facade progress only; ordinary saves preserve dates and completion saves timing/pendencies.
 - Facade pickers bypass checklist autosave. Bounded recognition preserves manual names, discards closed-dialog results and never gates saving.
 - Facade attachment triggers only clear facade pending fields; guarded explicit starts and the first nonempty persisted checklist response register point start, excluding retrospective manual visits.

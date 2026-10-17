@@ -4846,6 +4846,7 @@ export type Database = {
           environment_type_id: string | null
           id: string
           last_progress_at: string | null
+          location: string | null
           meter_number: string | null
           name: string
           pending_fields: Json
@@ -4868,6 +4869,7 @@ export type Database = {
           environment_type_id?: string | null
           id?: string
           last_progress_at?: string | null
+          location?: string | null
           meter_number?: string | null
           name: string
           pending_fields?: Json
@@ -4890,6 +4892,7 @@ export type Database = {
           environment_type_id?: string | null
           id?: string
           last_progress_at?: string | null
+          location?: string | null
           meter_number?: string | null
           name?: string
           pending_fields?: Json

@@ -59,9 +59,9 @@ export function SiteSurveyClientPendingReport({ visit, client, unit, project, po
           if ((result.data?.length ?? 0) < 1000) break;
         }
         for (let from = 0; ; from += 1000) {
-          const result = await supabase.from("site_survey_visit_environments").select("id,name,point_type").eq("visit_id", visit.id).eq("active", true).order("id").range(from, from + 999);
+          const result = await supabase.from("site_survey_visit_environments").select("id,name,location,point_type").eq("visit_id", visit.id).eq("active", true).order("id").range(from, from + 999);
           if (result.error) throw new Error(result.error.message);
-          fresh.push(...(result.data ?? []).map((point) => ({ value: `environment:${point.id}`, label: point.name, pointType: surveyPointType(point, "environment") })));
+          fresh.push(...(result.data ?? []).map((point) => ({ value: `environment:${point.id}`, label: [point.name, point.location].filter(Boolean).join(" — "), location: point.location, pointType: surveyPointType(point, "environment") })));
           if ((result.data?.length ?? 0) < 1000) break;
         }
         return fresh;
