@@ -43,7 +43,8 @@ const shrinkPhoto = (dataUrl: string) => new Promise<string>((resolve) => {
 });
 
 type LucRow = { id: string; luc_number: string; shop_name: string; location: string | null; point_type: string; classification_type?: string | null; meter_number?: string | null };
-type EnvironmentRow = { id: string; name: string; template_id: string | null; point_type: string; meter_number?: string | null };
+type EnvironmentRow = { id: string; name: string; template_id: string | null; point_type: string; meter_number?: string | null; environment_type_id?: string | null };
+type EnvironmentTypeOption = { id: string; name: string; discipline: string };
 type DisplayRow = { id: string; source: "luc" | "environment"; luc_number: string; shop_name: string; location: string | null; point_type: string; classification_type?: string | null; meter_number?: string | null; template_id: string | null };
 type LucHistoryRow = { id: string; visit_luc_id: string; luc_number: string; shop_name: string; valid_from: string; valid_until: string | null };
 type PreviewRow = { lucNumber: string; shopName: string; location: string; meterNumber: string; issue?: string };
@@ -101,6 +102,7 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, canA
   const nameRevision = useRef(0);
   const [rows, setRows] = useState<LucRow[]>([]);
   const [environmentRows, setEnvironmentRows] = useState<EnvironmentRow[]>([]);
+  const [environmentTypes, setEnvironmentTypes] = useState<EnvironmentTypeOption[]>([]);
   const [history, setHistory] = useState<LucHistoryRow[]>([]);
   const [preview, setPreview] = useState<PreviewRow[]>([]);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -114,6 +116,7 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, canA
   const [pointType, setPointType] = useState<"shop" | "kiosk" | "environment" | "vacant" | null>(null);
   const [environmentName, setEnvironmentName] = useState("");
   const [environmentTemplateId, setEnvironmentTemplateId] = useState("");
+  const [environmentTypeId, setEnvironmentTypeId] = useState("");
   const [analyzing, setAnalyzing] = useState(false);
   const [draftMeter, setDraftMeter] = useState("");
   const [saving, setSaving] = useState(false);
