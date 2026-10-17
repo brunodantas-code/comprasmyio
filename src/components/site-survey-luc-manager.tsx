@@ -80,15 +80,18 @@ function TotalChip({ label, count }: { label: string; count: number }) {
   </div>;
 }
 
-function PointTypeTotals({ totals, serviceTotals, environmentTotals }: { totals: Record<SurveyPointType, number>; serviceTotals?: EnergyWaterTotals; environmentTotals?: { hydraulic: number; electrical: number } }) {
+function PointTypeTotals({ totals, groupTotals, environmentTotals }: { totals: Record<SurveyPointType, number>; groupTotals?: { shops: EnergyWaterTotals; concessionaria: EnergyWaterTotals; others: EnergyWaterTotals; hasConcessionaria: boolean; hasOthers: boolean }; environmentTotals?: { hydraulic: number; electrical: number } }) {
   const grandTotal = totals.shop + totals.kiosk + totals.environment + totals.vacant;
-  // Na desktop, a 1ª linha traz as quantidades de pontos (até Lojas vagas) e a 2ª, as de água/energia.
+  const serviceLine = (label: string, values: EnergyWaterTotals) => <div className="flex flex-wrap items-center gap-2" aria-label={`Totalizadores de ${label}`}><span className="text-xs font-semibold text-foreground">{label}</span>{[...SERVICE_TOTALS_PRIMARY, ...SERVICE_TOTALS_SECONDARY].map((item) => <TotalChip key={item.key} label={item.label} count={values[item.key]} />)}</div>;
+  // Na desktop, a 1ª linha traz as quantidades de pontos (até Lojas vagas); as demais, água/energia por grupo.
   return <div className="flex flex-col gap-1" aria-label="Quantidade de lojas, quiosques e ambientes">
     <div className="flex flex-wrap items-center gap-2">
       <TotalChip label="Total geral" count={grandTotal} />
       {POINT_TOTALS.filter((item) => item.key !== "vacant" || totals.vacant > 0).map((item) => <TotalChip key={item.key} label={item.label} count={totals[item.key]} />)}
     </div>
-    {serviceTotals ? <div className="flex flex-wrap items-center gap-2">{[...SERVICE_TOTALS_PRIMARY, ...SERVICE_TOTALS_SECONDARY].map((item) => <TotalChip key={item.key} label={item.label} count={serviceTotals[item.key]} />)}</div> : null}
+    {groupTotals ? serviceLine("Lojas e Quiosques", groupTotals.shops) : null}
+    {groupTotals?.hasConcessionaria ? serviceLine("Entrada da Concessionária", groupTotals.concessionaria) : null}
+    {groupTotals?.hasOthers ? serviceLine("Demais ambientes", groupTotals.others) : null}
     {environmentTotals && (environmentTotals.hydraulic > 0 || environmentTotals.electrical > 0) ? <div className="flex flex-wrap items-center gap-2" aria-label="Ambientes por disciplina"><TotalChip label="Hidrômetros" count={environmentTotals.hydraulic} /><TotalChip label="Medições elétricas" count={environmentTotals.electrical} /></div> : null}
   </div>;
 }
