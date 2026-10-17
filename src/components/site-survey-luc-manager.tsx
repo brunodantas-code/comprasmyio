@@ -57,17 +57,25 @@ const POINT_TOTALS: { key: SurveyPointType; label: string }[] = [
   { key: "vacant", label: "Lojas vagas" },
 ];
 
-function PointTypeTotals({ totals }: { totals: Record<SurveyPointType, number> }) {
+const SERVICE_TOTALS: { key: keyof EnergyWaterTotals; label: string }[] = [
+  { key: "energy", label: "Só Energia" },
+  { key: "water", label: "Só Água" },
+  { key: "both", label: "Água + Energia" },
+];
+
+function TotalChip({ label, count }: { label: string; count: number }) {
+  const isActive = count > 0;
+  return <div className={`flex items-center gap-2 rounded-sm px-2.5 py-1.5 ${isActive ? "bg-myio-green/5" : ""}`}>
+    <span className={`h-5 w-1.5 shrink-0 rounded-full ${isActive ? "bg-myio-green" : "bg-muted-foreground/25"}`} aria-hidden="true" />
+    <span className={`text-xs font-medium ${isActive ? "text-foreground" : "text-muted-foreground"}`}>{label}</span>
+    <strong className={`text-base leading-none tabular-nums ${isActive ? "text-foreground" : "text-muted-foreground/70"}`}>{count}</strong>
+  </div>;
+}
+
+function PointTypeTotals({ totals, serviceTotals }: { totals: Record<SurveyPointType, number>; serviceTotals?: EnergyWaterTotals }) {
   return <div className="flex flex-wrap items-center gap-2" aria-label="Quantidade de lojas, quiosques e ambientes">
-    {POINT_TOTALS.filter((item) => item.key !== "vacant" || totals.vacant > 0).map((item) => {
-      const count = totals[item.key];
-      const isActive = count > 0;
-      return <div key={item.key} className={`flex items-center gap-2 rounded-sm px-2.5 py-1.5 ${isActive ? "bg-myio-green/5" : ""}`}>
-        <span className={`h-5 w-1.5 shrink-0 rounded-full ${isActive ? "bg-myio-green" : "bg-muted-foreground/25"}`} aria-hidden="true" />
-        <span className={`text-xs font-medium ${isActive ? "text-foreground" : "text-muted-foreground"}`}>{item.label}</span>
-        <strong className={`text-base leading-none tabular-nums ${isActive ? "text-foreground" : "text-muted-foreground/70"}`}>{count}</strong>
-      </div>;
-    })}
+    {POINT_TOTALS.filter((item) => item.key !== "vacant" || totals.vacant > 0).map((item) => <TotalChip key={item.key} label={item.label} count={totals[item.key]} />)}
+    {serviceTotals ? SERVICE_TOTALS.map((item) => <TotalChip key={item.key} label={item.label} count={serviceTotals[item.key]} />) : null}
   </div>;
 }
 
