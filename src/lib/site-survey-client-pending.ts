@@ -8,6 +8,11 @@ export function unidentifiedLucPoints(points: ClientPendingPoint[]) {
     return !luc || luc === "sem luc" || luc === "nao identificado";
   }).sort((a, b) => (a.name ?? a.label).localeCompare(b.name ?? b.label, "pt-BR", { numeric: true }));
 }
+export function vacantShopPoints(points: ClientPendingPoint[]) {
+  return points
+    .filter((point) => point.pointType === "vacant")
+    .sort((a, b) => (a.name ?? a.label).localeCompare(b.name ?? b.label, "pt-BR", { numeric: true }));
+}
 export function duplicateNamePoints(points: ClientPendingPoint[]) {
   const byName = new Map<string, ClientPendingPoint[]>();
   for (const point of points) {
