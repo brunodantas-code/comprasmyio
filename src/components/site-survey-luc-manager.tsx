@@ -375,7 +375,7 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, canA
       const type = surveyPointType(row);
       return {
         luc: type === "environment" ? "–" : row.luc_number || "Sem LUC",
-        meter: row.meter_number || "—",
+        meter: row.meter_number || "",
         type: surveyPointTypeLabel(type),
         name: row.shop_name,
         location: environmentLocation(row.location) || "—",
@@ -401,15 +401,19 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, canA
     finally { setExporting(false); }
   };
   const [exportingPdf, setExportingPdf] = useState(false);
-  const exportPdf = async () => {
+  const [pdfStyleOpen, setPdfStyleOpen] = useState(false);
+  const exportPdf = async (grayscale: boolean) => {
+    setPdfStyleOpen(false);
     setExportingPdf(true);
     const toastId = toast.loading("Gerando PDF do cadastro…");
     try {
       const { buildRegistrationPdf } = await import("@/lib/site-survey-registration-pdf");
-      const { data: visitRow, error } = await supabase.from("site_survey_visits").select("client_id, clients(name)").eq("id", visitId).single();
+      const { data: visitRow, error } = await supabase.from("site_survey_visits").select("client_id, clients(name), projects(name)").eq("id", visitId).single();
       if (error) throw error;
-      const clientName = ((visitRow as { clients?: { name?: string } | null } | null)?.clients?.name) || undefined;
-      const blob = await buildRegistrationPdf(await registrationRows(), clientName);
+      const names = visitRow as { clients?: { name?: string } | null; projects?: { name?: string } | null } | null;
+      const clientName = names?.clients?.name || undefined;
+      const projectName = names?.projects?.name?.split("|").pop()?.trim() || undefined;
+      const blob = await buildRegistrationPdf(await registrationRows(), clientName, projectName, grayscale);
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a"); a.href = url; a.download = `cadastro-os-${visitId}.pdf`;
       document.body.appendChild(a); a.click(); a.remove();
