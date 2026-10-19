@@ -153,8 +153,9 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
         return (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 5;
       };
       let y = table(42, ["Visita", "Cliente / unidade", "Projeto"], [[`SS-${number}\nData da visita: ${date(visit.completed_at ?? visit.scheduled_start)}\nEmissão: ${date(new Date().toISOString())}`, [client, unit].filter(Boolean).join("\n") || "—", project || "—"]]);
-      pdf.setFont("Nunito", "normal"); pdf.setFontSize(10); pdf.text(`${questionCount} pergunta(s) aguardando resposta do cliente`, 14, y); y += 10;
-      if (!questionCount) pdf.text("Nenhuma pergunta pendente nesta visita.", 14, y);
+      if (questionCount > 0) {
+        pdf.setFont("Nunito", "normal"); pdf.setFontSize(10); pdf.text(`${questionCount} pergunta(s) aguardando resposta do cliente`, 14, y); y += 10;
+      }
       for (const group of groups) {
         if (!group.questions.length) continue;
         const kind = ({ shop: "Loja", kiosk: "Quiosque", environment: "Ambiente", vacant: "Loja vaga", general: "Geral" } as Record<string, string>)[group.pointType] ?? "Ponto";
