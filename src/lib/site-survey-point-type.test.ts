@@ -37,5 +37,14 @@ test("Loja vaga é contada à parte e não aumenta a quantidade de lojas", () =>
 });
 
 test("Cadastro vazio totaliza zero em todos os tipos", () => {
-  assert.deepEqual(surveyPointTotals([]), { shop: 0, kiosk: 0, environment: 0, vacant: 0 });
+  assert.deepEqual(surveyPointTotals([]), { shop: 0, kiosk: 0, environment: 0, vacant: 0, vacant_kiosk: 0 });
+});
+
+test("Quiosque vago é contado à parte, separado de quiosques e lojas vagas", () => {
+  const totals = surveyPointTotals([
+    { classification_type: "kiosk", point_type: "kiosk" },
+    { classification_type: "vacant_kiosk", point_type: "kiosk" },
+    { classification_type: "vacant", point_type: "shop" },
+  ]);
+  assert.deepEqual(totals, { shop: 0, kiosk: 1, environment: 0, vacant: 1, vacant_kiosk: 1 });
 });
