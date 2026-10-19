@@ -1034,3 +1034,4 @@
 - [ ] Relatório de pendências: Emissão = data de hoje; manter data da visita (02/09/26)
 - [ ] Responder: por que aparecem 3 fotos do Subway no relatório
 - [ ] Pop-up de vincular foto: exibir a foto atualmente vinculada marcada, mantendo todas as disponíveis
+- [ ] Histórico de nomes: Netão e GP Pneus aparecem "Sem LUC"; nome antigo do GP Pneus igual ao atual — verificar se deveria aparecer
