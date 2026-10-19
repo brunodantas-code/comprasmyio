@@ -23,6 +23,18 @@ export function showsCustomerQuestions(view: "execution" | "summary" | "pending"
   return view !== "pending";
 }
 
+export function registrationCustomerQuestion<T extends { id: string; section_id: string; active: boolean; prompt: string; question_key?: string | null }>(questions: T[], sections: { id: string; template_id: string; active: boolean }[], pointTemplateId: string | null, visitTemplateId: string | null, storedQuestionIds: string[] = []): T | undefined {
+  const candidates = questions.filter((question) => question.active && isCustomerQuestion(question));
+  const stored = candidates.find((question) => storedQuestionIds.includes(question.id));
+  if (stored) return stored;
+  for (const templateId of [pointTemplateId, visitTemplateId]) {
+    const sectionIds = new Set(sections.filter((section) => section.active && section.template_id === templateId).map((section) => section.id));
+    const question = candidates.find((candidate) => sectionIds.has(candidate.section_id));
+    if (question) return question;
+  }
+  return undefined;
+}
+
 export function customerQuestions(answer: unknown): string[] {
   if (answer && typeof answer === "object" && !Array.isArray(answer)) {
     if ("customer_questions" in answer && Array.isArray(answer.customer_questions)) {

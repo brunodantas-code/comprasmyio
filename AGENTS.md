@@ -31,7 +31,7 @@
 - RLS uses effective menus/app grants; shared files follow record access and uploads bind owners, preserving authorized collaboration. Survey previews lazy-load/cache private images; uploads use lazy compression, a serial queue and retry cache with prepared-file metadata to bound memory.
 
 - Pending cards reuse the guarded editor by section; optional answer.observation stays separate from required details.
-- Completed surveys stay out of execution and can never be reopened; History allows authorized registration remediation without changing visit status or technical dates. Section 7 guards customer Q&A; models copy independently.
+- Completed surveys never reopen; History remediation preserves status/dates. Customer Q&A resolves stored, point then visit-template Section 7 independently of pending groups, supporting vacant shops and environments. Models copy independently.
 - Registration PDF/Excel share filtered rows and freshly authorized installation approvals; PDF uses pdf-lib AcroForm after jsPDF layout and Excel native OOXML cell controls so client file edits remain independent of ERP records.
 - Proposals use private visit-keyed files; authenticated extraction syncs totals by trigger and stores group breakdown in proposal metadata. Environment remainders preserve unknown quantities as null.
 
