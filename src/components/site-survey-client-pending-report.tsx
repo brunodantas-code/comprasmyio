@@ -187,9 +187,24 @@ export function SiteSurveyClientPendingReport({ visit, client, unit, project, po
           styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: 3, overflow: "linebreak", valign: "middle" },
           headStyles: { fontStyle: "bold", textColor: accent, lineWidth: { bottom: 0.3 }, lineColor: green },
           rowPageBreak: "avoid", showHead: "everyPage",
-          columnStyles: { 0: { cellWidth: 46 }, 1: { cellWidth: 28 }, 2: { cellWidth: 28 }, 3: { cellWidth: 20 }, 4: { cellWidth: 60 } },
-          head: [["Nome da loja", "LUC", "Nº do medidor", "Tipo", "Localização"]],
-          body: duplicated.flatMap((group) => group.map((point) => [point.name ?? point.label, point.lucNumber?.trim() || "Sem LUC", point.meterNumber || "—", point.pointType === "kiosk" ? "Quiosque" : point.pointType === "vacant" ? "Loja vaga" : "Loja", point.location || "—"])),
+          columnStyles: { 0: { cellWidth: 40 }, 1: { cellWidth: 25 }, 2: { cellWidth: 25 }, 3: { cellWidth: 18 }, 4: { cellWidth: 44 }, 5: { cellWidth: 30 } },
+          head: [["Nome da loja", "LUC", "Nº do medidor", "Tipo", "Localização", "Confirmação"]],
+          body: duplicated.flatMap((group) => group.map((point) => [point.name ?? point.label, point.lucNumber?.trim() || "Sem LUC", point.meterNumber || "—", point.pointType === "kiosk" ? "Quiosque" : point.pointType === "vacant" ? "Loja vaga" : "Loja", point.location || "—", ""])),
+          didDrawCell: (cell) => {
+            if (cell.section !== "body" || cell.column.index !== 5) return;
+            // Caixas editáveis para o cliente marcar OK ou Duplicado em cada ponto.
+            const rowIndex = cell.row.index;
+            const midY = cell.cell.y + cell.cell.height / 2;
+            const options: [string, string, number][] = [["OK", `confirma_ok_${rowIndex}`, cell.cell.x + 2], ["Duplicado", `confirma_dup_${rowIndex}`, cell.cell.x + 14]];
+            pdf.setFont("Nunito", "normal"); pdf.setFontSize(7); pdf.setTextColor(...ink);
+            for (const [label, fieldName, x] of options) {
+              const box = new pdf.AcroFormCheckBox();
+              box.fieldName = fieldName; box.value = "Off"; box.readOnly = false;
+              box.Rect = [x, midY - 1.75, 3.5, 3.5];
+              pdf.addField(box);
+              pdf.text(label, x + 4.5, midY + 1.2);
+            }
+          },
         });
       }
       const vacant = vacantShopPoints(freshPoints.length ? freshPoints : points);
