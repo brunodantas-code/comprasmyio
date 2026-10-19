@@ -1,6 +1,6 @@
 import { isCustomerQuestion, pendingCustomerQuestions } from "@/lib/site-survey-questions";
 
-export type ClientPendingPoint = { value: string; label: string; pointType: string; lucNumber?: string; name?: string; location?: string | null; meterNumber?: string | null };
+export type ClientPendingPoint = { value: string; label: string; pointType: string; lucNumber?: string | null; name?: string; location?: string | null; meterNumber?: string | null };
 export function unidentifiedLucPoints(points: ClientPendingPoint[]) {
   return points.filter((point) => {
     if (point.pointType !== "shop" && point.pointType !== "kiosk" && point.pointType !== "vacant") return false;
