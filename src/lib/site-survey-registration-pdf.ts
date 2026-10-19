@@ -28,7 +28,7 @@ const token = (name: string): [number, number, number] => {
 const tint = (color: [number, number, number], amount: number): [number, number, number] =>
   [0, 1, 2].map((i) => Math.round(color[i] + (255 - color[i]) * amount)) as [number, number, number];
 
-async function thumbnail(attachment: FacadeThumbnailAttachment) {
+async function thumbnail(attachment: FacadeThumbnailAttachment, grayscale: boolean) {
   const { data: original, error } = await supabase.storage.from("site-survey-attachments").download(attachment.storage_path);
   if (error || !original) return undefined;
   let blob: Blob = original;
@@ -43,6 +43,7 @@ async function thumbnail(attachment: FacadeThumbnailAttachment) {
     const context = canvas.getContext("2d");
     if (!context) return undefined;
     clipRoundedPhoto(context, 240, 240);
+    if (grayscale) context.filter = "grayscale(1)";
     const side = Math.min(image.naturalWidth, image.naturalHeight);
     context.drawImage(image, (image.naturalWidth - side) / 2, (image.naturalHeight - side) / 2, side, side, 0, 0, 240, 240);
     return canvas.toDataURL("image/png");
