@@ -1038,3 +1038,4 @@
 - [ ] Histórico de nomes: Netão e GP Pneus aparecem "Sem LUC" — verificar se deveria aparecer (GP Pneus com nome antigo igual ao atual já foi filtrado).
 - [x] Botão + de "Adicionar pergunta para o cliente" voltou a aparecer no Histórico do ponto (Cadastro completo), mesmo sem pendências.
 
+- [ ] Site Survey — Cadastro: filtro geral multiseleção ao lado de Ações (pop-up com todas as opções de todas as seções do checklist, aplicado a todos os pontos; PDF/Excel exportam só o que foi selecionado). Ex.: lojas com hidrômetro vazão até 10 m³/h ou bitola de cabo até 16 mm, ou combinações.
