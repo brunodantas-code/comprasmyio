@@ -3,20 +3,20 @@ import { isCustomerQuestion, pendingCustomerQuestions } from "@/lib/site-survey-
 export type ClientPendingPoint = { value: string; label: string; pointType: string; lucNumber?: string | null; name?: string; location?: string | null; meterNumber?: string | null };
 export function unidentifiedLucPoints(points: ClientPendingPoint[]) {
   return points.filter((point) => {
-    if (point.pointType !== "shop" && point.pointType !== "kiosk" && point.pointType !== "vacant") return false;
+    if (point.pointType !== "shop" && point.pointType !== "kiosk" && point.pointType !== "vacant" && point.pointType !== "vacant_kiosk") return false;
     const luc = (point.lucNumber ?? "").trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR");
     return !luc || luc === "sem luc" || luc === "nao identificado";
   }).sort((a, b) => (a.name ?? a.label).localeCompare(b.name ?? b.label, "pt-BR", { numeric: true }));
 }
 export function vacantShopPoints(points: ClientPendingPoint[]) {
   return points
-    .filter((point) => point.pointType === "vacant")
+    .filter((point) => point.pointType === "vacant" || point.pointType === "vacant_kiosk")
     .sort((a, b) => (a.name ?? a.label).localeCompare(b.name ?? b.label, "pt-BR", { numeric: true }));
 }
 export function duplicateNamePoints(points: ClientPendingPoint[]) {
   const byName = new Map<string, ClientPendingPoint[]>();
   for (const point of points) {
-    if (point.pointType !== "shop" && point.pointType !== "kiosk" && point.pointType !== "vacant") continue;
+    if (point.pointType !== "shop" && point.pointType !== "kiosk" && point.pointType !== "vacant" && point.pointType !== "vacant_kiosk") continue;
     const name = (point.name ?? point.label).trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR");
     if (!name) continue;
     byName.set(name, [...(byName.get(name) ?? []), point]);
