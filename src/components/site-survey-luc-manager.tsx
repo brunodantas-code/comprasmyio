@@ -18,7 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { surveyPointType, surveyPointTypeLabel, surveyPointTotals, requiresSurveyLuc, type SurveyPointType } from "@/lib/site-survey-point-type";
+import { surveyPointType, surveyPointTypeLabel, surveyPointTotals, requiresSurveyLuc, isSurveyVacant, type SurveyPointType } from "@/lib/site-survey-point-type";
 import { approvalEnergyWaterTotals, type EnergyWaterTotals } from "@/lib/site-survey-energy-water";
 import { environmentLocation } from "@/lib/site-survey-environment-location";
 import { environmentDisciplineTotals } from "@/lib/site-survey-environment-totals";
@@ -62,6 +62,7 @@ const POINT_TOTALS: { key: SurveyPointType; label: string }[] = [
   { key: "kiosk", label: "Quiosques" },
   { key: "environment", label: "Ambientes" },
   { key: "vacant", label: "Lojas vagas" },
+  { key: "vacant_kiosk", label: "Quiosques vagos" },
 ];
 
 const SERVICE_TOTALS_PRIMARY: { key: keyof EnergyWaterTotals; label: string }[] = [
@@ -87,7 +88,7 @@ function TotalChip({ label, count, compact = false }: { label: string; count: nu
 }
 
 function PointTypeTotals({ totals, groupTotals, environmentTotals }: { totals: Record<SurveyPointType, number>; groupTotals?: { shops: EnergyWaterTotals; concessionaria: EnergyWaterTotals; others: EnergyWaterTotals; hasConcessionaria: boolean; hasOthers: boolean }; environmentTotals?: { hydraulic: number; electrical: number } }) {
-  const grandTotal = totals.shop + totals.kiosk + totals.environment + totals.vacant;
+  const grandTotal = totals.shop + totals.kiosk + totals.environment + totals.vacant + totals.vacant_kiosk;
   const serviceLine = (label: string, values: EnergyWaterTotals) => <div className="flex flex-wrap items-center gap-2" aria-label={`Totalizadores de ${label}`}><span className="text-xs font-semibold text-foreground">{label}</span>{[...SERVICE_TOTALS_PRIMARY, ...SERVICE_TOTALS_SECONDARY].map((item) => <TotalChip key={item.key} label={item.label} count={values[item.key]} />)}</div>;
   // Na desktop, a 1ª linha traz as quantidades de pontos (até Lojas vagas); as demais, água/energia por grupo.
   return <div className="w-full min-w-0 space-y-1" aria-label="Quantidade de lojas, quiosques e ambientes">
@@ -133,7 +134,7 @@ export function SiteSurveyLucManager({ checklistData, visitId, userId, canImport
   const [draftName, setDraftName] = useState("");
   const [draftContractName, setDraftContractName] = useState("");
   const [draftLocation, setDraftLocation] = useState("");
-  const [pointType, setPointType] = useState<"shop" | "kiosk" | "environment" | "vacant" | null>(null);
+  const [pointType, setPointType] = useState<"shop" | "kiosk" | "environment" | "vacant" | "vacant_kiosk" | null>(null);
   const [environmentName, setEnvironmentName] = useState("");
   const [environmentTemplateId, setEnvironmentTemplateId] = useState("");
   const [environmentTypeId, setEnvironmentTypeId] = useState("");
@@ -253,13 +254,13 @@ export function SiteSurveyLucManager({ checklistData, visitId, userId, canImport
     try { await saveEditInner(confirmed); } catch (error) { toast.error(error instanceof Error ? error.message : "Não foi possível salvar. Verifique a conexão e tente novamente."); } finally { setSaving(false); }
   };
   const saveEditInner = async (confirmed = false) => {
-    if (!pointType) return toast.error("Selecione Loja, Quiosque, Ambiente ou Loja vaga.");
+    if (!pointType) return toast.error("Selecione Loja, Quiosque, Ambiente, Loja vaga ou Quiosque vago.");
     if (editingEnvironmentId) {
       const name = (pointType === "environment" ? environmentName : draftName).trim();
       if (!name) return toast.error(pointType === "environment" ? "Informe o nome do ambiente." : "Informe o nome do ponto.");
       if (pointType === "environment" && !environmentTemplateId) return toast.error("Selecione o checklist do ambiente.");
       const lucNumber = pointType === "environment" ? "" : draftLuc.trim();
-      if (requiresSurveyLuc(pointType) && !lucNumber) return toast.error("Informe o LUC da loja vaga.");
+      if (requiresSurveyLuc(pointType) && !lucNumber) return toast.error(pointType === "vacant_kiosk" ? "Informe o LUC do quiosque vago." : "Informe o LUC da loja vaga.");
       if (lucNumber && duplicateNames.length && !confirmed) { setDuplicateConfirmation("edit"); return; }
       const { error } = await supabase.from("site_survey_visit_environments").update({ name, point_type: pointType, luc_number: lucNumber || null, ...(pointType === "environment" ? { template_id: environmentTemplateId, environment_type_id: environmentTypeId || null } : { environment_type_id: null }), location: environmentLocation(draftLocation), meter_number: draftMeter.trim() || null, updated_by: userId }).eq("id", editingEnvironmentId);
       if (error) return toast.error(error.code === "23505" ? "Este ambiente já está cadastrado nesta OS." : error.message);
@@ -281,11 +282,11 @@ export function SiteSurveyLucManager({ checklistData, visitId, userId, canImport
       return;
     }
     const lucNumber = pointType === "environment" ? "" : draftLuc.trim(); const shopName = draftName.trim();
-    if (pointType && requiresSurveyLuc(pointType) && !lucNumber) return toast.error("Informe o LUC da loja vaga.");
+    if (pointType && requiresSurveyLuc(pointType) && !lucNumber) return toast.error(pointType === "vacant_kiosk" ? "Informe o LUC do quiosque vago." : "Informe o LUC da loja vaga.");
     if (!shopName) return toast.error("Informe o nome do ponto.");
     const duplicateRows = lucNumber ? rows.filter((row) => row.id !== editing?.id && normalizeHeader(row.luc_number) === normalizeHeader(lucNumber)) : [];
     if (duplicateRows.length && !confirmed) { setDuplicateConfirmation("edit"); return; }
-    const payload = { visit_id: visitId, luc_number: lucNumber, shop_name: shopName, contract_name: draftContractName.trim() || null, location: draftLocation.trim() || null, meter_number: draftMeter.trim() || null, point_type: pointType === "kiosk" ? "kiosk" : pointType === "vacant" ? "vacant" : "shop", classification_type: pointType, updated_by: userId, active: true };
+    const payload = { visit_id: visitId, luc_number: lucNumber, shop_name: shopName, contract_name: draftContractName.trim() || null, location: draftLocation.trim() || null, meter_number: draftMeter.trim() || null, point_type: pointType === "kiosk" || pointType === "vacant_kiosk" ? "kiosk" : pointType === "vacant" ? "vacant" : "shop", classification_type: pointType, updated_by: userId, active: true };
     const result = editing?.id
       ? editMode === "correction"
         ? await supabase.rpc("correct_site_survey_visit_luc", { _id: editing.id, _luc_number: lucNumber, _shop_name: shopName, _location: draftLocation.trim() }).then(async (correction) => correction.error ? correction : supabase.from("site_survey_visit_lucs").update({ classification_type: pointType, contract_name: draftContractName.trim() || null, meter_number: draftMeter.trim() || null, updated_by: userId }).eq("id", editing.id))
@@ -367,7 +368,7 @@ export function SiteSurveyLucManager({ checklistData, visitId, userId, canImport
     const matchesPending = pendingFilter === "all" || (pendingFilter === "with" ? count > 0 : count === 0);
     const approval = scope.approvals.find((item) => item.point_kind === row.source && item.point_id === row.id);
     const matchesApproval = approvalFilter === "all" || (approvalFilter === "water" ? !!approval?.hydraulic_approved : approvalFilter === "energy" ? !!approval?.electrical_approved : approvalFilter === "both" ? !!approval?.hydraulic_approved && !!approval?.electrical_approved : !approval?.hydraulic_approved && !approval?.electrical_approved);
-    return matchesApproval && matchesPending && matchesLuc && matchesName && matchesLocation && matchesType && (!missingFacadeOnly || !hasFacade || surveyPointType(row) === "vacant") && (isPointVisible?.(pointValue) ?? true);
+    return matchesApproval && matchesPending && matchesLuc && matchesName && matchesLocation && matchesType && (!missingFacadeOnly || !hasFacade || isSurveyVacant(surveyPointType(row))) && (isPointVisible?.(pointValue) ?? true);
   }).sort((a, b) => {
     const comparison = (a[sortBy] ?? "").localeCompare(b[sortBy] ?? "", "pt-BR", { numeric: true, sensitivity: "base" });
     return sortAscending ? comparison : -comparison;
@@ -454,6 +455,7 @@ export function SiteSurveyLucManager({ checklistData, visitId, userId, canImport
             <div className="flex items-center gap-2"><Checkbox id="add-kiosk" checked={pointType === "kiosk"} onCheckedChange={() => setPointType(pointType === "kiosk" ? null : "kiosk")} /><Label htmlFor="add-kiosk" className="cursor-pointer">Quiosque</Label></div>
            <div className="flex items-center gap-2"><Checkbox id="add-environment" checked={pointType === "environment"} onCheckedChange={() => setPointType(pointType === "environment" ? null : "environment")} /><Label htmlFor="add-environment" className="cursor-pointer">Ambiente</Label></div>
            <div className="flex items-center gap-2"><Checkbox id="add-vacant" checked={pointType === "vacant"} onCheckedChange={() => setPointType(pointType === "vacant" ? null : "vacant")} /><Label htmlFor="add-vacant" className="cursor-pointer">Loja vaga</Label></div>
+           <div className="flex items-center gap-2"><Checkbox id="add-vacant-kiosk" checked={pointType === "vacant_kiosk"} onCheckedChange={() => setPointType(pointType === "vacant_kiosk" ? null : "vacant_kiosk")} /><Label htmlFor="add-vacant-kiosk" className="cursor-pointer">Quiosque vago</Label></div>
           </div>}
            {pointType === "shop" || pointType === "kiosk" || pointType === "vacant" || Boolean(editing?.id) && pointType === "environment" && !editingEnvironmentId ? <>
              <div className="grid gap-4 sm:grid-cols-2">{pointType !== "environment" ? <div className="space-y-2"><Label htmlFor="luc-draft">{pointType === "vacant" ? "LUC" : "LUC (opcional)"}</Label><Input id="luc-draft" required={pointType === "vacant"} value={draftLuc} onChange={(event) => setDraftLuc(event.target.value)} /></div> : null}<div className="space-y-2"><Label htmlFor="shop-draft">{pointType === "environment" ? "Nome do ambiente" : pointType === "kiosk" ? "Nome do quiosque" : "Nome da loja"}</Label>{pointType === "environment" ? <Input id="shop-draft" value={draftName} onChange={(event) => changeShopName(event.target.value)} /> : <><Popover open={namePickerOpen} onOpenChange={setNamePickerOpen}><PopoverTrigger asChild><Button type="button" variant="outline" role="combobox" aria-expanded={namePickerOpen} aria-label={pointType === "kiosk" ? "Buscar ou informar nome do quiosque" : "Buscar ou informar nome da loja"} className="w-full justify-between !bg-myio-green/10 font-normal hover:!bg-myio-green/15"><span className={draftName ? "truncate" : "truncate text-muted-foreground"}>{draftName || "Digite ou selecione"}</span><ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" /></Button></PopoverTrigger><PopoverContent align="start" className="w-(--radix-popover-trigger-width) p-0"><Command shouldFilter><CommandInput id="shop-draft" value={draftName} onValueChange={changeShopName} placeholder={pointType === "kiosk" ? "Buscar ou digitar quiosque..." : "Buscar ou digitar loja..."} /><CommandList><CommandEmpty><span className="block px-3 py-2 text-left">Nome novo: <strong>{draftName.trim() || "digite para cadastrar"}</strong></span></CommandEmpty><CommandGroup>{matchingCatalog.map((item) => <CommandItem key={item.id} value={item.name} onSelect={() => { changeShopName(item.name); setNamePickerOpen(false); }}><Check className={normalizeHeader(draftName) === normalizeHeader(item.name) ? "opacity-100" : "opacity-0"} /><span className="truncate">{item.name}</span></CommandItem>)}</CommandGroup></CommandList></Command></PopoverContent></Popover><p className="text-xs text-muted-foreground">Pesquise um nome cadastrado ou digite um novo.</p></>}</div>{pointType !== "environment" ? <div className="space-y-2 sm:col-span-2"><Label htmlFor="contract-draft">Nome do contrato</Label><Input id="contract-draft" value={draftContractName} onChange={(event) => setDraftContractName(event.target.value)} placeholder="Nome usado pelo shopping para o contrato" /><p className="text-xs text-muted-foreground">O nome da loja acima é o da fachada; aqui fica o nome do contrato junto ao shopping.</p></div> : null}<div className="space-y-2 sm:col-span-2"><Label htmlFor="location-draft">Localização (opcional)</Label><Input id="location-draft" value={draftLocation} onChange={(event) => setDraftLocation(event.target.value)} placeholder="Ex.: G1 – Deck" /></div><div className="space-y-2 sm:col-span-2"><Label htmlFor="meter-draft">Número do medidor (opcional)</Label><Input id="meter-draft" value={draftMeter} onChange={(event) => setDraftMeter(event.target.value)} placeholder="Energia e/ou água" /></div></div>
