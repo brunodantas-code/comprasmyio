@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { proposalGroupQuantities, proposalScopeSchema, proposalShopKioskComparison, validateProposalPdf } from "./site-survey-proposal";
+import { proposalGroupQuantities, proposalOtherEnergyBreakdown, proposalOtherEnergyText, proposalScopeSchema, proposalShopKioskComparison, validateProposalPdf } from "./site-survey-proposal";
 test("proposta exige PDF real não vazio", async () => {
   await assert.rejects(validateProposalPdf(new Blob([])), /não vazio/);
   await assert.rejects(validateProposalPdf(new Blob(["not a PDF"])), /PDF válido/);
