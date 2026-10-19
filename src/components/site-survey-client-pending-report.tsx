@@ -198,7 +198,7 @@ export function SiteSurveyClientPendingReport({ visit, client, unit, project, po
             const options: [string, string, number][] = [["OK", `confirma_ok_${rowIndex}`, cell.cell.x + 2], ["Duplicado", `confirma_dup_${rowIndex}`, cell.cell.x + 14]];
             pdf.setFont("Nunito", "normal"); pdf.setFontSize(7); pdf.setTextColor(...ink);
             for (const [label, fieldName, x] of options) {
-              const box = new pdf.AcroForm.CheckBox();
+              const box = pdf.AcroForm.CheckBox();
               box.fieldName = fieldName; box.value = "Off"; box.readOnly = false;
               box.Rect = [x, midY - 1.75, 3.5, 3.5];
               pdf.addField(box);
