@@ -97,7 +97,7 @@ export async function buildRegistrationPdf(rows: RegistrationPdfRow[], clientNam
     bodyStyles: { minCellHeight: 14 }, rowPageBreak: "avoid", showHead: "everyPage",
     columnStyles: Object.fromEntries(widths.map((width, index) => [index, { cellWidth: width, ...(index >= waterIndex ? { halign: "center" as const } : {}) }])),
     head: [headers],
-    body: rows.map((row) => [thumbs[rows.indexOf(row)] ? "" : "Sem foto", row.luc, ...(withMeter ? [row.meter] : []), row.type, row.name, row.location, "", ""]),
+    body: rows.map((row, i) => [thumbs[i] ? "" : "Sem foto", row.luc, ...(withMeter ? [row.meter] : []), row.type, row.name, row.location, "", ""]),
     didDrawCell: (cell) => {
       if (cell.section !== "body") return;
       if (cell.column.index === 0) {
