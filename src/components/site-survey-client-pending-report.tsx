@@ -202,7 +202,8 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
             const options: [string, string, number][] = [["OK", `confirma_ok_${rowIndex}`, cell.cell.x + 2], ["Duplicado", `confirma_dup_${rowIndex}`, cell.cell.x + 14]];
             pdf.setFont("Nunito", "normal"); pdf.setFontSize(7); pdf.setTextColor(...ink);
             for (const [label, fieldName, x] of options) {
-              const box = new pdf.AcroForm.CheckBox();
+              const CheckBoxClass = (pdf.AcroForm as unknown as { CheckBox: new () => { fieldName: string; value: string; readOnly: boolean; x: number; y: number; width: number; height: number } }).CheckBox;
+              const box = new CheckBoxClass();
               box.fieldName = fieldName; box.value = "Off"; box.readOnly = false;
               box.x = x; box.y = midY - 1.75; box.width = 3.5; box.height = 3.5;
               pdf.addField(box);
