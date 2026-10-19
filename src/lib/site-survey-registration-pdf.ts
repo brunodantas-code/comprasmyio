@@ -28,7 +28,7 @@ const token = (name: string): [number, number, number] => {
 const tint = (color: [number, number, number], amount: number): [number, number, number] =>
   [0, 1, 2].map((i) => Math.round(color[i] + (255 - color[i]) * amount)) as [number, number, number];
 
-async function thumbnail(attachment: FacadeThumbnailAttachment) {
+async function thumbnail(attachment: FacadeThumbnailAttachment, grayscale: boolean) {
   const { data: original, error } = await supabase.storage.from("site-survey-attachments").download(attachment.storage_path);
   if (error || !original) return undefined;
   let blob: Blob = original;
@@ -43,32 +43,34 @@ async function thumbnail(attachment: FacadeThumbnailAttachment) {
     const context = canvas.getContext("2d");
     if (!context) return undefined;
     clipRoundedPhoto(context, 240, 240);
+    if (grayscale) context.filter = "grayscale(1)";
     const side = Math.min(image.naturalWidth, image.naturalHeight);
     context.drawImage(image, (image.naturalWidth - side) / 2, (image.naturalHeight - side) / 2, side, side, 0, 0, 240, 240);
     return canvas.toDataURL("image/png");
   } catch { return undefined; } finally { URL.revokeObjectURL(url); }
 }
 
-export async function buildRegistrationPdf(rows: RegistrationPdfRow[], clientName?: string) {
+export async function buildRegistrationPdf(rows: RegistrationPdfRow[], clientName?: string, projectName?: string, grayscale = false) {
   const [{ jsPDF }, { default: autoTable }, { PDFDocument }, regular, bold] = await Promise.all([import("jspdf"), import("jspdf-autotable"), import("pdf-lib"), loadFont(nunitoRegularUrl), loadFont(nunitoBoldUrl)]);
   const fields: { page: number; x: number; y: number; checked: boolean; name: string }[] = [];
   // Serial decoding bounds memory even when originals are large.
   const thumbs: (string | undefined)[] = [];
-  for (const row of rows) thumbs.push(row.facade ? await thumbnail(row.facade) : undefined);
+  for (const row of rows) thumbs.push(row.facade ? await thumbnail(row.facade, grayscale) : undefined);
   const pdf = new jsPDF({ unit: "mm", format: "a4" });
   pdf.addFileToVFS("Nunito-Regular.ttf", regular); pdf.addFont("Nunito-Regular.ttf", "Nunito", "normal");
   pdf.addFileToVFS("Nunito-Bold.ttf", bold); pdf.addFont("Nunito-Bold.ttf", "Nunito", "bold");
-  const ink = token("--myio-dark"), accent = token("--myio-purple"), green = token("--myio-green");
-  const titleTop = 22, hasClient = Boolean(clientName);
+  const ink: [number, number, number] = grayscale ? [30, 30, 30] : token("--myio-dark");
+  const accent: [number, number, number] = grayscale ? [60, 60, 60] : token("--myio-purple");
+  const green: [number, number, number] = grayscale ? [140, 140, 140] : token("--myio-green");
+  const titleTop = 22, hasClient = Boolean(clientName), hasProject = Boolean(projectName);
   pdf.setFont("Nunito", "bold"); pdf.setFontSize(20); pdf.setTextColor(...accent); pdf.text("myio | Site Survey", 14, titleTop);
-  if (hasClient) {
-    pdf.setFontSize(15); pdf.setTextColor(...ink); pdf.text(String(clientName), 14, titleTop + 10);
-    pdf.setFontSize(11); pdf.text("Cadastro de lojas, quiosques e ambientes", 14, titleTop + 17);
-  } else {
-    pdf.setFontSize(15); pdf.setTextColor(...ink); pdf.text("Cadastro de lojas, quiosques e ambientes", 14, titleTop + 10);
-  }
-  const ruleY = hasClient ? titleTop + 22 : titleTop + 15;
-  const infoY = hasClient ? titleTop + 29 : titleTop + 22;
+  let lineY = titleTop + 10;
+  pdf.setTextColor(...ink);
+  if (hasClient) { pdf.setFontSize(15); pdf.text(String(clientName), 14, lineY); lineY += 7; }
+  if (hasProject) { pdf.setFontSize(13); pdf.text(`Implantação ${String(projectName)}`, 14, lineY); lineY += 6; }
+  pdf.setFontSize(11); pdf.text("Cadastro de lojas, quiosques e ambientes", 14, lineY);
+  const ruleY = lineY + 5;
+  const infoY = lineY + 12;
   pdf.setDrawColor(...green); pdf.line(14, ruleY, 196, ruleY);
   pdf.setFont("Nunito", "normal"); pdf.setFontSize(10);
   pdf.text(`${rows.length} ponto(s) · Emissão: ${new Date().toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" })}`, 14, infoY);

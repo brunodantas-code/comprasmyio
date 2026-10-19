@@ -579,7 +579,9 @@ function VisitDetails({ pointSearch = "", visit, data, onClose, onChanged, close
         approvedActionKeysRef.current.delete(key);
         setDeclinedActionKeys((current) => { const next = new Set(current); next.delete(key); return next; });
       } else if ((!alreadyGenerated || photoOnly) && !approvedActionKeys.has(key) && !declinedActionKeys.has(key)) {
-        setPendingAction({ key, actionName, questionId: rule.question_id, phase, photoOnly }); setActionPhotoChoice(""); setActionPhotoFile(null);
+        // Pré-seleciona a foto já vinculada para permitir trocar ou confirmar a mesma.
+        const savedRef = photoReferenceId((detail?.responses ?? []).find((item) => item.question_id === rule.question_id && (phase === "pre_visit" ? !item.visit_luc_id && !item.visit_environment_id : matchesPoint(item)))?.answer);
+        setPendingAction({ key, actionName, questionId: rule.question_id, phase, photoOnly }); setActionPhotoChoice(savedRef); setActionPhotoFile(null);
       }
     }
   };
