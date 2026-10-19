@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Checkbox } from "@/components/ui/checkbox";
 import { installationApproved, type InstallationApproval } from "@/lib/site-survey-installation-scope";
-import { proposalGroupQuantities, proposalScopeSchema, proposalShopKioskComparison } from "@/lib/site-survey-proposal";
+import { proposalGroupQuantities, proposalOtherEnergyText, proposalScopeSchema, proposalShopKioskComparison, type ProposalScopeBreakdown } from "@/lib/site-survey-proposal";
 
 type Point = { id: string; source: string; shop_name: string; luc_number: string };
 export function useInstallationScope(visitId: string) {
