@@ -667,7 +667,9 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     const unitName = units.find((item) => item.id === visit.client_unit_id)?.name ?? "—";
     const projectName = projects.find((item) => item.id === visit.project_id)?.name ?? "—";
     const technicianName = technicians.find((item) => item.id === visit.technician_id)?.full_name ?? "—";
-    const issueDate = new Date(visit.completed_at ?? visit.scheduled_start).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
+    // Emissão é sempre o dia da geração; a data da visita permanece na capa.
+    const issueDate = new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
+    const visitDate = new Date(visit.completed_at ?? visit.scheduled_start).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
     const [regularFont, boldFont, extraBoldFont, logoDataUrl] = await Promise.all([fileBase64(nunitoRegularUrl), fileBase64(nunitoBoldUrl), fileBase64(nunitoExtraBoldUrl), imageDataUrl(myioLogoUrl, blackAndWhite)]);
     pdf.addFileToVFS("Nunito-Regular.ttf", regularFont); pdf.addFont("Nunito-Regular.ttf", "Nunito", "normal");
     pdf.addFileToVFS("Nunito-Bold.ttf", boldFont); pdf.addFont("Nunito-Bold.ttf", "Nunito", "bold");
