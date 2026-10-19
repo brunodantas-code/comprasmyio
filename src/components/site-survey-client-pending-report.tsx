@@ -172,7 +172,7 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
       }
       for (const group of groups) {
         if (!group.questions.length) continue;
-        const kind = ({ shop: "Loja", kiosk: "Quiosque", environment: "Ambiente", vacant: "Loja vaga", general: "Geral" } as Record<string, string>)[group.pointType] ?? "Ponto";
+        const kind = ({ shop: "Loja", kiosk: "Quiosque", environment: "Ambiente", vacant: "Loja vaga", vacant_kiosk: "Quiosque vago", general: "Geral" } as Record<string, string>)[group.pointType] ?? "Ponto";
         y = table(y, [`${kind} — ${group.label}`], [
           ...group.questions.map((text, index) => [`${index + 1}. ${text}`]),
         ], 1.5);
@@ -251,7 +251,7 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
         sectionHeading("Lojas e quiosques com nomes repetidos", "Confirme que os pontos abaixo, de mesmo nome e LUCs diferentes, existem de fato no shopping e não são erro de cadastro.");
         // Sem nenhum número de medidor na tabela, a coluna não aparece (padrão do Cadastro).
         const dupMeter = duplicated.some((group) => group.some((point) => Boolean(point.meterNumber?.trim())));
-        const dupType = (point: ClientPendingPoint) => point.pointType === "kiosk" ? "Quiosque" : point.pointType === "vacant" ? "Loja vaga" : "Loja";
+        const dupType = (point: ClientPendingPoint) => point.pointType === "kiosk" ? "Quiosque" : point.pointType === "vacant" ? "Loja vaga" : point.pointType === "vacant_kiosk" ? "Quiosque vago" : "Loja";
         const dupBody = duplicated.flatMap((group) => group.map((point) => [point.name ?? point.label, point.lucNumber?.trim() || "Sem LUC", ...(dupMeter ? [point.meterNumber || "—"] : []), dupType(point), point.location || "—", ""]));
         // O tipo nunca pode quebrar ao meio: a coluna recebe a largura do rótulo mais longo.
         const dupTypeWidth = textColumnWidth(pdf, dupBody.map((row) => row[dupMeter ? 3 : 2]), 3, 20, 30);
@@ -282,7 +282,7 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
       }
       const vacant = vacantShopPoints(freshPoints.length ? freshPoints : points);
       if (vacant.length) {
-        sectionHeading("Lojas vagas cadastradas", `Confirme as ${vacant.length} loja(s) vaga(s) abaixo, cadastradas para futura implantação.`);
+        sectionHeading("Lojas e quiosques vagos cadastrados", `Confirme os ${vacant.length} espaço(s) vago(s) abaixo, cadastrados para futura implantação.`);
         // Sem nenhum número de medidor na tabela, a coluna não aparece (padrão do Cadastro).
         const vacantMeter = vacant.some((point) => Boolean(point.meterNumber?.trim()));
         const vacantWidths = [28, ...(vacantMeter ? [28] : []), vacantMeter ? 46 : 66, vacantMeter ? 50 : 58, 30];
@@ -292,7 +292,7 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
           headStyles: { fontStyle: "bold", textColor: accent, lineWidth: { bottom: 0.3 }, lineColor: green },
           rowPageBreak: "avoid", showHead: "everyPage",
           columnStyles: Object.fromEntries(vacantWidths.map((width, index) => [index, { cellWidth: width }])),
-          head: [["LUC", ...(vacantMeter ? ["Nº do medidor"] : []), "Nome da loja", "Localização", "Confirmação"]],
+          head: [["LUC", ...(vacantMeter ? ["Nº do medidor"] : []), "Nome", "Localização", "Confirmação"]],
           body: vacant.map((point) => [point.lucNumber?.trim() || "Sem LUC", ...(vacantMeter ? [point.meterNumber || "—"] : []), point.name ?? point.label, point.location || "—", ""]),
           didDrawCell: (cell) => {
             if (cell.section !== "body" || cell.column.index !== vacantWidths.length - 1) return;
