@@ -133,28 +133,32 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
       if (missingLucs.length) {
         const thumbnails = new Map<string, string>();
         // Serial decoding bounds memory even when originals are large.
+        // Falha numa foto não impede o relatório: o ponto sai "Sem foto".
+        const withTimeout = <T,>(promise: Promise<T>) => Promise.race([promise, new Promise<never>((_, reject) => setTimeout(() => reject(new Error("timeout")), 20000))]);
         for (const point of missingLucs) {
-          const attachment = facades.find((item) => point.value === (item.visit_luc_id ? `luc:${item.visit_luc_id}` : `environment:${item.visit_environment_id}`));
-          if (!attachment) continue;
-          const { data: original, error } = await supabase.storage.from("site-survey-attachments").download(attachment.storage_path);
-          if (error || !original) throw new Error(`Não foi possível carregar a fachada de ${point.name ?? point.label}. Tente gerar o relatório novamente.`);
-          let blob = original;
-          if (/\.(heic|heif)$/i.test(attachment.file_name) || /image\/hei[cf]/i.test(attachment.content_type ?? "")) {
-            const { heicTo } = await import("heic-to/csp");
-            blob = await heicTo({ blob, type: "image/jpeg", quality: 0.85 });
-          }
-          const url = URL.createObjectURL(blob);
           try {
-            const image = new Image(); image.src = url; await image.decode();
-            const canvas = document.createElement("canvas"); canvas.width = 240; canvas.height = 240;
-            const context = canvas.getContext("2d");
-            if (!context) throw new Error("Não foi possível preparar as fotos do relatório.");
-            // Quadrado com bordas arredondadas, como nas fachadas do Histórico.
-            clipRoundedPhoto(context, 240, 240);
-            const side = Math.min(image.naturalWidth, image.naturalHeight);
-            context.drawImage(image, (image.naturalWidth - side) / 2, (image.naturalHeight - side) / 2, side, side, 0, 0, 240, 240);
-            thumbnails.set(point.value, canvas.toDataURL("image/png"));
-          } finally { URL.revokeObjectURL(url); }
+            const attachment = facades.find((item) => point.value === (item.visit_luc_id ? `luc:${item.visit_luc_id}` : `environment:${item.visit_environment_id}`));
+            if (!attachment) continue;
+            const { data: original, error } = await withTimeout(supabase.storage.from("site-survey-attachments").download(attachment.storage_path));
+            if (error || !original) continue;
+            let blob = original;
+            if (/\.(heic|heif)$/i.test(attachment.file_name) || /image\/hei[cf]/i.test(attachment.content_type ?? "")) {
+              const { heicTo } = await import("heic-to/csp");
+              blob = await withTimeout(heicTo({ blob, type: "image/jpeg", quality: 0.85 }));
+            }
+            const url = URL.createObjectURL(blob);
+            try {
+              const image = new Image(); image.src = url; await withTimeout(image.decode());
+              const canvas = document.createElement("canvas"); canvas.width = 240; canvas.height = 240;
+              const context = canvas.getContext("2d");
+              if (!context) continue;
+              // Quadrado com bordas arredondadas, como nas fachadas do Histórico.
+              clipRoundedPhoto(context, 240, 240);
+              const side = Math.min(image.naturalWidth, image.naturalHeight);
+              context.drawImage(image, (image.naturalWidth - side) / 2, (image.naturalHeight - side) / 2, side, side, 0, 0, 240, 240);
+              thumbnails.set(point.value, canvas.toDataURL("image/png"));
+            } finally { URL.revokeObjectURL(url); }
+          } catch { /* foto indisponível: segue sem thumbnail */ }
         }
         pdf.addPage(); pdf.setFont("Nunito", "bold"); pdf.setFontSize(15); pdf.setTextColor(...accent);
         pdf.text("Lojas e quiosques com LUC não identificado", 14, 25);
