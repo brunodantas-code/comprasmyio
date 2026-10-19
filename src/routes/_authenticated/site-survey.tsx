@@ -558,7 +558,8 @@ function VisitDetails({ pointSearch = "", visit, data, onClose, onChanged, close
   const handleQuestionAnswerChange = (question: Question, value: unknown, phase: "pre_visit" | "point") => {
     for (const rule of data.questionActions.filter((item) => item.question_id === question.id)) {
       const key = actionScopeKey(rule.id, phase);
-      const alreadyGenerated = generatedCallsForScope(phase).some((item) => item.question_action_id === rule.id);
+      // Cancelled occurrences must not suppress a new confirmation when the answer triggers again.
+      const alreadyGenerated = generatedCallsForScope(phase).some((item) => item.question_action_id === rule.id && item.status !== "cancelado");
       if (!answerMatches(value, rule.trigger_value)) {
         setApprovedActionKeys((current) => { const next = new Set(current); next.delete(key); return next; });
         approvedActionKeysRef.current.delete(key);
