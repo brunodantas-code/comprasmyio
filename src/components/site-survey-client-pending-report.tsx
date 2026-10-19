@@ -14,7 +14,41 @@ type Props = {
   client: string; unit: string; project: string; points: ClientPendingPoint[];
   questions: { id: string; prompt: string; question_key?: string | null; conditioned_on_question_id?: string | null; conditioned_operator?: string | null; conditioned_value?: string | null }[];
 };
-const statusLabel = (status: string) => ({ aberto: "Em aberto", em_andamento: "Em andamento", atendido: "Atendido", concluido: "Concluído", cancelado: "Cancelado" } as Record<string, string>)[status] ?? status.replaceAll("_", " ");
+
+/* Checkbox verde do app dentro do PDF: desmarcado por padrão (borda verde) e, ao marcar, fundo verde com ✓. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const styleGreenCheckbox = (pdf: any, box: any) => {
+  // Verde do app (#0fc482) em RGB 0–1.
+  const green = "0.059 0.769 0.510";
+  const f2 = (n: number) => n.toFixed(2);
+  const appearance = pdf.AcroFormAppearance;
+  // Marcado: fundo verde com o ✓ escuro, como no app.
+  const on = (formObject: any) => {
+    const w = appearance.internal.getWidth(formObject), h = appearance.internal.getHeight(formObject);
+    const xobj = appearance.CheckBox.OffPushDown(formObject);
+    const fontKey = formObject.scope.internal.getFont(formObject.fontName, formObject.fontStyle).id;
+    const size = Math.min(h * 0.8, w * 0.8);
+    xobj.stream = [
+      `${green} rg`, `0 0 ${f2(w)} ${f2(h)} re`, "f",
+      "0 0 0 rg", "BT", `/${fontKey} ${f2(size)} Tf`,
+      `${f2(w / 2 - size * 0.38)} ${f2(h / 2 - size * 0.32)} Td`, "(3) Tj", "ET",
+    ].join("\n");
+    return xobj;
+  };
+  // Desmarcado: fundo branco com borda verde.
+  const off = (formObject: any) => {
+    const w = appearance.internal.getWidth(formObject), h = appearance.internal.getHeight(formObject);
+    const xobj = appearance.CheckBox.OffPushDown(formObject);
+    xobj.stream = [
+      "1 1 1 rg", `0 0 ${f2(w)} ${f2(h)} re`, "f",
+      `${green} RG`, "0.4 w", `0 0 ${f2(w)} ${f2(h)} re`, "S",
+    ].join("\n");
+    return xobj;
+  };
+  box.appearanceStreamContent = { N: { On: on, Off: off }, D: { On: on, Off: off } };
+  box.appearanceState = "Off";
+  box.value = "Off";
+};
 
 export function SiteSurveyClientPendingReport({ visit, client, unit, project, points, questions }: Props) {
   const [busy, setBusy] = useState(false);
@@ -108,7 +142,8 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
       };
       const ink = token("--myio-dark"), accent = token("--myio-purple"), green = token("--myio-green");
       const number = String(visit.survey_number).padStart(12, "0");
-      const questionCount = groups.reduce((count, group) => count + group.questions.length, 0), callCount = groups.reduce((count, group) => count + group.calls.length, 0);
+      // Intervenções/chamados não entram: existe o relatório específico de intervenções.
+      const questionCount = groups.reduce((count, group) => count + group.questions.length, 0);
       const date = (value: string) => new Date(value).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
       pdf.setFont("Nunito", "bold"); pdf.setFontSize(20); pdf.setTextColor(...accent); pdf.text("myio | Site Survey", 14, 22);
       pdf.setFontSize(15); pdf.setTextColor(...ink); pdf.text("Pendências para o cliente", 14, 32);
@@ -118,15 +153,13 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
         return (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 5;
       };
       let y = table(42, ["Visita", "Cliente / unidade", "Projeto"], [[`SS-${number}\nData da visita: ${date(visit.completed_at ?? visit.scheduled_start)}\nEmissão: ${date(new Date().toISOString())}`, [client, unit].filter(Boolean).join("\n") || "—", project || "—"]]);
-      pdf.setFont("Nunito", "normal"); pdf.setFontSize(10); pdf.text(`${questionCount} pergunta(s) aguardando resposta · ${callCount} chamado(s) / intervenção(ões)`, 14, y); y += 10;
-      if (!groups.length) pdf.text("Nenhuma pergunta pendente ou chamado gerado nesta visita.", 14, y);
+      pdf.setFont("Nunito", "normal"); pdf.setFontSize(10); pdf.text(`${questionCount} pergunta(s) aguardando resposta do cliente`, 14, y); y += 10;
+      if (!questionCount) pdf.text("Nenhuma pergunta pendente nesta visita.", 14, y);
       for (const group of groups) {
+        if (!group.questions.length) continue;
         const kind = ({ shop: "Loja", kiosk: "Quiosque", environment: "Ambiente", vacant: "Loja vaga", general: "Geral" } as Record<string, string>)[group.pointType] ?? "Ponto";
         y = table(y, [`${kind} — ${group.label}`], [
           ...group.questions.map((text, index) => [`${index + 1}. ${text}`]),
-          ...group.calls.map((call) => [call.call_number
-            ? `Chamado #${call.call_number} — ${call.title}\nSituação: ${statusLabel(call.status)}${call.description?.trim() ? `\n${call.description.trim()}` : ""}`
-            : call.description?.trim() || "—"]),
         ], 1.5);
       }
       const missingLucs = unidentifiedLucPoints(freshPoints);
@@ -206,7 +239,9 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
               const CheckBoxClass = (pdf.AcroForm as unknown as { CheckBox: new () => Record<string, unknown> }).CheckBox;
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const box = new CheckBoxClass() as any;
-              box.fieldName = fieldName; box.value = "Off"; box.readOnly = false;
+              box.fieldName = fieldName; box.readOnly = false;
+              box.fontName = "zapfdingbats"; box.fontStyle = "normal";
+              styleGreenCheckbox(pdf, box);
               box.x = x; box.y = midY - 1.75; box.width = 3.5; box.height = 3.5;
               pdf.addField(box);
               pdf.text(label, x + 4.5, midY + 1.2);

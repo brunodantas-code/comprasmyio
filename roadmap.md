@@ -1027,14 +1027,15 @@
 - [x] Alinhar detalhamento elétrico dos Demais ambientes sob o card Energia 42
 - [x] Site Survey — pop-up de vinculação de foto: reabrir quando a intervenção já existe sem foto; correção aplicada, falta conferir na tela.
 - [x] Site Survey — Cadastro em PDF: aplicar o mesmo layout do Excel (título com nome do cliente, totalizador no topo, filtros/linha congelada) e reduzir a distância entre linhas para diminuir as páginas.
-- [ ] Site Survey — Cadastro em PDF/Excel do cliente: nova última coluna com checkbox OK/Duplicado para conferência do cliente.
-- [ ] Site Survey — relatório de pendências do cliente: incluir a quantidade de intervenções no cabeçalho da seção de nomes repetidos (onde consta o número 1).
-- [ ] Site Survey — responder: por que Beach Tennis saiu como Sem LUC nas pendências do cliente.
-- [ ] Relatório de pendências do cliente: corrigir falha na geração (não baixa o PDF)
-- [ ] Relatório de pendências: Emissão = data de hoje; manter data da visita (02/09/26)
-- [ ] Responder: por que aparecem 3 fotos do Subway no relatório
-- [ ] Pop-up de vincular foto: exibir a foto atualmente vinculada marcada, mantendo todas as disponíveis
-- [ ] Histórico de nomes: Netão e GP Pneus aparecem "Sem LUC"; nome antigo do GP Pneus igual ao atual — verificar se deveria aparecer
-- [ ] Urgente: corrigir data de emissão (deve ser a data de hoje) no relatório
-- [ ] Urgente: fotos sumiram do relatório
-- [ ] Relatório de pendências: retomar após os urgentes (checkbox AcroForm corrigido, falta testar)
+- [x] Site Survey — Cadastro em PDF/Excel do cliente: nova última coluna com checkbox OK/Duplicado para conferência do cliente (coluna Confirmação no relatório de pendências, nomes repetidos).
+- [x] Site Survey — relatório de pendências do cliente: checkbox OK/Duplicado desmarcado por padrão; ao marcar, fundo verde com ✓ no padrão do app (aparências On/Off personalizadas).
+- [x] Site Survey — responder: por que Beach Tennis saiu como Sem LUC nas pendências do cliente (leitura corrigida para incluir o LUC dos ambientes).
+- [x] Relatório de pendências do cliente: corrigir falha na geração (new pdf.AcroForm.CheckBox() + timeout nas fotos).
+- [x] Relatório de pendências: Emissão = data de hoje; manter data da visita (02/09/26).
+- [x] Responder: por que aparecem 3 fotos do Subway no relatório (duas intervenções compartilham a mesma foto vinculada).
+- [x] Relatório de pendências do cliente: remover chamados/intervenções (existe o relatório específico de intervenções); manter LUCs não identificados e nomes repetidos; perguntas pendentes do cliente continuam na lista por ponto.
+- [ ] Pop-up de vincular foto: exibir a foto atualmente vinculada marcada, mantendo todas as disponíveis (aguardando conferência do usuário).
+- [ ] Histórico de nomes: Netão e GP Pneus aparecem "Sem LUC" — verificar se deveria aparecer (GP Pneus com nome antigo igual ao atual já foi filtrado).
+- [x] Botão + de "Adicionar pergunta para o cliente" voltou a aparecer no Histórico do ponto (Cadastro completo), mesmo sem pendências.
+
+- [ ] Site Survey — Cadastro: filtro geral multiseleção ao lado de Ações (pop-up com todas as opções de todas as seções do checklist, aplicado a todos os pontos; PDF/Excel exportam só o que foi selecionado). Ex.: lojas com hidrômetro vazão até 10 m³/h ou bitola de cabo até 16 mm, ou combinações.
