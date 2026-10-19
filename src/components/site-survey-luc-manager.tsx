@@ -386,7 +386,9 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, canA
       const rows = await registrationRows();
       if (!rows.length) return toast.error("Não há lojas ou ambientes para exportar.");
       const { buildRegistrationExcel } = await import("@/lib/site-survey-registration-excel");
-      const bytes = await buildRegistrationExcel(rows);
+      const { data: visitRow } = await supabase.from("site_survey_visits").select("projects(name), clients(name)").eq("id", visitId).single();
+      const names = visitRow as { projects?: { name?: string } | null; clients?: { name?: string } | null } | null;
+      const bytes = await buildRegistrationExcel(rows, (names?.projects?.name?.split("|").pop()?.trim()) || names?.clients?.name || "");
       const url = URL.createObjectURL(new Blob([new Uint8Array(bytes)], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }));
       const a = document.createElement("a"); a.href = url; a.download = `lojas-ambientes-os-${visitId}.xlsx`;
       document.body.appendChild(a); a.click(); a.remove();
