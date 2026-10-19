@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { proposalGroupQuantities, proposalScopeSchema, validateProposalPdf } from "./site-survey-proposal";
+import { proposalGroupQuantities, proposalScopeSchema, proposalShopKioskComparison, validateProposalPdf } from "./site-survey-proposal";
 test("proposta exige PDF real não vazio", async () => {
   await assert.rejects(validateProposalPdf(new Blob([])), /não vazio/);
   await assert.rejects(validateProposalPdf(new Blob(["not a PDF"])), /PDF válido/);
@@ -25,4 +25,12 @@ test("quantidades da proposta não identificadas continuam nulas, valores negati
   assert.equal(proposalScopeSchema.parse({ hydraulic_shops: null, hydraulic_general: null, electrical: null, evidence: "Não identificado" }).electrical, null);
   assert.equal(proposalScopeSchema.safeParse({ hydraulic_shops: -1, hydraulic_general: 0, electrical: 185, evidence: "" }).success, false);
   assert.equal(proposalScopeSchema.safeParse({ hydraulic_shops: 1.5, hydraulic_general: 0, electrical: 185, evidence: "" }).success, false);
+});
+test("compara lojas/quiosques da proposta com aprovados no cadastro", () => {
+  const scope = { hydraulic_shops: 50, hydraulic_general: 7, electrical: 227, scope_breakdown: { hydraulic_entry: 1, electrical_shops: 185, electrical_entry: 0 } };
+  const ok = proposalShopKioskComparison(scope, 50, 185);
+  assert.deepEqual(ok.map((c) => c.matches), [true, true]);
+  const divergent = proposalShopKioskComparison(scope, 49, 190);
+  assert.deepEqual(divergent.map((c) => ({ p: c.proposal, a: c.approved, m: c.matches })), [{ p: 50, a: 49, m: false }, { p: 185, a: 190, m: false }]);
+  assert.deepEqual(proposalShopKioskComparison({ hydraulic_shops: null, hydraulic_general: null, electrical: null }, 0, 0), []);
 });
