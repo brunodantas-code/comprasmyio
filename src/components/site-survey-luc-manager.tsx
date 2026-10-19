@@ -45,7 +45,7 @@ const shrinkPhoto = (dataUrl: string) => new Promise<string>((resolve) => {
 });
 
 type LucRow = { id: string; luc_number: string; shop_name: string; contract_name?: string | null; location: string | null; point_type: string; classification_type?: string | null; meter_number?: string | null };
-type EnvironmentRow = { id: string; name: string; location?: string | null; template_id: string | null; point_type: string; meter_number?: string | null; environment_type_id?: string | null };
+type EnvironmentRow = { id: string; name: string; location?: string | null; template_id: string | null; point_type: string; meter_number?: string | null; environment_type_id?: string | null; luc_number?: string | null };
 type EnvironmentTypeOption = { id: string; name: string; discipline: string };
 type DisplayRow = { environment_type_id?: string | null; id: string; source: "luc" | "environment"; luc_number: string; shop_name: string; contract_name?: string | null; location: string | null; point_type: string; classification_type?: string | null; meter_number?: string | null; template_id: string | null };
 type LucHistoryRow = { id: string; visit_luc_id: string; luc_number: string; shop_name: string; valid_from: string; valid_until: string | null };
@@ -146,7 +146,7 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, canA
   const load = async () => {
     const [{ data, error }, { data: environmentsData, error: environmentsError }, { data: historyRows, error: historyError }, { data: environmentTypesData, error: environmentTypesError }] = await Promise.all([
       supabase.from("site_survey_visit_lucs").select("id,luc_number,shop_name,contract_name,location,point_type,classification_type,meter_number").eq("visit_id", visitId).eq("active", true).order("luc_number"),
-      supabase.from("site_survey_visit_environments").select("id,name,location,template_id,point_type,meter_number,environment_type_id").eq("visit_id", visitId).eq("active", true).order("name"),
+      supabase.from("site_survey_visit_environments").select("id,name,location,template_id,point_type,meter_number,environment_type_id,luc_number").eq("visit_id", visitId).eq("active", true).order("name"),
       supabase.from("site_survey_visit_luc_history").select("id,visit_luc_id,luc_number,shop_name,valid_from,valid_until").eq("visit_id", visitId).order("valid_from", { ascending: false }),
       supabase.from("site_survey_environment_types").select("id,name,discipline").eq("active", true).order("name"),
     ]);
