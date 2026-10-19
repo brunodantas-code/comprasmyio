@@ -1043,3 +1043,5 @@
 - [x] Site Survey — relatórios do cliente: coluna Tipo sem quebrar "Quiosque"/"Loja vaga" (largura calculada pelo texto) e checkbox de confirmação na tabela "Lojas vagas cadastradas".
 - [x] Site Survey — relatórios do cliente: ocultar a coluna "Nº do medidor" quando nenhum ponto da tabela tiver número (mesma regra do Cadastro em PDF/Excel).
 - [x] Histórico de nomes: linha "Alpha Express → Netão" aparece "Sem LUC"; o LUC (STB1082A) é mantido na troca de nome e deve constar na linha.
+
+- [ ] Relatório de pendências do cliente: continuar seções na mesma página, reduzir espaços em branco e eliminar quebras desnecessárias.

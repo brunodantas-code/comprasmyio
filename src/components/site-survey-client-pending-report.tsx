@@ -163,7 +163,7 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
       pdf.setFontSize(15); pdf.setTextColor(...ink); pdf.text("Pendências para o cliente", 14, 32);
       pdf.setDrawColor(...green); pdf.line(14, 37, 196, 37);
       const table = (startY: number, head: string[], body: string[][], padding = 3) => {
-        autoTable(pdf, { startY, theme: "plain", pageBreak: "avoid", margin: { top: 20, bottom: 20, left: 14, right: 14 }, styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: padding, overflow: "linebreak" }, headStyles: { fontStyle: "bold", textColor: accent, lineWidth: { bottom: 0.3 }, lineColor: green }, head: [head], body, rowPageBreak: "avoid" });
+        autoTable(pdf, { startY, theme: "plain", pageBreak: "auto", margin: { top: 20, bottom: 20, left: 14, right: 14 }, styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: padding, overflow: "linebreak" }, headStyles: { fontStyle: "bold", textColor: accent, lineWidth: { bottom: 0.3 }, lineColor: green }, head: [head], body, rowPageBreak: "avoid" });
         return (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 5;
       };
       let y = table(42, ["Visita", "Cliente / unidade", "Projeto"], [[`SS-${number}\nData da visita: ${date(visit.completed_at ?? visit.scheduled_start)}\nEmissão: ${date(new Date().toISOString())}`, [client, unit].filter(Boolean).join("\n") || "—", project || "—"]]);
@@ -177,6 +177,19 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
           ...group.questions.map((text, index) => [`${index + 1}. ${text}`]),
         ], 1.5);
       }
+      const sectionHeading = (title: string, description: string, minimumBody = 24) => {
+        pdf.setFont("Nunito", "normal"); pdf.setFontSize(10);
+        const lines = pdf.splitTextToSize(description, 182) as string[];
+        const height = 13 + lines.length * 4.5;
+        if (y + height + minimumBody > 274) { pdf.addPage(); y = 23; }
+        y += 3;
+        pdf.setFont("Nunito", "bold"); pdf.setFontSize(14); pdf.setTextColor(...accent);
+        pdf.text(title, 14, y); y += 7;
+        pdf.setFont("Nunito", "normal"); pdf.setFontSize(10); pdf.setTextColor(...ink);
+        pdf.text(lines, 14, y); y += lines.length * 4.5 + 3;
+        return y;
+      };
+      const advanceTable = () => { y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 6; };
       const missingLucs = unidentifiedLucPoints(freshPoints);
       if (missingLucs.length) {
         const thumbnails = new Map<string, string>();
@@ -208,10 +221,7 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
             } finally { URL.revokeObjectURL(url); }
           } catch { /* foto indisponível: segue sem thumbnail */ }
         }
-        pdf.addPage(); pdf.setFont("Nunito", "bold"); pdf.setFontSize(15); pdf.setTextColor(...accent);
-        pdf.text("Lojas e quiosques com LUC não identificado", 14, 25);
-        pdf.setFont("Nunito", "normal"); pdf.setFontSize(10); pdf.setTextColor(...ink);
-        pdf.text(`${missingLucs.length} ponto(s) para identificação do LUC`, 14, 33);
+        sectionHeading("Lojas e quiosques com LUC não identificado", `${missingLucs.length} ponto(s) para identificação do LUC`, 35);
         const lucType = (point: ClientPendingPoint) => point.pointType === "kiosk" ? "Quiosque" : "Loja";
         // O tipo nunca pode quebrar ao meio: a coluna recebe a largura do rótulo mais longo.
         const lucTypeWidth = textColumnWidth(pdf, missingLucs.map(lucType), 3, 20, 30);
@@ -220,8 +230,8 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
         const lucWidths = [24, 28, ...(lucMeter ? [28] : []), lucTypeWidth, 46];
         lucWidths.push(182 - lucWidths.reduce((total, width) => total + width, 0));
         autoTable(pdf, {
-          startY: 39, theme: "plain", margin: { top: 20, bottom: 20, left: 14, right: 14 },
-          styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: 3, overflow: "linebreak", valign: "middle" },
+          startY: y, theme: "plain", margin: { top: 20, bottom: 20, left: 14, right: 14 },
+          styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: 1.8, overflow: "linebreak", valign: "middle" },
           headStyles: { fontStyle: "bold", textColor: accent, lineWidth: { bottom: 0.3 }, lineColor: green },
           bodyStyles: { minCellHeight: 24 }, rowPageBreak: "avoid", showHead: "everyPage",
           columnStyles: Object.fromEntries(lucWidths.map((width, index) => [index, { cellWidth: width }])),
@@ -234,13 +244,11 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
             if (thumbnail) pdf.addImage(thumbnail, "PNG", cell.cell.x + 3, cell.cell.y + (cell.cell.height - 18) / 2, 18, 18);
           },
         });
+        advanceTable();
       }
       const duplicated = duplicateNamePoints(freshPoints.length ? freshPoints : points);
       if (duplicated.length) {
-        pdf.addPage(); pdf.setFont("Nunito", "bold"); pdf.setFontSize(15); pdf.setTextColor(...accent);
-        pdf.text("Lojas e quiosques com nomes repetidos", 14, 25);
-        pdf.setFont("Nunito", "normal"); pdf.setFontSize(10); pdf.setTextColor(...ink);
-        pdf.text("Confirme que os pontos abaixo, de mesmo nome e LUCs diferentes, existem de fato no shopping e não são erro de cadastro.", 14, 33, { maxWidth: 182 });
+        sectionHeading("Lojas e quiosques com nomes repetidos", "Confirme que os pontos abaixo, de mesmo nome e LUCs diferentes, existem de fato no shopping e não são erro de cadastro.");
         // Sem nenhum número de medidor na tabela, a coluna não aparece (padrão do Cadastro).
         const dupMeter = duplicated.some((group) => group.some((point) => Boolean(point.meterNumber?.trim())));
         const dupType = (point: ClientPendingPoint) => point.pointType === "kiosk" ? "Quiosque" : point.pointType === "vacant" ? "Loja vaga" : "Loja";
@@ -250,8 +258,8 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
         const dupWidths = [40, 25, ...(dupMeter ? [25] : []), dupTypeWidth];
         dupWidths.push(182 - 40 - 25 - (dupMeter ? 25 : 0) - dupTypeWidth - 30, 30);
         autoTable(pdf, {
-          startY: 41, theme: "plain", margin: { top: 20, bottom: 20, left: 14, right: 14 },
-          styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: 3, overflow: "linebreak", valign: "middle" },
+          startY: y, theme: "plain", margin: { top: 20, bottom: 20, left: 14, right: 14 },
+          styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: 1.8, overflow: "linebreak", valign: "middle" },
           headStyles: { fontStyle: "bold", textColor: accent, lineWidth: { bottom: 0.3 }, lineColor: green },
           rowPageBreak: "avoid", showHead: "everyPage",
           columnStyles: Object.fromEntries(dupWidths.map((width, index) => [index, { cellWidth: width }])),
@@ -270,19 +278,17 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
             }
           },
         });
+        advanceTable();
       }
       const vacant = vacantShopPoints(freshPoints.length ? freshPoints : points);
       if (vacant.length) {
-        pdf.addPage(); pdf.setFont("Nunito", "bold"); pdf.setFontSize(15); pdf.setTextColor(...accent);
-        pdf.text("Lojas vagas cadastradas", 14, 25);
-        pdf.setFont("Nunito", "normal"); pdf.setFontSize(10); pdf.setTextColor(...ink);
-        pdf.text(`Confirme as ${vacant.length} loja(s) vaga(s) abaixo, cadastradas para futura implantação.`, 14, 33, { maxWidth: 182 });
+        sectionHeading("Lojas vagas cadastradas", `Confirme as ${vacant.length} loja(s) vaga(s) abaixo, cadastradas para futura implantação.`);
         // Sem nenhum número de medidor na tabela, a coluna não aparece (padrão do Cadastro).
         const vacantMeter = vacant.some((point) => Boolean(point.meterNumber?.trim()));
         const vacantWidths = [28, ...(vacantMeter ? [28] : []), vacantMeter ? 46 : 66, vacantMeter ? 50 : 58, 30];
         autoTable(pdf, {
-          startY: 41, theme: "plain", margin: { top: 20, bottom: 20, left: 14, right: 14 },
-          styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: 3, overflow: "linebreak", valign: "middle" },
+          startY: y, theme: "plain", margin: { top: 20, bottom: 20, left: 14, right: 14 },
+          styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: 1.8, overflow: "linebreak", valign: "middle" },
           headStyles: { fontStyle: "bold", textColor: accent, lineWidth: { bottom: 0.3 }, lineColor: green },
           rowPageBreak: "avoid", showHead: "everyPage",
           columnStyles: Object.fromEntries(vacantWidths.map((width, index) => [index, { cellWidth: width }])),

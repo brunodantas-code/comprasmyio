@@ -32,6 +32,6 @@
 
 - Pending cards reuse the guarded editor by section; optional answer.observation stays separate from required details.
 - Completed surveys never reopen; History remediation preserves status/dates. Customer Q&A resolves stored, point then visit-template Section 7 independently of pending groups, supporting vacant shops and environments. Models copy independently.
-- Registration PDF/Excel share filtered rows and freshly authorized installation approvals; PDF uses pdf-lib AcroForm after jsPDF layout and Excel native OOXML cell controls so client file edits remain independent of ERP records.
+- Registration lists/PDF/Excel share a pure checklist matcher and filtered rows with fresh authorized approvals; PDF uses pdf-lib AcroForm and Excel OOXML controls, independent of ERP data.
 - Proposals use private visit-keyed files; authenticated extraction syncs totals by trigger and stores group breakdown in proposal metadata. Environment remainders preserve unknown quantities as null.
 
