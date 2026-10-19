@@ -14,7 +14,6 @@ type Props = {
   client: string; unit: string; project: string; points: ClientPendingPoint[];
   questions: { id: string; prompt: string; question_key?: string | null; conditioned_on_question_id?: string | null; conditioned_operator?: string | null; conditioned_value?: string | null }[];
 };
-const statusLabel = (status: string) => ({ aberto: "Em aberto", em_andamento: "Em andamento", atendido: "Atendido", concluido: "Concluído", cancelado: "Cancelado" } as Record<string, string>)[status] ?? status.replaceAll("_", " ");
 
 /* Checkbox verde do app dentro do PDF: desmarcado por padrão (borda verde) e, ao marcar, fundo verde com ✓. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
