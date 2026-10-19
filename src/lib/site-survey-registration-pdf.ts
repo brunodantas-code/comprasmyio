@@ -24,6 +24,10 @@ const token = (name: string): [number, number, number] => {
   return [c[0], c[1], c[2]];
 };
 
+// Light tint of a theme colour, used for the totals band so it reads as the same family as the on-screen chips.
+const tint = (color: [number, number, number], amount: number): [number, number, number] =>
+  [0, 1, 2].map((i) => Math.round(color[i] + (255 - color[i]) * amount)) as [number, number, number];
+
 async function thumbnail(attachment: FacadeThumbnailAttachment) {
   const { data: original, error } = await supabase.storage.from("site-survey-attachments").download(attachment.storage_path);
   if (error || !original) return undefined;
@@ -68,24 +72,42 @@ export async function buildRegistrationPdf(rows: RegistrationPdfRow[], clientNam
   pdf.setDrawColor(...green); pdf.line(14, ruleY, 196, ruleY);
   pdf.setFont("Nunito", "normal"); pdf.setFontSize(10);
   pdf.text(`${rows.length} ponto(s) · Emissão: ${new Date().toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" })}`, 14, infoY);
+
+  // Same layout as the approved workbook: totals above the header, meter column only when filled.
+  const withMeter = rows.some((row) => row.meter.trim());
+  const widths = withMeter
+    ? [16, 20, 22, 20, 38, 33, 16, 17]
+    : [16, 20, 22, 50, 40, 16, 18];
+  const headers = ["Foto", "LUC", ...(withMeter ? ["Nº do medidor"] : []), "Tipo", "Nome", "Localização", "Água", "Energia"];
+  const waterIndex = headers.length - 2, energyIndex = headers.length - 1;
+  const columnX: number[] = [];
+  for (const width of widths) { columnX.push(14 + widths.slice(0, columnX.length).reduce((a, b) => a + b, 0)); }
+
+  const bandY = infoY + 3, bandH = 7;
+  pdf.setFillColor(...tint(green, 0.9)); pdf.rect(14, bandY, 182, bandH, "F");
+  pdf.setFont("Nunito", "bold"); pdf.setFontSize(10); pdf.setTextColor(...ink);
+  pdf.text("Total selecionado", 17, bandY + 4.9);
+  pdf.text(String(rows.filter((row) => row.water).length), columnX[waterIndex] + widths[waterIndex] / 2, bandY + 4.9, { align: "center" });
+  pdf.text(String(rows.filter((row) => row.energy).length), columnX[energyIndex] + widths[energyIndex] / 2, bandY + 4.9, { align: "center" });
+
   autoTable(pdf, {
-    startY: infoY + 5, theme: "plain", margin: { top: 20, bottom: 20, left: 14, right: 14 },
-    styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: 3, overflow: "linebreak", valign: "middle" },
+    startY: bandY + bandH + 3, theme: "plain", margin: { top: 20, bottom: 20, left: 14, right: 14 },
+    styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: 1.5, overflow: "linebreak", valign: "middle" },
     headStyles: { fontStyle: "bold", textColor: accent, lineWidth: { bottom: 0.3 }, lineColor: green },
-    bodyStyles: { minCellHeight: 24 }, rowPageBreak: "avoid", showHead: "everyPage",
-    columnStyles: { 0: { cellWidth: 22 }, 1: { cellWidth: 19 }, 2: { cellWidth: 25 }, 3: { cellWidth: 21 }, 4: { cellWidth: 30 }, 5: { cellWidth: 32 }, 6: { cellWidth: 14, halign: "center" }, 7: { cellWidth: 19, halign: "center" } },
-    head: [["Foto", "LUC", "Nº do medidor", "Tipo", "Nome", "Localização", "Água", "Energia"]],
-    body: rows.map((row, i) => [thumbs[i] ? "" : "Sem foto", row.luc, row.meter, row.type, row.name, row.location, "", ""]),
+    bodyStyles: { minCellHeight: 14 }, rowPageBreak: "avoid", showHead: "everyPage",
+    columnStyles: Object.fromEntries(widths.map((width, index) => [index, { cellWidth: width, ...(index >= waterIndex ? { halign: "center" as const } : {}) }])),
+    head: [headers],
+    body: rows.map((row) => [thumbs[rows.indexOf(row)] ? "" : "Sem foto", row.luc, ...(withMeter ? [row.meter] : []), row.type, row.name, row.location, "", ""]),
     didDrawCell: (cell) => {
       if (cell.section !== "body") return;
       if (cell.column.index === 0) {
         const t = thumbs[cell.row.index];
-        if (t) pdf.addImage(t, "PNG", cell.cell.x + 2, cell.cell.y + (cell.cell.height - 18) / 2, 18, 18);
+        if (t) pdf.addImage(t, "PNG", cell.cell.x + 1.5, cell.cell.y + (cell.cell.height - 11) / 2, 11, 11);
       }
-      if (cell.column.index === 6 || cell.column.index === 7) {
+      if (cell.column.index === waterIndex || cell.column.index === energyIndex) {
         const row = rows[cell.row.index];
         if (!row) return;
-        const service = cell.column.index === 6 ? "water" : "energy";
+        const service = cell.column.index === waterIndex ? "water" : "energy";
         fields.push({ page: pdf.getCurrentPageInfo().pageNumber, x: cell.cell.x + (cell.cell.width - 5) / 2, y: cell.cell.y + (cell.cell.height - 5) / 2, checked: row[service], name: `${service}_${cell.row.index + 1}` });
       }
     },
