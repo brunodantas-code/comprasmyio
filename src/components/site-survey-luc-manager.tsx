@@ -96,7 +96,7 @@ function PointTypeTotals({ totals, groupTotals, environmentTotals }: { totals: R
       <div className="min-w-0"><h3 className="font-bold">Cadastro completo de lojas, quiosques e ambientes</h3><p className="text-sm text-muted-foreground">Expanda uma linha para consultar ou completar suas pendências.</p></div>
       <div className="grid min-w-0 grid-cols-2 gap-2 sm:grid-cols-5">
       <TotalChip compact label="Total geral" count={grandTotal} />
-      {POINT_TOTALS.filter((item) => item.key !== "vacant" || totals.vacant > 0).map((item) => <TotalChip compact key={item.key} label={item.label} count={totals[item.key]} />)}
+      {POINT_TOTALS.filter((item) => (item.key !== "vacant" && item.key !== "vacant_kiosk") || totals[item.key] > 0).map((item) => <TotalChip compact key={item.key} label={item.label} count={totals[item.key]} />)}
       </div>
     </div>
     <div className="pt-4 space-y-1">
