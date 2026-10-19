@@ -30,14 +30,14 @@ type Named = { id: string; name: string };
 type Question = { id: string; section_id: string; prompt: string; position?: number };
 type Section = { id: string; template_id: string; title: string; position: number };
 type Profile = { id: string; full_name: string };
-type Point = { id: string; label: string; templateId: string | null; created_at: string; started_at: string | null; completed_at: string | null; completion_status: string; cancellationReason: string | null; kind: "luc" | "environment"; pointType: "shop" | "kiosk" | "environment" | "vacant"; skippedSectionIds: string[] };
+type Point = { id: string; label: string; templateId: string | null; created_at: string; started_at: string | null; completed_at: string | null; completion_status: string; cancellationReason: string | null; kind: "luc" | "environment"; pointType: "shop" | "kiosk" | "environment" | "vacant" | "vacant_kiosk"; skippedSectionIds: string[] };
 type PointPause = { id: string; visit_luc_id: string | null; visit_environment_id: string | null; reason_id: string; started_at: string; ended_at: string | null; site_survey_pause_reasons: { name: string } | null };
 type ReportResponse = { id: string; question_id: string; visit_luc_id?: string | null; visit_environment_id?: string | null; answer: unknown };
 type RichPart = { text: string; bold?: boolean };
 type PointSummary = { title: string; parts: RichPart[]; questionIds: Set<string> };
 type VisitMaterial = { id: string; visit_luc_id: string | null; visit_environment_id: string | null; quantity: number; notes: string | null; site_survey_material_catalog: { name?: string; category?: string } | null; site_survey_screwdriver_types: { name?: string } | null; site_survey_wrench_sizes: { name?: string } | null; site_survey_custom_catalog_items: { name?: string } | null };
 type SortKey = "type" | "created" | "technician";
-type PointFilter = "all" | "shop" | "kiosk" | "environment" | "vacant" | "selected";
+type PointFilter = "all" | "shop" | "kiosk" | "environment" | "vacant" | "vacant_kiosk" | "selected";
 type ReportType = "complete" | "purchases" | "interventions" | "equipment";
 type MeterMapping = { name: string; position: number };
 type Intervention = { id: string; questionId: string; question: string; action: string; answer: string; pointKey: string | null; pointLabel: string; callNumber: string | null };
@@ -457,7 +457,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     return [...new Set(ids.map((id) => technicians.find((person) => person.id === id)?.full_name).filter((name): name is string => Boolean(name)))].sort((a, b) => a.localeCompare(b, "pt-BR")).join(", ") || "—";
   };
   const sortedPoints = useMemo(() => {
-    const typeOrder = { shop: 0, kiosk: 1, environment: 2, vacant: 1 };
+    const typeOrder = { shop: 0, kiosk: 1, environment: 2, vacant: 1, vacant_kiosk: 1 };
     const compare = (a: Point, b: Point, key: SortKey) => key === "type" ? typeOrder[a.pointType] - typeOrder[b.pointType] : key === "created" ? a.created_at.localeCompare(b.created_at) : technicianForPoint(a).localeCompare(technicianForPoint(b), "pt-BR");
     return [...filteredPoints].sort((a, b) => compare(a, b, primarySort) || (secondarySort !== "none" ? compare(a, b, secondarySort) : 0) || a.created_at.localeCompare(b.created_at) || a.label.localeCompare(b.label, "pt-BR"));
   }, [filteredPoints, data?.visitTechs, technicians, visit.technician_id, primarySort, secondarySort]);
@@ -475,7 +475,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     for (const key of keys) { if (shouldSelect) next.add(key); else next.delete(key); }
     return next;
   });
-  const pointTypeLabel = (point: Point) => point.pointType === "shop" ? "Loja" : point.pointType === "kiosk" ? "Quiosque" : point.pointType === "vacant" ? "Loja vaga" : "Ambiente";
+  const pointTypeLabel = (point: Point) => point.pointType === "shop" ? "Loja" : point.pointType === "kiosk" ? "Quiosque" : point.pointType === "vacant" ? "Loja vaga" : point.pointType === "vacant_kiosk" ? "Quiosque vago" : "Ambiente";
   const reportPointsTitle = pointFilter === "shop" ? "Lojas" : pointFilter === "kiosk" ? "Quiosques" : pointFilter === "environment" ? "Ambientes" : "Lojas, quiosques e ambientes";
   const interventions = useMemo<Intervention[]>(() => (data?.calls ?? []).filter(callIsIncluded).flatMap((call) => {
     const actionRule = call.site_survey_question_actions as unknown as { site_survey_action_catalog: { name: string } | null } | null;
