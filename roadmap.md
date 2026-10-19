@@ -1030,3 +1030,7 @@
 - [ ] Site Survey — Cadastro em PDF/Excel do cliente: nova última coluna com checkbox OK/Duplicado para conferência do cliente.
 - [ ] Site Survey — relatório de pendências do cliente: incluir a quantidade de intervenções no cabeçalho da seção de nomes repetidos (onde consta o número 1).
 - [ ] Site Survey — responder: por que Beach Tennis saiu como Sem LUC nas pendências do cliente.
+- [ ] Relatório de pendências do cliente: corrigir falha na geração (não baixa o PDF)
+- [ ] Relatório de pendências: Emissão = data de hoje; manter data da visita (02/09/26)
+- [ ] Responder: por que aparecem 3 fotos do Subway no relatório
+- [ ] Pop-up de vincular foto: exibir a foto atualmente vinculada marcada, mantendo todas as disponíveis
