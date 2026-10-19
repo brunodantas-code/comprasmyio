@@ -241,7 +241,9 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
               const CheckBoxClass = (pdf.AcroForm as unknown as { CheckBox: new () => Record<string, unknown> }).CheckBox;
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const box = new CheckBoxClass() as any;
-              box.fieldName = fieldName; box.value = "Off"; box.readOnly = false;
+              box.fieldName = fieldName; box.readOnly = false;
+              box.fontName = "zapfdingbats"; box.fontStyle = "normal";
+              styleGreenCheckbox(pdf, box);
               box.x = x; box.y = midY - 1.75; box.width = 3.5; box.height = 3.5;
               pdf.addField(box);
               pdf.text(label, x + 4.5, midY + 1.2);
