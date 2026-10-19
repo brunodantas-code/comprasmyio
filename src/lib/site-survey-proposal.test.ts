@@ -34,3 +34,12 @@ test("compara lojas/quiosques da proposta com aprovados no cadastro", () => {
   assert.deepEqual(divergent.map((c) => ({ p: c.proposal, a: c.approved, m: c.matches })), [{ p: 50, a: 49, m: false }, { p: 185, a: 190, m: false }]);
   assert.deepEqual(proposalShopKioskComparison({ hydraulic_shops: null, hydraulic_general: null, electrical: null }, 0, 0), []);
 });
+test("detalhamento elétrico dos demais ambientes da proposta do Taboão", () => {
+  const scope = proposalScopeSchema.parse({ hydraulic_shops: 50, hydraulic_general: 7, electrical: 227, evidence: "Proposta", scope_breakdown: { hydraulic_entry: 1, electrical_shops: 185, electrical_entry: 0, electrical_others: { transformadores: 7, casas_de_maquinas: 15, geradores: 3, bombas_hidraulicas: 7, bombas_de_incendio: 6, elevadores: 4 } } });
+  const breakdown = proposalOtherEnergyBreakdown(scope);
+  assert.deepEqual(breakdown.map((item) => item.label), ["Transformadores", "Casas de Máquinas", "Geradores", "Bombas Hidráulicas", "Bombas de Incêndio", "Elevadores"]);
+  assert.equal(breakdown.reduce((sum, item) => sum + item.count, 0), 42);
+  assert.equal(proposalOtherEnergyText(scope), "7 Transformadores · 15 Casas de Máquinas · 3 Geradores · 7 Bombas Hidráulicas · 6 Bombas de Incêndio · 4 Elevadores");
+  assert.deepEqual(proposalOtherEnergyBreakdown({ scope_breakdown: { hydraulic_entry: 1, electrical_shops: 185, electrical_entry: 0 } }), []);
+  assert.equal(proposalOtherEnergyText({ scope_breakdown: { hydraulic_entry: 1, electrical_shops: 185, electrical_entry: 0, electrical_others: { transformadores: null, casas_de_maquinas: 2, geradores: null, bombas_hidraulicas: null, bombas_de_incendio: null, elevadores: null } } }), "2 Casas de Máquinas");
+});
