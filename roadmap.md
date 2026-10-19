@@ -1035,3 +1035,6 @@
 - [ ] Responder: por que aparecem 3 fotos do Subway no relatório
 - [ ] Pop-up de vincular foto: exibir a foto atualmente vinculada marcada, mantendo todas as disponíveis
 - [ ] Histórico de nomes: Netão e GP Pneus aparecem "Sem LUC"; nome antigo do GP Pneus igual ao atual — verificar se deveria aparecer
+- [ ] Urgente: corrigir data de emissão (deve ser a data de hoje) no relatório
+- [ ] Urgente: fotos sumiram do relatório
+- [ ] Relatório de pendências: retomar após os urgentes (checkbox AcroForm corrigido, falta testar)
