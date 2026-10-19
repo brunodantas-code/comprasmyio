@@ -1036,6 +1036,6 @@
 - [x] Relatório de pendências do cliente: remover chamados/intervenções (existe o relatório específico de intervenções); manter LUCs não identificados e nomes repetidos; perguntas pendentes do cliente continuam na lista por ponto.
 - [ ] Pop-up de vincular foto: exibir a foto atualmente vinculada marcada, mantendo todas as disponíveis (aguardando conferência do usuário).
 - [ ] Histórico de nomes: Netão e GP Pneus aparecem "Sem LUC" — verificar se deveria aparecer (GP Pneus com nome antigo igual ao atual já foi filtrado).
-- [x] Botão + de "Adicionar pergunta para o cliente" voltou a aparecer no Histórico do ponto (Cadastro completo), mesmo sem pendências.
+- [ ] Botão + de "Adicionar pergunta para o cliente": corrigir também lojas vagas, ambientes e pontos sem pendências; verificar abertura e salvamento.
 
 - [ ] Site Survey — Cadastro: filtro geral multiseleção ao lado de Ações (pop-up com todas as opções de todas as seções do checklist, aplicado a todos os pontos; PDF/Excel exportam só o que foi selecionado). Ex.: lojas com hidrômetro vazão até 10 m³/h ou bitola de cabo até 16 mm, ou combinações.
