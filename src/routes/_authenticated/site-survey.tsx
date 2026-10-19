@@ -1325,15 +1325,22 @@ function VisitDetails({ pointSearch = "", visit, data, onClose, onChanged, close
       } else if (actionPhotoChoice && questionId) {
         const chosen = pendingActionPhotoCandidates.find((item) => item.id === actionPhotoChoice);
         // Foto já vinculada a outra seção: duplica o vínculo para não remover a foto da seção original.
-        const { error } = chosen?.question_id
-          ? await supabase.from("site_survey_attachments").insert({ visit_id: visit.id, ...scope, question_id: questionId, attachment_kind: "question", uploaded_by: data.userId, file_name: chosen.file_name, storage_path: chosen.storage_path, content_type: chosen.content_type })
+        // Cada vínculo exige arquivo próprio (caminho único); copia a foto original sem alterá-la.
+        let copiedPath: string | null = null;
+        if (chosen?.question_id) {
+          copiedPath = `${visit.id}/${action.phase === "pre_visit" ? "geral" : pointId}/${crypto.randomUUID()}-${chosen.file_name.replace(/[^a-zA-Z0-9._-]/g, "-")}`;
+          const { error: copyError } = await supabase.storage.from("site-survey-attachments").copy(chosen.storage_path, copiedPath);
+          if (copyError) throw copyError;
+        }
+        const { error } = chosen?.question_id && copiedPath
+          ? await supabase.from("site_survey_attachments").insert({ visit_id: visit.id, ...scope, question_id: questionId, attachment_kind: "question", uploaded_by: data.userId, file_name: chosen.file_name, storage_path: copiedPath, content_type: chosen.content_type })
           : await supabase.from("site_survey_attachments").update({ question_id: questionId, attachment_kind: "question" }).eq("id", actionPhotoChoice);
         if (error) throw error;
         toast.success("Foto vinculada à intervenção");
         void refetchDetail();
       }
     } catch (error) {
-      toast.error(error instanceof Error ? `Não foi possível vincular a foto: ${error.message}` : "Não foi possível vincular a foto.");
+      const message = error && typeof error === "object" && "message" in error ? String(error.message) : ""; toast.error(message ? `Não foi possível vincular a foto: ${message}` : "Não foi possível vincular a foto.");
     }
     setActionPhotoChoice(""); setActionPhotoFile(null);
     setPendingAction(null);
