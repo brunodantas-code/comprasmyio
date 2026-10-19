@@ -45,7 +45,7 @@ const shrinkPhoto = (dataUrl: string) => new Promise<string>((resolve) => {
 });
 
 type LucRow = { id: string; luc_number: string; shop_name: string; contract_name?: string | null; location: string | null; point_type: string; classification_type?: string | null; meter_number?: string | null };
-type EnvironmentRow = { id: string; name: string; location?: string | null; template_id: string | null; point_type: string; meter_number?: string | null; environment_type_id?: string | null };
+type EnvironmentRow = { id: string; name: string; location?: string | null; template_id: string | null; point_type: string; meter_number?: string | null; environment_type_id?: string | null; luc_number?: string | null };
 type EnvironmentTypeOption = { id: string; name: string; discipline: string };
 type DisplayRow = { environment_type_id?: string | null; id: string; source: "luc" | "environment"; luc_number: string; shop_name: string; contract_name?: string | null; location: string | null; point_type: string; classification_type?: string | null; meter_number?: string | null; template_id: string | null };
 type LucHistoryRow = { id: string; visit_luc_id: string; luc_number: string; shop_name: string; valid_from: string; valid_until: string | null };
@@ -146,7 +146,7 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, canA
   const load = async () => {
     const [{ data, error }, { data: environmentsData, error: environmentsError }, { data: historyRows, error: historyError }, { data: environmentTypesData, error: environmentTypesError }] = await Promise.all([
       supabase.from("site_survey_visit_lucs").select("id,luc_number,shop_name,contract_name,location,point_type,classification_type,meter_number").eq("visit_id", visitId).eq("active", true).order("luc_number"),
-      supabase.from("site_survey_visit_environments").select("id,name,location,template_id,point_type,meter_number,environment_type_id").eq("visit_id", visitId).eq("active", true).order("name"),
+      supabase.from("site_survey_visit_environments").select("id,name,location,template_id,point_type,meter_number,environment_type_id,luc_number").eq("visit_id", visitId).eq("active", true).order("name"),
       supabase.from("site_survey_visit_luc_history").select("id,visit_luc_id,luc_number,shop_name,valid_from,valid_until").eq("visit_id", visitId).order("valid_from", { ascending: false }),
       supabase.from("site_survey_environment_types").select("id,name,discipline").eq("active", true).order("name"),
     ]);
@@ -235,7 +235,7 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, canA
   const closeEdit = () => { facadeRequest.current += 1; setAnalyzing(false); setEditing(null); setEditingEnvironmentId(null); };
   useEffect(() => () => { facadeRequest.current += 1; }, []);
   const startEdit = (row?: LucRow) => { facadeRequest.current += 1; setAnalyzing(false); setEditingEnvironmentId(null); setEditing(row ?? { id: "", luc_number: "", shop_name: "", location: null, point_type: "shop" }); setEditMode("correction"); setPointType(row ? surveyPointType(row) : null); setDraftLuc(row?.luc_number ?? ""); changeShopName(row?.shop_name ?? ""); setDraftContractName(row?.contract_name ?? row?.shop_name ?? ""); setDraftLocation(row?.location ?? ""); setDraftMeter(row?.meter_number ?? ""); setEnvironmentName(""); setEnvironmentTemplateId(""); setEnvironmentTypeId(""); setNamePickerOpen(false); };
-  const startEnvironmentEdit = (row: EnvironmentRow) => { facadeRequest.current += 1; setAnalyzing(false); setEditingEnvironmentId(row.id); setEditing({ id: row.id, luc_number: "", shop_name: row.name, location: environmentLocation(row.location), point_type: "environment", classification_type: "environment", meter_number: row.meter_number }); setPointType("environment"); setDraftLuc(""); changeShopName(row.name); setDraftContractName(""); setDraftLocation(row.location ?? ""); setDraftMeter(row.meter_number ?? ""); setEnvironmentName(row.name); setEnvironmentTemplateId(row.template_id ?? ""); setEnvironmentTypeId(row.environment_type_id ?? ""); setNamePickerOpen(false); };
+  const startEnvironmentEdit = (row: EnvironmentRow) => { facadeRequest.current += 1; setAnalyzing(false); setEditingEnvironmentId(row.id); setEditing({ id: row.id, luc_number: "", shop_name: row.name, location: environmentLocation(row.location), point_type: "environment", classification_type: "environment", meter_number: row.meter_number }); setPointType("environment"); setDraftLuc(row.luc_number ?? ""); changeShopName(row.name); setDraftContractName(""); setDraftLocation(row.location ?? ""); setDraftMeter(row.meter_number ?? ""); setEnvironmentName(row.name); setEnvironmentTemplateId(row.template_id ?? ""); setEnvironmentTypeId(row.environment_type_id ?? ""); setNamePickerOpen(false); };
   const saveEdit = async (confirmed = false) => {
     if (!canEdit || (addOnly && editing?.id)) return;
     if (saving) return;
@@ -244,11 +244,14 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, canA
   };
   const saveEditInner = async (confirmed = false) => {
     if (!pointType) return toast.error("Selecione Loja, Quiosque, Ambiente ou Loja vaga.");
-    if (pointType === "environment" && editingEnvironmentId) {
-      const name = environmentName.trim();
-      if (!name) return toast.error("Informe o nome do ambiente.");
-      if (!environmentTemplateId) return toast.error("Selecione o checklist do ambiente.");
-      const { error } = await supabase.from("site_survey_visit_environments").update({ name, template_id: environmentTemplateId, location: environmentLocation(draftLocation), meter_number: draftMeter.trim() || null, environment_type_id: environmentTypeId || null, updated_by: userId }).eq("id", editingEnvironmentId);
+    if (editingEnvironmentId) {
+      const name = (pointType === "environment" ? environmentName : draftName).trim();
+      if (!name) return toast.error(pointType === "environment" ? "Informe o nome do ambiente." : "Informe o nome do ponto.");
+      if (pointType === "environment" && !environmentTemplateId) return toast.error("Selecione o checklist do ambiente.");
+      const lucNumber = pointType === "environment" ? "" : draftLuc.trim();
+      if (requiresSurveyLuc(pointType) && !lucNumber) return toast.error("Informe o LUC da loja vaga.");
+      if (lucNumber && duplicateNames.length && !confirmed) { setDuplicateConfirmation("edit"); return; }
+      const { error } = await supabase.from("site_survey_visit_environments").update({ name, point_type: pointType, luc_number: lucNumber || null, ...(pointType === "environment" ? { template_id: environmentTemplateId, environment_type_id: environmentTypeId || null } : { environment_type_id: null }), location: environmentLocation(draftLocation), meter_number: draftMeter.trim() || null, updated_by: userId }).eq("id", editingEnvironmentId);
       if (error) return toast.error(error.code === "23505" ? "Este ambiente já está cadastrado nesta OS." : error.message);
       toast.success("Ambiente atualizado."); closeEdit(); await load(); onChanged?.();
       return;
@@ -310,13 +313,13 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, canA
     finally { if (timeout) clearTimeout(timeout); if (request === facadeRequest.current) setAnalyzing(false); }
   };
   const currentByLuc = useMemo(() => new Set(rows.map((row) => normalizeHeader(row.luc_number)).filter(Boolean)), [rows]);
-  const duplicateNames = draftLuc.trim() ? rows.filter((row) => row.id !== editing?.id && normalizeHeader(row.luc_number) === normalizeHeader(draftLuc)).map((row) => row.shop_name) : [];
+  const duplicateNames = draftLuc.trim() ? [...rows.filter((row) => row.id !== editing?.id && normalizeHeader(row.luc_number) === normalizeHeader(draftLuc)).map((row) => row.shop_name), ...environmentRows.filter((row) => row.id !== editingEnvironmentId && row.luc_number && normalizeHeader(row.luc_number) === normalizeHeader(draftLuc)).map((row) => row.name)] : [];
   const matchingCatalog = useMemo(() => shopCatalog
     .filter((item) => item.active && item.point_type === pointType)
     .sort((left, right) => left.name.localeCompare(right.name, "pt-BR", { sensitivity: "base" })), [pointType, shopCatalog]);
   const displayRows = useMemo<DisplayRow[]>(() => [
     ...rows.map((row) => ({ ...row, source: "luc" as const, template_id: null })),
-    ...environmentRows.map((row) => ({ id: row.id, source: "environment" as const, luc_number: "", shop_name: row.name, location: environmentLocation(row.location), point_type: row.point_type, classification_type: "environment", meter_number: row.meter_number, environment_type_id: row.environment_type_id, template_id: row.template_id })),
+    ...environmentRows.map((row) => ({ id: row.id, source: "environment" as const, luc_number: row.luc_number ?? "", shop_name: row.name, location: environmentLocation(row.location), point_type: row.point_type, classification_type: "environment", meter_number: row.meter_number, environment_type_id: row.environment_type_id, template_id: row.template_id })),
   ], [rows, environmentRows]);
   const typeTotals = useMemo(() => surveyPointTotals(displayRows), [displayRows]);
   const environmentTotals = useMemo(() => environmentDisciplineTotals(environmentRows, environmentTypes), [environmentRows, environmentTypes]);
