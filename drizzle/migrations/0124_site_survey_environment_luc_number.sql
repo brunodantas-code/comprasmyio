@@ -1,0 +1,2 @@
+ALTER TABLE public.site_survey_visit_environments ADD COLUMN luc_number text;
+COMMENT ON COLUMN public.site_survey_visit_environments.luc_number IS 'LUC informado quando o ponto cadastrado como ambiente é reclassificado para loja ou quiosque; a linha e os vínculos são preservados.';
