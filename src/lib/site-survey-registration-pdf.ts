@@ -3,6 +3,7 @@ import nunitoRegularUrl from "@/assets/fonts/nunito-regular.ttf?url";
 import nunitoBoldUrl from "@/assets/fonts/nunito-bold.ttf?url";
 import type { FacadeThumbnailAttachment } from "@/components/site-survey-facade-thumbnail";
 import { clipRoundedPhoto } from "@/lib/site-survey-photo";
+import { textColumnWidth } from "@/lib/site-survey-pdf-measure";
 import type { RegistrationExportRow } from "./site-survey-registration-export";
 
 export type RegistrationPdfRow = RegistrationExportRow & { facade?: FacadeThumbnailAttachment };
@@ -77,9 +78,12 @@ export async function buildRegistrationPdf(rows: RegistrationPdfRow[], clientNam
 
   // Same layout as the approved workbook: totals above the header, meter column only when filled.
   const withMeter = rows.some((row) => row.meter.trim());
+  // A coluna de tipo nunca pode quebrar "Quiosque" ou "Loja vaga" ao meio.
+  const typeWidth = textColumnWidth(pdf, rows.map((row) => row.type), 1.5, 20, 28);
+  const nameWidth = Math.max(30, (withMeter ? 58 : 72) - typeWidth);
   const widths = withMeter
-    ? [16, 20, 22, 20, 38, 33, 16, 17]
-    : [16, 20, 22, 50, 40, 16, 18];
+    ? [16, 20, 22, typeWidth, nameWidth, 33, 16, 17]
+    : [16, 20, typeWidth, nameWidth, 40, 16, 18];
   const headers = ["Foto", "LUC", ...(withMeter ? ["Nº do medidor"] : []), "Tipo", "Nome", "Localização", "Água", "Energia"];
   const waterIndex = headers.length - 2, energyIndex = headers.length - 1;
   const columnX: number[] = [];

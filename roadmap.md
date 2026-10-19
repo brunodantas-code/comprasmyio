@@ -1035,8 +1035,11 @@
 - [x] Responder: por que aparecem 3 fotos do Subway no relatório (duas intervenções compartilham a mesma foto vinculada).
 - [x] Relatório de pendências do cliente: remover chamados/intervenções (existe o relatório específico de intervenções); manter LUCs não identificados e nomes repetidos; perguntas pendentes do cliente continuam na lista por ponto.
 - [ ] Pop-up de vincular foto: exibir a foto atualmente vinculada marcada, mantendo todas as disponíveis (aguardando conferência do usuário).
-- [ ] Histórico de nomes: Netão e GP Pneus aparecem "Sem LUC" — verificar se deveria aparecer (GP Pneus com nome antigo igual ao atual já foi filtrado).
+- [x] Histórico de nomes: Netão e GP Pneus aparecem "Sem LUC" — verificar se deveria aparecer (GP Pneus com nome antigo igual ao atual já foi filtrado).
 - [x] Botão + de "Adicionar pergunta para o cliente": lojas vagas, ambientes e pontos sem pendências; abertura conferida em quatro pontos e pergunta salva/relida/removida no Busway.
 - [x] Relatório de pendências: ocultar contagem zero e mensagem sem perguntas quando não houver perguntas pendentes.
 
 - [ ] Site Survey — Cadastro: filtro geral multiseleção ao lado de Ações (pop-up com todas as opções de todas as seções do checklist, aplicado a todos os pontos; PDF/Excel exportam só o que foi selecionado). Ex.: lojas com hidrômetro vazão até 10 m³/h ou bitola de cabo até 16 mm, ou combinações.
+- [x] Site Survey — relatórios do cliente: coluna Tipo sem quebrar "Quiosque"/"Loja vaga" (largura calculada pelo texto) e checkbox de confirmação na tabela "Lojas vagas cadastradas".
+- [x] Site Survey — relatórios do cliente: ocultar a coluna "Nº do medidor" quando nenhum ponto da tabela tiver número (mesma regra do Cadastro em PDF/Excel).
+- [x] Histórico de nomes: linha "Alpha Express → Netão" aparece "Sem LUC"; o LUC (STB1082A) é mantido na troca de nome e deve constar na linha.
