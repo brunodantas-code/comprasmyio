@@ -346,7 +346,7 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, canA
       hasConcessionaria: concessionariaKeys.size > 0,
       hasOthers: otherKeys.size > 0,
     };
-  }, [scope.approvals, rows, environmentRows, environmentTypes]);
+  }, [scope.approvals, displayRows, environmentTypes]);
   const sortedRows = useMemo(() => displayRows.filter((row) => {
     const matchesLuc = normalizeHeader(row.luc_number).includes(normalizeHeader(lucFilter));
     const matchesName = normalizeHeader(row.shop_name).includes(normalizeHeader(shopNameFilter));
