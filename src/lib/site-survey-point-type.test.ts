@@ -24,7 +24,7 @@ test("Totaliza lojas, quiosques e ambientes pela classificação efetiva", () =>
     { classification_type: null, point_type: "kiosk" },
     { classification_type: "environment", point_type: "shop" },
   ]);
-  assert.deepEqual(totals, { shop: 2, kiosk: 1, environment: 1, vacant: 0 });
+  assert.deepEqual(totals, { shop: 2, kiosk: 1, environment: 1, vacant: 0, vacant_kiosk: 0 });
 });
 
 test("Loja vaga é contada à parte e não aumenta a quantidade de lojas", () => {
