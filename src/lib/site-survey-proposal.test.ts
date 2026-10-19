@@ -39,7 +39,7 @@ test("detalhamento elétrico dos demais ambientes da proposta do Taboão", () =>
   const breakdown = proposalOtherEnergyBreakdown(scope);
   assert.deepEqual(breakdown.map((item) => item.label), ["Transformadores", "Casas de Máquinas", "Geradores", "Bombas Hidráulicas", "Bombas de Incêndio", "Elevadores"]);
   assert.equal(breakdown.reduce((sum, item) => sum + item.count, 0), 42);
-  assert.equal(proposalOtherEnergyText(scope), "7 Transformadores · 15 Casas de Máquinas · 3 Geradores · 7 Bombas Hidráulicas · 6 Bombas de Incêndio · 4 Elevadores");
+  assert.equal(proposalOtherEnergyText(scope), "7\u00A0Transformadores · 15\u00A0Casas\u00A0de\u00A0Máquinas · 3\u00A0Geradores · 7\u00A0Bombas\u00A0Hidráulicas · 6\u00A0Bombas\u00A0de\u00A0Incêndio · 4\u00A0Elevadores");
   assert.deepEqual(proposalOtherEnergyBreakdown({ scope_breakdown: { hydraulic_entry: 1, electrical_shops: 185, electrical_entry: 0 } }), []);
   assert.equal(proposalOtherEnergyText({ scope_breakdown: { hydraulic_entry: 1, electrical_shops: 185, electrical_entry: 0, electrical_others: { transformadores: null, casas_de_maquinas: 2, geradores: null, bombas_hidraulicas: null, bombas_de_incendio: null, elevadores: null } } }), "2 Casas de Máquinas");
 });

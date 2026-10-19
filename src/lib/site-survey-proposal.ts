@@ -48,7 +48,7 @@ export function proposalOtherEnergyBreakdown(scope: { scope_breakdown?: Proposal
   return otherEnergyLabels.filter(([key]) => others[key] !== null && others[key] !== undefined).map(([key, label]) => ({ key, label, count: others[key] as number }));
 }
 export function proposalOtherEnergyText(scope: { scope_breakdown?: ProposalScopeBreakdown | null }): string {
-  return proposalOtherEnergyBreakdown(scope).map((item) => `${item.count} ${item.label}`).join(" · ");
+  return proposalOtherEnergyBreakdown(scope).map((item) => `${item.count}\u00A0${item.label.replaceAll(" ", "\u00A0")}`).join(" · ");
 }
 export type ProposalComparison = { discipline: "water" | "energy"; label: string; proposal: number | null; approved: number; matches: boolean | null };
 export function proposalShopKioskComparison(scope: { hydraulic_shops: number | null; hydraulic_general: number | null; electrical: number | null; scope_breakdown?: ProposalScopeBreakdown | null }, approvedWater: number, approvedEnergy: number): ProposalComparison[] {
