@@ -1028,3 +1028,4 @@
 - [x] Site Survey — pop-up de vinculação de foto: reabrir quando a intervenção já existe sem foto; correção aplicada, falta conferir na tela.
 - [x] Site Survey — Cadastro em PDF: aplicar o mesmo layout do Excel (título com nome do cliente, totalizador no topo, filtros/linha congelada) e reduzir a distância entre linhas para diminuir as páginas.
 - [ ] Site Survey — Cadastro em PDF/Excel do cliente: nova última coluna com checkbox OK/Duplicado para conferência do cliente.
+- [ ] Site Survey — relatório de pendências do cliente: incluir a quantidade de intervenções no cabeçalho da seção de nomes repetidos (onde consta o número 1).
