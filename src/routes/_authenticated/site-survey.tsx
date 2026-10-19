@@ -27,7 +27,7 @@ import { surveyPointType, requiresSurveyFacade, requiresSurveyLuc, type SurveyPo
 import { energyWaterTotals as surveyEnergyWaterTotals } from "@/lib/site-survey-energy-water";
 import { visitSearchHaystack } from "@/lib/site-survey-visit-search";
 import { SiteSurveyCustomerQuestions } from "@/components/site-survey-customer-questions";
-import { answeredCustomerQuestions, customerQuestionResponses, customerQuestions, isCustomerQuestion, pendingCustomerQuestions, showsCustomerQuestions, simplifiedAnswerType, persistedAnswerType } from "@/lib/site-survey-questions";
+import { answeredCustomerQuestions, customerQuestionResponses, customerQuestions, isCustomerQuestion, pendingCustomerQuestions, showsCustomerQuestions, registrationCustomerQuestion, simplifiedAnswerType, persistedAnswerType } from "@/lib/site-survey-questions";
 import { prepareSurveyPhoto } from "@/lib/site-survey-photo";
 import { countPointInterventions } from "@/lib/site-survey-interventions";
 import { useSurveyPointEdit } from "@/hooks/use-survey-point-edit";
@@ -1070,20 +1070,19 @@ function VisitDetails({ pointSearch = "", visit, data, onClose, onChanged, close
       const skipped = sectionDispositionSets(Array.isArray(record?.skipped_section_ids) ? record.skipped_section_ids.filter((item): item is string => typeof item === "string") : []).excluded;
       const scope = (item: { visit_luc_id?: string | null; visit_environment_id?: string | null }) => kind === "luc" ? item.visit_luc_id === id : item.visit_environment_id === id;
       const answers = new Map<string, unknown>(detail.responses.filter(scope).map((item) => [item.question_id, item.answer]));
+      const customerQuestion = showsCustomerQuestions(view) ? registrationCustomerQuestion(data.questions, data.sections, point.templateId ?? visit.template_id, visit.template_id, [...answers.keys()]) : undefined;
       const items: { key: string; label: string; sectionId?: string; groupKey?: string; groupLabel?: string; customer?: boolean; customerResponse?: string }[] = [];
       if (requiresSurveyFacade(point.pointType) && !detail.attachments.some((item) => item.attachment_kind === "facade" && scope(item))) items.push({ key: "facade", label: "Foto da fachada" });
       const luc = kind === "luc" ? detail.lucs.find((item) => item.id === id) : null;
       // Loja vaga exige LUC, sem exigir foto de fachada ou localização.
       if (point.pointType === "vacant") {
         if (!luc?.luc_number?.trim()) items.push({ key: "luc", label: "LUC não informado" });
-        return { point, luc, items, groups: items.length ? [{ key: "luc", label: "LUC não informado", items }] : [], customerQuestion: undefined };
       }
-      if (luc && !luc.location?.trim()) items.push({ key: "location", label: "Localização (andar)" });
-      for (const section of sectionsFor(point.templateId ?? visit.template_id, own)) {
+      if (point.pointType !== "vacant" && luc && !luc.location?.trim()) items.push({ key: "location", label: "Localização (andar)" });
+      for (const section of point.pointType === "vacant" ? [] : sectionsFor(point.templateId ?? visit.template_id, own)) {
         if (skipped.has(section.id)) continue;
         for (const question of sortByPosition(data.questions.filter((item) => item.active && item.section_id === section.id))) if (isQuestionVisible(question, answers) && (isNotInformedAnswer(answerParts(answers.get(question.id)).value) || !isStoredQuestionComplete(question, answers, detail.attachments, scope))) items.push({ key: question.id, label: `${section.title}: ${question.prompt}`, sectionId: section.id });
       }
-      const customerQuestion = showsCustomerQuestions(view) ? sectionsFor(point.templateId ?? visit.template_id, own).flatMap((section) => data.questions.filter((question) => question.active && question.section_id === section.id && isCustomerQuestion(question)))[0] : undefined;
       if (customerQuestion) {
         const storedCustomerAnswer = answers.get(customerQuestion.id);
         const customerResponses = customerQuestionResponses(storedCustomerAnswer);
@@ -1137,17 +1136,18 @@ function VisitDetails({ pointSearch = "", visit, data, onClose, onChanged, close
   const customerQuestionTarget = (pointValue: string) => {
     const row = registrationPending.find((item) => item.point.value === pointValue);
     if (!row?.customerQuestion) return null;
+    const question = row.customerQuestion;
     const [kind, id = ""] = pointValue.split(":");
     const matches = (item: { visit_luc_id?: string | null; visit_environment_id?: string | null }) => kind === "luc" ? item.visit_luc_id === id : item.visit_environment_id === id;
-    const response = detail?.responses.find((item) => matches(item) && item.question_id === row.customerQuestion!.id) ?? null;
-    return { row, matches, response };
+    const response = detail?.responses.find((item) => matches(item) && item.question_id === question.id) ?? null;
+    return { row, question, matches, response };
   };
   const addPendingCustomerQuestion = async (pointValue: string, text: string) => {
     const clean = text.trim();
     if (!clean) return;
     const target = customerQuestionTarget(pointValue);
     if (!target) return;
-    const question = target.row.customerQuestion!;
+    const question = target.question;
     const rows = customerQuestions(target.response?.answer);
     if (rows.some((item) => item === clean)) return toast.error("Esta pergunta já está cadastrada neste ponto.");
     const base = target.response?.answer && typeof target.response.answer === "object" && !Array.isArray(target.response.answer) ? target.response.answer : { value: rows.join("\n") };
