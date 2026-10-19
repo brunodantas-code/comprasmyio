@@ -1025,3 +1025,5 @@
 - [x] Site Survey — barras verticais dos totalizadores alinhadas entre linhas (largura fixa dos chips no desktop) e mesma barra verde/cinza nos números da Proposta aprovada; conferido na prévia.
 - [x] Site Survey — filtro de instalação aprovada movido da coluna Pendências para a coluna Ações, alinhado com os demais filtros; seleção "Aprovada: Água" testada na prévia (lista filtra corretamente).
 - [x] Alinhar detalhamento elétrico dos Demais ambientes sob o card Energia 42
+- [ ] Site Survey — pop-up de vinculação de foto: reabrir quando a intervenção já existe sem foto; correção aplicada, falta conferir na tela.
+- [ ] Site Survey — Cadastro em PDF: aplicar o mesmo layout do Excel (título com nome do cliente, totalizador no topo, filtros/linha congelada) e reduzir a distância entre linhas para diminuir as páginas.
