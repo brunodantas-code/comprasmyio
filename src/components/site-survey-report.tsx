@@ -682,7 +682,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     pdf.setTextColor(...purple); pdf.text(reportTitle, 16, 115);
     pdf.setFont("Nunito", "normal"); pdf.setFontSize(13); pdf.setTextColor(85, 82, 94); pdf.text(unitName, 16, 128);
     pdf.setDrawColor(...purple); pdf.setLineWidth(0.3); pdf.line(16, 218, 194, 218);
-    const coverRows = [["Cliente", clientName], ["Data de emissão", issueDate], ["Unidade", unitName], ["Número da visita", `SS-${reportNumber}`]];
+    const coverRows = [["Cliente", clientName], ["Data de emissão", issueDate], ["Data da visita", visitDate], ["Unidade", unitName], ["Número da visita", `SS-${reportNumber}`]];
     coverRows.forEach(([label, value], index) => { const rowY = 228 + index * 10; pdf.setFontSize(8); pdf.setFont("Nunito", "bold"); pdf.setTextColor(120, 116, 128); pdf.text(label, 16, rowY); pdf.setFontSize(11); pdf.setTextColor(...dark); pdf.text(value, 194, rowY, { align: "right", maxWidth: 122 }); });
     pdf.setFontSize(7); pdf.setTextColor(145, 141, 151); pdf.text("myio Automação Ltda — Relatório de Site Survey", 16, 282); pdf.setFillColor(...green); pdf.rect(181, 280.5, 13, 1.3, "F");
 
