@@ -323,6 +323,10 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, canA
   ], [rows, environmentRows]);
   const typeTotals = useMemo(() => surveyPointTotals(displayRows), [displayRows]);
   const environmentTotals = useMemo(() => environmentDisciplineTotals(environmentRows, environmentTypes), [environmentRows, environmentTypes]);
+  const approvedShopKiosk = useMemo(() => {
+    const shopKioskRows = displayRows.filter((row) => { const type = surveyPointType(row); return type === "shop" || type === "kiosk"; });
+    return { water: shopKioskRows.filter((row) => installationApproved(scope.approvals, row.source, row.id, "hydraulic")).length, energy: shopKioskRows.filter((row) => installationApproved(scope.approvals, row.source, row.id, "electrical")).length };
+  }, [displayRows, scope.approvals]);
   // Totalizadores de aprovação separados: Lojas/Quiosques, Entrada da Concessionária e demais ambientes (consolidados).
   const approvalGroupTotals = useMemo(() => {
     const shopKeys = new Set(rows.filter((row) => surveyPointType(row) !== "vacant").map((row) => `luc:${row.id}`));
