@@ -16,6 +16,7 @@
 - [x] Site Survey — intervenção do cliente: no pop-up de confirmação, perguntar se deseja vincular foto para aparecer no relatório do cliente.
 - [x] Site Survey — ícone da fachada: bolinha vermelha com a quantidade de intervenções nas lojas/ambientes/quiosques que necessitam intervenção (cadastro completo e Histórico do Checklist; só intervenções abertas).
 - [ ] Site Survey — Localizações antigas de 1º e 2º andar: aguarda identificação dos pontos; ambientes agora têm campo próprio e não exibem o checklist como localização.
+- [x] Site Survey — quadro Pontos contratados no padrão dos demais totalizadores (chips verde-claros com barra) e observação comparando Água/Energia da proposta com as aprovadas no cadastro; conferido no Taboão (Água 50 conforme; Energia 185 × 177, diferença de 8) e testes em src/lib/site-survey-proposal.test.ts.
 - [x] Site Survey — investigar fotos ausentes no relatório de intervenções (somente Borelli). Confirmado: só Borelli tem foto vinculada à pergunta da intervenção; sem reutilizar fotos de outros pontos.
 - [x] Site Survey — intervenções: remover coluna Chamado e usar “Registro sem manopla.”.
 - [x] Site Survey — intervenções: alterar “Muito rígido” para “Registro muito rígido. Risco de quebra.”.

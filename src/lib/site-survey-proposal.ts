@@ -23,6 +23,15 @@ export function proposalGroupQuantities(scope: { hydraulic_shops: number | null;
     { key: "others", label: "Demais ambientes", water: remainder(scope.hydraulic_general, breakdown?.hydraulic_entry), energy: remainder(scope.electrical, breakdown?.electrical_shops, breakdown?.electrical_entry) },
   ];
 }
+export type ProposalComparison = { discipline: "water" | "energy"; label: string; proposal: number | null; approved: number; matches: boolean | null };
+export function proposalShopKioskComparison(scope: { hydraulic_shops: number | null; hydraulic_general: number | null; electrical: number | null; scope_breakdown?: { hydraulic_entry: number | null; electrical_shops: number | null; electrical_entry: number | null } | null }, approvedWater: number, approvedEnergy: number): ProposalComparison[] {
+  const shops = proposalGroupQuantities(scope).find((group) => group.key === "shops");
+  if (!shops || (shops.water === null && shops.energy === null)) return [];
+  return [
+    { discipline: "water" as const, label: "Água", proposal: shops.water, approved: approvedWater, matches: shops.water === null ? null : shops.water === approvedWater },
+    { discipline: "energy" as const, label: "Energia", proposal: shops.energy, approved: approvedEnergy, matches: shops.energy === null ? null : shops.energy === approvedEnergy },
+  ];
+}
 export async function validateProposalPdf(file: Blob) {
   if (!file.size) throw new Error("Selecione um PDF não vazio.");
   const signature = new TextDecoder().decode(await file.slice(0, 5).arrayBuffer());
