@@ -324,18 +324,20 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, canA
   ], [rows, environmentRows]);
   const typeTotals = useMemo(() => surveyPointTotals(displayRows), [displayRows]);
   const environmentTotals = useMemo(() => environmentDisciplineTotals(environmentRows, environmentTypes), [environmentRows, environmentTypes]);
+  // Lojas, quiosques e lojas vagas (pelo tipo efetivo) formam o grupo "Lojas e Quiosques", igual ao filtro de aprovação.
+  const isShopGroup = (row: { classification_type?: string | null; point_type?: string | null }) => surveyPointType(row) !== "environment";
   const approvedShopKiosk = useMemo(() => {
-    const shopKioskRows = displayRows.filter((row) => { const type = surveyPointType(row); return type === "shop" || type === "kiosk"; });
+    const shopKioskRows = displayRows.filter(isShopGroup);
     return { water: shopKioskRows.filter((row) => installationApproved(scope.approvals, row.source, row.id, "hydraulic")).length, energy: shopKioskRows.filter((row) => installationApproved(scope.approvals, row.source, row.id, "electrical")).length };
   }, [displayRows, scope.approvals]);
   // Totalizadores de aprovação separados: Lojas/Quiosques, Entrada da Concessionária e demais ambientes (consolidados).
   const approvalGroupTotals = useMemo(() => {
-    const shopKeys = new Set(rows.filter((row) => surveyPointType(row) !== "vacant").map((row) => `luc:${row.id}`));
+    const shopKeys = new Set(displayRows.filter(isShopGroup).map((row) => `${row.source}:${row.id}`));
     const concessionariaKeys = new Set<string>();
     const otherKeys = new Set<string>();
-    for (const env of environmentRows) {
+    for (const env of displayRows.filter((row) => !isShopGroup(row))) {
       const type = environmentTypes.find((item) => item.id === env.environment_type_id);
-      (type && normalizeHeader(type.name) === "hidrometro da entrada da concessionaria" ? concessionariaKeys : otherKeys).add(`environment:${env.id}`);
+      (type && normalizeHeader(type.name) === "hidrometro da entrada da concessionaria" ? concessionariaKeys : otherKeys).add(`${env.source}:${env.id}`);
     }
     return {
       shops: approvalEnergyWaterTotals(scope.approvals, shopKeys),
@@ -344,7 +346,7 @@ export function SiteSurveyLucManager({ visitId, userId, canImport, canEdit, canA
       hasConcessionaria: concessionariaKeys.size > 0,
       hasOthers: otherKeys.size > 0,
     };
-  }, [scope.approvals, rows, environmentRows, environmentTypes]);
+  }, [scope.approvals, displayRows, environmentTypes]);
   const sortedRows = useMemo(() => displayRows.filter((row) => {
     const matchesLuc = normalizeHeader(row.luc_number).includes(normalizeHeader(lucFilter));
     const matchesName = normalizeHeader(row.shop_name).includes(normalizeHeader(shopNameFilter));
