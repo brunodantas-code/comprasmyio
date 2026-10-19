@@ -200,7 +200,7 @@ export function SiteSurveyClientPendingReport({ visit, client, unit, project, po
             for (const [label, fieldName, x] of options) {
               const box = pdf.AcroForm.CheckBox();
               box.fieldName = fieldName; box.value = "Off"; box.readOnly = false;
-              box.Rect = [x, midY - 1.75, 3.5, 3.5];
+              box.x = x; box.y = midY - 1.75; box.width = 3.5; box.height = 3.5;
               pdf.addField(box);
               pdf.text(label, x + 4.5, midY + 1.2);
             }
