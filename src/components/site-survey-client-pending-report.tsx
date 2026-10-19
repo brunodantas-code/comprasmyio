@@ -8,6 +8,7 @@ import nunitoRegularUrl from "@/assets/fonts/nunito-regular.ttf?url";
 import nunitoBoldUrl from "@/assets/fonts/nunito-bold.ttf?url";
 import { surveyPointType } from "@/lib/site-survey-point-type";
 import { clipRoundedPhoto } from "@/lib/site-survey-photo";
+import { textColumnWidth } from "@/lib/site-survey-pdf-measure";
 
 type Props = {
   visit: { id: string; survey_number: number; completed_at: string | null; scheduled_start: string };
@@ -48,6 +49,19 @@ const styleGreenCheckbox = (pdf: any, box: any) => {
   box.appearanceStreamContent = { N: { On: on, Off: off }, D: { On: on, Off: off } };
   box.appearanceState = "Off";
   box.value = "Off";
+};
+
+/* Caixa verde editável no PDF: desmarcada por padrão, fundo verde com ✓ ao marcar. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const addGreenCheckbox = (pdf: any, fieldName: string, x: number, midY: number, size = 3.5) => {
+  const CheckBoxClass = (pdf.AcroForm as unknown as { CheckBox: new () => Record<string, unknown> }).CheckBox;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const box = new CheckBoxClass() as any;
+  box.fieldName = fieldName; box.readOnly = false;
+  box.fontName = "zapfdingbats"; box.fontStyle = "normal";
+  styleGreenCheckbox(pdf, box);
+  box.x = x; box.y = midY - size / 2; box.width = size; box.height = size;
+  pdf.addField(box);
 };
 
 export function SiteSurveyClientPendingReport({ visit, client, unit, project, points, questions }: Props) {
@@ -198,14 +212,21 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
         pdf.text("Lojas e quiosques com LUC não identificado", 14, 25);
         pdf.setFont("Nunito", "normal"); pdf.setFontSize(10); pdf.setTextColor(...ink);
         pdf.text(`${missingLucs.length} ponto(s) para identificação do LUC`, 14, 33);
+        const lucType = (point: ClientPendingPoint) => point.pointType === "kiosk" ? "Quiosque" : "Loja";
+        // O tipo nunca pode quebrar ao meio: a coluna recebe a largura do rótulo mais longo.
+        const lucTypeWidth = textColumnWidth(pdf, missingLucs.map(lucType), 3, 20, 30);
+        // Sem nenhum número de medidor na tabela, a coluna não aparece (padrão do Cadastro).
+        const lucMeter = missingLucs.some((point) => Boolean(point.meterNumber?.trim()));
+        const lucWidths = [24, 28, ...(lucMeter ? [28] : []), lucTypeWidth, 46];
+        lucWidths.push(182 - lucWidths.reduce((total, width) => total + width, 0));
         autoTable(pdf, {
           startY: 39, theme: "plain", margin: { top: 20, bottom: 20, left: 14, right: 14 },
           styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: 3, overflow: "linebreak", valign: "middle" },
           headStyles: { fontStyle: "bold", textColor: accent, lineWidth: { bottom: 0.3 }, lineColor: green },
           bodyStyles: { minCellHeight: 24 }, rowPageBreak: "avoid", showHead: "everyPage",
-          columnStyles: { 0: { cellWidth: 24 }, 1: { cellWidth: 28 }, 2: { cellWidth: 28 }, 3: { cellWidth: 20 }, 4: { cellWidth: 46 }, 5: { cellWidth: 36 } },
-          head: [["Foto", "LUC", "Nº do medidor", "Tipo", "Nome da loja", "Localização"]],
-          body: missingLucs.map((point) => [thumbnails.has(point.value) ? "" : "Sem foto", point.lucNumber?.trim() || "Sem LUC", point.meterNumber || "—", point.pointType === "kiosk" ? "Quiosque" : "Loja", point.name ?? point.label, point.location || "—"]),
+          columnStyles: Object.fromEntries(lucWidths.map((width, index) => [index, { cellWidth: width }])),
+          head: [["Foto", "LUC", ...(lucMeter ? ["Nº do medidor"] : []), "Tipo", "Nome da loja", "Localização"]],
+          body: missingLucs.map((point) => [thumbnails.has(point.value) ? "" : "Sem foto", point.lucNumber?.trim() || "Sem LUC", ...(lucMeter ? [point.meterNumber || "—"] : []), lucType(point), point.name ?? point.label, point.location || "—"]),
           didDrawCell: (cell) => {
             if (cell.section !== "body" || cell.column.index !== 0) return;
             const point = missingLucs[cell.row.index];
@@ -220,31 +241,31 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
         pdf.text("Lojas e quiosques com nomes repetidos", 14, 25);
         pdf.setFont("Nunito", "normal"); pdf.setFontSize(10); pdf.setTextColor(...ink);
         pdf.text("Confirme que os pontos abaixo, de mesmo nome e LUCs diferentes, existem de fato no shopping e não são erro de cadastro.", 14, 33, { maxWidth: 182 });
+        // Sem nenhum número de medidor na tabela, a coluna não aparece (padrão do Cadastro).
+        const dupMeter = duplicated.some((group) => group.some((point) => Boolean(point.meterNumber?.trim())));
+        const dupType = (point: ClientPendingPoint) => point.pointType === "kiosk" ? "Quiosque" : point.pointType === "vacant" ? "Loja vaga" : "Loja";
+        const dupBody = duplicated.flatMap((group) => group.map((point) => [point.name ?? point.label, point.lucNumber?.trim() || "Sem LUC", ...(dupMeter ? [point.meterNumber || "—"] : []), dupType(point), point.location || "—", ""]));
+        // O tipo nunca pode quebrar ao meio: a coluna recebe a largura do rótulo mais longo.
+        const dupTypeWidth = textColumnWidth(pdf, dupBody.map((row) => row[dupMeter ? 3 : 2]), 3, 20, 30);
+        const dupWidths = [40, 25, ...(dupMeter ? [25] : []), dupTypeWidth];
+        dupWidths.push(182 - 40 - 25 - (dupMeter ? 25 : 0) - dupTypeWidth - 30, 30);
         autoTable(pdf, {
           startY: 41, theme: "plain", margin: { top: 20, bottom: 20, left: 14, right: 14 },
           styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: 3, overflow: "linebreak", valign: "middle" },
           headStyles: { fontStyle: "bold", textColor: accent, lineWidth: { bottom: 0.3 }, lineColor: green },
           rowPageBreak: "avoid", showHead: "everyPage",
-          columnStyles: { 0: { cellWidth: 40 }, 1: { cellWidth: 25 }, 2: { cellWidth: 25 }, 3: { cellWidth: 18 }, 4: { cellWidth: 44 }, 5: { cellWidth: 30 } },
-          head: [["Nome da loja", "LUC", "Nº do medidor", "Tipo", "Localização", "Confirmação"]],
-          body: duplicated.flatMap((group) => group.map((point) => [point.name ?? point.label, point.lucNumber?.trim() || "Sem LUC", point.meterNumber || "—", point.pointType === "kiosk" ? "Quiosque" : point.pointType === "vacant" ? "Loja vaga" : "Loja", point.location || "—", ""])),
+          columnStyles: Object.fromEntries(dupWidths.map((width, index) => [index, { cellWidth: width }])),
+          head: [["Nome da loja", "LUC", ...(dupMeter ? ["Nº do medidor"] : []), "Tipo", "Localização", "Confirmação"]],
+          body: dupBody,
           didDrawCell: (cell) => {
-            if (cell.section !== "body" || cell.column.index !== 5) return;
+            if (cell.section !== "body" || cell.column.index !== dupWidths.length - 1) return;
             // Caixas editáveis para o cliente marcar OK ou Duplicado em cada ponto.
             const rowIndex = cell.row.index;
             const midY = cell.cell.y + cell.cell.height / 2;
             const options: [string, string, number][] = [["OK", `confirma_ok_${rowIndex}`, cell.cell.x + 2], ["Duplicado", `confirma_dup_${rowIndex}`, cell.cell.x + 14]];
             pdf.setFont("Nunito", "normal"); pdf.setFontSize(7); pdf.setTextColor(...ink);
             for (const [label, fieldName, x] of options) {
-              // Tipagem do jsPDF não declara o construtor de CheckBox; instanciamos via any.
-              const CheckBoxClass = (pdf.AcroForm as unknown as { CheckBox: new () => Record<string, unknown> }).CheckBox;
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const box = new CheckBoxClass() as any;
-              box.fieldName = fieldName; box.readOnly = false;
-              box.fontName = "zapfdingbats"; box.fontStyle = "normal";
-              styleGreenCheckbox(pdf, box);
-              box.x = x; box.y = midY - 1.75; box.width = 3.5; box.height = 3.5;
-              pdf.addField(box);
+              addGreenCheckbox(pdf, fieldName, x, midY);
               pdf.text(label, x + 4.5, midY + 1.2);
             }
           },
@@ -256,14 +277,25 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
         pdf.text("Lojas vagas cadastradas", 14, 25);
         pdf.setFont("Nunito", "normal"); pdf.setFontSize(10); pdf.setTextColor(...ink);
         pdf.text(`Confirme as ${vacant.length} loja(s) vaga(s) abaixo, cadastradas para futura implantação.`, 14, 33, { maxWidth: 182 });
+        // Sem nenhum número de medidor na tabela, a coluna não aparece (padrão do Cadastro).
+        const vacantMeter = vacant.some((point) => Boolean(point.meterNumber?.trim()));
+        const vacantWidths = [28, ...(vacantMeter ? [28] : []), vacantMeter ? 46 : 66, vacantMeter ? 50 : 58, 30];
         autoTable(pdf, {
           startY: 41, theme: "plain", margin: { top: 20, bottom: 20, left: 14, right: 14 },
           styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: 3, overflow: "linebreak", valign: "middle" },
           headStyles: { fontStyle: "bold", textColor: accent, lineWidth: { bottom: 0.3 }, lineColor: green },
           rowPageBreak: "avoid", showHead: "everyPage",
-          columnStyles: { 0: { cellWidth: 28 }, 1: { cellWidth: 28 }, 2: { cellWidth: 46 }, 3: { cellWidth: 80 } },
-          head: [["LUC", "Nº do medidor", "Nome da loja", "Localização"]],
-          body: vacant.map((point) => [point.lucNumber?.trim() || "Sem LUC", point.meterNumber || "—", point.name ?? point.label, point.location || "—"]),
+          columnStyles: Object.fromEntries(vacantWidths.map((width, index) => [index, { cellWidth: width }])),
+          head: [["LUC", ...(vacantMeter ? ["Nº do medidor"] : []), "Nome da loja", "Localização", "Confirmação"]],
+          body: vacant.map((point) => [point.lucNumber?.trim() || "Sem LUC", ...(vacantMeter ? [point.meterNumber || "—"] : []), point.name ?? point.label, point.location || "—", ""]),
+          didDrawCell: (cell) => {
+            if (cell.section !== "body" || cell.column.index !== vacantWidths.length - 1) return;
+            // Caixa verde editável para o cliente confirmar cada loja vaga.
+            const midY = cell.cell.y + cell.cell.height / 2;
+            addGreenCheckbox(pdf, `confirma_vaga_${cell.row.index}`, cell.cell.x + 2, midY);
+            pdf.setFont("Nunito", "normal"); pdf.setFontSize(7); pdf.setTextColor(...ink);
+            pdf.text("OK", cell.cell.x + 6.5, midY + 1.2);
+          },
         });
       }
       const pages = pdf.getNumberOfPages();
