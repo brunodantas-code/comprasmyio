@@ -1,35 +1,3 @@
-      if (questionId) {
-        const linkedRefs: string[] = [];
-        for (const choice of actionPhotoChoices) {
-          const chosen = pendingActionPhotoCandidates.find((item) => item.id === choice);
-          // Foto já vinculada a outra pergunta: reaproveita por referência, sem duplicar o anexo.
-          if (chosen?.question_id) { actionPhotoReferencesRef.current.set(questionId, chosen.id); linkedRefs.push(chosen.id); continue; }
-          const { error } = await supabase.from("site_survey_attachments").update({ question_id: questionId, attachment_kind: "question" }).eq("id", choice);
-          if (error) throw error;
-        }
-        if (linkedRefs.length) {
-          let query = supabase.from("site_survey_responses").select("id,answer").eq("visit_id", visit.id).eq("question_id", questionId);
-          query = scope.visit_luc_id ? query.eq("visit_luc_id", scope.visit_luc_id) : scope.visit_environment_id ? query.eq("visit_environment_id", scope.visit_environment_id) : query.is("visit_luc_id", null).is("visit_environment_id", null);
-          const { data: existing } = await query.maybeSingle();
-          if (existing) {
-            const current = existing.answer && typeof existing.answer === "object" && !Array.isArray(existing.answer) ? existing.answer as Record<string, unknown> : { value: existing.answer };
-            const prev = Array.isArray(current.photo_reference_ids) ? (current.photo_reference_ids as unknown[]).filter((item): item is string => typeof item === "string") : [];
-            const merged = [...new Set([...prev, ...linkedRefs])];
-            const { error: refError } = await supabase.from("site_survey_responses").update({ answer: JSON.parse(JSON.stringify({ ...current, photo_reference_id: typeof current.photo_reference_id === "string" ? current.photo_reference_id : merged[0], photo_reference_ids: merged })) }).eq("id", existing.id);
-            if (refError) throw refError;
-          }
-        }
-        for (const raw of actionPhotoFiles) {
-          const file = await prepareSurveyPhoto(raw);
-          const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
-          const path = `${visit.id}/${action.phase === "pre_visit" ? "geral" : pointId}/${crypto.randomUUID()}-${safe}`;
-          const { error: uploadError } = await supabase.storage.from("site-survey-attachments").upload(path, file);
-          if (uploadError) throw uploadError;
-          const { error } = await supabase.from("site_survey_attachments").insert({ visit_id: visit.id, ...scope, question_id: questionId, attachment_kind: "question", uploaded_by: data.userId, file_name: file.name, storage_path: path, content_type: file.type, file_size: file.size });
-          if (error) throw error;
-        }
-        if (actionPhotoChoices.length || actionPhotoFiles.length) { toast.success(actionPhotoChoices.length + actionPhotoFiles.length > 1 ? "Fotos vinculadas à intervenção" : "Foto vinculada à intervenção"); void refetchDetail(); }
-      }
 import { formatPurchaseQuantity, validCatalogQuantity } from "@/lib/site-survey-meter-electrical";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -1360,37 +1328,37 @@ function VisitDetails({ pointSearch = "", visit, data, onClose, onChanged, close
     const questionId = rule?.question_id ?? action.questionId;
     const scope = action.phase === "pre_visit" ? { visit_luc_id: null, visit_environment_id: null } : pointKind === "luc" ? { visit_luc_id: pointId, visit_environment_id: null } : { visit_luc_id: null, visit_environment_id: pointId };
     try {
-      if (actionPhotoFile && questionId) {
-        const file = await prepareSurveyPhoto(actionPhotoFile);
-        const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
-        const path = `${visit.id}/${action.phase === "pre_visit" ? "geral" : pointId}/${crypto.randomUUID()}-${safe}`;
-        const { error: uploadError } = await supabase.storage.from("site-survey-attachments").upload(path, file);
-        if (uploadError) throw uploadError;
-        const { error } = await supabase.from("site_survey_attachments").insert({ visit_id: visit.id, ...scope, question_id: questionId, attachment_kind: "question", uploaded_by: data.userId, file_name: file.name, storage_path: path, content_type: file.type, file_size: file.size });
-        if (error) throw error;
-        toast.success("Foto vinculada à intervenção");
-        void refetchDetail();
-      } else if (actionPhotoChoice && questionId) {
-        const chosen = pendingActionPhotoCandidates.find((item) => item.id === actionPhotoChoice);
-        // Foto já vinculada a outra seção: duplica o vínculo para não remover a foto da seção original.
-        if (chosen?.question_id) {
-          // Mesma regra das perguntas: reaproveita a foto por referência, sem duplicar o anexo.
-          actionPhotoReferencesRef.current.set(questionId, chosen.id);
+      if (questionId) {
+        const linkedRefs: string[] = [];
+        for (const choice of actionPhotoChoices) {
+          const chosen = pendingActionPhotoCandidates.find((item) => item.id === choice);
+          // Foto já vinculada a outra pergunta: reaproveita por referência, sem duplicar o anexo.
+          if (chosen?.question_id) { actionPhotoReferencesRef.current.set(questionId, chosen.id); linkedRefs.push(chosen.id); continue; }
+          const { error } = await supabase.from("site_survey_attachments").update({ question_id: questionId, attachment_kind: "question" }).eq("id", choice);
+          if (error) throw error;
+        }
+        if (linkedRefs.length) {
           let query = supabase.from("site_survey_responses").select("id,answer").eq("visit_id", visit.id).eq("question_id", questionId);
           query = scope.visit_luc_id ? query.eq("visit_luc_id", scope.visit_luc_id) : scope.visit_environment_id ? query.eq("visit_environment_id", scope.visit_environment_id) : query.is("visit_luc_id", null).is("visit_environment_id", null);
           const { data: existing } = await query.maybeSingle();
           if (existing) {
             const current = existing.answer && typeof existing.answer === "object" && !Array.isArray(existing.answer) ? existing.answer as Record<string, unknown> : { value: existing.answer };
-            const { error: refError } = await supabase.from("site_survey_responses").update({ answer: JSON.parse(JSON.stringify({ ...current, photo_reference_id: chosen.id })) }).eq("id", existing.id);
+            const prev = Array.isArray(current.photo_reference_ids) ? (current.photo_reference_ids as unknown[]).filter((item): item is string => typeof item === "string") : [];
+            const merged = [...new Set([...prev, ...linkedRefs])];
+            const { error: refError } = await supabase.from("site_survey_responses").update({ answer: JSON.parse(JSON.stringify({ ...current, photo_reference_id: typeof current.photo_reference_id === "string" ? current.photo_reference_id : merged[0], photo_reference_ids: merged })) }).eq("id", existing.id);
             if (refError) throw refError;
           }
         }
-        const { error } = chosen?.question_id
-          ? { error: null }
-          : await supabase.from("site_survey_attachments").update({ question_id: questionId, attachment_kind: "question" }).eq("id", actionPhotoChoice);
-        if (error) throw error;
-        toast.success("Foto vinculada à intervenção");
-        void refetchDetail();
+        for (const raw of actionPhotoFiles) {
+          const file = await prepareSurveyPhoto(raw);
+          const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
+          const path = `${visit.id}/${action.phase === "pre_visit" ? "geral" : pointId}/${crypto.randomUUID()}-${safe}`;
+          const { error: uploadError } = await supabase.storage.from("site-survey-attachments").upload(path, file);
+          if (uploadError) throw uploadError;
+          const { error } = await supabase.from("site_survey_attachments").insert({ visit_id: visit.id, ...scope, question_id: questionId, attachment_kind: "question", uploaded_by: data.userId, file_name: file.name, storage_path: path, content_type: file.type, file_size: file.size });
+          if (error) throw error;
+        }
+        if (actionPhotoChoices.length || actionPhotoFiles.length) { toast.success(actionPhotoChoices.length + actionPhotoFiles.length > 1 ? "Fotos vinculadas à intervenção" : "Foto vinculada à intervenção"); void refetchDetail(); }
       }
     } catch (error) {
       const message = error && typeof error === "object" && "message" in error ? String(error.message) : ""; toast.error(message ? `Não foi possível vincular a foto: ${message}` : "Não foi possível vincular a foto.");
