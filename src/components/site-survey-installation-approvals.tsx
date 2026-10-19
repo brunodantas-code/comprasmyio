@@ -8,7 +8,7 @@ import { proposalGroupQuantities, proposalScopeSchema, proposalShopKioskComparis
 type Point = { id: string; source: string; shop_name: string; luc_number: string };
 export function useInstallationScope(visitId: string) {
   const [approvals, setApprovals] = useState<InstallationApproval[]>([]);
-  const [contract, setContract, setContractRaw] = useState as never;
+  const [contract, setContract] = useState<{ hydraulic_shops: number | null; hydraulic_general: number | null; electrical: number | null; scope_breakdown: ProposalScopeBreakdown | null }>({ hydraulic_shops: null, hydraulic_general: null, electrical: null, scope_breakdown: null });
   const [busy, setBusy] = useState(false);
   const load = async () => {
     const [a, c] = await Promise.all([supabase.from("site_survey_installation_approvals").select("*").eq("visit_id", visitId), supabase.from("site_survey_commercial_proposals").select("hydraulic_shops,hydraulic_general,electrical,scope_breakdown").eq("visit_id", visitId).maybeSingle()]);
