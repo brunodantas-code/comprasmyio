@@ -8,6 +8,12 @@ const data: GeneralFilterData = {
 const fields = generalFilterFields(data);
 const flowKey = fields[0].key, cableKey = fields[1].key;
 describe("filtro geral do Cadastro", () => {
+  it("respeita a condição da pergunta com resposta simples ou estruturada", () => {
+    const conditional: GeneralFilterData = { ...data, questions: [{ ...data.questions[0], conditioned_on_question_id: "exists", conditioned_value: "Sim" }, { ...data.questions[0], id: "exists", prompt: "Existe hidrômetro?" }], responses: [...data.responses, { question_id: "exists", visit_luc_id: "shop", visit_environment_id: null, answer: "Sim" }, { question_id: "exists", visit_luc_id: null, visit_environment_id: "env", answer: { value: "Não" } }] };
+    const filter: GeneralFilter = { mode: "all", rules: { [flowKey]: { values: ["Até 10 m³/h", "Acima de 10 m³/h"] } } };
+    expect(matchesGeneralFilter({ id: "shop", source: "luc" }, conditional, generalFilterFields(conditional), filter)).toBe(true);
+    expect(matchesGeneralFilter({ id: "env", source: "environment" }, conditional, generalFilterFields(conditional), filter)).toBe(false);
+  });
   it("seleciona hidrômetros até 10 m³/h por opção, sem incluir acima de 10", () => {
     const filter: GeneralFilter = { mode: "all", rules: { [flowKey]: { values: ["Até 10 m³/h"] } } };
     expect(matchesGeneralFilter({ id: "shop", source: "luc" }, data, fields, filter)).toBe(true);
