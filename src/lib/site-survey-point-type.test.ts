@@ -1,13 +1,20 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { surveyPointTotals, requiresSurveyLuc, requiresSurveyFacade } from "./site-survey-point-type";
+import { surveyPointTotals, surveyPointTypeLabel, requiresSurveyLuc, requiresSurveyFacade } from "./site-survey-point-type";
 
 test("Loja Vaga exige LUC, mas não exige fachada; loja comum mantém LUC opcional", () => {
   assert.equal(requiresSurveyLuc("vacant"), true);
   assert.equal(requiresSurveyFacade("vacant"), false);
   assert.equal(requiresSurveyLuc("shop"), false);
   assert.equal(requiresSurveyLuc("environment"), false);
+});
+
+test("Quiosque vago exige LUC, dispensa fachada e tem rótulo próprio", () => {
+  assert.equal(requiresSurveyLuc("vacant_kiosk"), true);
+  assert.equal(requiresSurveyFacade("vacant_kiosk"), false);
+  assert.equal(surveyPointTypeLabel("vacant_kiosk"), "Quiosque vago");
+  assert.equal(surveyPointTypeLabel("kiosk"), "Quiosque");
 });
 
 test("Totaliza lojas, quiosques e ambientes pela classificação efetiva", () => {
