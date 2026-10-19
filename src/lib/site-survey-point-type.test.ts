@@ -1,13 +1,20 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { surveyPointTotals, requiresSurveyLuc, requiresSurveyFacade } from "./site-survey-point-type";
+import { surveyPointTotals, surveyPointTypeLabel, requiresSurveyLuc, requiresSurveyFacade } from "./site-survey-point-type";
 
 test("Loja Vaga exige LUC, mas não exige fachada; loja comum mantém LUC opcional", () => {
   assert.equal(requiresSurveyLuc("vacant"), true);
   assert.equal(requiresSurveyFacade("vacant"), false);
   assert.equal(requiresSurveyLuc("shop"), false);
   assert.equal(requiresSurveyLuc("environment"), false);
+});
+
+test("Quiosque vago exige LUC, dispensa fachada e tem rótulo próprio", () => {
+  assert.equal(requiresSurveyLuc("vacant_kiosk"), true);
+  assert.equal(requiresSurveyFacade("vacant_kiosk"), false);
+  assert.equal(surveyPointTypeLabel("vacant_kiosk"), "Quiosque vago");
+  assert.equal(surveyPointTypeLabel("kiosk"), "Quiosque");
 });
 
 test("Totaliza lojas, quiosques e ambientes pela classificação efetiva", () => {
@@ -17,7 +24,7 @@ test("Totaliza lojas, quiosques e ambientes pela classificação efetiva", () =>
     { classification_type: null, point_type: "kiosk" },
     { classification_type: "environment", point_type: "shop" },
   ]);
-  assert.deepEqual(totals, { shop: 2, kiosk: 1, environment: 1, vacant: 0 });
+  assert.deepEqual(totals, { shop: 2, kiosk: 1, environment: 1, vacant: 0, vacant_kiosk: 0 });
 });
 
 test("Loja vaga é contada à parte e não aumenta a quantidade de lojas", () => {
@@ -30,5 +37,14 @@ test("Loja vaga é contada à parte e não aumenta a quantidade de lojas", () =>
 });
 
 test("Cadastro vazio totaliza zero em todos os tipos", () => {
-  assert.deepEqual(surveyPointTotals([]), { shop: 0, kiosk: 0, environment: 0, vacant: 0 });
+  assert.deepEqual(surveyPointTotals([]), { shop: 0, kiosk: 0, environment: 0, vacant: 0, vacant_kiosk: 0 });
+});
+
+test("Quiosque vago é contado à parte, separado de quiosques e lojas vagas", () => {
+  const totals = surveyPointTotals([
+    { classification_type: "kiosk", point_type: "kiosk" },
+    { classification_type: "vacant_kiosk", point_type: "kiosk" },
+    { classification_type: "vacant", point_type: "shop" },
+  ]);
+  assert.deepEqual(totals, { shop: 0, kiosk: 1, environment: 0, vacant: 1, vacant_kiosk: 1 });
 });

@@ -23,7 +23,7 @@ import { SiteSurveyClientPendingReport } from "@/components/site-survey-client-p
 import { SiteSurveyReportTexts } from "@/components/site-survey-report-texts";
 import { SiteSurveyScreenSummary } from "@/components/site-survey-screen-summary";
 import { useSurveyImage } from "@/hooks/use-survey-image";
-import { surveyPointType, requiresSurveyFacade, requiresSurveyLuc, type SurveyPointType } from "@/lib/site-survey-point-type";
+import { surveyPointType, requiresSurveyFacade, requiresSurveyLuc, isSurveyVacant, type SurveyPointType } from "@/lib/site-survey-point-type";
 import { energyWaterTotals as surveyEnergyWaterTotals } from "@/lib/site-survey-energy-water";
 import { visitSearchHaystack } from "@/lib/site-survey-visit-search";
 import { SiteSurveyCustomerQuestions } from "@/components/site-survey-customer-questions";
@@ -911,7 +911,7 @@ function VisitDetails({ pointSearch = "", visit, data, onClose, onChanged, close
         // Persist the currently open section even when its autosave had not been scheduled yet.
         await saveAnswers(form, "point", false, [], true);
         const refreshed = await refetchDetail();
-        const fields = points.find((point) => point.value === selectedPoint)?.pointType === "vacant" ? [] : pointPendingFields(form, undefined, refreshed.data);
+        const fields = points.find((point) => point.value === selectedPoint)?.pointType && isSurveyVacant(points.find((point) => point.value === selectedPoint)!.pointType) ? [] : pointPendingFields(form, undefined, refreshed.data);
         if (fields.length) {
           setValidatedPoints((current) => new Set(current).add(selectedPoint));
           setOpenSectionId(pointSections.find((section) => section.title.startsWith("Revisão"))?.id ?? null);
@@ -1016,8 +1016,9 @@ function VisitDetails({ pointSearch = "", visit, data, onClose, onChanged, close
         .map((field) => field.slice(section.title.length + 1).trim()),
     })).filter((group) => group.fields.length > 0);
     const pointFollowUpFields = (form?: HTMLFormElement) => {
-      // Loja vaga dispensa fachada, mas deve manter seu LUC.
-      if (points.find((point) => point.value === selectedPoint)?.pointType === "vacant") {
+      // Loja vaga e quiosque vago dispensam fachada, mas devem manter seu LUC.
+      const currentPoint = points.find((point) => point.value === selectedPoint)?.pointType;
+      if (currentPoint && isSurveyVacant(currentPoint)) {
         const luc = detail?.lucs.find((point) => `luc:${point.id}` === selectedPoint);
         return luc?.luc_number?.trim() ? [] : ["LUC não informado"];
       }
@@ -1074,12 +1075,12 @@ function VisitDetails({ pointSearch = "", visit, data, onClose, onChanged, close
       const items: { key: string; label: string; sectionId?: string; groupKey?: string; groupLabel?: string; customer?: boolean; customerResponse?: string }[] = [];
       if (requiresSurveyFacade(point.pointType) && !detail.attachments.some((item) => item.attachment_kind === "facade" && scope(item))) items.push({ key: "facade", label: "Foto da fachada" });
       const luc = kind === "luc" ? detail.lucs.find((item) => item.id === id) : null;
-      // Loja vaga exige LUC, sem exigir foto de fachada ou localização.
-      if (point.pointType === "vacant") {
+      // Loja vaga e quiosque vago exigem LUC, sem exigir foto de fachada ou localização.
+      if (isSurveyVacant(point.pointType)) {
         if (!luc?.luc_number?.trim()) items.push({ key: "luc", label: "LUC não informado" });
       }
-      if (point.pointType !== "vacant" && luc && !luc.location?.trim()) items.push({ key: "location", label: "Localização (andar)" });
-      for (const section of point.pointType === "vacant" ? [] : sectionsFor(point.templateId ?? visit.template_id, own)) {
+      if (!isSurveyVacant(point.pointType) && luc && !luc.location?.trim()) items.push({ key: "location", label: "Localização (andar)" });
+      for (const section of isSurveyVacant(point.pointType) ? [] : sectionsFor(point.templateId ?? visit.template_id, own)) {
         if (skipped.has(section.id)) continue;
         for (const question of sortByPosition(data.questions.filter((item) => item.active && item.section_id === section.id))) if (isQuestionVisible(question, answers) && (isNotInformedAnswer(answerParts(answers.get(question.id)).value) || !isStoredQuestionComplete(question, answers, detail.attachments, scope))) items.push({ key: question.id, label: `${section.title}: ${question.prompt}`, sectionId: section.id });
       }

@@ -22,7 +22,7 @@ export function classifyPointEnergyWater(answers: Map<string, unknown>, question
 export function energyWaterTotals(points: { kind: string; id: string; pointType: string; completionStatus: string }[], responses: { visit_luc_id?: string | null; visit_environment_id?: string | null; question_id: string; answer: unknown }[], questions: Question[]): EnergyWaterTotals {
   const totals: EnergyWaterTotals = { water: 0, energy: 0, both: 0, waterAll: 0, energyAll: 0 };
   for (const point of points) {
-    if (point.pointType === "vacant" || point.completionStatus === "cancelada") continue;
+    if (point.pointType === "vacant" || point.pointType === "vacant_kiosk" || point.completionStatus === "cancelada") continue;
     const scope = (item: { visit_luc_id?: string | null; visit_environment_id?: string | null }) => point.kind === "luc" ? item.visit_luc_id === point.id : item.visit_environment_id === point.id;
     const answers = new Map(responses.filter(scope).map((item) => [item.question_id, item.answer]));
     const classification = classifyPointEnergyWater(answers, questions);

@@ -14,6 +14,7 @@
 - [x] Site Survey — Sanar Pendências: filtro por tipo de pendência ao lado do filtro de LUC/nome, com tipos únicos (agrupados por rótulo) e cards filtrados; conferido na prévia (115 pontos sem filtro, 32 com "Foto da fachada").
 - [x] Site Survey — Histórico do Checklist: subir os botões de pendências e perguntas ao cliente para a linha das fotos no desktop, reduzindo o Card.
 - [x] Site Survey — intervenção do cliente: no pop-up de confirmação, perguntar se deseja vincular foto para aparecer no relatório do cliente.
+- [x] Site Survey — Quiosque vago: nova classificação no cadastro, com LUC obrigatório, sem fachada, totalizador próprio (Quiosques vagos), rótulo na lista, filtros Somente quiosques vagos, pendências do cliente, totalizadores de água/energia e relatórios; conferido no preview (ponto de teste criado, filtrado e excluído) e 33 testes passaram.
 - [x] Site Survey — ícone da fachada: bolinha vermelha com a quantidade de intervenções nas lojas/ambientes/quiosques que necessitam intervenção (cadastro completo e Histórico do Checklist; só intervenções abertas).
 - [ ] Site Survey — Localizações antigas de 1º e 2º andar: aguarda identificação dos pontos; ambientes agora têm campo próprio e não exibem o checklist como localização.
 - [x] Site Survey — quadro Pontos contratados no padrão dos demais totalizadores (chips verde-claros com barra) e observação comparando Água/Energia da proposta com as aprovadas no cadastro; conferido no Taboão (Água 50 conforme; Energia 185 × 177, diferença de 8) e testes em src/lib/site-survey-proposal.test.ts.
