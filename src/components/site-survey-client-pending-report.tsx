@@ -16,6 +16,41 @@ type Props = {
 };
 const statusLabel = (status: string) => ({ aberto: "Em aberto", em_andamento: "Em andamento", atendido: "Atendido", concluido: "Concluído", cancelado: "Cancelado" } as Record<string, string>)[status] ?? status.replaceAll("_", " ");
 
+/* Checkbox verde do app dentro do PDF: desmarcado por padrão (borda verde) e, ao marcar, fundo verde com ✓. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const styleGreenCheckbox = (pdf: any, box: any) => {
+  // Verde do app (#0fc482) em RGB 0–1.
+  const green = "0.059 0.769 0.510";
+  const f2 = (n: number) => n.toFixed(2);
+  const appearance = pdf.AcroFormAppearance;
+  // Marcado: fundo verde com o ✓ escuro, como no app.
+  const on = (formObject: any) => {
+    const w = appearance.internal.getWidth(formObject), h = appearance.internal.getHeight(formObject);
+    const xobj = appearance.CheckBox.OffPushDown(formObject);
+    const fontKey = formObject.scope.internal.getFont(formObject.fontName, formObject.fontStyle).id;
+    const size = Math.min(h * 0.8, w * 0.8);
+    xobj.stream = [
+      `${green} rg`, `0 0 ${f2(w)} ${f2(h)} re`, "f",
+      "0 0 0 rg", "BT", `/${fontKey} ${f2(size)} Tf`,
+      `${f2(w / 2 - size * 0.38)} ${f2(h / 2 - size * 0.32)} Td`, "(3) Tj", "ET",
+    ].join("\n");
+    return xobj;
+  };
+  // Desmarcado: fundo branco com borda verde.
+  const off = (formObject: any) => {
+    const w = appearance.internal.getWidth(formObject), h = appearance.internal.getHeight(formObject);
+    const xobj = appearance.CheckBox.OffPushDown(formObject);
+    xobj.stream = [
+      "1 1 1 rg", `0 0 ${f2(w)} ${f2(h)} re`, "f",
+      `${green} RG`, "0.4 w", `0 0 ${f2(w)} ${f2(h)} re`, "S",
+    ].join("\n");
+    return xobj;
+  };
+  box.appearanceStreamContent = { N: { On: on, Off: off }, D: { On: on, Off: off } };
+  box.appearanceState = "Off";
+  box.value = "Off";
+};
+
 export function SiteSurveyClientPendingReport({ visit, client, unit, project, points, questions }: Props) {
   const [busy, setBusy] = useState(false);
   const [prepared, setPrepared] = useState<Blob | null>(null);
