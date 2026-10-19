@@ -883,6 +883,13 @@
       "when": 1792430330330,
       "tag": "0125_survey_lease_same_user_takeover",
       "breakpoints": true
+    },
+    {
+      "idx": 126,
+      "version": "7",
+      "when": 1792430345992,
+      "tag": "0126_survey_lease_editable_flag",
+      "breakpoints": true
     }
   ]
 }
