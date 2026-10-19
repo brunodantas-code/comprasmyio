@@ -1040,6 +1040,6 @@
 - [x] Relatório de pendências: ocultar contagem zero e mensagem sem perguntas quando não houver perguntas pendentes.
 
 - [ ] Site Survey — Cadastro: filtro geral multiseleção ao lado de Ações (pop-up com todas as opções de todas as seções do checklist, aplicado a todos os pontos; PDF/Excel exportam só o que foi selecionado). Ex.: lojas com hidrômetro vazão até 10 m³/h ou bitola de cabo até 16 mm, ou combinações.
-- [ ] Site Survey — relatórios do cliente: coluna Tipo sem quebrar "Quiosque"/"Loja vaga" (largura calculada pelo texto) e checkbox de confirmação na tabela "Lojas vagas cadastradas".
-- [ ] Site Survey — relatórios do cliente: ocultar a coluna "Nº do medidor" quando nenhum ponto da tabela tiver número (mesma regra do Cadastro em PDF/Excel).
+- [x] Site Survey — relatórios do cliente: coluna Tipo sem quebrar "Quiosque"/"Loja vaga" (largura calculada pelo texto) e checkbox de confirmação na tabela "Lojas vagas cadastradas".
+- [x] Site Survey — relatórios do cliente: ocultar a coluna "Nº do medidor" quando nenhum ponto da tabela tiver número (mesma regra do Cadastro em PDF/Excel).
 - [ ] Histórico de nomes: linha "Alpha Express → Netão" aparece "Sem LUC"; o LUC (STB1082A) é mantido na troca de nome e deve constar na linha.
