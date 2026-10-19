@@ -113,9 +113,9 @@ export function SiteSurveyClientPendingReport({ visit, client, unit, project, po
       pdf.setFont("Nunito", "bold"); pdf.setFontSize(20); pdf.setTextColor(...accent); pdf.text("myio | Site Survey", 14, 22);
       pdf.setFontSize(15); pdf.setTextColor(...ink); pdf.text("Pendências para o cliente", 14, 32);
       pdf.setDrawColor(...green); pdf.line(14, 37, 196, 37);
-      const table = (startY: number, head: string[], body: string[][]) => {
-        autoTable(pdf, { startY, theme: "plain", pageBreak: "avoid", margin: { top: 20, bottom: 20, left: 14, right: 14 }, styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: 3, overflow: "linebreak" }, headStyles: { fontStyle: "bold", textColor: accent, lineWidth: { bottom: 0.3 }, lineColor: green }, head: [head], body, rowPageBreak: "avoid" });
-        return (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 8;
+      const table = (startY: number, head: string[], body: string[][], padding = 3) => {
+        autoTable(pdf, { startY, theme: "plain", pageBreak: "avoid", margin: { top: 20, bottom: 20, left: 14, right: 14 }, styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: padding, overflow: "linebreak" }, headStyles: { fontStyle: "bold", textColor: accent, lineWidth: { bottom: 0.3 }, lineColor: green }, head: [head], body, rowPageBreak: "avoid" });
+        return (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 5;
       };
       let y = table(42, ["Visita", "Cliente / unidade", "Projeto"], [[`SS-${number}\nData da visita: ${date(visit.completed_at ?? visit.scheduled_start)}\nEmissão: ${date(new Date().toISOString())}`, [client, unit].filter(Boolean).join("\n") || "—", project || "—"]]);
       pdf.setFont("Nunito", "normal"); pdf.setFontSize(10); pdf.text(`${questionCount} pergunta(s) aguardando resposta · ${callCount} chamado(s) / intervenção(ões)`, 14, y); y += 10;
@@ -124,10 +124,10 @@ export function SiteSurveyClientPendingReport({ visit, client, unit, project, po
         const kind = ({ shop: "Loja", kiosk: "Quiosque", environment: "Ambiente", vacant: "Loja vaga", general: "Geral" } as Record<string, string>)[group.pointType] ?? "Ponto";
         y = table(y, [`${kind} — ${group.label}`], [
           ...group.questions.map((text, index) => [`${index + 1}. ${text}`]),
-          ...(group.calls.length ? [["Chamados e intervenções gerados durante o checklist"], ...group.calls.map((call) => [call.call_number
+          ...group.calls.map((call) => [call.call_number
             ? `Chamado #${call.call_number} — ${call.title}\nSituação: ${statusLabel(call.status)}${call.description?.trim() ? `\n${call.description.trim()}` : ""}`
-            : `Intervenção${call.description?.trim() ? `\n${call.description.trim()}` : ""}`])] : []),
-        ]);
+            : call.description?.trim() || "—"]),
+        ], 1.5);
       }
       const missingLucs = unidentifiedLucPoints(freshPoints);
       if (missingLucs.length) {
