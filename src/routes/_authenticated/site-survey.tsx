@@ -442,6 +442,8 @@ function VisitDetails({ pointSearch = "", visit, data, onClose, onChanged, close
   const saveQueue = useRef<Promise<unknown>>(Promise.resolve());
   const [approvedActionKeys, setApprovedActionKeys] = useState<Set<string>>(() => new Set());
   const approvedActionKeysRef = useRef<Set<string>>(new Set());
+  // Photo reused by an intervention: stored as a reference on the response, never duplicated.
+  const actionPhotoReferencesRef = useRef<Map<string, string>>(new Map());
   const [declinedActionKeys, setDeclinedActionKeys] = useState<Set<string>>(() => new Set());
   const [pendingAction, setPendingAction] = useState<{ key: string; actionName: string; questionId: string; phase: "pre_visit" | "point" } | null>(null);
   const [actionPhotoChoice, setActionPhotoChoice] = useState("");
@@ -724,9 +726,10 @@ function VisitDetails({ pointSearch = "", visit, data, onClose, onChanged, close
       const observation = values.has(`${question.id}__observation`) ? String(values.get(`${question.id}__observation`) ?? "").trim() : questionObservation(savedAnswer);
        const hasOtherOption = Array.isArray(question.options) && question.options.some((option) => typeof option === "string" && isOtherOption(option));
       const questionScope = phase === "pre_visit" ? { visit_luc_id: null, visit_environment_id: null } : scope;
-       const photoReference = String(values.get(`${question.id}__photo_reference`) ?? "");
+       const forcedReference = actionPhotoReferencesRef.current.get(question.id) ?? "";
+       const photoReference = String(values.get(`${question.id}__photo_reference`) ?? "") || forcedReference;
        const priorQuestionIds = new Set(questionOrder.slice(0, questionOrder.findIndex((item) => item.question.id === question.id)).map((item) => item.question.id));
-       const validReference = (detail?.attachments ?? []).some((item) => item.id === photoReference && Boolean(item.question_id && priorQuestionIds.has(item.question_id)) && item.content_type?.startsWith("image/") && (phase === "pre_visit" ? !item.visit_luc_id && !item.visit_environment_id : matchesPoint(item)));
+       const validReference = (detail?.attachments ?? []).some((item) => item.id === photoReference && Boolean(item.question_id && (priorQuestionIds.has(item.question_id) || (photoReference === forcedReference && item.question_id !== question.id))) && item.content_type?.startsWith("image/") && (phase === "pre_visit" ? !item.visit_luc_id && !item.visit_environment_id : matchesPoint(item)));
        return { visit_id: visit.id, ...questionScope, question_id: question.id, answered_by: data.userId, answer: customerRows || config.detail || config.other_detail || hasOtherOption || validReference || config.observation || observation ? { value, ...(customerRows ? { customer_questions: customerRows } : {}), ...(customerAnswered?.length ? { customer_questions_answered: customerAnswered } : {}), ...(customerResponses && Object.keys(customerResponses).length ? { customer_question_responses: customerResponses } : {}), ...(config.detail || config.other_detail || hasOtherOption ? { detail: detailValue || null } : {}), ...(config.observation || observation ? { observation: observation || null } : {}), ...(validReference ? { photo_reference_id: photoReference } : {}) } : value, question_snapshot: JSON.parse(JSON.stringify({ prompt: question.prompt, options: question.options, configuration: question.configuration })) };
     });
     for (const question of visibleQuestions.filter((item) => item.question_key !== "shopping_maintenance_companions")) {
@@ -1325,15 +1328,20 @@ function VisitDetails({ pointSearch = "", visit, data, onClose, onChanged, close
       } else if (actionPhotoChoice && questionId) {
         const chosen = pendingActionPhotoCandidates.find((item) => item.id === actionPhotoChoice);
         // Foto já vinculada a outra seção: duplica o vínculo para não remover a foto da seção original.
-        // Cada vínculo exige arquivo próprio (caminho único); copia a foto original sem alterá-la.
-        let copiedPath: string | null = null;
         if (chosen?.question_id) {
-          copiedPath = `${visit.id}/${action.phase === "pre_visit" ? "geral" : pointId}/${crypto.randomUUID()}-${chosen.file_name.replace(/[^a-zA-Z0-9._-]/g, "-")}`;
-          const { error: copyError } = await supabase.storage.from("site-survey-attachments").copy(chosen.storage_path, copiedPath);
-          if (copyError) throw copyError;
+          // Mesma regra das perguntas: reaproveita a foto por referência, sem duplicar o anexo.
+          actionPhotoReferencesRef.current.set(questionId, chosen.id);
+          let query = supabase.from("site_survey_responses").select("id,answer").eq("visit_id", visit.id).eq("question_id", questionId);
+          query = scope.visit_luc_id ? query.eq("visit_luc_id", scope.visit_luc_id) : scope.visit_environment_id ? query.eq("visit_environment_id", scope.visit_environment_id) : query.is("visit_luc_id", null).is("visit_environment_id", null);
+          const { data: existing } = await query.maybeSingle();
+          if (existing) {
+            const current = existing.answer && typeof existing.answer === "object" && !Array.isArray(existing.answer) ? existing.answer as Record<string, unknown> : { value: existing.answer };
+            const { error: refError } = await supabase.from("site_survey_responses").update({ answer: JSON.parse(JSON.stringify({ ...current, photo_reference_id: chosen.id })) }).eq("id", existing.id);
+            if (refError) throw refError;
+          }
         }
-        const { error } = chosen?.question_id && copiedPath
-          ? await supabase.from("site_survey_attachments").insert({ visit_id: visit.id, ...scope, question_id: questionId, attachment_kind: "question", uploaded_by: data.userId, file_name: chosen.file_name, storage_path: copiedPath, content_type: chosen.content_type })
+        const { error } = chosen?.question_id
+          ? { error: null }
           : await supabase.from("site_survey_attachments").update({ question_id: questionId, attachment_kind: "question" }).eq("id", actionPhotoChoice);
         if (error) throw error;
         toast.success("Foto vinculada à intervenção");
