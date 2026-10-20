@@ -271,7 +271,7 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
           bodyStyles: { minCellHeight: photoSize + 4 }, rowPageBreak: "avoid", showHead: "everyPage",
           columnStyles: Object.fromEntries(lucWidths.map((width, index) => [index, { cellWidth: width }])),
           head: [["Foto", "LUC", ...(lucMeter ? ["Nº do medidor"] : []), "Tipo", "Nome da loja", "Localização"]],
-          body: group.map((point) => [thumbnails.has(point.value) ? "" : "Sem foto", point.lucNumber?.trim() || "Sem LUC", ...(lucMeter ? [point.meterNumber || "—"] : []), lucType(point), point.name ?? point.label, point.location || "—"]),
+          body: group.map((point) => [thumbnails.has(point.value) ? "" : "Sem foto", point.lucNumber?.trim() || "Sem LUC", ...(lucMeter ? [point.meterNumber || "—"] : []), lucType(point), point.name?.trim() || (withNameField ? "Não identificado" : point.label), point.location || "—"]),
           didParseCell: (cell) => {
             if (cell.section === "body" && (cell.column.index === 1 || (withNameField && cell.column.index === nameColumn))) { cell.cell.styles.valign = "top"; cell.cell.styles.minCellHeight = Math.max(photoSize + 4, 16); }
             if (lucMeter && cell.column.index === 2) cell.cell.styles.overflow = "visible";
