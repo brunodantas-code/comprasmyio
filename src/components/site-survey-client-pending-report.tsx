@@ -174,6 +174,38 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
       const answerFields: CustomerAnswerField[] = [];
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const TextFieldClass = (pdf.AcroForm as any).TextField as new () => any;
+      // Miniaturas de fachada compartilhadas: perguntas e identificação de LUC usam a mesma foto.
+      const withTimeout = <T,>(promise: Promise<T>) => Promise.race([promise, new Promise<never>((_, reject) => setTimeout(() => reject(new Error("timeout")), 20000))]);
+      const thumbnails = new Map<string, string>();
+      // Decodificação serial limita a memória mesmo com originais grandes; falha numa foto não impede o relatório.
+      const loadThumbnail = async (pointValue: string) => {
+        if (thumbnails.has(pointValue)) return;
+        try {
+          const attachment = facades.find((item) => pointValue === (item.visit_luc_id ? `luc:${item.visit_luc_id}` : `environment:${item.visit_environment_id}`));
+          if (!attachment) return;
+          const { data: original, error } = await withTimeout(supabase.storage.from("site-survey-attachments").download(attachment.storage_path));
+          if (error || !original) return;
+          let blob = original;
+          if (/\.(heic|heif)$/i.test(attachment.file_name) || /image\/hei[cf]/i.test(attachment.content_type ?? "")) {
+            const { heicTo } = await import("heic-to/csp");
+            blob = await withTimeout(heicTo({ blob, type: "image/jpeg", quality: 0.85 }));
+          }
+          const url = URL.createObjectURL(blob);
+          try {
+            const image = new Image(); image.src = url; await withTimeout(image.decode());
+            const canvas = document.createElement("canvas"); canvas.width = 240; canvas.height = 240;
+            const context = canvas.getContext("2d");
+            if (!context) return;
+            // Quadrado com bordas arredondadas, como nas fachadas do Histórico.
+            clipRoundedPhoto(context, 240, 240);
+            const side = Math.min(image.naturalWidth, image.naturalHeight);
+            context.drawImage(image, (image.naturalWidth - side) / 2, (image.naturalHeight - side) / 2, side, side, 0, 0, 240, 240);
+            thumbnails.set(pointValue, canvas.toDataURL("image/png"));
+          } finally { URL.revokeObjectURL(url); }
+        } catch { /* foto indisponível: segue sem thumbnail */ }
+      };
+      // Pontos com perguntas mostram a foto da fachada no cabeçalho, para o cliente identificar o ponto.
+      for (const group of groups) if (group.questions.length) await loadThumbnail(group.value);
       for (const group of groups) {
         if (!group.questions.length) continue;
         const kind = ({ shop: "Loja", kiosk: "Quiosque", environment: "Ambiente", vacant: "Loja vaga", vacant_kiosk: "Quiosque vago", general: "Geral" } as Record<string, string>)[group.pointType] ?? "Ponto";
