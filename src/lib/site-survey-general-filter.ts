@@ -16,27 +16,31 @@ function answerField(answer: unknown, path: string): string[] {
   return strings(path === "value" ? ("value" in object ? object.value : answer) : object[path]);
 }
 const EXCLUDED_SECTIONS = ["diversos", "check list de preparacao", "checklist de preparacao", "equipe", "condicoes do local", "revisao, pendencias, fotos e encerramento", "observacoes finais e fotos adicionais"];
-const excludedQuestion = (prompt: string) => { const p = normalize(prompt); return p.includes("cisterna") || p.startsWith("qual a dificuldade de acesso ao hidrometro"); };
+const excludedQuestion = (prompt: string) => { const p = normalize(prompt); return p.includes("cisterna") || p.startsWith("qual a dificuldade de acesso ao hidrometro") || p.startsWith("inserir foto"); };
 // Hydrometer questions stored under "Tipo" are shown with "Água e hidrômetros".
 const filterSectionTitle = (title: string, prompt: string) => normalize(title) === "tipo" && normalize(prompt).includes("hidrometro") ? "Água e hidrômetros" : title;
 export function generalFilterFields(data: GeneralFilterData): FilterField[] {
   const fields = new Map<string, FilterField>();
+  const sortIndex = new Map<string, number>();
   for (const section of data.sections.filter((s) => s.active && !EXCLUDED_SECTIONS.includes(normalize(s.title)) && [data.visitTemplateId, ...(data.pointTemplateIds ?? [])].includes(s.template_id)).sort((a, b) => a.position - b.position)) {
     for (const q of data.questions.filter((q) => q.active && q.section_id === section.id && !excludedQuestion(q.prompt)).sort((a, b) => a.position - b.position)) {
       const config = record(q.configuration), detail = record(config.detail);
       const sectionTitle = filterSectionTitle(section.title, q.prompt);
       const paths = [{ path: "value", label: q.prompt, options: q.options, numeric: q.question_type === "number" }, ...(Object.keys(detail).length ? [{ path: "detail", label: String(detail.label || "Detalhes"), options: detail.options, numeric: false }] : []), ...(detail.suboptions ? [{ path: "subdetail", label: "Complemento", options: Object.values(record(detail.suboptions)).flat(), numeric: false }] : [])];
-      for (const item of paths) {
+      for (const [index, item] of paths.entries()) {
         const key = `${normalize(sectionTitle)}|${normalize(q.prompt)}|${item.path}`;
         const field = fields.get(key) ?? { key, section: sectionTitle, prompt: q.prompt, label: item.label, path: item.path, questionIds: [], options: [], numeric: item.numeric };
         field.questionIds.push(q.id);
+        if (!sortIndex.has(key) || sortIndex.get(key)! > section.position * 100000 + q.position * 10 + index) sortIndex.set(key, section.position * 100000 + q.position * 10 + index);
         const observed = data.responses.filter((r) => r.question_id === q.id).flatMap((r) => answerField(r.answer, item.path));
         field.options = [...new Set([...field.options, ...strings(item.options), ...(q.question_type === "checkbox" && item.path === "value" ? ["Sim", "Não"] : []), ...observed])];
         fields.set(key, field);
       }
     }
   }
-  return [...fields.values()];
+  const sectionOrder: string[] = [];
+  for (const field of fields.values()) if (!sectionOrder.includes(field.section)) sectionOrder.push(field.section);
+  return sectionOrder.flatMap((section) => [...fields.values()].filter((f) => f.section === section).sort((a, b) => (sortIndex.get(a.key) ?? 0) - (sortIndex.get(b.key) ?? 0)));
 }
 function ruleMatches(values: string[], rule: FilterRule): boolean {
   const optionsMatch = rule.values.length === 0 || values.some((v) => rule.values.some((selected) => normalize(v) === normalize(selected)));

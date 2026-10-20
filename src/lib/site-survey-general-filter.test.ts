@@ -38,4 +38,15 @@ describe("filtro geral do Cadastro", () => {
     const key = detailFields.find((f) => f.path === "detail")?.key ?? "invalid";
     expect(matchesGeneralFilter({ id: "shop", source: "luc" }, detailData, detailFields, { mode: "all", rules: { [key]: { values: ["Até 10"] } } })).toBe(true);
   });
+  it("mantém a sequência do checklist original dentro da seção mesclada", () => {
+    const merged: GeneralFilterData = { ...data, sections: [...data.sections, { id: "tipo", template_id: "shopping", title: "Tipo", position: 2, active: true }, { id: "agua-hidrometros", template_id: "shopping", title: "Água e hidrômetros", position: 4, active: true }], questions: [...data.questions, { id: "meter-exists", section_id: "tipo", prompt: "Existe hidrômetro na loja?", question_type: "radio", position: 2, active: true, options: ["Sim", "Não", "Não informado"], configuration: {} }, { id: "meter-brand", section_id: "agua-hidrometros", prompt: "Marca do hidrômetro", question_type: "text", position: 5, active: true, options: [], configuration: {} }] };
+    const mergedFields = generalFilterFields(merged);
+    const waterFields = mergedFields.filter((f) => f.section === "Água e hidrômetros");
+    expect(waterFields[0].prompt).toBe("Existe hidrômetro na loja?");
+    expect(waterFields[1].prompt).toBe("Marca do hidrômetro");
+  });
+  it("exclui perguntas de foto dos filtros", () => {
+    const withPhoto: GeneralFilterData = { ...data, questions: [...data.questions, { id: "photo-panel", section_id: "energy", prompt: "Inserir foto do quadro elétrico aberto", question_type: "text", position: 9, active: true, options: [], configuration: {} }] };
+    expect(generalFilterFields(withPhoto).some((f) => f.prompt === "Inserir foto do quadro elétrico aberto")).toBe(false);
+  });
 });
