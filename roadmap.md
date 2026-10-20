@@ -1047,3 +1047,7 @@
 
 - [x] Relatório de pendências do cliente: continuar seções na mesma página, reduzir espaços em branco e eliminar quebras desnecessárias. PDF do Taboão conferido em duas páginas.
 - [x] Site Survey — Cadastro completo: seta verde de exibir/recolher no título, ocultando totalizadores e Pontos contratados e deixando à vista o cabeçalho da visita e os botões de relatório; conferido no preview (recolher e reexibir na visita 202609300001).
+
+- [x] Filtro Geral: remover droplist de comparação (Texto contém/Número até/…) mantendo o campo de Texto da Resposta.
+- [x] Filtro Geral: manter a sequência do checklist original na ordenação das perguntas (pergunta "Existe hidrômetro na loja?" estava no fim).
+- [ ] Filtro Geral: excluir "Inserir foto do quadro elétrico aberto" da seção de Elétrica.
