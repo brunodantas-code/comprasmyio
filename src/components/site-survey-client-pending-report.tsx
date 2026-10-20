@@ -133,7 +133,7 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
           if ((result.data?.length ?? 0) < 1000) return rows;
         }
       };
-      const [responses, calls, freshPoints, texts, facades, { jsPDF }, { default: autoTable }] = await Promise.all([loadResponses(), loadCalls(), loadPoints(), loadTexts(), loadFacades(), import("jspdf"), import("jspdf-autotable")]);
+      const [responses, calls, freshPoints, texts, facades, { jsPDF }, { default: autoTable }, { PDFDocument, PDFName, PDFTextField }] = await Promise.all([loadResponses(), loadCalls(), loadPoints(), loadTexts(), loadFacades(), import("jspdf"), import("jspdf-autotable"), import("pdf-lib")]);
       if (calls.some((call) => call.internal_call_id && !call.internal_calls)) throw new Error("Não foi possível consultar todos os chamados vinculados. Verifique seu acesso aos chamados antes de gerar o relatório.");
       const groups = buildClientPendingGroups(freshPoints.length ? freshPoints : points, responses, questions, calls, texts);
       const pdf = new jsPDF({ unit: "mm", format: "a4" });
