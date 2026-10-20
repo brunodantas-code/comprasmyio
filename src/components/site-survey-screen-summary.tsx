@@ -1,4 +1,4 @@
-import { customerQuestionResponses, customerQuestions, isCustomerQuestion, numberedCustomerQuestions } from "@/lib/site-survey-questions";
+import { customerQuestionResponses, customerQuestions, customerHistorySectionIds, isCustomerQuestion, numberedCustomerQuestions } from "@/lib/site-survey-questions";
 import { surveyPointType } from "@/lib/site-survey-point-type";
 import { SurveyPhotoNav, surveyPhotoKeydown, isSurveyImageFile } from "@/components/site-survey-photo-viewer";
 import { useMemo, useState, type ReactNode } from "react";
@@ -105,7 +105,7 @@ function FacadePhotoThumbnail({ attachment, gallery, userId, canDelete, canEditA
   };
   return <div className="relative">
     <PhotoThumbnail attachment={attachment} gallery={gallery} />
-    {deletable ? <div className="absolute -right-1.5 -top-1.5 z-10"><ConfirmDeleteButton title="Excluir foto da fachada?" description="A foto será removida desta visita. Esta ação não pode ser desfeita." ariaLabel={`Excluir foto da fachada: ${attachment.file_name}`} confirmLabel="Excluir" pending={pending} onConfirm={() => void remove()} trigger={<Button type="button" size="compactIcon" variant="ghost" className="h-6 w-6 rounded-full bg-background text-myio-green shadow-sm hover:!text-myio-green" aria-label={`Excluir foto da fachada: ${attachment.file_name}`}><Trash2 className="h-3.5 w-3.5" /></Button>} /></div> : null}
+    {deletable ? <div className="absolute -right-1.5 -top-1.5 z-10 rounded-full bg-background shadow-sm"><ConfirmDeleteButton title="Excluir foto da fachada?" description="A foto será removida desta visita. Esta ação não pode ser desfeita." ariaLabel={`Excluir foto da fachada: ${attachment.file_name}`} confirmLabel="Excluir" pending={pending} onConfirm={() => void remove()} trigger={<Button type="button" size="compactIcon" variant="action" className="group h-7 w-7 rounded-full hover:!text-action-hover-foreground focus-visible:!text-action-hover-foreground active:!text-action-hover-foreground" aria-label={`Excluir foto da fachada: ${attachment.file_name}`}><Trash2 className="h-3.5 w-3.5 group-hover:!text-action-hover-foreground group-focus-visible:!text-action-hover-foreground group-active:!text-action-hover-foreground" /></Button>} /></div> : null}
   </div>;
 }
 
@@ -181,7 +181,8 @@ export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections
                 const pointAttachments = attachments.filter((item) => matchesPoint(point, item));
                 const pointMaterials = materials.filter((item) => matchesPoint(point, item));
                 const excludedSections = excludedSectionIds(point.skippedSectionIds);
-                const availableSections = sections.filter((section) => section.active && section.template_id === point.templateId && !excludedSections.has(section.id)).sort((left, right) => left.position - right.position);
+                const customerSectionIds = customerHistorySectionIds(questions, pointResponses);
+                const availableSections = sections.filter((section) => (section.active && section.template_id === point.templateId && !excludedSections.has(section.id)) || customerSectionIds.has(section.id)).sort((left, right) => left.position - right.position);
                 const grouped = availableSections.map((section) => ({ section, nature: sectionNature(section.title), rows: pointResponses.filter((response) => questions.find((question) => question.id === response.question_id)?.section_id === section.id).sort((left, right) => (questions.find((question) => question.id === left.question_id)?.position ?? Number.MAX_SAFE_INTEGER) - (questions.find((question) => question.id === right.question_id)?.position ?? Number.MAX_SAFE_INTEGER)) })).filter((group) => group.rows.length || pointAttachments.some((attachment) => attachment.question_id && questions.find((question) => question.id === attachment.question_id)?.section_id === group.section.id));
                 const firstPhotoSectionId = sidePanel ? grouped.find((group) => pointAttachments.some((attachment) => attachment.question_id && questions.find((question) => question.id === attachment.question_id)?.section_id === group.section.id))?.section.id ?? null : null;
                 const knownResponseIds = new Set(pointResponses.filter((response) => { const sectionId = questions.find((question) => question.id === response.question_id)?.section_id; return Boolean(sectionId && excludedSections.has(sectionId)); }).map((response) => response.id));

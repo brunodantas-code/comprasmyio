@@ -71,3 +71,14 @@ export function pendingCustomerQuestions(answer: unknown): string[] {
   const answered = new Set(answeredCustomerQuestions(answer));
   return customerQuestions(answer).filter((value) => !answered.has(value));
 }
+/** Customer Q&A keeps its original section visible after a point changes templates. */
+export function customerHistorySectionIds(
+  questions: { id: string; section_id: string; prompt: string; question_key?: string | null }[],
+  responses: { question_id: string; answer: unknown }[],
+): Set<string> {
+  return new Set(questions.filter((question) => responses.some((response) =>
+    response.question_id === question.id &&
+    (isCustomerQuestion(question) || (response.answer !== null && typeof response.answer === "object" && "customer_questions" in response.answer)) &&
+    customerQuestions(response.answer).length > 0,
+  )).map((question) => question.section_id));
+}
