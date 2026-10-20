@@ -2,7 +2,10 @@ import { customerQuestionResponses, customerQuestions, isCustomerQuestion, numbe
 import { surveyPointType } from "@/lib/site-survey-point-type";
 import { SurveyPhotoNav, surveyPhotoKeydown, isSurveyImageFile } from "@/components/site-survey-photo-viewer";
 import { useMemo, useState, type ReactNode } from "react";
-import { Camera, ChevronDown, ChevronUp, ClipboardList, Droplets, FileText, ImageIcon, MapPin, Package, Search, Wrench, Zap } from "lucide-react";
+import { Camera, ChevronDown, ChevronUp, ClipboardList, Droplets, FileText, ImageIcon, MapPin, Package, Search, Trash2, Wrench, Zap } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 
 import { SiteSurveyFacadeThumbnail } from "@/components/site-survey-facade-thumbnail";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +18,7 @@ import { useSurveyImage } from "@/hooks/use-survey-image";
 
 type SummaryQuestion = { id: string; section_id: string; prompt: string; position: number; active: boolean };
 type SummarySection = { id: string; template_id: string; title: string; position: number; active: boolean };
-type SummaryAttachment = { id: string; question_id: string | null; visit_luc_id: string | null; visit_environment_id: string | null; file_name: string; storage_path: string; content_type: string | null; attachment_kind?: string };
+type SummaryAttachment = { id: string; question_id: string | null; visit_luc_id: string | null; visit_environment_id: string | null; file_name: string; storage_path: string; content_type: string | null; attachment_kind?: string; uploaded_by?: string | null };
 type SummaryResponse = { id: string; question_id: string; visit_luc_id: string | null; visit_environment_id: string | null; answer: unknown; question_snapshot?: unknown };
 type SummaryMaterial = { id: string; visit_luc_id: string | null; visit_environment_id: string | null; catalog_item_id: string; quantity: number; notes: string | null; screwdriver_type_id?: string | null; wrench_size_id?: string | null; custom_type_item_id?: string | null };
 type SummaryPoint = { id: string; kind: "luc" | "environment"; pointType: "shop" | "kiosk" | "environment" | "vacant" | "vacant_kiosk"; name: string; luc: string; location: string; templateId: string | null; completionStatus: string; skippedSectionIds: string[] };
@@ -81,7 +84,32 @@ function PhotoThumbnail({ attachment, gallery }: { attachment: SummaryAttachment
   </>;
 }
 
-export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections, questions, lucs, environments, responses, attachments, materials, catalog, screwdriverTypes, wrenchSizes, customCatalogs, onClose, onQuestionClick, onOpenChecklist, pointValue, embedded = false, sidePanel, interventionCount }: {
+function FacadePhotoThumbnail({ attachment, gallery, userId, canDelete, canEditAttachments, onDeleted }: { attachment: SummaryAttachment; gallery?: SummaryAttachment[]; userId?: string; canDelete?: boolean; canEditAttachments?: boolean; onDeleted?: () => void }) {
+  const [pending, setPending] = useState(false);
+  const deletable = Boolean(canDelete && userId && (attachment.uploaded_by === userId || canEditAttachments));
+  const remove = async () => {
+    if (pending) return;
+    setPending(true);
+    try {
+      const { data: removed, error } = await supabase.from("site_survey_attachments").delete().eq("id", attachment.id).select("id");
+      if (error) throw error;
+      if (removed?.length !== 1) throw new Error("Não foi possível excluir a foto. Atualize a visita e tente novamente.");
+      const { error: storageError } = await supabase.storage.from("site-survey-attachments").remove([attachment.storage_path]);
+      onDeleted?.();
+      if (storageError) toast.warning("Foto removida da visita, mas o arquivo não pôde ser apagado do armazenamento.");
+      else toast.success("Foto da fachada excluída.");
+    } catch (error) {
+      onDeleted?.();
+      toast.error(error instanceof Error ? error.message : "Não foi possível excluir a foto da fachada.");
+    } finally { setPending(false); }
+  };
+  return <div className="relative">
+    <PhotoThumbnail attachment={attachment} gallery={gallery} />
+    {deletable ? <div className="absolute -right-1.5 -top-1.5 z-10"><ConfirmDeleteButton title="Excluir foto da fachada?" description="A foto será removida desta visita. Esta ação não pode ser desfeita." ariaLabel={`Excluir foto da fachada: ${attachment.file_name}`} confirmLabel="Excluir" pending={pending} onConfirm={() => void remove()} trigger={<Button type="button" size="compactIcon" variant="ghost" className="h-6 w-6 rounded-full bg-background text-myio-green shadow-sm hover:!text-myio-green" aria-label={`Excluir foto da fachada: ${attachment.file_name}`}><Trash2 className="h-3.5 w-3.5" /></Button>} /></div> : null}
+  </div>;
+}
+
+export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections, questions, lucs, environments, responses, attachments, materials, catalog, screwdriverTypes, wrenchSizes, customCatalogs, onClose, onQuestionClick, onOpenChecklist, pointValue, embedded = false, sidePanel, interventionCount, userId, canManageAttachments = false, canEditAttachments = false, onAttachmentsChanged }: {
   visitNumber: number;
   visitTemplateId: string | null;
   sections: SummarySection[];
@@ -102,6 +130,10 @@ export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections
   embedded?: boolean;
   sidePanel?: ReactNode;
   interventionCount?: (pointValue: string) => number;
+  userId?: string;
+  canManageAttachments?: boolean;
+  canEditAttachments?: boolean;
+  onAttachmentsChanged?: () => void;
 }) {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
@@ -175,7 +207,7 @@ export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections
                       <Button type="button" variant="ghost" size="compactIcon" title={`${collapsed ? "Exibir" : "Recolher"} ${point.name}`} className="col-start-2 row-start-1 sm:col-start-auto sm:row-start-auto" aria-label={`${collapsed ? "Exibir" : "Recolher"} ${point.name}`} aria-expanded={!collapsed} aria-controls={contentId} onClick={() => setCollapsedPoints((previous) => { const next = new Set(previous); if (next.has(pointKey)) next.delete(pointKey); else next.add(pointKey); return next; })}>{collapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}</Button>
                     </header> : <div className="mb-3 flex flex-wrap items-center justify-between gap-2"><h4 className="text-xs font-bold uppercase text-muted-foreground">Histórico do checklist</h4>{onOpenChecklist ? <Button type="button" size="sm" variant="action" onClick={() => onOpenChecklist(`${point.kind}:${point.id}`)}><ClipboardList className="h-4 w-4" />Abrir checklist</Button> : null}</div>}
                     <div id={contentId} hidden={!embedded && collapsed} className={`${embedded ? "lg:flow-root" : "mt-3"} min-w-0 space-y-3`}>
-                      {facadePhotos.length ? <div className="space-y-2 border-b border-border pb-3"><div className="flex min-w-24 items-center gap-2 text-xs font-bold uppercase text-muted-foreground"><ImageIcon className="h-4 w-4 text-primary" />Fachada</div><div className="flex min-w-0 flex-wrap gap-2">{facadePhotos.map((photo) => <PhotoThumbnail key={photo.id} attachment={photo} gallery={facadePhotos} />)}</div></div> : null}
+                      {facadePhotos.length ? <div className="space-y-2 border-b border-border pb-3"><div className="flex min-w-24 items-center gap-2 text-xs font-bold uppercase text-muted-foreground"><ImageIcon className="h-4 w-4 text-primary" />Fachada</div><div className="flex min-w-0 flex-wrap gap-2">{facadePhotos.map((photo) => <FacadePhotoThumbnail key={photo.id} attachment={photo} gallery={facadePhotos} userId={userId} canDelete={canManageAttachments} canEditAttachments={canEditAttachments} onDeleted={onAttachmentsChanged} />)}</div></div> : null}
                       {grouped.map(({ section, nature, rows }) => { const Icon = nature.icon; const groupPhotos = pointAttachments.filter((attachment) => attachment.question_id && questions.find((question) => question.id === attachment.question_id)?.section_id === section.id); return <section key={section.id} className="min-w-0"><h4 className="mb-1.5 flex items-center gap-2 text-xs font-bold uppercase text-muted-foreground"><Icon className="h-4 w-4 shrink-0 text-primary" />{nature.label}</h4><dl className="grid gap-x-4 gap-y-1.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{rows.map((response, rowIndex) => { const question = questions.find((item) => item.id === response.question_id); const customerRows = (question && isCustomerQuestion(question)) || (response.answer && typeof response.answer === "object" && "customer_questions" in response.answer) ? customerQuestions(response.answer) : []; const customerResponses = customerQuestionResponses(response.answer); const numberControl = onQuestionClick ? <Button type="button" variant="ghost" size="compactIcon" className="h-5 w-5 rounded-md !bg-primary/15 text-[10px] font-bold leading-none !text-primary hover:!bg-primary hover:!text-primary-foreground" aria-label={`Editar pergunta ${rowIndex + 1}: ${question?.prompt ?? snapshotPrompt(response.question_snapshot)}`} title="Editar resposta" onClick={() => onQuestionClick(`${point.kind}:${point.id}`, response.question_id)}>{rowIndex + 1}</Button> : <span className="grid h-5 w-5 shrink-0 place-items-center rounded-md bg-primary/15 text-[10px] font-bold leading-none text-primary">{rowIndex + 1}</span>; return customerRows.length ? <div key={response.id} className="min-w-0 space-y-2 sm:col-span-2 lg:col-span-3 xl:col-span-4">{customerRows.map((customerQuestion, customerIndex) => <div key={`${response.id}-${customerQuestion}`} className="rounded-md border border-border bg-background p-2"><div className="flex min-w-0 items-start gap-2"><Button type="button" variant="ghost" size="compactIcon" className="h-5 w-5 rounded-md !bg-primary/15 text-[10px] font-bold leading-none !text-primary hover:!bg-primary hover:!text-primary-foreground" disabled={!onQuestionClick} aria-label={`Editar pergunta ${customerIndex + 1}: ${customerQuestion}`} title={onQuestionClick ? "Editar resposta" : undefined} onClick={() => onQuestionClick?.(`${point.kind}:${point.id}`, response.question_id)}>{customerIndex + 1}</Button><div className="min-w-0 flex-1"><dd className="mt-1 whitespace-pre-wrap break-words text-sm leading-snug">{customerQuestion}</dd></div></div>{customerResponses[customerQuestion] ? <div className="ml-7 mt-2 rounded-md bg-action/30 px-2 py-1.5"><p className="text-[11px] font-medium leading-tight text-muted-foreground">Resposta do cliente</p><p className="mt-1 whitespace-pre-wrap break-words text-sm leading-snug">{customerResponses[customerQuestion]}</p></div> : null}</div>)}</div> : <div key={response.id} className="flex min-w-0 items-start gap-1.5 border-l-2 border-primary/35 pl-2">{numberControl}<div className="min-w-0"><dt className="text-[11px] leading-tight text-muted-foreground">{question?.prompt ?? snapshotPrompt(response.question_snapshot)}</dt><dd className="whitespace-pre-wrap break-words text-sm font-semibold leading-tight">{answerText(response.answer)}</dd></div></div>; })}</dl>{groupPhotos.length ? <>{sidePanel && firstPhotoSectionId === section.id ? <div className="hidden lg:float-right lg:ml-4 lg:mb-2 lg:w-72 lg:block">{sidePanel}</div> : null}<div className="mt-2 flex flex-wrap gap-2">{groupPhotos.map((photo) => <PhotoThumbnail key={photo.id} attachment={photo} gallery={groupPhotos} />)}</div></> : sidePanel && !firstPhotoSectionId && grouped[0]?.section.id === section.id ? <div className="hidden lg:float-right lg:ml-4 lg:mb-2 lg:w-72 lg:block">{sidePanel}</div> : null}</section>; })}
                       {unmatched.length ? <section className="min-w-0"><h4 className="mb-1.5 flex items-center gap-2 text-xs font-bold uppercase text-muted-foreground"><FileText className="h-4 w-4 text-primary" />Outras respostas</h4><dl className="grid gap-x-4 gap-y-1.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{unmatched.map((response, rowIndex) => { const question = questions.find((item) => item.id === response.question_id); return <div key={response.id} className="flex min-w-0 items-start gap-1.5 border-l-2 border-primary/35 pl-2">{onQuestionClick ? <Button type="button" variant="ghost" size="compactIcon" className="h-5 w-5 rounded-md !bg-primary/15 text-[10px] font-bold leading-none !text-primary hover:!bg-primary hover:!text-primary-foreground" aria-label={`Editar pergunta ${rowIndex + 1}: ${question?.prompt ?? snapshotPrompt(response.question_snapshot)}`} title="Editar resposta" onClick={() => onQuestionClick(`${point.kind}:${point.id}`, response.question_id)}>{rowIndex + 1}</Button> : <span className="grid h-5 w-5 shrink-0 place-items-center rounded-md bg-primary/15 text-[10px] font-bold leading-none text-primary">{rowIndex + 1}</span>}<div className="min-w-0"><dt className="text-[11px] leading-tight text-muted-foreground">{question?.prompt ?? snapshotPrompt(response.question_snapshot)}</dt><dd className="whitespace-pre-wrap break-words text-sm font-semibold leading-tight">{answerText(response.answer)}</dd></div></div>; })}</dl></section> : null}
                       {pointMaterials.length ? <section className="min-w-0"><h4 className="mb-1.5 flex items-center gap-2 text-xs font-bold uppercase text-muted-foreground"><Package className="h-4 w-4 text-primary" />Itens previstos</h4><div className="flex flex-wrap gap-2">{pointMaterials.map((material) => { const item = catalog.find((entry) => entry.id === material.catalog_item_id); const detail = item?.type_builtin === "screwdriver" ? screwdriverTypes.find((entry) => entry.id === material.screwdriver_type_id)?.name : item?.type_builtin === "wrench" ? wrenchSizes.find((entry) => entry.id === material.wrench_size_id)?.name : customCatalogs.flatMap((entry) => entry.site_survey_custom_catalog_items).find((entry) => entry.id === material.custom_type_item_id)?.name; return <span key={material.id} className="rounded-md border bg-muted/30 px-2.5 py-1.5 text-xs"><strong>{material.quantity}× {item?.name ?? "Item"}</strong>{detail ? ` · ${detail}` : ""}{material.notes ? ` · ${material.notes}` : ""}</span>; })}</div></section> : null}
