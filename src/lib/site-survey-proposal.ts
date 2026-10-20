@@ -6,6 +6,8 @@ const electricalOthersSchema = z.object({
   bombas_hidraulicas: z.number().int().nonnegative().nullable(),
   bombas_de_incendio: z.number().int().nonnegative().nullable(),
   elevadores: z.number().int().nonnegative().nullable(),
+  escadas_rolantes: z.number().int().nonnegative().nullable().optional(),
+  central_myio: z.number().int().nonnegative().nullable().optional(),
 }).strict().nullable().optional();
 export const proposalScopeSchema = z.object({
   hydraulic_shops: z.number().int().nonnegative().nullable(),
@@ -41,6 +43,8 @@ const otherEnergyLabels: [keyof NonNullable<ProposalScopeBreakdown["electrical_o
   ["bombas_hidraulicas", "Bombas Hidráulicas"],
   ["bombas_de_incendio", "Bombas de Incêndio"],
   ["elevadores", "Elevadores"],
+  ["escadas_rolantes", "Escadas Rolantes"],
+  ["central_myio", "Central myio"],
 ];
 export function proposalOtherEnergyBreakdown(scope: { scope_breakdown?: ProposalScopeBreakdown | null }): { key: string; label: string; count: number }[] {
   const others = scope.scope_breakdown?.electrical_others;
