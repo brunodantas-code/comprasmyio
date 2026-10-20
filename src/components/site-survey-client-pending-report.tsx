@@ -219,6 +219,15 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
           head: [[`${kind} — ${group.label}`]], body, rowPageBreak: "avoid",
           didParseCell: (cell) => { if (cell.section === "body" && cell.row.index % 2 === 1) cell.cell.styles.minCellHeight = 13; },
           didDrawCell: (cell) => {
+            if (cell.section === "head") {
+              // Foto da fachada no cabeçalho do ponto, para o cliente identificar sobre o que é a pergunta.
+              const thumbnail = thumbnails.get(group.value);
+              if (thumbnail) {
+                const size = Math.min(cell.cell.height - 1.5, 12);
+                pdf.addImage(thumbnail, "PNG", cell.cell.x + cell.cell.width - size - 2, cell.cell.y + (cell.cell.height - size) / 2, size, size);
+              }
+              return;
+            }
             if (cell.section !== "body" || cell.row.index % 2 !== 1) return;
             const x = cell.cell.x + 2, top = cell.cell.y + 1, w = cell.cell.width - 4, h = cell.cell.height - 2.5;
             pdf.setDrawColor(...green); pdf.setLineWidth(0.3); pdf.roundedRect(x, top, w, h, 1, 1, "S");
@@ -246,35 +255,8 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
       // Lojas/quiosques vagos ("Vaga") têm seção própria; não são nome de ponto a identificar.
       const missingLucs = unidentifiedLucPoints(freshPoints).filter((point) => point.pointType !== "vacant" && point.pointType !== "vacant_kiosk" && !/^vag[ao]$/i.test((point.name ?? "").trim()));
       if (missingLucs.length) {
-        const thumbnails = new Map<string, string>();
-        // Serial decoding bounds memory even when originals are large.
-        // Falha numa foto não impede o relatório: o ponto sai "Sem foto".
-        const withTimeout = <T,>(promise: Promise<T>) => Promise.race([promise, new Promise<never>((_, reject) => setTimeout(() => reject(new Error("timeout")), 20000))]);
-        for (const point of missingLucs) {
-          try {
-            const attachment = facades.find((item) => point.value === (item.visit_luc_id ? `luc:${item.visit_luc_id}` : `environment:${item.visit_environment_id}`));
-            if (!attachment) continue;
-            const { data: original, error } = await withTimeout(supabase.storage.from("site-survey-attachments").download(attachment.storage_path));
-            if (error || !original) continue;
-            let blob = original;
-            if (/\.(heic|heif)$/i.test(attachment.file_name) || /image\/hei[cf]/i.test(attachment.content_type ?? "")) {
-              const { heicTo } = await import("heic-to/csp");
-              blob = await withTimeout(heicTo({ blob, type: "image/jpeg", quality: 0.85 }));
-            }
-            const url = URL.createObjectURL(blob);
-            try {
-              const image = new Image(); image.src = url; await withTimeout(image.decode());
-              const canvas = document.createElement("canvas"); canvas.width = 240; canvas.height = 240;
-              const context = canvas.getContext("2d");
-              if (!context) continue;
-              // Quadrado com bordas arredondadas, como nas fachadas do Histórico.
-              clipRoundedPhoto(context, 240, 240);
-              const side = Math.min(image.naturalWidth, image.naturalHeight);
-              context.drawImage(image, (image.naturalWidth - side) / 2, (image.naturalHeight - side) / 2, side, side, 0, 0, 240, 240);
-              thumbnails.set(point.value, canvas.toDataURL("image/png"));
-            } finally { URL.revokeObjectURL(url); }
-          } catch { /* foto indisponível: segue sem thumbnail */ }
-        }
+        // Pontos "Sem foto" saem sem thumbnail; falha numa foto não impede o relatório.
+        for (const point of missingLucs) await loadThumbnail(point.value);
         const [namedGroup, unnamedGroup] = splitUnidentifiedByName(missingLucs);
         let lucFieldIndex = 0;
         let nameFieldIndex = 0;
