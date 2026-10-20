@@ -44,12 +44,14 @@ const otherEnergyLabels: [keyof NonNullable<ProposalScopeBreakdown["electrical_o
   ["bombas_de_incendio", "Bombas de Incêndio"],
   ["elevadores", "Elevadores"],
   ["escadas_rolantes", "Escadas Rolantes"],
-  ["central_myio", "Central myio"],
 ];
 export function proposalOtherEnergyBreakdown(scope: { scope_breakdown?: ProposalScopeBreakdown | null }): { key: string; label: string; count: number }[] {
   const others = scope.scope_breakdown?.electrical_others;
   if (!others) return [];
   return otherEnergyLabels.filter(([key]) => others[key] !== null && others[key] !== undefined).map(([key, label]) => ({ key, label, count: others[key] as number }));
+}
+export function proposalGatewayCount(scope: { scope_breakdown?: ProposalScopeBreakdown | null }): number | null {
+  return scope.scope_breakdown?.electrical_others?.central_myio ?? null;
 }
 export function proposalOtherEnergyText(scope: { scope_breakdown?: ProposalScopeBreakdown | null }): string {
   return proposalOtherEnergyBreakdown(scope).map((item) => `${item.count}\u00A0${item.label.replaceAll(" ", "\u00A0")}`).join(" · ");
