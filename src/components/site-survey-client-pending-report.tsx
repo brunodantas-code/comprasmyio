@@ -415,17 +415,17 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
       const document = await PDFDocument.load(await pdf.output("arraybuffer"));
       const form = document.getForm();
       const nunito = await document.embedFont(new Uint8Array(atob(regular).split("").map((char) => char.charCodeAt(0))));
-      const fontResources = document.context.obj({ Nunito: nunito.ref });
+      // O dicionário de recursos (DR) precisa conhecer a Nunito para o leitor de PDF usá-la ao digitar.
+      const fontResources = document.context.obj({});
+      fontResources.set(PDFName.of("Nunito"), nunito.ref);
+      const resources = document.context.obj({});
+      resources.set(PDFName.of("Font"), fontResources);
       for (const field of form.getFields()) {
         if (!(field instanceof PDFTextField)) continue;
         field.acroField.setDefaultAppearance("/Nunito 9 Tf 0 g");
-        // O dicionário de recursos do formulário precisa conhecer a Nunito para o leitor de PDF usá-la ao digitar.
-        const dr = document.context.obj({});
-        dr.set(PDFName.of("Font"), document.context.obj({}));
-        dr.lookup(PDFName.of("Font"), document.context.obj({}).constructor as never).set(PDFName.of("Nunito"), nunito.ref);
-        field.acroField.getWidgets().forEach((widget) => widget.dict.set(PDFName.of("DR"), dr));
+        field.acroField.getWidgets().forEach((widget) => widget.dict.set(PDFName.of("DR"), resources));
       }
-      form.acroForm.dict.set(PDFName.of("DR"), (() => { const dr = document.context.obj({}); dr.set(PDFName.of("Font"), fontResources); return dr; })());
+      form.acroForm.dict.set(PDFName.of("DR"), resources);
       const blob = new Blob([new Uint8Array(await document.save())], { type: "application/pdf" });
       if (matchMedia("(pointer: coarse)").matches) { setPrepared(blob); toast.success("PDF pronto para baixar.", { id: toastId }); }
       else { download(blob); toast.success("Relatório gerado.", { id: toastId }); }
