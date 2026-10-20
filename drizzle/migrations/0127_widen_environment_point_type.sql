@@ -1,0 +1,2 @@
+ALTER TABLE public.site_survey_visit_environments DROP CONSTRAINT site_survey_visit_environments_point_type_check;
+ALTER TABLE public.site_survey_visit_environments ADD CONSTRAINT site_survey_visit_environments_point_type_check CHECK (point_type = ANY (ARRAY['shop'::text, 'kiosk'::text, 'environment'::text, 'vacant'::text, 'vacant_kiosk'::text]));

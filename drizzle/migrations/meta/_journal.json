@@ -890,6 +890,13 @@
       "when": 1792430345992,
       "tag": "0126_survey_lease_editable_flag",
       "breakpoints": true
+    },
+    {
+      "idx": 127,
+      "version": "7",
+      "when": 1792492282181,
+      "tag": "0127_widen_environment_point_type",
+      "breakpoints": true
     }
   ]
 }
