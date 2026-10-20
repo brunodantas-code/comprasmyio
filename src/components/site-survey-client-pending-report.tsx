@@ -412,17 +412,17 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
       }
       pdf.setProperties({ title: `Pendências para o cliente SS-${number}`, subject: encodeCustomerAnswerMap({ visit: visit.id, fields: answerFields }) });
       // Campos editáveis do cliente usam a mesma fonte e tamanho do texto do relatório (Nunito 9).
-      const document = await PDFDocument.load(await pdf.output("arraybuffer"));
-      const form = document.getForm();
+      const formDoc = await PDFDocument.load(await pdf.output("arraybuffer"));
+      const form = formDoc.getForm();
       // Reaproveita a Nunito já embutida pelo jsPDF (embutir de novo exigiria fontkit no navegador).
-      let nunitoRef: ReturnType<typeof document.context.getObjectRef> | undefined;
-      for (const [ref, object] of document.context.enumerateIndirectObjects()) {
+      let nunitoRef: ReturnType<typeof formDoc.context.getObjectRef> | undefined;
+      for (const [ref, object] of formDoc.context.enumerateIndirectObjects()) {
         if (object instanceof PDFDict && object.has(PDFName.of("BaseFont")) && String(object.get(PDFName.of("BaseFont"))).includes("Nunito")) { nunitoRef = ref; break; }
       }
       // O dicionário de recursos (DR) precisa conhecer a Nunito para o leitor de PDF usá-la ao digitar.
-      const resources = document.context.obj({});
+      const resources = formDoc.context.obj({});
       if (nunitoRef) {
-        const fontResources = document.context.obj({});
+        const fontResources = formDoc.context.obj({});
         fontResources.set(PDFName.of("Nunito"), nunitoRef);
         resources.set(PDFName.of("Font"), fontResources);
       }
