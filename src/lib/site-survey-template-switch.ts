@@ -24,7 +24,7 @@ export async function carryAnswersToTemplate(params: { visitId: string; kind: "l
   const oldIds = (sections ?? []).filter((s) => s.template_id === fromTemplateId).map((s) => s.id);
   const newIds = (sections ?? []).filter((s) => s.template_id === toTemplateId).map((s) => s.id);
   if (!oldIds.length || !newIds.length) return 0;
-  const { data: questions, error: qErr } = await supabase.from("site_survey_questions").select("id,prompt,question_key,section_id").in("section_id", [...oldIds, ...newIds]);
+  const { data: questions, error: qErr } = await supabase.from("site_survey_questions").select("id,prompt,question_key,section_id,active").in("section_id", [...oldIds, ...newIds]);
   if (qErr) throw qErr;
   const map = matchTemplateQuestions((questions ?? []).filter((q) => oldIds.includes(q.section_id)), (questions ?? []).filter((q) => newIds.includes(q.section_id) && q.active !== false));
   if (!map.size) return 0;
