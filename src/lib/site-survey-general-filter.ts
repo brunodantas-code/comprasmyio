@@ -21,6 +21,7 @@ const excludedQuestion = (prompt: string) => { const p = normalize(prompt); retu
 const filterSectionTitle = (title: string, prompt: string) => normalize(title) === "tipo" && normalize(prompt).includes("hidrometro") ? "Água e hidrômetros" : title;
 export function generalFilterFields(data: GeneralFilterData): FilterField[] {
   const fields = new Map<string, FilterField>();
+  const sortIndex = new Map<string, number>();
   for (const section of data.sections.filter((s) => s.active && !EXCLUDED_SECTIONS.includes(normalize(s.title)) && [data.visitTemplateId, ...(data.pointTemplateIds ?? [])].includes(s.template_id)).sort((a, b) => a.position - b.position)) {
     for (const q of data.questions.filter((q) => q.active && q.section_id === section.id && !excludedQuestion(q.prompt)).sort((a, b) => a.position - b.position)) {
       const config = record(q.configuration), detail = record(config.detail);
