@@ -211,7 +211,8 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
         return y;
       };
       const advanceTable = () => { y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 6; };
-      const missingLucs = unidentifiedLucPoints(freshPoints);
+      // Lojas/quiosques vagos ("Vaga") têm seção própria; não são nome de ponto a identificar.
+      const missingLucs = unidentifiedLucPoints(freshPoints).filter((point) => point.pointType !== "vacant" && point.pointType !== "vacant_kiosk" && !/^vag[ao]$/i.test((point.name ?? "").trim()));
       if (missingLucs.length) {
         const thumbnails = new Map<string, string>();
         // Serial decoding bounds memory even when originals are large.
@@ -244,8 +245,12 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
           } catch { /* foto indisponível: segue sem thumbnail */ }
         }
         const [namedGroup, unnamedGroup] = splitUnidentifiedByName(missingLucs);
-        const renderGroup = (group: ClientPendingPoint[], title: string, subtitle: string, largePhoto = false) => {
+        let lucFieldIndex = 0;
+        const renderGroup = (initialGroup: ClientPendingPoint[], title: string, subtitle: string, largePhoto = false) => {
+        let group = initialGroup;
         if (!group.length) return;
+        // Pontos "Sem foto" vão para o final, preservando a ordem dos demais.
+        group = [...group.filter((point) => thumbnails.has(point.value)), ...group.filter((point) => !thumbnails.has(point.value))];
         sectionHeading(title, subtitle, largePhoto ? 70 : 35);
         const lucType = (point: ClientPendingPoint) => point.pointType === "kiosk" ? "Quiosque" : "Loja";
         // O tipo nunca pode quebrar ao meio: a coluna recebe a largura do rótulo mais longo.
@@ -254,7 +259,8 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
         const lucMeter = group.some((point) => Boolean(point.meterNumber?.trim()));
         // Foto em 5cm para os pontos sem nome e sem LUC: o cliente identifica pela imagem.
         const photoSize = largePhoto ? 50 : 18;
-        const lucWidths = [photoSize + 6, 28, ...(lucMeter ? [28] : []), lucTypeWidth, 46];
+        const meterWidth = textColumnWidth(pdf, ["Nº do medidor", ...group.map((point) => point.meterNumber || "—")], 4, 22, 40);
+        const lucWidths = [photoSize + 6, 32, ...(lucMeter ? [meterWidth] : []), lucTypeWidth, 46];
         lucWidths.push(182 - lucWidths.reduce((total, width) => total + width, 0));
         autoTable(pdf, {
           startY: y, theme: "plain", margin: { top: 20, bottom: 20, left: 14, right: 14 },
@@ -264,7 +270,21 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
           columnStyles: Object.fromEntries(lucWidths.map((width, index) => [index, { cellWidth: width }])),
           head: [["Foto", "LUC", ...(lucMeter ? ["Nº do medidor"] : []), "Tipo", "Nome da loja", "Localização"]],
           body: group.map((point) => [thumbnails.has(point.value) ? "" : "Sem foto", point.lucNumber?.trim() || "Sem LUC", ...(lucMeter ? [point.meterNumber || "—"] : []), lucType(point), point.name ?? point.label, point.location || "—"]),
+          didParseCell: (cell) => {
+            if (cell.section === "body" && cell.column.index === 1) { cell.cell.styles.valign = "top"; cell.cell.styles.minCellHeight = Math.max(photoSize + 4, 16); }
+            if (lucMeter && cell.column.index === 2) cell.cell.styles.overflow = "visible";
+          },
           didDrawCell: (cell) => {
+            if (cell.section === "body" && cell.column.index === 1) {
+              // Campo editável para o cliente informar o LUC, logo abaixo de "Não identificado".
+              const x = cell.cell.x + 1.5, w = cell.cell.width - 3, top = cell.cell.y + 7, h = 6;
+              pdf.setDrawColor(...green); pdf.setLineWidth(0.3); pdf.roundedRect(x, top, w, h, 1, 1, "S");
+              const field = new TextFieldClass();
+              field.fieldName = `luc_${lucFieldIndex++}`; field.fontSize = 9; field.readOnly = false;
+              field.x = x + 0.4; field.y = top + 0.4; field.width = w - 0.8; field.height = h - 0.8;
+              pdf.addField(field);
+              return;
+            }
             if (cell.section !== "body" || cell.column.index !== 0) return;
             const point = group[cell.row.index];
             const thumbnail = point ? thumbnails.get(point.value) : undefined;
