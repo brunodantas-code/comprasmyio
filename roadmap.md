@@ -1056,3 +1056,4 @@
 - [x] Filtro Geral: excluir a segunda barra cinza do rodapé (borda superior do rodapé mantendo só a linha final da última seção).
 - [x] Site Survey — Cadastro > Tipos de ambiente: etiquetas Água/Energia reposicionadas para a direita, junto do lápis de edição.
 - [x] Site Survey — Cadastro: Novo cadastro e Premissas de tempo na grade de duas colunas (mesma largura de Lojas/Quiosques) e Textos do relatório para o cliente reposicionado na última posição.
+- [x] Site Survey — cadastro de pontos: abaixo do tipo do ponto (Loja/Quiosque/Ambiente), exibir o nome do checklist aplicado e o tipo de ambiente, na mesma fonte e cor do nome do Contrato; nomes longos quebram em duas linhas em vez de truncar; conferido no preview (Taboão: Loja com "Shoppings", ambiente com checklist "Cisterna" e tipo "Reservatórios de Água Potável", tipo revertido depois).
