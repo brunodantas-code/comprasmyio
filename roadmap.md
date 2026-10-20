@@ -1055,3 +1055,4 @@
 - [x] Site Survey — quadro da proposta: linha da Central myio (gateway) posicionada abaixo de Demais ambientes e sem a observação "não conta como ponto de medição".
 - [x] Filtro Geral: excluir a segunda barra cinza do rodapé (borda superior do rodapé mantendo só a linha final da última seção).
 - [x] Site Survey — Cadastro > Tipos de ambiente: etiquetas Água/Energia reposicionadas para a direita, junto do lápis de edição.
+- [x] Site Survey — Cadastro: Novo cadastro e Premissas de tempo na grade de duas colunas (mesma largura de Lojas/Quiosques) e Textos do relatório para o cliente reposicionado na última posição.
