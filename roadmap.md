@@ -1051,3 +1051,4 @@
 - [x] Filtro Geral: remover droplist de comparação (Texto contém/Número até/…) mantendo o campo de Texto da Resposta.
 - [x] Filtro Geral: manter a sequência do checklist original na ordenação das perguntas (pergunta "Existe hidrômetro na loja?" estava no fim).
 - [ ] Filtro Geral: excluir "Inserir foto do quadro elétrico aberto" da seção de Elétrica.
+- [x] Filtro Geral: excluir "Inserir foto do quadro elétrico aberto" da seção de Elétrica.
