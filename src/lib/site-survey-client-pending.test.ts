@@ -23,6 +23,19 @@ test("duplicateNamePoints agrupa mesmo nome com LUCs diferentes", async () => {
   assert.equal(groups.length, 1);
   assert.deepEqual(groups[0].map((point) => point.value), ["a", "b"]);
 });
+test("duplicateNamePoints ignora lojas e quiosques vagos, mesmo com nome repetido", async () => {
+  const { duplicateNamePoints } = await import("@/lib/site-survey-client-pending");
+  const points = [
+    { value: "a", label: "Vaga", pointType: "vacant", lucNumber: "Q008", name: "Vaga" },
+    { value: "b", label: "Vaga", pointType: "vacant_kiosk", lucNumber: "Q113", name: "Vaga" },
+    { value: "c", label: "Vaga", pointType: "vacant", lucNumber: "S007", name: "Vaga" },
+    { value: "d", label: "Vivara", pointType: "shop", lucNumber: "101", name: "Vivara" },
+    { value: "e", label: "Vivara", pointType: "shop", lucNumber: "202", name: "Vivara" },
+  ];
+  const groups = duplicateNamePoints(points);
+  assert.equal(groups.length, 1);
+  assert.deepEqual(groups[0].map((point) => point.value), ["d", "e"]);
+});
 test("vacantShopPoints lista apenas lojas vagas, na ordem alfabética", async () => {
   const { vacantShopPoints } = await import("@/lib/site-survey-client-pending");
   const points = [
