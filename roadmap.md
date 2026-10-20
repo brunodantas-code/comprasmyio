@@ -1053,3 +1053,4 @@
 - [x] Filtro Geral: excluir "Inserir foto do quadro elétrico aberto" da seção de Elétrica.
 - [x] Site Survey — totalizadores do cadastro: quantidade aprovada em vermelho quando difere da proposta do grupo (ex.: Energia 140 × 138 em Lojas e Quiosques) e texto de conferência em vermelho; teste em src/lib/site-survey-proposal.test.ts.
 - [x] Site Survey — quadro da proposta: linha da Central myio (gateway) posicionada abaixo de Demais ambientes e sem a observação "não conta como ponto de medição".
+- [x] Filtro Geral: excluir a segunda barra cinza do rodapé (borda superior do rodapé mantendo só a linha final da última seção).
