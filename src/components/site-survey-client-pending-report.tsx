@@ -232,34 +232,36 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
             const url = URL.createObjectURL(blob);
             try {
               const image = new Image(); image.src = url; await withTimeout(image.decode());
-              // Resolução maior: a foto dos pontos não identificados sai em 5cm no PDF.
-              const canvas = document.createElement("canvas"); canvas.width = 360; canvas.height = 360;
+              const canvas = document.createElement("canvas"); canvas.width = 240; canvas.height = 240;
               const context = canvas.getContext("2d");
               if (!context) continue;
               // Quadrado com bordas arredondadas, como nas fachadas do Histórico.
-              clipRoundedPhoto(context, 360, 360);
+              clipRoundedPhoto(context, 240, 240);
               const side = Math.min(image.naturalWidth, image.naturalHeight);
-              context.drawImage(image, (image.naturalWidth - side) / 2, (image.naturalHeight - side) / 2, side, side, 0, 0, 360, 360);
+              context.drawImage(image, (image.naturalWidth - side) / 2, (image.naturalHeight - side) / 2, side, side, 0, 0, 240, 240);
               thumbnails.set(point.value, canvas.toDataURL("image/png"));
             } finally { URL.revokeObjectURL(url); }
           } catch { /* foto indisponível: segue sem thumbnail */ }
         }
         const [namedGroup, unnamedGroup] = splitUnidentifiedByName(missingLucs);
         let lucFieldIndex = 0;
-        const renderGroup = (initialGroup: ClientPendingPoint[], title: string, subtitle: string, largePhoto = false) => {
+        let nameFieldIndex = 0;
+        const renderGroup = (initialGroup: ClientPendingPoint[], title: string, subtitle: string, withNameField = false) => {
         let group = initialGroup;
         if (!group.length) return;
         // Pontos "Sem foto" vão para o final, preservando a ordem dos demais.
         group = [...group.filter((point) => thumbnails.has(point.value)), ...group.filter((point) => !thumbnails.has(point.value))];
-        sectionHeading(title, subtitle, largePhoto ? 70 : 35);
+        sectionHeading(title, subtitle, 35);
         const lucType = (point: ClientPendingPoint) => point.pointType === "kiosk" ? "Quiosque" : "Loja";
         // O tipo nunca pode quebrar ao meio: a coluna recebe a largura do rótulo mais longo.
         const lucTypeWidth = textColumnWidth(pdf, group.map(lucType), 3, 20, 30);
         // Sem nenhum número de medidor na tabela, a coluna não aparece (padrão do Cadastro).
         const lucMeter = group.some((point) => Boolean(point.meterNumber?.trim()));
-        // Foto em 5cm para os pontos sem nome e sem LUC: o cliente identifica pela imagem.
-        const photoSize = largePhoto ? 50 : 18;
+        // Foto no mesmo tamanho dos demais thumbnails do relatório.
+        const photoSize = 18;
         const meterWidth = textColumnWidth(pdf, ["Nº do medidor", ...group.map((point) => point.meterNumber || "—")], 4, 22, 40);
+        // Campo do nome só na seção sem LUC e sem nome identificados.
+        const nameColumn = lucMeter ? 4 : 3;
         const lucWidths = [photoSize + 6, 32, ...(lucMeter ? [meterWidth] : []), lucTypeWidth, 46];
         lucWidths.push(182 - lucWidths.reduce((total, width) => total + width, 0));
         autoTable(pdf, {
@@ -269,9 +271,9 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
           bodyStyles: { minCellHeight: photoSize + 4 }, rowPageBreak: "avoid", showHead: "everyPage",
           columnStyles: Object.fromEntries(lucWidths.map((width, index) => [index, { cellWidth: width }])),
           head: [["Foto", "LUC", ...(lucMeter ? ["Nº do medidor"] : []), "Tipo", "Nome da loja", "Localização"]],
-          body: group.map((point) => [thumbnails.has(point.value) ? "" : "Sem foto", point.lucNumber?.trim() || "Sem LUC", ...(lucMeter ? [point.meterNumber || "—"] : []), lucType(point), point.name ?? point.label, point.location || "—"]),
+          body: group.map((point) => [thumbnails.has(point.value) ? "" : "Sem foto", point.lucNumber?.trim() || "Sem LUC", ...(lucMeter ? [point.meterNumber || "—"] : []), lucType(point), point.name?.trim() || (withNameField ? "Não identificado" : point.label), point.location || "—"]),
           didParseCell: (cell) => {
-            if (cell.section === "body" && cell.column.index === 1) { cell.cell.styles.valign = "top"; cell.cell.styles.minCellHeight = Math.max(photoSize + 4, 16); }
+            if (cell.section === "body" && (cell.column.index === 1 || (withNameField && cell.column.index === nameColumn))) { cell.cell.styles.valign = "top"; cell.cell.styles.minCellHeight = Math.max(photoSize + 4, 16); }
             if (lucMeter && cell.column.index === 2) cell.cell.styles.overflow = "visible";
           },
           didDrawCell: (cell) => {
@@ -281,6 +283,16 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
               pdf.setDrawColor(...green); pdf.setLineWidth(0.3); pdf.roundedRect(x, top, w, h, 1, 1, "S");
               const field = new TextFieldClass();
               field.fieldName = `luc_${lucFieldIndex++}`; field.fontSize = 9; field.readOnly = false;
+              field.x = x + 0.4; field.y = top + 0.4; field.width = w - 0.8; field.height = h - 0.8;
+              pdf.addField(field);
+              return;
+            }
+            if (withNameField && cell.section === "body" && cell.column.index === nameColumn) {
+              // Campo editável para o cliente informar o nome, logo abaixo de "Não identificado".
+              const x = cell.cell.x + 1.5, w = cell.cell.width - 3, top = cell.cell.y + 7, h = 6;
+              pdf.setDrawColor(...green); pdf.setLineWidth(0.3); pdf.roundedRect(x, top, w, h, 1, 1, "S");
+              const field = new TextFieldClass();
+              field.fieldName = `nome_${nameFieldIndex++}`; field.fontSize = 9; field.readOnly = false;
               field.x = x + 0.4; field.y = top + 0.4; field.width = w - 0.8; field.height = h - 0.8;
               pdf.addField(field);
               return;
