@@ -231,13 +231,14 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
             const url = URL.createObjectURL(blob);
             try {
               const image = new Image(); image.src = url; await withTimeout(image.decode());
-              const canvas = document.createElement("canvas"); canvas.width = 240; canvas.height = 240;
+              // Resolução maior: a foto dos pontos não identificados sai em 5cm no PDF.
+              const canvas = document.createElement("canvas"); canvas.width = 360; canvas.height = 360;
               const context = canvas.getContext("2d");
               if (!context) continue;
               // Quadrado com bordas arredondadas, como nas fachadas do Histórico.
-              clipRoundedPhoto(context, 240, 240);
+              clipRoundedPhoto(context, 360, 360);
               const side = Math.min(image.naturalWidth, image.naturalHeight);
-              context.drawImage(image, (image.naturalWidth - side) / 2, (image.naturalHeight - side) / 2, side, side, 0, 0, 240, 240);
+              context.drawImage(image, (image.naturalWidth - side) / 2, (image.naturalHeight - side) / 2, side, side, 0, 0, 360, 360);
               thumbnails.set(point.value, canvas.toDataURL("image/png"));
             } finally { URL.revokeObjectURL(url); }
           } catch { /* foto indisponível: segue sem thumbnail */ }
