@@ -1058,3 +1058,9 @@
 - [x] Site Survey — Cadastro: Novo cadastro e Premissas de tempo na grade de duas colunas (mesma largura de Lojas/Quiosques) e Textos do relatório para o cliente reposicionado na última posição.
 - [x] Site Survey — cadastro de pontos: abaixo do tipo do ponto (Loja/Quiosque/Ambiente), exibir o nome do checklist aplicado e o tipo de ambiente, na mesma fonte e cor do nome do Contrato; nomes longos quebram em duas linhas em vez de truncar; conferido no preview (Taboão: Loja com "Shoppings", ambiente com checklist "Cisterna" e tipo "Reservatórios de Água Potável", tipo revertido depois).
 - [x] Site Survey — fotos não somem mais ao trocar o checklist de um ponto: fotos presas a perguntas do checklist anterior agora aparecem em "Outras fotos"; conferido no Mogi (Casa Máquina Lago voltou a mostrar 1 foto e Gerador as 6, sendo 3 do checklist antigo e 3 soltas).
+
+- [x] Site Survey — perguntas e respostas preservadas no histórico após troca de checklist; Ar Condicionado 03 e Pet Center 22 conferidos na tela; filtro e baixa manual explicados; 11 testes passaram.
+
+- [x] Site Survey — lixeira nas fotos da fachada com fundo sólido, borda verde e ícone contrastante na interação.
+
+- [x] Site Survey — orientar baixa manual sem PDF: salvar resposta recebida por e-mail/mensagem/celular, marcar quadradinho da pergunta e confirmar.

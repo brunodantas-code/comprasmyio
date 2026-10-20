@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { registrationCustomerQuestion, showsCustomerQuestions } from "./site-survey-questions";
+import { customerHistorySectionIds, pendingCustomerQuestions, customerQuestionResponses, registrationCustomerQuestion, showsCustomerQuestions } from "./site-survey-questions";
 
 test("Sanar Pendências não lista nem permite perguntas para o cliente", () => {
   assert.equal(showsCustomerQuestions("pending"), false);
@@ -27,4 +27,19 @@ test("Perguntas existentes preservam o identificador ao trocar modelo", () => {
   const own = { ...question, id: "own", section_id: "env" };
   assert.equal(registrationCustomerQuestion([own, question], sections, "environment", "visit", ["customer"])?.id, "customer");
   assert.equal(registrationCustomerQuestion([own, question], sections, "environment", "visit")?.id, "own");
+});
+
+test("Pergunta e resposta continuam na seção original após trocar para Quadros Elétricos", () => {
+  const answer = { customer_questions: ["Onde se localiza fisicamente esse AC?"], customer_question_responses: { "Onde se localiza fisicamente esse AC?": "Na parte externa, conforme foto anexa." }, customer_questions_answered: ["Onde se localiza fisicamente esse AC?"] };
+  assert.deepEqual([...customerHistorySectionIds([question], [{ question_id: "customer", answer }])], ["s7"]);
+  assert.equal(customerQuestionResponses(answer)["Onde se localiza fisicamente esse AC?"], "Na parte externa, conforme foto anexa.");
+  assert.deepEqual(pendingCustomerQuestions(answer), []);
+});
+test("Resposta salva permanece pendente até confirmação manual", () => {
+  const answer = { customer_questions: ["Confirma a existência do registro?"], customer_question_responses: { "Confirma a existência do registro?": "Confirmada existência do registro no forro." } };
+  assert.deepEqual(pendingCustomerQuestions(answer), ["Confirma a existência do registro?"]);
+  assert.deepEqual(pendingCustomerQuestions({ ...answer, customer_questions_answered: ["Confirma a existência do registro?"] }), []);
+});
+test("Perguntas de outros pontos não acrescentam seções ao histórico", () => {
+  assert.deepEqual([...customerHistorySectionIds([question], [])], []);
 });
