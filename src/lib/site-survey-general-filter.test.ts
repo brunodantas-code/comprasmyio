@@ -45,4 +45,8 @@ describe("filtro geral do Cadastro", () => {
     expect(waterFields[0].prompt).toBe("Existe hidrômetro na loja?");
     expect(waterFields[1].prompt).toBe("Marca do hidrômetro");
   });
+  it("exclui perguntas de foto dos filtros", () => {
+    const withPhoto: GeneralFilterData = { ...data, questions: [...data.questions, { id: "photo-panel", section_id: "energy", prompt: "Inserir foto do quadro elétrico aberto", question_type: "text", position: 9, active: true, options: [], configuration: {} }] };
+    expect(generalFilterFields(withPhoto).some((f) => f.prompt === "Inserir foto do quadro elétrico aberto")).toBe(false);
+  });
 });
