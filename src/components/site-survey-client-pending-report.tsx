@@ -231,33 +231,36 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
             const url = URL.createObjectURL(blob);
             try {
               const image = new Image(); image.src = url; await withTimeout(image.decode());
-              const canvas = document.createElement("canvas"); canvas.width = 240; canvas.height = 240;
+              // Resolução maior: a foto dos pontos não identificados sai em 5cm no PDF.
+              const canvas = document.createElement("canvas"); canvas.width = 360; canvas.height = 360;
               const context = canvas.getContext("2d");
               if (!context) continue;
               // Quadrado com bordas arredondadas, como nas fachadas do Histórico.
-              clipRoundedPhoto(context, 240, 240);
+              clipRoundedPhoto(context, 360, 360);
               const side = Math.min(image.naturalWidth, image.naturalHeight);
-              context.drawImage(image, (image.naturalWidth - side) / 2, (image.naturalHeight - side) / 2, side, side, 0, 0, 240, 240);
+              context.drawImage(image, (image.naturalWidth - side) / 2, (image.naturalHeight - side) / 2, side, side, 0, 0, 360, 360);
               thumbnails.set(point.value, canvas.toDataURL("image/png"));
             } finally { URL.revokeObjectURL(url); }
           } catch { /* foto indisponível: segue sem thumbnail */ }
         }
         const [namedGroup, unnamedGroup] = splitUnidentifiedByName(missingLucs);
-        const renderGroup = (group: ClientPendingPoint[], title: string, subtitle: string) => {
+        const renderGroup = (group: ClientPendingPoint[], title: string, subtitle: string, largePhoto = false) => {
         if (!group.length) return;
-        sectionHeading(title, subtitle, 35);
+        sectionHeading(title, subtitle, largePhoto ? 70 : 35);
         const lucType = (point: ClientPendingPoint) => point.pointType === "kiosk" ? "Quiosque" : "Loja";
         // O tipo nunca pode quebrar ao meio: a coluna recebe a largura do rótulo mais longo.
         const lucTypeWidth = textColumnWidth(pdf, group.map(lucType), 3, 20, 30);
         // Sem nenhum número de medidor na tabela, a coluna não aparece (padrão do Cadastro).
         const lucMeter = group.some((point) => Boolean(point.meterNumber?.trim()));
-        const lucWidths = [24, 28, ...(lucMeter ? [28] : []), lucTypeWidth, 46];
+        // Foto em 5cm para os pontos sem nome e sem LUC: o cliente identifica pela imagem.
+        const photoSize = largePhoto ? 50 : 18;
+        const lucWidths = [photoSize + 6, 28, ...(lucMeter ? [28] : []), lucTypeWidth, 46];
         lucWidths.push(182 - lucWidths.reduce((total, width) => total + width, 0));
         autoTable(pdf, {
           startY: y, theme: "plain", margin: { top: 20, bottom: 20, left: 14, right: 14 },
           styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: 1.8, overflow: "linebreak", valign: "middle" },
           headStyles: { fontStyle: "bold", textColor: accent, lineWidth: { bottom: 0.3 }, lineColor: green },
-          bodyStyles: { minCellHeight: 24 }, rowPageBreak: "avoid", showHead: "everyPage",
+          bodyStyles: { minCellHeight: photoSize + 4 }, rowPageBreak: "avoid", showHead: "everyPage",
           columnStyles: Object.fromEntries(lucWidths.map((width, index) => [index, { cellWidth: width }])),
           head: [["Foto", "LUC", ...(lucMeter ? ["Nº do medidor"] : []), "Tipo", "Nome da loja", "Localização"]],
           body: group.map((point) => [thumbnails.has(point.value) ? "" : "Sem foto", point.lucNumber?.trim() || "Sem LUC", ...(lucMeter ? [point.meterNumber || "—"] : []), lucType(point), point.name ?? point.label, point.location || "—"]),
@@ -265,13 +268,13 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
             if (cell.section !== "body" || cell.column.index !== 0) return;
             const point = group[cell.row.index];
             const thumbnail = point ? thumbnails.get(point.value) : undefined;
-            if (thumbnail) pdf.addImage(thumbnail, "PNG", cell.cell.x + 3, cell.cell.y + (cell.cell.height - 18) / 2, 18, 18);
+            if (thumbnail) pdf.addImage(thumbnail, "PNG", cell.cell.x + 3, cell.cell.y + (cell.cell.height - photoSize) / 2, photoSize, photoSize);
           },
         });
         advanceTable();
         };
         renderGroup(namedGroup, "Lojas e quiosques com nome identificado e sem LUC", `${namedGroup.length} ponto(s) para identificação do LUC`);
-        renderGroup(unnamedGroup, "Lojas e quiosques sem LUC e sem nome identificados", `${unnamedGroup.length} ponto(s) para identificação do LUC e do nome`);
+        renderGroup(unnamedGroup, "Lojas e quiosques sem LUC e sem nome identificados", `${unnamedGroup.length} ponto(s) para identificação do LUC e do nome`, true);
       }
       const duplicated = duplicateNamePoints(freshPoints.length ? freshPoints : points);
       if (duplicated.length) {
