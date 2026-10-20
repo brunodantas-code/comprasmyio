@@ -514,7 +514,12 @@ function VisitDetails({ pointSearch = "", visit, data, onClose, onChanged, close
   const selectedLucTemplateId = pointKind === "luc" ? detail?.lucs.find((item) => item.id === pointId)?.template_id : null;
   const hasOwnEnvironmentTemplate = (pointKind === "environment" && Boolean(selectedEnvironment?.template_id)) || (Boolean(selectedLucTemplateId) && selectedLucTemplateId !== visit?.template_id);
   const pointSections = sortByPosition(data.sections.filter((section) => section.active && section.template_id === selectedPointTemplateId)).slice(hasOwnEnvironmentTemplate ? 0 : 3);
-  const questions = sortByPosition(data.questions.filter((question) => question.active && (generalSections.some((section) => section.id === question.section_id) || pointSections.some((section) => section.id === question.section_id))));
+  // A checklist switch must not hide the customer questions stored with the old template.
+  const pointStoredQuestionIds = (detail?.responses ?? []).filter((row) => pointKind === "luc" ? row.visit_luc_id === pointId : row.visit_environment_id === pointId).map((row) => row.question_id);
+  const pointCustomerQuestion = pointId ? registrationCustomerQuestion(data.questions, data.sections, selectedPointTemplateId, visit?.template_id ?? null, pointStoredQuestionIds) : undefined;
+  const borrowedCustomerSection = pointCustomerQuestion && !pointSections.some((section) => section.id === pointCustomerQuestion.section_id) ? data.sections.find((section) => section.id === pointCustomerQuestion.section_id) : undefined;
+  if (borrowedCustomerSection) pointSections.push(borrowedCustomerSection);
+  const questions = sortByPosition(data.questions.filter((question) => question.active && (generalSections.some((section) => section.id === question.section_id) || (borrowedCustomerSection?.id === question.section_id ? question.id === pointCustomerQuestion?.id : pointSections.some((section) => section.id === question.section_id)))));
   const selectedPointCancelled = pointKind === "luc" && selectedPointRecord?.completion_status === "cancelada";
   const matchesPoint = (item: { visit_luc_id?: string | null; visit_environment_id?: string | null }) => pointKind === "luc" ? item.visit_luc_id === pointId : item.visit_environment_id === pointId;
    const facadeAttachment = (detail?.attachments ?? []).find((item) => item.attachment_kind === "facade" && matchesPoint(item));
