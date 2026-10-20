@@ -9,6 +9,7 @@ import nunitoBoldUrl from "@/assets/fonts/nunito-bold.ttf?url";
 import { surveyPointType } from "@/lib/site-survey-point-type";
 import { clipRoundedPhoto } from "@/lib/site-survey-photo";
 import { textColumnWidth } from "@/lib/site-survey-pdf-measure";
+import { encodeCustomerAnswerMap, type CustomerAnswerField } from "@/lib/site-survey-customer-answer-import";
 
 type Props = {
   visit: { id: string; survey_number: number; completed_at: string | null; scheduled_start: string };
@@ -170,12 +171,32 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
       if (questionCount > 0) {
         pdf.setFont("Nunito", "normal"); pdf.setFontSize(10); pdf.text(`${questionCount} pergunta(s) aguardando resposta do cliente`, 14, y); y += 10;
       }
+      const answerFields: CustomerAnswerField[] = [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const TextFieldClass = (pdf.AcroForm as any).TextField as new () => any;
       for (const group of groups) {
         if (!group.questions.length) continue;
         const kind = ({ shop: "Loja", kiosk: "Quiosque", environment: "Ambiente", vacant: "Loja vaga", vacant_kiosk: "Quiosque vago", general: "Geral" } as Record<string, string>)[group.pointType] ?? "Ponto";
-        y = table(y, [`${kind} — ${group.label}`], [
-          ...group.questions.map((text, index) => [`${index + 1}. ${text}`]),
-        ], 1.5);
+        // Cada pergunta ganha uma linha de resposta editável logo abaixo; o mapa vai nos metadados para a importação.
+        const body = group.questions.flatMap((text, index) => [[`${index + 1}. ${text}`], [""]]);
+        const fieldsForGroup = group.questions.map((text) => { const field = `cq_${answerFields.length}`; answerFields.push({ field, point: group.value, label: `${kind} — ${group.label}`, question: text }); return field; });
+        autoTable(pdf, {
+          startY: y, theme: "plain", pageBreak: "auto", margin: { top: 20, bottom: 20, left: 14, right: 14 },
+          styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: 1.5, overflow: "linebreak" },
+          headStyles: { fontStyle: "bold", textColor: accent, lineWidth: { bottom: 0.3 }, lineColor: green },
+          head: [[`${kind} — ${group.label}`]], body, rowPageBreak: "avoid",
+          didParseCell: (cell) => { if (cell.section === "body" && cell.row.index % 2 === 1) cell.cell.styles.minCellHeight = 13; },
+          didDrawCell: (cell) => {
+            if (cell.section !== "body" || cell.row.index % 2 !== 1) return;
+            const x = cell.cell.x + 2, top = cell.cell.y + 1, w = cell.cell.width - 4, h = cell.cell.height - 2.5;
+            pdf.setDrawColor(...green); pdf.setLineWidth(0.3); pdf.roundedRect(x, top, w, h, 1, 1, "S");
+            const field = new TextFieldClass();
+            field.fieldName = fieldsForGroup[(cell.row.index - 1) / 2]; field.multiline = true; field.fontSize = 9; field.readOnly = false;
+            field.x = x + 0.5; field.y = top + 0.5; field.width = w - 1; field.height = h - 1;
+            pdf.addField(field);
+          },
+        });
+        y = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 5;
       }
       const sectionHeading = (title: string, description: string, minimumBody = 24) => {
         pdf.setFont("Nunito", "normal"); pdf.setFontSize(10);
@@ -317,6 +338,7 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
         pdf.setDrawColor(...green); pdf.line(14, 280, 196, 280);
         pdf.text("myio Automação Ltda", 14, 287); pdf.text(`Página ${page} de ${pages}`, 196, 287, { align: "right" });
       }
+      pdf.setProperties({ title: `Pendências para o cliente SS-${number}`, subject: encodeCustomerAnswerMap({ visit: visit.id, fields: answerFields }) });
       const blob = pdf.output("blob");
       if (matchMedia("(pointer: coarse)").matches) { setPrepared(blob); toast.success("PDF pronto para baixar.", { id: toastId }); }
       else { download(blob); toast.success("Relatório gerado.", { id: toastId }); }
