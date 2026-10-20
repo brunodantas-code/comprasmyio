@@ -109,7 +109,7 @@ export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections
   const [sort, setSort] = useState("luc");
   const [collapsedPoints, setCollapsedPoints] = useState<Set<string>>(() => new Set());
   const points = useMemo<SummaryPoint[]>(() => [
-    ...lucs.map((point) => ({ id: point.id, kind: "luc" as const, pointType: surveyPointType(point), name: point.shop_name, luc: point.luc_number, location: point.location ?? "", templateId: visitTemplateId, completionStatus: point.completion_status, skippedSectionIds: Array.isArray(point.skipped_section_ids) ? point.skipped_section_ids.filter((id): id is string => typeof id === "string") : [] })),
+    ...lucs.map((point) => ({ id: point.id, kind: "luc" as const, pointType: surveyPointType(point), name: point.shop_name, luc: point.luc_number, location: point.location ?? "", templateId: (point as { template_id?: string | null }).template_id ?? visitTemplateId, completionStatus: point.completion_status, skippedSectionIds: Array.isArray(point.skipped_section_ids) ? point.skipped_section_ids.filter((id): id is string => typeof id === "string") : [] })),
     ...environments.map((point) => ({ id: point.id, kind: "environment" as const, pointType: surveyPointType(point, "environment"), name: point.name, luc: "", location: point.location ?? "", templateId: point.template_id ?? visitTemplateId, completionStatus: point.completion_status, skippedSectionIds: Array.isArray(point.skipped_section_ids) ? point.skipped_section_ids.filter((id): id is string => typeof id === "string") : [] })),
   ], [lucs, environments, visitTemplateId]);
   const visiblePoints = useMemo(() => points.filter((point) => {
