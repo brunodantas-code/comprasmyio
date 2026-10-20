@@ -174,6 +174,38 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
       const answerFields: CustomerAnswerField[] = [];
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const TextFieldClass = (pdf.AcroForm as any).TextField as new () => any;
+      // Miniaturas de fachada compartilhadas: perguntas e identificação de LUC usam a mesma foto.
+      const withTimeout = <T,>(promise: Promise<T>) => Promise.race([promise, new Promise<never>((_, reject) => setTimeout(() => reject(new Error("timeout")), 20000))]);
+      const thumbnails = new Map<string, string>();
+      // Decodificação serial limita a memória mesmo com originais grandes; falha numa foto não impede o relatório.
+      const loadThumbnail = async (pointValue: string) => {
+        if (thumbnails.has(pointValue)) return;
+        try {
+          const attachment = facades.find((item) => pointValue === (item.visit_luc_id ? `luc:${item.visit_luc_id}` : `environment:${item.visit_environment_id}`));
+          if (!attachment) return;
+          const { data: original, error } = await withTimeout(supabase.storage.from("site-survey-attachments").download(attachment.storage_path));
+          if (error || !original) return;
+          let blob = original;
+          if (/\.(heic|heif)$/i.test(attachment.file_name) || /image\/hei[cf]/i.test(attachment.content_type ?? "")) {
+            const { heicTo } = await import("heic-to/csp");
+            blob = await withTimeout(heicTo({ blob, type: "image/jpeg", quality: 0.85 }));
+          }
+          const url = URL.createObjectURL(blob);
+          try {
+            const image = new Image(); image.src = url; await withTimeout(image.decode());
+            const canvas = document.createElement("canvas"); canvas.width = 240; canvas.height = 240;
+            const context = canvas.getContext("2d");
+            if (!context) return;
+            // Quadrado com bordas arredondadas, como nas fachadas do Histórico.
+            clipRoundedPhoto(context, 240, 240);
+            const side = Math.min(image.naturalWidth, image.naturalHeight);
+            context.drawImage(image, (image.naturalWidth - side) / 2, (image.naturalHeight - side) / 2, side, side, 0, 0, 240, 240);
+            thumbnails.set(pointValue, canvas.toDataURL("image/png"));
+          } finally { URL.revokeObjectURL(url); }
+        } catch { /* foto indisponível: segue sem thumbnail */ }
+      };
+      // Pontos com perguntas mostram a foto da fachada no cabeçalho, para o cliente identificar o ponto.
+      for (const group of groups) if (group.questions.length) await loadThumbnail(group.value);
       for (const group of groups) {
         if (!group.questions.length) continue;
         const kind = ({ shop: "Loja", kiosk: "Quiosque", environment: "Ambiente", vacant: "Loja vaga", vacant_kiosk: "Quiosque vago", general: "Geral" } as Record<string, string>)[group.pointType] ?? "Ponto";
@@ -187,6 +219,15 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
           head: [[`${kind} — ${group.label}`]], body, rowPageBreak: "avoid",
           didParseCell: (cell) => { if (cell.section === "body" && cell.row.index % 2 === 1) cell.cell.styles.minCellHeight = 13; },
           didDrawCell: (cell) => {
+            if (cell.section === "head") {
+              // Foto da fachada no cabeçalho do ponto, para o cliente identificar sobre o que é a pergunta.
+              const thumbnail = thumbnails.get(group.value);
+              if (thumbnail) {
+                const size = Math.min(cell.cell.height - 1.5, 12);
+                pdf.addImage(thumbnail, "PNG", cell.cell.x + cell.cell.width - size - 2, cell.cell.y + (cell.cell.height - size) / 2, size, size);
+              }
+              return;
+            }
             if (cell.section !== "body" || cell.row.index % 2 !== 1) return;
             const x = cell.cell.x + 2, top = cell.cell.y + 1, w = cell.cell.width - 4, h = cell.cell.height - 2.5;
             pdf.setDrawColor(...green); pdf.setLineWidth(0.3); pdf.roundedRect(x, top, w, h, 1, 1, "S");
@@ -214,38 +255,12 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
       // Lojas/quiosques vagos ("Vaga") têm seção própria; não são nome de ponto a identificar.
       const missingLucs = unidentifiedLucPoints(freshPoints).filter((point) => point.pointType !== "vacant" && point.pointType !== "vacant_kiosk" && !/^vag[ao]$/i.test((point.name ?? "").trim()));
       if (missingLucs.length) {
-        const thumbnails = new Map<string, string>();
-        // Serial decoding bounds memory even when originals are large.
-        // Falha numa foto não impede o relatório: o ponto sai "Sem foto".
-        const withTimeout = <T,>(promise: Promise<T>) => Promise.race([promise, new Promise<never>((_, reject) => setTimeout(() => reject(new Error("timeout")), 20000))]);
-        for (const point of missingLucs) {
-          try {
-            const attachment = facades.find((item) => point.value === (item.visit_luc_id ? `luc:${item.visit_luc_id}` : `environment:${item.visit_environment_id}`));
-            if (!attachment) continue;
-            const { data: original, error } = await withTimeout(supabase.storage.from("site-survey-attachments").download(attachment.storage_path));
-            if (error || !original) continue;
-            let blob = original;
-            if (/\.(heic|heif)$/i.test(attachment.file_name) || /image\/hei[cf]/i.test(attachment.content_type ?? "")) {
-              const { heicTo } = await import("heic-to/csp");
-              blob = await withTimeout(heicTo({ blob, type: "image/jpeg", quality: 0.85 }));
-            }
-            const url = URL.createObjectURL(blob);
-            try {
-              const image = new Image(); image.src = url; await withTimeout(image.decode());
-              const canvas = document.createElement("canvas"); canvas.width = 240; canvas.height = 240;
-              const context = canvas.getContext("2d");
-              if (!context) continue;
-              // Quadrado com bordas arredondadas, como nas fachadas do Histórico.
-              clipRoundedPhoto(context, 240, 240);
-              const side = Math.min(image.naturalWidth, image.naturalHeight);
-              context.drawImage(image, (image.naturalWidth - side) / 2, (image.naturalHeight - side) / 2, side, side, 0, 0, 240, 240);
-              thumbnails.set(point.value, canvas.toDataURL("image/png"));
-            } finally { URL.revokeObjectURL(url); }
-          } catch { /* foto indisponível: segue sem thumbnail */ }
-        }
+        // Pontos "Sem foto" saem sem thumbnail; falha numa foto não impede o relatório.
+        for (const point of missingLucs) await loadThumbnail(point.value);
         const [namedGroup, unnamedGroup] = splitUnidentifiedByName(missingLucs);
         let lucFieldIndex = 0;
         let nameFieldIndex = 0;
+        let obsFieldIndex = 0;
         const renderGroup = (initialGroup: ClientPendingPoint[], title: string, subtitle: string, withNameField = false) => {
         let group = initialGroup;
         if (!group.length) return;
@@ -254,24 +269,26 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
         sectionHeading(title, subtitle, 35);
         const lucType = (point: ClientPendingPoint) => point.pointType === "kiosk" ? "Quiosque" : "Loja";
         // O tipo nunca pode quebrar ao meio: a coluna recebe a largura do rótulo mais longo.
-        const lucTypeWidth = textColumnWidth(pdf, group.map(lucType), 3, 20, 30);
+        const lucTypeWidth = textColumnWidth(pdf, group.map(lucType), 3, 20, 26);
         // Sem nenhum número de medidor na tabela, a coluna não aparece (padrão do Cadastro).
         const lucMeter = group.some((point) => Boolean(point.meterNumber?.trim()));
         // Foto no mesmo tamanho dos demais thumbnails do relatório.
         const photoSize = 18;
-        const meterWidth = textColumnWidth(pdf, ["Nº do medidor", ...group.map((point) => point.meterNumber || "—")], 4, 22, 40);
+        const meterWidth = textColumnWidth(pdf, ["Nº do medidor", ...group.map((point) => point.meterNumber || "—")], 4, 22, 30);
         // Campo do nome só na seção sem LUC e sem nome identificados.
         const nameColumn = lucMeter ? 4 : 3;
-        const lucWidths = [photoSize + 6, 32, ...(lucMeter ? [meterWidth] : []), lucTypeWidth, 46];
-        lucWidths.push(182 - lucWidths.reduce((total, width) => total + width, 0));
+        // Observações: última coluna, editável pelo cliente; Localização fica com o espaço restante.
+        const obsWidth = 28;
+        const lucWidths = [photoSize + 4, 28, ...(lucMeter ? [meterWidth] : []), lucTypeWidth, 38];
+        lucWidths.push(182 - lucWidths.reduce((total, width) => total + width, 0) - obsWidth, obsWidth);
         autoTable(pdf, {
           startY: y, theme: "plain", margin: { top: 20, bottom: 20, left: 14, right: 14 },
           styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: 1.8, overflow: "linebreak", valign: "middle" },
           headStyles: { fontStyle: "bold", textColor: accent, lineWidth: { bottom: 0.3 }, lineColor: green },
           bodyStyles: { minCellHeight: photoSize + 4 }, rowPageBreak: "avoid", showHead: "everyPage",
           columnStyles: Object.fromEntries(lucWidths.map((width, index) => [index, { cellWidth: width }])),
-          head: [["Foto", "LUC", ...(lucMeter ? ["Nº do medidor"] : []), "Tipo", "Nome da loja", "Localização"]],
-          body: group.map((point) => [thumbnails.has(point.value) ? "" : "Sem foto", point.lucNumber?.trim() || "Sem LUC", ...(lucMeter ? [point.meterNumber || "—"] : []), lucType(point), point.name?.trim() || (withNameField ? "Não identificado" : point.label), point.location || "—"]),
+          head: [["Foto", "LUC", ...(lucMeter ? ["Nº do medidor"] : []), "Tipo", "Nome da loja", "Localização", "Observações"]],
+          body: group.map((point) => [thumbnails.has(point.value) ? "" : "Sem foto", point.lucNumber?.trim() || "Sem LUC", ...(lucMeter ? [point.meterNumber || "—"] : []), lucType(point), point.name?.trim() || (withNameField ? "Não identificado" : point.label), point.location || "—", ""]),
           didParseCell: (cell) => {
             if (cell.section === "body" && (cell.column.index === 1 || (withNameField && cell.column.index === nameColumn))) { cell.cell.styles.valign = "top"; cell.cell.styles.minCellHeight = Math.max(photoSize + 4, 16); }
             if (lucMeter && cell.column.index === 2) cell.cell.styles.overflow = "visible";
@@ -297,6 +314,16 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
               pdf.addField(field);
               return;
             }
+            if (cell.section === "body" && cell.column.index === lucWidths.length - 1) {
+              // Campo editável de observações para o cliente, ocupando a célula toda.
+              const x = cell.cell.x + 1.5, w = cell.cell.width - 3, top = cell.cell.y + 1.5, h = cell.cell.height - 3;
+              pdf.setDrawColor(...green); pdf.setLineWidth(0.3); pdf.roundedRect(x, top, w, h, 1, 1, "S");
+              const field = new TextFieldClass();
+              field.fieldName = `obs_${obsFieldIndex++}`; field.multiline = true; field.fontSize = 9; field.readOnly = false;
+              field.x = x + 0.4; field.y = top + 0.4; field.width = w - 0.8; field.height = h - 0.8;
+              pdf.addField(field);
+              return;
+            }
             if (cell.section !== "body" || cell.column.index !== 0) return;
             const point = group[cell.row.index];
             const thumbnail = point ? thumbnails.get(point.value) : undefined;
@@ -317,8 +344,10 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
         const dupBody = duplicated.flatMap((group) => group.map((point) => [point.name ?? point.label, point.lucNumber?.trim() || "Sem LUC", ...(dupMeter ? [point.meterNumber || "—"] : []), dupType(point), point.location || "—", ""]));
         // O tipo nunca pode quebrar ao meio: a coluna recebe a largura do rótulo mais longo.
         const dupTypeWidth = textColumnWidth(pdf, dupBody.map((row) => row[dupMeter ? 3 : 2]), 3, 20, 30);
-        const dupWidths = [40, 25, ...(dupMeter ? [25] : []), dupTypeWidth];
-        dupWidths.push(182 - 40 - 25 - (dupMeter ? 25 : 0) - dupTypeWidth - 30, 30);
+        // O número do medidor nunca quebra: a coluna recebe a largura do maior valor.
+        const dupMeterWidth = textColumnWidth(pdf, ["Nº do medidor", ...duplicated.flatMap((group) => group.map((point) => point.meterNumber || "—"))], 4, 22, 40);
+        const dupWidths = [40, 25, ...(dupMeter ? [dupMeterWidth] : []), dupTypeWidth];
+        dupWidths.push(182 - 40 - 25 - (dupMeter ? dupMeterWidth : 0) - dupTypeWidth - 30, 30);
         autoTable(pdf, {
           startY: y, theme: "plain", margin: { top: 20, bottom: 20, left: 14, right: 14 },
           styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: 1.8, overflow: "linebreak", valign: "middle" },
@@ -327,6 +356,7 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
           columnStyles: Object.fromEntries(dupWidths.map((width, index) => [index, { cellWidth: width }])),
           head: [["Nome da loja", "LUC", ...(dupMeter ? ["Nº do medidor"] : []), "Tipo", "Localização", "Confirmação"]],
           body: dupBody,
+          didParseCell: (cell) => { if (dupMeter && cell.column.index === 2) cell.cell.styles.overflow = "visible"; },
           didDrawCell: (cell) => {
             if (cell.section !== "body" || cell.column.index !== dupWidths.length - 1) return;
             // Caixas editáveis para o cliente marcar OK ou Duplicado em cada ponto.
@@ -347,7 +377,9 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
         sectionHeading("Lojas e quiosques vagos cadastrados", `Confirme os ${vacant.length} espaço(s) vago(s) abaixo, cadastrados para futura implantação.`);
         // Sem nenhum número de medidor na tabela, a coluna não aparece (padrão do Cadastro).
         const vacantMeter = vacant.some((point) => Boolean(point.meterNumber?.trim()));
-        const vacantWidths = [28, ...(vacantMeter ? [28] : []), vacantMeter ? 46 : 66, vacantMeter ? 50 : 58, 30];
+        // O número do medidor nunca quebra: a coluna recebe a largura do maior valor.
+        const vacantMeterWidth = textColumnWidth(pdf, ["Nº do medidor", ...vacant.map((point) => point.meterNumber || "—")], 4, 22, 40);
+        const vacantWidths = [28, ...(vacantMeter ? [vacantMeterWidth] : []), vacantMeter ? 46 : 66, vacantMeter ? 50 : 58, 30];
         autoTable(pdf, {
           startY: y, theme: "plain", margin: { top: 20, bottom: 20, left: 14, right: 14 },
           styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: 1.8, overflow: "linebreak", valign: "middle" },
@@ -356,6 +388,7 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
           columnStyles: Object.fromEntries(vacantWidths.map((width, index) => [index, { cellWidth: width }])),
           head: [["LUC", ...(vacantMeter ? ["Nº do medidor"] : []), "Nome", "Localização", "Confirmação"]],
           body: vacant.map((point) => [point.lucNumber?.trim() || "Sem LUC", ...(vacantMeter ? [point.meterNumber || "—"] : []), point.name ?? point.label, point.location || "—", ""]),
+          didParseCell: (cell) => { if (vacantMeter && cell.column.index === 1) cell.cell.styles.overflow = "visible"; },
           didDrawCell: (cell) => {
             if (cell.section !== "body" || cell.column.index !== vacantWidths.length - 1) return;
             // Caixa verde editável para o cliente confirmar cada loja vaga.

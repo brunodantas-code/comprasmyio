@@ -262,7 +262,8 @@ export function SiteSurveyLucManager({ checklistData, visitTemplateId: visitTemp
   const saveEditInner = async (confirmed = false) => {
     if (!pointType) return toast.error("Selecione Loja, Quiosque, Ambiente, Loja vaga ou Quiosque vago.");
     if (editingEnvironmentId) {
-      const name = (pointType === "environment" ? environmentName : draftName).trim();
+      // Loja/quiosque vago pode ficar sem nome: assume "Vaga".
+      const name = (pointType === "environment" ? environmentName : draftName).trim() || (pointType === "vacant" || pointType === "vacant_kiosk" ? "Vaga" : "");
       if (!name) return toast.error(pointType === "environment" ? "Informe o nome do ambiente." : "Informe o nome do ponto.");
       if (pointType === "environment" && !environmentTemplateId) return toast.error("Selecione o checklist do ambiente.");
       const lucNumber = pointType === "environment" ? "" : draftLuc.trim();
@@ -289,7 +290,7 @@ export function SiteSurveyLucManager({ checklistData, visitTemplateId: visitTemp
       toast.success(existing ? "Ambiente reativado com o checklist selecionado." : "Ambiente adicionado."); closeEdit(); await load(); onChanged?.();
       return;
     }
-    const lucNumber = pointType === "environment" ? "" : draftLuc.trim(); const shopName = draftName.trim();
+    const lucNumber = pointType === "environment" ? "" : draftLuc.trim(); const shopName = draftName.trim() || (pointType === "vacant" || pointType === "vacant_kiosk" ? "Vaga" : "");
     if (pointType && requiresSurveyLuc(pointType) && !lucNumber) return toast.error(pointType === "vacant_kiosk" ? "Informe o LUC do quiosque vago." : "Informe o LUC da loja vaga.");
     if (!shopName) return toast.error("Informe o nome do ponto.");
     const duplicateRows = lucNumber ? rows.filter((row) => row.id !== editing?.id && normalizeHeader(row.luc_number) === normalizeHeader(lucNumber)) : [];
