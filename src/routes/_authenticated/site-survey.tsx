@@ -510,7 +510,8 @@ function VisitDetails({ pointSearch = "", visit, data, onClose, onChanged, close
   const { skipped: skippedSectionIds, notApplicable: notApplicableSectionIds, excluded: excludedSectionIds } = sectionDispositionSets(storedSectionDispositions);
   const currentPause = detail?.pauses.find((item) => item.ended_at === null && (pointKind === "luc" ? item.visit_luc_id === pointId : item.visit_environment_id === pointId));
   const selectedPointTemplateId = points.find((point) => point.value === selectedPoint)?.templateId ?? visit?.template_id ?? null;
-  const hasOwnEnvironmentTemplate = pointKind === "environment" && Boolean(selectedEnvironment?.template_id);
+  const selectedLucTemplateId = pointKind === "luc" ? detail?.lucs.find((item) => item.id === pointId)?.template_id : null;
+  const hasOwnEnvironmentTemplate = (pointKind === "environment" && Boolean(selectedEnvironment?.template_id)) || (Boolean(selectedLucTemplateId) && selectedLucTemplateId !== visit?.template_id);
   const pointSections = sortByPosition(data.sections.filter((section) => section.active && section.template_id === selectedPointTemplateId)).slice(hasOwnEnvironmentTemplate ? 0 : 3);
   const questions = sortByPosition(data.questions.filter((question) => question.active && (generalSections.some((section) => section.id === question.section_id) || pointSections.some((section) => section.id === question.section_id))));
   const selectedPointCancelled = pointKind === "luc" && selectedPointRecord?.completion_status === "cancelada";
