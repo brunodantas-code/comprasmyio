@@ -339,7 +339,7 @@ export function SiteSurveyLucManager({ checklistData, visitTemplateId: visitTemp
     .filter((item) => item.active && item.point_type === pointType)
     .sort((left, right) => left.name.localeCompare(right.name, "pt-BR", { sensitivity: "base" })), [pointType, shopCatalog]);
   const displayRows = useMemo<DisplayRow[]>(() => [
-    ...rows.map((row) => ({ ...row, source: "luc" as const, template_id: null })),
+    ...rows.map((row) => ({ ...row, source: "luc" as const, template_id: row.template_id ?? null })),
     ...environmentRows.map((row) => ({ id: row.id, source: "environment" as const, luc_number: row.luc_number ?? "", shop_name: row.name, location: environmentLocation(row.location), point_type: row.point_type, classification_type: row.point_type, meter_number: row.meter_number, environment_type_id: row.environment_type_id, template_id: row.template_id })),
   ], [rows, environmentRows]);
   const typeTotals = useMemo(() => surveyPointTotals(displayRows), [displayRows]);
