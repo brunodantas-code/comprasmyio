@@ -9,6 +9,13 @@ const electricalOthersSchema = z.object({
   escadas_rolantes: z.number().int().nonnegative().nullable().optional(),
   central_myio: z.number().int().nonnegative().nullable().optional(),
 }).strict().nullable().optional();
+const hydraulicOthersSchema = z.object({
+  banheiros: z.number().int().nonnegative().nullable(),
+  reservatorios: z.number().int().nonnegative().nullable(),
+  nivel_reservatorio: z.number().int().nonnegative().nullable(),
+  saida_pulsada: z.number().int().nonnegative().nullable(),
+  uso_alternativo: z.number().int().nonnegative().nullable(),
+}).strict().nullable().optional();
 export const proposalScopeSchema = z.object({
   hydraulic_shops: z.number().int().nonnegative().nullable(),
   hydraulic_general: z.number().int().nonnegative().nullable(),
@@ -18,6 +25,7 @@ export const proposalScopeSchema = z.object({
     electrical_shops: z.number().int().nonnegative().nullable(),
     electrical_entry: z.number().int().nonnegative().nullable(),
     electrical_others: electricalOthersSchema,
+    hydraulic_others: hydraulicOthersSchema,
   }).strict().nullable().optional(),
   evidence: z.string(),
 }).strict();
@@ -49,6 +57,18 @@ export function proposalOtherEnergyBreakdown(scope: { scope_breakdown?: Proposal
   const others = scope.scope_breakdown?.electrical_others;
   if (!others) return [];
   return otherEnergyLabels.filter(([key]) => others[key] !== null && others[key] !== undefined).map(([key, label]) => ({ key, label, count: others[key] as number }));
+}
+const otherWaterLabels: [keyof NonNullable<ProposalScopeBreakdown["hydraulic_others"]>, string][] = [
+  ["banheiros", "Banheiros"],
+  ["reservatorios", "Reservatórios de Água Potável"],
+  ["nivel_reservatorio", "Nível de Reservatório"],
+  ["saida_pulsada", "Saídas Pulsadas"],
+  ["uso_alternativo", "Uso Alternativo (poço/fonte)"],
+];
+export function proposalOtherWaterBreakdown(scope: { scope_breakdown?: ProposalScopeBreakdown | null }): { key: string; label: string; count: number }[] {
+  const others = scope.scope_breakdown?.hydraulic_others;
+  if (!others) return [];
+  return otherWaterLabels.filter(([key]) => others[key] != null).map(([key, label]) => ({ key, label, count: others[key] as number }));
 }
 export function proposalGatewayCount(scope: { scope_breakdown?: ProposalScopeBreakdown | null }): number | null {
   return scope.scope_breakdown?.electrical_others?.central_myio ?? null;
