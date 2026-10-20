@@ -212,24 +212,27 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
         // Cada pergunta ganha uma linha de resposta editável logo abaixo; o mapa vai nos metadados para a importação.
         const body = group.questions.flatMap((text, index) => [[`${index + 1}. ${text}`], [""]]);
         const fieldsForGroup = group.questions.map((text) => { const field = `cq_${answerFields.length}`; answerFields.push({ field, point: group.value, label: `${kind} — ${group.label}`, question: text }); return field; });
+        const thumbnail = thumbnails.get(group.value);
+        const thumbSize = 18, indent = thumbnail ? thumbSize + 3 : 0;
         autoTable(pdf, {
           startY: y, theme: "plain", pageBreak: "auto", margin: { top: 20, bottom: 20, left: 14, right: 14 },
           styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: 1.5, overflow: "linebreak" },
           headStyles: { fontStyle: "bold", textColor: accent, lineWidth: { bottom: 0.3 }, lineColor: green },
           head: [[`${kind} — ${group.label}`]], body, rowPageBreak: "avoid",
-          didParseCell: (cell) => { if (cell.section === "body" && cell.row.index % 2 === 1) cell.cell.styles.minCellHeight = 13; },
+          didParseCell: (cell) => {
+            if (cell.section !== "body") return;
+            // Com foto, pergunta e resposta ficam à direita do thumbnail.
+            if (thumbnail) cell.cell.styles.cellPadding = { top: 1.5, bottom: 1.5, right: 1.5, left: indent + 1.5 };
+            if (cell.row.index % 2 === 1) cell.cell.styles.minCellHeight = 13;
+          },
           didDrawCell: (cell) => {
-            if (cell.section === "head") {
-              // Foto da fachada no cabeçalho do ponto, para o cliente identificar sobre o que é a pergunta.
-              const thumbnail = thumbnails.get(group.value);
-              if (thumbnail) {
-                const size = Math.min(cell.cell.height - 1.5, 12);
-                pdf.addImage(thumbnail, "PNG", cell.cell.x + cell.cell.width - size - 2, cell.cell.y + (cell.cell.height - size) / 2, size, size);
-              }
-              return;
+            if (cell.section !== "body") return;
+            if (thumbnail && cell.row.index === 0 && cell.column.index === 0) {
+              // Foto da fachada no tamanho dos demais thumbnails, abaixo da linha do ponto.
+              pdf.addImage(thumbnail, "PNG", cell.cell.x + 1.5, cell.cell.y + 1.5, thumbSize, thumbSize);
             }
-            if (cell.section !== "body" || cell.row.index % 2 !== 1) return;
-            const x = cell.cell.x + 2, top = cell.cell.y + 1, w = cell.cell.width - 4, h = cell.cell.height - 2.5;
+            if (cell.row.index % 2 !== 1) return;
+            const x = cell.cell.x + 2 + indent, top = cell.cell.y + 1, w = cell.cell.width - 4 - indent, h = cell.cell.height - 2.5;
             pdf.setDrawColor(...green); pdf.setLineWidth(0.3); pdf.roundedRect(x, top, w, h, 1, 1, "S");
             const field = new TextFieldClass();
             field.fieldName = fieldsForGroup[(cell.row.index - 1) / 2]; field.multiline = true; field.fontSize = 9; field.readOnly = false;
@@ -277,10 +280,10 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
         const meterWidth = textColumnWidth(pdf, ["Nº do medidor", ...group.map((point) => point.meterNumber || "—")], 4, 22, 30);
         // Campo do nome só na seção sem LUC e sem nome identificados.
         const nameColumn = lucMeter ? 4 : 3;
-        // Observações: última coluna, editável pelo cliente; Localização fica com o espaço restante.
-        const obsWidth = 28;
-        const lucWidths = [photoSize + 4, 28, ...(lucMeter ? [meterWidth] : []), lucTypeWidth, 38];
-        lucWidths.push(182 - lucWidths.reduce((total, width) => total + width, 0) - obsWidth, obsWidth);
+        // Observações: última coluna, editável pelo cliente, com todo o espaço restante.
+        const locationWidth = textColumnWidth(pdf, ["Localização", ...group.map((point) => point.location || "—")], 4, 24, 32);
+        const lucWidths = [photoSize + 4, 28, ...(lucMeter ? [meterWidth] : []), lucTypeWidth, 36, locationWidth];
+        lucWidths.push(182 - lucWidths.reduce((total, width) => total + width, 0));
         autoTable(pdf, {
           startY: y, theme: "plain", margin: { top: 20, bottom: 20, left: 14, right: 14 },
           styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: 1.8, overflow: "linebreak", valign: "middle" },
@@ -316,7 +319,8 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
             }
             if (cell.section === "body" && cell.column.index === lucWidths.length - 1) {
               // Campo editável de observações para o cliente, ocupando a célula toda.
-              const x = cell.cell.x + 1.5, w = cell.cell.width - 3, top = cell.cell.y + 1.5, h = cell.cell.height - 3;
+              // Mesma altura do thumbnail, centralizado na linha.
+              const h = photoSize, x = cell.cell.x + 1.5, w = cell.cell.width - 3, top = cell.cell.y + (cell.cell.height - h) / 2;
               pdf.setDrawColor(...green); pdf.setLineWidth(0.3); pdf.roundedRect(x, top, w, h, 1, 1, "S");
               const field = new TextFieldClass();
               field.fieldName = `obs_${obsFieldIndex++}`; field.multiline = true; field.fontSize = 9; field.readOnly = false;
