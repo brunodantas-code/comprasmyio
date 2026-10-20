@@ -20,6 +20,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { surveyPointType, surveyPointTypeLabel, surveyPointTotals, requiresSurveyLuc, isSurveyVacant, type SurveyPointType } from "@/lib/site-survey-point-type";
 import { approvalEnergyWaterTotals, type EnergyWaterTotals } from "@/lib/site-survey-energy-water";
+import { proposalGroupDivergence, type ProposalGroupDivergence } from "@/lib/site-survey-proposal";
 import { environmentLocation } from "@/lib/site-survey-environment-location";
 import { environmentDisciplineTotals } from "@/lib/site-survey-environment-totals";
 import { SiteSurveyGeneralFilter } from "@/components/site-survey-general-filter";
@@ -79,18 +80,18 @@ const SERVICE_TOTALS_SECONDARY: { key: keyof EnergyWaterTotals; label: string }[
 
 const ACTION_CLS = "border-primary !bg-transparent !text-primary shadow-sm hover:!bg-primary hover:!text-primary-foreground active:!bg-primary active:!text-primary-foreground focus-visible:!bg-primary focus-visible:!text-primary-foreground";
 
-function TotalChip({ label, count, compact = false }: { label: string; count: number; compact?: boolean }) {
+function TotalChip({ label, count, compact = false, alert = false }: { label: string; count: number; compact?: boolean; alert?: boolean }) {
   const isActive = count > 0;
-  return <div className={`flex min-w-0 items-center gap-2 rounded-sm px-2.5 py-1.5 ${compact ? "" : "sm:w-44"} ${isActive ? "bg-myio-green/5" : ""}`}>
-    <span className={`h-5 w-1.5 shrink-0 rounded-full ${isActive ? "bg-myio-green" : "bg-muted-foreground/25"}`} aria-hidden="true" />
+  return <div className={`flex min-w-0 items-center gap-2 rounded-sm px-2.5 py-1.5 ${compact ? "" : "sm:w-44"} ${isActive ? "bg-myio-green/5" : ""}`} title={alert ? "Diferente da proposta aprovada" : undefined}>
+    <span className={`h-5 w-1.5 shrink-0 rounded-full ${alert ? "bg-destructive" : isActive ? "bg-myio-green" : "bg-muted-foreground/25"}`} aria-hidden="true" />
     <span className={`text-xs font-medium ${isActive ? "text-foreground" : "text-muted-foreground"}`}>{label}</span>
-    <strong className={`text-base leading-none tabular-nums ${isActive ? "text-foreground" : "text-muted-foreground/70"}`}>{count}</strong>
+    <strong className={`text-base leading-none tabular-nums ${alert ? "text-destructive" : isActive ? "text-foreground" : "text-muted-foreground/70"}`}>{count}</strong>
   </div>;
 }
 
-function PointTypeTotals({ totals, groupTotals, environmentTotals, collapsed = false, onToggleCollapsed }: { totals: Record<SurveyPointType, number>; groupTotals?: { shops: EnergyWaterTotals; concessionaria: EnergyWaterTotals; others: EnergyWaterTotals; hasConcessionaria: boolean; hasOthers: boolean }; environmentTotals?: { hydraulic: number; electrical: number }; collapsed?: boolean; onToggleCollapsed?: () => void }) {
+function PointTypeTotals({ totals, groupTotals, environmentTotals, groupDivergence, collapsed = false, onToggleCollapsed }: { groupDivergence?: Partial<Record<"shops" | "entry" | "others", ProposalGroupDivergence>>; totals: Record<SurveyPointType, number>; groupTotals?: { shops: EnergyWaterTotals; concessionaria: EnergyWaterTotals; others: EnergyWaterTotals; hasConcessionaria: boolean; hasOthers: boolean }; environmentTotals?: { hydraulic: number; electrical: number }; collapsed?: boolean; onToggleCollapsed?: () => void }) {
   const grandTotal = totals.shop + totals.kiosk + totals.environment + totals.vacant + totals.vacant_kiosk;
-  const serviceLine = (label: string, values: EnergyWaterTotals) => <div className="flex flex-wrap items-center gap-2" aria-label={`Totalizadores de ${label}`}><span className="text-xs font-semibold text-foreground">{label}</span>{[...SERVICE_TOTALS_PRIMARY, ...SERVICE_TOTALS_SECONDARY].map((item) => <TotalChip key={item.key} label={item.label} count={values[item.key]} />)}</div>;
+  const serviceLine = (label: string, values: EnergyWaterTotals, divergence?: ProposalGroupDivergence) => <div className="flex flex-wrap items-center gap-2" aria-label={`Totalizadores de ${label}`}><span className="text-xs font-semibold text-foreground">{label}</span>{[...SERVICE_TOTALS_PRIMARY, ...SERVICE_TOTALS_SECONDARY].map((item) => <TotalChip key={item.key} label={item.label} count={values[item.key]} alert={item.key === "energyAll" ? divergence?.energy : item.key === "waterAll" ? divergence?.water : false} />)}</div>;
   // Seta verde de exibir/recolher: oculta totalizadores e proposta, deixando título e botões à vista.
   const toggle = onToggleCollapsed ? <button type="button" className="shrink-0 self-start p-1 text-primary" aria-expanded={!collapsed} aria-label={collapsed ? "Exibir totalizadores do cadastro" : "Recolher totalizadores do cadastro"} title={collapsed ? "Exibir totalizadores" : "Recolher totalizadores"} onClick={onToggleCollapsed}><ChevronDown className={`h-4 w-4 transition-transform ${collapsed ? "" : "rotate-180"}`} /></button> : null;
   // Na desktop, a 1ª linha traz as quantidades de pontos (até Lojas vagas); as demais, água/energia por grupo.

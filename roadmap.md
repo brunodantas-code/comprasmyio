@@ -1051,3 +1051,5 @@
 - [x] Filtro Geral: remover droplist de comparação (Texto contém/Número até/…) mantendo o campo de Texto da Resposta.
 - [x] Filtro Geral: manter a sequência do checklist original na ordenação das perguntas (pergunta "Existe hidrômetro na loja?" estava no fim).
 - [x] Filtro Geral: excluir "Inserir foto do quadro elétrico aberto" da seção de Elétrica.
+- [x] Site Survey — totalizadores do cadastro: quantidade aprovada em vermelho quando difere da proposta do grupo (ex.: Energia 140 × 138 em Lojas e Quiosques) e texto de conferência em vermelho; teste em src/lib/site-survey-proposal.test.ts.
+- [x] Site Survey — quadro da proposta: linha da Central myio (gateway) posicionada abaixo de Demais ambientes e sem a observação "não conta como ponto de medição".
