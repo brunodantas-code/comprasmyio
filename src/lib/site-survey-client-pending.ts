@@ -23,9 +23,10 @@ export function vacantShopPoints(points: ClientPendingPoint[]) {
 export function duplicateNamePoints(points: ClientPendingPoint[]) {
   const byName = new Map<string, ClientPendingPoint[]>();
   for (const point of points) {
-    if (point.pointType !== "shop" && point.pointType !== "kiosk" && point.pointType !== "vacant" && point.pointType !== "vacant_kiosk") continue;
+    // Lojas/quiosques vagos têm seção própria e nunca são "nome repetido".
+    if (point.pointType !== "shop" && point.pointType !== "kiosk") continue;
     const name = (point.name ?? point.label).trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR");
-    if (!name) continue;
+    if (!name || /^vag[ao]$/.test(name)) continue;
     byName.set(name, [...(byName.get(name) ?? []), point]);
   }
   return [...byName.values()]
