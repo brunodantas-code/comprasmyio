@@ -33,3 +33,12 @@ test("vacantShopPoints lista apenas lojas vagas, na ordem alfabética", async ()
   ];
   assert.deepEqual(vacantShopPoints(points).map((point) => point.value), ["a", "c"]);
 });
+test("splitUnidentifiedByName separa nome identificado de nome não identificado", async () => {
+  const { splitUnidentifiedByName } = await import("@/lib/site-survey-client-pending");
+  const [named, unnamed] = splitUnidentifiedByName([
+    { value: "a", label: "Chaves", pointType: "kiosk", name: "Chaves", lucNumber: "Não identificado" },
+    { value: "b", label: "x", pointType: "kiosk", name: "Não Identificado", lucNumber: "Não identificado" },
+  ]);
+  assert.deepEqual(named.map((p) => p.value), ["a"]);
+  assert.deepEqual(unnamed.map((p) => p.value), ["b"]);
+});
