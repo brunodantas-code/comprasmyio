@@ -260,6 +260,7 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
         const [namedGroup, unnamedGroup] = splitUnidentifiedByName(missingLucs);
         let lucFieldIndex = 0;
         let nameFieldIndex = 0;
+        let obsFieldIndex = 0;
         const renderGroup = (initialGroup: ClientPendingPoint[], title: string, subtitle: string, withNameField = false) => {
         let group = initialGroup;
         if (!group.length) return;
@@ -268,24 +269,26 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
         sectionHeading(title, subtitle, 35);
         const lucType = (point: ClientPendingPoint) => point.pointType === "kiosk" ? "Quiosque" : "Loja";
         // O tipo nunca pode quebrar ao meio: a coluna recebe a largura do rótulo mais longo.
-        const lucTypeWidth = textColumnWidth(pdf, group.map(lucType), 3, 20, 30);
+        const lucTypeWidth = textColumnWidth(pdf, group.map(lucType), 3, 20, 26);
         // Sem nenhum número de medidor na tabela, a coluna não aparece (padrão do Cadastro).
         const lucMeter = group.some((point) => Boolean(point.meterNumber?.trim()));
         // Foto no mesmo tamanho dos demais thumbnails do relatório.
         const photoSize = 18;
-        const meterWidth = textColumnWidth(pdf, ["Nº do medidor", ...group.map((point) => point.meterNumber || "—")], 4, 22, 40);
+        const meterWidth = textColumnWidth(pdf, ["Nº do medidor", ...group.map((point) => point.meterNumber || "—")], 4, 22, 30);
         // Campo do nome só na seção sem LUC e sem nome identificados.
         const nameColumn = lucMeter ? 4 : 3;
-        const lucWidths = [photoSize + 6, 32, ...(lucMeter ? [meterWidth] : []), lucTypeWidth, 46];
-        lucWidths.push(182 - lucWidths.reduce((total, width) => total + width, 0));
+        // Observações: última coluna, editável pelo cliente; Localização fica com o espaço restante.
+        const obsWidth = 28;
+        const lucWidths = [photoSize + 4, 28, ...(lucMeter ? [meterWidth] : []), lucTypeWidth, 38];
+        lucWidths.push(182 - lucWidths.reduce((total, width) => total + width, 0) - obsWidth, obsWidth);
         autoTable(pdf, {
           startY: y, theme: "plain", margin: { top: 20, bottom: 20, left: 14, right: 14 },
           styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: 1.8, overflow: "linebreak", valign: "middle" },
           headStyles: { fontStyle: "bold", textColor: accent, lineWidth: { bottom: 0.3 }, lineColor: green },
           bodyStyles: { minCellHeight: photoSize + 4 }, rowPageBreak: "avoid", showHead: "everyPage",
           columnStyles: Object.fromEntries(lucWidths.map((width, index) => [index, { cellWidth: width }])),
-          head: [["Foto", "LUC", ...(lucMeter ? ["Nº do medidor"] : []), "Tipo", "Nome da loja", "Localização"]],
-          body: group.map((point) => [thumbnails.has(point.value) ? "" : "Sem foto", point.lucNumber?.trim() || "Sem LUC", ...(lucMeter ? [point.meterNumber || "—"] : []), lucType(point), point.name?.trim() || (withNameField ? "Não identificado" : point.label), point.location || "—"]),
+          head: [["Foto", "LUC", ...(lucMeter ? ["Nº do medidor"] : []), "Tipo", "Nome da loja", "Localização", "Observações"]],
+          body: group.map((point) => [thumbnails.has(point.value) ? "" : "Sem foto", point.lucNumber?.trim() || "Sem LUC", ...(lucMeter ? [point.meterNumber || "—"] : []), lucType(point), point.name?.trim() || (withNameField ? "Não identificado" : point.label), point.location || "—", ""]),
           didParseCell: (cell) => {
             if (cell.section === "body" && (cell.column.index === 1 || (withNameField && cell.column.index === nameColumn))) { cell.cell.styles.valign = "top"; cell.cell.styles.minCellHeight = Math.max(photoSize + 4, 16); }
             if (lucMeter && cell.column.index === 2) cell.cell.styles.overflow = "visible";
@@ -307,6 +310,16 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
               pdf.setDrawColor(...green); pdf.setLineWidth(0.3); pdf.roundedRect(x, top, w, h, 1, 1, "S");
               const field = new TextFieldClass();
               field.fieldName = `nome_${nameFieldIndex++}`; field.fontSize = 9; field.readOnly = false;
+              field.x = x + 0.4; field.y = top + 0.4; field.width = w - 0.8; field.height = h - 0.8;
+              pdf.addField(field);
+              return;
+            }
+            if (cell.section === "body" && cell.column.index === lucWidths.length - 1) {
+              // Campo editável de observações para o cliente, ocupando a célula toda.
+              const x = cell.cell.x + 1.5, w = cell.cell.width - 3, top = cell.cell.y + 1.5, h = cell.cell.height - 3;
+              pdf.setDrawColor(...green); pdf.setLineWidth(0.3); pdf.roundedRect(x, top, w, h, 1, 1, "S");
+              const field = new TextFieldClass();
+              field.fieldName = `obs_${obsFieldIndex++}`; field.multiline = true; field.fontSize = 9; field.readOnly = false;
               field.x = x + 0.4; field.y = top + 0.4; field.width = w - 0.8; field.height = h - 0.8;
               pdf.addField(field);
               return;
