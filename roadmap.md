@@ -1046,3 +1046,4 @@
 - [x] Histórico de nomes: linha "Alpha Express → Netão" aparece "Sem LUC"; o LUC (STB1082A) é mantido na troca de nome e deve constar na linha.
 
 - [x] Relatório de pendências do cliente: continuar seções na mesma página, reduzir espaços em branco e eliminar quebras desnecessárias. PDF do Taboão conferido em duas páginas.
+- [x] Site Survey — Cadastro completo: seta verde de exibir/recolher no título, ocultando totalizadores e Pontos contratados e deixando à vista o cabeçalho da visita e os botões de relatório; conferido no preview (recolher e reexibir na visita 202609300001).
