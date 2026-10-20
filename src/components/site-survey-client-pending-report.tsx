@@ -133,7 +133,7 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
           if ((result.data?.length ?? 0) < 1000) return rows;
         }
       };
-      const [responses, calls, freshPoints, texts, facades, { jsPDF }, { default: autoTable }] = await Promise.all([loadResponses(), loadCalls(), loadPoints(), loadTexts(), loadFacades(), import("jspdf"), import("jspdf-autotable")]);
+      const [responses, calls, freshPoints, texts, facades, { jsPDF }, { default: autoTable }, { PDFDocument, PDFName, PDFDict, PDFTextField }] = await Promise.all([loadResponses(), loadCalls(), loadPoints(), loadTexts(), loadFacades(), import("jspdf"), import("jspdf-autotable"), import("pdf-lib")]);
       if (calls.some((call) => call.internal_call_id && !call.internal_calls)) throw new Error("Não foi possível consultar todos os chamados vinculados. Verifique seu acesso aos chamados antes de gerar o relatório.");
       const groups = buildClientPendingGroups(freshPoints.length ? freshPoints : points, responses, questions, calls, texts);
       const pdf = new jsPDF({ unit: "mm", format: "a4" });
@@ -411,7 +411,29 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
         pdf.text("myio Automação Ltda", 14, 287); pdf.text(`Página ${page} de ${pages}`, 196, 287, { align: "right" });
       }
       pdf.setProperties({ title: `Pendências para o cliente SS-${number}`, subject: encodeCustomerAnswerMap({ visit: visit.id, fields: answerFields }) });
-      const blob = pdf.output("blob");
+      // Campos editáveis do cliente usam a mesma fonte e tamanho do texto do relatório (Nunito 9).
+      const formDoc = await PDFDocument.load(await pdf.output("arraybuffer"));
+      const form = formDoc.getForm();
+      // Reaproveita a Nunito já embutida pelo jsPDF (embutir de novo exigiria fontkit no navegador).
+      let nunitoRef: ReturnType<typeof formDoc.context.getObjectRef> | undefined;
+      for (const [ref, object] of formDoc.context.enumerateIndirectObjects()) {
+        if (object instanceof PDFDict && object.has(PDFName.of("BaseFont")) && String(object.get(PDFName.of("BaseFont"))).includes("Nunito")) { nunitoRef = ref; break; }
+      }
+      // O dicionário de recursos (DR) precisa conhecer a Nunito para o leitor de PDF usá-la ao digitar.
+      const resources = formDoc.context.obj({});
+      if (nunitoRef) {
+        const fontResources = formDoc.context.obj({});
+        fontResources.set(PDFName.of("Nunito"), nunitoRef);
+        resources.set(PDFName.of("Font"), fontResources);
+      }
+      for (const field of form.getFields()) {
+        if (!(field instanceof PDFTextField)) continue;
+        field.acroField.setDefaultAppearance(nunitoRef ? "/Nunito 9 Tf 0 g" : "/Helv 9 Tf 0 g");
+        field.acroField.getWidgets().forEach((widget) => widget.dict.set(PDFName.of("DR"), resources));
+      }
+      form.acroForm.dict.set(PDFName.of("DR"), resources);
+      // updateFieldAppearances: false preserva a aparência e a fonte definidas acima.
+      const blob = new Blob([new Uint8Array(await formDoc.save({ updateFieldAppearances: false }))], { type: "application/pdf" });
       if (matchMedia("(pointer: coarse)").matches) { setPrepared(blob); toast.success("PDF pronto para baixar.", { id: toastId }); }
       else { download(blob); toast.success("Relatório gerado.", { id: toastId }); }
     } catch (error) { toast.error(error instanceof Error ? error.message : "Não foi possível gerar o relatório.", { id: toastId }); }
