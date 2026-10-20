@@ -5047,6 +5047,7 @@ export type Database = {
           contract_name: string | null
           created_at: string
           created_by: string | null
+          environment_type_id: string | null
           id: string
           last_progress_at: string | null
           location: string | null
@@ -5058,6 +5059,7 @@ export type Database = {
           skipped_section_ids: Json
           started_at: string | null
           started_by: string | null
+          template_id: string | null
           updated_at: string
           updated_by: string | null
           visit_id: string
@@ -5074,6 +5076,7 @@ export type Database = {
           contract_name?: string | null
           created_at?: string
           created_by?: string | null
+          environment_type_id?: string | null
           id?: string
           last_progress_at?: string | null
           location?: string | null
@@ -5085,6 +5088,7 @@ export type Database = {
           skipped_section_ids?: Json
           started_at?: string | null
           started_by?: string | null
+          template_id?: string | null
           updated_at?: string
           updated_by?: string | null
           visit_id: string
@@ -5101,6 +5105,7 @@ export type Database = {
           contract_name?: string | null
           created_at?: string
           created_by?: string | null
+          environment_type_id?: string | null
           id?: string
           last_progress_at?: string | null
           location?: string | null
@@ -5112,6 +5117,7 @@ export type Database = {
           skipped_section_ids?: Json
           started_at?: string | null
           started_by?: string | null
+          template_id?: string | null
           updated_at?: string
           updated_by?: string | null
           visit_id?: string
@@ -5146,10 +5152,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "site_survey_visit_lucs_environment_type_id_fkey"
+            columns: ["environment_type_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_environment_types"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "site_survey_visit_lucs_started_by_fkey"
             columns: ["started_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_visit_lucs_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_templates"
             referencedColumns: ["id"]
           },
           {

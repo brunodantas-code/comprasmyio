@@ -1,0 +1,1 @@
+ALTER TABLE public.site_survey_visit_lucs ADD COLUMN IF NOT EXISTS template_id uuid REFERENCES public.site_survey_templates(id) ON DELETE SET NULL, ADD COLUMN IF NOT EXISTS environment_type_id uuid REFERENCES public.site_survey_environment_types(id) ON DELETE SET NULL;

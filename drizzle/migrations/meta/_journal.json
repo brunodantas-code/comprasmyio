@@ -897,6 +897,13 @@
       "when": 1792492282181,
       "tag": "0127_widen_environment_point_type",
       "breakpoints": true
+    },
+    {
+      "idx": 128,
+      "version": "7",
+      "when": 1792493578378,
+      "tag": "0128_luc_point_template",
+      "breakpoints": true
     }
   ]
 }
