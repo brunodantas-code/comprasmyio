@@ -433,7 +433,7 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
       }
       form.acroForm.dict.set(PDFName.of("DR"), resources);
       // updateFieldAppearances: false preserva a aparência e a fonte definidas acima.
-      const blob = new Blob([new Uint8Array(await document.save({ updateFieldAppearances: false }))], { type: "application/pdf" });
+      const blob = new Blob([new Uint8Array(await formDoc.save({ updateFieldAppearances: false }))], { type: "application/pdf" });
       if (matchMedia("(pointer: coarse)").matches) { setPrepared(blob); toast.success("PDF pronto para baixar.", { id: toastId }); }
       else { download(blob); toast.success("Relatório gerado.", { id: toastId }); }
     } catch (error) { toast.error(error instanceof Error ? error.message : "Não foi possível gerar o relatório.", { id: toastId }); }
