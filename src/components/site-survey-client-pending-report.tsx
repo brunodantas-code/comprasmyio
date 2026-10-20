@@ -411,7 +411,22 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
         pdf.text("myio Automação Ltda", 14, 287); pdf.text(`Página ${page} de ${pages}`, 196, 287, { align: "right" });
       }
       pdf.setProperties({ title: `Pendências para o cliente SS-${number}`, subject: encodeCustomerAnswerMap({ visit: visit.id, fields: answerFields }) });
-      const blob = pdf.output("blob");
+      // Campos editáveis do cliente usam a mesma fonte e tamanho do texto do relatório (Nunito 9).
+      const document = await PDFDocument.load(await pdf.output("arraybuffer"));
+      const form = document.getForm();
+      const nunito = await document.embedFont(new Uint8Array(atob(regular).split("").map((char) => char.charCodeAt(0))));
+      const fontResources = document.context.obj({ Nunito: nunito.ref });
+      for (const field of form.getFields()) {
+        if (!(field instanceof PDFTextField)) continue;
+        field.acroField.setDefaultAppearance("/Nunito 9 Tf 0 g");
+        // O dicionário de recursos do formulário precisa conhecer a Nunito para o leitor de PDF usá-la ao digitar.
+        const dr = document.context.obj({});
+        dr.set(PDFName.of("Font"), document.context.obj({}));
+        dr.lookup(PDFName.of("Font"), document.context.obj({}).constructor as never).set(PDFName.of("Nunito"), nunito.ref);
+        field.acroField.getWidgets().forEach((widget) => widget.dict.set(PDFName.of("DR"), dr));
+      }
+      form.acroForm.dict.set(PDFName.of("DR"), (() => { const dr = document.context.obj({}); dr.set(PDFName.of("Font"), fontResources); return dr; })());
+      const blob = new Blob([new Uint8Array(await document.save())], { type: "application/pdf" });
       if (matchMedia("(pointer: coarse)").matches) { setPrepared(blob); toast.success("PDF pronto para baixar.", { id: toastId }); }
       else { download(blob); toast.success("Relatório gerado.", { id: toastId }); }
     } catch (error) { toast.error(error instanceof Error ? error.message : "Não foi possível gerar o relatório.", { id: toastId }); }
