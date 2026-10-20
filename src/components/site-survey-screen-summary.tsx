@@ -84,7 +84,7 @@ function PhotoThumbnail({ attachment, gallery }: { attachment: SummaryAttachment
   </>;
 }
 
-function FacadePhotoThumbnail({ attachment, gallery, userId, canDelete, canEditAttachments, onDeleted }: { attachment: SummaryAttachment; gallery?: SummaryAttachment[]; userId?: string; canDelete?: boolean; canEditAttachments?: boolean; onDeleted?: () => void }) {
+function DeletablePhotoThumbnail({ attachment, gallery, userId, canDelete, canEditAttachments, onDeleted, label = "foto" }: { attachment: SummaryAttachment; gallery?: SummaryAttachment[]; userId?: string; canDelete?: boolean; canEditAttachments?: boolean; onDeleted?: () => void; label?: string }) {
   const [pending, setPending] = useState(false);
   const deletable = Boolean(canDelete && userId && (attachment.uploaded_by === userId || canEditAttachments));
   const remove = async () => {
@@ -97,15 +97,15 @@ function FacadePhotoThumbnail({ attachment, gallery, userId, canDelete, canEditA
       const { error: storageError } = await supabase.storage.from("site-survey-attachments").remove([attachment.storage_path]);
       onDeleted?.();
       if (storageError) toast.warning("Foto removida da visita, mas o arquivo não pôde ser apagado do armazenamento.");
-      else toast.success("Foto da fachada excluída.");
+      else toast.success(label === "foto" ? "Foto excluída." : "Foto da fachada excluída.");
     } catch (error) {
       onDeleted?.();
-      toast.error(error instanceof Error ? error.message : "Não foi possível excluir a foto da fachada.");
+      toast.error(error instanceof Error ? error.message : `Não foi possível excluir a ${label}.`);
     } finally { setPending(false); }
   };
   return <div className="relative">
     <PhotoThumbnail attachment={attachment} gallery={gallery} />
-    {deletable ? <div className="absolute -right-1.5 -top-1.5 z-10 rounded-full bg-background shadow-sm"><ConfirmDeleteButton title="Excluir foto da fachada?" description="A foto será removida desta visita. Esta ação não pode ser desfeita." ariaLabel={`Excluir foto da fachada: ${attachment.file_name}`} confirmLabel="Excluir" pending={pending} onConfirm={() => void remove()} trigger={<Button type="button" size="compactIcon" variant="action" className="group h-7 w-7 rounded-full hover:!text-action-hover-foreground focus-visible:!text-action-hover-foreground active:!text-action-hover-foreground" aria-label={`Excluir foto da fachada: ${attachment.file_name}`}><Trash2 className="h-3.5 w-3.5 group-hover:!text-action-hover-foreground group-focus-visible:!text-action-hover-foreground group-active:!text-action-hover-foreground" /></Button>} /></div> : null}
+    {deletable ? <div className="absolute -right-1.5 -top-1.5 z-10 rounded-full bg-background shadow-sm"><ConfirmDeleteButton title={`Excluir ${label}?`} description="A foto será removida desta visita. Esta ação não pode ser desfeita." ariaLabel={`Excluir ${label}: ${attachment.file_name}`} confirmLabel="Excluir" pending={pending} onConfirm={() => void remove()} trigger={<Button type="button" size="compactIcon" variant="action" className="group h-7 w-7 rounded-full hover:!text-action-hover-foreground focus-visible:!text-action-hover-foreground active:!text-action-hover-foreground" aria-label={`Excluir ${label}: ${attachment.file_name}`}><Trash2 className="h-3.5 w-3.5 group-hover:!text-action-hover-foreground group-focus-visible:!text-action-hover-foreground group-active:!text-action-hover-foreground" /></Button>} /></div> : null}
   </div>;
 }
 
