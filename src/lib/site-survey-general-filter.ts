@@ -16,7 +16,7 @@ function answerField(answer: unknown, path: string): string[] {
   return strings(path === "value" ? ("value" in object ? object.value : answer) : object[path]);
 }
 const EXCLUDED_SECTIONS = ["diversos", "check list de preparacao", "checklist de preparacao", "equipe", "condicoes do local", "revisao, pendencias, fotos e encerramento", "observacoes finais e fotos adicionais"];
-const excludedQuestion = (prompt: string) => { const p = normalize(prompt); return p.includes("cisterna") || p.startsWith("qual a dificuldade de acesso ao hidrometro"); };
+const excludedQuestion = (prompt: string) => { const p = normalize(prompt); return p.includes("cisterna") || p.startsWith("qual a dificuldade de acesso ao hidrometro") || p.startsWith("inserir foto"); };
 // Hydrometer questions stored under "Tipo" are shown with "Água e hidrômetros".
 const filterSectionTitle = (title: string, prompt: string) => normalize(title) === "tipo" && normalize(prompt).includes("hidrometro") ? "Água e hidrômetros" : title;
 export function generalFilterFields(data: GeneralFilterData): FilterField[] {
