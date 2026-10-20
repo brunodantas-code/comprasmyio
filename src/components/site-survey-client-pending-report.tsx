@@ -3,7 +3,7 @@ import { Download, LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { buildClientPendingGroups, duplicateNamePoints, unidentifiedLucPoints, vacantShopPoints, type ClientPendingPoint, type ClientPendingResponse } from "@/lib/site-survey-client-pending";
+import { buildClientPendingGroups, duplicateNamePoints, unidentifiedLucPoints, splitUnidentifiedByName, vacantShopPoints, type ClientPendingPoint, type ClientPendingResponse } from "@/lib/site-survey-client-pending";
 import nunitoRegularUrl from "@/assets/fonts/nunito-regular.ttf?url";
 import nunitoBoldUrl from "@/assets/fonts/nunito-bold.ttf?url";
 import { surveyPointType } from "@/lib/site-survey-point-type";
@@ -221,12 +221,15 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
             } finally { URL.revokeObjectURL(url); }
           } catch { /* foto indisponível: segue sem thumbnail */ }
         }
-        sectionHeading("Lojas e quiosques com LUC não identificado", `${missingLucs.length} ponto(s) para identificação do LUC`, 35);
+        const [namedGroup, unnamedGroup] = splitUnidentifiedByName(missingLucs);
+        const renderGroup = (group: ClientPendingPoint[], title: string, subtitle: string) => {
+        if (!group.length) return;
+        sectionHeading(title, subtitle, 35);
         const lucType = (point: ClientPendingPoint) => point.pointType === "kiosk" ? "Quiosque" : "Loja";
         // O tipo nunca pode quebrar ao meio: a coluna recebe a largura do rótulo mais longo.
-        const lucTypeWidth = textColumnWidth(pdf, missingLucs.map(lucType), 3, 20, 30);
+        const lucTypeWidth = textColumnWidth(pdf, group.map(lucType), 3, 20, 30);
         // Sem nenhum número de medidor na tabela, a coluna não aparece (padrão do Cadastro).
-        const lucMeter = missingLucs.some((point) => Boolean(point.meterNumber?.trim()));
+        const lucMeter = group.some((point) => Boolean(point.meterNumber?.trim()));
         const lucWidths = [24, 28, ...(lucMeter ? [28] : []), lucTypeWidth, 46];
         lucWidths.push(182 - lucWidths.reduce((total, width) => total + width, 0));
         autoTable(pdf, {
@@ -236,15 +239,18 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
           bodyStyles: { minCellHeight: 24 }, rowPageBreak: "avoid", showHead: "everyPage",
           columnStyles: Object.fromEntries(lucWidths.map((width, index) => [index, { cellWidth: width }])),
           head: [["Foto", "LUC", ...(lucMeter ? ["Nº do medidor"] : []), "Tipo", "Nome da loja", "Localização"]],
-          body: missingLucs.map((point) => [thumbnails.has(point.value) ? "" : "Sem foto", point.lucNumber?.trim() || "Sem LUC", ...(lucMeter ? [point.meterNumber || "—"] : []), lucType(point), point.name ?? point.label, point.location || "—"]),
+          body: group.map((point) => [thumbnails.has(point.value) ? "" : "Sem foto", point.lucNumber?.trim() || "Sem LUC", ...(lucMeter ? [point.meterNumber || "—"] : []), lucType(point), point.name ?? point.label, point.location || "—"]),
           didDrawCell: (cell) => {
             if (cell.section !== "body" || cell.column.index !== 0) return;
-            const point = missingLucs[cell.row.index];
+            const point = group[cell.row.index];
             const thumbnail = point ? thumbnails.get(point.value) : undefined;
             if (thumbnail) pdf.addImage(thumbnail, "PNG", cell.cell.x + 3, cell.cell.y + (cell.cell.height - 18) / 2, 18, 18);
           },
         });
         advanceTable();
+        };
+        renderGroup(namedGroup, "Lojas e quiosques com nome identificado e sem LUC", `${namedGroup.length} ponto(s) para identificação do LUC`);
+        renderGroup(unnamedGroup, "Lojas e quiosques sem LUC e sem nome identificados", `${unnamedGroup.length} ponto(s) para identificação do LUC e do nome`);
       }
       const duplicated = duplicateNamePoints(freshPoints.length ? freshPoints : points);
       if (duplicated.length) {

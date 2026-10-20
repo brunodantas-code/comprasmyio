@@ -8,6 +8,13 @@ export function unidentifiedLucPoints(points: ClientPendingPoint[]) {
     return !luc || luc === "sem luc" || luc === "nao identificado";
   }).sort((a, b) => (a.name ?? a.label).localeCompare(b.name ?? b.label, "pt-BR", { numeric: true }));
 }
+export function splitUnidentifiedByName(points: ClientPendingPoint[]) {
+  const unknown = (point: ClientPendingPoint) => {
+    const name = (point.name ?? point.label).trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR");
+    return !name || name === "nao identificado" || name === "sem nome";
+  };
+  return [points.filter((point) => !unknown(point)), points.filter(unknown)] as const;
+}
 export function vacantShopPoints(points: ClientPendingPoint[]) {
   return points
     .filter((point) => point.pointType === "vacant" || point.pointType === "vacant_kiosk")
