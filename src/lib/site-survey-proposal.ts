@@ -85,6 +85,15 @@ export function proposalShopKioskComparison(scope: { hydraulic_shops: number | n
     { discipline: "energy" as const, label: "Energia", proposal: shops.energy, approved: approvedEnergy, matches: shops.energy === null ? null : shops.energy === approvedEnergy },
   ];
 }
+export type ProposalGroupDivergence = { water: boolean; energy: boolean };
+/** Divergência por grupo: só sinaliza quando a proposta traz a quantidade (null = não identificado). */
+export function proposalGroupDivergence(scope: { hydraulic_shops: number | null; hydraulic_general: number | null; electrical: number | null; scope_breakdown?: ProposalScopeBreakdown | null }, groupKey: "shops" | "entry" | "others", approved: { water: number; energy: number }): ProposalGroupDivergence {
+  const group = proposalGroupQuantities(scope).find((item) => item.key === groupKey);
+  return {
+    water: group?.water != null && group.water !== approved.water,
+    energy: group?.energy != null && group.energy !== approved.energy,
+  };
+}
 export async function validateProposalPdf(file: Blob) {
   if (!file.size) throw new Error("Selecione um PDF não vazio.");
   const signature = new TextDecoder().decode(await file.slice(0, 5).arrayBuffer());

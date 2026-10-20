@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { proposalGroupQuantities, proposalOtherEnergyBreakdown, proposalOtherEnergyText, proposalScopeSchema, proposalShopKioskComparison, validateProposalPdf } from "./site-survey-proposal";
+import { proposalGroupDivergence, proposalGroupQuantities, proposalOtherEnergyBreakdown, proposalOtherEnergyText, proposalScopeSchema, proposalShopKioskComparison, validateProposalPdf } from "./site-survey-proposal";
 test("proposta exige PDF real não vazio", async () => {
   await assert.rejects(validateProposalPdf(new Blob([])), /não vazio/);
   await assert.rejects(validateProposalPdf(new Blob(["not a PDF"])), /PDF válido/);
@@ -42,4 +42,12 @@ test("detalhamento elétrico dos demais ambientes da proposta do Taboão", () =>
   assert.equal(proposalOtherEnergyText(scope), "7\u00A0Transformadores · 15\u00A0Casas\u00A0de\u00A0Máquinas · 3\u00A0Geradores · 7\u00A0Bombas\u00A0Hidráulicas · 6\u00A0Bombas\u00A0de\u00A0Incêndio · 4\u00A0Elevadores");
   assert.deepEqual(proposalOtherEnergyBreakdown({ scope_breakdown: { hydraulic_entry: 1, electrical_shops: 185, electrical_entry: 0 } }), []);
   assert.equal(proposalOtherEnergyText({ scope_breakdown: { hydraulic_entry: 1, electrical_shops: 185, electrical_entry: 0, electrical_others: { transformadores: null, casas_de_maquinas: 2, geradores: null, bombas_hidraulicas: null, bombas_de_incendio: null, elevadores: null } } }), "2\u00A0Casas\u00A0de\u00A0Máquinas");
+});
+test("divergência entre aprovados no cadastro e proposta destaca só o grupo divergente", () => {
+  const mogi = { hydraulic_shops: 100, hydraulic_general: 9, electrical: 160, scope_breakdown: { hydraulic_entry: 1, electrical_shops: 138, electrical_entry: 1 } };
+  assert.deepEqual(proposalGroupDivergence(mogi, "shops", { water: 0, energy: 140 }), { water: true, energy: true });
+  assert.deepEqual(proposalGroupDivergence(mogi, "entry", { water: 1, energy: 1 }), { water: false, energy: false });
+  assert.deepEqual(proposalGroupDivergence(mogi, "others", { water: 8, energy: 21 }), { water: false, energy: false });
+  assert.deepEqual(proposalGroupDivergence(mogi, "others", { water: 0, energy: 21 }), { water: true, energy: false });
+  assert.deepEqual(proposalGroupDivergence({ hydraulic_shops: null, hydraulic_general: null, electrical: null }, "shops", { water: 0, energy: 0 }), { water: false, energy: false });
 });
