@@ -344,8 +344,10 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
         const dupBody = duplicated.flatMap((group) => group.map((point) => [point.name ?? point.label, point.lucNumber?.trim() || "Sem LUC", ...(dupMeter ? [point.meterNumber || "—"] : []), dupType(point), point.location || "—", ""]));
         // O tipo nunca pode quebrar ao meio: a coluna recebe a largura do rótulo mais longo.
         const dupTypeWidth = textColumnWidth(pdf, dupBody.map((row) => row[dupMeter ? 3 : 2]), 3, 20, 30);
-        const dupWidths = [40, 25, ...(dupMeter ? [25] : []), dupTypeWidth];
-        dupWidths.push(182 - 40 - 25 - (dupMeter ? 25 : 0) - dupTypeWidth - 30, 30);
+        // O número do medidor nunca quebra: a coluna recebe a largura do maior valor.
+        const dupMeterWidth = textColumnWidth(pdf, ["Nº do medidor", ...duplicated.flatMap((group) => group.map((point) => point.meterNumber || "—"))], 4, 22, 40);
+        const dupWidths = [40, 25, ...(dupMeter ? [dupMeterWidth] : []), dupTypeWidth];
+        dupWidths.push(182 - 40 - 25 - (dupMeter ? dupMeterWidth : 0) - dupTypeWidth - 30, 30);
         autoTable(pdf, {
           startY: y, theme: "plain", margin: { top: 20, bottom: 20, left: 14, right: 14 },
           styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: 1.8, overflow: "linebreak", valign: "middle" },
@@ -354,6 +356,7 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
           columnStyles: Object.fromEntries(dupWidths.map((width, index) => [index, { cellWidth: width }])),
           head: [["Nome da loja", "LUC", ...(dupMeter ? ["Nº do medidor"] : []), "Tipo", "Localização", "Confirmação"]],
           body: dupBody,
+          didParseCell: (cell) => { if (dupMeter && cell.column.index === 2) cell.cell.styles.overflow = "visible"; },
           didDrawCell: (cell) => {
             if (cell.section !== "body" || cell.column.index !== dupWidths.length - 1) return;
             // Caixas editáveis para o cliente marcar OK ou Duplicado em cada ponto.
@@ -374,7 +377,9 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
         sectionHeading("Lojas e quiosques vagos cadastrados", `Confirme os ${vacant.length} espaço(s) vago(s) abaixo, cadastrados para futura implantação.`);
         // Sem nenhum número de medidor na tabela, a coluna não aparece (padrão do Cadastro).
         const vacantMeter = vacant.some((point) => Boolean(point.meterNumber?.trim()));
-        const vacantWidths = [28, ...(vacantMeter ? [28] : []), vacantMeter ? 46 : 66, vacantMeter ? 50 : 58, 30];
+        // O número do medidor nunca quebra: a coluna recebe a largura do maior valor.
+        const vacantMeterWidth = textColumnWidth(pdf, ["Nº do medidor", ...vacant.map((point) => point.meterNumber || "—")], 4, 22, 40);
+        const vacantWidths = [28, ...(vacantMeter ? [vacantMeterWidth] : []), vacantMeter ? 46 : 66, vacantMeter ? 50 : 58, 30];
         autoTable(pdf, {
           startY: y, theme: "plain", margin: { top: 20, bottom: 20, left: 14, right: 14 },
           styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: 1.8, overflow: "linebreak", valign: "middle" },
@@ -383,6 +388,7 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
           columnStyles: Object.fromEntries(vacantWidths.map((width, index) => [index, { cellWidth: width }])),
           head: [["LUC", ...(vacantMeter ? ["Nº do medidor"] : []), "Nome", "Localização", "Confirmação"]],
           body: vacant.map((point) => [point.lucNumber?.trim() || "Sem LUC", ...(vacantMeter ? [point.meterNumber || "—"] : []), point.name ?? point.label, point.location || "—", ""]),
+          didParseCell: (cell) => { if (vacantMeter && cell.column.index === 1) cell.cell.styles.overflow = "visible"; },
           didDrawCell: (cell) => {
             if (cell.section !== "body" || cell.column.index !== vacantWidths.length - 1) return;
             // Caixa verde editável para o cliente confirmar cada loja vaga.
