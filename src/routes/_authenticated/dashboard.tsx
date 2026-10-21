@@ -2290,7 +2290,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                   <SelectContent>
                     {(profiles ?? []).map((p) => (
                       <SelectItem key={p.id} value={p.id}>
-                        {p.full_name || p.email || p.id}
+                        {p.full_name || p.email || p.id}{p.full_name && p.email ? <span className="ml-2 text-muted-foreground">· {p.email}</span> : null}
                       </SelectItem>
                     ))}
                   </SelectContent>
