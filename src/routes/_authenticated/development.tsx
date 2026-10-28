@@ -154,7 +154,7 @@ function DevelopmentPage() {
       && (appFilter === "todos" || ticket.app_key === appFilter)
       && (typeFilter === "todos" || ticket.ticket_type === typeFilter)
       && (priorityFilter === "todos" || ticket.priority === priorityFilter)
-      && (statusFilter === "todos" || ticket.status === statusFilter);
+      && (statusFilter === "todos" ? ticket.status !== "excluido" : ticket.status === statusFilter);
   }), [appFilter, data?.tickets, priorityFilter, search, statusFilter, typeFilter]);
   const profileNames = useMemo(() => new Map((data?.profiles ?? []).map((profile) => [profile.id, profile.full_name || profile.email || "Usuário"])), [data?.profiles]);
   useEffect(() => {
