@@ -1,5 +1,5 @@
 # Roadmap
 
-- [ ] Gerar mockups gráficos das 3 opções de cabeçalho/filtros (barra em cartão, linha divisória fina, filtros recolhíveis) e apresentar para escolha
-- [ ] Refazer mockup da opção 1 incluindo símbolo de filtro (funil) em cinza claro nos campos
-- [ ] Implementar a opção escolhida nas tabelas do sistema
+- [x] Gerar mockups gráficos das opções de cabeçalho/filtros e apresentar para escolha
+- [x] Aplicar opção 1b (barra em cartão com funil cinza) somente em Minhas Solicitações para avaliação
+- [ ] Aguardar avaliação do usuário: se aprovado, estender o padrão às demais tabelas
