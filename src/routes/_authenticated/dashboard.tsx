@@ -1569,6 +1569,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
           const depLabel = isRental ? "a data de retirada" : "a data de ida";
           const retLabel = isRental ? "a data de devolução" : "a data de retorno";
           if (leg.destination.trim().length < 2) return toast.error(`Solicitação ${n}: informe ${destLabel}`);
+          if (!(await import("@/data/br-cities.json")).default.includes(leg.destination.trim())) return toast.error(`Solicitação ${n}: selecione ${destLabel} na lista de cidades`);
           if (!leg.departure) return toast.error(`Solicitação ${n}: informe ${depLabel}`);
           if (!leg.return) return toast.error(`Solicitação ${n}: informe ${retLabel}`);
           if (leg.return < leg.departure) return toast.error(`Solicitação ${n}: ${retLabel} não pode ser anterior a ${depLabel}`);
