@@ -2861,7 +2861,7 @@ function OrdersTable({
   );
 
   const filterBarContent = filterBar ? (
-    <div className="flex flex-wrap items-end gap-x-4 gap-y-3 rounded-xl bg-muted/50 px-4 py-3">
+    <div className="flex flex-wrap items-end gap-x-4 gap-y-3 rounded-xl border border-border bg-muted/50 px-4 py-3">
       {barField("Nº", <Input value={fApproval} onChange={(e) => setFApproval(e.target.value)} placeholder="Filtrar Nº" className="h-8 w-28 bg-background text-xs" />)}
       {barField("Item", <Input value={fItem} onChange={(e) => setFItem(e.target.value)} placeholder="Filtrar item" className="h-8 w-44 bg-background text-xs" />)}
       {barField("Alocação", <Input value={fAloc} onChange={(e) => setFAloc(e.target.value)} placeholder="Filtrar alocação" className="h-8 w-36 bg-background text-xs" />)}
