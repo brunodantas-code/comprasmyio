@@ -77,7 +77,7 @@ function CallsPage() {
     },
   });
   const names = useMemo(() => new Map((data?.profiles ?? []).map((profile) => [profile.id, profile.full_name || profile.email || "Usuário"])), [data?.profiles]);
-  const filtered = (data?.calls ?? []).filter((call) => (!search.trim() || `${call.call_number} ${call.site_survey_number ?? ""} ${call.title}`.toLocaleLowerCase("pt-BR").includes(search.trim().toLocaleLowerCase("pt-BR"))) && (category === "todos" || call.category === category) && (status === "todos" || call.status === status));
+  const filtered = (data?.calls ?? []).filter((call) => (!search.trim() || `${call.call_number} ${call.site_survey_number ?? ""} ${call.title}`.toLocaleLowerCase("pt-BR").includes(search.trim().toLocaleLowerCase("pt-BR"))) && (category === "todos" || call.category === category) && (status === "todos" ? call.status !== "cancelado" : call.status === status));
   useEffect(() => { const call = data?.calls.find((item) => item.id === routeSearch.chamado); if (call) setSelected(call); }, [data?.calls, routeSearch.chamado]);
   const refresh = () => { void qc.invalidateQueries({ queryKey: ["internal-calls"] }); void qc.invalidateQueries({ queryKey: ["pending-actions"] }); };
   return <div className="min-h-screen bg-background">
