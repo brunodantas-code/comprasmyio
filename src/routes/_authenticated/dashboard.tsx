@@ -2434,7 +2434,7 @@ function MyOrders({ userId, canManageDevices }: { userId: string; canManageDevic
           {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
             !orders?.length ? <p className="text-sm text-muted-foreground">Nenhuma solicitação aberta.</p> :
             !visible.length ? <p className="text-sm text-muted-foreground">Nenhum pedido para exibir com o filtro atual.</p> :
-            <OrdersTable orders={visible} projectName={projectName} showRequester={false} canEditRequester canDelete stockParts={stockParts} headerFilters />
+            <OrdersTable orders={visible} projectName={projectName} showRequester={false} canEditRequester canDelete stockParts={stockParts} filterBar />
           }
           {stockOnly.length > 0 && (
             <div className="rounded-md border p-4">
@@ -3028,7 +3028,7 @@ function OrdersTable({
             <TableHead className="w-[95px] text-center">Status</TableHead>
             <TableHead className="w-[80px] text-center">Palavra passe</TableHead>
           </TableRow>
-          {headerFilters && (
+          {headerFilters && !filterBar && (
             <TableRow>
               <TableHead className="py-1">{filterInput(fApproval, setFApproval, "Nº")}</TableHead>
               <TableHead className="py-1">{filterInput(fItem, setFItem, "Item")}</TableHead>
