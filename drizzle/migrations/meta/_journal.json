@@ -911,6 +911,13 @@
       "when": 1792592195411,
       "tag": "0129_grant_request_types_insert_delete",
       "breakpoints": true
+    },
+    {
+      "idx": 130,
+      "version": "7",
+      "when": 1793203366713,
+      "tag": "0130_supply_project_client_allocation_guard",
+      "breakpoints": true
     }
   ]
 }
