@@ -6531,6 +6531,10 @@ export type Database = {
           target_user_id: string
         }[]
       }
+      delete_code_observation: {
+        Args: { _observation_id: string; _ticket_id: string }
+        Returns: undefined
+      }
       delete_site_survey_visit: {
         Args: { _delete_calls: boolean; _visit_id: string }
         Returns: number
