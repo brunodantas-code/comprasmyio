@@ -2892,7 +2892,8 @@ function OrdersTable({
     <>
       {/* Mobile: cartões com rótulo à esquerda e informação à direita */}
       <div className="space-y-3 md:hidden">
-        {(headerFilters || statusFilterControl || deliveredFilterControl) && (
+        {filterBarContent}
+        {!filterBar && (headerFilters || statusFilterControl || deliveredFilterControl) && (
           <div className="grid grid-cols-1 gap-2 rounded-lg bg-primary/10 p-2 sm:grid-cols-2">
             {filterInput(fApproval, setFApproval, "Nº do Approval")}
             {filterInput(fItem, setFItem, "Tipo")}
@@ -3010,6 +3011,7 @@ function OrdersTable({
 
       <div className="hidden md:block">
 
+      {filterBarContent && <div className="mb-3">{filterBarContent}</div>}
       <Table className="w-full table-fixed">
         <TableHeader className="[&_tr]:border-b">
           <TableRow className="border-b">
