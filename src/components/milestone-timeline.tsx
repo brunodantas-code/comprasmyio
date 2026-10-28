@@ -40,7 +40,7 @@ export function MilestoneTimeline({ entries }: { entries: MilestoneEntry[] }) {
 }
 
 function collapsedParts(text: string) {
-  if (!/^(Observação|Pergunta|Resposta)/.test(text)) return null;
+  if (!/^(Observação|Pergunta|Resposta|Título)/.test(text)) return null;
   const lines = text.split("\n");
   const first = lines[0];
   const colon = first.indexOf(":");
