@@ -197,7 +197,7 @@ export function RemindersTab() {
             <p className="text-sm text-muted-foreground">Nenhum lembrete cadastrado.</p>
           ) : (
             <div className="overflow-hidden rounded-md border">
-              <div className="hidden grid-cols-[2fr_2fr_1.5fr_1fr_auto] gap-2 border-b border-t-0 bg-myio-green/20 px-3 py-2 text-center text-sm font-bold sm:grid">
+              <div className="hidden grid-cols-[2fr_2fr_1.5fr_1fr_auto] gap-2 border-b border-t-0 bg-myio-green/20 px-3 py-2 text-center text-sm sm:grid">
                 <span className="text-left">Usuário</span>
                 <span>Frequência</span>
                 <span>Horário</span>

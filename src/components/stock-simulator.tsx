@@ -324,9 +324,9 @@ export function ProductionCapacityCard() {
         <Table>
           <TableHeader className="[&_tr]:border-b">
             <TableRow className="border-t bg-primary/15 hover:bg-primary/15">
-              <TableHead className="font-bold">Dispositivo</TableHead>
-              <TableHead className="text-right font-bold">Pode produzir</TableHead>
-              <TableHead className="font-bold">Componente limitante</TableHead>
+              <TableHead>Dispositivo</TableHead>
+              <TableHead className="text-right">Pode produzir</TableHead>
+              <TableHead>Componente limitante</TableHead>
             </TableRow>
             <TableRow className="bg-primary/5 hover:bg-primary/5"><TableHead className="py-1"><Input className="h-8 bg-background" placeholder="Filtrar" aria-label="Filtrar por dispositivo" value={search} onChange={(e) => setSearch(e.target.value)} /></TableHead><TableHead className="py-1" /><TableHead className="py-1" /></TableRow>
           </TableHeader>
