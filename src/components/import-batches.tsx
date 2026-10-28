@@ -66,6 +66,7 @@ type ImportBatch = {
 };
 
 type ImportableItem = {
+  myioCode: string | null;
   key: string;
   id: string;
   name: string;
