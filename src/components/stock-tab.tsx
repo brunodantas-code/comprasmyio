@@ -233,7 +233,7 @@ function MovementHistoryTable({
           <TableHead className="font-bold">Data</TableHead>
           <TableHead className="font-bold">Descrição</TableHead>
           <TableHead className="font-bold">Tipo</TableHead>
-          <TableHead className="text-right font-bold">Qtd.</TableHead>
+          <TableHead className="text-right">Qtd.</TableHead>
           <TableHead className="font-bold">Motivo</TableHead>
           <TableHead className="font-bold">Responsável</TableHead>
         </TableRow>
@@ -1181,11 +1181,11 @@ function StockTableCard({
           <Table>
             <TableHeader className={columnFilters ? "[&_tr]:border-b" : undefined}>
                 <TableRow className={columnFilters ? "border-t bg-primary/15 hover:bg-primary/15" : undefined}>
-                  <TableHead className={`${simple ? "w-[70%]" : "w-[45%]"}${columnFilters ? " font-bold" : ""}`}>Descrição</TableHead>
-                  {!simple && <TableHead className={`w-[12%]${columnFilters ? " font-bold" : ""}`}>Cód. Myio</TableHead>}
-                  {!simple && <TableHead className={`w-[12%]${columnFilters ? " font-bold" : ""}`}>Cód. Fabricante</TableHead>}
-                  <TableHead className={`${simple ? "w-[15%] text-right" : "w-[10%] text-right"}${columnFilters ? " font-bold" : ""}`}>Saldo</TableHead>
-                  {!simple && <TableHead className={`w-[10%]${columnFilters ? " font-bold" : ""}`}>Imagem</TableHead>}
+                  <TableHead className={`${simple ? "w-[70%]" : "w-[45%]"}${columnFilters ? "" : ""}`}>Descrição</TableHead>
+                  {!simple && <TableHead className={`w-[12%]${columnFilters ? "" : ""}`}>Cód. Myio</TableHead>}
+                  {!simple && <TableHead className={`w-[12%]${columnFilters ? "" : ""}`}>Cód. Fabricante</TableHead>}
+                  <TableHead className={`${simple ? "w-[15%] text-right" : "w-[10%] text-right"}${columnFilters ? "" : ""}`}>Saldo</TableHead>
+                  {!simple && <TableHead className={`w-[10%]${columnFilters ? "" : ""}`}>Imagem</TableHead>}
                   <TableHead className={simple ? "w-[15%] text-right" : "w-[11%] text-right"}></TableHead>
                 </TableRow>
                 {columnFilters && <TableRow className="bg-primary/5 hover:bg-primary/5">
@@ -1952,11 +1952,11 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
             <Table>
               <TableHeader className="[&_tr]:border-b">
                 <TableRow className="border-t bg-primary/15 hover:bg-primary/15">
-                  <TableHead className="w-[45%] font-bold">Descrição</TableHead>
-                  <TableHead className="w-[12%] font-bold">Cód. Myio</TableHead>
-                  <TableHead className="w-[12%] font-bold">Cód. Fabricante</TableHead>
-                  <TableHead className="w-[10%] text-right font-bold">Saldo</TableHead>
-                  <TableHead className="w-[10%] font-bold">Imagem</TableHead>
+                  <TableHead className="w-[45%]">Descrição</TableHead>
+                  <TableHead className="w-[12%]">Cód. Myio</TableHead>
+                  <TableHead className="w-[12%]">Cód. Fabricante</TableHead>
+                  <TableHead className="w-[10%] text-right">Saldo</TableHead>
+                  <TableHead className="w-[10%]">Imagem</TableHead>
                   <TableHead className="w-[11%] text-right"></TableHead>
                 </TableRow>
                 <TableRow className="bg-primary/5 hover:bg-primary/5">
