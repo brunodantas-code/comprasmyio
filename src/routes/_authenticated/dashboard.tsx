@@ -1779,7 +1779,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                     <div className="grid gap-4 md:grid-cols-3 items-end">
                       <div className="space-y-2">
                         <Label htmlFor={`travel_destination_${i}`}>{travelType === "aluguel_veiculos" ? "Cidade e UF de retirada" : "Cidade e UF de destino"}</Label>
-                        <Input id={`travel_destination_${i}`} value={leg.destination} onChange={(e) => updateLeg(i, { destination: e.target.value })} placeholder="Ex.: São Paulo - SP" />
+                        <BrCityPicker id={`travel_destination_${i}`} value={leg.destination} onChange={(destination) => updateLeg(i, { destination })} />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor={`travel_departure_${i}`}>{travelType === "aluguel_veiculos" ? "Data de retirada" : "Data de ida"}</Label>
