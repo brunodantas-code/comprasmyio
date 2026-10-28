@@ -1330,33 +1330,42 @@ export type Database = {
         Row: {
           changed_by: string
           created_at: string
+          event_type: string | null
           id: string
           new_assignee_id: string | null
           new_status: string | null
           note: string | null
+          observation_id: string | null
           previous_assignee_id: string | null
+          previous_note: string | null
           previous_status: string | null
           ticket_id: string
         }
         Insert: {
           changed_by: string
           created_at?: string
+          event_type?: string | null
           id?: string
           new_assignee_id?: string | null
           new_status?: string | null
           note?: string | null
+          observation_id?: string | null
           previous_assignee_id?: string | null
+          previous_note?: string | null
           previous_status?: string | null
           ticket_id: string
         }
         Update: {
           changed_by?: string
           created_at?: string
+          event_type?: string | null
           id?: string
           new_assignee_id?: string | null
           new_status?: string | null
           note?: string | null
+          observation_id?: string | null
           previous_assignee_id?: string | null
+          previous_note?: string | null
           previous_status?: string | null
           ticket_id?: string
         }
@@ -1454,6 +1463,7 @@ export type Database = {
           id: string
           menu_name: string | null
           priority: string
+          proposed_solution: string | null
           reporter_id: string
           status: string
           submenu_name: string | null
@@ -1473,6 +1483,7 @@ export type Database = {
           id?: string
           menu_name?: string | null
           priority: string
+          proposed_solution?: string | null
           reporter_id: string
           status?: string
           submenu_name?: string | null
@@ -1492,6 +1503,7 @@ export type Database = {
           id?: string
           menu_name?: string | null
           priority?: string
+          proposed_solution?: string | null
           reporter_id?: string
           status?: string
           submenu_name?: string | null
@@ -6633,6 +6645,10 @@ export type Database = {
       }
       request_user_deletion: {
         Args: { _target_user_id: string }
+        Returns: string
+      }
+      save_code_observation: {
+        Args: { _observation_id?: string; _text: string; _ticket_id: string }
         Returns: string
       }
       security_app_access: { Args: { _apps: string[] }; Returns: boolean }
