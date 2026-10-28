@@ -815,10 +815,10 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
         </DialogHeader>
         {!independent && (
         <div className="flex gap-2">
-          <Button type="button" size="sm" variant={mode === "new" ? "default" : "outline"} onClick={() => setMode("new")}>
+          <Button type="button" size="sm" variant={mode === "new" ? "default" : "outline"} className={mode === "new" ? "!bg-primary !text-primary-foreground hover:!bg-primary/90 hover:!text-primary-foreground" : undefined} onClick={() => setMode("new")}>
             Criar novo
           </Button>
-          <Button type="button" size="sm" variant={mode === "import" ? "default" : "outline"} onClick={() => setMode("import")}>
+          <Button type="button" size="sm" variant={mode === "import" ? "default" : "outline"} className={mode === "import" ? "!bg-primary !text-primary-foreground hover:!bg-primary/90 hover:!text-primary-foreground" : undefined} onClick={() => setMode("import")}>
             Importar da biblioteca
           </Button>
         </div>

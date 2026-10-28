@@ -2623,7 +2623,7 @@ function BuyerQueue({ mode = "all" }: { mode?: ApprovalListMode }) {
             <div className="flex justify-start">
               <Button
                 type="button"
-                variant={groupByProject ? "default" : "outline"}
+                variant={groupByProject ? "default" : "outline"} className={groupByProject ? "!bg-primary !text-primary-foreground hover:!bg-primary/90 hover:!text-primary-foreground" : undefined}
                 size="sm"
                 onClick={() => setGroupByProject((v) => !v)}
               >
