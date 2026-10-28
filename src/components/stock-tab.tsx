@@ -230,12 +230,12 @@ function MovementHistoryTable({
     <Table>
       <TableHeader className="[&_tr]:border-b">
         <TableRow className="border-t bg-primary/15 hover:bg-primary/15">
-          <TableHead className="font-bold">Data</TableHead>
-          <TableHead className="font-bold">Descrição</TableHead>
-          <TableHead className="font-bold">Tipo</TableHead>
+          <TableHead>Data</TableHead>
+          <TableHead>Descrição</TableHead>
+          <TableHead>Tipo</TableHead>
           <TableHead className="text-right">Qtd.</TableHead>
-          <TableHead className="font-bold">Motivo</TableHead>
-          <TableHead className="font-bold">Responsável</TableHead>
+          <TableHead>Motivo</TableHead>
+          <TableHead>Responsável</TableHead>
         </TableRow>
         <TableRow className="bg-primary/5 hover:bg-primary/5">
           <TableHead className="py-1"><Input value={dateFilter} onChange={(event) => setDateFilter(event.target.value)} placeholder="Filtrar" aria-label="Filtrar por data" className="h-8 min-w-32 bg-background" /></TableHead>
