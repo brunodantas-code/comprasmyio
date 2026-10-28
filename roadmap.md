@@ -1066,4 +1066,5 @@
 - [x] Site Survey — orientar baixa manual sem PDF: salvar resposta recebida por e-mail/mensagem/celular, marcar quadradinho da pergunta e confirmar.
 - [x] Supply — botões de ação sem fundo verde: padrão vazado verde (preenche na interação) aplicado às variantes default/outline/ghost; alternâncias mantêm destaque quando ativas; anexos do chamado viraram link de texto.
 - [ ] Chamados/Desenvolvimento — apresentar e aplicar novo layout de milestones no histórico do atendimento (aguardando escolha do usuário).
-- [ ] Chamados/Tickets — ocultar excluídos por padrão; mostrar somente quando selecionados no filtro de situação.
+- [x] Chamados/Tickets — excluídos/cancelados ocultos por padrão; aparecem só ao selecionar a situação no filtro; conferido no preview (ticket #4).
+- [x] Chamados/Tickets — histórico do atendimento em linha do tempo vertical com ícones por tipo de evento (abertura, pergunta, resposta, troca de status); componente MilestoneTimeline aplicado em Tickets e Chamados; conferido no preview (ticket #3).
