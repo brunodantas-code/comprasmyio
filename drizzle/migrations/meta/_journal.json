@@ -974,6 +974,13 @@
       "when": 1793230000002,
       "tag": "0138_edit_code_ticket_title",
       "breakpoints": true
+    },
+    {
+      "idx": 139,
+      "version": "7",
+      "when": 1793230000003,
+      "tag": "0139_ticket_attachment_delete_reporter",
+      "breakpoints": true
     }
   ]
 }

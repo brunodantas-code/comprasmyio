@@ -1,0 +1,3 @@
+DROP POLICY IF EXISTS "Uploaders and Code admins can remove development attachments" ON public.development_ticket_attachments;
+CREATE POLICY "Uploaders, reporters and Code admins can remove development attachments" ON public.development_ticket_attachments FOR DELETE TO authenticated
+USING (uploaded_by = auth.uid() OR private.is_code_admin(auth.uid()) OR EXISTS (SELECT 1 FROM public.development_tickets t WHERE t.id = development_ticket_attachments.ticket_id AND t.reporter_id = auth.uid() AND t.status NOT IN ('concluido','excluido')));
