@@ -2175,7 +2175,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                     value={newItemName}
                     onChange={(e) => setNewItemName(e.target.value)}
                     onBlur={(e) => { if (requestModel === "materiais") checkDuplicates(e.target.value); }}
-                    placeholder={requestModel === "materiais" ? "Descreva o item que precisa ser comprado" : requestModel === "servicos" ? "Descreva o serviço contratado" : "Descreva a viagem (destino, período, motivo)"}
+                    placeholder={requestModel === "materiais" ? "Descreva o item que precisa ser comprado" : requestModel === "servicos" ? "Descreva o serviço contratado" : "Inserir o motivo ou objetivo"}
                   />
                   {requestModel === "materiais" && (
                   <div className="space-y-2 pt-1">
