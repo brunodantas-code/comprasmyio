@@ -6543,6 +6543,10 @@ export type Database = {
         Args: { _message_id: string; _text: string }
         Returns: undefined
       }
+      edit_code_ticket_title: {
+        Args: { _ticket_id: string; _title: string }
+        Returns: undefined
+      }
       get_client_deletion_links: {
         Args: { _client_id: string }
         Returns: {
