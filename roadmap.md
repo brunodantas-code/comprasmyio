@@ -1065,3 +1065,4 @@
 
 - [x] Site Survey — orientar baixa manual sem PDF: salvar resposta recebida por e-mail/mensagem/celular, marcar quadradinho da pergunta e confirmar.
 - [x] Supply — botões de ação sem fundo verde: padrão vazado verde (preenche na interação) aplicado às variantes default/outline/ghost; alternâncias mantêm destaque quando ativas; anexos do chamado viraram link de texto.
+- [ ] Chamados/Desenvolvimento — apresentar e aplicar novo layout de milestones no histórico do atendimento (aguardando escolha do usuário).
