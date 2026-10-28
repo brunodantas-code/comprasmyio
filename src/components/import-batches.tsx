@@ -616,7 +616,7 @@ export function ImportBatchesSection({ userId, children }: { userId: string; chi
       <CardContent>
         <Table>
             <TableHeader>
-              <TableRow className="bg-primary/20 hover:bg-primary/20">
+              <TableRow>
                 <TableHead>Importação</TableHead>
                 <TableHead>Itens</TableHead>
                 <TableHead>Anexos</TableHead>
@@ -624,7 +624,7 @@ export function ImportBatchesSection({ userId, children }: { userId: string; chi
                 <TableHead>Status</TableHead>
                 <TableHead className="w-32" />
               </TableRow>
-              <TableRow className="bg-primary/5 hover:bg-primary/5">
+              <TableRow>
                 <TableHead className="py-1" />
                 <TableHead className="py-1" />
                 <TableHead className="py-1" />

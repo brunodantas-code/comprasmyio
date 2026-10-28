@@ -532,7 +532,7 @@ export function MyioOrdersTab({ userId, canManage = true }: { userId: string; ca
       <CardContent>
         <Table>
             <TableHeader>
-              <TableRow className="bg-primary/20 hover:bg-primary/20">
+              <TableRow>
                 <TableHead>Projeto</TableHead>
                 <TableHead>Cliente</TableHead>
                 <TableHead>Approval</TableHead>
@@ -542,7 +542,7 @@ export function MyioOrdersTab({ userId, canManage = true }: { userId: string; ca
                 <TableHead>Status</TableHead>
                 {canManage && <TableHead className="w-20" />}
               </TableRow>
-              <TableRow className="bg-primary/5 hover:bg-primary/5">
+              <TableRow>
                 <TableHead className="py-1" />
                 <TableHead className="py-1" />
                 <TableHead className="py-1" />

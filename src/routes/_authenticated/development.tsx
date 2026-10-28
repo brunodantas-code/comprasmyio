@@ -193,8 +193,8 @@ function DevelopmentPage() {
             {isLoading ? <p className="py-8 text-center text-sm text-muted-foreground">Carregando tickets...</p> : (
               <Table>
                  <TableHeader>
-                   <TableRow className="bg-primary/20 hover:bg-primary/20"><TableHead>Nº</TableHead><TableHead>Solicitante</TableHead><TableHead>Aplicativo</TableHead><TableHead>Tipo</TableHead><TableHead>Título</TableHead><TableHead>Prioridade</TableHead><TableHead>Situação</TableHead><TableHead>Data</TableHead></TableRow>
-                   <TableRow className="bg-primary/5 hover:bg-primary/5">
+                   <TableRow><TableHead>Nº</TableHead><TableHead>Solicitante</TableHead><TableHead>Aplicativo</TableHead><TableHead>Tipo</TableHead><TableHead>Título</TableHead><TableHead>Prioridade</TableHead><TableHead>Situação</TableHead><TableHead>Data</TableHead></TableRow>
+                   <TableRow>
                      <TableHead className="py-1" />
                      <TableHead className="py-1"><HeaderFilterSelect value={reporterFilter} onChange={setReporterFilter} label="Filtrar por solicitante" options={[...new Set((data?.tickets ?? []).map((ticket) => ticket.reporter_id))].map((id) => ({ value: id, label: profileNames.get(id) ?? "Usuário" })).sort((a,b) => a.label.localeCompare(b.label, "pt-BR"))} /></TableHead>
                      <TableHead className="py-1"><HeaderFilterSelect value={appFilter} onChange={setAppFilter} label="Filtrar por aplicativo" options={Object.entries(APP_NAMES).map(([value, label]) => ({ value, label }))} /></TableHead>

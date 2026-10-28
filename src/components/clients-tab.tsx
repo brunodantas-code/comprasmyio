@@ -267,7 +267,7 @@ export function ClientsTab({ userId }: { userId: string }) {
             <Table>
               <TableHeader>
                  <TableRow><TableHead>Nome fantasia</TableHead><TableHead>Razão social</TableHead><TableHead>Categoria</TableHead><TableHead>Cidade</TableHead><TableHead>UF</TableHead><TableHead>CNPJ</TableHead><TableHead className="w-20" /></TableRow>
-                <TableRow className="bg-primary/5 hover:bg-primary/5">
+                <TableRow>
                   <TableHead className="py-1">
                     <Input
                       value={clientSearch}

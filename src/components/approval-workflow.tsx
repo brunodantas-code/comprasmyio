@@ -443,7 +443,7 @@ export function PendingForMe({ renderEditAction }: { renderEditAction?: EditActi
       <CardContent>
         <Table>
           <TableHeader className="[&_tr]:border-b">
-              <TableRow className="border-t bg-primary/15 hover:bg-primary/15">
+              <TableRow className="border-b">
                 <TableHead>Approval</TableHead>
                 <TableHead>Tipo</TableHead>
                 <TableHead>Solicitante</TableHead>
@@ -453,7 +453,7 @@ export function PendingForMe({ renderEditAction }: { renderEditAction?: EditActi
                 <TableHead>Projeto ou Cliente</TableHead>
                 <TableHead aria-label="Ações" />
               </TableRow>
-              <TableRow className="bg-primary/5 hover:bg-primary/5">
+              <TableRow>
                 <TableHead className="py-1">
                   <Input
                     value={search}
@@ -686,7 +686,7 @@ export function MyApprovalFlows({ renderEditAction }: { renderEditAction?: EditA
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="border-t bg-primary/5 p-2">
+        <div className="border-t p-2">
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}

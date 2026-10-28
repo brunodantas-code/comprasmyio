@@ -92,7 +92,7 @@ export function ChartOfAccountsTab({ userId }: { userId: string }) {
       {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : !rows.length ? <p className="text-sm text-muted-foreground">Cadastre a primeira conta do plano.</p> : <Table className="md:table-fixed">
         <TableHeader><TableRow><TableHead className="md:w-[18%]">Conta</TableHead>{MONTHS.map(([, label]) => <TableHead key={label} className="px-1 text-center">{label}</TableHead>)}<TableHead className="px-1 text-center md:w-[9%]">Total anual</TableHead><TableHead className="md:w-24" aria-label="Ações" /></TableRow></TableHeader>
         <TableBody>
-          <TableRow className="bg-primary font-bold text-primary-foreground hover:bg-primary">
+          <TableRow>
             <TableCell>Total mensal</TableCell>
             {monthlyTotals.map((total, index) => <TableCell key={MONTHS[index][0]} className="px-1 text-center text-xs">{BRL.format(total)}</TableCell>)}
             <TableCell className="px-1 text-center text-xs">{BRL.format(annualTotal)}</TableCell>
