@@ -490,7 +490,7 @@ export function QrCheckSection() {
                 className="pl-8"
               />
             </div>
-            <Button type="button" onClick={() => setCode(input.trim())} disabled={!input.trim()}>
+            <Button type="button" variant="ghost" className="text-primary hover:bg-transparent hover:text-primary/70" onClick={() => setCode(input.trim())} disabled={!input.trim()}>
               <QrCode className="mr-1 h-4 w-4" /> Checar
             </Button>
             <ManualQrDialog
