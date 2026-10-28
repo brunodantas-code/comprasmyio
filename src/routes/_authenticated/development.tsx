@@ -1,7 +1,7 @@
 import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { CodeXml, Download, Eye, History, MessageCircleQuestion, Paperclip, Plus, Send, Trash2 } from "lucide-react";
+import { CodeXml, Download, Eye, History, MessageCircleQuestion, Paperclip, Plus, Send, Trash2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { MyioAppLogo } from "@/components/myio-app-logo";
@@ -18,6 +18,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { APP_NAVIGATION_OPTIONS } from "@/lib/app-navigation-options";
 import { AppHeader } from "@/components/app-header";
 import { MilestoneTimeline } from "@/components/milestone-timeline";
+import { currentCodeObservations, proposedSolutionSchema, codeObservationSchema } from "@/lib/code-records";
 
 type TicketStatus = "aberto" | "em_atendimento" | "atendido" | "concluido" | "excluido";
 type Ticket = {
@@ -36,6 +37,7 @@ type Ticket = {
   submenu_name: string | null;
   assignee_id: string | null;
   admin_notes: string | null;
+  proposed_solution: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -123,6 +125,7 @@ function DevelopmentPage() {
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [search, setSearch] = useState("");
   const [appFilter, setAppFilter] = useState("todos");
+  const [reporterFilter, setReporterFilter] = useState("todos");
   const [typeFilter, setTypeFilter] = useState("todos");
   const [priorityFilter, setPriorityFilter] = useState("todos");
   const [statusFilter, setStatusFilter] = useState("todos");
@@ -151,11 +154,12 @@ function DevelopmentPage() {
   const filteredTickets = useMemo(() => (data?.tickets ?? []).filter((ticket) => {
     const term = search.trim().toLocaleLowerCase("pt-BR");
     return (!term || ticket.title.toLocaleLowerCase("pt-BR").includes(term) || String(ticket.ticket_number).includes(term))
+      && (reporterFilter === "todos" || ticket.reporter_id === reporterFilter)
       && (appFilter === "todos" || ticket.app_key === appFilter)
       && (typeFilter === "todos" || ticket.ticket_type === typeFilter)
       && (priorityFilter === "todos" || ticket.priority === priorityFilter)
       && (statusFilter === "todos" ? ticket.status !== "excluido" : ticket.status === statusFilter);
-  }), [appFilter, data?.tickets, priorityFilter, search, statusFilter, typeFilter]);
+  }), [appFilter, data?.tickets, priorityFilter, reporterFilter, search, statusFilter, typeFilter]);
   const profileNames = useMemo(() => new Map((data?.profiles ?? []).map((profile) => [profile.id, profile.full_name || profile.email || "Usuário"])), [data?.profiles]);
   useEffect(() => {
     if (!routeSearch.ticket || !data?.tickets.length) return;
@@ -192,7 +196,7 @@ function DevelopmentPage() {
                    <TableRow className="bg-primary/20 hover:bg-primary/20"><TableHead>Nº</TableHead><TableHead>Solicitante</TableHead><TableHead>Aplicativo</TableHead><TableHead>Tipo</TableHead><TableHead>Título</TableHead><TableHead>Prioridade</TableHead><TableHead>Situação</TableHead><TableHead>Data</TableHead></TableRow>
                    <TableRow className="bg-primary/5 hover:bg-primary/5">
                      <TableHead className="py-1" />
-                     <TableHead className="py-1" />
+                     <TableHead className="py-1"><HeaderFilterSelect value={reporterFilter} onChange={setReporterFilter} label="Filtrar por solicitante" options={[...new Set((data?.tickets ?? []).map((ticket) => ticket.reporter_id))].map((id) => ({ value: id, label: profileNames.get(id) ?? "Usuário" })).sort((a,b) => a.label.localeCompare(b.label, "pt-BR"))} /></TableHead>
                      <TableHead className="py-1"><HeaderFilterSelect value={appFilter} onChange={setAppFilter} label="Filtrar por aplicativo" options={Object.entries(APP_NAMES).map(([value, label]) => ({ value, label }))} /></TableHead>
                      <TableHead className="py-1"><HeaderFilterSelect value={typeFilter} onChange={setTypeFilter} label="Filtrar por tipo" options={[{ value: "melhoria", label: "Melhoria" }, { value: "bug", label: "Bug" }]} /></TableHead>
                      <TableHead className="py-1"><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Filtrar" aria-label="Filtrar por número ou título" className="h-8 min-w-28 bg-background" /></TableHead>
@@ -319,6 +323,9 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
   const [status, setStatus] = useState<TicketStatus>("aberto");
   const [assignee, setAssignee] = useState("none");
   const [notes, setNotes] = useState("");
+  const [solution, setSolution] = useState("");
+  const [observation, setObservation] = useState("");
+  const [editingObservation, setEditingObservation] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [replyToId, setReplyToId] = useState("");
   const [reporterMode, setReporterMode] = useState<"question" | "answer">("answer");
@@ -330,6 +337,8 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
     setStatus(ticket.status);
     setAssignee(ticket.assignee_id ?? "none");
     setNotes(ticket.admin_notes ?? "");
+    setSolution(ticket.proposed_solution ?? "");
+    setObservation(""); setEditingObservation(null);
      setMessage("");
      setReplyToId("");
      setReporterMode("answer");
@@ -352,6 +361,28 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
     },
   });
   const messages = details.data?.messages ?? [];
+  const observations = currentCodeObservations(details.data?.logs ?? []);
+  const canRecord = Boolean(data?.isAdmin && ticket && ticket.status !== "excluido");
+  const saveSolution = useMutation({
+    mutationFn: async () => {
+      if (!ticket || !canRecord) throw new Error("Sem permissão para registrar a solução.");
+      const value = proposedSolutionSchema.parse(solution);
+      const { error } = await supabase.from("development_tickets").update({ proposed_solution: value || null }).eq("id", ticket.id);
+      if (error) throw error;
+    },
+    onSuccess: async () => { toast.success("Solução salva"); await details.refetch(); onUpdated(); },
+    onError: (error: Error) => toast.error(error.message),
+  });
+  const saveObservation = useMutation({
+    mutationFn: async () => {
+      if (!ticket || !canRecord) throw new Error("Sem permissão para registrar observações.");
+      const text = codeObservationSchema.parse(observation);
+      const { error } = await supabase.rpc("save_code_observation", { _ticket_id: ticket.id, _text: text, _observation_id: editingObservation ?? undefined });
+      if (error) throw error;
+    },
+    onSuccess: async () => { toast.success(editingObservation ? "Observação atualizada" : "Observação adicionada"); setObservation(""); setEditingObservation(null); await details.refetch(); onUpdated(); },
+    onError: (error: Error) => toast.error(error.message),
+  });
   const answeredQuestionIds = new Set(messages.filter((entry) => entry.message_type === "answer" && entry.parent_message_id).map((entry) => entry.parent_message_id));
   const pendingQuestions = messages.filter((entry) => entry.message_type === "question" && entry.author_id !== data?.userId && !answeredQuestionIds.has(entry.id));
   const canAsk = Boolean(data?.isAdmin && ticket && !["atendido", "concluido", "excluido"].includes(ticket.status));
@@ -412,7 +443,7 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
   const update = useMutation({
     mutationFn: async () => {
       if (!ticket) return;
-      const { error } = await supabase.from("development_tickets").update({ status, assignee_id: assignee === "none" ? null : assignee, admin_notes: notes.trim() || null }).eq("id", ticket.id);
+      const { error } = await supabase.from("development_tickets").update({ status, assignee_id: assignee === "none" ? null : assignee, admin_notes: notes.trim() || null, proposed_solution: proposedSolutionSchema.parse(solution) || null }).eq("id", ticket.id);
       if (error) throw error;
     },
     onSuccess: () => { toast.success("Ticket atualizado"); onClose(); onUpdated(); },
@@ -455,11 +486,17 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
         <div className="grid gap-4 sm:grid-cols-2"><div><p className="text-xs font-semibold text-muted-foreground">Descrição</p><p className="mt-1 whitespace-pre-wrap text-sm">{ticket.description}</p></div><div><p className="text-xs font-semibold text-muted-foreground">Resultado esperado</p><p className="mt-1 whitespace-pre-wrap text-sm">{ticket.expected_result}</p></div></div>
         <div className="flex flex-wrap gap-2"><Badge variant="status">{STATUS_NAMES[ticket.status]}</Badge><Badge variant="outline">Prioridade {PRIORITY_NAMES[ticket.priority]}</Badge>{ticket.urgency === "urgente" ? <Badge variant="destructive">Urgente</Badge> : null}</div>
          {details.data?.attachments.some((attachment) => !attachment.message_id) ? <div><p className="mb-2 flex items-center gap-2 text-sm font-semibold"><Paperclip className="h-4 w-4" />Anexos do chamado</p><div className="flex flex-wrap gap-2">{details.data.attachments.filter((attachment) => !attachment.message_id).map((attachment) => <Button key={attachment.id} variant="ghost" size="sm" className="h-auto px-1 !text-foreground underline hover:!bg-transparent hover:!text-primary" onClick={() => openPreview(attachment.storage_path, attachment.file_name, attachment.content_type)}><Eye className="h-4 w-4" /><span className="max-w-64 truncate">{attachment.file_name}</span></Button>)}</div></div> : null}
+        <section className="space-y-2 border-t pt-4"><Label htmlFor="ticket-solution">Solução Proposta <span className="text-muted-foreground">(opcional)</span></Label><Textarea id="ticket-solution" value={solution} onChange={(event) => setSolution(event.target.value)} maxLength={4000} readOnly={!canRecord} className="min-h-24" />{canRecord && <div className="flex justify-end"><Button onClick={() => saveSolution.mutate()} disabled={saveSolution.isPending}>Salvar solução</Button></div>}</section>
          {messages.length || canAttach ? <div className="space-y-3 border-t pt-4"><p className="flex items-center gap-2 text-sm font-semibold"><MessageCircleQuestion className="h-4 w-4" />Conversa</p>{messages.length ? <div className="space-y-2">{messages.map((entry) => <div key={entry.id} className={`rounded-md border p-3 text-sm ${entry.message_type === "question" ? "border-border bg-muted/50" : "border-primary/40 bg-primary/10"}`}><div className="mb-1 flex flex-wrap items-center justify-between gap-2"><span className="font-semibold">{entry.message_type === "question" ? entry.author_id === ticket.reporter_id ? "Solicitante" : "Admin" : "Solicitante"} · {data?.profiles.find((profile) => profile.id === entry.author_id)?.full_name || data?.profiles.find((profile) => profile.id === entry.author_id)?.email || "Usuário"}</span><span className="text-xs text-muted-foreground">{new Date(entry.created_at).toLocaleString("pt-BR")}</span></div><p className="whitespace-pre-wrap">{entry.message}</p>{details.data?.attachments.filter((attachment) => attachment.message_id === entry.id).map((attachment) => <Button key={attachment.id} variant="ghost" size="sm" className="mt-2 max-w-full !bg-transparent !text-primary shadow-none hover:!bg-transparent hover:!text-primary" onClick={() => openPreview(attachment.storage_path, attachment.file_name, attachment.content_type)}><Paperclip className="h-4 w-4" /><span className="truncate underline">{attachment.file_name}</span></Button>)}{entry.message_type === "question" && !answeredQuestionIds.has(entry.id) ? <Badge variant="destructive" className="mt-2">Aguardando resposta</Badge> : null}</div>)}</div> : <p className="text-sm text-muted-foreground">Nenhuma mensagem registrada.</p>}{canAttach ? <div>{(isReporter || canAsk) && pendingQuestions.length > 0 ? <div className="mb-3 flex gap-2"><Button size="sm" variant={reporterMode === "answer" ? "default" : "outline"} className={reporterMode === "answer" ? "!bg-primary !text-primary-foreground hover:!bg-primary/90 hover:!text-primary-foreground" : undefined} onClick={() => setReporterMode("answer")}>Responder</Button><Button size="sm" variant={reporterMode === "question" ? "default" : "outline"} className={reporterMode === "question" ? "!bg-primary !text-primary-foreground hover:!bg-primary/90 hover:!text-primary-foreground" : undefined} onClick={() => setReporterMode("question")}>Nova pergunta</Button></div> : null}{canAnswer && pendingQuestions.length > 1 ? <div className="mb-3"><Label htmlFor="ticket-reply-to">Responder à pergunta</Label><Select value={pendingQuestions.some((entry) => entry.id === replyToId) ? replyToId : pendingQuestions[0].id} onValueChange={setReplyToId}><SelectTrigger id="ticket-reply-to" className="mt-1"><SelectValue /></SelectTrigger><SelectContent>{pendingQuestions.map((entry, index) => <SelectItem key={entry.id} value={entry.id}>{`Pergunta ${index + 1}: ${entry.message.slice(0, 70)}`}</SelectItem>)}</SelectContent></Select></div> : null}<Label htmlFor="ticket-message">{shouldAnswer ? "Responder à pergunta" : canAskReporter ? "Nova pergunta" : canAsk ? "Pergunta ao solicitante" : "Anexar imagens"}</Label><Textarea id="ticket-message" value={message} onChange={(event) => setMessage(event.target.value)} maxLength={4000} className="mt-1 min-h-24" disabled={!canAsk && !canAnswer && !canAskReporter} placeholder={shouldAnswer ? "Digite sua resposta" : canAskReporter ? "Digite sua nova pergunta" : canAsk ? "Digite a dúvida que precisa ser esclarecida" : "Selecione as imagens abaixo"} /><Label htmlFor="ticket-message-images" className="mt-3 block">Prints e fotos (até 10 MB por imagem)</Label><Input key={messageFileInputKey} id="ticket-message-images" type="file" accept="image/*" multiple onChange={(event) => setMessageFiles(Array.from(event.target.files ?? []))} className="mt-1" /><div className="mt-2 flex justify-end"><Button onClick={() => sendMessage.mutate()} disabled={sendMessage.isPending || (!message.trim() && !messageFiles.length)}><Send className="h-4 w-4" />{sendMessage.isPending ? "Enviando..." : !message.trim() ? "Anexar imagens" : shouldAnswer ? "Enviar resposta" : "Enviar pergunta"}</Button></div></div> : null}</div> : null}
-        {data?.isAdmin && ticket.status !== "concluido" && ticket.status !== "excluido" ? <div className="space-y-3 border-t pt-4"><h3 className="font-semibold">Gestão do ticket</h3><div className="grid gap-3 sm:grid-cols-2"><div><Label>Situação</Label><FilterSelect value={status} onChange={(value) => setStatus(value as TicketStatus)} placeholder="Situação" options={Object.entries(ADMIN_STATUS_NAMES).map(([value, label]) => ({ value, label }))} firstOption={null} /></div><div><Label>Responsável pela execução</Label><FilterSelect value={assignee} onChange={setAssignee} placeholder="Responsável pela execução" options={(data.codeAdmins ?? []).map((profile) => ({ value: profile.id, label: profile.full_name || profile.email || "Usuário" }))} firstOption={{ value: "none", label: "Sem responsável" }} /></div></div><div><Label htmlFor="admin-notes">Observações</Label><Textarea id="admin-notes" value={notes} onChange={(event) => setNotes(event.target.value)} maxLength={4000} /></div><Button onClick={() => update.mutate()} disabled={update.isPending}>Salvar andamento</Button></div> : ticket.admin_notes ? <div><p className="text-sm font-semibold">Observações</p><p className="mt-1 whitespace-pre-wrap text-sm">{ticket.admin_notes}</p></div> : null}
+        {data?.isAdmin && ticket.status !== "concluido" && ticket.status !== "excluido" ? <div className="space-y-3 border-t pt-4"><h3 className="font-semibold">Gestão do ticket</h3><div className="grid gap-3 sm:grid-cols-2"><div><Label>Situação</Label><FilterSelect value={status} onChange={(value) => setStatus(value as TicketStatus)} placeholder="Situação" options={Object.entries(ADMIN_STATUS_NAMES).map(([value, label]) => ({ value, label }))} firstOption={null} /></div><div><Label>Responsável pela execução</Label><FilterSelect value={assignee} onChange={setAssignee} placeholder="Responsável pela execução" options={(data.codeAdmins ?? []).map((profile) => ({ value: profile.id, label: profile.full_name || profile.email || "Usuário" }))} firstOption={{ value: "none", label: "Sem responsável" }} /></div></div><Button onClick={() => update.mutate()} disabled={update.isPending}>Salvar andamento</Button></div> : null}
         {ticket.status === "atendido" && ticket.reporter_id === data?.userId ? <div className="space-y-2 border-t pt-4"><p className="text-sm text-muted-foreground">Confirme se a correção ou melhoria foi entregue conforme esperado.</p><Button onClick={() => conclude.mutate()} disabled={conclude.isPending}>{conclude.isPending ? "Concluindo..." : "Marcar como concluído"}</Button></div> : null}
         {ticket.status === "aberto" && ticket.reporter_id === data?.userId ? <div className="flex justify-end border-t pt-4"><AlertDialog><AlertDialogTrigger asChild><Button variant="destructive"><Trash2 className="h-4 w-4" />Excluir ticket</Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Excluir este ticket?</AlertDialogTitle><AlertDialogDescription>Ele permanecerá no histórico com a situação “Excluído” e deixará de ser uma pendência para o executor.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={() => remove.mutate()} disabled={remove.isPending}>{remove.isPending ? "Excluindo..." : "Confirmar exclusão"}</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog></div> : null}
-        <div className="border-t pt-4"><p className="mb-2 flex items-center gap-2 text-sm font-semibold"><History className="h-4 w-4" />Histórico</p><MilestoneTimeline entries={[{ id: `opened-${ticket.id}`, created_at: ticket.created_at, text: "Ticket aberto" }, ...(details.data?.logs ?? []).map((log) => ({ id: log.id, created_at: log.created_at, text: log.previous_status !== log.new_status ? `${STATUS_NAMES[log.previous_status as TicketStatus] ?? "—"} → ${STATUS_NAMES[log.new_status as TicketStatus] ?? "—"}` : "Responsável ou observação atualizados" })), ...messages.map((entry) => ({ id: entry.id, created_at: entry.created_at, text: entry.message_type === "question" ? entry.author_id === ticket.reporter_id ? "Pergunta enviada pelo Solicitante" : "Pergunta enviada pelo Admin" : "Resposta enviada pelo Solicitante" }))]} /></div>
+        <section className="space-y-3 border-t pt-4"><h3 className="text-sm font-semibold">Observações</h3>
+          {ticket.admin_notes && !observations.some((entry) => entry.observation_id === ticket.id) && <div className="space-y-2"><div className="flex items-center justify-between"><Label>Observação anterior</Label>{canRecord && <Button variant="ghost" size="compactIcon" title="Editar observação anterior" aria-label="Editar observação anterior" onClick={() => { setEditingObservation(ticket.id); setObservation(ticket.admin_notes ?? ""); }}><Pencil className="h-3.5 w-3.5" /></Button>}</div><p className="whitespace-pre-wrap text-sm">{ticket.admin_notes}</p></div>}
+          {observations.map((entry) => <div key={entry.observation_id} className="border-b border-border pb-3"><div className="flex items-start justify-between gap-2"><p className="whitespace-pre-wrap break-words text-sm">{entry.note}</p>{canRecord && <Button variant="ghost" size="compactIcon" aria-label="Editar observação" title="Editar observação" onClick={() => { setEditingObservation(entry.observation_id); setObservation(entry.note ?? ""); }}><Pencil className="h-3.5 w-3.5" /></Button>}</div><p className="mt-1 text-xs text-muted-foreground">{data?.profiles.find((profile) => profile.id === entry.changed_by)?.full_name ?? "Usuário"} · {new Date(entry.created_at).toLocaleString("pt-BR")}</p></div>)}
+          {canRecord && <div className="space-y-2"><Label htmlFor="ticket-observation">{editingObservation ? "Editar observação" : "Nova observação"}</Label><Textarea id="ticket-observation" value={observation} onChange={(event) => setObservation(event.target.value)} maxLength={4000} /><div className="flex justify-end gap-2">{editingObservation && <Button variant="outline" onClick={() => { setEditingObservation(null); setObservation(""); }}>Cancelar</Button>}<Button onClick={() => saveObservation.mutate()} disabled={saveObservation.isPending || !observation.trim()}>{editingObservation ? "Salvar observação" : "Adicionar observação"}</Button></div></div>}
+        </section>
+        <div className="border-t pt-4"><p className="mb-2 flex items-center gap-2 text-sm font-semibold"><History className="h-4 w-4" />Histórico</p><MilestoneTimeline entries={[{ id: `opened-${ticket.id}`, created_at: ticket.created_at, text: "Ticket aberto" }, ...(details.data?.logs ?? []).map((log) => ({ id: log.id, created_at: log.created_at, text: log.event_type === "observation_added" ? `Observação adicionada: ${log.note ?? ""}` : log.event_type === "observation_edited" ? `Observação alterada\nAntes: ${log.previous_note ?? ""}\nDepois: ${log.note ?? ""}` : log.event_type === "solution_updated" ? `Solução Proposta atualizada\nAntes: ${log.previous_note ?? "—"}\nDepois: ${log.note ?? "—"}` : log.previous_status !== log.new_status ? `${STATUS_NAMES[log.previous_status as TicketStatus] ?? "—"} → ${STATUS_NAMES[log.new_status as TicketStatus] ?? "—"}` : log.note ? `Responsável ou observação atualizados: ${log.note}` : "Responsável atualizado" })), ...messages.map((entry) => ({ id: entry.id, created_at: entry.created_at, text: entry.message_type === "question" ? entry.author_id === ticket.reporter_id ? "Pergunta enviada pelo Solicitante" : "Pergunta enviada pelo Admin" : "Resposta enviada pelo Solicitante" }))]} /></div>
         </div> : null}
       </DialogContent>
     </Dialog>

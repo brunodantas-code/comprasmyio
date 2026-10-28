@@ -1,3 +1,6 @@
+- [x] Code — filtro de Solicitante no Acompanhamento, conferido com Leonardo Roedel.
+- [x] Code — Solução Proposta opcional antes da conversa; adicionar/editar observações ao final com autoria, data e registro de alterações no histórico; gravação, edição e reabertura conferidas em ticket temporário.
+- [x] Supply — separar Projeto/Implantação-Upsell de Cliente/Sustentação, herdar cliente do projeto, manter centro de custo e validar gravação e troca de finalidade; dois pedidos temporários salvos e vínculos conferidos, dados de teste removidos.
 - [x] Site Survey — Localização na criação/edição de ambientes, independente do checklist; criação e reabertura com 2º andar verificadas, teste temporário removido, celular conferido e sete testes passaram.
 - [x] Site Survey — alinhar os totalizadores de quantidade com o título do Cadastro completo; conferido em 1280/1073 px e celular sem transbordamento.
 - [x] Site Survey — proposta do Taboão: Água 50 lojas/quiosques, 1 entrada da concessionária e saldo 6 nos demais ambientes; Energia 185 lojas/quiosques e saldo 42 nos demais ambientes. Dados reais e cinco testes conferidos.
@@ -1065,7 +1068,7 @@
 
 - [x] Site Survey — orientar baixa manual sem PDF: salvar resposta recebida por e-mail/mensagem/celular, marcar quadradinho da pergunta e confirmar.
 - [x] Supply — botões de ação sem fundo verde: padrão vazado verde (preenche na interação) aplicado às variantes default/outline/ghost; alternâncias mantêm destaque quando ativas; anexos do chamado viraram link de texto.
-- [ ] Chamados/Desenvolvimento — apresentar e aplicar novo layout de milestones no histórico do atendimento (aguardando escolha do usuário).
+- [x] Chamados/Desenvolvimento — layout escolhido e aplicado: linha do tempo com ícones.
 - [x] Chamados/Tickets — excluídos/cancelados ocultos por padrão; aparecem só ao selecionar a situação no filtro; conferido no preview (ticket #4).
 - [x] Chamados/Tickets — histórico do atendimento em linha do tempo vertical com ícones por tipo de evento (abertura, pergunta, resposta, troca de status); componente MilestoneTimeline aplicado em Tickets e Chamados; conferido no preview (ticket #3).
 - [x] Cabeçalhos verdes sem negrito e com borda cinza clara arredondada (padrão Site Survey) em todas as tabelas do Supply; conferido no preview (font-weight 400).

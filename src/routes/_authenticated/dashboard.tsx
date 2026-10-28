@@ -54,6 +54,8 @@ import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { AppHeader } from "@/components/app-header";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { takeSiteSurveyPurchaseDraft, type SiteSurveyPurchaseDraft } from "@/lib/site-survey-purchase-draft";
+import { SupplyAllocationSelector, InheritedProjectClient } from "@/components/supply-allocation-selector";
+import { resolveSupplyAllocation, type SupplyAllocationType } from "@/lib/supply-allocation";
 
 
 
@@ -1197,6 +1199,18 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
     canAllocateProject ? "projeto" : canAllocateClient ? "cliente" : "interna",
   );
   const [clientId, setClientId] = useState("");
+  const allocationOptions: SupplyAllocationType[] = [
+    ...(canAllocateProject ? ["projeto" as const] : []),
+    ...(canAllocateClient ? ["cliente" as const] : []),
+    ...(canAllocateStock ? ["estoque" as const] : []),
+    ...(canAllocateInternal ? ["interna" as const] : []),
+  ];
+  function changeAllocation(value: SupplyAllocationType) {
+    setForStock(value === "estoque");
+    setAllocTarget(value === "estoque" ? "projeto" : value);
+    setProjectId(""); setClientId(""); setClientUnitId("");
+  }
+
   const { data: clientsList } = useClients();
   const [clientUnitId, setClientUnitId] = useState("");
   const { data: clientUnits } = useClientUnits(clientId || undefined);
@@ -1381,6 +1395,9 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
   const submit = useMutation({
     mutationFn: async ({ values, buyQty, shipQty, groupedItems }: { values: z.infer<typeof newOrderSchema>; buyQty: number; shipQty: number; groupedItems?: MaterialRequestItem[] }) => {
       let createdOrder: { budget_exceeded: boolean; budget_snapshot: number | null; projected_committed_snapshot: number | null } | null = null;
+      const resolvedAllocation = requestModel === "rh"
+        ? { project_id: null, client_id: clientId && clientId !== "none" ? clientId : null, client_unit_id: null }
+        : resolveSupplyAllocation(forStock ? "estoque" : allocTarget, values.project_id ?? "", clientId, clientUnitId, projects ?? []);
       let ids = {
         material_id: isNewItem ? null : (item?.material_id ?? null),
         terceiros_material_id: isNewItem ? null : (item?.terceiros_material_id ?? null),
@@ -1434,14 +1451,10 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
 
       if (buyQty > 0) {
         const { data, error } = await supabase.from("purchase_orders").insert({
-          project_id: forStock || allocTarget === "interna" ? null : (values.project_id ?? null),
+          ...resolvedAllocation,
           for_stock: forStock,
           allocation_type: forStock ? "estoque" : allocTarget,
           request_type: requestType,
-          client_id: requestModel === "rh"
-            ? (clientId && clientId !== "none" ? clientId : null)
-            : (allocTarget === "cliente" ? (clientId || null) : null),
-          client_unit_id: allocTarget === "cliente" && clientUnitId ? clientUnitId : null,
           cost_center_id: restrictedCc ? await resolveOperacaoCostCenterId() : (costCenterId || null),
           parent_order_id: null,
           payment_date: requestModel === "pagamento" ? paymentDate : null,
@@ -1601,6 +1614,10 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
       return toast.error("Selecione o destinatário");
     }
 
+    if (!isRh) {
+      try { resolveSupplyAllocation(forStock ? "estoque" : allocTarget, projectId, clientId, clientUnitId, projects ?? []); }
+      catch (error) { return toast.error(error instanceof Error ? error.message : "Alocação inválida."); }
+    }
     const fd = new FormData(e.currentTarget);
     const parsed = newOrderSchema.safeParse({
       project_id: isRh ? (projectId || undefined) : (allocTarget === "projeto" && !forStock ? projectId : undefined),
@@ -1930,29 +1947,12 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
               <>
                 <div className="space-y-2">
                   <Label>Alocação</Label>
-                  <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-                    {canAllocateProject && <label className="flex cursor-pointer items-center gap-2 text-sm">
-                      <Checkbox checked={!forStock && allocTarget === "projeto"} onCheckedChange={() => { setForStock(false); setAllocTarget("projeto"); setClientId(""); setClientUnitId(""); }} />
-                      Projeto
-                    </label>}
-                    {canAllocateClient && <label className="flex cursor-pointer items-center gap-2 text-sm">
-                      <Checkbox checked={!forStock && allocTarget === "cliente"} onCheckedChange={() => { setForStock(false); setAllocTarget("cliente"); setProjectId(""); }} />
-                      Cliente
-                    </label>}
-                    {canAllocateStock && <label className="flex cursor-pointer items-center gap-2 text-sm">
-                      <Checkbox checked={forStock} onCheckedChange={() => { setForStock(true); setAllocTarget("projeto"); setProjectId(""); setClientId(""); setClientUnitId(""); }} />
-                      Estoque
-                    </label>}
-                    {canAllocateInternal && <label className="flex cursor-pointer items-center gap-2 text-sm">
-                      <Checkbox checked={!forStock && allocTarget === "interna"} onCheckedChange={() => { setForStock(false); setAllocTarget("interna"); setProjectId(""); setClientId(""); setClientUnitId(""); }} />
-                      Interna
-                    </label>}
-                  </div>
+                  <SupplyAllocationSelector value={forStock ? "estoque" : allocTarget} options={allocationOptions} hasDestination={!!(projectId || clientId)} onChange={changeAllocation} />
                   {canAllocateProject && !forStock && allocTarget === "projeto" && (
-                    <p className="text-xs text-muted-foreground">Prova de conceito ou potencial cliente, ainda não implantado.</p>
+                    <p className="text-xs text-muted-foreground">Implantação ou upsell — custos associados ao Projeto e ao Cliente vinculado.</p>
                   )}
                   {canAllocateClient && !forStock && allocTarget === "cliente" && (
-                    <p className="text-xs text-muted-foreground">Contrato assinado e ativo.</p>
+                    <p className="text-xs text-muted-foreground">Sustentação e manutenção do Cliente — custos associados à receita de MRR.</p>
                   )}
                   {canAllocateInternal && !forStock && allocTarget === "interna" && (
                     <p className="text-xs text-muted-foreground">Qualquer despesa interna não atrelada a clientes ou projetos</p>
@@ -1980,6 +1980,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                         {projects.filter((p) => !p.status || p.status === "active").map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
                       </SelectContent>
                     </Select>
+                    <InheritedProjectClient projectId={projectId} projects={projects ?? []} clients={clientsList ?? []} />
                     {selectedBudget && selectedBudget.budget > 0 && <BudgetProgress summary={selectedBudget} pendingValue={pendingBudgetValue} />}
                   </div>
                 )}
@@ -2011,25 +2012,12 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
               <>
                 <div className="space-y-2">
                   <Label>Alocação</Label>
-                  <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-                    {canAllocateProject && <label className="flex cursor-pointer items-center gap-2 text-sm">
-                      <Checkbox checked={allocTarget === "projeto"} onCheckedChange={() => { setAllocTarget("projeto"); setClientId(""); setClientUnitId(""); }} />
-                      Projeto
-                    </label>}
-                    {canAllocateClient && <label className="flex cursor-pointer items-center gap-2 text-sm">
-                      <Checkbox checked={allocTarget === "cliente"} onCheckedChange={() => { setAllocTarget("cliente"); setProjectId(""); }} />
-                      Cliente
-                    </label>}
-                    {canAllocateInternal && <label className="flex cursor-pointer items-center gap-2 text-sm">
-                      <Checkbox checked={allocTarget === "interna"} onCheckedChange={() => { setAllocTarget("interna"); setProjectId(""); setClientId(""); setClientUnitId(""); }} />
-                      Interna
-                    </label>}
-                  </div>
+                  <SupplyAllocationSelector value={allocTarget} options={allocationOptions.filter((value) => value !== "estoque")} hasDestination={!!(projectId || clientId)} onChange={changeAllocation} />
                   {canAllocateProject && allocTarget === "projeto" && (
-                    <p className="text-xs text-muted-foreground">Prova de conceito ou potencial cliente, ainda não implantado.</p>
+                    <p className="text-xs text-muted-foreground">Implantação ou upsell — custos associados ao Projeto e ao Cliente vinculado.</p>
                   )}
                   {canAllocateClient && allocTarget === "cliente" && (
-                    <p className="text-xs text-muted-foreground">Contrato assinado e ativo.</p>
+                    <p className="text-xs text-muted-foreground">Sustentação e manutenção do Cliente — custos associados à receita de MRR.</p>
                   )}
                   {canAllocateInternal && allocTarget === "interna" && (
                     <p className="text-xs text-muted-foreground">Qualquer despesa interna não atrelada a clientes ou projetos</p>
@@ -2057,6 +2045,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                         {projects.filter((p) => !p.status || p.status === "active").map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
                       </SelectContent>
                     </Select>
+                    <InheritedProjectClient projectId={projectId} projects={projects ?? []} clients={clientsList ?? []} />
                     {selectedBudget && selectedBudget.budget > 0 && <BudgetProgress summary={selectedBudget} pendingValue={pendingBudgetValue} />}
                   </div>
                 ) : canAllocateClient && allocTarget === "cliente" ? (
@@ -2735,13 +2724,12 @@ function AdminEditApprovalDialog({ order, items }: { order: Order; items: Approv
       if (requestTypeModel(requestType, requestTypes) === "pagamento" && costCenterId === "none") throw new Error("Selecione o Centro de Custo.");
       if ((allocationType === "projeto" || allocationType === "cliente") && !destinationId) throw new Error("Selecione o destino da alocação.");
       const unit = units?.find((candidate) => candidate.id === destinationId);
+      const resolvedAllocation = resolveSupplyAllocation(allocationType, allocationType === "projeto" ? destinationId : "", unit?.client_id ?? destinationId, unit?.id ?? "", projects ?? []);
       const changes = {
         request_type: requestType,
         payment_date: requestTypeModel(requestType, requestTypes) === "pagamento" ? paymentDate : null,
         allocation_type: allocationType,
-        project_id: allocationType === "projeto" ? destinationId : null,
-        client_id: allocationType === "cliente" ? unit?.client_id ?? destinationId : null,
-        client_unit_id: allocationType === "cliente" ? unit?.id ?? null : null,
+        ...resolvedAllocation,
         cost_center_id: costCenterId === "none" ? null : costCenterId,
         item_name: itemName.trim(), item_link: itemLink.trim() || null, quantity: Number(quantity), estimated_value: Number(estimatedValue),
         recipient: recipient.trim(), delivery_point: deliveryPoint.trim() || null, deadline_type: deadlineType,
@@ -2769,8 +2757,9 @@ function AdminEditApprovalDialog({ order, items }: { order: Order; items: Approv
         <div className="space-y-2"><Label>Tipo de Solicitação</Label><Select value={requestType} onValueChange={setRequestType}><SelectTrigger><SelectValue placeholder="Selecione o tipo" /></SelectTrigger><SelectContent>{(requestTypes ?? []).filter((type) => type.active || type.code === order.request_type).map((type) => <SelectItem key={type.code} value={type.code}>{type.name}</SelectItem>)}</SelectContent></Select></div>
         {requestTypeModel(requestType, requestTypes) === "pagamento" && <div className="space-y-2"><Label htmlFor={`payment-date-${order.id}`}>Data do pagamento</Label><Input id={`payment-date-${order.id}`} type="date" value={paymentDate} onChange={(event) => setPaymentDate(event.target.value)} /></div>}
         <section className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2"><Label>Alocação</Label><Select value={allocationType} onValueChange={(value) => { setAllocationType(value as typeof allocationType); setDestinationId(""); }}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="interna">Interna</SelectItem><SelectItem value="projeto">Projeto</SelectItem><SelectItem value="cliente">Cliente ou Unidade/Filial</SelectItem><SelectItem value="estoque">Estoque</SelectItem></SelectContent></Select></div>
+          <div className="space-y-2"><Label>Alocação</Label><SupplyAllocationSelector value={allocationType} options={["projeto", "cliente", "estoque", "interna"]} hasDestination={!!destinationId} onChange={(value) => { setAllocationType(value); setDestinationId(""); }} /></div>
           {(allocationType === "projeto" || allocationType === "cliente") && <div className="space-y-2"><Label>Destino</Label><Popover open={destinationOpen} onOpenChange={setDestinationOpen}><PopoverTrigger asChild><Button type="button" variant="outline" role="combobox" className="w-full justify-between font-normal"><span className="truncate">{selectedDestination?.label ?? "Digite ou selecione"}</span><ArrowUpDown className="h-4 w-4 opacity-50" /></Button></PopoverTrigger><PopoverContent className="w-(--radix-popover-trigger-width) p-0"><Command><CommandInput placeholder="Buscar destino..." /><CommandList><CommandEmpty>Nenhum destino encontrado.</CommandEmpty><CommandGroup>{destinations.map((destination) => <CommandItem key={destination.id} value={destination.label} onSelect={() => { setDestinationId(destination.id); setDestinationOpen(false); }}><CheckCircle2 className={destination.id === destinationId ? "opacity-100" : "opacity-0"} />{destination.label}</CommandItem>)}</CommandGroup></CommandList></Command></PopoverContent></Popover></div>}
+          {allocationType === "projeto" && <InheritedProjectClient projectId={destinationId} projects={projects ?? []} clients={clients ?? []} />}
           <div className="space-y-2 sm:col-span-2"><Label>Centro de Custo</Label><Select value={costCenterId} onValueChange={setCostCenterId}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="none">Sem centro de custo</SelectItem>{(costCenters ?? []).filter((center) => center.active).map((center) => <SelectItem key={center.id} value={center.id}>{center.code ? `${center.code} — ` : ""}{center.name}</SelectItem>)}</SelectContent></Select></div>
         </section>
         <section className="space-y-3 border-t pt-4"><h3 className="text-sm font-semibold">Itens e valores</h3>{editedItems.length ? editedItems.map((item, index) => <div key={item.id} className="grid gap-3 rounded-md border p-3 sm:grid-cols-[minmax(0,2fr)_6rem_9rem]"><div className="space-y-2"><Label>Item {index + 1}</Label><Input value={item.item_name} onChange={(event) => setEditedItems((current) => current.map((row) => row.id === item.id ? { ...row, item_name: event.target.value } : row))} /><Input value={item.item_link ?? ""} placeholder="Link de referência" onChange={(event) => setEditedItems((current) => current.map((row) => row.id === item.id ? { ...row, item_link: event.target.value } : row))} /></div><div className="space-y-2"><Label>Qtd.</Label><Input type="number" min={1} value={item.quantity} onChange={(event) => setEditedItems((current) => current.map((row) => row.id === item.id ? { ...row, quantity: event.target.value } : row))} /></div><div className="space-y-2"><Label>Valor unitário</Label><MoneyInput value={item.estimated_unit_value} onChange={(value) => setEditedItems((current) => current.map((row) => row.id === item.id ? { ...row, estimated_unit_value: value } : row))} /></div></div>) : <div className="grid gap-3 sm:grid-cols-2"><div className="space-y-2 sm:col-span-2"><Label>Item</Label><Input value={itemName} onChange={(event) => setItemName(event.target.value)} /></div><div className="space-y-2"><Label>Link de referência</Label><Input value={itemLink} onChange={(event) => setItemLink(event.target.value)} /></div><div className="space-y-2"><Label>Quantidade</Label><Input type="number" min={1} value={quantity} onChange={(event) => setQuantity(event.target.value)} /></div><div className="space-y-2"><Label>Valor total</Label><MoneyInput value={estimatedValue} onChange={setEstimatedValue} /></div></div>}</section>
@@ -3544,15 +3533,14 @@ function EditRequesterDialog({ order }: { order: Order }) {
 
   const save = useMutation({
     mutationFn: async (v: z.infer<typeof newOrderSchema>) => {
+      const resolvedAllocation = resolveSupplyAllocation(allocation, v.project_id ?? "", clientId, clientUnitId, projects ?? []);
       let attachments = order.attachments ?? [];
       if (files.length) {
         const uploaded = await uploadOrderAttachments(order.id, files);
         attachments = [...attachments, ...uploaded];
       }
       const { error } = await supabase.from("purchase_orders").update({
-        project_id: allocation === "projeto" ? (v.project_id ?? null) : null,
-        client_id: allocation === "cliente" ? clientId : null,
-        client_unit_id: allocation === "cliente" && clientUnitId ? clientUnitId : null,
+        ...resolvedAllocation,
         allocation_type: allocation,
         for_stock: allocation === "estoque",
         item_name: v.item_name,
@@ -3627,24 +3615,7 @@ function EditRequesterDialog({ order }: { order: Order }) {
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label>Alocação</Label>
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-              <label className="flex cursor-pointer items-center gap-2 text-sm">
-                <Checkbox checked={allocation === "projeto"} onCheckedChange={() => { setAllocation("projeto"); setClientId(""); setClientUnitId(""); }} />
-                Projeto
-              </label>
-              <label className="flex cursor-pointer items-center gap-2 text-sm">
-                <Checkbox checked={allocation === "cliente"} onCheckedChange={() => { setAllocation("cliente"); setProjectId(""); }} />
-                Cliente
-              </label>
-              <label className="flex cursor-pointer items-center gap-2 text-sm">
-                <Checkbox checked={allocation === "estoque"} onCheckedChange={() => { setAllocation("estoque"); setProjectId(""); setClientId(""); setClientUnitId(""); }} />
-                Estoque
-              </label>
-              <label className="flex cursor-pointer items-center gap-2 text-sm">
-                <Checkbox checked={allocation === "interna"} onCheckedChange={() => { setAllocation("interna"); setProjectId(""); setClientId(""); setClientUnitId(""); }} />
-                Interna
-              </label>
-            </div>
+            <SupplyAllocationSelector value={allocation} options={["projeto", "cliente", "estoque", "interna"]} hasDestination={!!(projectId || clientId)} onChange={(value) => { setAllocation(value); setProjectId(""); setClientId(""); setClientUnitId(""); }} />
           </div>
           {allocation === "projeto" && (
             <div className="space-y-2">
@@ -3655,6 +3626,7 @@ function EditRequesterDialog({ order }: { order: Order }) {
                   {(projects ?? []).filter((p) => !p.status || p.status === "active").map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
                 </SelectContent>
               </Select>
+              <InheritedProjectClient projectId={projectId} projects={projects ?? []} clients={clients ?? []} />
             </div>
           )}
           {allocation === "cliente" && (

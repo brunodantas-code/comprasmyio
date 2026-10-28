@@ -10,6 +10,7 @@
 <!-- LOVABLE:END -->
 
 - Supply uses recipient IDs, not names; RLS preserves recipient reads. Personal queues union requester/recipient IDs without duplicates; actions stay gated.
+- Supply allocation uses a shared exclusive selector and resolver; purchase-order triggers derive project-owned client/unit IDs and reject conflicting direct allocations, so client consolidation counts each order once while preserving independent cost centers.
 - Approval views stay under Supply bottom navigation. Execution opens `supply`, decisions `mine`; payment approvals stay in Cash Flow, outside Supply execution/counts.
 - Supply PDF: mobile PDF.js; desktop tab.
 - Payment approvals recognize the active finance role or job title (an inactive legacy title must not block); above the joint-approval threshold, eligible joint approvers join finance and the requester never self-approves.
@@ -18,6 +19,7 @@
 - Survey completion preserves technical timestamps; remediation is not execution. No daily completion charts.
 - Survey deletion atomically checks OpDesk links and offers keep/delete; OpDesk retains visit number.
 - Code images use private ticket attachments: message images stay with replies, standalone images with tickets. Open tickets allow new questions before answers; answers link to pending admin questions, preserving permissions.
+- Code observations use append-only ticket-log revisions through an admin-authorized RPC, while proposed solutions are separately guarded and audited; this preserves original notes and every edit without widening ticket permissions.
 - Site Survey actions update/deactivate in place to preserve references; recreating a deleted environment reactivates its row with the selected checklist. Warnings use active visible questions only after explicit save, not autosave; manual visits start `concluida` with historical end.
 - Photo drops/pastes autosave; block outside drops. Serialize saves by point/question and flush before switches/closing. Reset stale point selection. Section skips are exclusive, keep answers, remove pending requirements and flush; not-applicable sections stay out of screen summaries.
 - Survey report/PDF share ordering and DN from De-Para. Shared prose classifiers distinguish missing location and unverifiable flow; missing flow has no specification. Purchase-report photos come only from the meter-flow question and remain grouped by point. Photo reuse stores same-point attachment ID on response; deletion invalidates it.

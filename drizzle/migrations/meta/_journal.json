@@ -911,6 +911,34 @@
       "when": 1792592195411,
       "tag": "0129_grant_request_types_insert_delete",
       "breakpoints": true
+    },
+    {
+      "idx": 130,
+      "version": "7",
+      "when": 1793203366713,
+      "tag": "0130_supply_project_client_allocation_guard",
+      "breakpoints": true
+    },
+    {
+      "idx": 131,
+      "version": "7",
+      "when": 1793203410610,
+      "tag": "0131_preserve_internal_admin_allocation",
+      "breakpoints": true
+    },
+    {
+      "idx": 132,
+      "version": "7",
+      "when": 1793203757437,
+      "tag": "0132_code_solution_and_observation_history",
+      "breakpoints": true
+    },
+    {
+      "idx": 133,
+      "version": "7",
+      "when": 1793203883454,
+      "tag": "0133_audit_legacy_code_observations",
+      "breakpoints": true
     }
   ]
 }
