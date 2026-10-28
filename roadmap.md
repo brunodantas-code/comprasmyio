@@ -1064,3 +1064,4 @@
 - [x] Site Survey — lixeira nas fotos da fachada com fundo sólido, borda verde e ícone contrastante na interação.
 
 - [x] Site Survey — orientar baixa manual sem PDF: salvar resposta recebida por e-mail/mensagem/celular, marcar quadradinho da pergunta e confirmar.
+- [x] Supply — botões de ação sem fundo verde: padrão vazado verde (preenche na interação) aplicado às variantes default/outline/ghost; alternâncias mantêm destaque quando ativas; anexos do chamado viraram link de texto.
