@@ -86,7 +86,7 @@ export function SearchableSelect({ value, onChange, options, placeholder = "Digi
   return (
     <Popover open={open} onOpenChange={(o) => { if (!o) close(); }}>
       <PopoverAnchor asChild>
-        <div className={cn("relative flex h-10 w-full items-center rounded-md border border-input bg-background text-sm ring-offset-background focus-within:border-primary focus-within:ring-1 focus-within:ring-primary", disabled && "cursor-not-allowed opacity-50", className)}>
+        <div className={cn("relative flex h-9 w-full items-center rounded-md border border-input bg-transparent text-sm shadow-sm ring-offset-background focus-within:border-primary focus-within:ring-1 focus-within:ring-primary", disabled && "cursor-not-allowed opacity-50", className)}>
           <input
             ref={inputRef}
             type="text"
@@ -135,7 +135,7 @@ export function SearchableSelect({ value, onChange, options, placeholder = "Digi
                   role="option"
                   data-index={index}
                   aria-selected={index === active}
-                  className={cn("cursor-pointer rounded-sm px-2 py-1.5", index === active && "bg-accent text-accent-foreground", option.value === value && "font-medium")}
+                  className={cn("cursor-pointer rounded-sm px-2 py-1.5", index === active && "bg-dropdown-highlight text-dropdown-highlight-foreground", option.value === value && "font-medium")}
                   onMouseEnter={() => setActive(index)}
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => pick(option)}
