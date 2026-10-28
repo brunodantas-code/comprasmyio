@@ -5,7 +5,7 @@ export type CodeObservationLog = { id: string; observation_id: string | null; ev
 export function currentCodeObservations<T extends CodeObservationLog>(logs: T[]): T[] {
   const latest = new Map<string, T>();
   for (const log of [...logs].sort((a,b) => b.created_at.localeCompare(a.created_at) || b.id.localeCompare(a.id))) {
-    if (log.observation_id && ["observation_added", "observation_edited"].includes(log.event_type ?? "") && !latest.has(log.observation_id)) latest.set(log.observation_id, log);
+    if (log.observation_id && ["observation_added", "observation_edited", "observation_deleted"].includes(log.event_type ?? "") && !latest.has(log.observation_id)) latest.set(log.observation_id, log);
   }
-  return [...latest.values()];
+  return [...latest.values()].filter((log) => log.event_type !== "observation_deleted");
 }
