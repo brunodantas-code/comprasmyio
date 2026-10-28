@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -1923,14 +1924,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                 {!restrictedCc && (
                   <div className="space-y-2">
                     <Label>Centro de Custo</Label>
-                    <Select value={costCenterId} onValueChange={setCostCenterId}>
-                      <SelectTrigger><SelectValue placeholder="Selecione o centro de custo" /></SelectTrigger>
-                      <SelectContent>
-                        {(costCenters ?? []).filter((c) => c.active).map((c) => (
-                          <SelectItem key={c.id} value={c.id}>{c.code ? `${c.code} — ${c.name}` : c.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <SearchableSelect value={costCenterId} onChange={setCostCenterId} placeholder="Digite ou selecione o centro de custo" options={(costCenters ?? []).filter((c) => c.active).map((c) => ({ value: c.id, label: c.code ? `${c.code} — ${c.name}` : c.name }))} />
                     {selectedBudget && selectedBudget.budget > 0 && <BudgetProgress summary={selectedBudget} pendingValue={pendingBudgetValue} />}
                   </div>
                 )}
@@ -1962,26 +1956,14 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                   {!restrictedCc && (
                     <div className="pt-2">
                       <Label>Centro de Custo</Label>
-                      <Select value={costCenterId} onValueChange={setCostCenterId}>
-                        <SelectTrigger className="mt-2"><SelectValue placeholder="Selecione o centro de custo" /></SelectTrigger>
-                        <SelectContent>
-                          {(costCenters ?? []).filter((c) => c.active).map((c) => (
-                            <SelectItem key={c.id} value={c.id}>{c.code ? `${c.code} — ${c.name}` : c.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <SearchableSelect className="mt-2" value={costCenterId} onChange={setCostCenterId} placeholder="Digite ou selecione o centro de custo" options={(costCenters ?? []).filter((c) => c.active).map((c) => ({ value: c.id, label: c.code ? `${c.code} — ${c.name}` : c.name }))} />
                     </div>
                   )}
                 </div>
                 {canAllocateProject && !forStock && allocTarget === "projeto" && (
                   <div className="space-y-2">
                     <Label>Projeto</Label>
-                    <Select value={projectId} onValueChange={setProjectId}>
-                      <SelectTrigger><SelectValue placeholder="Selecione o projeto" /></SelectTrigger>
-                      <SelectContent>
-                        {projects.filter((p) => !p.status || p.status === "active").map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
+                    <SearchableSelect value={projectId} onChange={setProjectId} placeholder="Digite ou selecione o projeto" options={projects.filter((p) => !p.status || p.status === "active").map((p) => ({ value: p.id, label: p.name }))} />
                     <InheritedProjectClient projectId={projectId} projects={projects ?? []} clients={clientsList ?? []} />
                     {selectedBudget && selectedBudget.budget > 0 && <BudgetProgress summary={selectedBudget} pendingValue={pendingBudgetValue} />}
                   </div>
@@ -1989,12 +1971,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                 {canAllocateClient && !forStock && allocTarget === "cliente" && (
                   <div className="space-y-2">
                     <Label>Cliente</Label>
-                    <Select value={clientId} onValueChange={(value) => { setClientId(value); setClientUnitId(""); }}>
-                      <SelectTrigger><SelectValue placeholder="Selecione o cliente" /></SelectTrigger>
-                      <SelectContent>
-                        {(clientsList ?? []).map((client) => <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
+                    <SearchableSelect value={clientId} onChange={(value) => { setClientId(value); setClientUnitId(""); }} placeholder="Digite ou selecione o cliente" options={(clientsList ?? []).map((c) => ({ value: c.id, label: c.name }))} />
                     {!!clientId && !!clientUnits?.length && (
                       <div className="space-y-2 pt-2">
                         <Label>Filial ou unidade</Label>
@@ -2027,38 +2004,21 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                   {!restrictedCc && (
                     <div className="pt-2">
                       <Label>Centro de Custo</Label>
-                      <Select value={costCenterId} onValueChange={setCostCenterId}>
-                        <SelectTrigger className="mt-2"><SelectValue placeholder="Selecione o centro de custo" /></SelectTrigger>
-                        <SelectContent>
-                          {(costCenters ?? []).filter((c) => c.active).map((c) => (
-                            <SelectItem key={c.id} value={c.id}>{c.code ? `${c.code} — ${c.name}` : c.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <SearchableSelect className="mt-2" value={costCenterId} onChange={setCostCenterId} placeholder="Digite ou selecione o centro de custo" options={(costCenters ?? []).filter((c) => c.active).map((c) => ({ value: c.id, label: c.code ? `${c.code} — ${c.name}` : c.name }))} />
                     </div>
                   )}
                 </div>
                 {canAllocateProject && allocTarget === "projeto" ? (
                   <div className="space-y-2">
                     <Label>Projeto</Label>
-                    <Select value={projectId} onValueChange={setProjectId}>
-                      <SelectTrigger><SelectValue placeholder="Selecione o projeto" /></SelectTrigger>
-                      <SelectContent>
-                        {projects.filter((p) => !p.status || p.status === "active").map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
+                    <SearchableSelect value={projectId} onChange={setProjectId} placeholder="Digite ou selecione o projeto" options={projects.filter((p) => !p.status || p.status === "active").map((p) => ({ value: p.id, label: p.name }))} />
                     <InheritedProjectClient projectId={projectId} projects={projects ?? []} clients={clientsList ?? []} />
                     {selectedBudget && selectedBudget.budget > 0 && <BudgetProgress summary={selectedBudget} pendingValue={pendingBudgetValue} />}
                   </div>
                 ) : canAllocateClient && allocTarget === "cliente" ? (
                   <div className="space-y-2">
                     <Label>Cliente</Label>
-                    <Select value={clientId} onValueChange={(value) => { setClientId(value); setClientUnitId(""); }}>
-                      <SelectTrigger><SelectValue placeholder="Selecione o cliente" /></SelectTrigger>
-                      <SelectContent>
-                        {(clientsList ?? []).map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
+                    <SearchableSelect value={clientId} onChange={(value) => { setClientId(value); setClientUnitId(""); }} placeholder="Digite ou selecione o cliente" options={(clientsList ?? []).map((c) => ({ value: c.id, label: c.name }))} />
                     {!!clientId && !!clientUnits?.length && (
                       <div className="space-y-2 pt-2">
                         <Label>Filial ou unidade</Label>
@@ -2272,20 +2232,11 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
             {requestModel === "materiais" && (
               <div className="space-y-2">
                 <Label>Destinatário</Label>
-                <Select value={recipientUserId ?? ""} onValueChange={(id) => {
+                <SearchableSelect value={recipientUserId ?? ""} placeholder="Digite ou selecione o usuário" onChange={(id) => {
                   const selected = profiles?.find((profile) => profile.id === id);
                   setRecipientUserId(selected?.id ?? null);
                   setRecipient(selected?.full_name || selected?.email || "");
-                }}>
-                  <SelectTrigger><SelectValue placeholder="Selecione o usuário" /></SelectTrigger>
-                  <SelectContent>
-                    {(profiles ?? []).map((p) => (
-                      <SelectItem key={p.id} value={p.id}>
-                        {p.full_name || p.email || p.id}{p.full_name && p.email ? <span className="ml-2 text-muted-foreground">· {p.email}</span> : null}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                }} options={(profiles ?? []).map((p) => ({ value: p.id, label: p.full_name || p.email || p.id, hint: p.full_name && p.email ? p.email : undefined }))} />
               </div>
             )}
             {requestModel !== "reembolso" && requestModel !== "rh" && requestModel !== "pagamento" && (!isMaterialsRequest || isNewItem) && (
