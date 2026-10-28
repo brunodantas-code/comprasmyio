@@ -95,22 +95,22 @@ function useImportableItems() {
     queryKey: ["importable-items"],
     queryFn: async (): Promise<ImportableItem[]> => {
       const [mats, ters, tools] = await Promise.all([
-        supabase.from("materials").select("id, name, is_manufactured, lot_quantity").eq("purchase_type", "importacao").order("name"),
-        supabase.from("terceiros_materials").select("id, name, lot_quantity").eq("purchase_type", "importacao").order("name"),
-        supabase.from("tool_assets").select("id, name, lot_quantity").eq("purchase_type", "importacao").order("name"),
+        supabase.from("materials").select("id, name, is_manufactured, lot_quantity, myio_code").eq("purchase_type", "importacao").order("name"),
+        supabase.from("terceiros_materials").select("id, name, lot_quantity, myio_code").eq("purchase_type", "importacao").order("name"),
+        supabase.from("tool_assets").select("id, name, lot_quantity, myio_code").eq("purchase_type", "importacao").order("name"),
       ]);
       if (mats.error) throw mats.error;
       if (ters.error) throw ters.error;
       if (tools.error) throw tools.error;
       return [
         ...(mats.data ?? []).filter((m) => !m.is_manufactured).map((m) => ({
-          key: `fabrica:${m.id}`, id: m.id, name: m.name, source: "fabrica" as const, originLabel: SOURCE_LABELS.fabrica, lotQuantity: Math.max(1, m.lot_quantity ?? 1),
+          key: `fabrica:${m.id}`, id: m.id, name: m.name, source: "fabrica" as const, originLabel: SOURCE_LABELS.fabrica, lotQuantity: Math.max(1, m.lot_quantity ?? 1), myioCode: m.myio_code ?? null,
         })),
         ...(ters.data ?? []).map((m) => ({
-          key: `terceiros:${m.id}`, id: m.id, name: m.name, source: "terceiros" as const, originLabel: SOURCE_LABELS.terceiros, lotQuantity: Math.max(1, m.lot_quantity ?? 1),
+          key: `terceiros:${m.id}`, id: m.id, name: m.name, source: "terceiros" as const, originLabel: SOURCE_LABELS.terceiros, lotQuantity: Math.max(1, m.lot_quantity ?? 1), myioCode: m.myio_code ?? null,
         })),
         ...(tools.data ?? []).map((m) => ({
-          key: `ferramenta:${m.id}`, id: m.id, name: m.name, source: "ferramenta" as const, originLabel: SOURCE_LABELS.ferramenta, lotQuantity: Math.max(1, m.lot_quantity ?? 1),
+          key: `ferramenta:${m.id}`, id: m.id, name: m.name, source: "ferramenta" as const, originLabel: SOURCE_LABELS.ferramenta, lotQuantity: Math.max(1, m.lot_quantity ?? 1), myioCode: m.myio_code ?? null,
         })),
       ];
     },
@@ -312,7 +312,7 @@ export function NewImportDialog({ userId, triggerLabel = "Nova importação", in
                   <div className="min-w-0">
                     <p className="truncate text-sm">{i.name}</p>
                     <p className="text-xs text-muted-foreground">
-                      {i.originLabel} · {i.lotQuantity} un/lote
+                      Cód. Myio: {i.myioCode || "—"} · {i.originLabel} · {i.lotQuantity} un/lote
                     </p>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
@@ -435,7 +435,7 @@ export function NewImportDialog({ userId, triggerLabel = "Nova importação", in
                   <div className="min-w-0">
                     <p className="truncate text-sm">{i.name}</p>
                     <p className="text-xs text-muted-foreground">
-                      {i.originLabel} · {i.lotQuantity} un/lote
+                      Cód. Myio: {i.myioCode || "—"} · {i.originLabel} · {i.lotQuantity} un/lote
                     </p>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
