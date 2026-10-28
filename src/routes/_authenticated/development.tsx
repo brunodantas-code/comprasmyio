@@ -464,8 +464,10 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
   const update = useMutation({
     mutationFn: async () => {
       if (!ticket) return;
+      validateImages(messageFiles);
       const { error } = await supabase.from("development_tickets").update({ status, assignee_id: assignee === "none" ? null : assignee, admin_notes: notes.trim() || null, proposed_solution: proposedSolutionSchema.parse(solution) || null }).eq("id", ticket.id);
       if (error) throw error;
+      await flushPendingImages();
     },
     onSuccess: () => { toast.success("Ticket atualizado"); onClose(); onUpdated(); },
     onError: (error: Error) => toast.error(error.message),
