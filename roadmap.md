@@ -1,3 +1,4 @@
+- [ ] Supply — separar Projeto/Implantação-Upsell de Cliente/Sustentação, herdar cliente do projeto, manter centro de custo e validar gravação e troca de finalidade.
 - [x] Site Survey — Localização na criação/edição de ambientes, independente do checklist; criação e reabertura com 2º andar verificadas, teste temporário removido, celular conferido e sete testes passaram.
 - [x] Site Survey — alinhar os totalizadores de quantidade com o título do Cadastro completo; conferido em 1280/1073 px e celular sem transbordamento.
 - [x] Site Survey — proposta do Taboão: Água 50 lojas/quiosques, 1 entrada da concessionária e saldo 6 nos demais ambientes; Energia 185 lojas/quiosques e saldo 42 nos demais ambientes. Dados reais e cinco testes conferidos.
