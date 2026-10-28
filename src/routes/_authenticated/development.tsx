@@ -1,7 +1,7 @@
 import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { CodeXml, Download, Eye, History, MessageCircleQuestion, Paperclip, Plus, Send, Trash2 } from "lucide-react";
+import { CodeXml, Download, Eye, History, MessageCircleQuestion, Paperclip, Plus, Send, Trash2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { MyioAppLogo } from "@/components/myio-app-logo";
@@ -18,6 +18,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { APP_NAVIGATION_OPTIONS } from "@/lib/app-navigation-options";
 import { AppHeader } from "@/components/app-header";
 import { MilestoneTimeline } from "@/components/milestone-timeline";
+import { currentCodeObservations, proposedSolutionSchema, codeObservationSchema } from "@/lib/code-records";
 
 type TicketStatus = "aberto" | "em_atendimento" | "atendido" | "concluido" | "excluido";
 type Ticket = {
@@ -36,6 +37,7 @@ type Ticket = {
   submenu_name: string | null;
   assignee_id: string | null;
   admin_notes: string | null;
+  proposed_solution: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -319,6 +321,9 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
   const [status, setStatus] = useState<TicketStatus>("aberto");
   const [assignee, setAssignee] = useState("none");
   const [notes, setNotes] = useState("");
+  const [solution, setSolution] = useState("");
+  const [observation, setObservation] = useState("");
+  const [editingObservation, setEditingObservation] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [replyToId, setReplyToId] = useState("");
   const [reporterMode, setReporterMode] = useState<"question" | "answer">("answer");
@@ -330,6 +335,8 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
     setStatus(ticket.status);
     setAssignee(ticket.assignee_id ?? "none");
     setNotes(ticket.admin_notes ?? "");
+    setSolution(ticket.proposed_solution ?? "");
+    setObservation(""); setEditingObservation(null);
      setMessage("");
      setReplyToId("");
      setReporterMode("answer");
@@ -352,6 +359,28 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
     },
   });
   const messages = details.data?.messages ?? [];
+  const observations = currentCodeObservations(details.data?.logs ?? []);
+  const canRecord = Boolean(data?.isAdmin && ticket && ticket.status !== "excluido");
+  const saveSolution = useMutation({
+    mutationFn: async () => {
+      if (!ticket || !canRecord) throw new Error("Sem permissão para registrar a solução.");
+      const value = proposedSolutionSchema.parse(solution);
+      const { error } = await supabase.from("development_tickets").update({ proposed_solution: value || null }).eq("id", ticket.id);
+      if (error) throw error;
+    },
+    onSuccess: async () => { toast.success("Solução salva"); await details.refetch(); onUpdated(); },
+    onError: (error: Error) => toast.error(error.message),
+  });
+  const saveObservation = useMutation({
+    mutationFn: async () => {
+      if (!ticket || !canRecord) throw new Error("Sem permissão para registrar observações.");
+      const text = codeObservationSchema.parse(observation);
+      const { error } = await supabase.rpc("save_code_observation", { _ticket_id: ticket.id, _text: text, _observation_id: editingObservation ?? undefined });
+      if (error) throw error;
+    },
+    onSuccess: async () => { toast.success(editingObservation ? "Observação atualizada" : "Observação adicionada"); setObservation(""); setEditingObservation(null); await details.refetch(); onUpdated(); },
+    onError: (error: Error) => toast.error(error.message),
+  });
   const answeredQuestionIds = new Set(messages.filter((entry) => entry.message_type === "answer" && entry.parent_message_id).map((entry) => entry.parent_message_id));
   const pendingQuestions = messages.filter((entry) => entry.message_type === "question" && entry.author_id !== data?.userId && !answeredQuestionIds.has(entry.id));
   const canAsk = Boolean(data?.isAdmin && ticket && !["atendido", "concluido", "excluido"].includes(ticket.status));
@@ -412,7 +441,7 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
   const update = useMutation({
     mutationFn: async () => {
       if (!ticket) return;
-      const { error } = await supabase.from("development_tickets").update({ status, assignee_id: assignee === "none" ? null : assignee, admin_notes: notes.trim() || null }).eq("id", ticket.id);
+      const { error } = await supabase.from("development_tickets").update({ status, assignee_id: assignee === "none" ? null : assignee, admin_notes: notes.trim() || null, proposed_solution: proposedSolutionSchema.parse(solution) || null }).eq("id", ticket.id);
       if (error) throw error;
     },
     onSuccess: () => { toast.success("Ticket atualizado"); onClose(); onUpdated(); },
