@@ -2830,7 +2830,7 @@ function OrdersTable({
   const allocationCategoryOf = (o: Order) => o.allocation_type === "cliente"
     ? "Cliente"
     : !o.for_stock && o.allocation_type !== "interna" && o.project_id ? "Projeto" : null;
-  const visibleOrders = !headerFilters
+  const visibleOrders = !headerFilters && !filterBar
     ? orders
     : orders.filter((o) =>
         (!fApproval || norm(o.approval_number ?? "").includes(norm(fApproval))) &&
