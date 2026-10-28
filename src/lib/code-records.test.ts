@@ -12,5 +12,5 @@ test("observação excluída sai da lista atual", () => {
     { id: "1", observation_id: "o1", event_type: "observation_added", note: "A", created_at: "2026-10-28T10:00:00Z", changed_by: "u" },
     { id: "2", observation_id: "o1", event_type: "observation_deleted", note: null, created_at: "2026-10-28T11:00:00Z", changed_by: "u" },
   ];
-  expect(currentCodeObservations(logs)).toEqual([]);
+  assert.deepEqual(currentCodeObservations(logs), []);
 });
