@@ -1,3 +1,4 @@
+- [ ] Code — Solução Proposta opcional antes da conversa; adicionar/editar observações ao final com autoria, data e registro de alterações no histórico.
 - [ ] Supply — separar Projeto/Implantação-Upsell de Cliente/Sustentação, herdar cliente do projeto, manter centro de custo e validar gravação e troca de finalidade.
 - [x] Site Survey — Localização na criação/edição de ambientes, independente do checklist; criação e reabertura com 2º andar verificadas, teste temporário removido, celular conferido e sete testes passaram.
 - [x] Site Survey — alinhar os totalizadores de quantidade com o título do Cadastro completo; conferido em 1280/1073 px e celular sem transbordamento.
