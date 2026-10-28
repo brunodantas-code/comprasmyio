@@ -386,12 +386,20 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
     onSuccess: async () => { toast.success("Observação excluída"); if (editingObservation === deletingObservation) { setEditingObservation(null); setObservation(""); } setDeletingObservation(null); await details.refetch(); onUpdated(); },
     onError: (error: Error) => toast.error(error.message),
   });
+  const flushPendingImages = async () => {
+    if (!ticket || !data?.userId || !messageFiles.length) return;
+    await uploadTicketImages(ticket.id, data.userId, messageFiles);
+    setMessageFiles([]);
+    setMessageFileInputKey((key) => key + 1);
+  };
   const saveObservation = useMutation({
     mutationFn: async () => {
       if (!ticket || !canRecord) throw new Error("Sem permissão para registrar observações.");
       const text = codeObservationSchema.parse(observation);
+      validateImages(messageFiles);
       const { error } = await supabase.rpc("save_code_observation", { _ticket_id: ticket.id, _text: text, _observation_id: editingObservation ?? undefined });
       if (error) throw error;
+      await flushPendingImages();
     },
     onSuccess: async () => { toast.success(editingObservation ? "Observação atualizada" : "Observação adicionada"); setObservation(""); setEditingObservation(null); await details.refetch(); onUpdated(); },
     onError: (error: Error) => toast.error(error.message),
