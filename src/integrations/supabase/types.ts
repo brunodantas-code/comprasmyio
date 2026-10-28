@@ -6539,6 +6539,10 @@ export type Database = {
         Args: { _delete_calls: boolean; _visit_id: string }
         Returns: number
       }
+      edit_code_message: {
+        Args: { _message_id: string; _text: string }
+        Returns: undefined
+      }
       get_client_deletion_links: {
         Args: { _client_id: string }
         Returns: {
