@@ -37,10 +37,10 @@ export function usePendingActions() {
           .eq("status", "pendente"),
         supabase
           .from("development_tickets")
-          .select("id, ticket_number, title, reporter_id, status"),
+          .select("id, ticket_number, title, reporter_id, status, created_at"),
         supabase
           .from("development_ticket_messages")
-          .select("id, ticket_id, author_id, message_type, parent_message_id, development_tickets(ticket_number,title,reporter_id)"),
+          .select("id, ticket_id, author_id, message_type, parent_message_id, development_tickets(ticket_number,title,reporter_id,created_at)"),
         currentUser?.isComprador
           ? supabase
               .from("purchase_orders")
@@ -76,20 +76,28 @@ export function usePendingActions() {
           .filter((message) => message.message_type === "answer" && message.parent_message_id)
           .map((message) => message.parent_message_id),
       );
-      const codeItems = new Map<string, { ticketId: string; ticketNumber: number; title: string; reason: "responder" | "aceitar" | "atender" }>();
+      const codeItems = new Map<string, { ticketId: string; ticketNumber: number; title: string; reporterId: string; createdAt: string; reporterName?: string; reason: "responder" | "aceitar" | "atender" }>();
       for (const ticket of codeResult.data ?? []) {
         if (ticket.status === "atendido" && ticket.reporter_id === userId) {
-          codeItems.set(ticket.id, { ticketId: ticket.id, ticketNumber: ticket.ticket_number, title: ticket.title, reason: "aceitar" });
+          codeItems.set(ticket.id, { ticketId: ticket.id, ticketNumber: ticket.ticket_number, title: ticket.title, reporterId: ticket.reporter_id, createdAt: ticket.created_at, reason: "aceitar" });
         } else if (isAdmin && (ticket.status === "aberto" || ticket.status === "em_atendimento")) {
-          codeItems.set(ticket.id, { ticketId: ticket.id, ticketNumber: ticket.ticket_number, title: ticket.title, reason: "atender" });
+          codeItems.set(ticket.id, { ticketId: ticket.id, ticketNumber: ticket.ticket_number, title: ticket.title, reporterId: ticket.reporter_id, createdAt: ticket.created_at, reason: "atender" });
         }
       }
       for (const message of codeMessagesResult.data ?? []) {
         const relatedTicket = Array.isArray(message.development_tickets) ? message.development_tickets[0] : message.development_tickets;
         if (message.message_type !== "question" || message.author_id === relatedTicket?.reporter_id || answeredQuestionIds.has(message.id) || relatedTicket?.reporter_id !== userId) continue;
-        codeItems.set(message.ticket_id, { ticketId: message.ticket_id, ticketNumber: relatedTicket.ticket_number, title: relatedTicket.title, reason: "responder" });
+        codeItems.set(message.ticket_id, { ticketId: message.ticket_id, ticketNumber: relatedTicket.ticket_number, title: relatedTicket.title, reporterId: relatedTicket.reporter_id, createdAt: relatedTicket.created_at, reason: "responder" });
       }
       const pendingCodeItems = [...codeItems.values()];
+      const reporterIds = [...new Set(pendingCodeItems.map((item) => item.reporterId).filter(Boolean))];
+      if (reporterIds.length) {
+        const { data: reporters } = await supabase.from("profiles").select("id, full_name, email").in("id", reporterIds);
+        for (const item of pendingCodeItems) {
+          const reporter = reporters?.find((profile) => profile.id === item.reporterId);
+          item.reporterName = reporter?.full_name || reporter?.email || undefined;
+        }
+      }
       const pendingCodeTickets = pendingCodeItems.length;
       const pendingSupplyQueue = supplyQueueResult.count ?? 0;
       const supportCallItems = (supportCallsResult.data ?? [])
