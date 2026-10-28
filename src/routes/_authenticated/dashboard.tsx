@@ -2776,7 +2776,7 @@ function AdminEditApprovalDialog({ order, items }: { order: Order; items: Approv
 }
 
 function OrdersTable({
-  orders, projectName, requesterName, showRequester, canEdit, canDelete, canEditRequester, stockParts, headerFilters, statusFilterControl, deliveredFilterControl,
+  orders, projectName, requesterName, showRequester, canEdit, canDelete, canEditRequester, stockParts, headerFilters, filterBar, statusFilterControl, deliveredFilterControl,
 }: {
   orders: Order[];
   projectName: (id: string) => string;
@@ -2787,6 +2787,7 @@ function OrdersTable({
   canEditRequester?: boolean;
   stockParts?: Map<string, StockPart>;
   headerFilters?: boolean;
+  filterBar?: boolean;
   statusFilterControl?: React.ReactNode;
   deliveredFilterControl?: React.ReactNode;
 }) {
