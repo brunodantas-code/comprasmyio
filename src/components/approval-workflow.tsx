@@ -686,7 +686,7 @@ export function MyApprovalFlows({ renderEditAction }: { renderEditAction?: EditA
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="border-t bg-primary/5 p-2">
+        <div className="border-t p-2">
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}

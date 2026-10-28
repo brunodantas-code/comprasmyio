@@ -1180,7 +1180,7 @@ function StockTableCard({
         ) : (
           <Table>
             <TableHeader className={columnFilters ? "[&_tr]:border-b" : undefined}>
-                <TableRow className={columnFilters ? "border-t bg-primary/15 hover:bg-primary/15" : undefined}>
+                <TableRow className={columnFilters ? "border-b" : undefined}>
                   <TableHead className={`${simple ? "w-[70%]" : "w-[45%]"}${columnFilters ? "" : ""}`}>Descrição</TableHead>
                   {!simple && <TableHead className={`w-[12%]${columnFilters ? "" : ""}`}>Cód. Myio</TableHead>}
                   {!simple && <TableHead className={`w-[12%]${columnFilters ? "" : ""}`}>Cód. Fabricante</TableHead>}
