@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import { useDeliveryPoints } from "@/components/delivery-points-tab";
 
 const BROWSER_KEY = import.meta.env['VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY'] as string | undefined;
@@ -143,7 +143,7 @@ export function AddressAutocomplete({
     <div className="space-y-2" ref={boxRef}>
       <Label htmlFor={`${name}-search`}>{label}</Label>
       {allowDeliveryPoints && deliveryPoints && deliveryPoints.length > 0 && (
-        <Select value={deliveryPoints.find((point) => point.address === addressValue)?.code ?? "manual"} onValueChange={(code) => {
+        <SearchableSelect aria-label="Selecionar ponto de entrega" clearable={false} placeholder="Digite ou selecione um ponto cadastrado" value={deliveryPoints.find((point) => point.address === addressValue)?.code ?? "manual"} options={[...deliveryPoints.map((point) => ({ value: point.code, label: point.name, keywords: point.address })), { value: "manual", label: "Outro endereço" }]} onChange={(code) => {
           if (code === "manual") {
             setAddress("");
             setQuery("");
@@ -157,13 +157,7 @@ export function AddressAutocomplete({
           setConfirmed(true);
           setOpen(false);
           setSuggestions([]);
-        }}>
-          <SelectTrigger aria-label="Selecionar ponto de entrega"><SelectValue placeholder="Selecione um ponto cadastrado" /></SelectTrigger>
-          <SelectContent>
-            {deliveryPoints.map((point) => <SelectItem key={point.code} value={point.code}>{point.name}</SelectItem>)}
-            <SelectItem value="manual">Outro endereço</SelectItem>
-          </SelectContent>
-        </Select>
+        }} />
       )}
       <div className="relative">
         <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />

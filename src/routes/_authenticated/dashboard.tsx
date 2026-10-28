@@ -1062,53 +1062,30 @@ const CATEGORIES = [
 
 function PurchasableItemPicker({ value, onPick, disabled, categories = ["todas"], excludedKeys = [] }: { value: PurchasableItem | null; onPick: (i: PurchasableItem) => void; disabled?: boolean; categories?: string[]; excludedKeys?: string[] }) {
   const { data: items, isLoading } = usePurchasableItems();
-  const [open, setOpen] = useState(false);
   const origins = ["Insumos de Fabricação", "Insumos de Instalação", "Material de Almoxarifado", "Máquinas e Ferramentas", "Dispositivos myio"];
   const filtered = (items ?? []).filter((i) => (categories.includes("todas") || categories.includes(i.origin)) && (!excludedKeys.includes(i.key) || i.key === value?.key));
+  const ordered = origins.flatMap((origin) => filtered.filter((i) => i.origin === origin));
+  const extra = value && !ordered.some((i) => i.key === value.key) ? [value] : [];
+  const options = [...ordered, ...extra].map((i) => {
+    const myio = (i as { myio_code?: string | null }).myio_code;
+    return {
+      value: i.key,
+      label: i.description || i.name,
+      group: i.origin,
+      hint: `${i.origin} · Cód. Fabricante: ${i.manufacturer_code || "—"}`,
+      keywords: `${i.name} ${i.manufacturer_code ?? ""} ${myio ?? ""}`,
+    };
+  });
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button type="button" variant="outline" className="w-full justify-start font-normal" disabled={disabled}>
-          {value ? (
-            <span className="truncate">
-              {value.description || value.name} <span className="text-xs text-muted-foreground">· {value.origin}</span>
-            </span>
-          ) : (
-            <span className="text-muted-foreground">Selecione um item cadastrado...</span>
-          )}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[min(28rem,calc(100vw-2rem))] p-0" align="start">
-        <Command>
-          <CommandInput placeholder="Buscar item cadastrado..." />
-          <CommandList>
-            <CommandEmpty>{isLoading ? "Carregando..." : "Nenhum item cadastrado nesta categoria."}</CommandEmpty>
-            {origins.map((origin) => {
-              const list = filtered.filter((i) => i.origin === origin);
-              if (!list.length) return null;
-              return (
-                <CommandGroup key={origin} heading={origin}>
-                  {list.map((i) => (
-                    <CommandItem
-                      key={i.key}
-                      value={`${i.description || i.name} (${i.origin})`}
-                      onSelect={() => { onPick(i); setOpen(false); }}
-                    >
-                      <div className="flex min-w-0 flex-col">
-                        <span className="truncate font-medium">{i.description || i.name}</span>
-                        <span className="truncate text-xs text-muted-foreground">
-                          {i.manufacturer_code ? `Cód. Fabricante: ${i.manufacturer_code}` : "Cód. Fabricante: —"}
-                        </span>
-                      </div>
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              );
-            })}
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+    <SearchableSelect
+      value={value?.key ?? ""}
+      disabled={disabled}
+      clearable={false}
+      placeholder="Digite ou selecione um item cadastrado..."
+      emptyText={isLoading ? "Carregando..." : "Nenhum item cadastrado encontrado."}
+      options={options}
+      onChange={(key) => { const item = [...filtered, ...extra].find((i) => i.key === key); if (item) onPick(item); }}
+    />
   );
 }
 
