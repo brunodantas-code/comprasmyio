@@ -160,7 +160,7 @@ function ProfileDialog({ definition, requestTypes, title, saving, onSave }: { de
   };
   return (
     <Dialog open={open} onOpenChange={(next) => { setOpen(next); if (next) reset(); }}>
-      <DialogTrigger asChild><Button size="compactIcon" variant={definition ? "ghost" : "default"} title={title} aria-label={title}>{definition ? <Pencil className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}</Button></DialogTrigger>
+      <DialogTrigger asChild><Button size="compactIcon" variant="ghost" title={title} aria-label={title}>{definition ? <Pencil className="h-3.5 w-3.5" /> : <Plus className="h-4 w-4 text-primary" />}</Button></DialogTrigger>
       <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
         <DialogHeader><DialogTitle>{title}</DialogTitle><DialogDescription>Escolha exatamente quais áreas estarão disponíveis para quem receber este perfil.</DialogDescription></DialogHeader>
         <form className="space-y-5" onSubmit={async (event) => { event.preventDefault(); if (name.trim().length < 2) return toast.error("Nome muito curto."); try { await onSave(name.trim(), permissions, permissions.has("solicitacoes_novas") ? allowedRequestTypes : new Set()); setOpen(false); } catch { /* A mensagem é exibida pela alteração. */ } }}>
