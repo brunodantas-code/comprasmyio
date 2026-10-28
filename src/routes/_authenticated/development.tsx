@@ -403,7 +403,7 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
   const canAnswer = Boolean((isReporter || canAsk) && pendingQuestions.length && reporterMode === "answer");
   const canAskReporter = Boolean(isReporter && (reporterMode === "question" || !pendingQuestions.length));
   const shouldAnswer = Boolean(canAnswer && !canAskReporter);
-  const canAttach = Boolean(ticket && (canAsk || isReporter) && !["concluido", "excluido"].includes(ticket.status));
+  const canAttach = Boolean(ticket && (data?.isAdmin || ticket.reporter_id === data?.userId) && !["concluido", "excluido"].includes(ticket.status));
   const sendMessage = useMutation({
     mutationFn: async () => {
       if (!ticket || !data?.userId || (!message.trim() && !messageFiles.length)) throw new Error("Digite uma mensagem ou selecione uma imagem");
