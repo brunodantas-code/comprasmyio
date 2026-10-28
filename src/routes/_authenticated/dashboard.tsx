@@ -1929,7 +1929,6 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                         ))}
                       </SelectContent>
                     </Select>
-                    <InheritedProjectClient projectId={projectId} projects={projects ?? []} clients={clientsList ?? []} />
                     {selectedBudget && selectedBudget.budget > 0 && <BudgetProgress summary={selectedBudget} pendingValue={pendingBudgetValue} />}
                   </div>
                 )}
