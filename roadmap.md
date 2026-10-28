@@ -1068,3 +1068,4 @@
 - [ ] Chamados/Desenvolvimento — apresentar e aplicar novo layout de milestones no histórico do atendimento (aguardando escolha do usuário).
 - [x] Chamados/Tickets — excluídos/cancelados ocultos por padrão; aparecem só ao selecionar a situação no filtro; conferido no preview (ticket #4).
 - [x] Chamados/Tickets — histórico do atendimento em linha do tempo vertical com ícones por tipo de evento (abertura, pergunta, resposta, troca de status); componente MilestoneTimeline aplicado em Tickets e Chamados; conferido no preview (ticket #3).
+- [x] Cabeçalhos verdes sem negrito e com borda cinza clara arredondada (padrão Site Survey) em todas as tabelas do Supply; conferido no preview (font-weight 400).
