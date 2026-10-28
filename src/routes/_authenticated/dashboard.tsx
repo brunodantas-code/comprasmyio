@@ -1,3 +1,4 @@
+import { BrCityPicker } from "@/components/br-city-picker";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useState, useRef, useEffect, useMemo } from "react";
@@ -1568,6 +1569,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
           const depLabel = isRental ? "a data de retirada" : "a data de ida";
           const retLabel = isRental ? "a data de devolução" : "a data de retorno";
           if (leg.destination.trim().length < 2) return toast.error(`Solicitação ${n}: informe ${destLabel}`);
+          if (!(await import("@/data/br-cities.json")).default.includes(leg.destination.trim())) return toast.error(`Solicitação ${n}: selecione ${destLabel} na lista de cidades`);
           if (!leg.departure) return toast.error(`Solicitação ${n}: informe ${depLabel}`);
           if (!leg.return) return toast.error(`Solicitação ${n}: informe ${retLabel}`);
           if (leg.return < leg.departure) return toast.error(`Solicitação ${n}: ${retLabel} não pode ser anterior a ${depLabel}`);
@@ -1779,7 +1781,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                     <div className="grid gap-4 md:grid-cols-3 items-end">
                       <div className="space-y-2">
                         <Label htmlFor={`travel_destination_${i}`}>{travelType === "aluguel_veiculos" ? "Cidade e UF de retirada" : "Cidade e UF de destino"}</Label>
-                        <Input id={`travel_destination_${i}`} value={leg.destination} onChange={(e) => updateLeg(i, { destination: e.target.value })} placeholder="Ex.: São Paulo - SP" />
+                        <BrCityPicker id={`travel_destination_${i}`} value={leg.destination} onChange={(destination) => updateLeg(i, { destination })} />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor={`travel_departure_${i}`}>{travelType === "aluguel_veiculos" ? "Data de retirada" : "Data de ida"}</Label>
