@@ -229,7 +229,7 @@ function MovementHistoryTable({
   return (
     <Table>
       <TableHeader className="[&_tr]:border-b">
-        <TableRow className="border-t bg-primary/15 hover:bg-primary/15">
+        <TableRow className="border-b">
           <TableHead>Data</TableHead>
           <TableHead>Descrição</TableHead>
           <TableHead>Tipo</TableHead>
@@ -237,7 +237,7 @@ function MovementHistoryTable({
           <TableHead>Motivo</TableHead>
           <TableHead>Responsável</TableHead>
         </TableRow>
-        <TableRow className="bg-primary/5 hover:bg-primary/5">
+        <TableRow>
           <TableHead className="py-1"><Input value={dateFilter} onChange={(event) => setDateFilter(event.target.value)} placeholder="Filtrar" aria-label="Filtrar por data" className="h-8 min-w-32 bg-background" /></TableHead>
           <TableHead className="py-1"><Input value={descriptionFilter} onChange={(event) => setDescriptionFilter(event.target.value)} placeholder="Filtrar" aria-label="Filtrar por descrição" className="h-8 min-w-36 bg-background" /></TableHead>
           <TableHead className="py-1">
@@ -1188,7 +1188,7 @@ function StockTableCard({
                   {!simple && <TableHead className={`w-[10%]${columnFilters ? "" : ""}`}>Imagem</TableHead>}
                   <TableHead className={simple ? "w-[15%] text-right" : "w-[11%] text-right"}></TableHead>
                 </TableRow>
-                {columnFilters && <TableRow className="bg-primary/5 hover:bg-primary/5">
+                {columnFilters && <TableRow>
                   <TableHead className="py-1"><Input value={descriptionFilter} onChange={(e) => setDescriptionFilter(e.target.value)} placeholder="Filtrar" aria-label="Filtrar por descrição" className="h-8 bg-background" /></TableHead>
                   {!simple && <TableHead className="py-1"><Input value={myioCodeFilter} onChange={(e) => setMyioCodeFilter(e.target.value)} placeholder="Filtrar" aria-label="Filtrar por código myio" className="h-8 bg-background" /></TableHead>}
                   {!simple && <TableHead className="py-1"><Input value={manufacturerCodeFilter} onChange={(e) => setManufacturerCodeFilter(e.target.value)} placeholder="Filtrar" aria-label="Filtrar por código do fabricante" className="h-8 bg-background" /></TableHead>}
@@ -1951,7 +1951,7 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
           ) : (
             <Table>
               <TableHeader className="[&_tr]:border-b">
-                <TableRow className="border-t bg-primary/15 hover:bg-primary/15">
+                <TableRow className="border-b">
                   <TableHead className="w-[45%]">Descrição</TableHead>
                   <TableHead className="w-[12%]">Cód. Myio</TableHead>
                   <TableHead className="w-[12%]">Cód. Fabricante</TableHead>
@@ -1959,7 +1959,7 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
                   <TableHead className="w-[10%]">Imagem</TableHead>
                   <TableHead className="w-[11%] text-right"></TableHead>
                 </TableRow>
-                <TableRow className="bg-primary/5 hover:bg-primary/5">
+                <TableRow>
                   <TableHead className="py-1"><Input value={descriptionFilter} onChange={(e) => setDescriptionFilter(e.target.value)} placeholder="Filtrar" aria-label="Filtrar por descrição" className="h-8 bg-background" /></TableHead>
                   <TableHead className="py-1"><Input value={myioCodeFilter} onChange={(e) => setMyioCodeFilter(e.target.value)} placeholder="Filtrar" aria-label="Filtrar por código myio" className="h-8 bg-background" /></TableHead>
                   <TableHead className="py-1"><Input value={manufacturerCodeFilter} onChange={(e) => setManufacturerCodeFilter(e.target.value)} placeholder="Filtrar" aria-label="Filtrar por código do fabricante" className="h-8 bg-background" /></TableHead>

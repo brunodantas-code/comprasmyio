@@ -443,7 +443,7 @@ export function PendingForMe({ renderEditAction }: { renderEditAction?: EditActi
       <CardContent>
         <Table>
           <TableHeader className="[&_tr]:border-b">
-              <TableRow className="border-t bg-primary/15 hover:bg-primary/15">
+              <TableRow className="border-b">
                 <TableHead>Approval</TableHead>
                 <TableHead>Tipo</TableHead>
                 <TableHead>Solicitante</TableHead>
@@ -453,7 +453,7 @@ export function PendingForMe({ renderEditAction }: { renderEditAction?: EditActi
                 <TableHead>Projeto ou Cliente</TableHead>
                 <TableHead aria-label="Ações" />
               </TableRow>
-              <TableRow className="bg-primary/5 hover:bg-primary/5">
+              <TableRow>
                 <TableHead className="py-1">
                   <Input
                     value={search}

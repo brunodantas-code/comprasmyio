@@ -2980,7 +2980,7 @@ function OrdersTable({
 
       <Table className="w-full table-fixed">
         <TableHeader className="[&_tr]:border-b">
-          <TableRow className="border-t bg-primary/15 hover:bg-primary/15">
+          <TableRow className="border-b">
             <TableHead className="w-[200px] text-left">Approval</TableHead>
             <TableHead className="w-[180px] text-center">Itens da Solicitação</TableHead>
             <TableHead className="w-[105px] text-center">Tipo</TableHead>
@@ -2995,7 +2995,7 @@ function OrdersTable({
             <TableHead className="w-[80px] text-center">Palavra passe</TableHead>
           </TableRow>
           {headerFilters && (
-            <TableRow className="bg-primary/5 hover:bg-primary/5">
+            <TableRow>
               <TableHead className="py-1">{filterInput(fApproval, setFApproval, "Nº")}</TableHead>
               <TableHead className="py-1">{filterInput(fItem, setFItem, "Item")}</TableHead>
               <TableHead className="py-1" />
@@ -3021,7 +3021,7 @@ function OrdersTable({
              </TableRow>
            )}
           {!headerFilters && (statusFilterControl || deliveredFilterControl) && (
-            <TableRow className="bg-primary/5 hover:bg-primary/5">
+            <TableRow>
               <TableHead className="py-1" />
               <TableHead className="py-1" />
               <TableHead className="py-1" />

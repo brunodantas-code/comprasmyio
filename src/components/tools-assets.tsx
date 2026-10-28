@@ -569,7 +569,7 @@ export function ToolAssetsSection({ userId, canDelete, canCreate = false }: { us
           ) : (
             <Table>
               <TableHeader className="[&_tr]:border-b">
-                <TableRow className="border-t bg-primary/15 hover:bg-primary/15">
+                <TableRow className="border-b">
                   <TableHead className="w-[45%]">Ferramenta / Ativo</TableHead>
                   <TableHead className="w-[12%]">Cód. Myio</TableHead>
                   <TableHead className="w-[12%]">Cód. Fabricante</TableHead>
@@ -577,7 +577,7 @@ export function ToolAssetsSection({ userId, canDelete, canCreate = false }: { us
                   <TableHead className="w-[10%]">Imagem</TableHead>
                   <TableHead className="w-[11%] text-right" />
                 </TableRow>
-                <TableRow className="bg-primary/5 hover:bg-primary/5">
+                <TableRow>
                   <TableHead className="py-1">
                     <Input
                       value={toolFilter}
