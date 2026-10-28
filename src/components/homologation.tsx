@@ -104,7 +104,7 @@ export function QrScannerDialog({ onResult, label }: { onResult: (v: string) => 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button type="button" variant="outline" size="icon" title={label}>
+        <Button type="button" variant="ghost" size="icon" className="text-primary hover:bg-transparent hover:text-primary/70" title={label}>
           <Camera className="h-4 w-4" />
         </Button>
       </DialogTrigger>
@@ -167,8 +167,9 @@ export function GalleryQrButton({ label, onResult }: { label: string; onResult: 
       />
       <Button
         type="button"
-        variant="outline"
+        variant="ghost"
         size="icon"
+        className="text-primary hover:bg-transparent hover:text-primary/70"
         disabled={busy}
         title={`${label} — escolher da galeria`}
         onClick={() => inputRef.current?.click()}
@@ -191,7 +192,7 @@ export function ManualQrDialog({ label, value, onResult }: { label: string; valu
       }}
     >
       <DialogTrigger asChild>
-        <Button type="button" variant="outline" size="icon" title={`${label} — digitar manualmente`}>
+        <Button type="button" variant="ghost" size="icon" className="text-primary hover:bg-transparent hover:text-primary/70" title={`${label} — digitar manualmente`}>
           <Keyboard className="h-4 w-4" />
         </Button>
       </DialogTrigger>
