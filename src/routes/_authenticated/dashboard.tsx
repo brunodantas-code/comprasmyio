@@ -2850,6 +2850,37 @@ function OrdersTable({
     />
   );
 
+  const barField = (label: string, children: React.ReactNode, className?: string) => (
+    <div className={`grid min-w-0 gap-1 ${className ?? ""}`}>
+      <span className="flex items-center gap-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+        <Filter className="size-3 text-muted-foreground/70" aria-hidden="true" />
+        {label}
+      </span>
+      {children}
+    </div>
+  );
+
+  const filterBarContent = filterBar ? (
+    <div className="flex flex-wrap items-end gap-x-4 gap-y-3 rounded-xl bg-muted/50 px-4 py-3">
+      {barField("Nº", <Input value={fApproval} onChange={(e) => setFApproval(e.target.value)} placeholder="Filtrar Nº" className="h-8 w-28 bg-background text-xs" />)}
+      {barField("Item", <Input value={fItem} onChange={(e) => setFItem(e.target.value)} placeholder="Filtrar item" className="h-8 w-44 bg-background text-xs" />)}
+      {barField("Alocação", <Input value={fAloc} onChange={(e) => setFAloc(e.target.value)} placeholder="Filtrar alocação" className="h-8 w-36 bg-background text-xs" />)}
+      {showRequester && barField("Solicitante", <Input value={fReq} onChange={(e) => setFReq(e.target.value)} placeholder="Filtrar solicitante" className="h-8 w-36 bg-background text-xs" />)}
+      {barField("Prazo ou previsão", <Input type="date" aria-label="Prazo ou previsão" value={fDate} onChange={(e) => setFDate(e.target.value)} className="h-8 w-36 bg-background text-xs" />)}
+      {barField("Status", (
+        <Select value={fStatus} onValueChange={setFStatus}>
+          <SelectTrigger className="h-8 w-36 bg-background text-xs"><SelectValue placeholder="Status" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos</SelectItem>
+            {STATUS_KEYS.map((k) => <SelectItem key={k} value={k}>{STATUS_LABELS[k]}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      ))}
+      {deliveredFilterControl}
+      {statusFilterControl}
+    </div>
+  ) : null;
+
   const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
     <div className="grid grid-cols-[minmax(0,96px)_minmax(0,1fr)] gap-2 border-t border-border/60 py-1.5 first:border-t-0">
       <div className="text-xs font-semibold text-muted-foreground">{label}</div>
