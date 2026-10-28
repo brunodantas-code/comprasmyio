@@ -2990,18 +2990,18 @@ function OrdersTable({
       <Table className="w-full table-fixed">
         <TableHeader className="[&_tr]:border-b">
           <TableRow className="border-t bg-primary/15 hover:bg-primary/15">
-            <TableHead className="w-[200px] text-left font-bold">Approval</TableHead>
-            <TableHead className="w-[180px] text-center font-bold">Itens da Solicitação</TableHead>
-            <TableHead className="w-[105px] text-center font-bold">Tipo</TableHead>
-            <TableHead className="w-[90px] text-center font-bold">Alocação</TableHead>
-            {showRequester && <TableHead className="w-[105px] text-center font-bold">Solicitante</TableHead>}
-            <TableHead className="w-[45px] text-center font-bold">Qtd</TableHead>
-            <TableHead className="w-[95px] text-center font-bold">Valor Total</TableHead>
-            <TableHead className="w-[90px] text-center font-bold">Destinatário</TableHead>
-            <TableHead className="w-[105px] text-center font-bold">Endereço de Entrega</TableHead>
-            <TableHead className="w-[95px] text-center font-bold">Prazo e Previsão</TableHead>
-            <TableHead className="w-[95px] text-center font-bold">Status</TableHead>
-            <TableHead className="w-[80px] text-center font-bold">Palavra passe</TableHead>
+            <TableHead className="w-[200px] text-left">Approval</TableHead>
+            <TableHead className="w-[180px] text-center">Itens da Solicitação</TableHead>
+            <TableHead className="w-[105px] text-center">Tipo</TableHead>
+            <TableHead className="w-[90px] text-center">Alocação</TableHead>
+            {showRequester && <TableHead className="w-[105px] text-center">Solicitante</TableHead>}
+            <TableHead className="w-[45px] text-center">Qtd</TableHead>
+            <TableHead className="w-[95px] text-center">Valor Total</TableHead>
+            <TableHead className="w-[90px] text-center">Destinatário</TableHead>
+            <TableHead className="w-[105px] text-center">Endereço de Entrega</TableHead>
+            <TableHead className="w-[95px] text-center">Prazo e Previsão</TableHead>
+            <TableHead className="w-[95px] text-center">Status</TableHead>
+            <TableHead className="w-[80px] text-center">Palavra passe</TableHead>
           </TableRow>
           {headerFilters && (
             <TableRow className="bg-primary/5 hover:bg-primary/5">
