@@ -20,7 +20,7 @@ import { AppHeader } from "@/components/app-header";
 import { MilestoneTimeline } from "@/components/milestone-timeline";
 import { currentCodeObservations, proposedSolutionSchema, codeObservationSchema } from "@/lib/code-records";
 
-type TicketStatus = "aberto" | "em_atendimento" | "atendido" | "concluido" | "excluido";
+type TicketStatus = "aberto" | "em_atendimento" | "aguardando_resposta" | "atendido" | "concluido" | "excluido";
 type Ticket = {
   id: string;
   ticket_number: number;
@@ -64,6 +64,7 @@ const APP_NAMES: Record<string, string> = {
 const STATUS_NAMES: Record<TicketStatus, string> = {
   aberto: "Em aberto",
   em_atendimento: "Em atendimento",
+  aguardando_resposta: "Aguardando resposta",
   atendido: "Atendido",
   concluido: "Concluído",
   excluido: "Excluído",
@@ -71,6 +72,7 @@ const STATUS_NAMES: Record<TicketStatus, string> = {
 const ADMIN_STATUS_NAMES: Record<Exclude<TicketStatus, "concluido" | "excluido">, string> = {
   aberto: "Em aberto",
   em_atendimento: "Em atendimento",
+  aguardando_resposta: "Aguardando resposta",
   atendido: "Atendido",
 };
 const PRIORITY_NAMES = { baixa: "Baixa", media: "Média", alta: "Alta", critica: "Crítica" } as const;
