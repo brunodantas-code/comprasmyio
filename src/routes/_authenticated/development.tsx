@@ -19,7 +19,7 @@ import { APP_NAVIGATION_OPTIONS } from "@/lib/app-navigation-options";
 import { AppHeader } from "@/components/app-header";
 import { MilestoneTimeline } from "@/components/milestone-timeline";
 import { currentCodeObservations, proposedSolutionSchema, codeObservationSchema } from "@/lib/code-records";
-import { canReplyToCodeQuestion } from "@/lib/code-conversation";
+import { canReplyToCodeQuestion, shouldShowCodeAnswer, canConcludeCodeTicket } from "@/lib/code-conversation";
 
 type TicketStatus = "aberto" | "em_atendimento" | "aguardando_resposta" | "atendido" | "concluido" | "excluido";
 type Ticket = {
@@ -445,7 +445,7 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
   const canAsk = Boolean(data?.isAdmin && ticket && !["atendido", "concluido", "excluido"].includes(ticket.status));
   const isReporter = Boolean(ticket && ticket.reporter_id === data?.userId && !["concluido", "excluido"].includes(ticket.status));
   const canReply = canReplyToCodeQuestion(ticket?.status, Boolean(data?.isAdmin), isReporter, pendingQuestions.length);
-  const canAnswer = canReply && reporterMode === "answer";
+  const canAnswer = shouldShowCodeAnswer(canReply, reporterMode, canAsk || isReporter);
   const canAskReporter = Boolean(isReporter && (reporterMode === "question" || !pendingQuestions.length));
   const shouldAnswer = Boolean(canAnswer && !canAskReporter);
   const canAttach = Boolean(ticket && (data?.isAdmin || ticket.reporter_id === data?.userId) && !["concluido", "excluido"].includes(ticket.status));
@@ -511,7 +511,7 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
   });
   const conclude = useMutation({
     mutationFn: async () => {
-      if (!ticket || ticket.status !== "atendido" || ticket.reporter_id !== data?.userId) throw new Error("Este ticket não está disponível para conclusão");
+      if (!ticket || !canConcludeCodeTicket(ticket.status, ticket.reporter_id === data?.userId)) throw new Error("Este ticket não está disponível para conclusão");
       const { error } = await supabase.from("development_tickets").update({ status: "concluido" }).eq("id", ticket.id);
       if (error) throw error;
     },
