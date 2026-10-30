@@ -11,6 +11,7 @@
 
 - Supply uses recipient IDs, not names; RLS preserves recipient reads. Personal queues union requester/recipient IDs without duplicates; actions stay gated.
 - Supply allocation uses a shared exclusive selector and resolver; purchase-order triggers derive project-owned client/unit IDs and reject conflicting direct allocations, so client consolidation counts each order once while preserving independent cost centers.
+- Supply new-request values use a shared schema guard and insert-only database validation for targeted request models; material unit values are entered and persisted for all authorized requesters, preserving historical orders and unrelated workflows.
 - Approval views stay under Supply bottom navigation. Execution opens `supply`, decisions `mine`; payment approvals stay in Cash Flow, outside Supply execution/counts.
 - Supply PDF: mobile PDF.js; desktop tab.
 - Payment approvals recognize the active finance role or job title (an inactive legacy title must not block); above the joint-approval threshold, eligible joint approvers join finance and the requester never self-approves.

@@ -981,6 +981,13 @@
       "when": 1793230000003,
       "tag": "0139_ticket_attachment_delete_reporter",
       "breakpoints": true
+    },
+    {
+      "idx": 140,
+      "version": "7",
+      "when": 1793367870158,
+      "tag": "0140_supply_required_new_request_value",
+      "breakpoints": true
     }
   ]
 }
