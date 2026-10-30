@@ -58,6 +58,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { takeSiteSurveyPurchaseDraft, type SiteSurveyPurchaseDraft } from "@/lib/site-survey-purchase-draft";
 import { SupplyAllocationSelector, InheritedProjectClient } from "@/components/supply-allocation-selector";
 import { resolveSupplyAllocation, type SupplyAllocationType } from "@/lib/supply-allocation";
+import { invalidSupplyRequestValueIndex } from "@/lib/supply-request-value";
 
 
 
@@ -1373,6 +1374,8 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
 
   const submit = useMutation({
     mutationFn: async ({ values, buyQty, shipQty, groupedItems }: { values: z.infer<typeof newOrderSchema>; buyQty: number; shipQty: number; groupedItems?: MaterialRequestItem[] }) => {
+      const invalidValueIndex = invalidSupplyRequestValueIndex(requestModel, groupedItems ? groupedItems.map((row) => row.estimatedValue) : [values.estimated_value]);
+      if (invalidValueIndex !== -1) throw new Error(groupedItems ? `Material ${invalidValueIndex + 1}: informe o valor unitário estimado maior que zero.` : "Informe o valor unitário estimado maior que zero.");
       let createdOrder: { budget_exceeded: boolean; budget_snapshot: number | null; projected_committed_snapshot: number | null } | null = null;
       const resolvedAllocation = requestModel === "rh"
         ? { project_id: null, client_id: clientId && clientId !== "none" ? clientId : null, client_unit_id: null }
@@ -1478,7 +1481,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
             item_name: row.item?.description || row.item?.name || "Material",
             item_link: row.itemLink.trim() || null,
             quantity: Number(row.quantity),
-            estimated_unit_value: canManageProducts ? Number(row.estimatedValue || 0) : 0,
+            estimated_unit_value: Number(row.estimatedValue),
             material_id: row.item?.material_id ?? null,
             terceiros_material_id: row.item?.terceiros_material_id ?? null,
             tool_asset_id: row.item?.tool_asset_id ?? null,
@@ -1522,6 +1525,12 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
     const isReembolso = requestModel === "reembolso";
     const isRh = requestModel === "rh";
     const isPagamento = requestModel === "pagamento";
+    const invalidValueIndex = invalidSupplyRequestValueIndex(requestModel, isMateriais && !isNewItem ? materialItems.map((row) => row.estimatedValue) : [estimatedValue]);
+    if (invalidValueIndex !== -1) {
+      const fieldId = isMateriais && !isNewItem ? `material-value-${materialItems[invalidValueIndex]?.id}` : "estimated_value";
+      document.getElementById(fieldId)?.focus();
+      return toast.error(isMateriais && !isNewItem ? `Material ${invalidValueIndex + 1}: informe o valor unitário estimado maior que zero.` : "Informe o valor unitário estimado maior que zero.");
+    }
     if (!isRh && allocTarget === "projeto" && !canAllocateProject) return toast.error("Alocação em Projeto não permitida para este perfil.");
     if (!isRh && allocTarget === "cliente" && !canAllocateClient) return toast.error("Alocação em Cliente não permitida para este perfil.");
     if (isPagamento && allocTarget === "interna" && !canAllocateInternal) return toast.error("Alocação Interna não permitida para este perfil.");
@@ -1610,7 +1619,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
         : (!isMateriais || isNewItem ? newItemName : materialItems.map((row) => row.item?.description || row.item?.name).join("; ")),
       item_link: isReembolso || isRh || isPagamento || (isMateriais && !isNewItem) ? undefined : (itemLink || undefined),
       quantity: isReembolso || isRh || isPagamento ? 1 : isMateriais && !isNewItem ? materialItems.reduce((sum, row) => sum + Number(row.quantity || 0), 0) : (Number(qty) || 1),
-      estimated_value: isReembolso ? reembolsoTotal : isRh ? Number(rhRemuneracao || 0) : isPagamento ? Number(paymentValue) : isMateriais && !isNewItem ? materialItems.reduce((sum, row) => sum + Number(row.estimatedValue || 0) * Number(row.quantity || 0), 0) : (isMateriais && !canManageProducts ? 0 : (Number(estimatedValue) || 0)),
+      estimated_value: isReembolso ? reembolsoTotal : isRh ? Number(rhRemuneracao || 0) : isPagamento ? Number(paymentValue) : isMateriais && !isNewItem ? materialItems.reduce((sum, row) => sum + Number(row.estimatedValue || 0) * Number(row.quantity || 0), 0) : (Number(estimatedValue) || 0),
       recipient: isRh ? rhGestor : isPagamento ? "Financeiro" : recipient,
       requester_notes: isRh
         ? `${rhTipo === "reposicao" ? "Reposição" : "Nova Contratação"} — Motivo: ${rhMotivo.trim()}${fd.get("requester_notes") ? ` | ${fd.get("requester_notes")}` : ""}`
@@ -2086,6 +2095,10 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                               trigger={<Button type="button" size="compactIcon" variant="outline" aria-label={`Remover material ${index + 1}`} title="Remover material" disabled={materialItems.length === 1}><Trash2 className="h-4 w-4" /></Button>}
                             />
                              <div className="min-w-0 space-y-2 sm:col-span-3">
+                               <Label htmlFor={`material-value-${row.id}`}>Valor unitário estimado (R$) *</Label>
+                               <MoneyInput id={`material-value-${row.id}`} value={row.estimatedValue} required onChange={(value) => setMaterialItems((current) => current.map((entry) => entry.id === row.id ? { ...entry, estimatedValue: value } : entry))} />
+                             </div>
+                             <div className="min-w-0 space-y-2 sm:col-span-3">
                                <Label htmlFor={`material-link-${row.id}`}>Link de referência <span className="text-muted-foreground">(opcional)</span></Label>
                                <Input id={`material-link-${row.id}`} type="url" placeholder="https://..." value={row.itemLink} onChange={(event) => setMaterialItems((current) => current.map((entry) => entry.id === row.id ? { ...entry, itemLink: event.target.value } : entry))} />
                              </div>
@@ -2165,8 +2178,8 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                 <Label htmlFor="quantity">{requestModel === "viagens" ? (travelType === "aluguel_veiculos" ? "Quantidade de veículos" : "Quantidade de Pessoas") : "Quantidade"}</Label>
                 <Input id="quantity" name="quantity" type="number" min={1} max={99999} className="w-20" value={qty} onChange={(e) => setQty(e.target.value)} required />
               </div>
-              {(!isMaterialsRequest || canManageProducts) && <div className="space-y-2">
-                <Label htmlFor="estimated_value">Valor unitário estimado (R$)</Label>
+              <div className="space-y-2">
+                <Label htmlFor="estimated_value">Valor unitário estimado (R$) *</Label>
                 <div className="relative">
                   <MoneyInput id="estimated_value" name="estimated_value" className="w-32 pr-8" value={estimatedValue} onChange={setEstimatedValue} required />
                   {lookingUpPrice && <Loader2 className="absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />}
@@ -2181,7 +2194,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                     value={`R$ ${(Number(estimatedValue || 0) * Number(qty || 1)).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                   />
                 </div>
-              </div>}
+              </div>
               {!isMaterialsRequest && !isNewItem && item && (
                 <div className="space-y-2">
                   <Label>Valor médio (últimos 6 meses)</Label>
