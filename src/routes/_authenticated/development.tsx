@@ -19,6 +19,7 @@ import { APP_NAVIGATION_OPTIONS } from "@/lib/app-navigation-options";
 import { AppHeader } from "@/components/app-header";
 import { MilestoneTimeline } from "@/components/milestone-timeline";
 import { currentCodeObservations, proposedSolutionSchema, codeObservationSchema } from "@/lib/code-records";
+import { canReplyToCodeQuestion } from "@/lib/code-conversation";
 
 type TicketStatus = "aberto" | "em_atendimento" | "aguardando_resposta" | "atendido" | "concluido" | "excluido";
 type Ticket = {
@@ -443,7 +444,8 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
   const pendingQuestions = messages.filter((entry) => entry.message_type === "question" && entry.author_id !== data?.userId && !answeredQuestionIds.has(entry.id));
   const canAsk = Boolean(data?.isAdmin && ticket && !["atendido", "concluido", "excluido"].includes(ticket.status));
   const isReporter = Boolean(ticket && ticket.reporter_id === data?.userId && !["concluido", "excluido"].includes(ticket.status));
-  const canAnswer = Boolean((isReporter || canAsk) && pendingQuestions.length && reporterMode === "answer");
+  const canReply = canReplyToCodeQuestion(ticket?.status, Boolean(data?.isAdmin), isReporter, pendingQuestions.length);
+  const canAnswer = canReply && reporterMode === "answer";
   const canAskReporter = Boolean(isReporter && (reporterMode === "question" || !pendingQuestions.length));
   const shouldAnswer = Boolean(canAnswer && !canAskReporter);
   const canAttach = Boolean(ticket && (data?.isAdmin || ticket.reporter_id === data?.userId) && !["concluido", "excluido"].includes(ticket.status));
