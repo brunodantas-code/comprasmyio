@@ -1,5 +1,5 @@
 # Roadmap
-- [ ] Corrigir textos cortados nos boxes e prévia, preservando fontes e ajustando espaço útil automaticamente
+- [x] Corrigir textos cortados nos boxes e prévia, preservando fontes e ajustando espaço útil automaticamente
 - [x] Alinhar barra de tarefas à borda esquerda do box e preencher nós de branco para ocultar traços internos
 - [x] Informar onde fica o destaque de caminho crítico
 - [x] Retirar bordas das opções de cor da fonte e permitir cor dos controles por box, com prévia, persistência e herança no split/importação
