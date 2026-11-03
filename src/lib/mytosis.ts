@@ -15,6 +15,10 @@ export type MytosisNode = {
   shape?: string;
   fill_color?: string;
   border_color?: string;
+  title_font_size?: number;
+  description_font_size?: number;
+  text_align?: "left" | "center" | "right";
+  text_vertical_align?: "top" | "center" | "bottom";
 };
 
 export type MytosisLink = { predecessor_id: string; successor_id: string; style?: string };

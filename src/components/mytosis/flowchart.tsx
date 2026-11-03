@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Filter, Plus, Route as RouteIcon, Search, Settings2 } from "lucide-react";
 import { toast } from "sonner";
@@ -17,6 +17,8 @@ import type { NodeDialogState } from "./node-dialog";
 import { ConnectorGlyph, ShapeSvg, borderOf, fillOf, shapeInset, type LinkStyle, type ShapeKey } from "./shapes";
 import { BoxTaskDialog, BoxTaskList, type TaskSelection } from "./box-tasks";
 import { predecessorTaskSignal } from "@/lib/mytosis-tasks";
+import { ConnectionLayer } from "./connection-layer";
+import { Checkbox } from "@/components/ui/checkbox";
 
 type Props = {
   data: MytosisData;
@@ -41,6 +43,8 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
   const [locatorQuery, setLocatorQuery] = useState("");
   const [showCritical, setShowCritical] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const allExpanded = hideRight.size === 0 && hideDown.size === 0;
 
   const children = useMemo(() => childrenMap(data.nodes), [data.nodes]);
   const progress = useMemo(() => computeProgress(data.nodes), [data.nodes]);
@@ -127,6 +131,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
             <div className="relative transition-[width,opacity] duration-500 ease-in-out" style={{ width: collapsed ? 30 : data.box.width, height: data.box.height, opacity: collapsed ? 0.55 : 1 }}>
               <div
                 id={`mytosis-box-${node.locator}`}
+                data-mytosis-node={node.id}
                 role="button"
                 tabIndex={0}
                 draggable={canEdit && !collapsed}
@@ -146,12 +151,12 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
                 </div>}
                 {collapsed ? <span className="relative m-auto text-[10px] text-muted-foreground [writing-mode:vertical-rl]">{numberOf(node)}</span> : (
                   <div className="relative flex min-w-0 flex-1 flex-col justify-between px-2.5 py-1.5" style={shapeInset[shape]}>
-                    <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
+                    <div className="flex shrink-0 items-center justify-between gap-2 text-[11px] text-muted-foreground">
                       <span className="flex min-w-0 items-center gap-1.5"><span className="inline-flex min-h-5 shrink-0 items-center justify-center rounded-md bg-primary/10 px-1.5 text-primary">{numberOf(node)}</span>{node.kind === "objective" ? <span className="truncate">{process ? "Fluxograma" : "Objetivo"}</span> : null}</span>
                       {process ? null : <span className="text-muted-foreground/70">{pct}%</span>}
                     </div>
-                    <div className="min-w-0"><p className={cn("text-lg font-semibold leading-tight", node.description ? "line-clamp-1" : "line-clamp-2")}>{node.title}</p>{node.description ? <p className="line-clamp-1 text-[11px] font-normal leading-tight text-muted-foreground" title={node.description}>{node.description}</p> : null}</div>
-                    <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
+                    <div className={cn("flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden", node.text_vertical_align === "top" ? "justify-start" : node.text_vertical_align === "bottom" ? "justify-end" : "justify-center")} style={{ textAlign: node.text_align ?? "left" }}><p className={cn("shrink-0 break-words font-semibold leading-tight", node.description ? "line-clamp-1" : "line-clamp-2")} style={{ fontSize: `${node.title_font_size ?? 18}px` }}>{node.title}</p>{node.description ? <p className="line-clamp-1 shrink-0 break-words font-normal leading-tight text-muted-foreground" style={{ fontSize: `${node.description_font_size ?? 11}px` }} title={node.description}>{node.description}</p> : null}</div>
+                    <div className="flex shrink-0 items-center justify-between gap-2 text-[11px] text-muted-foreground">
                       <span className="truncate">{nameOf(node.responsible_id)}{process ? "" : ` · ${formatDate(node.due_date)}`}</span>
                       {canEdit ? (
                         <DropdownMenu>
@@ -187,7 +192,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
               </button>
               <div className="grid transition-[grid-template-rows,opacity] duration-500 ease-in-out" style={{ gridTemplateRows: downOpen ? "1fr" : "0fr", opacity: downOpen ? 1 : 0 }}>
                 <div className="overflow-hidden">
-                  <div className="ml-2 flex flex-col gap-4 border-l border-primary/40 py-2 pl-4">
+                  <div className="ml-2 flex flex-col gap-4 py-2 pl-4">
                     {kids.map((kid) => <Fragment key={kid.id}>{renderBranch(kid)}</Fragment>)}
                   </div>
                 </div>
@@ -201,9 +206,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
               <div className="flex flex-col gap-4">
                 {succ.map((s) => (
                   <div key={s.id} className="flex items-start">
-                    <span className="flex items-center px-0.5" style={{ height: data.box.height }}>
-                      <ConnectorGlyph style={(data.links.find((l) => l.predecessor_id === node.id && l.successor_id === s.id)?.style ?? "arrow") as LinkStyle} color="var(--myio-green)" />
-                    </span>
+                    <span className="w-8 shrink-0" style={{ height: data.box.height }} />
                     {renderBranch(s)}
                   </div>
                 ))}
@@ -230,13 +233,18 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
           <Label className="text-xs text-muted-foreground">Fases exibidas: {last === 0 ? "única" : `${visibleFrom + 1} a ${last + 1} de ${last + 1}`}</Label>
           <Slider min={0} max={Math.max(last, 1)} step={1} value={[Math.min(k, last)]} onValueChange={([v]) => setK(v)} disabled={last === 0} className="h-9" />
         </div>
+        <label className="flex h-9 cursor-pointer items-center gap-2 text-xs text-muted-foreground"><Checkbox checked={allExpanded} aria-label="Exibir tudo" onCheckedChange={(checked) => {
+          setHideRight(checked ? new Set() : new Set(data.nodes.map((node) => node.id)));
+          setHideDown(checked ? new Set() : new Set(data.nodes.map((node) => node.id)));
+          if (checked) setK(last);
+        }} />Exibir tudo</label>
         {process ? null : <Button variant="outline" onClick={() => setShowCritical((v) => !v)} className={cn(showCritical && "!bg-primary !text-primary-foreground")}><RouteIcon className="h-4 w-4" />Caminho crítico</Button>}
-        {data.role === "admin" ? <Button variant="ghost" size="icon" onClick={() => setSettingsOpen(true)} className="text-primary" aria-label="Padrões dos boxes" title="Padrões dos boxes"><Settings2 className="h-4 w-4" /></Button> : null}
-        {canEdit ? <Button variant="ghost" size="icon" className="text-primary" onClick={() => openDialog({ mode: "create", kind: "objective", parentId: null, process })} aria-label={process ? "Nova etapa" : "Novo objetivo"} title={process ? "Nova etapa" : "Novo objetivo"}><Plus className="h-5 w-5" /></Button> : null}
+        {data.role === "admin" ? <Button variant="outline" size="icon" onClick={() => setSettingsOpen(true)} aria-label="Padrões dos boxes" title="Padrões dos boxes"><Settings2 className="h-4 w-4" /></Button> : null}
+        {canEdit ? <Button variant="outline" size="icon" onClick={() => openDialog({ mode: "create", kind: "objective", parentId: null, process })} aria-label={process ? "Nova etapa" : "Novo objetivo"} title={process ? "Nova etapa" : "Novo objetivo"}><Plus className="h-5 w-5" /></Button> : null}
       </div>
       {objective ? (
         <div className="overflow-auto rounded-xl border border-border bg-card p-6" onClick={() => setHighlight(null)}>
-          <div className="w-max min-w-full pt-3" onClick={(e) => e.stopPropagation()}>{renderBranch(objective)}</div>
+          <div ref={canvasRef} className="relative w-max min-w-full pt-3" onClick={(e) => e.stopPropagation()}>{renderBranch(objective)}<ConnectionLayer container={canvasRef} nodes={data.nodes} links={data.links} layoutKey={`${objectiveId}:${[...hideRight].join(',')}:${[...hideDown].join(',')}:${k}`} /></div>
         </div>
       ) : <p className="py-16 text-center text-muted-foreground">{process ? (objectives.length ? "Selecione um fluxograma." : "Nenhum fluxograma cadastrado. Use o + para criar a primeira etapa.") : objectives.length ? "Selecione um objetivo." : "Nenhum objetivo cadastrado. Use o + para criar o primeiro."}</p>}
       <ImportBlockDialog target={importTarget} onClose={() => setImportTarget(null)} data={data} />
@@ -289,16 +297,23 @@ function ImportBlockDialog({ target, onClose, data }: { target: MytosisNode | nu
       const idMap = new Map<string, string>();
       const position = data.nodes.filter((n) => n.parent_id === target.id).length;
       for (const n of ordered) {
-        const parent = n.id === sourceId ? target.id : idMap.get(n.parent_id!)!;
+        const parent = n.id === sourceId ? target.id : n.parent_id ? idMap.get(n.parent_id) : undefined;
+        if (!parent) throw new Error("Box pai não encontrado na importação.");
         const { data: created, error } = await supabase.from("mytosis_nodes").insert({
           kind: "task", title: n.title, description: n.description, parent_id: parent, responsible_id: n.responsible_id,
           due_date: null, weight: 0, progress: 0, shape: n.shape, fill_color: n.fill_color, border_color: n.border_color, position: n.id === sourceId ? position : n.position, is_process: !!target.is_process,
+          title_font_size: n.title_font_size, description_font_size: n.description_font_size, text_align: n.text_align, text_vertical_align: n.text_vertical_align,
         }).select("id").single();
         if (error) throw error;
         idMap.set(n.id, created.id);
       }
       if (internalLinks.length) {
-        const { error } = await supabase.from("mytosis_links").insert(internalLinks.map((l) => ({ predecessor_id: idMap.get(l.predecessor_id)!, successor_id: idMap.get(l.successor_id)!, style: l.style })));
+        const copiedLinks = internalLinks.map((l) => {
+          const predecessor = idMap.get(l.predecessor_id), successor = idMap.get(l.successor_id);
+          if (!predecessor || !successor) throw new Error("Ligação não encontrada na importação.");
+          return { predecessor_id: predecessor, successor_id: successor, style: l.style };
+        });
+        const { error } = await supabase.from("mytosis_links").insert(copiedLinks);
         if (error) throw error;
       }
       return ordered.length;
