@@ -24,7 +24,7 @@ export function NodePreview(props: Props) {
         <div className="relative flex min-w-0 flex-1 flex-col justify-between px-2.5 py-1.5" style={shapeInset[props.shape]}>
           <div className="flex shrink-0 items-center justify-between gap-2 text-[11px] text-muted-foreground">
             <span className="inline-flex min-h-5 shrink-0 items-center justify-center rounded-md bg-primary/10 px-1.5 text-primary">{props.number}</span>
-            <div className="flex items-center gap-1"><MytosisIcon data-mytosis-control className="h-5 w-5 shrink-0" /><Trash2 data-mytosis-control className="h-3 w-3 shrink-0" /></div>
+            <div data-mytosis-control className="flex items-center gap-1"><MytosisIcon className="h-5 w-5 shrink-0" /><Trash2 className="h-3 w-3 shrink-0" /></div>
           </div>
           <NodeText title={props.title || "Nova etapa"} description={props.description || null} titleSize={props.titleSize} descriptionSize={props.descriptionSize} align={props.align} verticalAlign={props.verticalAlign} titleColor={props.titleColor} fillKey={props.fillKey} />
           <div className="flex shrink-0 items-center justify-between gap-2 text-[11px] text-muted-foreground"><span className="truncate">{props.responsible || "—"}</span><div className="flex items-center gap-1"><ChevronLeft data-mytosis-control className="size-4" /><ChevronDown data-mytosis-control className="size-4" /><Plus data-mytosis-control className="h-3.5 w-3.5 shrink-0" /></div></div>
