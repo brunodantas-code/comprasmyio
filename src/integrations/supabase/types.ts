@@ -2802,6 +2802,136 @@ export type Database = {
         }
         Relationships: []
       }
+      mytosis_task_logs: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          id: string
+          task_id: string
+          text: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          task_id: string
+          text: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          task_id?: string
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mytosis_task_logs_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "mytosis_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mytosis_task_messages: {
+        Row: {
+          author_id: string
+          created_at: string
+          id: string
+          kind: string
+          reply_to_id: string | null
+          task_id: string
+          text: string
+          updated_at: string
+        }
+        Insert: {
+          author_id?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          reply_to_id?: string | null
+          task_id: string
+          text: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          reply_to_id?: string | null
+          task_id?: string
+          text?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mytosis_task_messages_reply_to_id_fkey"
+            columns: ["reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "mytosis_task_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mytosis_task_messages_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "mytosis_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mytosis_tasks: {
+        Row: {
+          completed: boolean
+          created_at: string
+          created_by: string
+          description: string
+          due_date: string | null
+          id: string
+          involved_ids: string[]
+          node_id: string
+          responsible_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          created_by?: string
+          description?: string
+          due_date?: string | null
+          id?: string
+          involved_ids?: string[]
+          node_id: string
+          responsible_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          created_by?: string
+          description?: string
+          due_date?: string | null
+          id?: string
+          involved_ids?: string[]
+          node_id?: string
+          responsible_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mytosis_tasks_node_id_fkey"
+            columns: ["node_id"]
+            isOneToOne: false
+            referencedRelation: "mytosis_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       operational_functions: {
         Row: {
           active: boolean
@@ -6786,6 +6916,10 @@ export type Database = {
       }
       mytosis_can_edit: { Args: { _user_id: string }; Returns: boolean }
       mytosis_role: { Args: { _user_id: string }; Returns: string }
+      mytosis_task_can_converse: {
+        Args: { _task_id: string; _user_id: string }
+        Returns: boolean
+      }
       mytosis_users: {
         Args: never
         Returns: {

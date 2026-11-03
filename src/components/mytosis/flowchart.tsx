@@ -15,6 +15,8 @@ import { childrenMap, computeBoxNumbers, computePhases, computeProgress, critica
 import { firstName, type MytosisData } from "./use-mytosis";
 import type { NodeDialogState } from "./node-dialog";
 import { ConnectorGlyph, ShapeSvg, borderOf, fillOf, shapeInset, type LinkStyle, type ShapeKey } from "./shapes";
+import { BoxTaskDialog, BoxTaskList, type TaskSelection } from "./box-tasks";
+import { predecessorTaskSignal } from "@/lib/mytosis-tasks";
 
 type Props = {
   data: MytosisData;
@@ -30,6 +32,7 @@ type Props = {
 export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focusLocator, onFocusHandled, openDialog, process }: Props) {
   const objectives = data.nodes.filter((n) => !n.parent_id && !!n.is_process === process);
   const [importTarget, setImportTarget] = useState<MytosisNode | null>(null);
+  const [taskSelection, setTaskSelection] = useState<TaskSelection>(null);
   const word = process ? "etapa" : "tarefa";
   const objective = objectives.find((o) => o.id === objectiveId) ?? null;
   const [hideRight, setHideRight] = useState<Set<string>>(new Set());
@@ -116,6 +119,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
     const stroke = critical.has(node.id) || highlight === node.id ? "var(--myio-green)" : borderOf(node.border_color).color;
     const fillColor = highlight === node.id ? "var(--mytosis-green-soft)" : critical.has(node.id) ? "var(--mytosis-green-mid)" : fill.color;
     const darkText = fill.dark && highlight !== node.id && !critical.has(node.id);
+    const signal = predecessorTaskSignal(node.id, data.tasks, data.links);
     return (
       <div className="flex items-start">
         <div className="flex flex-col">
@@ -131,8 +135,8 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
                 onDragOver={(e) => { if (dragId && dragId !== node.id) { e.preventDefault(); e.dataTransfer.dropEffect = "link"; if (dropId !== node.id) setDropId(node.id); } }}
                 onDragLeave={() => setDropId((d) => (d === node.id ? null : d))}
                 onDrop={(e) => { e.preventDefault(); const from = e.dataTransfer.getData("text/plain") || dragId; setDropId(null); setDragId(null); if (from) connect(from, node.id); }}
-                onClick={() => openDialog({ mode: "edit", node })}
-                onKeyDown={(e) => e.key === "Enter" && openDialog({ mode: "edit", node })}
+                onClick={(e) => { if (e.target instanceof Element && e.target.closest("button,[role='menuitem']")) return; openDialog({ mode: "edit", node }); }}
+                onKeyDown={(e) => { if (e.target === e.currentTarget && e.key === "Enter") openDialog({ mode: "edit", node }); }}
                 title={canEdit ? `${numberOf(node)} — ${node.title}\nArraste sobre outro box para ligá-lo como sucessor.` : `${numberOf(node)} — ${node.title}`}
                 className={cn("group relative flex h-full w-full cursor-pointer overflow-hidden rounded-md transition-colors duration-300", dropId === node.id && "ring-2 ring-primary ring-offset-2", dragId === node.id && "opacity-50", darkText ? "text-primary-foreground [&_*]:!text-[color:var(--card)]" : "text-foreground")}
               >
@@ -143,16 +147,17 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
                 {collapsed ? <span className="relative m-auto text-[10px] text-muted-foreground [writing-mode:vertical-rl]">{numberOf(node)}</span> : (
                   <div className="relative flex min-w-0 flex-1 flex-col justify-between px-2.5 py-1.5" style={shapeInset[shape]}>
                     <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
-                      <span>{numberOf(node)}{node.kind === "objective" ? (process ? " · Fluxograma" : " · Objetivo") : ""}</span>
+                      <span className="flex min-w-0 items-center gap-1.5"><span className="inline-flex min-h-5 shrink-0 items-center justify-center rounded-md bg-primary/10 px-1.5 text-primary">{numberOf(node)}</span>{node.kind === "objective" ? <span className="truncate">{process ? "Fluxograma" : "Objetivo"}</span> : null}</span>
                       {process ? null : <span className="text-muted-foreground/70">{pct}%</span>}
                     </div>
-                    <p className="line-clamp-2 text-sm font-normal leading-snug">{node.title}</p>
+                    <div className="min-w-0"><p className={cn("text-lg font-semibold leading-tight", node.description ? "line-clamp-1" : "line-clamp-2")}>{node.title}</p>{node.description ? <p className="line-clamp-1 text-[11px] font-normal leading-tight text-muted-foreground" title={node.description}>{node.description}</p> : null}</div>
                     <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
                       <span className="truncate">{nameOf(node.responsible_id)}{process ? "" : ` · ${formatDate(node.due_date)}`}</span>
                       {canEdit ? (
                         <DropdownMenu>
-                          <DropdownMenuTrigger asChild><button type="button" onClick={(e) => e.stopPropagation()} className="text-primary" aria-label={`Adicionar ${word}`} title={`Adicionar ${word}`}><Plus className="h-3.5 w-3.5" /></button></DropdownMenuTrigger>
+                          <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()} className="h-4 w-4 !text-primary" aria-label={`Adicionar ${word}`} title={`Adicionar ${word}`}><Plus className="h-3.5 w-3.5" /></Button></DropdownMenuTrigger>
                           <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                            <DropdownMenuItem onClick={() => setTaskSelection({ nodeId: node.id })}>Nova tarefa neste box</DropdownMenuItem>
                             <DropdownMenuItem onClick={() => openDialog({ mode: "create", kind: "task", parentId: node.id })}>{process ? "Etapa associada (abaixo)" : "Tarefa associada (abaixo)"}</DropdownMenuItem>
                             {node.parent_id ? <DropdownMenuItem onClick={() => openDialog({ mode: "create", kind: "task", parentId: node.parent_id, predecessorId: node.id })}>{process ? "Etapa dependente (à direita)" : "Tarefa dependente (à direita)"}</DropdownMenuItem> : null}
                             <DropdownMenuItem onClick={() => setImportTarget(node)}>Importar fluxograma como bloco (abaixo)</DropdownMenuItem>
@@ -171,6 +176,10 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
               </button>
             ) : null}
           </div>
+          {!collapsed ? <div style={{ width: data.box.width }}>
+            {signal.pending > 0 ? <p role="status" className="mt-1 text-xs text-destructive">{signal.pending} tarefa{signal.pending > 1 ? "s" : ""} pendente{signal.pending > 1 ? "s" : ""} na etapa anterior</p> : null}
+            <BoxTaskList nodeId={node.id} data={data} onOpen={setTaskSelection} />
+          </div> : null}
           {kids.length ? (
             <>
               <button type="button" className="mt-1 self-start text-primary" onClick={() => setHideDown((s) => toggle(s, node.id))} aria-label={downOpen ? "Recolher tarefas associadas" : "Exibir tarefas associadas"} title={downOpen ? "Recolher tarefas associadas" : "Exibir tarefas associadas"}>
@@ -231,6 +240,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
         </div>
       ) : <p className="py-16 text-center text-muted-foreground">{process ? (objectives.length ? "Selecione um fluxograma." : "Nenhum fluxograma cadastrado. Use o + para criar a primeira etapa.") : objectives.length ? "Selecione um objetivo." : "Nenhum objetivo cadastrado. Use o + para criar o primeiro."}</p>}
       <ImportBlockDialog target={importTarget} onClose={() => setImportTarget(null)} data={data} />
+      <BoxTaskDialog selection={taskSelection} onSelect={setTaskSelection} onClose={() => setTaskSelection(null)} data={data} canEdit={canEdit} />
       <BoxSettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} box={data.box} />
     </div>
   );
