@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Permitir tamanho de fonte e alinhamento horizontal/vertical por box no Mytosis, com persistência
 - [x] Aplicar fontes do Supply aos títulos e descrições dos boxes
 - [x] Aplicar padrão do Checklist do Supply com contador de caracteres nos campos indicados
 - [x] Aplicar destaque verde-claro do Supply à numeração dos boxes, preservando o caminho completo
