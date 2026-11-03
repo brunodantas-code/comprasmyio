@@ -2642,16 +2642,19 @@ export type Database = {
         Row: {
           created_at: string
           predecessor_id: string
+          style: string
           successor_id: string
         }
         Insert: {
           created_at?: string
           predecessor_id: string
+          style?: string
           successor_id: string
         }
         Update: {
           created_at?: string
           predecessor_id?: string
+          style?: string
           successor_id?: string
         }
         Relationships: [
@@ -2702,10 +2705,12 @@ export type Database = {
       }
       mytosis_nodes: {
         Row: {
+          border_color: string
           created_at: string
           created_by: string | null
           description: string | null
           due_date: string | null
+          fill_color: string
           id: string
           is_process: boolean
           kind: string
@@ -2714,15 +2719,18 @@ export type Database = {
           position: number
           progress: number
           responsible_id: string | null
+          shape: string
           title: string
           updated_at: string
           weight: number
         }
         Insert: {
+          border_color?: string
           created_at?: string
           created_by?: string | null
           description?: string | null
           due_date?: string | null
+          fill_color?: string
           id?: string
           is_process?: boolean
           kind?: string
@@ -2731,15 +2739,18 @@ export type Database = {
           position?: number
           progress?: number
           responsible_id?: string | null
+          shape?: string
           title: string
           updated_at?: string
           weight?: number
         }
         Update: {
+          border_color?: string
           created_at?: string
           created_by?: string | null
           description?: string | null
           due_date?: string | null
+          fill_color?: string
           id?: string
           is_process?: boolean
           kind?: string
@@ -2748,6 +2759,7 @@ export type Database = {
           position?: number
           progress?: number
           responsible_id?: string | null
+          shape?: string
           title?: string
           updated_at?: string
           weight?: number

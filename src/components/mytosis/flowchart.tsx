@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { childrenMap, computePhases, computeProgress, criticalPath, formatDate, planBlockImport, rootObjectiveOf, type MytosisNode } from "@/lib/mytosis";
 import { firstName, type MytosisData } from "./use-mytosis";
 import type { NodeDialogState } from "./node-dialog";
+import { ConnectorGlyph, ShapeSvg, borderOf, fillOf, shapeInset, type LinkStyle, type ShapeKey } from "./shapes";
 
 type Props = {
   data: MytosisData;
@@ -83,6 +84,11 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
     const pct = progress.get(node.id) ?? 0;
     const downOpen = !hideDown.has(node.id);
     const rightOpen = !hideRight.has(node.id);
+    const shape = (node.shape ?? "process") as ShapeKey;
+    const fill = fillOf(node.fill_color);
+    const stroke = critical.has(node.id) || highlight === node.id ? "var(--myio-green)" : borderOf(node.border_color).color;
+    const fillColor = highlight === node.id ? "var(--mytosis-green-soft)" : critical.has(node.id) ? "var(--mytosis-green-mid)" : fill.color;
+    const darkText = fill.dark && highlight !== node.id && !critical.has(node.id);
     return (
       <div className="flex items-start">
         <div className="flex flex-col">
@@ -96,17 +102,14 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
                 onClick={() => openDialog({ mode: "edit", node })}
                 onKeyDown={(e) => e.key === "Enter" && openDialog({ mode: "edit", node })}
                 title={`#${node.locator} — ${node.title}`}
-                className={cn(
-                  "flex h-full w-full cursor-pointer overflow-hidden rounded-lg border border-primary/40 bg-card text-foreground transition-colors duration-300 hover:border-primary",
-                  critical.has(node.id) && "bg-primary/25",
-                  highlight === node.id && "bg-primary/10 ring-2 ring-primary/40",
-                )}
+                className={cn("group relative flex h-full w-full cursor-pointer overflow-hidden transition-colors duration-300", darkText ? "text-primary-foreground [&_*]:!text-[color:var(--card)]" : "text-foreground")}
               >
+                <ShapeSvg shape={shape} fill={fillColor} stroke={stroke} strokeWidth={highlight === node.id ? 2 : 1} className="pointer-events-none absolute inset-0 h-full w-full transition-all duration-300 group-hover:[filter:drop-shadow(0_0_1px_var(--myio-green))]" />
                 {process ? null : <div className="relative w-1.5 shrink-0 bg-primary/10" aria-label={`${pct}% concluído`}>
                   <div className="absolute inset-x-0 bottom-0 bg-primary transition-[height] duration-500" style={{ height: `${pct}%` }} />
                 </div>}
-                {collapsed ? <span className="m-auto text-[10px] text-muted-foreground [writing-mode:vertical-rl]">#{node.locator}</span> : (
-                  <div className="flex min-w-0 flex-1 flex-col justify-between px-2.5 py-1.5">
+                {collapsed ? <span className="relative m-auto text-[10px] text-muted-foreground [writing-mode:vertical-rl]">#{node.locator}</span> : (
+                  <div className="relative flex min-w-0 flex-1 flex-col justify-between px-2.5 py-1.5" style={shapeInset[shape]}>
                     <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
                       <span>#{node.locator}{node.kind === "objective" ? (process ? " · Fluxograma" : " · Objetivo") : ""}</span>
                       {process ? null : <span className="text-muted-foreground/70">{pct}%</span>}
@@ -157,10 +160,8 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
               <div className="flex flex-col gap-4">
                 {succ.map((s) => (
                   <div key={s.id} className="flex items-start">
-                    <span className="flex items-center" style={{ height: data.box.height }}>
-                      <span className="h-1.5 w-1.5 rounded-full border border-primary/60 bg-card" />
-                      <span className="h-px w-6 bg-primary/40" />
-                      <span className="h-1.5 w-1.5 rounded-full border border-primary/60 bg-card" />
+                    <span className="flex items-center px-0.5" style={{ height: data.box.height }}>
+                      <ConnectorGlyph style={(data.links.find((l) => l.predecessor_id === node.id && l.successor_id === s.id)?.style ?? "arrow") as LinkStyle} color="var(--myio-green)" />
                     </span>
                     {renderBranch(s)}
                   </div>
@@ -248,13 +249,13 @@ function ImportBlockDialog({ target, onClose, data }: { target: MytosisNode | nu
         const parent = n.id === sourceId ? target.id : idMap.get(n.parent_id!)!;
         const { data: created, error } = await supabase.from("mytosis_nodes").insert({
           kind: "task", title: n.title, description: n.description, parent_id: parent, responsible_id: n.responsible_id,
-          due_date: null, weight: 0, progress: 0, position: n.id === sourceId ? position : n.position, is_process: !!target.is_process,
+          due_date: null, weight: 0, progress: 0, shape: n.shape, fill_color: n.fill_color, border_color: n.border_color, position: n.id === sourceId ? position : n.position, is_process: !!target.is_process,
         }).select("id").single();
         if (error) throw error;
         idMap.set(n.id, created.id);
       }
       if (internalLinks.length) {
-        const { error } = await supabase.from("mytosis_links").insert(internalLinks.map((l) => ({ predecessor_id: idMap.get(l.predecessor_id)!, successor_id: idMap.get(l.successor_id)! })));
+        const { error } = await supabase.from("mytosis_links").insert(internalLinks.map((l) => ({ predecessor_id: idMap.get(l.predecessor_id)!, successor_id: idMap.get(l.successor_id)!, style: l.style })));
         if (error) throw error;
       }
       return ordered.length;

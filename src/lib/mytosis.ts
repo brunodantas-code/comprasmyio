@@ -12,9 +12,12 @@ export type MytosisNode = {
   position: number;
   created_at: string;
   is_process?: boolean;
+  shape?: string;
+  fill_color?: string;
+  border_color?: string;
 };
 
-export type MytosisLink = { predecessor_id: string; successor_id: string };
+export type MytosisLink = { predecessor_id: string; successor_id: string; style?: string };
 
 export function childrenMap(nodes: MytosisNode[]) {
   const map = new Map<string, MytosisNode[]>();
