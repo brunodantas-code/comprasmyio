@@ -46,3 +46,4 @@
 - Mytosis text sizes and horizontal/vertical alignment are persisted per node and copied on block import; canvas text stays in a bounded area separate from the locator and footer to prevent overlap.
 - Mytosis connectors use pure obstacle-avoiding routing in `src/lib/mytosis-connectors.ts` and a measured SVG overlay; process views draw only explicit dependencies, OKRs retain hierarchy lines. Visible-box obstacles prevent crossings; styles and editor hit areas remain preserved.
 - Mytosis collapse state is local to each box's outgoing branches and tasks; it never changes stored dependencies or hides predecessors.
+- Mytosis box title capacity uses a shared pure width/font/shape resolver; editors validate without truncating historical titles.
