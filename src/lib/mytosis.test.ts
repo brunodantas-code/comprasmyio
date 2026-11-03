@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { computePhases, computeProgress, criticalPath, groupPendings, planBlockImport as _plan, type MytosisNode } from "./mytosis";
+import { computeBoxNumbers, computePhases, computeProgress, criticalPath, groupPendings, planBlockImport as _plan, type MytosisNode } from "./mytosis";
 
 const n = (id: string, parent: string | null, extra: Partial<MytosisNode> = {}): MytosisNode => ({
   id, locator: 1, kind: parent ? "task" : "objective", title: id, description: null, parent_id: parent,
@@ -7,6 +7,22 @@ const n = (id: string, parent: string | null, extra: Partial<MytosisNode> = {}):
 });
 
 describe("Mytosis", () => {
+  it("box 3 mostra a sequência 1.2.3, usando o predecessor horizontal", () => {
+    const nodes = [n("root", null, { locator: 1 }), n("contact", "root", { locator: 2 }), n("email", "root", { locator: 3 })];
+    const numbers = computeBoxNumbers(nodes, [{ predecessor_id: "contact", successor_id: "email" }]);
+    expect(numbers.get("root")).toBe("1");
+    expect(numbers.get("contact")).toBe("1.2");
+    expect(numbers.get("email")).toBe("1.2.3");
+  });
+
+  it("mantém uma sequência única no encontro de caminhos e em etapas verticais", () => {
+    const nodes = [n("root", null, { locator: 1 }), n("a", "root", { locator: 2 }), n("b", "root", { locator: 3 }), n("c", "root", { locator: 4 }), n("child", "c", { locator: 5 })];
+    const links = [{ predecessor_id: "b", successor_id: "c" }, { predecessor_id: "a", successor_id: "c" }];
+    expect(computeBoxNumbers(nodes, links).get("c")).toBe("1.2.4");
+    expect(computeBoxNumbers(nodes, links).get("child")).toBe("1.2.4.5");
+    expect(computeBoxNumbers(nodes, links.slice(0, 1)).get("c")).toBe("1.3.4");
+  });
+
   it("objetivo soma as tarefas pelo peso informado", () => {
     const nodes = [n("o", null), n("a", "o", { weight: 70, progress: 100 }), n("b", "o", { weight: 30, progress: 0 })];
     expect(computeProgress(nodes).get("o")).toBe(70);
