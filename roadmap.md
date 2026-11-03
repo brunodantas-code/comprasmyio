@@ -1,5 +1,6 @@
 # Roadmap
 - [ ] Aplicar padrão do Checklist do Supply com contador de caracteres nos campos indicados
+- [ ] Aplicar destaque verde-claro do Supply à numeração dos boxes, preservando o caminho completo
 
 - [ ] Adicionar tarefas internas por box com checkbox, conversa, histórico e sinalização sem bloqueio
 - [ ] Validar conclusão somente por responsável/criador e persistência da conversa
