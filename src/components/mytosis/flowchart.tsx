@@ -152,7 +152,6 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
     const signal = predecessorTaskSignal(node.id, data.tasks, data.links);
     const hasTasks = data.tasks.some((task) => task.node_id === node.id);
     const tasksOpen = !hideTasks.has(node.id);
-    const downExpanded = (hasTasks ? tasksOpen : true) && (kids.length ? downOpen : true);
     return (
       <div className="flex items-start">
         <div className="flex flex-col">
@@ -187,7 +186,8 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
                       <span className="truncate">{nameOf(node.responsible_id)}{process ? "" : ` · ${formatDate(node.due_date)}`}</span>
                       <div className="flex shrink-0 items-center gap-0.5">
                       {succ.length ? <Button variant="ghost" size="icon" className="h-5 w-5 !bg-transparent hover:!bg-transparent" aria-label={`${rightOpen ? "Recolher" : "Exibir"} boxes dependentes de ${numberOf(node)}`} title={rightOpen ? "Recolher boxes dependentes" : "Exibir boxes dependentes"} aria-expanded={rightOpen} onClick={(e) => { e.stopPropagation(); setHideRight((s) => toggle(s, node.id)); }} onPointerDown={(e) => e.stopPropagation()}>{rightOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}</Button> : null}
-                      {hasTasks || kids.length ? <Button variant="ghost" size="icon" className="h-5 w-5 !bg-transparent hover:!bg-transparent" aria-label={`${downExpanded ? "Recolher" : "Exibir"} tarefas do box ${numberOf(node)}`} title={downExpanded ? "Recolher tarefas" : "Exibir tarefas"} aria-expanded={downExpanded} onClick={(e) => { e.stopPropagation(); const update = (current: Set<string>) => { const next = new Set(current); if (downExpanded) next.add(node.id); else next.delete(node.id); return next; }; setHideTasks(update); setHideDown(update); }} onPointerDown={(e) => e.stopPropagation()}>{downExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}</Button> : null}
+                      {kids.length ? <Button variant="ghost" size="icon" className="h-5 w-5 !bg-transparent hover:!bg-transparent" aria-label={`${downOpen ? "Recolher" : "Exibir"} boxes abaixo de ${numberOf(node)}`} title={downOpen ? "Recolher boxes abaixo" : "Exibir boxes abaixo"} aria-expanded={downOpen} onClick={(e) => { e.stopPropagation(); setHideDown((s) => toggle(s, node.id)); }} onPointerDown={(e) => e.stopPropagation()}>{downOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}</Button> : null}
+                      {hasTasks ? <Button variant="ghost" size="icon" className="h-5 w-5 !bg-transparent text-[11px] font-semibold hover:!bg-transparent" aria-label={`${tasksOpen ? "Recolher" : "Exibir"} tarefas do box ${numberOf(node)}`} title={tasksOpen ? "Recolher tarefas" : "Exibir tarefas"} aria-expanded={tasksOpen} aria-controls={`mytosis-tasks-${node.id}`} onClick={(e) => { e.stopPropagation(); setHideTasks((s) => toggle(s, node.id)); }} onPointerDown={(e) => e.stopPropagation()}>T</Button> : null}
                       {canEdit ? (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()} className="h-4 w-4" aria-label={`Adicionar ${word}`} title={`Adicionar ${word}`}><Plus className="h-3.5 w-3.5" /></Button></DropdownMenuTrigger>
@@ -269,7 +269,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
       </div>
       {objective ? (
         <div className="overflow-auto rounded-xl border border-border bg-card p-6" onClick={() => setHighlight(null)}>
-          <div ref={canvasRef} className="relative w-max min-w-full pt-3" onClick={(e) => e.stopPropagation()}>{renderBranch(objective)}<ConnectionLayer container={canvasRef} nodes={data.nodes} links={data.links} onSelect={canEdit ? setSelectedLink : undefined} layoutKey={`${objectiveId}:${[...hideRight].join(',')}:${[...hideDown].join(',')}:${k}`} /></div>
+          <div ref={canvasRef} className="relative w-max min-w-full pt-3" onClick={(e) => e.stopPropagation()}>{renderBranch(objective)}<ConnectionLayer container={canvasRef} nodes={data.nodes} links={data.links} onSelect={canEdit ? setSelectedLink : undefined} layoutKey={`${objectiveId}:${[...hideRight].join(',')}:${[...hideDown].join(',')}:${[...hideTasks].join(',')}:${k}`} /></div>
         </div>
       ) : <p className="py-16 text-center text-muted-foreground">{process ? (objectives.length ? "Selecione um fluxograma." : "Nenhum fluxograma cadastrado. Use o + para criar a primeira etapa.") : objectives.length ? "Selecione um objetivo." : "Nenhum objetivo cadastrado. Use o + para criar o primeiro."}</p>}
       <ImportBlockDialog target={importTarget} onClose={() => setImportTarget(null)} data={data} />
