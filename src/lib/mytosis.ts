@@ -16,6 +16,7 @@ export type MytosisNode = {
   fill_color?: string;
   border_color?: string;
   title_font_size?: number;
+  title_color?: string | null;
   description_font_size?: number;
   text_align?: "left" | "center" | "right";
   text_vertical_align?: "top" | "center" | "bottom";
