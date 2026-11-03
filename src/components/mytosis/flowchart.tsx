@@ -150,7 +150,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
                       <span className="flex min-w-0 items-center gap-1.5"><span className="inline-flex min-h-5 shrink-0 items-center justify-center rounded-md bg-primary/10 px-1.5 text-primary">{numberOf(node)}</span>{node.kind === "objective" ? <span className="truncate">{process ? "Fluxograma" : "Objetivo"}</span> : null}</span>
                       {process ? null : <span className="text-muted-foreground/70">{pct}%</span>}
                     </div>
-                    <p className="line-clamp-2 text-sm font-normal leading-snug">{node.title}</p>
+                    <div className="min-w-0"><p className={cn("text-lg font-semibold leading-tight", node.description ? "line-clamp-1" : "line-clamp-2")}>{node.title}</p>{node.description ? <p className="line-clamp-1 text-[11px] font-normal leading-tight text-muted-foreground" title={node.description}>{node.description}</p> : null}</div>
                     <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
                       <span className="truncate">{nameOf(node.responsible_id)}{process ? "" : ` · ${formatDate(node.due_date)}`}</span>
                       {canEdit ? (
