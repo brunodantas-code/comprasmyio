@@ -42,7 +42,7 @@ export function ConnectionLayer({ container, nodes, links, layoutKey, onSelect }
           if (!route) return [];
           const from = { ...route.points[0], color: borderOf(byId.get(edge.from)?.border_color).color };
           const to = { ...route.points[route.points.length - 1], color: borderOf(byId.get(edge.to)?.border_color).color };
-          return [{ id: `${edge.from}-${edge.to}`, from, to, ...route, style: edge.link?.style ?? "line", color: edge.link?.color, link: edge.link }];
+          return [{ id: `${edge.from}-${edge.to}`, from, to, ...route, style: edge.link ? edge.link.style ?? "arrow" : "line", color: edge.link?.color, link: edge.link }];
         }));
       });
     };
