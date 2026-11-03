@@ -2786,6 +2786,7 @@ export type Database = {
           id: string
           kind: string
           node_id: string
+          recipient_id: string | null
           reply_to_id: string | null
           text: string
           updated_at: string
@@ -2796,6 +2797,7 @@ export type Database = {
           id?: string
           kind: string
           node_id: string
+          recipient_id?: string | null
           reply_to_id?: string | null
           text: string
           updated_at?: string
@@ -2806,6 +2808,7 @@ export type Database = {
           id?: string
           kind?: string
           node_id?: string
+          recipient_id?: string | null
           reply_to_id?: string | null
           text?: string
           updated_at?: string
@@ -2816,6 +2819,13 @@ export type Database = {
             columns: ["node_id"]
             isOneToOne: false
             referencedRelation: "mytosis_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mytosis_node_messages_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -2982,6 +2992,7 @@ export type Database = {
           created_at: string
           id: string
           kind: string
+          recipient_id: string | null
           reply_to_id: string | null
           task_id: string
           text: string
@@ -2992,6 +3003,7 @@ export type Database = {
           created_at?: string
           id?: string
           kind?: string
+          recipient_id?: string | null
           reply_to_id?: string | null
           task_id: string
           text: string
@@ -3002,12 +3014,20 @@ export type Database = {
           created_at?: string
           id?: string
           kind?: string
+          recipient_id?: string | null
           reply_to_id?: string | null
           task_id?: string
           text?: string
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "mytosis_task_messages_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "mytosis_task_messages_reply_to_id_fkey"
             columns: ["reply_to_id"]
@@ -7064,6 +7084,30 @@ export type Database = {
       mytosis_node_can_converse: {
         Args: { _node_id: string; _user_id: string }
         Returns: boolean
+      }
+      mytosis_node_question_participant: {
+        Args: { _node_id: string; _user_id: string }
+        Returns: boolean
+      }
+      mytosis_pending_questions: {
+        Args: never
+        Returns: {
+          author_name: string
+          created_at: string
+          message_id: string
+          node_id: string
+          node_title: string
+          question_text: string
+          task_id: string
+          task_title: string
+        }[]
+      }
+      mytosis_question_recipients: {
+        Args: { _node_id: string; _task_id?: string }
+        Returns: {
+          full_name: string
+          id: string
+        }[]
       }
       mytosis_role: { Args: { _user_id: string }; Returns: string }
       mytosis_task_can_converse: {
