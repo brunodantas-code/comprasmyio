@@ -14,7 +14,7 @@ export function OkrsTab({ data, canEdit, openDialog, onOpenObjective, onLocate }
   const [by, setBy] = useState<"responsible" | "date">("responsible");
   const progress = useMemo(() => computeProgress(data.nodes), [data.nodes]);
   const nameOf = (id: string | null) => data.users.find((u) => u.id === id)?.full_name ?? "—";
-  const objectives = data.nodes.filter((n) => !n.parent_id);
+  const objectives = data.nodes.filter((n) => !n.parent_id && !n.is_process);
   const groups = useMemo(() => groupPendings(data.nodes, by, nameOf), [data.nodes, by, data.users]); // eslint-disable-line react-hooks/exhaustive-deps
   const today = new Date().toISOString().slice(0, 10);
 
@@ -30,7 +30,7 @@ export function OkrsTab({ data, canEdit, openDialog, onOpenObjective, onLocate }
             <TableBody>
               {objectives.length ? objectives.map((o) => {
                 const pct = progress.get(o.id) ?? 0;
-                const count = data.nodes.filter((n) => n.kind === "task" && rootObjectiveOf(n.id, data.nodes)?.id === o.id).length;
+                const count = data.nodes.filter((n) => n.kind === "task" && !n.is_process && rootObjectiveOf(n.id, data.nodes)?.id === o.id).length;
                 return (
                   <TableRow key={o.id} className="cursor-pointer" onClick={() => onOpenObjective(o.id)}>
                     <TableCell className="text-muted-foreground">#{o.locator}</TableCell>

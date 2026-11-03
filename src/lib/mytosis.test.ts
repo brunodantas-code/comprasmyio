@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { computePhases, computeProgress, criticalPath, groupPendings, type MytosisNode } from "./mytosis";
+import { computePhases, computeProgress, criticalPath, groupPendings, planBlockImport as _plan, type MytosisNode } from "./mytosis";
 
 const n = (id: string, parent: string | null, extra: Partial<MytosisNode> = {}): MytosisNode => ({
   id, locator: 1, kind: parent ? "task" : "objective", title: id, description: null, parent_id: parent,
@@ -34,4 +34,15 @@ describe("Mytosis", () => {
     const groups = groupPendings(nodes, "responsible", () => "Ana");
     expect(groups.map((g) => [g.label, g.items.length])).toEqual([["Ana", 1], ["Sem responsável", 1]]);
   });
+});
+
+
+it("importar bloco copia pais antes dos filhos e só ligações internas", () => {
+  const mk = (id: string, parent: string | null, locator: number) => ({ id, locator, kind: "task" as const, title: id, description: null, parent_id: parent, responsible_id: null, due_date: null, weight: 0, progress: 0, position: 0, created_at: "" });
+  const nodes = [mk("c", "a", 3), mk("a", null, 1), mk("b", "a", 2), mk("x", null, 9)];
+  const links = [{ predecessor_id: "b", successor_id: "c" }, { predecessor_id: "c", successor_id: "x" }];
+  const r = _plan("a", nodes, links);
+  expect(r.ordered[0].id).toBe("a");
+  expect(r.ordered.map((n) => n.id).sort()).toEqual(["a", "b", "c"]);
+  expect(r.internalLinks).toEqual([{ predecessor_id: "b", successor_id: "c" }]);
 });

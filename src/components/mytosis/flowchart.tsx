@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { cn } from "@/lib/utils";
-import { childrenMap, computePhases, computeProgress, criticalPath, formatDate, rootObjectiveOf, type MytosisNode } from "@/lib/mytosis";
+import { childrenMap, computePhases, computeProgress, criticalPath, formatDate, planBlockImport, rootObjectiveOf, type MytosisNode } from "@/lib/mytosis";
 import { firstName, type MytosisData } from "./use-mytosis";
 import type { NodeDialogState } from "./node-dialog";
 
@@ -23,10 +23,13 @@ type Props = {
   focusLocator: number | null;
   onFocusHandled: () => void;
   openDialog: (state: NodeDialogState) => void;
+  process: boolean;
 };
 
-export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focusLocator, onFocusHandled, openDialog }: Props) {
-  const objectives = data.nodes.filter((n) => !n.parent_id);
+export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focusLocator, onFocusHandled, openDialog, process }: Props) {
+  const objectives = data.nodes.filter((n) => !n.parent_id && !!n.is_process === process);
+  const [importTarget, setImportTarget] = useState<MytosisNode | null>(null);
+  const word = process ? "etapa" : "tarefa";
   const objective = objectives.find((o) => o.id === objectiveId) ?? null;
   const [hideRight, setHideRight] = useState<Set<string>>(new Set());
   const [hideDown, setHideDown] = useState<Set<string>>(new Set());
@@ -99,24 +102,25 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
                   highlight === node.id && "bg-primary/10 ring-2 ring-primary/40",
                 )}
               >
-                <div className="relative w-1.5 shrink-0 bg-primary/10" aria-label={`${pct}% concluído`}>
+                {process ? null : <div className="relative w-1.5 shrink-0 bg-primary/10" aria-label={`${pct}% concluído`}>
                   <div className="absolute inset-x-0 bottom-0 bg-primary transition-[height] duration-500" style={{ height: `${pct}%` }} />
-                </div>
+                </div>}
                 {collapsed ? <span className="m-auto text-[10px] text-muted-foreground [writing-mode:vertical-rl]">#{node.locator}</span> : (
                   <div className="flex min-w-0 flex-1 flex-col justify-between px-2.5 py-1.5">
                     <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
-                      <span>#{node.locator}{node.kind === "objective" ? " · Objetivo" : ""}</span>
-                      <span className="text-muted-foreground/70">{pct}%</span>
+                      <span>#{node.locator}{node.kind === "objective" ? (process ? " · Fluxograma" : " · Objetivo") : ""}</span>
+                      {process ? null : <span className="text-muted-foreground/70">{pct}%</span>}
                     </div>
                     <p className="line-clamp-2 text-sm font-normal leading-snug">{node.title}</p>
                     <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
-                      <span className="truncate">{nameOf(node.responsible_id)} · {formatDate(node.due_date)}</span>
+                      <span className="truncate">{nameOf(node.responsible_id)}{process ? "" : ` · ${formatDate(node.due_date)}`}</span>
                       {canEdit ? (
                         <DropdownMenu>
-                          <DropdownMenuTrigger asChild><button type="button" onClick={(e) => e.stopPropagation()} className="text-primary" aria-label="Adicionar tarefa" title="Adicionar tarefa"><Plus className="h-3.5 w-3.5" /></button></DropdownMenuTrigger>
+                          <DropdownMenuTrigger asChild><button type="button" onClick={(e) => e.stopPropagation()} className="text-primary" aria-label={`Adicionar ${word}`} title={`Adicionar ${word}`}><Plus className="h-3.5 w-3.5" /></button></DropdownMenuTrigger>
                           <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-                            <DropdownMenuItem onClick={() => openDialog({ mode: "create", kind: "task", parentId: node.id })}>Tarefa associada (abaixo)</DropdownMenuItem>
-                            {node.parent_id ? <DropdownMenuItem onClick={() => openDialog({ mode: "create", kind: "task", parentId: node.parent_id, predecessorId: node.id })}>Tarefa dependente (à direita)</DropdownMenuItem> : null}
+                            <DropdownMenuItem onClick={() => openDialog({ mode: "create", kind: "task", parentId: node.id })}>{process ? "Etapa associada (abaixo)" : "Tarefa associada (abaixo)"}</DropdownMenuItem>
+                            {node.parent_id ? <DropdownMenuItem onClick={() => openDialog({ mode: "create", kind: "task", parentId: node.parent_id, predecessorId: node.id })}>{process ? "Etapa dependente (à direita)" : "Tarefa dependente (à direita)"}</DropdownMenuItem> : null}
+                            <DropdownMenuItem onClick={() => setImportTarget(node)}>Importar fluxograma como bloco (abaixo)</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       ) : null}
@@ -173,8 +177,8 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
     <div className="space-y-4">
       <div className="flex flex-wrap items-end gap-3 rounded-xl border border-border bg-muted/50 px-4 py-3">
         <Filter className="mb-2.5 h-4 w-4 text-muted-foreground/60" />
-        <div className="grid min-w-64 flex-1 gap-1"><Label className="text-xs text-muted-foreground">Objetivo</Label>
-          <SearchableSelect value={objectiveId} onChange={onObjectiveChange} clearable={false} placeholder="Selecione o objetivo" options={objectives.map((o) => ({ value: o.id, label: `#${o.locator} ${o.title}` }))} />
+        <div className="grid min-w-64 flex-1 gap-1"><Label className="text-xs text-muted-foreground">{process ? "Fluxograma" : "Objetivo"}</Label>
+          <SearchableSelect value={objectiveId} onChange={onObjectiveChange} clearable={false} placeholder={process ? "Selecione o fluxograma" : "Selecione o objetivo"} options={objectives.map((o) => ({ value: o.id, label: `#${o.locator} ${o.title}` }))} />
         </div>
         <form className="grid gap-1" onSubmit={(e) => { e.preventDefault(); const v = Number(locatorQuery.replace("#", "")); if (v) locate(v); }}>
           <Label className="text-xs text-muted-foreground">Localizador</Label>
@@ -184,15 +188,16 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
           <Label className="text-xs text-muted-foreground">Fases exibidas: {last === 0 ? "única" : `${visibleFrom + 1} a ${last + 1} de ${last + 1}`}</Label>
           <Slider min={0} max={Math.max(last, 1)} step={1} value={[Math.min(k, last)]} onValueChange={([v]) => setK(v)} disabled={last === 0} className="h-9" />
         </div>
-        <Button variant="outline" onClick={() => setShowCritical((v) => !v)} className={cn(showCritical && "!bg-primary !text-primary-foreground")}><RouteIcon className="h-4 w-4" />Caminho crítico</Button>
+        {process ? null : <Button variant="outline" onClick={() => setShowCritical((v) => !v)} className={cn(showCritical && "!bg-primary !text-primary-foreground")}><RouteIcon className="h-4 w-4" />Caminho crítico</Button>}
         {data.role === "admin" ? <Button variant="ghost" size="icon" onClick={() => setSettingsOpen(true)} className="text-primary" aria-label="Padrões dos boxes" title="Padrões dos boxes"><Settings2 className="h-4 w-4" /></Button> : null}
-        {canEdit ? <Button variant="ghost" size="icon" className="text-primary" onClick={() => openDialog({ mode: "create", kind: "objective", parentId: null })} aria-label="Novo objetivo" title="Novo objetivo"><Plus className="h-5 w-5" /></Button> : null}
+        {canEdit ? <Button variant="ghost" size="icon" className="text-primary" onClick={() => openDialog({ mode: "create", kind: "objective", parentId: null, process })} aria-label={process ? "Nova etapa" : "Novo objetivo"} title={process ? "Nova etapa" : "Novo objetivo"}><Plus className="h-5 w-5" /></Button> : null}
       </div>
       {objective ? (
         <div className="overflow-auto rounded-xl border border-border bg-card p-6" onClick={() => setHighlight(null)}>
           <div className="w-max min-w-full pt-3" onClick={(e) => e.stopPropagation()}>{renderBranch(objective)}</div>
         </div>
-      ) : <p className="py-16 text-center text-muted-foreground">{objectives.length ? "Selecione um objetivo." : "Nenhum objetivo cadastrado. Use o + para criar o primeiro."}</p>}
+      ) : <p className="py-16 text-center text-muted-foreground">{process ? (objectives.length ? "Selecione um fluxograma." : "Nenhum fluxograma cadastrado. Use o + para criar a primeira etapa.") : objectives.length ? "Selecione um objetivo." : "Nenhum objetivo cadastrado. Use o + para criar o primeiro."}</p>}
+      <ImportBlockDialog target={importTarget} onClose={() => setImportTarget(null)} data={data} />
       <BoxSettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} box={data.box} />
     </div>
   );
@@ -222,6 +227,47 @@ function BoxSettingsDialog({ open, onClose, box }: { open: boolean; onClose: () 
           <div className="grid gap-1.5"><Label>Altura (px)</Label><Input type="number" value={height} onChange={(e) => setHeight(e.target.value)} /></div>
         </div>
         <DialogFooter><Button variant="outline" onClick={onClose}>Cancelar</Button><Button variant="outline" onClick={() => save.mutate()} disabled={save.isPending}>Salvar</Button></DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function ImportBlockDialog({ target, onClose, data }: { target: MytosisNode | null; onClose: () => void; data: MytosisData }) {
+  const queryClient = useQueryClient();
+  const [sourceId, setSourceId] = useState("");
+  useEffect(() => { if (target) setSourceId(""); }, [target]);
+  const targetRoot = target ? rootObjectiveOf(target.id, data.nodes) : null;
+  const sources = data.nodes.filter((n) => !n.parent_id && n.is_process && n.id !== targetRoot?.id);
+  const run = useMutation({
+    mutationFn: async () => {
+      if (!target || !sourceId) throw new Error("Selecione o fluxograma a importar.");
+      const { ordered, internalLinks } = planBlockImport(sourceId, data.nodes, data.links);
+      const idMap = new Map<string, string>();
+      const position = data.nodes.filter((n) => n.parent_id === target.id).length;
+      for (const n of ordered) {
+        const parent = n.id === sourceId ? target.id : idMap.get(n.parent_id!)!;
+        const { data: created, error } = await supabase.from("mytosis_nodes").insert({
+          kind: "task", title: n.title, description: n.description, parent_id: parent, responsible_id: n.responsible_id,
+          due_date: null, weight: 0, progress: 0, position: n.id === sourceId ? position : n.position, is_process: !!target.is_process,
+        }).select("id").single();
+        if (error) throw error;
+        idMap.set(n.id, created.id);
+      }
+      if (internalLinks.length) {
+        const { error } = await supabase.from("mytosis_links").insert(internalLinks.map((l) => ({ predecessor_id: idMap.get(l.predecessor_id)!, successor_id: idMap.get(l.successor_id)! })));
+        if (error) throw error;
+      }
+      return ordered.length;
+    },
+    onSuccess: (count) => { toast.success(`Bloco importado (${count} boxes).`); queryClient.invalidateQueries({ queryKey: ["mytosis"] }); onClose(); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  return (
+    <Dialog open={!!target} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader><DialogTitle className="font-normal">Importar fluxograma como bloco</DialogTitle><DialogDescription>Uma cópia do fluxograma escolhido entra abaixo de #{target?.locator} {target?.title}. O original não muda.</DialogDescription></DialogHeader>
+        <SearchableSelect value={sourceId} onChange={setSourceId} placeholder="Selecione o fluxograma" options={sources.map((o) => ({ value: o.id, label: `#${o.locator} ${o.title}` }))} />
+        <DialogFooter><Button variant="outline" onClick={onClose}>Cancelar</Button><Button variant="outline" onClick={() => run.mutate()} disabled={run.isPending || !sourceId}>Confirmar</Button></DialogFooter>
       </DialogContent>
     </Dialog>
   );

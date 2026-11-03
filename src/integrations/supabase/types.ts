@@ -2707,6 +2707,7 @@ export type Database = {
           description: string | null
           due_date: string | null
           id: string
+          is_process: boolean
           kind: string
           locator: number
           parent_id: string | null
@@ -2723,6 +2724,7 @@ export type Database = {
           description?: string | null
           due_date?: string | null
           id?: string
+          is_process?: boolean
           kind?: string
           locator?: number
           parent_id?: string | null
@@ -2739,6 +2741,7 @@ export type Database = {
           description?: string | null
           due_date?: string | null
           id?: string
+          is_process?: boolean
           kind?: string
           locator?: number
           parent_id?: string | null

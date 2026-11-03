@@ -39,3 +39,4 @@
 - Proposals use private visit-keyed files; authenticated extraction syncs totals by trigger and stores group breakdown in proposal metadata. Environment remainders preserve unknown quantities as null.
 
 - Mytosis (OKRs/fluxogramas) keeps hierarchy in `mytosis_nodes.parent_id` (vertical) and dependencies in `mytosis_links` (horizontal); progress, phases, critical path and pending reports are pure functions in `src/lib/mytosis.ts` so the canvas and report never diverge. Access comes from `mytosis_role()` (ERP admin > member role > app grant as viewer).
+- Mytosis flowcharts are trees with mytosis_nodes.is_process=true (no dates/progress, excluded from pendings); block import copies a subtree plus internal links under a target box, leaving the original untouched.

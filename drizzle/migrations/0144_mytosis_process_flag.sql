@@ -1,0 +1,1 @@
+ALTER TABLE public.mytosis_nodes ADD COLUMN IF NOT EXISTS is_process boolean NOT NULL DEFAULT false;
