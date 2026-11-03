@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Reposicionar setas dentro dos boxes e separar ações para dependentes, anteriores e tarefas
 - [x] Afastar lápis do fechamento no diálogo de tarefa e incluir seta para recolher/exibir tarefas por box
 - [x] Impedir conectores dentro dos boxes e remover entradas automáticas sem predecessor nos fluxogramas
 - [x] Clarear seta entre boxes alinhados e permitir editar tipo/cor ou excluir conexão
