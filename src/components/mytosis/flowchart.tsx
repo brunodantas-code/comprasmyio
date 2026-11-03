@@ -82,7 +82,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
     const map = new Map<string, MytosisNode[]>();
     for (const l of data.links) {
       const a = byId.get(l.predecessor_id); const b = byId.get(l.successor_id);
-      if (!a || !b || a.parent_id !== b.parent_id) continue;
+      if (!a || !b || !(a.parent_id === b.parent_id || (!a.parent_id && b.parent_id === a.id))) continue;
       map.set(b.id, [...(map.get(b.id) ?? []), a].sort((x, y) => x.locator - y.locator));
     }
     return map;
@@ -103,7 +103,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
   useEffect(() => { if (focusLocator !== null) { locate(focusLocator); onFocusHandled(); } }, [focusLocator]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (!locatorQuery.trim()) setHighlight(null); }, [locatorQuery]);
 
-  // Arrastar um box sobre outro cria a ligação: arrastado = predecessor, alvo = sucessor.
+  // Arrastado passa a ser sucessor do destino, com movimentação atômica.
   const queryClient = useQueryClient();
   const [dragId, setDragId] = useState<string | null>(null);
   const [dropId, setDropId] = useState<string | null>(null);
@@ -118,10 +118,10 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
   });
   const linkMutation = useMutation({
     mutationFn: async ({ from, to }: { from: string; to: string }) => {
-      const { error } = await supabase.from("mytosis_links").insert({ predecessor_id: from, successor_id: to });
+      const { error } = await supabase.rpc("reposition_mytosis_node", { _node_id: from, _target_id: to });
       if (error) throw error;
     },
-    onSuccess: (_d, v) => { toast.success(`Ligação criada.`); queryClient.invalidateQueries({ queryKey: ["mytosis"] }); },
+    onSuccess: (_d, v) => { setHideRight((current) => { const next = new Set(current); next.delete(v.to); return next; }); setK(Number.MAX_SAFE_INTEGER); toast.success("Etapa reposicionada e numeração atualizada."); queryClient.invalidateQueries({ queryKey: ["mytosis"] }); },
     onError: (e: Error) => toast.error(e.message),
   });
   function reaches(from: string, to: string) {
@@ -131,8 +131,8 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
   }
   function connect(from: string, to: string) {
     if (from === to) return;
-    if (data.links.some((l) => l.predecessor_id === from && l.successor_id === to)) return toast.info("Esses boxes já estão ligados.");
-    if (reaches(to, from)) return toast.error("Essa ligação criaria um ciclo entre os boxes.");
+    if (!canEdit || linkMutation.isPending) return;
+    if (reaches(from, to)) return toast.error("Essa ligação criaria um ciclo entre os boxes.");
     linkMutation.mutate({ from, to });
   }
 
@@ -170,7 +170,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
                 style={{ minHeight: data.box.height }}
                 role="button"
                 tabIndex={0}
-                draggable={canEdit && !collapsed}
+                draggable={canEdit && !collapsed && !!node.parent_id && !linkMutation.isPending}
                 onDragStart={(e) => { e.dataTransfer.setData("text/plain", node.id); e.dataTransfer.effectAllowed = "link"; setDragId(node.id); }}
                 onDragEnd={() => { setDragId(null); setDropId(null); }}
                 onDragOver={(e) => { if (dragId && dragId !== node.id) { e.preventDefault(); e.dataTransfer.dropEffect = "link"; if (dropId !== node.id) setDropId(node.id); } }}
@@ -178,7 +178,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
                 onDrop={(e) => { e.preventDefault(); const from = e.dataTransfer.getData("text/plain") || dragId; setDropId(null); setDragId(null); if (from) connect(from, node.id); }}
                 onClick={(e) => { if (e.target instanceof Element && e.target.closest("button,[role='menuitem']")) return; openDialog({ mode: "edit", node }); }}
                 onKeyDown={(e) => { if (e.target === e.currentTarget && e.key === "Enter") openDialog({ mode: "edit", node }); }}
-                title={canEdit ? `${numberOf(node)} — ${node.title}\nArraste sobre outro box para ligá-lo como sucessor.` : `${numberOf(node)} — ${node.title}`}
+                title={canEdit ? `${numberOf(node)} — ${node.title}\nArraste sobre outro box para posicionar esta etapa à direita dele.` : `${numberOf(node)} — ${node.title}`}
                 className={cn("mytosis-controls group relative flex h-full w-full cursor-pointer overflow-hidden rounded-md transition-colors duration-300 [&_button]:!border-0 [&_button]:!shadow-none [&_button]:!bg-transparent [&_button:hover]:!bg-transparent [&_button:focus-visible]:!ring-0", dropId === node.id && "ring-2 ring-primary ring-offset-2", dragId === node.id && "opacity-50", darkText ? "text-mytosis-text-light [&_p:not([data-mytosis-title])]:!text-mytosis-text-light [&_span]:!text-mytosis-text-light" : purpleMediumText ? "text-mytosis-text-dark [&_p:not([data-mytosis-title])]:!text-mytosis-text-dark [&_span]:!text-mytosis-text-dark" : "text-foreground")}
               >
                 <ShapeSvg shape={shape} fill={fillColor} stroke={stroke} strokeWidth={highlight === node.id ? 2 : 1} className="pointer-events-none absolute inset-0 h-full w-full transition-all duration-300 group-hover:[filter:drop-shadow(0_0_1px_var(--myio-green))]" />
