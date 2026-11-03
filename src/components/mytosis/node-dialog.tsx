@@ -21,6 +21,7 @@ import { TITLE_COLORS, type TitleColorKey } from "./title-colors";
 import { NodePreview } from "./node-preview";
 import { firstName } from "./use-mytosis";
 import { ColorOptions } from "./color-options";
+import { NodeAttachments, uploadNodeAttachments } from "./node-attachments";
 
 export type NodeDialogState =
   | { mode: "edit"; node: MytosisNode }
@@ -34,6 +35,9 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
   const parentId = editing?.parent_id ?? (state?.mode === "create" ? state.parentId : null);
   const parentNode = parentId ? data.nodes.find((n) => n.id === parentId) : null;
   const isProcess = editing ? !!editing.is_process : parentNode ? !!parentNode.is_process : state?.mode === "create" && !!state.process;
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
+  const [attachmentsBusy, setAttachmentsBusy] = useState(false);
+  const [createdId, setCreatedId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [responsible, setResponsible] = useState("");
@@ -58,6 +62,7 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
 
   useEffect(() => {
     if (!state) return;
+    setPendingFiles([]); setCreatedId(null);
     setTitle(editing?.title ?? "");
     setTitleSize(editing?.title_font_size ?? 18);
     setTitleColor(TITLE_COLORS.find((item) => item.key === editing?.title_color)?.key ?? null);
@@ -110,16 +115,20 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
         title_font_size: titleSize, title_color: titleColor, description_font_size: descriptionSize, text_align: textAlign, text_vertical_align: verticalAlign,
         weight: w, progress: kids.length ? editing?.progress ?? 0 : Math.min(100, Math.max(0, Number(progress) || 0)),
       };
-      let id = editing?.id;
+      let id = editing?.id ?? createdId;
       if (editing) {
         const { error } = await supabase.from("mytosis_nodes").update(row).eq("id", editing.id);
+        if (error) throw error;
+      } else if (createdId) {
+        const { error } = await supabase.from("mytosis_nodes").update(row).eq("id", createdId);
         if (error) throw error;
       } else {
         const { data: created, error } = await supabase.from("mytosis_nodes").insert({ ...row, kind, is_process: isProcess, parent_id: parentId, position: siblings.length }).select("id").single();
         if (error) throw error;
-        id = created.id;
+        id = created.id; setCreatedId(created.id);
       }
       if (!id) throw new Error("Box não encontrado.");
+      if (pendingFiles.length) { await uploadNodeAttachments(id, pendingFiles); setPendingFiles([]); }
       const current = new Set(data.links.filter((l) => l.successor_id === id).map((l) => l.predecessor_id));
       const toAdd = [...preds].filter((p) => !current.has(p));
       const toRemove = [...current].filter((p) => !preds.has(p));
@@ -154,8 +163,8 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
   const numbers = useMemo(() => computeBoxNumbers(data.nodes, data.links), [data.nodes, data.links]);
   const label = isProcess ? "Etapa" : kind === "objective" ? "Objetivo" : "Tarefa";
   return (
-    <Dialog open={!!state} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
+    <Dialog open={!!state} onOpenChange={(open) => { if (!open && !attachmentsBusy && !save.isPending) onClose(); }}>
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl" onEscapeKeyDown={(event) => { if (attachmentsBusy || save.isPending) event.preventDefault(); }} onInteractOutside={(event) => { if (attachmentsBusy || save.isPending) event.preventDefault(); }}>
         <DialogHeader>
           <DialogTitle className="font-normal">{editing ? `${numbers.get(editing.id) ?? editing.locator} — ${label}` : isProcess ? "Nova etapa" : `Novo ${label.toLowerCase()}`}</DialogTitle>
           <DialogDescription>{editing ? `Criado em ${new Date(editing.created_at).toLocaleDateString("pt-BR")}` : `Data de criação: ${new Date().toLocaleDateString("pt-BR")}`}</DialogDescription>
@@ -225,10 +234,11 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
           {editing && !isProcess ? <p className="text-xs text-muted-foreground">Prazo atual: {formatDate(editing.due_date)}</p> : null}
         </fieldset>
         {editing && !isProcess ? <NodeConversation nodeId={editing.id} data={data} /> : null}
+        <NodeAttachments nodeId={editing?.id ?? createdId ?? undefined} canEdit={canEdit} pending={pendingFiles} onPendingChange={setPendingFiles} onBusyChange={setAttachmentsBusy} />
         <DialogFooter className="gap-2">
           {editing && canEdit ? <Button variant="outline" onClick={() => { if (window.confirm(`Excluir ${numbers.get(editing.id) ?? editing.locator} e todas as tarefas abaixo dele?`)) remove.mutate(); }} disabled={remove.isPending}>Excluir</Button> : null}
-          <Button variant="outline" onClick={onClose}>Cancelar</Button>
-          {canEdit ? <Button variant="outline" onClick={() => save.mutate()} disabled={save.isPending || titleTooLong || descriptionTooLong}>Salvar</Button> : null}
+          <Button variant="outline" onClick={onClose} disabled={attachmentsBusy || save.isPending}>Cancelar</Button>
+          {canEdit ? <Button variant="outline" onClick={() => save.mutate()} disabled={save.isPending || attachmentsBusy || titleTooLong || descriptionTooLong}>Salvar</Button> : null}
         </DialogFooter>
       </DialogContent>
     </Dialog>

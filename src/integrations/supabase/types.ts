@@ -2706,6 +2706,47 @@ export type Database = {
           },
         ]
       }
+      mytosis_node_attachments: {
+        Row: {
+          content_type: string
+          created_at: string
+          file_name: string
+          file_size: number
+          id: string
+          node_id: string
+          storage_path: string
+          uploaded_by: string
+        }
+        Insert: {
+          content_type: string
+          created_at?: string
+          file_name: string
+          file_size: number
+          id?: string
+          node_id: string
+          storage_path: string
+          uploaded_by?: string
+        }
+        Update: {
+          content_type?: string
+          created_at?: string
+          file_name?: string
+          file_size?: number
+          id?: string
+          node_id?: string
+          storage_path?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mytosis_node_attachments_node_id_fkey"
+            columns: ["node_id"]
+            isOneToOne: false
+            referencedRelation: "mytosis_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mytosis_node_logs: {
         Row: {
           actor_id: string | null
@@ -7014,6 +7055,10 @@ export type Database = {
           status: string
           title: string
         }[]
+      }
+      mytosis_attachment_owned_object: {
+        Args: { _path: string }
+        Returns: boolean
       }
       mytosis_can_edit: { Args: { _user_id: string }; Returns: boolean }
       mytosis_node_can_converse: {

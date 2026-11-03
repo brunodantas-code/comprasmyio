@@ -1,4 +1,8 @@
 # Roadmap
+- [x] Investigar novo erro de redesenho ao recolher boxes após ajustes de formas
+- [x] Simplificar conectores com setas retas sem degraus quando não houver obstáculos
+- [x] Permitir anexar foto/arquivo pelo clipe à esquerda do Mytosis e pelo campo Anexo ao fim do editor
+- [x] Adaptar textos, informações e controles às formas; conferir losango e demais opções na prévia e no fluxograma
 - [x] Conferir redesenho após criar etapas pelo botão Mytosis
 - [x] Conferir traço verde solto abaixo do box 2.2 no Site Survey
 - [x] Corrigir redesenho dos conectores ao exibir/recolher e ligação reta entre 1.1 e 1.2

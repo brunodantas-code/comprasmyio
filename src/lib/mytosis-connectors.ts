@@ -40,6 +40,11 @@ export function routeConnector(from: ConnectorBox, to: ConnectorBox, boxes: Conn
   const da = portDirection(fromSide), db = portDirection(toSide);
   const start = { x: a.x + da.x * 10, y: a.y + da.y * 10 };
   const end = { x: b.x + db.x * 10, y: b.y + db.y * 10 };
+  if (horizontal) {
+    const corridor = (a.x + b.x) / 2;
+    const points = [a, { x: corridor, y: a.y }, { x: corridor, y: b.y }, b];
+    if (points.slice(1).every((point, index) => !boxes.some((box) => segmentCrossesBox(points[index], point, box)))) return { points, fromSide, toSide };
+  }
   const obstacles = boxes.map((box) => ({ ...box, left: box.left - 6, right: box.right + 6, top: box.top - 6, bottom: box.bottom + 6 }));
   if (boxes.some((box) => box.id !== from.id && segmentCrossesBox(a, start, box)) || boxes.some((box) => box.id !== to.id && segmentCrossesBox(end, b, box))) return null;
   const xs = [...new Set([start.x, end.x, ...obstacles.flatMap((box) => [box.left, box.right])])].sort((a, b) => a - b);
@@ -64,7 +69,14 @@ export function routeConnector(from: ConnectorBox, to: ConnectorBox, boxes: Conn
         i = parent;
         points.unshift(at(i));
       }
-      return { points: [a, ...points, b], fromSide, toSide };
+      const compact: ConnectorPoint[] = [];
+      for (const point of [a, ...points, b]) {
+        const last = compact[compact.length - 1], prior = compact[compact.length - 2];
+        if (last && last.x === point.x && last.y === point.y) continue;
+        if (prior && last && ((prior.x === last.x && last.x === point.x) || (prior.y === last.y && last.y === point.y))) compact.pop();
+        compact.push(point);
+      }
+      return { points: compact, fromSide, toSide };
     }
     const x = current.index % width, y = Math.floor(current.index / width);
     const neighbors = [x > 0 ? current.index - 1 : -1, x + 1 < width ? current.index + 1 : -1, y > 0 ? current.index - width : -1, y + 1 < ys.length ? current.index + width : -1];
@@ -72,7 +84,10 @@ export function routeConnector(from: ConnectorBox, to: ConnectorBox, boxes: Conn
       if (next < 0) continue;
       const p = at(current.index), q = at(next);
       if (obstacles.some((box) => segmentCrossesBox(p, q, box))) continue;
-      const distance = current.distance + Math.abs(p.x - q.x) + Math.abs(p.y - q.y);
+      const parent = previous.get(current.index);
+      const prior = parent === undefined ? a : at(parent);
+      const turned = (prior.x === p.x) !== (p.x === q.x);
+      const distance = current.distance + Math.abs(p.x - q.x) + Math.abs(p.y - q.y) + (turned ? 20 : 0);
       if (distance >= (distances.get(next) ?? Infinity)) continue;
       distances.set(next, distance); previous.set(next, current.index); queue.push({ index: next, distance });
     }
