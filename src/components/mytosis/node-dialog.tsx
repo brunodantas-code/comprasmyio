@@ -134,8 +134,9 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
           <div className="grid gap-2 rounded-xl border border-border bg-muted/40 p-3">
             <div className="grid gap-1"><Label className="text-xs text-muted-foreground">Forma</Label>
               <div className="flex flex-wrap gap-1.5">{SHAPES.map((s) => (
-                <button key={s.key} type="button" title={s.label} aria-label={s.label} aria-pressed={shape === s.key} onClick={() => setShape(s.key)} className={cn("flex h-9 w-11 items-center justify-center rounded-md border bg-card transition-colors", shape === s.key ? "border-primary bg-primary/10" : "border-border hover:border-primary/60")}>
+                <button key={s.key} type="button" title={s.label} aria-label={s.label} aria-pressed={shape === s.key} onClick={() => setShape(s.key)} className={cn("flex w-16 flex-col items-center justify-center gap-0.5 rounded-md border bg-card px-1 py-1.5 transition-colors", shape === s.key ? "border-primary bg-primary/10" : "border-border hover:border-primary/60")}>
                   <ShapeSvg shape={s.key} fill="transparent" stroke="var(--foreground)" className="h-5 w-8" />
+                  <span className="w-full truncate text-center text-[10px] leading-tight text-muted-foreground">{s.label}</span>
                 </button>))}</div>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
