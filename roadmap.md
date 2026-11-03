@@ -1,4 +1,7 @@
 # Roadmap
+- [x] Conferir redesenho após criar etapas pelo botão Mytosis
+- [x] Conferir traço verde solto abaixo do box 2.2 no Site Survey
+- [x] Corrigir redesenho dos conectores ao exibir/recolher e ligação reta entre 1.1 e 1.2
 - [x] Reposicionar etapa arrastada à direita do destino e renumerar automaticamente; conferir persistência e ciclos
 - [x] Exportar o fluxograma visível para PDF e conferir o download e a aparência
 - [x] Conferir e remover o rótulo Fluxograma ainda mostrado no box Site Survey

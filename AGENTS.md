@@ -44,6 +44,6 @@
 - Mytosis internal checklists live in separate node-keyed tasks, messages and append-only audit logs, never as process boxes; database guards bind identities and authorize completion, while the shared task-signal helper keeps predecessor warnings independent of advancement.
 - OKR conversations use node-keyed messages and append-only logs, separate from task conversations; author-bound edits and same-node answer guards preserve history without changing existing node access.
 - Mytosis typography/colors persist and copy on import/split; preview and canvas share NodeText, token controls and height-based shape insets, growing vertically to fit text without header/footer overlap.
-- Mytosis connectors use pure obstacle-avoiding routing in `src/lib/mytosis-connectors.ts` and a measured SVG overlay; process views draw only explicit dependencies, OKRs retain hierarchy lines. Visible-box obstacles prevent crossings; styles and editor hit areas remain preserved.
+- Mytosis connectors use pure obstacle routing and a size-bound paint-contained SVG; observe transitions and clipped endpoints. Processes draw explicit links, OKRs retain hierarchy; preserve styles/edit hit areas.
 - Mytosis collapse state is local to each box's outgoing branches and tasks; it never changes stored dependencies or hides predecessors.
 - Mytosis title capacity shares a pure size/font/shape resolver; editors never truncate historical titles. PDF lazily captures the settled visible canvas on one proportional page, with a prepared download for mobile activation.

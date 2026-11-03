@@ -14,7 +14,16 @@ export function connectorRelations<N extends { id: string; parent_id: string | n
 export function segmentCrossesBox(a: ConnectorPoint, b: ConnectorPoint, box: ConnectorBox): boolean {
   if (a.x === b.x) return a.x > box.left && a.x < box.right && Math.max(a.y, b.y) > box.top && Math.min(a.y, b.y) < box.bottom;
   if (a.y === b.y) return a.y > box.top && a.y < box.bottom && Math.max(a.x, b.x) > box.left && Math.min(a.x, b.x) < box.right;
-  return true;
+  // Clip a diagonal segment against the open rectangle interior.
+  let low = 0, high = 1;
+  for (const [start, delta, min, max] of [[a.x, b.x - a.x, box.left, box.right], [a.y, b.y - a.y, box.top, box.bottom]]) {
+    if (delta === 0) { if (start <= min || start >= max) return false; continue; }
+    const first = (min - start) / delta, last = (max - start) / delta;
+    low = Math.max(low, Math.min(first, last));
+    high = Math.min(high, Math.max(first, last));
+    if (low >= high) return false;
+  }
+  return low < high && high > 0 && low < 1;
 }
 
 /** Orthogonal visibility grid: every segment is checked against all visible boxes. */
@@ -26,6 +35,8 @@ export function routeConnector(from: ConnectorBox, to: ConnectorBox, boxes: Conn
   const toSide: ConnectorSide = fromSide === "right" ? "left" : fromSide === "left" ? "right" : fromSide === "bottom" ? "top" : "bottom";
   const port = (box: ConnectorBox, side: ConnectorSide): ConnectorPoint => ({ x: side === "left" ? box.left : side === "right" ? box.right : (box.left + box.right) / 2, y: side === "top" ? box.top : side === "bottom" ? box.bottom : (box.top + box.bottom) / 2 });
   const a = port(from, fromSide), b = port(to, toSide);
+  // Adjacent boxes connect directly at their side centres, even with different heights.
+  if (horizontal && Math.abs(a.y - b.y) <= 12 && !boxes.some((box) => segmentCrossesBox(a, b, box))) return { points: [a, b], fromSide, toSide };
   const da = portDirection(fromSide), db = portDirection(toSide);
   const start = { x: a.x + da.x * 10, y: a.y + da.y * 10 };
   const end = { x: b.x + db.x * 10, y: b.y + db.y * 10 };
