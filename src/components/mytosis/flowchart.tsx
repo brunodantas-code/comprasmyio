@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Filter, Plus, Route as RouteIcon, Search, Settings2, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Download, FileDown, Filter, Plus, Route as RouteIcon, Search, Settings2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,7 @@ import { ChecklistText } from "./checklist-text";
 import { MytosisIcon } from "@/components/mytosis-icon";
 import { SplitDialog } from "./split-dialog";
 import { NodeText } from "./node-text";
+import { createMytosisPdf, downloadMytosisPdf } from "@/lib/mytosis-pdf";
 
 type Props = {
   data: MytosisData;
@@ -53,6 +54,16 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
   const [showCritical, setShowCritical] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
+  const [pdfBusy, setPdfBusy] = useState(false);
+  const [preparedPdf, setPreparedPdf] = useState<{ blob: Blob; title: string } | null>(null);
+  async function exportPdf() {
+    const canvas = canvasRef.current;
+    if (!canvas || !objective || pdfBusy) return;
+    setPdfBusy(true);
+    try { setPreparedPdf({ blob: await createMytosisPdf(canvas), title: objective.title }); }
+    catch { toast.error("Não foi possível gerar o PDF. Tente novamente."); }
+    finally { setPdfBusy(false); }
+  }
   const allExpanded = hideRight.size === 0 && hideDown.size === 0 && hideTasks.size === 0;
 
   const children = useMemo(() => childrenMap(data.nodes), [data.nodes]);
@@ -262,6 +273,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
           if (checked) setK(last);
         }} />Exibir tudo</label>
         {process ? null : <Button variant="outline" onClick={() => setShowCritical((v) => !v)} className={cn(showCritical && "!bg-primary !text-primary-foreground")}><RouteIcon className="h-4 w-4" />Caminho crítico</Button>}
+        <Button variant="outline" size="icon" aria-label="Exportar fluxograma para PDF" title={pdfBusy ? "Gerando PDF…" : "Exportar fluxograma para PDF"} disabled={!objective || pdfBusy} onClick={exportPdf}><FileDown className={cn("h-4 w-4", pdfBusy && "animate-pulse motion-reduce:animate-none")} /></Button>
         {data.role === "admin" ? <Button variant="outline" size="icon" onClick={() => setSettingsOpen(true)} aria-label="Padrões dos boxes" title="Padrões dos boxes"><Settings2 className="h-4 w-4" /></Button> : null}
         {canEdit ? <Button variant="outline" size="icon" onClick={() => openDialog({ mode: "create", kind: "objective", parentId: null, process })} aria-label={process ? "Nova etapa" : "Novo objetivo"} title={process ? "Nova etapa" : "Novo objetivo"}><Plus className="h-5 w-5" /></Button> : null}
       </div>
@@ -271,6 +283,12 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
         </div>
       ) : <p className="py-16 text-center text-muted-foreground">{process ? (objectives.length ? "Selecione um fluxograma." : "Nenhum fluxograma cadastrado. Use o + para criar a primeira etapa.") : objectives.length ? "Selecione um objetivo." : "Nenhum objetivo cadastrado. Use o + para criar o primeiro."}</p>}
       <ImportBlockDialog target={importTarget} onClose={() => setImportTarget(null)} data={data} />
+      <Dialog open={!!preparedPdf} onOpenChange={(open) => { if (!open) setPreparedPdf(null); }}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader><DialogTitle className="font-normal">Exportar PDF</DialogTitle><DialogDescription>{preparedPdf?.title}</DialogDescription></DialogHeader>
+          <DialogFooter><Button variant="outline" onClick={() => setPreparedPdf(null)}>Cancelar</Button><Button variant="outline" onClick={() => { if (preparedPdf) void downloadMytosisPdf(preparedPdf.blob, preparedPdf.title).catch(() => toast.error("Não foi possível baixar o PDF.")); }}><Download className="h-4 w-4" />Baixar PDF</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
       <SplitDialog node={splitTarget} onClose={() => setSplitTarget(null)} onCreated={(id) => { setHideRight((current) => { const next = new Set(current); next.delete(id); return next; }); setHideDown((current) => { const next = new Set(current); next.delete(id); return next; }); setK(Number.MAX_SAFE_INTEGER); }} />
       <BoxTaskDialog selection={taskSelection} onSelect={setTaskSelection} onClose={() => setTaskSelection(null)} data={data} canEdit={canEdit} />
       <BoxSettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} box={data.box} />
