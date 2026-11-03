@@ -56,6 +56,16 @@ export const shapeInset: Record<ShapeKey, CSSProperties> = {
   manual: { paddingTop: "12%" }, preparation: { paddingInline: "12%" }, or: { paddingInline: "18%", paddingBlock: "10%" }, delay: { paddingRight: "12%" },
 };
 
+/** Vertical percentage padding must use box height, not CSS's containing width. */
+export function shapeContentInset(shape: ShapeKey, height: number): CSSProperties {
+  const inset = { ...shapeInset[shape] };
+  for (const key of ["paddingTop", "paddingBottom", "paddingBlock"] as const) {
+    const value = inset[key];
+    if (typeof value === "string" && value.endsWith("%")) inset[key] = height * parseFloat(value) / 100;
+  }
+  return inset;
+}
+
 function paths(shape: ShapeKey): string[] {
   switch (shape) {
     case "terminal": return ["M20 2 H80 A18 28 0 0 1 80 58 H20 A18 28 0 0 1 20 2 Z"];
