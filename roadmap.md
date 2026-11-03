@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Permitir escolher destinatário das perguntas do Mytosis e mostrar na Central de Pendências
 - [ ] Mostrar miniaturas de anexos e clipe somente em boxes com anexos
 - [ ] Aplicar largura e altura iguais conforme Padrões dos boxes, conferindo textos e controles
 - [x] Investigar novo erro de redesenho ao recolher boxes após ajustes de formas
