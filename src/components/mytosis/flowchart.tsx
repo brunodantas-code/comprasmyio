@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Download, FileDown, Filter, Plus, Route as RouteIcon, Search, Settings2, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Download, FileDown, Filter, Plus, Paperclip, Route as RouteIcon, Search, Settings2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,7 @@ import { MytosisIcon } from "@/components/mytosis-icon";
 import { SplitDialog } from "./split-dialog";
 import { NodeText } from "./node-text";
 import { NodeFrame } from "./node-frame";
+import { NodeAttachmentDialog } from "./node-attachments";
 import { createMytosisPdf, downloadMytosisPdf } from "@/lib/mytosis-pdf";
 
 type Props = {
@@ -44,6 +45,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
   const [importTarget, setImportTarget] = useState<MytosisNode | null>(null);
   const [taskSelection, setTaskSelection] = useState<TaskSelection>(null);
   const [selectedLink, setSelectedLink] = useState<MytosisLink | null>(null);
+  const [attachmentTarget, setAttachmentTarget] = useState<MytosisNode | null>(null);
   const [splitTarget, setSplitTarget] = useState<MytosisNode | null>(null);
   const word = process ? "etapa" : "tarefa";
   const objective = objectives.find((o) => o.id === objectiveId) ?? null;
@@ -179,7 +181,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
                 <NodeFrame shape={shape} height={data.box.height} fill={fillColor} stroke={stroke} fillKey={displayFillKey} strokeWidth={highlight === node.id ? 2 : 1} progress={process ? undefined : pct} collapsed={collapsed} controlColor={node.control_color}
                   header={<div className="flex shrink-0 items-center justify-between gap-2 text-[11px] text-muted-foreground">
                       <span className="flex min-w-0 items-center gap-1.5"><span className="inline-flex min-h-5 shrink-0 items-center justify-center rounded-md bg-primary/10 px-1.5 text-primary">{numberOf(node)}</span>{node.kind === "objective" && !process ? <span className="truncate">Objetivo</span> : null}</span>
-                      <div className="flex shrink-0 items-center gap-1">{process ? null : <span className="text-muted-foreground/70">{pct}%</span>}{canEdit ? <><Button variant="ghost" size="icon" className="h-5 w-5 !bg-transparent hover:!bg-transparent [&_svg]:!size-5" aria-label={`Dividir próxima etapa de ${numberOf(node)}`} title="Dividir próxima etapa" onClick={(event) => { event.stopPropagation(); setSplitTarget(node); }} onPointerDown={(event) => event.stopPropagation()}><MytosisIcon className="h-5 w-5" /></Button><Button variant="ghost" size="icon" className="h-5 w-5 !bg-transparent hover:!bg-transparent [&_svg]:!size-3" aria-label={`Excluir etapa ${numberOf(node)}`} title="Excluir etapa" disabled={deleteNode.isPending} onClick={(event) => { event.stopPropagation(); if (window.confirm(`Excluir a etapa ${numberOf(node)} — ${node.title} e todas as tarefas e etapas associadas abaixo dela? Esta ação não pode ser desfeita.`)) deleteNode.mutate(node); }} onPointerDown={(event) => event.stopPropagation()}><Trash2 className="h-3 w-3" /></Button></> : null}</div>
+                      <div className="flex shrink-0 items-center gap-1">{process ? null : <span className="text-muted-foreground/70">{pct}%</span>}<Button variant="ghost" size="icon" className="h-5 w-5" aria-label={`Anexos da etapa ${numberOf(node)}`} title="Anexos" onClick={(event) => { event.stopPropagation(); setAttachmentTarget(node); }} onPointerDown={(event) => event.stopPropagation()}><Paperclip className="h-3.5 w-3.5" /></Button>{canEdit ? <><Button variant="ghost" size="icon" className="h-5 w-5 !bg-transparent hover:!bg-transparent [&_svg]:!size-5" aria-label={`Dividir próxima etapa de ${numberOf(node)}`} title="Dividir próxima etapa" onClick={(event) => { event.stopPropagation(); setSplitTarget(node); }} onPointerDown={(event) => event.stopPropagation()}><MytosisIcon className="h-5 w-5" /></Button><Button variant="ghost" size="icon" className="h-5 w-5 !bg-transparent hover:!bg-transparent [&_svg]:!size-3" aria-label={`Excluir etapa ${numberOf(node)}`} title="Excluir etapa" disabled={deleteNode.isPending} onClick={(event) => { event.stopPropagation(); if (window.confirm(`Excluir a etapa ${numberOf(node)} — ${node.title} e todas as tarefas e etapas associadas abaixo dela? Esta ação não pode ser desfeita.`)) deleteNode.mutate(node); }} onPointerDown={(event) => event.stopPropagation()}><Trash2 className="h-3 w-3" /></Button></> : null}</div>
                     </div>}
                   footer={<div className="flex shrink-0 items-center justify-between gap-2 text-[11px] text-muted-foreground">
                       <span className="truncate">{nameOf(node.responsible_id)}{process ? "" : ` · ${formatDate(node.due_date)}`}</span>
@@ -278,6 +280,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
           <DialogFooter><Button variant="outline" onClick={() => setPreparedPdf(null)}>Cancelar</Button><Button variant="outline" onClick={() => { if (preparedPdf) void downloadMytosisPdf(preparedPdf.blob, preparedPdf.title).catch(() => toast.error("Não foi possível baixar o PDF.")); }}><Download className="h-4 w-4" />Baixar PDF</Button></DialogFooter>
         </DialogContent>
       </Dialog>
+      <NodeAttachmentDialog node={attachmentTarget} canEdit={canEdit} onClose={() => setAttachmentTarget(null)} />
       <SplitDialog node={splitTarget} onClose={() => setSplitTarget(null)} onCreated={(id) => { setHideRight((current) => { const next = new Set(current); next.delete(id); return next; }); setHideDown((current) => { const next = new Set(current); next.delete(id); return next; }); setK(Number.MAX_SAFE_INTEGER); }} />
       <BoxTaskDialog selection={taskSelection} onSelect={setTaskSelection} onClose={() => setTaskSelection(null)} data={data} canEdit={canEdit} />
       <BoxSettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} box={data.box} />
