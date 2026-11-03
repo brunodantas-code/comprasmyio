@@ -19,6 +19,29 @@ export type MytosisNode = {
 
 export type MytosisLink = { predecessor_id: string; successor_id: string; style?: string };
 
+/** Display path follows the same primary sibling predecessor as the canvas, then the parent. */
+export function computeBoxNumbers(nodes: MytosisNode[], links: MytosisLink[]) {
+  const byId = new Map(nodes.map((node) => [node.id, node]));
+  const predecessors = new Map<string, MytosisNode[]>();
+  for (const link of links) {
+    const from = byId.get(link.predecessor_id);
+    const to = byId.get(link.successor_id);
+    if (!from || !to || from.parent_id !== to.parent_id) continue;
+    predecessors.set(to.id, [...(predecessors.get(to.id) ?? []), from]);
+  }
+  for (const list of predecessors.values()) list.sort((a, b) => a.locator - b.locator);
+  const numbers = new Map<string, string>();
+  const path = (id: string, seen: Set<string>): number[] => {
+    const node = byId.get(id);
+    if (!node || seen.has(id)) return [];
+    const next = new Set(seen).add(id);
+    const previous = predecessors.get(id)?.[0]?.id ?? node.parent_id;
+    return [...(previous ? path(previous, next) : []), node.locator];
+  };
+  for (const node of nodes) numbers.set(node.id, path(node.id, new Set()).join("."));
+  return numbers;
+}
+
 export function childrenMap(nodes: MytosisNode[]) {
   const map = new Map<string, MytosisNode[]>();
   for (const node of nodes) {

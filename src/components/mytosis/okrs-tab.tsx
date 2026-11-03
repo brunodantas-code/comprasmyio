@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/utils";
-import { computeProgress, formatDate, groupPendings, rootObjectiveOf } from "@/lib/mytosis";
+import { computeBoxNumbers, computeProgress, formatDate, groupPendings, rootObjectiveOf } from "@/lib/mytosis";
 import type { MytosisData } from "./use-mytosis";
 import type { NodeDialogState } from "./node-dialog";
 
@@ -12,6 +12,7 @@ export function OkrsTab({ data, canEdit, openDialog, onOpenObjective, onLocate }
   data: MytosisData; canEdit: boolean; openDialog: (s: NodeDialogState) => void; onOpenObjective: (id: string) => void; onLocate: (locator: number) => void;
 }) {
   const [by, setBy] = useState<"responsible" | "date">("responsible");
+  const numbers = useMemo(() => computeBoxNumbers(data.nodes, data.links), [data.nodes, data.links]);
   const progress = useMemo(() => computeProgress(data.nodes), [data.nodes]);
   const nameOf = (id: string | null) => data.users.find((u) => u.id === id)?.full_name ?? "—";
   const objectives = data.nodes.filter((n) => !n.parent_id && !n.is_process);
@@ -33,7 +34,7 @@ export function OkrsTab({ data, canEdit, openDialog, onOpenObjective, onLocate }
                 const count = data.nodes.filter((n) => n.kind === "task" && !n.is_process && rootObjectiveOf(n.id, data.nodes)?.id === o.id).length;
                 return (
                   <TableRow key={o.id} className="cursor-pointer" onClick={() => onOpenObjective(o.id)}>
-                    <TableCell className="text-muted-foreground">#{o.locator}</TableCell>
+                    <TableCell className="text-muted-foreground">{numbers.get(o.id) ?? o.locator}</TableCell>
                     <TableCell className="hover:text-primary">{o.title}</TableCell>
                     <TableCell>{nameOf(o.responsible_id)}</TableCell>
                     <TableCell>{formatDate(o.due_date)}</TableCell>
@@ -65,7 +66,7 @@ export function OkrsTab({ data, canEdit, openDialog, onOpenObjective, onLocate }
                   const late = !!t.due_date && t.due_date < today;
                   return (
                     <TableRow key={t.id} className="cursor-pointer" onClick={() => onLocate(t.locator)}>
-                      <TableCell className="text-muted-foreground">#{t.locator}</TableCell>
+                      <TableCell className="text-muted-foreground">{numbers.get(t.id) ?? t.locator}</TableCell>
                       <TableCell className="hover:text-primary">{t.title}</TableCell>
                       <TableCell className="text-muted-foreground">{rootObjectiveOf(t.id, data.nodes)?.title ?? "—"}</TableCell>
                       <TableCell className={cn(by === "responsible" && late && "text-destructive")}>{by === "responsible" ? formatDate(t.due_date) : nameOf(t.responsible_id)}</TableCell>

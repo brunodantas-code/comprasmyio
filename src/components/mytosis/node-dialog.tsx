@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SearchableSelect } from "@/components/ui/searchable-select";
-import { childrenMap, computeProgress, descendantIds, formatDate, rootObjectiveOf, type MytosisNode } from "@/lib/mytosis";
+import { childrenMap, computeBoxNumbers, computeProgress, descendantIds, formatDate, rootObjectiveOf, type MytosisNode } from "@/lib/mytosis";
 import type { MytosisData } from "./use-mytosis";
 import { BORDERS, ConnectorGlyph, FILLS, LINK_STYLES, SHAPES, ShapeSvg, type BorderKey, type FillKey, type LinkStyle, type ShapeKey } from "./shapes";
 import { cn } from "@/lib/utils";
@@ -121,12 +121,13 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const numbers = useMemo(() => computeBoxNumbers(data.nodes, data.links), [data.nodes, data.links]);
   const label = isProcess ? "Etapa" : kind === "objective" ? "Objetivo" : "Tarefa";
   return (
     <Dialog open={!!state} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle className="font-normal">{editing ? `#${editing.locator} — ${label}` : isProcess ? "Nova etapa" : `Novo ${label.toLowerCase()}`}</DialogTitle>
+          <DialogTitle className="font-normal">{editing ? `${numbers.get(editing.id) ?? editing.locator} — ${label}` : isProcess ? "Nova etapa" : `Novo ${label.toLowerCase()}`}</DialogTitle>
           <DialogDescription>{editing ? `Criado em ${new Date(editing.created_at).toLocaleDateString("pt-BR")}` : `Data de criação: ${new Date().toLocaleDateString("pt-BR")}`}</DialogDescription>
         </DialogHeader>
         <fieldset disabled={!canEdit} className="grid gap-4">
@@ -167,17 +168,17 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
                 {candidates.length ? candidates.map((c) => (
                   <label key={c.id} className="flex items-center gap-2 py-1 text-sm">
                     <Checkbox checked={preds.has(c.id)} onCheckedChange={(v) => setPreds((prev) => { const next = new Set(prev); if (v) next.add(c.id); else next.delete(c.id); return next; })} />
-                    <span className="text-muted-foreground">#{c.locator}</span> {c.title}
+                    <span className="text-muted-foreground">{numbers.get(c.id) ?? c.locator}</span> {c.title}
                   </label>
                 )) : <p className="text-sm text-muted-foreground">{isProcess ? "Nenhuma outra etapa neste fluxograma." : "Nenhuma outra tarefa neste objetivo."}</p>}
               </div>
-              <span className="text-xs text-muted-foreground">Box sucessor (posterior): {successors.length ? successors.map((s) => `#${s.locator} ${s.title}`).join(", ") : "nenhum"}</span>
+              <span className="text-xs text-muted-foreground">Box sucessor (posterior): {successors.length ? successors.map((s) => `${numbers.get(s.id) ?? s.locator} ${s.title}`).join(", ") : "nenhum"}</span>
             </div>
           ) : null}
           {editing && !isProcess ? <p className="text-xs text-muted-foreground">Prazo atual: {formatDate(editing.due_date)}</p> : null}
         </fieldset>
         <DialogFooter className="gap-2">
-          {editing && canEdit ? <Button variant="outline" onClick={() => { if (window.confirm(`Excluir #${editing.locator} e todas as tarefas abaixo dele?`)) remove.mutate(); }} disabled={remove.isPending}>Excluir</Button> : null}
+          {editing && canEdit ? <Button variant="outline" onClick={() => { if (window.confirm(`Excluir ${numbers.get(editing.id) ?? editing.locator} e todas as tarefas abaixo dele?`)) remove.mutate(); }} disabled={remove.isPending}>Excluir</Button> : null}
           <Button variant="outline" onClick={onClose}>Cancelar</Button>
           {canEdit ? <Button variant="outline" onClick={() => save.mutate()} disabled={save.isPending}>Salvar</Button> : null}
         </DialogFooter>
