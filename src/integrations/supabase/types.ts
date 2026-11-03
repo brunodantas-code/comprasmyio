@@ -2640,18 +2640,21 @@ export type Database = {
       }
       mytosis_links: {
         Row: {
+          color: string | null
           created_at: string
           predecessor_id: string
           style: string
           successor_id: string
         }
         Insert: {
+          color?: string | null
           created_at?: string
           predecessor_id: string
           style?: string
           successor_id: string
         }
         Update: {
+          color?: string | null
           created_at?: string
           predecessor_id?: string
           style?: string

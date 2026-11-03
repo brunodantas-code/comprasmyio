@@ -1,0 +1,1 @@
+ALTER TABLE public.mytosis_links ADD COLUMN IF NOT EXISTS color text CHECK (color IN ('green-mid','green','purple-mid','purple','dark','gray'));
