@@ -14,6 +14,7 @@ import type { MytosisData } from "./use-mytosis";
 import { BORDERS, ConnectorGlyph, FILLS, LINK_STYLES, SHAPES, ShapeSvg, type BorderKey, type FillKey, type LinkStyle, type ShapeKey } from "./shapes";
 import { cn } from "@/lib/utils";
 import { ChecklistText } from "./checklist-text";
+import { NodeConversation } from "./node-conversation";
 import { AlignLeft, AlignCenter, AlignRight, AlignStartVertical, AlignCenterVertical, AlignEndVertical } from "lucide-react";
 
 export type NodeDialogState =
@@ -175,10 +176,10 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
             <div className="flex flex-wrap gap-5">
               <div className="grid gap-1.5"><Label className="text-xs text-muted-foreground">Alinhamento horizontal</Label><div className="flex gap-1">{([
                 { value: "left", label: "À esquerda", Icon: AlignLeft }, { value: "center", label: "Centralizado", Icon: AlignCenter }, { value: "right", label: "À direita", Icon: AlignRight },
-              ] as const).map(({ value, label, Icon }) => <Button key={value} type="button" variant="ghost" size="icon" title={label} aria-label={label} aria-pressed={textAlign === value} onClick={() => setTextAlign(value)} className={cn("text-primary", textAlign === value && "bg-primary/10 ring-1 ring-primary/40")}><Icon className="h-4 w-4" /></Button>)}</div></div>
+              ] as const).map(({ value, label, Icon }) => <Button key={value} type="button" variant="outline" size="icon" title={label} aria-label={label} aria-pressed={textAlign === value} onClick={() => setTextAlign(value)} className={cn(textAlign === value && "!bg-primary !text-primary-foreground")}><Icon className="h-4 w-4" /></Button>)}</div></div>
               <div className="grid gap-1.5"><Label className="text-xs text-muted-foreground">Alinhamento vertical</Label><div className="flex gap-1">{([
                 { value: "top", label: "Superior", Icon: AlignStartVertical }, { value: "center", label: "Centro vertical", Icon: AlignCenterVertical }, { value: "bottom", label: "Inferior", Icon: AlignEndVertical },
-              ] as const).map(({ value, label, Icon }) => <Button key={value} type="button" variant="ghost" size="icon" title={label} aria-label={label} aria-pressed={verticalAlign === value} onClick={() => setVerticalAlign(value)} className={cn("text-primary", verticalAlign === value && "bg-primary/10 ring-1 ring-primary/40")}><Icon className="h-4 w-4" /></Button>)}</div></div>
+              ] as const).map(({ value, label, Icon }) => <Button key={value} type="button" variant="outline" size="icon" title={label} aria-label={label} aria-pressed={verticalAlign === value} onClick={() => setVerticalAlign(value)} className={cn(verticalAlign === value && "!bg-primary !text-primary-foreground")}><Icon className="h-4 w-4" /></Button>)}</div></div>
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -205,6 +206,7 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
           ) : null}
           {editing && !isProcess ? <p className="text-xs text-muted-foreground">Prazo atual: {formatDate(editing.due_date)}</p> : null}
         </fieldset>
+        {editing && !isProcess ? <NodeConversation nodeId={editing.id} data={data} /> : null}
         <DialogFooter className="gap-2">
           {editing && canEdit ? <Button variant="outline" onClick={() => { if (window.confirm(`Excluir ${numbers.get(editing.id) ?? editing.locator} e todas as tarefas abaixo dele?`)) remove.mutate(); }} disabled={remove.isPending}>Excluir</Button> : null}
           <Button variant="outline" onClick={onClose}>Cancelar</Button>

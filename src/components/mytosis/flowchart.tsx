@@ -239,8 +239,8 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
           if (checked) setK(last);
         }} />Exibir tudo</label>
         {process ? null : <Button variant="outline" onClick={() => setShowCritical((v) => !v)} className={cn(showCritical && "!bg-primary !text-primary-foreground")}><RouteIcon className="h-4 w-4" />Caminho crítico</Button>}
-        {data.role === "admin" ? <Button variant="ghost" size="icon" onClick={() => setSettingsOpen(true)} className="text-primary" aria-label="Padrões dos boxes" title="Padrões dos boxes"><Settings2 className="h-4 w-4" /></Button> : null}
-        {canEdit ? <Button variant="ghost" size="icon" className="text-primary" onClick={() => openDialog({ mode: "create", kind: "objective", parentId: null, process })} aria-label={process ? "Nova etapa" : "Novo objetivo"} title={process ? "Nova etapa" : "Novo objetivo"}><Plus className="h-5 w-5" /></Button> : null}
+        {data.role === "admin" ? <Button variant="outline" size="icon" onClick={() => setSettingsOpen(true)} aria-label="Padrões dos boxes" title="Padrões dos boxes"><Settings2 className="h-4 w-4" /></Button> : null}
+        {canEdit ? <Button variant="outline" size="icon" onClick={() => openDialog({ mode: "create", kind: "objective", parentId: null, process })} aria-label={process ? "Nova etapa" : "Novo objetivo"} title={process ? "Nova etapa" : "Novo objetivo"}><Plus className="h-5 w-5" /></Button> : null}
       </div>
       {objective ? (
         <div className="overflow-auto rounded-xl border border-border bg-card p-6" onClick={() => setHighlight(null)}>
