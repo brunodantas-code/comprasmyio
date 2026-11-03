@@ -1100,6 +1100,13 @@
       "when": 1793732008826,
       "tag": "0156_mytosis_node_attachments",
       "breakpoints": true
+    },
+    {
+      "idx": 157,
+      "version": "7",
+      "when": 1793732202277,
+      "tag": "0157_mytosis_attachment_storage_guard",
+      "breakpoints": true
     }
   ]
 }

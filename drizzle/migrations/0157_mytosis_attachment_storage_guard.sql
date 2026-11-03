@@ -1,0 +1,4 @@
+CREATE FUNCTION public.mytosis_attachment_owned_object(_path text) RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public AS $$ SELECT EXISTS (SELECT 1 FROM storage.objects WHERE bucket_id='mytosis-attachments' AND name=_path AND owner_id=auth.uid()::text) $$;
+REVOKE ALL ON FUNCTION public.mytosis_attachment_owned_object(text) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.mytosis_attachment_owned_object(text) TO authenticated, service_role;
+ALTER POLICY mytosis_attachments_insert ON public.mytosis_node_attachments WITH CHECK (uploaded_by=auth.uid() AND public.mytosis_can_edit(auth.uid()) AND EXISTS (SELECT 1 FROM public.mytosis_nodes n WHERE n.id=node_id) AND public.mytosis_attachment_owned_object(storage_path));

@@ -7056,6 +7056,10 @@ export type Database = {
           title: string
         }[]
       }
+      mytosis_attachment_owned_object: {
+        Args: { _path: string }
+        Returns: boolean
+      }
       mytosis_can_edit: { Args: { _user_id: string }; Returns: boolean }
       mytosis_node_can_converse: {
         Args: { _node_id: string; _user_id: string }
