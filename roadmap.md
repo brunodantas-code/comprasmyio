@@ -1,9 +1,9 @@
 # Roadmap
-- [ ] Incluir conversa Perguntas/Respostas e histórico com milestones do Code nos OKRs
-- [ ] Conferir botões de ação do Mytosis no padrão Site Survey
-- [ ] Adicionar checkbox Exibir tudo/Recolher tudo com transição visível
-- [ ] Adicionar nós vazados no centro dos lados conectados e ligar todos os conectores pelos nós
-- [ ] Permitir tamanho de fonte e alinhamento horizontal/vertical por box no Mytosis, com persistência
+- [x] Incluir conversa Perguntas/Respostas e histórico com milestones do Code nos OKRs
+- [x] Conferir botões de ação do Mytosis no padrão Site Survey
+- [x] Adicionar checkbox Exibir tudo/Recolher tudo com transição visível
+- [x] Adicionar nós vazados no centro dos lados conectados e ligar todos os conectores pelos nós
+- [x] Permitir tamanho de fonte e alinhamento horizontal/vertical por box no Mytosis, com persistência
 - [x] Aplicar fontes do Supply aos títulos e descrições dos boxes
 - [x] Aplicar padrão do Checklist do Supply com contador de caracteres nos campos indicados
 - [x] Aplicar destaque verde-claro do Supply à numeração dos boxes, preservando o caminho completo
