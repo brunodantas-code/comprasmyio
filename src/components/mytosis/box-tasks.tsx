@@ -33,7 +33,7 @@ export function BoxTaskList({ nodeId, data, onOpen, expanded = true }: { nodeId:
   const completion = useTaskCompletion();
   const tasks = data.tasks.filter((t) => t.node_id === nodeId);
   if (!tasks.length) return null;
-  return <div id={`mytosis-tasks-${nodeId}`} inert={!expanded} aria-hidden={!expanded} className={cn("grid transition-[grid-template-rows,opacity] duration-500 ease-in-out motion-reduce:transition-none", expanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0")}><div className="min-h-0 overflow-hidden"><ul className="mt-2 space-y-1 border-l border-primary/30 pl-2">
+  return <div id={`mytosis-tasks-${nodeId}`} inert={!expanded} aria-hidden={!expanded} className={cn("grid transition-[grid-template-rows,opacity] duration-500 ease-in-out motion-reduce:transition-none", expanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0")}><div className="min-h-0 overflow-hidden"><ul className="ml-[2%] mt-2 space-y-1 border-l border-primary/30 pl-2">
     {tasks.map((task) => <li key={task.id} className="flex min-h-7 items-center gap-2">
       <Checkbox aria-label={`Concluir tarefa ${task.title}`} checked={task.completed} disabled={completion.isPending || !canCompleteBoxTask(task, data.userId, !!data.role)} onCheckedChange={(checked) => completion.mutate({ id: task.id, completed: checked === true })} />
       <Button variant="ghost" className={cn("h-auto min-w-0 justify-start rounded-none p-0 text-left text-xs font-normal !bg-transparent !text-foreground hover:!bg-transparent hover:!text-primary", task.completed && "!text-muted-foreground line-through")} onClick={() => onOpen({ nodeId, taskId: task.id })}><span className="break-words">{task.title}</span></Button>
