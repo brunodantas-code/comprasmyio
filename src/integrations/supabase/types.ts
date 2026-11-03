@@ -2807,6 +2807,7 @@ export type Database = {
           text_align: string
           text_vertical_align: string
           title: string
+          title_color: string | null
           title_font_size: number
           updated_at: string
           weight: number
@@ -2831,6 +2832,7 @@ export type Database = {
           text_align?: string
           text_vertical_align?: string
           title: string
+          title_color?: string | null
           title_font_size?: number
           updated_at?: string
           weight?: number
@@ -2855,6 +2857,7 @@ export type Database = {
           text_align?: string
           text_vertical_align?: string
           title?: string
+          title_color?: string | null
           title_font_size?: number
           updated_at?: string
           weight?: number

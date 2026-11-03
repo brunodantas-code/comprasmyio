@@ -1058,6 +1058,13 @@
       "when": 1793727594653,
       "tag": "0150_mytosis_split_successors",
       "breakpoints": true
+    },
+    {
+      "idx": 151,
+      "version": "7",
+      "when": 1793728120719,
+      "tag": "0151_mytosis_title_color",
+      "breakpoints": true
     }
   ]
 }
