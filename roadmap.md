@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Aplicar fontes do Supply aos títulos e descrições dos boxes
 - [ ] Aplicar padrão do Checklist do Supply com contador de caracteres nos campos indicados
 - [ ] Aplicar destaque verde-claro do Supply à numeração dos boxes, preservando o caminho completo
 
