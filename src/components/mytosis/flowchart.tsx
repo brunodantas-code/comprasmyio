@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import { childrenMap, computeBoxNumbers, computePhases, computeProgress, criticalPath, formatDate, planBlockImport, rootObjectiveOf, type MytosisNode } from "@/lib/mytosis";
 import { firstName, type MytosisData } from "./use-mytosis";
 import type { NodeDialogState } from "./node-dialog";
-import { ConnectorGlyph, ShapeSvg, borderOf, fillOf, shapeInset, type LinkStyle, type ShapeKey } from "./shapes";
+import { ConnectorGlyph, ShapeSvg, borderOf, fillOf, shapeInset, shapeContentInset, type LinkStyle, type ShapeKey } from "./shapes";
 import { BoxTaskDialog, BoxTaskList, type TaskSelection } from "./box-tasks";
 import { predecessorTaskSignal } from "@/lib/mytosis-tasks";
 import { ConnectionLayer } from "./connection-layer";
@@ -150,12 +150,13 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
       <div className="flex items-start">
         <div className="flex flex-col">
           <div className="flex items-start gap-1.5">
-            <div className="relative transition-[width,opacity] duration-500 ease-in-out" style={{ width: collapsed ? 30 : data.box.width, height: data.box.height, opacity: collapsed ? 0.55 : 1 }}>
+            <div className="relative transition-[width,opacity] duration-500 ease-in-out" style={{ width: collapsed ? 30 : data.box.width, minHeight: data.box.height, opacity: collapsed ? 0.55 : 1 }}>
               <div
                 id={`mytosis-box-${node.locator}`}
                 data-mytosis-node={node.id}
                 data-control-color={node.control_color ?? "green"}
                 data-mytosis-collapsed={collapsed ? "true" : "false"}
+                style={{ minHeight: data.box.height }}
                 role="button"
                 tabIndex={0}
                 draggable={canEdit && !collapsed}
@@ -174,7 +175,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
                   <div className="absolute inset-x-0 bottom-0 bg-primary transition-[height] duration-500" style={{ height: `${pct}%` }} />
                 </div>}
                 {collapsed ? <span className="relative m-auto text-[10px] text-muted-foreground [writing-mode:vertical-rl]">{numberOf(node)}</span> : (
-                  <div className="relative flex min-w-0 flex-1 flex-col justify-between px-2.5 py-1.5" style={shapeInset[shape]}>
+                  <div className="relative flex min-w-0 flex-1 flex-col justify-between gap-1 px-2.5 py-1.5" style={shapeContentInset(shape, data.box.height)}>
                     <div className="flex shrink-0 items-center justify-between gap-2 text-[11px] text-muted-foreground">
                       <span className="flex min-w-0 items-center gap-1.5"><span className="inline-flex min-h-5 shrink-0 items-center justify-center rounded-md bg-primary/10 px-1.5 text-primary">{numberOf(node)}</span>{node.kind === "objective" ? <span className="truncate">{process ? "Fluxograma" : "Objetivo"}</span> : null}</span>
                       <div className="flex shrink-0 items-center gap-1">{process ? null : <span className="text-muted-foreground/70">{pct}%</span>}{canEdit ? <><Button variant="ghost" size="icon" className="h-5 w-5 !bg-transparent hover:!bg-transparent [&_svg]:!size-5" aria-label={`Dividir próxima etapa de ${numberOf(node)}`} title="Dividir próxima etapa" onClick={(event) => { event.stopPropagation(); setSplitTarget(node); }} onPointerDown={(event) => event.stopPropagation()}><MytosisIcon className="h-5 w-5" /></Button><Button variant="ghost" size="icon" className="h-5 w-5 !bg-transparent hover:!bg-transparent [&_svg]:!size-3" aria-label={`Excluir etapa ${numberOf(node)}`} title="Excluir etapa" disabled={deleteNode.isPending} onClick={(event) => { event.stopPropagation(); if (window.confirm(`Excluir a etapa ${numberOf(node)} — ${node.title} e todas as tarefas e etapas associadas abaixo dela? Esta ação não pode ser desfeita.`)) deleteNode.mutate(node); }} onPointerDown={(event) => event.stopPropagation()}><Trash2 className="h-3 w-3" /></Button></> : null}</div>
