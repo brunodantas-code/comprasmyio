@@ -21,10 +21,10 @@ export function ConnectionLayer({ container, nodes, links, layoutKey }: { contai
           const id = element.dataset.mytosisNode;
           const rect = element.getBoundingClientRect();
           let parent = element.parentElement;
-          let hidden = false;
+          let hidden = element.dataset.mytosisCollapsed === "true";
           while (parent && parent !== root) {
             const bounds = parent.getBoundingClientRect();
-            if (bounds.width < 1 || bounds.height < 1) hidden = true;
+            if (parent.dataset.mytosisHidden === "true" || bounds.width < 1 || bounds.height < 1) hidden = true;
             parent = parent.parentElement;
           }
           if (id && rect.width > 40 && rect.height > 1 && !hidden) boxes.set(id, rect);
@@ -52,7 +52,7 @@ export function ConnectionLayer({ container, nodes, links, layoutKey }: { contai
     };
     const observer = new ResizeObserver(measure);
     observer.observe(root);
-    root.querySelectorAll("[data-mytosis-node]").forEach((element) => observer.observe(element));
+    root.querySelectorAll("[data-mytosis-node],[data-mytosis-hidden]").forEach((element) => observer.observe(element));
     measure();
     return () => { observer.disconnect(); cancelAnimationFrame(frame); };
   }, [container, nodes, links, layoutKey]);
