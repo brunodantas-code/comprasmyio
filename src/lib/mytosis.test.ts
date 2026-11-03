@@ -7,6 +7,17 @@ const n = (id: string, parent: string | null, extra: Partial<MytosisNode> = {}):
 });
 
 describe("Mytosis", () => {
+  it("recalcula localizadores após excluir uma etapa sem alterar os vínculos ou IDs armazenados", () => {
+    const root = n("root", null, { locator: 10 });
+    const a = n("a", "root", { locator: 30 });
+    const removed = n("removed", "root", { locator: 40 });
+    const b = n("b", "root", { locator: 90 });
+    const links = [{ predecessor_id: "a", successor_id: "b" }];
+    expect(computeBoxNumbers([root, a, removed, b], links).get("b")).toBe("1.2.4");
+    expect(computeBoxNumbers([root, a, b], links).get("b")).toBe("1.2.3");
+    expect(b.locator).toBe(90);
+    expect(links).toEqual([{ predecessor_id: "a", successor_id: "b" }]);
+  });
   it("box 3 mostra a sequência 1.2.3, usando o predecessor horizontal", () => {
     const nodes = [n("root", null, { locator: 1 }), n("contact", "root", { locator: 2 }), n("email", "root", { locator: 3 })];
     const numbers = computeBoxNumbers(nodes, [{ predecessor_id: "contact", successor_id: "email" }]);
