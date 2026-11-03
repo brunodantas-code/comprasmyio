@@ -7,6 +7,10 @@ const n = (id: string, parent: string | null, extra: Partial<MytosisNode> = {}):
 });
 
 describe("Mytosis", () => {
+  it("Site Survey é o fluxograma 2, independentemente do localizador armazenado", () => {
+    const nodes = [n("captacao", null, { locator: 1, is_process: true }), n("survey", null, { locator: 8, is_process: true })];
+    expect(computeBoxNumbers(nodes, []).get("survey")).toBe("2");
+  });
   it("recalcula localizadores após excluir uma etapa sem alterar os vínculos ou IDs armazenados", () => {
     const root = n("root", null, { locator: 10 });
     const a = n("a", "root", { locator: 30 });
