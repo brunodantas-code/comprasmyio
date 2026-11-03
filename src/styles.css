@@ -10,11 +10,13 @@
 .mytosis-controls[data-control-color="purple"] { --mytosis-control-color: var(--myio-purple); }
 .mytosis-controls[data-control-color="dark"] { --mytosis-control-color: var(--myio-dark); }
 .mytosis-controls[data-control-color="gray"] { --mytosis-control-color: var(--mytosis-gray-line); }
-.mytosis-controls button,
-.mytosis-controls button:hover,
-.mytosis-controls button:active,
-.mytosis-controls button:focus-visible,
-.mytosis-controls [data-mytosis-control] { color: var(--mytosis-control-color) !important; }
+@layer base {
+  .mytosis-controls button,
+  .mytosis-controls button:hover,
+  .mytosis-controls button:active,
+  .mytosis-controls button:focus-visible,
+  .mytosis-controls [data-mytosis-control] { color: var(--mytosis-control-color) !important; }
+}
 
 /*
  * Design system definition.
