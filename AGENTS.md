@@ -46,4 +46,4 @@
 - Mytosis typography/colors persist and copy on import/split; preview and canvas share NodeFrame/NodeText and shape-specific safe insets, with external chrome for constrained symbols and surface-only connector measurement, growing vertically to fit text without overlap.
 - Mytosis connectors use pure obstacle routing and a size-bound paint-contained SVG; observe transitions and clipped endpoints. Processes draw explicit links, OKRs retain hierarchy; preserve styles/edit hit areas.
 - Mytosis collapse state is local to each box's outgoing branches and tasks; it never changes stored dependencies or hides predecessors.
-- Mytosis title capacity shares a pure size/font/shape resolver; editors never truncate historical titles. PDF lazily captures the settled visible canvas on one proportional page, with a prepared download for mobile activation.
+- Mytosis title limits use size/font/shape; never truncate old titles. PDF captures the visible canvas on one proportional page. Node attachments use private owner/node paths, role-gated rows and signed URLs; object ownership checks avoid recursive RLS.
