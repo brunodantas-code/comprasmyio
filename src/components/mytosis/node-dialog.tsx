@@ -155,7 +155,7 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
                   <span className="w-full truncate text-center text-[10px] leading-tight text-muted-foreground">{s.label}</span>
                 </button>))}</div>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid items-start gap-3 sm:grid-cols-2">
               <div className="grid gap-1"><Label className="text-xs text-muted-foreground">Fundo</Label>
                 <div className="flex flex-wrap gap-1.5">{FILLS.map((f) => <button key={f.key} type="button" title={f.label} aria-label={`Fundo ${f.label}`} aria-pressed={fillKey === f.key} onClick={() => setFillKey(f.key)} className={cn("h-7 w-7 rounded-full border border-border", fillKey === f.key && "ring-2 ring-primary ring-offset-1")} style={{ background: f.color }} />)}</div>
               </div>
