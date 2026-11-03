@@ -15,7 +15,7 @@ import { BORDERS, ConnectorGlyph, FILLS, LINK_STYLES, SHAPES, ShapeSvg, type Bor
 import { cn } from "@/lib/utils";
 import { ChecklistText } from "./checklist-text";
 import { NodeConversation } from "./node-conversation";
-import { boxTitleLimit } from "@/lib/mytosis-title";
+import { boxTitleLimit, boxDescriptionLimit } from "@/lib/mytosis-title";
 import { AlignLeft, AlignCenter, AlignRight, AlignStartVertical, AlignCenterVertical, AlignEndVertical } from "lucide-react";
 import { TITLE_COLORS, type TitleColorKey } from "./title-colors";
 import { NodePreview } from "./node-preview";
@@ -53,6 +53,8 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
   const [verticalAlign, setVerticalAlign] = useState<"top" | "center" | "bottom">("center");
   const titleLimit = boxTitleLimit(data.box.width, titleSize, shape);
   const titleTooLong = title.trim().length > titleLimit;
+  const descriptionLimit = boxDescriptionLimit(data.box.width, data.box.height, descriptionSize, titleSize, shape);
+  const descriptionTooLong = description.length > descriptionLimit;
 
   useEffect(() => {
     if (!state) return;
@@ -96,6 +98,7 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
     mutationFn: async () => {
       if (!title.trim()) throw new Error("Informe o título.");
       if (titleTooLong) throw new Error(`O título permite até ${titleLimit} caracteres para este box. Use a Descrição para as demais informações.`);
+      if (descriptionTooLong) throw new Error(`A descrição permite até ${descriptionLimit} caracteres para este box. Reduza o texto ou ajuste o tamanho do box e da fonte.`);
       if (![titleSize, descriptionSize].every((size) => Number.isInteger(size) && size >= 10 && size <= 32)) throw new Error("Informe tamanhos de fonte entre 10 e 32 px.");
       if (!responsible) throw new Error("Informe o Responsável.");
       if (!due && !isProcess) throw new Error("Informe a Data estimada de conclusão.");
@@ -182,7 +185,7 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
               <div className="flex flex-wrap gap-1.5">{LINK_STYLES.map((l) => <button key={l.key} type="button" title={l.label} aria-label={l.label} aria-pressed={linkStyle === l.key} onClick={() => setLinkStyle(l.key)} className={cn("flex h-8 items-center gap-2 rounded-md border bg-card px-2 text-xs", linkStyle === l.key ? "border-primary bg-primary/10" : "border-border hover:border-primary/60")}><ConnectorGlyph style={l.key} color="var(--foreground)" />{l.label}</button>)}</div>
             </div> : null}
           </div>
-          <div className="grid gap-1.5"><Label>Descrição</Label><ChecklistText label="Descrição" value={description} onChange={setDescription} multiline hint="Redija a descrição." /></div>
+          <div className="grid gap-1.5"><Label>Descrição</Label><ChecklistText label="Descrição" value={description} onChange={setDescription} maxLength={descriptionLimit} multiline hint="Redija a descrição." />{descriptionTooLong ? <p role="alert" className="text-xs text-destructive">A descrição excede o limite atual de {descriptionLimit} caracteres. Reduza o texto ou ajuste o tamanho do box e da fonte.</p> : null}</div>
           <div className="grid gap-3 border-t border-border pt-3">
             <div className="grid grid-cols-2 gap-3">
               <div className="grid gap-1.5"><Label htmlFor="box-title-size">Fonte do título (px)</Label><Input id="box-title-size" type="number" min={10} max={32} step={1} value={titleSize} onChange={(e) => setTitleSize(Number(e.target.value))} /></div>
@@ -225,7 +228,7 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
         <DialogFooter className="gap-2">
           {editing && canEdit ? <Button variant="outline" onClick={() => { if (window.confirm(`Excluir ${numbers.get(editing.id) ?? editing.locator} e todas as tarefas abaixo dele?`)) remove.mutate(); }} disabled={remove.isPending}>Excluir</Button> : null}
           <Button variant="outline" onClick={onClose}>Cancelar</Button>
-          {canEdit ? <Button variant="outline" onClick={() => save.mutate()} disabled={save.isPending || titleTooLong}>Salvar</Button> : null}
+          {canEdit ? <Button variant="outline" onClick={() => save.mutate()} disabled={save.isPending || titleTooLong || descriptionTooLong}>Salvar</Button> : null}
         </DialogFooter>
       </DialogContent>
     </Dialog>
