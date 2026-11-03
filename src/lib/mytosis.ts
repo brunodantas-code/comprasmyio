@@ -11,6 +11,7 @@ export type MytosisNode = {
   progress: number;
   position: number;
   created_at: string;
+  is_process?: boolean;
 };
 
 export type MytosisLink = { predecessor_id: string; successor_id: string };
@@ -159,4 +160,15 @@ export function formatDate(value: string | null) {
   if (!value) return "—";
   const [y, m, d] = value.slice(0, 10).split("-");
   return `${d}/${m}/${y}`;
+}
+
+/** Ordena a cópia de um bloco (pais antes dos filhos) e as ligações internas, para importar um fluxograma em outro box. */
+export function planBlockImport(sourceRootId: string, nodes: MytosisNode[], links: MytosisLink[]) {
+  const scope = descendantIds(sourceRootId, nodes);
+  const kids = childrenMap(nodes);
+  const ordered: MytosisNode[] = [];
+  const queue = nodes.filter((n) => n.id === sourceRootId);
+  while (queue.length) { const n = queue.shift()!; ordered.push(n); queue.push(...(kids.get(n.id) ?? [])); }
+  const internalLinks = links.filter((l) => scope.has(l.predecessor_id) && scope.has(l.successor_id));
+  return { ordered, internalLinks };
 }
