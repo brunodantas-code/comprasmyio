@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Clarear seta entre boxes alinhados e permitir editar tipo/cor ou excluir conexão
 - [x] Incluir conversa Perguntas/Respostas e histórico com milestones do Code nos OKRs
 - [x] Conferir botões de ação do Mytosis no padrão Site Survey
 - [x] Adicionar checkbox Exibir tudo/Recolher tudo com transição visível
