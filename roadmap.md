@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Incluir divisão em N etapas dependentes pelo ícone Mytosis no topo do box e conferir criação persistida
 - [x] Reposicionar setas dentro dos boxes e separar ações para dependentes, anteriores e tarefas
 - [x] Afastar lápis do fechamento no diálogo de tarefa e incluir seta para recolher/exibir tarefas por box
 - [x] Impedir conectores dentro dos boxes e remover entradas automáticas sem predecessor nos fluxogramas

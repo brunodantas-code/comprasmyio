@@ -22,6 +22,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ConnectorDialog } from "./connector-dialog";
 import type { MytosisLink } from "@/lib/mytosis";
 import { ChecklistText } from "./checklist-text";
+import { MytosisIcon } from "@/components/mytosis-icon";
+import { SplitDialog } from "./split-dialog";
 
 type Props = {
   data: MytosisData;
@@ -39,6 +41,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
   const [importTarget, setImportTarget] = useState<MytosisNode | null>(null);
   const [taskSelection, setTaskSelection] = useState<TaskSelection>(null);
   const [selectedLink, setSelectedLink] = useState<MytosisLink | null>(null);
+  const [splitTarget, setSplitTarget] = useState<MytosisNode | null>(null);
   const word = process ? "etapa" : "tarefa";
   const objective = objectives.find((o) => o.id === objectiveId) ?? null;
   const [hideRight, setHideRight] = useState<Set<string>>(new Set());
@@ -162,7 +165,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
                   <div className="relative flex min-w-0 flex-1 flex-col justify-between px-2.5 py-1.5" style={shapeInset[shape]}>
                     <div className="flex shrink-0 items-center justify-between gap-2 text-[11px] text-muted-foreground">
                       <span className="flex min-w-0 items-center gap-1.5"><span className="inline-flex min-h-5 shrink-0 items-center justify-center rounded-md bg-primary/10 px-1.5 text-primary">{numberOf(node)}</span>{node.kind === "objective" ? <span className="truncate">{process ? "Fluxograma" : "Objetivo"}</span> : null}</span>
-                      {process ? null : <span className="text-muted-foreground/70">{pct}%</span>}
+                      <div className="flex shrink-0 items-center gap-1">{process ? null : <span className="text-muted-foreground/70">{pct}%</span>}{canEdit ? <Button variant="ghost" size="icon" className="h-5 w-5 !bg-transparent !text-primary hover:!bg-transparent" aria-label={`Dividir próxima etapa de ${numberOf(node)}`} title="Dividir próxima etapa" onClick={(event) => { event.stopPropagation(); setSplitTarget(node); }} onPointerDown={(event) => event.stopPropagation()}><MytosisIcon className="h-4 w-4" /></Button> : null}</div>
                     </div>
                     <div className={cn("flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden", node.text_vertical_align === "top" ? "justify-start" : node.text_vertical_align === "bottom" ? "justify-end" : "justify-center")} style={{ textAlign: node.text_align ?? "left" }}><p className={cn("shrink-0 break-words font-semibold leading-tight", node.description ? "line-clamp-1" : "line-clamp-2")} style={{ fontSize: `${node.title_font_size ?? 18}px` }}>{node.title}</p>{node.description ? <p className="line-clamp-1 shrink-0 break-words font-normal leading-tight text-muted-foreground" style={{ fontSize: `${node.description_font_size ?? 11}px` }} title={node.description}>{node.description}</p> : null}</div>
                     <div className="flex shrink-0 items-center justify-between gap-2 text-[11px] text-muted-foreground">
@@ -255,6 +258,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
         </div>
       ) : <p className="py-16 text-center text-muted-foreground">{process ? (objectives.length ? "Selecione um fluxograma." : "Nenhum fluxograma cadastrado. Use o + para criar a primeira etapa.") : objectives.length ? "Selecione um objetivo." : "Nenhum objetivo cadastrado. Use o + para criar o primeiro."}</p>}
       <ImportBlockDialog target={importTarget} onClose={() => setImportTarget(null)} data={data} />
+      <SplitDialog node={splitTarget} onClose={() => setSplitTarget(null)} onCreated={(id) => { setHideRight((current) => { const next = new Set(current); next.delete(id); return next; }); setHideDown((current) => { const next = new Set(current); next.delete(id); return next; }); setK(Number.MAX_SAFE_INTEGER); }} />
       <BoxTaskDialog selection={taskSelection} onSelect={setTaskSelection} onClose={() => setTaskSelection(null)} data={data} canEdit={canEdit} />
       <BoxSettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} box={data.box} />
       <ConnectorDialog link={selectedLink} onClose={() => setSelectedLink(null)} label={selectedLink ? `${data.nodes.find((n) => n.id === selectedLink.predecessor_id)?.title} → ${data.nodes.find((n) => n.id === selectedLink.successor_id)?.title}` : ""} />

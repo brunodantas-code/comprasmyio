@@ -7086,6 +7086,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      split_mytosis_node: {
+        Args: { _count: number; _node_id: string }
+        Returns: string[]
+      }
       survey_point_edit_lease: {
         Args: {
           _acquire?: boolean
