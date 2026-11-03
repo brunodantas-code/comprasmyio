@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Recalcular localizadores visíveis após exclusões, sem lacunas e sem alterar vínculos; conferir busca e sequência
 - [x] Corrigir textos cortados nos boxes e prévia, preservando fontes e ajustando espaço útil automaticamente
 - [x] Alinhar barra de tarefas à borda esquerda do box e preencher nós de branco para ocultar traços internos
 - [x] Informar onde fica o destaque de caminho crítico

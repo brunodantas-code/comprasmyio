@@ -36,13 +36,25 @@ export function computeBoxNumbers(nodes: MytosisNode[], links: MytosisLink[]) {
     predecessors.set(to.id, [...(predecessors.get(to.id) ?? []), from]);
   }
   for (const list of predecessors.values()) list.sort((a, b) => a.locator - b.locator);
+  // Stored locators remain stable; only the visible sequence is compacted.
+  const displayLocators = new Map<string, number>();
+  const roots = nodes.filter((node) => !node.parent_id).sort((a, b) => a.locator - b.locator);
+  for (const process of [false, true]) {
+    const categoryRoots = roots.filter((node) => !!node.is_process === process);
+    categoryRoots.forEach((root, rootIndex) => {
+      const scope = descendantIds(root.id, nodes);
+      const ordered = nodes.filter((node) => scope.has(node.id) && node.id !== root.id).sort((a, b) => a.locator - b.locator);
+      displayLocators.set(root.id, rootIndex + 1);
+      ordered.forEach((node, index) => displayLocators.set(node.id, index + 2));
+    });
+  }
   const numbers = new Map<string, string>();
   const path = (id: string, seen: Set<string>): number[] => {
     const node = byId.get(id);
     if (!node || seen.has(id)) return [];
     const next = new Set(seen).add(id);
     const previous = predecessors.get(id)?.[0]?.id ?? node.parent_id;
-    return [...(previous ? path(previous, next) : []), node.locator];
+    return [...(previous ? path(previous, next) : []), displayLocators.get(id) ?? node.locator];
   };
   for (const node of nodes) numbers.set(node.id, path(node.id, new Set()).join("."));
   return numbers;
