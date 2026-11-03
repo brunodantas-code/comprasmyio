@@ -72,6 +72,31 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
     window.setTimeout(() => document.getElementById(`mytosis-box-${locator}`)?.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" }), 600);
   }
   useEffect(() => { if (focusLocator !== null) { locate(focusLocator); onFocusHandled(); } }, [focusLocator]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (!locatorQuery.trim()) setHighlight(null); }, [locatorQuery]);
+
+  // Arrastar um box sobre outro cria a ligação: arrastado = predecessor, alvo = sucessor.
+  const queryClient = useQueryClient();
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [dropId, setDropId] = useState<string | null>(null);
+  const linkMutation = useMutation({
+    mutationFn: async ({ from, to }: { from: string; to: string }) => {
+      const { error } = await supabase.from("mytosis_links").insert({ predecessor_id: from, successor_id: to });
+      if (error) throw error;
+    },
+    onSuccess: (_d, v) => { toast.success(`Ligação criada: #${byId.get(v.from)?.locator} → #${byId.get(v.to)?.locator}.`); queryClient.invalidateQueries({ queryKey: ["mytosis"] }); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  function reaches(from: string, to: string) {
+    const seen = new Set<string>(); const stack = [from];
+    while (stack.length) { const c = stack.pop()!; if (c === to) return true; if (seen.has(c)) continue; seen.add(c); for (const l of data.links) if (l.predecessor_id === c) stack.push(l.successor_id); }
+    return false;
+  }
+  function connect(from: string, to: string) {
+    if (from === to) return;
+    if (data.links.some((l) => l.predecessor_id === from && l.successor_id === to)) return toast.info("Esses boxes já estão ligados.");
+    if (reaches(to, from)) return toast.error("Essa ligação criaria um ciclo entre os boxes.");
+    linkMutation.mutate({ from, to });
+  }
 
   const toggle = (set: Set<string>, id: string) => { const next = new Set(set); if (next.has(id)) next.delete(id); else next.add(id); return next; };
   const visibleFrom = last - Math.min(k, last);
@@ -99,10 +124,16 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
                 id={`mytosis-box-${node.locator}`}
                 role="button"
                 tabIndex={0}
+                draggable={canEdit && !collapsed}
+                onDragStart={(e) => { e.dataTransfer.setData("text/plain", node.id); e.dataTransfer.effectAllowed = "link"; setDragId(node.id); }}
+                onDragEnd={() => { setDragId(null); setDropId(null); }}
+                onDragOver={(e) => { if (dragId && dragId !== node.id) { e.preventDefault(); e.dataTransfer.dropEffect = "link"; if (dropId !== node.id) setDropId(node.id); } }}
+                onDragLeave={() => setDropId((d) => (d === node.id ? null : d))}
+                onDrop={(e) => { e.preventDefault(); const from = e.dataTransfer.getData("text/plain") || dragId; setDropId(null); setDragId(null); if (from) connect(from, node.id); }}
                 onClick={() => openDialog({ mode: "edit", node })}
                 onKeyDown={(e) => e.key === "Enter" && openDialog({ mode: "edit", node })}
-                title={`#${node.locator} — ${node.title}`}
-                className={cn("group relative flex h-full w-full cursor-pointer overflow-hidden transition-colors duration-300", darkText ? "text-primary-foreground [&_*]:!text-[color:var(--card)]" : "text-foreground")}
+                title={canEdit ? `#${node.locator} — ${node.title}\nArraste sobre outro box para ligá-lo como sucessor.` : `#${node.locator} — ${node.title}`}
+                className={cn("group relative flex h-full w-full cursor-pointer overflow-hidden rounded-md transition-colors duration-300", dropId === node.id && "ring-2 ring-primary ring-offset-2", dragId === node.id && "opacity-50", darkText ? "text-primary-foreground [&_*]:!text-[color:var(--card)]" : "text-foreground")}
               >
                 <ShapeSvg shape={shape} fill={fillColor} stroke={stroke} strokeWidth={highlight === node.id ? 2 : 1} className="pointer-events-none absolute inset-0 h-full w-full transition-all duration-300 group-hover:[filter:drop-shadow(0_0_1px_var(--myio-green))]" />
                 {process ? null : <div className="relative w-1.5 shrink-0 bg-primary/10" aria-label={`${pct}% concluído`}>
