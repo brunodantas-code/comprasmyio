@@ -52,7 +52,7 @@ export const borderOf = (k?: string | null) => BORDERS.find((b) => b.key === k) 
 /** Espaço interno do texto conforme a forma (losango e círculo têm menos área útil). */
 export const shapeInset: Record<ShapeKey, CSSProperties> = {
   process: {}, terminal: { paddingInline: "10%" }, document: { paddingBottom: "12%" }, decision: { paddingInline: "22%", paddingBlock: "14%" },
-  connector: { paddingInline: "16%", paddingBlock: "8%" }, io: { paddingInline: "12%" }, multidoc: { paddingTop: "12%", paddingRight: "14%", paddingBottom: "14%" },
+  connector: { paddingInline: "16%", paddingBlock: "8%" }, io: { paddingInline: "12%" }, multidoc: { paddingTop: "20%", paddingRight: "14%", paddingBottom: "18%" },
   manual: { paddingTop: "12%" }, preparation: { paddingInline: "12%" }, or: { paddingInline: "18%", paddingBlock: "10%" }, delay: { paddingRight: "12%" },
 };
 
