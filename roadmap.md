@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Reposicionar etapa arrastada à direita do destino e renumerar automaticamente; conferir persistência e ciclos
 - [x] Exportar o fluxograma visível para PDF e conferir o download e a aparência
 - [x] Conferir e remover o rótulo Fluxograma ainda mostrado no box Site Survey
 - [x] Conferir Site Survey como fluxograma 2 e concluir limite proporcional da descrição
