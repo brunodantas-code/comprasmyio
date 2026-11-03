@@ -209,7 +209,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
               {extraPreds.length && !collapsed ? <span className="absolute -top-4 left-0 text-[10px] text-muted-foreground">também depende de {extraPreds.map((p) => numberOf(p)).join(", ")}</span> : null}
             </div>
           </div>
-          {!collapsed ? <div style={{ width: data.box.width }}>
+          {!collapsed ? <div style={{ width: data.box.width }} className={tasksOpen ? "pb-6" : undefined}>
             <BoxTaskList nodeId={node.id} data={data} onOpen={setTaskSelection} expanded={tasksOpen} />
           </div> : null}
           {kids.length ? (
