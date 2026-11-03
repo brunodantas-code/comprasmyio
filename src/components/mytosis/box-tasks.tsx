@@ -7,11 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { MilestoneTimeline } from "@/components/milestone-timeline";
-import { canCompleteBoxTask, type BoxTask } from "@/lib/mytosis-tasks";
+import { canCompleteBoxTask } from "@/lib/mytosis-tasks";
 import { cn } from "@/lib/utils";
 import type { MytosisData } from "./use-mytosis";
 import { ChecklistText } from "./checklist-text";
@@ -37,7 +36,7 @@ export function BoxTaskList({ nodeId, data, onOpen }: { nodeId: string; data: My
   return <ul className="mt-2 space-y-1 border-l border-primary/30 pl-2">
     {tasks.map((task) => <li key={task.id} className="flex min-h-7 items-center gap-2">
       <Checkbox aria-label={`Concluir tarefa ${task.title}`} checked={task.completed} disabled={completion.isPending || !canCompleteBoxTask(task, data.userId, !!data.role)} onCheckedChange={(checked) => completion.mutate({ id: task.id, completed: checked === true })} />
-      <Button variant="link" className={cn("h-auto min-w-0 justify-start p-0 text-left text-xs font-normal", task.completed && "text-muted-foreground line-through")} onClick={() => onOpen({ nodeId, taskId: task.id })}><span className="break-words">{task.title}</span></Button>
+      <Button variant="ghost" className={cn("h-auto min-w-0 justify-start rounded-none p-0 text-left text-xs font-normal !bg-transparent !text-foreground hover:!bg-transparent hover:!text-primary", task.completed && "!text-muted-foreground line-through")} onClick={() => onOpen({ nodeId, taskId: task.id })}><span className="break-words">{task.title}</span></Button>
     </li>)}
   </ul>;
 }
@@ -69,7 +68,7 @@ export function BoxTaskDialog({ selection, onClose, onSelect, data, canEdit }: {
   }, [selection?.nodeId, selection?.taskId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const details = useQuery({
-    queryKey: ["mytosis-task", task?.id], enabled: !!selection && !!task,
+    queryKey: ["mytosis-task", task?.id], enabled: !!selection && !!task, refetchInterval: 15000,
     queryFn: async () => {
       if (!task) throw new Error("Tarefa não encontrada.");
       const [messages, logs, access] = await Promise.all([
@@ -115,7 +114,7 @@ export function BoxTaskDialog({ selection, onClose, onSelect, data, canEdit }: {
   const pending = questions.filter((q) => q.author_id !== data.userId && !messages.some((m) => m.reply_to_id === q.id));
   const renderMessage = (m: typeof messages[number], index: number) => <div key={m.id} className={cn("rounded-md border p-3", m.kind === "answer" ? "ml-4 border-primary/40 bg-primary/10" : "border-border bg-muted/40")}>
     <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground"><span>{m.kind === "question" ? "Pergunta" : "Resposta"} {index} · {person(m.author_id)}</span><span className="flex items-center gap-2">{new Date(m.created_at).toLocaleString("pt-BR")}{m.author_id === data.userId && details.data?.canConverse ? <Button variant="ghost" size="icon" className="h-6 w-6 !text-primary" aria-label="Editar mensagem" title="Editar mensagem" onClick={() => { setMessageEdit(m.id); setMessageText(m.text); }}><Pencil className="h-3.5 w-3.5" /></Button> : null}</span></div>
-    {messageEdit === m.id ? <div className="mt-2 space-y-2"><Textarea value={messageText} onChange={(e) => setMessageText(e.target.value)} maxLength={4000} /><div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setMessageEdit(null)}>Cancelar</Button><Button variant="outline" onClick={() => editMessage.mutate()} disabled={editMessage.isPending}>Salvar</Button></div></div> : <p className="mt-2 whitespace-pre-wrap break-words text-sm">{m.text}</p>}
+    {messageEdit === m.id ? <div className="mt-2 space-y-2"><ChecklistText label="Editar mensagem" value={messageText} onChange={setMessageText} maxLength={4000} multiline /><div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setMessageEdit(null)}>Cancelar</Button><Button variant="outline" onClick={() => editMessage.mutate()} disabled={editMessage.isPending}>Salvar</Button></div></div> : <p className="mt-2 whitespace-pre-wrap break-words text-sm">{m.text}</p>}
   </div>;
 
   return <Dialog open={!!selection} onOpenChange={(open) => !open && onClose()}><DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
@@ -131,7 +130,7 @@ export function BoxTaskDialog({ selection, onClose, onSelect, data, canEdit }: {
       <section className="space-y-3 border-t border-border pt-4"><h3 className="flex items-center gap-2 text-sm font-normal"><MessageCircleQuestion className="h-4 w-4" />Conversa</h3>
         {details.isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : null}{details.error ? <p role="alert" className="text-sm text-destructive">Não foi possível carregar a conversa. {details.error.message}</p> : null}
         {questions.map((q, i) => <div key={q.id} className="space-y-2">{renderMessage(q, i + 1)}{messages.filter((a) => a.reply_to_id === q.id).map((a) => renderMessage(a, i + 1))}</div>)}
-        {details.data?.canConverse ? <div className="space-y-2">{pending.length ? <SearchableSelect value={replyId} onChange={setReplyId} placeholder="Nova pergunta" options={[{ value: "", label: "Nova pergunta" }, ...pending.map((q) => ({ value: q.id, label: `Responder à pergunta ${questions.findIndex((p) => p.id === q.id) + 1}: ${q.text}` }))]} /> : null}<Textarea aria-label={replyId ? "Resposta" : "Nova pergunta"} placeholder={replyId ? "Escreva a resposta" : "Escreva uma pergunta"} value={text} onChange={(e) => setText(e.target.value)} maxLength={4000} /><div className="flex justify-end"><Button variant="outline" onClick={() => send.mutate()} disabled={send.isPending || !text.trim()}><Send className="h-4 w-4" />{replyId ? "Enviar resposta" : "Enviar pergunta"}</Button></div></div> : null}
+        {details.data?.canConverse ? <div className="space-y-2">{pending.length ? <SearchableSelect value={replyId} onChange={setReplyId} placeholder="Nova pergunta" options={[{ value: "", label: "Nova pergunta" }, ...pending.map((q) => ({ value: q.id, label: `Responder à pergunta ${questions.findIndex((p) => p.id === q.id) + 1}: ${q.text}` }))]} /> : null}<ChecklistText label={replyId ? "Resposta" : "Nova pergunta"} hint={replyId ? "Escreva a resposta" : "Escreva uma pergunta"} value={text} onChange={setText} maxLength={4000} multiline /><div className="flex justify-end"><Button variant="outline" onClick={() => send.mutate()} disabled={send.isPending || !text.trim()}><Send className="h-4 w-4" />{replyId ? "Enviar resposta" : "Enviar pergunta"}</Button></div></div> : null}
       </section>
       <section className="space-y-3 border-t border-border pt-4"><h3 className="flex items-center gap-2 text-sm font-normal"><History className="h-4 w-4" />Histórico</h3><MilestoneTimeline entries={(details.data?.logs ?? []).map((log) => ({ id: log.id, created_at: log.created_at, text: `${log.text}\npor ${person(log.actor_id)}` }))} /></section>
       <DialogFooter><Button variant="outline" onClick={onClose}>Fechar</Button></DialogFooter>
