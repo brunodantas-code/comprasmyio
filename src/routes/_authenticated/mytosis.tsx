@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { ChevronLeft, Target, UsersRound, Workflow } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,9 +9,12 @@ import { useMytosisData } from "@/components/mytosis/use-mytosis";
 import { Flowchart } from "@/components/mytosis/flowchart";
 import { OkrsTab } from "@/components/mytosis/okrs-tab";
 import { UsersTab } from "@/components/mytosis/users-tab";
+import { BoxTaskDialog, type TaskSelection } from "@/components/mytosis/box-tasks";
+import { rootObjectiveOf } from "@/lib/mytosis";
 import { NodeDialog, type NodeDialogState } from "@/components/mytosis/node-dialog";
 
 export const Route = createFileRoute("/_authenticated/mytosis")({
+  validateSearch: (search: Record<string, unknown>): { node?: string; task?: string } => ({ node: typeof search.node === "string" ? search.node : undefined, task: typeof search.task === "string" ? search.task : undefined }),
   beforeLoad: async ({ context }) => {
     const { data } = await supabase.rpc("mytosis_role", { _user_id: context.user.id });
     if (!data) throw redirect({ to: "/portal" });
@@ -33,12 +36,25 @@ type Section = "okrs" | "flow" | "users";
 
 function MytosisPage() {
   const { data, isLoading } = useMytosisData();
+  const search = Route.useSearch();
+  const [pendingTask, setPendingTask] = useState<TaskSelection>(null);
   const [section, setSection] = useState<Section>("okrs");
   const [objectiveId, setObjectiveId] = useState("");
   const [okrId, setOkrId] = useState("");
   const [okrFocus, setOkrFocus] = useState<number | null>(null);
   const [focusLocator, setFocusLocator] = useState<number | null>(null);
   const [dialog, setDialog] = useState<NodeDialogState>(null);
+
+  useEffect(() => {
+    if (!data || !search.node) return;
+    const node = data.nodes.find((item) => item.id === search.node);
+    if (!node) return;
+    const root = rootObjectiveOf(node.id, data.nodes);
+    if (node.is_process) { setSection("flow"); setObjectiveId(root?.id ?? node.id); setFocusLocator(node.locator); }
+    else { setSection("okrs"); setOkrId(root?.id ?? node.id); setOkrFocus(node.locator); }
+    if (search.task) setPendingTask({ nodeId: node.id, taskId: search.task });
+    else setDialog({ mode: "edit", node });
+  }, [data?.nodes, search.node, search.task]);
 
   if (isLoading || !data) return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Carregando...</div>;
   const canEdit = data.role === "admin" || data.role === "editor";
@@ -53,11 +69,12 @@ function MytosisPage() {
     <div className="min-h-screen bg-background">
       <AppHeader logo={<MyioAppLogo appName="Mytosis" className="text-xl sm:text-2xl" />} />
       <main className="mx-auto max-w-[1500px] px-4 pb-28 pt-6 sm:px-6">
-        {section === "okrs" && !okrId ? <OkrsTab data={data} canEdit={canEdit} openDialog={setDialog} onOpenObjective={setOkrId} onLocate={(loc) => { const n = data.nodes.find((x) => x.locator === loc); let r = n; while (r?.parent_id) r = data.nodes.find((x) => x.id === r!.parent_id); if (r) { setOkrId(r.id); setOkrFocus(loc); } }} /> : null}
+        {section === "okrs" && !okrId ? <OkrsTab data={data} canEdit={canEdit} openDialog={setDialog} onOpenObjective={setOkrId} onLocate={(loc) => { const n = data.nodes.find((x) => x.locator === loc); let r = n; while (r?.parent_id) { const parent = r.parent_id; r = data.nodes.find((x) => x.id === parent); } if (r) { setOkrId(r.id); setOkrFocus(loc); } }} /> : null}
         {section === "okrs" && okrId ? <div className="space-y-3"><Button variant="ghost" className="text-primary" onClick={() => setOkrId("")}><ChevronLeft className="h-4 w-4" />Voltar aos OKRs</Button><Flowchart process={false} data={data} canEdit={canEdit} objectiveId={okrId} onObjectiveChange={setOkrId} focusLocator={okrFocus} onFocusHandled={() => setOkrFocus(null)} openDialog={setDialog} /></div> : null}
         {section === "flow" ? <Flowchart process data={data} canEdit={canEdit} objectiveId={currentObjective} onObjectiveChange={setObjectiveId} focusLocator={focusLocator} onFocusHandled={() => setFocusLocator(null)} openDialog={setDialog} /> : null}
         {section === "users" ? <UsersTab data={data} /> : null}
       </main>
+      <BoxTaskDialog selection={pendingTask} onSelect={setPendingTask} onClose={() => setPendingTask(null)} data={data} canEdit={canEdit} />
       <NodeDialog state={dialog} onClose={() => setDialog(null)} data={data} canEdit={canEdit} />
       <nav className="fixed inset-x-3 bottom-3 z-50" aria-label="Navegação do Mytosis">
         <div className="mx-auto grid max-w-md grid-cols-3 items-stretch rounded-[1.75rem] border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/90">

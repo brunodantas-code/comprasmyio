@@ -43,7 +43,7 @@
 - Mytosis numbers/search use compact hierarchy paths; dependencies order siblings without adding levels. Drag moves use an authenticated invoker RPC; IDs/locators stay stable.
 - Mytosis internal checklists live in separate node-keyed tasks, messages and append-only audit logs, never as process boxes; database guards bind identities and authorize completion, while the shared task-signal helper keeps predecessor warnings independent of advancement.
 - OKR conversations use node-keyed messages and append-only logs, separate from task conversations; author-bound edits and same-node answer guards preserve history without changing existing node access.
-- Mytosis typography/colors persist and copy on import/split; preview and canvas share NodeFrame/NodeText and shape-specific safe insets, with external chrome for constrained symbols and surface-only connector measurement, growing vertically to fit text without overlap.
+- Mytosis styles copy on import/split; preview/canvas share fixed-size NodeFrame/NodeText, safe shape insets and measured text fitting without truncation. External chrome fits inside total settings height; connectors measure surfaces only.
 - Mytosis connectors use pure obstacle routing and a size-bound paint-contained SVG; observe transitions and clipped endpoints. Processes draw explicit links, OKRs retain hierarchy; preserve styles/edit hit areas.
-- Mytosis right/lower branches and tasks collapse independently per box; controls preserve dependencies and predecessors.
+- Mytosis branches/tasks collapse independently; new stages inherit source formatting. Question recipients are server-validated participants; Central reads unanswered addressed messages via an invoker RPC.
 - Mytosis title limits use size/font/shape; never truncate old titles. PDF captures the visible canvas on one proportional page. Node attachments use private owner/node paths, role-gated rows and signed URLs; object ownership checks avoid recursive RLS.

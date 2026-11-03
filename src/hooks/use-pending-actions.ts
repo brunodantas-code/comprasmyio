@@ -26,7 +26,7 @@ export function usePendingActions() {
       if (authError || !authData.user) throw authError ?? new Error("Sessão não encontrada");
       const userId = authData.user.id;
 
-      const [stepsResult, deletionsResult, codeResult, codeMessagesResult, supplyQueueResult, supportCallsResult] = await Promise.all([
+      const [stepsResult, deletionsResult, codeResult, codeMessagesResult, supplyQueueResult, supportCallsResult, mytosisResult] = await Promise.all([
         supabase
           .from("approval_steps")
           .select("order_id, step_index, approver_id, status, purchase_orders(requester_id)")
@@ -50,6 +50,7 @@ export function usePendingActions() {
               .in("status", ["pendente", "comprado_aguardando", "recebido_problema"])
           : Promise.resolve({ count: 0, error: null }),
         supabase.from("internal_calls").select("id, call_number, title, status, reporter_id").order("created_at", { ascending: false }),
+        supabase.rpc("mytosis_pending_questions"),
       ]);
 
       if (stepsResult.error) throw stepsResult.error;
@@ -58,6 +59,7 @@ export function usePendingActions() {
       if (codeMessagesResult.error) throw codeMessagesResult.error;
       if (supplyQueueResult.error) throw supplyQueueResult.error;
       if (supportCallsResult.error) throw supportCallsResult.error;
+      if (mytosisResult.error) throw mytosisResult.error;
 
       const isAdmin = currentUser?.isAdmin ?? false;
       const steps = (stepsResult.data ?? []) as ApprovalStep[];
@@ -108,6 +110,8 @@ export function usePendingActions() {
       const supportCalls = supportCallItems.length;
 
       return {
+        mytosisItems: mytosisResult.data ?? [],
+        mytosisQuestions: mytosisResult.data?.length ?? 0,
         approvals: pendingApprovals,
         userDeletions: pendingUserDeletions,
         codeTickets: pendingCodeTickets,
@@ -117,7 +121,7 @@ export function usePendingActions() {
         supportCallItems,
         isCustomerSupportAnalyst: currentUser?.isCustomerSupportAnalyst ?? false,
         supply: pendingApprovals + pendingUserDeletions + pendingSupplyQueue,
-        total: pendingApprovals + pendingUserDeletions + pendingCodeTickets + pendingSupplyQueue + supportCalls,
+        total: pendingApprovals + pendingUserDeletions + pendingCodeTickets + pendingSupplyQueue + supportCalls + (mytosisResult.data?.length ?? 0),
       };
     },
     staleTime: 30_000,

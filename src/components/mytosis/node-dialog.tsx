@@ -22,10 +22,11 @@ import { NodePreview } from "./node-preview";
 import { firstName } from "./use-mytosis";
 import { ColorOptions } from "./color-options";
 import { NodeAttachments, uploadNodeAttachments } from "./node-attachments";
+import { initialStageFormat } from "@/lib/mytosis-format";
 
 export type NodeDialogState =
   | { mode: "edit"; node: MytosisNode }
-  | { mode: "create"; kind: "objective" | "task"; parentId: string | null; predecessorId?: string | null; process?: boolean }
+  | { mode: "create"; kind: "objective" | "task"; parentId: string | null; predecessorId?: string | null; formatSourceId?: string; process?: boolean }
   | null;
 
 export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialogState; onClose: () => void; data: MytosisData; canEdit: boolean }) {
@@ -63,22 +64,24 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
   useEffect(() => {
     if (!state) return;
     setPendingFiles([]); setCreatedId(null);
+    const sourceId = state.mode === "create" ? state.formatSourceId ?? state.predecessorId ?? state.parentId : null;
+    const format = initialStageFormat(data.nodes, editing, sourceId);
     setTitle(editing?.title ?? "");
-    setTitleSize(editing?.title_font_size ?? 18);
-    setTitleColor(TITLE_COLORS.find((item) => item.key === editing?.title_color)?.key ?? null);
-    setControlColor(TITLE_COLORS.find((item) => item.key === editing?.control_color)?.key ?? null);
-    setDescriptionSize(editing?.description_font_size ?? 11);
-    setTextAlign(editing?.text_align ?? "left");
-    setVerticalAlign(editing?.text_vertical_align ?? "center");
+    setTitleSize(format?.title_font_size ?? 18);
+    setTitleColor(TITLE_COLORS.find((item) => item.key === format?.title_color)?.key ?? null);
+    setControlColor(TITLE_COLORS.find((item) => item.key === format?.control_color)?.key ?? null);
+    setDescriptionSize(format?.description_font_size ?? 11);
+    setTextAlign(format?.text_align ?? "left");
+    setVerticalAlign(format?.text_vertical_align ?? "center");
     setDescription(editing?.description ?? "");
     setResponsible(editing?.responsible_id ?? (state.mode === "create" ? data.userId : ""));
     setDue(editing?.due_date ?? "");
     setWeight(String(editing?.weight ?? 0));
     setProgress(String(editing?.progress ?? 0));
-    setShape((editing?.shape as ShapeKey) ?? "process");
-    setFillKey((editing?.fill_color as FillKey) ?? "none");
-    setBorderKey((editing?.border_color as BorderKey) ?? "green-mid");
-    setLinkStyle(((editing && data.links.find((l) => l.successor_id === editing.id)?.style) as LinkStyle) ?? "arrow");
+    setShape((format?.shape as ShapeKey) ?? "process");
+    setFillKey((format?.fill_color as FillKey) ?? "none");
+    setBorderKey((format?.border_color as BorderKey) ?? "green-mid");
+    setLinkStyle(((format && data.links.find((l) => l.successor_id === format.id)?.style) as LinkStyle) ?? "arrow");
     setPreds(new Set(editing
       ? data.links.filter((l) => l.successor_id === editing.id).map((l) => l.predecessor_id)
       : state.mode === "create" && state.predecessorId ? [state.predecessorId] : []));
@@ -172,7 +175,7 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
         <fieldset disabled={!canEdit} className="grid gap-4">
           <div className="grid gap-1.5"><Label>Título</Label><ChecklistText label="Título" value={title} onChange={setTitle} maxLength={titleLimit} hint="Use a Descrição para mais informações." autoFocus />{titleTooLong ? <p role="alert" className="text-xs text-destructive">O título excede o limite atual de {titleLimit} caracteres. Reduza o título ou transfira as informações para a Descrição.</p> : null}</div>
           <div className="grid gap-2 rounded-xl border border-border bg-muted/40 p-3">
-            <NodePreview width={data.box.width} height={data.box.height} shape={shape} fillKey={fillKey} borderKey={borderKey} title={title} description={description} responsible={firstName(data.users.find((user) => user.id === responsible)?.full_name ?? "—")} number={editing ? numbers.get(editing.id) ?? String(editing.locator) : "…"} titleSize={titleSize} descriptionSize={descriptionSize} titleColor={titleColor} controlColor={controlColor} align={textAlign} verticalAlign={verticalAlign} process={isProcess} />
+            <NodePreview width={data.box.width} height={data.box.height} shape={shape} fillKey={fillKey} borderKey={borderKey} title={title} description={description} responsible={firstName(data.users.find((user) => user.id === responsible)?.full_name ?? "—")} number={editing ? numbers.get(editing.id) ?? String(editing.locator) : "…"} titleSize={titleSize} descriptionSize={descriptionSize} titleColor={titleColor} controlColor={controlColor} align={textAlign} verticalAlign={verticalAlign} process={isProcess} hasAttachments={pendingFiles.length > 0 || data.attachmentNodeIds.includes(editing?.id ?? createdId ?? "")} />
             <div className="grid gap-1"><Label className="text-xs text-muted-foreground">Forma</Label>
               <div className="flex flex-wrap gap-1.5">{SHAPES.map((s) => (
                 <button key={s.key} type="button" title={s.label} aria-label={s.label} aria-pressed={shape === s.key} onClick={() => setShape(s.key)} className={cn("flex w-16 flex-col items-center justify-center gap-0.5 rounded-md border bg-card px-1 py-1.5 transition-colors", shape === s.key ? "border-primary bg-primary/10" : "border-border hover:border-primary/60")}>

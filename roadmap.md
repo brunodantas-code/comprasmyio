@@ -1,4 +1,9 @@
 # Roadmap
+- [x] Nova Etapa inicia com formatação da anterior na prévia, permitindo edição individual
+- [x] Permitir escolher destinatário das perguntas do Mytosis e mostrar na Central de Pendências
+- [x] Mostrar miniaturas de anexos e clipe somente em boxes com anexos
+- [x] Aplicar largura e altura iguais conforme Padrões dos boxes, conferindo textos e controles
+- [ ] Conferir leitura/resposta na Central como destinatário: sessão de outro usuário indisponível para este usuário do editor
 - [x] Investigar novo erro de redesenho ao recolher boxes após ajustes de formas
 - [x] Simplificar conectores com setas retas sem degraus quando não houver obstáculos
 - [x] Permitir anexar foto/arquivo pelo clipe à esquerda do Mytosis e pelo campo Anexo ao fim do editor
