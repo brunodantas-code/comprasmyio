@@ -15,6 +15,7 @@ import { BORDERS, ConnectorGlyph, FILLS, LINK_STYLES, SHAPES, ShapeSvg, type Bor
 import { cn } from "@/lib/utils";
 import { ChecklistText } from "./checklist-text";
 import { NodeConversation } from "./node-conversation";
+import { boxTitleLimit } from "@/lib/mytosis-title";
 import { AlignLeft, AlignCenter, AlignRight, AlignStartVertical, AlignCenterVertical, AlignEndVertical } from "lucide-react";
 
 export type NodeDialogState =
@@ -44,6 +45,8 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
   const [descriptionSize, setDescriptionSize] = useState(11);
   const [textAlign, setTextAlign] = useState<"left" | "center" | "right">("left");
   const [verticalAlign, setVerticalAlign] = useState<"top" | "center" | "bottom">("center");
+  const titleLimit = boxTitleLimit(data.box.width, titleSize, shape);
+  const titleTooLong = title.trim().length > titleLimit;
 
   useEffect(() => {
     if (!state) return;
@@ -84,6 +87,7 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
   const save = useMutation({
     mutationFn: async () => {
       if (!title.trim()) throw new Error("Informe o título.");
+      if (titleTooLong) throw new Error(`O título permite até ${titleLimit} caracteres para este box. Use a Descrição para as demais informações.`);
       if (![titleSize, descriptionSize].every((size) => Number.isInteger(size) && size >= 10 && size <= 32)) throw new Error("Informe tamanhos de fonte entre 10 e 32 px.");
       if (!responsible) throw new Error("Informe o Responsável.");
       if (!due && !isProcess) throw new Error("Informe a Data estimada de conclusão.");
@@ -146,7 +150,7 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
           <DialogDescription>{editing ? `Criado em ${new Date(editing.created_at).toLocaleDateString("pt-BR")}` : `Data de criação: ${new Date().toLocaleDateString("pt-BR")}`}</DialogDescription>
         </DialogHeader>
         <fieldset disabled={!canEdit} className="grid gap-4">
-          <div className="grid gap-1.5"><Label>Título</Label><ChecklistText label="Título" value={title} onChange={setTitle} maxLength={200} hint="Redija o nome do box." autoFocus /></div>
+          <div className="grid gap-1.5"><Label>Título</Label><ChecklistText label="Título" value={title} onChange={setTitle} maxLength={titleLimit} hint="Use a Descrição para mais informações." autoFocus />{titleTooLong ? <p role="alert" className="text-xs text-destructive">O título excede o limite atual de {titleLimit} caracteres. Reduza o título ou transfira as informações para a Descrição.</p> : null}</div>
           <div className="grid gap-2 rounded-xl border border-border bg-muted/40 p-3">
             <div className="grid gap-1"><Label className="text-xs text-muted-foreground">Forma</Label>
               <div className="flex flex-wrap gap-1.5">{SHAPES.map((s) => (
@@ -210,7 +214,7 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
         <DialogFooter className="gap-2">
           {editing && canEdit ? <Button variant="outline" onClick={() => { if (window.confirm(`Excluir ${numbers.get(editing.id) ?? editing.locator} e todas as tarefas abaixo dele?`)) remove.mutate(); }} disabled={remove.isPending}>Excluir</Button> : null}
           <Button variant="outline" onClick={onClose}>Cancelar</Button>
-          {canEdit ? <Button variant="outline" onClick={() => save.mutate()} disabled={save.isPending}>Salvar</Button> : null}
+          {canEdit ? <Button variant="outline" onClick={() => save.mutate()} disabled={save.isPending || titleTooLong}>Salvar</Button> : null}
         </DialogFooter>
       </DialogContent>
     </Dialog>
