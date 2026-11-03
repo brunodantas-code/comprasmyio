@@ -20,6 +20,7 @@ import { AlignLeft, AlignCenter, AlignRight, AlignStartVertical, AlignCenterVert
 import { TITLE_COLORS, type TitleColorKey } from "./title-colors";
 import { NodePreview } from "./node-preview";
 import { firstName } from "./use-mytosis";
+import { ColorOptions } from "./color-options";
 
 export type NodeDialogState =
   | { mode: "edit"; node: MytosisNode }
@@ -46,6 +47,7 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
   const [linkStyle, setLinkStyle] = useState<LinkStyle>("arrow");
   const [titleSize, setTitleSize] = useState(18);
   const [titleColor, setTitleColor] = useState<TitleColorKey | null>(null);
+  const [controlColor, setControlColor] = useState<TitleColorKey | null>(null);
   const [descriptionSize, setDescriptionSize] = useState(11);
   const [textAlign, setTextAlign] = useState<"left" | "center" | "right">("left");
   const [verticalAlign, setVerticalAlign] = useState<"top" | "center" | "bottom">("center");
@@ -57,6 +59,7 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
     setTitle(editing?.title ?? "");
     setTitleSize(editing?.title_font_size ?? 18);
     setTitleColor(TITLE_COLORS.find((item) => item.key === editing?.title_color)?.key ?? null);
+    setControlColor(TITLE_COLORS.find((item) => item.key === editing?.control_color)?.key ?? null);
     setDescriptionSize(editing?.description_font_size ?? 11);
     setTextAlign(editing?.text_align ?? "left");
     setVerticalAlign(editing?.text_vertical_align ?? "center");
@@ -100,7 +103,7 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
       if (!isProcess && kind === "task" && parentId && siblingWeight + w > 100) throw new Error(`A soma dos pesos passa de 100% (demais tarefas: ${siblingWeight}%).`);
       const row = {
         title: title.trim(), description: description.trim() || null, responsible_id: responsible, due_date: isProcess ? null : due,
-        shape, fill_color: fillKey, border_color: borderKey,
+        shape, fill_color: fillKey, border_color: borderKey, control_color: controlColor,
         title_font_size: titleSize, title_color: titleColor, description_font_size: descriptionSize, text_align: textAlign, text_vertical_align: verticalAlign,
         weight: w, progress: kids.length ? editing?.progress ?? 0 : Math.min(100, Math.max(0, Number(progress) || 0)),
       };
@@ -157,7 +160,7 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
         <fieldset disabled={!canEdit} className="grid gap-4">
           <div className="grid gap-1.5"><Label>Título</Label><ChecklistText label="Título" value={title} onChange={setTitle} maxLength={titleLimit} hint="Use a Descrição para mais informações." autoFocus />{titleTooLong ? <p role="alert" className="text-xs text-destructive">O título excede o limite atual de {titleLimit} caracteres. Reduza o título ou transfira as informações para a Descrição.</p> : null}</div>
           <div className="grid gap-2 rounded-xl border border-border bg-muted/40 p-3">
-            <NodePreview width={data.box.width} height={data.box.height} shape={shape} fillKey={fillKey} borderKey={borderKey} title={title} description={description} responsible={firstName(data.users.find((user) => user.id === responsible)?.full_name ?? "—")} number={editing ? numbers.get(editing.id) ?? String(editing.locator) : "…"} titleSize={titleSize} descriptionSize={descriptionSize} titleColor={titleColor} align={textAlign} verticalAlign={verticalAlign} process={isProcess} />
+            <NodePreview width={data.box.width} height={data.box.height} shape={shape} fillKey={fillKey} borderKey={borderKey} title={title} description={description} responsible={firstName(data.users.find((user) => user.id === responsible)?.full_name ?? "—")} number={editing ? numbers.get(editing.id) ?? String(editing.locator) : "…"} titleSize={titleSize} descriptionSize={descriptionSize} titleColor={titleColor} controlColor={controlColor} align={textAlign} verticalAlign={verticalAlign} process={isProcess} />
             <div className="grid gap-1"><Label className="text-xs text-muted-foreground">Forma</Label>
               <div className="flex flex-wrap gap-1.5">{SHAPES.map((s) => (
                 <button key={s.key} type="button" title={s.label} aria-label={s.label} aria-pressed={shape === s.key} onClick={() => setShape(s.key)} className={cn("flex w-16 flex-col items-center justify-center gap-0.5 rounded-md border bg-card px-1 py-1.5 transition-colors", shape === s.key ? "border-primary bg-primary/10" : "border-border hover:border-primary/60")}>
@@ -173,10 +176,8 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
                 <div className="flex flex-wrap gap-1.5">{BORDERS.map((b) => <button key={b.key} type="button" title={b.label} aria-label={`Borda ${b.label}`} aria-pressed={borderKey === b.key} onClick={() => setBorderKey(b.key)} className={cn("h-7 w-7 rounded-full border-[3px] bg-card", borderKey === b.key && "ring-2 ring-primary ring-offset-1")} style={{ borderColor: b.color }} />)}</div>
               </div>
             </div>
-            <div className="grid gap-1.5"><Label className="text-xs text-muted-foreground">Cor do título</Label><div className="flex flex-wrap items-center gap-2">
-              <Button type="button" variant="outline" aria-pressed={titleColor === null} className={cn("h-7 px-2 text-xs", titleColor === null && "!bg-primary !text-primary-foreground")} onClick={() => setTitleColor(null)}>Automática</Button>
-              {TITLE_COLORS.map((color) => <Button key={color.key} type="button" variant="outline" size="icon" title={color.label} aria-label={`Cor do título ${color.label}`} aria-pressed={titleColor === color.key} onClick={() => setTitleColor(color.key)} className={cn("h-7 w-7 rounded-full p-1", titleColor === color.key && "ring-2 ring-primary ring-offset-1")}><span className="h-full w-full rounded-full border border-border" style={{ backgroundColor: color.color }} /></Button>)}
-            </div></div>
+            <ColorOptions label="Cor do título" value={titleColor} onChange={setTitleColor} />
+            <ColorOptions label="Cor dos botões e setas" value={controlColor} onChange={setControlColor} defaultLabel="Padrão" />
             {kind === "task" ? <div className="grid gap-1"><Label className="text-xs text-muted-foreground">Conector de entrada (vindo do box predecessor)</Label>
               <div className="flex flex-wrap gap-1.5">{LINK_STYLES.map((l) => <button key={l.key} type="button" title={l.label} aria-label={l.label} aria-pressed={linkStyle === l.key} onClick={() => setLinkStyle(l.key)} className={cn("flex h-8 items-center gap-2 rounded-md border bg-card px-2 text-xs", linkStyle === l.key ? "border-primary bg-primary/10" : "border-border hover:border-primary/60")}><ConnectorGlyph style={l.key} color="var(--foreground)" />{l.label}</button>)}</div>
             </div> : null}

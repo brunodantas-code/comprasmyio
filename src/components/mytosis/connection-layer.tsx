@@ -71,6 +71,6 @@ export function ConnectionLayer({ container, nodes, links, layoutKey, onSelect }
         {style === "double" ? <path d={arrow(start, da)} /> : null}
       </g>;
     })}
-    {[...ports].map(([key, point]) => <circle key={key} cx={point.x} cy={point.y} r={radius} fill="none" stroke={point.color} strokeWidth={1} />)}
+    {[...ports].map(([key, point]) => <circle key={key} cx={point.x} cy={point.y} r={radius} fill="var(--mytosis-text-light)" stroke={point.color} strokeWidth={1} />)}
   </svg>;
 }

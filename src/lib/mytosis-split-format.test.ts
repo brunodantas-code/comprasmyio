@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { expect, it } from "vitest";
 
 it("a divisão herda toda a formatação diretamente da etapa original", () => {
-  const sql = readFileSync(new URL("../../drizzle/migrations/0152_mytosis_split_inherit_format.sql", import.meta.url), "utf8");
+  const sql = readFileSync(new URL("../../drizzle/migrations/0153_mytosis_control_colors.sql", import.meta.url), "utf8");
   const insert = sql.match(/INSERT INTO public\.mytosis_nodes\s*\(([^)]+)\)\s*VALUES\s*\(([^;]+)\)\s*RETURNING/);
   expect(insert).not.toBeNull();
   if (!insert) return;
@@ -17,7 +17,7 @@ it("a divisão herda toda a formatação diretamente da etapa original", () => {
     if (char === "," && depth === 0) { values.push(insert[2].slice(start, index).trim()); start = index + 1; }
   }
   values.push(insert[2].slice(start).trim());
-  for (const field of ["shape", "fill_color", "border_color", "title_font_size", "description_font_size", "text_align", "text_vertical_align", "title_color"]) {
+  for (const field of ["shape", "fill_color", "border_color", "title_font_size", "description_font_size", "text_align", "text_vertical_align", "title_color", "control_color"]) {
     expect(fields).toContain(field);
     expect(values[fields.indexOf(field)]).toBe(`source.${field}`);
   }

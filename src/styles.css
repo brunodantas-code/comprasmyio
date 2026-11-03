@@ -4,6 +4,20 @@
 
 @custom-variant dark (&:is(.dark *));
 
+.mytosis-controls { --mytosis-control-color: var(--myio-green); }
+.mytosis-controls[data-control-color="black"] { --mytosis-control-color: var(--mytosis-text-dark); }
+.mytosis-controls[data-control-color="white"] { --mytosis-control-color: var(--mytosis-text-light); }
+.mytosis-controls[data-control-color="purple"] { --mytosis-control-color: var(--myio-purple); }
+.mytosis-controls[data-control-color="dark"] { --mytosis-control-color: var(--myio-dark); }
+.mytosis-controls[data-control-color="gray"] { --mytosis-control-color: var(--mytosis-gray-line); }
+@layer base {
+  .mytosis-controls button,
+  .mytosis-controls button:hover,
+  .mytosis-controls button:active,
+  .mytosis-controls button:focus-visible,
+  .mytosis-controls [data-mytosis-control] { color: var(--mytosis-control-color) !important; }
+}
+
 /*
  * Design system definition.
  *

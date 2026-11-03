@@ -1,4 +1,7 @@
 # Roadmap
+- [x] Alinhar barra de tarefas à borda esquerda do box e preencher nós de branco para ocultar traços internos
+- [x] Informar onde fica o destaque de caminho crítico
+- [x] Retirar bordas das opções de cor da fonte e permitir cor dos controles por box, com prévia, persistência e herança no split/importação
 - [x] Incluir prévia da etapa e cor do título persistida; conferir criação e edição, preservando a cor na importação
 - [x] Aplicar fontes pretas no roxo médio e brancas no roxo myio; alinhar pendências com o Responsável e conferir no fluxograma
 - [x] Incluir divisão em N etapas dependentes pelo ícone Mytosis no topo do box e conferir criação persistida
