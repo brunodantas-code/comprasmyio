@@ -8,7 +8,7 @@ export function NodeFrame({ shape, height, fill, stroke, fillKey, strokeWidth = 
   strokeWidth?: number; header: ReactNode; footer: ReactNode; children: ReactNode;
   progress?: number; collapsed?: boolean; controlColor?: string | null;
 }) {
-  const external = shapeExternalChrome(shape) && !collapsed;
+  const external = !collapsed && (shapeExternalChrome(shape) || (height < 140 && shape !== "process"));
   const contrast = fillKey === "purple" || fillKey === "dark"
     ? "text-mytosis-text-light [&_p:not([data-mytosis-title])]:!text-mytosis-text-light [&_span]:!text-mytosis-text-light"
     : fillKey === "purple-mid" ? "text-mytosis-text-dark [&_p:not([data-mytosis-title])]:!text-mytosis-text-dark [&_span]:!text-mytosis-text-dark" : "text-foreground";
