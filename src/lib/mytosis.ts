@@ -139,7 +139,7 @@ export function groupPendings(
   nameOf: (id: string | null) => string,
 ) {
   const progress = computeProgress(nodes);
-  const pending = nodes.filter((n) => n.kind === "task" && (progress.get(n.id) ?? 0) < 100);
+  const pending = nodes.filter((n) => n.kind === "task" && !n.is_process && (progress.get(n.id) ?? 0) < 100);
   const groups = new Map<string, PendingGroup>();
   for (const node of pending) {
     const key = by === "responsible" ? node.responsible_id ?? "" : node.due_date ?? "";
