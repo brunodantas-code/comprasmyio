@@ -1030,6 +1030,13 @@
       "when": 1793718809225,
       "tag": "0146_mytosis_internal_tasks",
       "breakpoints": true
+    },
+    {
+      "idx": 147,
+      "version": "7",
+      "when": 1793723530609,
+      "tag": "0147_mytosis_box_text_layout",
+      "breakpoints": true
     }
   ]
 }

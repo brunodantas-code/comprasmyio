@@ -2709,6 +2709,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           description: string | null
+          description_font_size: number
           due_date: string | null
           fill_color: string
           id: string
@@ -2720,7 +2721,10 @@ export type Database = {
           progress: number
           responsible_id: string | null
           shape: string
+          text_align: string
+          text_vertical_align: string
           title: string
+          title_font_size: number
           updated_at: string
           weight: number
         }
@@ -2729,6 +2733,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          description_font_size?: number
           due_date?: string | null
           fill_color?: string
           id?: string
@@ -2740,7 +2745,10 @@ export type Database = {
           progress?: number
           responsible_id?: string | null
           shape?: string
+          text_align?: string
+          text_vertical_align?: string
           title: string
+          title_font_size?: number
           updated_at?: string
           weight?: number
         }
@@ -2749,6 +2757,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          description_font_size?: number
           due_date?: string | null
           fill_color?: string
           id?: string
@@ -2760,7 +2769,10 @@ export type Database = {
           progress?: number
           responsible_id?: string | null
           shape?: string
+          text_align?: string
+          text_vertical_align?: string
           title?: string
+          title_font_size?: number
           updated_at?: string
           weight?: number
         }
