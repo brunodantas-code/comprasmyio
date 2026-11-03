@@ -10,6 +10,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { MyioPlatformLogo } from "@/components/myio-platform-logo";
 import { ErpAppAccessAdmin } from "@/components/erp-app-access-admin";
 import { CrmFunnelIcon } from "@/components/crm-funnel-icon";
+import { MytosisIcon } from "@/components/mytosis-icon";
 import { usePendingActions } from "@/hooks/use-pending-actions";
 import { ChangePasswordDialog } from "@/components/change-password-dialog";
 import { ThemeMenuItem, ThemeToggle } from "@/components/theme-toggle";
@@ -40,15 +41,16 @@ function PortalPage() {
       const { data: authData, error: authError } = await supabase.auth.getUser();
       if (authError || !authData.user) throw authError ?? new Error("Sessão não encontrada");
       const userId = authData.user.id;
-      const [{ data: profile }, { data: accesses, error: accessError }, { data: erpAdmin }] = await Promise.all([
+      const [{ data: profile }, { data: accesses, error: accessError }, { data: erpAdmin }, { data: mytosisRole }] = await Promise.all([
         supabase.from("profiles").select("full_name, email").eq("id", userId).maybeSingle(),
         supabase.from("user_app_access").select("app_key").eq("user_id", userId),
         supabase.from("erp_admins").select("user_id").eq("user_id", userId).maybeSingle(),
+        supabase.rpc("mytosis_role", { _user_id: userId }),
       ]);
       if (accessError) throw accessError;
       return {
         name: profile?.full_name || profile?.email || authData.user.email || "Usuário",
-        appKeys: new Set((accesses ?? []).map((access) => access.app_key)),
+        appKeys: new Set([...(accesses ?? []).map((access) => access.app_key), ...(mytosisRole ? ["mytosis"] : [])]),
         isErpAdmin: Boolean(erpAdmin),
       };
     },
@@ -75,6 +77,7 @@ function PortalPage() {
     { key: "site_survey", name: "Site Survey", description: ["Visitas técnicas"], to: "/site-survey" as const },
     { key: "chamados", name: "OpDesk", description: ["Suporte ao cliente", "e operação"], to: "/chamados" as const },
     { key: "development", name: "Code", description: ["Melhorias e Bugs"], to: "/development" as const },
+    { key: "mytosis", name: "Mytosis", description: ["Fluxogramas", "e processos"], to: "/mytosis" as const },
   ].filter((app) => data.appKeys.has(app.key) || (app.key === "chamados" && pendingActions?.isCustomerSupportAnalyst));
   const mobileAppPages = Array.from({ length: Math.ceil(apps.length / 8) }, (_, pageIndex) => apps.slice(pageIndex * 8, pageIndex * 8 + 8));
 
@@ -96,6 +99,7 @@ function PortalPage() {
           : key === "rh" ? <><span className="flex h-11 w-full translate-y-0.5 items-center justify-center sm:h-16 sm:translate-y-1" aria-hidden="true"><UsersRound className="h-11 w-11 stroke-[1.8] sm:h-16 sm:w-16" /></span><span className="text-xs font-normal leading-none sm:text-sm">{name}</span></>
           : key === "site_survey" ? <><span className="flex h-11 w-full translate-y-0.5 items-center justify-center sm:h-16 sm:translate-y-1" aria-hidden="true"><Search className="h-11 w-11 stroke-[2.8] sm:h-16 sm:w-16" /></span><span className="text-[0.65rem] font-normal leading-none sm:text-xs">{name}</span></>
           : key === "chamados" ? <><span className="flex h-11 w-full translate-y-0.5 items-center justify-center sm:h-16 sm:translate-y-1" aria-hidden="true"><Phone className="h-11 w-11 stroke-[2.4] sm:h-16 sm:w-16" /></span><span className="text-[0.65rem] font-normal leading-none sm:text-xs">{name}</span></>
+          : key === "mytosis" ? <><span className="flex h-11 w-full translate-y-0.5 items-center justify-center sm:h-16 sm:translate-y-1" aria-hidden="true"><MytosisIcon className="h-11 w-11 stroke-[1.8] sm:h-16 sm:w-16" /></span><span className="text-[0.65rem] font-normal leading-none sm:text-xs">{name}</span></>
           : <><span className="flex h-11 w-full translate-y-0.5 items-center justify-center sm:h-16 sm:translate-y-1" aria-hidden="true"><CodeXml className="h-11 w-11 stroke-[2.8] sm:h-16 sm:w-16" /></span><span className="text-[0.65rem] font-normal leading-none sm:text-xs">{name}</span></>}
       </Link>
       <p className="mt-2 w-20 max-w-full break-words text-center text-[0.68rem] leading-4 text-muted-foreground sm:mt-3 sm:w-28 sm:text-sm sm:leading-5">{description.map((line) => <span key={line} className="block">{line}</span>)}</p>
