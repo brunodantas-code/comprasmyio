@@ -17,7 +17,7 @@ export type MytosisNode = {
   border_color?: string;
 };
 
-export type MytosisLink = { predecessor_id: string; successor_id: string };
+export type MytosisLink = { predecessor_id: string; successor_id: string; style?: string };
 
 export function childrenMap(nodes: MytosisNode[]) {
   const map = new Map<string, MytosisNode[]>();
