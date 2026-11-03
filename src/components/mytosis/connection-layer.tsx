@@ -10,6 +10,7 @@ type Edge = { id: string; from: Point; to: Point; points: ConnectorPoint[]; from
 export function ConnectionLayer({ container, nodes, links, layoutKey, onSelect }: { container: RefObject<HTMLDivElement | null>; nodes: MytosisNode[]; links: MytosisLink[]; layoutKey: string; onSelect?: (link: MytosisLink) => void }) {
   const [edges, setEdges] = useState<Edge[]>([]);
   const [size, setSize] = useState({ width: 1, height: 1 });
+  const [revision, setRevision] = useState(0);
   useEffect(() => {
     const root = container.current;
     if (!root) return;
@@ -59,6 +60,7 @@ export function ConnectionLayer({ container, nodes, links, layoutKey, onSelect }
         const bounds = new Map(measured.map((box) => [box.id, box]));
         const visibleRoot = nodes.find((node) => boxes.has(node.id) && !node.parent_id);
         const relations = connectorRelations(nodes, links, !!visibleRoot?.is_process);
+        setRevision((value) => value + 1);
         setEdges(relations.flatMap((edge) => {
           const a = bounds.get(edge.from), b = bounds.get(edge.to);
           if (!a || !b) return [];
@@ -89,7 +91,7 @@ export function ConnectionLayer({ container, nodes, links, layoutKey, onSelect }
   const ports = new Map<string, Point>();
   for (const edge of edges) for (const point of [edge.from, edge.to]) ports.set(`${point.x}-${point.y}`, point);
   const radius = 3;
-  return <svg data-mytosis-connectors width={size.width} height={size.height} viewBox={`0 0 ${size.width} ${size.height}`} className="pointer-events-none absolute left-0 top-0 overflow-hidden [contain:paint]">
+  return <svg key={revision} data-mytosis-connectors width={size.width} height={size.height} viewBox={`0 0 ${size.width} ${size.height}`} className="pointer-events-none absolute left-0 top-0 overflow-hidden">
     {edges.map(({ id, from, to, points, fromSide, toSide, style, color, link }) => {
       const da = portDirection(fromSide), db = portDirection(toSide);
       const start = { x: from.x + da.x * radius, y: from.y + da.y * radius };
