@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Incluir conversa Perguntas/Respostas e histórico com milestones do Code nos OKRs
 - [ ] Conferir botões de ação do Mytosis no padrão Site Survey
 - [ ] Adicionar checkbox Exibir tudo/Recolher tudo com transição visível
 - [ ] Adicionar nós vazados no centro dos lados conectados e ligar todos os conectores pelos nós
