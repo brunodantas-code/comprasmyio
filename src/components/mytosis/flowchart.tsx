@@ -131,6 +131,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
     const stroke = critical.has(node.id) || highlight === node.id ? "var(--myio-green)" : borderOf(node.border_color).color;
     const fillColor = highlight === node.id ? "var(--mytosis-green-soft)" : critical.has(node.id) ? "var(--mytosis-green-mid)" : fill.color;
     const darkText = fill.dark && highlight !== node.id && !critical.has(node.id);
+    const purpleMediumText = fill.key === "purple-mid" && highlight !== node.id && !critical.has(node.id);
     const signal = predecessorTaskSignal(node.id, data.tasks, data.links);
     const hasTasks = data.tasks.some((task) => task.node_id === node.id);
     const tasksOpen = !hideTasks.has(node.id);
@@ -155,7 +156,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
                 onClick={(e) => { if (e.target instanceof Element && e.target.closest("button,[role='menuitem']")) return; openDialog({ mode: "edit", node }); }}
                 onKeyDown={(e) => { if (e.target === e.currentTarget && e.key === "Enter") openDialog({ mode: "edit", node }); }}
                 title={canEdit ? `${numberOf(node)} — ${node.title}\nArraste sobre outro box para ligá-lo como sucessor.` : `${numberOf(node)} — ${node.title}`}
-                className={cn("group relative flex h-full w-full cursor-pointer overflow-hidden rounded-md transition-colors duration-300", dropId === node.id && "ring-2 ring-primary ring-offset-2", dragId === node.id && "opacity-50", darkText ? "text-primary-foreground [&_*]:!text-[color:var(--card)]" : "text-foreground")}
+                className={cn("group relative flex h-full w-full cursor-pointer overflow-hidden rounded-md transition-colors duration-300", dropId === node.id && "ring-2 ring-primary ring-offset-2", dragId === node.id && "opacity-50", darkText ? "text-mytosis-text-light [&_*]:!text-mytosis-text-light" : purpleMediumText ? "text-mytosis-text-dark [&_p]:!text-mytosis-text-dark [&_span]:!text-mytosis-text-dark" : "text-foreground")}
               >
                 <ShapeSvg shape={shape} fill={fillColor} stroke={stroke} strokeWidth={highlight === node.id ? 2 : 1} className="pointer-events-none absolute inset-0 h-full w-full transition-all duration-300 group-hover:[filter:drop-shadow(0_0_1px_var(--myio-green))]" />
                 {process ? null : <div className="relative w-1.5 shrink-0 bg-primary/10" aria-label={`${pct}% concluído`}>
@@ -193,7 +194,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
             </div>
           </div>
           {!collapsed ? <div style={{ width: data.box.width }}>
-            {signal.pending > 0 ? <p role="status" className="mt-1 text-xs text-muted-foreground">{signal.pending} tarefa{signal.pending > 1 ? "s" : ""} pendente{signal.pending > 1 ? "s" : ""} na etapa anterior</p> : null}
+            {signal.pending > 0 ? <p role="status" className="mt-1 text-left text-[11px] text-muted-foreground" style={{ paddingLeft: shapeInset[shape].paddingInline ?? (process ? 10 : 16), paddingRight: shapeInset[shape].paddingInline ?? 10 }}>{signal.pending} tarefa{signal.pending > 1 ? "s" : ""} pendente{signal.pending > 1 ? "s" : ""} na etapa anterior</p> : null}
             <BoxTaskList nodeId={node.id} data={data} onOpen={setTaskSelection} expanded={tasksOpen} />
           </div> : null}
           {kids.length ? (
