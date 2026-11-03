@@ -279,6 +279,13 @@ function PortalPage() {
                             </span>
                             <span className="text-xs font-normal leading-none">{name}</span>
                           </>
+                        ) : key === "mytosis" ? (
+                          <>
+                            <span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true">
+                              <MytosisIcon className="h-14 w-14 stroke-[1.8] sm:h-16 sm:w-16" />
+                            </span>
+                            <span className="text-xs font-normal leading-none">{name}</span>
+                          </>
                         ) : (
                           <>
                             <span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true">
