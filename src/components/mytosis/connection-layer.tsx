@@ -21,11 +21,13 @@ export function ConnectionLayer({ container, nodes, links, layoutKey, onSelect }
         const origin = root.getBoundingClientRect();
         setSize({ width: Math.ceil(root.scrollWidth), height: Math.ceil(root.scrollHeight) });
         const boxes = new Map<string, DOMRect>();
+        const collapsedObstacles: ConnectorBox[] = [];
         root.querySelectorAll<HTMLElement>("[data-mytosis-node]").forEach((element) => {
           const id = element.dataset.mytosisNode;
           const rect = (element.querySelector("[data-mytosis-surface]") ?? element).getBoundingClientRect();
           let parent = element.parentElement;
-          let hidden = element.dataset.mytosisCollapsed === "true";
+          const collapsed = element.dataset.mytosisCollapsed === "true";
+          let hidden = false;
           while (parent && parent !== root) {
             const bounds = parent.getBoundingClientRect();
             if (parent.dataset.mytosisHidden === "true" || bounds.width < 1 || bounds.height < 1) hidden = true;
@@ -33,7 +35,8 @@ export function ConnectionLayer({ container, nodes, links, layoutKey, onSelect }
             if ((style.overflowX === "hidden" && (rect.left < bounds.left - 1 || rect.right > bounds.right + 1)) || (style.overflowY === "hidden" && (rect.top < bounds.top - 1 || rect.bottom > bounds.bottom + 1))) hidden = true;
             parent = parent.parentElement;
           }
-          if (id && rect.width > 40 && rect.height > 1 && !hidden) boxes.set(id, rect);
+          if (id && rect.width > 1 && rect.height > 1 && !hidden && collapsed) collapsedObstacles.push({ id: `${id}-collapsed`, left: rect.left - origin.left, right: rect.right - origin.left, top: rect.top - origin.top, bottom: rect.bottom - origin.top });
+          if (id && rect.width > 40 && rect.height > 1 && !hidden && !collapsed) boxes.set(id, rect);
         });
         const byId = new Map(nodes.map((node) => [node.id, node]));
         const measured: ConnectorBox[] = [...boxes].map(([id, box]) => {
@@ -59,7 +62,7 @@ export function ConnectionLayer({ container, nodes, links, layoutKey, onSelect }
         setEdges(relations.flatMap((edge) => {
           const a = bounds.get(edge.from), b = bounds.get(edge.to);
           if (!a || !b) return [];
-          const route = routeConnector(a, b, [...measured, ...chrome.filter((item) => !item.id.startsWith(`${edge.from}-`) && !item.id.startsWith(`${edge.to}-`))]);
+          const route = routeConnector(a, b, [...measured, ...collapsedObstacles, ...chrome.filter((item) => !item.id.startsWith(`${edge.from}-`) && !item.id.startsWith(`${edge.to}-`))]);
           if (!route) return [];
           const from = { ...route.points[0], color: borderOf(byId.get(edge.from)?.border_color).color };
           const to = { ...route.points[route.points.length - 1], color: borderOf(byId.get(edge.to)?.border_color).color };
