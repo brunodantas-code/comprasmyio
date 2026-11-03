@@ -7,7 +7,7 @@ export function QuestionRecipient({ nodeId, taskId, value, onChange }: { nodeId:
   const recipients = useQuery({
     queryKey: ["mytosis-question-recipients", nodeId, taskId],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("mytosis_question_recipients", { _node_id: nodeId, _task_id: taskId ?? null });
+      const { data, error } = await supabase.rpc("mytosis_question_recipients", { _node_id: nodeId, _task_id: taskId });
       if (error) throw error;
       return data;
     },

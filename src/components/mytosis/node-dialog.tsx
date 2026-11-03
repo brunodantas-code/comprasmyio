@@ -22,6 +22,7 @@ import { NodePreview } from "./node-preview";
 import { firstName } from "./use-mytosis";
 import { ColorOptions } from "./color-options";
 import { NodeAttachments, uploadNodeAttachments } from "./node-attachments";
+import { initialStageFormat } from "@/lib/mytosis-format";
 
 export type NodeDialogState =
   | { mode: "edit"; node: MytosisNode }
@@ -64,7 +65,7 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
     if (!state) return;
     setPendingFiles([]); setCreatedId(null);
     const sourceId = state.mode === "create" ? state.formatSourceId ?? state.predecessorId ?? state.parentId : null;
-    const format = editing ?? data.nodes.find((node) => node.id === sourceId);
+    const format = initialStageFormat(data.nodes, editing, sourceId);
     setTitle(editing?.title ?? "");
     setTitleSize(format?.title_font_size ?? 18);
     setTitleColor(TITLE_COLORS.find((item) => item.key === format?.title_color)?.key ?? null);

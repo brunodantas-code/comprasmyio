@@ -45,5 +45,5 @@
 - OKR conversations use node-keyed messages and append-only logs, separate from task conversations; author-bound edits and same-node answer guards preserve history without changing existing node access.
 - Mytosis styles copy on import/split; preview/canvas share fixed-size NodeFrame/NodeText, safe shape insets and measured text fitting without truncation. External chrome fits inside total settings height; connectors measure surfaces only.
 - Mytosis connectors use pure obstacle routing and a size-bound paint-contained SVG; observe transitions and clipped endpoints. Processes draw explicit links, OKRs retain hierarchy; preserve styles/edit hit areas.
-- Mytosis right/lower branches and tasks collapse independently per box; controls preserve dependencies and predecessors.
+- Mytosis branches/tasks collapse independently; new stages inherit source formatting. Question recipients are server-validated participants; Central reads unanswered addressed messages via an invoker RPC.
 - Mytosis title limits use size/font/shape; never truncate old titles. PDF captures the visible canvas on one proportional page. Node attachments use private owner/node paths, role-gated rows and signed URLs; object ownership checks avoid recursive RLS.
