@@ -1,0 +1,1 @@
+ALTER TABLE public.mytosis_nodes ALTER COLUMN locator RESTART WITH 1;
