@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import { childrenMap, computeBoxNumbers, computePhases, computeProgress, criticalPath, formatDate, planBlockImport, rootObjectiveOf, type MytosisNode } from "@/lib/mytosis";
 import { firstName, type MytosisData } from "./use-mytosis";
 import type { NodeDialogState } from "./node-dialog";
-import { ConnectorGlyph, ShapeSvg, borderOf, fillOf, shapeInset, shapeContentInset, type LinkStyle, type ShapeKey } from "./shapes";
+import { ConnectorGlyph, borderOf, fillOf, shapeInset, type LinkStyle, type ShapeKey } from "./shapes";
 import { BoxTaskDialog, BoxTaskList, type TaskSelection } from "./box-tasks";
 import { predecessorTaskSignal } from "@/lib/mytosis-tasks";
 import { ConnectionLayer } from "./connection-layer";
@@ -25,6 +25,7 @@ import { ChecklistText } from "./checklist-text";
 import { MytosisIcon } from "@/components/mytosis-icon";
 import { SplitDialog } from "./split-dialog";
 import { NodeText } from "./node-text";
+import { NodeFrame } from "./node-frame";
 import { createMytosisPdf, downloadMytosisPdf } from "@/lib/mytosis-pdf";
 
 type Props = {
@@ -145,8 +146,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
     const fill = fillOf(node.fill_color);
     const stroke = critical.has(node.id) || highlight === node.id ? "var(--myio-green)" : borderOf(node.border_color).color;
     const fillColor = highlight === node.id ? "var(--mytosis-green-soft)" : critical.has(node.id) ? "var(--mytosis-green-mid)" : fill.color;
-    const darkText = fill.dark && highlight !== node.id && !critical.has(node.id);
-    const purpleMediumText = fill.key === "purple-mid" && highlight !== node.id && !critical.has(node.id);
+    const displayFillKey = highlight === node.id ? "green-soft" : critical.has(node.id) ? "green-mid" : fill.key;
     const signal = predecessorTaskSignal(node.id, data.tasks, data.links);
     const hasTasks = data.tasks.some((task) => task.node_id === node.id);
     const tasksOpen = !hideTasks.has(node.id);
@@ -159,6 +159,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
               <div
                 id={`mytosis-box-${node.locator}`}
                 data-mytosis-node={node.id}
+                data-mytosis-shape={shape}
                 data-control-color={node.control_color ?? "green"}
                 data-mytosis-collapsed={collapsed ? "true" : "false"}
                 style={{ minHeight: data.box.height }}
@@ -173,20 +174,14 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
                 onClick={(e) => { if (e.target instanceof Element && e.target.closest("button,[role='menuitem']")) return; openDialog({ mode: "edit", node }); }}
                 onKeyDown={(e) => { if (e.target === e.currentTarget && e.key === "Enter") openDialog({ mode: "edit", node }); }}
                 title={canEdit ? `${numberOf(node)} — ${node.title}\nArraste sobre outro box para posicionar esta etapa à direita dele.` : `${numberOf(node)} — ${node.title}`}
-                className={cn("mytosis-controls group relative flex h-full w-full cursor-pointer overflow-hidden rounded-md transition-colors duration-300 [&_button]:!border-0 [&_button]:!shadow-none [&_button]:!bg-transparent [&_button:hover]:!bg-transparent [&_button:focus-visible]:!ring-0", dropId === node.id && "ring-2 ring-primary ring-offset-2", dragId === node.id && "opacity-50", darkText ? "text-mytosis-text-light [&_p:not([data-mytosis-title])]:!text-mytosis-text-light [&_span]:!text-mytosis-text-light" : purpleMediumText ? "text-mytosis-text-dark [&_p:not([data-mytosis-title])]:!text-mytosis-text-dark [&_span]:!text-mytosis-text-dark" : "text-foreground")}
+                className={cn("mytosis-controls group relative flex h-full w-full cursor-pointer rounded-md transition-colors duration-300 [&_button]:!border-0 [&_button]:!shadow-none [&_button]:!bg-transparent [&_button:hover]:!bg-transparent [&_button:focus-visible]:!ring-0", dropId === node.id && "ring-2 ring-primary ring-offset-2", dragId === node.id && "opacity-50")}
               >
-                <ShapeSvg shape={shape} fill={fillColor} stroke={stroke} strokeWidth={highlight === node.id ? 2 : 1} className="pointer-events-none absolute inset-0 h-full w-full transition-all duration-300 group-hover:[filter:drop-shadow(0_0_1px_var(--myio-green))]" />
-                {process ? null : <div className="relative w-1.5 shrink-0 bg-primary/10" aria-label={`${pct}% concluído`}>
-                  <div className="absolute inset-x-0 bottom-0 bg-primary transition-[height] duration-500" style={{ height: `${pct}%` }} />
-                </div>}
-                {collapsed ? <span className="relative m-auto text-[10px] text-muted-foreground [writing-mode:vertical-rl]">{numberOf(node)}</span> : (
-                  <div className="relative flex min-w-0 flex-1 flex-col justify-between gap-1 px-2.5 py-1.5" style={shapeContentInset(shape, data.box.height)}>
-                    <div className="flex shrink-0 items-center justify-between gap-2 text-[11px] text-muted-foreground">
+                <NodeFrame shape={shape} height={data.box.height} fill={fillColor} stroke={stroke} fillKey={displayFillKey} strokeWidth={highlight === node.id ? 2 : 1} progress={process ? undefined : pct} collapsed={collapsed} controlColor={node.control_color}
+                  header={<div className="flex shrink-0 items-center justify-between gap-2 text-[11px] text-muted-foreground">
                       <span className="flex min-w-0 items-center gap-1.5"><span className="inline-flex min-h-5 shrink-0 items-center justify-center rounded-md bg-primary/10 px-1.5 text-primary">{numberOf(node)}</span>{node.kind === "objective" && !process ? <span className="truncate">Objetivo</span> : null}</span>
                       <div className="flex shrink-0 items-center gap-1">{process ? null : <span className="text-muted-foreground/70">{pct}%</span>}{canEdit ? <><Button variant="ghost" size="icon" className="h-5 w-5 !bg-transparent hover:!bg-transparent [&_svg]:!size-5" aria-label={`Dividir próxima etapa de ${numberOf(node)}`} title="Dividir próxima etapa" onClick={(event) => { event.stopPropagation(); setSplitTarget(node); }} onPointerDown={(event) => event.stopPropagation()}><MytosisIcon className="h-5 w-5" /></Button><Button variant="ghost" size="icon" className="h-5 w-5 !bg-transparent hover:!bg-transparent [&_svg]:!size-3" aria-label={`Excluir etapa ${numberOf(node)}`} title="Excluir etapa" disabled={deleteNode.isPending} onClick={(event) => { event.stopPropagation(); if (window.confirm(`Excluir a etapa ${numberOf(node)} — ${node.title} e todas as tarefas e etapas associadas abaixo dela? Esta ação não pode ser desfeita.`)) deleteNode.mutate(node); }} onPointerDown={(event) => event.stopPropagation()}><Trash2 className="h-3 w-3" /></Button></> : null}</div>
-                    </div>
-                    <NodeText title={node.title} description={node.description} titleSize={node.title_font_size} descriptionSize={node.description_font_size} align={node.text_align} verticalAlign={node.text_vertical_align} titleColor={node.title_color} fillKey={highlight === node.id ? "green-soft" : critical.has(node.id) ? "green-mid" : node.fill_color} />
-                    <div className="flex shrink-0 items-center justify-between gap-2 text-[11px] text-muted-foreground">
+                    </div>}
+                  footer={<div className="flex shrink-0 items-center justify-between gap-2 text-[11px] text-muted-foreground">
                       <span className="truncate">{nameOf(node.responsible_id)}{process ? "" : ` · ${formatDate(node.due_date)}`}</span>
                       <div className="flex shrink-0 items-center gap-0.5">
                       {succ.length ? <Button variant="ghost" size="icon" className="h-5 w-5 !bg-transparent hover:!bg-transparent" aria-label={`${rightOpen ? "Recolher" : "Exibir"} boxes dependentes de ${numberOf(node)}`} title={rightOpen ? "Recolher boxes dependentes" : "Exibir boxes dependentes"} aria-expanded={rightOpen} onClick={(e) => { e.stopPropagation(); setHideRight((s) => toggle(s, node.id)); }} onPointerDown={(e) => e.stopPropagation()}>{rightOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}</Button> : null}
@@ -203,9 +198,9 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
                         </DropdownMenu>
                       ) : null}
                       </div>
-                    </div>
-                  </div>
-                )}
+                    </div>}>
+                  {collapsed ? <span className="relative m-auto text-[10px] text-muted-foreground [writing-mode:vertical-rl]">{numberOf(node)}</span> : (<NodeText title={node.title} description={node.description} titleSize={node.title_font_size} descriptionSize={node.description_font_size} align={node.text_align} verticalAlign={node.text_vertical_align} titleColor={node.title_color} fillKey={highlight === node.id ? "green-soft" : critical.has(node.id) ? "green-mid" : node.fill_color} />)}
+                </NodeFrame>
               </div>
               {extraPreds.length && !collapsed ? <span className="absolute -top-4 left-0 text-[10px] text-muted-foreground">também depende de {extraPreds.map((p) => numberOf(p)).join(", ")}</span> : null}
             </div>
