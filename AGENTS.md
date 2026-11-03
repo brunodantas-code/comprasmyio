@@ -39,7 +39,7 @@
 - Proposals use private visit-keyed files; authenticated extraction syncs totals by trigger and stores group breakdown in proposal metadata. Environment remainders preserve unknown quantities as null.
 
 - Mytosis (OKRs/fluxogramas) keeps hierarchy in `mytosis_nodes.parent_id` (vertical) and dependencies in `mytosis_links` (horizontal); progress, phases, critical path and pending reports are pure functions in `src/lib/mytosis.ts` so the canvas and report never diverge. Access comes from `mytosis_role()` (ERP admin > member role > app grant as viewer).
-- Mytosis flowcharts are trees with mytosis_nodes.is_process=true (no dates/progress, excluded from pendings); block import copies a subtree plus internal links under a target box, leaving the original untouched.
+- Mytosis process trees use is_process=true without dates/progress; imports copy subtrees/internal links. Split uses an authenticated invoker RPC to atomically create parallel successors and direct links, preserving originals and RLS.
 - Mytosis display numbers and search use a shared path-number resolver following the canvas primary sibling predecessor (lowest locator), otherwise the parent; stored locators and record IDs remain unchanged to preserve links.
 - Mytosis internal checklists live in separate node-keyed tasks, messages and append-only audit logs, never as process boxes; database guards bind identities and authorize completion, while the shared task-signal helper keeps predecessor warnings independent of advancement.
 - OKR conversations use node-keyed messages and append-only logs, separate from task conversations; author-bound edits and same-node answer guards preserve history without changing existing node access.
