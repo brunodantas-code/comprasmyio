@@ -7199,6 +7199,10 @@ export type Database = {
         }
         Returns: Json
       }
+      wrap_mytosis_node: {
+        Args: { _new_id: string; _node_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       access_profile: "admin" | "padrao" | "restrito"
