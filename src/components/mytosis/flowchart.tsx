@@ -124,15 +124,9 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
     onSuccess: (_d, v) => { setHideRight((current) => { const next = new Set(current); next.delete(v.to); return next; }); setK(Number.MAX_SAFE_INTEGER); toast.success("Etapa reposicionada e numeração atualizada."); queryClient.invalidateQueries({ queryKey: ["mytosis"] }); },
     onError: (e: Error) => toast.error(e.message),
   });
-  function reaches(from: string, to: string) {
-    const seen = new Set<string>(); const stack = [from];
-    while (stack.length) { const c = stack.pop(); if (!c) continue; if (c === to) return true; if (seen.has(c)) continue; seen.add(c); for (const l of data.links) if (l.predecessor_id === c) stack.push(l.successor_id); }
-    return false;
-  }
   function connect(from: string, to: string) {
     if (from === to) return;
     if (!canEdit || linkMutation.isPending) return;
-    if (reaches(from, to)) return toast.error("Essa ligação criaria um ciclo entre os boxes.");
     linkMutation.mutate({ from, to });
   }
 
