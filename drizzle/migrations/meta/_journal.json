@@ -1065,6 +1065,13 @@
       "when": 1793728120719,
       "tag": "0151_mytosis_title_color",
       "breakpoints": true
+    },
+    {
+      "idx": 152,
+      "version": "7",
+      "when": 1793728442021,
+      "tag": "0152_mytosis_split_inherit_format",
+      "breakpoints": true
     }
   ]
 }
