@@ -78,8 +78,7 @@ export function ShapeSvg({ shape, fill, stroke, strokeWidth = 1, className }: { 
     <svg viewBox="0 0 100 60" preserveAspectRatio="none" className={className} aria-hidden>
       {list.map((d, i) => {
         const closed = d.trim().endsWith("Z");
-        const isOrLine = shape === "or" && i > 0;
-        return <path key={i} d={d} fill={closed ? fill : "none"} stroke={stroke} strokeWidth={strokeWidth} vectorEffect="non-scaling-stroke" strokeLinejoin="round" style={isOrLine ? undefined : undefined} />;
+        return <path key={i} d={d} fill={closed ? fill : "none"} stroke={stroke} strokeWidth={strokeWidth} vectorEffect="non-scaling-stroke" strokeLinejoin="round" />;
       })}
     </svg>
   );

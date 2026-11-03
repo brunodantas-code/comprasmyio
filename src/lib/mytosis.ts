@@ -12,6 +12,9 @@ export type MytosisNode = {
   position: number;
   created_at: string;
   is_process?: boolean;
+  shape?: string;
+  fill_color?: string;
+  border_color?: string;
 };
 
 export type MytosisLink = { predecessor_id: string; successor_id: string };
