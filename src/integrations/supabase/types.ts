@@ -2703,6 +2703,86 @@ export type Database = {
           },
         ]
       }
+      mytosis_node_logs: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          id: string
+          node_id: string
+          text: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          node_id: string
+          text: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          node_id?: string
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mytosis_node_logs_node_id_fkey"
+            columns: ["node_id"]
+            isOneToOne: false
+            referencedRelation: "mytosis_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mytosis_node_messages: {
+        Row: {
+          author_id: string
+          created_at: string
+          id: string
+          kind: string
+          node_id: string
+          reply_to_id: string | null
+          text: string
+          updated_at: string
+        }
+        Insert: {
+          author_id?: string
+          created_at?: string
+          id?: string
+          kind: string
+          node_id: string
+          reply_to_id?: string | null
+          text: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          node_id?: string
+          reply_to_id?: string | null
+          text?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mytosis_node_messages_node_id_fkey"
+            columns: ["node_id"]
+            isOneToOne: false
+            referencedRelation: "mytosis_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mytosis_node_messages_reply_to_id_fkey"
+            columns: ["reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "mytosis_node_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mytosis_nodes: {
         Row: {
           border_color: string
@@ -6927,6 +7007,10 @@ export type Database = {
         }[]
       }
       mytosis_can_edit: { Args: { _user_id: string }; Returns: boolean }
+      mytosis_node_can_converse: {
+        Args: { _node_id: string; _user_id: string }
+        Returns: boolean
+      }
       mytosis_role: { Args: { _user_id: string }; Returns: string }
       mytosis_task_can_converse: {
         Args: { _task_id: string; _user_id: string }
