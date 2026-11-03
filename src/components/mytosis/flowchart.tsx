@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Filter, Plus, Route as RouteIcon, Search, Settings2 } from "lucide-react";
 import { toast } from "sonner";
@@ -72,7 +72,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
   const toggle = (set: Set<string>, id: string) => { const next = new Set(set); if (next.has(id)) next.delete(id); else next.add(id); return next; };
   const visibleFrom = last - Math.min(k, last);
 
-  function Branch({ node, index }: { node: MytosisNode; index?: number }) {
+  function renderBranch(node: MytosisNode, index?: number) {
     const kids = (children.get(node.id) ?? []).filter((c) => !siblingPreds.has(c.id));
     const succ = drawnSuccessors(node.id);
     const extraPreds = (siblingPreds.get(node.id) ?? []).slice(1);
@@ -140,7 +140,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
               <div className="grid transition-[grid-template-rows,opacity] duration-500 ease-in-out" style={{ gridTemplateRows: downOpen ? "1fr" : "0fr", opacity: downOpen ? 1 : 0 }}>
                 <div className="overflow-hidden">
                   <div className={cn("ml-2 flex flex-col gap-4 border-l border-primary/40 py-2 pl-4", index !== undefined && "ml-6")}>
-                    {kids.map((kid, i) => <Branch key={kid.id} node={kid} index={i + 1} />)}
+                    {kids.map((kid, i) => <Fragment key={kid.id}>{renderBranch(kid, i + 1)}</Fragment>)}
                   </div>
                 </div>
               </div>
@@ -158,7 +158,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
                       <span className="h-px w-6 bg-primary/40" />
                       <span className="h-1.5 w-1.5 rounded-full border border-primary/60 bg-card" />
                     </span>
-                    <Branch node={s} />
+                    {renderBranch(s)}
                   </div>
                 ))}
               </div>
@@ -190,7 +190,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
       </div>
       {objective ? (
         <div className="overflow-auto rounded-xl border border-border bg-card p-6" onClick={() => setHighlight(null)}>
-          <div className="w-max min-w-full pt-3" onClick={(e) => e.stopPropagation()}><Branch node={objective} /></div>
+          <div className="w-max min-w-full pt-3" onClick={(e) => e.stopPropagation()}>{renderBranch(objective)}</div>
         </div>
       ) : <p className="py-16 text-center text-muted-foreground">{objectives.length ? "Selecione um objetivo." : "Nenhum objetivo cadastrado. Use o + para criar o primeiro."}</p>}
       <BoxSettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} box={data.box} />
