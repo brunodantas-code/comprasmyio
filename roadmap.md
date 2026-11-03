@@ -1,5 +1,5 @@
 # Roadmap
-- [ ] Conferir Site Survey como fluxograma 2 e concluir limite proporcional da descrição
+- [x] Conferir Site Survey como fluxograma 2 e concluir limite proporcional da descrição
 - [x] Recalcular localizadores visíveis após exclusões, sem lacunas e sem alterar vínculos; conferir busca e sequência
 - [x] Corrigir textos cortados nos boxes e prévia, preservando fontes e ajustando espaço útil automaticamente
 - [x] Alinhar barra de tarefas à borda esquerda do box e preencher nós de branco para ocultar traços internos
