@@ -51,10 +51,14 @@ export const borderOf = (k?: string | null) => BORDERS.find((b) => b.key === k) 
 
 /** Espaço interno do texto conforme a forma (losango e círculo têm menos área útil). */
 export const shapeInset: Record<ShapeKey, CSSProperties> = {
-  process: {}, terminal: { paddingInline: "10%" }, document: { paddingBottom: "12%" }, decision: { paddingInline: "22%", paddingBlock: "14%" },
-  connector: { paddingInline: "16%", paddingBlock: "8%" }, io: { paddingInline: "12%" }, multidoc: { paddingTop: "20%", paddingRight: "14%", paddingBottom: "18%" },
-  manual: { paddingTop: "12%" }, preparation: { paddingInline: "12%" }, or: { paddingInline: "18%", paddingBlock: "10%" }, delay: { paddingRight: "12%" },
+  process: { paddingInline: "5%", paddingBlock: "8%" }, terminal: { paddingInline: "22%", paddingBlock: "10%" }, document: { paddingInline: "5%", paddingTop: "8%", paddingBottom: "26%" }, decision: { paddingInline: "27%", paddingBlock: "28%" },
+  connector: { paddingInline: "20%", paddingBlock: "20%" }, io: { paddingInline: "17%", paddingBlock: "8%" }, multidoc: { paddingTop: "24%", paddingLeft: "5%", paddingRight: "18%", paddingBottom: "26%" },
+  manual: { paddingInline: "5%", paddingTop: "34%", paddingBottom: "8%" }, preparation: { paddingInline: "18%", paddingBlock: "10%" }, or: { paddingInline: "20%", paddingBlock: "20%" }, delay: { paddingLeft: "5%", paddingRight: "28%", paddingBlock: "10%" },
 };
+
+export function shapeExternalChrome(shape: ShapeKey): boolean {
+  return shape === "decision" || shape === "connector" || shape === "or";
+}
 
 /** Vertical percentage padding must use box height, not CSS's containing width. */
 export function shapeContentInset(shape: ShapeKey, height: number): CSSProperties {
