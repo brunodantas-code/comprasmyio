@@ -146,12 +146,12 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
                 </div>}
                 {collapsed ? <span className="relative m-auto text-[10px] text-muted-foreground [writing-mode:vertical-rl]">{numberOf(node)}</span> : (
                   <div className="relative flex min-w-0 flex-1 flex-col justify-between px-2.5 py-1.5" style={shapeInset[shape]}>
-                    <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
+                    <div className="flex shrink-0 items-center justify-between gap-2 text-[11px] text-muted-foreground">
                       <span className="flex min-w-0 items-center gap-1.5"><span className="inline-flex min-h-5 shrink-0 items-center justify-center rounded-md bg-primary/10 px-1.5 text-primary">{numberOf(node)}</span>{node.kind === "objective" ? <span className="truncate">{process ? "Fluxograma" : "Objetivo"}</span> : null}</span>
                       {process ? null : <span className="text-muted-foreground/70">{pct}%</span>}
                     </div>
-                    <div className="min-w-0"><p className={cn("text-lg font-semibold leading-tight", node.description ? "line-clamp-1" : "line-clamp-2")}>{node.title}</p>{node.description ? <p className="line-clamp-1 text-[11px] font-normal leading-tight text-muted-foreground" title={node.description}>{node.description}</p> : null}</div>
-                    <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
+                    <div className={cn("flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden", node.text_vertical_align === "top" ? "justify-start" : node.text_vertical_align === "bottom" ? "justify-end" : "justify-center")} style={{ textAlign: node.text_align ?? "left" }}><p className={cn("shrink-0 break-words font-semibold leading-tight", node.description ? "line-clamp-1" : "line-clamp-2")} style={{ fontSize: `${node.title_font_size ?? 18}px` }}>{node.title}</p>{node.description ? <p className="line-clamp-1 shrink-0 break-words font-normal leading-tight text-muted-foreground" style={{ fontSize: `${node.description_font_size ?? 11}px` }} title={node.description}>{node.description}</p> : null}</div>
+                    <div className="flex shrink-0 items-center justify-between gap-2 text-[11px] text-muted-foreground">
                       <span className="truncate">{nameOf(node.responsible_id)}{process ? "" : ` · ${formatDate(node.due_date)}`}</span>
                       {canEdit ? (
                         <DropdownMenu>
@@ -289,16 +289,23 @@ function ImportBlockDialog({ target, onClose, data }: { target: MytosisNode | nu
       const idMap = new Map<string, string>();
       const position = data.nodes.filter((n) => n.parent_id === target.id).length;
       for (const n of ordered) {
-        const parent = n.id === sourceId ? target.id : idMap.get(n.parent_id!)!;
+        const parent = n.id === sourceId ? target.id : n.parent_id ? idMap.get(n.parent_id) : undefined;
+        if (!parent) throw new Error("Box pai não encontrado na importação.");
         const { data: created, error } = await supabase.from("mytosis_nodes").insert({
           kind: "task", title: n.title, description: n.description, parent_id: parent, responsible_id: n.responsible_id,
           due_date: null, weight: 0, progress: 0, shape: n.shape, fill_color: n.fill_color, border_color: n.border_color, position: n.id === sourceId ? position : n.position, is_process: !!target.is_process,
+          title_font_size: n.title_font_size, description_font_size: n.description_font_size, text_align: n.text_align, text_vertical_align: n.text_vertical_align,
         }).select("id").single();
         if (error) throw error;
         idMap.set(n.id, created.id);
       }
       if (internalLinks.length) {
-        const { error } = await supabase.from("mytosis_links").insert(internalLinks.map((l) => ({ predecessor_id: idMap.get(l.predecessor_id)!, successor_id: idMap.get(l.successor_id)!, style: l.style })));
+        const copiedLinks = internalLinks.map((l) => {
+          const predecessor = idMap.get(l.predecessor_id), successor = idMap.get(l.successor_id);
+          if (!predecessor || !successor) throw new Error("Ligação não encontrada na importação.");
+          return { predecessor_id: predecessor, successor_id: successor, style: l.style };
+        });
+        const { error } = await supabase.from("mytosis_links").insert(copiedLinks);
         if (error) throw error;
       }
       return ordered.length;

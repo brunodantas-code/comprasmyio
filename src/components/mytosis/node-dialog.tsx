@@ -14,6 +14,7 @@ import type { MytosisData } from "./use-mytosis";
 import { BORDERS, ConnectorGlyph, FILLS, LINK_STYLES, SHAPES, ShapeSvg, type BorderKey, type FillKey, type LinkStyle, type ShapeKey } from "./shapes";
 import { cn } from "@/lib/utils";
 import { ChecklistText } from "./checklist-text";
+import { AlignLeft, AlignCenter, AlignRight, AlignStartVertical, AlignCenterVertical, AlignEndVertical } from "lucide-react";
 
 export type NodeDialogState =
   | { mode: "edit"; node: MytosisNode }
@@ -38,10 +39,18 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
   const [fillKey, setFillKey] = useState<FillKey>("none");
   const [borderKey, setBorderKey] = useState<BorderKey>("green-mid");
   const [linkStyle, setLinkStyle] = useState<LinkStyle>("arrow");
+  const [titleSize, setTitleSize] = useState(18);
+  const [descriptionSize, setDescriptionSize] = useState(11);
+  const [textAlign, setTextAlign] = useState<"left" | "center" | "right">("left");
+  const [verticalAlign, setVerticalAlign] = useState<"top" | "center" | "bottom">("center");
 
   useEffect(() => {
     if (!state) return;
     setTitle(editing?.title ?? "");
+    setTitleSize(editing?.title_font_size ?? 18);
+    setDescriptionSize(editing?.description_font_size ?? 11);
+    setTextAlign(editing?.text_align ?? "left");
+    setVerticalAlign(editing?.text_vertical_align ?? "center");
     setDescription(editing?.description ?? "");
     setResponsible(editing?.responsible_id ?? (state.mode === "create" ? data.userId : ""));
     setDue(editing?.due_date ?? "");
@@ -74,6 +83,7 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
   const save = useMutation({
     mutationFn: async () => {
       if (!title.trim()) throw new Error("Informe o título.");
+      if (![titleSize, descriptionSize].every((size) => Number.isInteger(size) && size >= 10 && size <= 32)) throw new Error("Informe tamanhos de fonte entre 10 e 32 px.");
       if (!responsible) throw new Error("Informe o Responsável.");
       if (!due && !isProcess) throw new Error("Informe a Data estimada de conclusão.");
       const w = Number(weight) || 0;
@@ -81,6 +91,7 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
       const row = {
         title: title.trim(), description: description.trim() || null, responsible_id: responsible, due_date: isProcess ? null : due,
         shape, fill_color: fillKey, border_color: borderKey,
+        title_font_size: titleSize, description_font_size: descriptionSize, text_align: textAlign, text_vertical_align: verticalAlign,
         weight: w, progress: kids.length ? editing?.progress ?? 0 : Math.min(100, Math.max(0, Number(progress) || 0)),
       };
       let id = editing?.id;
@@ -92,20 +103,21 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
         if (error) throw error;
         id = created.id;
       }
+      if (!id) throw new Error("Box não encontrado.");
       const current = new Set(data.links.filter((l) => l.successor_id === id).map((l) => l.predecessor_id));
       const toAdd = [...preds].filter((p) => !current.has(p));
       const toRemove = [...current].filter((p) => !preds.has(p));
       if (toAdd.length) {
-        const { error } = await supabase.from("mytosis_links").insert(toAdd.map((p) => ({ predecessor_id: p, successor_id: id!, style: linkStyle })));
+        const { error } = await supabase.from("mytosis_links").insert(toAdd.map((p) => ({ predecessor_id: p, successor_id: id, style: linkStyle })));
         if (error) throw error;
       }
       const keep = [...preds].filter((p) => current.has(p));
       if (keep.length) {
-        const { error } = await supabase.from("mytosis_links").update({ style: linkStyle }).eq("successor_id", id!).in("predecessor_id", keep);
+        const { error } = await supabase.from("mytosis_links").update({ style: linkStyle }).eq("successor_id", id).in("predecessor_id", keep);
         if (error) throw error;
       }
       for (const p of toRemove) {
-        const { error } = await supabase.from("mytosis_links").delete().eq("predecessor_id", p).eq("successor_id", id!);
+        const { error } = await supabase.from("mytosis_links").delete().eq("predecessor_id", p).eq("successor_id", id);
         if (error) throw error;
       }
     },
@@ -115,7 +127,8 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
 
   const remove = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("mytosis_nodes").delete().eq("id", editing!.id);
+      if (!editing) throw new Error("Box não encontrado.");
+      const { error } = await supabase.from("mytosis_nodes").delete().eq("id", editing.id);
       if (error) throw error;
     },
     onSuccess: () => { toast.success("Box excluído."); queryClient.invalidateQueries({ queryKey: ["mytosis"] }); onClose(); },
@@ -154,6 +167,20 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
             </div> : null}
           </div>
           <div className="grid gap-1.5"><Label>Descrição</Label><ChecklistText label="Descrição" value={description} onChange={setDescription} multiline hint="Redija a descrição." /></div>
+          <div className="grid gap-3 border-t border-border pt-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="grid gap-1.5"><Label htmlFor="box-title-size">Fonte do título (px)</Label><Input id="box-title-size" type="number" min={10} max={32} step={1} value={titleSize} onChange={(e) => setTitleSize(Number(e.target.value))} /></div>
+              <div className="grid gap-1.5"><Label htmlFor="box-description-size">Fonte da descrição (px)</Label><Input id="box-description-size" type="number" min={10} max={32} step={1} value={descriptionSize} onChange={(e) => setDescriptionSize(Number(e.target.value))} /></div>
+            </div>
+            <div className="flex flex-wrap gap-5">
+              <div className="grid gap-1.5"><Label className="text-xs text-muted-foreground">Alinhamento horizontal</Label><div className="flex gap-1">{([
+                { value: "left", label: "À esquerda", Icon: AlignLeft }, { value: "center", label: "Centralizado", Icon: AlignCenter }, { value: "right", label: "À direita", Icon: AlignRight },
+              ] as const).map(({ value, label, Icon }) => <Button key={value} type="button" variant="ghost" size="icon" title={label} aria-label={label} aria-pressed={textAlign === value} onClick={() => setTextAlign(value)} className={cn("text-primary", textAlign === value && "bg-primary/10 ring-1 ring-primary/40")}><Icon className="h-4 w-4" /></Button>)}</div></div>
+              <div className="grid gap-1.5"><Label className="text-xs text-muted-foreground">Alinhamento vertical</Label><div className="flex gap-1">{([
+                { value: "top", label: "Superior", Icon: AlignStartVertical }, { value: "center", label: "Centro vertical", Icon: AlignCenterVertical }, { value: "bottom", label: "Inferior", Icon: AlignEndVertical },
+              ] as const).map(({ value, label, Icon }) => <Button key={value} type="button" variant="ghost" size="icon" title={label} aria-label={label} aria-pressed={verticalAlign === value} onClick={() => setVerticalAlign(value)} className={cn("text-primary", verticalAlign === value && "bg-primary/10 ring-1 ring-primary/40")}><Icon className="h-4 w-4" /></Button>)}</div></div>
+            </div>
+          </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className={isProcess ? "grid gap-1.5 sm:col-span-2" : "grid gap-1.5"}><Label>Responsável</Label><SearchableSelect value={responsible} onChange={setResponsible} options={userOptions} placeholder="Selecione o usuário" disabled={!canEdit} /></div>
             {isProcess ? null : <div className="grid gap-1.5"><Label>Data estimada de conclusão</Label><Input type="date" value={due} onChange={(e) => setDue(e.target.value)} /></div>}
