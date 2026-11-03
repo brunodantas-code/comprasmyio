@@ -13,6 +13,7 @@ import { childrenMap, computeBoxNumbers, computeProgress, descendantIds, formatD
 import type { MytosisData } from "./use-mytosis";
 import { BORDERS, ConnectorGlyph, FILLS, LINK_STYLES, SHAPES, ShapeSvg, type BorderKey, type FillKey, type LinkStyle, type ShapeKey } from "./shapes";
 import { cn } from "@/lib/utils";
+import { ChecklistText } from "./checklist-text";
 
 export type NodeDialogState =
   | { mode: "edit"; node: MytosisNode }
@@ -131,7 +132,7 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
           <DialogDescription>{editing ? `Criado em ${new Date(editing.created_at).toLocaleDateString("pt-BR")}` : `Data de criação: ${new Date().toLocaleDateString("pt-BR")}`}</DialogDescription>
         </DialogHeader>
         <fieldset disabled={!canEdit} className="grid gap-4">
-          <div className="grid gap-1.5"><Label>Título</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} autoFocus /></div>
+          <div className="grid gap-1.5"><Label>Título</Label><ChecklistText label="Título" value={title} onChange={setTitle} maxLength={200} hint="Redija o nome do box." autoFocus /></div>
           <div className="grid gap-2 rounded-xl border border-border bg-muted/40 p-3">
             <div className="grid gap-1"><Label className="text-xs text-muted-foreground">Forma</Label>
               <div className="flex flex-wrap gap-1.5">{SHAPES.map((s) => (
@@ -152,7 +153,7 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
               <div className="flex flex-wrap gap-1.5">{LINK_STYLES.map((l) => <button key={l.key} type="button" title={l.label} aria-label={l.label} aria-pressed={linkStyle === l.key} onClick={() => setLinkStyle(l.key)} className={cn("flex h-8 items-center gap-2 rounded-md border bg-card px-2 text-xs", linkStyle === l.key ? "border-primary bg-primary/10" : "border-border hover:border-primary/60")}><ConnectorGlyph style={l.key} color="var(--foreground)" />{l.label}</button>)}</div>
             </div> : null}
           </div>
-          <div className="grid gap-1.5"><Label>Descrição</Label><Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} /></div>
+          <div className="grid gap-1.5"><Label>Descrição</Label><ChecklistText label="Descrição" value={description} onChange={setDescription} multiline hint="Redija a descrição." /></div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className={isProcess ? "grid gap-1.5 sm:col-span-2" : "grid gap-1.5"}><Label>Responsável</Label><SearchableSelect value={responsible} onChange={setResponsible} options={userOptions} placeholder="Selecione o usuário" disabled={!canEdit} /></div>
             {isProcess ? null : <div className="grid gap-1.5"><Label>Data estimada de conclusão</Label><Input type="date" value={due} onChange={(e) => setDue(e.target.value)} /></div>}

@@ -147,7 +147,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
                 {collapsed ? <span className="relative m-auto text-[10px] text-muted-foreground [writing-mode:vertical-rl]">{numberOf(node)}</span> : (
                   <div className="relative flex min-w-0 flex-1 flex-col justify-between px-2.5 py-1.5" style={shapeInset[shape]}>
                     <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
-                      <span>{numberOf(node)}{node.kind === "objective" ? (process ? " · Fluxograma" : " · Objetivo") : ""}</span>
+                      <span className="flex min-w-0 items-center gap-1.5"><span className="inline-flex min-h-5 shrink-0 items-center justify-center rounded-md bg-primary/10 px-1.5 text-primary">{numberOf(node)}</span>{node.kind === "objective" ? <span className="truncate">{process ? "Fluxograma" : "Objetivo"}</span> : null}</span>
                       {process ? null : <span className="text-muted-foreground/70">{pct}%</span>}
                     </div>
                     <p className="line-clamp-2 text-sm font-normal leading-snug">{node.title}</p>

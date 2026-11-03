@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { History, MessageCircleQuestion, Pencil, Plus, Send } from "lucide-react";
+import { History, MessageCircleQuestion, Pencil, Send } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import { MilestoneTimeline } from "@/components/milestone-timeline";
 import { canCompleteBoxTask, type BoxTask } from "@/lib/mytosis-tasks";
 import { cn } from "@/lib/utils";
 import type { MytosisData } from "./use-mytosis";
+import { ChecklistText } from "./checklist-text";
 
 export type TaskSelection = { nodeId: string; taskId?: string } | null;
 
@@ -120,8 +121,8 @@ export function BoxTaskDialog({ selection, onClose, onSelect, data, canEdit }: {
   return <Dialog open={!!selection} onOpenChange={(open) => !open && onClose()}><DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
     <DialogHeader><DialogTitle className="flex items-start justify-between gap-3 font-normal"><span>{task?.title ?? "Nova tarefa"}</span>{task && isOwner && !editing ? <Button variant="ghost" size="icon" className="h-6 w-6 !text-primary" title="Editar tarefa" aria-label="Editar tarefa" onClick={() => setEditing(true)}><Pencil className="h-4 w-4" /></Button> : null}</DialogTitle><DialogDescription>{node?.title}{task ? ` · Criada por ${person(task.created_by)} em ${new Date(task.created_at).toLocaleString("pt-BR")}` : ""}</DialogDescription></DialogHeader>
     {editing ? <div className="grid gap-4">
-      <div className="grid gap-1.5"><Label htmlFor="task-title">Título</Label><Input id="task-title" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} autoFocus /></div>
-      <div className="grid gap-1.5"><Label htmlFor="task-description">Descrição</Label><Textarea id="task-description" value={description} onChange={(e) => setDescription(e.target.value)} /></div>
+      <div className="grid gap-1.5"><Label htmlFor="task-title">Título</Label><ChecklistText id="task-title" label="Título" value={title} onChange={setTitle} maxLength={200} hint="Redija a tarefa do check List." autoFocus /></div>
+      <div className="grid gap-1.5"><Label htmlFor="task-description">Descrição</Label><ChecklistText id="task-description" label="Descrição" value={description} onChange={setDescription} multiline hint="Redija a descrição da tarefa." /></div>
       <div className="grid gap-4 sm:grid-cols-2"><div className="grid gap-1.5"><Label>Responsável</Label><SearchableSelect value={responsible} onChange={setResponsible} options={data.users.map((u) => ({ value: u.id, label: u.full_name }))} /></div><div className="grid gap-1.5"><Label htmlFor="task-due">Prazo</Label><Input id="task-due" type="date" value={due} onChange={(e) => setDue(e.target.value)} /></div></div>
       <div className="space-y-2"><Label>Demais envolvidos</Label><div className="max-h-32 space-y-2 overflow-y-auto">{data.users.filter((u) => u.id !== responsible).map((u) => <label key={u.id} className="flex items-center gap-2 text-sm"><Checkbox checked={involved.includes(u.id)} onCheckedChange={(checked) => setInvolved((ids) => checked ? [...ids, u.id] : ids.filter((id) => id !== u.id))} />{u.full_name}</label>)}</div></div>
       <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => task ? setEditing(false) : onClose()}>Cancelar</Button><Button variant="outline" disabled={save.isPending} onClick={() => save.mutate()}>Salvar</Button></div>
