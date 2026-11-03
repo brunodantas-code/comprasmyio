@@ -1,10 +1,10 @@
 # Roadmap
-- [ ] Aplicar fontes do Supply aos títulos e descrições dos boxes
-- [ ] Aplicar padrão do Checklist do Supply com contador de caracteres nos campos indicados
-- [ ] Aplicar destaque verde-claro do Supply à numeração dos boxes, preservando o caminho completo
+- [x] Aplicar fontes do Supply aos títulos e descrições dos boxes
+- [x] Aplicar padrão do Checklist do Supply com contador de caracteres nos campos indicados
+- [x] Aplicar destaque verde-claro do Supply à numeração dos boxes, preservando o caminho completo
 
-- [ ] Adicionar tarefas internas por box com checkbox, conversa, histórico e sinalização sem bloqueio
-- [ ] Validar conclusão somente por responsável/criador e persistência da conversa
+- [x] Adicionar tarefas internas por box com checkbox, conversa, histórico e sinalização sem bloqueio
+- [x] Validar conclusão somente por responsável/criador e persistência da conversa
 
 - [x] Unificar numeração do Mytosis pelo caminho, sem #, e conferir busca e apresentação
 
