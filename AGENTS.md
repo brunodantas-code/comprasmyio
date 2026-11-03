@@ -46,4 +46,4 @@
 - Mytosis typography/colors persist and copy on import/split; preview and canvas share NodeText, token controls and height-based shape insets, growing vertically to fit text without header/footer overlap.
 - Mytosis connectors use pure obstacle-avoiding routing in `src/lib/mytosis-connectors.ts` and a measured SVG overlay; process views draw only explicit dependencies, OKRs retain hierarchy lines. Visible-box obstacles prevent crossings; styles and editor hit areas remain preserved.
 - Mytosis collapse state is local to each box's outgoing branches and tasks; it never changes stored dependencies or hides predecessors.
-- Mytosis box title capacity uses a shared pure width/font/shape resolver; editors validate without truncating historical titles.
+- Mytosis title capacity shares a pure size/font/shape resolver; editors never truncate historical titles. PDF lazily captures the settled visible canvas on one proportional page, with a prepared download for mobile activation.
