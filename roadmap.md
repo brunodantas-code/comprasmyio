@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Aplicar fontes pretas no roxo médio e brancas no roxo myio; alinhar pendências com o Responsável e conferir no fluxograma
 - [x] Incluir divisão em N etapas dependentes pelo ícone Mytosis no topo do box e conferir criação persistida
 - [x] Reposicionar setas dentro dos boxes e separar ações para dependentes, anteriores e tarefas
 - [x] Afastar lápis do fechamento no diálogo de tarefa e incluir seta para recolher/exibir tarefas por box

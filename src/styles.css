@@ -72,6 +72,8 @@
   --font-sans: "Nunito", ui-sans-serif, system-ui, sans-serif;
   --color-myio-green: var(--myio-green);
   --color-myio-purple: var(--myio-purple);
+  --color-mytosis-text-dark: var(--mytosis-text-dark);
+  --color-mytosis-text-light: var(--mytosis-text-light);
   --color-erp-landing: var(--erp-landing);
   --color-erp-landing-soft: var(--erp-landing-soft);
   --color-erp-landing-foreground: var(--erp-landing-foreground);
@@ -98,6 +100,8 @@
   --mytosis-purple-mid: color-mix(in oklab, var(--myio-purple) 40%, white);
   --mytosis-gray: color-mix(in oklab, var(--myio-dark) 8%, white);
   --mytosis-gray-line: color-mix(in oklab, var(--myio-dark) 35%, white);
+  --mytosis-text-dark: #000000;
+  --mytosis-text-light: #ffffff;
   --erp-landing: oklch(0.18 0.09 300);
   --erp-landing-soft: oklch(0.27 0.12 300);
   --erp-landing-foreground: oklch(0.99 0 0);
