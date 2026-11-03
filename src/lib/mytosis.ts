@@ -21,7 +21,7 @@ export type MytosisNode = {
   text_vertical_align?: "top" | "center" | "bottom";
 };
 
-export type MytosisLink = { predecessor_id: string; successor_id: string; style?: string };
+export type MytosisLink = { predecessor_id: string; successor_id: string; style?: string; color?: string | null };
 
 /** Display path follows the same primary sibling predecessor as the canvas, then the parent. */
 export function computeBoxNumbers(nodes: MytosisNode[], links: MytosisLink[]) {

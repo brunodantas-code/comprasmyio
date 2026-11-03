@@ -12,7 +12,7 @@ export function useMytosisData() {
       const { data: auth } = await supabase.auth.getUser();
       const [nodes, links, settings, users, role, tasks] = await Promise.all([
         supabase.from("mytosis_nodes").select("id,locator,kind,title,description,parent_id,responsible_id,due_date,weight,progress,position,created_at,is_process,shape,fill_color,border_color,title_font_size,description_font_size,text_align,text_vertical_align").order("locator"),
-        supabase.from("mytosis_links").select("predecessor_id,successor_id,style"),
+        supabase.from("mytosis_links").select("predecessor_id,successor_id,style,color"),
         supabase.from("mytosis_settings").select("box_width,box_height").eq("id", 1).maybeSingle(),
         supabase.rpc("mytosis_users"),
         supabase.rpc("mytosis_role", { _user_id: auth.user?.id ?? "" }),

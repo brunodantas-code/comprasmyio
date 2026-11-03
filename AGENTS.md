@@ -44,4 +44,4 @@
 - Mytosis internal checklists live in separate node-keyed tasks, messages and append-only audit logs, never as process boxes; database guards bind identities and authorize completion, while the shared task-signal helper keeps predecessor warnings independent of advancement.
 - OKR conversations use node-keyed messages and append-only logs, separate from task conversations; author-bound edits and same-node answer guards preserve history without changing existing node access.
 - Mytosis text sizes and horizontal/vertical alignment are persisted per node and copied on block import; canvas text stays in a bounded area separate from the locator and footer to prevent overlap.
-- Mytosis connector geometry measures visible rendered boxes in a shared SVG overlay; hierarchy and every dependency attach to hollow side-center ports, and resize observation follows collapse transitions.
+- Mytosis connector geometry measures visible boxes in a shared SVG overlay; dependencies choose facing side-center ports, hide with collapsed branches, and expose editor-only hit areas; link styles/colors persist and copy on import.

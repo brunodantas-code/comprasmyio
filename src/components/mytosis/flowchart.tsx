@@ -19,6 +19,8 @@ import { BoxTaskDialog, BoxTaskList, type TaskSelection } from "./box-tasks";
 import { predecessorTaskSignal } from "@/lib/mytosis-tasks";
 import { ConnectionLayer } from "./connection-layer";
 import { Checkbox } from "@/components/ui/checkbox";
+import { ConnectorDialog } from "./connector-dialog";
+import type { MytosisLink } from "@/lib/mytosis";
 
 type Props = {
   data: MytosisData;
@@ -35,6 +37,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
   const objectives = data.nodes.filter((n) => !n.parent_id && !!n.is_process === process);
   const [importTarget, setImportTarget] = useState<MytosisNode | null>(null);
   const [taskSelection, setTaskSelection] = useState<TaskSelection>(null);
+  const [selectedLink, setSelectedLink] = useState<MytosisLink | null>(null);
   const word = process ? "etapa" : "tarefa";
   const objective = objectives.find((o) => o.id === objectiveId) ?? null;
   const [hideRight, setHideRight] = useState<Set<string>>(new Set());
@@ -245,12 +248,13 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
       </div>
       {objective ? (
         <div className="overflow-auto rounded-xl border border-border bg-card p-6" onClick={() => setHighlight(null)}>
-          <div ref={canvasRef} className="relative w-max min-w-full pt-3" onClick={(e) => e.stopPropagation()}>{renderBranch(objective)}<ConnectionLayer container={canvasRef} nodes={data.nodes} links={data.links} layoutKey={`${objectiveId}:${[...hideRight].join(',')}:${[...hideDown].join(',')}:${k}`} /></div>
+          <div ref={canvasRef} className="relative w-max min-w-full pt-3" onClick={(e) => e.stopPropagation()}>{renderBranch(objective)}<ConnectionLayer container={canvasRef} nodes={data.nodes} links={data.links} onSelect={canEdit ? setSelectedLink : undefined} layoutKey={`${objectiveId}:${[...hideRight].join(',')}:${[...hideDown].join(',')}:${k}`} /></div>
         </div>
       ) : <p className="py-16 text-center text-muted-foreground">{process ? (objectives.length ? "Selecione um fluxograma." : "Nenhum fluxograma cadastrado. Use o + para criar a primeira etapa.") : objectives.length ? "Selecione um objetivo." : "Nenhum objetivo cadastrado. Use o + para criar o primeiro."}</p>}
       <ImportBlockDialog target={importTarget} onClose={() => setImportTarget(null)} data={data} />
       <BoxTaskDialog selection={taskSelection} onSelect={setTaskSelection} onClose={() => setTaskSelection(null)} data={data} canEdit={canEdit} />
       <BoxSettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} box={data.box} />
+      <ConnectorDialog link={selectedLink} onClose={() => setSelectedLink(null)} label={selectedLink ? `${data.nodes.find((n) => n.id === selectedLink.predecessor_id)?.title} → ${data.nodes.find((n) => n.id === selectedLink.successor_id)?.title}` : ""} />
     </div>
   );
 }
@@ -312,7 +316,7 @@ function ImportBlockDialog({ target, onClose, data }: { target: MytosisNode | nu
         const copiedLinks = internalLinks.map((l) => {
           const predecessor = idMap.get(l.predecessor_id), successor = idMap.get(l.successor_id);
           if (!predecessor || !successor) throw new Error("Ligação não encontrada na importação.");
-          return { predecessor_id: predecessor, successor_id: successor, style: l.style };
+          return { predecessor_id: predecessor, successor_id: successor, style: l.style, color: l.color };
         });
         const { error } = await supabase.from("mytosis_links").insert(copiedLinks);
         if (error) throw error;
