@@ -1,4 +1,6 @@
 # Roadmap
+- [ ] Mostrar miniaturas de anexos e clipe somente em boxes com anexos
+- [ ] Aplicar largura e altura iguais conforme Padrões dos boxes, conferindo textos e controles
 - [x] Investigar novo erro de redesenho ao recolher boxes após ajustes de formas
 - [x] Simplificar conectores com setas retas sem degraus quando não houver obstáculos
 - [x] Permitir anexar foto/arquivo pelo clipe à esquerda do Mytosis e pelo campo Anexo ao fim do editor
