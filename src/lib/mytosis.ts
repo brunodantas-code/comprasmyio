@@ -25,38 +25,27 @@ export type MytosisNode = {
 
 export type MytosisLink = { predecessor_id: string; successor_id: string; style?: string; color?: string | null };
 
-/** Display path follows the same primary sibling predecessor as the canvas, then the parent. */
+/** Hierarchy defines levels; dependencies order siblings without adding levels. */
 export function computeBoxNumbers(nodes: MytosisNode[], links: MytosisLink[]) {
-  const byId = new Map(nodes.map((node) => [node.id, node]));
-  const predecessors = new Map<string, MytosisNode[]>();
-  for (const link of links) {
-    const from = byId.get(link.predecessor_id);
-    const to = byId.get(link.successor_id);
-    if (!from || !to || from.parent_id !== to.parent_id) continue;
-    predecessors.set(to.id, [...(predecessors.get(to.id) ?? []), from]);
-  }
-  for (const list of predecessors.values()) list.sort((a, b) => a.locator - b.locator);
-  // Stored locators remain stable; only the visible sequence is compacted.
-  const displayLocators = new Map<string, number>();
+  const numbers = new Map<string, string>();
+  const children = childrenMap(nodes);
+  const assign = (node: MytosisNode, number: string, seen: Set<string>) => {
+    if (seen.has(node.id)) return;
+    numbers.set(node.id, number);
+    const next = new Set(seen).add(node.id);
+    const remaining = [...(children.get(node.id) ?? [])];
+    const ordered: MytosisNode[] = [];
+    while (remaining.length) {
+      const index = remaining.findIndex((candidate) => !links.some((link) => link.successor_id === candidate.id && remaining.some((other) => other.id === link.predecessor_id)));
+      const [child] = remaining.splice(index < 0 ? 0 : index, 1);
+      if (child) ordered.push(child);
+    }
+    ordered.forEach((child, index) => assign(child, `${number}.${index + 1}`, next));
+  };
   const roots = nodes.filter((node) => !node.parent_id).sort((a, b) => a.locator - b.locator);
   for (const process of [false, true]) {
-    const categoryRoots = roots.filter((node) => !!node.is_process === process);
-    categoryRoots.forEach((root, rootIndex) => {
-      const scope = descendantIds(root.id, nodes);
-      const ordered = nodes.filter((node) => scope.has(node.id) && node.id !== root.id).sort((a, b) => a.locator - b.locator);
-      displayLocators.set(root.id, rootIndex + 1);
-      ordered.forEach((node, index) => displayLocators.set(node.id, index + 2));
-    });
+    roots.filter((node) => !!node.is_process === process).forEach((root, index) => assign(root, String(index + 1), new Set()));
   }
-  const numbers = new Map<string, string>();
-  const path = (id: string, seen: Set<string>): number[] => {
-    const node = byId.get(id);
-    if (!node || seen.has(id)) return [];
-    const next = new Set(seen).add(id);
-    const previous = predecessors.get(id)?.[0]?.id ?? node.parent_id;
-    return [...(previous ? path(previous, next) : []), displayLocators.get(id) ?? node.locator];
-  };
-  for (const node of nodes) numbers.set(node.id, path(node.id, new Set()).join("."));
   return numbers;
 }
 

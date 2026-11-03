@@ -7068,6 +7068,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      reposition_mytosis_node: {
+        Args: { _node_id: string; _target_id: string }
+        Returns: undefined
+      }
       request_user_deletion: {
         Args: { _target_user_id: string }
         Returns: string

@@ -17,25 +17,31 @@ describe("Mytosis", () => {
     const removed = n("removed", "root", { locator: 40 });
     const b = n("b", "root", { locator: 90 });
     const links = [{ predecessor_id: "a", successor_id: "b" }];
-    expect(computeBoxNumbers([root, a, removed, b], links).get("b")).toBe("1.2.4");
-    expect(computeBoxNumbers([root, a, b], links).get("b")).toBe("1.2.3");
+    expect(computeBoxNumbers([root, a, removed, b], links).get("b")).toBe("1.3");
+    expect(computeBoxNumbers([root, a, b], links).get("b")).toBe("1.2");
     expect(b.locator).toBe(90);
     expect(links).toEqual([{ predecessor_id: "a", successor_id: "b" }]);
   });
-  it("box 3 mostra a sequência 1.2.3, usando o predecessor horizontal", () => {
+  it("dependência horizontal não acrescenta nível à numeração", () => {
     const nodes = [n("root", null, { locator: 1 }), n("contact", "root", { locator: 2 }), n("email", "root", { locator: 3 })];
     const numbers = computeBoxNumbers(nodes, [{ predecessor_id: "contact", successor_id: "email" }]);
     expect(numbers.get("root")).toBe("1");
-    expect(numbers.get("contact")).toBe("1.2");
-    expect(numbers.get("email")).toBe("1.2.3");
+    expect(numbers.get("contact")).toBe("1.1");
+    expect(numbers.get("email")).toBe("1.2");
   });
 
   it("mantém uma sequência única no encontro de caminhos e em etapas verticais", () => {
     const nodes = [n("root", null, { locator: 1 }), n("a", "root", { locator: 2 }), n("b", "root", { locator: 3 }), n("c", "root", { locator: 4 }), n("child", "c", { locator: 5 })];
     const links = [{ predecessor_id: "b", successor_id: "c" }, { predecessor_id: "a", successor_id: "c" }];
-    expect(computeBoxNumbers(nodes, links).get("c")).toBe("1.2.4");
-    expect(computeBoxNumbers(nodes, links).get("child")).toBe("1.2.4.5");
-    expect(computeBoxNumbers(nodes, links.slice(0, 1)).get("c")).toBe("1.3.4");
+    expect(computeBoxNumbers(nodes, links).get("c")).toBe("1.3");
+    expect(computeBoxNumbers(nodes, links).get("child")).toBe("1.3.1");
+    expect(computeBoxNumbers(nodes, links.slice(0, 1)).get("c")).toBe("1.3");
+  });
+  it("após reposicionar, Site Survey tem etapas 2.1 e 2.2 preservando IDs", () => {
+    const nodes = [n("first", null, { is_process: true }), n("survey", null, { locator: 8, is_process: true }), n("proposal", "survey", { locator: 9 }), n("luc", "survey", { locator: 10 })];
+    const numbers = computeBoxNumbers(nodes, [{ predecessor_id: "proposal", successor_id: "luc" }]);
+    expect([numbers.get("survey"), numbers.get("proposal"), numbers.get("luc")]).toEqual(["2", "2.1", "2.2"]);
+    expect(nodes[3].id).toBe("luc");
   });
 
   it("objetivo soma as tarefas pelo peso informado", () => {
