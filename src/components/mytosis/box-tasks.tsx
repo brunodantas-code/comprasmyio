@@ -29,16 +29,16 @@ export function useTaskCompletion() {
   });
 }
 
-export function BoxTaskList({ nodeId, data, onOpen }: { nodeId: string; data: MytosisData; onOpen: (selection: TaskSelection) => void }) {
+export function BoxTaskList({ nodeId, data, onOpen, expanded = true }: { nodeId: string; data: MytosisData; onOpen: (selection: TaskSelection) => void; expanded?: boolean }) {
   const completion = useTaskCompletion();
   const tasks = data.tasks.filter((t) => t.node_id === nodeId);
   if (!tasks.length) return null;
-  return <ul className="mt-2 space-y-1 border-l border-primary/30 pl-2">
+  return <div id={`mytosis-tasks-${nodeId}`} inert={!expanded} aria-hidden={!expanded} className={cn("grid transition-[grid-template-rows,opacity] duration-500 ease-in-out motion-reduce:transition-none", expanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0")}><div className="min-h-0 overflow-hidden"><ul className="mt-2 space-y-1 border-l border-primary/30 pl-2">
     {tasks.map((task) => <li key={task.id} className="flex min-h-7 items-center gap-2">
       <Checkbox aria-label={`Concluir tarefa ${task.title}`} checked={task.completed} disabled={completion.isPending || !canCompleteBoxTask(task, data.userId, !!data.role)} onCheckedChange={(checked) => completion.mutate({ id: task.id, completed: checked === true })} />
       <Button variant="ghost" className={cn("h-auto min-w-0 justify-start rounded-none p-0 text-left text-xs font-normal !bg-transparent !text-foreground hover:!bg-transparent hover:!text-primary", task.completed && "!text-muted-foreground line-through")} onClick={() => onOpen({ nodeId, taskId: task.id })}><span className="break-words">{task.title}</span></Button>
     </li>)}
-  </ul>;
+  </ul></div></div>;
 }
 
 export function BoxTaskDialog({ selection, onClose, onSelect, data, canEdit }: { selection: TaskSelection; onClose: () => void; onSelect: (s: TaskSelection) => void; data: MytosisData; canEdit: boolean }) {
@@ -118,7 +118,7 @@ export function BoxTaskDialog({ selection, onClose, onSelect, data, canEdit }: {
   </div>;
 
   return <Dialog open={!!selection} onOpenChange={(open) => !open && onClose()}><DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
-    <DialogHeader><DialogTitle className="flex items-start justify-between gap-3 font-normal"><span>{task?.title ?? "Nova tarefa"}</span>{task && isOwner && !editing ? <Button variant="ghost" size="icon" className="h-6 w-6 !text-primary" title="Editar tarefa" aria-label="Editar tarefa" onClick={() => setEditing(true)}><Pencil className="h-4 w-4" /></Button> : null}</DialogTitle><DialogDescription>{node?.title}{task ? ` · Criada por ${person(task.created_by)} em ${new Date(task.created_at).toLocaleString("pt-BR")}` : ""}</DialogDescription></DialogHeader>
+    <DialogHeader className="pr-8"><DialogTitle className="flex items-start gap-3 font-normal"><span className="min-w-0 break-words">{task?.title ?? "Nova tarefa"}</span>{task && isOwner && !editing ? <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0 !text-primary" title="Editar tarefa" aria-label="Editar tarefa" onClick={() => setEditing(true)}><Pencil className="h-4 w-4" /></Button> : null}</DialogTitle><DialogDescription>{node?.title}{task ? ` · Criada por ${person(task.created_by)} em ${new Date(task.created_at).toLocaleString("pt-BR")}` : ""}</DialogDescription></DialogHeader>
     {editing ? <div className="grid gap-4">
       <div className="grid gap-1.5"><Label htmlFor="task-title">Título</Label><ChecklistText id="task-title" label="Título" value={title} onChange={setTitle} maxLength={200} hint="Redija a tarefa do check List." autoFocus /></div>
       <div className="grid gap-1.5"><Label htmlFor="task-description">Descrição</Label><ChecklistText id="task-description" label="Descrição" value={description} onChange={setDescription} multiline hint="Redija a descrição da tarefa." /></div>
