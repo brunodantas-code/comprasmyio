@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { cn } from "@/lib/utils";
-import { childrenMap, computePhases, computeProgress, criticalPath, formatDate, planBlockImport, rootObjectiveOf, type MytosisNode } from "@/lib/mytosis";
+import { childrenMap, computeBoxNumbers, computePhases, computeProgress, criticalPath, formatDate, planBlockImport, rootObjectiveOf, type MytosisNode } from "@/lib/mytosis";
 import { firstName, type MytosisData } from "./use-mytosis";
 import type { NodeDialogState } from "./node-dialog";
 import { ConnectorGlyph, ShapeSvg, borderOf, fillOf, shapeInset, type LinkStyle, type ShapeKey } from "./shapes";
@@ -46,6 +46,8 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
   useEffect(() => setK(last), [last, objectiveId]);
   const critical = useMemo(() => showCritical && objective ? criticalPath(objective.id, data.nodes, data.links) : new Set<string>(), [showCritical, objective, data.nodes, data.links]);
   const byId = useMemo(() => new Map(data.nodes.map((n) => [n.id, n])), [data.nodes]);
+  const numbers = useMemo(() => computeBoxNumbers(data.nodes, data.links), [data.nodes, data.links]);
+  const numberOf = (node: MytosisNode) => numbers.get(node.id) ?? String(node.locator);
   const nameOf = (id: string | null) => firstName(data.users.find((u) => u.id === id)?.full_name ?? "—");
 
   // Predecessores entre irmãos: o sucessor é desenhado à direita do primeiro predecessor.
@@ -60,16 +62,16 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
   }, [data.links, byId]);
   const drawnSuccessors = (id: string) => data.links
     .filter((l) => l.predecessor_id === id && siblingPreds.get(l.successor_id)?.[0]?.id === id)
-    .map((l) => byId.get(l.successor_id)!).filter(Boolean).sort((a, b) => a.locator - b.locator);
+    .flatMap((l) => { const node = byId.get(l.successor_id); return node ? [node] : []; }).sort((a, b) => a.locator - b.locator);
 
-  function locate(locator: number) {
-    const node = data.nodes.find((n) => n.locator === locator);
-    if (!node) return toast.error(`Localizador #${locator} não encontrado.`);
+  function locate(locator: number | string) {
+    const node = data.nodes.find((n) => typeof locator === "number" ? n.locator === locator : numberOf(n) === locator.trim());
+    if (!node) return toast.error(`Localizador ${locator} não encontrado.`);
     const root = rootObjectiveOf(node.id, data.nodes);
     if (root && root.id !== objectiveId) onObjectiveChange(root.id);
     setHideRight(new Set()); setHideDown(new Set()); setK(Number.MAX_SAFE_INTEGER);
     setHighlight(node.id);
-    window.setTimeout(() => document.getElementById(`mytosis-box-${locator}`)?.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" }), 600);
+    window.setTimeout(() => document.getElementById(`mytosis-box-${node.locator}`)?.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" }), 600);
   }
   useEffect(() => { if (focusLocator !== null) { locate(focusLocator); onFocusHandled(); } }, [focusLocator]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (!locatorQuery.trim()) setHighlight(null); }, [locatorQuery]);
@@ -83,12 +85,12 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
       const { error } = await supabase.from("mytosis_links").insert({ predecessor_id: from, successor_id: to });
       if (error) throw error;
     },
-    onSuccess: (_d, v) => { toast.success(`Ligação criada: #${byId.get(v.from)?.locator} → #${byId.get(v.to)?.locator}.`); queryClient.invalidateQueries({ queryKey: ["mytosis"] }); },
+    onSuccess: (_d, v) => { toast.success(`Ligação criada.`); queryClient.invalidateQueries({ queryKey: ["mytosis"] }); },
     onError: (e: Error) => toast.error(e.message),
   });
   function reaches(from: string, to: string) {
     const seen = new Set<string>(); const stack = [from];
-    while (stack.length) { const c = stack.pop()!; if (c === to) return true; if (seen.has(c)) continue; seen.add(c); for (const l of data.links) if (l.predecessor_id === c) stack.push(l.successor_id); }
+    while (stack.length) { const c = stack.pop(); if (!c) continue; if (c === to) return true; if (seen.has(c)) continue; seen.add(c); for (const l of data.links) if (l.predecessor_id === c) stack.push(l.successor_id); }
     return false;
   }
   function connect(from: string, to: string) {
@@ -101,7 +103,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
   const toggle = (set: Set<string>, id: string) => { const next = new Set(set); if (next.has(id)) next.delete(id); else next.add(id); return next; };
   const visibleFrom = last - Math.min(k, last);
 
-  function renderBranch(node: MytosisNode, index?: number) {
+  function renderBranch(node: MytosisNode) {
     const kids = (children.get(node.id) ?? []).filter((c) => !siblingPreds.has(c.id));
     const succ = drawnSuccessors(node.id);
     const extraPreds = (siblingPreds.get(node.id) ?? []).slice(1);
@@ -118,7 +120,6 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
       <div className="flex items-start">
         <div className="flex flex-col">
           <div className="flex items-start gap-1.5">
-            {index !== undefined ? <span className="pt-2 text-xs text-muted-foreground">{index}.</span> : null}
             <div className="relative transition-[width,opacity] duration-500 ease-in-out" style={{ width: collapsed ? 30 : data.box.width, height: data.box.height, opacity: collapsed ? 0.55 : 1 }}>
               <div
                 id={`mytosis-box-${node.locator}`}
@@ -132,17 +133,17 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
                 onDrop={(e) => { e.preventDefault(); const from = e.dataTransfer.getData("text/plain") || dragId; setDropId(null); setDragId(null); if (from) connect(from, node.id); }}
                 onClick={() => openDialog({ mode: "edit", node })}
                 onKeyDown={(e) => e.key === "Enter" && openDialog({ mode: "edit", node })}
-                title={canEdit ? `#${node.locator} — ${node.title}\nArraste sobre outro box para ligá-lo como sucessor.` : `#${node.locator} — ${node.title}`}
+                title={canEdit ? `${numberOf(node)} — ${node.title}\nArraste sobre outro box para ligá-lo como sucessor.` : `${numberOf(node)} — ${node.title}`}
                 className={cn("group relative flex h-full w-full cursor-pointer overflow-hidden rounded-md transition-colors duration-300", dropId === node.id && "ring-2 ring-primary ring-offset-2", dragId === node.id && "opacity-50", darkText ? "text-primary-foreground [&_*]:!text-[color:var(--card)]" : "text-foreground")}
               >
                 <ShapeSvg shape={shape} fill={fillColor} stroke={stroke} strokeWidth={highlight === node.id ? 2 : 1} className="pointer-events-none absolute inset-0 h-full w-full transition-all duration-300 group-hover:[filter:drop-shadow(0_0_1px_var(--myio-green))]" />
                 {process ? null : <div className="relative w-1.5 shrink-0 bg-primary/10" aria-label={`${pct}% concluído`}>
                   <div className="absolute inset-x-0 bottom-0 bg-primary transition-[height] duration-500" style={{ height: `${pct}%` }} />
                 </div>}
-                {collapsed ? <span className="relative m-auto text-[10px] text-muted-foreground [writing-mode:vertical-rl]">#{node.locator}</span> : (
+                {collapsed ? <span className="relative m-auto text-[10px] text-muted-foreground [writing-mode:vertical-rl]">{numberOf(node)}</span> : (
                   <div className="relative flex min-w-0 flex-1 flex-col justify-between px-2.5 py-1.5" style={shapeInset[shape]}>
                     <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
-                      <span>#{node.locator}{node.kind === "objective" ? (process ? " · Fluxograma" : " · Objetivo") : ""}</span>
+                      <span>{numberOf(node)}{node.kind === "objective" ? (process ? " · Fluxograma" : " · Objetivo") : ""}</span>
                       {process ? null : <span className="text-muted-foreground/70">{pct}%</span>}
                     </div>
                     <p className="line-clamp-2 text-sm font-normal leading-snug">{node.title}</p>
@@ -162,7 +163,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
                   </div>
                 )}
               </div>
-              {extraPreds.length && !collapsed ? <span className="absolute -top-4 left-0 text-[10px] text-muted-foreground">também depende de {extraPreds.map((p) => `#${p.locator}`).join(", ")}</span> : null}
+              {extraPreds.length && !collapsed ? <span className="absolute -top-4 left-0 text-[10px] text-muted-foreground">também depende de {extraPreds.map((p) => numberOf(p)).join(", ")}</span> : null}
             </div>
             {succ.length ? (
               <button type="button" className="mt-2 text-primary" onClick={() => setHideRight((s) => toggle(s, node.id))} aria-label={rightOpen ? "Recolher dependentes" : "Exibir dependentes"} title={rightOpen ? "Recolher dependentes" : "Exibir dependentes"}>
@@ -172,13 +173,13 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
           </div>
           {kids.length ? (
             <>
-              <button type="button" className={cn("mt-1 self-start text-primary", index !== undefined && "ml-4")} onClick={() => setHideDown((s) => toggle(s, node.id))} aria-label={downOpen ? "Recolher tarefas associadas" : "Exibir tarefas associadas"} title={downOpen ? "Recolher tarefas associadas" : "Exibir tarefas associadas"}>
+              <button type="button" className="mt-1 self-start text-primary" onClick={() => setHideDown((s) => toggle(s, node.id))} aria-label={downOpen ? "Recolher tarefas associadas" : "Exibir tarefas associadas"} title={downOpen ? "Recolher tarefas associadas" : "Exibir tarefas associadas"}>
                 {downOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               </button>
               <div className="grid transition-[grid-template-rows,opacity] duration-500 ease-in-out" style={{ gridTemplateRows: downOpen ? "1fr" : "0fr", opacity: downOpen ? 1 : 0 }}>
                 <div className="overflow-hidden">
-                  <div className={cn("ml-2 flex flex-col gap-4 border-l border-primary/40 py-2 pl-4", index !== undefined && "ml-6")}>
-                    {kids.map((kid, i) => <Fragment key={kid.id}>{renderBranch(kid, i + 1)}</Fragment>)}
+                  <div className="ml-2 flex flex-col gap-4 border-l border-primary/40 py-2 pl-4">
+                    {kids.map((kid) => <Fragment key={kid.id}>{renderBranch(kid)}</Fragment>)}
                   </div>
                 </div>
               </div>
@@ -210,11 +211,11 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
       <div className="flex flex-wrap items-end gap-3 rounded-xl border border-border bg-muted/50 px-4 py-3">
         <Filter className="mb-2.5 h-4 w-4 text-muted-foreground/60" />
         <div className="grid min-w-64 flex-1 gap-1"><Label className="text-xs text-muted-foreground">{process ? "Fluxograma" : "Objetivo"}</Label>
-          <SearchableSelect value={objectiveId} onChange={onObjectiveChange} clearable={false} placeholder={process ? "Selecione o fluxograma" : "Selecione o objetivo"} options={objectives.map((o) => ({ value: o.id, label: `#${o.locator} ${o.title}` }))} />
+          <SearchableSelect value={objectiveId} onChange={onObjectiveChange} clearable={false} placeholder={process ? "Selecione o fluxograma" : "Selecione o objetivo"} options={objectives.map((o) => ({ value: o.id, label: `${numbers.get(o.id) ?? o.locator} ${o.title}` }))} />
         </div>
-        <form className="grid gap-1" onSubmit={(e) => { e.preventDefault(); const v = Number(locatorQuery.replace("#", "")); if (v) locate(v); }}>
+        <form className="grid gap-1" onSubmit={(e) => { e.preventDefault(); const v = locatorQuery.trim(); if (v) locate(v); else setHighlight(null); }}>
           <Label className="text-xs text-muted-foreground">Localizador</Label>
-          <div className="flex gap-1"><Input value={locatorQuery} onChange={(e) => setLocatorQuery(e.target.value)} placeholder="Nº do box" className="h-9 w-28" inputMode="numeric" /><Button type="submit" variant="outline" size="icon" aria-label="Localizar box" title="Localizar box"><Search className="h-4 w-4" /></Button></div>
+          <div className="flex gap-1"><Input value={locatorQuery} onChange={(e) => setLocatorQuery(e.target.value)} placeholder="Nº do box" className="h-9 w-28" inputMode="decimal" /><Button type="submit" variant="outline" size="icon" aria-label="Localizar box" title="Localizar box"><Search className="h-4 w-4" /></Button></div>
         </form>
         <div className="grid min-w-48 gap-1">
           <Label className="text-xs text-muted-foreground">Fases exibidas: {last === 0 ? "única" : `${visibleFrom + 1} a ${last + 1} de ${last + 1}`}</Label>
@@ -268,6 +269,7 @@ function ImportBlockDialog({ target, onClose, data }: { target: MytosisNode | nu
   const queryClient = useQueryClient();
   const [sourceId, setSourceId] = useState("");
   useEffect(() => { if (target) setSourceId(""); }, [target]);
+  const numbers = useMemo(() => computeBoxNumbers(data.nodes, data.links), [data.nodes, data.links]);
   const targetRoot = target ? rootObjectiveOf(target.id, data.nodes) : null;
   const sources = data.nodes.filter((n) => !n.parent_id && n.is_process && n.id !== targetRoot?.id);
   const run = useMutation({
@@ -297,8 +299,8 @@ function ImportBlockDialog({ target, onClose, data }: { target: MytosisNode | nu
   return (
     <Dialog open={!!target} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="sm:max-w-md">
-        <DialogHeader><DialogTitle className="font-normal">Importar fluxograma como bloco</DialogTitle><DialogDescription>Uma cópia do fluxograma escolhido entra abaixo de #{target?.locator} {target?.title}. O original não muda.</DialogDescription></DialogHeader>
-        <SearchableSelect value={sourceId} onChange={setSourceId} placeholder="Selecione o fluxograma" options={sources.map((o) => ({ value: o.id, label: `#${o.locator} ${o.title}` }))} />
+        <DialogHeader><DialogTitle className="font-normal">Importar fluxograma como bloco</DialogTitle><DialogDescription>Uma cópia do fluxograma escolhido entra abaixo de {target ? numbers.get(target.id) ?? target.locator : ""} {target?.title}. O original não muda.</DialogDescription></DialogHeader>
+        <SearchableSelect value={sourceId} onChange={setSourceId} placeholder="Selecione o fluxograma" options={sources.map((o) => ({ value: o.id, label: `${numbers.get(o.id) ?? o.locator} ${o.title}` }))} />
         <DialogFooter><Button variant="outline" onClick={onClose}>Cancelar</Button><Button variant="outline" onClick={() => run.mutate()} disabled={run.isPending || !sourceId}>Confirmar</Button></DialogFooter>
       </DialogContent>
     </Dialog>
