@@ -13,6 +13,7 @@ export function ConnectionLayer({ container, nodes, links, layoutKey, onSelect }
     const root = container.current;
     if (!root) return;
     let frame = 0;
+    let animateUntil = 0;
     const measure = () => {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
@@ -26,6 +27,8 @@ export function ConnectionLayer({ container, nodes, links, layoutKey, onSelect }
           while (parent && parent !== root) {
             const bounds = parent.getBoundingClientRect();
             if (parent.dataset.mytosisHidden === "true" || bounds.width < 1 || bounds.height < 1) hidden = true;
+            const style = getComputedStyle(parent);
+            if ((style.overflowX === "hidden" && (rect.left < bounds.left - 1 || rect.right > bounds.right + 1)) || (style.overflowY === "hidden" && (rect.top < bounds.top - 1 || rect.bottom > bounds.bottom + 1))) hidden = true;
             parent = parent.parentElement;
           }
           if (id && rect.width > 40 && rect.height > 1 && !hidden) boxes.set(id, rect);
@@ -44,19 +47,28 @@ export function ConnectionLayer({ container, nodes, links, layoutKey, onSelect }
           const to = { ...route.points[route.points.length - 1], color: borderOf(byId.get(edge.to)?.border_color).color };
           return [{ id: `${edge.from}-${edge.to}`, from, to, ...route, style: edge.link ? edge.link.style ?? "arrow" : "line", color: edge.link?.color, link: edge.link }];
         }));
+        if (performance.now() < animateUntil) measure();
       });
     };
+    const transition = () => { animateUntil = performance.now() + 650; measure(); };
     const observer = new ResizeObserver(measure);
     observer.observe(root);
     root.querySelectorAll("[data-mytosis-node],[data-mytosis-hidden]").forEach((element) => observer.observe(element));
+    const mutations = new MutationObserver((records) => {
+      if (records.some((record) => record.target instanceof HTMLElement && !record.target.closest("svg"))) transition();
+    });
+    mutations.observe(root, { subtree: true, attributes: true, attributeFilter: ["data-mytosis-hidden", "data-mytosis-collapsed", "style"], childList: true });
+    root.addEventListener("transitionrun", transition);
+    root.addEventListener("transitionend", measure);
+    root.addEventListener("transitioncancel", measure);
     measure();
-    return () => { observer.disconnect(); cancelAnimationFrame(frame); };
+    return () => { observer.disconnect(); mutations.disconnect(); root.removeEventListener("transitionrun", transition); root.removeEventListener("transitionend", measure); root.removeEventListener("transitioncancel", measure); cancelAnimationFrame(frame); };
   }, [container, nodes, links, layoutKey]);
 
   const ports = new Map<string, Point>();
   for (const edge of edges) for (const point of [edge.from, edge.to]) ports.set(`${point.x}-${point.y}`, point);
   const radius = 3;
-  return <svg className="pointer-events-none absolute inset-0 h-full w-full overflow-visible">
+  return <svg data-mytosis-connectors className="pointer-events-none absolute inset-0 h-full w-full overflow-visible">
     {edges.map(({ id, from, to, points, fromSide, toSide, style, color, link }) => {
       const da = portDirection(fromSide), db = portDirection(toSide);
       const start = { x: from.x + da.x * radius, y: from.y + da.y * radius };
