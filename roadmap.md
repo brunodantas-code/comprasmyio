@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Incluir prévia da etapa e cor do título persistida; conferir criação e edição, preservando a cor na importação
 - [x] Aplicar fontes pretas no roxo médio e brancas no roxo myio; alinhar pendências com o Responsável e conferir no fluxograma
 - [x] Incluir divisão em N etapas dependentes pelo ícone Mytosis no topo do box e conferir criação persistida
 - [x] Reposicionar setas dentro dos boxes e separar ações para dependentes, anteriores e tarefas

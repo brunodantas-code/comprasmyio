@@ -43,7 +43,7 @@
 - Mytosis display numbers and search use a shared path-number resolver following the canvas primary sibling predecessor (lowest locator), otherwise the parent; stored locators and record IDs remain unchanged to preserve links.
 - Mytosis internal checklists live in separate node-keyed tasks, messages and append-only audit logs, never as process boxes; database guards bind identities and authorize completion, while the shared task-signal helper keeps predecessor warnings independent of advancement.
 - OKR conversations use node-keyed messages and append-only logs, separate from task conversations; author-bound edits and same-node answer guards preserve history without changing existing node access.
-- Mytosis text sizes and horizontal/vertical alignment are persisted per node and copied on block import; canvas text stays in a bounded area separate from the locator and footer to prevent overlap.
+- Mytosis text sizes, alignment and nullable title colors persist per node and copy on import; preview and canvas share NodeText/color resolution, bounded away from locator/footer.
 - Mytosis connectors use pure obstacle-avoiding routing in `src/lib/mytosis-connectors.ts` and a measured SVG overlay; process views draw only explicit dependencies, OKRs retain hierarchy lines. Visible-box obstacles prevent crossings; styles and editor hit areas remain preserved.
 - Mytosis collapse state is local to each box's outgoing branches and tasks; it never changes stored dependencies or hides predecessors.
 - Mytosis box title capacity uses a shared pure width/font/shape resolver; editors validate without truncating historical titles.

@@ -24,6 +24,7 @@ import type { MytosisLink } from "@/lib/mytosis";
 import { ChecklistText } from "./checklist-text";
 import { MytosisIcon } from "@/components/mytosis-icon";
 import { SplitDialog } from "./split-dialog";
+import { NodeText } from "./node-text";
 
 type Props = {
   data: MytosisData;
@@ -156,7 +157,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
                 onClick={(e) => { if (e.target instanceof Element && e.target.closest("button,[role='menuitem']")) return; openDialog({ mode: "edit", node }); }}
                 onKeyDown={(e) => { if (e.target === e.currentTarget && e.key === "Enter") openDialog({ mode: "edit", node }); }}
                 title={canEdit ? `${numberOf(node)} — ${node.title}\nArraste sobre outro box para ligá-lo como sucessor.` : `${numberOf(node)} — ${node.title}`}
-                className={cn("group relative flex h-full w-full cursor-pointer overflow-hidden rounded-md transition-colors duration-300", dropId === node.id && "ring-2 ring-primary ring-offset-2", dragId === node.id && "opacity-50", darkText ? "text-mytosis-text-light [&_*]:!text-mytosis-text-light" : purpleMediumText ? "text-mytosis-text-dark [&_p]:!text-mytosis-text-dark [&_span]:!text-mytosis-text-dark" : "text-foreground")}
+                className={cn("group relative flex h-full w-full cursor-pointer overflow-hidden rounded-md transition-colors duration-300", dropId === node.id && "ring-2 ring-primary ring-offset-2", dragId === node.id && "opacity-50", darkText ? "text-mytosis-text-light [&_p:not([data-mytosis-title])]:!text-mytosis-text-light [&_span]:!text-mytosis-text-light [&_button]:!text-mytosis-text-light" : purpleMediumText ? "text-mytosis-text-dark [&_p:not([data-mytosis-title])]:!text-mytosis-text-dark [&_span]:!text-mytosis-text-dark" : "text-foreground")}
               >
                 <ShapeSvg shape={shape} fill={fillColor} stroke={stroke} strokeWidth={highlight === node.id ? 2 : 1} className="pointer-events-none absolute inset-0 h-full w-full transition-all duration-300 group-hover:[filter:drop-shadow(0_0_1px_var(--myio-green))]" />
                 {process ? null : <div className="relative w-1.5 shrink-0 bg-primary/10" aria-label={`${pct}% concluído`}>
@@ -168,7 +169,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
                       <span className="flex min-w-0 items-center gap-1.5"><span className="inline-flex min-h-5 shrink-0 items-center justify-center rounded-md bg-primary/10 px-1.5 text-primary">{numberOf(node)}</span>{node.kind === "objective" ? <span className="truncate">{process ? "Fluxograma" : "Objetivo"}</span> : null}</span>
                       <div className="flex shrink-0 items-center gap-1">{process ? null : <span className="text-muted-foreground/70">{pct}%</span>}{canEdit ? <Button variant="ghost" size="icon" className="h-5 w-5 !bg-transparent !text-primary hover:!bg-transparent" aria-label={`Dividir próxima etapa de ${numberOf(node)}`} title="Dividir próxima etapa" onClick={(event) => { event.stopPropagation(); setSplitTarget(node); }} onPointerDown={(event) => event.stopPropagation()}><MytosisIcon className="h-4 w-4" /></Button> : null}</div>
                     </div>
-                    <div className={cn("flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden", node.text_vertical_align === "top" ? "justify-start" : node.text_vertical_align === "bottom" ? "justify-end" : "justify-center")} style={{ textAlign: node.text_align ?? "left" }}><p className={cn("shrink-0 break-words font-semibold leading-tight", node.description ? "line-clamp-1" : "line-clamp-2")} style={{ fontSize: `${node.title_font_size ?? 18}px` }}>{node.title}</p>{node.description ? <p className="line-clamp-1 shrink-0 break-words font-normal leading-tight text-muted-foreground" style={{ fontSize: `${node.description_font_size ?? 11}px` }} title={node.description}>{node.description}</p> : null}</div>
+                    <NodeText title={node.title} description={node.description} titleSize={node.title_font_size} descriptionSize={node.description_font_size} align={node.text_align} verticalAlign={node.text_vertical_align} titleColor={node.title_color} fillKey={highlight === node.id ? "green-soft" : critical.has(node.id) ? "green-mid" : node.fill_color} />
                     <div className="flex shrink-0 items-center justify-between gap-2 text-[11px] text-muted-foreground">
                       <span className="truncate">{nameOf(node.responsible_id)}{process ? "" : ` · ${formatDate(node.due_date)}`}</span>
                       <div className="flex shrink-0 items-center gap-0.5">
@@ -315,7 +316,7 @@ function ImportBlockDialog({ target, onClose, data }: { target: MytosisNode | nu
         const { data: created, error } = await supabase.from("mytosis_nodes").insert({
           kind: "task", title: n.title, description: n.description, parent_id: parent, responsible_id: n.responsible_id,
           due_date: null, weight: 0, progress: 0, shape: n.shape, fill_color: n.fill_color, border_color: n.border_color, position: n.id === sourceId ? position : n.position, is_process: !!target.is_process,
-          title_font_size: n.title_font_size, description_font_size: n.description_font_size, text_align: n.text_align, text_vertical_align: n.text_vertical_align,
+          title_font_size: n.title_font_size, title_color: n.title_color, description_font_size: n.description_font_size, text_align: n.text_align, text_vertical_align: n.text_vertical_align,
         }).select("id").single();
         if (error) throw error;
         idMap.set(n.id, created.id);
