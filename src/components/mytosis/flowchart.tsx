@@ -21,6 +21,7 @@ import { ConnectionLayer } from "./connection-layer";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ConnectorDialog } from "./connector-dialog";
 import type { MytosisLink } from "@/lib/mytosis";
+import { ChecklistText } from "./checklist-text";
 
 type Props = {
   data: MytosisData;
@@ -196,7 +197,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
               </button>
               <div data-mytosis-hidden={!downOpen ? "true" : "false"} className="grid transition-[grid-template-rows,opacity] duration-500 ease-in-out" style={{ gridTemplateRows: downOpen ? "1fr" : "0fr", opacity: downOpen ? 1 : 0 }}>
                 <div className="overflow-hidden">
-                  <div className="ml-2 flex flex-col gap-4 py-2 pl-4">
+                  <div className="flex flex-col gap-4 py-2">
                     {kids.map((kid) => <Fragment key={kid.id}>{renderBranch(kid)}</Fragment>)}
                   </div>
                 </div>
@@ -226,12 +227,13 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
     <div className="space-y-4">
       <div className="flex flex-wrap items-end gap-3 rounded-xl border border-border bg-muted/50 px-4 py-3">
         <Filter className="mb-2.5 h-4 w-4 text-muted-foreground/60" />
-        <div className="grid min-w-64 flex-1 gap-1"><Label className="text-xs text-muted-foreground">{process ? "Fluxograma" : "Objetivo"}</Label>
-          <SearchableSelect value={objectiveId} onChange={onObjectiveChange} clearable={false} placeholder={process ? "Selecione o fluxograma" : "Selecione o objetivo"} options={objectives.map((o) => ({ value: o.id, label: `${numbers.get(o.id) ?? o.locator} ${o.title}` }))} />
+        <div className="grid min-w-0 flex-1 basis-64 gap-1"><Label className="text-xs text-muted-foreground">{process ? "Fluxograma" : "Objetivo"}</Label>
+          <SearchableSelect aria-label={process ? "Fluxograma" : "Objetivo"} className="h-10 rounded-none border-0 border-b border-primary text-lg font-semibold shadow-none focus-within:ring-0 [&_input]:px-0" value={objectiveId} onChange={onObjectiveChange} clearable={false} placeholder={process ? "Selecione o fluxograma" : "Selecione o objetivo"} options={objectives.map((o) => ({ value: o.id, label: `${numbers.get(o.id) ?? o.locator} ${o.title}` }))} />
+          <div className="flex justify-between gap-2 text-[11px] text-muted-foreground"><span>{process ? "Selecione o fluxograma." : "Selecione o objetivo."}</span><span className="tabular-nums">{objective ? `${numbers.get(objective.id) ?? objective.locator} ${objective.title}`.length : 0} caracteres</span></div>
         </div>
         <form className="grid gap-1" onSubmit={(e) => { e.preventDefault(); const v = locatorQuery.trim(); if (v) locate(v); else setHighlight(null); }}>
           <Label className="text-xs text-muted-foreground">Localizador</Label>
-          <div className="flex gap-1"><Input value={locatorQuery} onChange={(e) => setLocatorQuery(e.target.value)} placeholder="Nº do box" className="h-9 w-28" inputMode="decimal" /><Button type="submit" variant="outline" size="icon" aria-label="Localizar box" title="Localizar box"><Search className="h-4 w-4" /></Button></div>
+          <div className="flex items-start gap-2"><div className="w-36 [&_input]:border-primary"><ChecklistText value={locatorQuery} onChange={setLocatorQuery} label="Localizador" hint="Nº do box" /></div><Button type="submit" variant="outline" size="icon" aria-label="Localizar box" title="Localizar box"><Search className="h-4 w-4" /></Button></div>
         </form>
         <div className="grid min-w-48 gap-1">
           <Label className="text-xs text-muted-foreground">Fases exibidas: {last === 0 ? "única" : `${visibleFrom + 1} a ${last + 1} de ${last + 1}`}</Label>
