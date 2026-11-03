@@ -43,12 +43,13 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
   const objective = objectives.find((o) => o.id === objectiveId) ?? null;
   const [hideRight, setHideRight] = useState<Set<string>>(new Set());
   const [hideDown, setHideDown] = useState<Set<string>>(new Set());
+  const [hideTasks, setHideTasks] = useState<Set<string>>(new Set());
   const [highlight, setHighlight] = useState<string | null>(null);
   const [locatorQuery, setLocatorQuery] = useState("");
   const [showCritical, setShowCritical] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
-  const allExpanded = hideRight.size === 0 && hideDown.size === 0;
+  const allExpanded = hideRight.size === 0 && hideDown.size === 0 && hideTasks.size === 0;
 
   const children = useMemo(() => childrenMap(data.nodes), [data.nodes]);
   const progress = useMemo(() => computeProgress(data.nodes), [data.nodes]);
@@ -128,6 +129,8 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
     const fillColor = highlight === node.id ? "var(--mytosis-green-soft)" : critical.has(node.id) ? "var(--mytosis-green-mid)" : fill.color;
     const darkText = fill.dark && highlight !== node.id && !critical.has(node.id);
     const signal = predecessorTaskSignal(node.id, data.tasks, data.links);
+    const hasTasks = data.tasks.some((task) => task.node_id === node.id);
+    const tasksOpen = !hideTasks.has(node.id);
     return (
       <div className="flex items-start">
         <div className="flex flex-col">
@@ -163,6 +166,8 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
                     <div className={cn("flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden", node.text_vertical_align === "top" ? "justify-start" : node.text_vertical_align === "bottom" ? "justify-end" : "justify-center")} style={{ textAlign: node.text_align ?? "left" }}><p className={cn("shrink-0 break-words font-semibold leading-tight", node.description ? "line-clamp-1" : "line-clamp-2")} style={{ fontSize: `${node.title_font_size ?? 18}px` }}>{node.title}</p>{node.description ? <p className="line-clamp-1 shrink-0 break-words font-normal leading-tight text-muted-foreground" style={{ fontSize: `${node.description_font_size ?? 11}px` }} title={node.description}>{node.description}</p> : null}</div>
                     <div className="flex shrink-0 items-center justify-between gap-2 text-[11px] text-muted-foreground">
                       <span className="truncate">{nameOf(node.responsible_id)}{process ? "" : ` · ${formatDate(node.due_date)}`}</span>
+                      <div className="flex shrink-0 items-center gap-2">
+                      {hasTasks ? <Button variant="ghost" size="icon" className="h-6 w-6 !bg-transparent !text-primary hover:!bg-transparent" aria-label={`${tasksOpen ? "Recolher" : "Exibir"} tarefas do box ${numberOf(node)}`} title={tasksOpen ? "Recolher tarefas" : "Exibir tarefas"} aria-expanded={tasksOpen} aria-controls={`mytosis-tasks-${node.id}`} onClick={(e) => { e.stopPropagation(); setHideTasks((s) => toggle(s, node.id)); }} onPointerDown={(e) => e.stopPropagation()}>{tasksOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}</Button> : null}
                       {canEdit ? (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()} className="h-4 w-4 !text-primary" aria-label={`Adicionar ${word}`} title={`Adicionar ${word}`}><Plus className="h-3.5 w-3.5" /></Button></DropdownMenuTrigger>
@@ -174,6 +179,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
                           </DropdownMenuContent>
                         </DropdownMenu>
                       ) : null}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -188,7 +194,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
           </div>
           {!collapsed ? <div style={{ width: data.box.width }}>
             {signal.pending > 0 ? <p role="status" className="mt-1 text-xs text-destructive">{signal.pending} tarefa{signal.pending > 1 ? "s" : ""} pendente{signal.pending > 1 ? "s" : ""} na etapa anterior</p> : null}
-            <BoxTaskList nodeId={node.id} data={data} onOpen={setTaskSelection} />
+            <BoxTaskList nodeId={node.id} data={data} onOpen={setTaskSelection} expanded={tasksOpen} />
           </div> : null}
           {kids.length ? (
             <>
@@ -242,6 +248,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
         <label className="flex h-9 cursor-pointer items-center gap-2 text-xs text-muted-foreground"><Checkbox checked={allExpanded} aria-label="Exibir tudo" onCheckedChange={(checked) => {
           setHideRight(checked ? new Set() : new Set(data.nodes.map((node) => node.id)));
           setHideDown(checked ? new Set() : new Set(data.nodes.map((node) => node.id)));
+          setHideTasks(checked ? new Set() : new Set(data.nodes.map((node) => node.id)));
           if (checked) setK(last);
         }} />Exibir tudo</label>
         {process ? null : <Button variant="outline" onClick={() => setShowCritical((v) => !v)} className={cn(showCritical && "!bg-primary !text-primary-foreground")}><RouteIcon className="h-4 w-4" />Caminho crítico</Button>}
