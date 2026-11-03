@@ -19,6 +19,7 @@ import { Route as AuthenticatedCrmRouteImport } from './routes/_authenticated/cr
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDevelopmentRouteImport } from './routes/_authenticated/development'
 import { Route as AuthenticatedLegalRouteImport } from './routes/_authenticated/legal'
+import { Route as AuthenticatedMytosisRouteImport } from './routes/_authenticated/mytosis'
 import { Route as AuthenticatedPendentesRouteImport } from './routes/_authenticated/pendentes'
 import { Route as AuthenticatedPortalRouteImport } from './routes/_authenticated/portal'
 import { Route as AuthenticatedRhRouteImport } from './routes/_authenticated/rh'
@@ -75,6 +76,11 @@ const AuthenticatedLegalRoute = AuthenticatedLegalRouteImport.update({
   path: '/legal',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMytosisRoute = AuthenticatedMytosisRouteImport.update({
+  id: '/mytosis',
+  path: '/mytosis',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPendentesRoute = AuthenticatedPendentesRouteImport.update({
   id: '/pendentes',
   path: '/pendentes',
@@ -112,6 +118,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/development': typeof AuthenticatedDevelopmentRoute
   '/legal': typeof AuthenticatedLegalRoute
+  '/mytosis': typeof AuthenticatedMytosisRoute
   '/pendentes': typeof AuthenticatedPendentesRoute
   '/portal': typeof AuthenticatedPortalRoute
   '/rh': typeof AuthenticatedRhRoute
@@ -128,6 +135,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/development': typeof AuthenticatedDevelopmentRoute
   '/legal': typeof AuthenticatedLegalRoute
+  '/mytosis': typeof AuthenticatedMytosisRoute
   '/pendentes': typeof AuthenticatedPendentesRoute
   '/portal': typeof AuthenticatedPortalRoute
   '/rh': typeof AuthenticatedRhRoute
@@ -146,6 +154,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/development': typeof AuthenticatedDevelopmentRoute
   '/_authenticated/legal': typeof AuthenticatedLegalRoute
+  '/_authenticated/mytosis': typeof AuthenticatedMytosisRoute
   '/_authenticated/pendentes': typeof AuthenticatedPendentesRoute
   '/_authenticated/portal': typeof AuthenticatedPortalRoute
   '/_authenticated/rh': typeof AuthenticatedRhRoute
@@ -164,6 +173,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/development'
     | '/legal'
+    | '/mytosis'
     | '/pendentes'
     | '/portal'
     | '/rh'
@@ -180,6 +190,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/development'
     | '/legal'
+    | '/mytosis'
     | '/pendentes'
     | '/portal'
     | '/rh'
@@ -197,6 +208,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/development'
     | '/_authenticated/legal'
+    | '/_authenticated/mytosis'
     | '/_authenticated/pendentes'
     | '/_authenticated/portal'
     | '/_authenticated/rh'
@@ -284,6 +296,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedLegalRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/mytosis': {
+      id: '/_authenticated/mytosis'
+      path: '/mytosis'
+      fullPath: '/mytosis'
+      preLoaderRoute: typeof AuthenticatedMytosisRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/pendentes': {
       id: '/_authenticated/pendentes'
       path: '/pendentes'
@@ -329,6 +348,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDevelopmentRoute: typeof AuthenticatedDevelopmentRoute
   AuthenticatedLegalRoute: typeof AuthenticatedLegalRoute
+  AuthenticatedMytosisRoute: typeof AuthenticatedMytosisRoute
   AuthenticatedPendentesRoute: typeof AuthenticatedPendentesRoute
   AuthenticatedPortalRoute: typeof AuthenticatedPortalRoute
   AuthenticatedRhRoute: typeof AuthenticatedRhRoute
@@ -342,6 +362,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDevelopmentRoute: AuthenticatedDevelopmentRoute,
   AuthenticatedLegalRoute: AuthenticatedLegalRoute,
+  AuthenticatedMytosisRoute: AuthenticatedMytosisRoute,
   AuthenticatedPendentesRoute: AuthenticatedPendentesRoute,
   AuthenticatedPortalRoute: AuthenticatedPortalRoute,
   AuthenticatedRhRoute: AuthenticatedRhRoute,

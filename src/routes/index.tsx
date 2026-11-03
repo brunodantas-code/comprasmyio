@@ -7,6 +7,7 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { MyioPlatformLogo } from "@/components/myio-platform-logo";
 import { CrmFunnelIcon } from "@/components/crm-funnel-icon";
+import { MytosisIcon } from "@/components/mytosis-icon";
 import { toast } from "sonner";
 import { z } from "zod";
 import {
@@ -89,6 +90,12 @@ const MODULES = [
     icon: CodeXml,
     title: "Code",
     body: "Tickets e melhorias",
+    available: true,
+  },
+  {
+    icon: MytosisIcon,
+    title: "Mytosis",
+    body: "Fluxogramas e processos",
     available: true,
   },
 ];

@@ -2638,6 +2638,155 @@ export type Database = {
           },
         ]
       }
+      mytosis_links: {
+        Row: {
+          created_at: string
+          predecessor_id: string
+          successor_id: string
+        }
+        Insert: {
+          created_at?: string
+          predecessor_id: string
+          successor_id: string
+        }
+        Update: {
+          created_at?: string
+          predecessor_id?: string
+          successor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mytosis_links_predecessor_id_fkey"
+            columns: ["predecessor_id"]
+            isOneToOne: false
+            referencedRelation: "mytosis_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mytosis_links_successor_id_fkey"
+            columns: ["successor_id"]
+            isOneToOne: false
+            referencedRelation: "mytosis_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mytosis_members: {
+        Row: {
+          created_at: string
+          role: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          role?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          role?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mytosis_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mytosis_nodes: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          due_date: string | null
+          id: string
+          kind: string
+          locator: number
+          parent_id: string | null
+          position: number
+          progress: number
+          responsible_id: string | null
+          title: string
+          updated_at: string
+          weight: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          kind?: string
+          locator?: number
+          parent_id?: string | null
+          position?: number
+          progress?: number
+          responsible_id?: string | null
+          title: string
+          updated_at?: string
+          weight?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          kind?: string
+          locator?: number
+          parent_id?: string | null
+          position?: number
+          progress?: number
+          responsible_id?: string | null
+          title?: string
+          updated_at?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mytosis_nodes_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "mytosis_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mytosis_nodes_responsible_id_fkey"
+            columns: ["responsible_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mytosis_settings: {
+        Row: {
+          box_height: number
+          box_width: number
+          id: number
+          updated_at: string
+        }
+        Insert: {
+          box_height?: number
+          box_width?: number
+          id?: number
+          updated_at?: string
+        }
+        Update: {
+          box_height?: number
+          box_width?: number
+          id?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       operational_functions: {
         Row: {
           active: boolean
@@ -6618,6 +6767,16 @@ export type Database = {
           id: string
           status: string
           title: string
+        }[]
+      }
+      mytosis_can_edit: { Args: { _user_id: string }; Returns: boolean }
+      mytosis_role: { Args: { _user_id: string }; Returns: string }
+      mytosis_users: {
+        Args: never
+        Returns: {
+          email: string
+          full_name: string
+          id: string
         }[]
       }
       normalize_site_survey_point_name: {

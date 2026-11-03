@@ -16,6 +16,7 @@ const APPS = [
   { key: "site_survey", label: "Site Survey" },
   { key: "chamados", label: "OpDesk" },
   { key: "development", label: "Code" },
+  { key: "mytosis", label: "Mytosis" },
 ] as const;
 
 export function ErpAppAccessAdmin() {
