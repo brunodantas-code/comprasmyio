@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ChevronDown, ChevronLeft, ChevronRight, Filter, Plus, Route as RouteIcon, Search, Settings2 } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Filter, Plus, Route as RouteIcon, Search, Settings2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ConnectorDialog } from "./connector-dialog";
 import type { MytosisLink } from "@/lib/mytosis";
 import { ChecklistText } from "./checklist-text";
-import { previousBoxIds } from "@/lib/mytosis-visibility";
 
 type Props = {
   data: MytosisData;
@@ -45,13 +44,12 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
   const [hideRight, setHideRight] = useState<Set<string>>(new Set());
   const [hideDown, setHideDown] = useState<Set<string>>(new Set());
   const [hideTasks, setHideTasks] = useState<Set<string>>(new Set());
-  const [hidePrevious, setHidePrevious] = useState<Set<string>>(new Set());
   const [highlight, setHighlight] = useState<string | null>(null);
   const [locatorQuery, setLocatorQuery] = useState("");
   const [showCritical, setShowCritical] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
-  const allExpanded = hideRight.size === 0 && hideDown.size === 0 && hideTasks.size === 0 && hidePrevious.size === 0;
+  const allExpanded = hideRight.size === 0 && hideDown.size === 0 && hideTasks.size === 0;
 
   const children = useMemo(() => childrenMap(data.nodes), [data.nodes]);
   const progress = useMemo(() => computeProgress(data.nodes), [data.nodes]);
@@ -83,7 +81,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
     if (!node) return toast.error(`Localizador ${locator} não encontrado.`);
     const root = rootObjectiveOf(node.id, data.nodes);
     if (root && root.id !== objectiveId) onObjectiveChange(root.id);
-    setHideRight(new Set()); setHideDown(new Set()); setHidePrevious(new Set()); setK(Number.MAX_SAFE_INTEGER);
+    setHideRight(new Set()); setHideDown(new Set()); setK(Number.MAX_SAFE_INTEGER);
     setHighlight(node.id);
     window.setTimeout(() => document.getElementById(`mytosis-box-${node.locator}`)?.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" }), 600);
   }
@@ -121,7 +119,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
     const kids = (children.get(node.id) ?? []).filter((c) => !siblingPreds.has(c.id));
     const succ = drawnSuccessors(node.id);
     const extraPreds = (siblingPreds.get(node.id) ?? []).slice(1);
-    const collapsed = hidePrevious.has(node.id) || (phase.get(node.id) ?? 0) < visibleFrom;
+    const collapsed = (phase.get(node.id) ?? 0) < visibleFrom;
     const pct = progress.get(node.id) ?? 0;
     const downOpen = !hideDown.has(node.id);
     const rightOpen = !hideRight.has(node.id);
@@ -133,8 +131,6 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
     const signal = predecessorTaskSignal(node.id, data.tasks, data.links);
     const hasTasks = data.tasks.some((task) => task.node_id === node.id);
     const tasksOpen = !hideTasks.has(node.id);
-    const previous = previousBoxIds(node.id, data.links);
-    const previousHidden = previous.size > 0 && [...previous].every((id) => hidePrevious.has(id));
     const downExpanded = (hasTasks ? tasksOpen : true) && (kids.length ? downOpen : true);
     return (
       <div className="flex items-start">
@@ -172,9 +168,8 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
                     <div className="flex shrink-0 items-center justify-between gap-2 text-[11px] text-muted-foreground">
                       <span className="truncate">{nameOf(node.responsible_id)}{process ? "" : ` · ${formatDate(node.due_date)}`}</span>
                       <div className="flex shrink-0 items-center gap-0.5">
-                      {previous.size ? <Button variant="ghost" size="icon" className="h-5 w-5 !bg-transparent !text-primary hover:!bg-transparent" aria-label={`${previousHidden ? "Exibir" : "Recolher"} boxes anteriores a ${numberOf(node)}`} title={previousHidden ? "Exibir boxes anteriores" : "Recolher boxes anteriores"} onClick={(e) => { e.stopPropagation(); setHidePrevious((current) => { const next = new Set(current); for (const id of previous) { if (previousHidden) next.delete(id); else next.add(id); } return next; }); }} onPointerDown={(e) => e.stopPropagation()}><ChevronLeft className="h-4 w-4" /></Button> : null}
-                      {succ.length ? <Button variant="ghost" size="icon" className="h-5 w-5 !bg-transparent !text-primary hover:!bg-transparent" aria-label={`${rightOpen ? "Recolher" : "Exibir"} boxes dependentes de ${numberOf(node)}`} title={rightOpen ? "Recolher boxes dependentes" : "Exibir boxes dependentes"} aria-expanded={rightOpen} onClick={(e) => { e.stopPropagation(); setHideRight((s) => toggle(s, node.id)); }} onPointerDown={(e) => e.stopPropagation()}><ChevronRight className="h-4 w-4" /></Button> : null}
-                      {hasTasks || kids.length ? <Button variant="ghost" size="icon" className="h-5 w-5 !bg-transparent !text-primary hover:!bg-transparent" aria-label={`${downExpanded ? "Recolher" : "Exibir"} tarefas do box ${numberOf(node)}`} title={downExpanded ? "Recolher tarefas" : "Exibir tarefas"} aria-expanded={downExpanded} onClick={(e) => { e.stopPropagation(); const update = (current: Set<string>) => { const next = new Set(current); if (downExpanded) next.add(node.id); else next.delete(node.id); return next; }; setHideTasks(update); setHideDown(update); }} onPointerDown={(e) => e.stopPropagation()}><ChevronDown className="h-4 w-4" /></Button> : null}
+                      {succ.length ? <Button variant="ghost" size="icon" className="h-5 w-5 !bg-transparent !text-primary hover:!bg-transparent" aria-label={`${rightOpen ? "Recolher" : "Exibir"} boxes dependentes de ${numberOf(node)}`} title={rightOpen ? "Recolher boxes dependentes" : "Exibir boxes dependentes"} aria-expanded={rightOpen} onClick={(e) => { e.stopPropagation(); setHideRight((s) => toggle(s, node.id)); }} onPointerDown={(e) => e.stopPropagation()}>{rightOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}</Button> : null}
+                      {hasTasks || kids.length ? <Button variant="ghost" size="icon" className="h-5 w-5 !bg-transparent !text-primary hover:!bg-transparent" aria-label={`${downExpanded ? "Recolher" : "Exibir"} tarefas do box ${numberOf(node)}`} title={downExpanded ? "Recolher tarefas" : "Exibir tarefas"} aria-expanded={downExpanded} onClick={(e) => { e.stopPropagation(); const update = (current: Set<string>) => { const next = new Set(current); if (downExpanded) next.add(node.id); else next.delete(node.id); return next; }; setHideTasks(update); setHideDown(update); }} onPointerDown={(e) => e.stopPropagation()}>{downExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}</Button> : null}
                       {canEdit ? (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()} className="h-4 w-4 !text-primary" aria-label={`Adicionar ${word}`} title={`Adicionar ${word}`}><Plus className="h-3.5 w-3.5" /></Button></DropdownMenuTrigger>
@@ -195,7 +190,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
             </div>
           </div>
           {!collapsed ? <div style={{ width: data.box.width }}>
-            {signal.pending > 0 ? <p role="status" className="mt-1 text-xs text-destructive">{signal.pending} tarefa{signal.pending > 1 ? "s" : ""} pendente{signal.pending > 1 ? "s" : ""} na etapa anterior</p> : null}
+            {signal.pending > 0 ? <p role="status" className="mt-1 text-xs text-muted-foreground">{signal.pending} tarefa{signal.pending > 1 ? "s" : ""} pendente{signal.pending > 1 ? "s" : ""} na etapa anterior</p> : null}
             <BoxTaskList nodeId={node.id} data={data} onOpen={setTaskSelection} expanded={tasksOpen} />
           </div> : null}
           {kids.length ? (
@@ -248,7 +243,6 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
           setHideRight(checked ? new Set() : new Set(data.nodes.map((node) => node.id)));
           setHideDown(checked ? new Set() : new Set(data.nodes.map((node) => node.id)));
           setHideTasks(checked ? new Set() : new Set(data.nodes.map((node) => node.id)));
-          setHidePrevious(new Set());
           if (checked) setK(last);
         }} />Exibir tudo</label>
         {process ? null : <Button variant="outline" onClick={() => setShowCritical((v) => !v)} className={cn(showCritical && "!bg-primary !text-primary-foreground")}><RouteIcon className="h-4 w-4" />Caminho crítico</Button>}
@@ -257,7 +251,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
       </div>
       {objective ? (
         <div className="overflow-auto rounded-xl border border-border bg-card p-6" onClick={() => setHighlight(null)}>
-          <div ref={canvasRef} className="relative w-max min-w-full pt-3" onClick={(e) => e.stopPropagation()}>{renderBranch(objective)}<ConnectionLayer container={canvasRef} nodes={data.nodes} links={data.links} onSelect={canEdit ? setSelectedLink : undefined} layoutKey={`${objectiveId}:${[...hideRight].join(',')}:${[...hideDown].join(',')}:${[...hidePrevious].join(',')}:${k}`} /></div>
+          <div ref={canvasRef} className="relative w-max min-w-full pt-3" onClick={(e) => e.stopPropagation()}>{renderBranch(objective)}<ConnectionLayer container={canvasRef} nodes={data.nodes} links={data.links} onSelect={canEdit ? setSelectedLink : undefined} layoutKey={`${objectiveId}:${[...hideRight].join(',')}:${[...hideDown].join(',')}:${k}`} /></div>
         </div>
       ) : <p className="py-16 text-center text-muted-foreground">{process ? (objectives.length ? "Selecione um fluxograma." : "Nenhum fluxograma cadastrado. Use o + para criar a primeira etapa.") : objectives.length ? "Selecione um objetivo." : "Nenhum objetivo cadastrado. Use o + para criar o primeiro."}</p>}
       <ImportBlockDialog target={importTarget} onClose={() => setImportTarget(null)} data={data} />
