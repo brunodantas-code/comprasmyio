@@ -11,6 +11,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { childrenMap, computeProgress, descendantIds, formatDate, rootObjectiveOf, type MytosisNode } from "@/lib/mytosis";
 import type { MytosisData } from "./use-mytosis";
+import { BORDERS, ConnectorGlyph, FILLS, LINK_STYLES, SHAPES, ShapeSvg, type BorderKey, type FillKey, type LinkStyle, type ShapeKey } from "./shapes";
+import { cn } from "@/lib/utils";
 
 export type NodeDialogState =
   | { mode: "edit"; node: MytosisNode }
@@ -31,6 +33,10 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
   const [weight, setWeight] = useState("0");
   const [progress, setProgress] = useState("0");
   const [preds, setPreds] = useState<Set<string>>(new Set());
+  const [shape, setShape] = useState<ShapeKey>("process");
+  const [fillKey, setFillKey] = useState<FillKey>("none");
+  const [borderKey, setBorderKey] = useState<BorderKey>("green-mid");
+  const [linkStyle, setLinkStyle] = useState<LinkStyle>("arrow");
 
   useEffect(() => {
     if (!state) return;
@@ -40,6 +46,10 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
     setDue(editing?.due_date ?? "");
     setWeight(String(editing?.weight ?? 0));
     setProgress(String(editing?.progress ?? 0));
+    setShape((editing?.shape as ShapeKey) ?? "process");
+    setFillKey((editing?.fill_color as FillKey) ?? "none");
+    setBorderKey((editing?.border_color as BorderKey) ?? "green-mid");
+    setLinkStyle(((editing && data.links.find((l) => l.successor_id === editing.id)?.style) as LinkStyle) ?? "arrow");
     setPreds(new Set(editing
       ? data.links.filter((l) => l.successor_id === editing.id).map((l) => l.predecessor_id)
       : state.mode === "create" && state.predecessorId ? [state.predecessorId] : []));
@@ -69,6 +79,7 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
       if (!isProcess && kind === "task" && parentId && siblingWeight + w > 100) throw new Error(`A soma dos pesos passa de 100% (demais tarefas: ${siblingWeight}%).`);
       const row = {
         title: title.trim(), description: description.trim() || null, responsible_id: responsible, due_date: isProcess ? null : due,
+        shape, fill_color: fillKey, border_color: borderKey,
         weight: w, progress: kids.length ? editing?.progress ?? 0 : Math.min(100, Math.max(0, Number(progress) || 0)),
       };
       let id = editing?.id;
@@ -84,7 +95,12 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
       const toAdd = [...preds].filter((p) => !current.has(p));
       const toRemove = [...current].filter((p) => !preds.has(p));
       if (toAdd.length) {
-        const { error } = await supabase.from("mytosis_links").insert(toAdd.map((p) => ({ predecessor_id: p, successor_id: id! })));
+        const { error } = await supabase.from("mytosis_links").insert(toAdd.map((p) => ({ predecessor_id: p, successor_id: id!, style: linkStyle })));
+        if (error) throw error;
+      }
+      const keep = [...preds].filter((p) => current.has(p));
+      if (keep.length) {
+        const { error } = await supabase.from("mytosis_links").update({ style: linkStyle }).eq("successor_id", id!).in("predecessor_id", keep);
         if (error) throw error;
       }
       for (const p of toRemove) {
@@ -115,6 +131,25 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
         </DialogHeader>
         <fieldset disabled={!canEdit} className="grid gap-4">
           <div className="grid gap-1.5"><Label>Título</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} autoFocus /></div>
+          <div className="grid gap-2 rounded-xl border border-border bg-muted/40 p-3">
+            <div className="grid gap-1"><Label className="text-xs text-muted-foreground">Forma</Label>
+              <div className="flex flex-wrap gap-1.5">{SHAPES.map((s) => (
+                <button key={s.key} type="button" title={s.label} aria-label={s.label} aria-pressed={shape === s.key} onClick={() => setShape(s.key)} className={cn("flex h-9 w-11 items-center justify-center rounded-md border bg-card transition-colors", shape === s.key ? "border-primary bg-primary/10" : "border-border hover:border-primary/60")}>
+                  <ShapeSvg shape={s.key} fill="transparent" stroke="var(--foreground)" className="h-5 w-8" />
+                </button>))}</div>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-1"><Label className="text-xs text-muted-foreground">Fundo</Label>
+                <div className="flex flex-wrap gap-1.5">{FILLS.map((f) => <button key={f.key} type="button" title={f.label} aria-label={`Fundo ${f.label}`} aria-pressed={fillKey === f.key} onClick={() => setFillKey(f.key)} className={cn("h-7 w-7 rounded-full border border-border", fillKey === f.key && "ring-2 ring-primary ring-offset-1")} style={{ background: f.color }} />)}</div>
+              </div>
+              <div className="grid gap-1"><Label className="text-xs text-muted-foreground">Borda</Label>
+                <div className="flex flex-wrap gap-1.5">{BORDERS.map((b) => <button key={b.key} type="button" title={b.label} aria-label={`Borda ${b.label}`} aria-pressed={borderKey === b.key} onClick={() => setBorderKey(b.key)} className={cn("h-7 w-7 rounded-full border-[3px] bg-card", borderKey === b.key && "ring-2 ring-primary ring-offset-1")} style={{ borderColor: b.color }} />)}</div>
+              </div>
+            </div>
+            {kind === "task" ? <div className="grid gap-1"><Label className="text-xs text-muted-foreground">Conector de entrada (vindo do box predecessor)</Label>
+              <div className="flex flex-wrap gap-1.5">{LINK_STYLES.map((l) => <button key={l.key} type="button" title={l.label} aria-label={l.label} aria-pressed={linkStyle === l.key} onClick={() => setLinkStyle(l.key)} className={cn("flex h-8 items-center gap-2 rounded-md border bg-card px-2 text-xs", linkStyle === l.key ? "border-primary bg-primary/10" : "border-border hover:border-primary/60")}><ConnectorGlyph style={l.key} color="var(--foreground)" />{l.label}</button>)}</div>
+            </div> : null}
+          </div>
           <div className="grid gap-1.5"><Label>Descrição</Label><Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} /></div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className={isProcess ? "grid gap-1.5 sm:col-span-2" : "grid gap-1.5"}><Label>Responsável</Label><SearchableSelect value={responsible} onChange={setResponsible} options={userOptions} placeholder="Selecione o usuário" disabled={!canEdit} /></div>

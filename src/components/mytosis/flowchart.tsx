@@ -249,13 +249,13 @@ function ImportBlockDialog({ target, onClose, data }: { target: MytosisNode | nu
         const parent = n.id === sourceId ? target.id : idMap.get(n.parent_id!)!;
         const { data: created, error } = await supabase.from("mytosis_nodes").insert({
           kind: "task", title: n.title, description: n.description, parent_id: parent, responsible_id: n.responsible_id,
-          due_date: null, weight: 0, progress: 0, position: n.id === sourceId ? position : n.position, is_process: !!target.is_process,
+          due_date: null, weight: 0, progress: 0, shape: n.shape, fill_color: n.fill_color, border_color: n.border_color, position: n.id === sourceId ? position : n.position, is_process: !!target.is_process,
         }).select("id").single();
         if (error) throw error;
         idMap.set(n.id, created.id);
       }
       if (internalLinks.length) {
-        const { error } = await supabase.from("mytosis_links").insert(internalLinks.map((l) => ({ predecessor_id: idMap.get(l.predecessor_id)!, successor_id: idMap.get(l.successor_id)! })));
+        const { error } = await supabase.from("mytosis_links").insert(internalLinks.map((l) => ({ predecessor_id: idMap.get(l.predecessor_id)!, successor_id: idMap.get(l.successor_id)!, style: l.style })));
         if (error) throw error;
       }
       return ordered.length;
