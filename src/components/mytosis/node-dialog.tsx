@@ -26,7 +26,7 @@ import { initialStageFormat } from "@/lib/mytosis-format";
 
 export type NodeDialogState =
   | { mode: "edit"; node: MytosisNode }
-  | { mode: "create"; kind: "objective" | "task"; parentId: string | null; predecessorId?: string | null; formatSourceId?: string; process?: boolean }
+  | { mode: "create"; kind: "objective" | "task"; parentId: string | null; predecessorId?: string | null; formatSourceId?: string; process?: boolean; wrapId?: string }
   | null;
 
 export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialogState; onClose: () => void; data: MytosisData; canEdit: boolean }) {
@@ -129,6 +129,10 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
         const { data: created, error } = await supabase.from("mytosis_nodes").insert({ ...row, kind, is_process: isProcess, parent_id: parentId, position: siblings.length }).select("id").single();
         if (error) throw error;
         id = created.id; setCreatedId(created.id);
+        if (state?.mode === "create" && state.wrapId) {
+          const { error: wrapError } = await supabase.rpc("wrap_mytosis_node", { _new_id: created.id, _node_id: state.wrapId });
+          if (wrapError) throw wrapError;
+        }
       }
       if (!id) throw new Error("Box não encontrado.");
       if (pendingFiles.length) { await uploadNodeAttachments(id, pendingFiles); setPendingFiles([]); }

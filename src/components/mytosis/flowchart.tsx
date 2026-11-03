@@ -196,6 +196,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
                           <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                             <DropdownMenuItem onClick={() => setTaskSelection({ nodeId: node.id })}>Nova tarefa neste box</DropdownMenuItem>
                             <DropdownMenuItem onClick={() => openDialog({ mode: "create", kind: "task", parentId: node.id, formatSourceId: node.id })}>{process ? "Etapa associada (abaixo)" : "Tarefa associada (abaixo)"}</DropdownMenuItem>
+                            {node.parent_id ? <DropdownMenuItem onClick={() => openDialog({ mode: "create", kind: "task", parentId: node.parent_id, wrapId: node.id, formatSourceId: node.id })}>{process ? "Etapa associada (acima)" : "Tarefa associada (acima)"}</DropdownMenuItem> : null}
                             {node.parent_id ? <DropdownMenuItem onClick={() => openDialog({ mode: "create", kind: "task", parentId: node.parent_id, predecessorId: node.id, formatSourceId: node.id })}>{process ? "Etapa dependente (à direita)" : "Tarefa dependente (à direita)"}</DropdownMenuItem> : null}
                             <DropdownMenuItem onClick={() => setImportTarget(node)}>Importar fluxograma como bloco (abaixo)</DropdownMenuItem>
                           </DropdownMenuContent>
