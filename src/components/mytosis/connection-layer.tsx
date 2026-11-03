@@ -9,6 +9,7 @@ type Edge = { id: string; from: Point; to: Point; points: ConnectorPoint[]; from
 /** Measure the rendered tree so every relationship attaches to the actual box sides. */
 export function ConnectionLayer({ container, nodes, links, layoutKey, onSelect }: { container: RefObject<HTMLDivElement | null>; nodes: MytosisNode[]; links: MytosisLink[]; layoutKey: string; onSelect?: (link: MytosisLink) => void }) {
   const [edges, setEdges] = useState<Edge[]>([]);
+  const [size, setSize] = useState({ width: 1, height: 1 });
   useEffect(() => {
     const root = container.current;
     if (!root) return;
@@ -18,6 +19,7 @@ export function ConnectionLayer({ container, nodes, links, layoutKey, onSelect }
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
         const origin = root.getBoundingClientRect();
+        setSize({ width: Math.ceil(root.scrollWidth), height: Math.ceil(root.scrollHeight) });
         const boxes = new Map<string, DOMRect>();
         root.querySelectorAll<HTMLElement>("[data-mytosis-node]").forEach((element) => {
           const id = element.dataset.mytosisNode;
@@ -68,7 +70,7 @@ export function ConnectionLayer({ container, nodes, links, layoutKey, onSelect }
   const ports = new Map<string, Point>();
   for (const edge of edges) for (const point of [edge.from, edge.to]) ports.set(`${point.x}-${point.y}`, point);
   const radius = 3;
-  return <svg data-mytosis-connectors className="pointer-events-none absolute inset-0 h-full w-full overflow-visible">
+  return <svg data-mytosis-connectors width={size.width} height={size.height} viewBox={`0 0 ${size.width} ${size.height}`} className="pointer-events-none absolute left-0 top-0 overflow-hidden [contain:paint]">
     {edges.map(({ id, from, to, points, fromSide, toSide, style, color, link }) => {
       const da = portDirection(fromSide), db = portDirection(toSide);
       const start = { x: from.x + da.x * radius, y: from.y + da.y * radius };
