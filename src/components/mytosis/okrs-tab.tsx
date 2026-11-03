@@ -2,7 +2,6 @@ import { useMemo, useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/utils";
 import { computeBoxNumbers, computeProgress, formatDate, groupPendings, rootObjectiveOf } from "@/lib/mytosis";
 import type { MytosisData } from "./use-mytosis";
@@ -51,10 +50,10 @@ export function OkrsTab({ data, canEdit, openDialog, onOpenObjective, onLocate }
       <section className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-lg font-normal">Consolidação de pendências</h2>
-          <ToggleGroup type="single" value={by} onValueChange={(v) => v && setBy(v as "responsible" | "date")} variant="outline" size="sm">
-            <ToggleGroupItem value="responsible">Por responsável</ToggleGroupItem>
-            <ToggleGroupItem value="date">Por data</ToggleGroupItem>
-          </ToggleGroup>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" aria-pressed={by === "responsible"} onClick={() => setBy("responsible")} className={cn(by === "responsible" && "!bg-primary !text-primary-foreground")}>Por responsável</Button>
+            <Button variant="outline" size="sm" aria-pressed={by === "date"} onClick={() => setBy("date")} className={cn(by === "date" && "!bg-primary !text-primary-foreground")}>Por data</Button>
+          </div>
         </div>
         {groups.length ? groups.map((g) => (
           <div key={g.key || "none"} className="rounded-xl border border-border bg-card">
