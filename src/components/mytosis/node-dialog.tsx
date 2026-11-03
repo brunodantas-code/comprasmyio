@@ -163,8 +163,8 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
   const numbers = useMemo(() => computeBoxNumbers(data.nodes, data.links), [data.nodes, data.links]);
   const label = isProcess ? "Etapa" : kind === "objective" ? "Objetivo" : "Tarefa";
   return (
-    <Dialog open={!!state} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
+    <Dialog open={!!state} onOpenChange={(open) => { if (!open && !attachmentsBusy && !save.isPending) onClose(); }}>
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl" onEscapeKeyDown={(event) => { if (attachmentsBusy || save.isPending) event.preventDefault(); }} onInteractOutside={(event) => { if (attachmentsBusy || save.isPending) event.preventDefault(); }}>
         <DialogHeader>
           <DialogTitle className="font-normal">{editing ? `${numbers.get(editing.id) ?? editing.locator} — ${label}` : isProcess ? "Nova etapa" : `Novo ${label.toLowerCase()}`}</DialogTitle>
           <DialogDescription>{editing ? `Criado em ${new Date(editing.created_at).toLocaleDateString("pt-BR")}` : `Data de criação: ${new Date().toLocaleDateString("pt-BR")}`}</DialogDescription>
@@ -237,7 +237,7 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
         <NodeAttachments nodeId={editing?.id ?? createdId ?? undefined} canEdit={canEdit} pending={pendingFiles} onPendingChange={setPendingFiles} onBusyChange={setAttachmentsBusy} />
         <DialogFooter className="gap-2">
           {editing && canEdit ? <Button variant="outline" onClick={() => { if (window.confirm(`Excluir ${numbers.get(editing.id) ?? editing.locator} e todas as tarefas abaixo dele?`)) remove.mutate(); }} disabled={remove.isPending}>Excluir</Button> : null}
-          <Button variant="outline" onClick={onClose}>Cancelar</Button>
+          <Button variant="outline" onClick={onClose} disabled={attachmentsBusy || save.isPending}>Cancelar</Button>
           {canEdit ? <Button variant="outline" onClick={() => save.mutate()} disabled={save.isPending || attachmentsBusy || titleTooLong || descriptionTooLong}>Salvar</Button> : null}
         </DialogFooter>
       </DialogContent>

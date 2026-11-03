@@ -19,7 +19,7 @@ export function NodeFrame({ shape, height, fill, stroke, fillKey, strokeWidth = 
       <ShapeSvg shape={shape} fill={fill} stroke={stroke} strokeWidth={strokeWidth} className="pointer-events-none absolute inset-0 h-full w-full" />
       <div className="relative flex min-w-0 flex-1 flex-col justify-between gap-2 px-3 py-2" style={collapsed ? undefined : shapeContentInset(shape, height)}>
         {!external && !collapsed ? header : null}
-        {shape === "or" && !collapsed ? <div className="relative flex min-w-0 flex-1 flex-col bg-card px-1 py-1 text-foreground">{children}</div> : children}
+        {shape === "or" && !collapsed ? <div className="relative flex min-w-0 flex-1 flex-col px-1 py-1" style={{ background: fill }}>{children}</div> : children}
         {!external && !collapsed ? footer : null}
       </div>
     </div>
