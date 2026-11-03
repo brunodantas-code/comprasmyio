@@ -132,6 +132,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
               <div
                 id={`mytosis-box-${node.locator}`}
                 data-mytosis-node={node.id}
+                data-mytosis-collapsed={collapsed ? "true" : "false"}
                 role="button"
                 tabIndex={0}
                 draggable={canEdit && !collapsed}
@@ -190,7 +191,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
               <button type="button" className="mt-1 self-start text-primary" onClick={() => setHideDown((s) => toggle(s, node.id))} aria-label={downOpen ? "Recolher tarefas associadas" : "Exibir tarefas associadas"} title={downOpen ? "Recolher tarefas associadas" : "Exibir tarefas associadas"}>
                 {downOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               </button>
-              <div className="grid transition-[grid-template-rows,opacity] duration-500 ease-in-out" style={{ gridTemplateRows: downOpen ? "1fr" : "0fr", opacity: downOpen ? 1 : 0 }}>
+              <div data-mytosis-hidden={!downOpen ? "true" : "false"} className="grid transition-[grid-template-rows,opacity] duration-500 ease-in-out" style={{ gridTemplateRows: downOpen ? "1fr" : "0fr", opacity: downOpen ? 1 : 0 }}>
                 <div className="overflow-hidden">
                   <div className="ml-2 flex flex-col gap-4 py-2 pl-4">
                     {kids.map((kid) => <Fragment key={kid.id}>{renderBranch(kid)}</Fragment>)}
@@ -201,7 +202,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
           ) : null}
         </div>
         {succ.length ? (
-          <div className="grid transition-[grid-template-columns,opacity] duration-500 ease-in-out" style={{ gridTemplateColumns: rightOpen ? "1fr" : "0fr", opacity: rightOpen ? 1 : 0 }}>
+          <div data-mytosis-hidden={!rightOpen ? "true" : "false"} className="grid transition-[grid-template-columns,opacity] duration-500 ease-in-out" style={{ gridTemplateColumns: rightOpen ? "1fr" : "0fr", opacity: rightOpen ? 1 : 0 }}>
             <div className="min-w-0 overflow-hidden">
               <div className="flex flex-col gap-4">
                 {succ.map((s) => (
