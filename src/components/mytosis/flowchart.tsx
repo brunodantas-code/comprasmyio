@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Filter, Plus, Route as RouteIcon, Search, Settings2 } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Filter, Plus, Route as RouteIcon, Search, Settings2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -96,6 +96,15 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
   const queryClient = useQueryClient();
   const [dragId, setDragId] = useState<string | null>(null);
   const [dropId, setDropId] = useState<string | null>(null);
+  const deleteNode = useMutation({
+    mutationFn: async (node: MytosisNode) => {
+      if (!canEdit) throw new Error("Você não tem permissão para excluir esta etapa.");
+      const { error } = await supabase.from("mytosis_nodes").delete().eq("id", node.id);
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success("Etapa excluída."); queryClient.invalidateQueries({ queryKey: ["mytosis"] }); },
+    onError: (error: Error) => toast.error(error.message),
+  });
   const linkMutation = useMutation({
     mutationFn: async ({ from, to }: { from: string; to: string }) => {
       const { error } = await supabase.from("mytosis_links").insert({ predecessor_id: from, successor_id: to });
@@ -167,7 +176,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
                   <div className="relative flex min-w-0 flex-1 flex-col justify-between px-2.5 py-1.5" style={shapeInset[shape]}>
                     <div className="flex shrink-0 items-center justify-between gap-2 text-[11px] text-muted-foreground">
                       <span className="flex min-w-0 items-center gap-1.5"><span className="inline-flex min-h-5 shrink-0 items-center justify-center rounded-md bg-primary/10 px-1.5 text-primary">{numberOf(node)}</span>{node.kind === "objective" ? <span className="truncate">{process ? "Fluxograma" : "Objetivo"}</span> : null}</span>
-                      <div className="flex shrink-0 items-center gap-1">{process ? null : <span className="text-muted-foreground/70">{pct}%</span>}{canEdit ? <Button variant="ghost" size="icon" className="h-5 w-5 !bg-transparent !text-primary hover:!bg-transparent" aria-label={`Dividir próxima etapa de ${numberOf(node)}`} title="Dividir próxima etapa" onClick={(event) => { event.stopPropagation(); setSplitTarget(node); }} onPointerDown={(event) => event.stopPropagation()}><MytosisIcon className="h-4 w-4" /></Button> : null}</div>
+                      <div className="flex shrink-0 items-center gap-1">{process ? null : <span className="text-muted-foreground/70">{pct}%</span>}{canEdit ? <><Button variant="ghost" size="icon" className="h-5 w-5 !bg-transparent !text-primary hover:!bg-transparent" aria-label={`Dividir próxima etapa de ${numberOf(node)}`} title="Dividir próxima etapa" onClick={(event) => { event.stopPropagation(); setSplitTarget(node); }} onPointerDown={(event) => event.stopPropagation()}><MytosisIcon className="h-4 w-4" /></Button><Button variant="ghost" size="icon" className="h-5 w-5 !bg-transparent !text-primary hover:!bg-transparent" aria-label={`Excluir etapa ${numberOf(node)}`} title="Excluir etapa" disabled={deleteNode.isPending} onClick={(event) => { event.stopPropagation(); if (window.confirm(`Excluir a etapa ${numberOf(node)} — ${node.title} e todas as tarefas e etapas associadas abaixo dela? Esta ação não pode ser desfeita.`)) deleteNode.mutate(node); }} onPointerDown={(event) => event.stopPropagation()}><Trash2 className="h-3.5 w-3.5" /></Button></> : null}</div>
                     </div>
                     <NodeText title={node.title} description={node.description} titleSize={node.title_font_size} descriptionSize={node.description_font_size} align={node.text_align} verticalAlign={node.text_vertical_align} titleColor={node.title_color} fillKey={highlight === node.id ? "green-soft" : critical.has(node.id) ? "green-mid" : node.fill_color} />
                     <div className="flex shrink-0 items-center justify-between gap-2 text-[11px] text-muted-foreground">
