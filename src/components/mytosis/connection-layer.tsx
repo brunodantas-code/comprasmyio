@@ -65,7 +65,7 @@ export function ConnectionLayer({ container, nodes, links, layoutKey }: { contai
       const start = { x: from.x + (vertical ? 0 : radius), y: from.y + (vertical ? radius : 0) };
       const end = { x: to.x - (vertical ? 0 : radius), y: to.y - (vertical ? radius : 0) };
       const mid = vertical ? (start.y + end.y) / 2 : (start.x + end.x) / 2;
-      const path = vertical ? `M${start.x} ${start.y} V${mid} H${end.x} V${end.y}` : `M${start.x} ${start.y} H${mid} V${end.y} H${end.x}`;
+      const path = vertical ? `M${start.x} ${start.y} V${mid} H${end.x} V${end.y}` : Math.abs(start.y - end.y) < 1 ? `M${start.x} ${start.y} H${end.x}` : end.x < start.x ? `M${start.x} ${start.y} H${start.x + 12} V${(start.y + end.y) / 2} H${end.x - 12} V${end.y} H${end.x}` : `M${start.x} ${start.y} H${mid} V${end.y} H${end.x}`;
       return <g key={id} fill="none" stroke={from.color} strokeWidth={1} strokeLinejoin="round">
         <path d={path} strokeDasharray={style === "dashed" ? "4 3" : undefined} />
         {style === "arrow" || style === "double" ? <path d={vertical ? `M${end.x - 3} ${end.y - 5} L${end.x} ${end.y} L${end.x + 3} ${end.y - 5}` : `M${end.x - 5} ${end.y - 3} L${end.x} ${end.y} L${end.x - 5} ${end.y + 3}`} /> : null}
