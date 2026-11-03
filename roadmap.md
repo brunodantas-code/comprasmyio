@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Conferir botões de ação do Mytosis no padrão Site Survey
 - [ ] Adicionar checkbox Exibir tudo/Recolher tudo com transição visível
 - [ ] Adicionar nós vazados no centro dos lados conectados e ligar todos os conectores pelos nós
 - [ ] Permitir tamanho de fonte e alinhamento horizontal/vertical por box no Mytosis, com persistência
