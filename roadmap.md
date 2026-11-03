@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Investigar novo erro de redesenho ao recolher boxes após ajustes de formas
 - [ ] Simplificar conectores com setas retas sem degraus quando não houver obstáculos
 - [ ] Permitir anexar foto/arquivo pelo clipe à esquerda do Mytosis e pelo campo Anexo ao fim do editor
 - [ ] Adaptar textos, informações e controles às formas; conferir losango e demais opções na prévia e no fluxograma
