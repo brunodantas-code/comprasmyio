@@ -7,7 +7,7 @@ describe("Mytosis connectors", () => {
     const first = { id: "first", left: 232, right: 432, top: 0, bottom: 100 };
     const b = { id: "b", left: 232, right: 432, top: 150, bottom: 250 };
     const route = routeConnector(a, b, [a, first, b]);
-    expect(route?.points).toEqual([{ x: 200, y: 50 }, { x: 210, y: 50 }, { x: 210, y: 200 }, { x: 232, y: 200 }]);
+    expect(route?.points).toEqual([{ x: 200, y: 50 }, { x: 216, y: 50 }, { x: 216, y: 200 }, { x: 232, y: 200 }]);
   });
   it("liga 1.1 a 1.2 com uma única linha reta quando as alturas são diferentes", () => {
     const a = { id: "1.1", left: 0, right: 240, top: 0, bottom: 122 };
