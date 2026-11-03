@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Permitir anexar foto/arquivo pelo clipe à esquerda do Mytosis e pelo campo Anexo ao fim do editor
 - [ ] Adaptar textos, informações e controles às formas; conferir losango e demais opções na prévia e no fluxograma
 - [x] Conferir redesenho após criar etapas pelo botão Mytosis
 - [x] Conferir traço verde solto abaixo do box 2.2 no Site Survey
