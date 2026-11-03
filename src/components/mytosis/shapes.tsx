@@ -58,7 +58,7 @@ export const shapeInset: Record<ShapeKey, CSSProperties> = {
 
 function paths(shape: ShapeKey): string[] {
   switch (shape) {
-    case "terminal": return ["M15 2 H85 A13 13 0 0 1 85 58 H15 A13 13 0 0 1 15 2 Z"];
+    case "terminal": return ["M20 2 H80 A18 28 0 0 1 80 58 H20 A18 28 0 0 1 20 2 Z"];
     case "document": return ["M2 2 H98 V50 C75 40 60 66 30 54 C18 49 8 52 2 55 Z"];
     case "decision": return ["M50 2 L98 30 L50 58 L2 30 Z"];
     case "connector": return ["M50 2 A48 28 0 1 1 49.9 2 Z"];
