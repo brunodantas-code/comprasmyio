@@ -25,7 +25,7 @@ import { NodeAttachments, uploadNodeAttachments } from "./node-attachments";
 
 export type NodeDialogState =
   | { mode: "edit"; node: MytosisNode }
-  | { mode: "create"; kind: "objective" | "task"; parentId: string | null; predecessorId?: string | null; process?: boolean }
+  | { mode: "create"; kind: "objective" | "task"; parentId: string | null; predecessorId?: string | null; formatSourceId?: string; process?: boolean }
   | null;
 
 export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialogState; onClose: () => void; data: MytosisData; canEdit: boolean }) {
@@ -63,22 +63,24 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
   useEffect(() => {
     if (!state) return;
     setPendingFiles([]); setCreatedId(null);
+    const sourceId = state.mode === "create" ? state.formatSourceId ?? state.predecessorId ?? state.parentId : null;
+    const format = editing ?? data.nodes.find((node) => node.id === sourceId);
     setTitle(editing?.title ?? "");
-    setTitleSize(editing?.title_font_size ?? 18);
-    setTitleColor(TITLE_COLORS.find((item) => item.key === editing?.title_color)?.key ?? null);
-    setControlColor(TITLE_COLORS.find((item) => item.key === editing?.control_color)?.key ?? null);
-    setDescriptionSize(editing?.description_font_size ?? 11);
-    setTextAlign(editing?.text_align ?? "left");
-    setVerticalAlign(editing?.text_vertical_align ?? "center");
+    setTitleSize(format?.title_font_size ?? 18);
+    setTitleColor(TITLE_COLORS.find((item) => item.key === format?.title_color)?.key ?? null);
+    setControlColor(TITLE_COLORS.find((item) => item.key === format?.control_color)?.key ?? null);
+    setDescriptionSize(format?.description_font_size ?? 11);
+    setTextAlign(format?.text_align ?? "left");
+    setVerticalAlign(format?.text_vertical_align ?? "center");
     setDescription(editing?.description ?? "");
     setResponsible(editing?.responsible_id ?? (state.mode === "create" ? data.userId : ""));
     setDue(editing?.due_date ?? "");
     setWeight(String(editing?.weight ?? 0));
     setProgress(String(editing?.progress ?? 0));
-    setShape((editing?.shape as ShapeKey) ?? "process");
-    setFillKey((editing?.fill_color as FillKey) ?? "none");
-    setBorderKey((editing?.border_color as BorderKey) ?? "green-mid");
-    setLinkStyle(((editing && data.links.find((l) => l.successor_id === editing.id)?.style) as LinkStyle) ?? "arrow");
+    setShape((format?.shape as ShapeKey) ?? "process");
+    setFillKey((format?.fill_color as FillKey) ?? "none");
+    setBorderKey((format?.border_color as BorderKey) ?? "green-mid");
+    setLinkStyle(((format && data.links.find((l) => l.successor_id === format.id)?.style) as LinkStyle) ?? "arrow");
     setPreds(new Set(editing
       ? data.links.filter((l) => l.successor_id === editing.id).map((l) => l.predecessor_id)
       : state.mode === "create" && state.predecessorId ? [state.predecessorId] : []));

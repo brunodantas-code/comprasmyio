@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PendingForMe } from "@/components/approval-workflow";
 import { MyioLogo } from "@/components/myio-logo";
-import { Bell, CheckCircle2, CodeXml, Phone, ShieldCheck, ShoppingCart } from "lucide-react";
+import { Bell, CheckCircle2, CodeXml, Phone, ShieldCheck, ShoppingCart, MessageCircleQuestion } from "lucide-react";
 import { usePendingActions } from "@/hooks/use-pending-actions";
 import { AppHeader } from "@/components/app-header";
 
@@ -37,6 +37,7 @@ function PendentesPage() {
                  {(data?.supplyQueue ?? 0) > 0 ? <PendingLink icon={ShoppingCart} label="Compras e serviços a executar · Fila do Supply" count={data?.supplyQueue ?? 0} to="/dashboard" search={{ section: "queue", subsection: "supply" }} /> : null}
                 {(data?.userDeletions ?? 0) > 0 ? <PendingLink icon={ShieldCheck} label="Exclusões de usuários aguardando decisão" count={data?.userDeletions ?? 0} to="/dashboard" search={{ section: "admin", subsection: "usuarios" }} /> : null}
                 {(data?.codeItems ?? []).map((ticket) => <PendingLink key={ticket.ticketId} icon={CodeXml} label={`#${ticket.ticketNumber} · ${ticket.reason === "responder" ? "Responder ao Admin" : ticket.reason === "aceitar" ? "Confirmar atendimento" : "Ticket aguardando atendimento"} · ${ticket.reporterName ?? "Solicitante"} · ${new Date(ticket.createdAt).toLocaleDateString("pt-BR")} · ${ticket.title.length > 60 ? `${ticket.title.slice(0, 60)}…` : ticket.title}`} count={1} to="/development" search={{ ticket: ticket.ticketId }} />)}
+                {(data?.mytosisItems ?? []).map((question) => <Link key={question.message_id} to="/mytosis" search={{ node: question.node_id, task: question.task_id ?? undefined }} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10"><MessageCircleQuestion className="h-5 w-5 shrink-0" /><span className="min-w-0 flex-1 text-sm font-medium">Mytosis · {question.node_title}{question.task_title ? ` · ${question.task_title}` : ""} · {question.author_name} · {question.question_text}</span><span className="flex h-7 min-w-7 items-center justify-center rounded-full bg-destructive px-2 text-xs font-bold text-destructive-foreground">1</span></Link>)}
                 {(data?.supportCallItems ?? []).map((call) => <PendingLink key={call.callId} icon={Phone} label={`#${call.callNumber} · ${call.reason === "confirmar" ? "Confirmar conclusão" : call.title}`} count={1} to="/chamados" search={{ chamado: call.callId }} />)}
               </div>
             ) : null}
