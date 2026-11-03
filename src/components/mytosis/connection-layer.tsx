@@ -23,7 +23,7 @@ export function ConnectionLayer({ container, nodes, links, layoutKey, onSelect }
         const boxes = new Map<string, DOMRect>();
         root.querySelectorAll<HTMLElement>("[data-mytosis-node]").forEach((element) => {
           const id = element.dataset.mytosisNode;
-          const rect = element.getBoundingClientRect();
+          const rect = (element.querySelector("[data-mytosis-surface]") ?? element).getBoundingClientRect();
           let parent = element.parentElement;
           let hidden = element.dataset.mytosisCollapsed === "true";
           while (parent && parent !== root) {
@@ -36,14 +36,30 @@ export function ConnectionLayer({ container, nodes, links, layoutKey, onSelect }
           if (id && rect.width > 40 && rect.height > 1 && !hidden) boxes.set(id, rect);
         });
         const byId = new Map(nodes.map((node) => [node.id, node]));
-        const measured: ConnectorBox[] = [...boxes].map(([id, box]) => ({ id, left: box.left - origin.left + box.width * .02, right: box.right - origin.left - box.width * .02, top: box.top - origin.top + box.height * 2 / 60, bottom: box.bottom - origin.top - box.height * 2 / 60 }));
+        const measured: ConnectorBox[] = [...boxes].map(([id, box]) => {
+          const shape = byId.get(id)?.shape;
+          const left = shape === "io" ? .08 : .02;
+          const right = shape === "io" ? .92 : shape === "multidoc" ? .90 : .98;
+          const top = shape === "manual" || shape === "multidoc" ? 10 / 60 : 2 / 60;
+          const bottom = shape === "document" ? 57 / 60 : 58 / 60;
+          return { id, left: box.left - origin.left + box.width * left, right: box.left - origin.left + box.width * right, top: box.top - origin.top + box.height * top, bottom: box.top - origin.top + box.height * bottom };
+        });
+        const chrome: ConnectorBox[] = [];
+        root.querySelectorAll<HTMLElement>("[data-mytosis-node]").forEach((element) => {
+          const id = element.dataset.mytosisNode;
+          const surface = boxes.get(id ?? "");
+          if (!id || !surface) return;
+          const whole = element.getBoundingClientRect();
+          if (surface.top - whole.top > 2) chrome.push({ id: `${id}-header`, left: whole.left - origin.left, right: whole.right - origin.left, top: whole.top - origin.top, bottom: surface.top - origin.top - 1 });
+          if (whole.bottom - surface.bottom > 2) chrome.push({ id: `${id}-footer`, left: whole.left - origin.left, right: whole.right - origin.left, top: surface.bottom - origin.top + 1, bottom: whole.bottom - origin.top });
+        });
         const bounds = new Map(measured.map((box) => [box.id, box]));
         const visibleRoot = nodes.find((node) => boxes.has(node.id) && !node.parent_id);
         const relations = connectorRelations(nodes, links, !!visibleRoot?.is_process);
         setEdges(relations.flatMap((edge) => {
           const a = bounds.get(edge.from), b = bounds.get(edge.to);
           if (!a || !b) return [];
-          const route = routeConnector(a, b, measured);
+          const route = routeConnector(a, b, [...measured, ...chrome.filter((item) => !item.id.startsWith(`${edge.from}-`) && !item.id.startsWith(`${edge.to}-`))]);
           if (!route) return [];
           const from = { ...route.points[0], color: borderOf(byId.get(edge.from)?.border_color).color };
           const to = { ...route.points[route.points.length - 1], color: borderOf(byId.get(edge.to)?.border_color).color };
