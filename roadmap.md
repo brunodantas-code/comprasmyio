@@ -1,5 +1,8 @@
 # Roadmap
 
+- [ ] Adicionar tarefas internas por box com checkbox, conversa, histórico e sinalização sem bloqueio
+- [ ] Validar conclusão somente por responsável/criador e persistência da conversa
+
 - [x] Unificar numeração do Mytosis pelo caminho, sem #, e conferir busca e apresentação
 
 - [x] Exigir Valor em novas solicitações de Serviços, Materiais e Viagens, com validação na tela e no salvamento
