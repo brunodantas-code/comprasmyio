@@ -2984,6 +2984,42 @@ export type Database = {
           },
         ]
       }
+      mytosis_processes: {
+        Row: {
+          created_at: string
+          created_by: string
+          flow_ids: string[]
+          id: string
+          name: string
+          revision: number
+          sections: Json
+          stage_bindings: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          flow_ids?: string[]
+          id?: string
+          name: string
+          revision?: number
+          sections?: Json
+          stage_bindings?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          flow_ids?: string[]
+          id?: string
+          name?: string
+          revision?: number
+          sections?: Json
+          stage_bindings?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       mytosis_settings: {
         Row: {
           box_format: Json

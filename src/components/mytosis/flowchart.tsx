@@ -4,7 +4,7 @@ import { FormatEditor } from "./format-editor";
 import type { BoxFormat } from "@/lib/mytosis-format";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Download, FileDown, Plus, Paperclip, Route as RouteIcon, Search, Settings2, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Download, FileDown, Pencil, Plus, Paperclip, Route as RouteIcon, Search, Settings2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,7 @@ import { NodeText } from "./node-text";
 import { NodeFrame } from "./node-frame";
 import { NodeAttachmentDialog } from "./node-attachments";
 import { createMytosisPdf, downloadMytosisPdf } from "@/lib/mytosis-pdf";
+import { processEntryNodes } from "@/lib/mytosis-editor";
 
 type Props = {
   data: MytosisData;
@@ -279,10 +280,11 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
         <Button variant="outline" size="icon" className="h-7 w-7 rounded-lg" aria-label="Exportar fluxograma para PDF" title={pdfBusy ? "Gerando PDF…" : "Exportar fluxograma para PDF"} disabled={!objective} onClick={() => setExportOpen(true)}><FileDown className={cn("h-3.5 w-3.5", pdfBusy && "animate-pulse motion-reduce:animate-none")} /></Button>
         {data.role === "admin" ? <Button variant="outline" size="icon" className="h-7 w-7 rounded-lg" onClick={() => setSettingsOpen(true)} aria-label="Box padrão" title="Box padrão"><Settings2 className="h-3.5 w-3.5" /></Button> : null}
         {canEdit ? <Button variant="outline" size="icon" className="h-7 w-7 rounded-lg" onClick={() => openDialog({ mode: "create", kind: "objective", parentId: null, process })} aria-label={process ? "Novo fluxograma" : "Novo objetivo"} title={process ? "Novo fluxograma" : "Novo objetivo"}><Plus className="h-5 w-5" /></Button> : null}
+        {process && objective && canEdit ? <><Button variant="outline" size="icon" className="h-7 w-7 rounded-lg" aria-label="Editar fluxograma" title="Editar fluxograma" onClick={() => openDialog({ mode: "edit", node: objective })}><Pencil className="size-3.5" /></Button><Button variant="outline" size="sm" onClick={() => openDialog({ mode: "create", kind: "task", parentId: objective.id, process: true })}><Plus className="size-3.5" />Nova etapa</Button></> : null}
       </div>
       {objective ? (
         <div className="overflow-auto rounded-xl border border-border bg-card p-6" onClick={() => setHighlight(null)}>
-          <div ref={canvasRef} className="relative w-max min-w-full pt-3" onClick={(e) => e.stopPropagation()}>{renderBranch(objective)}<ConnectionLayer container={canvasRef} nodes={data.nodes} links={data.links} onSelect={canEdit ? setSelectedLink : undefined} layoutKey={`${objectiveId}:${[...hideRight].join(',')}:${[...hideDown].join(',')}:${[...hideTasks].join(',')}:${k}`} /></div>
+          <div ref={canvasRef} className="relative w-max min-w-full pt-3" onClick={(e) => e.stopPropagation()}>{process ? <div className="flex flex-col gap-4">{processEntryNodes(objective.id, data.nodes, data.links).map((node) => <Fragment key={node.id}>{renderBranch(node)}</Fragment>)}</div> : renderBranch(objective)}<ConnectionLayer container={canvasRef} nodes={data.nodes} links={data.links} onSelect={canEdit ? setSelectedLink : undefined} layoutKey={`${objectiveId}:${[...hideRight].join(',')}:${[...hideDown].join(',')}:${[...hideTasks].join(',')}:${k}`} /></div>
         </div>
       ) : <p className="py-16 text-center text-muted-foreground">{process ? (objectives.length ? "Selecione um fluxograma." : "Nenhum fluxograma cadastrado.") : objectives.length ? "Selecione um objetivo." : "Nenhum objetivo cadastrado. Use o + para criar o primeiro."}</p>}
       <ImportBlockDialog target={importTarget} onClose={() => setImportTarget(null)} data={data} />

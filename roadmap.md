@@ -1,4 +1,8 @@
 # Roadmap
+- [x] Ocultar box informativo dos fluxogramas, iniciar pela primeira etapa e permitir próxima etapa sem subetapa prévia
+- [x] Incluir Processos no Mytosis com seções ordenáveis e parágrafos numerados
+- [x] Vincular fluxogramas, departamentos e responsáveis às etapas dentro dos Processos
+- [x] Conferir criação, edição, reordenação e leitura persistida dos Processos
 - [x] Aproximar formas da prévia em 4+4+3 e compactar edição de fundo, borda e cores
 - [x] Reposicionar fontes/alinhamentos à direita da prévia, usar checks de fundo/borda e remover rótulo Anexo
 - [x] Confirmar e corrigir envio de demandas Myio à fila de compras sem enfraquecer valor obrigatório
