@@ -198,7 +198,11 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
                             <DropdownMenuItem onClick={() => setTaskSelection({ nodeId: node.id })}>Nova tarefa neste box</DropdownMenuItem>
                             <DropdownMenuItem onClick={() => openDialog({ mode: "create", kind: "task", parentId: node.id, formatSourceId: node.id })}>{process ? "Etapa associada (abaixo)" : "Tarefa associada (abaixo)"}</DropdownMenuItem>
                             {node.parent_id ? <DropdownMenuItem onClick={() => openDialog({ mode: "create", kind: "task", parentId: node.parent_id, wrapId: node.id, formatSourceId: node.id })}>{process ? "Etapa associada (acima)" : "Tarefa associada (acima)"}</DropdownMenuItem> : null}
-                            {node.parent_id ? <DropdownMenuItem onClick={() => openDialog({ mode: "create", kind: "task", parentId: node.parent_id, predecessorId: node.id, formatSourceId: node.id })}>{process ? "Etapa dependente (à direita)" : "Tarefa dependente (à direita)"}</DropdownMenuItem> : null}
+                            {node.parent_id ? <DropdownMenuItem onClick={() => openDialog({ mode: "create", kind: "task", parentId: node.parent_id, predecessorId: node.id, formatSourceId: node.id })}>{process ? "Etapa dependente (à direita)" : "Tarefa dependente (à direita)"}</DropdownMenuItem> : (() => {
+                              const ends = kids.filter((k) => !data.links.some((l) => l.predecessor_id === k.id && kids.some((o) => o.id === l.successor_id))).sort((a, b) => numberOf(a).localeCompare(numberOf(b), undefined, { numeric: true }));
+                              const last = ends[ends.length - 1];
+                              return <DropdownMenuItem onClick={() => openDialog({ mode: "create", kind: "task", parentId: node.id, predecessorId: last?.id, formatSourceId: last?.id ?? node.id })}>{process ? "Etapa dependente (à direita)" : "Tarefa dependente (à direita)"}</DropdownMenuItem>;
+                            })()}
                             <DropdownMenuItem onClick={() => setImportTarget(node)}>Importar fluxograma como bloco (abaixo)</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
