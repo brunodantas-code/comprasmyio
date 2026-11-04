@@ -1,0 +1,1 @@
+- Mytosis stage and default-box editors share text-format controls and checked color swatches so their layout and selection feedback stay consistent.

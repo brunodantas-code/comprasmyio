@@ -47,5 +47,3 @@
 - Mytosis connectors use pure obstacle routing and a size-bound paint-contained SVG; observe transitions and clipped endpoints. Processes draw explicit links, OKRs retain hierarchy; preserve styles/edit hit areas.
 - Mytosis branches/tasks collapse independently; new stages inherit source formatting. Question recipients are server-validated participants; Central reads unanswered addressed messages via an invoker RPC.
 - Mytosis title limits use size/font/shape; never truncate old titles. PDF captures the visible canvas on one proportional page. Node attachments use private owner/node paths, role-gated rows and signed URLs; object ownership checks avoid recursive RLS.
-
-- Mytosis stage and default-box editors share text-format controls and checked color swatches so their layout and selection feedback stay consistent.
