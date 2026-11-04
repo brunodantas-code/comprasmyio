@@ -358,9 +358,13 @@ export function MyioDemandCard({ balances }: { balances: Record<string, number> 
         for (const i of toBuy) {
           const mat = materialByName.get(i.product.trim().toLowerCase());
           const terc = mat ? null : terceirosByName.get(i.product.trim().toLowerCase());
+          if ((!mat && !terc) || mat?.is_manufactured) throw new Error("A demanda deve usar um item cadastrado e comprável.");
           const { data, error } = await supabase
             .from("purchase_orders")
             .insert({
+              source_myio_order_item_id: i.id,
+              request_type: "materiais",
+              estimated_value: 0,
               project_id: order.project_id,
               requester_id: userId,
               item_name: i.product,

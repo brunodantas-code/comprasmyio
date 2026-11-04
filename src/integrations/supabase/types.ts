@@ -3618,6 +3618,7 @@ export type Database = {
           requester_id: string
           requester_notes: string | null
           site_survey_visit_id: string | null
+          source_myio_order_item_id: string | null
           status: Database["public"]["Enums"]["order_status"]
           terceiros_material_id: string | null
           tool_asset_id: string | null
@@ -3667,6 +3668,7 @@ export type Database = {
           requester_id: string
           requester_notes?: string | null
           site_survey_visit_id?: string | null
+          source_myio_order_item_id?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           terceiros_material_id?: string | null
           tool_asset_id?: string | null
@@ -3716,6 +3718,7 @@ export type Database = {
           requester_id?: string
           requester_notes?: string | null
           site_survey_visit_id?: string | null
+          source_myio_order_item_id?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           terceiros_material_id?: string | null
           tool_asset_id?: string | null
@@ -3788,6 +3791,13 @@ export type Database = {
             columns: ["site_survey_visit_id"]
             isOneToOne: false
             referencedRelation: "site_survey_visits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_source_myio_order_item_id_fkey"
+            columns: ["source_myio_order_item_id"]
+            isOneToOne: false
+            referencedRelation: "myio_order_items"
             referencedColumns: ["id"]
           },
           {

@@ -1,8 +1,18 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { resolveSupplyAllocation } from "./supply-allocation";
+import { resolveRhSupplyAllocation, resolveSupplyAllocation } from "./supply-allocation";
 
 const projects = [{ id: "implantacao", client_id: "cliente", client_unit_id: "unidade" }];
+test("RH sem cliente não exige Projeto nem Sustentação", () => {
+  for (const client of ["", "none"]) assert.deepEqual(resolveRhSupplyAllocation(client), {
+    allocation_type: "interna", for_stock: false, project_id: null, client_id: null, client_unit_id: null,
+  });
+});
+test("RH mantém Cliente opcional como contexto sem Projeto ou Estoque", () => {
+  assert.deepEqual(resolveRhSupplyAllocation("cliente"), {
+    allocation_type: "interna", for_stock: false, project_id: null, client_id: "cliente", client_unit_id: null,
+  });
+});
 test("Projeto herda Cliente e unidade, sem usar cliente direto selecionado", () => {
   assert.deepEqual(resolveSupplyAllocation("projeto", "implantacao", "outro-cliente", "outra-unidade", projects), { project_id: "implantacao", client_id: "cliente", client_unit_id: "unidade" });
 });

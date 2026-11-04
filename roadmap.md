@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Confirmar e corrigir envio de demandas Myio à fila de compras sem enfraquecer valor obrigatório
+- [x] Confirmar e corrigir contratação RH com cliente opcional e sem projeto
 - [x] Alinhar centros das formas conectadas para setas horizontais retas
 - [x] Adotar Subetapa e Próxima etapa no lugar de Etapa associada e Etapa dependente
 - [x] Retirar Pessoas envolvidas das novas tarefas de fluxogramas, mantendo nos OKRs

@@ -57,7 +57,7 @@ import { AppHeader } from "@/components/app-header";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { takeSiteSurveyPurchaseDraft, type SiteSurveyPurchaseDraft } from "@/lib/site-survey-purchase-draft";
 import { SupplyAllocationSelector, InheritedProjectClient } from "@/components/supply-allocation-selector";
-import { resolveSupplyAllocation, type SupplyAllocationType } from "@/lib/supply-allocation";
+import { resolveRhSupplyAllocation, resolveSupplyAllocation, type SupplyAllocationType } from "@/lib/supply-allocation";
 import { invalidSupplyRequestValueIndex } from "@/lib/supply-request-value";
 
 
@@ -1378,8 +1378,8 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
       if (invalidValueIndex !== -1) throw new Error(groupedItems ? `Material ${invalidValueIndex + 1}: informe o valor unitário estimado maior que zero.` : "Informe o valor unitário estimado maior que zero.");
       let createdOrder: { budget_exceeded: boolean; budget_snapshot: number | null; projected_committed_snapshot: number | null } | null = null;
       const resolvedAllocation = requestModel === "rh"
-        ? { project_id: null, client_id: clientId && clientId !== "none" ? clientId : null, client_unit_id: null }
-        : resolveSupplyAllocation(forStock ? "estoque" : allocTarget, values.project_id ?? "", clientId, clientUnitId, projects ?? []);
+        ? resolveRhSupplyAllocation(clientId)
+        : { ...resolveSupplyAllocation(forStock ? "estoque" : allocTarget, values.project_id ?? "", clientId, clientUnitId, projects ?? []), for_stock: forStock, allocation_type: forStock ? "estoque" as const : allocTarget };
       let ids = {
         material_id: isNewItem ? null : (item?.material_id ?? null),
         terceiros_material_id: isNewItem ? null : (item?.terceiros_material_id ?? null),
@@ -1434,8 +1434,6 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
       if (buyQty > 0) {
         const { data, error } = await supabase.from("purchase_orders").insert({
           ...resolvedAllocation,
-          for_stock: forStock,
-          allocation_type: forStock ? "estoque" : allocTarget,
           request_type: requestType,
           cost_center_id: restrictedCc ? await resolveOperacaoCostCenterId() : (costCenterId || null),
           parent_order_id: null,

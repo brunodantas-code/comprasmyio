@@ -4,6 +4,17 @@ export const allocationTypeSchema = z.enum(["projeto", "cliente", "estoque", "in
 export type SupplyAllocationType = z.infer<typeof allocationTypeSchema>;
 export type AllocationProject = { id: string; client_id: string | null; client_unit_id?: string | null };
 
+/** RH has no project destination; its optional client is contextual. */
+export function resolveRhSupplyAllocation(clientId: string) {
+  return {
+    allocation_type: "interna" as const,
+    for_stock: false,
+    project_id: null,
+    client_id: clientId && clientId !== "none" ? clientId : null,
+    client_unit_id: null,
+  };
+}
+
 export function resolveSupplyAllocation(type: SupplyAllocationType, projectId: string, clientId: string, unitId: string, projects: AllocationProject[]) {
   allocationTypeSchema.parse(type);
   if (type === "projeto") {
