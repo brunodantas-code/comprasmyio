@@ -7,6 +7,7 @@ import type { BoxFormat } from "@/lib/mytosis-format";
 import { BORDERS, FILLS, SHAPES, ShapeSvg, type ShapeKey } from "./shapes";
 import { ColorOptions } from "./color-options";
 import type { TitleColorKey } from "./title-colors";
+import { Button } from "@/components/ui/button";
 
 export function FormatEditor({ value, onChange, preview }: { value: BoxFormat; onChange: (next: BoxFormat) => void; preview: ReactNode }) {
   const set = <K extends keyof BoxFormat>(key: K, v: BoxFormat[K]) => onChange({ ...value, [key]: v });
@@ -15,10 +16,10 @@ export function FormatEditor({ value, onChange, preview }: { value: BoxFormat; o
       <div className="grid min-w-0 content-start gap-3">{preview}
     <div className="grid gap-1"><Label className="text-xs text-muted-foreground">Forma</Label>
       <div className="grid grid-cols-4 gap-1.5">{SHAPES.map((s) => (
-        <button key={s.key} type="button" title={s.label} aria-label={s.label} aria-pressed={value.shape === s.key} onClick={() => set("shape", s.key)} className={cn("flex min-w-0 flex-col items-center justify-center gap-0.5 rounded-md border bg-card px-1 py-1.5 transition-colors", value.shape === s.key ? "border-primary bg-primary/10" : "border-border hover:border-primary/60")}>
+        <Button variant="outline" key={s.key} type="button" title={s.label} aria-label={s.label} aria-pressed={value.shape === s.key} onClick={() => set("shape", s.key)} className={cn("flex h-auto min-w-0 flex-col items-center justify-center gap-0.5 rounded-md border bg-card px-1 py-1.5 transition-colors", value.shape === s.key ? "border-primary bg-primary/10" : "border-border hover:border-primary/60")}>
           <ShapeSvg shape={s.key as ShapeKey} fill="transparent" stroke="var(--foreground)" className="h-5 w-8" />
           <span className="w-full truncate text-center text-[10px] leading-tight text-muted-foreground">{s.label}</span>
-        </button>))}</div>
+        </Button>))}</div>
     </div>
       </div>
       <TextFormatEditor idPrefix="default" value={value} onChange={(next) => onChange({ ...value, ...next })} />

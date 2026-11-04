@@ -23,7 +23,7 @@ import { NodePreview } from "./node-preview";
 import { firstName } from "./use-mytosis";
 import { ColorOptions } from "./color-options";
 import { NodeAttachments, uploadNodeAttachments } from "./node-attachments";
-import { initialStageFormat, sameFormat, type BoxFormat } from "@/lib/mytosis-format";
+import { initialStageFormat, sameFormat, standardForShape, canEditBoxLayout, type BoxFormat } from "@/lib/mytosis-format";
 import { initialNodeShape, nodeFlowLink, requiresNodeResponsible } from "@/lib/mytosis-editor";
 
 export type NodeDialogState =
@@ -33,6 +33,7 @@ export type NodeDialogState =
 
 export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialogState; onClose: () => void; data: MytosisData; canEdit: boolean }) {
   const queryClient = useQueryClient();
+  const canStyle = canEditBoxLayout(data.role);
   const editing = state?.mode === "edit" ? state.node : null;
   const kind = editing?.kind ?? (state?.mode === "create" ? state.kind : "task");
   const parentId = editing?.parent_id ?? (state?.mode === "create" ? state.parentId : null);
@@ -60,6 +61,13 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
   const [descriptionSize, setDescriptionSize] = useState(11);
   const [textAlign, setTextAlign] = useState<"left" | "center" | "right">("left");
   const [verticalAlign, setVerticalAlign] = useState<"top" | "center" | "bottom">("center");
+  const setVisualFormat = (format: BoxFormat) => {
+    setShape(format.shape as ShapeKey); setFillKey(format.fill_color as FillKey); setBorderKey(format.border_color as BorderKey);
+    setTitleSize(format.title_font_size); setDescriptionSize(format.description_font_size);
+    setTitleColor(format.title_color as TitleColorKey | null); setControlColor(format.control_color as TitleColorKey | null);
+    setTextAlign(format.text_align); setVerticalAlign(format.text_vertical_align);
+  };
+  const chooseShape = (next: ShapeKey) => setVisualFormat(standardForShape(data.shapeFormats, data.defaultFormat, next));
   const titleLimit = boxTitleLimit(data.box.width, titleSize, shape);
   const titleTooLong = title.trim().length > titleLimit;
   const descriptionLimit = boxDescriptionLimit(data.box.width, data.box.height, descriptionSize, titleSize, shape);
@@ -87,6 +95,7 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
     setFillKey((format?.fill_color as FillKey) ?? "none");
     setBorderKey((format?.border_color as BorderKey) ?? "green-mid");
     setLinkStyle(((editing && data.links.find((l) => l.successor_id === editing.id)?.style) as LinkStyle) ?? "arrow");
+    if (!editing) setVisualFormat(standardForShape(data.shapeFormats, data.defaultFormat, initialNodeShape(isProcess, parentId, null, data.defaultFormat.shape)));
     setPreds(new Set(editing
       ? data.links.filter((l) => l.successor_id === editing.id).map((l) => l.predecessor_id)
       : state.mode === "create" && state.predecessorId ? [state.predecessorId] : []));
@@ -123,7 +132,7 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
         shape, fill_color: fillKey, border_color: borderKey, control_color: controlColor,
         title_font_size: titleSize, title_color: titleColor, description_font_size: descriptionSize, text_align: textAlign, text_vertical_align: verticalAlign,
         linked_node_id: nodeFlowLink(isProcess, isLinked, linked),
-        custom_format: !sameFormat({ shape, fill_color: fillKey, border_color: borderKey, title_font_size: titleSize, description_font_size: descriptionSize, text_align: textAlign, text_vertical_align: verticalAlign, title_color: titleColor, control_color: controlColor }, data.defaultFormat),
+        custom_format: !canStyle && editing && shape === editing.shape ? editing.custom_format ?? false : !sameFormat({ shape, fill_color: fillKey, border_color: borderKey, title_font_size: titleSize, description_font_size: descriptionSize, text_align: textAlign, text_vertical_align: verticalAlign, title_color: titleColor, control_color: controlColor }, standardForShape(data.shapeFormats, data.defaultFormat, shape)),
         weight: w, progress: kids.length ? editing?.progress ?? 0 : Math.min(100, Math.max(0, Number(progress) || 0)),
       };
       let id = editing?.id ?? createdId;
@@ -148,11 +157,11 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
       const toAdd = [...preds].filter((p) => !current.has(p));
       const toRemove = [...current].filter((p) => !preds.has(p));
       if (toAdd.length) {
-        const { error } = await supabase.from("mytosis_links").insert(toAdd.map((p) => ({ predecessor_id: p, successor_id: id, style: linkStyle })));
+        const { error } = await supabase.from("mytosis_links").insert(toAdd.map((p) => ({ predecessor_id: p, successor_id: id, style: canStyle ? linkStyle : "arrow" })));
         if (error) throw error;
       }
       const keep = [...preds].filter((p) => current.has(p));
-      if (keep.length) {
+      if (canStyle && keep.length) {
         const { error } = await supabase.from("mytosis_links").update({ style: linkStyle }).eq("successor_id", id).in("predecessor_id", keep);
         if (error) throw error;
       }
@@ -195,14 +204,15 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
               <div className="grid min-w-0 content-start gap-3"><NodePreview width={data.box.width} height={data.box.height} shape={shape} fillKey={fillKey} borderKey={borderKey} title={title} description={description} responsible={firstName(data.users.find((user) => user.id === responsible)?.full_name ?? "—")} number={editing ? numbers.get(editing.id) ?? String(editing.locator) : "…"} titleSize={titleSize} descriptionSize={descriptionSize} titleColor={titleColor} controlColor={controlColor} align={textAlign} verticalAlign={verticalAlign} process={isProcess} hasAttachments={pendingFiles.length > 0 || data.attachmentNodeIds.includes(editing?.id ?? createdId ?? "")} />
             <div className="grid gap-1"><Label className="text-xs text-muted-foreground">Forma</Label>
               <div className="grid grid-cols-4 gap-1.5">{SHAPES.map((s) => (
-                <button key={s.key} type="button" title={s.label} aria-label={s.label} aria-pressed={shape === s.key} onClick={() => setShape(s.key)} className={cn("flex min-w-0 flex-col items-center justify-center gap-0.5 rounded-md border bg-card px-1 py-1.5 transition-colors", shape === s.key ? "border-primary bg-primary/10" : "border-border hover:border-primary/60")}>
+                <Button variant="outline" key={s.key} type="button" title={s.label} aria-label={s.label} aria-pressed={shape === s.key} onClick={() => chooseShape(s.key)} className={cn("flex h-auto min-w-0 flex-col items-center justify-center gap-0.5 rounded-md border bg-card px-1 py-1.5 transition-colors", shape === s.key ? "border-primary bg-primary/10" : "border-border hover:border-primary/60")}>
                   <ShapeSvg shape={s.key} fill="transparent" stroke="var(--foreground)" className="h-5 w-8" />
                   <span className="w-full truncate text-center text-[10px] leading-tight text-muted-foreground">{s.label}</span>
-                </button>))}</div>
+                </Button>))}</div>
             </div>
               </div>
-              <TextFormatEditor idPrefix="box" value={{ title_font_size: titleSize, description_font_size: descriptionSize, text_align: textAlign, text_vertical_align: verticalAlign }} onChange={(next) => { setTitleSize(next.title_font_size); setDescriptionSize(next.description_font_size); setTextAlign(next.text_align); setVerticalAlign(next.text_vertical_align); }} />
+              {canStyle ? <TextFormatEditor idPrefix="box" value={{ title_font_size: titleSize, description_font_size: descriptionSize, text_align: textAlign, text_vertical_align: verticalAlign }} onChange={(next) => { setTitleSize(next.title_font_size); setDescriptionSize(next.description_font_size); setTextAlign(next.text_align); setVerticalAlign(next.text_vertical_align); }} /> : null}
             </div>
+            {canStyle ? <>
             <div className="grid items-start gap-3 sm:grid-cols-2">
               <FormatColorOptions label="Fundo" value={fillKey} options={FILLS} onChange={setFillKey} />
               <FormatColorOptions label="Borda" value={borderKey} options={BORDERS} onChange={setBorderKey} border />
@@ -212,6 +222,7 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
             {kind === "task" ? <div className="grid gap-1"><Label className="text-xs text-muted-foreground">Conector de entrada (vindo do box predecessor)</Label>
               <div className="flex flex-wrap gap-1.5">{LINK_STYLES.map((l) => <button key={l.key} type="button" title={l.label} aria-label={l.label} aria-pressed={linkStyle === l.key} onClick={() => setLinkStyle(l.key)} className={cn("flex h-8 items-center gap-2 rounded-md border bg-card px-2 text-xs", linkStyle === l.key ? "border-primary bg-primary/10" : "border-border hover:border-primary/60")}><ConnectorGlyph style={l.key} color="var(--foreground)" />{l.label}</button>)}</div>
             </div> : null}
+            </> : null}
           </div>
           {isProcess ? <div className="grid gap-2 rounded-xl border border-border p-3">
             <Label>Este fluxo é vinculado a outro fluxograma?</Label>

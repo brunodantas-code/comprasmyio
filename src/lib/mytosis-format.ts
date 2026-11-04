@@ -28,6 +28,21 @@ export function sameFormat(a: BoxFormat, b: BoxFormat) {
   return (Object.keys(BUILTIN_FORMAT) as (keyof BoxFormat)[]).every((key) => (a[key] ?? null) === (b[key] ?? null));
 }
 
+export type ShapeFormats = Record<string, BoxFormat>;
+
+export function resolveShapeFormats(raw: unknown, fallback: BoxFormat): ShapeFormats {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+  return Object.fromEntries(Object.entries(raw).map(([shape, value]) => [shape, { ...fallback, ...resolveDefaultFormat(value), shape }]));
+}
+
+export function standardForShape(formats: ShapeFormats, fallback: BoxFormat, shape: string): BoxFormat {
+  return { ...(formats[shape] ?? fallback), shape };
+}
+
+export function canEditBoxLayout(role: string | null) {
+  return role === "admin";
+}
+
 export function initialStageFormat(nodes: MytosisNode[], editing: MytosisNode | null, sourceId?: string | null) {
   return editing ?? nodes.find((node) => node.id === sourceId);
 }

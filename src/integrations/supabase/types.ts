@@ -3114,6 +3114,7 @@ export type Database = {
       mytosis_settings: {
         Row: {
           box_format: Json
+          box_formats: Json
           box_height: number
           box_width: number
           id: number
@@ -3121,6 +3122,7 @@ export type Database = {
         }
         Insert: {
           box_format?: Json
+          box_formats?: Json
           box_height?: number
           box_width?: number
           id?: number
@@ -3128,6 +3130,7 @@ export type Database = {
         }
         Update: {
           box_format?: Json
+          box_formats?: Json
           box_height?: number
           box_width?: number
           id?: number
@@ -7313,6 +7316,7 @@ export type Database = {
           name: string
         }[]
       }
+      mytosis_shape_format: { Args: { _shape: string }; Returns: Json }
       mytosis_task_can_converse: {
         Args: { _task_id: string; _user_id: string }
         Returns: boolean

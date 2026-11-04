@@ -1,7 +1,7 @@
 import { ExportDialog } from "./export-dialog";
 import { NodePreview } from "./node-preview";
 import { FormatEditor } from "./format-editor";
-import type { BoxFormat } from "@/lib/mytosis-format";
+import { standardForShape, type BoxFormat, type ShapeFormats } from "@/lib/mytosis-format";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Download, FileDown, Pencil, Plus, Paperclip, Route as RouteIcon, Search, Settings2, Trash2 } from "lucide-react";
@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 import { childrenMap, computeBoxNumbers, computePhases, computeProgress, criticalPath, formatDate, planBlockImport, rootObjectiveOf, type MytosisNode } from "@/lib/mytosis";
 import { firstName, type MytosisData } from "./use-mytosis";
 import type { NodeDialogState } from "./node-dialog";
-import { ConnectorGlyph, borderOf, fillOf, type LinkStyle, type ShapeKey } from "./shapes";
+import { SHAPES, ConnectorGlyph, borderOf, fillOf, type LinkStyle, type ShapeKey } from "./shapes";
 import { BoxTaskDialog, BoxTaskList, type TaskSelection } from "./box-tasks";
 import { predecessorTaskSignal } from "@/lib/mytosis-tasks";
 import { ConnectionLayer } from "./connection-layer";
@@ -346,28 +346,34 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
       <NodeAttachmentDialog node={attachmentTarget} canEdit={canEdit} onClose={() => setAttachmentTarget(null)} />
       <SplitDialog node={splitTarget} onClose={() => setSplitTarget(null)} onCreated={(id) => { setHideRight((current) => { const next = new Set(current); next.delete(id); return next; }); setHideDown((current) => { const next = new Set(current); next.delete(id); return next; }); setK(Number.MAX_SAFE_INTEGER); }} />
       <BoxTaskDialog selection={taskSelection} onSelect={setTaskSelection} onClose={() => setTaskSelection(null)} data={data} canEdit={canEdit} />
-      <BoxSettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} box={data.box} defaultFormat={data.defaultFormat} />
-      <ConnectorDialog link={selectedLink} onClose={() => setSelectedLink(null)} label={selectedLink ? `${data.nodes.find((n) => n.id === selectedLink.predecessor_id)?.title} → ${data.nodes.find((n) => n.id === selectedLink.successor_id)?.title}` : ""} />
+      <BoxSettingsDialog open={settingsOpen && data.role === "admin"} onClose={() => setSettingsOpen(false)} box={data.box} defaultFormat={data.defaultFormat} shapeFormats={data.shapeFormats} />
+      <ConnectorDialog canStyle={data.role === "admin"} link={selectedLink} onClose={() => setSelectedLink(null)} label={selectedLink ? `${data.nodes.find((n) => n.id === selectedLink.predecessor_id)?.title} → ${data.nodes.find((n) => n.id === selectedLink.successor_id)?.title}` : ""} />
     </div>
   );
 }
 
-function BoxSettingsDialog({ open, onClose, box, defaultFormat }: { open: boolean; onClose: () => void; box: { width: number; height: number }; defaultFormat: BoxFormat }) {
+function BoxSettingsDialog({ open, onClose, box, defaultFormat, shapeFormats }: { open: boolean; onClose: () => void; box: { width: number; height: number }; defaultFormat: BoxFormat; shapeFormats: ShapeFormats }) {
   const queryClient = useQueryClient();
   const [width, setWidth] = useState(String(box.width));
   const [height, setHeight] = useState(String(box.height));
-  const [format, setFormat] = useState<BoxFormat>(defaultFormat);
+  const [selectedShape, setSelectedShape] = useState(defaultFormat.shape);
+  const [formats, setFormats] = useState<ShapeFormats>(shapeFormats);
+  const format = standardForShape(formats, defaultFormat, selectedShape);
+  const changeFormat = (next: BoxFormat) => {
+    if (next.shape !== selectedShape) { setSelectedShape(next.shape); return; }
+    setFormats((current) => ({ ...current, [selectedShape]: next }));
+  };
   const [confirmApply, setConfirmApply] = useState(false);
-  useEffect(() => { if (open) { setWidth(String(box.width)); setHeight(String(box.height)); setFormat(defaultFormat); } }, [open, box, defaultFormat]);
+  useEffect(() => { if (open) { setWidth(String(box.width)); setHeight(String(box.height)); setSelectedShape(defaultFormat.shape); setFormats(Object.fromEntries(SHAPES.map(({ key }) => [key, standardForShape(shapeFormats, defaultFormat, key)]))); setConfirmApply(false); } }, [open, box, defaultFormat, shapeFormats]);
   const validate = () => {
     const w = Number(width), h = Number(height);
     if (!(w >= 160 && w <= 480) || !(h >= 64 && h <= 240)) throw new Error("Largura entre 160 e 480 px; altura entre 64 e 240 px.");
-    if (![format.title_font_size, format.description_font_size].every((n) => Number.isInteger(n) && n >= 10 && n <= 32)) throw new Error("Informe tamanhos de fonte entre 10 e 32 px.");
+    if (!Object.values(formats).every((f) => [f.title_font_size, f.description_font_size].every((n) => Number.isInteger(n) && n >= 10 && n <= 32))) throw new Error("Informe tamanhos de fonte entre 10 e 32 px.");
     return { w, h };
   };
   const persist = async () => {
     const { w, h } = validate();
-    const { error } = await supabase.from("mytosis_settings").update({ box_width: w, box_height: h, box_format: format }).eq("id", 1);
+    const { error } = await supabase.from("mytosis_settings").update({ box_width: w, box_height: h, box_format: standardForShape(formats, defaultFormat, defaultFormat.shape), box_formats: formats }).eq("id", 1).select("id").single();
     if (error) throw error;
   };
   const save = useMutation({
@@ -378,8 +384,10 @@ function BoxSettingsDialog({ open, onClose, box, defaultFormat }: { open: boolea
   const apply = useMutation({
     mutationFn: async () => {
       await persist();
-      const { error } = await supabase.from("mytosis_nodes").update({ ...format }).eq("is_process", true).eq("custom_format", false);
-      if (error) throw error;
+      for (const { key } of SHAPES) {
+        const { error } = await supabase.from("mytosis_nodes").update(standardForShape(formats, defaultFormat, key)).eq("shape", key).eq("is_process", true).eq("custom_format", false);
+        if (error) throw error;
+      }
     },
     onSuccess: () => { toast.success("Padrão aplicado aos boxes padrão de todos os fluxogramas."); setConfirmApply(false); queryClient.invalidateQueries({ queryKey: ["mytosis"] }); onClose(); },
     onError: (e: Error) => toast.error(e.message),
@@ -388,16 +396,16 @@ function BoxSettingsDialog({ open, onClose, box, defaultFormat }: { open: boolea
   return (
     <Dialog open={open} onOpenChange={(o) => !o && !busy && onClose()}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
-        <DialogHeader><DialogTitle className="font-normal">Box padrão</DialogTitle><DialogDescription>Novas etapas começam com este formato. Todos os boxes usam a mesma largura e altura.</DialogDescription></DialogHeader>
+        <DialogHeader><DialogTitle className="font-normal">Box padrão</DialogTitle><DialogDescription>Padrões por forma</DialogDescription></DialogHeader>
         <div className="grid gap-3 rounded-xl border border-border bg-muted/40 p-3">
-          <FormatEditor value={format} onChange={setFormat} preview={<NodePreview width={Number(width) || box.width} height={Number(height) || box.height} shape={format.shape as ShapeKey} fillKey={format.fill_color} borderKey={format.border_color} title="Título da etapa" description="Descrição" responsible="—" number="1.1" titleSize={format.title_font_size} descriptionSize={format.description_font_size} titleColor={format.title_color} controlColor={format.control_color} align={format.text_align} verticalAlign={format.text_vertical_align} process />} />
+          <FormatEditor value={format} onChange={changeFormat} preview={<NodePreview width={Number(width) || box.width} height={Number(height) || box.height} shape={format.shape as ShapeKey} fillKey={format.fill_color} borderKey={format.border_color} title="Título da etapa" description="Descrição" responsible="—" number="1.1" titleSize={format.title_font_size} descriptionSize={format.description_font_size} titleColor={format.title_color} controlColor={format.control_color} align={format.text_align} verticalAlign={format.text_vertical_align} process />} />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="grid gap-1.5"><Label>Largura (px)</Label><Input type="number" value={width} onChange={(e) => setWidth(e.target.value)} /></div>
           <div className="grid gap-1.5"><Label>Altura (px)</Label><Input type="number" value={height} onChange={(e) => setHeight(e.target.value)} /></div>
         </div>
         {confirmApply ? <div role="alert" className="grid gap-2 rounded-md border border-border p-3 text-sm">
-          <p>Todos os boxes padrão dos fluxogramas receberão este formato. Boxes customizados serão mantidos. Confirmar?</p>
+          <p>Aplicar o padrão de cada forma a todos os fluxogramas? As formas e os boxes customizados serão mantidos.</p>
           <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setConfirmApply(false)} disabled={busy}>Cancelar</Button><Button variant="outline" onClick={() => apply.mutate()} disabled={busy}>Confirmar</Button></div>
         </div> : null}
         <DialogFooter className="gap-2 sm:justify-between">

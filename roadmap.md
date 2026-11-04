@@ -1,4 +1,8 @@
 # Roadmap
+- [x] Esclarecer e distinguir botão Novo fluxograma de Nova etapa; confirmar + abre Novo fluxograma
+- [x] Salvar padrões individuais para todas as formas no Box Padrão e aplicar preservando formas e customizações
+- [x] Restringir edição visual a Admin, mantendo formas e conteúdo para Editores; testes de regras e persistência como Admin
+- [ ] Conferir edição autenticada como Editor: sessão disponível é de Admin; não alterar papéis reais para testar
 - [x] Posicionar lixeira do fluxograma ao lado do lápis
 - [x] Permitir vínculo entre fluxogramas em qualquer etapa, independentemente da forma
 - [x] Corrigir exclusão do fluxograma inteiro pela lixeira, confirmar cancelamento e exclusão autenticada com recarga
