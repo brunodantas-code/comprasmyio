@@ -42,7 +42,7 @@ export function computeBoxNumbers(nodes: MytosisNode[], links: MytosisLink[]) {
     }
     ordered.forEach((child, index) => assign(child, `${number}.${index + 1}`, next));
   };
-  const roots = nodes.filter((node) => !node.parent_id).sort((a, b) => a.locator - b.locator);
+  const roots = nodes.filter((node) => !node.parent_id).sort((a, b) => (a.position || 1e9) - (b.position || 1e9) || a.locator - b.locator);
   for (const process of [false, true]) {
     roots.filter((node) => !!node.is_process === process).forEach((root, index) => assign(root, String(index + 1), new Set()));
   }

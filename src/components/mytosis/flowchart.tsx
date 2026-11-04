@@ -41,7 +41,8 @@ type Props = {
 };
 
 export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focusLocator, onFocusHandled, openDialog, process }: Props) {
-  const objectives = data.nodes.filter((n) => !n.parent_id && !!n.is_process === process);
+  const objectives = data.nodes.filter((n) => !n.parent_id && !!n.is_process === process).sort((a, b) => (a.position || 1e9) - (b.position || 1e9) || a.locator - b.locator);
+  const [ordering, setOrdering] = useState(false);
   const [importTarget, setImportTarget] = useState<MytosisNode | null>(null);
   const [taskSelection, setTaskSelection] = useState<TaskSelection>(null);
   const [selectedLink, setSelectedLink] = useState<MytosisLink | null>(null);
@@ -245,11 +246,12 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
 
   return (
     <div className="space-y-4">
+      {ordering ? <RootOrderDialog roots={objectives} process={!!process} onClose={() => setOrdering(false)} /> : null}
       <div className="flex flex-wrap items-end gap-3 rounded-xl border border-border bg-muted/50 px-4 py-3">
         <Filter className="mb-2.5 h-4 w-4 text-muted-foreground/60" />
         <div className="grid min-w-0 flex-1 basis-64 gap-1"><Label className="text-xs text-muted-foreground">{process ? "Fluxograma" : "Objetivo"}</Label>
           <SearchableSelect aria-label={process ? "Fluxograma" : "Objetivo"} className="h-10 rounded-none border-0 border-b border-primary text-lg font-semibold shadow-none focus-within:ring-0 [&_input]:px-0" value={objectiveId} onChange={onObjectiveChange} clearable={false} placeholder={process ? "Selecione o fluxograma" : "Selecione o objetivo"} options={objectives.map((o) => ({ value: o.id, label: `${numbers.get(o.id) ?? o.locator} ${o.title}` }))} />
-          <div className="flex justify-between gap-2 text-[11px] text-muted-foreground"><span>{process ? "Selecione o fluxograma." : "Selecione o objetivo."}</span><span className="tabular-nums">{objective ? `${numbers.get(objective.id) ?? objective.locator} ${objective.title}`.length : 0} caracteres</span></div>
+          <div className="flex justify-between gap-2 text-[11px] text-muted-foreground"><span>{process ? "Selecione o fluxograma." : "Selecione o objetivo."}</span>{canEdit && objectives.length > 1 ? <button type="button" className="text-primary hover:underline" onClick={() => setOrdering(true)}>Ordenar</button> : null}<span className="tabular-nums">{objective ? `${numbers.get(objective.id) ?? objective.locator} ${objective.title}`.length : 0} caracteres</span></div>
         </div>
         <form className="grid gap-1" onSubmit={(e) => { e.preventDefault(); const v = locatorQuery.trim(); if (v) locate(v); else setHighlight(null); }}>
           <Label className="text-xs text-muted-foreground">Localizador</Label>
@@ -364,6 +366,46 @@ function ImportBlockDialog({ target, onClose, data }: { target: MytosisNode | nu
         <DialogHeader><DialogTitle className="font-normal">Importar fluxograma como bloco</DialogTitle><DialogDescription>Uma cópia do fluxograma escolhido entra abaixo de {target ? numbers.get(target.id) ?? target.locator : ""} {target?.title}. O original não muda.</DialogDescription></DialogHeader>
         <SearchableSelect value={sourceId} onChange={setSourceId} placeholder="Selecione o fluxograma" options={sources.map((o) => ({ value: o.id, label: `${numbers.get(o.id) ?? o.locator} ${o.title}` }))} />
         <DialogFooter><Button variant="outline" onClick={onClose}>Cancelar</Button><Button variant="outline" onClick={() => run.mutate()} disabled={run.isPending || !sourceId}>Confirmar</Button></DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function RootOrderDialog({ roots, process, onClose }: { roots: MytosisNode[]; process: boolean; onClose: () => void }) {
+  const queryClient = useQueryClient();
+  const [items, setItems] = useState(roots);
+  const [dragId, setDragId] = useState<string | null>(null);
+  const move = (overId: string) => {
+    if (!dragId || dragId === overId) return;
+    setItems((cur) => { const next = [...cur]; const from = next.findIndex((n) => n.id === dragId); const to = next.findIndex((n) => n.id === overId); const [m] = next.splice(from, 1); next.splice(to, 0, m); return next; });
+  };
+  const save = useMutation({
+    mutationFn: async () => {
+      for (const [i, n] of items.entries()) {
+        if ((n.position ?? 0) === i + 1) continue;
+        const { error } = await supabase.from("mytosis_nodes").update({ position: i + 1 }).eq("id", n.id);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => { toast.success("Ordem salva e numeração atualizada."); queryClient.invalidateQueries({ queryKey: ["mytosis"] }); onClose(); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-md">
+        <DialogHeader><DialogTitle className="font-normal">Ordenar {process ? "fluxogramas" : "objetivos"}</DialogTitle><DialogDescription>Arraste pelo número para mudar a posição. A numeração se atualiza automaticamente.</DialogDescription></DialogHeader>
+        <ul className="max-h-[60vh] divide-y divide-border overflow-y-auto">
+          {items.map((n, i) => (
+            <li key={n.id} onDragOver={(e) => { e.preventDefault(); move(n.id); }} onDrop={(e) => { e.preventDefault(); setDragId(null); }} className={cn("flex items-center gap-3 py-2", dragId === n.id && "opacity-50")}>
+              <div draggable onDragStart={(e) => { e.dataTransfer.effectAllowed = "move"; setDragId(n.id); }} onDragEnd={() => setDragId(null)} className="flex cursor-grab flex-col items-center gap-0.5 active:cursor-grabbing" title="Arrastar">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-sm font-semibold text-primary">{i + 1}</span>
+                <span className="text-[10px] text-muted-foreground">Arrastar</span>
+              </div>
+              <span className="min-w-0 flex-1 truncate text-sm">{n.title}</span>
+            </li>
+          ))}
+        </ul>
+        <DialogFooter><Button variant="outline" onClick={onClose}>Cancelar</Button><Button variant="outline" disabled={save.isPending} onClick={() => save.mutate()}>Salvar</Button></DialogFooter>
       </DialogContent>
     </Dialog>
   );
