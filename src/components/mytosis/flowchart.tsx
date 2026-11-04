@@ -1,3 +1,4 @@
+import { ExportDialog } from "./export-dialog";
 import { NodePreview } from "./node-preview";
 import { FormatEditor } from "./format-editor";
 import type { BoxFormat } from "@/lib/mytosis-format";
@@ -62,6 +63,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
   const [settingsOpen, setSettingsOpen] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
   const [pdfBusy, setPdfBusy] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
   const [preparedPdf, setPreparedPdf] = useState<{ blob: Blob; title: string } | null>(null);
   async function exportPdf() {
     const canvas = canvasRef.current;
@@ -275,7 +277,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
           if (checked) setK(last);
         }} />Exibir tudo</label>
         {process ? null : <Button variant="outline" onClick={() => setShowCritical((v) => !v)} className={cn(showCritical && "!bg-primary !text-primary-foreground")}><RouteIcon className="h-4 w-4" />Caminho crítico</Button>}
-        <Button variant="outline" size="icon" className="h-7 w-7 rounded-lg" aria-label="Exportar fluxograma para PDF" title={pdfBusy ? "Gerando PDF…" : "Exportar fluxograma para PDF"} disabled={!objective || pdfBusy} onClick={exportPdf}><FileDown className={cn("h-3.5 w-3.5", pdfBusy && "animate-pulse motion-reduce:animate-none")} /></Button>
+        <Button variant="outline" size="icon" className="h-7 w-7 rounded-lg" aria-label="Exportar fluxograma para PDF" title={pdfBusy ? "Gerando PDF…" : "Exportar fluxograma para PDF"} disabled={!objective} onClick={() => setExportOpen(true)}><FileDown className={cn("h-3.5 w-3.5", pdfBusy && "animate-pulse motion-reduce:animate-none")} /></Button>
         {data.role === "admin" ? <Button variant="outline" size="icon" className="h-7 w-7 rounded-lg" onClick={() => setSettingsOpen(true)} aria-label="Box padrão" title="Box padrão"><Settings2 className="h-3.5 w-3.5" /></Button> : null}
         {canEdit ? <Button variant="outline" size="icon" className="h-7 w-7 rounded-lg" onClick={() => openDialog({ mode: "create", kind: "objective", parentId: null, process })} aria-label={process ? "Nova etapa" : "Novo objetivo"} title={process ? "Nova etapa" : "Novo objetivo"}><Plus className="h-5 w-5" /></Button> : null}
       </div>
@@ -285,6 +287,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
         </div>
       ) : <p className="py-16 text-center text-muted-foreground">{process ? (objectives.length ? "Selecione um fluxograma." : "Nenhum fluxograma cadastrado. Use o + para criar a primeira etapa.") : objectives.length ? "Selecione um objetivo." : "Nenhum objetivo cadastrado. Use o + para criar o primeiro."}</p>}
       <ImportBlockDialog target={importTarget} onClose={() => setImportTarget(null)} data={data} />
+      <ExportDialog open={exportOpen} onClose={() => setExportOpen(false)} roots={objectives} currentId={objectiveId} onSelect={onObjectiveChange} getCanvas={() => canvasRef.current} canEdit={canEdit} process={process} />
       <Dialog open={!!preparedPdf} onOpenChange={(open) => { if (!open) setPreparedPdf(null); }}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader><DialogTitle className="font-normal">Exportar PDF</DialogTitle><DialogDescription>{preparedPdf?.title}</DialogDescription></DialogHeader>

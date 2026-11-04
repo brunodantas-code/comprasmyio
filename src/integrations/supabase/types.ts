@@ -2638,6 +2638,44 @@ export type Database = {
           },
         ]
       }
+      mytosis_flow_versions: {
+        Row: {
+          created_at: string
+          created_by: string
+          file_path: string
+          id: string
+          root_id: string
+          root_title: string
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          file_path: string
+          id?: string
+          root_id: string
+          root_title: string
+          version: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          file_path?: string
+          id?: string
+          root_id?: string
+          root_title?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mytosis_flow_versions_root_id_fkey"
+            columns: ["root_id"]
+            isOneToOne: false
+            referencedRelation: "mytosis_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mytosis_links: {
         Row: {
           color: string | null
