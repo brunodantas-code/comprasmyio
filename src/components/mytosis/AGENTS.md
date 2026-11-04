@@ -2,3 +2,5 @@
 - Textual processes keep ordered sections, paragraphs and stage assignments separate from flow nodes, with live flow references and revision-checked saves to preserve originals and concurrent edits.
 - Process canvases render entry stages without the root title box; the root remains stored for numbering, cross-flow links and title editing.
 - Linked-flow views use a cycle-safe pure traversal and draw each flow once in a shared canvas; cross-flow connectors are presentation-only and never persisted as dependencies. Pass process mode explicitly because hidden title roots cannot determine connector mode.
+- Mytosis styles copy on import/split; preview/canvas share fixed-size NodeFrame/NodeText, safe shape insets and measured text fitting without truncation. External chrome fits inside total settings height; connectors measure surfaces only.
+- Mytosis connectors use pure obstacle routing and a size-bound paint-contained SVG; observe transitions and clipped endpoints. Processes draw explicit links, OKRs retain hierarchy; preserve styles/edit hit areas.
