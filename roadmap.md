@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Reposicionar fontes/alinhamentos à direita da prévia, usar checks de fundo/borda e remover rótulo Anexo
 - [x] Confirmar e corrigir envio de demandas Myio à fila de compras sem enfraquecer valor obrigatório
 - [x] Confirmar e corrigir contratação RH com cliente opcional e sem projeto
 - [x] Alinhar centros das formas conectadas para setas horizontais retas

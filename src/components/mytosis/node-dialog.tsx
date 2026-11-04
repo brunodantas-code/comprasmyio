@@ -16,7 +16,8 @@ import { cn } from "@/lib/utils";
 import { ChecklistText } from "./checklist-text";
 import { NodeConversation } from "./node-conversation";
 import { boxTitleLimit, boxDescriptionLimit } from "@/lib/mytosis-title";
-import { AlignLeft, AlignCenter, AlignRight, AlignStartVertical, AlignCenterVertical, AlignEndVertical } from "lucide-react";
+import { TextFormatEditor } from "./text-format-editor";
+import { FormatColorOptions } from "./format-color-options";
 import { TITLE_COLORS, type TitleColorKey } from "./title-colors";
 import { NodePreview } from "./node-preview";
 import { firstName } from "./use-mytosis";
@@ -190,7 +191,10 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
         <fieldset disabled={!canEdit} className="grid gap-4">
           <div className="grid gap-1.5"><Label>Título</Label><ChecklistText label="Título" value={title} onChange={setTitle} maxLength={titleLimit} hint="Use a Descrição para mais informações." autoFocus />{titleTooLong ? <p role="alert" className="text-xs text-destructive">O título excede o limite atual de {titleLimit} caracteres. Reduza o título ou transfira as informações para a Descrição.</p> : null}</div>
           <div className="grid gap-2 rounded-xl border border-border bg-muted/40 p-3">
-            <NodePreview width={data.box.width} height={data.box.height} shape={shape} fillKey={fillKey} borderKey={borderKey} title={title} description={description} responsible={firstName(data.users.find((user) => user.id === responsible)?.full_name ?? "—")} number={editing ? numbers.get(editing.id) ?? String(editing.locator) : "…"} titleSize={titleSize} descriptionSize={descriptionSize} titleColor={titleColor} controlColor={controlColor} align={textAlign} verticalAlign={verticalAlign} process={isProcess} hasAttachments={pendingFiles.length > 0 || data.attachmentNodeIds.includes(editing?.id ?? createdId ?? "")} />
+            <div className="grid min-w-0 items-start gap-4 sm:grid-cols-[minmax(0,1fr)_180px]">
+              <div className="min-w-0"><NodePreview width={data.box.width} height={data.box.height} shape={shape} fillKey={fillKey} borderKey={borderKey} title={title} description={description} responsible={firstName(data.users.find((user) => user.id === responsible)?.full_name ?? "—")} number={editing ? numbers.get(editing.id) ?? String(editing.locator) : "…"} titleSize={titleSize} descriptionSize={descriptionSize} titleColor={titleColor} controlColor={controlColor} align={textAlign} verticalAlign={verticalAlign} process={isProcess} hasAttachments={pendingFiles.length > 0 || data.attachmentNodeIds.includes(editing?.id ?? createdId ?? "")} /></div>
+              <TextFormatEditor idPrefix="box" value={{ title_font_size: titleSize, description_font_size: descriptionSize, text_align: textAlign, text_vertical_align: verticalAlign }} onChange={(next) => { setTitleSize(next.title_font_size); setDescriptionSize(next.description_font_size); setTextAlign(next.text_align); setVerticalAlign(next.text_vertical_align); }} />
+            </div>
             <div className="grid gap-1"><Label className="text-xs text-muted-foreground">Forma</Label>
               <div className="flex flex-wrap gap-1.5">{SHAPES.map((s) => (
                 <button key={s.key} type="button" title={s.label} aria-label={s.label} aria-pressed={shape === s.key} onClick={() => setShape(s.key)} className={cn("flex w-16 flex-col items-center justify-center gap-0.5 rounded-md border bg-card px-1 py-1.5 transition-colors", shape === s.key ? "border-primary bg-primary/10" : "border-border hover:border-primary/60")}>
@@ -199,12 +203,8 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
                 </button>))}</div>
             </div>
             <div className="grid items-start gap-3 sm:grid-cols-2">
-              <div className="grid gap-1"><Label className="text-xs text-muted-foreground">Fundo</Label>
-                <div className="flex flex-wrap gap-1.5">{FILLS.map((f) => <button key={f.key} type="button" title={f.label} aria-label={`Fundo ${f.label}`} aria-pressed={fillKey === f.key} onClick={() => setFillKey(f.key)} className={cn("h-7 w-7 rounded-full border border-border", fillKey === f.key && "ring-2 ring-primary ring-offset-1")} style={{ background: f.color }} />)}</div>
-              </div>
-              <div className="grid gap-1"><Label className="text-xs text-muted-foreground">Borda</Label>
-                <div className="flex flex-wrap gap-1.5">{BORDERS.map((b) => <button key={b.key} type="button" title={b.label} aria-label={`Borda ${b.label}`} aria-pressed={borderKey === b.key} onClick={() => setBorderKey(b.key)} className={cn("h-7 w-7 rounded-full border-[3px] bg-card", borderKey === b.key && "ring-2 ring-primary ring-offset-1")} style={{ borderColor: b.color }} />)}</div>
-              </div>
+              <FormatColorOptions label="Fundo" value={fillKey} options={FILLS} onChange={setFillKey} />
+              <FormatColorOptions label="Borda" value={borderKey} options={BORDERS} onChange={setBorderKey} border />
             </div>
             <ColorOptions label="Cor do título" value={titleColor} onChange={setTitleColor} />
             <ColorOptions label="Cor dos botões e setas" value={controlColor} onChange={setControlColor} defaultLabel="Padrão" />
@@ -218,20 +218,6 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
             {isLinked ? <div className="grid gap-1.5"><span className="text-xs text-muted-foreground">Box (localizador) a partir do qual dispara-se o gatilho deste fluxo</span><SearchableSelect value={linked} onChange={setLinked} options={linkOptions} placeholder="Digite o número ou nome do box" disabled={!canEdit} /></div> : null}
           </div> : null}
           <div className="grid gap-1.5"><Label>Descrição</Label><ChecklistText label="Descrição" value={description} onChange={setDescription} maxLength={descriptionLimit} multiline hint="Redija a descrição." />{descriptionTooLong ? <p role="alert" className="text-xs text-destructive">A descrição excede o limite atual de {descriptionLimit} caracteres. Reduza o texto ou ajuste o tamanho do box e da fonte.</p> : null}</div>
-          <div className="grid gap-3 border-t border-border pt-3">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="grid gap-1.5"><Label htmlFor="box-title-size">Fonte do título (px)</Label><Input id="box-title-size" type="number" min={10} max={32} step={1} value={titleSize} onChange={(e) => setTitleSize(Number(e.target.value))} /></div>
-              <div className="grid gap-1.5"><Label htmlFor="box-description-size">Fonte da descrição (px)</Label><Input id="box-description-size" type="number" min={10} max={32} step={1} value={descriptionSize} onChange={(e) => setDescriptionSize(Number(e.target.value))} /></div>
-            </div>
-            <div className="flex flex-wrap gap-5">
-              <div className="grid gap-1.5"><Label className="text-xs text-muted-foreground">Alinhamento horizontal</Label><div className="flex gap-1">{([
-                { value: "left", label: "À esquerda", Icon: AlignLeft }, { value: "center", label: "Centralizado", Icon: AlignCenter }, { value: "right", label: "À direita", Icon: AlignRight },
-              ] as const).map(({ value, label, Icon }) => <Button key={value} type="button" variant="outline" size="icon" title={label} aria-label={label} aria-pressed={textAlign === value} onClick={() => setTextAlign(value)} className={cn(textAlign === value && "!bg-primary !text-primary-foreground")}><Icon className="h-4 w-4" /></Button>)}</div></div>
-              <div className="grid gap-1.5"><Label className="text-xs text-muted-foreground">Alinhamento vertical</Label><div className="flex gap-1">{([
-                { value: "top", label: "Superior", Icon: AlignStartVertical }, { value: "center", label: "Centro vertical", Icon: AlignCenterVertical }, { value: "bottom", label: "Inferior", Icon: AlignEndVertical },
-              ] as const).map(({ value, label, Icon }) => <Button key={value} type="button" variant="outline" size="icon" title={label} aria-label={label} aria-pressed={verticalAlign === value} onClick={() => setVerticalAlign(value)} className={cn(verticalAlign === value && "!bg-primary !text-primary-foreground")}><Icon className="h-4 w-4" /></Button>)}</div></div>
-            </div>
-          </div>
           {requiresNodeResponsible(isProcess) ? <div className="grid gap-4 sm:grid-cols-2">
             <div className="grid gap-1.5"><Label>Responsável</Label><SearchableSelect value={responsible} onChange={setResponsible} options={userOptions} placeholder="Selecione o usuário" disabled={!canEdit} /></div>
             <div className="grid gap-1.5"><Label>Data estimada de conclusão</Label><Input type="date" value={due} onChange={(e) => setDue(e.target.value)} /></div>

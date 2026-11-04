@@ -340,8 +340,7 @@ function BoxSettingsDialog({ open, onClose, box, defaultFormat }: { open: boolea
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
         <DialogHeader><DialogTitle className="font-normal">Box padrão</DialogTitle><DialogDescription>Novas etapas começam com este formato. Todos os boxes usam a mesma largura e altura.</DialogDescription></DialogHeader>
         <div className="grid gap-3 rounded-xl border border-border bg-muted/40 p-3">
-          <NodePreview width={Number(width) || box.width} height={Number(height) || box.height} shape={format.shape as ShapeKey} fillKey={format.fill_color} borderKey={format.border_color} title="Título da etapa" description="Descrição" responsible="—" number="1.1" titleSize={format.title_font_size} descriptionSize={format.description_font_size} titleColor={format.title_color} controlColor={format.control_color} align={format.text_align} verticalAlign={format.text_vertical_align} process />
-          <FormatEditor value={format} onChange={setFormat} />
+          <FormatEditor value={format} onChange={setFormat} preview={<NodePreview width={Number(width) || box.width} height={Number(height) || box.height} shape={format.shape as ShapeKey} fillKey={format.fill_color} borderKey={format.border_color} title="Título da etapa" description="Descrição" responsible="—" number="1.1" titleSize={format.title_font_size} descriptionSize={format.description_font_size} titleColor={format.title_color} controlColor={format.control_color} align={format.text_align} verticalAlign={format.text_vertical_align} process />} />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="grid gap-1.5"><Label>Largura (px)</Label><Input type="number" value={width} onChange={(e) => setWidth(e.target.value)} /></div>
