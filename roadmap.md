@@ -1,4 +1,10 @@
 # Roadmap
+- [x] Alinhar centros das formas conectadas para setas horizontais retas
+- [x] Adotar Subetapa e Próxima etapa no lugar de Etapa associada e Etapa dependente
+- [x] Retirar Pessoas envolvidas das novas tarefas de fluxogramas, mantendo nos OKRs
+- [x] Retirar Pendente, Conversa e Histórico do diálogo de tarefas de fluxogramas, mantendo nos OKRs
+- [x] Mostrar totalizador de tarefas pendentes somente nos OKRs
+- [x] Retirar checkbox das tarefas na lista do fluxograma, mantendo nos OKRs
 - [x] Ocultar Responsável nas etapas e prévias de fluxograma, distinguir Novo fluxograma de Nova etapa e conferir Início/fim com vínculo opcional
 - [x] Nova Etapa inicia com formatação da anterior na prévia, permitindo edição individual
 - [x] Permitir escolher destinatário das perguntas do Mytosis e mostrar na Central de Pendências

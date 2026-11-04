@@ -34,11 +34,12 @@ export function useTaskCompletion() {
 export function BoxTaskList({ nodeId, data, onOpen, expanded = true }: { nodeId: string; data: MytosisData; onOpen: (selection: TaskSelection) => void; expanded?: boolean }) {
   const completion = useTaskCompletion();
   const tasks = data.tasks.filter((t) => t.node_id === nodeId);
+  const process = !!data.nodes.find((node) => node.id === nodeId)?.is_process;
   if (!tasks.length) return null;
   return <div id={`mytosis-tasks-${nodeId}`} inert={!expanded} aria-hidden={!expanded} className={cn("grid transition-[grid-template-rows,opacity] duration-500 ease-in-out motion-reduce:transition-none", expanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0")}><div className="min-h-0 overflow-hidden"><ul className="ml-[2%] mt-2 space-y-1 border-l border-primary/30 pl-2">
     {tasks.map((task) => <li key={task.id} className="flex min-h-7 items-center gap-2">
-      <Checkbox aria-label={`Concluir tarefa ${task.title}`} checked={task.completed} disabled={completion.isPending || !canCompleteBoxTask(task, data.userId, !!data.role)} onCheckedChange={(checked) => completion.mutate({ id: task.id, completed: checked === true })} />
-      <Button variant="ghost" className={cn("h-auto min-w-0 justify-start rounded-none p-0 text-left text-xs font-normal !bg-transparent !text-foreground hover:!bg-transparent hover:!text-primary", task.completed && "!text-muted-foreground line-through")} onClick={() => onOpen({ nodeId, taskId: task.id })}><span className="break-words">{task.title}</span></Button>
+      {process ? null : <Checkbox aria-label={`Concluir tarefa ${task.title}`} checked={task.completed} disabled={completion.isPending || !canCompleteBoxTask(task, data.userId, !!data.role)} onCheckedChange={(checked) => completion.mutate({ id: task.id, completed: checked === true })} />}
+      <Button variant="ghost" className={cn("h-auto min-w-0 justify-start rounded-none p-0 text-left text-xs font-normal !bg-transparent !text-foreground hover:!bg-transparent hover:!text-primary", !process && task.completed && "!text-muted-foreground line-through")} onClick={() => onOpen({ nodeId, taskId: task.id })}><span className="break-words">{task.title}</span></Button>
     </li>)}
   </ul></div></div>;
 }
@@ -71,7 +72,7 @@ export function BoxTaskDialog({ selection, onClose, onSelect, data, canEdit }: {
   }, [selection?.nodeId, selection?.taskId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const details = useQuery({
-    queryKey: ["mytosis-task", task?.id], enabled: !!selection && !!task, refetchInterval: 15000,
+    queryKey: ["mytosis-task", task?.id], enabled: !!selection && !!task && !node?.is_process, refetchInterval: 15000,
     queryFn: async () => {
       if (!task) throw new Error("Tarefa não encontrada.");
       const [messages, logs, access] = await Promise.all([
@@ -129,10 +130,10 @@ export function BoxTaskDialog({ selection, onClose, onSelect, data, canEdit }: {
       <div className="grid gap-1.5"><Label htmlFor="task-title">Título</Label><ChecklistText id="task-title" label="Título" value={title} onChange={setTitle} maxLength={200} hint="Redija a tarefa do check List." autoFocus /></div>
       <div className="grid gap-1.5"><Label htmlFor="task-description">Descrição</Label><ChecklistText id="task-description" label="Descrição" value={description} onChange={setDescription} multiline hint="Redija a descrição da tarefa." /></div>
       {node?.is_process ? null :       <div className="grid gap-4 sm:grid-cols-2"><div className="grid gap-1.5"><Label>Responsável</Label><SearchableSelect value={responsible} onChange={setResponsible} options={data.users.map((u) => ({ value: u.id, label: u.full_name }))} /></div><div className="grid gap-1.5"><Label htmlFor="task-due">Prazo</Label><Input id="task-due" type="date" value={due} onChange={(e) => setDue(e.target.value)} /></div></div>}
-      <div className="space-y-2"><Label>Demais envolvidos</Label><div className="max-h-32 space-y-2 overflow-y-auto">{data.users.filter((u) => u.id !== responsible).map((u) => <label key={u.id} className="flex items-center gap-2 text-sm"><Checkbox checked={involved.includes(u.id)} onCheckedChange={(checked) => setInvolved((ids) => checked ? [...ids, u.id] : ids.filter((id) => id !== u.id))} />{u.full_name}</label>)}</div></div>
+      {node?.is_process ? null : <div className="space-y-2"><Label>Demais envolvidos</Label><div className="max-h-32 space-y-2 overflow-y-auto">{data.users.filter((u) => u.id !== responsible).map((u) => <label key={u.id} className="flex items-center gap-2 text-sm"><Checkbox checked={involved.includes(u.id)} onCheckedChange={(checked) => setInvolved((ids) => checked ? [...ids, u.id] : ids.filter((id) => id !== u.id))} />{u.full_name}</label>)}</div></div>}
       <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => task ? setEditing(false) : onClose()}>Cancelar</Button><Button variant="outline" disabled={save.isPending} onClick={() => save.mutate()}>Salvar</Button></div>
-    </div> : task ? <div className="space-y-3"><label className="flex items-center gap-2 text-sm"><Checkbox aria-label="Conclusão da tarefa" checked={task.completed} disabled={!isOwner || completion.isPending} onCheckedChange={(checked) => completion.mutate({ id: task.id, completed: checked === true })} />{task.completed ? "Concluída" : "Pendente"}</label><p className="whitespace-pre-wrap break-words text-sm">{task.description}</p><p className="text-xs text-muted-foreground">{node?.is_process ? null : <>Responsável: {person(task.responsible_id)} · Prazo: {task.due_date ? new Date(`${task.due_date}T12:00:00`).toLocaleDateString("pt-BR") : "—"}</>}</p>{task.involved_ids.length ? <p className="text-xs text-muted-foreground">Envolvidos: {task.involved_ids.map(person).join(", ")}</p> : null}</div> : null}
-    {task ? <>
+    </div> : task ? <div className="space-y-3">{node?.is_process ? null : <label className="flex items-center gap-2 text-sm"><Checkbox aria-label="Conclusão da tarefa" checked={task.completed} disabled={!isOwner || completion.isPending} onCheckedChange={(checked) => completion.mutate({ id: task.id, completed: checked === true })} />{task.completed ? "Concluída" : "Pendente"}</label>}<p className="whitespace-pre-wrap break-words text-sm">{task.description}</p><p className="text-xs text-muted-foreground">{node?.is_process ? null : <>Responsável: {person(task.responsible_id)} · Prazo: {task.due_date ? new Date(`${task.due_date}T12:00:00`).toLocaleDateString("pt-BR") : "—"}</>}</p>{!node?.is_process && task.involved_ids.length ? <p className="text-xs text-muted-foreground">Envolvidos: {task.involved_ids.map(person).join(", ")}</p> : null}</div> : null}
+    {task && !node?.is_process ? <>
       <section className="space-y-3 border-t border-border pt-4"><h3 className="flex items-center gap-2 text-sm font-normal"><MessageCircleQuestion className="h-4 w-4" />Conversa</h3>
         {details.isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : null}{details.error ? <p role="alert" className="text-sm text-destructive">Não foi possível carregar a conversa. {details.error.message}</p> : null}
         {questions.map((q, i) => <div key={q.id} className="space-y-2">{renderMessage(q, i + 1)}{messages.filter((a) => a.reply_to_id === q.id).map((a) => renderMessage(a, i + 1))}</div>)}
@@ -141,5 +142,6 @@ export function BoxTaskDialog({ selection, onClose, onSelect, data, canEdit }: {
       <section className="space-y-3 border-t border-border pt-4"><h3 className="flex items-center gap-2 text-sm font-normal"><History className="h-4 w-4" />Histórico</h3><MilestoneTimeline entries={(details.data?.logs ?? []).map((log) => ({ id: log.id, created_at: log.created_at, text: `${log.text}\npor ${person(log.actor_id)}` }))} /></section>
       <DialogFooter><Button variant="outline" onClick={onClose}>Fechar</Button></DialogFooter>
     </> : null}
+    {task && node?.is_process && !editing ? <DialogFooter><Button variant="outline" onClick={onClose}>Fechar</Button></DialogFooter> : null}
   </DialogContent></Dialog>;
 }

@@ -12,7 +12,7 @@ export function NodeFrame({ shape, height, fill, stroke, fillKey, strokeWidth = 
   const contrast = fillKey === "purple" || fillKey === "dark"
     ? "text-mytosis-text-light [&_p:not([data-mytosis-title])]:!text-mytosis-text-light [&_span]:!text-mytosis-text-light"
     : fillKey === "purple-mid" ? "text-mytosis-text-dark [&_p:not([data-mytosis-title])]:!text-mytosis-text-dark [&_span]:!text-mytosis-text-dark" : "text-foreground";
-  const chrome = (content: ReactNode) => <div data-control-color={controlColor === "white" ? "black" : controlColor ?? "green"} className="mytosis-controls relative z-10 min-w-0 px-2.5 py-1 text-muted-foreground">{content}</div>;
+  const chrome = (content: ReactNode) => <div data-control-color={controlColor === "white" ? "black" : controlColor ?? "green"} className="mytosis-controls relative z-10 flex h-7 min-w-0 shrink-0 items-center px-2.5 py-1 text-muted-foreground [&>div]:w-full">{content}</div>;
   const surfaceHeight = Math.max(1, height - (external ? 56 : 0) - (progress !== undefined && !collapsed ? 8 : 0));
   return <div className="flex w-full min-w-0 shrink-0 flex-col" style={{ height }}>
     {external ? chrome(header) : null}
