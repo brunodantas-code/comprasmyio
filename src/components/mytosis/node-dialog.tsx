@@ -192,15 +192,16 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
           <div className="grid gap-1.5"><Label>Título</Label><ChecklistText label="Título" value={title} onChange={setTitle} maxLength={titleLimit} hint="Use a Descrição para mais informações." autoFocus />{titleTooLong ? <p role="alert" className="text-xs text-destructive">O título excede o limite atual de {titleLimit} caracteres. Reduza o título ou transfira as informações para a Descrição.</p> : null}</div>
           <div className="grid gap-2 rounded-xl border border-border bg-muted/40 p-3">
             <div className="grid min-w-0 items-start gap-4 sm:grid-cols-[minmax(0,1fr)_180px]">
-              <div className="min-w-0"><NodePreview width={data.box.width} height={data.box.height} shape={shape} fillKey={fillKey} borderKey={borderKey} title={title} description={description} responsible={firstName(data.users.find((user) => user.id === responsible)?.full_name ?? "—")} number={editing ? numbers.get(editing.id) ?? String(editing.locator) : "…"} titleSize={titleSize} descriptionSize={descriptionSize} titleColor={titleColor} controlColor={controlColor} align={textAlign} verticalAlign={verticalAlign} process={isProcess} hasAttachments={pendingFiles.length > 0 || data.attachmentNodeIds.includes(editing?.id ?? createdId ?? "")} /></div>
-              <TextFormatEditor idPrefix="box" value={{ title_font_size: titleSize, description_font_size: descriptionSize, text_align: textAlign, text_vertical_align: verticalAlign }} onChange={(next) => { setTitleSize(next.title_font_size); setDescriptionSize(next.description_font_size); setTextAlign(next.text_align); setVerticalAlign(next.text_vertical_align); }} />
-            </div>
+              <div className="grid min-w-0 content-start gap-3"><NodePreview width={data.box.width} height={data.box.height} shape={shape} fillKey={fillKey} borderKey={borderKey} title={title} description={description} responsible={firstName(data.users.find((user) => user.id === responsible)?.full_name ?? "—")} number={editing ? numbers.get(editing.id) ?? String(editing.locator) : "…"} titleSize={titleSize} descriptionSize={descriptionSize} titleColor={titleColor} controlColor={controlColor} align={textAlign} verticalAlign={verticalAlign} process={isProcess} hasAttachments={pendingFiles.length > 0 || data.attachmentNodeIds.includes(editing?.id ?? createdId ?? "")} />
             <div className="grid gap-1"><Label className="text-xs text-muted-foreground">Forma</Label>
-              <div className="flex flex-wrap gap-1.5">{SHAPES.map((s) => (
-                <button key={s.key} type="button" title={s.label} aria-label={s.label} aria-pressed={shape === s.key} onClick={() => setShape(s.key)} className={cn("flex w-16 flex-col items-center justify-center gap-0.5 rounded-md border bg-card px-1 py-1.5 transition-colors", shape === s.key ? "border-primary bg-primary/10" : "border-border hover:border-primary/60")}>
+              <div className="grid grid-cols-4 gap-1.5">{SHAPES.map((s) => (
+                <button key={s.key} type="button" title={s.label} aria-label={s.label} aria-pressed={shape === s.key} onClick={() => setShape(s.key)} className={cn("flex min-w-0 flex-col items-center justify-center gap-0.5 rounded-md border bg-card px-1 py-1.5 transition-colors", shape === s.key ? "border-primary bg-primary/10" : "border-border hover:border-primary/60")}>
                   <ShapeSvg shape={s.key} fill="transparent" stroke="var(--foreground)" className="h-5 w-8" />
                   <span className="w-full truncate text-center text-[10px] leading-tight text-muted-foreground">{s.label}</span>
                 </button>))}</div>
+            </div>
+              </div>
+              <TextFormatEditor idPrefix="box" value={{ title_font_size: titleSize, description_font_size: descriptionSize, text_align: textAlign, text_vertical_align: verticalAlign }} onChange={(next) => { setTitleSize(next.title_font_size); setDescriptionSize(next.description_font_size); setTextAlign(next.text_align); setVerticalAlign(next.text_vertical_align); }} />
             </div>
             <div className="grid items-start gap-3 sm:grid-cols-2">
               <FormatColorOptions label="Fundo" value={fillKey} options={FILLS} onChange={setFillKey} />

@@ -12,15 +12,16 @@ export function FormatEditor({ value, onChange, preview }: { value: BoxFormat; o
   const set = <K extends keyof BoxFormat>(key: K, v: BoxFormat[K]) => onChange({ ...value, [key]: v });
   return <div className="grid gap-3">
     <div className="grid min-w-0 items-start gap-4 sm:grid-cols-[minmax(0,1fr)_180px]">
-      <div className="min-w-0">{preview}</div>
-      <TextFormatEditor idPrefix="default" value={value} onChange={(next) => onChange({ ...value, ...next })} />
-    </div>
+      <div className="grid min-w-0 content-start gap-3">{preview}
     <div className="grid gap-1"><Label className="text-xs text-muted-foreground">Forma</Label>
-      <div className="flex flex-wrap gap-1.5">{SHAPES.map((s) => (
-        <button key={s.key} type="button" title={s.label} aria-label={s.label} aria-pressed={value.shape === s.key} onClick={() => set("shape", s.key)} className={cn("flex w-16 flex-col items-center justify-center gap-0.5 rounded-md border bg-card px-1 py-1.5 transition-colors", value.shape === s.key ? "border-primary bg-primary/10" : "border-border hover:border-primary/60")}>
+      <div className="grid grid-cols-4 gap-1.5">{SHAPES.map((s) => (
+        <button key={s.key} type="button" title={s.label} aria-label={s.label} aria-pressed={value.shape === s.key} onClick={() => set("shape", s.key)} className={cn("flex min-w-0 flex-col items-center justify-center gap-0.5 rounded-md border bg-card px-1 py-1.5 transition-colors", value.shape === s.key ? "border-primary bg-primary/10" : "border-border hover:border-primary/60")}>
           <ShapeSvg shape={s.key as ShapeKey} fill="transparent" stroke="var(--foreground)" className="h-5 w-8" />
           <span className="w-full truncate text-center text-[10px] leading-tight text-muted-foreground">{s.label}</span>
         </button>))}</div>
+    </div>
+      </div>
+      <TextFormatEditor idPrefix="default" value={value} onChange={(next) => onChange({ ...value, ...next })} />
     </div>
     <div className="grid items-start gap-3 sm:grid-cols-2">
       <FormatColorOptions label="Fundo" value={value.fill_color} options={FILLS} onChange={(v) => set("fill_color", v)} />
