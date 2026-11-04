@@ -97,7 +97,7 @@ export function SearchableSelect({ value, onChange, options, placeholder = "Digi
             aria-label={rest["aria-label"]}
             disabled={disabled}
             autoComplete="off"
-            className="h-full min-w-0 flex-1 bg-transparent px-3 py-2 outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
+            className={cn("h-full min-w-0 flex-1 bg-transparent px-3 py-2 outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed", selected && !typing && renderSelected && "text-transparent")}
             placeholder={selected && !typing ? undefined : placeholder}
             value={showText}
             onFocus={(e) => { setOpen(true); e.currentTarget.select(); }}
@@ -106,7 +106,7 @@ export function SearchableSelect({ value, onChange, options, placeholder = "Digi
             onKeyDown={onKeyDown}
           />
           {selected && !typing && renderSelected && (
-            <span className="pointer-events-none absolute inset-y-0 left-3 right-16 flex items-center truncate bg-background">{renderSelected(selected)}</span>
+            <span className="pointer-events-none absolute inset-y-0 left-3 right-16 flex items-center truncate bg-transparent">{renderSelected(selected)}</span>
           )}
           {clearable && value && !disabled && (
             <button type="button" aria-label="Limpar" className="px-1 text-muted-foreground hover:text-foreground" onMouseDown={(e) => e.preventDefault()} onClick={() => { onChange(""); setQuery(""); setTyping(false); inputRef.current?.focus(); }}>
