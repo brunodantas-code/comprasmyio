@@ -50,9 +50,11 @@ type Props = {
   className?: string;
   "aria-label"?: string;
   renderSelected?: (option: SearchableOption) => React.ReactNode;
+  renderOption?: (option: SearchableOption) => React.ReactNode;
+  optionClassName?: string;
 };
 
-export function SearchableSelect({ value, onChange, options, placeholder = "Digite para buscar...", emptyText = "Nenhum resultado", disabled, clearable = true, className, renderSelected, ...rest }: Props) {
+export function SearchableSelect({ value, onChange, options, placeholder = "Digite para buscar...", emptyText = "Nenhum resultado", disabled, clearable = true, className, renderSelected, renderOption, optionClassName, ...rest }: Props) {
   const selected = options.find((o) => o.value === value) ?? null;
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
@@ -135,13 +137,13 @@ export function SearchableSelect({ value, onChange, options, placeholder = "Digi
                   role="option"
                   data-index={index}
                   aria-selected={index === active}
-                  className={cn("cursor-pointer rounded-sm px-2 py-1.5", index === active && "bg-dropdown-highlight text-dropdown-highlight-foreground", option.value === value && "font-medium")}
+                  className={cn("cursor-pointer rounded-sm px-2 py-1.5", index === active && "bg-dropdown-highlight text-dropdown-highlight-foreground", option.value === value && "font-medium", optionClassName)}
                   onMouseEnter={() => setActive(index)}
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => pick(option)}
                 >
-                  <div className="truncate">{option.label}</div>
-                  {option.hint && <div className="truncate text-xs text-muted-foreground">{option.hint}</div>}
+                  {renderOption ? renderOption(option) : <><div className="truncate">{option.label}</div>
+                  {option.hint && <div className="truncate text-xs text-muted-foreground">{option.hint}</div>}</>}
                 </div>
               </React.Fragment>
             );

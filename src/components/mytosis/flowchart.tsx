@@ -4,7 +4,7 @@ import { FormatEditor } from "./format-editor";
 import type { BoxFormat } from "@/lib/mytosis-format";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Download, FileDown, Filter, Plus, Paperclip, Route as RouteIcon, Search, Settings2, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Download, FileDown, Plus, Paperclip, Route as RouteIcon, Search, Settings2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -257,9 +257,8 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
     <div className="space-y-4">
       {ordering ? <RootOrderDialog roots={objectives} process={!!process} onClose={() => setOrdering(false)} /> : null}
       <div className="flex flex-wrap items-end gap-3 rounded-xl border border-border bg-muted/50 px-4 py-3">
-        <Filter className="mb-2.5 h-4 w-4 text-muted-foreground/60" />
         <div className="grid min-w-0 flex-1 basis-64 gap-1"><Label className="text-xs text-muted-foreground">{process ? "Fluxograma" : "Objetivo"}</Label>
-          <SearchableSelect aria-label={process ? "Fluxograma" : "Objetivo"} className="h-10 rounded-none border-0 border-b border-primary text-lg font-semibold shadow-none focus-within:ring-0 [&_input]:px-0" value={objectiveId} onChange={onObjectiveChange} clearable={false} placeholder={process ? "Selecione o fluxograma" : "Selecione o objetivo"} options={objectives.map((o) => ({ value: o.id, label: `${numbers.get(o.id) ?? o.locator} ${o.title}` }))} />
+          <SearchableSelect aria-label={process ? "Fluxograma" : "Objetivo"} className="h-10 rounded-none border-0 border-b border-primary text-lg font-semibold shadow-none focus-within:ring-0 [&_input]:px-0" value={objectiveId} onChange={onObjectiveChange} clearable={false} placeholder={process ? "Selecione o fluxograma" : "Selecione o objetivo"} options={objectives.map((o) => ({ value: o.id, label: `${numbers.get(o.id) ?? o.locator} ${o.title}`, hint: String(numbers.get(o.id) ?? o.locator), keywords: o.title }))} optionClassName="border-b border-border last:border-b-0 rounded-none py-2" renderOption={(option) => <span className="flex items-center gap-3"><span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-sm font-semibold text-primary">{option.hint}</span><span className="truncate text-base font-normal">{option.label.slice((option.hint ?? "").length + 1)}</span></span>} />
           <div className="flex justify-between gap-2 text-[11px] text-muted-foreground"><span>{process ? "Selecione o fluxograma." : "Selecione o objetivo."}</span>{canEdit && objectives.length > 1 ? <button type="button" className="text-primary hover:underline" onClick={() => setOrdering(true)}>Ordenar</button> : null}<span className="tabular-nums">{objective ? `${numbers.get(objective.id) ?? objective.locator} ${objective.title}`.length : 0} caracteres</span></div>
         </div>
         <form className="grid gap-1" onSubmit={(e) => { e.preventDefault(); const v = locatorQuery.trim(); if (v) locate(v); else setHighlight(null); }}>
