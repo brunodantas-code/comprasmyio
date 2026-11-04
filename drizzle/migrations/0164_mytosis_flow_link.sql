@@ -1,0 +1,2 @@
+ALTER TABLE public.mytosis_nodes ADD COLUMN IF NOT EXISTS linked_node_id uuid REFERENCES public.mytosis_nodes(id) ON DELETE SET NULL;
+COMMENT ON COLUMN public.mytosis_nodes.linked_node_id IS 'Box de outro fluxograma que dispara (gatilho) este box de Início/fim.';

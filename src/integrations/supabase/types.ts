@@ -2889,6 +2889,7 @@ export type Database = {
           id: string
           is_process: boolean
           kind: string
+          linked_node_id: string | null
           locator: number
           parent_id: string | null
           position: number
@@ -2916,6 +2917,7 @@ export type Database = {
           id?: string
           is_process?: boolean
           kind?: string
+          linked_node_id?: string | null
           locator?: number
           parent_id?: string | null
           position?: number
@@ -2943,6 +2945,7 @@ export type Database = {
           id?: string
           is_process?: boolean
           kind?: string
+          linked_node_id?: string | null
           locator?: number
           parent_id?: string | null
           position?: number
@@ -2958,6 +2961,13 @@ export type Database = {
           weight?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "mytosis_nodes_linked_node_id_fkey"
+            columns: ["linked_node_id"]
+            isOneToOne: false
+            referencedRelation: "mytosis_nodes"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "mytosis_nodes_parent_id_fkey"
             columns: ["parent_id"]

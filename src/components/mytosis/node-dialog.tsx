@@ -45,6 +45,8 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
   const [due, setDue] = useState("");
   const [weight, setWeight] = useState("0");
   const [progress, setProgress] = useState("0");
+  const [linked, setLinked] = useState("");
+  const [isLinked, setIsLinked] = useState(false);
   const [preds, setPreds] = useState<Set<string>>(new Set());
   const [shape, setShape] = useState<ShapeKey>("process");
   const [fillKey, setFillKey] = useState<FillKey>("none");
@@ -78,7 +80,8 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
     setDue(editing?.due_date ?? "");
     setWeight(String(editing?.weight ?? 0));
     setProgress(String(editing?.progress ?? 0));
-    setShape((format?.shape as ShapeKey) ?? "process");
+    setShape(!editing && state.mode === "create" && state.process && !state.parentId ? "terminal" : (format?.shape as ShapeKey) ?? "process");
+    setLinked(editing?.linked_node_id ?? ""); setIsLinked(!!editing?.linked_node_id);
     setFillKey((format?.fill_color as FillKey) ?? "none");
     setBorderKey((format?.border_color as BorderKey) ?? "green-mid");
     setLinkStyle(((editing && data.links.find((l) => l.successor_id === editing.id)?.style) as LinkStyle) ?? "arrow");
@@ -108,6 +111,7 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
       if (titleTooLong) throw new Error(`O título permite até ${titleLimit} caracteres para este box. Use a Descrição para as demais informações.`);
       if (descriptionTooLong) throw new Error(`A descrição permite até ${descriptionLimit} caracteres para este box. Reduza o texto ou ajuste o tamanho do box e da fonte.`);
       if (![titleSize, descriptionSize].every((size) => Number.isInteger(size) && size >= 10 && size <= 32)) throw new Error("Informe tamanhos de fonte entre 10 e 32 px.");
+      if (isProcess && shape === "terminal" && isLinked && !linked) throw new Error("Selecione o box do fluxograma que dispara este fluxo.");
       if (!responsible) throw new Error("Informe o Responsável.");
       if (!due && !isProcess) throw new Error("Informe a Data estimada de conclusão.");
       const w = Number(weight) || 0;
@@ -116,6 +120,7 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
         title: title.trim(), description: description.trim() || null, responsible_id: responsible, due_date: isProcess ? null : due,
         shape, fill_color: fillKey, border_color: borderKey, control_color: controlColor,
         title_font_size: titleSize, title_color: titleColor, description_font_size: descriptionSize, text_align: textAlign, text_vertical_align: verticalAlign,
+        linked_node_id: isProcess && shape === "terminal" && isLinked && linked ? linked : null,
         custom_format: !sameFormat({ shape, fill_color: fillKey, border_color: borderKey, title_font_size: titleSize, description_font_size: descriptionSize, text_align: textAlign, text_vertical_align: verticalAlign, title_color: titleColor, control_color: controlColor }, data.defaultFormat),
         weight: w, progress: kids.length ? editing?.progress ?? 0 : Math.min(100, Math.max(0, Number(progress) || 0)),
       };
@@ -169,6 +174,10 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
   });
 
   const numbers = useMemo(() => computeBoxNumbers(data.nodes, data.links), [data.nodes, data.links]);
+  const ownRootId = editing ? rootObjectiveOf(editing.id, data.nodes)?.id : parentId ? rootObjectiveOf(parentId, data.nodes)?.id : null;
+  const linkOptions = data.nodes.filter((n) => n.is_process && n.id !== editing?.id && (!ownRootId || rootObjectiveOf(n.id, data.nodes)?.id !== ownRootId))
+    .map((n) => ({ value: n.id, label: `${numbers.get(n.id) ?? n.locator} ${n.title}`, hint: rootObjectiveOf(n.id, data.nodes)?.title, group: n.shape === "terminal" ? "Início/fim" : "Demais boxes" }))
+    .sort((a, b) => (a.group === b.group ? a.label.localeCompare(b.label, "pt-BR", { numeric: true }) : a.group === "Início/fim" ? -1 : 1));
   const label = isProcess ? "Etapa" : kind === "objective" ? "Objetivo" : "Tarefa";
   return (
     <Dialog open={!!state} onOpenChange={(open) => { if (!open && !attachmentsBusy && !save.isPending) onClose(); }}>
@@ -202,6 +211,11 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
               <div className="flex flex-wrap gap-1.5">{LINK_STYLES.map((l) => <button key={l.key} type="button" title={l.label} aria-label={l.label} aria-pressed={linkStyle === l.key} onClick={() => setLinkStyle(l.key)} className={cn("flex h-8 items-center gap-2 rounded-md border bg-card px-2 text-xs", linkStyle === l.key ? "border-primary bg-primary/10" : "border-border hover:border-primary/60")}><ConnectorGlyph style={l.key} color="var(--foreground)" />{l.label}</button>)}</div>
             </div> : null}
           </div>
+          {isProcess && shape === "terminal" ? <div className="grid gap-2 rounded-xl border border-border p-3">
+            <Label>Este fluxo é vinculado a outro fluxograma?</Label>
+            <div className="flex gap-2">{([[false, "Não"], [true, "Sim"]] as const).map(([v, l]) => <Button key={l} type="button" variant="outline" size="sm" className={cn("w-20", isLinked === v && "!bg-primary !text-primary-foreground")} aria-pressed={isLinked === v} onClick={() => setIsLinked(v)}>{l}</Button>)}</div>
+            {isLinked ? <div className="grid gap-1.5"><span className="text-xs text-muted-foreground">Box (localizador) a partir do qual dispara-se o gatilho deste fluxo</span><SearchableSelect value={linked} onChange={setLinked} options={linkOptions} placeholder="Digite o número ou nome do box" disabled={!canEdit} /></div> : null}
+          </div> : null}
           <div className="grid gap-1.5"><Label>Descrição</Label><ChecklistText label="Descrição" value={description} onChange={setDescription} maxLength={descriptionLimit} multiline hint="Redija a descrição." />{descriptionTooLong ? <p role="alert" className="text-xs text-destructive">A descrição excede o limite atual de {descriptionLimit} caracteres. Reduza o texto ou ajuste o tamanho do box e da fonte.</p> : null}</div>
           <div className="grid gap-3 border-t border-border pt-3">
             <div className="grid grid-cols-2 gap-3">
