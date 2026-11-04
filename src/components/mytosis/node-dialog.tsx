@@ -177,7 +177,7 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
 
   const numbers = useMemo(() => computeBoxNumbers(data.nodes, data.links), [data.nodes, data.links]);
   const ownRootId = editing ? rootObjectiveOf(editing.id, data.nodes)?.id : parentId ? rootObjectiveOf(parentId, data.nodes)?.id : null;
-  const linkOptions = data.nodes.filter((n) => n.is_process && n.id !== editing?.id && (!ownRootId || rootObjectiveOf(n.id, data.nodes)?.id !== ownRootId))
+  const linkOptions = data.nodes.filter((n) => n.is_process && !!n.parent_id && n.id !== editing?.id && (!ownRootId || rootObjectiveOf(n.id, data.nodes)?.id !== ownRootId))
     .map((n) => ({ value: n.id, label: `${numbers.get(n.id) ?? n.locator} ${n.title}`, hint: rootObjectiveOf(n.id, data.nodes)?.title, group: n.shape === "terminal" ? "Início/fim" : "Demais boxes" }))
     .sort((a, b) => (a.group === b.group ? a.label.localeCompare(b.label, "pt-BR", { numeric: true }) : a.group === "Início/fim" ? -1 : 1));
   const label = isProcess ? (parentId ? "Etapa" : "Fluxograma") : kind === "objective" ? "Objetivo" : "Tarefa";
