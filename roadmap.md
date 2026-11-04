@@ -1,4 +1,7 @@
 # Roadmap
+- [x] Posicionar lixeira do fluxograma ao lado do lápis
+- [x] Permitir vínculo entre fluxogramas em qualquer etapa, independentemente da forma
+- [x] Corrigir exclusão do fluxograma inteiro pela lixeira, confirmar cancelamento e exclusão autenticada com recarga
 - [x] Mostrar gatilhos com título e expandir fluxogramas vinculados na sequência, com Exibir tudo dedicado aos vínculos
 - [x] Ocultar box informativo dos fluxogramas, iniciar pela primeira etapa e permitir próxima etapa sem subetapa prévia
 - [x] Incluir Processos no Mytosis com seções ordenáveis e parágrafos numerados

@@ -3,6 +3,10 @@ export function requiresNodeResponsible(isProcess: boolean) {
   return !isProcess;
 }
 
+export function nodeFlowLink(isProcess: boolean, enabled: boolean, linkedId: string) {
+  return isProcess && enabled && linkedId ? linkedId : null;
+}
+
 export function initialNodeShape(isProcess: boolean, parentId: string | null, editingShape: string | null, defaultShape: string) {
   return editingShape ?? (isProcess && !parentId ? "terminal" : defaultShape);
 }

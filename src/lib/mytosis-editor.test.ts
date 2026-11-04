@@ -1,5 +1,11 @@
 import { expect, it } from "vitest";
-import { initialNodeShape, processEntryNodes, requiresNodeResponsible } from "./mytosis-editor";
+import { initialNodeShape, nodeFlowLink, processEntryNodes, requiresNodeResponsible } from "./mytosis-editor";
+
+it("qualquer etapa de fluxograma pode salvar vínculo, independentemente da forma", () => {
+  expect(nodeFlowLink(true, true, "outra-etapa")).toBe("outra-etapa");
+  expect(nodeFlowLink(true, false, "outra-etapa")).toBeNull();
+  expect(nodeFlowLink(false, true, "outra-etapa")).toBeNull();
+});
 
 it("etapas de Fluxograma não exigem Responsável", () => {
   expect(requiresNodeResponsible(true)).toBe(false);

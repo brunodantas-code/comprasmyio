@@ -24,7 +24,7 @@ import { firstName } from "./use-mytosis";
 import { ColorOptions } from "./color-options";
 import { NodeAttachments, uploadNodeAttachments } from "./node-attachments";
 import { initialStageFormat, sameFormat, type BoxFormat } from "@/lib/mytosis-format";
-import { initialNodeShape, requiresNodeResponsible } from "@/lib/mytosis-editor";
+import { initialNodeShape, nodeFlowLink, requiresNodeResponsible } from "@/lib/mytosis-editor";
 
 export type NodeDialogState =
   | { mode: "edit"; node: MytosisNode }
@@ -113,7 +113,7 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
       if (titleTooLong) throw new Error(`O título permite até ${titleLimit} caracteres para este box. Use a Descrição para as demais informações.`);
       if (descriptionTooLong) throw new Error(`A descrição permite até ${descriptionLimit} caracteres para este box. Reduza o texto ou ajuste o tamanho do box e da fonte.`);
       if (![titleSize, descriptionSize].every((size) => Number.isInteger(size) && size >= 10 && size <= 32)) throw new Error("Informe tamanhos de fonte entre 10 e 32 px.");
-      if (isProcess && shape === "terminal" && isLinked && !linked) throw new Error("Selecione o box do fluxograma que dispara este fluxo.");
+      if (isProcess && isLinked && !linked) throw new Error("Selecione o box do fluxograma que dispara este fluxo.");
       if (requiresNodeResponsible(isProcess) && !responsible) throw new Error("Informe o Responsável.");
       if (!due && !isProcess) throw new Error("Informe a Data estimada de conclusão.");
       const w = Number(weight) || 0;
@@ -122,7 +122,7 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
         title: title.trim(), description: description.trim() || null, responsible_id: responsible || null, due_date: isProcess ? null : due,
         shape, fill_color: fillKey, border_color: borderKey, control_color: controlColor,
         title_font_size: titleSize, title_color: titleColor, description_font_size: descriptionSize, text_align: textAlign, text_vertical_align: verticalAlign,
-        linked_node_id: isProcess && shape === "terminal" && isLinked && linked ? linked : null,
+        linked_node_id: nodeFlowLink(isProcess, isLinked, linked),
         custom_format: !sameFormat({ shape, fill_color: fillKey, border_color: borderKey, title_font_size: titleSize, description_font_size: descriptionSize, text_align: textAlign, text_vertical_align: verticalAlign, title_color: titleColor, control_color: controlColor }, data.defaultFormat),
         weight: w, progress: kids.length ? editing?.progress ?? 0 : Math.min(100, Math.max(0, Number(progress) || 0)),
       };
@@ -168,7 +168,7 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
   const remove = useMutation({
     mutationFn: async () => {
       if (!editing) throw new Error("Box não encontrado.");
-      const { error } = await supabase.from("mytosis_nodes").delete().eq("id", editing.id);
+      const { error } = await supabase.from("mytosis_nodes").delete().eq("id", editing.id).select("id").single();
       if (error) throw error;
     },
     onSuccess: () => { toast.success("Box excluído."); queryClient.invalidateQueries({ queryKey: ["mytosis"] }); onClose(); },
@@ -213,7 +213,7 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
               <div className="flex flex-wrap gap-1.5">{LINK_STYLES.map((l) => <button key={l.key} type="button" title={l.label} aria-label={l.label} aria-pressed={linkStyle === l.key} onClick={() => setLinkStyle(l.key)} className={cn("flex h-8 items-center gap-2 rounded-md border bg-card px-2 text-xs", linkStyle === l.key ? "border-primary bg-primary/10" : "border-border hover:border-primary/60")}><ConnectorGlyph style={l.key} color="var(--foreground)" />{l.label}</button>)}</div>
             </div> : null}
           </div>
-          {isProcess && shape === "terminal" ? <div className="grid gap-2 rounded-xl border border-border p-3">
+          {isProcess ? <div className="grid gap-2 rounded-xl border border-border p-3">
             <Label>Este fluxo é vinculado a outro fluxograma?</Label>
             <div className="flex gap-2">{([[false, "Não"], [true, "Sim"]] as const).map(([v, l]) => <Button key={l} type="button" variant="outline" size="sm" className={cn("w-20", isLinked === v && "!bg-primary !text-primary-foreground")} aria-pressed={isLinked === v} onClick={() => setIsLinked(v)}>{l}</Button>)}</div>
             {isLinked ? <div className="grid gap-1.5"><span className="text-xs text-muted-foreground">Box (localizador) a partir do qual dispara-se o gatilho deste fluxo</span><SearchableSelect value={linked} onChange={setLinked} options={linkOptions} placeholder="Digite o número ou nome do box" disabled={!canEdit} /></div> : null}

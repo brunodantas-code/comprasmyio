@@ -49,6 +49,7 @@ type Props = {
 export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focusLocator, onFocusHandled, openDialog, process }: Props) {
   const objectives = data.nodes.filter((n) => !n.parent_id && !!n.is_process === process).sort((a, b) => (a.position || 1e9) - (b.position || 1e9) || a.locator - b.locator);
   const [ordering, setOrdering] = useState(false);
+  const [confirmDeleteFlow, setConfirmDeleteFlow] = useState(false);
   const [importTarget, setImportTarget] = useState<MytosisNode | null>(null);
   const [taskSelection, setTaskSelection] = useState<TaskSelection>(null);
   const [selectedLink, setSelectedLink] = useState<MytosisLink | null>(null);
@@ -56,6 +57,11 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
   const [splitTarget, setSplitTarget] = useState<MytosisNode | null>(null);
   const word = process ? "etapa" : "tarefa";
   const objective = objectives.find((o) => o.id === objectiveId) ?? null;
+  useEffect(() => {
+    if (objectiveId && !data.nodes.some((node) => node.id === objectiveId)) {
+      onObjectiveChange(objectives[0]?.id ?? "");
+    }
+  }, [objectiveId, data.nodes, onObjectiveChange]); // eslint-disable-line react-hooks/exhaustive-deps
   const [hideRight, setHideRight] = useState<Set<string>>(new Set());
   const [hideDown, setHideDown] = useState<Set<string>>(new Set());
   const [hideTasks, setHideTasks] = useState<Set<string>>(new Set());
@@ -146,10 +152,10 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
   const deleteNode = useMutation({
     mutationFn: async (node: MytosisNode) => {
       if (!canEdit) throw new Error("Você não tem permissão para excluir esta etapa.");
-      const { error } = await supabase.from("mytosis_nodes").delete().eq("id", node.id);
+      const { error } = await supabase.from("mytosis_nodes").delete().eq("id", node.id).select("id").single();
       if (error) throw error;
     },
-    onSuccess: () => { toast.success("Etapa excluída."); queryClient.invalidateQueries({ queryKey: ["mytosis"] }); },
+    onSuccess: (_result, node) => { setConfirmDeleteFlow(false); toast.success(node.parent_id ? "Etapa excluída." : process ? "Fluxograma excluído." : "Objetivo excluído."); queryClient.invalidateQueries({ queryKey: ["mytosis"] }); },
     onError: (error: Error) => toast.error(error.message),
   });
   const linkMutation = useMutation({
@@ -310,8 +316,16 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
         <Button variant="outline" size="icon" className="h-7 w-7 rounded-lg" aria-label="Exportar fluxograma para PDF" title={pdfBusy ? "Gerando PDF…" : "Exportar fluxograma para PDF"} disabled={!objective} onClick={() => setExportOpen(true)}><FileDown className={cn("h-3.5 w-3.5", pdfBusy && "animate-pulse motion-reduce:animate-none")} /></Button>
         {data.role === "admin" ? <Button variant="outline" size="icon" className="h-7 w-7 rounded-lg" onClick={() => setSettingsOpen(true)} aria-label="Box padrão" title="Box padrão"><Settings2 className="h-3.5 w-3.5" /></Button> : null}
         {canEdit ? <Button variant="outline" size="icon" className="h-7 w-7 rounded-lg" onClick={() => openDialog({ mode: "create", kind: "objective", parentId: null, process })} aria-label={process ? "Novo fluxograma" : "Novo objetivo"} title={process ? "Novo fluxograma" : "Novo objetivo"}><Plus className="h-5 w-5" /></Button> : null}
-        {process && objective && canEdit ? <><Button variant="outline" size="icon" className="h-7 w-7 rounded-lg" aria-label="Editar fluxograma" title="Editar fluxograma" onClick={() => openDialog({ mode: "edit", node: objective })}><Pencil className="size-3.5" /></Button><Button variant="outline" size="sm" onClick={() => openDialog({ mode: "create", kind: "task", parentId: objective.id, process: true })}><Plus className="size-3.5" />Nova etapa</Button></> : null}
+        {process && objective && canEdit ? <Button variant="outline" size="icon" className="h-7 w-7 rounded-lg" aria-label="Editar fluxograma" title="Editar fluxograma" onClick={() => openDialog({ mode: "edit", node: objective })}><Pencil className="size-3.5" /></Button> : null}
+        {process && objective && canEdit ? <Button variant="outline" size="icon" className="h-7 w-7 rounded-lg" aria-label="Excluir fluxograma" title="Excluir fluxograma" disabled={deleteNode.isPending} onClick={() => setConfirmDeleteFlow(true)}><Trash2 className="size-3.5" /></Button> : null}
+        {process && objective && canEdit ? <Button variant="outline" size="sm" onClick={() => openDialog({ mode: "create", kind: "task", parentId: objective.id, process: true })}><Plus className="size-3.5" />Nova etapa</Button> : null}
       </div>
+      <Dialog open={confirmDeleteFlow} onOpenChange={(open) => { if (!deleteNode.isPending) setConfirmDeleteFlow(open); }}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader><DialogTitle className="font-normal">Excluir fluxograma</DialogTitle><DialogDescription>Excluir {objective ? `${numberOf(objective)} — ${objective.title}` : "este fluxograma"} e todas as suas etapas, tarefas, anexos e versões salvas? Os vínculos que apontam para ele serão removidos, sem excluir os outros fluxogramas. Esta ação não pode ser desfeita.</DialogDescription></DialogHeader>
+          <DialogFooter><Button variant="outline" disabled={deleteNode.isPending} onClick={() => setConfirmDeleteFlow(false)}>Cancelar</Button><Button variant="outline" disabled={deleteNode.isPending || !objective} onClick={() => { if (objective) deleteNode.mutate(objective); }}>{deleteNode.isPending ? "Excluindo…" : "Excluir"}</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
       {objective ? (
         <div className="overflow-auto rounded-xl border border-border bg-card p-6" onClick={() => setHighlight(null)}>
           <div ref={canvasRef} className="relative w-max min-w-full pt-3" onClick={(e) => e.stopPropagation()}>{process ? <div className="flex items-start gap-16">{visibleFlowIds.map((id) => {
