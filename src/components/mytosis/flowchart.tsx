@@ -282,7 +282,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
 
   return (
     <div className="space-y-4">
-      {ordering ? <RootOrderDialog roots={objectives} process={!!process} onClose={() => setOrdering(false)} /> : null}
+      {ordering ? <RootOrderDialog roots={objectives} nodes={data.nodes} process={!!process} onClose={() => setOrdering(false)} /> : null}
       <div className="flex flex-wrap items-end gap-3 rounded-xl border border-border bg-muted/50 px-4 py-3">
         <div className="grid min-w-0 flex-1 basis-64 gap-1"><Label className="text-xs text-muted-foreground">{process ? "Fluxograma" : "Objetivo"}</Label>
           <SearchableSelect aria-label={process ? "Fluxograma" : "Objetivo"} className="h-10 rounded-none border-0 border-b border-primary text-lg font-semibold shadow-none focus-within:ring-0 [&_input]:px-0 [&>span]:left-0" renderSelected={(option) => <span className="flex items-center gap-3"><span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-sm font-semibold text-primary">{option.hint}</span><span className="truncate text-base font-normal">{option.label.slice((option.hint ?? "").length + 1)}</span></span>} value={objectiveId} onChange={onObjectiveChange} clearable={false} placeholder={process ? "Selecione o fluxograma" : "Selecione o objetivo"} options={objectives.map((o) => ({ value: o.id, label: `${numbers.get(o.id) ?? o.locator} ${o.title}`, hint: String(numbers.get(o.id) ?? o.locator), keywords: o.title }))} optionClassName="border-b border-border last:border-b-0 rounded-none py-2" renderOption={(option) => <span className="flex items-center gap-3"><span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-sm font-semibold text-primary">{option.hint}</span><span className="truncate text-base font-normal">{option.label.slice((option.hint ?? "").length + 1)}</span></span>} />
@@ -444,9 +444,27 @@ function ImportBlockDialog({ target, onClose, data }: { target: MytosisNode | nu
   );
 }
 
-function RootOrderDialog({ roots, process, onClose }: { roots: MytosisNode[]; process: boolean; onClose: () => void }) {
+function RootOrderDialog({ roots, nodes, process, onClose }: { roots: MytosisNode[]; nodes: MytosisNode[]; process: boolean; onClose: () => void }) {
   const queryClient = useQueryClient();
   const [items, setItems] = useState(roots);
+  const [relink, setRelink] = useState<Record<string, string> | null>(null);
+  const refs = useMemo(() => (process ? linkedFlowReferences(nodes) : []), [nodes, process]);
+  const label = (id: string) => { const r = rootObjectiveOf(id, nodes); const n = nodes.find((x) => x.id === id); const i = items.findIndex((x) => x.id === r?.id) + 1; return n && r ? (n.id === r.id ? `${i} ${r.title}` : `${i} ${r.title} › ${n.title}`) : ""; };
+  const linkOptions = (sourceRoot: string) => nodes.filter((n) => n.is_process && n.parent_id && rootObjectiveOf(n.id, nodes)?.id !== sourceRoot && items.some((r) => r.id === rootObjectiveOf(n.id, nodes)?.id))
+    .sort((a, b) => Number(b.shape === "terminal") - Number(a.shape === "terminal"))
+    .map((n) => ({ value: n.id, label: label(n.id) }));
+  const changed = items.some((n, i) => roots[i]?.id !== n.id);
+  const next = () => {
+    if (!changed || refs.length === 0) return save.mutate();
+    const draft: Record<string, string> = {};
+    for (const ref of refs) {
+      const pos = items.findIndex((r) => r.id === ref.sourceId);
+      const follower = items[pos + 1];
+      const suggestion = follower ? nodes.filter((n) => rootObjectiveOf(n.id, nodes)?.id === follower.id && n.parent_id).sort((a, b) => Number(b.shape === "terminal") - Number(a.shape === "terminal") || (a.position ?? 0) - (b.position ?? 0))[0]?.id : undefined;
+      draft[ref.nodeId] = items.findIndex((r) => r.id === ref.targetId) > pos ? ref.targetNodeId : suggestion ?? ref.targetNodeId;
+    }
+    setRelink(draft);
+  };
   const [dragId, setDragId] = useState<string | null>(null);
   const move = (overId: string) => {
     if (!dragId || dragId === overId) return;
@@ -459,6 +477,13 @@ function RootOrderDialog({ roots, process, onClose }: { roots: MytosisNode[]; pr
         const { error } = await supabase.from("mytosis_nodes").update({ position: i + 1 }).eq("id", n.id);
         if (error) throw error;
       }
+      for (const [nodeId, target] of Object.entries(relink ?? {})) {
+        const ref = refs.find((r) => r.nodeId === nodeId);
+        const value = target === "__none" ? null : target;
+        if (ref && ref.targetNodeId === value) continue;
+        const { error } = await supabase.from("mytosis_nodes").update({ linked_node_id: value }).eq("id", nodeId);
+        if (error) throw error;
+      }
     },
     onSuccess: () => { toast.success("Ordem salva e numeração atualizada."); queryClient.invalidateQueries({ queryKey: ["mytosis"] }); onClose(); },
     onError: (e: Error) => toast.error(e.message),
@@ -467,7 +492,18 @@ function RootOrderDialog({ roots, process, onClose }: { roots: MytosisNode[]; pr
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-md">
         <DialogHeader><DialogTitle className="font-normal">Ordenar {process ? "fluxogramas" : "objetivos"}</DialogTitle><DialogDescription>Arraste pelo número para mudar a posição. A numeração se atualiza automaticamente.</DialogDescription></DialogHeader>
-        <ul className="max-h-[60vh] divide-y divide-border overflow-y-auto">
+        {relink ? (
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">Há vínculos entre fluxogramas. Escolha o novo box vinculado de cada gatilho para reorganizar a sequência.</p>
+            {refs.map((ref) => (
+              <div key={ref.nodeId} className="space-y-1">
+                <p className="text-sm">Gatilho em {label(ref.nodeId)}</p>
+                <SearchableSelect value={relink[ref.nodeId]} onChange={(v) => setRelink((c) => ({ ...c!, [ref.nodeId]: v }))} placeholder="Selecione o box vinculado" options={[{ value: "__none", label: "Sem vínculo" }, ...linkOptions(ref.sourceId)]} />
+              </div>
+            ))}
+          </div>
+        ) : null}
+        <ul className={cn("max-h-[60vh] divide-y divide-border overflow-y-auto", relink && "hidden")}>
           {items.map((n, i) => (
             <li key={n.id} onDragOver={(e) => { e.preventDefault(); move(n.id); }} onDrop={(e) => { e.preventDefault(); setDragId(null); }} className={cn("flex items-center gap-3 py-2", dragId === n.id && "opacity-50")}>
               <div draggable onDragStart={(e) => { e.dataTransfer.effectAllowed = "move"; setDragId(n.id); }} onDragEnd={() => setDragId(null)} className="flex cursor-grab flex-col items-center gap-0.5 active:cursor-grabbing" title="Arrastar">
@@ -478,7 +514,7 @@ function RootOrderDialog({ roots, process, onClose }: { roots: MytosisNode[]; pr
             </li>
           ))}
         </ul>
-        <DialogFooter><Button variant="outline" onClick={onClose}>Cancelar</Button><Button variant="outline" disabled={save.isPending} onClick={() => save.mutate()}>Salvar</Button></DialogFooter>
+        <DialogFooter><Button variant="outline" onClick={onClose}>Cancelar</Button>{relink ? <Button variant="outline" onClick={() => setRelink(null)}>Voltar</Button> : null}<Button variant="outline" disabled={save.isPending} onClick={() => (relink ? save.mutate() : next())}>{!relink && changed && refs.length > 0 ? "Continuar" : "Salvar"}</Button></DialogFooter>
       </DialogContent>
     </Dialog>
   );
