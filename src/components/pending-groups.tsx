@@ -19,7 +19,7 @@ export function PendingGroups({ items }: { items: PendingGroupItem[] }) {
     <div className="flex items-center justify-end gap-2 text-xs text-muted-foreground">
       <span>Agrupar por</span>
       {([["app", "App"], ["requester", "Solicitante"]] as const).map(([value, label]) => (
-        <button key={value} type="button" aria-pressed={groupBy === value} onClick={() => { setGroupBy(value); setOpen(new Set()); }} className={cn("rounded-md border px-2 py-1 transition-colors", groupBy === value ? "border-primary bg-primary text-primary-foreground" : "border-primary text-primary hover:bg-primary hover:text-primary-foreground")}>{label}</button>
+        <button key={value} type="button" aria-pressed={groupBy === value} onClick={() => { setGroupBy(value); setOpen(new Set()); }} className={cn("h-8 w-28 rounded-md border px-2 text-center transition-colors", groupBy === value ? "border-primary bg-primary text-primary-foreground" : "border-primary text-primary hover:bg-primary hover:text-primary-foreground")}>{label}</button>
       ))}
     </div>
     <div className="divide-y divide-border overflow-hidden rounded-md border border-border bg-card">
