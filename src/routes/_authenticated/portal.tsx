@@ -1,3 +1,4 @@
+import { PendingGroups } from "@/components/pending-groups";
 import { useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -315,13 +316,13 @@ function PortalPage() {
                   <h2 id="pending-title" className="flex items-center gap-2 text-xl font-bold"><Bell className="h-5 w-5" />Minhas pendências</h2>
                   <Button asChild variant="outline" size="sm"><Link to="/pendentes">Ver painel</Link></Button>
                 </div>
-                <div className="divide-y divide-border overflow-hidden rounded-md border border-border bg-card">
-                  {(pendingActions?.approvals ?? 0) > 0 ? <PendingRow icon={CheckCircle2} label="Aguardando minha aprovação" count={pendingActions?.approvals ?? 0} to="/pendentes" /> : null}
-                   {(pendingActions?.supplyQueue ?? 0) > 0 ? <PendingRow icon={ShoppingCart} label="Compras e serviços a executar · Fila do Supply" count={pendingActions?.supplyQueue ?? 0} to="/dashboard" search={{ section: "queue", subsection: "supply" }} /> : null}
-                  {(pendingActions?.userDeletions ?? 0) > 0 ? <PendingRow icon={ShieldCheck} label="Exclusões de usuários aguardando decisão" count={pendingActions?.userDeletions ?? 0} to="/dashboard" search={{ section: "admin", subsection: "usuarios" }} /> : null}
-                  {(pendingActions?.codeItems ?? []).map((ticket) => <PendingRow key={ticket.ticketId} icon={CodeXml} label={`#${ticket.ticketNumber} · ${ticket.reason === "responder" ? "Responder ao Admin" : ticket.reason === "aceitar" ? "Confirmar atendimento" : "Ticket aguardando atendimento"} · ${ticket.reporterName ?? "Solicitante"} · ${new Date(ticket.createdAt).toLocaleDateString("pt-BR")} · ${ticket.title.length > 60 ? `${ticket.title.slice(0, 60)}…` : ticket.title}`} count={1} to="/development" search={{ ticket: ticket.ticketId }} />)}
-                   {(pendingActions?.supportCallItems ?? []).map((call) => <PendingRow key={call.callId} icon={Phone} label={`#${call.callNumber} · ${call.reason === "confirmar" ? "Confirmar conclusão" : call.title}`} count={1} to="/chamados" search={{ chamado: call.callId }} />)}
-                </div>
+                <PendingGroups items={[
+      ...((pendingActions?.approvals ?? 0) > 0 ? [{ key: "approvals", app: "Supply", requester: "Você", count: pendingActions?.approvals ?? 0, row: <PendingRow icon={CheckCircle2} label="Aguardando minha aprovação" count={pendingActions?.approvals ?? 0} to="/pendentes" /> }] : []),
+      ...((pendingActions?.supplyQueue ?? 0) > 0 ? [{ key: "queue", app: "Supply", requester: "Você", count: pendingActions?.supplyQueue ?? 0, row: <PendingRow icon={ShoppingCart} label="Compras e serviços a executar · Fila do Supply" count={pendingActions?.supplyQueue ?? 0} to="/dashboard" search={{ section: "queue", subsection: "supply" }} /> }] : []),
+      ...((pendingActions?.userDeletions ?? 0) > 0 ? [{ key: "deletions", app: "Admin", requester: "Você", count: pendingActions?.userDeletions ?? 0, row: <PendingRow icon={ShieldCheck} label="Exclusões de usuários aguardando decisão" count={pendingActions?.userDeletions ?? 0} to="/dashboard" search={{ section: "admin", subsection: "usuarios" }} /> }] : []),
+      ...(pendingActions?.codeItems ?? []).map((ticket) => ({ key: `c-${ticket.ticketId}`, app: "Code", requester: ticket.reason === "atender" ? ticket.reporterName ?? "Solicitante" : "Você", count: 1, row: <PendingRow icon={CodeXml} label={`#${ticket.ticketNumber} · ${ticket.reason === "responder" ? "Responder ao Admin" : ticket.reason === "aceitar" ? "Confirmar atendimento" : "Ticket aguardando atendimento"} · ${new Date(ticket.createdAt).toLocaleDateString("pt-BR")} · ${ticket.title.length > 60 ? `${ticket.title.slice(0, 60)}…` : ticket.title}`} count={1} to="/development" search={{ ticket: ticket.ticketId }} /> })),
+      ...(pendingActions?.supportCallItems ?? []).map((call) => ({ key: `s-${call.callId}`, app: "Chamados", requester: call.reason === "confirmar" ? "Você" : "Clientes", count: 1, row: <PendingRow icon={Phone} label={`#${call.callNumber} · ${call.reason === "confirmar" ? "Confirmar conclusão" : call.title}`} count={1} to="/chamados" search={{ chamado: call.callId }} /> })),
+    ]} />
               </section>
             ) : null}
           </TabsContent>
