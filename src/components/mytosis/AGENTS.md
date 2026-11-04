@@ -1,3 +1,4 @@
 - Mytosis stage and default-box editors share text-format controls and checked color swatches so their layout and selection feedback stay consistent.
 - Textual processes keep ordered sections, paragraphs and stage assignments separate from flow nodes, with live flow references and revision-checked saves to preserve originals and concurrent edits.
 - Process canvases render entry stages without the root title box; the root remains stored for numbering, cross-flow links and title editing.
+- Linked-flow views use a cycle-safe pure traversal and draw each flow once in a shared canvas; cross-flow connectors are presentation-only and never persisted as dependencies. Pass process mode explicitly because hidden title roots cannot determine connector mode.

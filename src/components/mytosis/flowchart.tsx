@@ -33,6 +33,7 @@ import { NodeFrame } from "./node-frame";
 import { NodeAttachmentDialog } from "./node-attachments";
 import { createMytosisPdf, downloadMytosisPdf } from "@/lib/mytosis-pdf";
 import { processEntryNodes } from "@/lib/mytosis-editor";
+import { linkedFlowReferences, visibleLinkedFlows } from "@/lib/mytosis-linked-flows";
 
 type Props = {
   data: MytosisData;
@@ -58,6 +59,8 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
   const [hideRight, setHideRight] = useState<Set<string>>(new Set());
   const [hideDown, setHideDown] = useState<Set<string>>(new Set());
   const [hideTasks, setHideTasks] = useState<Set<string>>(new Set());
+  const [expandedFlows, setExpandedFlows] = useState<Set<string>>(new Set());
+  useEffect(() => { setExpandedFlows(new Set()); }, [objectiveId]);
   const [highlight, setHighlight] = useState<string | null>(null);
   const [locatorQuery, setLocatorQuery] = useState("");
   const [showCritical, setShowCritical] = useState(false);
@@ -74,7 +77,10 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
     catch { toast.error("Não foi possível gerar o PDF. Tente novamente."); }
     finally { setPdfBusy(false); }
   }
-  const allExpanded = hideRight.size === 0 && hideDown.size === 0 && hideTasks.size === 0;
+  const flowReferences = useMemo(() => linkedFlowReferences(data.nodes), [data.nodes]);
+  const reachableFlowIds = useMemo(() => visibleLinkedFlows(objectiveId, flowReferences, new Set(flowReferences.map((ref) => ref.nodeId))), [objectiveId, flowReferences]);
+  const visibleFlowIds = useMemo(() => visibleLinkedFlows(objectiveId, flowReferences, expandedFlows), [objectiveId, flowReferences, expandedFlows]);
+  const allExpanded = process ? flowReferences.filter((ref) => reachableFlowIds.includes(ref.sourceId)).every((ref) => expandedFlows.has(ref.nodeId)) && reachableFlowIds.length > 1 : hideRight.size === 0 && hideDown.size === 0 && hideTasks.size === 0;
 
   const children = useMemo(() => childrenMap(data.nodes), [data.nodes]);
   const progress = useMemo(() => computeProgress(data.nodes), [data.nodes]);
@@ -86,6 +92,26 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
   const numbers = useMemo(() => computeBoxNumbers(data.nodes, data.links), [data.nodes, data.links]);
   const numberOf = (node: MytosisNode) => numbers.get(node.id) ?? String(node.locator);
   const nameOf = (id: string | null) => firstName(data.users.find((u) => u.id === id)?.full_name ?? "—");
+  const displayLinks = useMemo(() => {
+    if (!process) return data.links;
+    const synthetic = flowReferences.flatMap((ref) => {
+      if (!expandedFlows.has(ref.nodeId) || !visibleFlowIds.includes(ref.sourceId) || !visibleFlowIds.includes(ref.targetId)) return [];
+      const source = byId.get(ref.nodeId);
+      const target = byId.get(ref.targetNodeId);
+      const from = source?.parent_id ? source : processEntryNodes(ref.sourceId, data.nodes, data.links).at(-1);
+      const to = target?.parent_id ? target : processEntryNodes(ref.targetId, data.nodes, data.links)[0];
+      return from && to ? [{ predecessor_id: from.id, successor_id: to.id, style: "arrow" }] : [];
+    });
+    return [...data.links, ...synthetic];
+  }, [process, data.links, data.nodes, flowReferences, expandedFlows, visibleFlowIds, byId]);
+
+  function renderTrigger(node: MytosisNode) {
+    const ref = flowReferences.find((item) => item.nodeId === node.id);
+    const target = ref ? byId.get(ref.targetId) : null;
+    if (!ref || !target) return null;
+    const open = expandedFlows.has(node.id);
+    return <Button variant="ghost" className="h-auto min-w-0 justify-start gap-1 px-0 py-1 text-left text-[11px] font-normal text-foreground hover:text-primary" aria-expanded={open} aria-label={`${open ? "Recolher" : "Exibir"} fluxograma ${numberOf(target)} - ${target.title}`} onClick={(event) => { event.stopPropagation(); setExpandedFlows((current) => toggle(current, node.id)); }}><span className="min-w-0 whitespace-normal break-words">Gatilho: {numberOf(target)} - {target.title}</span>{open ? <ChevronDown className="size-3.5 shrink-0" /> : <ChevronRight className="size-3.5 shrink-0" />}</Button>;
+  }
 
   // Predecessores entre irmãos: o sucessor é desenhado à direita do primeiro predecessor.
   const siblingPreds = useMemo(() => {
@@ -192,7 +218,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
                       <div className="flex shrink-0 items-center gap-1">{process ? null : <span className="text-muted-foreground/70">{pct}%</span>}{showControls && hasAttachments ? <Button variant="ghost" size="icon" className="h-5 w-5" aria-label={`Anexos da etapa ${numberOf(node)}`} title="Anexos" onClick={(event) => { event.stopPropagation(); setAttachmentTarget(node); }} onPointerDown={(event) => event.stopPropagation()}><Paperclip className="h-3.5 w-3.5" /></Button> : null}{showControls && canEdit ? <><Button variant="ghost" size="icon" className="h-5 w-5 !bg-transparent hover:!bg-transparent [&_svg]:!size-5" aria-label={`Dividir próxima etapa de ${numberOf(node)}`} title="Dividir próxima etapa" onClick={(event) => { event.stopPropagation(); setSplitTarget(node); }} onPointerDown={(event) => event.stopPropagation()}><MytosisIcon className="h-5 w-5" /></Button><Button variant="ghost" size="icon" className="h-5 w-5 !bg-transparent hover:!bg-transparent [&_svg]:!size-3" aria-label={`Excluir etapa ${numberOf(node)}`} title="Excluir etapa" disabled={deleteNode.isPending} onClick={(event) => { event.stopPropagation(); if (window.confirm(`Excluir a etapa ${numberOf(node)} — ${node.title} e todas as tarefas e subetapas abaixo dela? Esta ação não pode ser desfeita.`)) deleteNode.mutate(node); }} onPointerDown={(event) => event.stopPropagation()}><Trash2 className="h-3 w-3" /></Button></> : null}{!process && signal.pending > 0 ? <div role="status" aria-label={`${signal.pending} tarefa${signal.pending > 1 ? "s" : ""} pendente${signal.pending > 1 ? "s" : ""} na etapa anterior`} title={`${signal.pending} pendência${signal.pending > 1 ? "s" : ""} na etapa anterior`} className="ml-1 flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold leading-none text-destructive-foreground">{signal.pending > 99 ? "99+" : signal.pending}</div> : null}</div>
                     </div>}
                   footer={<div className="flex shrink-0 items-center justify-between gap-2 text-[11px] text-muted-foreground">
-                      {process ? (node.linked_node_id ? <span className="truncate" title="Gatilho em outro fluxograma">Gatilho: {numbers.get(node.linked_node_id) ?? "—"}</span> : <span />) : <span className="truncate">{nameOf(node.responsible_id)} · {formatDate(node.due_date)}</span>}
+                      {process ? (renderTrigger(node) ?? <span />) : <span className="truncate">{nameOf(node.responsible_id)} · {formatDate(node.due_date)}</span>}
                       {showControls ? <div className="flex shrink-0 items-center gap-0.5">
                       {succ.length ? <Button variant="ghost" size="icon" className="h-5 w-5 !bg-transparent hover:!bg-transparent" aria-label={`${rightOpen ? "Recolher" : "Exibir"} boxes dependentes de ${numberOf(node)}`} title={rightOpen ? "Recolher boxes dependentes" : "Exibir boxes dependentes"} aria-expanded={rightOpen} onClick={(e) => { e.stopPropagation(); setHideRight((s) => toggle(s, node.id)); }} onPointerDown={(e) => e.stopPropagation()}>{rightOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}</Button> : null}
                       {kids.length ? <Button variant="ghost" size="icon" className="h-5 w-5 !bg-transparent hover:!bg-transparent" aria-label={`${downOpen ? "Recolher" : "Exibir"} boxes abaixo de ${numberOf(node)}`} title={downOpen ? "Recolher boxes abaixo" : "Exibir boxes abaixo"} aria-expanded={downOpen} onClick={(e) => { e.stopPropagation(); setHideDown((s) => toggle(s, node.id)); }} onPointerDown={(e) => e.stopPropagation()}>{downOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}</Button> : null}
@@ -271,6 +297,10 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
           <Slider min={0} max={Math.max(last, 1)} step={1} value={[Math.min(k, last)]} onValueChange={([v]) => setK(v)} disabled={last === 0} className="h-9" />
         </div>
         <label className="flex h-9 cursor-pointer items-center gap-2 text-xs text-muted-foreground"><Checkbox checked={allExpanded} aria-label="Exibir tudo" onCheckedChange={(checked) => {
+          if (process) {
+            setExpandedFlows(checked ? new Set(flowReferences.filter((ref) => reachableFlowIds.includes(ref.sourceId)).map((ref) => ref.nodeId)) : new Set());
+            return;
+          }
           setHideRight(checked ? new Set() : new Set(data.nodes.map((node) => node.id)));
           setHideDown(checked ? new Set() : new Set(data.nodes.map((node) => node.id)));
           setHideTasks(checked ? new Set() : new Set(data.nodes.map((node) => node.id)));
@@ -284,7 +314,11 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
       </div>
       {objective ? (
         <div className="overflow-auto rounded-xl border border-border bg-card p-6" onClick={() => setHighlight(null)}>
-          <div ref={canvasRef} className="relative w-max min-w-full pt-3" onClick={(e) => e.stopPropagation()}>{process ? <div className="flex flex-col gap-4">{processEntryNodes(objective.id, data.nodes, data.links).map((node) => <Fragment key={node.id}>{renderBranch(node)}</Fragment>)}</div> : renderBranch(objective)}<ConnectionLayer container={canvasRef} nodes={data.nodes} links={data.links} onSelect={canEdit ? setSelectedLink : undefined} layoutKey={`${objectiveId}:${[...hideRight].join(',')}:${[...hideDown].join(',')}:${[...hideTasks].join(',')}:${k}`} /></div>
+          <div ref={canvasRef} className="relative w-max min-w-full pt-3" onClick={(e) => e.stopPropagation()}>{process ? <div className="flex items-start gap-16">{visibleFlowIds.map((id) => {
+            const flow = byId.get(id);
+            if (!flow) return null;
+            return <section key={id} data-mytosis-flow={id} aria-label={`Fluxograma ${numberOf(flow)} - ${flow.title}`} className="min-w-0 shrink-0 space-y-4 animate-in fade-in motion-reduce:animate-none"><div className="flex min-h-12 items-center gap-3"><span className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-sm font-semibold text-primary">{numberOf(flow)}</span><h2 className="text-base font-normal">{flow.title}</h2>{renderTrigger(flow)}</div><div className="flex flex-col gap-4">{processEntryNodes(flow.id, data.nodes, data.links).map((node) => <Fragment key={node.id}>{renderBranch(node)}</Fragment>)}</div></section>;
+          })}</div> : renderBranch(objective)}<ConnectionLayer container={canvasRef} nodes={data.nodes} links={displayLinks} process={process} isLinkEditable={(link) => data.links.some((item) => item.predecessor_id === link.predecessor_id && item.successor_id === link.successor_id)} onSelect={canEdit ? (link) => { const stored = data.links.find((item) => item.predecessor_id === link.predecessor_id && item.successor_id === link.successor_id); if (stored) setSelectedLink(stored); } : undefined} layoutKey={`${objectiveId}:${[...expandedFlows].join(',')}:${[...hideRight].join(',')}:${[...hideDown].join(',')}:${[...hideTasks].join(',')}:${k}`} /></div>
         </div>
       ) : <p className="py-16 text-center text-muted-foreground">{process ? (objectives.length ? "Selecione um fluxograma." : "Nenhum fluxograma cadastrado.") : objectives.length ? "Selecione um objetivo." : "Nenhum objetivo cadastrado. Use o + para criar o primeiro."}</p>}
       <ImportBlockDialog target={importTarget} onClose={() => setImportTarget(null)} data={data} />

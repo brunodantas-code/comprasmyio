@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Mostrar gatilhos com título e expandir fluxogramas vinculados na sequência, com Exibir tudo dedicado aos vínculos
 - [x] Ocultar box informativo dos fluxogramas, iniciar pela primeira etapa e permitir próxima etapa sem subetapa prévia
 - [x] Incluir Processos no Mytosis com seções ordenáveis e parágrafos numerados
 - [x] Vincular fluxogramas, departamentos e responsáveis às etapas dentro dos Processos
