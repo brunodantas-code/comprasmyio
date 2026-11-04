@@ -2676,6 +2676,97 @@ export type Database = {
           },
         ]
       }
+      mytosis_kpi_results: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          kpi_id: string
+          notes: string | null
+          period_start: string
+          value: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          kpi_id: string
+          notes?: string | null
+          period_start: string
+          value: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          kpi_id?: string
+          notes?: string | null
+          period_start?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mytosis_kpi_results_kpi_id_fkey"
+            columns: ["kpi_id"]
+            isOneToOne: false
+            referencedRelation: "mytosis_kpis"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mytosis_kpis: {
+        Row: {
+          active: boolean
+          cost_center_id: string
+          created_at: string
+          created_by: string
+          description: string | null
+          frequency: string
+          id: string
+          name: string
+          responsible_id: string
+          target: number
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          cost_center_id: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          frequency?: string
+          id?: string
+          name: string
+          responsible_id: string
+          target: number
+          unit?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          cost_center_id?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          frequency?: string
+          id?: string
+          name?: string
+          responsible_id?: string
+          target?: number
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mytosis_kpis_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mytosis_links: {
         Row: {
           color: string | null
@@ -7181,6 +7272,10 @@ export type Database = {
         Returns: boolean
       }
       mytosis_can_edit: { Args: { _user_id: string }; Returns: boolean }
+      mytosis_can_post_kpi: {
+        Args: { _kpi_id: string; _user_id: string }
+        Returns: boolean
+      }
       mytosis_node_can_converse: {
         Args: { _node_id: string; _user_id: string }
         Returns: boolean
@@ -7210,6 +7305,14 @@ export type Database = {
         }[]
       }
       mytosis_role: { Args: { _user_id: string }; Returns: string }
+      mytosis_segments: {
+        Args: never
+        Returns: {
+          code: string
+          id: string
+          name: string
+        }[]
+      }
       mytosis_task_can_converse: {
         Args: { _task_id: string; _user_id: string }
         Returns: boolean

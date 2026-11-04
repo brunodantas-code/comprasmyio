@@ -4,3 +4,4 @@
 - Linked-flow views use a cycle-safe pure traversal and draw each flow once in a shared canvas; cross-flow connectors are presentation-only and never persisted as dependencies. Pass process mode explicitly because hidden title roots cannot determine connector mode.
 - Mytosis styles copy on import/split; preview/canvas share fixed-size NodeFrame/NodeText, safe shape insets and measured text fitting without truncation. External chrome fits inside total settings height; connectors measure surfaces only.
 - Mytosis connectors use pure obstacle routing and a size-bound paint-contained SVG; observe transitions and clipped endpoints. Processes draw explicit links, OKRs retain hierarchy; preserve styles/edit hit areas.
+- KPIs read company segments from active cost centers through a Mytosis-gated definer RPC, since cost-center RLS is limited to Supply/Cash Flow; results are one row per KPI period, posted only by the responsible user or a Mytosis admin.
