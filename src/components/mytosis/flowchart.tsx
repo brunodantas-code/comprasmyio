@@ -255,7 +255,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
         </div>
         <form className="grid gap-1" onSubmit={(e) => { e.preventDefault(); const v = locatorQuery.trim(); if (v) locate(v); else setHighlight(null); }}>
           <Label className="text-xs text-muted-foreground">Localizador</Label>
-          <div className="flex items-start gap-2"><div className="w-36 [&_input]:border-primary"><ChecklistText value={locatorQuery} onChange={setLocatorQuery} label="Localizador" hint="Nº do box" /></div><Button type="submit" variant="outline" size="icon" aria-label="Localizar box" title="Localizar box"><Search className="h-4 w-4" /></Button></div>
+          <div className="flex items-end gap-2"><div className="w-36 [&_input]:border-primary"><ChecklistText value={locatorQuery} onChange={setLocatorQuery} label="Localizador" hint="Nº do box" /></div><Button type="submit" variant="outline" size="icon" className="h-9 w-9 rounded-lg" aria-label="Localizar box" title="Localizar box"><Search className="h-4 w-4" /></Button></div>
         </form>
         <div className="grid min-w-48 gap-1">
           <Label className="text-xs text-muted-foreground">Fases exibidas: {last === 0 ? "única" : `${visibleFrom + 1} a ${last + 1} de ${last + 1}`}</Label>
@@ -268,9 +268,9 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
           if (checked) setK(last);
         }} />Exibir tudo</label>
         {process ? null : <Button variant="outline" onClick={() => setShowCritical((v) => !v)} className={cn(showCritical && "!bg-primary !text-primary-foreground")}><RouteIcon className="h-4 w-4" />Caminho crítico</Button>}
-        <Button variant="outline" size="icon" aria-label="Exportar fluxograma para PDF" title={pdfBusy ? "Gerando PDF…" : "Exportar fluxograma para PDF"} disabled={!objective || pdfBusy} onClick={exportPdf}><FileDown className={cn("h-4 w-4", pdfBusy && "animate-pulse motion-reduce:animate-none")} /></Button>
-        {data.role === "admin" ? <Button variant="outline" size="icon" onClick={() => setSettingsOpen(true)} aria-label="Padrões dos boxes" title="Padrões dos boxes"><Settings2 className="h-4 w-4" /></Button> : null}
-        {canEdit ? <Button variant="outline" size="icon" onClick={() => openDialog({ mode: "create", kind: "objective", parentId: null, process })} aria-label={process ? "Nova etapa" : "Novo objetivo"} title={process ? "Nova etapa" : "Novo objetivo"}><Plus className="h-5 w-5" /></Button> : null}
+        <Button variant="outline" size="icon" className="h-9 w-9 rounded-lg" aria-label="Exportar fluxograma para PDF" title={pdfBusy ? "Gerando PDF…" : "Exportar fluxograma para PDF"} disabled={!objective || pdfBusy} onClick={exportPdf}><FileDown className={cn("h-4 w-4", pdfBusy && "animate-pulse motion-reduce:animate-none")} /></Button>
+        {data.role === "admin" ? <Button variant="outline" size="icon" className="h-9 w-9 rounded-lg" onClick={() => setSettingsOpen(true)} aria-label="Padrões dos boxes" title="Padrões dos boxes"><Settings2 className="h-4 w-4" /></Button> : null}
+        {canEdit ? <Button variant="outline" size="icon" className="h-9 w-9 rounded-lg" onClick={() => openDialog({ mode: "create", kind: "objective", parentId: null, process })} aria-label={process ? "Nova etapa" : "Novo objetivo"} title={process ? "Nova etapa" : "Novo objetivo"}><Plus className="h-5 w-5" /></Button> : null}
       </div>
       {objective ? (
         <div className="overflow-auto rounded-xl border border-border bg-card p-6" onClick={() => setHighlight(null)}>
