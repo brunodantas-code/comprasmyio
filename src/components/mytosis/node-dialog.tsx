@@ -23,6 +23,7 @@ import { firstName } from "./use-mytosis";
 import { ColorOptions } from "./color-options";
 import { NodeAttachments, uploadNodeAttachments } from "./node-attachments";
 import { initialStageFormat, sameFormat, type BoxFormat } from "@/lib/mytosis-format";
+import { initialNodeShape, requiresNodeResponsible } from "@/lib/mytosis-editor";
 
 export type NodeDialogState =
   | { mode: "edit"; node: MytosisNode }
@@ -80,7 +81,7 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
     setDue(editing?.due_date ?? "");
     setWeight(String(editing?.weight ?? 0));
     setProgress(String(editing?.progress ?? 0));
-    setShape(!editing && state.mode === "create" && state.process && !state.parentId ? "terminal" : (format?.shape as ShapeKey) ?? "process");
+    setShape(initialNodeShape(isProcess, parentId, editing?.shape ?? null, format?.shape ?? "process") as ShapeKey);
     setLinked(editing?.linked_node_id ?? ""); setIsLinked(!!editing?.linked_node_id);
     setFillKey((format?.fill_color as FillKey) ?? "none");
     setBorderKey((format?.border_color as BorderKey) ?? "green-mid");
@@ -112,12 +113,12 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
       if (descriptionTooLong) throw new Error(`A descrição permite até ${descriptionLimit} caracteres para este box. Reduza o texto ou ajuste o tamanho do box e da fonte.`);
       if (![titleSize, descriptionSize].every((size) => Number.isInteger(size) && size >= 10 && size <= 32)) throw new Error("Informe tamanhos de fonte entre 10 e 32 px.");
       if (isProcess && shape === "terminal" && isLinked && !linked) throw new Error("Selecione o box do fluxograma que dispara este fluxo.");
-      if (!responsible) throw new Error("Informe o Responsável.");
+      if (requiresNodeResponsible(isProcess) && !responsible) throw new Error("Informe o Responsável.");
       if (!due && !isProcess) throw new Error("Informe a Data estimada de conclusão.");
       const w = Number(weight) || 0;
       if (!isProcess && kind === "task" && parentId && siblingWeight + w > 100) throw new Error(`A soma dos pesos passa de 100% (demais tarefas: ${siblingWeight}%).`);
       const row = {
-        title: title.trim(), description: description.trim() || null, responsible_id: responsible, due_date: isProcess ? null : due,
+        title: title.trim(), description: description.trim() || null, responsible_id: responsible || null, due_date: isProcess ? null : due,
         shape, fill_color: fillKey, border_color: borderKey, control_color: controlColor,
         title_font_size: titleSize, title_color: titleColor, description_font_size: descriptionSize, text_align: textAlign, text_vertical_align: verticalAlign,
         linked_node_id: isProcess && shape === "terminal" && isLinked && linked ? linked : null,
@@ -178,12 +179,12 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
   const linkOptions = data.nodes.filter((n) => n.is_process && n.id !== editing?.id && (!ownRootId || rootObjectiveOf(n.id, data.nodes)?.id !== ownRootId))
     .map((n) => ({ value: n.id, label: `${numbers.get(n.id) ?? n.locator} ${n.title}`, hint: rootObjectiveOf(n.id, data.nodes)?.title, group: n.shape === "terminal" ? "Início/fim" : "Demais boxes" }))
     .sort((a, b) => (a.group === b.group ? a.label.localeCompare(b.label, "pt-BR", { numeric: true }) : a.group === "Início/fim" ? -1 : 1));
-  const label = isProcess ? "Etapa" : kind === "objective" ? "Objetivo" : "Tarefa";
+  const label = isProcess ? (parentId ? "Etapa" : "Fluxograma") : kind === "objective" ? "Objetivo" : "Tarefa";
   return (
     <Dialog open={!!state} onOpenChange={(open) => { if (!open && !attachmentsBusy && !save.isPending) onClose(); }}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl" onEscapeKeyDown={(event) => { if (attachmentsBusy || save.isPending) event.preventDefault(); }} onInteractOutside={(event) => { if (attachmentsBusy || save.isPending) event.preventDefault(); }}>
         <DialogHeader>
-          <DialogTitle className="font-normal">{editing ? `${numbers.get(editing.id) ?? editing.locator} — ${label}` : isProcess ? "Nova etapa" : `Novo ${label.toLowerCase()}`}</DialogTitle>
+          <DialogTitle className="font-normal">{editing ? `${numbers.get(editing.id) ?? editing.locator} — ${label}` : isProcess && parentId ? "Nova etapa" : `Novo ${label.toLowerCase()}`}</DialogTitle>
           <DialogDescription>{editing ? `Criado em ${new Date(editing.created_at).toLocaleDateString("pt-BR")}` : `Data de criação: ${new Date().toLocaleDateString("pt-BR")}`}</DialogDescription>
         </DialogHeader>
         <fieldset disabled={!canEdit} className="grid gap-4">
@@ -231,10 +232,10 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
               ] as const).map(({ value, label, Icon }) => <Button key={value} type="button" variant="outline" size="icon" title={label} aria-label={label} aria-pressed={verticalAlign === value} onClick={() => setVerticalAlign(value)} className={cn(verticalAlign === value && "!bg-primary !text-primary-foreground")}><Icon className="h-4 w-4" /></Button>)}</div></div>
             </div>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className={isProcess ? "grid gap-1.5 sm:col-span-2" : "grid gap-1.5"}><Label>Responsável</Label><SearchableSelect value={responsible} onChange={setResponsible} options={userOptions} placeholder="Selecione o usuário" disabled={!canEdit} /></div>
-            {isProcess ? null : <div className="grid gap-1.5"><Label>Data estimada de conclusão</Label><Input type="date" value={due} onChange={(e) => setDue(e.target.value)} /></div>}
-          </div>
+          {requiresNodeResponsible(isProcess) ? <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-1.5"><Label>Responsável</Label><SearchableSelect value={responsible} onChange={setResponsible} options={userOptions} placeholder="Selecione o usuário" disabled={!canEdit} /></div>
+            <div className="grid gap-1.5"><Label>Data estimada de conclusão</Label><Input type="date" value={due} onChange={(e) => setDue(e.target.value)} /></div>
+          </div> : null}
           {isProcess ? null : <div className="grid gap-4 sm:grid-cols-2">
             {kind === "task" && parentId ? <div className="grid gap-1.5"><Label>Peso sobre o total (%)</Label><Input type="number" min={0} max={100} value={weight} onChange={(e) => setWeight(e.target.value)} /><span className="text-xs text-muted-foreground">Demais tarefas do mesmo box: {siblingWeight}% · disponível {Math.max(0, 100 - siblingWeight)}%</span></div> : null}
             <div className="grid gap-1.5"><Label>% de conclusão</Label>{kids.length ? <p className="h-9 py-2 text-sm text-muted-foreground">{computed}% (calculado pelas tarefas abaixo)</p> : <Input type="number" min={0} max={100} value={progress} onChange={(e) => setProgress(e.target.value)} />}</div>

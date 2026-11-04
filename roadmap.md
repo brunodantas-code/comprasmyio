@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Ocultar Responsável nas etapas e prévias de fluxograma, distinguir Novo fluxograma de Nova etapa e conferir Início/fim com vínculo opcional
 - [x] Nova Etapa inicia com formatação da anterior na prévia, permitindo edição individual
 - [x] Permitir escolher destinatário das perguntas do Mytosis e mostrar na Central de Pendências
 - [x] Mostrar miniaturas de anexos e clipe somente em boxes com anexos

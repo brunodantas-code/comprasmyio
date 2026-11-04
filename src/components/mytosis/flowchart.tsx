@@ -278,13 +278,13 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
         {process ? null : <Button variant="outline" onClick={() => setShowCritical((v) => !v)} className={cn(showCritical && "!bg-primary !text-primary-foreground")}><RouteIcon className="h-4 w-4" />Caminho crítico</Button>}
         <Button variant="outline" size="icon" className="h-7 w-7 rounded-lg" aria-label="Exportar fluxograma para PDF" title={pdfBusy ? "Gerando PDF…" : "Exportar fluxograma para PDF"} disabled={!objective} onClick={() => setExportOpen(true)}><FileDown className={cn("h-3.5 w-3.5", pdfBusy && "animate-pulse motion-reduce:animate-none")} /></Button>
         {data.role === "admin" ? <Button variant="outline" size="icon" className="h-7 w-7 rounded-lg" onClick={() => setSettingsOpen(true)} aria-label="Box padrão" title="Box padrão"><Settings2 className="h-3.5 w-3.5" /></Button> : null}
-        {canEdit ? <Button variant="outline" size="icon" className="h-7 w-7 rounded-lg" onClick={() => openDialog({ mode: "create", kind: "objective", parentId: null, process })} aria-label={process ? "Nova etapa" : "Novo objetivo"} title={process ? "Nova etapa" : "Novo objetivo"}><Plus className="h-5 w-5" /></Button> : null}
+        {canEdit ? <Button variant="outline" size="icon" className="h-7 w-7 rounded-lg" onClick={() => openDialog({ mode: "create", kind: "objective", parentId: null, process })} aria-label={process ? "Novo fluxograma" : "Novo objetivo"} title={process ? "Novo fluxograma" : "Novo objetivo"}><Plus className="h-5 w-5" /></Button> : null}
       </div>
       {objective ? (
         <div className="overflow-auto rounded-xl border border-border bg-card p-6" onClick={() => setHighlight(null)}>
           <div ref={canvasRef} className="relative w-max min-w-full pt-3" onClick={(e) => e.stopPropagation()}>{renderBranch(objective)}<ConnectionLayer container={canvasRef} nodes={data.nodes} links={data.links} onSelect={canEdit ? setSelectedLink : undefined} layoutKey={`${objectiveId}:${[...hideRight].join(',')}:${[...hideDown].join(',')}:${[...hideTasks].join(',')}:${k}`} /></div>
         </div>
-      ) : <p className="py-16 text-center text-muted-foreground">{process ? (objectives.length ? "Selecione um fluxograma." : "Nenhum fluxograma cadastrado. Use o + para criar a primeira etapa.") : objectives.length ? "Selecione um objetivo." : "Nenhum objetivo cadastrado. Use o + para criar o primeiro."}</p>}
+      ) : <p className="py-16 text-center text-muted-foreground">{process ? (objectives.length ? "Selecione um fluxograma." : "Nenhum fluxograma cadastrado.") : objectives.length ? "Selecione um objetivo." : "Nenhum objetivo cadastrado. Use o + para criar o primeiro."}</p>}
       <ImportBlockDialog target={importTarget} onClose={() => setImportTarget(null)} data={data} />
       <ExportDialog open={exportOpen} onClose={() => setExportOpen(false)} roots={objectives} currentId={objectiveId} onSelect={onObjectiveChange} getCanvas={() => canvasRef.current} canEdit={canEdit} process={process} />
       <Dialog open={!!preparedPdf} onOpenChange={(open) => { if (!open) setPreparedPdf(null); }}>
