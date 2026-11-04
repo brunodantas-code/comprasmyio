@@ -2843,6 +2843,7 @@ export type Database = {
           control_color: string | null
           created_at: string
           created_by: string | null
+          custom_format: boolean
           description: string | null
           description_font_size: number
           due_date: string | null
@@ -2869,6 +2870,7 @@ export type Database = {
           control_color?: string | null
           created_at?: string
           created_by?: string | null
+          custom_format?: boolean
           description?: string | null
           description_font_size?: number
           due_date?: string | null
@@ -2895,6 +2897,7 @@ export type Database = {
           control_color?: string | null
           created_at?: string
           created_by?: string | null
+          custom_format?: boolean
           description?: string | null
           description_font_size?: number
           due_date?: string | null
@@ -2935,18 +2938,21 @@ export type Database = {
       }
       mytosis_settings: {
         Row: {
+          box_format: Json
           box_height: number
           box_width: number
           id: number
           updated_at: string
         }
         Insert: {
+          box_format?: Json
           box_height?: number
           box_width?: number
           id?: number
           updated_at?: string
         }
         Update: {
+          box_format?: Json
           box_height?: number
           box_width?: number
           id?: number

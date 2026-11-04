@@ -1,3 +1,6 @@
+import { NodePreview } from "./node-preview";
+import { FormatEditor } from "./format-editor";
+import type { BoxFormat } from "@/lib/mytosis-format";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Download, FileDown, Filter, Plus, Paperclip, Route as RouteIcon, Search, Settings2, Trash2 } from "lucide-react";
@@ -273,7 +276,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
         }} />Exibir tudo</label>
         {process ? null : <Button variant="outline" onClick={() => setShowCritical((v) => !v)} className={cn(showCritical && "!bg-primary !text-primary-foreground")}><RouteIcon className="h-4 w-4" />Caminho crítico</Button>}
         <Button variant="outline" size="icon" className="h-7 w-7 rounded-lg" aria-label="Exportar fluxograma para PDF" title={pdfBusy ? "Gerando PDF…" : "Exportar fluxograma para PDF"} disabled={!objective || pdfBusy} onClick={exportPdf}><FileDown className={cn("h-3.5 w-3.5", pdfBusy && "animate-pulse motion-reduce:animate-none")} /></Button>
-        {data.role === "admin" ? <Button variant="outline" size="icon" className="h-7 w-7 rounded-lg" onClick={() => setSettingsOpen(true)} aria-label="Padrões dos boxes" title="Padrões dos boxes"><Settings2 className="h-3.5 w-3.5" /></Button> : null}
+        {data.role === "admin" ? <Button variant="outline" size="icon" className="h-7 w-7 rounded-lg" onClick={() => setSettingsOpen(true)} aria-label="Box padrão" title="Box padrão"><Settings2 className="h-3.5 w-3.5" /></Button> : null}
         {canEdit ? <Button variant="outline" size="icon" className="h-7 w-7 rounded-lg" onClick={() => openDialog({ mode: "create", kind: "objective", parentId: null, process })} aria-label={process ? "Nova etapa" : "Novo objetivo"} title={process ? "Nova etapa" : "Novo objetivo"}><Plus className="h-5 w-5" /></Button> : null}
       </div>
       {objective ? (
@@ -291,36 +294,65 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
       <NodeAttachmentDialog node={attachmentTarget} canEdit={canEdit} onClose={() => setAttachmentTarget(null)} />
       <SplitDialog node={splitTarget} onClose={() => setSplitTarget(null)} onCreated={(id) => { setHideRight((current) => { const next = new Set(current); next.delete(id); return next; }); setHideDown((current) => { const next = new Set(current); next.delete(id); return next; }); setK(Number.MAX_SAFE_INTEGER); }} />
       <BoxTaskDialog selection={taskSelection} onSelect={setTaskSelection} onClose={() => setTaskSelection(null)} data={data} canEdit={canEdit} />
-      <BoxSettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} box={data.box} />
+      <BoxSettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} box={data.box} defaultFormat={data.defaultFormat} />
       <ConnectorDialog link={selectedLink} onClose={() => setSelectedLink(null)} label={selectedLink ? `${data.nodes.find((n) => n.id === selectedLink.predecessor_id)?.title} → ${data.nodes.find((n) => n.id === selectedLink.successor_id)?.title}` : ""} />
     </div>
   );
 }
 
-function BoxSettingsDialog({ open, onClose, box }: { open: boolean; onClose: () => void; box: { width: number; height: number } }) {
+function BoxSettingsDialog({ open, onClose, box, defaultFormat }: { open: boolean; onClose: () => void; box: { width: number; height: number }; defaultFormat: BoxFormat }) {
   const queryClient = useQueryClient();
   const [width, setWidth] = useState(String(box.width));
   const [height, setHeight] = useState(String(box.height));
-  useEffect(() => { if (open) { setWidth(String(box.width)); setHeight(String(box.height)); } }, [open, box]);
+  const [format, setFormat] = useState<BoxFormat>(defaultFormat);
+  const [confirmApply, setConfirmApply] = useState(false);
+  useEffect(() => { if (open) { setWidth(String(box.width)); setHeight(String(box.height)); setFormat(defaultFormat); } }, [open, box, defaultFormat]);
+  const validate = () => {
+    const w = Number(width), h = Number(height);
+    if (!(w >= 160 && w <= 480) || !(h >= 64 && h <= 240)) throw new Error("Largura entre 160 e 480 px; altura entre 64 e 240 px.");
+    if (![format.title_font_size, format.description_font_size].every((n) => Number.isInteger(n) && n >= 10 && n <= 32)) throw new Error("Informe tamanhos de fonte entre 10 e 32 px.");
+    return { w, h };
+  };
+  const persist = async () => {
+    const { w, h } = validate();
+    const { error } = await supabase.from("mytosis_settings").update({ box_width: w, box_height: h, box_format: format }).eq("id", 1);
+    if (error) throw error;
+  };
   const save = useMutation({
-    mutationFn: async () => {
-      const w = Number(width), h = Number(height);
-      if (!(w >= 160 && w <= 480) || !(h >= 64 && h <= 240)) throw new Error("Largura entre 160 e 480 px; altura entre 64 e 240 px.");
-      const { error } = await supabase.from("mytosis_settings").update({ box_width: w, box_height: h }).eq("id", 1);
-      if (error) throw error;
-    },
-    onSuccess: () => { toast.success("Padrões salvos."); queryClient.invalidateQueries({ queryKey: ["mytosis"] }); onClose(); },
+    mutationFn: persist,
+    onSuccess: () => { toast.success("Box padrão salvo."); queryClient.invalidateQueries({ queryKey: ["mytosis"] }); onClose(); },
     onError: (e: Error) => toast.error(e.message),
   });
+  const apply = useMutation({
+    mutationFn: async () => {
+      await persist();
+      const { error } = await supabase.from("mytosis_nodes").update({ ...format }).eq("is_process", true).eq("custom_format", false);
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success("Padrão aplicado aos boxes padrão de todos os fluxogramas."); setConfirmApply(false); queryClient.invalidateQueries({ queryKey: ["mytosis"] }); onClose(); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  const busy = save.isPending || apply.isPending;
   return (
-    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-sm">
-        <DialogHeader><DialogTitle className="font-normal">Padrões dos boxes</DialogTitle><DialogDescription>Todos os boxes usam a mesma largura e altura.</DialogDescription></DialogHeader>
+    <Dialog open={open} onOpenChange={(o) => !o && !busy && onClose()}>
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
+        <DialogHeader><DialogTitle className="font-normal">Box padrão</DialogTitle><DialogDescription>Novas etapas começam com este formato. Todos os boxes usam a mesma largura e altura.</DialogDescription></DialogHeader>
+        <div className="grid gap-3 rounded-xl border border-border bg-muted/40 p-3">
+          <NodePreview width={Number(width) || box.width} height={Number(height) || box.height} shape={format.shape as ShapeKey} fillKey={format.fill_color} borderKey={format.border_color} title="Título da etapa" description="Descrição" responsible="—" number="1.1" titleSize={format.title_font_size} descriptionSize={format.description_font_size} titleColor={format.title_color} controlColor={format.control_color} align={format.text_align} verticalAlign={format.text_vertical_align} process />
+          <FormatEditor value={format} onChange={setFormat} />
+        </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="grid gap-1.5"><Label>Largura (px)</Label><Input type="number" value={width} onChange={(e) => setWidth(e.target.value)} /></div>
           <div className="grid gap-1.5"><Label>Altura (px)</Label><Input type="number" value={height} onChange={(e) => setHeight(e.target.value)} /></div>
         </div>
-        <DialogFooter><Button variant="outline" onClick={onClose}>Cancelar</Button><Button variant="outline" onClick={() => save.mutate()} disabled={save.isPending}>Salvar</Button></DialogFooter>
+        {confirmApply ? <div role="alert" className="grid gap-2 rounded-md border border-border p-3 text-sm">
+          <p>Todos os boxes padrão dos fluxogramas receberão este formato. Boxes customizados serão mantidos. Confirmar?</p>
+          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setConfirmApply(false)} disabled={busy}>Cancelar</Button><Button variant="outline" onClick={() => apply.mutate()} disabled={busy}>Confirmar</Button></div>
+        </div> : null}
+        <DialogFooter className="gap-2 sm:justify-between">
+          <Button variant="outline" onClick={() => setConfirmApply(true)} disabled={busy}>Aplicar a todos os fluxogramas</Button>
+          <div className="flex gap-2"><Button variant="outline" onClick={onClose} disabled={busy}>Cancelar</Button><Button variant="outline" onClick={() => save.mutate()} disabled={busy}>Salvar</Button></div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

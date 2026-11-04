@@ -22,7 +22,7 @@ import { NodePreview } from "./node-preview";
 import { firstName } from "./use-mytosis";
 import { ColorOptions } from "./color-options";
 import { NodeAttachments, uploadNodeAttachments } from "./node-attachments";
-import { initialStageFormat } from "@/lib/mytosis-format";
+import { initialStageFormat, sameFormat, type BoxFormat } from "@/lib/mytosis-format";
 
 export type NodeDialogState =
   | { mode: "edit"; node: MytosisNode }
@@ -65,7 +65,7 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
     if (!state) return;
     setPendingFiles([]); setCreatedId(null);
     const sourceId = state.mode === "create" ? state.formatSourceId ?? state.predecessorId ?? state.parentId : null;
-    const format = initialStageFormat(data.nodes, editing, sourceId);
+    const format: Partial<BoxFormat> | undefined = editing ? initialStageFormat(data.nodes, editing, sourceId) as Partial<BoxFormat> : data.defaultFormat;
     setTitle(editing?.title ?? "");
     setTitleSize(format?.title_font_size ?? 18);
     setTitleColor(TITLE_COLORS.find((item) => item.key === format?.title_color)?.key ?? null);
@@ -81,7 +81,7 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
     setShape((format?.shape as ShapeKey) ?? "process");
     setFillKey((format?.fill_color as FillKey) ?? "none");
     setBorderKey((format?.border_color as BorderKey) ?? "green-mid");
-    setLinkStyle(((format && data.links.find((l) => l.successor_id === format.id)?.style) as LinkStyle) ?? "arrow");
+    setLinkStyle(((editing && data.links.find((l) => l.successor_id === editing.id)?.style) as LinkStyle) ?? "arrow");
     setPreds(new Set(editing
       ? data.links.filter((l) => l.successor_id === editing.id).map((l) => l.predecessor_id)
       : state.mode === "create" && state.predecessorId ? [state.predecessorId] : []));
@@ -116,6 +116,7 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
         title: title.trim(), description: description.trim() || null, responsible_id: responsible, due_date: isProcess ? null : due,
         shape, fill_color: fillKey, border_color: borderKey, control_color: controlColor,
         title_font_size: titleSize, title_color: titleColor, description_font_size: descriptionSize, text_align: textAlign, text_vertical_align: verticalAlign,
+        custom_format: !sameFormat({ shape, fill_color: fillKey, border_color: borderKey, title_font_size: titleSize, description_font_size: descriptionSize, text_align: textAlign, text_vertical_align: verticalAlign, title_color: titleColor, control_color: controlColor }, data.defaultFormat),
         weight: w, progress: kids.length ? editing?.progress ?? 0 : Math.min(100, Math.max(0, Number(progress) || 0)),
       };
       let id = editing?.id ?? createdId;

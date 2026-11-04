@@ -1135,6 +1135,13 @@
       "when": 1793736482203,
       "tag": "0161_mytosis_drag_replace_predecessor",
       "breakpoints": true
+    },
+    {
+      "idx": 162,
+      "version": "7",
+      "when": 1793797729721,
+      "tag": "0162_mytosis_default_box_format",
+      "breakpoints": true
     }
   ]
 }
