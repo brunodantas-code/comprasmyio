@@ -2937,10 +2937,10 @@ function OrdersTable({
                  <div className="inline-flex max-w-full flex-col items-start font-bold">
                     <div className="flex max-w-full items-center gap-1.5">
                       <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} items={groupedOrderItems?.get(o.id)} />
-                     {me?.isAdmin && <AdminEditApprovalDialog order={o} items={(groupedOrderItems?.get(o.id) ?? []) as ApprovalEditItem[]} />}
-                     {me?.canEditSupplyPurchase && o.status !== "cancelado" && ["materiais", "servicos", "viagens"].includes(o.request_model ?? "") && <SupplyEditPurchase orderId={o.id} />}
-                     {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
-                     {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
+                   </div>
+                   <div className="mt-1 flex items-center gap-1">
+                      {me?.isAdmin ? <AdminEditApprovalDialog order={o} items={(groupedOrderItems?.get(o.id) ?? []) as ApprovalEditItem[]} /> : (me?.canEditSupplyPurchase && o.status !== "cancelado" && ["materiais", "servicos", "viagens"].includes(o.request_model ?? "") && true) ? <SupplyEditPurchase orderId={o.id} /> : canEditRequester && o.status === "pendente" ? <EditRequesterDialog order={o} /> : null}
+                      {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
                    </div>
                    {o.budget_exceeded && (
                      <Badge variant="destructive" className="mt-1.5 w-full justify-center whitespace-normal text-center font-sans text-[10px] leading-tight">
@@ -3072,10 +3072,10 @@ function OrdersTable({
                   <div className="inline-flex max-w-full flex-col items-start">
                     <div className="flex max-w-full flex-wrap items-center gap-1">
                       <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} items={groupedOrderItems?.get(o.id)} />
-                     {me?.isAdmin && <AdminEditApprovalDialog order={o} items={(groupedOrderItems?.get(o.id) ?? []) as ApprovalEditItem[]} />}
-                     {me?.canEditSupplyPurchase && o.status !== "cancelado" && ["materiais", "servicos", "viagens"].includes(o.request_model ?? "") && <SupplyEditPurchase orderId={o.id} />}
-                     {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
-                     {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
+                   </div>
+                   <div className="mt-1 flex items-center gap-1">
+                      {me?.isAdmin ? <AdminEditApprovalDialog order={o} items={(groupedOrderItems?.get(o.id) ?? []) as ApprovalEditItem[]} /> : (me?.canEditSupplyPurchase && o.status !== "cancelado" && ["materiais", "servicos", "viagens"].includes(o.request_model ?? "") && true) ? <SupplyEditPurchase orderId={o.id} /> : canEditRequester && o.status === "pendente" ? <EditRequesterDialog order={o} /> : null}
+                      {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
                    </div>
                    {o.budget_exceeded && (
                      <Badge variant="destructive" className="mt-1.5 w-full justify-center whitespace-normal text-center font-sans text-[10px] leading-tight">
