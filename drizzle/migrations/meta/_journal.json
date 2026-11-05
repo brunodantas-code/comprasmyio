@@ -1254,6 +1254,13 @@
       "when": 1793892138209,
       "tag": "0178_supply_order_conversations",
       "breakpoints": true
+    },
+    {
+      "idx": 179,
+      "version": "7",
+      "when": 1793894586986,
+      "tag": "0179_code_auto_answer_on_conclusion",
+      "breakpoints": true
     }
   ]
 }
