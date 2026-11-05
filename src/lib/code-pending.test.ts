@@ -1,8 +1,19 @@
 import { describe, expect, it } from 'vitest';
-import { codePendingItems, unansweredCodeQuestions, type PendingCodeTicket, type PendingCodeMessage } from './code-pending';
+import { codePendingItems, codeQuestionResponders, unansweredCodeQuestions, type PendingCodeTicket, type PendingCodeMessage } from './code-pending';
 const ticket: PendingCodeTicket = { id: 'ticket8', ticket_number: 8, title: 'Cidades', reporter_id: 'alexandre', status: 'atendido', created_at: '2026-10-28' };
 const question: PendingCodeMessage = { id: 'question1', ticket_id: 'ticket8', author_id: 'alexandre', message_type: 'question', parent_message_id: null };
 describe('Perguntas nas pendências do Code', () => {
+  it('pergunta do Solicitante aguarda Atendente', () => {
+    expect(codeQuestionResponders('ticket8', 'alexandre', [question])).toEqual({ requester: false, attendant: true });
+  });
+  it('pergunta do Atendente aguarda Solicitante', () => {
+    expect(codeQuestionResponders('ticket8', 'alexandre', [{ ...question, author_id: 'leonardo' }])).toEqual({ requester: true, attendant: false });
+  });
+  it('identifica simultaneamente as duas partes sem incluir perguntas respondidas', () => {
+    const other = { ...question, id: 'q2', author_id: 'leonardo' };
+    expect(codeQuestionResponders('ticket8', 'alexandre', [question, other])).toEqual({ requester: true, attendant: true });
+    expect(codeQuestionResponders('ticket8', 'alexandre', [question, other, { ...question, id: 'a2', message_type: 'answer', parent_message_id: 'q2' }])).toEqual({ requester: false, attendant: true });
+  });
   it('identifica pergunta sem resposta na lista independente de quem a escreveu', () => {
     expect(unansweredCodeQuestions([question]).map(q => q.ticket_id)).toEqual(['ticket8']);
   });

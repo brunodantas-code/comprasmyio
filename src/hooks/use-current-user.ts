@@ -69,6 +69,7 @@ export function useCurrentUser() {
       const profileMenus = new Set((definition?.access_profile_permissions ?? []).filter((item) => item.allowed).map((item) => item.menu_key));
       const individualTypes = new Set((individualRequestTypes ?? []).map((item) => item.request_type_code));
       const profileTypes = new Set((definition?.access_profile_request_types ?? []).map((item) => item.request_type_code));
+      const { data: canEditSupplyPurchase } = await supabase.rpc("can_edit_supply_purchase");
       const isSupply = titleKeys.some((title) => title.includes("supply"));
       const isCustomerSupportAnalyst = titleKeys.includes("analista de suporte ao cliente");
       const canAccess = (menu: MenuKey) => {
@@ -92,6 +93,7 @@ export function useCurrentUser() {
         canRequestType,
         isAdmin: accessProfileBase === "admin",
         isComprador: isSupply,
+        canEditSupplyPurchase: Boolean(canEditSupplyPurchase),
         isCustomerSupportAnalyst,
         isFabrica: titleKeys.includes("fabrica"),
         isEstoquista: titleKeys.includes("estoquista"),

@@ -71,6 +71,7 @@ const ACTION_LABELS: Record<string, string> = {
   aprovado: "Aprovado",
   rejeitado: "Rejeitado",
   approval_editado: "Approval editado",
+  approval_editado_supply: "Alterado pelo Supply",
 };
 
 function RequestTypeCheckboxes({ values, onChange, types }: { values: string[]; onChange: (values: string[]) => void; types: RequestTypeRecord[] }) {
@@ -317,6 +318,7 @@ function AuditTrailDialog({ orderId, title }: { orderId: string; title: string }
     if (action === "criado") return `Solicitação criada${d["item"] ? `: ${String(d["item"])}` : ""}.`;
     if (action === "status_alterado") return `Status alterado de ${String(d["de"])} para ${String(d["para"])}.`;
     if (action === "observacao_atualizada") return String(d["observacao"] ?? "Observação atualizada.");
+    if (action === "approval_editado_supply") return `Motivo: ${String(d["motivo"] ?? "—")}\nAlterações: ${JSON.stringify(d["campos"] ?? {}, null, 2)}${d["aprovacao_complementar"] ? "\nAguarda aprovação complementar." : ""}`;
     return "—";
   };
 

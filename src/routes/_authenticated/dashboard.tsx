@@ -60,6 +60,7 @@ import { SupplyAllocationSelector, InheritedProjectClient } from "@/components/s
 import { resolveRhSupplyAllocation, resolveSupplyAllocation, type SupplyAllocationType } from "@/lib/supply-allocation";
 import { invalidSupplyRequestValueIndex } from "@/lib/supply-request-value";
 import { SupplyConsolidation } from "@/components/supply-consolidation";
+import { SupplyEditPurchase } from "@/components/supply-edit-purchase";
 
 
 
@@ -96,6 +97,7 @@ type Order = {
   item_name: string;
   item_link: string | null;
   request_type: string;
+  request_model?: string | null;
   travel_type: string | null;
   material_id: string | null;
   terceiros_material_id: string | null;
@@ -2579,7 +2581,7 @@ function ApprovalsCenter({ value, onValueChange }: { value?: string; onValueChan
   const canSeeSupplyQueue = Boolean(me?.isAdmin || me?.isComprador);
   const renderAdminEdit = me?.isAdmin
     ? (order: ApprovalListOrder) => <AdminEditApprovalDialog order={order as unknown as Order} items={(order.purchase_order_items ?? []) as ApprovalEditItem[]} />
-    : undefined;
+    : me?.canEditSupplyPurchase ? (order: ApprovalListOrder) => !["pagamento", "reembolso", "rh", "dispositivos"].includes(order.request_model ?? "") && order.status !== "cancelado" ? <SupplyEditPurchase orderId={order.id} /> : null : undefined;
   const { data: supplyQueueCount = 0 } = useQuery({
     queryKey: ["orders", "supply-queue-count"],
     enabled: canSeeSupplyQueue,
@@ -2876,6 +2878,7 @@ function OrdersTable({
                     <div className="flex max-w-full items-center gap-1.5">
                       <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} items={groupedOrderItems?.get(o.id)} />
                      {me?.isAdmin && <AdminEditApprovalDialog order={o} items={(groupedOrderItems?.get(o.id) ?? []) as ApprovalEditItem[]} />}
+                     {me?.canEditSupplyPurchase && o.status !== "cancelado" && ["materiais", "servicos", "viagens"].includes(o.request_model ?? "") && <SupplyEditPurchase orderId={o.id} />}
                      {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
                      {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
                    </div>
@@ -3018,6 +3021,7 @@ function OrdersTable({
                     <div className="flex max-w-full items-center gap-1.5">
                       <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} items={groupedOrderItems?.get(o.id)} />
                      {me?.isAdmin && <AdminEditApprovalDialog order={o} items={(groupedOrderItems?.get(o.id) ?? []) as ApprovalEditItem[]} />}
+                     {me?.canEditSupplyPurchase && o.status !== "cancelado" && ["materiais", "servicos", "viagens"].includes(o.request_model ?? "") && <SupplyEditPurchase orderId={o.id} />}
                      {canDelete && (me?.isAdmin || me?.id === o.requester_id) && <DeleteOrderDialog order={o} />}
                      {canEditRequester && o.status === "pendente" && <EditRequesterDialog order={o} />}
                    </div>

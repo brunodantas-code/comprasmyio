@@ -6358,6 +6358,57 @@ export type Database = {
           },
         ]
       }
+      supply_edit_notifications: {
+        Row: {
+          actor_id: string
+          created_at: string
+          id: string
+          last_error: string | null
+          log_id: string
+          order_id: string
+          requester_id: string
+          sent_at: string | null
+          status: string
+        }
+        Insert: {
+          actor_id: string
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          log_id: string
+          order_id: string
+          requester_id: string
+          sent_at?: string | null
+          status?: string
+        }
+        Update: {
+          actor_id?: string
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          log_id?: string
+          order_id?: string
+          requester_id?: string
+          sent_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supply_edit_notifications_log_id_fkey"
+            columns: ["log_id"]
+            isOneToOne: true
+            referencedRelation: "order_logs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supply_edit_notifications_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       technician_moves: {
         Row: {
           created_at: string
@@ -7173,6 +7224,7 @@ export type Database = {
         Args: { _user_id: string }
         Returns: boolean
       }
+      can_edit_supply_purchase: { Args: never; Returns: boolean }
       can_manage_cash_flow: { Args: { _user_id: string }; Returns: boolean }
       can_manage_limits: { Args: { _user_id: string }; Returns: boolean }
       can_request_type: {
@@ -7437,6 +7489,15 @@ export type Database = {
       split_mytosis_node: {
         Args: { _count: number; _node_id: string }
         Returns: string[]
+      }
+      supply_edit_purchase: {
+        Args: {
+          _changes: Json
+          _items: Json
+          _order_id: string
+          _reason: string
+        }
+        Returns: Json
       }
       survey_point_edit_lease: {
         Args: {

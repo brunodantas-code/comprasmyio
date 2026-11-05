@@ -1,4 +1,8 @@
 # Roadmap
+- [x] Code: balão vermelho com ? quando devo responder; balão cinza com reticências quando aguardo a outra parte; chamados 8 e 10 conferidos
+- [x] Supply: edição pelo Compras com motivo, valores/entrega e auditoria; alteração de endereço conferida e restaurada
+- [ ] Supply: envio e reenvio de e-mail de cientificação aguardam configuração de domínio remetente; notificações registradas como pendentes
+- [ ] Supply: conferir alteração de valor e aprovação complementar com sessão de Compras não Admin
 - [x] Code: perguntas sem resposta nas Minhas Pendências e Central com símbolo “?”; chamado 8 conferido e regras das duas partes testadas
 - [x] Supply: implementar consolidação aprovada por item/solicitante com filtros e PDF
 - [x] Supply: testar somas, separação de origens, elegibilidade e exportação autenticada

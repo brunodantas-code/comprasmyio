@@ -9,6 +9,14 @@ export function unansweredCodeQuestions(messages: PendingCodeMessage[]) {
   return messages.filter(m => m.message_type === 'question' && !answered.has(`${m.ticket_id}:${m.id}`));
 }
 
+export function codeQuestionResponders(ticketId: string, reporterId: string, messages: PendingCodeMessage[]) {
+  const questions = unansweredCodeQuestions(messages).filter(message => message.ticket_id === ticketId);
+  return {
+    requester: questions.some(message => message.author_id !== reporterId),
+    attendant: questions.some(message => message.author_id === reporterId),
+  };
+}
+
 export function codePendingItems(tickets: PendingCodeTicket[], messages: PendingCodeMessage[], userId: string, isCodeAdmin: boolean): CodePendingItem[] {
   const unanswered = unansweredCodeQuestions(messages);
   return tickets.flatMap(ticket => {

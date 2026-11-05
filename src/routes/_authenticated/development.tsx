@@ -1,7 +1,7 @@
 import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { CodeXml, Download, Eye, History, MessageCircleQuestion, Paperclip, Plus, Send, Trash2, Pencil } from "lucide-react";
+import { CodeXml, Download, Eye, History, MessageCircleQuestion, MessageCircleMore, Paperclip, Plus, Send, Trash2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { MyioAppLogo } from "@/components/myio-app-logo";
@@ -20,7 +20,7 @@ import { AppHeader } from "@/components/app-header";
 import { MilestoneTimeline } from "@/components/milestone-timeline";
 import { currentCodeObservations, proposedSolutionSchema, codeObservationSchema } from "@/lib/code-records";
 import { canReplyToCodeQuestion, shouldShowCodeAnswer, canConcludeCodeTicket } from "@/lib/code-conversation";
-import { unansweredCodeQuestions } from "@/lib/code-pending";
+import { codeQuestionResponders } from "@/lib/code-pending";
 
 type TicketStatus = "aberto" | "em_atendimento" | "aguardando_resposta" | "atendido" | "concluido" | "excluido";
 type Ticket = {
@@ -153,8 +153,8 @@ function DevelopmentPage() {
       const codeAccessIds = new Set((codeAccesses ?? []).map((access) => access.user_id));
       const eligibleAdminIds = new Set((erpAdmins ?? []).map((entry) => entry.user_id).filter((id) => codeAccessIds.has(id)));
       const codeAdmins = (profiles ?? []).filter((profile) => eligibleAdminIds.has(profile.id));
-      const unansweredTicketIds = new Set(unansweredCodeQuestions(messagesResult.data ?? []).map(message => message.ticket_id));
-      return { tickets: (tickets ?? []) as Ticket[], isAdmin: Boolean(admin) && codeAccessIds.has(userId), profiles: profiles ?? [], codeAdmins, userId, unansweredTicketIds };
+      const questionResponders = new Map((tickets ?? []).map(ticket => [ticket.id, codeQuestionResponders(ticket.id, ticket.reporter_id, messagesResult.data ?? [])]));
+      return { tickets: (tickets ?? []) as Ticket[], isAdmin: Boolean(admin) && codeAccessIds.has(userId), profiles: profiles ?? [], codeAdmins, userId, questionResponders };
     },
   });
 
@@ -220,7 +220,7 @@ function DevelopmentPage() {
                     <TableCell><Badge variant="outline" className="font-normal">{ticket.ticket_type === "bug" ? "Bug" : "Melhoria"}</Badge></TableCell>
                     <TableCell className="max-w-xs truncate font-medium">{ticket.title}</TableCell>
                     <TableCell>{PRIORITY_NAMES[ticket.priority]}</TableCell>
-                    <TableCell><div className="flex items-center gap-2"><Badge variant="outline" className="font-normal">{STATUS_NAMES[ticket.status]}</Badge>{data?.unansweredTicketIds.has(ticket.id) ? <span className="inline-flex shrink-0 text-destructive" title="Pergunta aguardando resposta" aria-label="Pergunta aguardando resposta"><MessageCircleQuestion className="h-5 w-5" aria-hidden="true" /></span> : null}</div></TableCell>
+                    <TableCell><div className="flex items-center gap-2"><Badge variant="outline" className="font-normal">{STATUS_NAMES[ticket.status]}</Badge>{data?.questionResponders.get(ticket.id)?.requester ? ticket.reporter_id === data.userId ? <span className="inline-flex shrink-0 text-destructive" title="Pergunta aguardando sua resposta" aria-label="Pergunta aguardando sua resposta"><MessageCircleQuestion className="h-5 w-5" aria-hidden="true" /></span> : <span className="inline-flex shrink-0 text-muted-foreground" title="Aguardando resposta do Solicitante" aria-label="Aguardando resposta do Solicitante"><MessageCircleMore className="h-5 w-5" aria-hidden="true" /></span> : null}{data?.questionResponders.get(ticket.id)?.attendant ? ticket.reporter_id !== data.userId ? <span className="inline-flex shrink-0 text-destructive" title="Pergunta aguardando sua resposta" aria-label="Pergunta aguardando sua resposta"><MessageCircleQuestion className="h-5 w-5" aria-hidden="true" /></span> : <span className="inline-flex shrink-0 text-muted-foreground" title="Aguardando resposta do Atendente" aria-label="Aguardando resposta do Atendente"><MessageCircleMore className="h-5 w-5" aria-hidden="true" /></span> : null}</div></TableCell>
                     <TableCell>{new Date(ticket.created_at).toLocaleDateString("pt-BR")}</TableCell>
                   </TableRow>
                  ))}{!filteredTickets.length ? <TableRow><TableCell colSpan={8} className="h-24 text-center text-muted-foreground">Nenhum ticket encontrado.</TableCell></TableRow> : null}</TableBody>
