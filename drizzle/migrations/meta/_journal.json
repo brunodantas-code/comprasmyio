@@ -1219,6 +1219,13 @@
       "when": 1793888444689,
       "tag": "0173_supply_tags",
       "breakpoints": true
+    },
+    {
+      "idx": 174,
+      "version": "7",
+      "when": 1793889690125,
+      "tag": "0174_supply_tags_menu_permission",
+      "breakpoints": true
     }
   ]
 }

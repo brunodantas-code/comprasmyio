@@ -60,6 +60,7 @@ export const MENU_PERMISSION_GROUPS: MenuPermissionGroup[] = [
       { key: "cadastro_projetos", label: "Projetos" },
       { key: "cadastro_clientes", label: "Clientes" },
       { key: "cadastro_centros", label: "Centro de Custo" },
+      { key: "cadastro_etiquetas", label: "Etiquetas" },
       { key: "cadastro_cargos", label: "Cargos" },
       { key: "cadastro_lembretes", label: "Lembretes" },
       { key: "cadastro_diversos", label: "Diversos" },

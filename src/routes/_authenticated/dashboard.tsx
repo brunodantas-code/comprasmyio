@@ -579,7 +579,7 @@ function Dashboard() {
     { value: "projetos", allowed: me.canAccess("cadastro_projetos") },
     { value: "clientes", allowed: me.canAccess("cadastro_clientes") },
     { value: "centros", allowed: me.canAccess("cadastro_centros") },
-    { value: "etiquetas", allowed: me.canAccess("cadastro_centros") },
+    { value: "etiquetas", allowed: me.canAccess("cadastro_etiquetas") },
     { value: "cargos", allowed: me.canAccess("cadastro_cargos") },
     { value: "lembretes", allowed: me.canAccess("cadastro_lembretes") },
     { value: "diversos", allowed: me.canAccess("cadastro_diversos") },
@@ -657,7 +657,7 @@ function Dashboard() {
                 {me.canAccess("cadastro_projetos") && <TabsContent value="projetos"><ProjectsAdmin userId={me.id} /></TabsContent>}
                 {me.canAccess("cadastro_clientes") && <TabsContent value="clientes"><ClientsTab userId={me.id} /></TabsContent>}
                 {me.canAccess("cadastro_centros") && <TabsContent value="centros"><CostCentersTab userId={me.id} /></TabsContent>}
-                {me.canAccess("cadastro_centros") && <TabsContent value="etiquetas"><SupplyTagsTab userId={me.id} /></TabsContent>}
+                {me.canAccess("cadastro_etiquetas") && <TabsContent value="etiquetas"><SupplyTagsTab userId={me.id} /></TabsContent>}
                 {me.canAccess("cadastro_cargos") && <TabsContent value="cargos"><JobTitlesTab userId={me.id} /></TabsContent>}
                 {me.canAccess("cadastro_lembretes") && <TabsContent value="lembretes"><RemindersTab /></TabsContent>}
                 {me.canAccess("cadastro_diversos") && <TabsContent value="diversos">
@@ -737,7 +737,7 @@ function Dashboard() {
                     { value: "ferramentas", label: "Ferramentas/Ativos", icon: Boxes, allowed: me.canAccess("armazem_ferramentas_ativos") },
                   ].filter((item) => item.allowed)
               : value === "projects"
-                ? [{ value: "projetos", label: "Projetos", icon: FolderKanban, allowed: me.canAccess("cadastro_projetos") }, { value: "clientes", label: "Clientes", icon: Building2, allowed: me.canAccess("cadastro_clientes") }, { value: "centros", label: "Centro de Custo", icon: Landmark, allowed: me.canAccess("cadastro_centros") }, { value: "etiquetas", label: "Etiquetas", icon: Tag, allowed: me.canAccess("cadastro_centros") }, { value: "cargos", label: "Cargos", icon: Briefcase, allowed: me.canAccess("cadastro_cargos") }, { value: "lembretes", label: "Lembretes", icon: Bell, allowed: me.canAccess("cadastro_lembretes") }, { value: "diversos", label: "Diversos", icon: Layers3, allowed: me.canAccess("cadastro_diversos") }].filter((item) => item.allowed)
+                ? [{ value: "projetos", label: "Projetos", icon: FolderKanban, allowed: me.canAccess("cadastro_projetos") }, { value: "clientes", label: "Clientes", icon: Building2, allowed: me.canAccess("cadastro_clientes") }, { value: "centros", label: "Centro de Custo", icon: Landmark, allowed: me.canAccess("cadastro_centros") }, { value: "etiquetas", label: "Etiquetas", icon: Tag, allowed: me.canAccess("cadastro_etiquetas") }, { value: "cargos", label: "Cargos", icon: Briefcase, allowed: me.canAccess("cadastro_cargos") }, { value: "lembretes", label: "Lembretes", icon: Bell, allowed: me.canAccess("cadastro_lembretes") }, { value: "diversos", label: "Diversos", icon: Layers3, allowed: me.canAccess("cadastro_diversos") }].filter((item) => item.allowed)
                 : value === "admin"
                   ? [{ value: "usuarios", label: "Usuários", icon: Users, allowed: me.canAccess("usuarios_lista") }, { value: "acesso-restrito", label: "Perfis de acesso", icon: ShieldCheck, allowed: me.canAccess("usuarios_acesso_restrito") }, { value: "workflow:organograma", label: "Organograma de Aprovação", icon: CheckCircle2, allowed: me.canAccess("usuarios_workflow") }, { value: "workflow:padrao", label: "Alçadas de Aprovação", icon: CheckCircle2, allowed: me.canAccess("usuarios_workflow") }, { value: "workflow:etapas-adicionais", label: "Etapas Adicionais", icon: CheckCircle2, allowed: me.canAccess("usuarios_workflow") }, { value: "logs", label: "Logs", icon: ScrollText, allowed: me.canAccess("usuarios_logs") }, { value: "backup", label: "Backup", icon: DatabaseBackup, allowed: me.canAccess("usuarios_backup") }].filter((item) => item.allowed)
                   : [];
