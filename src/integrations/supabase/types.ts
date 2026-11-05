@@ -3792,6 +3792,7 @@ export type Database = {
           site_survey_visit_id: string | null
           source_myio_order_item_id: string | null
           status: Database["public"]["Enums"]["order_status"]
+          tag_id: string | null
           terceiros_material_id: string | null
           tool_asset_id: string | null
           travel_departure: string | null
@@ -3842,6 +3843,7 @@ export type Database = {
           site_survey_visit_id?: string | null
           source_myio_order_item_id?: string | null
           status?: Database["public"]["Enums"]["order_status"]
+          tag_id?: string | null
           terceiros_material_id?: string | null
           tool_asset_id?: string | null
           travel_departure?: string | null
@@ -3892,6 +3894,7 @@ export type Database = {
           site_survey_visit_id?: string | null
           source_myio_order_item_id?: string | null
           status?: Database["public"]["Enums"]["order_status"]
+          tag_id?: string | null
           terceiros_material_id?: string | null
           tool_asset_id?: string | null
           travel_departure?: string | null
@@ -3970,6 +3973,13 @@ export type Database = {
             columns: ["source_myio_order_item_id"]
             isOneToOne: false
             referencedRelation: "myio_order_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "supply_tags"
             referencedColumns: ["id"]
           },
           {
@@ -6409,6 +6419,33 @@ export type Database = {
           },
         ]
       }
+      supply_tags: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       technician_moves: {
         Row: {
           created_at: string
@@ -7227,6 +7264,7 @@ export type Database = {
       can_edit_supply_purchase: { Args: never; Returns: boolean }
       can_manage_cash_flow: { Args: { _user_id: string }; Returns: boolean }
       can_manage_limits: { Args: { _user_id: string }; Returns: boolean }
+      can_manage_supply_tags: { Args: { _user_id: string }; Returns: boolean }
       can_request_type: {
         Args: { _request_type_code: string; _user_id: string }
         Returns: boolean

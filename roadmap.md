@@ -81,3 +81,6 @@
 - [x] Gerar mockups gráficos das opções de cabeçalho/filtros e apresentar para escolha
 - [x] Aplicar opção 1b (barra em cartão com funil cinza) somente em Minhas Solicitações para avaliação
 - [ ] Aguardar avaliação do usuário: se aprovado, estender o padrão às demais tabelas
+
+- [x] Etiquetas: cadastro, campo na solicitação Interna
+- [x] Relatório de custo consolidado por Etiqueta (tela + PDF)

@@ -30,13 +30,16 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { toast } from "sonner";
 import { ArrowLeft, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Boxes, Building2, Plane, Landmark, Briefcase, Layers3, ArrowUpDown, CalendarDays } from "lucide-react";
-import { Trash2, Paperclip, Loader2, DatabaseBackup, Check, CheckCircle2, XCircle, RotateCcw, Pencil, Bell, ShieldCheck, AlertTriangle } from "lucide-react";
+import { Trash2, Paperclip, Loader2, DatabaseBackup, Check, CheckCircle2, XCircle, RotateCcw, Pencil, Bell, ShieldCheck, AlertTriangle, Tag } from "lucide-react";
 import { ApprovalWorkflow, MyApprovalFlows, PendingApprovalsByRole, PendingForMe, type ApprovalListOrder } from "@/components/approval-workflow";
 import { z } from "zod";
 import { StockTab } from "@/components/stock-tab";
 import { MyioOrdersTab, NewMyioOrderDialog } from "@/components/myio-orders-tab";
 import { ClientsTab, useClients, useClientUnits } from "@/components/clients-tab";
 import { CostCentersTab, useCostCenters } from "@/components/cost-centers-tab";
+import { SupplyTagsTab, useSupplyTags } from "@/components/supply-tags-tab";
+import { SupplyTagCostReport } from "@/components/supply-tag-cost-report";
+import { resolveSupplyTag } from "@/lib/supply-tags";
 import { JobTitlesTab, useJobTitles } from "@/components/job-titles-tab";
 import { RemindersTab } from "@/components/reminders-tab";
 import { AdditionalStepTypesTab } from "@/components/additional-step-types-tab";
@@ -576,6 +579,7 @@ function Dashboard() {
     { value: "projetos", allowed: me.canAccess("cadastro_projetos") },
     { value: "clientes", allowed: me.canAccess("cadastro_clientes") },
     { value: "centros", allowed: me.canAccess("cadastro_centros") },
+    { value: "etiquetas", allowed: me.canAccess("cadastro_centros") },
     { value: "cargos", allowed: me.canAccess("cadastro_cargos") },
     { value: "lembretes", allowed: me.canAccess("cadastro_lembretes") },
     { value: "diversos", allowed: me.canAccess("cadastro_diversos") },
@@ -653,6 +657,7 @@ function Dashboard() {
                 {me.canAccess("cadastro_projetos") && <TabsContent value="projetos"><ProjectsAdmin userId={me.id} /></TabsContent>}
                 {me.canAccess("cadastro_clientes") && <TabsContent value="clientes"><ClientsTab userId={me.id} /></TabsContent>}
                 {me.canAccess("cadastro_centros") && <TabsContent value="centros"><CostCentersTab userId={me.id} /></TabsContent>}
+                {me.canAccess("cadastro_centros") && <TabsContent value="etiquetas"><div className="space-y-6"><SupplyTagsTab userId={me.id} /><SupplyTagCostReport /></div></TabsContent>}
                 {me.canAccess("cadastro_cargos") && <TabsContent value="cargos"><JobTitlesTab userId={me.id} /></TabsContent>}
                 {me.canAccess("cadastro_lembretes") && <TabsContent value="lembretes"><RemindersTab /></TabsContent>}
                 {me.canAccess("cadastro_diversos") && <TabsContent value="diversos">
@@ -732,7 +737,7 @@ function Dashboard() {
                     { value: "ferramentas", label: "Ferramentas/Ativos", icon: Boxes, allowed: me.canAccess("armazem_ferramentas_ativos") },
                   ].filter((item) => item.allowed)
               : value === "projects"
-                ? [{ value: "projetos", label: "Projetos", icon: FolderKanban, allowed: me.canAccess("cadastro_projetos") }, { value: "clientes", label: "Clientes", icon: Building2, allowed: me.canAccess("cadastro_clientes") }, { value: "centros", label: "Centro de Custo", icon: Landmark, allowed: me.canAccess("cadastro_centros") }, { value: "cargos", label: "Cargos", icon: Briefcase, allowed: me.canAccess("cadastro_cargos") }, { value: "lembretes", label: "Lembretes", icon: Bell, allowed: me.canAccess("cadastro_lembretes") }, { value: "diversos", label: "Diversos", icon: Layers3, allowed: me.canAccess("cadastro_diversos") }].filter((item) => item.allowed)
+                ? [{ value: "projetos", label: "Projetos", icon: FolderKanban, allowed: me.canAccess("cadastro_projetos") }, { value: "clientes", label: "Clientes", icon: Building2, allowed: me.canAccess("cadastro_clientes") }, { value: "centros", label: "Centro de Custo", icon: Landmark, allowed: me.canAccess("cadastro_centros") }, { value: "etiquetas", label: "Etiquetas", icon: Tag, allowed: me.canAccess("cadastro_centros") }, { value: "cargos", label: "Cargos", icon: Briefcase, allowed: me.canAccess("cadastro_cargos") }, { value: "lembretes", label: "Lembretes", icon: Bell, allowed: me.canAccess("cadastro_lembretes") }, { value: "diversos", label: "Diversos", icon: Layers3, allowed: me.canAccess("cadastro_diversos") }].filter((item) => item.allowed)
                 : value === "admin"
                   ? [{ value: "usuarios", label: "Usuários", icon: Users, allowed: me.canAccess("usuarios_lista") }, { value: "acesso-restrito", label: "Perfis de acesso", icon: ShieldCheck, allowed: me.canAccess("usuarios_acesso_restrito") }, { value: "workflow:organograma", label: "Organograma de Aprovação", icon: CheckCircle2, allowed: me.canAccess("usuarios_workflow") }, { value: "workflow:padrao", label: "Alçadas de Aprovação", icon: CheckCircle2, allowed: me.canAccess("usuarios_workflow") }, { value: "workflow:etapas-adicionais", label: "Etapas Adicionais", icon: CheckCircle2, allowed: me.canAccess("usuarios_workflow") }, { value: "logs", label: "Logs", icon: ScrollText, allowed: me.canAccess("usuarios_logs") }, { value: "backup", label: "Backup", icon: DatabaseBackup, allowed: me.canAccess("usuarios_backup") }].filter((item) => item.allowed)
                   : [];
@@ -1199,6 +1204,8 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
   const { data: clientUnits } = useClientUnits(clientId || undefined);
   const [costCenterId, setCostCenterId] = useState<string>("");
   const { data: costCenters } = useCostCenters();
+  const [tagId, setTagId] = useState<string>("");
+  const { data: supplyTags } = useSupplyTags();
 
   const { data: me } = useCurrentUser();
   const restrictedCc = !canShowCostCenter;
@@ -1363,6 +1370,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
     setRecipient("");
     setRecipientUserId(null);
     setCostCenterId("");
+    setTagId("");
     setRhCargo("");
     setRhGestor("");
     setRhMotivo("");
@@ -1439,6 +1447,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
           ...resolvedAllocation,
           request_type: requestType,
           cost_center_id: restrictedCc ? await resolveOperacaoCostCenterId() : (costCenterId || null),
+          tag_id: resolveSupplyTag(resolvedAllocation.allocation_type, tagId),
           parent_order_id: null,
           payment_date: requestModel === "pagamento" ? paymentDate : null,
           site_survey_visit_id: siteSurveyDraft?.visitId ?? null,
@@ -1940,6 +1949,12 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                   {canAllocateInternal && !forStock && allocTarget === "interna" && (
                     <p className="text-xs text-muted-foreground">Qualquer despesa interna não atrelada a clientes ou projetos</p>
                   )}
+                  {canAllocateInternal && !forStock && allocTarget === "interna" && (
+                    <div className="pt-2">
+                      <Label>Etiqueta (opcional)</Label>
+                      <SearchableSelect className="mt-2" value={tagId} onChange={setTagId} placeholder="Digite ou selecione a etiqueta" options={(supplyTags ?? []).filter((t) => t.active).map((t) => ({ value: t.id, label: t.name }))} />
+                    </div>
+                  )}
                   {!restrictedCc && (
                     <div className="pt-2">
                       <Label>Centro de Custo</Label>
@@ -1987,6 +2002,12 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                   )}
                   {canAllocateInternal && allocTarget === "interna" && (
                     <p className="text-xs text-muted-foreground">Qualquer despesa interna não atrelada a clientes ou projetos</p>
+                  )}
+                  {canAllocateInternal && !forStock && allocTarget === "interna" && (
+                    <div className="pt-2">
+                      <Label>Etiqueta (opcional)</Label>
+                      <SearchableSelect className="mt-2" value={tagId} onChange={setTagId} placeholder="Digite ou selecione a etiqueta" options={(supplyTags ?? []).filter((t) => t.active).map((t) => ({ value: t.id, label: t.name }))} />
+                    </div>
                   )}
                   {!restrictedCc && (
                     <div className="pt-2">
