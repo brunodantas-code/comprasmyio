@@ -1,10 +1,8 @@
 import { Fragment, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ChevronDown, ChevronRight, FileDown } from "lucide-react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { useSupplyTags } from "@/components/supply-tags-tab";
 import { consolidateTagCosts } from "@/lib/supply-tags";
 
@@ -12,9 +10,8 @@ const money = (v: number) => v.toLocaleString("pt-BR", { style: "currency", curr
 const STATUS: Record<string, string> = { pendente: "Pendente", comprado_aguardando: "Comprado", entregue: "Entregue", recebido_ok: "Recebido", recebido_problema: "Recebido c/ problema", cancelado: "Cancelado" };
 type Row = { id: string; tag_id: string | null; status: string; estimated_value: number | null; approval_number: string | null; item_name: string; created_at: string; requester_id: string | null };
 
-export function SupplyTagCostReport() {
+export function useTagCostReport() {
   const { data: tags } = useSupplyTags();
-  const [open, setOpen] = useState<Set<string>>(new Set());
   const { data: orders } = useQuery({
     queryKey: ["supply_tag_cost_orders"],
     queryFn: async () => {
@@ -37,8 +34,7 @@ export function SupplyTagCostReport() {
     tag: t, ...totals.get(t.id)!, rows: (orders ?? []).filter((o) => o.tag_id === t.id && o.status !== "cancelado"),
   })).sort((a, b) => b.total - a.total);
   const grand = groups.reduce((s, g) => s + g.total, 0);
-  const toggle = (id: string) => setOpen((p) => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n; });
-  const date = (d: string) => new Date(d).toLocaleDateString("pt-BR");
+  return { groups, grand, names, exportPdf };
 
   async function exportPdf() {
     const { jsPDF } = await import("jspdf");
@@ -54,14 +50,20 @@ export function SupplyTagCostReport() {
     autoTable(doc, { startY: 28, head: [["Etiqueta", "Solicitação", "Data / Solicitante / Situação", "Valor"]], body, theme: "plain", styles: { fontSize: 8, cellPadding: 2 }, columnStyles: { 3: { halign: "right" } }, didParseCell: (d) => { if (d.section === "body" && d.row.raw && (d.row.raw as string[])[0]) d.cell.styles.fontStyle = "bold"; } });
     doc.save("Supply-custo-por-etiqueta.pdf");
   }
+}
+
+const date = (d: string) => new Date(d).toLocaleDateString("pt-BR");
+
+/** On-screen consolidated cost per tag (used in Todos os approvals). */
+export function SupplyTagCostReport() {
+  const { groups, grand, names } = useTagCostReport();
+  const [open, setOpen] = useState<Set<string>>(new Set());
+  const toggle = (id: string) => setOpen((p) => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n; });
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0">
-        <CardTitle>Custo consolidado por Etiqueta</CardTitle>
-        <Button size="sm" variant="action" onClick={exportPdf} disabled={!groups.length}><FileDown className="h-3.5 w-3.5" /> PDF</Button>
-      </CardHeader>
-      <CardContent>
+    <div className="rounded-lg border p-3">
+      <p className="mb-2 text-sm font-medium">Custo consolidado por Etiqueta</p>
+      <div>
         {!groups.length ? <p className="text-sm text-muted-foreground">Nenhuma solicitação com etiqueta ainda.</p> : (
           <Table>
             <TableHeader><TableRow><TableHead>Etiqueta</TableHead><TableHead>Solicitações</TableHead><TableHead className="text-right">Valor estimado</TableHead></TableRow></TableHeader>
@@ -84,7 +86,7 @@ export function SupplyTagCostReport() {
             </TableBody>
           </Table>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

@@ -30,7 +30,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { toast } from "sonner";
 import { ArrowLeft, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Boxes, Building2, Plane, Landmark, Briefcase, Layers3, ArrowUpDown, CalendarDays } from "lucide-react";
-import { Trash2, Paperclip, Loader2, DatabaseBackup, Check, CheckCircle2, XCircle, RotateCcw, Pencil, Bell, ShieldCheck, AlertTriangle, Tag } from "lucide-react";
+import { Trash2, Paperclip, Loader2, DatabaseBackup, Check, CheckCircle2, XCircle, RotateCcw, Pencil, Bell, ShieldCheck, AlertTriangle, Tag, FileText } from "lucide-react";
 import { ApprovalWorkflow, MyApprovalFlows, PendingApprovalsByRole, PendingForMe, type ApprovalListOrder } from "@/components/approval-workflow";
 import { z } from "zod";
 import { StockTab } from "@/components/stock-tab";
@@ -38,7 +38,7 @@ import { MyioOrdersTab, NewMyioOrderDialog } from "@/components/myio-orders-tab"
 import { ClientsTab, useClients, useClientUnits } from "@/components/clients-tab";
 import { CostCentersTab, useCostCenters } from "@/components/cost-centers-tab";
 import { SupplyTagsTab, useSupplyTags } from "@/components/supply-tags-tab";
-import { SupplyTagCostReport } from "@/components/supply-tag-cost-report";
+import { SupplyTagCostReport, useTagCostReport } from "@/components/supply-tag-cost-report";
 import { resolveSupplyTag } from "@/lib/supply-tags";
 import { JobTitlesTab, useJobTitles } from "@/components/job-titles-tab";
 import { RemindersTab } from "@/components/reminders-tab";
@@ -657,7 +657,7 @@ function Dashboard() {
                 {me.canAccess("cadastro_projetos") && <TabsContent value="projetos"><ProjectsAdmin userId={me.id} /></TabsContent>}
                 {me.canAccess("cadastro_clientes") && <TabsContent value="clientes"><ClientsTab userId={me.id} /></TabsContent>}
                 {me.canAccess("cadastro_centros") && <TabsContent value="centros"><CostCentersTab userId={me.id} /></TabsContent>}
-                {me.canAccess("cadastro_centros") && <TabsContent value="etiquetas"><div className="space-y-6"><SupplyTagsTab userId={me.id} /><SupplyTagCostReport /></div></TabsContent>}
+                {me.canAccess("cadastro_centros") && <TabsContent value="etiquetas"><SupplyTagsTab userId={me.id} /></TabsContent>}
                 {me.canAccess("cadastro_cargos") && <TabsContent value="cargos"><JobTitlesTab userId={me.id} /></TabsContent>}
                 {me.canAccess("cadastro_lembretes") && <TabsContent value="lembretes"><RemindersTab /></TabsContent>}
                 {me.canAccess("cadastro_diversos") && <TabsContent value="diversos">
@@ -2503,6 +2503,8 @@ function BuyerQueue({ mode = "all" }: { mode?: ApprovalListMode }) {
   const { data: me } = useCurrentUser();
   const canManageOperationalStatus = Boolean(me?.isAdmin || me?.isComprador);
   const [groupByProject, setGroupByProject] = useState(false);
+  const [showTagCosts, setShowTagCosts] = useState(false);
+  const tagCosts = useTagCostReport();
 
   const { data: orders, isLoading } = useQuery({
     queryKey: ["orders", "all"],
@@ -2584,8 +2586,14 @@ function BuyerQueue({ mode = "all" }: { mode?: ApprovalListMode }) {
                 Agrupar por Projeto e Cliente
               </Button>
               <SupplyConsolidation />
+              <Button type="button" size="sm" variant={showTagCosts ? "default" : "outline"} className={showTagCosts ? "!bg-primary !text-primary-foreground hover:!bg-primary/90 hover:!text-primary-foreground" : undefined} onClick={() => setShowTagCosts((v) => !v)}>
+                <Tag className="h-3.5 w-3.5" /> Custo por Etiqueta
+              </Button>
+              <Button type="button" size="sm" variant="outline" title="Exportar custo por Etiqueta em PDF" aria-label="Exportar custo por Etiqueta em PDF" disabled={!tagCosts.groups.length} onClick={() => tagCosts.exportPdf()}>
+                <FileText className="h-3.5 w-3.5" />
+              </Button>
             </div>
-            {renderOrders(filtered)}
+            {showTagCosts ? <SupplyTagCostReport /> : renderOrders(filtered)}
           </div>
         )}
       </CardContent>
