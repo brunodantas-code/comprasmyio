@@ -3184,12 +3184,15 @@ function ConfirmReceiptActions({ order }: { order: Order }) {
 
   return (
     <>
-      <button type="button" disabled={setStatus.isPending} onClick={() => setStatus.mutate("recebido_ok")} className="cursor-pointer disabled:opacity-50">
-        <Badge className={STATUS_BADGE_NEUTRAL}>{STATUS_LABELS.recebido_ok}</Badge>
-      </button>
-      <button type="button" disabled={setStatus.isPending} onClick={() => setStatus.mutate("recebido_problema")} className="cursor-pointer disabled:opacity-50">
-        <Badge className={STATUS_BADGE_NEUTRAL}>{STATUS_LABELS.recebido_problema}</Badge>
-      </button>
+      <Select value="" onValueChange={(v) => setStatus.mutate(v as Order["status"])} disabled={setStatus.isPending}>
+        <SelectTrigger aria-label="Confirmar recebimento" className="h-auto w-auto gap-1 rounded-full border-border bg-transparent px-2.5 py-0.5 text-xs font-normal text-foreground">
+          <SelectValue placeholder="Recebimento" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="recebido_ok">{STATUS_LABELS.recebido_ok}</SelectItem>
+          <SelectItem value="recebido_problema">{STATUS_LABELS.recebido_problema}</SelectItem>
+        </SelectContent>
+      </Select>
     </>
   );
 }
