@@ -20,6 +20,7 @@ import { AppHeader } from "@/components/app-header";
 import { MilestoneTimeline } from "@/components/milestone-timeline";
 import { currentCodeObservations, proposedSolutionSchema, codeObservationSchema } from "@/lib/code-records";
 import { canReplyToCodeQuestion, shouldShowCodeAnswer, canConcludeCodeTicket } from "@/lib/code-conversation";
+import { unansweredCodeQuestions } from "@/lib/code-pending";
 
 type TicketStatus = "aberto" | "em_atendimento" | "aguardando_resposta" | "atendido" | "concluido" | "excluido";
 type Ticket = {
@@ -139,18 +140,21 @@ function DevelopmentPage() {
       const { data: authData, error: authError } = await supabase.auth.getUser();
       if (authError || !authData.user) throw authError ?? new Error("Sessão não encontrada");
       const userId = authData.user.id;
-      const [{ data: tickets, error: ticketsError }, { data: admin }, { data: profiles }, { data: erpAdmins }, { data: codeAccesses }] = await Promise.all([
+      const [{ data: tickets, error: ticketsError }, { data: admin }, { data: profiles }, { data: erpAdmins }, { data: codeAccesses }, messagesResult] = await Promise.all([
         supabase.from("development_tickets").select("*").order("created_at", { ascending: false }),
         supabase.from("erp_admins").select("user_id").eq("user_id", userId).maybeSingle(),
         supabase.from("profiles").select("id, full_name, email").is("deleted_at", null).order("full_name"),
         supabase.from("erp_admins").select("user_id"),
         supabase.from("user_app_access").select("user_id").eq("app_key", "development"),
+        supabase.from("development_ticket_messages").select("id,ticket_id,author_id,message_type,parent_message_id"),
       ]);
       if (ticketsError) throw ticketsError;
+      if (messagesResult.error) throw messagesResult.error;
       const codeAccessIds = new Set((codeAccesses ?? []).map((access) => access.user_id));
       const eligibleAdminIds = new Set((erpAdmins ?? []).map((entry) => entry.user_id).filter((id) => codeAccessIds.has(id)));
       const codeAdmins = (profiles ?? []).filter((profile) => eligibleAdminIds.has(profile.id));
-      return { tickets: (tickets ?? []) as Ticket[], isAdmin: Boolean(admin) && codeAccessIds.has(userId), profiles: profiles ?? [], codeAdmins, userId };
+      const unansweredTicketIds = new Set(unansweredCodeQuestions(messagesResult.data ?? []).map(message => message.ticket_id));
+      return { tickets: (tickets ?? []) as Ticket[], isAdmin: Boolean(admin) && codeAccessIds.has(userId), profiles: profiles ?? [], codeAdmins, userId, unansweredTicketIds };
     },
   });
 
@@ -216,7 +220,7 @@ function DevelopmentPage() {
                     <TableCell><Badge variant="outline" className="font-normal">{ticket.ticket_type === "bug" ? "Bug" : "Melhoria"}</Badge></TableCell>
                     <TableCell className="max-w-xs truncate font-medium">{ticket.title}</TableCell>
                     <TableCell>{PRIORITY_NAMES[ticket.priority]}</TableCell>
-                    <TableCell><Badge variant="outline" className="font-normal">{STATUS_NAMES[ticket.status]}</Badge></TableCell>
+                    <TableCell><div className="flex items-center gap-2"><Badge variant="outline" className="font-normal">{STATUS_NAMES[ticket.status]}</Badge>{data?.unansweredTicketIds.has(ticket.id) ? <span className="inline-flex shrink-0 text-destructive" title="Pergunta aguardando resposta" aria-label="Pergunta aguardando resposta"><MessageCircleQuestion className="h-5 w-5" aria-hidden="true" /></span> : null}</div></TableCell>
                     <TableCell>{new Date(ticket.created_at).toLocaleDateString("pt-BR")}</TableCell>
                   </TableRow>
                  ))}{!filteredTickets.length ? <TableRow><TableCell colSpan={8} className="h-24 text-center text-muted-foreground">Nenhum ticket encontrado.</TableCell></TableRow> : null}</TableBody>

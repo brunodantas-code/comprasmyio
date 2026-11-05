@@ -1,8 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { codePendingItems, type PendingCodeTicket, type PendingCodeMessage } from './code-pending';
+import { codePendingItems, unansweredCodeQuestions, type PendingCodeTicket, type PendingCodeMessage } from './code-pending';
 const ticket: PendingCodeTicket = { id: 'ticket8', ticket_number: 8, title: 'Cidades', reporter_id: 'alexandre', status: 'atendido', created_at: '2026-10-28' };
 const question: PendingCodeMessage = { id: 'question1', ticket_id: 'ticket8', author_id: 'alexandre', message_type: 'question', parent_message_id: null };
 describe('Perguntas nas pendências do Code', () => {
+  it('identifica pergunta sem resposta na lista independente de quem a escreveu', () => {
+    expect(unansweredCodeQuestions([question]).map(q => q.ticket_id)).toEqual(['ticket8']);
+  });
+  it('retira o indicador somente com resposta vinculada ao mesmo chamado e pergunta', () => {
+    const answer = { ...question, id: 'a1', message_type: 'answer', parent_message_id: question.id };
+    expect(unansweredCodeQuestions([question, answer])).toEqual([]);
+    expect(unansweredCodeQuestions([question, { ...answer, ticket_id: 'other' }])).toEqual([question]);
+  });
   it('mostra a pergunta do Alexandre no chamado 8 atendido para o atendente', () => {
     expect(codePendingItems([ticket], [question], 'leonardo', true)).toEqual([expect.objectContaining({ ticketNumber: 8, reason: 'responder' })]);
   });
