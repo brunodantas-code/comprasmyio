@@ -8,6 +8,7 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+- Code lists share pending logic to prevent drift.
 
 - Legal stores app-granted records and private uploader/record files; PDFs embed drawn signatures and changed content clears prior signatures.
 

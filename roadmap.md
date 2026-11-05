@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Code: perguntas sem resposta nas Minhas Pendências e Central com símbolo “?”; chamado 8 conferido e regras das duas partes testadas
 - [x] Supply: implementar consolidação aprovada por item/solicitante com filtros e PDF
 - [x] Supply: testar somas, separação de origens, elegibilidade e exportação autenticada
 - [x] Legal: menus inferiores Contratos, Atas de Reunião e Documentos Padrão

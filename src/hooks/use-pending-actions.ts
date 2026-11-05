@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { codePendingItems } from "@/lib/code-pending";
 
 type ApprovalStep = {
   order_id: string;
@@ -26,7 +27,7 @@ export function usePendingActions() {
       if (authError || !authData.user) throw authError ?? new Error("Sessão não encontrada");
       const userId = authData.user.id;
 
-      const [stepsResult, deletionsResult, codeResult, codeMessagesResult, supplyQueueResult, supportCallsResult, mytosisResult] = await Promise.all([
+      const [stepsResult, deletionsResult, codeResult, codeMessagesResult, supplyQueueResult, supportCallsResult, mytosisResult, codeAdminResult, codeAccessResult] = await Promise.all([
         supabase
           .from("approval_steps")
           .select("order_id, step_index, approver_id, status, purchase_orders(requester_id)")
@@ -40,7 +41,7 @@ export function usePendingActions() {
           .select("id, ticket_number, title, reporter_id, status, created_at"),
         supabase
           .from("development_ticket_messages")
-          .select("id, ticket_id, author_id, message_type, parent_message_id, development_tickets(ticket_number,title,reporter_id,created_at)"),
+          .select("id, ticket_id, author_id, message_type, parent_message_id"),
         currentUser?.isComprador
           ? supabase
               .from("purchase_orders")
@@ -51,6 +52,8 @@ export function usePendingActions() {
           : Promise.resolve({ count: 0, error: null }),
         supabase.from("internal_calls").select("id, call_number, title, status, reporter_id").order("created_at", { ascending: false }),
         supabase.rpc("mytosis_pending_questions"),
+        supabase.from("erp_admins").select("user_id").eq("user_id", userId).maybeSingle(),
+        supabase.from("user_app_access").select("user_id").eq("user_id", userId).eq("app_key", "development").maybeSingle(),
       ]);
 
       if (stepsResult.error) throw stepsResult.error;
@@ -60,6 +63,8 @@ export function usePendingActions() {
       if (supplyQueueResult.error) throw supplyQueueResult.error;
       if (supportCallsResult.error) throw supportCallsResult.error;
       if (mytosisResult.error) throw mytosisResult.error;
+      if (codeAdminResult.error) throw codeAdminResult.error;
+      if (codeAccessResult.error) throw codeAccessResult.error;
 
       const isAdmin = currentUser?.isAdmin ?? false;
       const steps = (stepsResult.data ?? []) as ApprovalStep[];
@@ -73,25 +78,7 @@ export function usePendingActions() {
       const pendingUserDeletions = isAdmin
         ? (deletionsResult.data ?? []).filter((request) => request.requested_by !== userId).length
         : 0;
-      const answeredQuestionIds = new Set(
-        (codeMessagesResult.data ?? [])
-          .filter((message) => message.message_type === "answer" && message.parent_message_id)
-          .map((message) => message.parent_message_id),
-      );
-      const codeItems = new Map<string, { ticketId: string; ticketNumber: number; title: string; reporterId: string; createdAt: string; reporterName?: string; reason: "responder" | "aceitar" | "atender" }>();
-      for (const ticket of codeResult.data ?? []) {
-        if (ticket.status === "atendido" && ticket.reporter_id === userId) {
-          codeItems.set(ticket.id, { ticketId: ticket.id, ticketNumber: ticket.ticket_number, title: ticket.title, reporterId: ticket.reporter_id, createdAt: ticket.created_at, reason: "aceitar" });
-        } else if (isAdmin && (ticket.status === "aberto" || ticket.status === "em_atendimento")) {
-          codeItems.set(ticket.id, { ticketId: ticket.id, ticketNumber: ticket.ticket_number, title: ticket.title, reporterId: ticket.reporter_id, createdAt: ticket.created_at, reason: "atender" });
-        }
-      }
-      for (const message of codeMessagesResult.data ?? []) {
-        const relatedTicket = Array.isArray(message.development_tickets) ? message.development_tickets[0] : message.development_tickets;
-        if (message.message_type !== "question" || message.author_id === relatedTicket?.reporter_id || answeredQuestionIds.has(message.id) || relatedTicket?.reporter_id !== userId) continue;
-        codeItems.set(message.ticket_id, { ticketId: message.ticket_id, ticketNumber: relatedTicket.ticket_number, title: relatedTicket.title, reporterId: relatedTicket.reporter_id, createdAt: relatedTicket.created_at, reason: "responder" });
-      }
-      const pendingCodeItems = [...codeItems.values()];
+      const pendingCodeItems = codePendingItems(codeResult.data ?? [], codeMessagesResult.data ?? [], userId, Boolean(codeAdminResult.data && codeAccessResult.data));
       const reporterIds = [...new Set(pendingCodeItems.map((item) => item.reporterId).filter(Boolean))];
       if (reporterIds.length) {
         const { data: reporters } = await supabase.from("profiles").select("id, full_name, email").in("id", reporterIds);
