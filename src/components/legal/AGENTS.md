@@ -1,0 +1,2 @@
+- Legal uses loader-backed query data and app-scoped RLS for collaborative records. Storage paths are uploader/record/file and reads use expiring signed URLs.
+- Minutes require every participant's drawn signature before generating a signed PDF; changes invalidate signatures and stale PDFs so revised content is signed again.

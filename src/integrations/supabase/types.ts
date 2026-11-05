@@ -2242,6 +2242,48 @@ export type Database = {
         }
         Relationships: []
       }
+      legal_records: {
+        Row: {
+          category: string
+          content: Json
+          created_at: string
+          created_by: string
+          file_name: string | null
+          file_path: string | null
+          id: string
+          meeting_date: string | null
+          pdf_path: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          content?: Json
+          created_at?: string
+          created_by?: string
+          file_name?: string | null
+          file_path?: string | null
+          id?: string
+          meeting_date?: string | null
+          pdf_path?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          content?: Json
+          created_at?: string
+          created_by?: string
+          file_name?: string | null
+          file_path?: string | null
+          id?: string
+          meeting_date?: string | null
+          pdf_path?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       material_stock_types: {
         Row: {
           active: boolean

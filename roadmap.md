@@ -1,4 +1,8 @@
 # Roadmap
+- [ ] Supply: aguardar aprovação da proposta de consolidação de itens e PDF antes de implementar
+- [x] Legal: menus inferiores Contratos, Atas de Reunião e Documentos Padrão
+- [x] Legal: atas por assuntos, participantes, assinaturas na tela, busca, ordenação e PDF privado
+- [x] Legal: verificar salvamento, assinatura, PDF e edição em computador e celular
 - [x] Esclarecer e distinguir botão Novo fluxograma de Nova etapa; confirmar + abre Novo fluxograma
 - [x] Salvar padrões individuais para todas as formas no Box Padrão e aplicar preservando formas e customizações
 - [x] Restringir edição visual a Admin, mantendo formas e conteúdo para Editores; testes de regras e persistência como Admin
