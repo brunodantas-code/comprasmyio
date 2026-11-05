@@ -165,8 +165,11 @@ function DevelopmentPage() {
       && (appFilter === "todos" || ticket.app_key === appFilter)
       && (typeFilter === "todos" || ticket.ticket_type === typeFilter)
       && (priorityFilter === "todos" || ticket.priority === priorityFilter)
-      && (statusFilter === "todos" ? ticket.status !== "excluido" : ticket.status === statusFilter);
-  }), [appFilter, data?.tickets, priorityFilter, reporterFilter, search, statusFilter, typeFilter]);
+      && (statusFilter === "todos" ? ticket.status !== "excluido"
+        : statusFilter === "pergunta_solicitante" ? Boolean(data?.questionResponders.get(ticket.id)?.requester) && ticket.status !== "excluido"
+        : statusFilter === "pergunta_responsavel" ? Boolean(data?.questionResponders.get(ticket.id)?.attendant) && ticket.status !== "excluido"
+        : ticket.status === statusFilter);
+  }), [appFilter, data?.questionResponders, data?.tickets, priorityFilter, reporterFilter, search, statusFilter, typeFilter]);
   const profileNames = useMemo(() => new Map((data?.profiles ?? []).map((profile) => [profile.id, profile.full_name || profile.email || "Usuário"])), [data?.profiles]);
   useEffect(() => {
     if (!routeSearch.ticket || !data?.tickets.length) return;
@@ -208,7 +211,7 @@ function DevelopmentPage() {
                      <TableHead className="py-1"><HeaderFilterSelect value={typeFilter} onChange={setTypeFilter} label="Filtrar por tipo" options={[{ value: "melhoria", label: "Melhoria" }, { value: "bug", label: "Bug" }]} /></TableHead>
                      <TableHead className="py-1"><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Filtrar" aria-label="Filtrar por número ou título" className="h-8 min-w-28 bg-background" /></TableHead>
                      <TableHead className="py-1"><HeaderFilterSelect value={priorityFilter} onChange={setPriorityFilter} label="Filtrar por prioridade" options={Object.entries(PRIORITY_NAMES).map(([value, label]) => ({ value, label }))} /></TableHead>
-                     <TableHead className="py-1"><HeaderFilterSelect value={statusFilter} onChange={setStatusFilter} label="Filtrar por situação" options={Object.entries(STATUS_NAMES).map(([value, label]) => ({ value, label }))} /></TableHead>
+                     <TableHead className="py-1"><HeaderFilterSelect value={statusFilter} onChange={setStatusFilter} label="Filtrar por situação" options={[...Object.entries(STATUS_NAMES).map(([value, label]) => ({ value, label })), { value: "pergunta_solicitante", label: "Pergunta aguardando Solicitante" }, { value: "pergunta_responsavel", label: "Pergunta aguardando Responsável" }]} /></TableHead>
                      <TableHead className="py-1" />
                    </TableRow>
                  </TableHeader>
