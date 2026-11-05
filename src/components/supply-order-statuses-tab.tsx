@@ -9,7 +9,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { GripVertical, Pencil, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, GripVertical, Pencil, Plus, Trash2 } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { DndContext, PointerSensor, KeyboardSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -48,6 +49,7 @@ export function SupplyOrderStatusesTab({ userId }: { userId: string }) {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const [expanded, setExpanded] = useState(false);
   const [localOrder, setLocalOrder] = useState<OrderStatusRow[] | null>(null);
   const list = localOrder ?? rows ?? [];
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }));
@@ -88,12 +90,15 @@ export function SupplyOrderStatusesTab({ userId }: { userId: string }) {
   });
 
   return (
-    <Card>
+    <Collapsible open={expanded} onOpenChange={setExpanded} asChild><Card>
       <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0">
         <CardTitle>Status das Solicitações</CardTitle>
-        {canManage && <StatusDialog onSave={(v) => save.mutate(v)} />}
+        <div className="flex items-center gap-1">
+          {expanded && canManage && <StatusDialog onSave={(v) => save.mutate(v)} />}
+          <CollapsibleTrigger asChild><Button size="compactIcon" variant="ghost" aria-label={expanded ? "Recolher Status das Solicitações" : "Expandir Status das Solicitações"}>{expanded ? <ChevronUp /> : <ChevronDown />}</Button></CollapsibleTrigger>
+        </div>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CollapsibleContent asChild><CardContent className="space-y-3">
         <p className="text-xs text-muted-foreground">
           A sequência define a ordem em que as situações aparecem nas listas e filtros (arraste pela alça para mudar; a numeração se ajusta sozinha). Situações originais podem ser renomeadas, mantendo suas regras (ex.: Conforme dá entrada no estoque). Situações novas servem só para acompanhamento.
           {canManage ? "" : " Somente Admin, Financeiro e Compras alteram esta lista."}
@@ -123,8 +128,8 @@ export function SupplyOrderStatusesTab({ userId }: { userId: string }) {
             </TableBody>
           </Table>
         )}
-      </CardContent>
-    </Card>
+      </CardContent></CollapsibleContent>
+    </Card></Collapsible>
   );
 }
 
