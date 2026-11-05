@@ -398,6 +398,27 @@ function useStatusCatalog() {
 }
 
 const PASSPHRASE_MAX = 20;
+const NO_DEADLINE_MODELS = ["reembolso", "pagamento"];
+const fmtDay = (d: string) => new Date(d + "T00:00:00").toLocaleDateString("pt-BR");
+
+/** Prazo pedido pelo solicitante x previsão informada por Compras; traço quando não se aplica. */
+function DeadlineForecast({ order: o, canEdit, align }: { order: Order; canEdit?: boolean; align?: "center" }) {
+  if (NO_DEADLINE_MODELS.includes(o.request_model ?? "")) return <span className="text-muted-foreground">-</span>;
+  const requested = o.deadline_type === "customizado" ? (o.deadline_date ? fmtDay(o.deadline_date) : "—") : DEADLINE_LABELS[o.deadline_type];
+  const late = !!(o.delivery_forecast && o.deadline_type === "customizado" && o.deadline_date && o.delivery_forecast > o.deadline_date);
+  return (
+    <div className="space-y-1">
+      <div><div className="text-xs text-muted-foreground">Solicitado até</div><div>{requested}</div></div>
+      <div className="border-t pt-1">
+        <div className="text-xs text-muted-foreground">Previsão de Compras</div>
+        <div className={late ? "text-destructive" : undefined} title={late ? "Previsão depois do prazo solicitado" : undefined}>
+          <InlineField order={o} field="delivery_forecast" type="date" canEdit={canEdit} display={o.delivery_forecast ? fmtDay(o.delivery_forecast) : "—"} align={align} />
+        </div>
+        {late && <div className="text-xs text-destructive">Após o prazo</div>}
+      </div>
+    </div>
+  );
+}
 const STATUS_BADGE_BASE = "border-status-border bg-status text-status-foreground hover:bg-status";
 const STATUS_BADGE_NEUTRAL = "border-border bg-transparent font-normal text-foreground hover:bg-muted";
 
@@ -2995,22 +3016,8 @@ function OrdersTable({
               <Row label="Valor Total">{formatBRL(o.estimated_value)}</Row>
               <Row label="Destinatário">{o.recipient || "—"}</Row>
               <Row label={o.delivery_mode === "retirada" ? "Endereço de Retirada" : "Endereço de Entrega"}>{o.delivery_point}</Row>
-              <Row label="Prazo e Previsão">
-                <div>{DEADLINE_LABELS[o.deadline_type]}</div>
-                {o.deadline_type === "customizado" && o.deadline_date && (
-                  <div className="text-muted-foreground">{new Date(o.deadline_date + "T00:00:00").toLocaleDateString("pt-BR")}</div>
-                )}
-                <InlineField
-                  order={o}
-                  field="delivery_forecast"
-                  type="date"
-                  canEdit={canEdit}
-                  display={
-                    o.delivery_forecast
-                      ? `Prev.: ${new Date(o.delivery_forecast + "T00:00:00").toLocaleDateString("pt-BR")}`
-                      : "Prev.: —"
-                  }
-                />
+              <Row label="Prazo">
+                <DeadlineForecast order={o} canEdit={canEdit} />
               </Row>
               <Row label="Status"><div className="flex flex-col items-start gap-1"><StatusHistoryDialog order={o} canEdit={canEdit} />{canEditRequester && o.status === "entregue" && <ConfirmReceiptActions order={o} />}</div></Row>
               <Row label="Palavra passe">
@@ -3038,7 +3045,7 @@ function OrdersTable({
             <TableHead className="w-[45px] text-center">Qtd</TableHead>
             <TableHead className="w-[100px] text-center">Valor Total</TableHead>
             <TableHead className="w-[100px] text-center">Destinatário</TableHead>
-            <TableHead className="w-[100px] text-center">Prazo e Previsão</TableHead>
+            <TableHead className="w-[100px] text-center">Prazo</TableHead>
             <TableHead className="w-[105px] text-center">Status</TableHead>
             <TableHead className="w-[100px] text-center">Palavra passe</TableHead>
           </TableRow>
@@ -3133,24 +3140,7 @@ function OrdersTable({
               <TableCell className="text-center text-sm tabular-nums">{formatBRL(o.estimated_value)}</TableCell>
               <TableCell className="text-sm break-words text-center">{o.recipient || "—"}</TableCell>
               <TableCell className="text-sm break-words text-center">
-                <div>{DEADLINE_LABELS[o.deadline_type]}</div>
-                {o.deadline_type === "customizado" && o.deadline_date && (
-                  <div className="text-muted-foreground">{new Date(o.deadline_date + "T00:00:00").toLocaleDateString("pt-BR")}</div>
-                )}
-                <div className="mt-1 border-t pt-1">
-                  <InlineField
-                    order={o}
-                    field="delivery_forecast"
-                    type="date"
-                    canEdit={canEdit}
-                     display={
-                       o.delivery_forecast
-                         ? `Prev.: ${new Date(o.delivery_forecast + "T00:00:00").toLocaleDateString("pt-BR")}`
-                         : "Prev.: —"
-                     }
-                     align="center"
-                   />
-                </div>
+                <DeadlineForecast order={o} canEdit={canEdit} align="center" />
               </TableCell>
               <TableCell className="text-center"><div className="flex flex-col items-center gap-1"><StatusHistoryDialog order={o} canEdit={canEdit} />{canEditRequester && o.status === "entregue" && <ConfirmReceiptActions order={o} />}</div></TableCell>
               <TableCell className="text-sm break-words text-center">
