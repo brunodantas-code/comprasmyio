@@ -59,6 +59,7 @@ import { takeSiteSurveyPurchaseDraft, type SiteSurveyPurchaseDraft } from "@/lib
 import { SupplyAllocationSelector, InheritedProjectClient } from "@/components/supply-allocation-selector";
 import { resolveRhSupplyAllocation, resolveSupplyAllocation, type SupplyAllocationType } from "@/lib/supply-allocation";
 import { invalidSupplyRequestValueIndex } from "@/lib/supply-request-value";
+import { SupplyConsolidation } from "@/components/supply-consolidation";
 
 
 
@@ -2550,7 +2551,7 @@ function BuyerQueue({ mode = "all" }: { mode?: ApprovalListMode }) {
           <p className="text-sm text-muted-foreground">Nada por aqui.</p>
         ) : (
           <div className="space-y-2">
-            <div className="flex justify-start">
+            <div className="flex flex-wrap justify-start gap-2">
               <Button
                 type="button"
                 variant={groupByProject ? "default" : "outline"} className={groupByProject ? "!bg-primary !text-primary-foreground hover:!bg-primary/90 hover:!text-primary-foreground" : undefined}
@@ -2559,6 +2560,7 @@ function BuyerQueue({ mode = "all" }: { mode?: ApprovalListMode }) {
               >
                 Agrupar por Projeto e Cliente
               </Button>
+              <SupplyConsolidation />
             </div>
             {renderOrders(filtered)}
           </div>
