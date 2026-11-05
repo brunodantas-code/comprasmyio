@@ -2948,11 +2948,6 @@ function OrdersTable({
                      </Badge>
                    )}
                  </div>
-                <div className="mt-1 space-y-1">
-                                    <div className="flex flex-wrap items-center gap-1">
-                    {canEditRequester && o.status === "entregue" && <ConfirmReceiptActions order={o} />}
-                  </div>
-                </div>
               </Row>
               <Row label="Itens da Solicitação">
                 {(groupedOrderItems?.get(o.id) ?? []).length ? (
@@ -3000,7 +2995,7 @@ function OrdersTable({
                   }
                 />
               </Row>
-              <Row label="Status"><StatusHistoryDialog order={o} canEdit={canEdit} /></Row>
+              <Row label="Status"><div className="flex flex-col items-start gap-1"><StatusHistoryDialog order={o} canEdit={canEdit} />{canEditRequester && o.status === "entregue" && <ConfirmReceiptActions order={o} />}</div></Row>
               <Row label="Palavra passe">
                 <InlineField order={o} field="passphrase" type="text" canEdit={canEdit} display={o.passphrase || "—"} maxLength={PASSPHRASE_MAX} />
               </Row>
@@ -3088,11 +3083,6 @@ function OrdersTable({
                      </Badge>
                    )}
                  </div>
-                <div className="mt-1 space-y-1 font-sans">
-                                    <div className="flex flex-wrap items-center gap-1">
-                    {canEditRequester && o.status === "entregue" && <ConfirmReceiptActions order={o} />}
-                  </div>
-                </div>
               </TableCell>
               <TableCell>
                 {(groupedOrderItems?.get(o.id) ?? []).length ? (
@@ -3144,7 +3134,7 @@ function OrdersTable({
                    />
                 </div>
               </TableCell>
-              <TableCell className="text-center"><StatusHistoryDialog order={o} canEdit={canEdit} /></TableCell>
+              <TableCell className="text-center"><div className="flex flex-col items-center gap-1"><StatusHistoryDialog order={o} canEdit={canEdit} />{canEditRequester && o.status === "entregue" && <ConfirmReceiptActions order={o} />}</div></TableCell>
               <TableCell className="text-sm break-words text-center">
                 <InlineField order={o} field="passphrase" type="text" canEdit={canEdit} display={o.passphrase || "—"} align="center" maxLength={PASSPHRASE_MAX} />
               </TableCell>
@@ -3176,12 +3166,12 @@ function ConfirmReceiptActions({ order }: { order: Order }) {
 
   return (
     <>
-      <Button size="sm" variant="outline" disabled={setStatus.isPending} onClick={() => setStatus.mutate("recebido_ok")}>
-        Recebido corretamente
-      </Button>
-      <Button size="sm" variant="outline" disabled={setStatus.isPending} onClick={() => setStatus.mutate("recebido_problema")}>
-        Recebido com problemas
-      </Button>
+      <button type="button" disabled={setStatus.isPending} onClick={() => setStatus.mutate("recebido_ok")} className="cursor-pointer disabled:opacity-50">
+        <Badge className={STATUS_BADGE_NEUTRAL}>Conforme</Badge>
+      </button>
+      <button type="button" disabled={setStatus.isPending} onClick={() => setStatus.mutate("recebido_problema")} className="cursor-pointer disabled:opacity-50">
+        <Badge className={STATUS_BADGE_NEUTRAL}>Não Conforme</Badge>
+      </button>
     </>
   );
 }
