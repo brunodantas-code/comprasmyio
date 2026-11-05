@@ -9,7 +9,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { ArrowDown, ArrowUp, Pencil, Plus, Trash2 } from "lucide-react";
+import { GripVertical, Pencil, Plus, Trash2 } from "lucide-react";
+import { DndContext, PointerSensor, KeyboardSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
+import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { useCanManageSupplyTags } from "@/components/supply-tags-tab";
 
 export type OrderStatusRow = { id: string; system_code: string | null; label: string; position: number; active: boolean; created_by: string | null; created_at: string };
@@ -45,23 +48,28 @@ export function SupplyOrderStatusesTab({ userId }: { userId: string }) {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const move = useMutation({
-    mutationFn: async ({ index, dir }: { index: number; dir: -1 | 1 }) => {
-      const list = [...(rows ?? [])];
-      const j = index + dir;
-      if (j < 0 || j >= list.length) return;
-      [list[index], list[j]] = [list[j], list[index]];
-      for (let i = 0; i < list.length; i++) {
+  const [localOrder, setLocalOrder] = useState<OrderStatusRow[] | null>(null);
+  const list = localOrder ?? rows ?? [];
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }));
+  const reorder = useMutation({
+    mutationFn: async (next: OrderStatusRow[]) => {
+      for (let i = 0; i < next.length; i++) {
         const pos = (i + 1) * 10;
-        if (list[i].position !== pos) {
-          const { error } = await supabase.from("supply_order_statuses").update({ position: pos }).eq("id", list[i].id);
+        if (next[i].position !== pos) {
+          const { error } = await supabase.from("supply_order_statuses").update({ position: pos }).eq("id", next[i].id);
           if (error) throw error;
         }
       }
     },
-    onSuccess: refresh,
+    onSettled: async () => { await qc.invalidateQueries({ queryKey: ["supply_order_statuses"] }); setLocalOrder(null); },
     onError: (e: Error) => toast.error(e.message),
   });
+  const onDragEnd = (e: DragEndEvent) => {
+    if (!canManage || !e.over || e.active.id === e.over.id) return;
+    const from = list.findIndex((r) => r.id === e.active.id), to = list.findIndex((r) => r.id === e.over!.id);
+    const next = arrayMove(list, from, to);
+    setLocalOrder(next); reorder.mutate(next);
+  };
 
   const remove = useMutation({
     mutationFn: async (row: OrderStatusRow) => {
@@ -87,42 +95,21 @@ export function SupplyOrderStatusesTab({ userId }: { userId: string }) {
       </CardHeader>
       <CardContent className="space-y-3">
         <p className="text-xs text-muted-foreground">
-          A sequência define a ordem em que as situações aparecem nas listas e filtros (use as setas para mudar). Situações originais podem ser renomeadas, mantendo suas regras (ex.: Conforme dá entrada no estoque). Situações novas servem só para acompanhamento.
+          A sequência define a ordem em que as situações aparecem nas listas e filtros (arraste pela alça para mudar; a numeração se ajusta sozinha). Situações originais podem ser renomeadas, mantendo suas regras (ex.: Conforme dá entrada no estoque). Situações novas servem só para acompanhamento.
           {canManage ? "" : " Somente Admin, Financeiro e Compras alteram esta lista."}
         </p>
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : (
           <Table>
             <TableHeader><TableRow><TableHead>Sequência</TableHead><TableHead>Nome</TableHead><TableHead>Tipo</TableHead><TableHead>Situação</TableHead><TableHead /></TableRow></TableHeader>
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+            <SortableContext items={list.map((r) => r.id)} strategy={verticalListSortingStrategy}>
             <TableBody>
-              {(rows ?? []).map((r, i) => (
-                <TableRow key={r.id}>
-                  <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
-                    <span className="inline-block w-5">{i + 1}</span>
-                    {canManage && <>
-                      <Button size="compactIcon" variant="ghost" title="Subir" aria-label="Subir" disabled={i === 0 || move.isPending} onClick={() => move.mutate({ index: i, dir: -1 })}><ArrowUp className="h-3.5 w-3.5" /></Button>
-                      <Button size="compactIcon" variant="ghost" title="Descer" aria-label="Descer" disabled={i === (rows?.length ?? 0) - 1 || move.isPending} onClick={() => move.mutate({ index: i, dir: 1 })}><ArrowDown className="h-3.5 w-3.5" /></Button>
-                    </>}
-                  </TableCell>
-                  <TableCell className="font-medium">{r.label}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{r.system_code ? "Original (com regras)" : "Acompanhamento"}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{r.active ? "Ativa" : "Inativa"}</TableCell>
-                  <TableCell className="space-x-1 whitespace-nowrap text-right">
-                    {canManage && <>
-                      <StatusDialog row={r} onSave={(v) => save.mutate({ ...v, id: r.id })} />
-                      {!r.system_code && (
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild><Button size="compactIcon" variant="ghost" title="Excluir" aria-label="Excluir"><Trash2 className="h-3.5 w-3.5" /></Button></AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader><AlertDialogTitle>Excluir situação?</AlertDialogTitle><AlertDialogDescription>Se “{r.label}” estiver em uso, ela será inativada para preservar as solicitações.</AlertDialogDescription></AlertDialogHeader>
-                            <AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={() => remove.mutate(r)}>Excluir</AlertDialogAction></AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      )}
-                    </>}
-                  </TableCell>
-                </TableRow>
+              {list.map((r, i) => (
+                <SortableStatusRow key={r.id} row={r} index={i} canManage={!!canManage} onSave={(v) => save.mutate({ ...v, id: r.id })} onRemove={() => remove.mutate(r)} />
               ))}
             </TableBody>
+            </SortableContext>
+            </DndContext>
           </Table>
         )}
       </CardContent>
@@ -159,5 +146,37 @@ function StatusDialog({ row, onSave }: { row?: OrderStatusRow; onSave: (v: { lab
         </form>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function SortableStatusRow({ row, index, canManage, onSave, onRemove }: { row: OrderStatusRow; index: number; canManage: boolean; onSave: (v: { label: string; position: number; active?: boolean }) => void; onRemove: () => void }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: row.id, disabled: !canManage });
+  const style = { transform: CSS.Transform.toString(transform), transition };
+  return (
+    <TableRow ref={setNodeRef} style={style} className={isDragging ? "relative z-10 bg-muted" : undefined}>
+                  <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
+                    <span className="inline-flex items-center gap-2">
+                      {canManage && <button type="button" {...attributes} {...listeners} className="cursor-grab touch-none text-muted-foreground active:cursor-grabbing" aria-label="Arrastar para reordenar"><GripVertical className="h-4 w-4" /></button>}
+                      <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full border border-border px-1 text-xs">{index + 1}</span>
+                    </span>
+                  </TableCell>
+                  <TableCell className="font-medium">{row.label}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{row.system_code ? "Original (com regras)" : "Acompanhamento"}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{row.active ? "Ativa" : "Inativa"}</TableCell>
+                  <TableCell className="space-x-1 whitespace-nowrap text-right">
+                    {canManage && <>
+                      <StatusDialog row={row} onSave={(v) => onSave(v)} />
+                      {!row.system_code && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild><Button size="compactIcon" variant="ghost" title="Excluir" aria-label="Excluir"><Trash2 className="h-3.5 w-3.5" /></Button></AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader><AlertDialogTitle>Excluir situação?</AlertDialogTitle><AlertDialogDescription>Se “{row.label}” estiver em uso, ela será inativada para preservar as solicitações.</AlertDialogDescription></AlertDialogHeader>
+                            <AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={() => onRemove()}>Excluir</AlertDialogAction></AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
+                    </>}
+                  </TableCell>
+                </TableRow>
   );
 }
