@@ -57,6 +57,6 @@ function PendingLink({ icon: Icon, label, count, to, search }: { icon: typeof Be
   if (to === "/pendentes") return <a href="#approvals" className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10">{content}</a>;
   if (to === "/development") return <Link to="/development" search={(search && "ticket" in search) ? search : { ticket: undefined }} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10">{content}</Link>;
   if (to === "/chamados") return <Link to="/chamados" search={(search && "chamado" in search) ? search : { chamado: undefined }} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10">{content}</Link>;
-  if (to === "/dashboard" && search && "order" in search) return <Link to="/dashboard" search={{ order: search.order }} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10">{content}</Link>;
+  if (to === "/dashboard" && search && "order" in search) return <Link to="/dashboard" search={{ order: search.order, section: undefined, subsection: undefined }} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10">{content}</Link>;
   return <Link to="/dashboard" search={search && "section" in search ? { section: search.section, subsection: "subsection" in search ? search.subsection : undefined } : { section: "queue", subsection: undefined }} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10">{content}</Link>;
 }
