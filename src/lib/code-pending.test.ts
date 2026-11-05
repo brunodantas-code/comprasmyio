@@ -3,6 +3,22 @@ import { codePendingItems, codeQuestionResponders, unansweredCodeQuestions, type
 const ticket: PendingCodeTicket = { id: 'ticket8', ticket_number: 8, title: 'Cidades', reporter_id: 'alexandre', status: 'atendido', created_at: '2026-10-28' };
 const question: PendingCodeMessage = { id: 'question1', ticket_id: 'ticket8', author_id: 'alexandre', message_type: 'question', parent_message_id: null };
 describe('Perguntas nas pendências do Code', () => {
+  it('direciona a resposta somente ao usuário selecionado, mesmo sem ser admin ou solicitante', () => {
+    const directed = { ...question, author_id: 'leonardo', recipient_id: 'outro' };
+    expect(codePendingItems([ticket], [directed], 'outro', false)[0]?.reason).toBe('responder');
+    expect(codePendingItems([ticket], [directed], 'admin-nao-destinatario', true)).toEqual([]);
+  });
+  it('notifica o Solicitante sem atribuir a ele a resposta de outra pessoa', () => {
+    const directed = { ...question, author_id: 'leonardo', recipient_id: 'outro' };
+    expect(codePendingItems([ticket], [directed], 'alexandre', false)[0]?.reason).toBe('notificado');
+    expect(codePendingItems([ticket], [{ ...directed, requester_seen_at: '2026-11-05' }], 'alexandre', false)[0]?.reason).toBe('aceitar');
+  });
+  it('mantém alerta não lido mesmo após a resposta e retira a tarefa do destinatário', () => {
+    const directed = { ...question, author_id: 'leonardo', recipient_id: 'outro' };
+    const answer = { ...question, id: 'answer', author_id: 'outro', message_type: 'answer', parent_message_id: question.id };
+    expect(codePendingItems([ticket], [directed, answer], 'outro', false)).toEqual([]);
+    expect(codePendingItems([ticket], [directed, answer], 'alexandre', false)[0]?.reason).toBe('notificado');
+  });
   it('pergunta do Solicitante aguarda Atendente', () => {
     expect(codeQuestionResponders('ticket8', 'alexandre', [question])).toEqual({ requester: false, attendant: true });
   });

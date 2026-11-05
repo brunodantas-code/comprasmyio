@@ -1,0 +1,1 @@
+CREATE POLICY "Code question recipients read private files" ON storage.objects FOR SELECT TO authenticated USING (bucket_id='development-ticket-attachments' AND EXISTS (SELECT 1 FROM public.development_ticket_attachments a WHERE a.storage_path=name AND public.code_question_participant(a.ticket_id)));

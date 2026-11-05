@@ -52,9 +52,10 @@ type Props = {
   renderSelected?: (option: SearchableOption) => React.ReactNode;
   renderOption?: (option: SearchableOption) => React.ReactNode;
   optionClassName?: string;
+  optionFilter?: (options: SearchableOption[], query: string) => SearchableOption[];
 };
 
-export function SearchableSelect({ value, onChange, options, placeholder = "Digite para buscar...", emptyText = "Nenhum resultado", disabled, clearable = true, className, renderSelected, renderOption, optionClassName, ...rest }: Props) {
+export function SearchableSelect({ value, onChange, options, placeholder = "Digite para buscar...", emptyText = "Nenhum resultado", disabled, clearable = true, className, renderSelected, renderOption, optionClassName, optionFilter = filterOptions, ...rest }: Props) {
   const selected = options.find((o) => o.value === value) ?? null;
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
@@ -63,7 +64,7 @@ export function SearchableSelect({ value, onChange, options, placeholder = "Digi
   const inputRef = React.useRef<HTMLInputElement>(null);
   const listRef = React.useRef<HTMLDivElement>(null);
 
-  const results = React.useMemo(() => filterOptions(options, typing ? query : ""), [options, query, typing]);
+  const results = React.useMemo(() => optionFilter(options, typing ? query : ""), [options, query, typing, optionFilter]);
 
   React.useEffect(() => { setActive(0); }, [query, open]);
   React.useEffect(() => {

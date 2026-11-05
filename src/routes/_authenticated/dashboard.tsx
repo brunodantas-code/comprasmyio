@@ -64,6 +64,8 @@ import { resolveRhSupplyAllocation, resolveSupplyAllocation, type SupplyAllocati
 import { invalidSupplyRequestValueIndex } from "@/lib/supply-request-value";
 import { SupplyConsolidation } from "@/components/supply-consolidation";
 import { SupplyEditPurchase } from "@/components/supply-edit-purchase";
+import { SupplyOrderConversation } from "@/components/supply-order-conversation";
+import { MilestoneTimeline } from "@/components/milestone-timeline";
 
 
 
@@ -71,6 +73,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   validateSearch: (search: Record<string, unknown>) => ({
     section: typeof search.section === "string" ? search.section : undefined,
     subsection: typeof search.subsection === "string" ? search.subsection : undefined,
+    ...(typeof search.order === "string" ? { order: search.order } : {}),
   }),
   beforeLoad: async ({ context }) => {
     const { data } = await supabase.from("user_app_access").select("app_key").eq("user_id", context.user.id).eq("app_key", "supply").maybeSingle();
@@ -549,6 +552,15 @@ function DeliveredFilter({
 function Dashboard() {
   const qc = useQueryClient();
   const search = Route.useSearch();
+  const { data: linkedOrder } = useQuery({
+    queryKey: ['linked-supply-order', search.order], enabled: Boolean(search.order),
+    queryFn: async () => {
+      const { data, error } = await supabase.from('purchase_orders').select('*').eq('id', search.order ?? '').maybeSingle();
+      if (error) throw error;
+      return data as Order | null;
+    },
+  });
+  const linkedDialog = linkedOrder ? <OrderReportDialog key={linkedOrder.id} order={linkedOrder} projectName={() => '—'} initiallyOpen /> : null;
   const { data: me, isLoading: meLoading } = useCurrentUser();
   const [section, setSection] = useState(search.section);
   const [requestSection, setRequestSection] = useState<string | undefined>(search.section === "pedidos" ? search.subsection : undefined);
@@ -623,6 +635,7 @@ function Dashboard() {
         </div>
       </AppHeader>
 
+      {linkedDialog}
       <main className="mx-auto max-w-7xl px-3 pb-28 pt-5 sm:px-6 sm:pt-8">
         <Tabs value={activeSection} onValueChange={setSection}>
 
@@ -3228,14 +3241,15 @@ function fmtDateTime(v?: string | null) {
 }
 
 function OrderReportDialog({
-  order, projectName, requesterName, items = [],
+  order, projectName, requesterName, items = [], initiallyOpen = false,
 }: {
   order: Order;
   projectName: (id: string) => string;
   requesterName?: (id: string) => string;
   items?: PurchaseOrderItem[];
+  initiallyOpen?: boolean;
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(initiallyOpen);
   const { data: requestTypes } = useRequestTypes();
   const { data: profiles } = useProfilesMap();
   const { data: clients } = useClients();
@@ -3407,22 +3421,14 @@ function OrderReportDialog({
             )}
           </section>
 
-          <section className="space-y-2">
-            <h3 className="text-sm font-semibold">Histórico completo</h3>
-            {loadingLogs ? (
-              <p className="text-sm text-muted-foreground">Carregando...</p>
-            ) : !displayedLogs || displayedLogs.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Nenhum registro.</p>
-            ) : (
-              <ol className="space-y-3 border-l pl-4">
-                {displayedLogs.map((l) => (
-                  <li key={l.id} className="space-y-1">
-                    <div className="text-sm font-medium">{LOG_ACTION_LABELS[l.action] ?? l.action}</div>
-                    <div className="text-xs text-muted-foreground">{fmtDateTime(l.created_at)} — {nameFor(l.actor_id)}</div>
-                  </li>
-                ))}
-              </ol>
-            )}
+          <SupplyOrderConversation order={order} nameFor={nameFor} />
+          <section className="space-y-2 border-t pt-4">
+            <h3 className="text-sm font-semibold">Histórico</h3>
+            {loadingLogs ? <p className="text-sm text-muted-foreground">Carregando...</p> : <MilestoneTimeline entries={(displayedLogs ?? []).map(l => {
+              const detail = l.details && typeof l.details === 'object' && !Array.isArray(l.details) ? l.details : {};
+              const text = l.action === 'conversa_question' ? 'Pergunta enviada' : l.action === 'conversa_answer' ? 'Resposta enviada' : LOG_ACTION_LABELS[l.action] ?? l.action;
+              return { id: l.id, created_at: l.created_at, text: `${text}${typeof detail.message === 'string' ? `: ${detail.message}` : ''}\npor ${nameFor(l.actor_id)}` };
+            })} />}
           </section>
         </div>
 

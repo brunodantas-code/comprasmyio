@@ -1,4 +1,6 @@
 # Roadmap
+- [ ] Code: destinatário pesquisável, padrão Solicitante, resposta pelo destinatário e alerta ao Solicitante na Central
+- [ ] Supply: conversa Solicitante/Comprador com perguntas, respostas e Histórico no padrão Code; pendências na Central e Minhas Pendências
 - [x] Retirar # dos números na lista do Code, Central e Minhas Pendências; conferir as três listas autenticadas
 - [x] Confirmar disponibilidade da edição pelo Compras e informar que e-mails aguardam configuração do remetente
 - [x] Code: balão vermelho com ? quando devo responder; balão cinza com reticências quando aguardo a outra parte; chamados 8 e 10 conferidos

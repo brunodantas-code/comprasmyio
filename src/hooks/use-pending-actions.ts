@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { codePendingItems } from "@/lib/code-pending";
+import { supplyPendingQuestions } from "@/lib/supply-conversation";
 
 type ApprovalStep = {
   order_id: string;
@@ -41,7 +42,7 @@ export function usePendingActions() {
           .select("id, ticket_number, title, reporter_id, status, created_at"),
         supabase
           .from("development_ticket_messages")
-          .select("id, ticket_id, author_id, message_type, parent_message_id"),
+          .select("id, ticket_id, author_id, message_type, parent_message_id, recipient_id, requester_seen_at"),
         currentUser?.isComprador
           ? supabase
               .from("purchase_orders")
@@ -88,6 +89,14 @@ export function usePendingActions() {
         }
       }
       const pendingCodeTickets = pendingCodeItems.length;
+      const [supplyMessages, supplyOrders] = await Promise.all([
+        supabase.from('supply_order_messages').select('*'),
+        supabase.from('purchase_orders').select('id,requester_id,approval_number,item_name,status,request_type'),
+      ]);
+      if (supplyMessages.error) throw supplyMessages.error;
+      if (supplyOrders.error) throw supplyOrders.error;
+      const supplyQuestions = supplyPendingQuestions(supplyMessages.data ?? [], supplyOrders.data ?? [], userId, Boolean(currentUser?.canEditSupplyPurchase));
+      const supplyQuestionCount = supplyQuestions.reduce((sum, q) => sum + q.count, 0);
       const pendingSupplyQueue = supplyQueueResult.count ?? 0;
       const supportCallItems = (supportCallsResult.data ?? [])
         .filter((call) => currentUser?.isCustomerSupportAnalyst
@@ -97,6 +106,7 @@ export function usePendingActions() {
       const supportCalls = supportCallItems.length;
 
       return {
+        supplyQuestions,
         mytosisItems: mytosisResult.data ?? [],
         mytosisQuestions: mytosisResult.data?.length ?? 0,
         approvals: pendingApprovals,
@@ -107,10 +117,11 @@ export function usePendingActions() {
         supportCalls,
         supportCallItems,
         isCustomerSupportAnalyst: currentUser?.isCustomerSupportAnalyst ?? false,
-        supply: pendingApprovals + pendingUserDeletions + pendingSupplyQueue,
-        total: pendingApprovals + pendingUserDeletions + pendingCodeTickets + pendingSupplyQueue + supportCalls + (mytosisResult.data?.length ?? 0),
+        supply: pendingApprovals + pendingUserDeletions + pendingSupplyQueue + supplyQuestionCount,
+        total: pendingApprovals + pendingUserDeletions + pendingCodeTickets + pendingSupplyQueue + supportCalls + supplyQuestionCount + (mytosisResult.data?.length ?? 0),
       };
     },
     staleTime: 30_000,
+    refetchInterval: 30_000,
   });
 }

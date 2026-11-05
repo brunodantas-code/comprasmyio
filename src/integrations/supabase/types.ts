@@ -1408,6 +1408,8 @@ export type Database = {
           message: string
           message_type: string
           parent_message_id: string | null
+          recipient_id: string | null
+          requester_seen_at: string | null
           ticket_id: string
         }
         Insert: {
@@ -1417,6 +1419,8 @@ export type Database = {
           message: string
           message_type: string
           parent_message_id?: string | null
+          recipient_id?: string | null
+          requester_seen_at?: string | null
           ticket_id: string
         }
         Update: {
@@ -1426,6 +1430,8 @@ export type Database = {
           message?: string
           message_type?: string
           parent_message_id?: string | null
+          recipient_id?: string | null
+          requester_seen_at?: string | null
           ticket_id?: string
         }
         Relationships: [
@@ -1441,6 +1447,13 @@ export type Database = {
             columns: ["parent_message_id"]
             isOneToOne: false
             referencedRelation: "development_ticket_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "development_ticket_messages_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -6461,6 +6474,68 @@ export type Database = {
           },
         ]
       }
+      supply_order_messages: {
+        Row: {
+          author_id: string
+          created_at: string
+          id: string
+          message: string
+          message_type: string
+          order_id: string
+          parent_message_id: string | null
+          recipient_id: string | null
+        }
+        Insert: {
+          author_id: string
+          created_at?: string
+          id?: string
+          message: string
+          message_type: string
+          order_id: string
+          parent_message_id?: string | null
+          recipient_id?: string | null
+        }
+        Update: {
+          author_id?: string
+          created_at?: string
+          id?: string
+          message?: string
+          message_type?: string
+          order_id?: string
+          parent_message_id?: string | null
+          recipient_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supply_order_messages_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supply_order_messages_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supply_order_messages_parent_message_id_fkey"
+            columns: ["parent_message_id"]
+            isOneToOne: false
+            referencedRelation: "supply_order_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supply_order_messages_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       supply_tags: {
         Row: {
           active: boolean
@@ -7319,6 +7394,19 @@ export type Database = {
         Args: { _user_id: string; _visit_id: string }
         Returns: boolean
       }
+      code_can_open: { Args: never; Returns: boolean }
+      code_conversation_users: {
+        Args: never
+        Returns: {
+          email: string
+          full_name: string
+          id: string
+        }[]
+      }
+      code_question_participant: {
+        Args: { _ticket_id: string }
+        Returns: boolean
+      }
       convert_client_to_unit: {
         Args: { _destination_client_id: string; _source_client_id: string }
         Returns: string
@@ -7447,6 +7535,10 @@ export type Database = {
           status: string
           title: string
         }[]
+      }
+      mark_code_question_alerts_read: {
+        Args: { _ticket_id: string }
+        Returns: undefined
       }
       mytosis_attachment_owned_object: {
         Args: { _path: string }
