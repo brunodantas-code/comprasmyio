@@ -385,7 +385,9 @@ const STATUS_LABELS: Record<Order["status"], string> = {
   recebido_problema: "Recebido com problemas",
 };
 
+const PASSPHRASE_MAX = 20;
 const STATUS_BADGE_BASE = "border-status-border bg-status text-status-foreground hover:bg-status";
+const STATUS_BADGE_NEUTRAL = "border-border bg-transparent font-normal text-foreground hover:bg-muted";
 
 const STATUS_CLASSES: Record<Order["status"], string> = {
   pendente: STATUS_BADGE_BASE,
@@ -2932,7 +2934,7 @@ function OrdersTable({
           return (
             <div key={o.id} className="rounded-lg border border-border bg-card p-3">
                <Row label="Approval">
-                 <div className="inline-flex max-w-full flex-col items-start font-mono font-bold">
+                 <div className="inline-flex max-w-full flex-col items-start font-bold">
                     <div className="flex max-w-full items-center gap-1.5">
                       <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} items={groupedOrderItems?.get(o.id)} />
                      {me?.isAdmin && <AdminEditApprovalDialog order={o} items={(groupedOrderItems?.get(o.id) ?? []) as ApprovalEditItem[]} />}
@@ -2947,8 +2949,7 @@ function OrdersTable({
                    )}
                  </div>
                 <div className="mt-1 space-y-1">
-                  <ExistingAttachments orderId={o.id} attachments={o.attachments ?? []} canRemove={canEdit} />
-                  <div className="flex flex-wrap items-center gap-1">
+                                    <div className="flex flex-wrap items-center gap-1">
                     {canEditRequester && o.status === "entregue" && <ConfirmReceiptActions order={o} />}
                   </div>
                 </div>
@@ -3001,7 +3002,7 @@ function OrdersTable({
               </Row>
               <Row label="Status"><StatusHistoryDialog order={o} canEdit={canEdit} /></Row>
               <Row label="Palavra passe">
-                <InlineField order={o} field="passphrase" type="text" canEdit={canEdit} display={o.passphrase || "—"} />
+                <InlineField order={o} field="passphrase" type="text" canEdit={canEdit} display={o.passphrase || "—"} maxLength={PASSPHRASE_MAX} />
               </Row>
             </div>
           );
@@ -3018,17 +3019,16 @@ function OrdersTable({
         <TableHeader className="[&_tr]:border-b">
           <TableRow className="border-b">
             <TableHead className="w-[200px] text-left">Approval</TableHead>
-            <TableHead className="w-[180px] text-center">Itens da Solicitação</TableHead>
-            <TableHead className="w-[105px] text-center">Tipo</TableHead>
-            <TableHead className="w-[90px] text-center">Alocação</TableHead>
+            <TableHead className="w-[170px] text-center">Itens da Solicitação</TableHead>
+            <TableHead className="w-[120px] text-center">Tipo</TableHead>
+            <TableHead className="w-[125px] text-center">Alocação</TableHead>
             {showRequester && <TableHead className="w-[105px] text-center">Solicitante</TableHead>}
             <TableHead className="w-[45px] text-center">Qtd</TableHead>
-            <TableHead className="w-[95px] text-center">Valor Total</TableHead>
-            <TableHead className="w-[90px] text-center">Destinatário</TableHead>
-            <TableHead className="w-[105px] text-center">Endereço de Entrega</TableHead>
-            <TableHead className="w-[95px] text-center">Prazo e Previsão</TableHead>
-            <TableHead className="w-[95px] text-center">Status</TableHead>
-            <TableHead className="w-[80px] text-center">Palavra passe</TableHead>
+            <TableHead className="w-[100px] text-center">Valor Total</TableHead>
+            <TableHead className="w-[100px] text-center">Destinatário</TableHead>
+            <TableHead className="w-[100px] text-center">Prazo e Previsão</TableHead>
+            <TableHead className="w-[105px] text-center">Status</TableHead>
+            <TableHead className="w-[100px] text-center">Palavra passe</TableHead>
           </TableRow>
           {headerFilters && !filterBar && (
             <TableRow>
@@ -3037,7 +3037,6 @@ function OrdersTable({
               <TableHead className="py-1" />
               <TableHead className="py-1">{filterInput(fAloc, setFAloc, "Alocação")}</TableHead>
               {showRequester && <TableHead className="py-1">{filterInput(fReq, setFReq, "Solicitante")}</TableHead>}
-              <TableHead className="py-1" />
               <TableHead className="py-1" />
               <TableHead className="py-1" />
               <TableHead className="py-1" />
@@ -3065,7 +3064,7 @@ function OrdersTable({
               {showRequester && <TableHead className="py-1" />}
               <TableHead className="py-1" />
               <TableHead className="py-1" />
-              <TableHead colSpan={3} className="py-1">{deliveredFilterControl}</TableHead>
+              <TableHead colSpan={2} className="py-1">{deliveredFilterControl}</TableHead>
               <TableHead className="py-1">{statusFilterControl}</TableHead>
               <TableHead className="py-1" />
             </TableRow>
@@ -3073,10 +3072,10 @@ function OrdersTable({
         </TableHeader>
         <TableBody>
           {visibleOrders.map((o) => (
-            <TableRow key={o.id} className="align-top">
-               <TableCell className="font-mono text-xs text-left">
+            <TableRow key={o.id} lang="pt-BR" className="align-middle font-sans text-sm hyphens-auto [&>td]:py-3">
+               <TableCell className="text-left font-bold">
                   <div className="inline-flex max-w-full flex-col items-start">
-                    <div className="flex max-w-full items-center gap-1.5">
+                    <div className="flex max-w-full flex-wrap items-center gap-1">
                       <OrderReportDialog order={o} projectName={projectName} requesterName={requesterName} items={groupedOrderItems?.get(o.id)} />
                      {me?.isAdmin && <AdminEditApprovalDialog order={o} items={(groupedOrderItems?.get(o.id) ?? []) as ApprovalEditItem[]} />}
                      {me?.canEditSupplyPurchase && o.status !== "cancelado" && ["materiais", "servicos", "viagens"].includes(o.request_model ?? "") && <SupplyEditPurchase orderId={o.id} />}
@@ -3090,19 +3089,18 @@ function OrdersTable({
                    )}
                  </div>
                 <div className="mt-1 space-y-1 font-sans">
-                  <ExistingAttachments orderId={o.id} attachments={o.attachments ?? []} canRemove={canEdit} />
-                  <div className="flex flex-wrap items-center gap-1">
+                                    <div className="flex flex-wrap items-center gap-1">
                     {canEditRequester && o.status === "entregue" && <ConfirmReceiptActions order={o} />}
                   </div>
                 </div>
               </TableCell>
               <TableCell>
                 {(groupedOrderItems?.get(o.id) ?? []).length ? (
-                   <ul className="space-y-1">{groupedOrderItems?.get(o.id)?.map((row) => <li key={row.id} className="text-sm break-words"><span className="font-medium">{row.item_name}</span> <span className="text-xs text-muted-foreground">× {row.quantity}</span>{/^https?:\/\//i.test(row.item_link ?? "") && <a href={row.item_link ?? ""} target="_blank" rel="noopener noreferrer" className="flex w-fit items-center gap-1 text-primary hover:underline">Abrir link <ExternalLink className="h-3 w-3" /></a>}</li>)}</ul>
+                   <ul className="space-y-1">{groupedOrderItems?.get(o.id)?.map((row) => <li key={row.id} className="text-sm break-words"><span>{row.item_name}</span> <span className="text-xs text-muted-foreground">× {row.quantity}</span>{/^https?:\/\//i.test(row.item_link ?? "") && <a href={row.item_link ?? ""} target="_blank" rel="noopener noreferrer" className="flex w-fit items-center gap-1 text-primary hover:underline">Abrir link <ExternalLink className="h-3 w-3" /></a>}</li>)}</ul>
                  ) : <span className="text-sm break-words">{o.item_name || "—"}{/^https?:\/\//i.test(o.item_link ?? "") && <a href={o.item_link ?? ""} target="_blank" rel="noopener noreferrer" className="flex w-fit items-center gap-1 text-primary hover:underline">Abrir link <ExternalLink className="h-3 w-3" /></a>}</span>}
               </TableCell>
               <TableCell className="text-center">
-                <div className="line-clamp-4 font-medium break-words">{requestTypeLabel(o, requestTypes)}</div>
+                <div className="break-words">{requestTypeLabel(o, requestTypes)}</div>
               </TableCell>
               <TableCell className="text-sm break-words text-center">
                 <div>{allocationOf(o)}</div>
@@ -3124,13 +3122,9 @@ function OrdersTable({
                   );
                 })()}
               </TableCell>
-              <TableCell className="text-center text-sm font-medium tabular-nums">{formatBRL(o.estimated_value)}</TableCell>
+              <TableCell className="text-center text-sm tabular-nums">{formatBRL(o.estimated_value)}</TableCell>
               <TableCell className="text-sm break-words text-center">{o.recipient || "—"}</TableCell>
-              <TableCell className="text-sm text-muted-foreground">
-                <div className="line-clamp-4 break-words">{o.delivery_point}</div>
-                <FullTextPopover text={o.delivery_point ?? ""} />
-              </TableCell>
-              <TableCell className="text-xs break-words text-center">
+              <TableCell className="text-sm break-words text-center">
                 <div>{DEADLINE_LABELS[o.deadline_type]}</div>
                 {o.deadline_type === "customizado" && o.deadline_date && (
                   <div className="text-muted-foreground">{new Date(o.deadline_date + "T00:00:00").toLocaleDateString("pt-BR")}</div>
@@ -3152,7 +3146,7 @@ function OrdersTable({
               </TableCell>
               <TableCell className="text-center"><StatusHistoryDialog order={o} canEdit={canEdit} /></TableCell>
               <TableCell className="text-sm break-words text-center">
-                <InlineField order={o} field="passphrase" type="text" canEdit={canEdit} display={o.passphrase || "—"} align="center" />
+                <InlineField order={o} field="passphrase" type="text" canEdit={canEdit} display={o.passphrase || "—"} align="center" maxLength={PASSPHRASE_MAX} />
               </TableCell>
             </TableRow>
           ))}
@@ -3161,33 +3155,6 @@ function OrdersTable({
       </div>
     </>
 
-  );
-}
-
-function FullTextPopover({ text }: { text: string }) {
-  const [open, setOpen] = useState(false);
-  if (!text.trim()) return null;
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          onMouseEnter={() => setOpen(true)}
-          onMouseLeave={() => setOpen(false)}
-          className="text-xs text-primary hover:underline"
-        >
-          descrição completa
-        </button>
-      </PopoverTrigger>
-      <PopoverContent
-        align="start"
-        onMouseEnter={() => setOpen(true)}
-        onMouseLeave={() => setOpen(false)}
-        className="max-w-sm text-xs whitespace-pre-wrap break-words"
-      >
-        {text}
-      </PopoverContent>
-    </Popover>
   );
 }
 
@@ -3440,7 +3407,7 @@ function OrderReportDialog({
 
 
 function InlineField({
-  order, field, type, canEdit, display, align = "left",
+  order, field, type, canEdit, display, align = "left", maxLength,
 }: {
   order: Order;
   field: "delivery_forecast" | "passphrase" | "buyer_notes";
@@ -3448,6 +3415,7 @@ function InlineField({
   canEdit?: boolean;
   display: string;
   align?: "left" | "center";
+  maxLength?: number;
 }) {
   const qc = useQueryClient();
   const [editing, setEditing] = useState(false);
@@ -3517,10 +3485,12 @@ function InlineField({
   }
 
   return (
+    <div className="space-y-0.5">
     <Input
       autoFocus
       type={type}
       value={value}
+      maxLength={maxLength}
       disabled={save.isPending}
       onChange={(e) => setValue(e.target.value)}
       onBlur={commit}
@@ -3529,6 +3499,8 @@ function InlineField({
         if (e.key === "Escape") setEditing(false);
       }}
     />
+    {maxLength && <div className="text-right text-[10px] text-muted-foreground">{value.length}/{maxLength}</div>}
+    </div>
   );
 }
 
@@ -3596,7 +3568,7 @@ function EditRequesterDialog({ order }: { order: Order }) {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Pedido atualizado");
+      toast.success("Solicitação atualizada");
       qc.invalidateQueries({ queryKey: ["orders"] });
       setFiles([]);
       setOpen(false);
@@ -3641,14 +3613,14 @@ function EditRequesterDialog({ order }: { order: Order }) {
       setOpen(nextOpen);
     }}>
       <DialogTrigger asChild>
-        <Button size="compactIcon" variant="ghost" title="Editar pedido pendente (Solicitante)" aria-label="Editar pedido pendente como solicitante">
+        <Button size="compactIcon" variant="ghost" title="Editar solicitação pendente (Solicitante)" aria-label="Editar solicitação pendente como solicitante">
           <Pencil className="h-3.5 w-3.5" />
         </Button>
       </DialogTrigger>
       <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Editar pedido</DialogTitle>
-          <DialogDescription>Você pode editar enquanto o pedido está pendente.</DialogDescription>
+          <DialogTitle>Editar solicitação</DialogTitle>
+          <DialogDescription>Você pode editar enquanto a solicitação está pendente.</DialogDescription>
         </DialogHeader>
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -3761,7 +3733,7 @@ function InternalDeleteOrderDialog({ order }: { order: Order }) {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Pedido excluído");
+      toast.success("Solicitação excluída");
       qc.invalidateQueries({ queryKey: ["orders"] });
       qc.invalidateQueries({ queryKey: ["logs"] });
       qc.invalidateQueries({ queryKey: ["cash-flow-payables"] });
@@ -3773,13 +3745,13 @@ function InternalDeleteOrderDialog({ order }: { order: Order }) {
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button type="button" size="compactIcon" variant="ghost" aria-label="Excluir pedido" title="Excluir pedido">
+        <Button type="button" size="compactIcon" variant="ghost" aria-label="Excluir solicitação" title="Excluir solicitação">
           <Trash2 className="h-3.5 w-3.5" />
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Excluir pedido</AlertDialogTitle>
+          <AlertDialogTitle>Excluir solicitação</AlertDialogTitle>
           <AlertDialogDescription>
             Esta ação apaga <strong>{order.item_name}</strong> e todo o seu histórico. Deseja continuar?
           </AlertDialogDescription>
@@ -4708,11 +4680,11 @@ function StatusHistoryDialog({ order, canEdit }: { order: Order; canEdit?: boole
       <DialogTrigger asChild>
         <button type="button" className="cursor-pointer">
           {awaitingApproval ? (
-            <Badge className={STATUS_BADGE_BASE}>Aguardando aprovação</Badge>
+            <Badge className={STATUS_BADGE_NEUTRAL}>Aguardando aprovação</Badge>
           ) : rejected ? (
-            <Badge className={STATUS_BADGE_BASE}>Rejeitado</Badge>
+            <Badge className={STATUS_BADGE_NEUTRAL}>Rejeitado</Badge>
           ) : (
-            <Badge className={STATUS_CLASSES[order.status]}>{STATUS_LABELS[order.status]}</Badge>
+            <Badge className={STATUS_BADGE_NEUTRAL}>{STATUS_LABELS[order.status]}</Badge>
           )}
         </button>
       </DialogTrigger>
