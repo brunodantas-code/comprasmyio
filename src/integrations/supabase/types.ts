@@ -3779,6 +3779,7 @@ export type Database = {
           committed_before_snapshot: number | null
           cost_center_id: string | null
           created_at: string
+          custom_status_id: string | null
           deadline_date: string | null
           deadline_type: Database["public"]["Enums"]["deadline_type"]
           delivery_forecast: string | null
@@ -3832,6 +3833,7 @@ export type Database = {
           committed_before_snapshot?: number | null
           cost_center_id?: string | null
           created_at?: string
+          custom_status_id?: string | null
           deadline_date?: string | null
           deadline_type?: Database["public"]["Enums"]["deadline_type"]
           delivery_forecast?: string | null
@@ -3885,6 +3887,7 @@ export type Database = {
           committed_before_snapshot?: number | null
           cost_center_id?: string | null
           created_at?: string
+          custom_status_id?: string | null
           deadline_date?: string | null
           deadline_type?: Database["public"]["Enums"]["deadline_type"]
           delivery_forecast?: string | null
@@ -3943,6 +3946,13 @@ export type Database = {
             columns: ["cost_center_id"]
             isOneToOne: false
             referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_custom_status_id_fkey"
+            columns: ["custom_status_id"]
+            isOneToOne: false
+            referencedRelation: "supply_order_statuses"
             referencedColumns: ["id"]
           },
           {
@@ -6538,6 +6548,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      supply_order_statuses: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          id: string
+          label: string
+          position: number
+          system_code: Database["public"]["Enums"]["order_status"] | null
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label: string
+          position?: number
+          system_code?: Database["public"]["Enums"]["order_status"] | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label?: string
+          position?: number
+          system_code?: Database["public"]["Enums"]["order_status"] | null
+        }
+        Relationships: []
       }
       supply_tags: {
         Row: {

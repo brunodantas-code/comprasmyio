@@ -1275,6 +1275,13 @@
       "when": 1793895674551,
       "tag": "0181_admin_edit_accepts_delivery_mode",
       "breakpoints": true
+    },
+    {
+      "idx": 182,
+      "version": "7",
+      "when": 1793903038378,
+      "tag": "0182_supply_order_statuses",
+      "breakpoints": true
     }
   ]
 }

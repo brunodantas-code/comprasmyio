@@ -30,7 +30,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { toast } from "sonner";
 import { ArrowLeft, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Boxes, Building2, Plane, Landmark, Briefcase, Layers3, ArrowUpDown, CalendarDays } from "lucide-react";
-import { Trash2, Paperclip, Loader2, DatabaseBackup, Check, CheckCircle2, XCircle, RotateCcw, Pencil, Bell, ShieldCheck, AlertTriangle, Tag, FileText } from "lucide-react";
+import { ListChecks, Trash2, Paperclip, Loader2, DatabaseBackup, Check, CheckCircle2, XCircle, RotateCcw, Pencil, Bell, ShieldCheck, AlertTriangle, Tag, FileText } from "lucide-react";
 import { ApprovalWorkflow, MyApprovalFlows, PendingApprovalsByRole, PendingForMe, type ApprovalListOrder } from "@/components/approval-workflow";
 import { z } from "zod";
 import { StockTab } from "@/components/stock-tab";
@@ -38,6 +38,7 @@ import { MyioOrdersTab, NewMyioOrderDialog } from "@/components/myio-orders-tab"
 import { ClientsTab, useClients, useClientUnits } from "@/components/clients-tab";
 import { CostCentersTab, useCostCenters } from "@/components/cost-centers-tab";
 import { SupplyTagsTab, useSupplyTags } from "@/components/supply-tags-tab";
+import { SupplyOrderStatusesTab, useOrderStatuses } from "@/components/supply-order-statuses-tab";
 import { SupplyTagCostReport, useTagCostReport } from "@/components/supply-tag-cost-report";
 import { resolveSupplyTag } from "@/lib/supply-tags";
 import { JobTitlesTab, useJobTitles } from "@/components/job-titles-tab";
@@ -94,6 +95,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 
 type Order = {
   id: string;
+  custom_status_id?: string | null;
   project_id: string | null;
   client_id?: string | null;
   client_unit_id?: string | null;
@@ -381,9 +383,19 @@ const STATUS_LABELS: Record<Order["status"], string> = {
   comprado_aguardando: "Comprado e aguardando envio",
   entregue: "Entregue",
   cancelado: "Cancelado",
-  recebido_ok: "Recebido corretamente",
-  recebido_problema: "Recebido com problemas",
+  recebido_ok: "Conforme",
+  recebido_problema: "Não Conforme",
 };
+
+/** Aplica nomes do Cadastro → Status às situações originais e devolve as situações de acompanhamento ativas. */
+function useStatusCatalog() {
+  const { data } = useOrderStatuses();
+  for (const r of data ?? []) if (r.system_code && r.system_code in STATUS_LABELS) STATUS_LABELS[r.system_code as Order["status"]] = r.label;
+  const all = data ?? [];
+  const custom = all.filter((r) => !r.system_code);
+  const order = all.filter((r) => r.system_code).map((r) => r.system_code as Order["status"]);
+  return { custom, active: custom.filter((r) => r.active), customLabel: (id?: string | null) => (id ? custom.find((r) => r.id === id)?.label : undefined), order };
+}
 
 const PASSPHRASE_MAX = 20;
 const STATUS_BADGE_BASE = "border-status-border bg-status text-status-foreground hover:bg-status";
@@ -553,6 +565,7 @@ function DeliveredFilter({
 }
 
 function Dashboard() {
+  useStatusCatalog();
   const qc = useQueryClient();
   const search = Route.useSearch();
   const { data: linkedOrder } = useQuery({
@@ -674,6 +687,7 @@ function Dashboard() {
                 {me.canAccess("cadastro_clientes") && <TabsContent value="clientes"><ClientsTab userId={me.id} /></TabsContent>}
                 {me.canAccess("cadastro_centros") && <TabsContent value="centros"><CostCentersTab userId={me.id} /></TabsContent>}
                 {me.canAccess("cadastro_etiquetas") && <TabsContent value="etiquetas"><SupplyTagsTab userId={me.id} /></TabsContent>}
+                {me.canAccess("cadastro_etiquetas") && <TabsContent value="status"><SupplyOrderStatusesTab userId={me.id} /></TabsContent>}
                 {me.canAccess("cadastro_cargos") && <TabsContent value="cargos"><JobTitlesTab userId={me.id} /></TabsContent>}
                 {me.canAccess("cadastro_lembretes") && <TabsContent value="lembretes"><RemindersTab /></TabsContent>}
                 {me.canAccess("cadastro_diversos") && <TabsContent value="diversos">
@@ -753,7 +767,7 @@ function Dashboard() {
                     { value: "ferramentas", label: "Ferramentas/Ativos", icon: Boxes, allowed: me.canAccess("armazem_ferramentas_ativos") },
                   ].filter((item) => item.allowed)
               : value === "projects"
-                ? [{ value: "projetos", label: "Projetos", icon: FolderKanban, allowed: me.canAccess("cadastro_projetos") }, { value: "clientes", label: "Clientes", icon: Building2, allowed: me.canAccess("cadastro_clientes") }, { value: "centros", label: "Centro de Custo", icon: Landmark, allowed: me.canAccess("cadastro_centros") }, { value: "etiquetas", label: "Etiquetas", icon: Tag, allowed: me.canAccess("cadastro_etiquetas") }, { value: "cargos", label: "Cargos", icon: Briefcase, allowed: me.canAccess("cadastro_cargos") }, { value: "lembretes", label: "Lembretes", icon: Bell, allowed: me.canAccess("cadastro_lembretes") }, { value: "diversos", label: "Diversos", icon: Layers3, allowed: me.canAccess("cadastro_diversos") }].filter((item) => item.allowed)
+                ? [{ value: "projetos", label: "Projetos", icon: FolderKanban, allowed: me.canAccess("cadastro_projetos") }, { value: "clientes", label: "Clientes", icon: Building2, allowed: me.canAccess("cadastro_clientes") }, { value: "centros", label: "Centro de Custo", icon: Landmark, allowed: me.canAccess("cadastro_centros") }, { value: "etiquetas", label: "Etiquetas", icon: Tag, allowed: me.canAccess("cadastro_etiquetas") }, { value: "status", label: "Status", icon: ListChecks, allowed: me.canAccess("cadastro_etiquetas") }, { value: "cargos", label: "Cargos", icon: Briefcase, allowed: me.canAccess("cadastro_cargos") }, { value: "lembretes", label: "Lembretes", icon: Bell, allowed: me.canAccess("cadastro_lembretes") }, { value: "diversos", label: "Diversos", icon: Layers3, allowed: me.canAccess("cadastro_diversos") }].filter((item) => item.allowed)
                 : value === "admin"
                   ? [{ value: "usuarios", label: "Usuários", icon: Users, allowed: me.canAccess("usuarios_lista") }, { value: "acesso-restrito", label: "Perfis de acesso", icon: ShieldCheck, allowed: me.canAccess("usuarios_acesso_restrito") }, { value: "workflow:organograma", label: "Organograma de Aprovação", icon: CheckCircle2, allowed: me.canAccess("usuarios_workflow") }, { value: "workflow:padrao", label: "Alçadas de Aprovação", icon: CheckCircle2, allowed: me.canAccess("usuarios_workflow") }, { value: "workflow:etapas-adicionais", label: "Etapas Adicionais", icon: CheckCircle2, allowed: me.canAccess("usuarios_workflow") }, { value: "logs", label: "Logs", icon: ScrollText, allowed: me.canAccess("usuarios_logs") }, { value: "backup", label: "Backup", icon: DatabaseBackup, allowed: me.canAccess("usuarios_backup") }].filter((item) => item.allowed)
                   : [];
@@ -2825,6 +2839,7 @@ function OrdersTable({
   const [fDate, setFDate] = useState("");
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [fStatus, setFStatus] = useState<string>("all");
+  const statusCatalog = useStatusCatalog();
 
   const norm = (s: string) => s.toLowerCase().trim();
   const allocationOf = (o: Order) => o.allocation_type === "cliente"
@@ -2841,7 +2856,7 @@ function OrdersTable({
         (!fAloc || norm(allocationOf(o)).includes(norm(fAloc))) &&
         (!fReq || norm(requesterName?.(o.requester_id) ?? "").includes(norm(fReq))) &&
         (!fDate || o.deadline_date === fDate || o.delivery_forecast === fDate) &&
-        (fStatus === "all" || o.status === fStatus)
+        (fStatus === "all" || (fStatus.startsWith("c:") ? o.custom_status_id === fStatus.slice(2) : o.status === fStatus && !o.custom_status_id))
       );
 
   const filterInput = (value: string, onChange: (v: string) => void, placeholder: string) => (
@@ -2876,6 +2891,7 @@ function OrdersTable({
           <SelectContent>
             <SelectItem value="all">Todos</SelectItem>
             {STATUS_KEYS.map((k) => <SelectItem key={k} value={k}>{STATUS_LABELS[k]}</SelectItem>)}
+            {statusCatalog.custom.map((r) => <SelectItem key={r.id} value={`c:${r.id}`}>{r.label}</SelectItem>)}
           </SelectContent>
         </Select>
       ))}
@@ -2923,6 +2939,7 @@ function OrdersTable({
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
                 {STATUS_KEYS.map((k) => <SelectItem key={k} value={k}>{STATUS_LABELS[k]}</SelectItem>)}
+            {statusCatalog.custom.map((r) => <SelectItem key={r.id} value={`c:${r.id}`}>{r.label}</SelectItem>)}
               </SelectContent>
             </Select>
             {deliveredFilterControl}
@@ -3044,6 +3061,7 @@ function OrdersTable({
                   <SelectContent>
                     <SelectItem value="all">Todos</SelectItem>
                     {STATUS_KEYS.map((k) => <SelectItem key={k} value={k}>{STATUS_LABELS[k]}</SelectItem>)}
+            {statusCatalog.custom.map((r) => <SelectItem key={r.id} value={`c:${r.id}`}>{r.label}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </TableHead>
@@ -3167,10 +3185,10 @@ function ConfirmReceiptActions({ order }: { order: Order }) {
   return (
     <>
       <button type="button" disabled={setStatus.isPending} onClick={() => setStatus.mutate("recebido_ok")} className="cursor-pointer disabled:opacity-50">
-        <Badge className={STATUS_BADGE_NEUTRAL}>Conforme</Badge>
+        <Badge className={STATUS_BADGE_NEUTRAL}>{STATUS_LABELS.recebido_ok}</Badge>
       </button>
       <button type="button" disabled={setStatus.isPending} onClick={() => setStatus.mutate("recebido_problema")} className="cursor-pointer disabled:opacity-50">
-        <Badge className={STATUS_BADGE_NEUTRAL}>Não Conforme</Badge>
+        <Badge className={STATUS_BADGE_NEUTRAL}>{STATUS_LABELS.recebido_problema}</Badge>
       </button>
     </>
   );
@@ -4628,9 +4646,12 @@ function StatusHistoryDialog({ order, canEdit }: { order: Order; canEdit?: boole
   const rejected = approvalStatus === "rejeitado";
   if (awaitingApproval || rejected) canEdit = false;
   const qc = useQueryClient();
+  const statusCatalog = useStatusCatalog();
+  const customLabel = statusCatalog.customLabel(order.custom_status_id);
   const updateStatus = useMutation({
-    mutationFn: async (next: Order["status"]) => {
-      const { error } = await supabase.from("purchase_orders").update({ status: next }).eq("id", order.id);
+    mutationFn: async (next: string) => {
+      const patch = next.startsWith("c:") ? { custom_status_id: next.slice(2) } : next === order.status ? { custom_status_id: null } : { status: next as Order["status"], custom_status_id: null };
+      const { error } = await supabase.from("purchase_orders").update(patch).eq("id", order.id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -4674,7 +4695,7 @@ function StatusHistoryDialog({ order, canEdit }: { order: Order; canEdit?: boole
           ) : rejected ? (
             <Badge className={STATUS_BADGE_NEUTRAL}>Rejeitado</Badge>
           ) : (
-            <Badge className={STATUS_BADGE_NEUTRAL}>{STATUS_LABELS[order.status]}</Badge>
+            <Badge className={STATUS_BADGE_NEUTRAL}>{customLabel ?? STATUS_LABELS[order.status]}</Badge>
           )}
         </button>
       </DialogTrigger>
@@ -4687,14 +4708,17 @@ function StatusHistoryDialog({ order, canEdit }: { order: Order; canEdit?: boole
           <div className="space-y-2">
             <Label>Alterar status</Label>
             <Select
-              value={order.status}
-              onValueChange={(v) => updateStatus.mutate(v as Order["status"])}
+              value={order.custom_status_id ? `c:${order.custom_status_id}` : order.status}
+              onValueChange={(v) => updateStatus.mutate(v)}
               disabled={updateStatus.isPending}
             >
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 {(BUYER_STATUS_KEYS.includes(order.status) ? BUYER_STATUS_KEYS : [...BUYER_STATUS_KEYS, order.status]).map((v) => (
                   <SelectItem key={v} value={v}>{STATUS_LABELS[v]}</SelectItem>
+                ))}
+                {statusCatalog.custom.filter((r) => r.active || r.id === order.custom_status_id).map((r) => (
+                  <SelectItem key={r.id} value={`c:${r.id}`}>{r.label}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -4708,7 +4732,7 @@ function StatusHistoryDialog({ order, canEdit }: { order: Order; canEdit?: boole
         ) : (
           <ol className="space-y-3">
             {logs.map((l) => {
-              const d = (l.details ?? {}) as { status?: string; de?: string; para?: string };
+              const d = (l.details ?? {}) as { status?: string; de?: string; para?: string; para_custom?: string };
               const isCreation = l.action === "criado";
               const rawStatus = isCreation ? d.status : d.para;
               // Mapeia status legados (antes da simplificação do enum) para os atuais
@@ -4718,7 +4742,7 @@ function StatusHistoryDialog({ order, canEdit }: { order: Order; canEdit?: boole
                 a_caminho: "comprado_aguardando",
               };
               const statusKey = (rawStatus && (legacyMap[rawStatus] ?? (rawStatus as Order["status"]))) as Order["status"] | undefined;
-              const label = statusKey && STATUS_LABELS[statusKey] ? STATUS_LABELS[statusKey] : (rawStatus ?? l.action);
+              const label = d.para_custom ?? (statusKey && STATUS_LABELS[statusKey] ? STATUS_LABELS[statusKey] : (rawStatus ?? l.action));
               const cls = statusKey && STATUS_CLASSES[statusKey] ? STATUS_CLASSES[statusKey] : STATUS_BADGE_BASE;
               return (
                 <li key={l.id} className="flex items-start gap-3 border-l-2 border-muted pl-3">
