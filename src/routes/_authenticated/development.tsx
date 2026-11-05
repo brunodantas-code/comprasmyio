@@ -214,7 +214,7 @@ function DevelopmentPage() {
                  </TableHeader>
                 <TableBody>{filteredTickets.map((ticket) => (
                   <TableRow key={ticket.id} className="cursor-pointer" onClick={() => setSelectedTicket(ticket)}>
-                    <TableCell className="font-semibold">#{ticket.ticket_number}</TableCell>
+                    <TableCell className="font-semibold">{ticket.ticket_number}</TableCell>
                      <TableCell>{profileNames.get(ticket.reporter_id) ?? "Usuário"}</TableCell>
                     <TableCell>{APP_NAMES[ticket.app_key] ?? ticket.app_key}</TableCell>
                     <TableCell><Badge variant="outline" className="font-normal">{ticket.ticket_type === "bug" ? "Bug" : "Melhoria"}</Badge></TableCell>

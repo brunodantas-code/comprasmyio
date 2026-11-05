@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Retirar # dos números na lista do Code, Central e Minhas Pendências; conferir as três listas autenticadas
+- [x] Confirmar disponibilidade da edição pelo Compras e informar que e-mails aguardam configuração do remetente
 - [x] Code: balão vermelho com ? quando devo responder; balão cinza com reticências quando aguardo a outra parte; chamados 8 e 10 conferidos
 - [x] Supply: edição pelo Compras com motivo, valores/entrega e auditoria; alteração de endereço conferida e restaurada
 - [ ] Supply: envio e reenvio de e-mail de cientificação aguardam configuração de domínio remetente; notificações registradas como pendentes
