@@ -1657,7 +1657,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
         ? `${rhTipo === "reposicao" ? "Reposição" : "Nova Contratação"} — Motivo: ${rhMotivo.trim()}${fd.get("requester_notes") ? ` | ${fd.get("requester_notes")}` : ""}`
         : (requesterNotes || undefined),
       delivery_point: (fd.get("delivery_point") as string | null) || undefined,
-      deadline_type: deadlineType,
+      deadline_type: requestModel !== "reembolso" && requestModel !== "rh" && requestModel !== "pagamento" ? "customizado" : deadlineType,
       deadline_date: deadlineDate || undefined,
     });
     if (!parsed.success) {
@@ -2299,20 +2299,9 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
             {requestModel !== "reembolso" && requestModel !== "rh" && requestModel !== "pagamento" && (
             <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label>Prazo de recebimento</Label>
-                <Select value={deadlineType} onValueChange={(v) => setDeadlineType(v as Order["deadline_type"])}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(DEADLINE_LABELS).map(([v, l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="deadline_date">Data limite para recebimento</Label>
+                <Input id="deadline_date" type="date" value={deadlineDate} onChange={(e) => setDeadlineDate(e.target.value)} required />
               </div>
-              {deadlineType === "customizado" && (
-                <div className="space-y-2">
-                  <Label htmlFor="deadline_date">Data limite</Label>
-                  <Input id="deadline_date" type="date" value={deadlineDate} onChange={(e) => setDeadlineDate(e.target.value)} required />
-                </div>
-              )}
             </div>
             )}
             <div className="space-y-2">
