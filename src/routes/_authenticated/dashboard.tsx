@@ -43,7 +43,7 @@ import { resolveSupplyTag } from "@/lib/supply-tags";
 import { JobTitlesTab, useJobTitles } from "@/components/job-titles-tab";
 import { RemindersTab } from "@/components/reminders-tab";
 import { AdditionalStepTypesTab } from "@/components/additional-step-types-tab";
-import { RequestTypesTab, requestTypeModel, requestTypeName, useRequestTypes, type RequestTypeRecord } from "@/components/request-types-tab";
+import { RequestTypesTab, requestTypeModel, requestTypeName, useRequestTypes, useRequestSubtypes, SUBTYPE_NAME_CACHE, type RequestTypeRecord } from "@/components/request-types-tab";
 import { StockDestinationsTab } from "@/components/stock-destinations-tab";
 import { DeliveryPointsTab } from "@/components/delivery-points-tab";
 import { DamageReasonsTab } from "@/components/damage-reasons-tab";
@@ -421,7 +421,7 @@ const REQUEST_TYPE_LABELS: Record<string, string> = {
 function requestTypeLabel(o: { request_type?: string | null; travel_type?: string | null }, types?: RequestTypeRecord[]): string {
   const rt = o.request_type ?? "";
   if (rt === "viagens") {
-    const sub = o.travel_type ? TRAVEL_TYPE_LABELS[o.travel_type] : undefined;
+    const sub = o.travel_type ? (SUBTYPE_NAME_CACHE[o.travel_type] ?? TRAVEL_TYPE_LABELS[o.travel_type]) : undefined;
     return sub ?? "Viagens";
   }
   return requestTypeName(rt, types);
@@ -1175,7 +1175,14 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
   const [projectId, setProjectId] = useState("");
   const [forStock, setForStock] = useState(!canAllocateProject && !canAllocateClient && !canAllocateInternal && canAllocateStock);
   const [requestType, setRequestType] = useState<string>("");
-  const requestModel = requestType ? requestTypeModel(requestType, requestTypes) : "";
+  const baseRequestModel = requestType ? requestTypeModel(requestType, requestTypes) : "";
+  const [travelType, setTravelType] = useState("");
+  const [requestSubtype, setRequestSubtype] = useState("");
+  const { data: allSubtypes } = useRequestSubtypes();
+  const subtypeOptions = (allSubtypes ?? []).filter((item) => item.active && (item.request_type_code === requestType || (baseRequestModel === "viagens" && item.request_type_code === "viagens" && !(allSubtypes ?? []).some((other) => other.request_type_code === requestType))));
+  const selectedTravelSubtype = baseRequestModel === "viagens" ? subtypeOptions.find((item) => item.code === travelType) : undefined;
+  // Opções de Viagens do tipo "despesa" usam o formulário de descrição, valor e data.
+  const requestModel = selectedTravelSubtype?.form_kind === "expense" ? "reembolso" : baseRequestModel;
   const isMaterialsRequest = requestModel === "materiais";
   const [rhCargo, setRhCargo] = useState("");
   const [rhGestor, setRhGestor] = useState("");
@@ -1230,7 +1237,6 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
   const [files, setFiles] = useState<File[]>([]);
   const [deadlineType, setDeadlineType] = useState<Order["deadline_type"]>("esta_semana");
   const [deadlineDate, setDeadlineDate] = useState("");
-  const [travelType, setTravelType] = useState("");
   type TravelLeg = { destination: string; departure: string; return: string };
   const [travelLegs, setTravelLegs] = useState<TravelLeg[]>([{ destination: "", departure: "", return: "" }]);
   const updateLeg = (i: number, patch: Partial<TravelLeg>) =>
@@ -1467,7 +1473,8 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
           delivery_point: values.delivery_point ?? null,
           deadline_type: values.deadline_type,
           deadline_date: values.deadline_type === "customizado" ? (values.deadline_date ?? null) : null,
-          travel_type: requestModel === "viagens" ? travelType : null,
+          travel_type: baseRequestModel === "viagens" ? travelType : null,
+          request_subtype: baseRequestModel === "viagens" ? travelType : (requestSubtype || null),
           travel_destination: requestModel === "viagens" ? travelDestination.trim() : null,
           travel_departure: requestModel === "viagens" ? travelDeparture : null,
           travel_return: requestModel === "viagens" ? travelReturn : null,
@@ -1531,6 +1538,8 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (baseRequestModel === "viagens" && !travelType) return toast.error("Selecione o que deseja solicitar");
+    if ((baseRequestModel === "materiais" || baseRequestModel === "servicos") && subtypeOptions.length > 0 && !requestSubtype) return toast.error("Selecione o que deseja solicitar");
     const isMateriais = requestModel === "materiais";
     const isReembolso = requestModel === "reembolso";
     const isRh = requestModel === "rh";
@@ -1621,7 +1630,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
     const parsed = newOrderSchema.safeParse({
       project_id: isRh ? (projectId || undefined) : (allocTarget === "projeto" && !forStock ? projectId : undefined),
       item_name: isReembolso
-        ? "Reembolso de Despesas"
+        ? (selectedTravelSubtype ? selectedTravelSubtype.name : "Reembolso de Despesas")
         : isPagamento
         ? paymentDescription.trim()
         : isRh
@@ -1666,6 +1675,8 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
         value={requestType}
         onValueChange={(v) => {
           setRequestType(v);
+          setTravelType("");
+          setRequestSubtype("");
           const model = requestTypeModel(v, requestTypes);
           if (model === "materiais") {
             setClientId("");
@@ -1693,10 +1704,10 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
       {requestModel === "materiais" && (
         <p className="text-xs text-muted-foreground">Solicitações de Materiais são cadastradas no Armazém.</p>
       )}
-      {requestModel === "viagens" && (
-        <p className="text-xs text-muted-foreground">Passagens, Hospedagens, Aluguel de Veículos.</p>
+      {baseRequestModel === "viagens" && (
+        <p className="text-xs text-muted-foreground">{subtypeOptions.map((item) => item.name).join(", ")}.</p>
       )}
-      {requestModel === "reembolso" && (
+      {baseRequestModel === "reembolso" && (
         <p className="text-xs text-muted-foreground">Reembolso de despesas incorridas pelo solicitante.</p>
       )}
       {requestModel === "pagamento" && (
@@ -1749,16 +1760,27 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
         ) : (
           <form ref={formRef} onSubmit={onSubmit} className="space-y-4">
             {siteSurveyDraft ? <div className="border-l-2 border-myio-green bg-muted/40 px-3 py-2 text-sm"><p className="font-semibold">Solicitação gerada a partir do Site Survey SS-{String(siteSurveyDraft.surveyNumber).padStart(12, "0")}</p><p className="text-muted-foreground">Selecione o item cadastrado correspondente a cada sugestão antes de enviar.</p></div> : null}
-            {requestModel === "viagens" && (
+            {baseRequestModel === "viagens" && (
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label>O que você deseja solicitar?</Label>
                   <Select value={travelType} onValueChange={setTravelType}>
                     <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="passagens">Passagens</SelectItem>
-                      <SelectItem value="hospedagens">Hospedagens</SelectItem>
-                      <SelectItem value="aluguel_veiculos">Aluguel de Veículos</SelectItem>
+                      {subtypeOptions.map((item) => <SelectItem key={item.id} value={item.code}>{item.name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+            {(baseRequestModel === "materiais" || baseRequestModel === "servicos") && subtypeOptions.length > 0 && (
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>O que você deseja solicitar?</Label>
+                  <Select value={requestSubtype} onValueChange={setRequestSubtype}>
+                    <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                    <SelectContent>
+                      {subtypeOptions.map((item) => <SelectItem key={item.id} value={item.code}>{item.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
@@ -1810,7 +1832,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                 {reembolsoLegs.map((leg, i) => (
                   <div key={i} className="rounded-md border p-3 space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-semibold">Reembolso {i + 1}</span>
+                      <span className="text-sm font-semibold">{selectedTravelSubtype ? `${selectedTravelSubtype.name} ${i + 1}` : `Reembolso ${i + 1}`}</span>
                       {reembolsoLegs.length > 1 && (
                         <ConfirmDeleteButton title="Remover reembolso?" description={`Confirma a remoção do reembolso ${i + 1}?`} ariaLabel="Remover reembolso" confirmLabel="Remover" onConfirm={() => setReembolsoLegs((prev) => prev.filter((_, idx) => idx !== i))} trigger={<Button type="button" variant="ghost" size="compactIcon" className="text-destructive hover:text-destructive" title="Remover reembolso" aria-label="Remover reembolso"><Trash2 className="h-3.5 w-3.5" /></Button>} />
                       )}

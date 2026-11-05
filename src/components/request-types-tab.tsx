@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
+import type React from "react";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronUp, ChevronDown, Pencil, Plus } from "lucide-react";
 import { toast } from "sonner";
@@ -58,6 +60,8 @@ export function RequestTypesTab() {
   const { data: types, isLoading } = useRequestTypes();
   const [createOpen, setCreateOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [openSubs, setOpenSubs] = useState<Record<string, boolean>>({});
+  const { data: canManageSubs } = useCanManageRequestSubtypes();
   const invalidate = () => qc.invalidateQueries({ queryKey: ["request-types"] });
 
   const create = useMutation({
@@ -123,8 +127,12 @@ export function RequestTypesTab() {
             <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Modelo</TableHead><TableHead>Ativo</TableHead><TableHead /></TableRow></TableHeader>
             <TableBody>
               {(types ?? []).map((type) => (
-                <TableRow key={type.code}>
-                  <TableCell className="font-medium">{type.name}</TableCell>
+                <Fragment key={type.code}>
+                <TableRow>
+                  <TableCell className="font-medium">{SUBTYPE_MODELS.includes(type.model_code) ? (
+                    <button type="button" className="inline-flex items-center gap-1 text-left" onClick={() => setOpenSubs((prev) => ({ ...prev, [type.code]: !prev[type.code] }))} aria-label={openSubs[type.code] ? `Recolher opções de ${type.name}` : `Exibir opções de ${type.name}`}>
+                      {openSubs[type.code] ? <ChevronUp className="h-3.5 w-3.5 text-primary" /> : <ChevronDown className="h-3.5 w-3.5 text-primary" />}{type.name}
+                    </button>) : <span className="pl-[18px]">{type.name}</span>}</TableCell>
                   <TableCell>{REQUEST_TYPE_FALLBACKS[type.model_code] ?? type.model_code}</TableCell>
                   <TableCell><Switch checked={type.active} onCheckedChange={(active) => toggle.mutate({ code: type.code, active })} /></TableCell>
                   <TableCell className="text-right whitespace-nowrap">
@@ -144,6 +152,8 @@ export function RequestTypesTab() {
                     </div>
                   </TableCell>
                 </TableRow>
+                {openSubs[type.code] && SUBTYPE_MODELS.includes(type.model_code) && <RequestSubtypesRows type={type} canManage={Boolean(canManageSubs)} />}
+                </Fragment>
               ))}
               {!types?.length && <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">Nenhum tipo cadastrado.</TableCell></TableRow>}
             </TableBody>
@@ -189,4 +199,104 @@ function EditRequestTypeDialog({ type, saving, onSave }: { type: RequestTypeReco
       </DialogContent>
     </Dialog>
   );
+}
+export type RequestSubtype = { id: string; request_type_code: string; code: string; name: string; form_kind: string; active: boolean; position: number; is_system: boolean };
+
+export const SUBTYPE_NAME_CACHE: Record<string, string> = {};
+
+export const SUBTYPE_MODELS = ["viagens", "materiais", "servicos"];
+
+export function useRequestSubtypes() {
+  return useQuery({
+    queryKey: ["request-subtypes"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("request_subtypes").select("id,request_type_code,code,name,form_kind,active,position,is_system").order("position");
+      if (error) throw error;
+      for (const item of data as RequestSubtype[]) SUBTYPE_NAME_CACHE[item.code] = item.name;
+      return data as RequestSubtype[];
+    },
+  });
+}
+
+export function useCanManageRequestSubtypes() {
+  return useQuery({
+    queryKey: ["can-manage-request-subtypes"],
+    queryFn: async () => {
+      const { data: auth } = await supabase.auth.getUser();
+      if (!auth.user) return false;
+      const { data, error } = await supabase.rpc("can_manage_request_subtypes", { _user_id: auth.user.id });
+      if (error) return false;
+      return Boolean(data);
+    },
+  });
+}
+
+function RequestSubtypesRows({ type, canManage }: { type: RequestTypeRecord; canManage: boolean }) {
+  const qc = useQueryClient();
+  const { data: all } = useRequestSubtypes();
+  const items = (all ?? []).filter((s) => s.request_type_code === type.code);
+  const isTravel = type.model_code === "viagens";
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["request-subtypes"] });
+  const fail = (error: Error & { code?: string }) => toast.error(error.code === "23505" ? "Esta opção já está cadastrada" : error.message);
+  const create = useMutation({
+    mutationFn: async (name: string) => {
+      const code = makeCode(name);
+      if (!code) throw new Error("Informe um nome válido");
+      const { data: auth } = await supabase.auth.getUser();
+      const position = Math.max(0, ...items.map((s) => s.position)) + 1;
+      const { error } = await supabase.from("request_subtypes").insert({ request_type_code: type.code, code, name: name.trim(), form_kind: isTravel ? "expense" : "category", position, created_by: auth.user?.id ?? null });
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success("Opção criada"); invalidate(); },
+    onError: fail,
+  });
+  const update = useMutation({
+    mutationFn: async ({ id, patch }: { id: string; patch: { name?: string; active?: boolean } }) => {
+      const { error } = await supabase.from("request_subtypes").update(patch).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+    onError: fail,
+  });
+  const remove = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("request_subtypes").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success("Opção excluída"); invalidate(); },
+    onError: fail,
+  });
+  return <>
+    {items.map((s) => (
+      <TableRow key={s.id} className="bg-muted/30">
+        <TableCell className="pl-10 text-sm">{s.name}</TableCell>
+        <TableCell className="text-sm text-muted-foreground">{s.form_kind === "trip" ? "Destino e datas" : s.form_kind === "rental" ? "Retirada e devolução" : s.form_kind === "expense" ? "Descrição, valor e data" : "Categoria"}</TableCell>
+        <TableCell><Switch checked={s.active} disabled={!canManage} onCheckedChange={(active) => update.mutate({ id: s.id, patch: { active } })} /></TableCell>
+        <TableCell className="text-right whitespace-nowrap">
+          {canManage && <div className="flex items-center justify-end gap-1">
+            <SubtypeNameDialog title="Editar opção" initial={s.name} trigger={<Button size="compactIcon" variant="ghost" title="Editar" aria-label={`Editar ${s.name}`}><Pencil className="h-3.5 w-3.5" /></Button>} onSave={(name) => update.mutateAsync({ id: s.id, patch: { name } })} />
+            {!s.is_system && <ConfirmDeleteButton title="Excluir opção?" description={`Confirma a exclusão de "${s.name}"? Solicitações já enviadas mantêm o registro.`} ariaLabel={`Excluir ${s.name}`} onConfirm={() => remove.mutate(s.id)} />}
+          </div>}
+        </TableCell>
+      </TableRow>
+    ))}
+    {!items.length && <TableRow className="bg-muted/30"><TableCell colSpan={4} className="pl-10 text-sm text-muted-foreground">Nenhuma opção cadastrada.</TableCell></TableRow>}
+    {canManage && <TableRow className="bg-muted/30"><TableCell colSpan={4} className="pl-10">
+      <SubtypeNameDialog title={`Nova opção em ${type.name}`} initial="" trigger={<Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs"><Plus className="h-3.5 w-3.5" />Nova opção</Button>} onSave={(name) => create.mutateAsync(name)} />
+    </TableCell></TableRow>}
+  </>;
+}
+
+function SubtypeNameDialog({ title, initial, trigger, onSave }: { title: string; initial: string; trigger: React.ReactNode; onSave: (name: string) => Promise<unknown> }) {
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState(initial);
+  return <Dialog open={open} onOpenChange={(next) => { setOpen(next); if (next) setName(initial); }}>
+    <DialogTrigger asChild>{trigger}</DialogTrigger>
+    <DialogContent><DialogHeader><DialogTitle>{title}</DialogTitle></DialogHeader>
+      <form className="space-y-4" onSubmit={async (event) => { event.preventDefault(); if (name.trim().length < 2) return toast.error("Nome muito curto"); try { await onSave(name.trim()); setOpen(false); } catch { /* exibido */ } }}>
+        <div className="space-y-2"><Label htmlFor="subtype-name">Nome</Label><Input id="subtype-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Inserir nome" required /></div>
+        <DialogFooter><Button type="submit">Salvar</Button></DialogFooter>
+      </form>
+    </DialogContent>
+  </Dialog>;
 }

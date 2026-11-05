@@ -3786,6 +3786,7 @@ export type Database = {
           recipient_user_id: string | null
           request_group_id: string | null
           request_model: string
+          request_subtype: string | null
           request_type: string
           requester_id: string
           requester_notes: string | null
@@ -3837,6 +3838,7 @@ export type Database = {
           recipient_user_id?: string | null
           request_group_id?: string | null
           request_model?: string
+          request_subtype?: string | null
           request_type?: string
           requester_id: string
           requester_notes?: string | null
@@ -3888,6 +3890,7 @@ export type Database = {
           recipient_user_id?: string | null
           request_group_id?: string | null
           request_model?: string
+          request_subtype?: string | null
           request_type?: string
           requester_id?: string
           requester_notes?: string | null
@@ -4075,6 +4078,45 @@ export type Database = {
           time_2?: string
           updated_at?: string
           weekday?: number
+        }
+        Relationships: []
+      }
+      request_subtypes: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          created_by: string | null
+          form_kind: string
+          id: string
+          is_system: boolean
+          name: string
+          position: number
+          request_type_code: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          created_by?: string | null
+          form_kind?: string
+          id?: string
+          is_system?: boolean
+          name: string
+          position?: number
+          request_type_code: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          form_kind?: string
+          id?: string
+          is_system?: boolean
+          name?: string
+          position?: number
+          request_type_code?: string
         }
         Relationships: []
       }
@@ -7264,6 +7306,10 @@ export type Database = {
       can_edit_supply_purchase: { Args: never; Returns: boolean }
       can_manage_cash_flow: { Args: { _user_id: string }; Returns: boolean }
       can_manage_limits: { Args: { _user_id: string }; Returns: boolean }
+      can_manage_request_subtypes: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
       can_manage_supply_tags: { Args: { _user_id: string }; Returns: boolean }
       can_request_type: {
         Args: { _request_type_code: string; _user_id: string }
