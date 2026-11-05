@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { useDeliveryPoints } from "@/components/delivery-points-tab";
+import { BrCityPicker } from "@/components/br-city-picker";
 
 const BROWSER_KEY = import.meta.env['VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY'] as string | undefined;
 const TRACKING_ID = import.meta.env['VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_TRACKING_ID'] as string | undefined;
@@ -30,6 +31,8 @@ function loadMaps(): Promise<void> {
   return mapsPromise;
 }
 
+const normalizeText = (text: string) => text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
 type Suggestion = { id: string; text: string; place: () => Promise<string | null> };
 
 export function AddressAutocomplete({
@@ -52,6 +55,8 @@ export function AddressAutocomplete({
   const [address, setAddress] = useState(initial);
   const [confirmed, setConfirmed] = useState(Boolean(initial));
   const [details, setDetails] = useState("");
+  const [complement, setComplement] = useState("");
+  const [city, setCity] = useState("");
   const [query, setQuery] = useState(initial);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(false);
@@ -128,7 +133,11 @@ export function AddressAutocomplete({
   const manualAddress = query.trim();
   const addressValue = confirmed ? address : manualAddress;
   const validAddress = addressValue.length >= 3;
-  const full = [addressValue, details.trim()].filter(Boolean).join(" — ");
+  const isDeliveryPoint = Boolean(allowDeliveryPoints && deliveryPoints?.some((point) => point.address === addressValue));
+  const manualMode = !isDeliveryPoint;
+  const cityPart = manualMode && city && !normalizeText(addressValue).includes(normalizeText(city.split(" - ")[0])) ? city : "";
+  const street = [addressValue, manualMode ? complement.trim() : ""].filter(Boolean).join(", ");
+  const full = [[street, cityPart].filter(Boolean).join(" — "), details.trim()].filter(Boolean).join(" — ");
 
   useEffect(() => {
     if (!allowDeliveryPoints || initializedDefaultRef.current || defaultValue || !deliveryPoints?.length) return;
@@ -159,6 +168,7 @@ export function AddressAutocomplete({
           setSuggestions([]);
         }} />
       )}
+      {manualMode && <Label htmlFor={`${name}-search`} className="text-xs text-muted-foreground">Rua e número</Label>}
       <div className="relative">
         <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
@@ -205,8 +215,20 @@ export function AddressAutocomplete({
           Você pode selecionar uma sugestão ou continuar com o endereço digitado.
         </p>
       )}
+      {manualMode && (
+        <div className="grid gap-2 sm:grid-cols-2">
+          <div className="space-y-1">
+            <Label htmlFor={`${name}-complement`} className="text-xs text-muted-foreground">Complemento</Label>
+            <Input id={`${name}-complement`} placeholder="Ex.: Sala 12, Bloco B" value={complement} onChange={(e) => setComplement(e.target.value)} />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor={`${name}-city`} className="text-xs text-muted-foreground">UF e Cidade</Label>
+            <BrCityPicker id={`${name}-city`} value={city} onChange={setCity} />
+          </div>
+        </div>
+      )}
       <Textarea
-        placeholder="Complemento / referência (ex.: com João no portão)"
+        placeholder="Referência para entrega (ex.: com João no portão)"
         value={details}
         onChange={(e) => setDetails(e.target.value)}
         rows={2}
