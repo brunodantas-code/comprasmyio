@@ -27,6 +27,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { ptBR } from "date-fns/locale";
 import { Checkbox } from "@/components/ui/checkbox";
+import { ColumnFilter } from "@/components/column-filter";
+import { isFilterActive, matchesColumnFilter, type ColumnFilterValue, type FilterKind } from "@/lib/column-filters";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { toast } from "sonner";
 import { ArrowLeft, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Boxes, Building2, Plane, Landmark, Briefcase, Layers3, ArrowUpDown, CalendarDays } from "lucide-react";
@@ -2869,9 +2871,37 @@ function OrdersTable({
   const allocationCategoryOf = (o: Order) => o.allocation_type === "cliente"
     ? "Cliente"
     : !o.for_stock && o.allocation_type !== "interna" && o.project_id ? "Projeto" : null;
+  const [cf, setCf] = useState<Record<string, ColumnFilterValue | undefined>>({});
+  const statusLabelOf = (o: Order) => (o.custom_status_id ? statusCatalog.custom.find((r) => r.id === o.custom_status_id)?.label : undefined) ?? STATUS_LABELS[o.status];
+  const itemsTextOf = (o: Order) => { const rows = groupedOrderItems?.get(o.id) ?? []; return rows.length ? rows.map((r) => r.item_name).join(", ") : (o.item_name ?? ""); };
+  const noDeadline = (o: Order) => o.request_model === "reembolso" || o.request_model === "pagamento" || o.request_type === "reembolso" || o.request_type === "pagamento";
+  type ColDef = { key: string; label: string; kind: FilterKind; raw: (o: Order) => string | number | null | undefined; list: (o: Order) => string };
+  const colDefs: ColDef[] = [
+    { key: "approval", label: "Approval", kind: "text", raw: (o) => o.approval_number, list: (o) => o.approval_number ?? "" },
+    { key: "itens", label: "Itens", kind: "text", raw: itemsTextOf, list: itemsTextOf },
+    { key: "tipo", label: "Tipo", kind: "text", raw: (o) => requestTypeLabel(o, requestTypes), list: (o) => requestTypeLabel(o, requestTypes) },
+    { key: "aloc", label: "Alocação", kind: "text", raw: allocationOf, list: allocationOf },
+    ...(showRequester ? [{ key: "req", label: "Solicitante", kind: "text" as const, raw: (o: Order) => requesterName?.(o.requester_id) ?? "", list: (o: Order) => requesterName?.(o.requester_id) ?? "" }] : []),
+    { key: "qtd", label: "Qtd", kind: "number", raw: (o) => o.quantity, list: (o) => String(o.quantity ?? "") },
+    { key: "valor", label: "Valor Total", kind: "number", raw: (o) => o.estimated_value ?? null, list: (o) => (o.estimated_value != null ? formatBRL(o.estimated_value) : "") },
+    { key: "dest", label: "Destinatário", kind: "text", raw: (o) => o.recipient, list: (o) => o.recipient ?? "" },
+    { key: "end", label: "Endereço", kind: "text", raw: (o) => o.delivery_point, list: (o) => o.delivery_point ?? "" },
+    { key: "prazo", label: "Solicitado até", kind: "date", raw: (o) => (noDeadline(o) ? null : o.deadline_date), list: (o) => (noDeadline(o) ? "" : o.deadline_type === "customizado" ? (o.deadline_date ? fmtDay(o.deadline_date) : "") : DEADLINE_LABELS[o.deadline_type] ?? "") },
+    { key: "prev", label: "Previsão de Compras", kind: "date", raw: (o) => (noDeadline(o) ? null : o.delivery_forecast), list: (o) => (!noDeadline(o) && o.delivery_forecast ? fmtDay(o.delivery_forecast) : "") },
+    { key: "status", label: "Status", kind: "text", raw: statusLabelOf, list: statusLabelOf },
+    { key: "passe", label: "Palavra passe", kind: "text", raw: (o) => o.passphrase, list: (o) => o.passphrase ?? "" },
+  ];
+  const colByKey = Object.fromEntries(colDefs.map((c) => [c.key, c]));
+  const colFilter = (key: string, showLabel = false) => {
+    const c = colByKey[key];
+    if (!c) return null;
+    return <ColumnFilter label={c.label} kind={c.kind} showLabel={showLabel} values={orders.map(c.list)} value={cf[key]} onChange={(v) => setCf((prev) => ({ ...prev, [key]: v }))} />;
+  };
+  const activeColFilters = colDefs.filter((c) => isFilterActive(cf[c.key]));
+  const columnFiltered = orders.filter((o) => activeColFilters.every((c) => matchesColumnFilter(c.kind, c.raw(o), c.list(o), cf[c.key])));
   const visibleOrders = !headerFilters && !filterBar
-    ? orders
-    : orders.filter((o) =>
+    ? columnFiltered
+    : columnFiltered.filter((o) =>
         (!fApproval || norm(o.approval_number ?? "").includes(norm(fApproval))) &&
         (!fItem || norm(`${requestTypeLabel(o, requestTypes)} ${o.item_name ?? ""} ${(groupedOrderItems?.get(o.id) ?? []).map((row) => row.item_name).join(" ")} ${o.requester_notes ?? ""}`).includes(norm(fItem))) &&
         (!fAloc || norm(allocationOf(o)).includes(norm(fAloc))) &&
@@ -2933,6 +2963,10 @@ function OrdersTable({
       {/* Mobile: cartões com rótulo à esquerda e informação à direita */}
       <div className="space-y-3 md:hidden">
         {filterBarContent}
+        <div className="flex flex-wrap gap-1.5">
+          {colDefs.map((c) => <span key={c.key}>{colFilter(c.key, true)}</span>)}
+          {activeColFilters.length > 0 && <Button type="button" variant="outline" size="sm" className="h-7 text-xs" onClick={() => setCf({})}>Limpar filtros</Button>}
+        </div>
         {!filterBar && (headerFilters || statusFilterControl || deliveredFilterControl) && (
           <div className="grid grid-cols-1 gap-2 rounded-lg bg-primary/10 p-2 sm:grid-cols-2">
             {filterInput(fApproval, setFApproval, "Nº do Approval")}
@@ -3034,20 +3068,30 @@ function OrdersTable({
       <div className="hidden md:block">
 
       {filterBarContent && <div className="mb-3">{filterBarContent}</div>}
+      <div className="mb-2 flex flex-wrap items-center gap-2 text-xs">
+        <span className="text-muted-foreground">Filtro por endereço:</span>
+        {colFilter("end", true)}
+        {activeColFilters.length > 0 && (
+          <>
+            <span className="text-muted-foreground">{activeColFilters.length} filtro(s) ativo(s): {activeColFilters.map((c) => c.label).join(", ")}</span>
+            <Button type="button" variant="outline" size="sm" className="h-7 text-xs" onClick={() => setCf({})}>Limpar filtros</Button>
+          </>
+        )}
+      </div>
       <Table className="w-full table-fixed">
         <TableHeader className="[&_tr]:border-b">
           <TableRow className="border-b">
-            <TableHead className="w-[200px] text-left">Approval</TableHead>
-            <TableHead className="w-[170px] text-center">Itens da Solicitação</TableHead>
-            <TableHead className="w-[120px] text-center">Tipo</TableHead>
-            <TableHead className="w-[125px] text-center">Alocação</TableHead>
-            {showRequester && <TableHead className="w-[105px] text-center">Solicitante</TableHead>}
-            <TableHead className="w-[45px] text-center">Qtd</TableHead>
-            <TableHead className="w-[100px] text-center">Valor Total</TableHead>
-            <TableHead className="w-[100px] text-center">Destinatário</TableHead>
-            <TableHead className="w-[100px] text-center">Prazo</TableHead>
-            <TableHead className="w-[105px] text-center">Status</TableHead>
-            <TableHead className="w-[100px] text-center">Palavra passe</TableHead>
+            <TableHead className="w-[200px] text-left">Approval {colFilter("approval")}</TableHead>
+            <TableHead className="w-[170px] text-center">Itens da Solicitação {colFilter("itens")}</TableHead>
+            <TableHead className="w-[120px] text-center">Tipo {colFilter("tipo")}</TableHead>
+            <TableHead className="w-[125px] text-center">Alocação {colFilter("aloc")}</TableHead>
+            {showRequester && <TableHead className="w-[105px] text-center">Solicitante {colFilter("req")}</TableHead>}
+            <TableHead className="w-[45px] text-center">Qtd<br />{colFilter("qtd")}</TableHead>
+            <TableHead className="w-[100px] text-center">Valor Total {colFilter("valor")}</TableHead>
+            <TableHead className="w-[100px] text-center">Destinatário {colFilter("dest")}</TableHead>
+            <TableHead className="w-[100px] text-center">Prazo <span className="inline-flex gap-0.5">{colFilter("prazo")}{colFilter("prev")}</span></TableHead>
+            <TableHead className="w-[105px] text-center">Status {colFilter("status")}</TableHead>
+            <TableHead className="w-[100px] text-center">Palavra passe {colFilter("passe")}</TableHead>
           </TableRow>
           {headerFilters && !filterBar && (
             <TableRow>
