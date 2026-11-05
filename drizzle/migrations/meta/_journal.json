@@ -1261,6 +1261,20 @@
       "when": 1793894586986,
       "tag": "0179_code_auto_answer_on_conclusion",
       "breakpoints": true
+    },
+    {
+      "idx": 180,
+      "version": "7",
+      "when": 1793895651204,
+      "tag": "0180_purchase_order_delivery_mode",
+      "breakpoints": true
+    },
+    {
+      "idx": 181,
+      "version": "7",
+      "when": 1793895674551,
+      "tag": "0181_admin_edit_accepts_delivery_mode",
+      "breakpoints": true
     }
   ]
 }

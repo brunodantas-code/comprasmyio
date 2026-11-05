@@ -3782,6 +3782,7 @@ export type Database = {
           deadline_date: string | null
           deadline_type: Database["public"]["Enums"]["deadline_type"]
           delivery_forecast: string | null
+          delivery_mode: string
           delivery_point: string | null
           estimated_value: number
           for_stock: boolean
@@ -3834,6 +3835,7 @@ export type Database = {
           deadline_date?: string | null
           deadline_type?: Database["public"]["Enums"]["deadline_type"]
           delivery_forecast?: string | null
+          delivery_mode?: string
           delivery_point?: string | null
           estimated_value?: number
           for_stock?: boolean
@@ -3886,6 +3888,7 @@ export type Database = {
           deadline_date?: string | null
           deadline_type?: Database["public"]["Enums"]["deadline_type"]
           delivery_forecast?: string | null
+          delivery_mode?: string
           delivery_point?: string | null
           estimated_value?: number
           for_stock?: boolean

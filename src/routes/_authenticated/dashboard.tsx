@@ -113,6 +113,7 @@ type Order = {
   recipient_user_id?: string | null;
   requester_notes: string | null;
   delivery_point: string;
+  delivery_mode?: "entrega" | "retirada" | string;
   status: "pendente" | "comprado_aguardando" | "entregue" | "cancelado" | "recebido_ok" | "recebido_problema";
   deadline_type: "urgente" | "esta_semana" | "este_mes" | "customizado";
   deadline_date: string | null;
@@ -1122,6 +1123,7 @@ const newOrderSchema = z.object({
   recipient: z.string().trim().min(2, "Informe o destinatário").max(200).optional().or(z.literal("").transform(() => undefined)),
   requester_notes: z.string().trim().max(2000).optional().or(z.literal("").transform(() => undefined)),
   delivery_point: z.string().trim().min(3).max(300).optional().or(z.literal("").transform(() => undefined)),
+  delivery_mode: z.enum(["entrega", "retirada"]).default("entrega"),
   deadline_type: z.enum(["urgente", "esta_semana", "este_mes", "customizado"]),
   deadline_date: z.string().trim().optional().or(z.literal("").transform(() => undefined)),
 }).refine((v) => v.deadline_type !== "customizado" || !!v.deadline_date, {
@@ -1484,6 +1486,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
           recipient_user_id: requestModel === "materiais" ? recipientUserId : null,
           requester_notes: values.requester_notes ?? null,
           delivery_point: values.delivery_point ?? null,
+          delivery_mode: values.delivery_mode,
           deadline_type: values.deadline_type,
           deadline_date: values.deadline_type === "customizado" ? (values.deadline_date ?? null) : null,
           travel_type: baseRequestModel === "viagens" ? travelType : null,
@@ -1657,6 +1660,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
         ? `${rhTipo === "reposicao" ? "Reposição" : "Nova Contratação"} — Motivo: ${rhMotivo.trim()}${fd.get("requester_notes") ? ` | ${fd.get("requester_notes")}` : ""}`
         : (requesterNotes || undefined),
       delivery_point: (fd.get("delivery_point") as string | null) || undefined,
+      delivery_mode: (fd.get("delivery_mode") as string | null) || "entrega",
       deadline_type: requestModel !== "reembolso" && requestModel !== "rh" && requestModel !== "pagamento" ? "customizado" : deadlineType,
       deadline_date: deadlineDate || undefined,
     });
@@ -2294,7 +2298,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
               <Input id="item_link" type="url" placeholder="https://..." value={itemLink} onChange={(e) => { setItemLink(e.target.value); scheduleAutoFillPrice(e.target.value); }} onPaste={(e) => { const t = e.clipboardData.getData("text"); if (t) setTimeout(() => void tryAutoFillPrice(t), 0); }} onBlur={() => void tryAutoFillPrice(itemLink)} />
             </div>
             )}
-            {requestModel === "materiais" && <AddressAutocomplete name="delivery_point" required />}
+            {requestModel === "materiais" && <AddressAutocomplete name="delivery_point" modeName="delivery_mode" required />}
 
             {requestModel !== "reembolso" && requestModel !== "rh" && requestModel !== "pagamento" && (
             <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
@@ -2686,6 +2690,7 @@ function AdminEditApprovalDialog({ order, items }: { order: Order; items: Approv
   const [estimatedValue, setEstimatedValue] = useState(String(order.estimated_value ?? 0));
   const [recipient, setRecipient] = useState(order.recipient ?? "");
   const [deliveryPoint, setDeliveryPoint] = useState(order.delivery_point ?? "");
+  const [deliveryMode, setDeliveryMode] = useState(order.delivery_mode === "retirada" ? "retirada" : "entrega");
   const [deadlineType, setDeadlineType] = useState<Order["deadline_type"]>(order.deadline_type);
   const [deadlineDate, setDeadlineDate] = useState(order.deadline_date ?? "");
   const [deliveryForecast, setDeliveryForecast] = useState(order.delivery_forecast ?? "");
@@ -2711,7 +2716,7 @@ function AdminEditApprovalDialog({ order, items }: { order: Order; items: Approv
     setDestinationId(order.project_id ?? order.client_unit_id ?? order.client_id ?? "");
     setCostCenterId(order.cost_center_id ?? "none");
     setItemName(order.item_name); setItemLink(order.item_link ?? ""); setQuantity(String(order.quantity)); setEstimatedValue(String(order.estimated_value ?? 0));
-    setRecipient(order.recipient ?? ""); setDeliveryPoint(order.delivery_point ?? ""); setDeadlineType(order.deadline_type); setDeadlineDate(order.deadline_date ?? "");
+    setRecipient(order.recipient ?? ""); setDeliveryPoint(order.delivery_point ?? ""); setDeliveryMode(order.delivery_mode === "retirada" ? "retirada" : "entrega"); setDeadlineType(order.deadline_type); setDeadlineDate(order.deadline_date ?? "");
     setDeliveryForecast(order.delivery_forecast ?? ""); setRequesterNotes(order.requester_notes ?? ""); setBuyerNotes(order.buyer_notes ?? "");
     setEditedItems(items.map((item) => ({ ...item, quantity: String(item.quantity), estimated_unit_value: String(item.estimated_unit_value) })));
   }
@@ -2730,7 +2735,7 @@ function AdminEditApprovalDialog({ order, items }: { order: Order; items: Approv
         ...resolvedAllocation,
         cost_center_id: costCenterId === "none" ? null : costCenterId,
         item_name: itemName.trim(), item_link: itemLink.trim() || null, quantity: Number(quantity), estimated_value: Number(estimatedValue),
-        recipient: recipient.trim(), delivery_point: deliveryPoint.trim() || null, deadline_type: deadlineType,
+        recipient: recipient.trim(), delivery_point: deliveryPoint.trim() || null, delivery_mode: deliveryMode, deadline_type: deadlineType,
         deadline_date: deadlineType === "customizado" ? deadlineDate || null : null, delivery_forecast: deliveryForecast || null,
         requester_notes: requesterNotes.trim() || null, buyer_notes: buyerNotes.trim() || null,
       };
@@ -2761,7 +2766,7 @@ function AdminEditApprovalDialog({ order, items }: { order: Order; items: Approv
           <div className="space-y-2 sm:col-span-2"><Label>Centro de Custo</Label><Select value={costCenterId} onValueChange={setCostCenterId}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="none">Sem centro de custo</SelectItem>{(costCenters ?? []).filter((center) => center.active).map((center) => <SelectItem key={center.id} value={center.id}>{center.code ? `${center.code} — ` : ""}{center.name}</SelectItem>)}</SelectContent></Select></div>
         </section>
         <section className="space-y-3 border-t pt-4"><h3 className="text-sm font-semibold">Itens e valores</h3>{editedItems.length ? editedItems.map((item, index) => <div key={item.id} className="grid gap-3 rounded-md border p-3 sm:grid-cols-[minmax(0,2fr)_6rem_9rem]"><div className="space-y-2"><Label>Item {index + 1}</Label><Input value={item.item_name} onChange={(event) => setEditedItems((current) => current.map((row) => row.id === item.id ? { ...row, item_name: event.target.value } : row))} /><Input value={item.item_link ?? ""} placeholder="Link de referência" onChange={(event) => setEditedItems((current) => current.map((row) => row.id === item.id ? { ...row, item_link: event.target.value } : row))} /></div><div className="space-y-2"><Label>Qtd.</Label><Input type="number" min={1} value={item.quantity} onChange={(event) => setEditedItems((current) => current.map((row) => row.id === item.id ? { ...row, quantity: event.target.value } : row))} /></div><div className="space-y-2"><Label>Valor unitário</Label><MoneyInput value={item.estimated_unit_value} onChange={(value) => setEditedItems((current) => current.map((row) => row.id === item.id ? { ...row, estimated_unit_value: value } : row))} /></div></div>) : <div className="grid gap-3 sm:grid-cols-2"><div className="space-y-2 sm:col-span-2"><Label>Item</Label><Input value={itemName} onChange={(event) => setItemName(event.target.value)} /></div><div className="space-y-2"><Label>Link de referência</Label><Input value={itemLink} onChange={(event) => setItemLink(event.target.value)} /></div><div className="space-y-2"><Label>Quantidade</Label><Input type="number" min={1} value={quantity} onChange={(event) => setQuantity(event.target.value)} /></div><div className="space-y-2"><Label>Valor total</Label><MoneyInput value={estimatedValue} onChange={setEstimatedValue} /></div></div>}</section>
-        <section className="grid gap-4 border-t pt-4 sm:grid-cols-2"><div className="space-y-2"><Label>Destinatário</Label><Input value={recipient} onChange={(event) => setRecipient(event.target.value)} /></div><div className="space-y-2"><Label>Ponto ou endereço de entrega</Label><Input value={deliveryPoint} onChange={(event) => setDeliveryPoint(event.target.value)} /></div><div className="space-y-2"><Label>Prazo</Label><Select value={deadlineType} onValueChange={(value) => setDeadlineType(value as Order["deadline_type"])}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="urgente">Urgente</SelectItem><SelectItem value="esta_semana">Esta semana</SelectItem><SelectItem value="este_mes">Este mês</SelectItem><SelectItem value="customizado">Data específica</SelectItem></SelectContent></Select></div>{deadlineType === "customizado" && <div className="space-y-2"><Label>Data do prazo</Label><Input type="date" value={deadlineDate} onChange={(event) => setDeadlineDate(event.target.value)} /></div>}<div className="space-y-2"><Label>Previsão de entrega</Label><Input type="date" value={deliveryForecast} onChange={(event) => setDeliveryForecast(event.target.value)} /></div><div className="space-y-2"><Label>Observações do solicitante</Label><Textarea value={requesterNotes} onChange={(event) => setRequesterNotes(event.target.value)} /></div><div className="space-y-2 sm:col-span-2"><Label>Observações de Supply</Label><Textarea value={buyerNotes} onChange={(event) => setBuyerNotes(event.target.value)} /></div></section>
+        <section className="grid gap-4 border-t pt-4 sm:grid-cols-2"><div className="space-y-2"><Label>Destinatário</Label><Input value={recipient} onChange={(event) => setRecipient(event.target.value)} /></div><div className="space-y-2"><Label>Modalidade</Label><Select value={deliveryMode} onValueChange={setDeliveryMode}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="entrega">Entrega</SelectItem><SelectItem value="retirada">Retirada</SelectItem></SelectContent></Select></div><div className="space-y-2"><Label>{deliveryMode === "retirada" ? "Ponto ou endereço de retirada" : "Ponto ou endereço de entrega"}</Label><Input value={deliveryPoint} onChange={(event) => setDeliveryPoint(event.target.value)} /></div><div className="space-y-2"><Label>Prazo</Label><Select value={deadlineType} onValueChange={(value) => setDeadlineType(value as Order["deadline_type"])}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="urgente">Urgente</SelectItem><SelectItem value="esta_semana">Esta semana</SelectItem><SelectItem value="este_mes">Este mês</SelectItem><SelectItem value="customizado">Data específica</SelectItem></SelectContent></Select></div>{deadlineType === "customizado" && <div className="space-y-2"><Label>Data do prazo</Label><Input type="date" value={deadlineDate} onChange={(event) => setDeadlineDate(event.target.value)} /></div>}<div className="space-y-2"><Label>Previsão de entrega</Label><Input type="date" value={deliveryForecast} onChange={(event) => setDeliveryForecast(event.target.value)} /></div><div className="space-y-2"><Label>Observações do solicitante</Label><Textarea value={requesterNotes} onChange={(event) => setRequesterNotes(event.target.value)} /></div><div className="space-y-2 sm:col-span-2"><Label>Observações de Supply</Label><Textarea value={buyerNotes} onChange={(event) => setBuyerNotes(event.target.value)} /></div></section>
       </div>
       <DialogFooter><Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button><Button type="button" onClick={() => requestType !== order.request_type ? setConfirmTypeChange(true) : save.mutate()} disabled={save.isPending}>{save.isPending ? "Salvando..." : "Salvar alterações"}</Button></DialogFooter>
       <AlertDialog open={confirmTypeChange} onOpenChange={setConfirmTypeChange}>
@@ -2976,7 +2981,7 @@ function OrdersTable({
               </Row>
               <Row label="Valor Total">{formatBRL(o.estimated_value)}</Row>
               <Row label="Destinatário">{o.recipient || "—"}</Row>
-              <Row label="Endereço de Entrega">{o.delivery_point}</Row>
+              <Row label={o.delivery_mode === "retirada" ? "Endereço de Retirada" : "Endereço de Entrega"}>{o.delivery_point}</Row>
               <Row label="Prazo e Previsão">
                 <div>{DEADLINE_LABELS[o.deadline_type]}</div>
                 {o.deadline_type === "customizado" && o.deadline_date && (
@@ -3222,7 +3227,9 @@ const LOG_ACTION_LABELS: Record<string, string> = {
   editado: "Alteração de dados",
   anexo_adicionado: "Anexo adicionado",
   anexo_removido: "Anexo removido",
+  modalidade_alterada: "Entrega/Retirada alterada",
 };
+const MODE_NAME = (v: unknown) => (v === "retirada" ? "Retirada" : "Entrega");
 
 function fmtDateTime(v?: string | null) {
   if (!v) return "—";
@@ -3339,7 +3346,8 @@ function OrderReportDialog({
             <Row label="Alocação" value={allocation} />
             <Row label="Solicitante" value={requesterName ? requesterName(order.requester_id) : nameFor(order.requester_id)} />
             <Row label="Destinatário" value={order.recipient} />
-            <Row label="Endereço de entrega" value={order.delivery_point} />
+            <Row label="Modalidade" value={order.delivery_mode === "retirada" ? "Retirada" : "Entrega"} />
+            <Row label={order.delivery_mode === "retirada" ? "Endereço de retirada" : "Endereço de entrega"} value={order.delivery_point} />
             <Row label="Prazo" value={`${DEADLINE_LABELS[order.deadline_type]}${order.deadline_date ? ` — ${new Date(order.deadline_date + "T00:00:00").toLocaleDateString("pt-BR")}` : ""}`} />
             <Row label="Previsão de entrega" value={order.delivery_forecast ? new Date(order.delivery_forecast + "T00:00:00").toLocaleDateString("pt-BR") : "—"} />
             <Row label="Status" value={STATUS_LABELS[order.status]} />
@@ -3416,7 +3424,8 @@ function OrderReportDialog({
             {loadingLogs ? <p className="text-sm text-muted-foreground">Carregando...</p> : <MilestoneTimeline entries={(displayedLogs ?? []).map(l => {
               const detail = l.details && typeof l.details === 'object' && !Array.isArray(l.details) ? l.details : {};
               const text = l.action === 'conversa_question' ? 'Pergunta enviada' : l.action === 'conversa_answer' ? 'Resposta enviada' : LOG_ACTION_LABELS[l.action] ?? l.action;
-              return { id: l.id, created_at: l.created_at, text: `${text}${typeof detail.message === 'string' ? `: ${detail.message}` : ''}\npor ${nameFor(l.actor_id)}` };
+              const modeText = l.action === 'modalidade_alterada' ? `${detail.modalidade_de !== detail.modalidade_para ? `\nDe ${MODE_NAME(detail.modalidade_de)} para ${MODE_NAME(detail.modalidade_para)}` : ''}\nEndereço anterior: ${detail.endereco_de || '—'}\nNovo endereço: ${detail.endereco_para || '—'}` : '';
+              return { id: l.id, created_at: l.created_at, text: `${text}${typeof detail.message === 'string' ? `: ${detail.message}` : ''}${modeText}\npor ${nameFor(l.actor_id)}` };
             })} />}
           </section>
         </div>
@@ -3579,6 +3588,7 @@ function EditRequesterDialog({ order }: { order: Order }) {
         recipient: v.recipient,
         requester_notes: v.requester_notes ?? null,
         delivery_point: v.delivery_point,
+        delivery_mode: v.delivery_mode,
         deadline_type: v.deadline_type,
         deadline_date: v.deadline_type === "customizado" ? (v.deadline_date ?? null) : null,
         attachments,
@@ -3612,6 +3622,7 @@ function EditRequesterDialog({ order }: { order: Order }) {
       recipient: fd.get("recipient"),
       requester_notes: fd.get("requester_notes") || undefined,
       delivery_point: fd.get("delivery_point"),
+      delivery_mode: fd.get("delivery_mode") || "entrega",
       deadline_type: deadlineType,
       deadline_date: deadlineDate || undefined,
     });
@@ -3702,7 +3713,7 @@ function EditRequesterDialog({ order }: { order: Order }) {
             <Label htmlFor={`e-link-${order.id}`}>Link de Referência <span className="text-muted-foreground">(opcional)</span></Label>
             <Input id={`e-link-${order.id}`} type="url" value={itemLink} onChange={(e) => setItemLink(e.target.value)} placeholder="https://..." />
           </div>
-          <AddressAutocomplete name="delivery_point" defaultValue={order.delivery_point} required />
+          <AddressAutocomplete name="delivery_point" modeName="delivery_mode" defaultMode={order.delivery_mode === "retirada" ? "retirada" : "entrega"} defaultValue={order.delivery_point} required />
 
           <div className="grid gap-4 [&>*]:min-w-0 sm:grid-cols-2">
             <div className="space-y-2">

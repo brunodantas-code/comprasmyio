@@ -42,6 +42,8 @@ export function AddressAutocomplete({
   label = "Ponto de entrega",
   detailsName,
   allowDeliveryPoints = true,
+  modeName,
+  defaultMode = "entrega",
 }: {
   name: string;
   defaultValue?: string;
@@ -49,7 +51,12 @@ export function AddressAutocomplete({
   label?: string;
   detailsName?: string;
   allowDeliveryPoints?: boolean;
+  /** Quando informado, exibe a escolha Entrega/Retirada e envia o valor neste campo do formulário. */
+  modeName?: string;
+  defaultMode?: "entrega" | "retirada";
 }) {
+  const [mode, setMode] = useState<"entrega" | "retirada">(defaultMode);
+  const pickup = Boolean(modeName) && mode === "retirada";
   // Valor final salvo: sugestão confirmada ou endereço digitado manualmente.
   const initial = defaultValue ?? "";
   const [address, setAddress] = useState(initial);
@@ -150,9 +157,22 @@ export function AddressAutocomplete({
 
   return (
     <div className="space-y-2" ref={boxRef}>
-      <Label htmlFor={`${name}-search`}>{label}</Label>
+      {modeName && (
+        <div className="space-y-2">
+          <Label>Modalidade</Label>
+          <div className="inline-flex rounded-md border p-0.5" role="radiogroup" aria-label="Entrega ou Retirada">
+            {(["entrega", "retirada"] as const).map((value) => (
+              <button key={value} type="button" role="radio" aria-checked={mode === value} onClick={() => setMode(value)} className={`rounded px-4 py-1.5 text-sm transition-colors ${mode === value ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}>
+                {value === "entrega" ? "Entrega" : "Retirada"}
+              </button>
+            ))}
+          </div>
+          <input type="hidden" name={modeName} value={mode} />
+        </div>
+      )}
+      <Label htmlFor={`${name}-search`}>{pickup ? "Ponto de retirada" : label}</Label>
       {allowDeliveryPoints && deliveryPoints && deliveryPoints.length > 0 && (
-        <SearchableSelect aria-label="Selecionar ponto de entrega" clearable={false} placeholder="Digite ou selecione um ponto cadastrado" value={deliveryPoints.find((point) => point.address === addressValue)?.code ?? "manual"} options={[...deliveryPoints.map((point) => ({ value: point.code, label: point.name, keywords: point.address })), { value: "manual", label: "Outro endereço" }]} onChange={(code) => {
+        <SearchableSelect aria-label={pickup ? "Selecionar ponto de retirada" : "Selecionar ponto de entrega"} clearable={false} placeholder="Digite ou selecione um ponto cadastrado" value={deliveryPoints.find((point) => point.address === addressValue)?.code ?? "manual"} options={[...deliveryPoints.map((point) => ({ value: point.code, label: point.name, keywords: point.address })), { value: "manual", label: "Outro endereço" }]} onChange={(code) => {
           if (code === "manual") {
             setAddress("");
             setQuery("");
@@ -228,7 +248,7 @@ export function AddressAutocomplete({
         </div>
       )}
       <Textarea
-        placeholder="Referência para entrega (ex.: com João no portão)"
+        placeholder={pickup ? "Referência para retirada (ex.: falar com João na recepção)" : "Referência para entrega (ex.: com João no portão)"}
         value={details}
         onChange={(e) => setDetails(e.target.value)}
         rows={2}

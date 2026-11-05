@@ -118,7 +118,7 @@ function useSteps() {
       const { data, error } = await supabase
         .from("approval_steps")
         .select(
-          "id, order_id, step_index, role_label, approver_id, status, comment, decided_at, decided_by, created_at, purchase_orders(id, project_id, client_id, client_unit_id, cost_center_id, item_name, item_link, quantity, estimated_value, approval_status, status, requester_id, requester_notes, buyer_notes, recipient, delivery_point, deadline_type, deadline_date, delivery_forecast, passphrase, created_at, updated_at, approval_number, request_type, request_model, travel_type, travel_destination, travel_departure, travel_return, payment_date, allocation_type, for_stock, attachments, budget_exceeded, budget_snapshot, committed_before_snapshot, projected_committed_snapshot, projects(name), clients(name), purchase_order_items(id, order_id, item_name, item_link, quantity, estimated_unit_value, position))"
+          "id, order_id, step_index, role_label, approver_id, status, comment, decided_at, decided_by, created_at, purchase_orders(id, project_id, client_id, client_unit_id, cost_center_id, item_name, item_link, quantity, estimated_value, approval_status, status, requester_id, requester_notes, buyer_notes, recipient, delivery_point, delivery_mode, deadline_type, deadline_date, delivery_forecast, passphrase, created_at, updated_at, approval_number, request_type, request_model, travel_type, travel_destination, travel_departure, travel_return, payment_date, allocation_type, for_stock, attachments, budget_exceeded, budget_snapshot, committed_before_snapshot, projected_committed_snapshot, projects(name), clients(name), purchase_order_items(id, order_id, item_name, item_link, quantity, estimated_unit_value, position))"
         )
         .order("step_index", { ascending: true });
       if (error) throw error;
@@ -150,7 +150,7 @@ function PendingApprovalDetails({ step, requestTypes }: { step: StepRow; request
   const fields = [
     ["Tipo", requestTypeLabel(order, requestTypes)], ["Itens", materialItems.length ? materialItems.map((item) => `${item.item_name} × ${item.quantity}`).join("\n") : order.item_name], ["Quantidade total", String(order.quantity ?? 1)],
     ...(order.request_model === "dispositivos" ? [] : [["Valor", BRL(Number(order.estimated_value ?? 0))]]), ["Projeto ou Cliente", allocation], ["Destinatário", order.recipient || "—"],
-    ["Endereço de entrega", order.delivery_point || "—"], ["Prazo", order.deadline_date ? new Date(`${order.deadline_date}T00:00:00`).toLocaleDateString("pt-BR") : order.deadline_type],
+    [(order as { delivery_mode?: string }).delivery_mode === "retirada" ? "Endereço de retirada" : "Endereço de entrega", order.delivery_point || "—"], ["Prazo", order.deadline_date ? new Date(`${order.deadline_date}T00:00:00`).toLocaleDateString("pt-BR") : order.deadline_type],
     ["Previsão de entrega", order.delivery_forecast ? new Date(`${order.delivery_forecast}T00:00:00`).toLocaleDateString("pt-BR") : "—"],
     ["Status da solicitação", order.status], ["Status da aprovação", order.approval_status], ["Palavra passe", order.passphrase || "—"], ["Criado em", dt(order.created_at)],
     ["Destino da viagem", order.travel_destination || "—"], ["Ida", order.travel_departure ? new Date(`${order.travel_departure}T00:00:00`).toLocaleDateString("pt-BR") : "—"], ["Volta", order.travel_return ? new Date(`${order.travel_return}T00:00:00`).toLocaleDateString("pt-BR") : "—"],
