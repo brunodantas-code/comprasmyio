@@ -110,6 +110,17 @@ export function SupplyOrderStatusesTab({ userId }: { userId: string }) {
             </TableBody>
             </SortableContext>
             </DndContext>
+            <TableBody>
+              {["Aguardando aprovação", "Rejeitado"].map((label) => (
+                <TableRow key={label}>
+                  <TableCell className="text-sm text-muted-foreground">—</TableCell>
+                  <TableCell className="font-medium">{label}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">Automática (fluxo de aprovação)</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">Ativa</TableCell>
+                  <TableCell />
+                </TableRow>
+              ))}
+            </TableBody>
           </Table>
         )}
       </CardContent>
