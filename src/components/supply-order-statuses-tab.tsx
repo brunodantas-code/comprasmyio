@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Pencil, Plus, Trash2 } from "lucide-react";
 import { useCanManageSupplyTags } from "@/components/supply-tags-tab";
 
 export type OrderStatusRow = { id: string; system_code: string | null; label: string; position: number; active: boolean; created_by: string | null; created_at: string };
@@ -45,6 +45,24 @@ export function SupplyOrderStatusesTab({ userId }: { userId: string }) {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const move = useMutation({
+    mutationFn: async ({ index, dir }: { index: number; dir: -1 | 1 }) => {
+      const list = [...(rows ?? [])];
+      const j = index + dir;
+      if (j < 0 || j >= list.length) return;
+      [list[index], list[j]] = [list[j], list[index]];
+      for (let i = 0; i < list.length; i++) {
+        const pos = (i + 1) * 10;
+        if (list[i].position !== pos) {
+          const { error } = await supabase.from("supply_order_statuses").update({ position: pos }).eq("id", list[i].id);
+          if (error) throw error;
+        }
+      }
+    },
+    onSuccess: refresh,
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const remove = useMutation({
     mutationFn: async (row: OrderStatusRow) => {
       const { count } = await supabase.from("purchase_orders").select("id", { count: "exact", head: true }).eq("custom_status_id", row.id);
@@ -69,16 +87,22 @@ export function SupplyOrderStatusesTab({ userId }: { userId: string }) {
       </CardHeader>
       <CardContent className="space-y-3">
         <p className="text-xs text-muted-foreground">
-          Situações originais podem ser renomeadas e reordenadas, mantendo suas regras (ex.: Conforme dá entrada no estoque). Situações novas servem só para acompanhamento.
+          A sequência define a ordem em que as situações aparecem nas listas e filtros (use as setas para mudar). Situações originais podem ser renomeadas, mantendo suas regras (ex.: Conforme dá entrada no estoque). Situações novas servem só para acompanhamento.
           {canManage ? "" : " Somente Admin, Financeiro e Compras alteram esta lista."}
         </p>
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : (
           <Table>
-            <TableHeader><TableRow><TableHead>Ordem</TableHead><TableHead>Nome</TableHead><TableHead>Tipo</TableHead><TableHead>Situação</TableHead><TableHead /></TableRow></TableHeader>
+            <TableHeader><TableRow><TableHead>Sequência</TableHead><TableHead>Nome</TableHead><TableHead>Tipo</TableHead><TableHead>Situação</TableHead><TableHead /></TableRow></TableHeader>
             <TableBody>
-              {(rows ?? []).map((r) => (
+              {(rows ?? []).map((r, i) => (
                 <TableRow key={r.id}>
-                  <TableCell className="text-sm text-muted-foreground">{r.position}</TableCell>
+                  <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
+                    <span className="inline-block w-5">{i + 1}</span>
+                    {canManage && <>
+                      <Button size="compactIcon" variant="ghost" title="Subir" aria-label="Subir" disabled={i === 0 || move.isPending} onClick={() => move.mutate({ index: i, dir: -1 })}><ArrowUp className="h-3.5 w-3.5" /></Button>
+                      <Button size="compactIcon" variant="ghost" title="Descer" aria-label="Descer" disabled={i === (rows?.length ?? 0) - 1 || move.isPending} onClick={() => move.mutate({ index: i, dir: 1 })}><ArrowDown className="h-3.5 w-3.5" /></Button>
+                    </>}
+                  </TableCell>
                   <TableCell className="font-medium">{r.label}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">{r.system_code ? "Original (com regras)" : "Acompanhamento"}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">{r.active ? "Ativa" : "Inativa"}</TableCell>
@@ -122,7 +146,7 @@ function StatusDialog({ row, onSave }: { row?: OrderStatusRow; onSave: (v: { lab
           const fd = new FormData(e.currentTarget);
           const name = label.trim();
           if (name.length < 2) return toast.error("Nome muito curto");
-          onSave({ label: name, position: Number(fd.get("position")) || 100, active: row && !row.system_code ? fd.get("active") === "on" : undefined });
+          onSave({ label: name, position: row?.position ?? 1000, active: row && !row.system_code ? fd.get("active") === "on" : undefined });
           setOpen(false);
         }}>
           <div className="space-y-2">
@@ -130,7 +154,6 @@ function StatusDialog({ row, onSave }: { row?: OrderStatusRow; onSave: (v: { lab
             <Input value={label} onChange={(e) => setLabel(e.target.value)} maxLength={LABEL_MAX} placeholder="Ex.: Em cotação" required />
             <p className="text-right text-xs text-muted-foreground">{label.length}/{LABEL_MAX}</p>
           </div>
-          <div className="space-y-2"><Label>Ordem</Label><Input name="position" type="number" defaultValue={row?.position ?? 100} /></div>
           {row && !row.system_code && <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="active" defaultChecked={row.active} /> Ativa</label>}
           <DialogFooter><Button type="submit" variant="action">Salvar</Button></DialogFooter>
         </form>

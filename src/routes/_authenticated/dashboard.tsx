@@ -30,7 +30,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { toast } from "sonner";
 import { ArrowLeft, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Boxes, Building2, Plane, Landmark, Briefcase, Layers3, ArrowUpDown, CalendarDays } from "lucide-react";
-import { ListChecks, Trash2, Paperclip, Loader2, DatabaseBackup, Check, CheckCircle2, XCircle, RotateCcw, Pencil, Bell, ShieldCheck, AlertTriangle, Tag, FileText } from "lucide-react";
+import { Trash2, Paperclip, Loader2, DatabaseBackup, Check, CheckCircle2, XCircle, RotateCcw, Pencil, Bell, ShieldCheck, AlertTriangle, Tag, FileText } from "lucide-react";
 import { ApprovalWorkflow, MyApprovalFlows, PendingApprovalsByRole, PendingForMe, type ApprovalListOrder } from "@/components/approval-workflow";
 import { z } from "zod";
 import { StockTab } from "@/components/stock-tab";
@@ -687,11 +687,11 @@ function Dashboard() {
                 {me.canAccess("cadastro_clientes") && <TabsContent value="clientes"><ClientsTab userId={me.id} /></TabsContent>}
                 {me.canAccess("cadastro_centros") && <TabsContent value="centros"><CostCentersTab userId={me.id} /></TabsContent>}
                 {me.canAccess("cadastro_etiquetas") && <TabsContent value="etiquetas"><SupplyTagsTab userId={me.id} /></TabsContent>}
-                {me.canAccess("cadastro_etiquetas") && <TabsContent value="status"><SupplyOrderStatusesTab userId={me.id} /></TabsContent>}
                 {me.canAccess("cadastro_cargos") && <TabsContent value="cargos"><JobTitlesTab userId={me.id} /></TabsContent>}
                 {me.canAccess("cadastro_lembretes") && <TabsContent value="lembretes"><RemindersTab /></TabsContent>}
                 {me.canAccess("cadastro_diversos") && <TabsContent value="diversos">
                   <div className="space-y-6">
+                    <SupplyOrderStatusesTab userId={me.id} />
                     <ClientCategoriesTab />
                     <MaterialsRegistryTab canCreate={me.canAccess("solicitacoes_item_novo")} />
                      <MyioDevicesRegistryTab />
@@ -767,7 +767,7 @@ function Dashboard() {
                     { value: "ferramentas", label: "Ferramentas/Ativos", icon: Boxes, allowed: me.canAccess("armazem_ferramentas_ativos") },
                   ].filter((item) => item.allowed)
               : value === "projects"
-                ? [{ value: "projetos", label: "Projetos", icon: FolderKanban, allowed: me.canAccess("cadastro_projetos") }, { value: "clientes", label: "Clientes", icon: Building2, allowed: me.canAccess("cadastro_clientes") }, { value: "centros", label: "Centro de Custo", icon: Landmark, allowed: me.canAccess("cadastro_centros") }, { value: "etiquetas", label: "Etiquetas", icon: Tag, allowed: me.canAccess("cadastro_etiquetas") }, { value: "status", label: "Status", icon: ListChecks, allowed: me.canAccess("cadastro_etiquetas") }, { value: "cargos", label: "Cargos", icon: Briefcase, allowed: me.canAccess("cadastro_cargos") }, { value: "lembretes", label: "Lembretes", icon: Bell, allowed: me.canAccess("cadastro_lembretes") }, { value: "diversos", label: "Diversos", icon: Layers3, allowed: me.canAccess("cadastro_diversos") }].filter((item) => item.allowed)
+                ? [{ value: "projetos", label: "Projetos", icon: FolderKanban, allowed: me.canAccess("cadastro_projetos") }, { value: "clientes", label: "Clientes", icon: Building2, allowed: me.canAccess("cadastro_clientes") }, { value: "centros", label: "Centro de Custo", icon: Landmark, allowed: me.canAccess("cadastro_centros") }, { value: "etiquetas", label: "Etiquetas", icon: Tag, allowed: me.canAccess("cadastro_etiquetas") }, { value: "cargos", label: "Cargos", icon: Briefcase, allowed: me.canAccess("cadastro_cargos") }, { value: "lembretes", label: "Lembretes", icon: Bell, allowed: me.canAccess("cadastro_lembretes") }, { value: "diversos", label: "Diversos", icon: Layers3, allowed: me.canAccess("cadastro_diversos") }].filter((item) => item.allowed)
                 : value === "admin"
                   ? [{ value: "usuarios", label: "Usuários", icon: Users, allowed: me.canAccess("usuarios_lista") }, { value: "acesso-restrito", label: "Perfis de acesso", icon: ShieldCheck, allowed: me.canAccess("usuarios_acesso_restrito") }, { value: "workflow:organograma", label: "Organograma de Aprovação", icon: CheckCircle2, allowed: me.canAccess("usuarios_workflow") }, { value: "workflow:padrao", label: "Alçadas de Aprovação", icon: CheckCircle2, allowed: me.canAccess("usuarios_workflow") }, { value: "workflow:etapas-adicionais", label: "Etapas Adicionais", icon: CheckCircle2, allowed: me.canAccess("usuarios_workflow") }, { value: "logs", label: "Logs", icon: ScrollText, allowed: me.canAccess("usuarios_logs") }, { value: "backup", label: "Backup", icon: DatabaseBackup, allowed: me.canAccess("usuarios_backup") }].filter((item) => item.allowed)
                   : [];
