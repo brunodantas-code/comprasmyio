@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { useEffect, useRef, useState } from "react";
 import { Check, Loader2, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -160,11 +161,11 @@ export function AddressAutocomplete({
       {modeName && (
         <div className="space-y-2">
           <Label>Modalidade</Label>
-          <div className="inline-flex rounded-md border p-0.5" role="radiogroup" aria-label="Entrega ou Retirada">
+          <div className="flex gap-2" role="radiogroup" aria-label="Entrega ou Retirada">
             {(["entrega", "retirada"] as const).map((value) => (
-              <button key={value} type="button" role="radio" aria-checked={mode === value} onClick={() => setMode(value)} className={`rounded px-4 py-1.5 text-sm transition-colors ${mode === value ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}>
+              <Button key={value} type="button" variant="outline" role="radio" aria-checked={mode === value} onClick={() => setMode(value)} className={mode === value ? "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground" : undefined}>
                 {value === "entrega" ? "Entrega" : "Retirada"}
-              </button>
+              </Button>
             ))}
           </div>
           <input type="hidden" name={modeName} value={mode} />
