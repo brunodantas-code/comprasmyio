@@ -29,6 +29,9 @@ import { useAdditionalStepTypes, type AdditionalStepType } from "@/components/ad
 import { requestTypeModel, requestTypeName, useRequestTypes, type RequestTypeRecord } from "@/components/request-types-tab";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { cn } from "@/lib/utils";
+import { ColumnSortButton } from "@/components/column-sort-button";
+import { compareColumnValues, type SortDirection, type SortValue } from "@/lib/column-sort";
+import type { FilterKind } from "@/lib/column-filters";
 
 const BRL = (v: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(v ?? 0));
@@ -386,6 +389,7 @@ export function PendingForMe({ renderEditAction }: { renderEditAction?: EditActi
   const { data: profiles } = useProfiles();
   const { data: requestTypes } = useRequestTypes();
   const [search, setSearch] = useState("");
+  const [sorting, setSorting] = useState<{ key: string; direction: SortDirection }>();
 
   const mine = useMemo(() => {
     if (!steps || !me) return [] as StepRow[];
@@ -409,6 +413,23 @@ export function PendingForMe({ renderEditAction }: { renderEditAction?: EditActi
       return !term || (s.purchase_orders?.approval_number ?? "").includes(term);
     });
   }, [steps, me, search]);
+
+  const sortDefs: { key: string; label: string; kind: FilterKind; value: (s: StepRow) => SortValue }[] = [
+    { key: "number", label: "Approval", kind: "text", value: s => s.purchase_orders?.approval_number },
+    { key: "type", label: "Tipo", kind: "text", value: s => requestTypeLabel(s.purchase_orders, requestTypes) },
+    { key: "requester", label: "Solicitante", kind: "text", value: s => profiles?.get(s.purchase_orders?.requester_id ?? "")?.full_name },
+    { key: "unit", label: "Valor unitário", kind: "number", value: s => Number(s.purchase_orders?.estimated_value ?? 0) / Math.max(Number(s.purchase_orders?.quantity ?? 1), 1) },
+    { key: "quantity", label: "Quantidade", kind: "number", value: s => s.purchase_orders?.quantity },
+    { key: "total", label: "Valor Total", kind: "number", value: s => s.purchase_orders?.estimated_value },
+    { key: "allocation", label: "Projeto ou Cliente", kind: "text", value: s => s.purchase_orders?.allocation_type === "interna" ? "Interna" : s.purchase_orders?.for_stock ? "Estoque" : s.purchase_orders?.projects?.name ?? s.purchase_orders?.clients?.name },
+  ];
+  const sortDef = sortDefs.find(c => c.key === sorting?.key);
+  const sortedMine = sortDef && sorting ? [...mine].sort((a, b) => compareColumnValues(sortDef.kind, sortDef.value(a), sortDef.value(b), sorting.direction)) : mine;
+  const sortControl = (key: string) => {
+    const c = sortDefs.find(c => c.key === key);
+    if (!c) return null;
+    return <span className="inline-flex items-center gap-1 whitespace-nowrap">{c.label}<ColumnSortButton label={c.label} direction={sorting?.key === key ? sorting.direction : undefined} onClick={() => setSorting(current => current?.key !== key ? { key, direction: "asc" } : current.direction === "asc" ? { key, direction: "desc" } : undefined)} /></span>;
+  };
 
   const refresh = () => {
     qc.invalidateQueries({ queryKey: ["approval-steps"] });
@@ -446,13 +467,13 @@ export function PendingForMe({ renderEditAction }: { renderEditAction?: EditActi
         <Table>
           <TableHeader className="[&_tr]:border-b">
               <TableRow className="border-b">
-                <TableHead>Approval</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead>Solicitante</TableHead>
-                <TableHead>Valor unitário</TableHead>
-                <TableHead>Quantidade</TableHead>
-                <TableHead>Valor Total</TableHead>
-                <TableHead>Projeto ou Cliente</TableHead>
+                <TableHead>{sortControl("number")}</TableHead>
+                <TableHead>{sortControl("type")}</TableHead>
+                <TableHead>{sortControl("requester")}</TableHead>
+                <TableHead>{sortControl("unit")}</TableHead>
+                <TableHead>{sortControl("quantity")}</TableHead>
+                <TableHead>{sortControl("total")}</TableHead>
+                <TableHead>{sortControl("allocation")}</TableHead>
                 <TableHead aria-label="Ações" />
               </TableRow>
               <TableRow>
@@ -473,7 +494,7 @@ export function PendingForMe({ renderEditAction }: { renderEditAction?: EditActi
               <TableRow><TableCell colSpan={8} className="text-sm text-muted-foreground">Carregando...</TableCell></TableRow>
             ) : mine.length === 0 ? (
               <TableRow><TableCell colSpan={8} className="text-sm text-muted-foreground">Nenhuma aprovação pendente.</TableCell></TableRow>
-            ) : mine.map((s) => {
+            ) : sortedMine.map((s) => {
                 const o = s.purchase_orders;
                 const req = o?.requester_id ? profiles?.get(o.requester_id) : undefined;
                 return (
@@ -656,6 +677,7 @@ export function MyApprovalFlows({ renderEditAction }: { renderEditAction?: EditA
   const { data: profiles } = useProfiles();
   const { data: requestTypes } = useRequestTypes();
   const [search, setSearch] = useState("");
+  const [numberDirection, setNumberDirection] = useState<SortDirection>();
 
   const orders = useMemo(() => {
     const byOrder = new Map<string, StepRow[]>();
@@ -673,11 +695,12 @@ export function MyApprovalFlows({ renderEditAction }: { renderEditAction?: EditA
           (!term || (order.approval_number ?? "").includes(term));
       })
       .sort((a, b) => {
+      if (numberDirection) return compareColumnValues("text", a[1][0]?.purchase_orders?.approval_number, b[1][0]?.purchase_orders?.approval_number, numberDirection);
       const da = a[1][0]?.purchase_orders?.created_at ?? "";
       const db = b[1][0]?.purchase_orders?.created_at ?? "";
       return db.localeCompare(da);
     });
-  }, [steps, me?.id, search]);
+  }, [steps, me?.id, search, numberDirection]);
 
   return (
     <Card>
@@ -688,7 +711,7 @@ export function MyApprovalFlows({ renderEditAction }: { renderEditAction?: EditA
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="border-t p-2">
+        <div className="flex items-center gap-2 border-t p-2">
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -696,6 +719,7 @@ export function MyApprovalFlows({ renderEditAction }: { renderEditAction?: EditA
             aria-label="Filtrar por número do approval"
             className="h-8 w-full bg-background sm:w-[200px]"
           />
+          <ColumnSortButton label="Approval" direction={numberDirection} onClick={() => setNumberDirection(current => current === undefined ? "asc" : current === "asc" ? "desc" : undefined)} />
         </div>
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando...</p>

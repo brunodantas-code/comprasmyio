@@ -28,6 +28,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { ptBR } from "date-fns/locale";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ColumnFilter } from "@/components/column-filter";
+import { ColumnSortButton } from "@/components/column-sort-button";
+import { compareColumnValues, type SortDirection } from "@/lib/column-sort";
 import { isFilterActive, matchesColumnFilter, type ColumnFilterValue, type FilterKind } from "@/lib/column-filters";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { toast } from "sonner";
@@ -2872,6 +2874,7 @@ function OrdersTable({
     ? "Cliente"
     : !o.for_stock && o.allocation_type !== "interna" && o.project_id ? "Projeto" : null;
   const [cf, setCf] = useState<Record<string, ColumnFilterValue | undefined>>({});
+  const [columnSort, setColumnSort] = useState<{ key: string; direction: SortDirection }>();
   const statusLabelOf = (o: Order) => (o.custom_status_id ? statusCatalog.custom.find((r) => r.id === o.custom_status_id)?.label : undefined) ?? STATUS_LABELS[o.status];
   const itemsTextOf = (o: Order) => { const rows = groupedOrderItems?.get(o.id) ?? []; return rows.length ? rows.map((r) => r.item_name).join(", ") : (o.item_name ?? ""); };
   const noDeadline = (o: Order) => o.request_model === "reembolso" || o.request_model === "pagamento" || o.request_type === "reembolso" || o.request_type === "pagamento";
@@ -2895,11 +2898,14 @@ function OrdersTable({
   const colFilter = (key: string, showLabel = false) => {
     const c = colByKey[key];
     if (!c) return null;
-    return <ColumnFilter label={c.label} kind={c.kind} showLabel={showLabel} values={orders.map(c.list)} value={cf[key]} onChange={(v) => setCf((prev) => ({ ...prev, [key]: v }))} />;
+    return <span className="inline-flex shrink-0 items-center gap-0.5">
+      <ColumnFilter label={c.label} kind={c.kind} showLabel={showLabel} values={orders.map(c.list)} value={cf[key]} onChange={(v) => setCf((prev) => ({ ...prev, [key]: v }))} />
+      <ColumnSortButton label={c.label} direction={columnSort?.key === key ? columnSort.direction : undefined} onClick={() => setColumnSort((current) => current?.key !== key ? { key, direction: "asc" } : current.direction === "asc" ? { key, direction: "desc" } : undefined)} />
+    </span>;
   };
   const activeColFilters = colDefs.filter((c) => isFilterActive(cf[c.key]));
   const columnFiltered = orders.filter((o) => activeColFilters.every((c) => matchesColumnFilter(c.kind, c.raw(o), c.list(o), cf[c.key])));
-  const visibleOrders = !headerFilters && !filterBar
+  const filteredOrders = !headerFilters && !filterBar
     ? columnFiltered
     : columnFiltered.filter((o) =>
         (!fApproval || norm(o.approval_number ?? "").includes(norm(fApproval))) &&
@@ -2909,6 +2915,11 @@ function OrdersTable({
         (!fDate || o.deadline_date === fDate || o.delivery_forecast === fDate) &&
         (fStatus === "all" || (fStatus.startsWith("c:") ? o.custom_status_id === fStatus.slice(2) : o.status === fStatus && !o.custom_status_id))
       );
+
+  const sortColumn = columnSort ? colByKey[columnSort.key] : undefined;
+  const visibleOrders = sortColumn && columnSort
+    ? [...filteredOrders].sort((a, b) => compareColumnValues(sortColumn.kind, sortColumn.raw(a), sortColumn.raw(b), columnSort.direction))
+    : filteredOrders;
 
   const filterInput = (value: string, onChange: (v: string) => void, placeholder: string) => (
     <Input
@@ -3078,20 +3089,20 @@ function OrdersTable({
           </>
         )}
       </div>
-      <Table className={`w-full table-fixed ${showRequester ? "min-w-[1330px]" : "min-w-[1225px]"}`}>
+      <Table className={`w-full table-fixed ${showRequester ? "min-w-[1590px]" : "min-w-[1470px]"}`}>
         <TableHeader className="[&_tr]:border-b">
           <TableRow className="border-b">
             <TableHead className="w-[150px] text-left"><span className="inline-flex items-center gap-1 whitespace-nowrap">Approval {colFilter("approval")}</span></TableHead>
-            <TableHead className="w-[190px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Itens da Solicitação {colFilter("itens")}</span></TableHead>
+            <TableHead className="w-[210px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Itens da Solicitação {colFilter("itens")}</span></TableHead>
             <TableHead className="w-[125px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Tipo {colFilter("tipo")}</span></TableHead>
-            <TableHead className="w-[120px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Alocação {colFilter("aloc")}</span></TableHead>
-            {showRequester && <TableHead className="w-[105px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Solicitante {colFilter("req")}</span></TableHead>}
-            <TableHead className="w-[65px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Qtd {colFilter("qtd")}</span></TableHead>
-            <TableHead className="w-[115px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Valor Total {colFilter("valor")}</span></TableHead>
-            <TableHead className="w-[120px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Destinatário {colFilter("dest")}</span></TableHead>
-            <TableHead className="w-[110px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Prazo <span className="inline-flex shrink-0 gap-0.5">{colFilter("prazo")}{colFilter("prev")}</span></span></TableHead>
-            <TableHead className="w-[110px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Status {colFilter("status")}</span></TableHead>
-            <TableHead className="w-[120px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Palavra passe {colFilter("passe")}</span></TableHead>
+            <TableHead className="w-[145px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Alocação {colFilter("aloc")}</span></TableHead>
+            {showRequester && <TableHead className="w-[125px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Solicitante {colFilter("req")}</span></TableHead>}
+            <TableHead className="w-[90px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Qtd {colFilter("qtd")}</span></TableHead>
+            <TableHead className="w-[140px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Valor Total {colFilter("valor")}</span></TableHead>
+            <TableHead className="w-[145px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Destinatário {colFilter("dest")}</span></TableHead>
+            <TableHead className="w-[145px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Prazo <span className="inline-flex shrink-0 gap-0.5">{colFilter("prazo")}{colFilter("prev")}</span></span></TableHead>
+            <TableHead className="w-[145px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Status {colFilter("status")}</span></TableHead>
+            <TableHead className="w-[145px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Palavra passe {colFilter("passe")}</span></TableHead>
           </TableRow>
           {headerFilters && !filterBar && (
             <TableRow>

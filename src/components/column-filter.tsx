@@ -46,14 +46,14 @@ export function ColumnFilter({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         {showLabel ? (
-          <Button type="button" variant="outline" size="sm" className={`h-7 gap-1 px-2 text-xs ${active ? "border-primary text-primary" : ""}`}>
+          <Button type="button" variant="outline" size="sm" className={`h-7 gap-1 px-2 text-xs !bg-transparent ${active ? "border-primary !text-primary" : ""}`}>
             <Filter className="size-3" />{label}
           </Button>
         ) : (
-          <button type="button" aria-label={`Filtrar ${label}`} title={`Filtrar ${label}`}
-            className={`inline-flex size-5 items-center justify-center rounded align-middle ${active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-primary"}`}>
+          <Button type="button" variant="ghost" size="icon" aria-label={`Filtrar ${label}`} title={`Filtrar ${label}`}
+            className={`size-5 shrink-0 p-0 align-middle !bg-transparent shadow-none ${active ? "!text-primary" : "!text-muted-foreground hover:!text-primary"}`}>
             <Filter className="size-3" />
-          </button>
+          </Button>
         )}
       </PopoverTrigger>
       <PopoverContent align="start" className="w-[min(18rem,calc(100vw-2rem))] space-y-2 p-3 text-left font-sans text-sm font-normal">
