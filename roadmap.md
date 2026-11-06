@@ -1,6 +1,6 @@
 # Roadmap
-- [ ] Ordenação por coluna em Minhas Solicitações e submenus do Approval, com filtros combinados e verificação em celular
-- [ ] Filtros ativos: ícone verde sem fundo, como o exemplo de Prazo
+- [x] Ordenação por coluna nas listas de solicitações/Supply/Todos; aprovações pendentes por colunas disponíveis e Meus em aprovação por número; testes e filtros combinados conferidos
+- [x] Filtros ativos: ícone verde sem fundo, como o exemplo de Prazo
 - [x] Avaliar redundância da faixa superior e responder: filtros sobrepostos, busca de Item também inclui observações; mantida até decisão do usuário
 - [x] Cabeçalhos do Approval: filtros à direita do título, sem quebra; conferidos em 1280 e 1083 px
 - [x] Ampliar área principal de todos os apps em aproximadamente 1 cm por lado no desktop; margens do celular preservadas e conferidas
