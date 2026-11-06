@@ -3560,6 +3560,33 @@ export type Database = {
           },
         ]
       }
+      project_types: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          position: number
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          position?: number
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          position?: number
+        }
+        Relationships: []
+      }
       projects: {
         Row: {
           budget: number
@@ -3573,6 +3600,8 @@ export type Database = {
           description: string | null
           id: string
           name: string
+          project_type: string | null
+          short_name: string | null
           status: string
         }
         Insert: {
@@ -3587,6 +3616,8 @@ export type Database = {
           description?: string | null
           id?: string
           name: string
+          project_type?: string | null
+          short_name?: string | null
           status?: string
         }
         Update: {
@@ -3601,6 +3632,8 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+          project_type?: string | null
+          short_name?: string | null
           status?: string
         }
         Relationships: [

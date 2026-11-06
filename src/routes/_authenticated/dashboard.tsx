@@ -1,4 +1,6 @@
 import { TableReportActions, TableReportProvider, useRegisterTableReport } from "@/components/table-report-actions";
+import { ProjectTypeFields, useProjectTypes } from "@/components/project-type-fields";
+import { composeProjectName, splitProjectName } from "@/lib/project-naming";
 import { useTableFilters } from "@/components/use-table-filters";
 import { BrCityPicker } from "@/components/br-city-picker";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
@@ -3714,6 +3716,8 @@ function ProjectsAdmin({ userId }: { userId: string }) {
   const canCreate = !!me?.canCreateProjects;
   const [budgetVal, setBudgetVal] = useState("0");
   const [newProjectClientId, setNewProjectClientId] = useState("");
+  const [newProjectType, setNewProjectType] = useState("");
+  const [newProjectShortName, setNewProjectShortName] = useState("");
   const [newProjectClientUnitId, setNewProjectClientUnitId] = useState("");
   const { data: newProjectClientUnits } = useClientUnits(newProjectClientId || undefined);
   const [statusDialog, setStatusDialog] = useState<{ id: string; name: string; action: "implantado" | "cancelado" } | null>(null);
@@ -3721,7 +3725,7 @@ function ProjectsAdmin({ userId }: { userId: string }) {
   const [projectSort, setProjectSort] = useState("name-asc");
 
   const create = useMutation({
-    mutationFn: async (v: { name: string; description: string; budget: number; client_id: string | null; client_unit_id: string | null; client_name: string }) => {
+    mutationFn: async (v: { name: string; project_type: string; short_name: string; description: string; budget: number; client_id: string | null; client_unit_id: string | null; client_name: string }) => {
       const { data: existing, error: lookupError } = await supabase.from("projects").select("id,name");
       if (lookupError) throw lookupError;
       const normalizedName = v.name.trim().toLocaleLowerCase("pt-BR");
@@ -3754,7 +3758,7 @@ function ProjectsAdmin({ userId }: { userId: string }) {
   });
 
   const update = useMutation({
-    mutationFn: async (v: { id: string; name: string; description: string; budget: number; client_id: string | null; client_unit_id: string | null; client_name: string }) => {
+    mutationFn: async (v: { id: string; name: string; project_type: string; short_name: string; description: string; budget: number; client_id: string | null; client_unit_id: string | null; client_name: string }) => {
       const { data: existing, error: lookupError } = await supabase.from("projects").select("id,name");
       if (lookupError) throw lookupError;
       const normalizedName = v.name.trim().toLocaleLowerCase("pt-BR");
@@ -3776,15 +3780,17 @@ function ProjectsAdmin({ userId }: { userId: string }) {
   function onCreate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    const name = String(fd.get("name") || "").trim();
     const description = String(fd.get("description") || "").trim();
     const budget = Number(budgetVal || "0");
     const client = clients?.find((item) => item.id === newProjectClientId);
-    if (name.length < 2) return toast.error("Nome muito curto");
+    if (!newProjectType) return toast.error("Selecione o tipo de projeto.");
+    const shortName = newProjectShortName.replace(/\|/g, " ").replace(/\s+/g, " ").trim();
+    if (shortName.length < 2) return toast.error("Nome muito curto");
+    const name = composeProjectName(newProjectType, shortName);
     if (!Number.isFinite(budget) || budget <= 0) return toast.error("Informe o orçamento aprovado do projeto.");
     create.mutate(
-      { name, description, budget, client_id: client?.id ?? null, client_unit_id: newProjectClientUnitId || null, client_name: client?.name ?? "" },
-      { onSuccess: () => { (e.target as HTMLFormElement).reset(); setNewProjectClientId(""); setNewProjectClientUnitId(""); setBudgetVal("0"); } },
+      { name, project_type: newProjectType, short_name: shortName, description, budget, client_id: client?.id ?? null, client_unit_id: newProjectClientUnitId || null, client_name: client?.name ?? "" },
+      { onSuccess: () => { (e.target as HTMLFormElement).reset(); setNewProjectType(""); setNewProjectShortName(""); setNewProjectClientId(""); setNewProjectClientUnitId(""); setBudgetVal("0"); } },
     );
   }
 
@@ -3832,15 +3838,15 @@ function ProjectsAdmin({ userId }: { userId: string }) {
           ) : (
           <form onSubmit={onCreate} className="space-y-4">
             <div className={newProjectClientId
-              ? "grid items-end gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)_minmax(0,0.9fr)_12rem_minmax(0,1.2fr)_auto]"
-              : "grid items-end gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)_12rem_minmax(0,1.2fr)_auto]"}>
-            <div className="min-w-0 space-y-2"><Label htmlFor="p-name">Nome do projeto</Label><Input id="p-name" name="name" required /></div>
+              ? "grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)_minmax(0,1fr)_minmax(0,0.9fr)_11rem_minmax(0,1fr)_auto]"
+              : "grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)_minmax(0,1fr)_11rem_minmax(0,1fr)_auto]"}>
+            <ProjectTypeFields idPrefix="p" projectType={newProjectType} shortName={newProjectShortName} onTypeChange={setNewProjectType} onNameChange={setNewProjectShortName} />
             <div className="min-w-0 space-y-2">
               <Label>Cliente</Label>
               <Select value={newProjectClientId || "none"} onValueChange={(value) => { setNewProjectClientId(value === "none" ? "" : value); setNewProjectClientUnitId(""); }}>
                 <SelectTrigger><SelectValue placeholder="Selecione um cliente" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">Sem cliente vinculado</SelectItem>
+                  <SelectItem value="none">Interna (sem cliente)</SelectItem>
                   {(clients ?? []).map((client) => <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>)}
                 </SelectContent>
               </Select>
@@ -3862,7 +3868,7 @@ function ProjectsAdmin({ userId }: { userId: string }) {
               <MoneyInput id="p-budget" className="w-full" value={budgetVal} onChange={setBudgetVal} required placeholder="0,00" />
             </div>
             <div className="min-w-0 space-y-2"><Label htmlFor="p-desc">Descrição</Label><Input id="p-desc" name="description" /></div>
-            <Button type="submit" className="w-full whitespace-nowrap xl:w-auto" disabled={create.isPending}>Criar</Button>
+            <Button type="submit" className="w-full whitespace-nowrap xl:mt-8 xl:w-auto" disabled={create.isPending}>Criar</Button>
             </div>
           </form>
           )}
@@ -4047,18 +4053,29 @@ function EditProjectDialog({
   project: EditableProject;
   clients: ProjectClientOption[];
   saving: boolean;
-  onSave: (values: { name: string; description: string; budget: number; client_id: string | null; client_unit_id: string | null; client_name: string }) => Promise<unknown>;
+  onSave: (values: { name: string; project_type: string; short_name: string; description: string; budget: number; client_id: string | null; client_unit_id: string | null; client_name: string }) => Promise<unknown>;
 }) {
   const [open, setOpen] = useState(false);
   const [clientId, setClientId] = useState(project.client_id ?? "");
   const [clientUnitId, setClientUnitId] = useState(project.client_unit_id ?? "");
   const [budget, setBudget] = useState(String(project.budget ?? 0));
+  const { data: projectTypes } = useProjectTypes();
+  const initialNaming = () => {
+    const stored = project as { project_type?: string | null; short_name?: string | null };
+    if (stored.project_type && stored.short_name) return { projectType: stored.project_type, shortName: stored.short_name };
+    return splitProjectName(project.name, (projectTypes ?? []).map((type) => type.name));
+  };
+  const [projectType, setProjectType] = useState("");
+  const [shortName, setShortName] = useState(project.name);
   const { data: units } = useClientUnits(clientId || undefined);
 
   function resetValues() {
     setClientId(project.client_id ?? "");
     setClientUnitId(project.client_unit_id ?? "");
     setBudget(String(project.budget ?? 0));
+    const naming = initialNaming();
+    setProjectType(naming.projectType);
+    setShortName(naming.shortName);
   }
 
   return (
@@ -4078,14 +4095,18 @@ function EditProjectDialog({
           onSubmit={async (event) => {
             event.preventDefault();
             const formData = new FormData(event.currentTarget);
-            const name = String(formData.get("name") || "").trim();
             const description = String(formData.get("description") || "").trim();
             const numericBudget = Number(budget || "0");
             const client = clients.find((item) => item.id === clientId);
-            if (name.length < 2) return toast.error("Nome muito curto");
+            if (!projectType) return toast.error("Selecione o tipo de projeto.");
+            const cleanName = shortName.replace(/\|/g, " ").replace(/\s+/g, " ").trim();
+            if (cleanName.length < 2) return toast.error("Nome muito curto");
+            const name = composeProjectName(projectType, cleanName);
             if (!Number.isFinite(numericBudget) || numericBudget < 0) return toast.error("Informe um orçamento válido para o projeto.");
             await onSave({
               name,
+              project_type: projectType,
+              short_name: cleanName,
               description,
               budget: numericBudget,
               client_id: client?.id ?? null,
@@ -4095,13 +4116,13 @@ function EditProjectDialog({
             setOpen(false);
           }}
         >
-          <div className="space-y-2"><Label htmlFor={`edit-project-name-${project.id}`}>Nome do projeto</Label><Input id={`edit-project-name-${project.id}`} name="name" defaultValue={project.name} required /></div>
+          <ProjectTypeFields idPrefix={`edit-project-${project.id}`} projectType={projectType} shortName={shortName} onTypeChange={setProjectType} onNameChange={setShortName} />
           <div className="space-y-2">
             <Label>Cliente</Label>
             <Select value={clientId || "none"} onValueChange={(value) => { setClientId(value === "none" ? "" : value); setClientUnitId(""); }}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">Sem cliente vinculado</SelectItem>
+                <SelectItem value="none">Interna (sem cliente)</SelectItem>
                 {clients.map((client) => <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>)}
               </SelectContent>
             </Select>

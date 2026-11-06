@@ -1282,6 +1282,13 @@
       "when": 1793903038378,
       "tag": "0182_supply_order_statuses",
       "breakpoints": true
+    },
+    {
+      "idx": 183,
+      "version": "7",
+      "when": 1793982094996,
+      "tag": "0183_project_types",
+      "breakpoints": true
     }
   ]
 }
