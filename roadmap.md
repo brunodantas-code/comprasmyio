@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Ajustar capa editável: ícone preto à direita, Supply/subtítulo alinhados à esquerda e título menor; retirar retorno antes do Sumário; sem gerar PDF
 - [x] Gerar V2 do manual Supply com ajustes acumulados; 24 páginas conferidas visualmente, setas e retorno ao Sumário validados; apresentada para aprovação final
 - [x] Ampliar negrito para referências a campos e opções em todo o manual, incluindo novo item, sem gerar PDF
 - [x] Incluir miniaturas dos ícones originais junto aos menus do manual Supply, sem gerar novo PDF
