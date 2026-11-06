@@ -37,7 +37,7 @@ export function TableReportActions({ title, report }: { title: string; report?: 
     finally { setBusy(false); }
   }
   return <span className="inline-flex shrink-0 items-center gap-1">
-    <Button variant="outline" size="icon" className="h-7 w-7" disabled={busy || !data.rows.length} title={`Exportar ${title} em PDF`} aria-label={`Exportar ${title} em PDF`} onClick={() => download("pdf")}>{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}</Button>
-    <Button variant="outline" size="icon" className="h-7 w-7" disabled={busy || !data.rows.length} title={`Exportar ${title} em Excel`} aria-label={`Exportar ${title} em Excel`} onClick={() => download("xlsx")}><FileSpreadsheet className="h-4 w-4" /></Button>
+    <Button variant="outline" size="sm" className="h-7 gap-1 px-2 text-xs" disabled={busy || !data.rows.length} title={`Exportar ${title} em PDF`} aria-label={`Exportar ${title} em PDF`} onClick={() => download("pdf")}>{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}<span>PDF</span></Button>
+    <Button variant="outline" size="sm" className="h-7 gap-1 px-2 text-xs" disabled={busy || !data.rows.length} title={`Exportar ${title} em Excel`} aria-label={`Exportar ${title} em Excel`} onClick={() => download("xlsx")}><FileSpreadsheet className="h-4 w-4" /><span>Excel</span></Button>
   </span>;
 }
