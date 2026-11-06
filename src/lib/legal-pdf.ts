@@ -1,5 +1,5 @@
 import type { LegalContent } from './legal';
-import { legalDate } from './legal';
+import { legalDate, legalSubjectResponsibles } from './legal';
 export async function legalPdf(title: string, date: string | null, content: LegalContent, minutes: boolean) {
   const { jsPDF } = await import('jspdf');
   const doc = new jsPDF(); let y = 22;
@@ -16,7 +16,8 @@ export async function legalPdf(title: string, date: string | null, content: Lega
     text(`${index + 1}. ${subject.title}`, 13); text(subject.description);
     if (minutes) {
       text('Deliberações', 11); text(subject.decisions);
-      if (subject.responsible) text(`Responsável: ${subject.responsible}`);
+      const responsibles = legalSubjectResponsibles(subject);
+      if (responsibles.length) text(`Responsáveis: ${responsibles.join(', ')}`);
       if (subject.completionDate) text(`Data de conclusão: ${legalDate(subject.completionDate)}`);
     }
   }

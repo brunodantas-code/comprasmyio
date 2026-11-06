@@ -1,3 +1,3 @@
 - Legal uses loader-backed query data and app-scoped RLS for collaborative records. Storage paths are uploader/record/file and reads use expiring signed URLs.
 - Minutes require every participant's drawn signature before generating a signed PDF; changes invalidate signatures and stale PDFs so revised content is signed again.
-- Subject assignments and completion dates are optional content snapshots; shared pure pending logic counts unsigned participants and assigned actions without completion dates.
+- Subject assignments use optional name arrays with legacy single-name fallback; shared helpers resolve names for editing, search, display, PDFs and pending actions, preserving older minutes.

@@ -1,6 +1,14 @@
 import { describe, it, expect } from 'vitest';
-import { allParticipantsSigned, clearLegalSignatures, emptyLegalContent, legalSearchText, legalPendingCount, parseLegalContent } from './legal';
+import { allParticipantsSigned, clearLegalSignatures, emptyLegalContent, legalSearchText, legalPendingCount, parseLegalContent, legalSubjectResponsibles } from './legal';
 describe('Atas do Legal', () => {
+  it('preserva responsável antigo e permite vários sem duplicar a ação pendente', () => {
+    const subject = {id:'1',title:'Ação',description:'',decisions:'',responsible:'Bruno'};
+    expect(legalSubjectResponsibles(subject)).toEqual(['Bruno']);
+    const updated = {...subject,responsibles:['Bruno','João','Bruno']};
+    expect(legalSubjectResponsibles(parseLegalContent({subjects:[updated]}).subjects[0])).toEqual(['Bruno','João']);
+    expect(legalPendingCount({...emptyLegalContent(),subjects:[updated]}).actions).toBe(1);
+    expect(legalSubjectResponsibles({...updated,responsibles:[]})).toEqual([]);
+  });
   it('conta assinaturas pendentes e elimina a pendência após assinar', () => {
     const content = emptyLegalContent();
     content.participants = [{id:'1', name:'Ana', signature:'', signedAt:''}];
