@@ -41,7 +41,12 @@ export function AppHeader({ logo, children }: { logo: ReactNode; children?: Reac
           </div>
         </div>
         <div className="mt-5 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:mt-0 sm:flex sm:min-w-0 sm:justify-end">
-          <p className="min-w-0 truncate text-sm font-semibold">{userName}</p>
+          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
+            <p className="min-w-0 truncate text-sm font-semibold">{userName}</p>
+            <Button asChild variant="ghost" size="icon" className="shrink-0 !bg-transparent !text-primary shadow-none hover:!bg-transparent hover:!text-primary" title="Início" aria-label="Voltar aos aplicativos">
+              <Link to="/portal"><Home className="h-4 w-4" /></Link>
+            </Button>
+          </div>
           {children}
           <div className="hidden shrink-0 items-center gap-1 sm:flex">
             <DesktopHeaderMenu userName={userName} onSignOut={signOut} onChangePassword={() => setPasswordOpen(true)} buttonClass={iconButton} />
@@ -62,7 +67,6 @@ function MobileHeaderMenu({ userName, onSignOut, onChangePassword, buttonClass }
       <SheetContent side="bottom" className="rounded-t-2xl px-5 pb-8">
         <SheetHeader><SheetTitle className="truncate text-left">{userName}</SheetTitle></SheetHeader>
         <nav className="mt-5 divide-y divide-border" aria-label="Menu do aplicativo">
-          <Button asChild variant="ghost" className="h-12 w-full justify-start rounded-none !bg-transparent !text-foreground hover:!bg-muted"><Link to="/portal"><Home className="h-5 w-5" />Início</Link></Button>
           <Button variant="ghost" className="h-12 w-full justify-start rounded-none !bg-transparent !text-foreground hover:!bg-muted" onClick={() => window.history.back()}><ArrowLeft className="h-5 w-5" />Voltar</Button>
           <Button variant="ghost" className="h-12 w-full justify-start rounded-none !bg-transparent !text-foreground hover:!bg-muted" onClick={onChangePassword}><KeyRound className="h-5 w-5" />Alterar senha</Button>
           <Button variant="ghost" className="h-12 w-full justify-start rounded-none !bg-transparent !text-destructive hover:!bg-muted hover:!text-destructive" onClick={onSignOut}><LogOut className="h-5 w-5" />Sair</Button>
@@ -87,9 +91,6 @@ function DesktopHeaderMenu({ userName, onSignOut, onChangePassword, buttonClass 
           <p className="truncate text-sm font-semibold text-foreground">{userName}</p>
         </div>
         <nav className="py-1" aria-label="Menu do aplicativo">
-          <Button asChild variant="ghost" className={itemClass}>
-            <Link to="/portal"><Home className="h-5 w-5" />Início</Link>
-          </Button>
           <Button variant="ghost" className={itemClass} onClick={() => window.history.back()}>
             <ArrowLeft className="h-5 w-5" />Voltar
           </Button>
