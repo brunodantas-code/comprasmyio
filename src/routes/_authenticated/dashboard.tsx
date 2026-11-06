@@ -73,6 +73,7 @@ import { SupplyConsolidation } from "@/components/supply-consolidation";
 import { SupplyEditPurchase } from "@/components/supply-edit-purchase";
 import { SupplyOrderConversation } from "@/components/supply-order-conversation";
 import { MilestoneTimeline } from "@/components/milestone-timeline";
+import { UserManualsTab } from "@/components/user-manuals-tab";
 
 
 
@@ -718,6 +719,7 @@ function Dashboard() {
                 {me.canAccess("cadastro_lembretes") && <TabsContent value="lembretes"><RemindersTab /></TabsContent>}
                 {me.canAccess("cadastro_diversos") && <TabsContent value="diversos">
                   <div className="space-y-6">
+                    <UserManualsTab />
                     <SupplyOrderStatusesTab userId={me.id} />
                     <ClientCategoriesTab />
                     <MaterialsRegistryTab canCreate={me.canAccess("solicitacoes_item_novo")} />

@@ -1,4 +1,7 @@
 # Roadmap
+- [x] Reposicionar ícone preto logo após Supply e pontuar os passos internos; PDF V4 com 24 páginas revisadas
+- [ ] Ativar skill de atualização funcional dos manuais: pronta, ativação bloqueada pela exigência de administrador/owner do workspace
+- [x] Disponibilizar versões V4 atual e V1–V3 anteriores em Supply → Cadastro → Diversos → Manual do Usuário; PDFs atual/anterior e telas desktop/celular conferidos
 - [x] Simplificar link de navegação do manual para “Sumário”
 - [x] Gerar manual Supply V3 final com ajustes recentes; 24 páginas conferidas visualmente e links validados
 - [x] Numeração interna do manual em lilás conforme títulos; badges verdes somente no Sumário; sem gerar PDF
