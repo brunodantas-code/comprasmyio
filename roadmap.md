@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Inserir setas verdes visíveis entre as etapas da sequência de uma demanda no manual Supply, sem gerar novo PDF
 - [x] Destacar em negrito todas as menções a menus e submenus no material editável do manual, sem gerar novo PDF
 - [x] Remover do cabeçalho do manual a informação já presente no rodapé, conforme print; manter retorno ao Sumário
 - [x] Incluir retorno clicável ao Sumário em todas as páginas do manual e numeração verde em quadrados verde-claros conforme checklist Site Survey; sem gerar novo PDF
