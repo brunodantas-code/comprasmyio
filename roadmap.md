@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Incluir Fabricação após Aprovações no subtítulo do manual Supply e explicitar fabricação de dispositivos, controle de estoque e almoxarifado no Objetivo; sem gerar novo PDF
 - [x] Atualizar subtítulo da capa Supply para “Solicitações, Aprovações, Estoque e Almoxarifado”, sem gerar novo PDF
 - [x] Incluir ícone original do app antes do nome na capa do manual Supply e registrar o padrão nos próximos manuais, sem gerar PDF durante a revisão
 - [x] Ajustar fonte editável do manual Supply: logo menor, capa limpa, Objetivo na segunda página e blocos separados Para quem/Como usar; sem gerar novo PDF durante a revisão
