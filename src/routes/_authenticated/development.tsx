@@ -203,9 +203,19 @@ function DevelopmentPage() {
           <CardContent>
             <div className="mb-2 flex flex-wrap gap-2 md:hidden">{["number", "reporter", "app", "type", "title", "priority", "status", "question", "date"].map(key => <span key={key}>{ticketFilters.header(key)}</span>)}</div>
             {isLoading ? <p className="py-8 text-center text-sm text-muted-foreground">Carregando tickets...</p> : (
-              <Table>
+              <Table className="table-fixed md:min-w-[900px]">
                  <TableHeader>
-                   <TableRow>{["number", "reporter", "app", "type", "title", "priority", "status", "date"].map((key) => <TableHead key={key}>{ticketFilters.header(key)}{key === "status" ? ticketFilters.control("question") : null}</TableHead>)}</TableRow>
+                   <TableRow>
+                     <TableHead className="w-[5%]">{ticketFilters.header("number")}</TableHead>
+                     <TableHead className="w-[13%]">{ticketFilters.header("reporter")}</TableHead>
+                     <TableHead className="w-[11%]">{ticketFilters.header("app")}</TableHead>
+                     <TableHead className="w-[8%]">{ticketFilters.header("type")}</TableHead>
+                     <TableHead className="w-[24%]">{ticketFilters.header("title")}</TableHead>
+                     <TableHead className="w-[10%]">{ticketFilters.header("priority")}</TableHead>
+                     <TableHead className="w-[12%]">{ticketFilters.header("status")}</TableHead>
+                     <TableHead className="w-[9%]">{ticketFilters.header("question")}</TableHead>
+                     <TableHead className="w-[8%]">{ticketFilters.header("date")}</TableHead>
+                   </TableRow>
                  </TableHeader>
                 <TableBody>{filteredTickets.map((ticket) => (
                   <TableRow key={ticket.id} className="cursor-pointer" onClick={() => setSelectedTicket(ticket)}>
@@ -213,12 +223,13 @@ function DevelopmentPage() {
                      <TableCell>{profileNames.get(ticket.reporter_id) ?? "Usuário"}</TableCell>
                     <TableCell>{APP_NAMES[ticket.app_key] ?? ticket.app_key}</TableCell>
                     <TableCell><Badge variant="outline" className="font-normal">{ticket.ticket_type === "bug" ? "Bug" : "Melhoria"}</Badge></TableCell>
-                    <TableCell className="max-w-xs truncate font-medium">{ticket.title}</TableCell>
+                    <TableCell className="md:truncate font-medium">{ticket.title}</TableCell>
                     <TableCell>{PRIORITY_NAMES[ticket.priority]}</TableCell>
-                    <TableCell><div className="flex items-center gap-2"><Badge variant="outline" className="font-normal">{STATUS_NAMES[ticket.status]}</Badge>{unansweredCodeQuestions(data?.questionMessages ?? []).some(q => q.ticket_id === ticket.id) ? unansweredCodeQuestions(data?.questionMessages ?? []).some(q => q.ticket_id === ticket.id && isCodeQuestionForUser(q, ticket.reporter_id, data?.userId ?? "", Boolean(data?.isAdmin))) ? <span className="inline-flex shrink-0 text-destructive" title="Pergunta aguardando sua resposta" aria-label="Pergunta aguardando sua resposta"><MessageCircleQuestion className="h-5 w-5" /></span> : <span className="inline-flex shrink-0 text-muted-foreground" title="Aguardando resposta de outro usuário" aria-label="Aguardando resposta de outro usuário"><MessageCircleMore className="h-5 w-5" /></span> : null}</div></TableCell>
-                    <TableCell>{new Date(ticket.created_at).toLocaleDateString("pt-BR")}</TableCell>
+                    <TableCell><Badge variant="outline" className="font-normal">{STATUS_NAMES[ticket.status]}</Badge></TableCell>
+                    <TableCell>{unansweredCodeQuestions(data?.questionMessages ?? []).some(q => q.ticket_id === ticket.id) ? unansweredCodeQuestions(data?.questionMessages ?? []).some(q => q.ticket_id === ticket.id && isCodeQuestionForUser(q, ticket.reporter_id, data?.userId ?? "", Boolean(data?.isAdmin))) ? <span className="inline-flex shrink-0 text-destructive" title="Pergunta aguardando sua resposta" aria-label="Pergunta aguardando sua resposta"><MessageCircleQuestion className="h-5 w-5" /></span> : <span className="inline-flex shrink-0 text-muted-foreground" title="Aguardando resposta de outro usuário" aria-label="Aguardando resposta de outro usuário"><MessageCircleMore className="h-5 w-5" /></span> : <span className="text-muted-foreground">-</span>}</TableCell>
+                    <TableCell className="whitespace-nowrap">{new Date(ticket.created_at).toLocaleDateString("pt-BR")}</TableCell>
                   </TableRow>
-                 ))}{!filteredTickets.length ? <TableRow><TableCell colSpan={8} className="h-24 text-center text-muted-foreground">Nenhum ticket encontrado.</TableCell></TableRow> : null}</TableBody>
+                 ))}{!filteredTickets.length ? <TableRow><TableCell colSpan={9} className="h-24 text-center text-muted-foreground">Nenhum ticket encontrado.</TableCell></TableRow> : null}</TableBody>
               </Table>
             )}
           </CardContent>
