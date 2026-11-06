@@ -1,4 +1,6 @@
 # Roadmap
+- [x] PDF e Excel junto aos títulos; downloads reais conferidos em Minhas/Todos/Fila, incluindo filtro de Reembolsos
+- [x] Filtros adicionais reunidos no funil verde; abertura conferida no computador e celular
 - [x] Approval: todas as colunas sem rolagem lateral em 1083/1280 px; fonte compacta e Código; celular conferido
 - [x] Remover faixa antiga Nº/Item/Alocação/Prazo ou Previsão/Status; ausência conferida na tela
 - [x] Substituir filtros antigos das listas por funis nos títulos; preservar seletores de preenchimento e filtros especializados de relatório/checklist; testes e listas autenticadas conferidos

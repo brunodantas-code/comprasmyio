@@ -1,3 +1,4 @@
+import { TableReportActions } from "@/components/table-report-actions";
 import { useTableFilters } from "@/components/use-table-filters";
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -451,7 +452,7 @@ export function PendingForMe({ renderEditAction }: { renderEditAction?: EditActi
       <CardHeader>
         <div>
           <CardTitle className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <span>Aguardando minha aprovação</span>
+            <span>Aguardando minha aprovação</span><TableReportActions title="Aguardando minha aprovação" report={{ columns: sortDefs.map(c => c.label), rows: sortedMine.map(row => sortDefs.map(c => c.value(row) ?? null)) }} />
             {mine.length > 0 && (
               <span className="text-sm font-normal text-muted-foreground">
                 {mine.length} {mine.length === 1 ? "approval" : "approvals"} ·{" "}
@@ -598,7 +599,7 @@ export function PendingApprovalsByRole({ renderEditAction }: { renderEditAction?
 
       <Card>
         <CardHeader>
-          <CardTitle>Consolidado por Cargo</CardTitle>
+          <CardTitle className="flex flex-wrap items-center gap-2">Consolidado por Cargo<TableReportActions title="Consolidado por Cargo" report={{ columns: ["Cargo", "Approval", "Tipo", "Itens da Solicitação", "Solicitante", "Valor Total"], rows: groups.flatMap(group => group.steps.map(step => { const o = step.purchase_orders; return [group.title, o?.approval_number ?? "—", requestTypeLabel(o, requestTypes), o?.purchase_order_items?.map(item => `${item.item_name} × ${item.quantity}`).join("; ") || o?.item_name || "—", profiles?.get(o?.requester_id ?? "")?.full_name || "—", o?.estimated_value ?? 0]; })) }} /></CardTitle>
           <CardDescription>Approvals com aprovação simultânea aparecem em cada cargo responsável. O total geral conta cada approval uma vez.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -697,7 +698,7 @@ export function MyApprovalFlows({ renderEditAction }: { renderEditAction?: EditA
     <Card>
       <CardHeader>
         <div>
-          <CardTitle>Meus em aprovação</CardTitle>
+          <CardTitle className="flex flex-wrap items-center gap-2">Meus em aprovação<TableReportActions title="Meus em aprovação" report={{ columns: ["Approval", "Tipo", "Itens da Solicitação", "Quantidade", "Valor Total"], rows: flowFilters.filtered.map(([, list]) => { const o = list[0]?.purchase_orders; return [o?.approval_number ?? "—", requestTypeLabel(o, requestTypes), o?.purchase_order_items?.map(item => `${item.item_name} × ${item.quantity}`).join("; ") || o?.item_name || "—", o?.quantity ?? 0, o?.estimated_value ?? 0]; }) }} /></CardTitle>
           <CardDescription>Approvals criados por você que ainda aguardam a conclusão da aprovação.</CardDescription>
         </div>
       </CardHeader>

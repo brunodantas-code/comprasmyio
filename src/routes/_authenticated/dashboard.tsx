@@ -1,3 +1,4 @@
+import { TableReportActions, TableReportProvider, useRegisterTableReport } from "@/components/table-report-actions";
 import { useTableFilters } from "@/components/use-table-filters";
 import { BrCityPicker } from "@/components/br-city-picker";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
@@ -2456,10 +2457,10 @@ function MyOrders({ userId, canManageDevices }: { userId: string; canManageDevic
 
   return (
     <div className="space-y-6">
-      <Card>
+      <TableReportProvider><Card>
         <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <CardTitle>Minhas Solicitações</CardTitle>
+            <CardTitle className="flex flex-wrap items-center gap-2">Minhas Solicitações<TableReportActions title="Minhas Solicitações" /></CardTitle>
             <CardDescription>Acompanhe o status de suas solicitações de Materiais, Serviços, Viagens, Reembolsos e Contratação de RH.</CardDescription>
           </div>
         </CardHeader>
@@ -2485,7 +2486,7 @@ function MyOrders({ userId, canManageDevices }: { userId: string; canManageDevic
             </div>
           )}
         </CardContent>
-      </Card>
+      </Card></TableReportProvider>
       <ImportOrders userId={userId} />
       <MyioOrdersTab userId={userId} canManage={canManageDevices} />
     </div>
@@ -2620,10 +2621,10 @@ function BuyerQueue({ mode = "all" }: { mode?: ApprovalListMode }) {
   };
 
   return (
-    <Card>
+    <TableReportProvider><Card>
       <CardHeader>
         <div>
-          <CardTitle>{mode === "supply" ? "Fila do Supply" : mode === "mine-supply" ? "Meus com Supply" : "Todos os approvals"}</CardTitle>
+          <CardTitle className="flex flex-wrap items-center gap-2">{mode === "supply" ? "Fila do Supply" : mode === "mine-supply" ? "Meus com Supply" : "Todos os approvals"}<TableReportActions title={mode === "supply" ? "Fila do Supply" : mode === "mine-supply" ? "Meus com Supply" : "Todos os approvals"} /></CardTitle>
           <CardDescription>
             {mode === "supply"
               ? "Pedidos aprovados que aguardam atuação do Time de Supply."
@@ -2661,7 +2662,7 @@ function BuyerQueue({ mode = "all" }: { mode?: ApprovalListMode }) {
           </div>
         )}
       </CardContent>
-    </Card>
+    </Card></TableReportProvider>
   );
 }
 
@@ -2897,6 +2898,9 @@ function OrdersTable({
     ? [...filteredOrders].sort((a, b) => compareColumnValues(sortColumn.kind, sortColumn.raw(a), sortColumn.raw(b), columnSort.direction))
     : filteredOrders;
 
+  const reportColumns = colDefs.filter(c => !["notes", "end", "received"].includes(c.key));
+  useRegisterTableReport({ columns: reportColumns.map(c => c.label === "Itens" ? "Itens da Solicitação" : c.label), rows: visibleOrders.map(order => reportColumns.map(c => c.kind === "number" ? Number(c.raw(order) ?? 0) : c.list(order) || "—")) });
+
   const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
     <div className="grid grid-cols-[minmax(0,96px)_minmax(0,1fr)] gap-2 border-t border-border/60 py-1.5 first:border-t-0">
       <div className="text-xs font-semibold text-muted-foreground">{label}</div>
@@ -2906,10 +2910,22 @@ function OrdersTable({
 
   return (
     <>
+      <div className="mb-2 flex flex-wrap items-center gap-2 text-xs">
+        <span className="inline-flex items-center gap-1 text-muted-foreground">Filtros Adicionais
+          <Popover><PopoverTrigger asChild><Button variant="ghost" size="icon" className="h-7 w-7 !bg-transparent !text-primary hover:!bg-transparent hover:!text-primary" title="Filtros Adicionais" aria-label="Filtros Adicionais"><Filter className="h-4 w-4" /></Button></PopoverTrigger>
+          <PopoverContent align="start" className="w-80 space-y-3"><p className="text-sm font-medium">Filtros Adicionais</p>{["end", "notes", "received"].map(key => <div key={key} className="flex items-center justify-between gap-2 text-sm"><span>{colByKey[key]?.label}</span>{colFilter(key)}</div>)}</PopoverContent></Popover>
+        </span>
+        {activeColFilters.length > 0 && (
+          <>
+            <span className="text-muted-foreground">{activeColFilters.length} filtro(s) ativo(s): {activeColFilters.map((c) => c.label).join(", ")}</span>
+            <Button type="button" variant="outline" size="sm" className="h-7 text-xs" onClick={() => setCf({})}>Limpar filtros</Button>
+          </>
+        )}
+      </div>
       {/* Mobile: cartões com rótulo à esquerda e informação à direita */}
       <div className="space-y-3 lg:hidden">
         <div className="flex flex-wrap gap-1.5">
-          {colDefs.map((c) => <span key={c.key}>{colFilter(c.key, true)}</span>)}
+          {colDefs.filter(c => !["end", "notes", "received"].includes(c.key)).map((c) => <span key={c.key}>{colFilter(c.key, true)}</span>)}
           {activeColFilters.length > 0 && <Button type="button" variant="outline" size="sm" className="h-7 text-xs" onClick={() => setCf({})}>Limpar filtros</Button>}
         </div>
         {visibleOrders.map((o) => {
@@ -2977,17 +2993,6 @@ function OrdersTable({
       </div>
 
       <div className="hidden lg:block">
-
-      <div className="mb-2 flex flex-wrap items-center gap-2 text-xs">
-        <span className="text-muted-foreground">Filtro por endereço:</span>
-        {colFilter("end", true)} {colFilter("notes", true)} {colFilter("received", true)}
-        {activeColFilters.length > 0 && (
-          <>
-            <span className="text-muted-foreground">{activeColFilters.length} filtro(s) ativo(s): {activeColFilters.map((c) => c.label).join(", ")}</span>
-            <Button type="button" variant="outline" size="sm" className="h-7 text-xs" onClick={() => setCf({})}>Limpar filtros</Button>
-          </>
-        )}
-      </div>
       <Table className="w-full table-fixed text-xs [&_th]:px-1 [&_th]:text-[11px] [&_td]:px-1 [&_td]:text-xs [&_td]:whitespace-normal [&_td]:break-words [&_td_*]:max-w-full [&_td_.text-sm]:text-xs">
         <TableHeader className="[&_tr]:border-b">
           <TableRow className="border-b">
