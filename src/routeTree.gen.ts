@@ -24,6 +24,7 @@ import { Route as AuthenticatedPendentesRouteImport } from './routes/_authentica
 import { Route as AuthenticatedPortalRouteImport } from './routes/_authenticated/portal'
 import { Route as AuthenticatedRhRouteImport } from './routes/_authenticated/rh'
 import { Route as AuthenticatedSiteSurveyRouteImport } from './routes/_authenticated/site-survey'
+import { Route as AuthenticatedSupplyManualRouteImport } from './routes/_authenticated/supply-manual'
 import { Route as ApiPublicHooksSyncProductStatusRouteImport } from './routes/api/public/hooks/sync-product-status'
 
 const IndexRoute = IndexRouteImport.update({
@@ -101,6 +102,12 @@ const AuthenticatedSiteSurveyRoute = AuthenticatedSiteSurveyRouteImport.update({
   path: '/site-survey',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSupplyManualRoute =
+  AuthenticatedSupplyManualRouteImport.update({
+    id: '/supply-manual',
+    path: '/supply-manual',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const ApiPublicHooksSyncProductStatusRoute =
   ApiPublicHooksSyncProductStatusRouteImport.update({
     id: '/api/public/hooks/sync-product-status',
@@ -123,6 +130,7 @@ export interface FileRoutesByFullPath {
   '/portal': typeof AuthenticatedPortalRoute
   '/rh': typeof AuthenticatedRhRoute
   '/site-survey': typeof AuthenticatedSiteSurveyRoute
+  '/supply-manual': typeof AuthenticatedSupplyManualRoute
   '/api/public/hooks/sync-product-status': typeof ApiPublicHooksSyncProductStatusRoute
 }
 export interface FileRoutesByTo {
@@ -140,6 +148,7 @@ export interface FileRoutesByTo {
   '/portal': typeof AuthenticatedPortalRoute
   '/rh': typeof AuthenticatedRhRoute
   '/site-survey': typeof AuthenticatedSiteSurveyRoute
+  '/supply-manual': typeof AuthenticatedSupplyManualRoute
   '/api/public/hooks/sync-product-status': typeof ApiPublicHooksSyncProductStatusRoute
 }
 export interface FileRoutesById {
@@ -159,6 +168,7 @@ export interface FileRoutesById {
   '/_authenticated/portal': typeof AuthenticatedPortalRoute
   '/_authenticated/rh': typeof AuthenticatedRhRoute
   '/_authenticated/site-survey': typeof AuthenticatedSiteSurveyRoute
+  '/_authenticated/supply-manual': typeof AuthenticatedSupplyManualRoute
   '/api/public/hooks/sync-product-status': typeof ApiPublicHooksSyncProductStatusRoute
 }
 export interface FileRouteTypes {
@@ -178,6 +188,7 @@ export interface FileRouteTypes {
     | '/portal'
     | '/rh'
     | '/site-survey'
+    | '/supply-manual'
     | '/api/public/hooks/sync-product-status'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -195,6 +206,7 @@ export interface FileRouteTypes {
     | '/portal'
     | '/rh'
     | '/site-survey'
+    | '/supply-manual'
     | '/api/public/hooks/sync-product-status'
   id:
     | '__root__'
@@ -213,6 +225,7 @@ export interface FileRouteTypes {
     | '/_authenticated/portal'
     | '/_authenticated/rh'
     | '/_authenticated/site-survey'
+    | '/_authenticated/supply-manual'
     | '/api/public/hooks/sync-product-status'
   fileRoutesById: FileRoutesById
 }
@@ -331,6 +344,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSiteSurveyRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/supply-manual': {
+      id: '/_authenticated/supply-manual'
+      path: '/supply-manual'
+      fullPath: '/supply-manual'
+      preLoaderRoute: typeof AuthenticatedSupplyManualRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/hooks/sync-product-status': {
       id: '/api/public/hooks/sync-product-status'
       path: '/api/public/hooks/sync-product-status'
@@ -353,6 +373,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPortalRoute: typeof AuthenticatedPortalRoute
   AuthenticatedRhRoute: typeof AuthenticatedRhRoute
   AuthenticatedSiteSurveyRoute: typeof AuthenticatedSiteSurveyRoute
+  AuthenticatedSupplyManualRoute: typeof AuthenticatedSupplyManualRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -367,6 +388,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPortalRoute: AuthenticatedPortalRoute,
   AuthenticatedRhRoute: AuthenticatedRhRoute,
   AuthenticatedSiteSurveyRoute: AuthenticatedSiteSurveyRoute,
+  AuthenticatedSupplyManualRoute: AuthenticatedSupplyManualRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
