@@ -1,4 +1,7 @@
 # Roadmap
+- [x] Preparar Manual do Usuário Supply em PDF: 23 páginas com objetivo, menus e navegação; todas renderizadas e conferidas, logo corrigido, sumário clicável; V1 apresentada para aprovação
+- [ ] Após aprovação do Supply: elaborar manuais Code, Site Survey e Mytosis; aguarda aprovação do conteúdo/layout
+- [ ] Após aprovação: disponibilizar manuais no menu de três barras; aguarda aprovação do primeiro PDF
 - [x] PDF e Excel junto aos títulos; downloads reais conferidos em Minhas/Todos/Fila, incluindo filtro de Reembolsos
 - [x] Filtros adicionais reunidos no funil verde; abertura conferida no computador e celular
 - [x] Approval: todas as colunas sem rolagem lateral em 1083/1280 px; fonte compacta e Código; celular conferido
