@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Disponibilizar manual atual do Supply em tela pelo menu principal, mantendo PDFs em Cadastro → Diversos e sem restaurar versões de teste; abertura pelo menu, sumário e 21 capítulos conferidos em computador/celular.
 - [x] Reposicionar ícone preto logo após Supply e pontuar os passos internos; PDF V4 com 24 páginas revisadas
 - [ ] Ativar skill de atualização funcional dos manuais: pronta, ativação bloqueada pela exigência de administrador/owner do workspace
 - [x] Disponibilizar versões V4 atual e V1–V3 anteriores em Supply → Cadastro → Diversos → Manual do Usuário; PDFs atual/anterior e telas desktop/celular conferidos

@@ -672,7 +672,7 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <AppHeader logo={<MyioLogo className="text-xl sm:text-2xl" />}>
+      <AppHeader supplyManual logo={<MyioLogo className="text-xl sm:text-2xl" />}>
         <div className="flex shrink-0 flex-wrap justify-end gap-1">
           <Badge variant="outline" className="text-[10px] uppercase">{me.accessProfileName}</Badge>
           {me.jobTitle ? <Badge variant="outline" className="text-[10px] uppercase">{me.jobTitle.name}</Badge> : null}

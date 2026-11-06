@@ -1,14 +1,14 @@
 import { useState, type ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Home, KeyRound, LogOut, Menu } from "lucide-react";
+import { ArrowLeft, BookOpen, Home, KeyRound, LogOut, Menu } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ChangePasswordDialog } from "@/components/change-password-dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
-export function AppHeader({ logo, children }: { logo: ReactNode; children?: ReactNode }) {
+export function AppHeader({ logo, children, supplyManual = false }: { logo: ReactNode; children?: ReactNode; supplyManual?: boolean }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [passwordOpen, setPasswordOpen] = useState(false);
@@ -37,7 +37,7 @@ export function AppHeader({ logo, children }: { logo: ReactNode; children?: Reac
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
           <Link to="/portal" className="flex min-w-0 items-center" title="Voltar aos aplicativos">{logo}</Link>
           <div className="flex shrink-0 items-center gap-1 sm:hidden">
-            <MobileHeaderMenu userName={userName} onSignOut={signOut} onChangePassword={() => setPasswordOpen(true)} buttonClass={iconButton} />
+            <MobileHeaderMenu supplyManual={supplyManual} userName={userName} onSignOut={signOut} onChangePassword={() => setPasswordOpen(true)} buttonClass={iconButton} />
           </div>
         </div>
         <div className="mt-5 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:mt-0 sm:flex sm:min-w-0 sm:justify-end">
@@ -49,7 +49,7 @@ export function AppHeader({ logo, children }: { logo: ReactNode; children?: Reac
           </div>
           {children}
           <div className="hidden shrink-0 items-center gap-1 sm:flex">
-            <DesktopHeaderMenu userName={userName} onSignOut={signOut} onChangePassword={() => setPasswordOpen(true)} buttonClass={iconButton} />
+            <DesktopHeaderMenu supplyManual={supplyManual} userName={userName} onSignOut={signOut} onChangePassword={() => setPasswordOpen(true)} buttonClass={iconButton} />
           </div>
         </div>
       </div>
@@ -58,15 +58,16 @@ export function AppHeader({ logo, children }: { logo: ReactNode; children?: Reac
   );
 }
 
-type HeaderMenuProps = { userName: string; onSignOut: () => void; onChangePassword: () => void; buttonClass: string };
+type HeaderMenuProps = { userName: string; onSignOut: () => void; onChangePassword: () => void; buttonClass: string; supplyManual?: boolean };
 
-function MobileHeaderMenu({ userName, onSignOut, onChangePassword, buttonClass }: HeaderMenuProps) {
+function MobileHeaderMenu({ userName, onSignOut, onChangePassword, buttonClass, supplyManual }: HeaderMenuProps) {
   return (
     <Sheet>
       <SheetTrigger asChild><Button variant="ghost" size="icon" className={buttonClass} aria-label="Abrir menu"><Menu className="!h-6 !w-6" /></Button></SheetTrigger>
       <SheetContent side="bottom" className="rounded-t-2xl px-5 pb-8">
         <SheetHeader><SheetTitle className="truncate text-left">{userName}</SheetTitle></SheetHeader>
         <nav className="mt-5 divide-y divide-border" aria-label="Menu do aplicativo">
+          {supplyManual && <Button asChild variant="ghost" className="h-12 w-full justify-start rounded-none text-foreground hover:bg-muted"><Link to="/supply-manual"><BookOpen className="h-5 w-5" />Manual do Usuário</Link></Button>}
           <Button variant="ghost" className="h-12 w-full justify-start rounded-none !bg-transparent !text-foreground hover:!bg-muted" onClick={() => window.history.back()}><ArrowLeft className="h-5 w-5" />Voltar</Button>
           <Button variant="ghost" className="h-12 w-full justify-start rounded-none !bg-transparent !text-foreground hover:!bg-muted" onClick={onChangePassword}><KeyRound className="h-5 w-5" />Alterar senha</Button>
           <Button variant="ghost" className="h-12 w-full justify-start rounded-none !bg-transparent !text-destructive hover:!bg-muted hover:!text-destructive" onClick={onSignOut}><LogOut className="h-5 w-5" />Sair</Button>
@@ -76,7 +77,7 @@ function MobileHeaderMenu({ userName, onSignOut, onChangePassword, buttonClass }
   );
 }
 
-function DesktopHeaderMenu({ userName, onSignOut, onChangePassword, buttonClass }: HeaderMenuProps) {
+function DesktopHeaderMenu({ userName, onSignOut, onChangePassword, buttonClass, supplyManual }: HeaderMenuProps) {
   const itemClass = "h-10 w-full justify-start rounded-none px-4 !bg-transparent !text-foreground hover:!bg-muted hover:!text-foreground";
 
   return (
@@ -91,6 +92,7 @@ function DesktopHeaderMenu({ userName, onSignOut, onChangePassword, buttonClass 
           <p className="truncate text-sm font-semibold text-foreground">{userName}</p>
         </div>
         <nav className="py-1" aria-label="Menu do aplicativo">
+          {supplyManual && <Button asChild variant="ghost" className={itemClass}><Link to="/supply-manual"><BookOpen className="h-5 w-5" />Manual do Usuário</Link></Button>}
           <Button variant="ghost" className={itemClass} onClick={() => window.history.back()}>
             <ArrowLeft className="h-5 w-5" />Voltar
           </Button>

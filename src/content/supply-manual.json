@@ -1,0 +1,1449 @@
+{
+  "labels": [
+    "Solicitações",
+    "Novas Solicitações",
+    "Minhas Solicitações",
+    "Approvals",
+    "Armazém",
+    "Cadastro",
+    "Usuários e logs",
+    "Voltar",
+    "Alterar senha",
+    "Sair",
+    "Meus com Supply",
+    "Todos os approvals",
+    "Aguardando minha aprovação",
+    "Meus em aprovação",
+    "Fila do Supply",
+    "Todos",
+    "Consolidado por Cargo",
+    "Diversos",
+    "Tipos de Solicitação",
+    "Projetos",
+    "Clientes",
+    "Centro de Custo",
+    "Etiquetas",
+    "Cargos",
+    "Lembretes",
+    "Fábrica",
+    "Estoque",
+    "Estoque de Componentes",
+    "Fila de Produção",
+    "Dispositivos Liberados",
+    "Homologação",
+    "Estoque myio",
+    "Clientes / Técnicos",
+    "Insumos de Instalação",
+    "Almoxarifado",
+    "Ferramentas/Ativos",
+    "Expedição",
+    "Checar QR Code",
+    "Status das Solicitações",
+    "Categorias de Clientes",
+    "Materiais / Dispositivos myio",
+    "Tipos de Etapas Adicionais",
+    "Destinos de Estoque",
+    "Pontos de Entrega",
+    "Motivos de Avaria",
+    "Categorias de Materiais",
+    "Usuários",
+    "Perfis de acesso",
+    "Organograma de Aprovação",
+    "Alçadas de Aprovação",
+    "Etapas Adicionais",
+    "Logs",
+    "Backup",
+    "Conversa",
+    "Histórico",
+    "Central de Pendências",
+    "Minhas Pendências",
+    "Materiais",
+    "Serviços",
+    "Viagens",
+    "Reembolso",
+    "Reembolsos",
+    "Pagamento",
+    "Contratação de RH",
+    "Dispositivos myio",
+    "Importação",
+    "Passagens",
+    "Hospedagens",
+    "Aluguel de Veículos",
+    "novo item",
+    "Tipo de solicitação",
+    "O que você deseja solicitar?",
+    "Quantidade",
+    "Valor unitário",
+    "Valor total",
+    "Valor Total",
+    "Valor",
+    "Descrição",
+    "Finalidade",
+    "Alocação",
+    "Interna",
+    "Etiqueta",
+    "Destinatário",
+    "Entrega",
+    "Retirada",
+    "Outro Endereço",
+    "Rua/número",
+    "Complemento",
+    "UF",
+    "Cidade",
+    "Código",
+    "Palavra Passe",
+    "Data limite para recebimento",
+    "Solicitado até",
+    "Previsão de Compras",
+    "Prazo",
+    "Previsão",
+    "Endereço",
+    "Observações",
+    "Observações de Supply",
+    "Motivo da alteração",
+    "Recebimento",
+    "Status",
+    "Conforme",
+    "Não Conforme",
+    "Nova pergunta",
+    "Responder",
+    "Editar pelo Compras",
+    "Salvar",
+    "Aprovar",
+    "Rejeitar",
+    "Limpar",
+    "Filtros Adicionais",
+    "Atualização do recebimento",
+    "Agrupar por Projeto e Cliente",
+    "Consolidar itens",
+    "Por Item",
+    "Por Solicitante",
+    "Aprovadas, não compradas",
+    "Em aprovação",
+    "Custo por Etiqueta",
+    "Projeto",
+    "Cliente",
+    "Manutenção",
+    "Reposição por mal uso",
+    "Upsell",
+    "Nome",
+    "CNPJ",
+    "Orçamento aprovado",
+    "Manual do Usuário"
+  ],
+  "icons": {
+    "Solicitações": "ClipboardList",
+    "Minhas Solicitações": "ClipboardList",
+    "Novas Solicitações": "Plus",
+    "Approvals": "ShoppingCart",
+    "Armazém": "Boxes",
+    "Cadastro": "FolderKanban",
+    "Usuários e logs": "Users",
+    "Projetos": "FolderKanban",
+    "Clientes": "Building2",
+    "Centro de Custo": "Landmark",
+    "Etiquetas": "Tag",
+    "Cargos": "Briefcase",
+    "Lembretes": "Bell",
+    "Diversos": "Layers3",
+    "Usuários": "Users",
+    "Perfis de acesso": "ShieldCheck",
+    "Organograma de Aprovação": "CheckCircle2",
+    "Alçadas de Aprovação": "CheckCircle2",
+    "Etapas Adicionais": "CheckCircle2",
+    "Logs": "ScrollText",
+    "Backup": "DatabaseBackup"
+  },
+  "sections": [
+    {
+      "title": "Navegação e primeiros passos",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "O Supply reúne cinco áreas na barra inferior. Clique no nome da área para abrir seus submenus e escolha a atividade desejada. No celular, os mesmos menus ficam na parte inferior da tela."
+        },
+        {
+          "kind": "table",
+          "headers": [
+            "Área",
+            "Para que serve"
+          ],
+          "rows": [
+            [
+              "Solicitações",
+              "Criar uma demanda e acompanhar o que você solicitou."
+            ],
+            [
+              "Approvals",
+              "Decidir aprovações, acompanhar a cadeia e executar demandas liberadas."
+            ],
+            [
+              "Armazém",
+              "Consultar e movimentar materiais, dispositivos e ferramentas; acompanhar produção e expedição."
+            ],
+            [
+              "Cadastro",
+              "Manter projetos, clientes, centros de custo, etiquetas e configurações."
+            ],
+            [
+              "Usuários e logs",
+              "Administrar acesso, regras de aprovação, registros e backup."
+            ]
+          ]
+        },
+        {
+          "kind": "h",
+          "text": "Cabeçalho e menu de três barras"
+        },
+        {
+          "kind": "p",
+          "text": "A casa verde ao lado do nome do usuário retorna ao início do ERP. O menu de três barras reúne <b>Voltar</b>, <b>Alterar senha</b> e <b>Sair</b>. Voltar retorna à tela anterior; Sair encerra a sessão. O olho no campo de senha permite mostrar ou ocultar o texto digitado."
+        },
+        {
+          "kind": "h",
+          "text": "Como começar"
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Entre no ERP com sua conta e abra o Supply.",
+            "Confira o perfil e o cargo exibidos junto ao seu nome.",
+            "Abra Solicitações → Novas Solicitações para registrar uma demanda, ou Minhas Solicitações para acompanhar as existentes.",
+            "Quando precisar decidir ou atender uma demanda, use o submenu adequado de Approvals."
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Você verá somente as áreas e ações autorizadas. Um menu ausente não significa perda de dados. Solicite ao administrador a conferência do seu perfil de acesso."
+        }
+      ]
+    },
+    {
+      "title": "Quem faz o quê",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "O perfil de acesso define quais telas e ações você pode usar. O cargo identifica sua função e pode participar da cadeia de aprovação. As permissões individuais complementam o acesso quando configuradas."
+        },
+        {
+          "kind": "table",
+          "headers": [
+            "Atuação",
+            "Rotina principal"
+          ],
+          "rows": [
+            [
+              "Solicitante",
+              "Registra a demanda, acompanha a aprovação, responde dúvidas e confirma o recebimento."
+            ],
+            [
+              "Destinatário",
+              "Pode acompanhar solicitações destinadas ao seu usuário em Meus com Supply, conforme o acesso concedido."
+            ],
+            [
+              "Aprovador",
+              "Avalia as etapas atribuídas à sua conta e aprova ou rejeita com motivo."
+            ],
+            [
+              "Compras / Supply",
+              "Executa demandas aprovadas, registra andamento e previsão, ajusta dados autorizados e conversa com o solicitante."
+            ],
+            [
+              "Armazém / Fábrica",
+              "Controla materiais, produção, homologação e movimentações nas áreas permitidas."
+            ],
+            [
+              "Administrador",
+              "Configura usuários, perfis, cadastros e regras de aprovação."
+            ]
+          ]
+        },
+        {
+          "kind": "h",
+          "text": "Não confunda acesso com responsabilidade"
+        },
+        {
+          "kind": "p",
+          "text": "Ter acesso a Todos os approvals não torna a pessoa responsável por aprovar todas as solicitações. A fila Aguardando minha aprovação usa as etapas efetivamente atribuídas ao usuário. Também não basta aparecer como destinatário para editar dados de compra ou escrever na conversa."
+        },
+        {
+          "kind": "h",
+          "text": "Sequência de uma demanda"
+        },
+        {
+          "kind": "p",
+          "text": "<b>Solicitação → análise e aprovação → atendimento pelo Supply ou estoque → entrega/retirada → conferência do recebimento.</b> A sequência e os responsáveis dependem do tipo e das regras cadastradas. Uma solicitação financeira de Pagamento segue tratamento próprio no Cash Flow."
+        },
+        {
+          "kind": "note",
+          "text": "Decisão de aprovação e status de atendimento são informações diferentes. “Aprovado” não significa “Comprado” ou “Entregue”."
+        }
+      ]
+    },
+    {
+      "title": "Criar uma solicitação",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "<b>Caminho:</b> Solicitações → Novas Solicitações. Os tipos ativos e autorizados aparecem na lista. Um tipo pode abrir um formulário baseado em Materiais, Serviços, Viagens, Reembolso, Pagamento ou Contratação de RH; Dispositivos myio e Importação têm formulários específicos."
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Selecione o Tipo de solicitação. Quando aparecer “O que você deseja solicitar?”, escolha também a opção ou subtipo.",
+            "Preencha os itens ou a descrição da necessidade. Seja específico sobre quantidade, finalidade e características.",
+            "Informe o valor solicitado ou estimado e as datas exigidas pelo formulário.",
+            "Escolha a alocação e, quando disponível, o Centro de Custo. Em Interna, a Etiqueta é opcional e você escolhe somente uma.",
+            "Para materiais, confira destinatário, Entrega ou Retirada, endereço e data limite para recebimento.",
+            "Inclua os documentos que apoiam a solicitação, revise e use a ação de envio do formulário.",
+            "Verifique a confirmação. Se houver aviso de validação, corrija o campo indicado antes de enviar novamente."
+          ]
+        },
+        {
+          "kind": "h",
+          "text": "Campos e validações"
+        },
+        {
+          "kind": "p",
+          "text": "Materiais, Serviços e Viagens exigem valor positivo. Outros modelos também verificam os valores próprios, como despesas e remuneração. Campos obrigatórios variam conforme o tipo; o formulário mostra somente os aplicáveis."
+        },
+        {
+          "kind": "p",
+          "text": "A lista de tipos e subtipos pode ser ampliada pelos responsáveis autorizados em Cadastro → Diversos → Tipos de Solicitação. Criar um nome novo reutiliza um modelo de formulário existente; não cria automaticamente uma nova rotina operacional."
+        },
+        {
+          "kind": "note",
+          "text": "A projeção de orçamento pode gerar um alerta de comprometimento acima do limite. Esse aviso não deve ser confundido com uma aprovação nem com bloqueio universal de envio."
+        }
+      ]
+    },
+    {
+      "title": "Materiais e dispositivos myio",
+      "blocks": [
+        {
+          "kind": "h",
+          "text": "Solicitar materiais do catálogo"
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Escolha o tipo de Materiais e o subtipo, quando existir.",
+            "Busque e selecione cada item no catálogo; informe quantidade e valor unitário estimado.",
+            "Adicione novas linhas para outros materiais. Use o link opcional para indicar uma referência, quando necessário.",
+            "Confira o total: quantidade × valor unitário de cada linha, somado entre todos os itens.",
+            "Complete alocação, destinatário, endereço e prazo; envie."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Não repita o mesmo material em duas linhas: ajuste a quantidade da linha existente. O item deve estar cadastrado e ser comprável. Produtos fabricados pela myio não são adquiridos como compra comum; seguem o atendimento de dispositivos myio. Itens de Escritório não entram no catálogo de compra."
+        },
+        {
+          "kind": "h",
+          "text": "Item novo, quando autorizado"
+        },
+        {
+          "kind": "p",
+          "text": "Use a opção de novo item, informe a descrição e selecione o estoque de destino ativo. O item é cadastrado antes de ser vinculado à solicitação. Essa permissão não concede direito geral de editar saldos ou movimentar estoque."
+        },
+        {
+          "kind": "h",
+          "text": "Solicitar Dispositivos myio"
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Selecione o formulário de Dispositivos myio.",
+            "Escolha Projeto ou Cliente, sem usar ambos como destinos diretos.",
+            "Informe a data de entrega. Para Cliente, escolha a classificação disponível: Manutenção, Reposição por mal uso ou Upsell.",
+            "Informe quantidade positiva de pelo menos um dispositivo, acrescente observações e envie."
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Uma demanda com vários materiais pode gerar registros vinculados e partes atendidas pelo estoque. Acompanhe o número e os registros apresentados, sem presumir que tudo resultará em uma única compra."
+        }
+      ]
+    },
+    {
+      "title": "Serviços, viagens e reembolsos",
+      "blocks": [
+        {
+          "kind": "h",
+          "text": "Serviços"
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Escolha o tipo baseado em Serviços e selecione o subtipo, se apresentado.",
+            "Descreva o serviço, o que será realizado e a finalidade.",
+            "Informe valor positivo, alocação e os demais campos obrigatórios apresentados.",
+            "Anexe a referência ou documentação pertinente e envie."
+          ]
+        },
+        {
+          "kind": "h",
+          "text": "Viagens"
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Selecione Passagens, Hospedagens, Aluguel de Veículos ou outra opção ativa.",
+            "Adicione os trechos/solicitações e escolha a cidade e UF na lista pesquisável.",
+            "Informe as datas de ida/retirada e retorno/devolução; o retorno não pode ser anterior à ida.",
+            "Complete os campos específicos e o valor estimado; revise os trechos antes de enviar."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "É possível adicionar ou remover trechos. Em Aluguel de Veículos, as datas são apresentadas como retirada e devolução. Use a cidade sugerida pela lista, em vez de apenas digitar um texto sem selecionar."
+        },
+        {
+          "kind": "h",
+          "text": "Reembolsos e despesas de viagem"
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Adicione uma linha para cada despesa.",
+            "Informe descrição, valor positivo e data da despesa.",
+            "Confira o total calculado e anexe os comprovantes pertinentes.",
+            "Complete a alocação e envie."
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Alguns subtipos de Viagens, como despesas adicionais cadastradas, usam o formulário de despesas e não o de deslocamento. Reembolsos não usam prazo/previsão de entrega: a tabela mostra um traço quando não se aplica."
+        }
+      ]
+    },
+    {
+      "title": "Pagamento, RH e importação",
+      "blocks": [
+        {
+          "kind": "h",
+          "text": "Pagamento"
+        },
+        {
+          "kind": "p",
+          "text": "Use para solicitar pagamento sem cotação ou compra pelo Supply. Não crie outro Approval para uma despesa que já possui uma solicitação correspondente."
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Informe descrição, valor positivo e data do pagamento.",
+            "Defina o destino da alocação e o Centro de Custo, quando permitido.",
+            "Inclua os documentos pertinentes e envie. Acompanhe a decisão financeira no Cash Flow, não na fila de execução do Supply."
+          ]
+        },
+        {
+          "kind": "h",
+          "text": "Contratação de RH"
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Selecione cargo, gestor e tipo de contratação.",
+            "Informe remuneração positiva e o motivo da contratação.",
+            "Escolha Centro de Custo, quando disponível. Cliente é opcional nesse formulário.",
+            "Revise e envie."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "A contratação de RH usa tratamento interno, sem projeto. O cliente opcional é uma informação contextual, não uma dupla alocação."
+        },
+        {
+          "kind": "h",
+          "text": "Importação"
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Abra o tipo Importação, quando autorizado.",
+            "Informe o nome da importação e acrescente observações e anexos.",
+            "Selecione os itens importados e informe as quantidades em lotes, observando as unidades por lote exibidas.",
+            "Confira a composição e envie."
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Importação utiliza uma rotina específica e só aparece para os usuários autorizados. As opções e os limites de documentos são apresentados no próprio formulário."
+        }
+      ]
+    },
+    {
+      "title": "Alocação, Centro de Custo e Etiqueta",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "A alocação informa a finalidade da despesa. Escolha <b>um destino principal</b>; Centro de Custo é uma dimensão independente e pode acompanhar a alocação quando autorizado."
+        },
+        {
+          "kind": "table",
+          "headers": [
+            "Alocação",
+            "Como preencher"
+          ],
+          "rows": [
+            [
+              "Projeto",
+              "Selecione um projeto válido ligado a um cliente. Cliente e unidade são derivados do projeto. Use para implantação/upsell."
+            ],
+            [
+              "Cliente",
+              "Escolha o cliente e, quando aplicável, a unidade/filial. Use para sustentação, manutenção e despesas diretas do cliente."
+            ],
+            [
+              "Estoque",
+              "Use para suprir o estoque, sem vincular diretamente projeto ou cliente."
+            ],
+            [
+              "Interna",
+              "Use para demandas internas. Se disponível, escolha Centro de Custo e uma Etiqueta opcional."
+            ]
+          ]
+        },
+        {
+          "kind": "h",
+          "text": "Centro de Custo"
+        },
+        {
+          "kind": "p",
+          "text": "Organiza a responsabilidade gerencial pela despesa, independentemente do destino. Se o campo não estiver autorizado para seu perfil, o sistema utiliza o centro Operação no envio. Não force a alocação em um cliente apenas para identificar uma área interna."
+        },
+        {
+          "kind": "h",
+          "text": "Etiqueta"
+        },
+        {
+          "kind": "p",
+          "text": "Serve para identificar uma iniciativa ou assunto interno. Uma solicitação pode ter <b>uma única Etiqueta, opcional</b>. As opções são mantidas em Cadastro → Etiquetas por usuários autorizados; o cadastro registra o criador. O relatório Custo por Etiqueta fica em Todos os approvals."
+        },
+        {
+          "kind": "h",
+          "text": "Ao mudar de destino"
+        },
+        {
+          "kind": "p",
+          "text": "Trocar a alocação limpa os vínculos anteriores de projeto, cliente e unidade. Revise todos os campos antes de salvar. Um custo de Projeto não deve ser contado novamente como um custo direto independente do mesmo Cliente."
+        },
+        {
+          "kind": "note",
+          "text": "Projetos de implantação/upsell e custos de sustentação de Cliente têm finalidades diferentes. A identificação usada na integração de QR não substitui a alocação gerencial da solicitação."
+        }
+      ]
+    },
+    {
+      "title": "Entrega, retirada, endereço e prazo",
+      "blocks": [
+        {
+          "kind": "h",
+          "text": "Entrega ou Retirada"
+        },
+        {
+          "kind": "p",
+          "text": "No formulário de Materiais, escolha Entrega ou Retirada. Entrega é a opção inicial. As duas modalidades usam os mesmos dados de local, destinatário e data; os rótulos se adaptam à escolha."
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Selecione a modalidade.",
+            "Escolha o local/endereço disponível. Para Outro Endereço, preencha os dados do local.",
+            "Informe Rua/número e Complemento quando necessário. Selecione UF e Cidade nas listas pesquisáveis.",
+            "Confira a referência do local, o destinatário e o Código, se utilizados.",
+            "Informe a Data limite para recebimento e revise antes de enviar."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "A busca digitável ajuda a localizar cidades e opções com variações de digitação. Confirme a opção correta antes de salvar. Quando houver criação de um novo endereço durante o preenchimento, revise os dados para evitar duplicações."
+        },
+        {
+          "kind": "h",
+          "text": "Solicitado até × Previsão de Compras"
+        },
+        {
+          "kind": "table",
+          "headers": [
+            "Informação",
+            "Responsabilidade e significado"
+          ],
+          "rows": [
+            [
+              "Solicitado até",
+              "Data limite informada na solicitação: quando o material é necessário."
+            ],
+            [
+              "Previsão de Compras",
+              "Data registrada por Compras: quando se espera a chegada. Não substitui automaticamente a data solicitada."
+            ],
+            [
+              "Previsão após o prazo",
+              "É destacada em vermelho para indicar que a previsão ultrapassa a necessidade."
+            ],
+            [
+              "Traço (–)",
+              "Indica que a informação não se aplica, como em Reembolso e Pagamento."
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Nas novas solicitações, o prazo é uma data limite, sem as opções Urgente, Esta semana ou Este mês. Pedidos antigos podem conservar informações anteriores."
+        },
+        {
+          "kind": "note",
+          "text": "A edição autorizada permite trocar Entrega por Retirada e vice-versa. A alteração é registrada no Histórico; confira novamente o local e o destinatário."
+        }
+      ]
+    },
+    {
+      "title": "Minhas Solicitações e detalhes",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "<b>Caminho:</b> Solicitações → Minhas Solicitações. Esta área reúne as solicitações feitas por você e apresenta as seções adicionais de importações, dispositivos e atendimento pelo estoque quando houver registros."
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Use os funis e a ordenação dos cabeçalhos para localizar a solicitação.",
+            "Clique no número de Approval para abrir o Relatório da solicitação.",
+            "Leia os dados, a trilha de aprovação, a Conversa e o Histórico.",
+            "Use o lápis quando houver edição autorizada. Antes de excluir ou cancelar, leia e confirme a ação.",
+            "Após o atendimento, registre a conferência de recebimento quando a opção estiver disponível."
+          ]
+        },
+        {
+          "kind": "h",
+          "text": "O que fica na lista e o que fica nos detalhes"
+        },
+        {
+          "kind": "p",
+          "text": "A tabela apresenta um resumo para acompanhamento. Endereço e relação de anexos ficam na janela de detalhes/edição, evitando excesso de informação na grade. A coluna Código corresponde à antiga Palavra Passe."
+        },
+        {
+          "kind": "h",
+          "text": "Anexos"
+        },
+        {
+          "kind": "p",
+          "text": "Abra o documento no relatório ou no editor. Use as ações de anexar e remover somente quando estiverem disponíveis para você. No computador, PDFs podem abrir em outra aba; no celular, a visualização é adaptada para leitura das páginas."
+        },
+        {
+          "kind": "h",
+          "text": "Edição da solicitação"
+        },
+        {
+          "kind": "p",
+          "text": "A edição pelo solicitante depende da situação e das permissões. Admin e Compras podem ter editores próprios. Se o lápis não aparecer, isso não significa que os dados desapareceram: confira a etapa atual e procure o responsável pelo atendimento."
+        },
+        {
+          "kind": "note",
+          "text": "Minhas Solicitações mostra o que você solicitou. Meus com Supply também pode incluir pedidos destinados ao seu usuário. As duas listas têm finalidades e critérios diferentes."
+        }
+      ]
+    },
+    {
+      "title": "Approvals: escolher a fila certa",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "<b>Caminho:</b> Approvals, na barra inferior. Abra o submenu que corresponde à atividade desejada."
+        },
+        {
+          "kind": "table",
+          "headers": [
+            "Submenu",
+            "Uso correto"
+          ],
+          "rows": [
+            [
+              "Aguardando minha aprovação",
+              "Decisões pendentes atribuídas a você e prontas para sua etapa. Não inclui automaticamente todas as pendências de Admin."
+            ],
+            [
+              "Meus em aprovação",
+              "Acompanhar as solicitações que você fez e que ainda estão na cadeia de aprovação."
+            ],
+            [
+              "Meus com Supply",
+              "Acompanhar demandas aprovadas feitas por você ou destinadas ao seu usuário, ainda nos estados operacionais dessa fila."
+            ],
+            [
+              "Fila do Supply",
+              "Atender demandas aprovadas que aguardam ação operacional do comprador, incluindo casos com problema de recebimento."
+            ],
+            [
+              "Todos",
+              "Consultar Todos os approvals autorizados, inclusive situações que não estão liberadas para compra."
+            ],
+            [
+              "Consolidado por Cargo",
+              "Analisar pendências e valores agrupados por cargo aprovador."
+            ]
+          ]
+        },
+        {
+          "kind": "h",
+          "text": "Aprovar"
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Abra Aguardando minha aprovação e consulte a solicitação.",
+            "Confira itens, valores, destino, documentos e informações disponíveis.",
+            "Clique em Aprovar e confirme no diálogo."
+          ]
+        },
+        {
+          "kind": "h",
+          "text": "Rejeitar"
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Clique em Rejeitar na etapa atribuída à sua conta.",
+            "Informe o motivo obrigatório e confirme."
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Etapas anteriores pendentes podem impedir a liberação da sua decisão. O solicitante não aprova a própria solicitação. Valores, alçadas e aprovação conjunta seguem as regras configuradas, não uma regra única para todos os tipos."
+        }
+      ]
+    },
+    {
+      "title": "Compras: atendimento e alterações",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "<b>Caminho:</b> Approvals → Fila do Supply. A fila operacional reúne demandas aprovadas nos estados de atendimento previstos; Pagamento não integra essa execução."
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Filtre as demandas e abra o Relatório da solicitação.",
+            "Confira necessidade, valor, quantidade, alocação, destinatário e data solicitada.",
+            "Quando precisar de esclarecimento, envie uma pergunta na Conversa.",
+            "Use Editar pelo Compras: ajuste quantidade/valor por item, link da cotação, destinatário, local, previsão e Observações de Supply. Informe Motivo da alteração e clique Salvar.",
+            "Registre o andamento no seletor de status e informe a Previsão de Compras quando disponível.",
+            "Acompanhe dúvidas e problemas de recebimento até a ação pertinente ser registrada."
+          ]
+        },
+        {
+          "kind": "h",
+          "text": "Edição pelo Compras"
+        },
+        {
+          "kind": "p",
+          "text": "Sem itens detalhados, o editor apresenta Quantidade e Valor total. Usuários autorizados podem corrigir solicitações de outros solicitantes, incluindo valor e informações de entrega/retirada. A alteração preserva autoria e registros de decisão, com trilha antes/depois e motivo. Mudanças de valor podem exigir reavaliação ou aprovação complementar conforme as regras aplicáveis."
+        },
+        {
+          "kind": "h",
+          "text": "Comunicação da mudança"
+        },
+        {
+          "kind": "p",
+          "text": "Confira o Histórico para ver quem alterou, quando e o que mudou. A cientificação por e-mail depende da configuração de envio: não use a ausência de e-mail como evidência de que nenhuma alteração aconteceu."
+        },
+        {
+          "kind": "h",
+          "text": "Agrupamento"
+        },
+        {
+          "kind": "p",
+          "text": "A opção Agrupar por Projeto e Cliente reorganiza a apresentação para análise. Consulte também a alocação de cada solicitação; esse agrupamento não substitui um relatório completo de rentabilidade por cliente."
+        },
+        {
+          "kind": "note",
+          "text": "O seletor de status fica bloqueado quando a solicitação ainda aguarda aprovação ou foi rejeitada. Visibilidade de um pedido não autoriza sua compra antes da liberação."
+        }
+      ]
+    },
+    {
+      "title": "Status e conferência do recebimento",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "O status operacional descreve o atendimento. Alguns rótulos podem ser alterados no Cadastro, mas os estados originais mantêm sua lógica."
+        },
+        {
+          "kind": "table",
+          "headers": [
+            "Situação",
+            "Como interpretar"
+          ],
+          "rows": [
+            [
+              "Aguardando aprovação",
+              "A demanda ainda está na cadeia de decisão. Não está liberada para execução."
+            ],
+            [
+              "Rejeitado",
+              "A decisão negativa foi registrada; consulte o motivo."
+            ],
+            [
+              "Pendente / em atendimento",
+              "Há ações operacionais necessárias, conforme a situação apresentada."
+            ],
+            [
+              "Comprado, aguardando",
+              "A compra foi registrada e ainda se aguarda o atendimento."
+            ],
+            [
+              "Entregue",
+              "O atendimento foi registrado; ainda pode ser necessária a conferência."
+            ],
+            [
+              "Conforme",
+              "Recebimento sem problema registrado; mantém a lógica original de recebido corretamente."
+            ],
+            [
+              "Não Conforme",
+              "Recebimento com problema; mantém a lógica original de recebido com problemas."
+            ],
+            [
+              "Cancelado",
+              "A solicitação foi cancelada; consulte o Histórico."
+            ]
+          ]
+        },
+        {
+          "kind": "h",
+          "text": "Registrar Conforme ou Não Conforme"
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Localize a solicitação Entregue.",
+            "Na coluna Status, abra a lista Recebimento abaixo da situação.",
+            "Escolha Conforme ou Não Conforme.",
+            "Confira a atualização e, em caso de problema, utilize os campos/ações apresentados e a Conversa para esclarecer a ocorrência."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "A ação só é oferecida a quem tem autorização. O recebimento conforme pode gerar a entrada no estoque de origem do item. Não faça outra entrada manual para o mesmo recebimento sem verificar a movimentação já registrada."
+        },
+        {
+          "kind": "note",
+          "text": "Status novos de acompanhamento não criam automaticamente regras de estoque ou aprovação. Conforme e Não Conforme continuam ligados às rotinas de recebimento já existentes."
+        }
+      ]
+    },
+    {
+      "title": "Conversa, Histórico e pendências",
+      "blocks": [
+        {
+          "kind": "h",
+          "text": "Conversa entre Solicitante e Comprador"
+        },
+        {
+          "kind": "p",
+          "text": "Abra o número de Approval e localize Conversa no Relatório da solicitação. Perguntas e respostas ficam vinculadas e identificadas por autor e data, no padrão do Code."
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Para iniciar um assunto, escolha Nova pergunta.",
+            "Digite a dúvida, alternativa ou atualização e envie.",
+            "Para responder, escolha Responder. Se houver mais de uma pergunta pendente, selecione a pergunta correspondente.",
+            "Envie a resposta e confira sua associação à pergunta."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "A escrita é destinada ao solicitante e ao comprador autorizado. Ser destinatário do pedido não concede automaticamente participação na conversa. Pedidos cancelados e solicitações de Pagamento não aceitam escrita nesse chat. A mensagem tem limite de 4.000 caracteres."
+        },
+        {
+          "kind": "h",
+          "text": "Central de Pendências e Minhas Pendências"
+        },
+        {
+          "kind": "p",
+          "text": "Perguntas sem resposta aparecem para quem deve responder. Abra a pendência para chegar à solicitação e registre a resposta na pergunta correta. Consulte o símbolo e o motivo da pendência: responder uma pergunta não necessariamente conclui outras ações do pedido."
+        },
+        {
+          "kind": "h",
+          "text": "Histórico"
+        },
+        {
+          "kind": "p",
+          "text": "Use o Histórico para acompanhar alterações e acontecimentos. A trilha de aprovação mostra etapas, responsáveis, decisões e motivos; o histórico de status mostra mudanças operacionais. Essas áreas são complementares e não precisam repetir os mesmos eventos."
+        },
+        {
+          "kind": "note",
+          "text": "Antes de enviar outra pergunta, veja se já existe uma pergunta aberta sobre o mesmo assunto. Para retirar uma pendência de resposta, responda pela ação vinculada, não apenas alterando outro campo do pedido."
+        }
+      ]
+    },
+    {
+      "title": "Filtros, ordenação, PDF e Excel",
+      "blocks": [
+        {
+          "kind": "h",
+          "text": "Filtrar a tabela"
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Clique no funil ao lado direito do título da coluna.",
+            "Busque e selecione os valores ou escolha uma condição disponível.",
+            "Combine filtros em outras colunas. A lista precisa atender aos critérios ativos em conjunto.",
+            "Use Limpar no filtro correspondente para ampliar novamente o resultado."
+          ]
+        },
+        {
+          "kind": "table",
+          "headers": [
+            "Dado",
+            "Exemplos de condições"
+          ],
+          "rows": [
+            [
+              "Texto",
+              "Contém, diferente de, busca e seleção de valores, vazios."
+            ],
+            [
+              "Número / valor",
+              "Maior que, menor que e demais comparações numéricas disponíveis."
+            ],
+            [
+              "Data",
+              "Antes de, depois de e condições de data disponíveis. Prazo solicitado e Previsão têm filtros próprios."
+            ]
+          ]
+        },
+        {
+          "kind": "h",
+          "text": "Filtros Adicionais"
+        },
+        {
+          "kind": "p",
+          "text": "Clique no funil verde ao lado de Filtros Adicionais para abrir as opções atuais, incluindo Endereço, Observações e Atualização do recebimento. Esses campos ajudam a localizar pedidos sem ocupar a grade principal."
+        },
+        {
+          "kind": "h",
+          "text": "Ordenar"
+        },
+        {
+          "kind": "p",
+          "text": "Use o botão de ordenação ao lado do funil. Cliques alternam crescente, decrescente e sem ordenação explícita. Exemplos: Previsão para ver próximas chegadas, Destinatário para reunir pessoas e Valor Total para comparar despesas."
+        },
+        {
+          "kind": "h",
+          "text": "Exportar"
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Aplique os filtros e a ordem desejados.",
+            "Clique em PDF ou Excel junto ao título da lista.",
+            "Abra o arquivo baixado e confira o período/seleção analisados."
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "A exportação da tabela respeita seu resultado filtrado e ordenado, mas não inclui anexos nem todos os campos auxiliares. Sem linhas, os botões ficam desabilitados. Relatórios especializados podem ter filtros próprios."
+        }
+      ]
+    },
+    {
+      "title": "Consolidação de itens e etiquetas",
+      "blocks": [
+        {
+          "kind": "h",
+          "text": "Consolidar itens"
+        },
+        {
+          "kind": "p",
+          "text": "Use para reunir demandas de materiais e apoiar a análise de compras; não confunda com Consolidado por Cargo."
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Na área de Approvals em que a ação está disponível, clique em Consolidar itens.",
+            "Escolha Por Item ou Por Solicitante.",
+            "Selecione Aprovadas, não compradas ou Em aprovação.",
+            "Filtre por item/código, solicitante, destino, origem, compra, data e valor.",
+            "Expanda os grupos para consultar a composição e os pedidos de origem.",
+            "Exporte o PDF Resumido ou Detalhado, conforme a análise desejada."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Itens são agregados respeitando as origens de catálogo. A classificação Nacional/Importação pertence à análise da consolidação; não altera, por si só, a decisão de aprovação dos pedidos."
+        },
+        {
+          "kind": "note",
+          "text": "A opção Em aprovação é apenas informativa: os itens ainda não estão liberados para compra. A consolidação não modifica as solicitações originais."
+        },
+        {
+          "kind": "h",
+          "text": "Custo por Etiqueta"
+        },
+        {
+          "kind": "p",
+          "text": "<b>Caminho:</b> Approvals → Todos. Use Custo por Etiqueta para ver os grupos em tela e o ícone PDF para exportar. Expanda uma Etiqueta para consultar as solicitações e o total correspondente."
+        },
+        {
+          "kind": "p",
+          "text": "A Etiqueta organiza demandas internas sem substituir Centro de Custo. O relatório utiliza sua consulta e seus próprios critérios; não presuma que ele herdará automaticamente todo filtro da tabela de Todos os approvals."
+        },
+        {
+          "kind": "h",
+          "text": "Escolher o relatório"
+        },
+        {
+          "kind": "table",
+          "headers": [
+            "Necessidade",
+            "Relatório"
+          ],
+          "rows": [
+            [
+              "Exportar a lista atual",
+              "PDF / Excel junto ao título."
+            ],
+            [
+              "Reunir materiais para compra",
+              "Consolidar itens."
+            ],
+            [
+              "Analisar iniciativas internas",
+              "Custo por Etiqueta."
+            ],
+            [
+              "Ver valores por aprovador/cargo",
+              "Consolidado por Cargo."
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Armazém: produção e estoques",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "<b>Caminho:</b> Armazém. Selecione o submenu. As áreas disponíveis dependem das permissões; os estoques de Fábrica e Terceiros são independentes."
+        },
+        {
+          "kind": "h",
+          "text": "Fábrica"
+        },
+        {
+          "kind": "table",
+          "headers": [
+            "Submenu",
+            "Finalidade"
+          ],
+          "rows": [
+            [
+              "Estoque de Componentes",
+              "Consultar componentes e seus saldos; realizar cadastros e movimentações permitidos."
+            ],
+            [
+              "Fila de Produção",
+              "Acompanhar as demandas de montagem e sua evolução."
+            ],
+            [
+              "Dispositivos Liberados",
+              "Consultar dispositivos liberados após a montagem."
+            ],
+            [
+              "Homologação",
+              "Etiquetar e homologar os dispositivos montados antes do envio ao estoque."
+            ]
+          ]
+        },
+        {
+          "kind": "h",
+          "text": "Estoque"
+        },
+        {
+          "kind": "table",
+          "headers": [
+            "Submenu",
+            "Finalidade"
+          ],
+          "rows": [
+            [
+              "Estoque myio",
+              "Consultar dispositivos, sua situação e os grupos disponíveis, como perdidos ou avariados."
+            ],
+            [
+              "Clientes / Técnicos",
+              "Acompanhar produtos e itens vinculados às unidades ou técnicos."
+            ],
+            [
+              "Insumos de Instalação",
+              "Consultar materiais da área de Terceiros e suas movimentações."
+            ],
+            [
+              "Almoxarifado",
+              "Controlar os materiais do almoxarifado, sem misturar com componentes da Fábrica."
+            ],
+            [
+              "Ferramentas/Ativos",
+              "Consultar ferramentas e ativos e as ações de movimentação autorizadas."
+            ]
+          ]
+        },
+        {
+          "kind": "h",
+          "text": "Rotina de consulta e movimentação"
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Entre no estoque correto e localize o item.",
+            "Abra a ficha ou ação de movimentação oferecida na tela.",
+            "Confira origem, destino, quantidade e dados exigidos.",
+            "Revise e confirme; consulte o saldo e as movimentações recentes."
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Não registre movimentações apenas para mudar a aparência de um status. Confira o item, o estoque e o movimento existente. Acesso a uma área não libera automaticamente todas as alterações."
+        }
+      ]
+    },
+    {
+      "title": "Armazém: atendimento, expedição e QR",
+      "blocks": [
+        {
+          "kind": "h",
+          "text": "Solicitações de dispositivos e materiais"
+        },
+        {
+          "kind": "p",
+          "text": "Armazém → Solicitações apresenta a rotina de atendimento correspondente ao estoque. Consulte os registros e as ações disponíveis para separar, montar ou liberar os itens, conforme a área e seu acesso. Ela não substitui a Fila do Supply para executar compras."
+        },
+        {
+          "kind": "h",
+          "text": "Expedição"
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Abra Armazém → Expedição e localize o atendimento liberado.",
+            "Confira os dispositivos/itens, a composição das caixas e o destino.",
+            "Registre os dados de envio e as ações disponíveis para expedir ou acompanhar o transporte.",
+            "Confirme a operação e verifique o acompanhamento do atendimento."
+          ]
+        },
+        {
+          "kind": "h",
+          "text": "Checar QR Code"
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Abra Armazém → Checar QR Code.",
+            "Informe ou leia o QR pela opção disponível.",
+            "Confira o resultado de identificação, situação e localização.",
+            "Se houver divergência, verifique o registro de homologação e a movimentação antes de efetuar alterações."
+          ]
+        },
+        {
+          "kind": "h",
+          "text": "Rastreabilidade"
+        },
+        {
+          "kind": "p",
+          "text": "O QR homologado identifica o dispositivo no fluxo de rastreio. Mudança de setor é acompanhamento de localização, não uma nova saída de estoque. A caixa é a referência de rastreio dos produtos que contém; ao instalar um produto no cliente, ele deixa a caixa conforme o fluxo de instalação."
+        },
+        {
+          "kind": "h",
+          "text": "Avarias e recuperação"
+        },
+        {
+          "kind": "p",
+          "text": "Consulte itens avariados somente nas áreas autorizadas. Ao recuperar um dispositivo, use a ação própria, confira o destino e preserve o vínculo do QR. Não crie uma nova identidade para um produto já homologado."
+        },
+        {
+          "kind": "note",
+          "text": "As ações de montagem, homologação, expedição e avaria dependem de permissões próprias. Este manual orienta a sequência de navegação; confirme os campos exigidos e as mensagens exibidas em cada operação."
+        }
+      ]
+    },
+    {
+      "title": "Cadastro: dados que sustentam o Supply",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "<b>Caminho:</b> Cadastro. Abra o submenu, expanda a seção quando necessário e use + para criar ou lápis para editar. Revise e salve; exclusão/inativação depende do cadastro e das referências existentes."
+        },
+        {
+          "kind": "table",
+          "headers": [
+            "Submenu",
+            "O que manter"
+          ],
+          "rows": [
+            [
+              "Projetos",
+              "Nome, cliente, unidade/filial quando aplicável, orçamento aprovado e descrição. Um projeto deve estar ligado a cliente para ser usado na alocação de compra."
+            ],
+            [
+              "Clientes",
+              "Razão social, nome fantasia, cidade/UF, categoria, CNPJ e unidades/filiais. O mapa de localização fica na área Clientes, junto aos relatórios disponíveis."
+            ],
+            [
+              "Centro de Custo",
+              "Nome, código e descrição da unidade gerencial responsável pela despesa."
+            ],
+            [
+              "Etiquetas",
+              "Nome da etiqueta interna e identificação do criador; edição e situação conforme a autorização."
+            ],
+            [
+              "Cargos",
+              "Nome, nome abreviado para o organograma e descrição."
+            ],
+            [
+              "Lembretes",
+              "Criar lembrete por usuário para approvals pendentes; editar frequência, dias, horários e texto do e-mail. Sem pendências, não há envio."
+            ]
+          ]
+        },
+        {
+          "kind": "h",
+          "text": "Projetos"
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Clique em criar e informe o nome.",
+            "Selecione cliente e unidade, quando aplicável.",
+            "Informe o orçamento aprovado e a descrição.",
+            "Salve e confira o registro. A criação depende da autorização do usuário."
+          ]
+        },
+        {
+          "kind": "h",
+          "text": "Etiquetas"
+        },
+        {
+          "kind": "p",
+          "text": "Criação é destinada a Admin, Financeiro e Compras autorizados. A disponibilidade do menu também depende do Perfil de Acesso. Cadastre nomes claros para evitar variações de uma mesma iniciativa."
+        },
+        {
+          "kind": "note",
+          "text": "Alterações de cadastro não devem ser usadas para apagar a história de solicitações já enviadas. Quando houver registros vinculados, prefira a ação de inativação oferecida pelo sistema."
+        }
+      ]
+    },
+    {
+      "title": "Cadastro → Diversos",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "Diversos reúne cadastros auxiliares. As seções podem ser exibidas ou recolhidas por setas; o botão de criação aparece no contexto aberto e autorizado. Em <b>Manual do Usuário</b>, expanda a lista e abra o PDF da versão <b>Atual</b> ou consulte as versões <b>Anteriores</b>, preservadas com número e data."
+        },
+        {
+          "kind": "table",
+          "headers": [
+            "Seção",
+            "Uso"
+          ],
+          "rows": [
+            [
+              "Status das Solicitações",
+              "Renomear e ordenar estados existentes e criar estados de acompanhamento. Arraste para mudar a sequência; a numeração é refeita."
+            ],
+            [
+              "Categorias de Clientes",
+              "Padronizar a classificação de clientes."
+            ],
+            [
+              "Materiais / Dispositivos myio",
+              "Manter as opções de catálogo usadas nos formulários."
+            ],
+            [
+              "Tipos de Solicitação",
+              "Manter os tipos e suas opções/subtipos usando modelos de formulário existentes."
+            ],
+            [
+              "Tipos de Etapas Adicionais",
+              "Classificar etapas extras usadas nas regras de aprovação."
+            ],
+            [
+              "Destinos de Estoque",
+              "Manter os destinos ativos usados nas movimentações."
+            ],
+            [
+              "Pontos de Entrega",
+              "Padronizar locais disponíveis para entrega/retirada."
+            ],
+            [
+              "Motivos de Avaria",
+              "Padronizar as causas registradas nas ocorrências."
+            ],
+            [
+              "Categorias de Materiais",
+              "Organizar tipos/categorias e destinos apresentados nos cadastros de materiais."
+            ]
+          ]
+        },
+        {
+          "kind": "h",
+          "text": "Tipos e subtipos"
+        },
+        {
+          "kind": "p",
+          "text": "Usuários Admin e Financeiro autorizados podem criar e editar opções em Materiais, Serviços e Viagens. Abra a seta da lista para consultar as opções. Passagens, Hospedagens e Aluguel de Veículos têm formulários originais: podem ser renomeados/inativados conforme a tela, mas não excluídos como opções novas."
+        },
+        {
+          "kind": "h",
+          "text": "Status"
+        },
+        {
+          "kind": "p",
+          "text": "Estados automáticos de aprovação, como Aguardando aprovação e Rejeitado, são informativos. Estados originais de operação mantêm suas regras. Um status novo é somente acompanhamento e não aciona estoque ou aprovações por si só."
+        },
+        {
+          "kind": "note",
+          "text": "Conforme e Não Conforme preservam, respectivamente, as rotinas de recebido corretamente e recebido com problemas, mesmo quando a apresentação dos nomes é ajustada."
+        }
+      ]
+    },
+    {
+      "title": "Usuários, aprovações e registros",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "<b>Caminho:</b> Usuários e logs. Área de administração; o conteúdo depende das permissões do perfil."
+        },
+        {
+          "kind": "h",
+          "text": "Usuários e Perfis de acesso"
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Em Usuários, confira a identificação, o cargo principal/adicional e o perfil.",
+            "Em Perfis de acesso, crie ou edite a definição reutilizável.",
+            "Autorize menus/submenus e os tipos de novas solicitações.",
+            "Para acesso customizado, configure as permissões individuais.",
+            "Salve e confira a atribuição ao usuário."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Perfil e cargo são distintos. Um cargo pode participar da aprovação sem conceder administração do ERP. Ao excluir um perfil em uso, o sistema exige realocar seus usuários; não deixe contas sem destino de acesso."
+        },
+        {
+          "kind": "h",
+          "text": "Organograma de Aprovação"
+        },
+        {
+          "kind": "p",
+          "text": "Apresenta a estrutura de responsabilidades utilizada nas decisões. Revise os cargos e responsáveis cadastrados antes de interpretar uma cadeia de aprovação."
+        },
+        {
+          "kind": "h",
+          "text": "Alçadas de Aprovação e Etapas Adicionais"
+        },
+        {
+          "kind": "p",
+          "text": "Configure a cadeia padrão e as condições de etapas extras, limites de valor/quantidade e aprovação conjunta. As regras podem variar por tipo e condições da solicitação. Alterar uma regra exige cuidado com os fluxos ainda pendentes."
+        },
+        {
+          "kind": "h",
+          "text": "Logs"
+        },
+        {
+          "kind": "p",
+          "text": "Consulte os registros de operações para verificar autor, data e detalhes disponíveis. Utilize o Histórico da própria solicitação para sua análise individual e os Logs para a visão administrativa."
+        },
+        {
+          "kind": "h",
+          "text": "Backup"
+        },
+        {
+          "kind": "p",
+          "text": "Baixe a cópia de registros em formato JSON pela ação Backup. <b>Anexos e imagens não são incluídos.</b> Guardar PDF ou Excel de uma lista não equivale a fazer backup do sistema."
+        },
+        {
+          "kind": "note",
+          "text": "A administração de regras não deve ser usada para aprovar a própria solicitação nem para contornar a cadeia de decisão. Verifique sempre as responsabilidades e as etapas efetivamente atribuídas."
+        }
+      ]
+    },
+    {
+      "title": "Dúvidas frequentes e roteiro diário",
+      "blocks": [
+        {
+          "kind": "h",
+          "text": "Não encontro um menu ou botão"
+        },
+        {
+          "kind": "p",
+          "text": "Confira o perfil e o cargo no cabeçalho. Peça ao administrador a revisão do menu específico e da ação necessária. Não é preciso abrir uma nova conta para corrigir acesso."
+        },
+        {
+          "kind": "h",
+          "text": "Minha demanda foi aprovada, mas não chegou"
+        },
+        {
+          "kind": "p",
+          "text": "Consulte o status operacional, a Previsão de Compras e a Conversa. A aprovação autoriza o fluxo; não significa que a compra, expedição ou recebimento já aconteceu."
+        },
+        {
+          "kind": "h",
+          "text": "Respondi, mas ainda há uma pendência"
+        },
+        {
+          "kind": "p",
+          "text": "Veja o motivo de cada pendência e confirme que respondeu à pergunta correta. Uma ação de aprovação, recebimento ou outro assunto em aberto não é concluído apenas por responder a uma pergunta."
+        },
+        {
+          "kind": "h",
+          "text": "Não vejo um pedido em Meus com Supply"
+        },
+        {
+          "kind": "p",
+          "text": "A lista usa as situações operacionais de sua finalidade, exige aprovação e identifica solicitante/destinatário pelo usuário. Consulte Minhas Solicitações ou Todos, quando autorizado, para situações fora dessa fila."
+        },
+        {
+          "kind": "h",
+          "text": "Prazo e Previsão são diferentes"
+        },
+        {
+          "kind": "p",
+          "text": "Prazo é a necessidade registrada pelo solicitante. Previsão é a estimativa informada por Compras. Se a previsão ultrapassar a data solicitada, avalie o destaque e converse com o responsável."
+        },
+        {
+          "kind": "h",
+          "text": "O relatório está vazio ou não baixa"
+        },
+        {
+          "kind": "p",
+          "text": "Confira os filtros e se há linhas. Limpe critérios excessivos e tente novamente. PDF/Excel da lista não inclui anexos e não substitui relatórios especializados ou backup."
+        },
+        {
+          "kind": "h",
+          "text": "Roteiro diário recomendado"
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Abra suas pendências e responda/decida o que está atribuído a você.",
+            "Revise Minhas Solicitações ou a Fila do Supply, conforme sua função.",
+            "Ordene pela previsão/prazo e consulte possíveis atrasos.",
+            "Leia conversas e registre alterações pelas ações próprias.",
+            "Confirme recebimentos e exporte a lista filtrada quando precisar compartilhar uma análise."
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Versão 4 • 06.11.2026 • Versão final. A apresentação de nomes pode variar conforme os cadastros ativos e o acesso do usuário."
+        }
+      ]
+    }
+  ]
+}
