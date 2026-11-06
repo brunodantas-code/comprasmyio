@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Simplificar link de navegação do manual para “Sumário”
+- [x] Gerar manual Supply V3 final com ajustes recentes; 24 páginas conferidas visualmente e links validados
 - [x] Numeração interna do manual em lilás conforme títulos; badges verdes somente no Sumário; sem gerar PDF
 - [x] Ajustar capa editável: ícone preto à direita, Supply/subtítulo alinhados à esquerda e título menor; retirar retorno antes do Sumário; sem gerar PDF
 - [x] Gerar V2 do manual Supply com ajustes acumulados; 24 páginas conferidas visualmente, setas e retorno ao Sumário validados; apresentada para aprovação final
