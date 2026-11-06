@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Ampliar negrito para referências a campos e opções em todo o manual, incluindo novo item, sem gerar PDF
 - [x] Incluir miniaturas dos ícones originais junto aos menus do manual Supply, sem gerar novo PDF
 - [x] Aplicar setas visíveis em todos os caminhos de navegação e sequências do manual, sem gerar novo PDF
 - [x] Inserir setas verdes visíveis entre as etapas da sequência de uma demanda no manual Supply, sem gerar novo PDF
