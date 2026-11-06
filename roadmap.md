@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Ajustar fonte editável do manual Supply: logo menor, capa limpa, Objetivo na segunda página e blocos separados Para quem/Como usar; sem gerar novo PDF durante a revisão
 - [x] Preparar Manual do Usuário Supply em PDF: 23 páginas com objetivo, menus e navegação; todas renderizadas e conferidas, logo corrigido, sumário clicável; V1 apresentada para aprovação
 - [ ] Após aprovação do Supply: elaborar manuais Code, Site Survey e Mytosis; aguarda aprovação do conteúdo/layout
 - [ ] Após aprovação: disponibilizar manuais no menu de três barras; aguarda aprovação do primeiro PDF
