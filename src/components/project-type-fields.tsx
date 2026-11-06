@@ -32,12 +32,13 @@ export function useCanManageProjectTypes() {
   });
 }
 
-export function ProjectTypeFields({ idPrefix, projectType, shortName, onTypeChange, onNameChange }: {
+export function ProjectTypeFields({ idPrefix, projectType, shortName, onTypeChange, onNameChange, inlineLayout = false }: {
   idPrefix: string;
   projectType: string;
   shortName: string;
   onTypeChange: (value: string) => void;
   onNameChange: (value: string) => void;
+  inlineLayout?: boolean;
 }) {
   const qc = useQueryClient();
   const { data: types } = useProjectTypes();
@@ -67,7 +68,7 @@ export function ProjectTypeFields({ idPrefix, projectType, shortName, onTypeChan
 
   return (
     <>
-      <div className="min-w-0 space-y-2">
+      <div className="flex min-w-0 flex-col gap-2">
         <div className="flex items-center justify-between gap-2">
           <Label>Tipo de projeto</Label>
           {canManage && (
@@ -90,10 +91,10 @@ export function ProjectTypeFields({ idPrefix, projectType, shortName, onTypeChan
           </Select>
         )}
       </div>
-      <div className="min-w-0 space-y-2">
+      <div className={inlineLayout ? "relative flex min-w-0 flex-col gap-2" : "flex min-w-0 flex-col gap-2"}>
         <Label htmlFor={`${idPrefix}-short-name`}>Nome do projeto</Label>
         <Input id={`${idPrefix}-short-name`} value={shortName} onChange={(event) => onNameChange(event.target.value)} maxLength={80} placeholder="Ex.: Drone Scan" required />
-        <p className="truncate text-xs text-muted-foreground" title={preview}>
+        <p className={inlineLayout ? "truncate text-xs text-muted-foreground xl:absolute xl:top-full xl:mt-2 xl:w-full" : "truncate text-xs text-muted-foreground"} title={preview}>
           Nome final: <span className="font-medium text-foreground">{preview || "—"}</span>
         </p>
       </div>
