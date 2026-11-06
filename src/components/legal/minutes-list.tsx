@@ -28,16 +28,30 @@ export function MinutesList({ rows, expanded, toggle, edit, remove, openPdf }: {
           <Button variant="outline" size="compactIcon" title="Excluir" aria-label={`Excluir ${row.title}`} onClick={() => remove(row)}><Trash2 /></Button>
           {row.pdf_path ? <Button variant="outline" size="compactIcon" title="PDF" aria-label={`Abrir PDF de ${row.title}`} onClick={() => { if (row.pdf_path) openPdf(row.pdf_path); }}><FileText /></Button> : null}
         </div>
-        {open ? <div className="divide-y divide-border border-t border-border bg-muted/30 pl-4 sm:pl-6">
-          <div className="space-y-1 px-4 py-3 text-sm"><p><span className="text-muted-foreground">Local: </span>{content.location}</p><p className="break-words"><span className="text-muted-foreground">Participantes: </span>{content.participants.map(p => p.name).join(', ')}</p></div>
-          {content.subjects.map((subject, index) => <section key={subject.id} className="space-y-2 px-4 py-3 text-sm">
-            <h2 className="flex items-center gap-3 font-medium"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-primary/15 text-xs text-primary">{index + 1}</span><span className="min-w-0 flex-1 break-words">{subject.title}</span>{subject.responsible?.trim() && !subject.completionDate ? <PendingDot label={`Ação pendente de ${subject.responsible}`} /> : null}</h2>
-            <p className="whitespace-pre-wrap break-words text-muted-foreground">{subject.description}</p>
-            <p className="whitespace-pre-wrap break-words"><span className="text-muted-foreground">Deliberações: </span>{subject.decisions || '—'}</p>
-            {subject.responsible ? <p><span className="text-muted-foreground">Responsável: </span>{subject.responsible}</p> : null}
-            {subject.completionDate ? <p><span className="text-muted-foreground">Data de conclusão: </span>{legalDate(subject.completionDate)}</p> : null}
+        {open ? <div className="border-t border-border bg-background">
+          <div className="space-y-2 px-4 py-4 text-sm sm:px-6"><p><span className="text-muted-foreground">Local: </span>{content.location}</p><p className="break-words"><span className="text-muted-foreground">Participantes: </span>{content.participants.map(p => p.name).join(', ')}</p></div>
+          {content.subjects.map((subject, index) => <section key={subject.id} className="border-t border-border text-sm" aria-label={`Assunto ${index + 1}: ${subject.title}`}>
+            <div className="space-y-3 bg-primary/10 px-4 py-4 sm:px-6">
+              <h2 className="text-base font-semibold">Assunto</h2>
+              <div className="flex items-start gap-3 sm:gap-4">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary text-sm font-semibold text-primary-foreground">{index + 1}</span>
+                <div className="grid min-w-0 flex-1 gap-4 sm:grid-cols-2">
+                  <div className="min-w-0"><h3 className="break-words border-b border-border pb-2 font-semibold">{subject.title}</h3><p className="mt-1 text-xs text-muted-foreground">Título do assunto</p></div>
+                  <div className="min-w-0"><p className="whitespace-pre-wrap break-words border-b border-border pb-2">{subject.description || '—'}</p><p className="mt-1 text-xs text-muted-foreground">Descrição</p></div>
+                </div>
+                {subject.responsible?.trim() && !subject.completionDate ? <PendingDot label={`Ação pendente de ${subject.responsible}`} /> : null}
+              </div>
+            </div>
+            <div className="space-y-3 border-t border-border px-4 py-4 sm:px-6">
+              <h4 className="text-base font-semibold">Deliberações</h4>
+              <p className="whitespace-pre-wrap break-words">{subject.decisions || '—'}</p>
+              {subject.responsible || subject.completionDate ? <div className="grid gap-3 border-t border-border pt-3 sm:grid-cols-2">
+                {subject.responsible ? <p className="break-words"><span className="text-muted-foreground">Responsável: </span>{subject.responsible}</p> : null}
+                {subject.completionDate ? <p><span className="text-muted-foreground">Data de conclusão: </span>{legalDate(subject.completionDate)}</p> : null}
+              </div> : null}
+            </div>
           </section>)}
-          <div className="space-y-2 px-4 py-3 text-sm">{content.participants.map(p => <p key={p.id} className="flex items-center gap-2"><span className="break-words">{p.name} — {p.signature && p.signedAt ? 'Assinatura registrada' : 'Aguardando assinatura'}</span>{!p.signature || !p.signedAt ? <PendingDot label={`Assinatura pendente de ${p.name}`} /> : null}</p>)}</div>
+          <div className="space-y-2 border-t border-border px-4 py-4 text-sm sm:px-6"><h2 className="text-base font-semibold">Assinaturas dos participantes</h2>{content.participants.map(p => <p key={p.id} className="flex items-center gap-2"><span className="break-words">{p.name} — {p.signature && p.signedAt ? 'Assinatura registrada' : 'Aguardando assinatura'}</span>{!p.signature || !p.signedAt ? <PendingDot label={`Assinatura pendente de ${p.name}`} /> : null}</p>)}</div>
         </div> : null}
       </article>;
     })}
