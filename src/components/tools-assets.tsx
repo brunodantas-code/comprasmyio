@@ -1,3 +1,4 @@
+import { useTableFilters } from "@/components/use-table-filters";
 import { useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -528,22 +529,13 @@ export function ToolAssetsSection({ userId, canDelete, canCreate = false }: { us
   const { data: profiles } = useToolProfiles();
   const { data: metaMap } = useStockMeta("tool_assets");
 
-  const [toolFilter, setToolFilter] = useState("");
-  const [myioCodeFilter, setMyioCodeFilter] = useState("");
-  const [manufacturerCodeFilter, setManufacturerCodeFilter] = useState("");
-  const [balanceFilter, setBalanceFilter] = useState<"with" | "zero" | "">("");
-
-  const normalize = (value: string | null | undefined) => value?.trim().toLocaleLowerCase("pt-BR") ?? "";
-  const filtered = (rows ?? []).filter((r) => {
-    const meta = metaMap?.[r.material_id];
-    const toolTerm = normalize(toolFilter);
-    const toolMatches = !toolTerm || normalize(`${r.name} ${meta?.description ?? ""}`).includes(toolTerm);
-    const myioCodeMatches = !normalize(myioCodeFilter) || normalize(meta?.myio_code).includes(normalize(myioCodeFilter));
-    const manufacturerCodeMatches =
-      !normalize(manufacturerCodeFilter) || normalize(meta?.manufacturer_code).includes(normalize(manufacturerCodeFilter));
-    const balanceMatches = balanceFilter === "with" ? r.balance > 0 : balanceFilter === "zero" ? r.balance <= 0 : true;
-    return toolMatches && myioCodeMatches && manufacturerCodeMatches && balanceMatches;
-  });
+  const toolFilters = useTableFilters(rows ?? [], [
+    { key: "name", label: "Ferramenta / Ativo", value: r => `${r.name} ${metaMap?.[r.material_id]?.description ?? ""}` },
+    { key: "myio", label: "Cód. Myio", value: r => metaMap?.[r.material_id]?.myio_code },
+    { key: "manufacturer", label: "Cód. Fabricante", value: r => metaMap?.[r.material_id]?.manufacturer_code },
+    { key: "balance", label: "Saldo", kind: "number", value: r => r.balance },
+  ]);
+  const filtered = toolFilters.filtered;
   const nameById = Object.fromEntries((rows ?? []).map((r) => [r.material_id, r.name]));
 
   return (
@@ -564,63 +556,18 @@ export function ToolAssetsSection({ userId, canDelete, canCreate = false }: { us
         <CardContent>
           {isLoading ? (
             <p className="text-sm text-muted-foreground">Carregando...</p>
-          ) : !filtered.length ? (
+          ) : !rows?.length ? (
             <p className="text-sm text-muted-foreground">Nenhuma ferramenta encontrada.</p>
           ) : (
             <Table>
               <TableHeader className="[&_tr]:border-b">
                 <TableRow className="border-b">
-                  <TableHead className="w-[45%]">Ferramenta / Ativo</TableHead>
-                  <TableHead className="w-[12%]">Cód. Myio</TableHead>
-                  <TableHead className="w-[12%]">Cód. Fabricante</TableHead>
-                  <TableHead className="w-[10%] text-right">Saldo</TableHead>
+                  <TableHead className="w-[45%]">{toolFilters.header("name")}</TableHead>
+                  <TableHead className="w-[12%]">{toolFilters.header("myio")}</TableHead>
+                  <TableHead className="w-[12%]">{toolFilters.header("manufacturer")}</TableHead>
+                  <TableHead className="w-[10%] text-right">{toolFilters.header("balance")}</TableHead>
                   <TableHead className="w-[10%]">Imagem</TableHead>
                   <TableHead className="w-[11%] text-right" />
-                </TableRow>
-                <TableRow>
-                  <TableHead className="py-1">
-                    <Input
-                      value={toolFilter}
-                      onChange={(event) => setToolFilter(event.target.value)}
-                      placeholder="Filtrar"
-                      aria-label="Filtrar por ferramenta ou ativo"
-                      className="h-8 bg-background"
-                    />
-                  </TableHead>
-                  <TableHead className="py-1">
-                    <Input
-                      value={myioCodeFilter}
-                      onChange={(event) => setMyioCodeFilter(event.target.value)}
-                      placeholder="Filtrar"
-                      aria-label="Filtrar por código myio"
-                      className="h-8 bg-background"
-                    />
-                  </TableHead>
-                  <TableHead className="py-1">
-                    <Input
-                      value={manufacturerCodeFilter}
-                      onChange={(event) => setManufacturerCodeFilter(event.target.value)}
-                      placeholder="Filtrar"
-                      aria-label="Filtrar por código do fabricante"
-                      className="h-8 bg-background"
-                    />
-                  </TableHead>
-                  <TableHead className="py-1">
-                    <Select
-                      value={balanceFilter}
-                      onValueChange={(value) => setBalanceFilter(value as "with" | "zero")}
-                    >
-                      <SelectTrigger className="h-8 w-full bg-background" aria-label="Filtrar por saldo">
-                        <SelectValue placeholder="Filtrar" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="with">Com saldo</SelectItem>
-                        <SelectItem value="zero">Sem saldo</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </TableHead>
-                  <TableHead className="py-1" />
-                  <TableHead className="py-1" />
                 </TableRow>
               </TableHeader>
               <TableBody>

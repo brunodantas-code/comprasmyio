@@ -1,3 +1,4 @@
+import { useTableFilters } from "@/components/use-table-filters";
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -155,7 +156,7 @@ function PendingApprovalDetails({ step, requestTypes }: { step: StepRow; request
     ...(order.request_model === "dispositivos" ? [] : [["Valor", BRL(Number(order.estimated_value ?? 0))]]), ["Projeto ou Cliente", allocation], ["Destinatário", order.recipient || "—"],
     [(order as { delivery_mode?: string }).delivery_mode === "retirada" ? "Endereço de retirada" : "Endereço de entrega", order.delivery_point || "—"], ["Prazo", order.deadline_date ? new Date(`${order.deadline_date}T00:00:00`).toLocaleDateString("pt-BR") : order.deadline_type],
     ["Previsão de entrega", order.delivery_forecast ? new Date(`${order.delivery_forecast}T00:00:00`).toLocaleDateString("pt-BR") : "—"],
-    ["Status da solicitação", order.status], ["Status da aprovação", order.approval_status], ["Palavra passe", order.passphrase || "—"], ["Criado em", dt(order.created_at)],
+    ["Status da solicitação", order.status], ["Status da aprovação", order.approval_status], ["Código", order.passphrase || "—"], ["Criado em", dt(order.created_at)],
     ["Destino da viagem", order.travel_destination || "—"], ["Ida", order.travel_departure ? new Date(`${order.travel_departure}T00:00:00`).toLocaleDateString("pt-BR") : "—"], ["Volta", order.travel_return ? new Date(`${order.travel_return}T00:00:00`).toLocaleDateString("pt-BR") : "—"],
     ["Data de pagamento", order.payment_date ? new Date(`${order.payment_date}T00:00:00`).toLocaleDateString("pt-BR") : "—"],
     ["Observações do solicitante", order.requester_notes || "—"], ["Observações de Supply", order.buyer_notes || "—"],
@@ -388,7 +389,6 @@ export function PendingForMe({ renderEditAction }: { renderEditAction?: EditActi
   const { data: steps, isLoading } = useSteps();
   const { data: profiles } = useProfiles();
   const { data: requestTypes } = useRequestTypes();
-  const [search, setSearch] = useState("");
   const [sorting, setSorting] = useState<{ key: string; direction: SortDirection }>();
 
   const mine = useMemo(() => {
@@ -409,10 +409,9 @@ export function PendingForMe({ renderEditAction }: { renderEditAction?: EditActi
         (o) => o.step_index < s.step_index && o.status === "pendente"
       );
       if (earlier.length !== 0) return false;
-      const term = search.trim();
-      return !term || (s.purchase_orders?.approval_number ?? "").includes(term);
+      return true;
     });
-  }, [steps, me, search]);
+  }, [steps, me]);
 
   const sortDefs: { key: string; label: string; kind: FilterKind; value: (s: StepRow) => SortValue }[] = [
     { key: "number", label: "Approval", kind: "text", value: s => s.purchase_orders?.approval_number },
@@ -423,12 +422,13 @@ export function PendingForMe({ renderEditAction }: { renderEditAction?: EditActi
     { key: "total", label: "Valor Total", kind: "number", value: s => s.purchase_orders?.estimated_value },
     { key: "allocation", label: "Projeto ou Cliente", kind: "text", value: s => s.purchase_orders?.allocation_type === "interna" ? "Interna" : s.purchase_orders?.for_stock ? "Estoque" : s.purchase_orders?.projects?.name ?? s.purchase_orders?.clients?.name },
   ];
+  const tableFilters = useTableFilters(mine, sortDefs);
   const sortDef = sortDefs.find(c => c.key === sorting?.key);
-  const sortedMine = sortDef && sorting ? [...mine].sort((a, b) => compareColumnValues(sortDef.kind, sortDef.value(a), sortDef.value(b), sorting.direction)) : mine;
+  const sortedMine = sortDef && sorting ? [...tableFilters.filtered].sort((a, b) => compareColumnValues(sortDef.kind, sortDef.value(a), sortDef.value(b), sorting.direction)) : tableFilters.filtered;
   const sortControl = (key: string) => {
     const c = sortDefs.find(c => c.key === key);
     if (!c) return null;
-    return <span className="inline-flex items-center gap-1 whitespace-nowrap">{c.label}<ColumnSortButton label={c.label} direction={sorting?.key === key ? sorting.direction : undefined} onClick={() => setSorting(current => current?.key !== key ? { key, direction: "asc" } : current.direction === "asc" ? { key, direction: "desc" } : undefined)} /></span>;
+    return <span className="inline-flex items-center gap-1 whitespace-nowrap">{c.label}{tableFilters.control(key)}<ColumnSortButton label={c.label} direction={sorting?.key === key ? sorting.direction : undefined} onClick={() => setSorting(current => current?.key !== key ? { key, direction: "asc" } : current.direction === "asc" ? { key, direction: "desc" } : undefined)} /></span>;
   };
 
   const refresh = () => {
@@ -475,18 +475,6 @@ export function PendingForMe({ renderEditAction }: { renderEditAction?: EditActi
                 <TableHead>{sortControl("total")}</TableHead>
                 <TableHead>{sortControl("allocation")}</TableHead>
                 <TableHead aria-label="Ações" />
-              </TableRow>
-              <TableRow>
-                <TableHead className="py-1">
-                  <Input
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Filtrar approval"
-                    aria-label="Filtrar por número do approval"
-                    className="h-8 min-w-36 bg-background"
-                  />
-                </TableHead>
-                <TableHead colSpan={7} />
               </TableRow>
           </TableHeader>
           <TableBody>
@@ -676,7 +664,6 @@ export function MyApprovalFlows({ renderEditAction }: { renderEditAction?: EditA
   const { data: steps, isLoading } = useSteps();
   const { data: profiles } = useProfiles();
   const { data: requestTypes } = useRequestTypes();
-  const [search, setSearch] = useState("");
   const [numberDirection, setNumberDirection] = useState<SortDirection>();
 
   const orders = useMemo(() => {
@@ -686,13 +673,11 @@ export function MyApprovalFlows({ renderEditAction }: { renderEditAction?: EditA
       arr.push(s);
       byOrder.set(s.order_id, arr);
     });
-    const term = search.trim();
     return [...byOrder.entries()]
       .filter(([, list]) => {
         const order = list[0]?.purchase_orders;
         return order?.requester_id === me?.id &&
-          order.approval_status === "aguardando_aprovacao" &&
-          (!term || (order.approval_number ?? "").includes(term));
+          order.approval_status === "aguardando_aprovacao";
       })
       .sort((a, b) => {
       if (numberDirection) return compareColumnValues("text", a[1][0]?.purchase_orders?.approval_number, b[1][0]?.purchase_orders?.approval_number, numberDirection);
@@ -700,7 +685,13 @@ export function MyApprovalFlows({ renderEditAction }: { renderEditAction?: EditA
       const db = b[1][0]?.purchase_orders?.created_at ?? "";
       return db.localeCompare(da);
     });
-  }, [steps, me?.id, search, numberDirection]);
+  }, [steps, me?.id, numberDirection]);
+
+  const flowFilters = useTableFilters(orders, [
+    { key: "approval", label: "Approval", value: row => row[1][0]?.purchase_orders?.approval_number },
+    { key: "type", label: "Tipo", value: row => requestTypeLabel(row[1][0]?.purchase_orders, requestTypes) },
+    { key: "value", label: "Valor Total", kind: "number", value: row => row[1][0]?.purchase_orders?.estimated_value },
+  ]);
 
   return (
     <Card>
@@ -712,13 +703,7 @@ export function MyApprovalFlows({ renderEditAction }: { renderEditAction?: EditA
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center gap-2 border-t p-2">
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Filtrar approval"
-            aria-label="Filtrar por número do approval"
-            className="h-8 w-full bg-background sm:w-[200px]"
-          />
+          {flowFilters.header("approval")}{flowFilters.header("type")}{flowFilters.header("value")}
           <ColumnSortButton label="Approval" direction={numberDirection} onClick={() => setNumberDirection(current => current === undefined ? "asc" : current === "asc" ? "desc" : undefined)} />
         </div>
         {isLoading ? (
@@ -726,7 +711,7 @@ export function MyApprovalFlows({ renderEditAction }: { renderEditAction?: EditA
         ) : orders.length === 0 ? (
           <p className="text-sm text-muted-foreground">Nenhuma solicitação em fluxo de aprovação.</p>
         ) : (
-          orders.map(([orderId, list]) => {
+          flowFilters.filtered.map(([orderId, list]) => {
             const o = list[0]?.purchase_orders;
             const req = o?.requester_id ? profiles?.get(o.requester_id) : undefined;
             return (

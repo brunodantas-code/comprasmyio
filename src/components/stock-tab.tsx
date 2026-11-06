@@ -1,3 +1,4 @@
+import { useTableFilters } from "@/components/use-table-filters";
 import { useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -208,48 +209,20 @@ function MovementHistoryTable({
   names: Record<string, string>;
   profiles?: Record<string, string>;
 }) {
-  const [dateFilter, setDateFilter] = useState("");
-  const [descriptionFilter, setDescriptionFilter] = useState("");
-  const [typeFilter, setTypeFilter] = useState<MovementType | "all">("all");
-  const [quantityFilter, setQuantityFilter] = useState("");
-  const [reasonFilter, setReasonFilter] = useState("");
-  const [responsibleFilter, setResponsibleFilter] = useState("");
-  const normalize = (value: string | null | undefined) => value?.trim().toLocaleLowerCase("pt-BR") ?? "";
-  const filtered = movements.filter((movement) => {
-    const responsible = movement.created_by ? (profiles?.[movement.created_by] ?? "Usuário") : "Sistema";
-    const signedQuantity = `${movement.type === "saida" ? "-" : "+"}${movement.quantity}`;
-    return (!normalize(dateFilter) || normalize(fmt(movement.created_at)).includes(normalize(dateFilter)))
-      && (!normalize(descriptionFilter) || normalize(names[movement.material_id] ?? "—").includes(normalize(descriptionFilter)))
-      && (typeFilter === "all" || movement.type === typeFilter)
-      && (!normalize(quantityFilter) || normalize(signedQuantity).includes(normalize(quantityFilter)))
-      && (!normalize(reasonFilter) || normalize(movement.reason ?? "—").includes(normalize(reasonFilter)))
-      && (!normalize(responsibleFilter) || normalize(responsible).includes(normalize(responsibleFilter)));
-  });
+  const movementFilters = useTableFilters(movements, [
+    { key: "date", label: "Data", kind: "date", value: m => m.created_at.slice(0,10), display: m => fmt(m.created_at) },
+    { key: "description", label: "Descrição", value: m => names[m.material_id] ?? "" },
+    { key: "type", label: "Tipo", value: m => MOVEMENT_LABELS[m.type] },
+    { key: "quantity", label: "Qtd.", kind: "number", value: m => (m.type === "saida" ? -1 : 1) * m.quantity },
+    { key: "reason", label: "Motivo", value: m => m.reason },
+    { key: "responsible", label: "Responsável", value: m => m.created_by ? profiles?.[m.created_by] ?? "Usuário" : "Sistema" },
+  ]);
+  const filtered = movementFilters.filtered;
 
   return (
     <Table>
       <TableHeader className="[&_tr]:border-b">
-        <TableRow className="border-b">
-          <TableHead>Data</TableHead>
-          <TableHead>Descrição</TableHead>
-          <TableHead>Tipo</TableHead>
-          <TableHead className="text-right">Qtd.</TableHead>
-          <TableHead>Motivo</TableHead>
-          <TableHead>Responsável</TableHead>
-        </TableRow>
-        <TableRow>
-          <TableHead className="py-1"><Input value={dateFilter} onChange={(event) => setDateFilter(event.target.value)} placeholder="Filtrar" aria-label="Filtrar por data" className="h-8 min-w-32 bg-background" /></TableHead>
-          <TableHead className="py-1"><Input value={descriptionFilter} onChange={(event) => setDescriptionFilter(event.target.value)} placeholder="Filtrar" aria-label="Filtrar por descrição" className="h-8 min-w-36 bg-background" /></TableHead>
-          <TableHead className="py-1">
-            <Select value={typeFilter} onValueChange={(value) => setTypeFilter(value as MovementType | "all")}>
-              <SelectTrigger className="h-8 min-w-28 bg-background" aria-label="Filtrar por tipo"><SelectValue /></SelectTrigger>
-              <SelectContent><SelectItem value="all">Todos</SelectItem><SelectItem value="entrada">Entrada</SelectItem><SelectItem value="saida">Saída</SelectItem><SelectItem value="ajuste">Ajuste</SelectItem></SelectContent>
-            </Select>
-          </TableHead>
-          <TableHead className="py-1"><Input value={quantityFilter} onChange={(event) => setQuantityFilter(event.target.value)} placeholder="Filtrar" aria-label="Filtrar por quantidade" className="h-8 min-w-24 bg-background text-right" /></TableHead>
-          <TableHead className="py-1"><Input value={reasonFilter} onChange={(event) => setReasonFilter(event.target.value)} placeholder="Filtrar" aria-label="Filtrar por motivo" className="h-8 min-w-36 bg-background" /></TableHead>
-          <TableHead className="py-1"><Input value={responsibleFilter} onChange={(event) => setResponsibleFilter(event.target.value)} placeholder="Filtrar" aria-label="Filtrar por responsável" className="h-8 min-w-36 bg-background" /></TableHead>
-        </TableRow>
+        <TableRow>{["date", "description", "type", "quantity", "reason", "responsible"].map(key => <TableHead key={key}>{movementFilters.header(key)}</TableHead>)}</TableRow>
       </TableHeader>
       <TableBody>
         {filtered.slice(0, 50).map((movement) => (
@@ -1150,18 +1123,13 @@ function StockTableCard({
   columnFilters?: boolean;
 }) {
   const { data: metaMap } = useStockMeta("materials");
-  const [descriptionFilter, setDescriptionFilter] = useState("");
-  const [myioCodeFilter, setMyioCodeFilter] = useState("");
-  const [manufacturerCodeFilter, setManufacturerCodeFilter] = useState("");
-  const [balanceFilter, setBalanceFilter] = useState<"with" | "zero" | "">("");
-  const normalize = (value: string | null | undefined) => value?.trim().toLocaleLowerCase("pt-BR") ?? "";
-  const displayedRows = columnFilters ? rows.filter((row) => {
-    const meta = metaMap?.[row.material_id];
-    return (!normalize(descriptionFilter) || normalize(`${row.name} ${meta?.description ?? ""}`).includes(normalize(descriptionFilter)))
-      && (simple || !normalize(myioCodeFilter) || normalize(meta?.myio_code).includes(normalize(myioCodeFilter)))
-      && (simple || !normalize(manufacturerCodeFilter) || normalize(meta?.manufacturer_code).includes(normalize(manufacturerCodeFilter)))
-      && (balanceFilter === "with" ? row.balance > 0 : balanceFilter === "zero" ? row.balance <= 0 : true);
-  }) : rows;
+  const stockFilters = useTableFilters(rows, [
+    { key: "description", label: "Descrição", value: r => `${r.name} ${metaMap?.[r.material_id]?.description ?? ""}` },
+    { key: "myio", label: "Cód. Myio", value: r => metaMap?.[r.material_id]?.myio_code },
+    { key: "manufacturer", label: "Cód. Fabricante", value: r => metaMap?.[r.material_id]?.manufacturer_code },
+    { key: "balance", label: "Saldo", kind: "number", value: r => r.balance },
+  ]);
+  const displayedRows = stockFilters.filtered;
 
   return (
     <Card>
@@ -1175,32 +1143,19 @@ function StockTableCard({
       <CardContent>
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando...</p>
-        ) : !displayedRows.length ? (
+        ) : !rows.length ? (
           <p className="text-sm text-muted-foreground">Nenhum material encontrado.</p>
         ) : (
           <Table>
             <TableHeader className={columnFilters ? "[&_tr]:border-b" : undefined}>
                 <TableRow className={columnFilters ? "border-b" : undefined}>
-                  <TableHead className={`${simple ? "w-[70%]" : "w-[45%]"}${columnFilters ? "" : ""}`}>Descrição</TableHead>
-                  {!simple && <TableHead className={`w-[12%]${columnFilters ? "" : ""}`}>Cód. Myio</TableHead>}
-                  {!simple && <TableHead className={`w-[12%]${columnFilters ? "" : ""}`}>Cód. Fabricante</TableHead>}
-                  <TableHead className={`${simple ? "w-[15%] text-right" : "w-[10%] text-right"}${columnFilters ? "" : ""}`}>Saldo</TableHead>
+                  <TableHead className={`${simple ? "w-[70%]" : "w-[45%]"}${columnFilters ? "" : ""}`}>{stockFilters.header("description")}</TableHead>
+                  {!simple && <TableHead className={`w-[12%]${columnFilters ? "" : ""}`}>{stockFilters.header("myio")}</TableHead>}
+                  {!simple && <TableHead className={`w-[12%]${columnFilters ? "" : ""}`}>{stockFilters.header("manufacturer")}</TableHead>}
+                  <TableHead className={`${simple ? "w-[15%] text-right" : "w-[10%] text-right"}${columnFilters ? "" : ""}`}>{stockFilters.header("balance")}</TableHead>
                   {!simple && <TableHead className={`w-[10%]${columnFilters ? "" : ""}`}>Imagem</TableHead>}
                   <TableHead className={simple ? "w-[15%] text-right" : "w-[11%] text-right"}></TableHead>
                 </TableRow>
-                {columnFilters && <TableRow>
-                  <TableHead className="py-1"><Input value={descriptionFilter} onChange={(e) => setDescriptionFilter(e.target.value)} placeholder="Filtrar" aria-label="Filtrar por descrição" className="h-8 bg-background" /></TableHead>
-                  {!simple && <TableHead className="py-1"><Input value={myioCodeFilter} onChange={(e) => setMyioCodeFilter(e.target.value)} placeholder="Filtrar" aria-label="Filtrar por código myio" className="h-8 bg-background" /></TableHead>}
-                  {!simple && <TableHead className="py-1"><Input value={manufacturerCodeFilter} onChange={(e) => setManufacturerCodeFilter(e.target.value)} placeholder="Filtrar" aria-label="Filtrar por código do fabricante" className="h-8 bg-background" /></TableHead>}
-                  <TableHead className="py-1">
-                    <Select value={balanceFilter} onValueChange={(value) => setBalanceFilter(value as "with" | "zero")}>
-                      <SelectTrigger className="h-8 w-full bg-background" aria-label="Filtrar por saldo"><SelectValue placeholder="Filtrar" /></SelectTrigger>
-                      <SelectContent><SelectItem value="with">Com saldo</SelectItem><SelectItem value="zero">Sem saldo</SelectItem></SelectContent>
-                    </Select>
-                  </TableHead>
-                  {!simple && <TableHead className="py-1" />}
-                  <TableHead className="py-1" />
-                </TableRow>}
             </TableHeader>
             <TableBody>
               {displayedRows.map((r) => {
@@ -1908,19 +1863,13 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
   const { data: profiles } = useStockProfiles();
   const { data: metaMap } = useStockMeta("terceiros_materials");
 
-  const [descriptionFilter, setDescriptionFilter] = useState("");
-  const [myioCodeFilter, setMyioCodeFilter] = useState("");
-  const [manufacturerCodeFilter, setManufacturerCodeFilter] = useState("");
-  const [balanceFilter, setBalanceFilter] = useState<"with" | "zero" | "">("");
-
-  const normalize = (value: string | null | undefined) => value?.trim().toLocaleLowerCase("pt-BR") ?? "";
-  const filtered = (rows ?? []).filter((row) => {
-    const meta = metaMap?.[row.material_id];
-    return (!normalize(descriptionFilter) || normalize(`${row.name} ${meta?.description ?? ""}`).includes(normalize(descriptionFilter)))
-      && (!normalize(myioCodeFilter) || normalize(meta?.myio_code).includes(normalize(myioCodeFilter)))
-      && (!normalize(manufacturerCodeFilter) || normalize(meta?.manufacturer_code).includes(normalize(manufacturerCodeFilter)))
-      && (balanceFilter === "with" ? row.balance > 0 : balanceFilter === "zero" ? row.balance <= 0 : true);
-  });
+  const stockFilters = useTableFilters(rows ?? [], [
+    { key: "description", label: "Descrição", value: r => `${r.name} ${metaMap?.[r.material_id]?.description ?? ""}` },
+    { key: "myio", label: "Cód. Myio", value: r => metaMap?.[r.material_id]?.myio_code },
+    { key: "manufacturer", label: "Cód. Fabricante", value: r => metaMap?.[r.material_id]?.manufacturer_code },
+    { key: "balance", label: "Saldo", kind: "number", value: r => r.balance },
+  ]);
+  const filtered = stockFilters.filtered;
   const nameById = Object.fromEntries((rows ?? []).map((r) => [r.material_id, r.name]));
 
   const toolbar = (
@@ -1946,30 +1895,18 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
         <CardContent>
           {isLoading ? (
             <p className="text-sm text-muted-foreground">Carregando...</p>
-          ) : !filtered.length ? (
+          ) : !rows?.length ? (
             <p className="text-sm text-muted-foreground">Nenhum item encontrado.</p>
           ) : (
             <Table>
               <TableHeader className="[&_tr]:border-b">
                 <TableRow className="border-b">
-                  <TableHead className="w-[45%]">Descrição</TableHead>
-                  <TableHead className="w-[12%]">Cód. Myio</TableHead>
-                  <TableHead className="w-[12%]">Cód. Fabricante</TableHead>
-                  <TableHead className="w-[10%] text-right">Saldo</TableHead>
+                  <TableHead className="w-[45%]">{stockFilters.header("description")}</TableHead>
+                  <TableHead className="w-[12%]">{stockFilters.header("myio")}</TableHead>
+                  <TableHead className="w-[12%]">{stockFilters.header("manufacturer")}</TableHead>
+                  <TableHead className="w-[10%] text-right">{stockFilters.header("balance")}</TableHead>
                   <TableHead className="w-[10%]">Imagem</TableHead>
                   <TableHead className="w-[11%] text-right"></TableHead>
-                </TableRow>
-                <TableRow>
-                  <TableHead className="py-1"><Input value={descriptionFilter} onChange={(e) => setDescriptionFilter(e.target.value)} placeholder="Filtrar" aria-label="Filtrar por descrição" className="h-8 bg-background" /></TableHead>
-                  <TableHead className="py-1"><Input value={myioCodeFilter} onChange={(e) => setMyioCodeFilter(e.target.value)} placeholder="Filtrar" aria-label="Filtrar por código myio" className="h-8 bg-background" /></TableHead>
-                  <TableHead className="py-1"><Input value={manufacturerCodeFilter} onChange={(e) => setManufacturerCodeFilter(e.target.value)} placeholder="Filtrar" aria-label="Filtrar por código do fabricante" className="h-8 bg-background" /></TableHead>
-                  <TableHead className="py-1">
-                    <Select value={balanceFilter} onValueChange={(value) => setBalanceFilter(value as "with" | "zero")}>
-                      <SelectTrigger className="h-8 w-full bg-background" aria-label="Filtrar por saldo"><SelectValue placeholder="Filtrar" /></SelectTrigger>
-                      <SelectContent><SelectItem value="with">Com saldo</SelectItem><SelectItem value="zero">Sem saldo</SelectItem></SelectContent>
-                    </Select>
-                  </TableHead>
-                  <TableHead className="py-1" /><TableHead className="py-1" />
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -2183,9 +2120,6 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
   const { data: stock, isLoading } = useStock();
   const { data: movements } = useMovements();
   const { data: profiles } = useStockProfiles();
-  const [search, setSearch] = useState("");
-  const [view, setView] = useState<"all" | "with" | "zero">("all");
-
   if (location === "fabrica") return <FabricaSection userId={userId} canDelete={canDelete} />;
   if (location === "almoxarifado") return <EstoqueMyioSection userId={userId} canDelete={canDelete} />;
 
@@ -2198,9 +2132,7 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
   const scopedMovements = (movements ?? []).filter((m) => scopedIds.has(m.material_id));
   const materialNames = Object.fromEntries((stock ?? []).map((row) => [row.material_id, row.name]));
 
-  const rows = scoped
-    .filter((r) => r.name.toLowerCase().includes(search.trim().toLowerCase()))
-    .filter((r) => (view === "with" ? r.balance > 0 : view === "zero" ? r.balance <= 0 : true));
+  const rows = scoped;
 
   const totalItems = scoped.reduce((acc, r) => acc + Math.max(r.balance, 0), 0);
 
@@ -2208,23 +2140,6 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
     <>
       <AddMaterialDialog location={location} userId={userId} />
       <ResetStockDialog rows={scoped} userId={userId} location={location} />
-      {location !== "almoxarifado_geral" && <div className="relative">
-        <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar material"
-          className="w-full pl-8 sm:w-[200px]"
-        />
-      </div>}
-      {location !== "almoxarifado_geral" && <Select value={view} onValueChange={(v) => setView(v as "all" | "with" | "zero")}>
-        <SelectTrigger className="w-full sm:w-[170px]"><SelectValue /></SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">Todos</SelectItem>
-          <SelectItem value="with">Com saldo</SelectItem>
-          <SelectItem value="zero">Sem saldo</SelectItem>
-        </SelectContent>
-      </Select>}
     </>
   );
 

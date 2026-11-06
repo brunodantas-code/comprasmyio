@@ -1,3 +1,4 @@
+import { useTableFilters } from "@/components/use-table-filters";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { BrowserMultiFormatReader } from "@zxing/browser";
@@ -1184,7 +1185,7 @@ type BoxRow = {
 };
 
 export function BoxesCard() {
-  const [search, setSearch] = useState("");
+
   const { data, isLoading } = useQuery({
     queryKey: ["boxes-list"],
     queryFn: async () => {
@@ -1198,11 +1199,14 @@ export function BoxesCard() {
     },
   });
 
-  const rows = (data ?? []).filter((b) => {
-    const q = search.trim().toLowerCase();
-    if (!q) return true;
-    return (b.materials?.name ?? "").toLowerCase().includes(q) || (b.box_qr ?? "").toLowerCase().includes(q);
-  });
+  const boxFilters = useTableFilters(data ?? [], [
+    { key: "box", label: "Caixa", value: b => `Caixa de ${b.box_size}` },
+    { key: "device", label: "Dispositivo", value: b => b.materials?.name },
+    { key: "quantity", label: "Dispositivos", kind: "number", value: b => b.homologation_units?.length ?? 0 },
+    { key: "qr", label: "QR Code da caixa", value: b => b.box_qr },
+    { key: "date", label: "Homologada em", kind: "date", value: b => b.created_at.slice(0,10), display: b => new Date(b.created_at).toLocaleDateString("pt-BR") },
+  ]);
+  const rows = boxFilters.filtered;
 
   return (
     <Card>
@@ -1214,27 +1218,21 @@ export function BoxesCard() {
             caixa para ver os dispositivos e seus QR Codes.
           </CardDescription>
         </div>
-        <Input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar caixa"
-          className="w-full sm:w-[200px]"
-        />
       </CardHeader>
       <CardContent>
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando...</p>
-        ) : !rows.length ? (
+        ) : !data?.length ? (
           <p className="text-sm text-muted-foreground">Nenhuma caixa homologada.</p>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Caixa</TableHead>
-                <TableHead>Dispositivo</TableHead>
-                <TableHead className="text-right">Dispositivos</TableHead>
-                <TableHead>QR Code da caixa</TableHead>
-                <TableHead>Homologada em</TableHead>
+                <TableHead>{boxFilters.header("box")}</TableHead>
+                <TableHead>{boxFilters.header("device")}</TableHead>
+                <TableHead className="text-right">{boxFilters.header("quantity")}</TableHead>
+                <TableHead>{boxFilters.header("qr")}</TableHead>
+                <TableHead>{boxFilters.header("date")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

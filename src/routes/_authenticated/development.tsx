@@ -1,3 +1,4 @@
+import { useTableFilters } from "@/components/use-table-filters";
 import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
@@ -132,12 +133,7 @@ function DevelopmentPage() {
   const routeSearch = Route.useSearch();
   const [createOpen, setCreateOpen] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
-  const [search, setSearch] = useState("");
-  const [appFilter, setAppFilter] = useState("todos");
-  const [reporterFilter, setReporterFilter] = useState("todos");
-  const [typeFilter, setTypeFilter] = useState("todos");
-  const [priorityFilter, setPriorityFilter] = useState("todos");
-  const [statusFilter, setStatusFilter] = useState("todos");
+
 
   const { data, isLoading } = useQuery({
     queryKey: ["development-tickets"],
@@ -163,19 +159,19 @@ function DevelopmentPage() {
     },
   });
 
-  const filteredTickets = useMemo(() => (data?.tickets ?? []).filter((ticket) => {
-    const term = search.trim().toLocaleLowerCase("pt-BR");
-    return (!term || ticket.title.toLocaleLowerCase("pt-BR").includes(term) || String(ticket.ticket_number).includes(term))
-      && (reporterFilter === "todos" || ticket.reporter_id === reporterFilter)
-      && (appFilter === "todos" || ticket.app_key === appFilter)
-      && (typeFilter === "todos" || ticket.ticket_type === typeFilter)
-      && (priorityFilter === "todos" || ticket.priority === priorityFilter)
-      && (statusFilter === "todos" ? ticket.status !== "excluido"
-        : statusFilter === "pergunta_solicitante" ? Boolean(data?.questionResponders.get(ticket.id)?.requester) && ticket.status !== "excluido"
-        : statusFilter === "pergunta_responsavel" ? Boolean(data?.questionResponders.get(ticket.id)?.attendant) && ticket.status !== "excluido"
-        : ticket.status === statusFilter);
-  }), [appFilter, data?.questionResponders, data?.tickets, priorityFilter, reporterFilter, search, statusFilter, typeFilter]);
   const profileNames = useMemo(() => new Map((data?.profiles ?? []).map((profile) => [profile.id, profile.full_name || profile.email || "Usuário"])), [data?.profiles]);
+  const ticketFilters = useTableFilters(data?.tickets ?? [], [
+    { key: "number", label: "Nº", kind: "number", value: (t) => t.ticket_number },
+    { key: "reporter", label: "Solicitante", value: (t) => profileNames.get(t.reporter_id) ?? "Usuário" },
+    { key: "app", label: "Aplicativo", value: (t) => APP_NAMES[t.app_key] ?? t.app_key },
+    { key: "type", label: "Tipo", value: (t) => t.ticket_type === "bug" ? "Bug" : "Melhoria" },
+    { key: "title", label: "Título", value: (t) => t.title },
+    { key: "priority", label: "Prioridade", value: (t) => PRIORITY_NAMES[t.priority] },
+    { key: "status", label: "Situação", value: (t) => STATUS_NAMES[t.status] },
+    { key: "question", label: "Perguntas", value: (t) => [data?.questionResponders.get(t.id)?.requester ? "Pergunta aguardando Solicitante" : "", data?.questionResponders.get(t.id)?.attendant ? "Pergunta aguardando Responsável" : ""].filter(Boolean).join("; ") },
+    { key: "date", label: "Data", kind: "date", value: (t) => t.created_at.slice(0, 10), display: (t) => new Date(t.created_at).toLocaleDateString("pt-BR") },
+  ]);
+  const filteredTickets = ticketFilters.filtered;
   useEffect(() => {
     if (!routeSearch.ticket || !data?.tickets.length) return;
     const linkedTicket = data.tickets.find((ticket) => ticket.id === routeSearch.ticket);
@@ -205,20 +201,11 @@ function DevelopmentPage() {
             <CardDescription>{data?.isAdmin ? "Todos os tickets abertos na plataforma." : "Tickets abertos por você ou atribuídos a você."}</CardDescription>
           </CardHeader>
           <CardContent>
+            <div className="mb-2 flex flex-wrap gap-2 md:hidden">{["number", "reporter", "app", "type", "title", "priority", "status", "question", "date"].map(key => <span key={key}>{ticketFilters.header(key)}</span>)}</div>
             {isLoading ? <p className="py-8 text-center text-sm text-muted-foreground">Carregando tickets...</p> : (
               <Table>
                  <TableHeader>
-                   <TableRow><TableHead>Nº</TableHead><TableHead>Solicitante</TableHead><TableHead>Aplicativo</TableHead><TableHead>Tipo</TableHead><TableHead>Título</TableHead><TableHead>Prioridade</TableHead><TableHead>Situação</TableHead><TableHead>Data</TableHead></TableRow>
-                   <TableRow>
-                     <TableHead className="py-1" />
-                     <TableHead className="py-1"><HeaderFilterSelect value={reporterFilter} onChange={setReporterFilter} label="Filtrar por solicitante" options={[...new Set((data?.tickets ?? []).map((ticket) => ticket.reporter_id))].map((id) => ({ value: id, label: profileNames.get(id) ?? "Usuário" })).sort((a,b) => a.label.localeCompare(b.label, "pt-BR"))} /></TableHead>
-                     <TableHead className="py-1"><HeaderFilterSelect value={appFilter} onChange={setAppFilter} label="Filtrar por aplicativo" options={Object.entries(APP_NAMES).map(([value, label]) => ({ value, label }))} /></TableHead>
-                     <TableHead className="py-1"><HeaderFilterSelect value={typeFilter} onChange={setTypeFilter} label="Filtrar por tipo" options={[{ value: "melhoria", label: "Melhoria" }, { value: "bug", label: "Bug" }]} /></TableHead>
-                     <TableHead className="py-1"><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Filtrar" aria-label="Filtrar por número ou título" className="h-8 min-w-28 bg-background" /></TableHead>
-                     <TableHead className="py-1"><HeaderFilterSelect value={priorityFilter} onChange={setPriorityFilter} label="Filtrar por prioridade" options={Object.entries(PRIORITY_NAMES).map(([value, label]) => ({ value, label }))} /></TableHead>
-                     <TableHead className="py-1"><HeaderFilterSelect value={statusFilter} onChange={setStatusFilter} label="Filtrar por situação" options={[...Object.entries(STATUS_NAMES).map(([value, label]) => ({ value, label })), { value: "pergunta_solicitante", label: "Pergunta aguardando Solicitante" }, { value: "pergunta_responsavel", label: "Pergunta aguardando Responsável" }]} /></TableHead>
-                     <TableHead className="py-1" />
-                   </TableRow>
+                   <TableRow>{["number", "reporter", "app", "type", "title", "priority", "status", "date"].map((key) => <TableHead key={key}>{ticketFilters.header(key)}{key === "status" ? ticketFilters.control("question") : null}</TableHead>)}</TableRow>
                  </TableHeader>
                 <TableBody>{filteredTickets.map((ticket) => (
                   <TableRow key={ticket.id} className="cursor-pointer" onClick={() => setSelectedTicket(ticket)}>
@@ -248,10 +235,6 @@ function DevelopmentPage() {
 
 function FilterSelect({ value, onChange, placeholder, options, firstOption = { value: "todos", label: "Todos" } }: { value: string; onChange: (value: string) => void; placeholder: string; options: { value: string; label: string }[]; firstOption?: { value: string; label: string } | null }) {
   return <Select value={value} onValueChange={onChange}><SelectTrigger><SelectValue placeholder={placeholder} /></SelectTrigger><SelectContent>{firstOption ? <SelectItem value={firstOption.value}>{firstOption.label}</SelectItem> : null}{options.map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}</SelectContent></Select>;
-}
-
-function HeaderFilterSelect({ value, onChange, label, options }: { value: string; onChange: (value: string) => void; label: string; options: { value: string; label: string }[] }) {
-  return <Select value={value} onValueChange={onChange}><SelectTrigger className="h-8 min-w-24 bg-background" aria-label={label}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="todos">Todos</SelectItem>{options.map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}</SelectContent></Select>;
 }
 
 function NewTicketDialog({ open, onOpenChange, userId, onCreated }: { open: boolean; onOpenChange: (open: boolean) => void; userId?: string; onCreated: () => void }) {

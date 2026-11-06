@@ -1,3 +1,4 @@
+import { useTableFilters } from "@/components/use-table-filters";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, ExternalLink, ListTree, Tags } from "lucide-react";
@@ -19,7 +20,6 @@ const statusLabel: Record<string, string> = { a_classificar: "Classificar", a_pa
 
 export function PayablesTab({ userId }: { userId: string }) {
   const qc = useQueryClient();
-  const [status, setStatus] = useState("all");
   const { data: accounts = [] } = useCashFlowAccounts();
   const postingAccounts = useMemo(() => accounts.filter((item) => isPostingAccount(item, accounts)), [accounts]);
   const { data: payables = [], isLoading } = useQuery({ queryKey: ["cash-flow-payables"], queryFn: async () => {
@@ -27,12 +27,22 @@ export function PayablesTab({ userId }: { userId: string }) {
     if (error) throw error;
     return data as unknown as Payable[];
   }});
-  const visible = status === "all" ? payables : payables.filter((item) => item.status === status);
+  const tableFilters = useTableFilters(payables, [
+    { key: "approval", label: "Approval", value: p => p.approval_number },
+    { key: "description", label: "Descrição", value: p => `${p.item_name} ${p.profiles?.full_name ?? p.request_type}` },
+    { key: "allocation", label: "Alocação", value: p => p.projects?.name ?? p.clients?.name ?? "Interna" },
+    { key: "center", label: "Centro de custo", value: p => p.cost_centers?.name },
+    { key: "references", label: "Referências", value: p => [formatPeriod(p.fiscal_period), formatPeriod(p.competence_period), formatPeriod(p.cash_period)].join(" ") },
+    { key: "amount", label: "Valor", kind: "number", value: p => p.amount, display: p => BRL.format(p.amount) },
+    { key: "account", label: "Conta", value: p => accounts.find(a => a.id === p.account_id)?.name },
+    { key: "status", label: "Situação", value: p => statusLabel[p.status] ?? p.status },
+  ]);
+  const visible = tableFilters.filtered;
   const pendingTotal = payables.filter((item) => !["conciliado", "cancelado"].includes(item.status)).reduce((sum, item) => sum + Number(item.amount), 0);
   return <div className="space-y-5">
     <div className="grid max-w-4xl gap-3 sm:grid-cols-3"><Summary label="Approvals recebidos" value={String(payables.length)} /><Summary label="A classificar" value={String(payables.filter((item) => item.status === "a_classificar").length)} /><Summary label="Total pendente" value={BRL.format(pendingTotal)} /></div>
-    <Card><CardHeader className="gap-3 sm:flex-row sm:items-end sm:justify-between"><div><CardTitle>Contas a pagar</CardTitle><CardDescription>Approvals concluídos no myio supply.</CardDescription></div><div className="w-full sm:w-52"><Select value={status} onValueChange={setStatus}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">Todas as situações</SelectItem>{Object.entries(statusLabel).map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}</SelectContent></Select></div></CardHeader><CardContent>
-      {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : !visible.length ? <p className="text-sm text-muted-foreground">Nenhum pagamento nesta situação.</p> : <Table><TableHeader><TableRow><TableHead>Approval</TableHead><TableHead>Descrição</TableHead><TableHead>Alocação</TableHead><TableHead>Centro de custo</TableHead><TableHead>Referências</TableHead><TableHead className="text-right">Valor</TableHead><TableHead>Conta</TableHead><TableHead>Situação</TableHead></TableRow></TableHeader><TableBody>{visible.map((payable) => <TableRow key={payable.id}>
+    <Card><CardHeader className="gap-3 sm:flex-row sm:items-end sm:justify-between"><div><CardTitle>Contas a pagar</CardTitle><CardDescription>Approvals concluídos no myio supply.</CardDescription></div></CardHeader><CardContent>
+      {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : !payables.length ? <p className="text-sm text-muted-foreground">Nenhum pagamento nesta situação.</p> : <Table><TableHeader><TableRow>{["approval", "description", "allocation", "center", "references", "amount", "account", "status"].map(key => <TableHead key={key}>{tableFilters.header(key)}</TableHead>)}</TableRow></TableHeader><TableBody>{visible.map((payable) => <TableRow key={payable.id}>
         <TableCell><PayableHistory payable={payable} accounts={accounts} /></TableCell><TableCell><p className="font-medium">{payable.item_name}</p><p className="text-xs text-muted-foreground">{payable.profiles?.full_name ?? payable.request_type}</p></TableCell><TableCell><p>{payable.projects?.name ?? payable.clients?.name ?? "Interna"}</p>{payable.projects?.name ? <p className="text-xs text-muted-foreground">Projeto</p> : payable.clients?.name ? <p className="text-xs text-muted-foreground">Cliente</p> : null}</TableCell><TableCell>{payable.cost_centers?.name ?? "—"}</TableCell><TableCell className="min-w-32 text-xs"><p>Emissão: {formatPeriod(payable.fiscal_period)}</p><p>Competência: {formatPeriod(payable.competence_period)}</p><p>Caixa: {formatPeriod(payable.cash_period)}</p></TableCell><TableCell className="text-right font-semibold">{BRL.format(Number(payable.amount))}</TableCell><TableCell>{accounts.find((item) => item.id === payable.account_id)?.name ?? "—"}</TableCell><TableCell>{payable.status === "a_classificar" ? <ClassifyPayable payable={payable} accounts={postingAccounts} userId={userId} onDone={() => qc.invalidateQueries({ queryKey: ["cash-flow-payables"] })} /> : <Badge variant="status">{statusLabel[payable.status] ?? payable.status}</Badge>}</TableCell>
       </TableRow>)}</TableBody></Table>}
     </CardContent></Card>

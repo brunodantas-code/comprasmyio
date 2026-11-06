@@ -1,3 +1,4 @@
+import { useTableFilters } from "@/components/use-table-filters";
 import { useRef, useState, type ReactNode } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -602,9 +603,10 @@ function DeleteImportDialog({ id }: { id: string }) {
 export function ImportBatchesSection({ userId, children }: { userId: string; children?: ReactNode }) {
   const { data: me } = useCurrentUser();
   const { data: batches, isLoading } = useImportBatches(userId);
-  const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  const list = (batches ?? []).filter((b) => statusFilter === "all" || b.status === statusFilter);
+
+  const batchFilters = useTableFilters(batches ?? [], [{ key: "name", label: "Importação", value: b => b.name }, { key: "items", label: "Itens", kind: "number", value: b => b.import_batch_items.length }, { key: "attachments", label: "Anexos", kind: "number", value: b => (b.attachments ?? []).length }, { key: "date", label: "Criada em", kind: "date", value: b => b.created_at.slice(0,10), display: b => formatDateTime(b.created_at) }, { key: "status", label: "Status", value: b => STATUS_LABELS[b.status] }]);
+  const list = batchFilters.filtered;
 
   return (
     <Card>
@@ -617,30 +619,7 @@ export function ImportBatchesSection({ userId, children }: { userId: string; chi
       <CardContent>
         <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Importação</TableHead>
-                <TableHead>Itens</TableHead>
-                <TableHead>Anexos</TableHead>
-                <TableHead>Criada em</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="w-32" />
-              </TableRow>
-              <TableRow>
-                <TableHead className="py-1" />
-                <TableHead className="py-1" />
-                <TableHead className="py-1" />
-                <TableHead className="py-1" />
-                <TableHead className="py-1">
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="h-8 min-w-36 bg-background" aria-label="Filtrar importações por status"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos os status</SelectItem>
-                      {STATUS_KEYS.map((s) => <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </TableHead>
-                <TableHead className="py-1" />
-              </TableRow>
+              <TableRow>{["name", "items", "attachments", "date", "status"].map(key => <TableHead key={key}>{batchFilters.header(key)}</TableHead>)}<TableHead className="w-32" /></TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? <TableRow><TableCell colSpan={6} className="h-20 text-center text-muted-foreground">Carregando...</TableCell></TableRow> : list.length === 0 ? <TableRow><TableCell colSpan={6} className="h-20 text-center text-muted-foreground">Nenhuma importação cadastrada.</TableCell></TableRow> : list.map((b) => (

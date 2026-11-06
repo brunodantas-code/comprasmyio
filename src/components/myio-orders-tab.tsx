@@ -1,3 +1,4 @@
+import { useTableFilters } from "@/components/use-table-filters";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -483,9 +484,7 @@ function DeleteMyioOrderInner({ id }: { id: string }) {
 export function MyioOrdersTab({ userId, canManage = true }: { userId: string; canManage?: boolean }) {
   const qc = useQueryClient();
   const { data: images } = useProductImages();
-  const [statusFilter, setStatusFilter] = useState<Set<MyioStatus>>(
-    new Set(Object.keys(STATUS_LABELS) as MyioStatus[])
-  );
+
   const { data: deliveredItemIds } = useQuery({
     queryKey: ["myio-item-deliveries"],
     queryFn: async () => {
@@ -519,7 +518,8 @@ export function MyioOrdersTab({ userId, canManage = true }: { userId: string; ca
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const list = (orders ?? []).filter((o) => statusFilter.has(o.status));
+  const myioFilters = useTableFilters(orders ?? [], [{ key: "project", label: "Projeto", value: o => o.projects?.name }, { key: "client", label: "Cliente", value: o => o.clients?.name }, { key: "approval", label: "Approval", value: o => o.purchase_orders?.approval_number }, { key: "replacement", label: "Reposição", value: o => o.is_replacement ? "Sim" : "Não" }, { key: "date", label: "Entrega", kind: "date", value: o => o.delivery_date }, { key: "products", label: "Produtos", value: o => o.myio_order_items.map(i => i.product).join(", ") }, { key: "status", label: "Status", value: o => STATUS_LABELS[o.status] }]);
+  const list = myioFilters.filtered;
 
   return (
     <Card>
@@ -532,37 +532,7 @@ export function MyioOrdersTab({ userId, canManage = true }: { userId: string; ca
       <CardContent>
         <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Projeto</TableHead>
-                <TableHead>Cliente</TableHead>
-                <TableHead>Approval</TableHead>
-                <TableHead>Reposição</TableHead>
-                <TableHead>Entrega</TableHead>
-                <TableHead>Produtos</TableHead>
-                <TableHead>Status</TableHead>
-                {canManage && <TableHead className="w-20" />}
-              </TableRow>
-              <TableRow>
-                <TableHead className="py-1" />
-                <TableHead className="py-1" />
-                <TableHead className="py-1" />
-                <TableHead className="py-1" />
-                <TableHead className="py-1" />
-                <TableHead className="py-1" />
-                <TableHead className="py-1">
-                  <Select
-                    value={statusFilter.size === STATUS_KEYS.length ? "all" : (Array.from(statusFilter)[0] ?? "all")}
-                    onValueChange={(v) => setStatusFilter(v === "all" ? new Set(STATUS_KEYS) : new Set([v as MyioStatus]))}
-                  >
-                    <SelectTrigger className="h-8 min-w-36 bg-background" aria-label="Filtrar solicitações por status"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos os status</SelectItem>
-                      {STATUS_KEYS.map((s) => <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </TableHead>
-                {canManage && <TableHead className="py-1" />}
-              </TableRow>
+              <TableRow>{["project", "client", "approval", "replacement", "date", "products", "status"].map(key => <TableHead key={key}>{myioFilters.header(key)}</TableHead>)} {canManage && <TableHead className="w-20" />}</TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? <TableRow><TableCell colSpan={canManage ? 8 : 7} className="h-20 text-center text-muted-foreground">Carregando...</TableCell></TableRow> : list.length === 0 ? <TableRow><TableCell colSpan={canManage ? 8 : 7} className="h-20 text-center text-muted-foreground">Nenhum pedido cadastrado.</TableCell></TableRow> : list.map((o) => (

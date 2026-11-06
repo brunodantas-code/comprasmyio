@@ -1,5 +1,6 @@
+import { useTableFilters } from "@/components/use-table-filters";
 import { customerQuestionResponses, customerQuestions, customerHistorySectionIds, isCustomerQuestion, numberedCustomerQuestions } from "@/lib/site-survey-questions";
-import { surveyPointType } from "@/lib/site-survey-point-type";
+import { surveyPointType, surveyPointTypeLabel } from "@/lib/site-survey-point-type";
 import { SurveyPhotoNav, surveyPhotoKeydown, isSurveyImageFile } from "@/components/site-survey-photo-viewer";
 import { useMemo, useState, type ReactNode } from "react";
 import { Camera, ChevronDown, ChevronUp, ClipboardList, Droplets, FileText, ImageIcon, MapPin, Package, Search, Trash2, Wrench, Zap } from "lucide-react";
@@ -135,8 +136,6 @@ export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections
   canEditAttachments?: boolean;
   onAttachmentsChanged?: () => void;
 }) {
-  const [search, setSearch] = useState("");
-  const [typeFilter, setTypeFilter] = useState("all");
   const [missingFacadeOnly, setMissingFacadeOnly] = useState(false);
   const [sort, setSort] = useState("luc");
   const [collapsedPoints, setCollapsedPoints] = useState<Set<string>>(() => new Set());
@@ -144,15 +143,18 @@ export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections
     ...lucs.map((point) => ({ id: point.id, kind: "luc" as const, pointType: surveyPointType(point), name: point.shop_name, luc: point.luc_number, location: point.location ?? "", templateId: (point as { template_id?: string | null }).template_id ?? visitTemplateId, completionStatus: point.completion_status, skippedSectionIds: Array.isArray(point.skipped_section_ids) ? point.skipped_section_ids.filter((id): id is string => typeof id === "string") : [] })),
     ...environments.map((point) => ({ id: point.id, kind: "environment" as const, pointType: surveyPointType(point, "environment"), name: point.name, luc: "", location: point.location ?? "", templateId: point.template_id ?? visitTemplateId, completionStatus: point.completion_status, skippedSectionIds: Array.isArray(point.skipped_section_ids) ? point.skipped_section_ids.filter((id): id is string => typeof id === "string") : [] })),
   ], [lucs, environments, visitTemplateId]);
-  const visiblePoints = useMemo(() => points.filter((point) => {
-    const term = normalize(search);
+  const pointFilters = useTableFilters(points, [
+    { key: "search", label: "LUC / Nome / Localização", value: p => [p.luc, p.name, p.location].join(" ") },
+    { key: "type", label: "Tipo", value: p => surveyPointTypeLabel(p.pointType) },
+  ]);
+  const visiblePoints = useMemo(() => pointFilters.filtered.filter((point) => {
     const value = `${point.kind === "luc" ? "luc" : "environment"}:${point.id}`;
-    return (!pointValue || value === pointValue) && (!missingFacadeOnly || !attachments.some((item) => item.attachment_kind === "facade" && matchesPoint(point, item))) && (typeFilter === "all" || point.pointType === typeFilter) && (!term || normalize([point.luc, point.name, point.location].join(" ")).includes(term));
+    return (!pointValue || value === pointValue) && (!missingFacadeOnly || !attachments.some((item) => item.attachment_kind === "facade" && matchesPoint(point, item)));
   }).sort((left, right) => {
     const leftValue = sort === "name" ? left.name : sort === "location" ? left.location : left.luc;
     const rightValue = sort === "name" ? right.name : sort === "location" ? right.location : right.luc;
     return leftValue.localeCompare(rightValue, "pt-BR", { numeric: true, sensitivity: "base" }) || left.name.localeCompare(right.name, "pt-BR");
-  }), [points, search, typeFilter, sort, missingFacadeOnly, attachments, pointValue]);
+  }), [pointFilters.filtered, sort, missingFacadeOnly, attachments, pointValue]);
   const completedCount = points.filter((point) => point.completionStatus === "concluida").length;
   const allCollapsed = points.length > 0 && points.every((point) => collapsedPoints.has(`${point.kind}-${point.id}`));
 
@@ -167,8 +169,7 @@ export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections
         <div>
           {!embedded ? <div className="border-b bg-muted/30 px-4 py-3 sm:px-6">
             <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem_12rem_auto] sm:items-center">
-              <div className="relative min-w-0"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar por LUC, nome ou localização" className="pl-9" /></div>
-              <Select value={typeFilter} onValueChange={setTypeFilter}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">Todos os tipos</SelectItem><SelectItem value="shop">Somente lojas</SelectItem><SelectItem value="kiosk">Somente quiosques</SelectItem><SelectItem value="environment">Somente ambientes</SelectItem></SelectContent></Select>
+              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">{pointFilters.header("search")}{pointFilters.header("type")}</div>
               <Select value={sort} onValueChange={setSort}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="luc">Ordenar por LUC</SelectItem><SelectItem value="name">Ordenar por nome</SelectItem><SelectItem value="location">Ordenar por localização</SelectItem></SelectContent></Select>
               <span className="shrink-0 text-xs font-semibold text-muted-foreground">{completedCount}/{points.length} concluídos</span>
               <label className="flex w-fit cursor-pointer items-center gap-2 text-sm sm:col-span-4"><Checkbox aria-label="Somente sem foto de fachada" checked={missingFacadeOnly} onCheckedChange={(checked) => setMissingFacadeOnly(checked === true)} />Somente sem foto de fachada</label>

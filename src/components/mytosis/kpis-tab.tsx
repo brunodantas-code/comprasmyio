@@ -1,3 +1,4 @@
+import { useTableFilters } from "@/components/use-table-filters";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, ChevronRight, Pencil, Plus, Trash2 } from "lucide-react";
@@ -44,7 +45,6 @@ export function KpisTab({ data, canEdit }: { data: MytosisData; canEdit: boolean
       return { kpis: (k.data ?? []) as Kpi[], results: (r.data ?? []) as KpiResult[], segments: (s.data ?? []) as Segment[], userId: u.data.user?.id ?? "" };
     },
   });
-  const [segmentFilter, setSegmentFilter] = useState("");
   const [draft, setDraft] = useState<Draft | null>(null);
   const [open, setOpen] = useState<Record<string, boolean>>({});
   const [posting, setPosting] = useState<{ kpi: Kpi; period: string; value: string; notes: string } | null>(null);
@@ -85,19 +85,25 @@ export function KpisTab({ data, canEdit }: { data: MytosisData; canEdit: boolean
   const segments = kpiData?.segments ?? [];
   const segName = (id: string) => { const s = segments.find((x) => x.id === id); return s ? (s.code ? `${s.code} ${s.name}` : s.name) : "Segmento"; };
   const userName = (id: string) => data.users.find((u) => u.id === id)?.full_name ?? "—";
+  const kpiFilters = useTableFilters(kpiData?.kpis ?? [], [
+    { key: "segment", label: "Segmento", value: k => segName(k.cost_center_id) },
+    { key: "name", label: "KPI", value: k => k.name },
+    { key: "responsible", label: "Responsável", value: k => userName(k.responsible_id) },
+    { key: "target", label: "Meta", kind: "number", value: k => k.target },
+  ]);
   const grouped = useMemo(() => {
-    const kpis = (kpiData?.kpis ?? []).filter((k) => !segmentFilter || k.cost_center_id === segmentFilter);
+    const kpis = kpiFilters.filtered;
     const map = new Map<string, Kpi[]>();
     kpis.forEach((k) => map.set(k.cost_center_id, [...(map.get(k.cost_center_id) ?? []), k]));
     return [...map.entries()];
-  }, [kpiData?.kpis, segmentFilter]);
+  }, [kpiFilters.filtered]);
 
   if (!kpiData) return <div className="py-10 text-center text-muted-foreground">Carregando...</div>;
   const canPost = (k: Kpi) => isAdmin || k.responsible_id === kpiData.userId;
 
   return <div className="space-y-4">
     <div className="flex items-end gap-2">
-      <div className="grid min-w-0 flex-1 gap-1.5 sm:max-w-sm"><Label>Segmento</Label><SearchableSelect aria-label="Filtrar segmento" value={segmentFilter} onChange={setSegmentFilter} options={segments.map((s) => ({ value: s.id, label: s.code ? `${s.code} ${s.name}` : s.name }))} placeholder="Todos os segmentos" /></div>
+      <div className="flex flex-1 flex-wrap gap-4 text-sm text-muted-foreground">{["segment", "name", "responsible", "target"].map(key => <span key={key}>{kpiFilters.header(key)}</span>)}</div>
       {canEdit ? <Button variant="outline" size="icon" className="h-8 w-8" title="Novo KPI" aria-label="Novo KPI" onClick={() => setDraft(emptyDraft())}><Plus className="size-3.5" /></Button> : null}
     </div>
 

@@ -1,3 +1,4 @@
+import { useTableFilters } from "@/components/use-table-filters";
 import { BrCityPicker } from "@/components/br-city-picker";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
@@ -2466,7 +2467,7 @@ function MyOrders({ userId, canManageDevices }: { userId: string; canManageDevic
           {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
             !orders?.length ? <p className="text-sm text-muted-foreground">Nenhuma solicitação aberta.</p> :
             !visible.length ? <p className="text-sm text-muted-foreground">Nenhum pedido para exibir com o filtro atual.</p> :
-            <OrdersTable orders={visible} projectName={projectName} showRequester={false} canEditRequester canDelete stockParts={stockParts} filterBar />
+            <OrdersTable orders={visible} projectName={projectName} showRequester={false} canEditRequester canDelete stockParts={stockParts} />
           }
           {stockOnly.length > 0 && (
             <div className="rounded-md border p-4">
@@ -2510,9 +2511,6 @@ function useImportMaterialIds() {
 function ImportOrders({ userId }: { userId: string }) {
   const { data: projects } = useProjects();
   const importIds = useImportMaterialIds();
-  const [deliveredMode, setDeliveredMode] = useState<DeliveredMode>("all");
-  const [deliveredFrom, setDeliveredFrom] = useState("");
-  const [statusSelected, setStatusSelected] = useState<Order["status"][]>([...STATUS_KEYS]);
 
   const { data: orders, isLoading } = useQuery({
     queryKey: ["orders", "mine", userId],
@@ -2529,8 +2527,7 @@ function ImportOrders({ userId }: { userId: string }) {
 
   const projectName = (id: string) => (id === ESTOQUE_PROJECT_ID ? "Estoque" : projects?.find((p) => p.id === id)?.name ?? "—");
   const importOrders = (orders ?? []).filter((o) => o.material_id && importIds.data?.has(o.material_id));
-  const statusFiltered = importOrders.filter((o) => statusSelected.includes(o.status));
-  const visible = filterDelivered(statusFiltered, deliveredMode, deliveredFrom);
+  const visible = importOrders;
 
   return (
     <div className="space-y-6">
@@ -2551,8 +2548,6 @@ function ImportOrders({ userId }: { userId: string }) {
               showRequester={false}
               canEditRequester
               canDelete
-              deliveredFilterControl={<DeliveredFilter mode={deliveredMode} setMode={setDeliveredMode} fromDate={deliveredFrom} setFromDate={setDeliveredFrom} />}
-              statusFilterControl={<StatusMultiFilter selected={statusSelected} setSelected={setStatusSelected} />}
             />
           }
         </section>
@@ -2621,7 +2616,7 @@ function BuyerQueue({ mode = "all" }: { mode?: ApprovalListMode }) {
         </div>
       ));
     }
-    return <OrdersTable orders={list} projectName={projectName} requesterName={requesterName} showRequester canEdit={canManageOperationalStatus} canDelete headerFilters />;
+    return <OrdersTable orders={list} projectName={projectName} requesterName={requesterName} showRequester canEdit={canManageOperationalStatus} canDelete />;
   };
 
   return (
@@ -2818,7 +2813,7 @@ function AdminEditApprovalDialog({ order, items }: { order: Order; items: Approv
 }
 
 function OrdersTable({
-  orders, projectName, requesterName, showRequester, canEdit, canDelete, canEditRequester, stockParts, headerFilters, filterBar, statusFilterControl, deliveredFilterControl,
+  orders, projectName, requesterName, showRequester, canEdit, canDelete, canEditRequester, stockParts,
 }: {
   orders: Order[];
   projectName: (id: string) => string;
@@ -2828,10 +2823,6 @@ function OrdersTable({
   canDelete?: boolean;
   canEditRequester?: boolean;
   stockParts?: Map<string, StockPart>;
-  headerFilters?: boolean;
-  filterBar?: boolean;
-  statusFilterControl?: React.ReactNode;
-  deliveredFilterControl?: React.ReactNode;
 }) {
   const { data: me } = useCurrentUser();
   const { data: requestTypes } = useRequestTypes();
@@ -2857,16 +2848,8 @@ function OrdersTable({
       return map;
     }, new Map<string, PurchaseOrderItem[]>()),
   });
-  const [fApproval, setFApproval] = useState("");
-  const [fItem, setFItem] = useState("");
-  const [fAloc, setFAloc] = useState("");
-  const [fReq, setFReq] = useState("");
-  const [fDate, setFDate] = useState("");
-  const [datePickerOpen, setDatePickerOpen] = useState(false);
-  const [fStatus, setFStatus] = useState<string>("all");
   const statusCatalog = useStatusCatalog();
 
-  const norm = (s: string) => s.toLowerCase().trim();
   const allocationOf = (o: Order) => o.allocation_type === "cliente"
     ? [clients?.find((client) => client.id === o.client_id)?.name, clientUnits?.find((unit) => unit.id === o.client_unit_id)?.name].filter(Boolean).join(" — ") || "Cliente"
     : o.allocation_type === "interna" ? "Interna" : o.for_stock ? "Estoque" : o.project_id ? projectName(o.project_id) : "—";
@@ -2882,6 +2865,7 @@ function OrdersTable({
   const colDefs: ColDef[] = [
     { key: "approval", label: "Approval", kind: "text", raw: (o) => o.approval_number, list: (o) => o.approval_number ?? "" },
     { key: "itens", label: "Itens", kind: "text", raw: itemsTextOf, list: itemsTextOf },
+    { key: "notes", label: "Observações", kind: "text", raw: (o) => o.requester_notes, list: (o) => o.requester_notes ?? "" },
     { key: "tipo", label: "Tipo", kind: "text", raw: (o) => requestTypeLabel(o, requestTypes), list: (o) => requestTypeLabel(o, requestTypes) },
     { key: "aloc", label: "Alocação", kind: "text", raw: allocationOf, list: allocationOf },
     ...(showRequester ? [{ key: "req", label: "Solicitante", kind: "text" as const, raw: (o: Order) => requesterName?.(o.requester_id) ?? "", list: (o: Order) => requesterName?.(o.requester_id) ?? "" }] : []),
@@ -2892,75 +2876,26 @@ function OrdersTable({
     { key: "prazo", label: "Solicitado até", kind: "date", raw: (o) => (noDeadline(o) ? null : o.deadline_date), list: (o) => (noDeadline(o) ? "" : o.deadline_type === "customizado" ? (o.deadline_date ? fmtDay(o.deadline_date) : "") : DEADLINE_LABELS[o.deadline_type] ?? "") },
     { key: "prev", label: "Previsão de Compras", kind: "date", raw: (o) => (noDeadline(o) ? null : o.delivery_forecast), list: (o) => (!noDeadline(o) && o.delivery_forecast ? fmtDay(o.delivery_forecast) : "") },
     { key: "status", label: "Status", kind: "text", raw: statusLabelOf, list: statusLabelOf },
-    { key: "passe", label: "Palavra passe", kind: "text", raw: (o) => o.passphrase, list: (o) => o.passphrase ?? "" },
+    { key: "received", label: "Atualização do recebimento", kind: "date", raw: (o) => ["entregue", "recebido_ok", "recebido_problema"].includes(o.status) ? o.updated_at : null, list: (o) => ["entregue", "recebido_ok", "recebido_problema"].includes(o.status) ? fmtDay(o.updated_at) : "" },
+    { key: "passe", label: "Código", kind: "text", raw: (o) => o.passphrase, list: (o) => o.passphrase ?? "" },
   ];
   const colByKey = Object.fromEntries(colDefs.map((c) => [c.key, c]));
   const colFilter = (key: string, showLabel = false) => {
     const c = colByKey[key];
     if (!c) return null;
-    return <span className="inline-flex shrink-0 items-center gap-0.5">
-      <ColumnFilter label={c.label} kind={c.kind} showLabel={showLabel} values={orders.map(c.list)} value={cf[key]} onChange={(v) => setCf((prev) => ({ ...prev, [key]: v }))} />
-      <ColumnSortButton label={c.label} direction={columnSort?.key === key ? columnSort.direction : undefined} onClick={() => setColumnSort((current) => current?.key !== key ? { key, direction: "asc" } : current.direction === "asc" ? { key, direction: "desc" } : undefined)} />
+    return <span className="inline-flex shrink-0 items-center gap-0">
+      <ColumnFilter compact label={c.label} kind={c.kind} showLabel={showLabel} values={orders.map(c.list)} value={cf[key]} onChange={(v) => setCf((prev) => ({ ...prev, [key]: v }))} />
+      <ColumnSortButton compact label={c.label} direction={columnSort?.key === key ? columnSort.direction : undefined} onClick={() => setColumnSort((current) => current?.key !== key ? { key, direction: "asc" } : current.direction === "asc" ? { key, direction: "desc" } : undefined)} />
     </span>;
   };
   const activeColFilters = colDefs.filter((c) => isFilterActive(cf[c.key]));
   const columnFiltered = orders.filter((o) => activeColFilters.every((c) => matchesColumnFilter(c.kind, c.raw(o), c.list(o), cf[c.key])));
-  const filteredOrders = !headerFilters && !filterBar
-    ? columnFiltered
-    : columnFiltered.filter((o) =>
-        (!fApproval || norm(o.approval_number ?? "").includes(norm(fApproval))) &&
-        (!fItem || norm(`${requestTypeLabel(o, requestTypes)} ${o.item_name ?? ""} ${(groupedOrderItems?.get(o.id) ?? []).map((row) => row.item_name).join(" ")} ${o.requester_notes ?? ""}`).includes(norm(fItem))) &&
-        (!fAloc || norm(allocationOf(o)).includes(norm(fAloc))) &&
-        (!fReq || norm(requesterName?.(o.requester_id) ?? "").includes(norm(fReq))) &&
-        (!fDate || o.deadline_date === fDate || o.delivery_forecast === fDate) &&
-        (fStatus === "all" || (fStatus.startsWith("c:") ? o.custom_status_id === fStatus.slice(2) : o.status === fStatus && !o.custom_status_id))
-      );
+  const filteredOrders = columnFiltered;
 
   const sortColumn = columnSort ? colByKey[columnSort.key] : undefined;
   const visibleOrders = sortColumn && columnSort
     ? [...filteredOrders].sort((a, b) => compareColumnValues(sortColumn.kind, sortColumn.raw(a), sortColumn.raw(b), columnSort.direction))
     : filteredOrders;
-
-  const filterInput = (value: string, onChange: (v: string) => void, placeholder: string) => (
-    <Input
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      className="h-7 px-1 text-xs"
-    />
-  );
-
-  const barField = (label: string, children: React.ReactNode, className?: string) => (
-    <div className={`grid min-w-0 gap-1 ${className ?? ""}`}>
-      <span className="flex items-center gap-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-        <Filter className="size-3 text-muted-foreground/70" aria-hidden="true" />
-        {label}
-      </span>
-      {children}
-    </div>
-  );
-
-  const filterBarContent = filterBar ? (
-    <div className="flex flex-wrap items-end gap-x-4 gap-y-3 rounded-xl border border-border bg-muted/50 px-4 py-3">
-      {barField("Nº", <Input value={fApproval} onChange={(e) => setFApproval(e.target.value)} placeholder="Filtrar Nº" className="h-8 w-28 bg-background text-xs" />)}
-      {barField("Item", <Input value={fItem} onChange={(e) => setFItem(e.target.value)} placeholder="Filtrar item" className="h-8 w-44 bg-background text-xs" />)}
-      {barField("Alocação", <Input value={fAloc} onChange={(e) => setFAloc(e.target.value)} placeholder="Filtrar alocação" className="h-8 w-36 bg-background text-xs" />)}
-      {showRequester && barField("Solicitante", <Input value={fReq} onChange={(e) => setFReq(e.target.value)} placeholder="Filtrar solicitante" className="h-8 w-36 bg-background text-xs" />)}
-      {barField("Prazo ou previsão", <Input type="date" aria-label="Prazo ou previsão" value={fDate} onChange={(e) => setFDate(e.target.value)} className="h-8 w-36 bg-background text-xs" />)}
-      {barField("Status", (
-        <Select value={fStatus} onValueChange={setFStatus}>
-          <SelectTrigger className="h-8 w-36 bg-background text-xs"><SelectValue placeholder="Status" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos</SelectItem>
-            {STATUS_KEYS.map((k) => <SelectItem key={k} value={k}>{STATUS_LABELS[k]}</SelectItem>)}
-            {statusCatalog.custom.map((r) => <SelectItem key={r.id} value={`c:${r.id}`}>{r.label}</SelectItem>)}
-          </SelectContent>
-        </Select>
-      ))}
-      {deliveredFilterControl}
-      {statusFilterControl}
-    </div>
-  ) : null;
 
   const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
     <div className="grid grid-cols-[minmax(0,96px)_minmax(0,1fr)] gap-2 border-t border-border/60 py-1.5 first:border-t-0">
@@ -2972,46 +2907,11 @@ function OrdersTable({
   return (
     <>
       {/* Mobile: cartões com rótulo à esquerda e informação à direita */}
-      <div className="space-y-3 md:hidden">
-        {filterBarContent}
+      <div className="space-y-3 lg:hidden">
         <div className="flex flex-wrap gap-1.5">
           {colDefs.map((c) => <span key={c.key}>{colFilter(c.key, true)}</span>)}
           {activeColFilters.length > 0 && <Button type="button" variant="outline" size="sm" className="h-7 text-xs" onClick={() => setCf({})}>Limpar filtros</Button>}
         </div>
-        {!filterBar && (headerFilters || statusFilterControl || deliveredFilterControl) && (
-          <div className="grid grid-cols-1 gap-2 rounded-lg bg-primary/10 p-2 sm:grid-cols-2">
-            {filterInput(fApproval, setFApproval, "Nº do Approval")}
-            {filterInput(fItem, setFItem, "Tipo")}
-            {filterInput(fAloc, setFAloc, "Alocação")}
-            {showRequester && filterInput(fReq, setFReq, "Solicitante")}
-             <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
-               <PopoverTrigger asChild>
-                 <Button type="button" variant="ghost" aria-label="Prazo ou previsão: abrir calendário" className="h-7 w-full min-w-0 justify-between border border-input !bg-transparent px-2 text-xs !text-foreground shadow-sm hover:!bg-transparent hover:!text-foreground">
-                   <span className={`truncate ${fDate ? "" : "text-muted-foreground"}`}>{fDate ? fDate.split("-").reverse().join("/") : "Prazo ou previsão"}</span>
-                   <CalendarDays className="size-4 shrink-0" aria-hidden="true" />
-                 </Button>
-               </PopoverTrigger>
-               <PopoverContent align="start" className="w-auto max-w-[calc(100vw-2rem)] p-0 pointer-events-auto">
-                 <Calendar mode="single" locale={ptBR} classNames={{ day_button: "!bg-transparent !text-foreground hover:!bg-muted data-[selected-single=true]:!bg-primary data-[selected-single=true]:!text-primary-foreground" }} selected={fDate ? new Date(`${fDate}T12:00:00`) : undefined} onSelect={(date) => {
-                   if (!date) return;
-                   setFDate(`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`);
-                   setDatePickerOpen(false);
-                 }} />
-                 {fDate && <Button type="button" variant="link" className="mx-3 mb-2 h-7 !bg-transparent px-0 !text-primary hover:!bg-transparent hover:!text-primary" onClick={() => { setFDate(""); setDatePickerOpen(false); }}>Limpar data</Button>}
-               </PopoverContent>
-             </Popover>
-            <Select value={fStatus} onValueChange={setFStatus}>
-              <SelectTrigger className="h-7 text-xs"><SelectValue placeholder="Status" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
-                {STATUS_KEYS.map((k) => <SelectItem key={k} value={k}>{STATUS_LABELS[k]}</SelectItem>)}
-            {statusCatalog.custom.map((r) => <SelectItem key={r.id} value={`c:${r.id}`}>{r.label}</SelectItem>)}
-              </SelectContent>
-            </Select>
-            {deliveredFilterControl}
-            {statusFilterControl}
-          </div>
-        )}
         {visibleOrders.map((o) => {
           const part = o.request_group_id ? stockParts?.get(o.request_group_id) : undefined;
           return (
@@ -3065,7 +2965,7 @@ function OrdersTable({
                 <DeadlineForecast order={o} canEdit={canEdit} />
               </Row>
               <Row label="Status"><div className="flex flex-col items-start gap-1"><StatusHistoryDialog order={o} canEdit={canEdit} />{canEditRequester && o.status === "entregue" && <ConfirmReceiptActions order={o} />}</div></Row>
-              <Row label="Palavra passe">
+              <Row label="Código">
                 <InlineField order={o} field="passphrase" type="text" canEdit={canEdit} display={o.passphrase || "—"} maxLength={PASSPHRASE_MAX} />
               </Row>
             </div>
@@ -3076,12 +2976,11 @@ function OrdersTable({
         )}
       </div>
 
-      <div className="hidden md:block">
+      <div className="hidden lg:block">
 
-      {filterBarContent && <div className="mb-3">{filterBarContent}</div>}
       <div className="mb-2 flex flex-wrap items-center gap-2 text-xs">
         <span className="text-muted-foreground">Filtro por endereço:</span>
-        {colFilter("end", true)}
+        {colFilter("end", true)} {colFilter("notes", true)} {colFilter("received", true)}
         {activeColFilters.length > 0 && (
           <>
             <span className="text-muted-foreground">{activeColFilters.length} filtro(s) ativo(s): {activeColFilters.map((c) => c.label).join(", ")}</span>
@@ -3089,61 +2988,21 @@ function OrdersTable({
           </>
         )}
       </div>
-      <Table className={`w-full table-fixed ${showRequester ? "min-w-[1590px]" : "min-w-[1470px]"}`}>
+      <Table className="w-full table-fixed text-xs [&_th]:px-1 [&_th]:text-[11px] [&_td]:px-1 [&_td]:text-xs [&_td]:whitespace-normal [&_td]:break-words [&_td_*]:max-w-full [&_td_.text-sm]:text-xs">
         <TableHeader className="[&_tr]:border-b">
           <TableRow className="border-b">
-            <TableHead className="w-[150px] text-left"><span className="inline-flex items-center gap-1 whitespace-nowrap">Approval {colFilter("approval")}</span></TableHead>
-            <TableHead className="w-[210px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Itens da Solicitação {colFilter("itens")}</span></TableHead>
-            <TableHead className="w-[125px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Tipo {colFilter("tipo")}</span></TableHead>
-            <TableHead className="w-[145px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Alocação {colFilter("aloc")}</span></TableHead>
-            {showRequester && <TableHead className="w-[125px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Solicitante {colFilter("req")}</span></TableHead>}
-            <TableHead className="w-[90px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Qtd {colFilter("qtd")}</span></TableHead>
-            <TableHead className="w-[140px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Valor Total {colFilter("valor")}</span></TableHead>
-            <TableHead className="w-[145px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Destinatário {colFilter("dest")}</span></TableHead>
-            <TableHead className="w-[145px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Prazo <span className="inline-flex shrink-0 gap-0.5">{colFilter("prazo")}{colFilter("prev")}</span></span></TableHead>
-            <TableHead className="w-[145px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Status {colFilter("status")}</span></TableHead>
-            <TableHead className="w-[145px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Palavra passe {colFilter("passe")}</span></TableHead>
+            <TableHead className="w-[11%] text-left"><span className="inline-flex max-w-full items-center gap-0.5"><span className="min-w-0 whitespace-normal break-words">Approval</span>{colFilter("approval")}</span></TableHead>
+            <TableHead className="w-[15%] text-center"><span className="inline-flex max-w-full items-center gap-0.5"><span className="min-w-0 whitespace-normal break-words">Itens da Solicitação</span>{colFilter("itens")}</span></TableHead>
+            <TableHead className="w-[9%] text-center"><span className="inline-flex max-w-full items-center gap-0.5"><span className="min-w-0 whitespace-normal break-words">Tipo</span>{colFilter("tipo")}</span></TableHead>
+            <TableHead className="w-[10%] text-center"><span className="inline-flex max-w-full items-center gap-0.5"><span className="min-w-0 whitespace-normal break-words">Alocação</span>{colFilter("aloc")}</span></TableHead>
+            {showRequester && <TableHead className="w-[11%] text-center"><span className="inline-flex max-w-full items-center gap-0.5"><span className="min-w-0 whitespace-normal break-words">Solicitante</span>{colFilter("req")}</span></TableHead>}
+            <TableHead className="w-[6%] text-center"><span className="inline-flex max-w-full items-center gap-0.5"><span className="min-w-0 whitespace-nowrap">Qtd</span>{colFilter("qtd")}</span></TableHead>
+            <TableHead className="w-[10%] text-center"><span className="inline-flex max-w-full items-center gap-0.5"><span className="min-w-0 whitespace-normal break-words">Valor Total</span>{colFilter("valor")}</span></TableHead>
+            <TableHead className="w-[12%] text-center"><span className="inline-flex max-w-full items-center gap-0.5"><span className="min-w-0 whitespace-normal break-words">Destinatário</span>{colFilter("dest")}</span></TableHead>
+            <TableHead className="w-[13%] text-center"><span className="inline-flex items-center gap-0.5">Prazo <span className="inline-flex shrink-0 gap-0.5">{colFilter("prazo")}{colFilter("prev")}</span></span></TableHead>
+            <TableHead className="w-[10%] text-center"><span className="inline-flex max-w-full items-center gap-0.5"><span className="min-w-0 whitespace-normal break-words">Status</span>{colFilter("status")}</span></TableHead>
+            <TableHead className="w-[10%] text-center"><span className="inline-flex max-w-full items-center gap-0.5"><span className="min-w-0 whitespace-normal">Código</span>{colFilter("passe")}</span></TableHead>
           </TableRow>
-          {headerFilters && !filterBar && (
-            <TableRow>
-              <TableHead className="py-1">{filterInput(fApproval, setFApproval, "Nº")}</TableHead>
-              <TableHead className="py-1">{filterInput(fItem, setFItem, "Item")}</TableHead>
-              <TableHead className="py-1" />
-              <TableHead className="py-1">{filterInput(fAloc, setFAloc, "Alocação")}</TableHead>
-              {showRequester && <TableHead className="py-1">{filterInput(fReq, setFReq, "Solicitante")}</TableHead>}
-              <TableHead className="py-1" />
-              <TableHead className="py-1" />
-              <TableHead className="py-1" />
-              <TableHead className="py-1">
-                <Input type="date" aria-label="Prazo ou previsão" title="Prazo ou previsão" value={fDate} onChange={(e) => setFDate(e.target.value)} className="h-7 px-1 text-xs" />
-              </TableHead>
-              <TableHead className="py-1">
-                <Select value={fStatus} onValueChange={setFStatus}>
-                  <SelectTrigger className="h-7 text-xs"><SelectValue placeholder="Status" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos</SelectItem>
-                    {STATUS_KEYS.map((k) => <SelectItem key={k} value={k}>{STATUS_LABELS[k]}</SelectItem>)}
-            {statusCatalog.custom.map((r) => <SelectItem key={r.id} value={`c:${r.id}`}>{r.label}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </TableHead>
-               <TableHead className="py-1" />
-             </TableRow>
-           )}
-          {!headerFilters && (statusFilterControl || deliveredFilterControl) && (
-            <TableRow>
-              <TableHead className="py-1" />
-              <TableHead className="py-1" />
-              <TableHead className="py-1" />
-              <TableHead className="py-1" />
-              {showRequester && <TableHead className="py-1" />}
-              <TableHead className="py-1" />
-              <TableHead className="py-1" />
-              <TableHead colSpan={2} className="py-1">{deliveredFilterControl}</TableHead>
-              <TableHead className="py-1">{statusFilterControl}</TableHead>
-              <TableHead className="py-1" />
-            </TableRow>
-          )}
         </TableHeader>
         <TableBody>
           {visibleOrders.map((o) => (
@@ -3351,7 +3210,7 @@ function OrderReportDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button type="button" className="font-normal text-foreground transition-colors hover:text-myio-green data-[state=open]:text-myio-green hover:underline" title="Ver relatório completo">
+        <button type="button" className="text-xs font-normal text-foreground transition-colors hover:text-myio-green data-[state=open]:text-myio-green hover:underline" title="Ver relatório completo">
           {order.approval_number ?? "—"}
         </button>
       </DialogTrigger>
@@ -3374,7 +3233,7 @@ function OrderReportDialog({
             <Row label="Prazo" value={`${DEADLINE_LABELS[order.deadline_type]}${order.deadline_date ? ` — ${new Date(order.deadline_date + "T00:00:00").toLocaleDateString("pt-BR")}` : ""}`} />
             <Row label="Previsão de entrega" value={order.delivery_forecast ? new Date(order.delivery_forecast + "T00:00:00").toLocaleDateString("pt-BR") : "—"} />
             <Row label="Status" value={STATUS_LABELS[order.status]} />
-            <Row label="Palavra passe" value={order.passphrase || "—"} />
+            <Row label="Código" value={order.passphrase || "—"} />
             <Row label="Criado em" value={fmtDateTime(order.created_at)} />
             {order.payment_date && <Row label="Data do pagamento" value={new Date(order.payment_date + "T00:00:00").toLocaleDateString("pt-BR")} />}
             {relatedOrders && relatedOrders.length > 1 && relatedOrders.map((related) => (
@@ -3852,9 +3711,6 @@ function ProjectsAdmin({ userId }: { userId: string }) {
   const { data: newProjectClientUnits } = useClientUnits(newProjectClientId || undefined);
   const [statusDialog, setStatusDialog] = useState<{ id: string; name: string; action: "implantado" | "cancelado" } | null>(null);
   const [statusDate, setStatusDate] = useState<string>(new Date().toISOString().slice(0, 10));
-  const [projectSearch, setProjectSearch] = useState("");
-  const [projectStatus, setProjectStatus] = useState("all");
-  const [budgetRange, setBudgetRange] = useState("all");
   const [projectSort, setProjectSort] = useState("name-asc");
 
   const create = useMutation({
@@ -3928,23 +3784,14 @@ function ProjectsAdmin({ userId }: { userId: string }) {
   const clientOf = (p: { client_id?: string | null }) => clients?.find((c) => c.id === p.client_id);
   const { data: clientUnits } = useClientUnits();
   const clientUnitOf = (p: { client_unit_id?: string | null }) => clientUnits?.find((unit) => unit.id === p.client_unit_id);
+  const projectFilters = useTableFilters(projects ?? [], [
+    { key: "name", label: "Projeto / Cliente", value: p => `${p.name} ${clientOf(p)?.name || p.client_name || ""} ${clientUnitOf(p)?.name || ""}` },
+    { key: "status", label: "Status", value: p => ({ active: "Ativo", implantado: "Implantado", cancelado: "Cancelado" }[p.status ?? "active"] ?? p.status) },
+    { key: "budget", label: "Orçamento", kind: "number", value: p => p.budget, display: p => formatBRL(p.budget) },
+  ]);
   const visibleProjects = useMemo(() => {
-    const normalizedSearch = projectSearch.trim().toLocaleLowerCase("pt-BR");
     const summaries = new Map((budgetSummaries ?? []).map((summary) => [summary.projectId, summary]));
-    return [...(projects ?? [])]
-      .filter((project) => {
-        const status = project.status ?? "active";
-        const budget = Number(project.budget ?? 0);
-        const clientName = clientOf(project)?.name || project.client_name || "";
-        const clientUnitName = clientUnitOf(project)?.name || "";
-        const matchesSearch = !normalizedSearch || `${project.name} ${clientName} ${clientUnitName}`.toLocaleLowerCase("pt-BR").includes(normalizedSearch);
-        const matchesStatus = projectStatus === "all" || status === projectStatus;
-        const matchesBudget = budgetRange === "all"
-          || (budgetRange === "under-100k" && budget < 100000)
-          || (budgetRange === "100k-500k" && budget >= 100000 && budget <= 500000)
-          || (budgetRange === "over-500k" && budget > 500000);
-        return matchesSearch && matchesStatus && matchesBudget;
-      })
+    return [...projectFilters.filtered]
       .sort((a, b) => {
         const [field, direction] = projectSort.split("-") as [string, "asc" | "desc"];
         const factor = direction === "asc" ? 1 : -1;
@@ -3962,7 +3809,7 @@ function ProjectsAdmin({ userId }: { userId: string }) {
         const [left, right] = values[field] ?? values.name;
         return (typeof left === "number" && typeof right === "number" ? left - right : String(left).localeCompare(String(right), "pt-BR")) * factor;
       });
-  }, [projects, clients, clientUnits, budgetSummaries, projectSearch, projectStatus, budgetRange, projectSort]);
+  }, [projectFilters.filtered, clients, clientUnits, budgetSummaries, projectSort]);
 
   return (
     <div className="space-y-6">
@@ -4017,16 +3864,8 @@ function ProjectsAdmin({ userId }: { userId: string }) {
       <Card>
         <CardHeader>
           <CardTitle>Projetos</CardTitle>
-          <div className="grid gap-2 pt-2 sm:grid-cols-2 xl:grid-cols-4">
-            <Input value={projectSearch} onChange={(event) => setProjectSearch(event.target.value)} placeholder="Buscar projeto ou cliente" aria-label="Buscar projeto ou cliente" />
-            <Select value={projectStatus} onValueChange={setProjectStatus}>
-              <SelectTrigger aria-label="Filtrar por status"><SelectValue /></SelectTrigger>
-              <SelectContent><SelectItem value="all">Todos os status</SelectItem><SelectItem value="active">Ativos</SelectItem><SelectItem value="implantado">Implantados</SelectItem><SelectItem value="cancelado">Cancelados</SelectItem></SelectContent>
-            </Select>
-            <Select value={budgetRange} onValueChange={setBudgetRange}>
-              <SelectTrigger aria-label="Filtrar por orçamento"><SelectValue /></SelectTrigger>
-              <SelectContent><SelectItem value="all">Todos os orçamentos</SelectItem><SelectItem value="under-100k">Até R$ 100 mil</SelectItem><SelectItem value="100k-500k">R$ 100 mil a R$ 500 mil</SelectItem><SelectItem value="over-500k">Acima de R$ 500 mil</SelectItem></SelectContent>
-            </Select>
+          <div className="flex flex-wrap items-center gap-4 pt-2 text-sm text-muted-foreground">
+            {projectFilters.header("name")}{projectFilters.header("status")}{projectFilters.header("budget")}
             <Select value={projectSort} onValueChange={setProjectSort}>
               <SelectTrigger aria-label="Ordenar projetos"><ArrowUpDown className="mr-2 h-4 w-4" /><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -4468,25 +4307,20 @@ function UsersAdmin() {
     return next ? jobTitles?.find((title) => title.id === next)?.name ?? "" : "";
   };
 
-  const [fName, setFName] = useState("");
-  const [fEmail, setFEmail] = useState("");
-  const [fManager, setFManager] = useState("");
-  const [fRole, setFRole] = useState("all");
   const [sortBy, setSortBy] = useState<"name" | "profile">("name");
 
-  const norm = (s: string) => s.toLowerCase().trim();
   const isPendingRestrictedUser = (user: NonNullable<typeof data>[number]) =>
     user.accessProfile === "customizado" && (!user.hasConfiguredAccess || !approverLabelOf(user.jobTitleId));
   const pendingUsers = (data ?? []).filter(isPendingRestrictedUser);
   const activeUsers = (data ?? []).filter((user) => !isPendingRestrictedUser(user));
-  const rows = activeUsers.filter((u) => {
-    return (
-      (!fName || norm(u.full_name ?? "").includes(norm(fName))) &&
-      (!fEmail || norm(u.email ?? "").includes(norm(fEmail))) &&
-      (!fManager || norm(approverLabelOf(u.jobTitleId)).includes(norm(fManager))) &&
-      (fRole === "all" || u.jobTitleId === fRole)
-    );
-  }).sort((a, b) => {
+  const userFilters = useTableFilters(activeUsers, [
+    { key: "name", label: "Nome", value: u => u.full_name },
+    { key: "email", label: "E-mail", value: u => u.email },
+    { key: "approver", label: "Cargo aprovador", value: u => approverLabelOf(u.jobTitleId) },
+    { key: "role", label: "Cargo", value: u => jobTitles?.find(t => t.id === u.jobTitleId)?.name },
+    { key: "profile", label: "Perfil", value: u => u.accessProfileName },
+  ]);
+  const rows = [...userFilters.filtered].sort((a, b) => {
     if (sortBy === "profile") {
       const byProfile = String(a.accessProfileName).localeCompare(String(b.accessProfileName), "pt-BR");
       if (byProfile !== 0) return byProfile;
@@ -4494,10 +4328,6 @@ function UsersAdmin() {
     return String(a.full_name ?? "").localeCompare(String(b.full_name ?? ""), "pt-BR");
   });
 
-
-  const filterInput = (value: string, onChange: (v: string) => void, placeholder: string) => (
-    <Input value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="h-7 px-1 text-xs" />
-  );
 
   return (
     <Card>
@@ -4508,18 +4338,8 @@ function UsersAdmin() {
       <CardContent className="space-y-4">
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
         <>
-          <div className="grid grid-cols-2 gap-2 rounded-lg bg-primary/10 p-2 sm:grid-cols-5">
-            {filterInput(fName, setFName, "Nome")}
-            {filterInput(fEmail, setFEmail, "E-mail")}
-            {filterInput(fManager, setFManager, "Cargo aprovador")}
-
-            <Select value={fRole} onValueChange={setFRole}>
-              <SelectTrigger className="h-7 text-xs"><SelectValue placeholder="Perfil" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
-                {(jobTitles ?? []).map((title) => <SelectItem key={title.id} value={title.id}>{title.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
+          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+            {["name", "email", "approver", "role", "profile"].map(key => <span key={key}>{userFilters.header(key)}</span>)}
             <Select value={sortBy} onValueChange={(value) => setSortBy(value as "name" | "profile")}>
               <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -4878,71 +4698,23 @@ function LogsAdmin() {
     },
   });
 
-  const [fAction, setFAction] = useState("all");
-  const [fActor, setFActor] = useState("all");
-  const [fFrom, setFFrom] = useState("");
-  const [fTo, setFTo] = useState("");
-
-  const actions = Array.from(new Set((logs ?? []).map((l) => l.action))).sort();
-  const actors = Array.from(new Set((logs ?? []).map((l) => l.actor_id).filter(Boolean) as string[]))
-    .map((id) => ({ id, name: profiles?.get(id)?.full_name || profiles?.get(id)?.email || id }))
-    .sort((a, b) => a.name.localeCompare(b.name));
-
-  const filtered = (logs ?? []).filter((l) => {
-    if (fAction !== "all" && l.action !== fAction) return false;
-    if (fActor !== "all" && l.actor_id !== fActor) return false;
-    const when = new Date(l.created_at);
-    if (fFrom && when < new Date(fFrom + "T00:00:00")) return false;
-    if (fTo && when > new Date(fTo + "T23:59:59")) return false;
-    return true;
-  });
-
-  const hasFilters = fAction !== "all" || fActor !== "all" || fFrom || fTo;
+  const logFilters = useTableFilters(logs ?? [], [
+    { key: "date", label: "Quando", kind: "date", value: l => l.created_at.slice(0,10), display: l => new Date(l.created_at).toLocaleDateString("pt-BR") },
+    { key: "action", label: "Ação", value: l => l.action },
+    { key: "order", label: "Pedido", value: l => l.purchase_orders?.item_name },
+    { key: "actor", label: "Quem", value: l => l.actor_id ? profiles?.get(l.actor_id)?.full_name || profiles?.get(l.actor_id)?.email : null },
+    { key: "details", label: "Detalhes", value: l => l.details ? JSON.stringify(l.details) : "" },
+  ]);
+  const filtered = logFilters.filtered;
 
   return (
     <Card>
       <CardHeader><CardTitle>Logs de pedidos</CardTitle><CardDescription>Últimas 200 ações.</CardDescription></CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid items-end gap-3 sm:grid-cols-[12rem_14rem_10rem_10rem_auto]">
-          <div className="min-w-0 space-y-1">
-            <Label className="text-xs">Ação</Label>
-            <Select value={fAction} onValueChange={setFAction}>
-              <SelectTrigger className="h-9 w-full"><SelectValue placeholder="Todas" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas</SelectItem>
-                {actions.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="min-w-0 space-y-1">
-            <Label className="text-xs">Quem</Label>
-            <Select value={fActor} onValueChange={setFActor}>
-              <SelectTrigger className="h-9 w-full"><SelectValue placeholder="Todos" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
-                {actors.map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="min-w-0 space-y-1">
-            <Label className="text-xs">De</Label>
-            <Input type="date" className="h-9 w-full text-sm" value={fFrom} onChange={(e) => setFFrom(e.target.value)} />
-          </div>
-          <div className="min-w-0 space-y-1">
-            <Label className="text-xs">Até</Label>
-            <Input type="date" className="h-9 w-full text-sm" value={fTo} onChange={(e) => setFTo(e.target.value)} />
-          </div>
-          {hasFilters && (
-            <Button variant="ghost" size="sm" onClick={() => { setFAction("all"); setFActor("all"); setFFrom(""); setFTo(""); }}>
-              Limpar filtros
-            </Button>
-          )}
-        </div>
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
           !logs?.length ? <p className="text-sm text-muted-foreground">Nada registrado ainda.</p> :
-          !filtered.length ? <p className="text-sm text-muted-foreground">Nenhum registro para os filtros selecionados.</p> :
           <Table>
-            <TableHeader><TableRow><TableHead>Quando</TableHead><TableHead>Ação</TableHead><TableHead>Pedido</TableHead><TableHead>Quem</TableHead><TableHead>Detalhes</TableHead></TableRow></TableHeader>
+            <TableHeader><TableRow>{["date", "action", "order", "actor", "details"].map(key => <TableHead key={key}>{logFilters.header(key)}</TableHead>)}</TableRow></TableHeader>
             <TableBody>
               {filtered.map((l) => {
                 const item = (l as unknown as { purchase_orders?: { item_name: string } }).purchase_orders?.item_name ?? "—";

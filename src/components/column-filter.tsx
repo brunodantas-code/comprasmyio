@@ -12,7 +12,7 @@ import {
 
 /** Botão de filtro de coluna no estilo Excel: condição + lista de valores com busca. */
 export function ColumnFilter({
-  label, kind, values, value, onChange, showLabel = false,
+  label, kind, values, value, onChange, showLabel = false, compact = false,
 }: {
   label: string;
   kind: FilterKind;
@@ -21,6 +21,7 @@ export function ColumnFilter({
   value: ColumnFilterValue | undefined;
   onChange: (v: ColumnFilterValue | undefined) => void;
   showLabel?: boolean;
+  compact?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -51,7 +52,7 @@ export function ColumnFilter({
           </Button>
         ) : (
           <Button type="button" variant="ghost" size="icon" aria-label={`Filtrar ${label}`} title={`Filtrar ${label}`}
-            className={`size-5 shrink-0 p-0 align-middle !bg-transparent shadow-none ${active ? "!text-primary" : "!text-muted-foreground hover:!text-primary"}`}>
+            className={`${compact ? "size-4" : "size-5"} shrink-0 p-0 align-middle !bg-transparent shadow-none ${active ? "!text-primary" : "!text-muted-foreground hover:!text-primary"}`}>
             <Filter className="size-3" />
           </Button>
         )}

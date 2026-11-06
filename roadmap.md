@@ -1,4 +1,7 @@
 # Roadmap
+- [x] Approval: todas as colunas sem rolagem lateral em 1083/1280 px; fonte compacta e Código; celular conferido
+- [x] Remover faixa antiga Nº/Item/Alocação/Prazo ou Previsão/Status; ausência conferida na tela
+- [x] Substituir filtros antigos das listas por funis nos títulos; preservar seletores de preenchimento e filtros especializados de relatório/checklist; testes e listas autenticadas conferidos
 - [x] Ordenação por coluna nas listas de solicitações/Supply/Todos; aprovações pendentes por colunas disponíveis e Meus em aprovação por número; testes e filtros combinados conferidos
 - [x] Filtros ativos: ícone verde sem fundo, como o exemplo de Prazo
 - [x] Avaliar redundância da faixa superior e responder: filtros sobrepostos, busca de Item também inclui observações; mantida até decisão do usuário
@@ -88,7 +91,7 @@
 
 - [x] Gerar mockups gráficos das opções de cabeçalho/filtros e apresentar para escolha
 - [x] Aplicar opção 1b (barra em cartão com funil cinza) somente em Minhas Solicitações para avaliação
-- [ ] Aguardar avaliação do usuário: se aprovado, estender o padrão às demais tabelas
+- [x] Avaliação substituída pelo pedido de funis nos títulos; faixa antiga removida
 
 - [x] Etiquetas: cadastro, campo na solicitação Interna
 - [x] Relatório de custo consolidado por Etiqueta (tela + PDF)

@@ -1,3 +1,4 @@
+import { useTableFilters } from "@/components/use-table-filters";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronUp, ChevronDown, Mail, Phone, Search, UserRound } from "lucide-react";
@@ -31,7 +32,6 @@ export const Route = createFileRoute("/_authenticated/rh")({
 
 function RhPage() {
   const queryClient = useQueryClient();
-  const [search, setSearch] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const { data: technicians = [], isLoading } = useQuery({
     queryKey: ["rh-supply-technicians"],
@@ -41,7 +41,12 @@ function RhPage() {
       return data ?? [];
     },
   });
-  const filtered = technicians.filter((technician) => [technician.full_name, technician.email, technician.mobile_phone].join(" ").toLocaleLowerCase("pt-BR").includes(search.toLocaleLowerCase("pt-BR")));
+  const technicianFilters = useTableFilters(technicians, [
+    { key: "name", label: "Nome", value: t => t.full_name },
+    { key: "email", label: "E-mail", value: t => t.email },
+    { key: "phone", label: "Celular", value: t => t.mobile_phone },
+  ]);
+  const filtered = technicianFilters.filtered;
 
   return (
     <div className="min-h-screen bg-background">
@@ -51,7 +56,7 @@ function RhPage() {
           <div className="min-w-0"><h1 className="text-2xl font-bold">Técnicos</h1><p className="mt-1 text-sm text-muted-foreground">Ficha básica dos técnicos cadastrados no Supply.</p></div>
           <Badge variant="outline" className="shrink-0">{technicians.length} técnicos</Badge>
         </div>
-        <div className="relative mb-4 max-w-lg"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar técnico" className="pl-9" /></div>
+        <div className="mb-4 flex flex-wrap gap-4 text-sm text-muted-foreground">{["name", "email", "phone"].map(key => <span key={key}>{technicianFilters.header(key)}</span>)}</div>
         <section className="overflow-hidden rounded-md border border-border bg-card shadow-sm" aria-label="Cadastro de técnicos">
           {isLoading ? <p className="p-6 text-sm text-muted-foreground">Carregando técnicos...</p> : filtered.map((technician) => <TechnicianRecord key={technician.id} technician={technician} expanded={expandedId === technician.id} onToggle={() => setExpandedId((current) => current === technician.id ? null : technician.id)} onSaved={() => void queryClient.invalidateQueries({ queryKey: ["rh-supply-technicians"] })} />)}
           {!isLoading && filtered.length === 0 ? <p className="p-8 text-center text-sm text-muted-foreground">Nenhum técnico encontrado.</p> : null}

@@ -1,3 +1,4 @@
+import { useTableFilters } from "@/components/use-table-filters";
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -43,7 +44,6 @@ export function SupplyTagsTab({ userId }: { userId: string }) {
   const qc = useQueryClient();
   const { data: tags, isLoading } = useSupplyTags();
   const { data: canManage } = useCanManageSupplyTags(userId);
-  const [search, setSearch] = useState("");
   const { data: creators } = useQuery({
     queryKey: ["supply_tags_creators", (tags ?? []).map((t) => t.created_by).join()],
     enabled: !!tags?.length,
@@ -82,10 +82,14 @@ export function SupplyTagsTab({ userId }: { userId: string }) {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const filtered = useMemo(() => {
-    const q = normalizeSearch(search);
-    return (tags ?? []).filter((t) => !q || normalizeSearch(`${t.name} ${t.description ?? ""}`).includes(q));
-  }, [tags, search]);
+  const tagFilters = useTableFilters(tags ?? [], [
+    { key: "name", label: "Nome", value: t => t.name },
+    { key: "description", label: "Descrição", value: t => t.description },
+    { key: "status", label: "Situação", value: t => t.active ? "Ativa" : "Inativa" },
+    { key: "creator", label: "Criada por", value: t => t.created_by ? creators?.get(t.created_by) : null },
+    { key: "date", label: "Data", kind: "date", value: t => t.created_at.slice(0,10), display: t => new Date(t.created_at).toLocaleDateString("pt-BR") },
+  ]);
+  const filtered = tagFilters.filtered;
 
   return (
     <Card>
@@ -95,13 +99,9 @@ export function SupplyTagsTab({ userId }: { userId: string }) {
       </CardHeader>
       <CardContent className="space-y-3">
         <p className="text-xs text-muted-foreground">Identificam projetos internos (feiras, novas tecnologias etc.) para consolidar seu custo total. {canManage ? "" : "Somente Admin, Financeiro e Compras criam ou alteram etiquetas."}</p>
-        <div className="relative max-w-sm">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input className="pl-8" placeholder="Buscar etiqueta" value={search} onChange={(e) => setSearch(e.target.value)} />
-        </div>
-        {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : !filtered.length ? <p className="text-sm text-muted-foreground">Nenhuma etiqueta.</p> : (
+        {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : !tags?.length ? <p className="text-sm text-muted-foreground">Nenhuma etiqueta.</p> : (
           <Table>
-            <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Descrição</TableHead><TableHead>Situação</TableHead><TableHead>Criada por</TableHead><TableHead>Data</TableHead><TableHead /></TableRow></TableHeader>
+            <TableHeader><TableRow>{["name", "description", "status", "creator", "date"].map(key => <TableHead key={key}>{tagFilters.header(key)}</TableHead>)}<TableHead /></TableRow></TableHeader>
             <TableBody>
               {filtered.map((t) => (
                 <TableRow key={t.id}>

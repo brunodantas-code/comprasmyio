@@ -1,3 +1,4 @@
+import { useTableFilters } from "@/components/use-table-filters";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -93,7 +94,6 @@ export function BomSettingsDialog() {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [productId, setProductId] = useState<string>("");
-  const [search, setSearch] = useState("");
   const [newComponent, setNewComponent] = useState("");
   const [newQty, setNewQty] = useState("1");
   const [newProductName, setNewProductName] = useState("");
@@ -123,9 +123,12 @@ export function BomSettingsDialog() {
   const selected = productId || products[0]?.id || "";
   const rows = (boms ?? [])
     .filter((b) => b.product_material_id === selected)
-    .filter((b) => nameOf(b.component_material_id).toLowerCase().includes(search.trim().toLowerCase()))
     .sort((a, b) => nameOf(a.component_material_id).localeCompare(nameOf(b.component_material_id)));
 
+  const componentFilters = useTableFilters(rows, [
+    { key: "component", label: "Componente", value: b => nameOf(b.component_material_id) },
+    { key: "quantity", label: "Qtd. por unidade", kind: "number", value: b => b.quantity },
+  ]);
   const invalidate = () => qc.invalidateQueries({ queryKey: ["product-boms"] });
 
   const createProduct = useMutation({
@@ -265,15 +268,6 @@ export function BomSettingsDialog() {
               ))}
             </SelectContent>
           </Select>
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar componente"
-              className="w-full pl-8 sm:w-[200px]"
-            />
-          </div>
           <Badge variant="outline">{rows.length} componentes</Badge>
           {selected && (
             <Button
@@ -371,8 +365,8 @@ export function BomSettingsDialog() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Componente</TableHead>
-                <TableHead className="text-right">Qtd. por unidade</TableHead>
+                <TableHead>{componentFilters.header("component")}</TableHead>
+                <TableHead className="text-right">{componentFilters.header("quantity")}</TableHead>
                 <TableHead className="text-right">Com perda</TableHead>
                 <TableHead className="w-10" />
               </TableRow>

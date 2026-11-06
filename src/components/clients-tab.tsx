@@ -1,3 +1,4 @@
+import { useTableFilters } from "@/components/use-table-filters";
 import { Fragment, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -72,14 +73,23 @@ export function ClientsTab({ userId }: { userId: string }) {
   const { data: categories } = useClientCategories(true);
   const [newUnits, setNewUnits] = useState<NewClientUnit[]>([]);
   const [expandedClients, setExpandedClients] = useState<Set<string>>(new Set());
-  const [clientSearch, setClientSearch] = useState("");
+  const clientFilters = useTableFilters(clients ?? [], [
+    { key: "name", label: "Nome fantasia", value: (c) => c.name },
+    { key: "legal", label: "Razão social", value: (c) => c.legal_name },
+    { key: "category", label: "Categoria", value: (c) => categories?.find(x => x.id === c.category_id)?.name },
+    { key: "city", label: "Cidade", value: (c) => c.city },
+    { key: "state", label: "UF", value: (c) => c.state },
+    { key: "cnpj", label: "CNPJ", value: (c) => c.cnpj },
+    { key: "search", label: "Clientes e unidades", value: (c) => [c.name, c.legal_name, c.cnpj, c.city, c.state, categories?.find(x => x.id === c.category_id)?.name, ...(allClientUnits ?? []).filter(u => u.client_id === c.id).flatMap(u => [u.name, u.cnpj, u.city, u.state, categories?.find(x => x.id === u.category_id)?.name])].filter(Boolean).join(" ") },
+  ]);
+  const clientSearch = clientFilters.searchText("search");
   const [clientSort, setClientSort] = useState<"name" | "category" | "state" | "city">("name");
 
   const normalizedSearch = normalizeSearchValue(clientSearch.trim());
   const activeClientsCount = clients?.length ?? 0;
   const activeUnitsCount = (allClientUnits ?? []).filter((unit) => unit.active).length;
   const totalActiveRecords = activeClientsCount + activeUnitsCount;
-  const filteredClients = (clients ?? []).filter((client) => {
+  const filteredClients = clientFilters.filtered.filter((client) => {
     if (!normalizedSearch) return true;
     const clientCategory = categories?.find((category) => category.id === client.category_id)?.name;
     const clientMatches = [client.name, client.legal_name, clientCategory, client.cnpj, client.city, client.state].some((value) =>
@@ -242,7 +252,7 @@ export function ClientsTab({ userId }: { userId: string }) {
       <Card>
         <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
-            <CardTitle>Clientes</CardTitle>
+            <CardTitle className="inline-flex items-center gap-1">Clientes {clientFilters.control("search")}</CardTitle>
             <ClientsReportDialog clients={clients ?? []} units={allClientUnits ?? []} categories={categories ?? []} />
             <ClientsMapDialog clients={clients ?? []} units={allClientUnits ?? []} categories={categories ?? []} />
             <Select value={clientSort} onValueChange={(value: "name" | "category" | "state" | "city") => setClientSort(value)}>
@@ -266,19 +276,7 @@ export function ClientsTab({ userId }: { userId: string }) {
             !clients?.length ? <p className="text-sm text-muted-foreground">Sem clientes.</p> :
             <Table>
               <TableHeader>
-                 <TableRow><TableHead>Nome fantasia</TableHead><TableHead>Razão social</TableHead><TableHead>Categoria</TableHead><TableHead>Cidade</TableHead><TableHead>UF</TableHead><TableHead>CNPJ</TableHead><TableHead className="w-20" /></TableRow>
-                <TableRow>
-                  <TableHead className="py-1">
-                    <Input
-                      value={clientSearch}
-                      onChange={(event) => setClientSearch(event.target.value)}
-                      placeholder="Filtrar clientes"
-                      aria-label="Filtrar clientes por nome fantasia, razão social, categoria, cidade, UF ou CNPJ"
-                      className="h-8 min-w-36 bg-background"
-                    />
-                  </TableHead>
-                   <TableHead colSpan={6} />
-                </TableRow>
+                 <TableRow>{["name", "legal", "category", "city", "state", "cnpj"].map(key => <TableHead key={key}>{clientFilters.header(key)}</TableHead>)}<TableHead className="w-20" /></TableRow>
               </TableHeader>
               <TableBody>
                  {!filteredClients.length ? <TableRow><TableCell colSpan={7} className="py-8 text-center text-sm text-muted-foreground">Nenhum cliente encontrado.</TableCell></TableRow> : filteredClients.map((c) => {

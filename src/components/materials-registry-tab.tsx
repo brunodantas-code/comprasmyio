@@ -1,3 +1,4 @@
+import { useTableFilters } from "@/components/use-table-filters";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronUp, ChevronDown, Pencil, Plus, Search, Trash2 } from "lucide-react";
@@ -211,7 +212,6 @@ function AddMaterialDialog({ categories }: { categories: MaterialStockType[] }) 
 export function MaterialsRegistryTab({ canCreate = false }: { canCreate?: boolean }) {
   const queryClient = useQueryClient();
   const [expanded, setExpanded] = useState(false);
-  const [search, setSearch] = useState("");
   const { data: stockTypes = [] } = useMaterialStockTypes();
   const activeCategories = stockTypes.filter((item) => item.active);
   const categoryNames = useMemo(() => new Map(stockTypes.map((item) => [item.code, item.name])), [stockTypes]);
@@ -240,11 +240,13 @@ export function MaterialsRegistryTab({ canCreate = false }: { canCreate?: boolea
     },
     onError: (error: Error) => toast.error(error.message),
   });
-  const filtered = useMemo(() => {
-    const term = normalize(search.trim());
-    if (!term) return materials;
-    return materials.filter((item) => normalize(`${item.name} ${item.description ?? ""} ${item.manufacturer_code ?? ""} ${item.group}`).includes(term));
-  }, [materials, search]);
+  const tableFilters = useTableFilters(materials, [
+    { key: "name", label: "Material", value: r => r.name },
+    { key: "description", label: "Descrição", value: r => r.description },
+    { key: "code", label: "Cód. Fabricante", value: r => r.manufacturer_code },
+    { key: "group", label: "Categoria", value: r => r.group },
+  ]);
+  const filtered = tableFilters.filtered;
 
   return <Collapsible open={expanded} onOpenChange={setExpanded} asChild>
     <Card>
@@ -264,12 +266,8 @@ export function MaterialsRegistryTab({ canCreate = false }: { canCreate?: boolea
       </CardHeader>
       <CollapsibleContent asChild>
         <CardContent className="space-y-4">
-          <div className="relative max-w-md">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar material..." className="pl-9" />
-          </div>
-          {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : !filtered.length ? <p className="text-sm text-muted-foreground">Nenhum material encontrado.</p> : <Table>
-            <TableHeader><TableRow><TableHead>Material</TableHead><TableHead>Categoria</TableHead><TableHead>Cód. Fabricante</TableHead><TableHead className="w-16" /></TableRow></TableHeader>
+          {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : !materials.length ? <p className="text-sm text-muted-foreground">Nenhum material encontrado.</p> : <Table>
+            <TableHeader><TableRow><TableHead>{tableFilters.header("name")}{tableFilters.control("description")}</TableHead><TableHead>{tableFilters.header("group")}</TableHead><TableHead>{tableFilters.header("code")}</TableHead><TableHead className="w-16" /></TableRow></TableHeader>
             <TableBody>{filtered.map((material) => <TableRow key={`${material.source}:${material.id}`}>
               <TableCell><div className="font-medium">{material.name}</div>{material.description && <div className="max-w-xl truncate text-xs text-muted-foreground">{material.description}</div>}</TableCell>
                <TableCell>
@@ -306,13 +304,13 @@ export function MaterialsRegistryTab({ canCreate = false }: { canCreate?: boolea
 
 export function MyioDevicesRegistryTab() {
   const [expanded, setExpanded] = useState(false);
-  const [search, setSearch] = useState("");
   const { data: devices = [], isLoading } = useMyioDevices();
-  const filtered = useMemo(() => {
-    const term = normalize(search.trim());
-    if (!term) return devices;
-    return devices.filter((item) => normalize(`${item.name} ${item.description ?? ""} ${item.manufacturer_code ?? ""}`).includes(term));
-  }, [devices, search]);
+  const tableFilters = useTableFilters(devices, [
+    { key: "name", label: "Dispositivo", value: r => r.name },
+    { key: "description", label: "Descrição", value: r => r.description },
+    { key: "code", label: "Cód. Fabricante", value: r => r.manufacturer_code },
+  ]);
+  const filtered = tableFilters.filtered;
 
   return <Collapsible open={expanded} onOpenChange={setExpanded} asChild>
     <Card>
@@ -329,12 +327,8 @@ export function MyioDevicesRegistryTab() {
       </CardHeader>
       <CollapsibleContent asChild>
         <CardContent className="space-y-4">
-          <div className="relative max-w-md">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar dispositivo..." className="pl-9" />
-          </div>
-          {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : !filtered.length ? <p className="text-sm text-muted-foreground">Nenhum dispositivo encontrado.</p> : <Table>
-            <TableHeader><TableRow><TableHead>Dispositivo</TableHead><TableHead>Cód. Fabricante</TableHead><TableHead className="w-16" /></TableRow></TableHeader>
+          {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : !devices.length ? <p className="text-sm text-muted-foreground">Nenhum dispositivo encontrado.</p> : <Table>
+            <TableHeader><TableRow><TableHead>{tableFilters.header("name")}{tableFilters.control("description")}</TableHead><TableHead>{tableFilters.header("code")}</TableHead><TableHead className="w-16" /></TableRow></TableHeader>
             <TableBody>{filtered.map((device) => <TableRow key={device.id}>
               <TableCell><div className="font-medium">{device.name}</div>{device.description && <div className="max-w-xl truncate text-xs text-muted-foreground">{device.description}</div>}</TableCell>
               <TableCell>{device.manufacturer_code || "—"}</TableCell>

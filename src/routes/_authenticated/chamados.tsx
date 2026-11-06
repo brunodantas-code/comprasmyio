@@ -1,3 +1,4 @@
+import { useTableFilters } from "@/components/use-table-filters";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
@@ -54,9 +55,6 @@ function CallsPage() {
   const routeSearch = Route.useSearch();
   const [newOpen, setNewOpen] = useState(false);
   const [selected, setSelected] = useState<InternalCall | null>(null);
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("todos");
-  const [status, setStatus] = useState("todos");
   const { data, isLoading } = useQuery({
     queryKey: ["internal-calls"],
     queryFn: async () => {
@@ -77,7 +75,17 @@ function CallsPage() {
     },
   });
   const names = useMemo(() => new Map((data?.profiles ?? []).map((profile) => [profile.id, profile.full_name || profile.email || "Usuário"])), [data?.profiles]);
-  const filtered = (data?.calls ?? []).filter((call) => (!search.trim() || `${call.call_number} ${call.site_survey_number ?? ""} ${call.title}`.toLocaleLowerCase("pt-BR").includes(search.trim().toLocaleLowerCase("pt-BR"))) && (category === "todos" || call.category === category) && (status === "todos" ? call.status !== "cancelado" : call.status === status));
+  const callFilters = useTableFilters(data?.calls ?? [], [
+    { key: "number", label: "Nº", kind: "number", value: c => c.call_number },
+    { key: "visit", label: "Visita", kind: "number", value: c => c.site_survey_number },
+    { key: "reporter", label: "Solicitante", value: c => names.get(c.reporter_id) },
+    { key: "category", label: "Categoria", value: c => CATEGORIES[c.category] },
+    { key: "title", label: "Título", value: c => c.title },
+    { key: "priority", label: "Prioridade", value: c => PRIORITIES[c.priority] },
+    { key: "status", label: "Situação", value: c => STATUSES[c.status] },
+    { key: "date", label: "Data", kind: "date", value: c => c.created_at.slice(0,10), display: c => new Date(c.created_at).toLocaleDateString("pt-BR") },
+  ]);
+  const filtered = callFilters.filtered;
   useEffect(() => { const call = data?.calls.find((item) => item.id === routeSearch.chamado); if (call) setSelected(call); }, [data?.calls, routeSearch.chamado]);
   const refresh = () => { void qc.invalidateQueries({ queryKey: ["internal-calls"] }); void qc.invalidateQueries({ queryKey: ["pending-actions"] }); };
   return <div className="min-h-screen bg-background">
@@ -85,8 +93,8 @@ function CallsPage() {
     <main className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6">
       <div className="flex items-end justify-between gap-4"><div><Phone className="h-8 w-8 text-foreground" aria-hidden="true" /><p className="mt-2 text-muted-foreground">Problemas em campo, reclamações e assuntos internos.</p></div><NewCallDialog open={newOpen} onOpenChange={setNewOpen} userId={data?.userId} onCreated={refresh} /></div>
       <Card><CardHeader><CardTitle>Acompanhamento</CardTitle><CardDescription>{data?.isAdmin ? "Chamados internos da plataforma." : "Chamados abertos por você ou atribuídos a você."}</CardDescription></CardHeader><CardContent>
-        <div className="mb-4 grid gap-2 sm:grid-cols-3"><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar por número ou título" /><Filter value={category} onChange={setCategory} options={CATEGORIES} /><Filter value={status} onChange={setStatus} options={STATUSES} /></div>
-        {isLoading ? <p className="py-8 text-center text-muted-foreground">Carregando chamados...</p> : <div className="overflow-x-auto"><Table><TableHeader><TableRow><TableHead>Nº</TableHead><TableHead>Visita</TableHead><TableHead>Solicitante</TableHead><TableHead>Categoria</TableHead><TableHead>Título</TableHead><TableHead>Prioridade</TableHead><TableHead>Situação</TableHead><TableHead>Data</TableHead></TableRow></TableHeader><TableBody>{filtered.map((call) => <TableRow key={call.id} className="cursor-pointer" onClick={() => setSelected(call)}><TableCell className="font-semibold">#{call.call_number}</TableCell><TableCell className="whitespace-nowrap">{call.site_survey_number ? String(call.site_survey_number).padStart(12, "0") : "—"}</TableCell><TableCell>{names.get(call.reporter_id)}</TableCell><TableCell>{CATEGORIES[call.category]}</TableCell><TableCell className="max-w-xs truncate font-medium">{call.title}</TableCell><TableCell>{PRIORITIES[call.priority]}</TableCell><TableCell><Badge variant="status">{STATUSES[call.status]}</Badge></TableCell><TableCell>{new Date(call.created_at).toLocaleDateString("pt-BR")}</TableCell></TableRow>)}{!filtered.length ? <TableRow><TableCell colSpan={8} className="h-24 text-center text-muted-foreground">Nenhum chamado encontrado.</TableCell></TableRow> : null}</TableBody></Table></div>}
+        <div className="mb-2 flex flex-wrap gap-2 md:hidden">{["number", "visit", "reporter", "category", "title", "priority", "status", "date"].map(key => <span key={key}>{callFilters.header(key)}</span>)}</div>
+        {isLoading ? <p className="py-8 text-center text-muted-foreground">Carregando chamados...</p> : <div className="overflow-x-auto"><Table><TableHeader><TableRow>{["number", "visit", "reporter", "category", "title", "priority", "status", "date"].map(key => <TableHead key={key}>{callFilters.header(key)}</TableHead>)}</TableRow></TableHeader><TableBody>{filtered.map((call) => <TableRow key={call.id} className="cursor-pointer" onClick={() => setSelected(call)}><TableCell className="font-semibold">#{call.call_number}</TableCell><TableCell className="whitespace-nowrap">{call.site_survey_number ? String(call.site_survey_number).padStart(12, "0") : "—"}</TableCell><TableCell>{names.get(call.reporter_id)}</TableCell><TableCell>{CATEGORIES[call.category]}</TableCell><TableCell className="max-w-xs truncate font-medium">{call.title}</TableCell><TableCell>{PRIORITIES[call.priority]}</TableCell><TableCell><Badge variant="status">{STATUSES[call.status]}</Badge></TableCell><TableCell>{new Date(call.created_at).toLocaleDateString("pt-BR")}</TableCell></TableRow>)}{!filtered.length ? <TableRow><TableCell colSpan={8} className="h-24 text-center text-muted-foreground">Nenhum chamado encontrado.</TableCell></TableRow> : null}</TableBody></Table></div>}
       </CardContent></Card>
     </main>
     <CallDetails call={selected} data={data} names={names} onClose={() => setSelected(null)} onUpdated={refresh} />

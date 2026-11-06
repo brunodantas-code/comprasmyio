@@ -1,3 +1,4 @@
+import { useTableFilters } from "@/components/use-table-filters";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronUp, ChevronDown, Search, ShieldCheck } from "lucide-react";
 import { useState } from "react";
@@ -25,7 +26,6 @@ function symmetricDifference(first: Set<string>, second: Set<string>) {
 
 export function AccessProfilesTab() {
   const qc = useQueryClient();
-  const [nameFilter, setNameFilter] = useState("");
   const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
   const { data: requestTypes = [] } = useRequestTypes();
   const activeRequestTypeCodes = requestTypes.filter((type) => type.active).map((type) => type.code);
@@ -78,10 +78,12 @@ export function AccessProfilesTab() {
     },
   });
 
-  const normalizedFilter = nameFilter.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR");
-  const filteredUsers = data?.filter((user) =>
-    (user.full_name || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR").includes(normalizedFilter),
-  );
+  const userFilters = useTableFilters(data ?? [], [
+    { key: "name", label: "Nome", value: u => u.full_name },
+    { key: "email", label: "E-mail", value: u => u.email },
+    { key: "profile", label: "Perfil", value: u => u.profileName },
+  ]);
+  const filteredUsers = userFilters.filtered;
 
   const updatePermissions = useMutation({
     mutationFn: async ({ userId, permissions, profilePermissions, requestTypes, profileRequestTypes }: { userId: string; permissions: Set<string>; profilePermissions: Set<string>; requestTypes: Set<string>; profileRequestTypes: Set<string> }) => {
@@ -118,17 +120,7 @@ export function AccessProfilesTab() {
         <CardDescription>Adicione ou remova acessos do perfil atual de cada usuário.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="relative max-w-sm">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            aria-label="Filtrar por nome do usuário"
-            className="pl-9"
-            onChange={(event) => setNameFilter(event.target.value)}
-            placeholder="Filtrar por nome do usuário"
-            type="search"
-            value={nameFilter}
-          />
-        </div>
+        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">{["name", "email", "profile"].map(key => <span key={key}>{userFilters.header(key)}</span>)}</div>
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : null}
         {!isLoading && data?.length === 0 ? <p className="text-sm text-muted-foreground">Nenhum usuário cadastrado.</p> : null}
         {!isLoading && data?.length !== 0 && filteredUsers?.length === 0 ? <p className="text-sm text-muted-foreground">Nenhum usuário encontrado.</p> : null}

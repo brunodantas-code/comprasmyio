@@ -1,3 +1,4 @@
+import { useTableFilters } from "@/components/use-table-filters";
 import { useMemo, useRef, useState, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -406,7 +407,6 @@ function CorrectReleaseDialog({
 export function ReleaseAssembledDialog({ userId }: { userId: string }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState("");
   const [qty, setQty] = useState<Record<string, string>>({});
   const [people, setPeople] = useState<string[]>([]);
   const [file, setFile] = useState<File | null>(null);
@@ -417,19 +417,15 @@ export function ReleaseAssembledDialog({ userId }: { userId: string }) {
   const { data: materials } = useAlmoxarifadoMaterials();
   const { data: profiles } = useProfilesList();
 
-  const filtered = useMemo(
-    () =>
-      (materials ?? [])
-        .filter((m) => m.name.toLowerCase().includes(search.trim().toLowerCase())),
-    [materials, search],
-  );
+  const deviceFilters = useTableFilters(materials ?? [], [{ key: "device", label: "Dispositivos e quantidades", value: m => m.name }]);
+  const filtered = deviceFilters.filtered;
 
   function reset() {
     setQty({});
     setPeople([]);
     setFile(null);
     setNotes("");
-    setSearch("");
+    deviceFilters.clear();
     if (fileRef.current) fileRef.current.value = "";
     if (cameraRef.current) cameraRef.current.value = "";
   }
@@ -622,16 +618,7 @@ export function ReleaseAssembledDialog({ userId }: { userId: string }) {
           }}
         >
           <div className="space-y-2">
-            <Label>Dispositivos e quantidades</Label>
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Buscar dispositivo do estoque"
-                className="pl-8"
-              />
-            </div>
+            <div className="text-sm">{deviceFilters.header("device")}</div>
             <div className="max-h-64 space-y-1 overflow-y-auto rounded border p-2">
               {!filtered.length ? (
                 <p className="p-2 text-sm text-muted-foreground">Nenhum dispositivo encontrado no estoque.</p>

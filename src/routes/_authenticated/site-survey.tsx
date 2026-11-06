@@ -1,3 +1,6 @@
+import { ColumnFilter } from "@/components/column-filter";
+import { matchesColumnFilter, type ColumnFilterValue } from "@/lib/column-filters";
+import { useTableFilters } from "@/components/use-table-filters";
 import { formatPurchaseQuantity, validCatalogQuantity } from "@/lib/site-survey-meter-electrical";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -172,8 +175,8 @@ function SiteSurveyPage() {
   const [section, setSection] = useState("visitas");
   const [visitsSection, setVisitsSection] = useState("minhas");
   const [userSection, setUserSection] = useState("lista");
-  const [statusFilter, setStatusFilter] = useState("todos");
-  const [search, setSearch] = useState("");
+  const statusFilter = "todos";
+  const search = "";
   const [selected, setSelected] = useState<Visit | null>(null);
   const visitCloseGuard = useRef<(() => Promise<boolean>) | null>(null);
   const toggleVisit = async (visit: Visit) => {
@@ -252,7 +255,7 @@ function SiteSurveyPage() {
       return ids;
     },
   });
-  const filtered = (data?.visits ?? []).filter((visit) => {
+  const scopedVisits = (data?.visits ?? []).filter((visit) => {
     if (visitsSection === "pendencias") {
       const haystack = visitSearchHaystack([visit.survey_number, names.clients.get(visit.client_id ?? ""), names.projects.get(visit.project_id ?? ""), visit.address], data?.pointNames.get(visit.id));
       return (visit.status === "em_andamento" || visit.status === "concluida") && (data?.isErpAdmin || data?.permissions.has("site_survey_editar") || visit.technician_id === data?.userId) && Boolean(pendingVisitIds.data?.has(visit.id)) && haystack.includes(search.toLocaleLowerCase("pt-BR"));
@@ -260,6 +263,16 @@ function SiteSurveyPage() {
     const haystack = visitSearchHaystack([visit.survey_number, names.clients.get(visit.client_id ?? ""), names.projects.get(visit.project_id ?? ""), names.technicians.get(visit.technician_id), visit.address], data?.pointNames.get(visit.id));
     return (visitsSection === "resumo" || !visit.is_manual_entry && (visit.status === "agendada" || visit.status === "em_andamento") && (data?.isErpAdmin || visit.technician_id === data?.userId)) && (visitsSection !== "resumo" || statusFilter === "todos" || visit.status === statusFilter) && haystack.includes(search.toLocaleLowerCase("pt-BR"));
   });
+  const visitFilters = useTableFilters(scopedVisits, [
+    { key: "number", label: "Nº / Abrir", kind: "number", value: v => v.survey_number },
+    { key: "client", label: "Cliente / Projeto", value: v => [names.clients.get(v.client_id ?? ""), names.projects.get(v.project_id ?? "")].filter(Boolean).join(" — ") },
+    { key: "technician", label: "Técnico", value: v => names.technicians.get(v.technician_id) },
+    { key: "date", label: "Agendamento", kind: "date", value: v => v.scheduled_start.slice(0,10), display: v => new Date(v.scheduled_start).toLocaleDateString("pt-BR") },
+    ...(visitsSection === "resumo" ? [{ key: "status", label: "Situação", value: (v: Visit) => STATUS[v.status] }] : []),
+    { key: "search", label: "Visitas e pontos", value: v => visitSearchHaystack([v.survey_number, names.clients.get(v.client_id ?? ""), names.projects.get(v.project_id ?? ""), names.technicians.get(v.technician_id), v.address], data?.pointNames.get(v.id)) },
+  ]);
+  const filtered = visitFilters.filtered;
+  const pointSearch = visitFilters.searchText("search");
   const invalidate = () => qc.invalidateQueries({ queryKey: ["site-survey-data"] });
   const cancelVisit = async (visit: Visit) => {
     const { error } = await supabase.from("site_survey_visits").update({ status: "cancelada", cancelled_at: new Date().toISOString() }).eq("id", visit.id);
@@ -314,9 +327,9 @@ function SiteSurveyPage() {
               </section>
             </TabsContent>
             {visitsSection === "minhas" || visitsSection === "resumo" || visitsSection === "pendencias" ? <div aria-label={visitsSection === "resumo" ? "Consulta das visitas" : visitsSection === "pendencias" ? "Sanar Pendências" : "Realizar Visita"}>
-<div className="mb-4 flex flex-col gap-3 sm:flex-row"><div className="relative flex-1"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar visita, cliente, projeto, técnico ou loja" className="pl-9" /></div>{visitsSection === "resumo" ? <Select value={statusFilter} onValueChange={setStatusFilter}><SelectTrigger className="sm:w-52"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="todos">Todas as situações</SelectItem>{STATUS_ORDER.map((status) => <SelectItem key={status} value={status}>{STATUS[status]}</SelectItem>)}</SelectContent></Select> : null}</div>
+<div className="mb-3 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">{visitFilters.header("search")}<div className="flex flex-wrap gap-4 lg:hidden">{["number", "client", "technician", "date", ...(visitsSection === "resumo" ? ["status"] : [])].map(key => <span key={key}>{visitFilters.header(key)}</span>)}</div></div>
                <div className="overflow-hidden rounded-md border border-border bg-card">
-                 <div className="hidden grid-cols-[250px_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_150px_max-content] items-center gap-3 border-b px-4 py-3 text-sm text-muted-foreground lg:grid"><span>Nº / Abrir</span><span>Cliente / Projeto</span><span>Técnico</span><span>Agendamento</span><span>Situação</span><span className="flex items-center justify-between gap-2">Ações<Button type="button" size="compactIcon" variant="ghost" aria-label={visitsListOpen ? "Recolher relação de visitas" : "Exibir relação de visitas"} title={visitsListOpen ? "Recolher" : "Exibir"} onClick={() => setVisitsListOpen((current) => !current)}><ChevronDown className={`h-5 w-5 transition-transform ${visitsListOpen ? "rotate-180" : ""}`} /></Button></span></div>
+                 <div className="hidden grid-cols-[250px_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_150px_max-content] items-center gap-3 border-b px-4 py-3 text-sm text-muted-foreground lg:grid"><span>{visitFilters.header("number")}</span><span>{visitFilters.header("client")}</span><span>{visitFilters.header("technician")}</span><span>{visitFilters.header("date")}</span><span>{visitsSection === "resumo" ? visitFilters.header("status") : "Situação"}</span><span className="flex items-center justify-between gap-2">Ações<Button type="button" size="compactIcon" variant="ghost" aria-label={visitsListOpen ? "Recolher relação de visitas" : "Exibir relação de visitas"} title={visitsListOpen ? "Recolher" : "Exibir"} onClick={() => setVisitsListOpen((current) => !current)}><ChevronDown className={`h-5 w-5 transition-transform ${visitsListOpen ? "rotate-180" : ""}`} /></Button></span></div>
                  {filtered.map((visit) => {
                    const visitExpanded = selected?.id === visit.id;
                    return <div key={visit.id} className={`${visitsListOpen ? "" : "lg:hidden"} grid gap-3 border-b border-border px-4 py-3 last:border-0 lg:grid-cols-[250px_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_150px_max-content] lg:items-center lg:py-4`}>
@@ -330,7 +343,7 @@ function SiteSurveyPage() {
                  })}
                  {filtered.length === 0 ? <p className={`${visitsListOpen ? "" : "lg:hidden"} px-4 py-12 text-center text-sm text-muted-foreground`}>{visitsSection === "pendencias" ? pendingVisitIds.isLoading ? "Carregando visitas com pendências..." : "Nenhuma visita com pendências." : "Nenhuma visita encontrada."}</p> : null}
                </div>
-               {(search.trim() ? filtered : filtered.filter((visit) => visit.id === selected?.id)).map((visit) => <VisitDetails key={visit.id} pointSearch={search} closeGuardRef={visitCloseGuard} view={visitsSection === "resumo" ? "summary" : visitsSection === "pendencias" ? "pending" : "execution"} visit={visit} data={data} onClose={() => { if (selected?.id === visit.id) setSelected(null); }} onChanged={(updatedVisit) => { void invalidate(); void qc.invalidateQueries({ queryKey: ["site-survey-pending-visits"] }); if (selected?.id === visit.id) setSelected(updatedVisit ?? null); }} executionPointFocus={executionPointFocus} onExecutionPointFocusConsumed={() => setExecutionPointFocus(null)} onGoToExecution={(pointValue) => { setExecutionPointFocus(pointValue); setVisitsSection("minhas"); }} />)}
+               {(pointSearch.trim() ? filtered : filtered.filter((visit) => visit.id === selected?.id)).map((visit) => <VisitDetails key={visit.id} pointSearch={pointSearch} closeGuardRef={visitCloseGuard} view={visitsSection === "resumo" ? "summary" : visitsSection === "pendencias" ? "pending" : "execution"} visit={visit} data={data} onClose={() => { if (selected?.id === visit.id) setSelected(null); }} onChanged={(updatedVisit) => { void invalidate(); void qc.invalidateQueries({ queryKey: ["site-survey-pending-visits"] }); if (selected?.id === visit.id) setSelected(updatedVisit ?? null); }} executionPointFocus={executionPointFocus} onExecutionPointFocusConsumed={() => setExecutionPointFocus(null)} onGoToExecution={(pointValue) => { setExecutionPointFocus(pointValue); setVisitsSection("minhas"); }} />)}
             </div> : null}
             {can("site_survey_agendar") ? <><TabsContent value="nova"><VisitDialog data={data} inline onSaved={() => { invalidate(); setVisitsSection("minhas"); }} /></TabsContent><TabsContent value="realizada"><VisitDialog data={data} inline manual onSaved={() => { invalidate(); setVisitsSection("resumo"); }} /></TabsContent></> : null}
           </Tabs>
@@ -460,8 +473,8 @@ function VisitDetails({ pointSearch = "", visit, data, onClose, onChanged, close
   const [screenSummaryOpen, setScreenSummaryOpen] = useState(false);
   const [checklistDialogOpen, setChecklistDialogOpen] = useState(false);
   const [registrationPendingOpen, setRegistrationPendingOpen] = useState(true);
-  const [pendingPointFilter, setPendingPointFilter] = useState("");
-  const [pendingTypeFilter, setPendingTypeFilter] = useState("");
+  const [pendingPointFilter, setPendingPointFilter] = useState<ColumnFilterValue>();
+  const [pendingTypeFilter, setPendingTypeFilter] = useState<ColumnFilterValue>();
   const [customerQuestionsOnly, setCustomerQuestionsOnly] = useState(false);
   const [initialStepsExpanded, setInitialStepsExpanded] = useState<boolean | null>(null);
   const [pendingGroup, setPendingGroup] = useState<{ pointValue: string; key: string } | null>(null);
@@ -1292,26 +1305,17 @@ function VisitDetails({ pointSearch = "", visit, data, onClose, onChanged, close
   );
   const checklistDialog = <Dialog open={checklistDialogOpen} onOpenChange={(open) => { if (!open) { setChecklistDialogOpen(false); void switchPoint(""); } }}><DialogContent className="max-h-[88vh] overflow-y-auto sm:max-w-3xl"><DialogHeader><DialogTitle className="text-base">Checklist — {points.find((point) => point.value === selectedPoint)?.label ?? ""}</DialogTitle><DialogDescription>Complete as respostas e fotos pendentes. O status e as datas da visita não são alterados.</DialogDescription></DialogHeader>{phaseForm}</DialogContent></Dialog>;
   if (view === "pending") {
-    const term = pendingPointFilter.trim().toLocaleLowerCase("pt-BR");
+
     const pendingTypes = new Map<string, string>();
     for (const row of registrationPending) for (const group of row.groups) if (!pendingTypes.has(group.label)) pendingTypes.set(group.label, group.label);
     const rows = registrationPending.filter((row) => row.items.length
-      && (!term || row.point.label.toLocaleLowerCase("pt-BR").includes(term))
-      && (!pendingTypeFilter || row.groups.some((group) => group.label === pendingTypeFilter)));
-    const pendingFilterActive = Boolean(term || pendingTypeFilter);
+      && matchesColumnFilter("text", row.point.label, row.point.label, pendingPointFilter)
+      && row.groups.some(group => matchesColumnFilter("text", group.label, group.label, pendingTypeFilter)));
+    const pendingFilterActive = Boolean(pendingPointFilter || pendingTypeFilter);
     return <section className="mt-5 space-y-4 rounded-md border border-border bg-card p-4 shadow-sm sm:p-6" aria-label={`Pendências da visita ${String(visit.survey_number).padStart(12, "0")}`}>
       <header className="flex items-start justify-between gap-2 border-b border-border pb-3"><div className="min-w-0"><h2 className="break-words text-lg font-bold">Sanar pendências — #{String(visit.survey_number).padStart(12, "0")}</h2><p className="mt-1 text-sm text-muted-foreground"><MapPin className="mr-1 inline h-3.5 w-3.5" />{visit.address}</p></div><Button type="button" variant="ghost" size="compactIcon" aria-label="Recolher visita" title="Recolher visita" onClick={() => void closeVisit()}><ChevronUp className="h-5 w-5" /></Button></header>
-      <div className="flex flex-col gap-2 sm:flex-row">
-        <div className="relative flex-1"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input value={pendingPointFilter} onChange={(event) => setPendingPointFilter(event.target.value)} placeholder="Filtrar por LUC ou nome da loja, quiosque ou ambiente" aria-label="Filtrar por LUC ou nome" className="pl-9" /></div>
-        <Select value={pendingTypeFilter || "all"} onValueChange={(value) => setPendingTypeFilter(value === "all" ? "" : value)}>
-          <SelectTrigger aria-label="Filtrar por tipo de pendência" className="w-full sm:w-72"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos os tipos de pendência</SelectItem>
-            {[...pendingTypes.keys()].map((label) => <SelectItem key={label} value={label}>{label}</SelectItem>)}
-          </SelectContent>
-        </Select>
-      </div>
-      {rows.length ? <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{rows.map((row) => <div key={row.point.value} className="space-y-2 rounded-md border border-border bg-background p-3"><p className="break-words text-sm font-semibold">{row.point.label}</p>{renderRegistrationPending(row.point.value, pendingTypeFilter || undefined)}</div>)}</div> : <p className="py-8 text-center text-sm text-muted-foreground">{pendingFilterActive ? "Nenhum ponto encontrado para os filtros informados." : "Nenhuma pendência nesta visita."}</p>}
+      <div className="flex flex-wrap gap-4 text-sm text-muted-foreground"><span className="inline-flex items-center gap-1">LUC / Nome<ColumnFilter label="LUC ou nome" kind="text" values={registrationPending.map(r => r.point.label)} value={pendingPointFilter} onChange={setPendingPointFilter} /></span><span className="inline-flex items-center gap-1">Tipo de pendência<ColumnFilter label="Tipo de pendência" kind="text" values={[...pendingTypes.keys()]} value={pendingTypeFilter} onChange={setPendingTypeFilter} /></span></div>
+      {rows.length ? <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{rows.map((row) => <div key={row.point.value} className="space-y-2 rounded-md border border-border bg-background p-3"><p className="break-words text-sm font-semibold">{row.point.label}</p>{renderRegistrationPending(row.point.value)}</div>)}</div> : <p className="py-8 text-center text-sm text-muted-foreground">{pendingFilterActive ? "Nenhum ponto encontrado para os filtros informados." : "Nenhuma pendência nesta visita."}</p>}
       {pendingPanel}{pendingFocusDialog}{checklistDialog}
     </section>;
   }

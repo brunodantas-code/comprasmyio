@@ -1,3 +1,4 @@
+import { useTableFilters } from "@/components/use-table-filters";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,7 +28,6 @@ const normalize = (s: string) =>
 export function StockSimulatorDialog({ userId }: { userId?: string }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState("");
   const [qtys, setQtys] = useState<Record<string, string>>({});
 
   const { data: materials } = useQuery({
@@ -61,10 +61,8 @@ export function StockSimulatorDialog({ userId }: { userId?: string }) {
     [materials],
   );
 
-  const visibleProducts = useMemo(() => {
-    const q = normalize(search);
-    return q ? products.filter((p) => normalize(p.name).includes(q)) : products;
-  }, [products, search]);
+  const simulatorFilters = useTableFilters(products, [{ key: "name", label: "Dispositivo", value: p => p.name }]);
+  const visibleProducts = simulatorFilters.filtered;
 
   const nameOf = (id: string) => (materials ?? []).find((m) => m.id === id)?.name ?? "Material";
 
@@ -130,21 +128,11 @@ export function StockSimulatorDialog({ userId }: { userId?: string }) {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="relative">
-          <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            className="pl-8"
-            placeholder="Buscar dispositivo"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-
         <div className="rounded-md border">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Dispositivo</TableHead>
+                <TableHead>{simulatorFilters.header("name")}</TableHead>
                 <TableHead className="w-32 text-right">Quantidade</TableHead>
               </TableRow>
             </TableHeader>
@@ -218,7 +206,6 @@ export function StockSimulatorDialog({ userId }: { userId?: string }) {
 }
 
 export function ProductionCapacityCard() {
-  const [search, setSearch] = useState("");
   const [limitDialog, setLimitDialog] = useState<{ name: string; possible: number | null; items: { name: string; can: number; per: number; balance: number }[] } | null>(null);
 
   const { data: materials } = useQuery({
@@ -304,10 +291,12 @@ export function ProductionCapacityCard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [materials, boms, stock]);
 
-  const visible = useMemo(() => {
-    const q = normalize(search);
-    return q ? rows.filter((r) => normalize(r.name).includes(q)) : rows;
-  }, [rows, search]);
+  const productionFilters = useTableFilters(rows, [
+    { key: "name", label: "Dispositivo", value: r => r.name },
+    { key: "possible", label: "Pode produzir", kind: "number", value: r => r.possible },
+    { key: "limiter", label: "Componente limitante", value: r => r.limiter },
+  ]);
+  const visible = productionFilters.filtered;
 
   return (
     <Card>
@@ -324,11 +313,11 @@ export function ProductionCapacityCard() {
         <Table>
           <TableHeader className="[&_tr]:border-b">
             <TableRow className="border-b">
-              <TableHead>Dispositivo</TableHead>
-              <TableHead className="text-right">Pode produzir</TableHead>
-              <TableHead>Componente limitante</TableHead>
+              <TableHead>{productionFilters.header("name")}</TableHead>
+              <TableHead className="text-right">{productionFilters.header("possible")}</TableHead>
+              <TableHead>{productionFilters.header("limiter")}</TableHead>
             </TableRow>
-            <TableRow><TableHead className="py-1"><Input className="h-8 bg-background" placeholder="Filtrar" aria-label="Filtrar por dispositivo" value={search} onChange={(e) => setSearch(e.target.value)} /></TableHead><TableHead className="py-1" /><TableHead className="py-1" /></TableRow>
+
           </TableHeader>
           <TableBody>
             {visible.map((r) => (
