@@ -36,15 +36,15 @@ export function MinutesList({ rows, expanded, toggle, edit, remove, openPdf }: {
               <div className="flex items-start gap-3 sm:gap-4">
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary text-sm font-semibold text-primary-foreground">{index + 1}</span>
                 <div className="grid min-w-0 flex-1 gap-4 sm:grid-cols-2">
-                  <div className="min-w-0"><h3 className="break-words border-b border-border pb-2 font-semibold">{subject.title}</h3><p className="mt-1 text-xs text-muted-foreground">Título do assunto</p></div>
-                  <div className="min-w-0"><p className="whitespace-pre-wrap break-words border-b border-border pb-2">{subject.description || '—'}</p><p className="mt-1 text-xs text-muted-foreground">Descrição</p></div>
+                  <div className="flex min-w-0 flex-col"><h3 className="flex-1 break-words border-b border-border pb-2 font-semibold">{subject.title}</h3><p className="mt-1 text-xs text-muted-foreground">Título do assunto</p></div>
+                  <div className="flex min-w-0 flex-col"><p className="flex-1 whitespace-pre-wrap break-words border-b border-border pb-2">{subject.description || '—'}</p><p className="mt-1 text-xs text-muted-foreground">Descrição</p></div>
                 </div>
                 {subject.responsible?.trim() && !subject.completionDate ? <PendingDot label={`Ação pendente de ${subject.responsible}`} /> : null}
               </div>
             </div>
             <div className="space-y-3 border-t border-border px-4 py-4 sm:px-6">
               <h4 className="text-base font-semibold">Deliberações</h4>
-              <p className="whitespace-pre-wrap break-words">{subject.decisions || '—'}</p>
+              {subject.decisions?.trim() ? <ol className="space-y-2">{subject.decisions.split(/\r?\n/).map(line => line.trim()).filter(Boolean).map((decision, decisionIndex) => <li key={decisionIndex} className="flex items-start gap-2"><span className="shrink-0">{decisionIndex + 1})</span><span className="min-w-0 whitespace-pre-wrap break-words">{decision.replace(/^\d+[.)]\s+/, '')}</span></li>)}</ol> : <p>—</p>}
               {subject.responsible || subject.completionDate ? <div className="grid gap-3 border-t border-border pt-3 sm:grid-cols-2">
                 {subject.responsible ? <p className="break-words"><span className="text-muted-foreground">Responsável: </span>{subject.responsible}</p> : null}
                 {subject.completionDate ? <p><span className="text-muted-foreground">Data de conclusão: </span>{legalDate(subject.completionDate)}</p> : null}
