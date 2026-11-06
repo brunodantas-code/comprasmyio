@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Destacar em negrito todas as menções a menus e submenus no material editável do manual, sem gerar novo PDF
 - [x] Remover do cabeçalho do manual a informação já presente no rodapé, conforme print; manter retorno ao Sumário
 - [x] Incluir retorno clicável ao Sumário em todas as páginas do manual e numeração verde em quadrados verde-claros conforme checklist Site Survey; sem gerar novo PDF
 - [x] Incluir Fabricação após Aprovações no subtítulo do manual Supply e explicitar fabricação de dispositivos, controle de estoque e almoxarifado no Objetivo; sem gerar novo PDF
