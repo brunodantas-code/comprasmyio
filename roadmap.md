@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Atas: consolidação no padrão Minhas Pendências, bolinha vermelha para assinaturas/ações pendentes e responsável/data de conclusão opcionais por assunto; persistência, baixa da ação e telas computador/celular conferidas.
 - [x] Atas: participantes com busca digitável tolerante de usuários do ERP e inclusão de nomes externos; salvamento e reabertura conferidos no computador e celular.
 - [x] Disponibilizar manual atual do Supply em tela pelo menu principal, mantendo PDFs em Cadastro → Diversos e sem restaurar versões de teste; abertura pelo menu, sumário e 21 capítulos conferidos em computador/celular.
 - [x] Reposicionar ícone preto logo após Supply e pontuar os passos internos; PDF V4 com 24 páginas revisadas

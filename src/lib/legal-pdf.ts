@@ -14,7 +14,11 @@ export async function legalPdf(title: string, date: string | null, content: Lega
   if (minutes) { text(`Data da reunião: ${legalDate(date)}`); text(`Local: ${content.location}`); text(`Participantes: ${content.participants.map(p => p.name).join(', ')}`); }
   for (const [index, subject] of content.subjects.entries()) {
     text(`${index + 1}. ${subject.title}`, 13); text(subject.description);
-    if (minutes) { text('Deliberações', 11); text(subject.decisions); }
+    if (minutes) {
+      text('Deliberações', 11); text(subject.decisions);
+      if (subject.responsible) text(`Responsável: ${subject.responsible}`);
+      if (subject.completionDate) text(`Data de conclusão: ${legalDate(subject.completionDate)}`);
+    }
   }
   if (minutes) {
     room(20); text('Assinaturas dos participantes', 13);

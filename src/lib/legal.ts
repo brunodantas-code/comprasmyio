@@ -1,5 +1,5 @@
 export type LegalCategory = 'minutes' | 'contracts' | 'templates';
-export type LegalSubject = { id: string; title: string; description: string; decisions: string };
+export type LegalSubject = { id: string; title: string; description: string; decisions: string; responsible?: string; completionDate?: string };
 export type LegalParticipant = { id: string; name: string; signature: string; signedAt: string };
 export type LegalContent = { location: string; counterpart: string; participants: LegalParticipant[]; subjects: LegalSubject[] };
 export function emptyLegalContent(): LegalContent { return { location: '', counterpart: '', participants: [], subjects: [] }; }
@@ -10,6 +10,11 @@ export function parseLegalContent(value: unknown): LegalContent {
 }
 export function allParticipantsSigned(content: LegalContent) { return content.participants.length > 0 && content.participants.every(p => p.name.trim() && p.signature && p.signedAt); }
 export function clearLegalSignatures(content: LegalContent): LegalContent { return { ...content, participants: content.participants.map(p => ({ ...p, signature: '', signedAt: '' })) }; }
-export function legalSearchText(title: string, content: LegalContent) { return normalizeLegalText([title, ...content.subjects.flatMap(s => [s.title, s.description, s.decisions])].join(' ')); }
+export function legalPendingCount(content: LegalContent) {
+  const signatures = content.participants.filter(p => !p.signature || !p.signedAt).length;
+  const actions = content.subjects.filter(s => s.responsible?.trim() && !s.completionDate).length;
+  return { signatures, actions, total: signatures + actions };
+}
+export function legalSearchText(title: string, content: LegalContent) { return normalizeLegalText([title, ...content.subjects.flatMap(s => [s.title, s.description, s.decisions, s.responsible ?? ''])].join(' ')); }
 export function normalizeLegalText(value: string) { return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
 export function legalDate(value: string | null) { return value ? value.split('-').reverse().join('/') : '—'; }

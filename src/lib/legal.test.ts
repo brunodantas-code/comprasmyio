@@ -1,6 +1,26 @@
 import { describe, it, expect } from 'vitest';
-import { allParticipantsSigned, clearLegalSignatures, emptyLegalContent, legalSearchText } from './legal';
+import { allParticipantsSigned, clearLegalSignatures, emptyLegalContent, legalSearchText, legalPendingCount, parseLegalContent } from './legal';
 describe('Atas do Legal', () => {
+  it('conta assinaturas pendentes e elimina a pendência após assinar', () => {
+    const content = emptyLegalContent();
+    content.participants = [{id:'1', name:'Ana', signature:'', signedAt:''}];
+    expect(legalPendingCount(content).signatures).toBe(1);
+    content.participants[0] = {...content.participants[0], signature:'PNG', signedAt:'2026-11-06'};
+    expect(legalPendingCount(content).signatures).toBe(0);
+  });
+  it('ação com responsável fica pendente até registrar a data de conclusão', () => {
+    const content = emptyLegalContent();
+    content.subjects = [{id:'1', title:'Contratar', description:'', decisions:'', responsible:'Ana'}];
+    expect(legalPendingCount(content).actions).toBe(1);
+    content.subjects[0].completionDate = '2026-11-06';
+    expect(legalPendingCount(content).actions).toBe(0);
+  });
+  it('responsável e conclusão são opcionais e preservados ao ler a ata', () => {
+    const legacy = {id:'1', title:'Assunto', description:'Descrição', decisions:'Deliberação'};
+    expect(legalPendingCount(parseLegalContent({subjects:[legacy]})).total).toBe(0);
+    const subject = {...legacy, responsible:'Maria Externa', completionDate:'2026-11-06'};
+    expect(parseLegalContent({subjects:[subject]}).subjects[0]).toEqual(subject);
+  });
   it('alterar o conteúdo exige novas assinaturas sem mudar os participantes', () => {
     const content = emptyLegalContent(); content.participants = [{id:'1',name:'Ana',signature:'PNG',signedAt:'2026-11-05'}];
     const updated = clearLegalSignatures(content);
