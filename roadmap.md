@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Remover do cabeçalho do manual a informação já presente no rodapé, conforme print; manter retorno ao Sumário
 - [x] Incluir retorno clicável ao Sumário em todas as páginas do manual e numeração verde em quadrados verde-claros conforme checklist Site Survey; sem gerar novo PDF
 - [x] Incluir Fabricação após Aprovações no subtítulo do manual Supply e explicitar fabricação de dispositivos, controle de estoque e almoxarifado no Objetivo; sem gerar novo PDF
 - [x] Atualizar subtítulo da capa Supply para “Solicitações, Aprovações, Estoque e Almoxarifado”, sem gerar novo PDF
