@@ -3078,20 +3078,20 @@ function OrdersTable({
           </>
         )}
       </div>
-      <Table className="w-full table-fixed">
+      <Table className={`w-full table-fixed ${showRequester ? "min-w-[1330px]" : "min-w-[1225px]"}`}>
         <TableHeader className="[&_tr]:border-b">
           <TableRow className="border-b">
-            <TableHead className="w-[200px] text-left">Approval {colFilter("approval")}</TableHead>
-            <TableHead className="w-[170px] text-center">Itens da Solicitação {colFilter("itens")}</TableHead>
-            <TableHead className="w-[120px] text-center">Tipo {colFilter("tipo")}</TableHead>
-            <TableHead className="w-[125px] text-center">Alocação {colFilter("aloc")}</TableHead>
-            {showRequester && <TableHead className="w-[105px] text-center">Solicitante {colFilter("req")}</TableHead>}
-            <TableHead className="w-[45px] text-center">Qtd<br />{colFilter("qtd")}</TableHead>
-            <TableHead className="w-[100px] text-center">Valor Total {colFilter("valor")}</TableHead>
-            <TableHead className="w-[100px] text-center">Destinatário {colFilter("dest")}</TableHead>
-            <TableHead className="w-[100px] text-center">Prazo <span className="inline-flex gap-0.5">{colFilter("prazo")}{colFilter("prev")}</span></TableHead>
-            <TableHead className="w-[105px] text-center">Status {colFilter("status")}</TableHead>
-            <TableHead className="w-[100px] text-center">Palavra passe {colFilter("passe")}</TableHead>
+            <TableHead className="w-[150px] text-left"><span className="inline-flex items-center gap-1 whitespace-nowrap">Approval {colFilter("approval")}</span></TableHead>
+            <TableHead className="w-[190px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Itens da Solicitação {colFilter("itens")}</span></TableHead>
+            <TableHead className="w-[125px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Tipo {colFilter("tipo")}</span></TableHead>
+            <TableHead className="w-[120px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Alocação {colFilter("aloc")}</span></TableHead>
+            {showRequester && <TableHead className="w-[105px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Solicitante {colFilter("req")}</span></TableHead>}
+            <TableHead className="w-[65px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Qtd {colFilter("qtd")}</span></TableHead>
+            <TableHead className="w-[115px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Valor Total {colFilter("valor")}</span></TableHead>
+            <TableHead className="w-[120px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Destinatário {colFilter("dest")}</span></TableHead>
+            <TableHead className="w-[110px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Prazo <span className="inline-flex shrink-0 gap-0.5">{colFilter("prazo")}{colFilter("prev")}</span></span></TableHead>
+            <TableHead className="w-[110px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Status {colFilter("status")}</span></TableHead>
+            <TableHead className="w-[120px] text-center"><span className="inline-flex items-center gap-1 whitespace-nowrap">Palavra passe {colFilter("passe")}</span></TableHead>
           </TableRow>
           {headerFilters && !filterBar && (
             <TableRow>

@@ -1,4 +1,7 @@
 # Roadmap
+- [x] Avaliar redundância da faixa superior e responder: filtros sobrepostos, busca de Item também inclui observações; mantida até decisão do usuário
+- [x] Cabeçalhos do Approval: filtros à direita do título, sem quebra; conferidos em 1280 e 1083 px
+- [x] Ampliar área principal de todos os apps em aproximadamente 1 cm por lado no desktop; margens do celular preservadas e conferidas
 - [x] Code: destinatário pesquisável, padrão Solicitante, resposta pelo destinatário e alerta ao Solicitante na Central; envio e leitura conferidos
 - [x] Supply: conversa Solicitante/Comprador com perguntas, respostas e Histórico no padrão Code; pendências na Central e Minhas Pendências; envio e recarga conferidos
 - [ ] Conferir resposta e recebimento de alerta com outra conta: sessão disponível é somente do solicitante Admin
