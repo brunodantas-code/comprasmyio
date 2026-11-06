@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Atas: participantes com busca digitável tolerante de usuários do ERP e inclusão de nomes externos; salvamento e reabertura conferidos no computador e celular.
 - [x] Disponibilizar manual atual do Supply em tela pelo menu principal, mantendo PDFs em Cadastro → Diversos e sem restaurar versões de teste; abertura pelo menu, sumário e 21 capítulos conferidos em computador/celular.
 - [x] Reposicionar ícone preto logo após Supply e pontuar os passos internos; PDF V4 com 24 páginas revisadas
 - [ ] Ativar skill de atualização funcional dos manuais: pronta, ativação bloqueada pela exigência de administrador/owner do workspace

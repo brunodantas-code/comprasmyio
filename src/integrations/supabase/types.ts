@@ -7602,6 +7602,13 @@ export type Database = {
       is_erp_admin: { Args: { _user_id: string }; Returns: boolean }
       is_supply_member: { Args: { _user_id: string }; Returns: boolean }
       is_supply_technician: { Args: { _user_id: string }; Returns: boolean }
+      legal_participant_users: {
+        Args: never
+        Returns: {
+          full_name: string
+          id: string
+        }[]
+      }
       list_site_survey_visit_calls: {
         Args: { _visit_id: string }
         Returns: {
