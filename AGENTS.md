@@ -10,8 +10,6 @@
 <!-- LOVABLE:END -->
 - Code lists share pending logic to prevent drift.
 
-- Legal stores app-granted records and private uploader/record files; PDFs embed drawn signatures and changed content clears prior signatures.
-
 - Supply uses recipient IDs, not names; RLS preserves recipient reads. Personal queues union requester/recipient IDs without duplicates; actions stay gated.
 - Supply allocation uses a shared exclusive selector and resolver; purchase-order triggers derive project-owned client/unit IDs and reject conflicting direct allocations, so client consolidation counts each order once while preserving independent cost centers.
 - Supply new-request values use a shared schema guard and insert-only database validation for targeted request models; material unit values are entered and persisted for all authorized requesters, preserving historical orders and unrelated workflows.
