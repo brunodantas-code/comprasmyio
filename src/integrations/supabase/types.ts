@@ -1042,18 +1042,24 @@ export type Database = {
           chosen_by: string
           created_at: string
           group_key: string
+          is_primary: boolean
+          screens: string[]
           variant_key: string
         }
         Insert: {
           chosen_by: string
           created_at?: string
           group_key: string
+          is_primary?: boolean
+          screens?: string[]
           variant_key: string
         }
         Update: {
           chosen_by?: string
           created_at?: string
           group_key?: string
+          is_primary?: boolean
+          screens?: string[]
           variant_key?: string
         }
         Relationships: []

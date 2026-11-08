@@ -1,1 +1,2 @@
 - CDE models: custom models in cde_models (style jsonb via CSS vars), exclusions in cde_removed with replacement standard; standards in cde_selected (multi only for fields).
+- CDE standards: one primary per single group plus optional secondary rows (is_primary=false, screens[] of inventory file paths); secondaries take uses of their screens, primary keeps the rest.

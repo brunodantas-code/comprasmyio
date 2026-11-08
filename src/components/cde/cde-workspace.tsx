@@ -62,6 +62,16 @@ const GROUPS: { key: GroupKey; title: string; hint: string; multi?: boolean }[] 
   { key: "trash", title: "5.8 Lixeira (excluir)", hint: "Padrão único" },
 ];
 
+/** Telas conhecidas pelo levantamento, com o app deduzido pelo caminho do arquivo. */
+const SCREENS = [...new Set(Object.values(inventory).flatMap((g) => (g as { files: string[] }[]).flatMap((v) => v.files)))].sort();
+const APP_BY_DIR: Record<string, string> = { mytosis: "Mytosis", "cash-flow": "Cash Flow", legal: "Legal", cde: "CDE", "site-survey": "Site Survey", opdesk: "OpDesk", code: "Code" };
+function screenApp(f: string) {
+  const parts = f.split("/");
+  if (parts[0] === "components" && parts.length > 2) return APP_BY_DIR[parts[1]] ?? parts[1];
+  if (parts[0] === "routes") return parts[parts.length - 1].replace(/\.tsx$/, "").replace(/^_authenticated\./, "");
+  return "Geral";
+}
+
 const inventoryKey = (v: Omit<Variant, "key">) => [v.tag, v.variant, v.size, v.className, v.icon, v.iconClass].join("|");
 
 function Preview({ v }: { v: Pick<Variant, "tag" | "variant" | "size" | "className" | "icon" | "iconClass" | "label" | "style"> }) {
@@ -83,12 +93,14 @@ export function CdeWorkspace() {
   const [draft, setDraft] = useState(emptyDraft);
   const [deleting, setDeleting] = useState<{ group: GroupKey; model: Variant; label: string } | null>(null);
   const [replacement, setReplacement] = useState("");
+  const [secondary, setSecondary] = useState<{ group: GroupKey; key: string; label: string; screens: string[] } | null>(null);
+  const [screenSearch, setScreenSearch] = useState("");
 
   const { data } = useQuery({
     queryKey: ["cde-data"],
     queryFn: async () => {
       const [sel, models, removed] = await Promise.all([
-        supabase.from("cde_selected").select("group_key,variant_key"),
+        supabase.from("cde_selected").select("group_key,variant_key,is_primary,screens"),
         supabase.from("cde_models").select("*").order("created_at"),
         supabase.from("cde_removed").select("group_key,variant_key,replaced_by"),
       ]);
@@ -112,28 +124,41 @@ export function CdeWorkspace() {
     all.filter((v) => removed.has(v.key)).forEach((v) => { const t = target(v.key); extra.set(t, (extra.get(t) ?? 0) + v.count); });
     let result = kept.map((v) => ({ ...v, count: v.count + (extra.get(v.key) ?? 0) }));
     // Grupos de padrão único: o padrão concentra todos os usos; os demais ficam com zero.
-    const std = standardsOf(g);
+    // Secundários ficam com os usos das telas associadas; o principal com o restante.
+    const std = primariesOf(g);
     const single = !GROUPS.find((x) => x.key === g)?.multi;
     if (single && std.length === 1 && result.some((v) => v.key === std[0])) {
       const total = result.reduce((s, v) => s + v.count, 0);
-      result = result.map((v) => ({ ...v, count: v.key === std[0] ? total : 0 }));
+      const secs = secondariesOf(g);
+      const secCount = new Map<string, number>();
+      for (const sec of secs) {
+        const scr = new Set(sec.screens);
+        let n = 0;
+        for (const v of all) if (v.files.length) n += v.count * v.files.filter((f) => scr.has(f)).length / v.files.length;
+        secCount.set(sec.variant_key, Math.round(n));
+      }
+      const used = [...secCount.values()].reduce((a, b) => a + b, 0);
+      result = result.map((v) => ({ ...v, count: v.key === std[0] ? Math.max(0, total - used) : secCount.get(v.key) ?? 0 }));
     }
     return result;
   };
   const standardsOf = (g: GroupKey) => (data?.selected ?? []).filter((s) => s.group_key === g).map((s) => s.variant_key);
+  const primariesOf = (g: GroupKey) => (data?.selected ?? []).filter((s) => s.group_key === g && s.is_primary).map((s) => s.variant_key);
+  const secondariesOf = (g: GroupKey) => (data?.selected ?? []).filter((s) => s.group_key === g && !s.is_primary);
 
   const toggleStandard = useMutation({
     mutationFn: async ({ group, key, multi }: { group: GroupKey; key: string; multi?: boolean }) => {
-      const current = standardsOf(group);
+      const current = primariesOf(group);
       if (current.includes(key)) {
         const { error } = await supabase.from("cde_selected").delete().eq("group_key", group).eq("variant_key", key);
         if (error) throw error;
         return;
       }
       if (!multi && current.length) {
-        const { error } = await supabase.from("cde_selected").delete().eq("group_key", group);
+        const { error } = await supabase.from("cde_selected").delete().eq("group_key", group).eq("is_primary", true);
         if (error) throw error;
       }
+      await supabase.from("cde_selected").delete().eq("group_key", group).eq("variant_key", key);
       const { error } = await supabase.from("cde_selected").insert({ group_key: group, variant_key: key, chosen_by: await uid() });
       if (error) throw error;
     },
@@ -149,6 +174,20 @@ export function CdeWorkspace() {
     },
     onSuccess: () => { refresh(); setCreating(null); setDraft(emptyDraft); toast.success("Modelo criado"); },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Não foi possível criar o modelo."),
+  });
+
+  const saveSecondary = useMutation({
+    mutationFn: async () => {
+      if (!secondary) return;
+      const { group, key, screens } = secondary;
+      const { error: delErr } = await supabase.from("cde_selected").delete().eq("group_key", group).eq("variant_key", key);
+      if (delErr) throw delErr;
+      if (!screens.length) return;
+      const { error } = await supabase.from("cde_selected").insert({ group_key: group, variant_key: key, is_primary: false, screens, chosen_by: await uid() });
+      if (error) throw error;
+    },
+    onSuccess: () => { refresh(); toast.success(secondary?.screens.length ? "Padrão secundário salvo" : "Padrão secundário removido"); setSecondary(null); },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Não foi possível salvar."),
   });
 
   const remove = useMutation({
@@ -180,6 +219,8 @@ export function CdeWorkspace() {
       {GROUPS.map((g) => {
         const list = groupModels(g.key);
         const standards = standardsOf(g.key);
+        const primaries = primariesOf(g.key);
+        const secs = secondariesOf(g.key);
         const nameOf = (key: string) => { const i = list.findIndex((v) => v.key === key); return i < 0 ? "Modelo excluído" : list[i].name ?? `Modelo ${i + 1}`; };
         const removed = (data?.removed ?? []).filter((r) => r.group_key === g.key);
         const isOpen = open.has(g.key);
@@ -203,13 +244,15 @@ export function CdeWorkspace() {
                 <div className="flex gap-3 overflow-x-auto p-4">
                   {list.map((v, i) => {
                     const selected = standards.includes(v.key);
+                    const isPrimary = primaries.includes(v.key);
+                    const sec = secs.find((s) => s.variant_key === v.key);
                     return (
                       <div key={v.key} className={cn("flex w-64 shrink-0 flex-col gap-2 rounded-lg border p-3", selected ? "border-primary bg-accent" : "border-border")}>
                         <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
                           <span className="truncate" title={v.style?.description || undefined}>{v.name ?? `Modelo ${i + 1}`}{v.custom ? " · criado no CDE" : ""}</span>
                           <span className="flex items-center gap-1">{v.custom && !v.count ? "novo" : `${v.count} uso${v.count === 1 ? "" : "s"}`}
                             <Button type="button" variant="outline" size="compactIcon" title={selected ? "Remova o padrão antes de excluir" : "Excluir modelo"} aria-label={`Excluir ${v.name ?? `Modelo ${i + 1}`}`} disabled={selected}
-                              onClick={() => { if (!standards.length) return toast.error("Escolha primeiro um padrão para substituir este modelo."); setReplacement(standards.length === 1 ? standards[0] : ""); setDeleting({ group: g.key, model: v, label: v.name ?? `Modelo ${i + 1}` }); }}><Trash2 /></Button>
+                              onClick={() => { if (!standards.length) return toast.error("Escolha primeiro um padrão para substituir este modelo."); setReplacement(primaries.length === 1 ? primaries[0] : standards.length === 1 ? standards[0] : ""); setDeleting({ group: g.key, model: v, label: v.name ?? `Modelo ${i + 1}` }); }}><Trash2 /></Button>
                           </span>
                         </div>
                         <div className="flex min-h-14 items-center justify-center rounded-md bg-background p-2"><Preview v={v} /></div>
@@ -221,9 +264,14 @@ export function CdeWorkspace() {
                           {v.icon ? <div className="break-all"><b>Ícone:</b> {v.icon} {v.iconClass}</div> : null}
                           {v.files.length ? <div className="break-all"><b>Onde:</b> {v.files.join(", ")}</div> : null}
                         </dl>
-                        <Button type="button" variant="action" size="sm" style={{ "--wa-bg": "var(--whatsapp-green)", "--wa-bd": "var(--whatsapp-border)", "--wa-tx": "var(--card)" } as React.CSSProperties} className="mt-auto !rounded-lg !border-2 !border-solid !border-[var(--wa-bd)] !bg-[var(--wa-bg)] !text-[var(--wa-tx)] hover:!brightness-110" disabled={toggleStandard.isPending || (selected && !g.multi)} onClick={() => toggleStandard.mutate({ group: g.key, key: v.key, multi: g.multi })}>
-                          {selected ? <><Check className="h-4 w-4" />Padrão{g.multi ? " (remover)" : ""}</> : g.multi ? "Adicionar como padrão" : "Escolher como padrão"}
+                        <Button type="button" variant="action" size="sm" style={{ "--wa-bg": "var(--whatsapp-green)", "--wa-bd": "var(--whatsapp-border)", "--wa-tx": "var(--card)" } as React.CSSProperties} className="mt-auto !rounded-lg !border-2 !border-solid !border-[var(--wa-bd)] !bg-[var(--wa-bg)] !text-[var(--wa-tx)] hover:!brightness-110" disabled={toggleStandard.isPending || (isPrimary && !g.multi)} onClick={() => toggleStandard.mutate({ group: g.key, key: v.key, multi: g.multi })}>
+                          {isPrimary ? <><Check className="h-4 w-4" />{g.multi ? "Padrão (remover)" : "Padrão principal"}</> : g.multi ? "Adicionar como padrão" : sec ? "Tornar principal" : "Escolher como padrão"}
                         </Button>
+                        {!g.multi && !isPrimary && primaries.length ? (
+                          <Button type="button" variant="outline" size="sm" onClick={() => { setScreenSearch(""); setSecondary({ group: g.key, key: v.key, label: v.name ?? `Modelo ${i + 1}`, screens: sec?.screens ?? [] }); }}>
+                            {sec ? `Secundário · ${sec.screens.length} tela${sec.screens.length === 1 ? "" : "s"} (editar)` : "Padrão secundário por tela"}
+                          </Button>
+                        ) : null}
                         <div className="text-center"><ColorCode color="var(--whatsapp-green)" /> · <ColorCode color="var(--whatsapp-border)" /></div>
                       </div>
                     );
@@ -302,6 +350,29 @@ export function CdeWorkspace() {
           <DialogFooter>
             <Button type="button" variant="action" onClick={() => setDeleting(null)}>Cancelar</Button>
             <Button type="button" variant="action" disabled={!replacement || remove.isPending} onClick={() => remove.mutate()}>Excluir</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={!!secondary} onOpenChange={(o) => !o && setSecondary(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle>Padrão secundário: {secondary?.label}</DialogTitle></DialogHeader>
+          <p className="text-sm text-muted-foreground">Escolha as telas que usarão este modelo para contraste ou diferenciação. As demais telas continuam no padrão principal.</p>
+          <Input value={screenSearch} onChange={(e) => setScreenSearch(e.target.value)} placeholder="Buscar tela ou app..." />
+          <div className="max-h-72 space-y-1 overflow-y-auto rounded-md border border-border p-2">
+            {SCREENS.filter((f) => `${screenApp(f)} ${f}`.toLowerCase().includes(screenSearch.toLowerCase())).map((f) => {
+              const on = secondary?.screens.includes(f) ?? false;
+              return (
+                <label key={f} className={cn("flex cursor-pointer items-start gap-2 rounded px-2 py-1 text-xs hover:bg-accent", on && "bg-accent")}>
+                  <input type="checkbox" className="mt-0.5 accent-[var(--myio-green)]" checked={on} onChange={() => secondary && setSecondary({ ...secondary, screens: on ? secondary.screens.filter((x) => x !== f) : [...secondary.screens, f] })} />
+                  <span><b>{screenApp(f)}</b> <span className="text-muted-foreground">· {f}</span></span>
+                </label>
+              );
+            })}
+          </div>
+          <p className="text-xs text-muted-foreground">{secondary?.screens.length ?? 0} tela(s) selecionada(s). Sem telas, o modelo deixa de ser secundário.</p>
+          <DialogFooter>
+            <Button type="button" variant="action" onClick={() => setSecondary(null)}>Cancelar</Button>
+            <Button type="button" variant="action" disabled={saveSecondary.isPending} onClick={() => saveSecondary.mutate()}>Salvar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
