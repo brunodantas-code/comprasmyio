@@ -3,7 +3,7 @@ import {
   BookOpen, Boxes, Briefcase, Building2, Bell, CalendarDays, CheckCircle2, ChevronDown, ChevronUp, ClipboardCheck, ClipboardList, CodeXml,
   DatabaseBackup, DollarSign, FileSignature, FileText, Files, FolderKanban, Gauge, History, Landmark, Layers3, ListTree, Package, Phone,
   Plus, ReceiptText, ScrollText, Search, Settings, ShieldCheck, ShoppingCart, Tag, Target, Users, UsersRound, WalletCards, Workflow,
-  Home, Menu, ArrowLeft, KeyRound, LogOut, type LucideIcon,
+  LayoutGrid, Menu, ArrowLeft, KeyRound, LogOut, type LucideIcon,
 } from "lucide-react";
 import { CrmFunnelIcon } from "@/components/crm-funnel-icon";
 import { MytosisIcon } from "@/components/mytosis-icon";
@@ -43,7 +43,7 @@ const APPS: App[] = [
   { name: "CDE", icon: CdeIcon, iconName: "CdeIcon", groups: [{ title: STD, items: [i("Criar modelo", Plus, "Plus")] }] },
 ];
 
-const SHARED: Item[] = [i("Início (casa)", Home, "Home"), i("Menu", Menu, "Menu"), i("Voltar", ArrowLeft, "ArrowLeft"), i("Alterar senha", KeyRound, "KeyRound"), i("Sair", LogOut, "LogOut")];
+const SHARED: Item[] = [i("Início (todos os apps)", LayoutGrid, "LayoutGrid"), i("Menu", Menu, "Menu"), i("Voltar", ArrowLeft, "ArrowLeft"), i("Alterar senha", KeyRound, "KeyRound"), i("Sair", LogOut, "LogOut")];
 
 function Tile({ it }: { it: Item }) {
   const Icon = it.icon;

@@ -3,7 +3,7 @@ import { useState } from "react";
 import type React from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { MessageCircleQuestion, Bell, CheckCircle2, ChevronRight, CodeXml, DollarSign, FileSignature, Home, Menu, Moon, Phone, Search, Settings, Settings2, ShieldCheck, ShoppingCart, UserRound, UsersRound, LogOut, KeyRound } from "lucide-react";
+import { MessageCircleQuestion, Bell, CheckCircle2, ChevronRight, CodeXml, DollarSign, FileSignature, Home, LayoutGrid, Menu, Moon, Phone, Search, Settings, Settings2, ShieldCheck, ShoppingCart, UserRound, UsersRound, LogOut, KeyRound } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
@@ -175,7 +175,7 @@ function PortalPage() {
             </div>
             {activeView === "users" ? (
               <Button variant="ghost" size="icon" className="!bg-transparent !text-primary shadow-none hover:!bg-transparent hover:!text-primary" onClick={() => setActiveView("apps")} title="Início" aria-label="Voltar aos aplicativos">
-                <Home className="h-4 w-4" />
+                <LayoutGrid className="h-4 w-4" />
               </Button>
             ) : null}
             <Button asChild variant="ghost" size="icon" className="relative !bg-transparent !text-primary shadow-none hover:!bg-transparent hover:!text-primary" title="Central de Pendências" aria-label={`Central de Pendências: ${pendingActions?.total ?? 0}`}>

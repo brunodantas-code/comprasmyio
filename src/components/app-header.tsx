@@ -3,7 +3,7 @@ import { Moon, Sun } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, BookOpen, Home, KeyRound, LogOut, Menu } from "lucide-react";
+import { ArrowLeft, BookOpen, LayoutGrid, KeyRound, LogOut, Menu } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -47,7 +47,7 @@ export function AppHeader({ logo, children, supplyManual = false }: { logo: Reac
           <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
             <p className="min-w-0 truncate text-sm font-semibold">{userName}</p>
             <Button asChild variant="ghost" size="icon" className="shrink-0 !bg-transparent !text-primary shadow-none hover:!bg-transparent hover:!text-primary" title="Início" aria-label="Voltar aos aplicativos">
-              <Link to="/portal"><Home className="h-4 w-4" /></Link>
+              <Link to="/portal"><LayoutGrid className="h-4 w-4" /></Link>
             </Button>
           </div>
           {children}
