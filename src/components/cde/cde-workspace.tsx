@@ -14,7 +14,7 @@ import inventory from "./inventory.json";
 import { BORDERS, FILLS } from "@/components/mytosis/shapes";
 import { FormatColorOptions } from "@/components/mytosis/format-color-options";
 
-type CdeStyle = { shape?: string; fill?: string; border?: string; borderWidth?: string; text?: string };
+type CdeStyle = { shape?: string; fill?: string; border?: string; borderWidth?: string; text?: string; description?: string };
 const FORMS = [
   { key: "", label: "Padrão" }, { key: "square", label: "Quadrado", radius: "0" }, { key: "soft", label: "Arredondado", radius: "0.375rem" },
   { key: "round", label: "Bem arredondado", radius: "0.75rem" }, { key: "pill", label: "Pílula", radius: "9999px" },
@@ -180,7 +180,7 @@ export function CdeWorkspace() {
                     return (
                       <div key={v.key} className={cn("flex w-64 shrink-0 flex-col gap-2 rounded-lg border p-3", selected ? "border-primary bg-accent" : "border-border")}>
                         <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
-                          <span className="truncate">{v.name ?? `Modelo ${i + 1}`}{v.custom ? " · criado no CDE" : ""}</span>
+                          <span className="truncate" title={v.style?.description || undefined}>{v.name ?? `Modelo ${i + 1}`}{v.custom ? " · criado no CDE" : ""}</span>
                           <span className="flex items-center gap-1">{v.custom ? "novo" : `${v.count} uso${v.count > 1 ? "s" : ""}`}
                             <Button type="button" variant="outline" size="compactIcon" title={selected ? "Remova o padrão antes de excluir" : "Excluir modelo"} aria-label={`Excluir ${v.name ?? `Modelo ${i + 1}`}`} disabled={selected}
                               onClick={() => { if (!standards.length) return toast.error("Escolha primeiro um padrão para substituir este modelo."); setReplacement(standards.length === 1 ? standards[0] : ""); setDeleting({ group: g.key, model: v, label: v.name ?? `Modelo ${i + 1}` }); }}><Trash2 /></Button>
@@ -189,6 +189,7 @@ export function CdeWorkspace() {
                         <div className="flex min-h-14 items-center justify-center rounded-md bg-background p-2"><Preview v={v} /></div>
                         <dl className="space-y-0.5 text-[0.7rem] leading-4 text-muted-foreground">
                           <div><b>Tipo:</b> {v.tag}{v.variant ? ` · ${v.variant}` : ""}{v.size ? ` · ${v.size}` : ""}</div>
+                          {v.style?.description ? <div className="whitespace-pre-wrap break-words"><b>Descrição:</b> {v.style.description}</div> : null}
                           {v.className ? <div className="break-all"><b>Classes:</b> {v.className}</div> : null}
                           {v.icon ? <div className="break-all"><b>Ícone:</b> {v.icon} {v.iconClass}</div> : null}
                           {v.files.length ? <div className="break-all"><b>Onde:</b> {v.files.join(", ")}</div> : null}
@@ -246,6 +247,7 @@ export function CdeWorkspace() {
             <div className="sm:col-span-2"><FormatColorOptions label="Fundo" value={draft.style.fill ?? "none"} options={FILLS.filter((f) => !f.key.startsWith("purple"))} onChange={(fill) => setDraft({ ...draft, style: { ...draft.style, fill } })} /></div>
             <div className="sm:col-span-2"><FormatColorOptions label="Borda" value={draft.style.border ?? ""} options={BORDERS.filter((b) => !b.key.startsWith("purple"))} onChange={(border) => setDraft({ ...draft, style: { ...draft.style, border } })} border /></div>
             <div className="sm:col-span-2"><FormatColorOptions label="Cor do texto e ícone" value={draft.style.text ?? "default"} options={TEXTS} onChange={(text) => setDraft({ ...draft, style: { ...draft.style, text } })} /></div>
+            <div className="space-y-1 sm:col-span-2"><Label>Descrição do desenvolvedor</Label><Textarea value={draft.style.description ?? ""} maxLength={1000} rows={3} onChange={(e) => setDraft({ ...draft, style: { ...draft.style, description: e.target.value } })} placeholder="Descreva como deseja o botão ou forma: uso, comportamento, cores, tamanho..." /></div>
             <div className="space-y-1 sm:col-span-2"><Label>Classes (opcional)</Label><Input value={draft.className} onChange={(e) => setDraft({ ...draft, className: e.target.value })} placeholder="h-8 text-sm" /></div>
           </div>
           <div className="flex min-h-16 items-center justify-center rounded-md border border-border bg-background p-3"><Preview v={draft} /></div>
