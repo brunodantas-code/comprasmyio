@@ -1,5 +1,9 @@
 import { useState } from "react";
 import { ColumnFilter } from "@/components/column-filter";
+import { Filter } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { isFilterActive, matchesColumnFilter, type ColumnFilterValue, type FilterKind } from "@/lib/column-filters";
 
 export type FilterColumn<T> = {
@@ -29,5 +33,30 @@ export function useTableFilters<T>(rows: readonly T[], columns: FilterColumn<T>[
     return <span className="inline-flex items-center gap-1 whitespace-nowrap">{column?.label}{control(key)}</span>;
   };
   const searchText = (key: string) => filters[key]?.op === "contains" ? filters[key]?.value ?? "" : "";
-  return { filtered, header, control, searchText, active: active.length, clear: () => setFilters({}) };
+  const menu = <TableFilterMenu rows={rows} columns={columns} filters={filters} onChange={(key, value) => setFilters(current => ({ ...current, [key]: value }))} clear={() => setFilters({})} />;
+  return { filtered, header, control, menu, searchText, active: active.length, clear: () => setFilters({}) };
+}
+
+function TableFilterMenu<T>({ rows, columns, filters, onChange, clear }: {
+  rows: readonly T[];
+  columns: FilterColumn<T>[];
+  filters: Record<string, ColumnFilterValue | undefined>;
+  onChange: (key: string, value: ColumnFilterValue | undefined) => void;
+  clear: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [key, setKey] = useState(columns[0]?.key ?? "");
+  const column = columns.find(c => c.key === key) ?? columns[0];
+  const active = columns.filter(c => isFilterActive(filters[c.key])).length;
+  return <Popover open={open} onOpenChange={setOpen}>
+    <PopoverTrigger asChild><Button variant="ghost" size="compactIcon" aria-label="Filtrar atas" title={active ? `Filtros (${active} ativos)` : "Filtros"} className="!bg-transparent !text-primary"><Filter /></Button></PopoverTrigger>
+    <PopoverContent align="start" className="w-[min(18rem,calc(100vw-2rem))] space-y-3 p-3">
+      <Select value={column?.key} onValueChange={setKey}>
+        <SelectTrigger aria-label="Tipo de filtro" className="h-8 text-xs"><SelectValue /></SelectTrigger>
+        <SelectContent>{columns.map(c => <SelectItem key={c.key} value={c.key}>{c.label}{isFilterActive(filters[c.key]) ? " •" : ""}</SelectItem>)}</SelectContent>
+      </Select>
+      {column && <ColumnFilter key={column.key} label={column.label} kind={column.kind ?? "text"} values={rows.map(row => column.display?.(row) ?? String(column.value(row) ?? ""))} value={filters[column.key]} onChange={value => onChange(column.key, value)} embedded onClose={() => setOpen(false)} />}
+      {active > 0 && <Button variant="outline" size="sm" className="h-7 w-full text-xs" onClick={clear}>Limpar todos os filtros ({active})</Button>}
+    </PopoverContent>
+  </Popover>;
 }

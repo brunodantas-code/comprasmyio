@@ -12,7 +12,7 @@ import {
 
 /** Botão de filtro de coluna no estilo Excel: condição + lista de valores com busca. */
 export function ColumnFilter({
-  label, kind, values, value, onChange, showLabel = false, compact = false,
+  label, kind, values, value, onChange, showLabel = false, compact = false, embedded = false, onClose,
 }: {
   label: string;
   kind: FilterKind;
@@ -22,6 +22,8 @@ export function ColumnFilter({
   onChange: (v: ColumnFilterValue | undefined) => void;
   showLabel?: boolean;
   compact?: boolean;
+  embedded?: boolean;
+  onClose?: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -43,22 +45,8 @@ export function ColumnFilter({
   };
   const toggle = (v: string) => setSelected(selected.includes(v) ? selected.filter((s) => s !== v) : [...selected, v]);
 
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        {showLabel ? (
-          <Button type="button" variant="outline" size="sm" className={`h-7 gap-1 px-2 text-xs !bg-transparent ${active ? "border-primary !text-primary" : ""}`}>
-            <Filter className="size-3" />{label}
-          </Button>
-        ) : (
-          <Button type="button" variant="ghost" size="icon" aria-label={`Filtrar ${label}`} title={`Filtrar ${label}`}
-            className={`${compact ? "size-4" : "size-5"} shrink-0 p-0 align-middle !bg-transparent shadow-none ${active ? "!text-primary" : "!text-muted-foreground hover:!text-primary"}`}>
-            <Filter className="size-3" />
-          </Button>
-        )}
-      </PopoverTrigger>
-      <PopoverContent align="start" className="w-[min(18rem,calc(100vw-2rem))] space-y-2 p-3 text-left font-sans text-sm font-normal">
-        <div className="text-xs font-medium text-muted-foreground">Filtrar {label}</div>
+  const content = <>
+        {!embedded && <div className="text-xs font-medium text-muted-foreground">Filtrar {label}</div>}
         <Select value={op} onValueChange={(v) => onChange({ ...value, op: v as FilterOp })}>
           <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
           <SelectContent>
@@ -96,9 +84,15 @@ export function ColumnFilter({
         )}
         <div className="flex justify-end gap-2 pt-1">
           <Button type="button" variant="outline" size="sm" className="h-7 text-xs" onClick={() => { onChange(undefined); setSearch(""); }}>Limpar</Button>
-          <Button type="button" variant="outline" size="sm" className="h-7 text-xs" onClick={() => setOpen(false)}>Concluir</Button>
+          <Button type="button" variant="outline" size="sm" className="h-7 text-xs" onClick={() => { setOpen(false); onClose?.(); }}>Concluir</Button>
         </div>
-      </PopoverContent>
-    </Popover>
-  );
+  </>;
+  if (embedded) return <div className="space-y-2">{content}</div>;
+  return <Popover open={open} onOpenChange={setOpen}>
+    <PopoverTrigger asChild>
+      {showLabel ? <Button type="button" variant="outline" size="sm" className={`h-7 gap-1 px-2 text-xs !bg-transparent ${active ? "border-primary !text-primary" : ""}`}><Filter className="size-3" />{label}</Button> :
+        <Button type="button" variant="ghost" size="icon" aria-label={`Filtrar ${label}`} title={`Filtrar ${label}`} className={`${compact ? "size-4" : "size-5"} shrink-0 p-0 align-middle !bg-transparent shadow-none ${active ? "!text-primary" : "!text-muted-foreground hover:!text-primary"}`}><Filter className="size-3" /></Button>}
+    </PopoverTrigger>
+    <PopoverContent align="start" className="w-[min(18rem,calc(100vw-2rem))] space-y-2 p-3 text-left font-sans text-sm font-normal">{content}</PopoverContent>
+  </Popover>;
 }
