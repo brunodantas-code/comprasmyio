@@ -22,7 +22,7 @@ function Row({ id, index }: { id: string; index: number }) {
   </div>;
 }
 
-export function CdeAppOrder({ number }: { number: number }) {
+export function CdeAppOrder({ number, handle }: { number: number; handle?: import("react").ReactNode }) {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<string[] | null>(null);
   const [saving, setSaving] = useState(false);
@@ -66,7 +66,7 @@ export function CdeAppOrder({ number }: { number: number }) {
     } catch { toast.error("Não foi possível salvar a ordem."); } finally { setSaving(false); }
   }
   return <section className="space-y-4">
-    <CdeCategoryHeader number={number} title="Apps da página principal" hint="Ordem, fonte do nome e tamanho dos símbolos" open={open} onToggle={() => setOpen(!open)} />
+    <CdeCategoryHeader handle={handle} number={number} title="Apps da página principal" hint="Ordem, fonte do nome e tamanho dos símbolos" open={open} onToggle={() => setOpen(!open)} />
     {open && <div className="max-w-3xl p-4"><DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={move}><SortableContext items={order} strategy={verticalListSortingStrategy}>{order.map((id, i) => <Row key={id} id={id} index={i} />)}</SortableContext></DndContext>
       <Button variant="action" className="mt-3" onClick={save} disabled={saving || !draft}><Save className="h-4 w-4" />Salvar</Button>
       <div className="mt-6 space-y-3 border-t border-border pt-4">

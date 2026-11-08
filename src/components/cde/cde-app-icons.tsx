@@ -54,10 +54,10 @@ function Tile({ it }: { it: Item }) {
   </div>;
 }
 
-export function CdeAppIcons({ number }: { number: number }) {
+export function CdeAppIcons({ number, handle }: { number: number; handle?: import("react").ReactNode }) {
   const [open, setOpen] = useState(false);
   return <section className="space-y-4">
-    <CdeCategoryHeader number={number} title="Ícones dos Apps e menus" hint={`${APPS.length} apps · ícone do portal, barra inferior, submenus e ações para comparar padrões`} open={open} onToggle={() => setOpen(!open)} />
+    <CdeCategoryHeader handle={handle} number={number} title="Ícones dos Apps e menus" hint={`${APPS.length} apps · ícone do portal, barra inferior, submenus e ações para comparar padrões`} open={open} onToggle={() => setOpen(!open)} />
     {open ? <div className="space-y-4 p-4">
       <div className="rounded-lg border border-border p-3"><div className="mb-2 text-sm font-semibold">Menu superior comum a todos os apps</div><div className="flex flex-wrap gap-3">{SHARED.map((it) => <Tile key={it.label} it={it} />)}</div></div>
       {APPS.map((a) => { const AppIcon = a.icon; return <div key={a.name} className="flex flex-col gap-3 rounded-lg border border-border p-3 sm:flex-row">

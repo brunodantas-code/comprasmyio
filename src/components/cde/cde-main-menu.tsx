@@ -24,7 +24,7 @@ function MenuRow({ id, checked, onChange }: { id: MenuId; checked: boolean; onCh
     <Checkbox aria-label={`Exibir ${item.label}`} checked={checked} disabled={id === "logout"} onCheckedChange={onChange} />
   </div>;
 }
-export function CdeMainMenu({ number }: { number: number }) {
+export function CdeMainMenu({ number, handle }: { number: number; handle?: import("react").ReactNode }) {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<MenuConfig | null>(null);
   const [saving, setSaving] = useState(false);
@@ -53,7 +53,7 @@ export function CdeMainMenu({ number }: { number: number }) {
     } catch { toast.error("Não foi possível salvar o menu."); } finally { setSaving(false); }
   }
   return <section className="space-y-4">
-    <CdeCategoryHeader number={number} title="Menu principal" hint="Ícones, ordem e exibição das ações do menu dos apps" open={open} onToggle={() => setOpen(!open)} />
+    <CdeCategoryHeader handle={handle} number={number} title="Menu principal" hint="Ícones, ordem e exibição das ações do menu dos apps" open={open} onToggle={() => setOpen(!open)} />
     {open && <div className="grid gap-6 p-4 sm:grid-cols-2"><div><DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={move}><SortableContext items={config.order} strategy={verticalListSortingStrategy}>{config.order.map((id) => <MenuRow key={id} id={id} checked={!config.hidden.includes(id)} onChange={() => setDraft({ ...config, hidden: config.hidden.includes(id) ? config.hidden.filter((v) => v !== id) : [...config.hidden, id] })} />)}</SortableContext></DndContext><div className="mt-4 space-y-1"><Label>Informação abaixo do nome do usuário</Label><Select value={config.userInfo ?? "name"} onValueChange={(v) => setDraft({ ...config, userInfo: v as MenuConfig["userInfo"] })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{USER_INFO_OPTIONS.map((o) => <SelectItem key={o.key} value={o.key}>{o.label}</SelectItem>)}</SelectContent></Select></div>
       <Button variant="action" className="mt-3" onClick={save} disabled={saving || !draft}><Save className="h-4 w-4" />Salvar</Button></div>
       <div className="space-y-3"><h3 className="text-sm font-semibold">Prévia</h3><div className="max-w-72 text-right"><p className="text-sm font-semibold">Nome do Usuário</p>{userInfoLine(config.userInfo, "Cargo", "Perfil") ? <p className="text-xs text-muted-foreground">{userInfoLine(config.userInfo, "Cargo", "Perfil")}</p> : null}</div><div className="max-w-72 overflow-hidden rounded-lg border border-border">{config.order.filter((id) => !config.hidden.includes(id)).map((id) => { const item = MENU_ITEMS.find((i) => i.id === id); if (!item) return null; const Icon = item.icon; return <div key={id} className="flex items-center gap-3 px-4 py-3 text-sm"><Icon className="h-5 w-5" />{item.label}</div>; })}</div></div>

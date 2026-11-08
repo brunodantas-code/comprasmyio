@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { CdeNumber } from "./cde-button";
 
 /** Top-level categories stay unframed; green bands belong to subcategories. */
-export function CdeCategoryHeader({ number, title, hint, open, onToggle, action }: {
+export function CdeCategoryHeader({ number, title, hint, open, onToggle, action, handle }: {
+  handle?: ReactNode;
   number: ReactNode;
   title: string;
   hint?: string;
@@ -20,6 +21,7 @@ export function CdeCategoryHeader({ number, title, hint, open, onToggle, action 
     {onToggle && (open ? <ChevronUp className="h-4 w-4 shrink-0" /> : <ChevronDown className="h-4 w-4 shrink-0" />)}
   </>;
   return <div className="flex items-center gap-3 rounded-xl border border-border px-4 py-3">
+    {handle}
     {onToggle ? <Button variant="ghost" aria-expanded={open} onClick={onToggle} className="h-auto min-w-0 flex-1 justify-start gap-3 rounded-none p-0 text-left hover:bg-transparent">{content}</Button>
       : <div className="flex min-w-0 flex-1 items-center gap-3">{content}</div>}
     {action}

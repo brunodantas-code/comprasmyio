@@ -14,6 +14,7 @@ import inventory from "./inventory.json";
 import filterUsage from "./filter-usage.json";
 import addTextUsage from "./add-text-usage.json";
 import { CdeAddTextList } from "./cde-add-text-list";
+import { CdeSortableList, useCdeOrder, type CdeOrder } from "./cde-order";
 import { BORDERS, FILLS } from "@/components/mytosis/shapes";
 import { ColorCode } from "./color-code";
 import { FONT_SIZES, FORMS, ICONS, TEXTS, WIDTHS, styleOf, type CdeStyle } from "./cde-render";
@@ -74,6 +75,14 @@ function screenApp(f: string) {
 /** Categorias-mãe das subcategorias numeradas (ex.: 3 → 3.1, 3.2). */
 const PARENTS: Record<string, string> = { "1": "Campos para preenchimento", "3": "Ordenação", "4": "Botões de ação", "5": "Boxes e mensagens", "6": "Numeração de categorias e subcategorias" };
 
+const baseTitle = (t: string) => t.split(" ").slice(1).join(" ");
+const groupParent = (t: string) => { const n = t.split(" ")[0].replace(/\.$/, ""); return n.includes(".") ? n.split(".")[0] : null; };
+const CDE_DEFAULT_ORDER: CdeOrder = {
+  cats: [...[...new Set(GROUPS.map((g) => groupParent(g.title) ? `p:${groupParent(g.title)}` : g.key))], "icons", "nav", "menu", "apps"],
+  subs: Object.fromEntries(Object.keys(PARENTS).map((p) => [p, GROUPS.filter((g) => groupParent(g.title) === p).map((g) => g.key)])),
+};
+const EXTRA_LABELS: Record<string, string> = { icons: "Ícones dos Apps e menus", nav: "Navegação (UI/UX)", menu: "Menu principal", apps: "Apps da página principal" };
+
 const inventoryKey = (v: Omit<Variant, "key">) => [v.tag, v.variant, v.size, v.className, v.icon, v.iconClass].join("|");
 
 function Preview({ v }: { v: Pick<Variant, "tag" | "variant" | "size" | "className" | "icon" | "iconClass" | "label" | "style"> }) {
@@ -94,6 +103,14 @@ export function CdeWorkspace() {
   const qc = useQueryClient();
   const [open, setOpen] = useState<Set<string>>(new Set());
   const [collapseKey, setCollapseKey] = useState(0);
+  const { order: cdeOrder, save: saveCdeOrder } = useCdeOrder(CDE_DEFAULT_ORDER);
+  const catLabel = (c: string) => c.startsWith("p:") ? PARENTS[c.slice(2)] : EXTRA_LABELS[c] ?? baseTitle(GROUPS.find((x) => x.key === c)?.title ?? c);
+  const groupTitle = (key: string) => {
+    const g = GROUPS.find((x) => x.key === key); if (!g) return "";
+    const p = groupParent(g.title);
+    const ci = cdeOrder.cats.indexOf(p ? `p:${p}` : key) + 1;
+    return p ? `${ci}.${(cdeOrder.subs[p] ?? []).indexOf(key) + 1} ${baseTitle(g.title)}` : `${ci} ${baseTitle(g.title)}`;
+  };
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(() => new Set(Object.keys(PARENTS)));
   const [expandedWhere, setExpandedWhere] = useState<Set<string>>(new Set());
   const [expandedHistory, setExpandedHistory] = useState<Set<string>>(new Set());
@@ -251,34 +268,18 @@ export function CdeWorkspace() {
     onSuccess: () => { refresh(); toast.success("Modelo restaurado"); },
   });
 
-  return (
-    <main className="app-workspace mx-auto max-w-7xl space-y-4 overflow-x-clip px-4 py-6 sm:px-6">
-      <div>
-        <div className="flex items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold">Ambiente de Desenvolvimento Colaborativo</h1>
-        <Button type="button" variant="ghost" size="sm" className="shrink-0 gap-1 text-xs" title="Recolher tudo" aria-label="Recolher tudo" onClick={() => { setOpen(new Set()); setCollapsedCategories(new Set(Object.keys(PARENTS))); setExpandedWhere(new Set()); setExpandedHistory(new Set()); setCollapseKey((k) => k + 1); }}><ChevronsDownUp className="h-4 w-4" />Recolher tudo</Button>
-        </div>
-        <p className="text-sm text-muted-foreground">Modelos de UI/UX utilizados em todos os apps, agrupados por tipo. Crie e exclua modelos e selecione os que devem ser utilizados como padrão.</p>
-      </div>
-      {GROUPS.map((g, gi) => {
-        const num = g.title.split(" ")[0].replace(/\.$/, "");
-        const parent = num.includes(".") ? num.split(".")[0] : null;
-        const showParent = parent && GROUPS[gi - 1]?.title.split(" ")[0].replace(/\.$/, "").split(".")[0] !== parent;
-        const parentHeader = showParent ? (
-          <CdeCategoryHeader key={`p-${parent}`} number={parent} title={parent ? PARENTS[parent] : ""} open={!collapsedCategories.has(parent)} onToggle={() => setCollapsedCategories((s) => { const next = new Set(s); if (next.has(parent)) next.delete(parent); else next.add(parent); return next; })} />
-        ) : null;
-        const list = groupModels(g.key);
+  const renderGroup = (g0: (typeof GROUPS)[number], num: string, parent: string | null, handle: React.ReactNode) => {
+        const g = { ...g0, title: `${num} ${baseTitle(g0.title)}` };
+                  const list = groupModels(g.key);
         const standards = standardsOf(g.key);
         const primaries = primariesOf(g.key);
         const secs = secondariesOf(g.key);
         const nameOf = (key: string) => { const i = list.findIndex((v) => v.key === key); return i < 0 ? "Modelo excluído" : list[i].name ?? `Modelo ${i + 1}`; };
         const removed = (data?.removed ?? []).filter((r) => r.group_key === g.key);
         const isOpen = open.has(g.key);
-        if (parent && collapsedCategories.has(parent)) return showParent ? <div key={g.key}>{parentHeader}</div> : null;
         return (
-          <div key={g.key} className="space-y-4">{parentHeader}
           <section className={cn(parent ? "overflow-hidden rounded-xl border border-border bg-card shadow-sm" : "min-w-0 space-y-4")}>
-            {!parent ? <CdeCategoryHeader number={num} title={g.title.split(" ").slice(1).join(" ")} hint={`${list.length} modelos · ${g.hint}`} open={isOpen} onToggle={() => setOpen((s) => { const n = new Set(s); if (n.has(g.key)) n.delete(g.key); else n.add(g.key); return n; })} action={<Button type="button" variant="outline" size="compactIcon" title="Criar modelo" aria-label={`Criar modelo em ${g.title}`} onClick={() => { setDraft({ ...emptyDraft, tag: (g.key === "box" || g.key === "confirm_dialog") ? "div" : "Button" }); setCreating(g.key); }}><Plus /></Button>} /> : <div className="flex items-center gap-3 bg-accent px-5 py-2">
+            {!parent ? <CdeCategoryHeader handle={handle} number={num} title={g.title.split(" ").slice(1).join(" ")} hint={`${list.length} modelos · ${g.hint}`} open={isOpen} onToggle={() => setOpen((s) => { const n = new Set(s); if (n.has(g.key)) n.delete(g.key); else n.add(g.key); return n; })} action={<Button type="button" variant="outline" size="compactIcon" title="Criar modelo" aria-label={`Criar modelo em ${g.title}`} onClick={() => { setDraft({ ...emptyDraft, tag: (g.key === "box" || g.key === "confirm_dialog") ? "div" : "Button" }); setCreating(g.key); }}><Plus /></Button>} /> : <div className="flex items-center gap-3 bg-accent px-5 py-2">{handle}
               <button type="button" aria-expanded={isOpen} onClick={() => setOpen((s) => { const n = new Set(s); if (n.has(g.key)) n.delete(g.key); else n.add(g.key); return n; })} className="flex min-w-0 flex-1 items-center gap-4 text-left">
                 <span className="flex flex-col">
                   <CdeNumber subcategory={!!parent}>{num}</CdeNumber>
@@ -373,17 +374,46 @@ export function CdeWorkspace() {
               </>
             ) : null}
           </section>
-          </div>
         );
-      })}
-      <CdeAppIcons key={`CdeAppIcons-${collapseKey}`} number={7} />
-      <CdeNavigation key={`CdeNavigation-${collapseKey}`} number={8} />
-      <CdeMainMenu key={`CdeMainMenu-${collapseKey}`} number={9} />
-      <CdeAppOrder key={`CdeAppOrder-${collapseKey}`} number={10} />
+  };
+
+  return (
+    <main className="app-workspace mx-auto max-w-7xl space-y-4 overflow-x-clip px-4 py-6 sm:px-6">
+      <div>
+        <div className="flex items-center justify-between gap-3">
+        <h1 className="text-xl font-semibold">Ambiente de Desenvolvimento Colaborativo</h1>
+        <Button type="button" variant="ghost" size="sm" className="shrink-0 gap-1 text-xs" title="Recolher tudo" aria-label="Recolher tudo" onClick={() => { setOpen(new Set()); setCollapsedCategories(new Set(Object.keys(PARENTS))); setExpandedWhere(new Set()); setExpandedHistory(new Set()); setCollapseKey((k) => k + 1); }}><ChevronsDownUp className="h-4 w-4" />Recolher tudo</Button>
+        </div>
+        <p className="text-sm text-muted-foreground">Modelos de UI/UX utilizados em todos os apps, agrupados por tipo. Crie e exclua modelos e selecione os que devem ser utilizados como padrão.</p>
+      </div>
+      <CdeSortableList className="space-y-4" ids={cdeOrder.cats} labelOf={catLabel} onMove={(cats) => saveCdeOrder({ ...cdeOrder, cats })}>
+        {(cat, ci, handle) => {
+          const n = String(ci + 1);
+          if (cat.startsWith("p:")) {
+            const pk = cat.slice(2);
+            const subs = cdeOrder.subs[pk] ?? [];
+            return (
+              <div className="space-y-4">
+                <CdeCategoryHeader handle={handle} number={n} title={PARENTS[pk]} open={!collapsedCategories.has(pk)} onToggle={() => setCollapsedCategories((s) => { const next = new Set(s); if (next.has(pk)) next.delete(pk); else next.add(pk); return next; })} />
+                {!collapsedCategories.has(pk) ? (
+                  <CdeSortableList className="space-y-4" ids={subs} labelOf={(k) => baseTitle(GROUPS.find((x) => x.key === k)?.title ?? k)} onMove={(ids) => saveCdeOrder({ ...cdeOrder, subs: { ...cdeOrder.subs, [pk]: ids } })}>
+                    {(key, si, subHandle) => renderGroup(GROUPS.find((x) => x.key === key)!, `${n}.${si + 1}`, n, subHandle)}
+                  </CdeSortableList>
+                ) : null}
+              </div>
+            );
+          }
+          if (cat === "icons") return <CdeAppIcons key={`CdeAppIcons-${collapseKey}`} number={ci + 1} handle={handle} />;
+          if (cat === "nav") return <CdeNavigation key={`CdeNavigation-${collapseKey}`} number={ci + 1} handle={handle} />;
+          if (cat === "menu") return <CdeMainMenu key={`CdeMainMenu-${collapseKey}`} number={ci + 1} handle={handle} />;
+          if (cat === "apps") return <CdeAppOrder key={`CdeAppOrder-${collapseKey}`} number={ci + 1} handle={handle} />;
+          return renderGroup(GROUPS.find((x) => x.key === cat)!, n, null, handle);
+        }}
+      </CdeSortableList>
 
       <Dialog open={!!creating} onOpenChange={(o) => { if (!o) { setCreating(null); setEditing(null); } }}>
         <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
-          <DialogHeader className="flex-row items-center justify-between gap-3 space-y-0 pr-8"><DialogTitle>{editing ? "Editar modelo" : "Criar modelo"} · {GROUPS.find((g) => g.key === creating)?.title}</DialogTitle><div className="flex min-h-12 min-w-24 items-center justify-center rounded-md border border-border bg-background px-3 py-2"><Preview v={draft} /></div></DialogHeader>
+          <DialogHeader className="flex-row items-center justify-between gap-3 space-y-0 pr-8"><DialogTitle>{editing ? "Editar modelo" : "Criar modelo"} · {creating ? groupTitle(creating) : ""}</DialogTitle><div className="flex min-h-12 min-w-24 items-center justify-center rounded-md border border-border bg-background px-3 py-2"><Preview v={draft} /></div></DialogHeader>
           <div className="grid gap-3 sm:grid-cols-2 [&_:is(input,textarea,button[role=combobox])]:!rounded-none [&_:is(input,textarea,button[role=combobox])]:!border-0 [&_:is(input,textarea,button[role=combobox])]:!border-b [&_:is(input,textarea,button[role=combobox])]:!border-myio-green [&_:is(input,textarea,button[role=combobox])]:!bg-transparent [&_:is(input,textarea,button[role=combobox])]:!px-0 [&_:is(input,textarea,button[role=combobox])]:!shadow-none [&_:is(input,textarea,button[role=combobox])]:!ring-0 [&_textarea]:!border-solid">
             <div className="space-y-1 sm:col-span-2"><Label>Nome do modelo</Label><Input value={draft.name} maxLength={60} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder="Ex.: Campo de busca" /></div>
             <div className="space-y-1"><Label>Tipo</Label>

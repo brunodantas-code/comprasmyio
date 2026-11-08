@@ -52,7 +52,7 @@ function Sketch({ kind }: { kind: Pattern["sketch"] }) {
   );
 }
 
-export function CdeNavigation({ number }: { number: number }) {
+export function CdeNavigation({ number, handle }: { number: number; handle?: import("react").ReactNode }) {
   const [open, setOpen] = useState(false);
   const qc = useQueryClient();
   const { data: chosen } = useQuery({
@@ -74,7 +74,7 @@ export function CdeNavigation({ number }: { number: number }) {
   };
   return (
     <section className="space-y-4">
-      <CdeCategoryHeader number={number} title="Navegação (UI/UX)" hint="Tela x pop-up, menus superior, inferior e lateral, flutuantes e organização do conteúdo" open={open} onToggle={() => setOpen(!open)} />
+      <CdeCategoryHeader handle={handle} number={number} title="Navegação (UI/UX)" hint="Tela x pop-up, menus superior, inferior e lateral, flutuantes e organização do conteúdo" open={open} onToggle={() => setOpen(!open)} />
       {open ? (
         <div className="space-y-4 p-4">
           {DECISIONS.map((d, di) => (
