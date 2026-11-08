@@ -1,3 +1,4 @@
+import { CdeButton } from "@/components/cde/cde-button";
 import { useTableFilters } from "@/components/use-table-filters";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -17,7 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Check, FactoryIcon, PackagePlus, Percent, Plus, RotateCcw, Search, Settings, Trash2 } from "lucide-react";
+import { Check, FactoryIcon, PackagePlus, Percent, RotateCcw, Search, Settings, Trash2 } from "lucide-react";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 
 type Material = { id: string; name: string; location: string; is_product: boolean; is_manufactured?: boolean | null; loss_percent?: number | null };
@@ -427,9 +428,7 @@ export function BomSettingsDialog() {
               value={newQty}
               onChange={(e) => setNewQty(e.target.value)}
             />
-            <Button size="sm" disabled={add.isPending} onClick={() => add.mutate()}>
-              <Plus className="mr-1 h-4 w-4" /> Adicionar
-            </Button>
+            <CdeButton group="plus" screen="components/bom-settings.tsx" disabled={add.isPending} onClick={() => add.mutate()}>Adicionar</CdeButton>
           </div>
           <p className="text-xs text-muted-foreground">
             Componentes novos devem ser criados antes em Estoque de Componentes.

@@ -1,6 +1,7 @@
+import { CdeButton } from "@/components/cde/cde-button";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -58,7 +59,7 @@ export function UsersTab({ data }: { data: MytosisData }) {
         <div className="flex flex-wrap items-end gap-3 rounded-xl border border-border bg-muted/50 px-4 py-3">
           <div className="min-w-64 flex-1"><SearchableSelect value={newUser} onChange={setNewUser} options={available.map((u) => ({ value: u.id, label: u.full_name, keywords: u.email ?? "" }))} placeholder="Selecione o usuário" /></div>
           <Select value={newRole} onValueChange={setNewRole}><SelectTrigger className="w-44"><SelectValue /></SelectTrigger><SelectContent>{ROLES.map((r) => <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>)}</SelectContent></Select>
-          <Button variant="ghost" size="icon" className="text-primary" disabled={!newUser || upsert.isPending} onClick={() => upsert.mutate({ userId: newUser, role: newRole })} aria-label="Adicionar usuário" title="Adicionar usuário"><Plus className="h-5 w-5" /></Button>
+          <CdeButton group="plus" screen="components/mytosis/users-tab.tsx" disabled={!newUser || upsert.isPending} onClick={() => upsert.mutate({ userId: newUser, role: newRole })} aria-label="Adicionar usuário" title="Adicionar usuário"></CdeButton>
         </div>
       ) : null}
       <div className="rounded-xl border border-border bg-card">

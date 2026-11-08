@@ -1,5 +1,5 @@
+import { CdeButton } from "@/components/cde/cde-button";
 import { useMemo, useState } from "react";
-import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
@@ -22,7 +22,7 @@ export function OkrsTab({ data, canEdit, openDialog, onOpenObjective, onLocate }
     <div className="space-y-8">
       <section className="space-y-3">
         <div className="flex items-center justify-between"><h2 className="text-lg font-normal">Objetivos (OKRs)</h2>
-          {canEdit ? <Button variant="ghost" size="icon" className="text-primary" onClick={() => openDialog({ mode: "create", kind: "objective", parentId: null })} aria-label="Novo objetivo" title="Novo objetivo"><Plus className="h-5 w-5" /></Button> : null}
+          {canEdit ? <CdeButton group="plus" screen="components/mytosis/okrs-tab.tsx" onClick={() => openDialog({ mode: "create", kind: "objective", parentId: null })} aria-label="Novo objetivo" title="Novo objetivo"></CdeButton> : null}
         </div>
         <div className="rounded-xl border border-border bg-card">
           <Table>

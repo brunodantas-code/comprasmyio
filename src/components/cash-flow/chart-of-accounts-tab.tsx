@@ -1,6 +1,7 @@
+import { CdeButton } from "@/components/cde/cde-button";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronRight, Pencil, Plus, Save, Trash2 } from "lucide-react";
+import { ChevronRight, Pencil, Save, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -83,7 +84,7 @@ export function ChartOfAccountsTab({ userId }: { userId: string }) {
       <div className="flex gap-2">
         <div className="w-28"><Label htmlFor="fiscal-year">Exercício</Label><Input id="fiscal-year" type="number" min={2000} max={2200} value={year} onChange={(e) => setYear(Number(e.target.value) || yearNow)} /></div>
         <Dialog open={open} onOpenChange={(value) => { setOpen(value); if (!value) setEditing(null); }}>
-          <DialogTrigger asChild><Button className="self-end"><Plus className="h-3.5 w-3.5" />Nova conta</Button></DialogTrigger>
+          <DialogTrigger asChild><CdeButton group="plus" screen="components/cash-flow/chart-of-accounts-tab.tsx" className="self-end">Nova conta</CdeButton></DialogTrigger>
           <AccountDialog account={editing} accounts={accounts} pending={saveAccount.isPending} onSubmit={(value) => saveAccount.mutate(value)} />
         </Dialog>
       </div>

@@ -1,3 +1,4 @@
+import { CdeButton } from "@/components/cde/cde-button";
 import { useTableFilters } from "@/components/use-table-filters";
 import { useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -42,7 +43,6 @@ import {
   ExternalLink,
   History,
   ImagePlus,
-  Plus,
   Trash2,
   Upload,
 } from "lucide-react";
@@ -432,7 +432,7 @@ function AddToolDialog({ userId }: { userId: string }) {
   return (
     <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) resetForm(); }}>
       <DialogTrigger asChild>
-        <Button size="sm" className="w-full sm:w-auto"><Plus className="mr-1 h-4 w-4" /> Adicionar ferramenta</Button>
+        <CdeButton group="plus" screen="components/tools-assets.tsx" className="w-full sm:w-auto">Adicionar ferramenta</CdeButton>
       </DialogTrigger>
       <DialogContent className="max-h-[85vh] overflow-y-auto">
         <DialogHeader>

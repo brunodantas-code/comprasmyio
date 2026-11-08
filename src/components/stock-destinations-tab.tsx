@@ -1,7 +1,8 @@
+import { CdeButton } from "@/components/cde/cde-button";
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronUp, ChevronDown, Pencil, Plus } from "lucide-react";
+import { ChevronUp, ChevronDown, Pencil } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -100,7 +101,7 @@ export function StockDestinationsTab() {
           defaultPosition={Math.max(0, ...(destinations ?? []).map((item) => item.position)) + 1}
           saving={create.isPending}
           onSave={(name, position) => create.mutateAsync({ name, position })}
-          trigger={<Button size="compactIcon" aria-label="Criar destino de estoque" title="Criar destino"><Plus className="h-3.5 w-3.5" /></Button>}
+          trigger={<CdeButton group="plus" screen="components/stock-destinations-tab.tsx" aria-label="Criar destino de estoque" title="Criar destino"></CdeButton>}
           open={createOpen}
           onOpenChange={setCreateOpen}
         /></CollapsibleContent><CollapsibleTrigger asChild><Button size="compactIcon" variant="ghost" aria-label={expanded ? "Recolher Destinos de Estoque" : "Expandir Destinos de Estoque"} title={expanded ? "Recolher" : "Expandir"}>{expanded ? <ChevronUp className="h-3.5 w-3.5"  /> : <ChevronDown className="h-3.5 w-3.5"  />}</Button></CollapsibleTrigger></div>

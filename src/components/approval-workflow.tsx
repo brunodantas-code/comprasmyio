@@ -1,9 +1,10 @@
+import { CdeButton } from "@/components/cde/cde-button";
 import { TableReportActions } from "@/components/table-report-actions";
 import { useTableFilters } from "@/components/use-table-filters";
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { AlertTriangle, ArrowDown, ArrowUp, CheckCircle2, ChevronDown, ChevronRight, Clock, History, Pencil, Plus, Trash2, XCircle } from "lucide-react";
+import { AlertTriangle, ArrowDown, ArrowUp, CheckCircle2, ChevronDown, ChevronRight, Clock, History, Pencil, Trash2, XCircle } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -1169,10 +1170,7 @@ export function RulesAdmin() {
               <RequestTypeCheckboxes values={requestTypes} onChange={setRequestTypes} types={requestTypesCatalog} />
             </div>
           </div>
-          <Button variant="action" className="mt-4" onClick={() => create.mutate()} disabled={!name.trim() || !stepType || requestTypes.length === 0 || create.isPending}>
-            <Plus className="mr-2 h-4 w-4" />
-            Adicionar etapa
-          </Button>
+          <CdeButton group="plus" screen="components/approval-workflow.tsx" onClick={() => create.mutate()} disabled={!name.trim() || !stepType || requestTypes.length === 0 || create.isPending} className="mt-4">Adicionar etapa</CdeButton>
         </CardContent>
       </Card>
 

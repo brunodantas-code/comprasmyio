@@ -1,6 +1,6 @@
+import { CdeButton } from "@/components/cde/cde-button";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -72,9 +72,7 @@ export function ProjectTypeFields({ idPrefix, projectType, shortName, onTypeChan
         <div className="flex items-center justify-between gap-2">
           <Label>Tipo de projeto</Label>
           {canManage && (
-            <Button type="button" variant="ghost" size="compactIcon" title="Novo tipo de projeto" aria-label="Novo tipo de projeto" onClick={() => setAdding((value) => !value)}>
-              <Plus className="h-3.5 w-3.5" />
-            </Button>
+            <CdeButton group="plus" screen="components/project-type-fields.tsx" type="button" title="Novo tipo de projeto" aria-label="Novo tipo de projeto" onClick={() => setAdding((value) => !value)}></CdeButton>
           )}
         </div>
         {adding ? (

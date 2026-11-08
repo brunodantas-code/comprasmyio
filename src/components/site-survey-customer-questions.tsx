@@ -1,5 +1,5 @@
+import { CdeButton } from "@/components/cde/cde-button";
 import { useState } from "react";
-import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -40,6 +40,6 @@ export function SiteSurveyCustomerQuestions({ questionId, answer, onChange }: { 
         <Textarea id={`${questionId}-customer-response-${index}`} name={`${questionId}__customer_response`} defaultValue={initialResponses[row] ?? ""} rows={2} className="bg-action/30 focus-visible:bg-action/40" />
       </div>
     </div>)}
-    <Button type="button" size="compactIcon" variant="ghost" aria-label="Adicionar pergunta para o cliente" title="Adicionar pergunta para o cliente" onClick={() => setRows((current) => [...current, ""])}><Plus className="h-5 w-5" /></Button>
+    <CdeButton group="plus" screen="components/site-survey-customer-questions.tsx" type="button" aria-label="Adicionar pergunta para o cliente" title="Adicionar pergunta para o cliente" onClick={() => setRows((current) => [...current, ""])}></CdeButton>
   </div>;
 }

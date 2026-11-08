@@ -1,7 +1,8 @@
+import { CdeButton } from "@/components/cde/cde-button";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { MenuPermissionSelector } from "@/components/menu-permission-selector";
@@ -160,7 +161,7 @@ function ProfileDialog({ definition, requestTypes, title, saving, onSave }: { de
   };
   return (
     <Dialog open={open} onOpenChange={(next) => { setOpen(next); if (next) reset(); }}>
-      <DialogTrigger asChild><Button size="compactIcon" variant="ghost" title={title} aria-label={title}>{definition ? <Pencil className="h-3.5 w-3.5" /> : <Plus className="h-4 w-4 text-primary" />}</Button></DialogTrigger>
+      <DialogTrigger asChild>{definition ? <Button size="compactIcon" title={title} aria-label={title} variant="ghost"><Pencil className="h-3.5 w-3.5" /></Button> : <CdeButton group="plus" screen="components/access-profile-definitions-tab.tsx" title={title} aria-label={title}></CdeButton>}</DialogTrigger>
       <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
         <DialogHeader><DialogTitle>{title}</DialogTitle><DialogDescription>Escolha exatamente quais áreas estarão disponíveis para quem receber este perfil.</DialogDescription></DialogHeader>
         <form className="space-y-5" onSubmit={async (event) => { event.preventDefault(); if (name.trim().length < 2) return toast.error("Nome muito curto."); try { await onSave(name.trim(), permissions, permissions.has("solicitacoes_novas") ? allowedRequestTypes : new Set()); setOpen(false); } catch { /* A mensagem é exibida pela alteração. */ } }}>

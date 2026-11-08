@@ -1,3 +1,4 @@
+import { CdeButton } from "@/components/cde/cde-button";
 import { useTableFilters } from "@/components/use-table-filters";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -17,7 +18,7 @@ import { ProductImageUploader, ProductPhotoPreview, useProductImages } from "@/c
 import { ItemDeliveriesDialog } from "@/components/myio-delivery-qr";
 import { useClients } from "@/components/clients-tab";
 import { toast } from "sonner";
-import { Plus, Trash2, Factory, Pencil, Check } from "lucide-react";
+import { Trash2, Factory, Pencil, Check } from "lucide-react";
 
 export const MYIO_PRODUCTS = [
   "Myio 3F",
@@ -289,7 +290,7 @@ export function NewMyioOrderDialog({ userId, triggerLabel, inline = false }: { u
           <Tooltip>
             <TooltipTrigger asChild>
               <DialogTrigger asChild>
-                <Button>{triggerLabel ? <><Plus className="mr-2 h-4 w-4" />{triggerLabel}</> : <Plus className="h-3.5 w-3.5" />}</Button>
+                <CdeButton group="plus" screen="components/myio-orders-tab.tsx" aria-label="Adicionar">{triggerLabel}</CdeButton>
               </DialogTrigger>
             </TooltipTrigger>
             <TooltipContent>Nova solicitação de Dispositivos myio e Insumos de Instalação</TooltipContent>

@@ -2556,5 +2556,63 @@
     "routes/_authenticated/site-survey.tsx"
    ]
   }
+ ],
+ "box": [
+  {
+   "tag": "div",
+   "variant": "",
+   "size": "",
+   "className": "rounded-xl border bg-card text-card-foreground shadow",
+   "icon": "",
+   "iconClass": "",
+   "label": "Box",
+   "count": 97,
+   "files": [
+    "components/access-profile-definitions-tab.tsx",
+    "components/access-profiles-tab.tsx",
+    "components/additional-step-types-tab.tsx",
+    "components/approval-workflow.tsx",
+    "components/assembly-release.tsx",
+    "components/cash-flow/cash-register-tab.tsx",
+    "components/cash-flow/chart-of-accounts-tab.tsx",
+    "components/cash-flow/payables-tab.tsx",
+    "components/client-categories-tab.tsx",
+    "components/clients-tab.tsx",
+    "components/cost-centers-tab.tsx",
+    "components/damage-reasons-tab.tsx",
+    "components/damaged-items.tsx",
+    "components/delivery-points-tab.tsx",
+    "components/distribution.tsx",
+    "components/erp-app-access-admin.tsx",
+    "components/external-sync.tsx",
+    "components/homologation.tsx",
+    "components/import-batches.tsx",
+    "components/job-titles-tab.tsx",
+    "components/material-stock-types-tab.tsx",
+    "components/materials-registry-tab.tsx",
+    "components/myio-demand.tsx",
+    "components/myio-orders-tab.tsx",
+    "components/qr-check.tsx",
+    "components/reminders-tab.tsx",
+    "components/request-types-tab.tsx",
+    "components/site-survey-profiles-admin.tsx",
+    "components/site-survey-report-texts.tsx",
+    "components/site-survey-time-assumptions.tsx",
+    "components/stock-destinations-tab.tsx",
+    "components/stock-simulator.tsx",
+    "components/stock-tab.tsx",
+    "components/supply-order-statuses-tab.tsx",
+    "components/supply-tags-tab.tsx",
+    "components/technician-items.tsx",
+    "components/tools-assets.tsx",
+    "components/unit-products.tsx",
+    "components/user-manuals-tab.tsx",
+    "routes/_authenticated/chamados.tsx",
+    "routes/_authenticated/dashboard.tsx",
+    "routes/_authenticated/development.tsx",
+    "routes/_authenticated/site-survey.tsx",
+    "routes/reset-password.tsx"
+   ]
+  }
  ]
 }

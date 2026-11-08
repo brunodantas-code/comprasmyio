@@ -1,9 +1,10 @@
+import { CdeButton } from "@/components/cde/cde-button";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { DndContext, KeyboardSensor, PointerSensor, TouchSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { ChevronDown, ChevronRight, Pencil, Plus, Trash2, Workflow } from "lucide-react";
+import { ChevronDown, ChevronRight, Pencil, Trash2, Workflow } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -40,7 +41,7 @@ function SectionRow({ section, editing, onChange, onDelete }: { section: Numbere
         {editing ? <Textarea aria-label={`Parágrafo ${paragraph.number}`} value={paragraph.text} onChange={(e) => onChange({ ...section, paragraphs: section.paragraphs.map((p) => p.id === paragraph.id ? { id: p.id, text: e.target.value } : p) })} className="min-h-24" /> : <p className="min-w-0 whitespace-pre-wrap break-words text-sm leading-6">{paragraph.text}</p>}
         {editing ? <Button variant="ghost" size="icon" className="h-7 w-7 text-primary" aria-label={`Excluir parágrafo ${paragraph.number}`} title="Excluir parágrafo" onClick={() => { if (window.confirm("Excluir este parágrafo?")) onChange({ ...section, paragraphs: section.paragraphs.filter((p) => p.id !== paragraph.id) }); }}><Trash2 className="size-3.5" /></Button> : <span />}
       </div>)}
-      {editing ? <Button variant="outline" size="sm" className="justify-self-start" onClick={() => onChange({ ...section, paragraphs: [...section.paragraphs, { id: crypto.randomUUID(), text: "" }] })}><Plus className="size-3.5" />Parágrafo</Button> : null}
+      {editing ? <CdeButton group="plus" screen="components/mytosis/processes-tab.tsx" onClick={() => onChange({ ...section, paragraphs: [...section.paragraphs, { id: crypto.randomUUID(), text: "" }] })} className="justify-self-start">Parágrafo</CdeButton> : null}
     </div> : null}
   </section>;
 }
@@ -88,7 +89,7 @@ export function ProcessesTab({ data, canEdit }: { data: MytosisData; canEdit: bo
       <div className="grid min-w-0 gap-1.5"><Label>Processo</Label><SearchableSelect aria-label="Processo" disabled={!!draft || save.isPending} value={selected?.id ?? ""} onChange={setSelectedId} options={processes.map((p, i) => ({ value: p.id, label: `${i + 1} ${p.name}` }))} placeholder="Selecione o Processo" /></div>
       {canEdit ? <div className="flex shrink-0 gap-1">
         {selected && !draft ? <Button variant="outline" size="icon" className="h-8 w-8" title="Editar Processo" aria-label="Editar Processo" onClick={() => setDraft(structuredClone(selected))}><Pencil className="size-3.5" /></Button> : null}
-        <Button variant="outline" size="icon" className="h-8 w-8" disabled={!!draft} title="Novo Processo" aria-label="Novo Processo" onClick={() => setDraft({ id: "", name: "", sections: [], flow_ids: [], stage_bindings: [], revision: 1 })}><Plus className="size-4" /></Button>
+        <CdeButton group="plus" screen="components/mytosis/processes-tab.tsx" disabled={!!draft} title="Novo Processo" aria-label="Novo Processo" onClick={() => setDraft({ id: "", name: "", sections: [], flow_ids: [], stage_bindings: [], revision: 1 })}></CdeButton>
       </div> : null}
     </header>
     {current ? <>
@@ -97,7 +98,7 @@ export function ProcessesTab({ data, canEdit }: { data: MytosisData; canEdit: bo
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}><SortableContext items={current.sections.map((s) => s.id)} strategy={verticalListSortingStrategy}>
           {numberedProcessSections(current.sections).map((section) => <SectionRow key={section.id} section={section} editing={!!draft} onChange={(next) => updateDraft({ ...current, sections: current.sections.map((s) => s.id === next.id ? next : s) })} onDelete={() => { if (window.confirm("Excluir esta seção e seus parágrafos?")) updateDraft({ ...current, sections: current.sections.filter((s) => s.id !== section.id) }); }} />)}
         </SortableContext></DndContext>
-        {draft ? <Button variant="outline" size="sm" className="mt-4" onClick={() => updateDraft({ ...draft, sections: [...draft.sections, { id: crypto.randomUUID(), title: "", paragraphs: [] }] })}><Plus className="size-3.5" />Seção</Button> : null}
+        {draft ? <CdeButton group="plus" screen="components/mytosis/processes-tab.tsx" onClick={() => updateDraft({ ...draft, sections: [...draft.sections, { id: crypto.randomUUID(), title: "", paragraphs: [] }] })} className="mt-4">Seção</CdeButton> : null}
         <div className="mt-6 grid gap-4 border-t border-border pt-5">
           <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3"><h3 className="text-base font-normal">Fluxogramas</h3>{draft ? <Button variant="outline" size="sm" onClick={() => { setFlowToImport(""); setImportOpen(true); }}><Workflow className="size-3.5" />Importar</Button> : null}</header>
           {current.flow_ids.map((id) => {

@@ -128,3 +128,7 @@
 - [x] Altura das linhas do Approval reduzida ~1/3
 - [x] CDE: borda, forma e cor de fundo (estilo Mytosis) com prévia ao criar modelo
 - [x] CDE: criar/excluir modelos; filtros com padrão único, campos com vários
+- [x] CDE: troca ao vivo dos botões + nas telas
+- [x] CDE: categorias-mãe (1, 3, 5) com subcategorias
+- [x] CDE: padrões de boxes (bordas, espessura, cores, fundo) com troca ao vivo
+- [x] CDE: lógica de navegação (tela x pop-up, menus laterais/base, flutuantes)

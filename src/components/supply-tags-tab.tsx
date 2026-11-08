@@ -1,3 +1,4 @@
+import { CdeButton } from "@/components/cde/cde-button";
 import { useTableFilters } from "@/components/use-table-filters";
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -10,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Pencil, Plus, Trash2, Search } from "lucide-react";
+import { Pencil, Trash2, Search } from "lucide-react";
 import { normalizeSearch } from "@/lib/supply-tags";
 
 export type SupplyTag = { id: string; name: string; description: string | null; active: boolean; created_by: string | null; created_at: string };
@@ -138,7 +139,7 @@ function TagDialog({ tag, onSave }: { tag?: SupplyTag; onSave: (v: { name: strin
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {tag ? <Button size="compactIcon" variant="ghost" title="Editar" aria-label="Editar"><Pencil className="h-3.5 w-3.5" /></Button>
-          : <Button size="compactIcon" variant="action" title="Nova etiqueta" aria-label="Nova etiqueta"><Plus className="h-3.5 w-3.5" /></Button>}
+          : <CdeButton group="plus" screen="components/supply-tags-tab.tsx" title="Nova etiqueta" aria-label="Nova etiqueta"></CdeButton>}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader><DialogTitle>{tag ? "Editar etiqueta" : "Nova etiqueta"}</DialogTitle></DialogHeader>

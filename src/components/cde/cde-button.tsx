@@ -6,12 +6,13 @@ import { cn } from "@/lib/utils";
 import { ICONS, styleOf, type CdeStyle } from "./cde-render";
 
 /** Grupos do CDE que já trocam ao vivo nas telas. */
-export type CdeGroup = "filter" | "plus";
+export type CdeGroup = "filter" | "plus" | "box";
 
 /** Padrão usado enquanto o CDE carrega ou se nenhum padrão estiver escolhido. */
 const FALLBACK: Record<CdeGroup, string> = {
   filter: "Button|ghost|icon||Filter|size-3",
   plus: "Button|ghost|icon|text-primary|Plus|h-5 w-5",
+  box: "div|||rounded-xl border bg-card text-card-foreground shadow||",
 };
 
 type Model = { variant: string; size: string; className: string; icon: string; iconClass: string; style?: CdeStyle };
@@ -80,3 +81,10 @@ export const CdeButton = forwardRef<HTMLButtonElement, Props>(function CdeButton
     </Button>
   );
 });
+
+/** Estilo de box (cartão) escolhido no CDE; vazio quando o padrão é o original. */
+export function useCdeBoxStyle(screen?: string) {
+  const { data } = useCdeStandards();
+  const m = resolveCdeModel(data, "box", screen);
+  return { ...styleOf(m.style), className: m.className };
+}

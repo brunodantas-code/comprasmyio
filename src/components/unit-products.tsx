@@ -1,3 +1,4 @@
+import { CdeButton } from "@/components/cde/cde-button";
 import { useMemo, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,7 +22,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { ArrowRightLeft, Camera, CheckCircle2, ImageUp, PauseCircle, Plus, Trash2 } from "lucide-react";
+import { ArrowRightLeft, Camera, CheckCircle2, ImageUp, PauseCircle, Trash2 } from "lucide-react";
 import { pushQrsToExternal } from "@/lib/push-external";
 import { useStockDestinations } from "@/components/stock-destinations-tab";
 import { useDamageReasons } from "@/components/damage-reasons-tab";
@@ -385,9 +386,7 @@ function AddUnitProductDialog({ materials, userId }: { materials: MaterialOption
       }}
     >
       <DialogTrigger asChild>
-        <Button size="sm">
-          <Plus className="mr-1 h-4 w-4" /> Adicionar produto
-        </Button>
+        <CdeButton group="plus" screen="components/unit-products.tsx">Adicionar produto</CdeButton>
       </DialogTrigger>
       <DialogContent className="max-h-[88vh] max-w-2xl overflow-y-auto">
         <DialogHeader>

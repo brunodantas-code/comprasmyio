@@ -1,8 +1,9 @@
+import { CdeButton } from "@/components/cde/cde-button";
 import { useTableFilters } from "@/components/use-table-filters";
 import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { CodeXml, Download, Eye, History, MessageCircleQuestion, MessageCircleMore, Paperclip, Plus, Send, Trash2, Pencil } from "lucide-react";
+import { CodeXml, Download, Eye, History, MessageCircleQuestion, MessageCircleMore, Paperclip, Send, Trash2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { MyioAppLogo } from "@/components/myio-app-logo";
@@ -291,7 +292,7 @@ function NewTicketDialog({ open, onOpenChange, userId, onCreated }: { open: bool
      },
   });
   return <Dialog open={open} onOpenChange={onOpenChange}>
-    <DialogTrigger asChild><Button variant="action"><Plus className="h-4 w-4" />Novo ticket</Button></DialogTrigger>
+    <DialogTrigger asChild><CdeButton group="plus" screen="routes/_authenticated/development.tsx">Novo ticket</CdeButton></DialogTrigger>
      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
       <form onSubmit={(event) => { event.preventDefault(); createTicket.mutate(event.currentTarget); }} className="space-y-4">
         <DialogHeader><DialogTitle>Novo ticket</DialogTitle><DialogDescription>Registre uma melhoria ou um problema encontrado.</DialogDescription></DialogHeader>

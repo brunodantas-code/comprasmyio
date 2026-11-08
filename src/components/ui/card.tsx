@@ -1,15 +1,21 @@
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
+import { useCdeBoxStyle } from "@/components/cde/cde-button";
 
 const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn("rounded-xl border bg-card text-card-foreground shadow", className)}
-      {...props}
-    />
-  ),
+  ({ className, style, ...props }, ref) => {
+    // Box segue ao vivo o padrão escolhido no CDE.
+    const box = useCdeBoxStyle();
+    return (
+      <div
+        ref={ref}
+        style={{ ...box.css, ...style }}
+        className={cn(box.className || "rounded-xl border bg-card text-card-foreground shadow", box.cls, className)}
+        {...props}
+      />
+    );
+  },
 );
 Card.displayName = "Card";
 

@@ -1,3 +1,4 @@
+import { CdeButton } from "@/components/cde/cde-button";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { ChevronDown, ChevronUp, GripVertical, Pencil, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, GripVertical, Pencil, Trash2 } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { DndContext, PointerSensor, KeyboardSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
@@ -140,7 +141,7 @@ function StatusDialog({ row, onSave }: { row?: OrderStatusRow; onSave: (v: { lab
     <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (o) setLabel(row?.label ?? ""); }}>
       <DialogTrigger asChild>
         {row ? <Button size="compactIcon" variant="ghost" title="Editar" aria-label="Editar"><Pencil className="h-3.5 w-3.5" /></Button>
-          : <Button size="compactIcon" variant="action" title="Nova situação" aria-label="Nova situação"><Plus className="h-3.5 w-3.5" /></Button>}
+          : <CdeButton group="plus" screen="components/supply-order-statuses-tab.tsx" title="Nova situação" aria-label="Nova situação"></CdeButton>}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader><DialogTitle>{row ? "Editar situação" : "Nova situação"}</DialogTitle></DialogHeader>

@@ -1,3 +1,4 @@
+import { CdeButton } from "@/components/cde/cde-button";
 import { useTableFilters } from "@/components/use-table-filters";
 import { Fragment, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -11,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ChevronUp, ChevronDown, Download, Pencil, Plus, Trash2 } from "lucide-react";
+import { ChevronUp, ChevronDown, Download, Pencil, Trash2 } from "lucide-react";
 import { LinkedRecordDeletionDialog } from "@/components/linked-record-deletion-dialog";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { useClientCategories, type ClientCategory } from "@/components/client-categories-tab";
@@ -209,9 +210,7 @@ export function ClientsTab({ userId }: { userId: string }) {
         <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
           <CardTitle>Novo cliente</CardTitle>
           <div className="flex items-center gap-2">
-            <Button type="button" variant="action" className="whitespace-nowrap" onClick={() => setNewUnits((current) => [...current, { name: "", city: "", state: "" }])}>
-              <Plus className="mr-1 h-4 w-4" />Filial
-            </Button>
+            <CdeButton group="plus" screen="components/clients-tab.tsx" type="button" onClick={() => setNewUnits((current) => [...current, { name: "", city: "", state: "" }])}>Filial</CdeButton>
             <Button type="submit" form="new-client-form" variant="action" className="whitespace-nowrap px-6" disabled={create.isPending}>Criar</Button>
           </div>
         </CardHeader>
@@ -404,7 +403,7 @@ function ClientUnitsList({ client, userId }: { client: Client; userId: string })
           categories={categories ?? []}
           saving={create.isPending}
           onSave={(values) => create.mutateAsync(values)}
-          trigger={<Button type="button" variant="action" size="sm"><Plus className="mr-1 h-4 w-4" />Adicionar unidade</Button>}
+          trigger={<CdeButton group="plus" screen="components/clients-tab.tsx" type="button">Adicionar unidade</CdeButton>}
         />
       </div>
       {!units?.length ? <p className="text-sm text-muted-foreground">Nenhuma unidade cadastrada.</p> : (

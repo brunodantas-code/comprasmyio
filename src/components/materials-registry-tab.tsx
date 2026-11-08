@@ -1,7 +1,8 @@
+import { CdeButton } from "@/components/cde/cde-button";
 import { useTableFilters } from "@/components/use-table-filters";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronUp, ChevronDown, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { ChevronUp, ChevronDown, Pencil, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { MaterialDetailDialog } from "@/components/material-detail";
@@ -171,7 +172,7 @@ function AddMaterialDialog({ categories }: { categories: MaterialStockType[] }) 
 
   return <Dialog open={open} onOpenChange={(nextOpen) => { setOpen(nextOpen); if (!nextOpen) reset(); }}>
     <DialogTrigger asChild>
-      <Button size="compactIcon" variant="ghost" aria-label="Adicionar material" title="Adicionar material"><Plus className="h-3.5 w-3.5" /></Button>
+      <CdeButton group="plus" screen="components/materials-registry-tab.tsx" aria-label="Adicionar material" title="Adicionar material"></CdeButton>
     </DialogTrigger>
     <DialogContent>
       <DialogHeader>

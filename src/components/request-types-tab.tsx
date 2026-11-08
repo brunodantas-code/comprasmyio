@@ -1,8 +1,9 @@
+import { CdeButton } from "@/components/cde/cde-button";
 import { Fragment, useState } from "react";
 import type React from "react";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronUp, ChevronDown, Pencil, Plus } from "lucide-react";
+import { ChevronUp, ChevronDown, Pencil } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -169,7 +170,7 @@ function CreateRequestTypeDialog({ open, onOpenChange, saving, onSave }: { open:
   const [name, setName] = useState("");
   const [modelCode, setModelCode] = useState("");
   return <Dialog open={open} onOpenChange={(next) => { onOpenChange(next); if (!next) { setName(""); setModelCode(""); } }}>
-    <DialogTrigger asChild><Button size="compactIcon" variant="ghost" aria-label="Criar tipo de solicitação" title="Criar tipo"><Plus className="h-3.5 w-3.5" /></Button></DialogTrigger>
+    <DialogTrigger asChild><CdeButton group="plus" screen="components/request-types-tab.tsx" aria-label="Criar tipo de solicitação" title="Criar tipo"></CdeButton></DialogTrigger>
     <DialogContent><DialogHeader><DialogTitle>Novo tipo de solicitação</DialogTitle><DialogDescription>Escolha o formulário e as regras que este tipo reutilizará.</DialogDescription></DialogHeader>
       <form className="space-y-4" onSubmit={async (event) => { event.preventDefault(); if (name.trim().length < 2) return toast.error("Nome muito curto"); if (!modelCode) return toast.error("Selecione um modelo"); try { await onSave(name.trim(), modelCode); } catch { /* A alteração exibe a mensagem. */ } }}>
         <div className="space-y-2"><Label htmlFor="new-request-type-name">Nome</Label><Input id="new-request-type-name" value={name} onChange={(event) => setName(event.target.value)} placeholder="Inserir nome" required /></div>
@@ -282,7 +283,7 @@ function RequestSubtypesRows({ type, canManage }: { type: RequestTypeRecord; can
     ))}
     {!items.length && <TableRow className="bg-muted/30"><TableCell colSpan={4} className="pl-10 text-sm text-muted-foreground">Nenhuma opção cadastrada.</TableCell></TableRow>}
     {canManage && <TableRow className="bg-muted/30"><TableCell colSpan={4} className="pl-10">
-      <SubtypeNameDialog title={`Nova opção em ${type.name}`} initial="" trigger={<Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs"><Plus className="h-3.5 w-3.5" />Nova opção</Button>} onSave={(name) => create.mutateAsync(name)} />
+      <SubtypeNameDialog title={`Nova opção em ${type.name}`} initial="" trigger={<CdeButton group="plus" screen="components/request-types-tab.tsx">Nova opção</CdeButton>} onSave={(name) => create.mutateAsync(name)} />
     </TableCell></TableRow>}
   </>;
 }

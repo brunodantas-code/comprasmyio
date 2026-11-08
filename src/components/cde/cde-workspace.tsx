@@ -15,6 +15,7 @@ import { BORDERS, FILLS } from "@/components/mytosis/shapes";
 import { ColorCode } from "./color-code";
 import { FORMS, ICONS, TEXTS, WIDTHS, styleOf, type CdeStyle } from "./cde-render";
 import { CdeAppIcons } from "./cde-app-icons";
+import { CdeNavigation } from "./cde-navigation";
 import { FormatColorOptions } from "@/components/mytosis/format-color-options";
 
 type Variant = { key: string; name?: string; custom?: boolean; tag: string; variant: string; size: string; className: string; icon: string; iconClass: string; label: string; count: number; files: string[]; style?: CdeStyle };
@@ -45,6 +46,7 @@ const GROUPS: { key: GroupKey; title: string; hint: string; multi?: boolean }[] 
   { key: "close", title: "5.6 Fechar", hint: "Padrão único" },
   { key: "pencil", title: "5.7 Lápis (editar)", hint: "Padrão único" },
   { key: "trash", title: "5.8 Lixeira (excluir)", hint: "Padrão único" },
+  { key: "box", title: "6. Boxes (cartões)", hint: "Forma, borda, espessura e fundo dos cartões · padrão único, aplicado ao vivo" },
 ];
 
 /** Telas conhecidas pelo levantamento, com o app deduzido pelo caminho do arquivo. */
@@ -57,10 +59,14 @@ function screenApp(f: string) {
   return "Geral";
 }
 
+/** Categorias-mãe das subcategorias numeradas (ex.: 3 → 3.1, 3.2). */
+const PARENTS: Record<string, string> = { "1": "Campos para preenchimento", "3": "Ordenação", "5": "Botões de ação" };
+
 const inventoryKey = (v: Omit<Variant, "key">) => [v.tag, v.variant, v.size, v.className, v.icon, v.iconClass].join("|");
 
 function Preview({ v }: { v: Pick<Variant, "tag" | "variant" | "size" | "className" | "icon" | "iconClass" | "label" | "style"> }) {
   const { css, cls } = styleOf(v.style);
+  if (v.tag === "div") return <div style={css} className={cn("flex h-14 w-48 items-center justify-center text-xs", v.className || "rounded-xl border bg-card shadow", cls)}>Box</div>;
   if (v.tag === "Textarea") return <Textarea style={css} className={cn("w-56", v.className, cls)} placeholder="Texto" readOnly />;
   if (["Input", "SelectTrigger", "PasswordInput"].includes(v.tag)) return <Input style={css} className={cn("w-56", v.className, cls)} placeholder={v.tag === "SelectTrigger" ? "Selecione…" : "Texto"} readOnly />;
   const Icon = ICONS[v.icon];
@@ -202,7 +208,16 @@ export function CdeWorkspace() {
         <h1 className="text-xl font-semibold">Ambiente de Desenvolvimento Colaborativo</h1>
         <p className="text-sm text-muted-foreground">Modelos usados hoje em todos os apps, agrupados por tipo. Escolha o padrão, crie novos modelos e exclua os que devem ser substituídos pelo padrão.</p>
       </div>
-      {GROUPS.map((g) => {
+      {GROUPS.map((g, gi) => {
+        const num = g.title.split(" ")[0].replace(/\.$/, "");
+        const parent = num.includes(".") ? num.split(".")[0] : null;
+        const showParent = parent && GROUPS[gi - 1]?.title.split(" ")[0].replace(/\.$/, "").split(".")[0] !== parent;
+        const parentHeader = showParent ? (
+          <div key={`p-${parent}`} className="flex items-center gap-3 pt-2">
+            <span className="flex h-8 min-w-8 items-center justify-center rounded-md bg-primary px-1.5 text-base font-bold">{parent}</span>
+            <h2 className="flex-1 border-b border-border pb-1 text-lg font-semibold">{PARENTS[parent!]}</h2>
+          </div>
+        ) : null;
         const list = groupModels(g.key);
         const standards = standardsOf(g.key);
         const primaries = primariesOf(g.key);
@@ -211,7 +226,8 @@ export function CdeWorkspace() {
         const removed = (data?.removed ?? []).filter((r) => r.group_key === g.key);
         const isOpen = open.has(g.key);
         return (
-          <section key={g.key} className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+          <div key={g.key} className="space-y-4">{parentHeader}
+          <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
             <div className="flex items-center gap-3 bg-accent px-5 py-2">
               <button type="button" onClick={() => setOpen((s) => { const n = new Set(s); if (n.has(g.key)) n.delete(g.key); else n.add(g.key); return n; })} className="flex min-w-0 flex-1 items-center gap-4 text-left">
                 <span className="flex flex-col">
@@ -223,7 +239,7 @@ export function CdeWorkspace() {
                 </span>
                 <span>{isOpen ? <ChevronUp className="h-4 w-4 shrink-0" /> : <ChevronDown className="h-4 w-4 shrink-0" />}</span>
               </button>
-              <Button type="button" variant="outline" size="compactIcon" title="Criar modelo" aria-label={`Criar modelo em ${g.title}`} onClick={() => { setDraft({ ...emptyDraft, tag: FIELD_TAGS[g.key]?.[0] ?? "Button" }); setCreating(g.key); }}><Plus /></Button>
+              <Button type="button" variant="outline" size="compactIcon" title="Criar modelo" aria-label={`Criar modelo em ${g.title}`} onClick={() => { setDraft({ ...emptyDraft, tag: FIELD_TAGS[g.key]?.[0] ?? (g.key === "box" ? "div" : "Button") }); setCreating(g.key); }}><Plus /></Button>
             </div>
             {isOpen ? (
               <>
@@ -276,9 +292,11 @@ export function CdeWorkspace() {
               </>
             ) : null}
           </section>
+          </div>
         );
       })}
-      <CdeAppIcons number={6} />
+      <CdeAppIcons number={7} />
+      <CdeNavigation number={8} />
 
       <Dialog open={!!creating} onOpenChange={(o) => !o && setCreating(null)}>
         <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
@@ -287,7 +305,7 @@ export function CdeWorkspace() {
             <div className="space-y-1 sm:col-span-2"><Label>Nome do modelo</Label><Input value={draft.name} maxLength={60} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder="Ex.: Campo de busca" /></div>
             <div className="space-y-1"><Label>Tipo</Label>
               <Select value={draft.tag} onValueChange={(tag) => setDraft({ ...draft, tag })}><SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{(creating && FIELD_TAGS[creating] ? FIELD_TAGS[creating] : ["Button", "button"]).map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select></div>
+                <SelectContent>{(creating && FIELD_TAGS[creating] ? FIELD_TAGS[creating] : (creating === "box" ? ["div"] : ["Button", "button"])).map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select></div>
             {!(creating && FIELD_TAGS[creating]) ? <>
               <div className="space-y-1"><Label>Estilo</Label>
                 <Select value={draft.variant || "none"} onValueChange={(v) => setDraft({ ...draft, variant: v === "none" ? "" : v })}><SelectTrigger><SelectValue /></SelectTrigger>

@@ -1,3 +1,4 @@
+import { CdeButton } from "@/components/cde/cde-button";
 import { useTableFilters } from "@/components/use-table-filters";
 import { useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -16,7 +17,7 @@ import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Plus, Library, Trash2, Eraser, Camera, Upload, ImagePlus, QrCode, AlertTriangle } from "lucide-react";
+import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Library, Trash2, Eraser, Camera, Upload, ImagePlus, QrCode, AlertTriangle } from "lucide-react";
 import { QrLinkPicker, type LinkedQr } from "@/components/myio-delivery-qr";
 import {
   AlertDialog,
@@ -773,7 +774,7 @@ function AddMaterialDialog({ location, userId }: { location: StockLocation; user
   return (
     <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) resetForm(); }}>
       <DialogTrigger asChild>
-        <Button size="sm"><Plus className="mr-1 h-4 w-4" /> Adicionar item</Button>
+        <CdeButton group="plus" screen="components/stock-tab.tsx">Adicionar item</CdeButton>
       </DialogTrigger>
       <DialogContent className={independent ? "max-h-[85vh] overflow-y-auto" : undefined}>
         <DialogHeader>
@@ -1679,7 +1680,7 @@ function AddTerceirosDialog({ userId }: { userId: string }) {
   return (
     <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) resetForm(); }}>
       <DialogTrigger asChild>
-        <Button size="sm"><Plus className="mr-1 h-4 w-4" /> Adicionar item</Button>
+        <CdeButton group="plus" screen="components/stock-tab.tsx">Adicionar item</CdeButton>
       </DialogTrigger>
       <DialogContent className="max-h-[85vh] overflow-y-auto">
         <DialogHeader>

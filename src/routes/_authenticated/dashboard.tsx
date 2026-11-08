@@ -1,3 +1,4 @@
+import { CdeButton } from "@/components/cde/cde-button";
 import { TableFilterMenu } from "@/components/use-table-filters";
 import { TableReportActions, TableReportProvider, useRegisterTableReport } from "@/components/table-report-actions";
 import { ProjectTypeFields, useProjectTypes } from "@/components/project-type-fields";
@@ -38,8 +39,8 @@ import { compareColumnValues, type SortDirection } from "@/lib/column-sort";
 import { isFilterActive, matchesColumnFilter, type ColumnFilterValue, type FilterKind } from "@/lib/column-filters";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { toast } from "sonner";
-import { ArrowLeft, Plus, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Boxes, Building2, Plane, Landmark, Briefcase, Layers3, ArrowUpDown, CalendarDays } from "lucide-react";
-import { Trash2, Paperclip, Loader2, DatabaseBackup, Check, CheckCircle2, XCircle, RotateCcw, Pencil, Bell, ShieldCheck, AlertTriangle, Tag, FileText } from "lucide-react";
+import { ArrowLeft, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Boxes, Building2, Plane, Landmark, Briefcase, Layers3, ArrowUpDown, CalendarDays } from "lucide-react";
+import { Plus, Trash2, Paperclip, Loader2, DatabaseBackup, Check, CheckCircle2, XCircle, RotateCcw, Pencil, Bell, ShieldCheck, AlertTriangle, Tag, FileText } from "lucide-react";
 import { ApprovalWorkflow, MyApprovalFlows, PendingApprovalsByRole, PendingForMe, type ApprovalListOrder } from "@/components/approval-workflow";
 import { z } from "zod";
 import { StockTab } from "@/components/stock-tab";
@@ -1879,14 +1880,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                   </div>
                 ))}
                 <div className="flex items-center gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="compactIcon"
-                    onClick={() => setTravelLegs((prev) => [...prev, { destination: "", departure: "", return: "" }])}
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                  </Button>
+                  <CdeButton group="plus" screen="routes/_authenticated/dashboard.tsx" type="button" onClick={() => setTravelLegs((prev) => [...prev, { destination: "", departure: "", return: "" }])} aria-label="Adicionar"></CdeButton>
                   <span className="text-sm text-muted-foreground">Deseja adicionar outra solicitação para esta viagem?</span>
                 </div>
               </div>
@@ -1919,14 +1913,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                   </div>
                 ))}
                 <div className="flex items-center gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="compactIcon"
-                    onClick={() => setReembolsoLegs((prev) => [...prev, { description: "", value: "", date: "" }])}
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                  </Button>
+                  <CdeButton group="plus" screen="routes/_authenticated/dashboard.tsx" type="button" onClick={() => setReembolsoLegs((prev) => [...prev, { description: "", value: "", date: "" }])} aria-label="Adicionar"></CdeButton>
                   <span className="text-sm text-muted-foreground">Deseja adicionar outro reembolso a esta Solicitação?</span>
                 </div>
               </div>
@@ -2213,9 +2200,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                              </div>
                           </div>
                         ))}
-                        <Button type="button" size="compactIcon" variant="outline" aria-label="Adicionar material" title="Adicionar material" onClick={() => setMaterialItems((current) => [...current, emptyMaterialItem()])}>
-                          <Plus className="h-4 w-4" />
-                        </Button>
+                        <CdeButton group="plus" screen="routes/_authenticated/dashboard.tsx" type="button" aria-label="Adicionar material" title="Adicionar material" onClick={() => setMaterialItems((current) => [...current, emptyMaterialItem()])}></CdeButton>
                       </div>
                     </div>
                   )}

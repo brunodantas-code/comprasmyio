@@ -1,3 +1,4 @@
+import { CdeButton } from "@/components/cde/cde-button";
 import { useTableFilters } from "@/components/use-table-filters";
 import { useRef, useState, type ReactNode } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -13,7 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Paperclip, Trash2, Plane, ExternalLink, FileSpreadsheet } from "lucide-react";
+import { Paperclip, Trash2, Plane, ExternalLink, FileSpreadsheet } from "lucide-react";
 import * as XLSX from "xlsx";
 import { matchCiSpreadsheet } from "@/lib/import-ci.functions";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
@@ -358,7 +359,7 @@ export function NewImportDialog({ userId, triggerLabel = "Nova importação", in
   return (
     <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) reset(); }}>
       <DialogTrigger asChild>
-        <Button><Plus className="mr-2 h-4 w-4" />{triggerLabel}</Button>
+        <CdeButton group="plus" screen="components/import-batches.tsx">{triggerLabel}</CdeButton>
       </DialogTrigger>
       <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>

@@ -1,7 +1,8 @@
+import { CdeButton } from "@/components/cde/cde-button";
 import { useTableFilters } from "@/components/use-table-filters";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronDown, ChevronRight, Pencil, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronRight, Pencil, Trash2 } from "lucide-react";
 import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -104,7 +105,7 @@ export function KpisTab({ data, canEdit }: { data: MytosisData; canEdit: boolean
   return <div className="space-y-4">
     <div className="flex items-end gap-2">
       <div className="flex flex-1 flex-wrap gap-4 text-sm text-muted-foreground">{["segment", "name", "responsible", "target"].map(key => <span key={key}>{kpiFilters.header(key)}</span>)}</div>
-      {canEdit ? <Button variant="outline" size="icon" className="h-8 w-8" title="Novo KPI" aria-label="Novo KPI" onClick={() => setDraft(emptyDraft())}><Plus className="size-3.5" /></Button> : null}
+      {canEdit ? <CdeButton group="plus" screen="components/mytosis/kpis-tab.tsx" title="Novo KPI" aria-label="Novo KPI" onClick={() => setDraft(emptyDraft())}></CdeButton> : null}
     </div>
 
     {grouped.length === 0 ? <p className="py-10 text-center text-sm text-muted-foreground">Nenhum KPI cadastrado.</p> : null}
@@ -152,7 +153,7 @@ export function KpisTab({ data, canEdit }: { data: MytosisData; canEdit: boolean
                 </tr>)}</tbody>
               </table>
               <div className="flex flex-wrap gap-2">
-                {canPost(k) ? <Button variant="outline" size="sm" onClick={() => setPosting({ kpi: k, period: periodStart(new Date(), k.frequency), value: "", notes: "" })}><Plus className="size-3.5" />Lançar resultado</Button> : null}
+                {canPost(k) ? <CdeButton group="plus" screen="components/mytosis/kpis-tab.tsx" onClick={() => setPosting({ kpi: k, period: periodStart(new Date(), k.frequency), value: "", notes: "" })}>Lançar resultado</CdeButton> : null}
                 {canEdit ? <Button variant="outline" size="sm" onClick={() => setDraft({ id: k.id, name: k.name, description: k.description ?? "", cost_center_id: k.cost_center_id, responsible_id: k.responsible_id, unit: k.unit, target: String(k.target), frequency: k.frequency })}><Pencil className="size-3.5" />Editar KPI</Button> : null}
                 {canEdit ? <Button variant="outline" size="sm" onClick={() => { if (window.confirm(`Excluir o KPI "${k.name}" e todos os lançamentos?`)) deleteKpi.mutate(k.id); }}><Trash2 className="size-3.5" />Excluir</Button> : null}
               </div>
