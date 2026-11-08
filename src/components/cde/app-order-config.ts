@@ -30,3 +30,23 @@ export function useAppOrder() {
     return parseAppOrder(data?.variant_key);
   } });
 }
+
+/** Tile look of portal apps: label font (desktop px; mobile is 2px smaller) and icon size (% of tile icon box). */
+export type AppTileConfig = { labelPx: number; iconPct: number };
+export const APP_TILE_DEFAULT: AppTileConfig = { labelPx: 14, iconPct: 100 };
+/** Optical correction so glyphs with thin strokes or large inner padding look the same size as the others. */
+export const APP_ICON_OPTICAL: Record<string, number> = { supply: 1.15, mytosis: 1.2, cde: 1.2 };
+export function parseAppTile(raw?: string): AppTileConfig {
+  try {
+    const p = JSON.parse(raw ?? "{}");
+    const labelPx = Number(p.labelPx), iconPct = Number(p.iconPct);
+    return { labelPx: labelPx >= 10 && labelPx <= 18 ? labelPx : APP_TILE_DEFAULT.labelPx, iconPct: iconPct >= 70 && iconPct <= 120 ? iconPct : APP_TILE_DEFAULT.iconPct };
+  } catch { return APP_TILE_DEFAULT; }
+}
+export function useAppTile() {
+  return useQuery({ queryKey: ["cde-app-tile"], queryFn: async () => {
+    const { data, error } = await supabase.from("cde_selected").select("variant_key").eq("group_key", "app_tile").eq("is_primary", true).maybeSingle();
+    if (error) throw error;
+    return parseAppTile(data?.variant_key);
+  } });
+}

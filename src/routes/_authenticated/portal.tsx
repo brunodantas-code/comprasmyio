@@ -1,5 +1,6 @@
 import { PendingGroups } from "@/components/pending-groups";
 import { useState } from "react";
+import type React from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { MessageCircleQuestion, Bell, CheckCircle2, ChevronRight, CodeXml, DollarSign, FileSignature, Home, Menu, Moon, Phone, Search, Settings, Settings2, ShieldCheck, ShoppingCart, UserRound, UsersRound, LogOut, KeyRound } from "lucide-react";
@@ -13,7 +14,17 @@ import { ErpAppAccessAdmin } from "@/components/erp-app-access-admin";
 import { CrmFunnelIcon } from "@/components/crm-funnel-icon";
 import { MytosisIcon } from "@/components/mytosis-icon";
 import { CdeIcon } from "@/components/cde-icon";
-import { useAppOrder } from "@/components/cde/app-order-config";
+import { APP_ICON_OPTICAL, useAppOrder, useAppTile, APP_TILE_DEFAULT } from "@/components/cde/app-order-config";
+const APP_ICONS: Record<string, [React.ComponentType<{ className?: string; style?: React.CSSProperties }>, number]> = {
+  supply: [Settings, 1.7], cash_flow: [DollarSign, 3.5], crm: [CrmFunnelIcon, 3], legal: [FileSignature, 1.8], rh: [UsersRound, 1.8],
+  site_survey: [Search, 2.8], chamados: [Phone, 2.4], cde: [CdeIcon, 1.8], mytosis: [MytosisIcon, 1.8], development: [CodeXml, 2.8],
+};
+function AppTileFace({ appKey, name, tile }: { appKey: string; name: string; tile: { labelPx: number; iconPct: number } }) {
+  const [Icon, stroke] = APP_ICONS[appKey] ?? [CodeXml, 2.8];
+  const scale = (tile.iconPct / 100) * (APP_ICON_OPTICAL[appKey] ?? 1);
+  return <><span className="flex h-11 w-full translate-y-0.5 items-center justify-center sm:h-16 sm:translate-y-1" aria-hidden="true"><Icon className="h-11 w-11 sm:h-16 sm:w-16" style={{ strokeWidth: stroke, transform: `scale(${scale})` }} /></span>
+    <span className="font-normal leading-none text-[length:var(--tile-fs-m)] sm:text-[length:var(--tile-fs)]" style={{ "--tile-fs": `${tile.labelPx}px`, "--tile-fs-m": `${tile.labelPx - 2}px` } as React.CSSProperties}>{name}</span></>;
+}
 import { usePendingActions } from "@/hooks/use-pending-actions";
 import { ChangePasswordDialog } from "@/components/change-password-dialog";
 import { ThemeMenuItem, ThemeToggle } from "@/components/theme-toggle";
@@ -39,6 +50,7 @@ function PortalPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { data: pendingActions } = usePendingActions();
   const { data: appOrder } = useAppOrder();
+  const tile = useAppTile().data ?? APP_TILE_DEFAULT;
   const { data, isLoading } = useQuery({
     queryKey: ["my-erp-access"],
     queryFn: async () => {
@@ -98,16 +110,7 @@ function PortalPage() {
         {key === "supply" && (pendingActions?.supply ?? 0) > 0 ? <PendingBadge count={pendingActions?.supply ?? 0} label="pendências no Supply" /> : null}
         {key === "development" && (pendingActions?.codeTickets ?? 0) > 0 ? <PendingBadge count={pendingActions?.codeTickets ?? 0} label="tickets pendentes no Code" /> : null}
         {key === "chamados" && (pendingActions?.supportCalls ?? 0) > 0 ? <PendingBadge count={pendingActions?.supportCalls ?? 0} label="chamados pendentes no OpDesk" /> : null}
-        {key === "supply" ? <><span className="flex h-11 w-full translate-y-0.5 items-center justify-center sm:h-16 sm:translate-y-1" aria-hidden="true"><Settings className="h-11 w-11 stroke-[1.7] sm:h-16 sm:w-16" /></span><span className="text-xs font-normal leading-none sm:text-sm">{name}</span></>
-          : key === "cash_flow" ? <><span className="flex h-11 w-full translate-y-0.5 items-center justify-center sm:h-16 sm:translate-y-1" aria-hidden="true"><DollarSign className="h-11 w-11 stroke-[3.5] sm:h-16 sm:w-16" /></span><span className="text-xs font-normal leading-none sm:text-sm">{name}</span></>
-          : key === "crm" ? <><span className="flex h-11 w-full translate-y-0.5 items-center justify-center sm:h-16 sm:translate-y-1" aria-hidden="true"><CrmFunnelIcon className="h-11 w-11 stroke-[3] sm:h-16 sm:w-16" /></span><span className="text-xs font-normal leading-none sm:text-sm">{name}</span></>
-          : key === "legal" ? <><span className="flex h-11 w-full translate-y-0.5 items-center justify-center sm:h-16 sm:translate-y-1" aria-hidden="true"><FileSignature className="h-11 w-11 stroke-[1.8] sm:h-16 sm:w-16" /></span><span className="text-xs font-normal leading-none sm:text-sm">{name}</span></>
-          : key === "rh" ? <><span className="flex h-11 w-full translate-y-0.5 items-center justify-center sm:h-16 sm:translate-y-1" aria-hidden="true"><UsersRound className="h-11 w-11 stroke-[1.8] sm:h-16 sm:w-16" /></span><span className="text-xs font-normal leading-none sm:text-sm">{name}</span></>
-          : key === "site_survey" ? <><span className="flex h-11 w-full translate-y-0.5 items-center justify-center sm:h-16 sm:translate-y-1" aria-hidden="true"><Search className="h-11 w-11 stroke-[2.8] sm:h-16 sm:w-16" /></span><span className="text-[0.65rem] font-normal leading-none sm:text-xs">{name}</span></>
-          : key === "chamados" ? <><span className="flex h-11 w-full translate-y-0.5 items-center justify-center sm:h-16 sm:translate-y-1" aria-hidden="true"><Phone className="h-11 w-11 stroke-[2.4] sm:h-16 sm:w-16" /></span><span className="text-[0.65rem] font-normal leading-none sm:text-xs">{name}</span></>
-          : key === "cde" ? <><span className="flex h-11 w-full translate-y-0.5 items-center justify-center sm:h-16 sm:translate-y-1" aria-hidden="true"><CdeIcon className="h-11 w-11 stroke-[1.8] sm:h-16 sm:w-16" /></span><span className="text-xs font-normal leading-none sm:text-sm">{name}</span></>
-          : key === "mytosis" ? <><span className="flex h-11 w-full translate-y-0.5 items-center justify-center sm:h-16 sm:translate-y-1" aria-hidden="true"><MytosisIcon className="h-11 w-11 stroke-[1.8] sm:h-16 sm:w-16" /></span><span className="text-[0.65rem] font-normal leading-none sm:text-xs">{name}</span></>
-          : <><span className="flex h-11 w-full translate-y-0.5 items-center justify-center sm:h-16 sm:translate-y-1" aria-hidden="true"><CodeXml className="h-11 w-11 stroke-[2.8] sm:h-16 sm:w-16" /></span><span className="text-[0.65rem] font-normal leading-none sm:text-xs">{name}</span></>}
+        <AppTileFace appKey={key} name={name} tile={tile} />
       </Link>
       <p className="mt-2 w-20 max-w-full break-words text-center text-[0.68rem] leading-4 text-muted-foreground sm:mt-3 sm:w-28 sm:text-sm sm:leading-5">{description.map((line) => <span key={line} className="block sm:whitespace-nowrap">{line}</span>)}</p>
     </div>
@@ -237,77 +240,7 @@ function PortalPage() {
                          {key === "supply" && (pendingActions?.supply ?? 0) > 0 ? <PendingBadge count={pendingActions?.supply ?? 0} label="pendências no Supply" /> : null}
                           {key === "development" && (pendingActions?.codeTickets ?? 0) > 0 ? <PendingBadge count={pendingActions?.codeTickets ?? 0} label="tickets pendentes no Code" /> : null}
                            {key === "chamados" && (pendingActions?.supportCalls ?? 0) > 0 ? <PendingBadge count={pendingActions?.supportCalls ?? 0} label="chamados pendentes no OpDesk" /> : null}
-                        {key === "supply" ? (
-                          <>
-                            <span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true">
-                              <Settings className="h-14 w-14 stroke-[1.7] sm:h-16 sm:w-16" />
-                            </span>
-                            <span className="text-sm font-normal leading-none">{name}</span>
-                          </>
-                        ) : key === "cash_flow" ? (
-                          <>
-                            <span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true">
-                              <DollarSign className="h-14 w-14 stroke-[3.5] sm:h-16 sm:w-16" />
-                            </span>
-                            <span className="text-sm font-normal leading-none">{name}</span>
-                          </>
-                        ) : key === "crm" ? (
-                          <>
-                            <span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true">
-                              <CrmFunnelIcon className="h-14 w-14 stroke-[3] sm:h-16 sm:w-16" />
-                            </span>
-                            <span className="text-sm font-normal leading-none">{name}</span>
-                          </>
-                        ) : key === "legal" ? (
-                          <>
-                            <span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true">
-                              <FileSignature className="h-14 w-14 stroke-[1.8] sm:h-16 sm:w-16" />
-                            </span>
-                            <span className="text-sm font-normal leading-none">{name}</span>
-                          </>
-                        ) : key === "rh" ? (
-                          <>
-                            <span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true">
-                              <UsersRound className="h-14 w-14 stroke-[1.8] sm:h-16 sm:w-16" />
-                            </span>
-                            <span className="text-sm font-normal leading-none">{name}</span>
-                          </>
-                        ) : key === "site_survey" ? (
-                          <>
-                            <span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true">
-                              <Search className="h-14 w-14 stroke-[2.8] sm:h-16 sm:w-16" />
-                            </span>
-                            <span className="text-xs font-normal leading-none">{name}</span>
-                          </>
-                        ) : key === "chamados" ? (
-                          <>
-                            <span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true">
-                              <Phone className="h-14 w-14 stroke-[2.4] sm:h-16 sm:w-16" />
-                            </span>
-                            <span className="text-xs font-normal leading-none">{name}</span>
-                          </>
-                        ) : key === "cde" ? (
-                          <>
-                            <span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true">
-                              <CdeIcon className="h-14 w-14 stroke-[1.8] sm:h-16 sm:w-16" />
-                            </span>
-                            <span className="text-sm font-normal leading-none">{name}</span>
-                          </>
-                        ) : key === "mytosis" ? (
-                          <>
-                            <span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true">
-                              <MytosisIcon className="h-14 w-14 stroke-[1.8] sm:h-16 sm:w-16" />
-                            </span>
-                            <span className="text-xs font-normal leading-none">{name}</span>
-                          </>
-                        ) : (
-                          <>
-                            <span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true">
-                              <CodeXml className="h-14 w-14 stroke-[2.8] sm:h-16 sm:w-16" />
-                            </span>
-                            <span className="text-[0.7rem] font-normal leading-none sm:text-xs">{name}</span>
-                          </>
-                        )}
+                        <AppTileFace appKey={key} name={name} tile={tile} />
                      </Link>
                       <p className="mt-3 w-24 max-w-full break-words text-center text-xs leading-4 text-muted-foreground sm:w-28 sm:text-sm sm:leading-5">
                         {description.map((line) => <span key={line} className="block sm:whitespace-nowrap">{line}</span>)}

@@ -143,3 +143,4 @@
 - [x] CDE: categorias-mãe (1, 3, 5) com subcategorias
 - [x] CDE: padrões de boxes (bordas, espessura, cores, fundo) com troca ao vivo
 - [x] CDE: lógica de navegação (tela x pop-up, menus laterais/base, flutuantes)
+- [ ] Ligar ao CDE os grupos que ainda não se aplicam sozinhos (botões de ação, caixas de seleção, ordenação) conforme o usuário define os padrões
