@@ -419,9 +419,6 @@ export function ProductionCapacityCard() {
             </Table>
           </div>
           )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setLimitDialog(null)}>Fechar</Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </Card>

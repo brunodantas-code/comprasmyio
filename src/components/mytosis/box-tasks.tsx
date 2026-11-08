@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { MilestoneTimeline } from "@/components/milestone-timeline";
 import { canCompleteBoxTask } from "@/lib/mytosis-tasks";
@@ -140,8 +140,6 @@ export function BoxTaskDialog({ selection, onClose, onSelect, data, canEdit }: {
         {details.data?.canConverse ? <div className="space-y-2">{pending.length ? <SearchableSelect value={replyId} onChange={setReplyId} placeholder="Nova pergunta" options={[{ value: "", label: "Nova pergunta" }, ...pending.map((q) => ({ value: q.id, label: `Responder à pergunta ${questions.findIndex((p) => p.id === q.id) + 1}: ${q.text}` }))]} /> : null}{!replyId ? <QuestionRecipient nodeId={task.node_id} taskId={task.id} value={recipientId} onChange={setRecipientId} /> : null}<ChecklistText label={replyId ? "Resposta" : "Nova pergunta"} hint={replyId ? "Escreva a resposta" : "Escreva uma pergunta"} value={text} onChange={setText} maxLength={4000} multiline /><div className="flex justify-end"><Button variant="outline" onClick={() => send.mutate()} disabled={send.isPending || !text.trim() || (!replyId && !recipientId)}><Send className="h-4 w-4" />{replyId ? "Enviar resposta" : "Enviar pergunta"}</Button></div></div> : null}
       </section>
       <section className="space-y-3 border-t border-border pt-4"><h3 className="flex items-center gap-2 text-sm font-normal"><History className="h-4 w-4" />Histórico</h3><MilestoneTimeline entries={(details.data?.logs ?? []).map((log) => ({ id: log.id, created_at: log.created_at, text: `${log.text}\npor ${person(log.actor_id)}` }))} /></section>
-      <DialogFooter><Button variant="outline" onClick={onClose}>Fechar</Button></DialogFooter>
     </> : null}
-    {task && node?.is_process && !editing ? <DialogFooter><Button variant="outline" onClick={onClose}>Fechar</Button></DialogFooter> : null}
   </DialogContent></Dialog>;
 }

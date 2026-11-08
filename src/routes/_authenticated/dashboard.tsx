@@ -3299,9 +3299,6 @@ function OrderReportDialog({
           </section>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>Fechar</Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

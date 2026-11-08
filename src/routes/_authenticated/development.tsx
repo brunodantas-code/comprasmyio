@@ -586,7 +586,6 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
           {preview && !preview.contentType.startsWith("image/") && preview.contentType !== "application/pdf" ? <p className="px-6 text-center text-sm text-muted-foreground">Este formato não possui visualização. Use o botão Baixar anexo.</p> : null}
         </div>
         <DialogFooter className="shrink-0 flex-row justify-end gap-2">
-          <Button variant="outline" onClick={() => setPreview(null)}>Fechar</Button>
           {preview ? <Button onClick={() => { const anchor = document.createElement("a"); anchor.href = preview.url; anchor.download = preview.name; anchor.click(); }}><Download className="h-4 w-4" />Baixar anexo</Button> : null}
         </DialogFooter>
       </DialogContent>
