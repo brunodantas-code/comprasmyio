@@ -13,6 +13,7 @@ import { ErpAppAccessAdmin } from "@/components/erp-app-access-admin";
 import { CrmFunnelIcon } from "@/components/crm-funnel-icon";
 import { MytosisIcon } from "@/components/mytosis-icon";
 import { CdeIcon } from "@/components/cde-icon";
+import { useAppOrder } from "@/components/cde/app-order-config";
 import { usePendingActions } from "@/hooks/use-pending-actions";
 import { ChangePasswordDialog } from "@/components/change-password-dialog";
 import { ThemeMenuItem, ThemeToggle } from "@/components/theme-toggle";
@@ -37,6 +38,7 @@ function PortalPage() {
   const [activeView, setActiveView] = useState<"apps" | "users">("apps");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { data: pendingActions } = usePendingActions();
+  const { data: appOrder } = useAppOrder();
   const { data, isLoading } = useQuery({
     queryKey: ["my-erp-access"],
     queryFn: async () => {
@@ -74,14 +76,15 @@ function PortalPage() {
     { key: "supply", name: "Supply", description: ["Solicitações", "e Estoque"], to: "/dashboard" as const },
     { key: "cash_flow", name: "Cash Flow", description: ["Gestão financeira"], to: "/cash-flow" as const },
     { key: "crm", name: "CRM", description: ["Vendas e", "Relacionamento"], to: "/crm" as const },
-    { key: "legal", name: "Legal", description: ["Contratos, Atas de", "Reunião e Jurídico"], to: "/legal" as const },
+    { key: "legal", name: "Legal", description: ["Contratos", "Atas de Reunião", "Jurídico"], to: "/legal" as const },
     { key: "rh", name: "RH", description: ["Gestão de Pessoas"], to: "/rh" as const },
     { key: "site_survey", name: "Site Survey", description: ["Visitas técnicas"], to: "/site-survey" as const },
     { key: "chamados", name: "OpDesk", description: ["Suporte ao cliente", "e operação"], to: "/chamados" as const },
     { key: "development", name: "Code", description: ["Melhorias e Bugs"], to: "/development" as const },
     { key: "mytosis", name: "Mytosis", description: ["Fluxogramas", "e processos"], to: "/mytosis" as const },
     { key: "cde", name: "CDE", description: ["Padrões de", "interface"], to: "/cde" as const },
-  ].filter((app) => (app.key === "cde" ? data.isErpAdmin : data.appKeys.has(app.key)) || (app.key === "chamados" && pendingActions?.isCustomerSupportAnalyst));
+  ].filter((app) => (app.key === "cde" ? data.isErpAdmin : data.appKeys.has(app.key)) || (app.key === "chamados" && pendingActions?.isCustomerSupportAnalyst))
+    .sort((a, b) => (appOrder ? appOrder.indexOf(a.key) - appOrder.indexOf(b.key) : 0));
   const mobileAppPages = Array.from({ length: Math.ceil(apps.length / 8) }, (_, pageIndex) => apps.slice(pageIndex * 8, pageIndex * 8 + 8));
 
   const renderApp = ({ key, name, description, to }: (typeof apps)[number]) => (
@@ -106,7 +109,7 @@ function PortalPage() {
           : key === "mytosis" ? <><span className="flex h-11 w-full translate-y-0.5 items-center justify-center sm:h-16 sm:translate-y-1" aria-hidden="true"><MytosisIcon className="h-11 w-11 stroke-[1.8] sm:h-16 sm:w-16" /></span><span className="text-[0.65rem] font-normal leading-none sm:text-xs">{name}</span></>
           : <><span className="flex h-11 w-full translate-y-0.5 items-center justify-center sm:h-16 sm:translate-y-1" aria-hidden="true"><CodeXml className="h-11 w-11 stroke-[2.8] sm:h-16 sm:w-16" /></span><span className="text-[0.65rem] font-normal leading-none sm:text-xs">{name}</span></>}
       </Link>
-      <p className="mt-2 w-20 max-w-full break-words text-center text-[0.68rem] leading-4 text-muted-foreground sm:mt-3 sm:w-28 sm:text-sm sm:leading-5">{description.map((line) => <span key={line} className="block">{line}</span>)}</p>
+      <p className="mt-2 w-20 max-w-full break-words text-center text-[0.68rem] leading-4 text-muted-foreground sm:mt-3 sm:w-28 sm:text-sm sm:leading-5">{description.map((line) => <span key={line} className="block sm:whitespace-nowrap">{line}</span>)}</p>
     </div>
   );
 
@@ -307,7 +310,7 @@ function PortalPage() {
                         )}
                      </Link>
                       <p className="mt-3 w-24 max-w-full break-words text-center text-xs leading-4 text-muted-foreground sm:w-28 sm:text-sm sm:leading-5">
-                        {description.map((line) => <span key={line} className="block">{line}</span>)}
+                        {description.map((line) => <span key={line} className="block sm:whitespace-nowrap">{line}</span>)}
                       </p>
                      </div>
                    ))}

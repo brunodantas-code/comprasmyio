@@ -19,6 +19,7 @@ import { CdeAppIcons } from "./cde-app-icons";
 import { CdeNavigation } from "./cde-navigation";
 import { CdeNumber } from "./cde-button";
 import { CdeMainMenu } from "./cde-main-menu";
+import { CdeAppOrder } from "./cde-app-order";
 import { CdeCategoryHeader } from "./cde-category-header";
 import { FormatColorOptions } from "@/components/mytosis/format-color-options";
 
@@ -357,6 +358,7 @@ export function CdeWorkspace() {
       <CdeAppIcons number={7} />
       <CdeNavigation number={8} />
       <CdeMainMenu number={9} />
+      <CdeAppOrder number={10} />
 
       <Dialog open={!!creating} onOpenChange={(o) => { if (!o) { setCreating(null); setEditing(null); } }}>
         <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
