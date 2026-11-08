@@ -77,12 +77,19 @@ function MainMenuEntries({ onSignOut, onChangePassword, supplyManual, itemClass 
   const { data } = useMainMenuConfig();
   const config = data ?? parseMenuConfig();
   const pendingTotal = usePendingActions().data?.total ?? 0;
-  return config.order.filter((id) => !config.hidden.includes(id) && (id !== "manual" || supplyManual)).map((id) => {
+  const { data: isErpAdmin } = useQuery({ queryKey: ["is-erp-admin-menu"], queryFn: async () => {
+    const { data: auth } = await supabase.auth.getUser();
+    if (!auth.user) return false;
+    const { data: row } = await supabase.from("erp_admins").select("user_id").eq("user_id", auth.user.id).maybeSingle();
+    return !!row;
+  } });
+  return config.order.filter((id) => !config.hidden.includes(id) && (id !== "manual" || supplyManual) && (id !== "access" || isErpAdmin)).map((id) => {
     const item = MENU_ITEMS.find((i) => i.id === id);
     if (!item) return null;
     const Icon = item.icon;
     if ("to" in item) return <Button key={id} asChild variant="ghost" className={itemClass}><Link to={item.to}><Icon className="h-5 w-5" />{item.label}{id === "pendentes" ? <CountBadge count={pendingTotal} className="ml-auto" /> : null}</Link></Button>;
     if (id === "manual") return <Button key={id} asChild variant="ghost" className={itemClass}><Link to="/supply-manual"><Icon className="h-5 w-5" />{item.label}</Link></Button>;
+    if (id === "access") return <Button key={id} asChild variant="ghost" className={itemClass}><Link to="/portal" search={{ view: "users" }}><Icon className="h-5 w-5" />Acessos</Link></Button>;
     if (id === "theme") return <ThemeEntry key={id} className={itemClass} />;
     return <Button key={id} variant="ghost" className={`${itemClass}`} onClick={id === "logout" ? onSignOut : id === "password" ? onChangePassword : () => window.history.back()}><Icon className="h-5 w-5" />{item.label}</Button>;
   });

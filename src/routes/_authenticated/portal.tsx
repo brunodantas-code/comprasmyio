@@ -22,6 +22,7 @@ import { ChangePasswordDialog } from "@/components/change-password-dialog";
 import { ThemeMenuItem, ThemeToggle } from "@/components/theme-toggle";
 
 export const Route = createFileRoute("/_authenticated/portal")({
+  validateSearch: (search: Record<string, unknown>): { view?: "users" } => (search.view === "users" ? { view: "users" } : {}),
   component: PortalPage,
   head: () => ({
     meta: [
@@ -38,7 +39,10 @@ export const Route = createFileRoute("/_authenticated/portal")({
 function PortalPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [activeView, setActiveView] = useState<"apps" | "users">("apps");
+  const search = Route.useSearch();
+  const navigateView = useNavigate();
+  const activeView: "apps" | "users" = search.view === "users" ? "users" : "apps";
+  const setActiveView = (view: "apps" | "users") => navigateView({ to: "/portal", search: view === "users" ? { view: "users" } : {} });
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { data: pendingActions } = usePendingActions();
   const { data: appOrder } = useAppOrder();
@@ -172,11 +176,6 @@ function PortalPage() {
             {activeView === "users" ? (
               <Button variant="ghost" size="icon" className="!bg-transparent !text-foreground shadow-none hover:!bg-transparent hover:!text-foreground" onClick={() => setActiveView("apps")} title="Início" aria-label="Voltar aos aplicativos">
                 <LayoutGrid className="h-4 w-4" />
-              </Button>
-            ) : null}
-            {data.isErpAdmin ? (
-              <Button variant="ghost" size="icon" className="!bg-transparent !text-foreground shadow-none hover:!bg-transparent hover:!text-foreground" onClick={() => setActiveView("users")} title="Acessos" aria-label="Acessos">
-                <Settings2 className="h-4 w-4" />
               </Button>
             ) : null}
             <DesktopHeaderMenu userName={data.name} onSignOut={handleSignOut} onChangePassword={() => setPasswordOpen(true)} buttonClass="!bg-transparent !text-foreground shadow-none hover:!bg-transparent hover:!text-foreground" />
