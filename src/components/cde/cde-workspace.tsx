@@ -165,13 +165,20 @@ export function CdeWorkspace() {
         const removed = (data?.removed ?? []).filter((r) => r.group_key === g.key);
         const isOpen = open.has(g.key);
         return (
-          <section key={g.key} className="overflow-hidden rounded-xl border border-border bg-card">
-            <div className="flex items-center gap-2 bg-accent px-4 py-2.5">
-              <button type="button" onClick={() => setOpen((s) => { const n = new Set(s); if (n.has(g.key)) n.delete(g.key); else n.add(g.key); return n; })} className="flex min-w-0 flex-1 items-center justify-between gap-3 text-left">
-                <span className="font-semibold">{g.title} <span className="font-normal text-muted-foreground">· {list.length} modelos · {g.hint}</span></span>
-                {isOpen ? <ChevronUp className="h-4 w-4 shrink-0" /> : <ChevronDown className="h-4 w-4 shrink-0" />}
+          <section key={g.key} className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+            <div className="flex items-start gap-3 bg-accent px-5 py-4">
+              <button type="button" onClick={() => setOpen((s) => { const n = new Set(s); if (n.has(g.key)) n.delete(g.key); else n.add(g.key); return n; })} className="flex min-w-0 flex-1 items-start gap-4 text-left">
+                <span className="flex flex-col">
+                  <span className="mb-2 text-base font-bold">Seção</span>
+                  <span className="flex h-12 min-w-12 items-center justify-center rounded-lg bg-primary px-2 text-lg font-bold">{g.title.split(" ")[0].replace(/\.$/, "")}</span>
+                </span>
+                <span className="mt-8 min-w-0 flex-1">
+                  <span className="block border-b border-border pb-2 font-semibold">{g.title.split(" ").slice(1).join(" ")}</span>
+                  <span className="mt-1 block text-xs text-muted-foreground">{list.length} modelos · {g.hint}</span>
+                </span>
+                <span className="mt-10">{isOpen ? <ChevronUp className="h-4 w-4 shrink-0" /> : <ChevronDown className="h-4 w-4 shrink-0" />}</span>
               </button>
-              <Button type="button" variant="outline" size="compactIcon" title="Criar modelo" aria-label={`Criar modelo em ${g.title}`} onClick={() => { setDraft({ ...emptyDraft, tag: g.key === "fields" ? "Input" : "Button" }); setCreating(g.key); }}><Plus /></Button>
+              <Button type="button" variant="outline" size="compactIcon" className="mt-9" title="Criar modelo" aria-label={`Criar modelo em ${g.title}`} onClick={() => { setDraft({ ...emptyDraft, tag: g.key === "fields" ? "Input" : "Button" }); setCreating(g.key); }}><Plus /></Button>
             </div>
             {isOpen ? (
               <>
