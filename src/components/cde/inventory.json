@@ -1,2665 +1,2762 @@
 {
-  "plus": [
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "compactIcon",
-      "className": "",
-      "icon": "Plus",
-      "iconClass": "h-3.5 w-3.5",
-      "label": "",
-      "count": 4,
-      "files": [
-        "components/additional-step-types-tab.tsx",
-        "components/materials-registry-tab.tsx",
-        "components/project-type-fields.tsx",
-        "components/request-types-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "",
-      "size": "sm",
-      "className": "",
-      "icon": "Plus",
-      "iconClass": "mr-1 h-4 w-4",
-      "label": "Adicionar",
-      "count": 4,
-      "files": [
-        "components/bom-settings.tsx",
-        "components/stock-tab.tsx",
-        "components/unit-products.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "",
-      "size": "compactIcon",
-      "className": "",
-      "icon": "Plus",
-      "iconClass": "h-3.5 w-3.5",
-      "label": "",
-      "count": 4,
-      "files": [
-        "components/damage-reasons-tab.tsx",
-        "components/delivery-points-tab.tsx",
-        "components/material-stock-types-tab.tsx",
-        "components/stock-destinations-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "compactIcon",
-      "className": "",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 4,
-      "files": [
-        "components/site-survey-report-texts.tsx",
-        "components/site-survey-time-assumptions.tsx",
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "compactIcon",
-      "className": "",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 4,
-      "files": [
-        "components/legal/legal-workspace.tsx",
-        "components/legal/subject-responsibles.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "sm",
-      "className": "",
-      "icon": "Plus",
-      "iconClass": "h-4 w-4",
-      "label": "Adicionar ambiente",
-      "count": 3,
-      "files": [
-        "components/site-survey-environment-manager.tsx",
-        "components/site-survey-luc-manager.tsx",
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "action",
-      "size": "compactIcon",
-      "className": "",
-      "icon": "Plus",
-      "iconClass": "h-3.5 w-3.5",
-      "label": "",
-      "count": 3,
-      "files": [
-        "components/supply-order-statuses-tab.tsx",
-        "components/supply-tags-tab.tsx",
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "",
-      "size": "",
-      "className": "",
-      "icon": "Plus",
-      "iconClass": "mr-2 h-4 w-4",
-      "label": "",
-      "count": 2,
-      "files": [
-        "components/import-batches.tsx",
-        "components/myio-orders-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "compactIcon",
-      "className": "",
-      "icon": "Plus",
-      "iconClass": "h-5 w-5",
-      "label": "",
-      "count": 2,
-      "files": [
-        "components/site-survey-customer-questions.tsx",
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "sm",
-      "className": "",
-      "icon": "Plus",
-      "iconClass": "size-3.5",
-      "label": "Nova etapa",
-      "count": 2,
-      "files": [
-        "components/mytosis/flowchart.tsx",
-        "components/mytosis/kpis-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "icon",
-      "className": "text-primary",
-      "icon": "Plus",
-      "iconClass": "h-5 w-5",
-      "label": "openDialog()} aria-label=\"Novo objetivo\"",
-      "count": 2,
-      "files": [
-        "components/mytosis/okrs-tab.tsx",
-        "components/mytosis/users-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "compactIcon",
-      "className": "",
-      "icon": "Plus",
-      "iconClass": "h-3.5 w-3.5",
-      "label": "[...prev, ])",
-      "count": 2,
-      "files": [
-        "routes/_authenticated/dashboard.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "compactIcon",
-      "className": "mb-5 text-myio-green hover:text-myio-green",
-      "icon": "Plus",
-      "iconClass": "h-5 w-5",
-      "label": "",
-      "count": 2,
-      "files": [
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "compactIcon",
-      "className": "",
-      "icon": "Pencil",
-      "iconClass": "h-3.5 w-3.5",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/access-profile-definitions-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "action",
-      "size": "",
-      "className": "mt-4",
-      "icon": "Plus",
-      "iconClass": "mr-2 h-4 w-4",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/approval-workflow.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "",
-      "size": "compactIcon",
-      "className": "",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/client-categories-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "action",
-      "size": "",
-      "className": "whitespace-nowrap",
-      "icon": "Plus",
-      "iconClass": "mr-1 h-4 w-4",
-      "label": "[...current, ])",
-      "count": 1,
-      "files": [
-        "components/clients-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "action",
-      "size": "sm",
-      "className": "",
-      "icon": "Plus",
-      "iconClass": "mr-1 h-4 w-4",
-      "label": "Adicionar unidade",
-      "count": 1,
-      "files": [
-        "components/clients-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "sm",
-      "className": "h-7 gap-1 px-2 text-xs",
-      "icon": "Plus",
-      "iconClass": "h-3.5 w-3.5",
-      "label": "Nova opção",
-      "count": 1,
-      "files": [
-        "components/request-types-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "",
-      "size": "compactIcon",
-      "className": "",
-      "icon": "Pencil",
-      "iconClass": "h-3.5 w-3.5",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/site-survey-profiles-admin.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "",
-      "size": "sm",
-      "className": "w-full sm:w-auto",
-      "icon": "Plus",
-      "iconClass": "mr-1 h-4 w-4",
-      "label": "Adicionar ferramenta",
-      "count": 1,
-      "files": [
-        "components/tools-assets.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "",
-      "size": "",
-      "className": "self-end",
-      "icon": "Plus",
-      "iconClass": "h-3.5 w-3.5",
-      "label": "Nova conta",
-      "count": 1,
-      "files": [
-        "components/cash-flow/chart-of-accounts-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "icon",
-      "className": "",
-      "icon": "Plus",
-      "iconClass": "h-3.5 w-3.5",
-      "label": "e.stopPropagation()} onPointerDown= clas",
-      "count": 1,
-      "files": [
-        "components/mytosis/flowchart.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "icon",
-      "className": "h-7 w-7 rounded-lg",
-      "icon": "Plus",
-      "iconClass": "h-5 w-5",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/mytosis/flowchart.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "icon",
-      "className": "h-8 w-8",
-      "icon": "Plus",
-      "iconClass": "size-3.5",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/mytosis/kpis-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "sm",
-      "className": "justify-self-start",
-      "icon": "Plus",
-      "iconClass": "size-3.5",
-      "label": "Parágrafo",
-      "count": 1,
-      "files": [
-        "components/mytosis/processes-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "icon",
-      "className": "h-8 w-8",
-      "icon": "Plus",
-      "iconClass": "size-4",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/mytosis/processes-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "sm",
-      "className": "mt-4",
-      "icon": "Plus",
-      "iconClass": "size-3.5",
-      "label": "Seção",
-      "count": 1,
-      "files": [
-        "components/mytosis/processes-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "action",
-      "size": "icon",
-      "className": "rounded-full",
-      "icon": "Plus",
-      "iconClass": "h-5 w-5",
-      "label": "",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/chamados.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "compactIcon",
-      "className": "",
-      "icon": "Plus",
-      "iconClass": "h-4 w-4",
-      "label": "[...curren",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/dashboard.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "action",
-      "size": "",
-      "className": "",
-      "icon": "Plus",
-      "iconClass": "h-4 w-4",
-      "label": "Novo ticket",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/development.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "compactIcon",
-      "className": "border-0 text-myio-green shadow-none hover:bg-myio-green/10 hover:text-myio-green",
-      "icon": "Plus",
-      "iconClass": "h-5 w-5",
-      "label": "",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "compactIcon",
-      "className": "text-myio-green hover:text-myio-green",
-      "icon": "Plus",
-      "iconClass": "h-5 w-5",
-      "label": "",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    }
-  ],
-  "save": [
-    {
-      "tag": "Button",
-      "variant": "",
-      "size": "",
-      "className": "",
-      "icon": "",
-      "iconClass": "",
-      "label": "Salvar perfil",
-      "count": 27,
-      "files": [
-        "components/access-profile-definitions-tab.tsx",
-        "components/additional-step-types-tab.tsx",
-        "components/approval-workflow.tsx",
-        "components/cash-flow/cash-register-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "",
-      "className": "",
-      "icon": "",
-      "iconClass": "",
-      "label": "add.mutate(newType.replace(/\\|/g, \" \").t",
-      "count": 14,
-      "files": [
-        "components/legal/legal-workspace.tsx",
-        "components/mytosis/box-tasks.tsx",
-        "components/mytosis/connector-dialog.tsx",
-        "components/mytosis/flowchart.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "action",
-      "size": "",
-      "className": "",
-      "icon": "",
-      "iconClass": "",
-      "label": "Salvar",
-      "count": 4,
-      "files": [
-        "components/clients-tab.tsx",
-        "components/supply-order-statuses-tab.tsx",
-        "components/supply-tags-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "action",
-      "size": "sm",
-      "className": "",
-      "icon": "Save",
-      "iconClass": "h-4 w-4",
-      "label": "Salvar",
-      "count": 3,
-      "files": [
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "",
-      "size": "sm",
-      "className": "",
-      "icon": "",
-      "iconClass": "",
-      "label": "Salvar",
-      "count": 2,
-      "files": [
-        "components/material-detail.tsx",
-        "routes/_authenticated/development.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "",
-      "size": "",
-      "className": "",
-      "icon": "ClipboardCheck",
-      "iconClass": "h-4 w-4",
-      "label": "Salvar progresso",
-      "count": 2,
-      "files": [
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "sm",
-      "className": "",
-      "icon": "Percent",
-      "iconClass": "mr-1 h-4 w-4",
-      "label": "applyLoss.mutate(Number(loss.replace(\",\"",
-      "count": 1,
-      "files": [
-        "components/bom-settings.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "action",
-      "size": "sm",
-      "className": "",
-      "icon": "",
-      "iconClass": "",
-      "label": "Salvar",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    }
-  ],
-  "trash": [
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "compactIcon",
-      "className": "text-destructive hover:text-destructive",
-      "icon": "Trash2",
-      "iconClass": "h-3.5 w-3.5",
-      "label": "",
-      "count": 19,
-      "files": [
-        "components/access-profile-definitions-tab.tsx",
-        "components/approval-workflow.tsx",
-        "components/clients-tab.tsx",
-        "components/confirm-delete-button.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "compactIcon",
-      "className": "",
-      "icon": "Trash2",
-      "iconClass": "h-3.5 w-3.5",
-      "label": "",
-      "count": 7,
-      "files": [
-        "components/supply-order-statuses-tab.tsx",
-        "components/supply-tags-tab.tsx",
-        "routes/_authenticated/dashboard.tsx",
-        "routes/_authenticated/development.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "compactIcon",
-      "className": "",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 5,
-      "files": [
-        "components/legal/legal-workspace.tsx",
-        "components/legal/minutes-list.tsx",
-        "components/legal/subject-responsibles.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "icon",
-      "className": "h-7 w-7 text-primary",
-      "icon": "Trash2",
-      "iconClass": "size-3.5",
-      "label": "",
-      "count": 4,
-      "files": [
-        "components/mytosis/kpis-tab.tsx",
-        "components/mytosis/processes-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "compactIcon",
-      "className": "",
-      "icon": "Trash2",
-      "iconClass": "h-3.5 w-3.5 text-destructive",
-      "label": "",
-      "count": 3,
-      "files": [
-        "components/assembly-release.tsx",
-        "components/import-batches.tsx",
-        "components/myio-orders-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "action",
-      "size": "compactIcon",
-      "className": "",
-      "icon": "Trash2",
-      "iconClass": "h-3.5 w-3.5",
-      "label": "",
-      "count": 3,
-      "files": [
-        "components/clients-tab.tsx",
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "compactIcon",
-      "className": "",
-      "icon": "Trash2",
-      "iconClass": "h-3.5 w-3.5 text-primary-foreground",
-      "label": "",
-      "count": 2,
-      "files": [
-        "components/stock-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "icon",
-      "className": "",
-      "icon": "Trash2",
-      "iconClass": "size-3",
-      "label": "void remove(file.id, file.storage_path)",
-      "count": 2,
-      "files": [
-        "components/mytosis/node-attachments.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "compactIcon",
-      "className": "!h-6 !w-6 shrink-0 text-destructive hover:text-destructive",
-      "icon": "Trash2",
-      "iconClass": "h-3.5 w-3.5",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/materials-registry-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "compactIcon",
-      "className": "text-destructive",
-      "icon": "Trash2",
-      "iconClass": "h-3.5 w-3.5",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/reminders-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "action",
-      "size": "compactIcon",
-      "className": "group h-7 w-7 rounded-full hover:!text-action-hover-foreground focus-visible:!text-action-hover-foreground active:!text-action-hover-foreground",
-      "icon": "Trash2",
-      "iconClass": "h-3.5 w-3.5 group-hover:!text-action-hover-foreground group-focus-visible:!text-action-hover-foreground group-active:!text-action-hover-foreground",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/site-survey-screen-summary.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "compactIcon",
-      "className": "",
-      "icon": "Trash2",
-      "iconClass": "h-3.5 w-3.5",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/unit-products.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "",
-      "className": "",
-      "icon": "",
-      "iconClass": "",
-      "label": "Excluir",
-      "count": 1,
-      "files": [
-        "components/legal/legal-workspace.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "icon",
-      "className": "h-5 w-5 !bg-transparent hover:!bg-transparent [&_svg]:!size-3",
-      "icon": "Trash2",
-      "iconClass": "h-3 w-3",
-      "label": "— $ e todas as tarefas e subetapas abaix",
-      "count": 1,
-      "files": [
-        "components/mytosis/flowchart.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "icon",
-      "className": "h-7 w-7 rounded-lg",
-      "icon": "Trash2",
-      "iconClass": "size-3.5",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/mytosis/flowchart.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "sm",
-      "className": "",
-      "icon": "Trash2",
-      "iconClass": "size-3.5",
-      "label": "\" e todos os lançamentos?`)) deleteKpi.m",
-      "count": 1,
-      "files": [
-        "components/mytosis/kpis-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "icon",
-      "className": "text-primary",
-      "icon": "Trash2",
-      "iconClass": "h-4 w-4",
-      "label": "aria-label=\"Remover usuário\" title=\"Re",
-      "count": 1,
-      "files": [
-        "components/mytosis/users-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "compactIcon",
-      "className": "",
-      "icon": "Trash2",
-      "iconClass": "h-4 w-4",
-      "label": "",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/dashboard.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "destructive",
-      "size": "",
-      "className": "",
-      "icon": "Trash2",
-      "iconClass": "h-4 w-4",
-      "label": "Excluir ticket",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/development.tsx"
-      ]
-    },
-    {
-      "tag": "button",
-      "variant": "",
-      "size": "",
-      "className": "absolute -right-1.5 -top-1.5 z-10 flex h-6 w-6 items-center justify-center rounded-full border bg-background text-primary shadow-sm hover:bg-primary hover:text-primary-foreground",
-      "icon": "Trash2",
-      "iconClass": "h-3.5 w-3.5",
-      "label": "",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/development.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "compactIcon",
-      "className": "",
-      "icon": "Trash2",
-      "iconClass": "h-4 w-4",
-      "label": "",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "compactIcon",
-      "className": "shrink-0 text-myio-green hover:text-myio-green",
-      "icon": "Trash2",
-      "iconClass": "h-4 w-4",
-      "label": "",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    }
-  ],
-  "cancel": [
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "",
-      "className": "",
-      "icon": "",
-      "iconClass": "",
-      "label": "Cancelar",
-      "count": 49,
-      "files": [
-        "components/access-profile-definitions-tab.tsx",
-        "components/approval-workflow.tsx",
-        "components/assembly-release.tsx",
-        "components/distribution.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "action",
-      "size": "",
-      "className": "",
-      "icon": "",
-      "iconClass": "",
-      "label": "Cancelar",
-      "count": 6,
-      "files": [
-        "components/change-password-dialog.tsx",
-        "components/site-survey-client-answer-import.tsx",
-        "components/site-survey-facade-picker.tsx",
-        "components/site-survey-general-filter.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "",
-      "className": "",
-      "icon": "",
-      "iconClass": "",
-      "label": "Cancelar",
-      "count": 2,
-      "files": [
-        "components/myio-demand.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "sm",
-      "className": "",
-      "icon": "",
-      "iconClass": "",
-      "label": "Cancelar",
-      "count": 1,
-      "files": [
-        "components/material-detail.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "sm",
-      "className": "",
-      "icon": "",
-      "iconClass": "",
-      "label": "Cancelar",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/development.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "action",
-      "size": "sm",
-      "className": "",
-      "icon": "",
-      "iconClass": "",
-      "label": "Cancelar",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    }
-  ],
-  "toggle": [
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "compactIcon",
-      "className": "",
-      "icon": "ChevronUp",
-      "iconClass": "h-3.5 w-3.5",
-      "label": "current =",
-      "count": 11,
-      "files": [
-        "components/access-profiles-tab.tsx",
-        "components/additional-step-types-tab.tsx",
-        "components/damage-reasons-tab.tsx",
-        "components/delivery-points-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "compactIcon",
-      "className": "",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 9,
-      "files": [
-        "components/client-categories-tab.tsx",
-        "components/site-survey-environment-manager.tsx",
-        "components/site-survey-luc-manager.tsx",
-        "components/site-survey-report-texts.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "compactIcon",
-      "className": "text-myio-green hover:text-myio-green",
-      "icon": "ChevronDown",
-      "iconClass": "h-5 w-5",
-      "label": "",
-      "count": 5,
-      "files": [
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "compactIcon",
-      "className": "",
-      "icon": "",
-      "iconClass": "",
-      "label": "setExpanded(allExpanded?new Set():new Se",
-      "count": 4,
-      "files": [
-        "components/legal/legal-workspace.tsx",
-        "components/supply-consolidation.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "compactIcon",
-      "className": "",
-      "icon": "ChevronUp",
-      "iconClass": "h-5 w-5",
-      "label": "",
-      "count": 3,
-      "files": [
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "",
-      "className": "w-full justify-between !bg-card text-foreground hover:!bg-muted sm:w-56",
-      "icon": "ChevronDown",
-      "iconClass": "h-4 w-4 shrink-0 opacity-60",
-      "label": "Selecione um modelo",
-      "count": 2,
-      "files": [
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "",
-      "className": "w-full justify-between !bg-myio-green/10 font-normal hover:!bg-myio-green/15",
-      "icon": "ChevronDown",
-      "iconClass": "h-4 w-4 shrink-0 opacity-50",
-      "label": "",
-      "count": 2,
-      "files": [
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    },
-    {
-      "tag": "button",
-      "variant": "",
-      "size": "",
-      "className": "",
-      "icon": "ChevronDown",
-      "iconClass": "h-5 w-5 shrink-0 text-primary",
-      "label": "toggle(name)} aria-expanded= className=\"",
-      "count": 1,
-      "files": [
-        "components/pending-groups.tsx"
-      ]
-    },
-    {
-      "tag": "button",
-      "variant": "",
-      "size": "",
-      "className": "inline-flex items-center gap-1 text-left",
-      "icon": "ChevronUp",
-      "iconClass": "h-3.5 w-3.5 text-primary",
-      "label": "())} aria-label=`",
-      "count": 1,
-      "files": [
-        "components/request-types-tab.tsx"
-      ]
-    },
-    {
-      "tag": "button",
-      "variant": "",
-      "size": "",
-      "className": "flex w-full items-center justify-between gap-3 bg-transparent px-1 py-2 text-left text-base font-semibold text-foreground",
-      "icon": "",
-      "iconClass": "",
-      "label": ") : null",
-      "count": 1,
-      "files": [
-        "components/site-survey-general-filter.tsx"
-      ]
-    },
-    {
-      "tag": "button",
-      "variant": "",
-      "size": "",
-      "className": "shrink-0 self-start p-1 text-primary",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/site-survey-luc-manager.tsx"
-      ]
-    },
-    {
-      "tag": "button",
-      "variant": "",
-      "size": "",
-      "className": "absolute right-2 top-1/2 z-10 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-background/85 text-foreground shadow-md ring-1 ring-border transition hover:bg-background sm:right-3 sm:h-11 sm:w-11",
-      "icon": "ChevronRight",
-      "iconClass": "h-5 w-5",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/site-survey-photo-viewer.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "compactIcon",
-      "className": "",
-      "icon": "ChevronDown",
-      "iconClass": "h-4 w-4",
-      "label": "setCollapsedPoints(allCollapsed ? new Se",
-      "count": 1,
-      "files": [
-        "components/site-survey-screen-summary.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "compactIcon",
-      "className": "col-start-2 row-start-1 sm:col-start-auto sm:row-start-auto",
-      "icon": "ChevronDown",
-      "iconClass": "h-4 w-4",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/site-survey-screen-summary.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "",
-      "className": "h-auto min-w-0 flex-1 justify-start gap-3 whitespace-normal p-0 text-left hover:bg-transparent",
-      "icon": "ChevronDown",
-      "iconClass": "h-5 w-5 shrink-0 text-primary",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/legal/minutes-list.tsx"
-      ]
-    },
-    {
-      "tag": "button",
-      "variant": "",
-      "size": "",
-      "className": "",
-      "icon": "ChevronDown",
-      "iconClass": "h-4 w-4 text-primary",
-      "label": "toggle(root.id)} aria-expanded= classNam",
-      "count": 1,
-      "files": [
-        "components/mytosis/export-dialog.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "",
-      "className": "h-auto min-w-0 justify-start gap-1 px-0 py-1 text-left text-[11px] font-normal text-foreground hover:text-primary",
-      "icon": "ChevronDown",
-      "iconClass": "size-3.5 shrink-0",
-      "label": "Gatilho: -",
-      "count": 1,
-      "files": [
-        "components/mytosis/flowchart.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "icon",
-      "className": "h-5 w-5 !bg-transparent hover:!bg-transparent",
-      "icon": "ChevronLeft",
-      "iconClass": "h-4 w-4",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/mytosis/flowchart.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "icon",
-      "className": "h-5 w-5 !bg-transparent hover:!bg-transparent",
-      "icon": "ChevronUp",
-      "iconClass": "h-4 w-4",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/mytosis/flowchart.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "icon",
-      "className": "h-7 w-7 shrink-0 text-primary",
-      "icon": "ChevronDown",
-      "iconClass": "size-4",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/mytosis/kpis-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "icon",
-      "className": "h-7 w-7 text-primary",
-      "icon": "ChevronDown",
-      "iconClass": "size-4",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/mytosis/processes-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "",
-      "className": "h-14 w-full justify-start rounded-none px-1 text-base !bg-transparent !text-foreground hover:!bg-muted hover:!text-foreground",
-      "icon": "Settings2",
-      "iconClass": "h-5 w-5 shrink-0",
-      "label": "",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/portal.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "compactIcon",
-      "className": "lg:hidden",
-      "icon": "ChevronUp",
-      "iconClass": "h-5 w-5",
-      "label": "",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "compactIcon",
-      "className": "order-last hidden shrink-0 lg:inline-flex",
-      "icon": "ChevronUp",
-      "iconClass": "h-5 w-5",
-      "label": "",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "compactIcon",
-      "className": "col-start-2 shrink-0 text-myio-green",
-      "icon": "ChevronUp",
-      "iconClass": "h-5 w-5",
-      "label": "",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "compactIcon",
-      "className": "",
-      "icon": "ChevronUp",
-      "iconClass": "h-4 w-4",
-      "label": "setInitialStepsExpanded(!(initialStepsEx",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "compactIcon",
-      "className": "shrink-0",
-      "icon": "ChevronUp",
-      "iconClass": "h-5 w-5",
-      "label": "",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "compactIcon",
-      "className": "",
-      "icon": "ChevronDown",
-      "iconClass": "rotate-180",
-      "label": "",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    }
-  ],
-  "pencil": [
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "compactIcon",
-      "className": "",
-      "icon": "Pencil",
-      "iconClass": "h-3.5 w-3.5",
-      "label": "",
-      "count": 33,
-      "files": [
-        "components/additional-step-types-tab.tsx",
-        "components/approval-workflow.tsx",
-        "components/assembly-release.tsx",
-        "components/cash-flow/cash-register-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "compactIcon",
-      "className": "",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 6,
-      "files": [
-        "components/client-categories-tab.tsx",
-        "components/site-survey-report-texts.tsx",
-        "components/site-survey-time-assumptions.tsx",
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "compactIcon",
-      "className": "!h-6 !w-6 shrink-0",
-      "icon": "Pencil",
-      "iconClass": "h-3.5 w-3.5",
-      "label": "",
-      "count": 2,
-      "files": [
-        "components/materials-registry-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "compactIcon",
-      "className": "",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 2,
-      "files": [
-        "components/legal/legal-workspace.tsx",
-        "components/legal/minutes-list.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "action",
-      "size": "compactIcon",
-      "className": "",
-      "icon": "Pencil",
-      "iconClass": "h-3.5 w-3.5",
-      "label": "",
-      "count": 2,
-      "files": [
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "sm",
-      "className": "",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/legal/legal-workspace.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "icon",
-      "className": "h-6 w-6 !text-primary",
-      "icon": "Pencil",
-      "iconClass": "h-3.5 w-3.5",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/mytosis/box-tasks.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "icon",
-      "className": "h-6 w-6 shrink-0 !text-primary",
-      "icon": "Pencil",
-      "iconClass": "h-4 w-4",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/mytosis/box-tasks.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "icon",
-      "className": "h-7 w-7 rounded-lg",
-      "icon": "Pencil",
-      "iconClass": "size-3.5",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/mytosis/flowchart.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "icon",
-      "className": "h-7 w-7 text-primary",
-      "icon": "Pencil",
-      "iconClass": "size-3.5",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/mytosis/kpis-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "sm",
-      "className": "",
-      "icon": "Pencil",
-      "iconClass": "size-3.5",
-      "label": "Editar KPI",
-      "count": 1,
-      "files": [
-        "components/mytosis/kpis-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "icon",
-      "className": "h-6 w-6",
-      "icon": "Pencil",
-      "iconClass": "h-3.5 w-3.5",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/mytosis/node-conversation.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "icon",
-      "className": "h-8 w-8",
-      "icon": "Pencil",
-      "iconClass": "size-3.5",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/mytosis/processes-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "",
-      "className": "",
-      "icon": "Pencil",
-      "iconClass": "h-4 w-4",
-      "label": "Solicitar",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    }
-  ],
-  "confirm": [
-    {
-      "tag": "Button",
-      "variant": "",
-      "size": "",
-      "className": "",
-      "icon": "",
-      "iconClass": "",
-      "label": "decide.mutate()} disabled=",
-      "count": 5,
-      "files": [
-        "components/approval-workflow.tsx",
-        "components/stock-tab.tsx",
-        "components/tools-assets.tsx",
-        "routes/_authenticated/dashboard.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "",
-      "className": "",
-      "icon": "",
-      "iconClass": "",
-      "label": "Concluir",
-      "count": 4,
-      "files": [
-        "components/homologation.tsx",
-        "components/mytosis/flowchart.tsx",
-        "components/mytosis/processes-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "sm",
-      "className": "h-7 text-xs",
-      "icon": "",
-      "iconClass": "",
-      "label": "Concluir",
-      "count": 1,
-      "files": [
-        "components/column-filter.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "",
-      "size": "",
-      "className": "",
-      "icon": "Check",
-      "iconClass": "h-4 w-4",
-      "label": "Concluir",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    }
-  ],
-  "sort": [
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "icon",
-      "className": "size-5 shrink-0 p-0 shadow-none !text-muted-foreground hover:!text-primary",
-      "icon": "ArrowUpDown",
-      "iconClass": "size-3",
-      "label": "",
-      "count": 3,
-      "files": [
-        "components/column-sort-button.tsx",
-        "components/approval-workflow.tsx",
-        "routes/_authenticated/dashboard.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "sm",
-      "className": "h-8 w-full items-center justify-start px-0 text-xs font-semibold !bg-transparent !text-foreground hover:!bg-transparent hover:!text-foreground",
-      "icon": "ArrowUp",
-      "iconClass": "h-3 w-3",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/site-survey-luc-manager.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "compactIcon",
-      "className": "",
-      "icon": "ArrowDownUp",
-      "iconClass": "h-4 w-4",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/legal/legal-workspace.tsx"
-      ]
-    },
-    {
-      "tag": "SelectTrigger",
-      "variant": "outline",
-      "size": "",
-      "className": "w-48",
-      "icon": "ArrowUpDown",
-      "iconClass": "mr-2 h-4 w-4",
-      "label": "Ordenar projetos",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/dashboard.tsx"
-      ]
-    }
-  ],
-  "move": [
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "compactIcon",
-      "className": "",
-      "icon": "ArrowUp",
-      "iconClass": "h-3.5 w-3.5",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/approval-workflow.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "compactIcon",
-      "className": "",
-      "icon": "ArrowDown",
-      "iconClass": "h-3.5 w-3.5",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/approval-workflow.tsx"
-      ]
-    }
-  ],
-  "summary": [
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "sm",
-      "className": "shrink-0 text-primary",
-      "icon": "ArrowUp",
-      "iconClass": "h-4 w-4",
-      "label": "Sumário",
-      "count": 1,
-      "files": [
-        "components/supply-manual-reader.tsx"
-      ]
-    }
-  ],
-  "filter": [
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "sm",
-      "className": "",
-      "icon": "Filter",
-      "iconClass": "size-3",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/column-filter.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "icon",
-      "className": "",
-      "icon": "Filter",
-      "iconClass": "size-3",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/column-filter.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "action",
-      "size": "sm",
-      "className": "h-8 shrink-0 gap-1 px-2 text-xs",
-      "icon": "Filter",
-      "iconClass": "h-3.5 w-3.5",
-      "label": "Filtro geral) : null",
-      "count": 1,
-      "files": [
-        "components/site-survey-general-filter.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "compactIcon",
-      "className": "!bg-transparent !text-primary",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/use-table-filters.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "sm",
-      "className": "w-full justify-start sm:w-[240px]",
-      "icon": "Filter",
-      "iconClass": "mr-2 h-4 w-4",
-      "label": "",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/dashboard.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "icon",
-      "className": "h-7 w-7 !bg-transparent !text-primary hover:!bg-transparent hover:!text-primary",
-      "icon": "Filter",
-      "iconClass": "h-4 w-4",
-      "label": "",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/dashboard.tsx"
-      ]
-    }
-  ],
-  "add": [
-    {
-      "tag": "Button",
-      "variant": "",
-      "size": "sm",
-      "className": "",
-      "icon": "",
-      "iconClass": "",
-      "label": "Nova pergunta",
-      "count": 2,
-      "files": [
-        "components/supply-order-conversation.tsx",
-        "routes/_authenticated/development.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "sm",
-      "className": "",
-      "icon": "PackagePlus",
-      "iconClass": "mr-1 h-3 w-3",
-      "label": "Adicionar à caixa",
-      "count": 1,
-      "files": [
-        "components/homologation.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "outline",
-      "size": "",
-      "className": "",
-      "icon": "Building2",
-      "iconClass": "h-4 w-4",
-      "label": "Nova conta bancária",
-      "count": 1,
-      "files": [
-        "components/cash-flow/cash-register-tab.tsx"
-      ]
-    }
-  ],
-  "close": [
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "icon",
-      "className": "",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/qr-check.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "ghost",
-      "size": "compactIcon",
-      "className": "",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    },
-    {
-      "tag": "Button",
-      "variant": "destructive",
-      "size": "",
-      "className": "",
-      "icon": "",
-      "iconClass": "",
-      "label": "Cancelar visit",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    }
-  ],
-  "fields": [
-    {
-      "tag": "Input",
-      "variant": "",
-      "size": "",
-      "className": "",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 219,
-      "files": [
-        "components/access-profile-definitions-tab.tsx",
-        "components/additional-step-types-tab.tsx",
-        "components/address-autocomplete.tsx",
-        "components/approval-workflow.tsx"
-      ]
-    },
-    {
-      "tag": "SelectTrigger",
-      "variant": "",
-      "size": "",
-      "className": "",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 111,
-      "files": [
-        "components/approval-workflow.tsx",
-        "components/cash-flow/cash-register-tab.tsx",
-        "components/cash-flow/chart-of-accounts-tab.tsx",
-        "components/cash-flow/payables-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Textarea",
-      "variant": "",
-      "size": "",
-      "className": "",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 52,
-      "files": [
-        "components/address-autocomplete.tsx",
-        "components/approval-workflow.tsx",
-        "components/assembly-release.tsx",
-        "components/cost-centers-tab.tsx"
-      ]
-    },
-    {
-      "tag": "PasswordInput",
-      "variant": "",
-      "size": "",
-      "className": "",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 5,
-      "files": [
-        "components/change-password-dialog.tsx",
-        "routes/reset-password.tsx"
-      ]
-    },
-    {
-      "tag": "Input",
-      "variant": "",
-      "size": "",
-      "className": "w-24",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 4,
-      "files": [
-        "components/assembly-release.tsx",
-        "components/import-batches.tsx"
-      ]
-    },
-    {
-      "tag": "SelectTrigger",
-      "variant": "",
-      "size": "",
-      "className": "h-9",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 4,
-      "files": [
-        "components/clients-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Input",
-      "variant": "",
-      "size": "",
-      "className": "w-20",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 4,
-      "files": [
-        "components/myio-orders-tab.tsx",
-        "routes/_authenticated/dashboard.tsx"
-      ]
-    },
-    {
-      "tag": "SelectTrigger",
-      "variant": "",
-      "size": "",
-      "className": "h-8 w-full text-xs",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 3,
-      "files": [
-        "routes/_authenticated/dashboard.tsx"
-      ]
-    },
-    {
-      "tag": "SelectTrigger",
-      "variant": "",
-      "size": "",
-      "className": "w-full",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 2,
-      "files": [
-        "components/access-profile-definitions-tab.tsx",
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    },
-    {
-      "tag": "SelectTrigger",
-      "variant": "",
-      "size": "",
-      "className": "w-full sm:w-[280px]",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 2,
-      "files": [
-        "components/bom-settings.tsx"
-      ]
-    },
-    {
-      "tag": "SelectTrigger",
-      "variant": "",
-      "size": "",
-      "className": "h-8 text-xs",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 2,
-      "files": [
-        "components/column-filter.tsx",
-        "components/use-table-filters.tsx"
-      ]
-    },
-    {
-      "tag": "Textarea",
-      "variant": "",
-      "size": "",
-      "className": "min-h-9 resize-none",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 2,
-      "files": [
-        "components/cost-centers-tab.tsx",
-        "components/job-titles-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Input",
-      "variant": "",
-      "size": "",
-      "className": "w-40",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 2,
-      "files": [
-        "components/damaged-items.tsx",
-        "components/technician-items.tsx"
-      ]
-    },
-    {
-      "tag": "Input",
-      "variant": "",
-      "size": "",
-      "className": "min-w-40 flex-1",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 2,
-      "files": [
-        "components/homologation.tsx"
-      ]
-    },
-    {
-      "tag": "SelectTrigger",
-      "variant": "",
-      "size": "",
-      "className": "w-full sm:w-[220px]",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 2,
-      "files": [
-        "components/homologation.tsx"
-      ]
-    },
-    {
-      "tag": "Input",
-      "variant": "",
-      "size": "",
-      "className": "w-32",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 2,
-      "files": [
-        "components/reminders-tab.tsx"
-      ]
-    },
-    {
-      "tag": "SelectTrigger",
-      "variant": "",
-      "size": "",
-      "className": "w-full sm:w-64",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 2,
-      "files": [
-        "components/site-survey-general-filter.tsx",
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    },
-    {
-      "tag": "SelectTrigger",
-      "variant": "",
-      "size": "",
-      "className": "h-auto min-h-9 whitespace-normal text-left",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 2,
-      "files": [
-        "components/site-survey-report-texts.tsx"
-      ]
-    },
-    {
-      "tag": "Textarea",
-      "variant": "",
-      "size": "",
-      "className": "min-h-28",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 2,
-      "files": [
-        "routes/_authenticated/chamados.tsx",
-        "routes/_authenticated/development.tsx"
-      ]
-    },
-    {
-      "tag": "Input",
-      "variant": "",
-      "size": "",
-      "className": "bg-muted",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 2,
-      "files": [
-        "routes/_authenticated/dashboard.tsx"
-      ]
-    },
-    {
-      "tag": "Input",
-      "variant": "",
-      "size": "",
-      "className": "h-8 w-28",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/approval-workflow.tsx"
-      ]
-    },
-    {
-      "tag": "SelectTrigger",
-      "variant": "",
-      "size": "",
-      "className": "h-8 w-full min-w-0 max-w-full md:w-56",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/approval-workflow.tsx"
-      ]
-    },
-    {
-      "tag": "Input",
-      "variant": "",
-      "size": "",
-      "className": "w-28 text-right",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/bom-settings.tsx"
-      ]
-    },
-    {
-      "tag": "Input",
-      "variant": "",
-      "size": "",
-      "className": "w-28",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/bom-settings.tsx"
-      ]
-    },
-    {
-      "tag": "SelectTrigger",
-      "variant": "",
-      "size": "",
-      "className": "w-20 shrink-0",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/br-city-picker.tsx"
-      ]
-    },
-    {
-      "tag": "SelectTrigger",
-      "variant": "",
-      "size": "",
-      "className": "w-52",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/clients-map-dialog.tsx"
-      ]
-    },
-    {
-      "tag": "Input",
-      "variant": "",
-      "size": "",
-      "className": "col-span-3 md:col-span-1 md:col-start-2 md:row-start-1",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/clients-tab.tsx"
-      ]
-    },
-    {
-      "tag": "SelectTrigger",
-      "variant": "",
-      "size": "",
-      "className": "h-8 w-40",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/clients-tab.tsx"
-      ]
-    },
-    {
-      "tag": "SelectTrigger",
-      "variant": "",
-      "size": "",
-      "className": "h-8 w-64",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/import-batches.tsx"
-      ]
-    },
-    {
-      "tag": "SelectTrigger",
-      "variant": "",
-      "size": "",
-      "className": "max-w-64",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/materials-registry-tab.tsx"
-      ]
-    },
-    {
-      "tag": "SelectTrigger",
-      "variant": "",
-      "size": "",
-      "className": "h-8 w-52",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/myio-orders-tab.tsx"
-      ]
-    },
-    {
-      "tag": "SelectTrigger",
-      "variant": "",
-      "size": "",
-      "className": "w-64",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/reminders-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Textarea",
-      "variant": "",
-      "size": "",
-      "className": "bg-action/30 focus-visible:bg-action/40",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/site-survey-customer-questions.tsx"
-      ]
-    },
-    {
-      "tag": "Input",
-      "variant": "",
-      "size": "",
-      "className": "h-8 min-w-0 flex-1 text-xs",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/site-survey-general-filter.tsx"
-      ]
-    },
-    {
-      "tag": "SelectTrigger",
-      "variant": "",
-      "size": "",
-      "className": "w-48 max-w-full",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/site-survey-progress-chart.tsx"
-      ]
-    },
-    {
-      "tag": "Input",
-      "variant": "",
-      "size": "",
-      "className": "w-24 text-right",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/stock-simulator.tsx"
-      ]
-    },
-    {
-      "tag": "SelectTrigger",
-      "variant": "",
-      "size": "",
-      "className": "w-44",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/mytosis/users-tab.tsx"
-      ]
-    },
-    {
-      "tag": "SelectTrigger",
-      "variant": "",
-      "size": "",
-      "className": "h-8 w-44",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "components/mytosis/users-tab.tsx"
-      ]
-    },
-    {
-      "tag": "Input",
-      "variant": "",
-      "size": "",
-      "className": "h-12 border-erp-access-border bg-erp-access-field text-erp-landing-foreground",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "routes/index.tsx"
-      ]
-    },
-    {
-      "tag": "Input",
-      "variant": "",
-      "size": "",
-      "className": "h-12 border-erp-access-border bg-erp-access-field text-erp-landing-foreground placeholder:text-erp-landing-muted focus-visible:ring-primary",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "routes/index.tsx"
-      ]
-    },
-    {
-      "tag": "PasswordInput",
-      "variant": "",
-      "size": "",
-      "className": "h-12 border-erp-access-border bg-erp-access-field text-erp-landing-foreground focus-visible:ring-primary",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "routes/index.tsx"
-      ]
-    },
-    {
-      "tag": "SelectTrigger",
-      "variant": "",
-      "size": "",
-      "className": "w-full sm:w-[240px]",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/dashboard.tsx"
-      ]
-    },
-    {
-      "tag": "SelectTrigger",
-      "variant": "",
-      "size": "",
-      "className": "w-full sm:w-[28rem]",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/dashboard.tsx"
-      ]
-    },
-    {
-      "tag": "SelectTrigger",
-      "variant": "",
-      "size": "",
-      "className": "h-auto w-auto gap-1 rounded-full border-border bg-transparent px-2.5 py-0.5 text-xs font-normal text-foreground",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/dashboard.tsx"
-      ]
-    },
-    {
-      "tag": "SelectTrigger",
-      "variant": "",
-      "size": "",
-      "className": "h-7 text-xs",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/dashboard.tsx"
-      ]
-    },
-    {
-      "tag": "SelectTrigger",
-      "variant": "",
-      "size": "",
-      "className": "mt-1",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/development.tsx"
-      ]
-    },
-    {
-      "tag": "Textarea",
-      "variant": "",
-      "size": "",
-      "className": "bg-action/30 text-sm leading-snug md:text-sm read-only:cursor-default focus-visible:bg-action/40",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    },
-    {
-      "tag": "SelectTrigger",
-      "variant": "",
-      "size": "",
-      "className": "w-full sm:w-48",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    },
-    {
-      "tag": "Input",
-      "variant": "",
-      "size": "",
-      "className": "bg-muted/40",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    },
-    {
-      "tag": "SelectTrigger",
-      "variant": "",
-      "size": "",
-      "className": "h-10 rounded-none border-0 border-b border-myio-green bg-transparent px-0 shadow-none focus:ring-0",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    },
-    {
-      "tag": "SelectTrigger",
-      "variant": "",
-      "size": "",
-      "className": "min-w-0 flex-1",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    },
-    {
-      "tag": "Textarea",
-      "variant": "",
-      "size": "",
-      "className": "w-full",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    },
-    {
-      "tag": "Input",
-      "variant": "",
-      "size": "",
-      "className": "w-full min-w-0 appearance-none border-0 bg-transparent pr-10 shadow-none focus-visible:ring-0 [&::-webkit-calendar-picker-indicator]:opacity-0",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    },
-    {
-      "tag": "Input",
-      "variant": "",
-      "size": "",
-      "className": "min-w-0 max-w-full",
-      "icon": "",
-      "iconClass": "",
-      "label": "",
-      "count": 1,
-      "files": [
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    }
-  ],
-  "box": [
-    {
-      "tag": "div",
-      "variant": "",
-      "size": "",
-      "className": "rounded-xl border bg-card text-card-foreground shadow",
-      "icon": "",
-      "iconClass": "",
-      "label": "Box",
-      "count": 97,
-      "files": [
-        "components/access-profile-definitions-tab.tsx",
-        "components/access-profiles-tab.tsx",
-        "components/additional-step-types-tab.tsx",
-        "components/approval-workflow.tsx",
-        "components/assembly-release.tsx",
-        "components/cash-flow/cash-register-tab.tsx",
-        "components/cash-flow/chart-of-accounts-tab.tsx",
-        "components/cash-flow/payables-tab.tsx",
-        "components/client-categories-tab.tsx",
-        "components/clients-tab.tsx",
-        "components/cost-centers-tab.tsx",
-        "components/damage-reasons-tab.tsx",
-        "components/damaged-items.tsx",
-        "components/delivery-points-tab.tsx",
-        "components/distribution.tsx",
-        "components/erp-app-access-admin.tsx",
-        "components/external-sync.tsx",
-        "components/homologation.tsx",
-        "components/import-batches.tsx",
-        "components/job-titles-tab.tsx",
-        "components/material-stock-types-tab.tsx",
-        "components/materials-registry-tab.tsx",
-        "components/myio-demand.tsx",
-        "components/myio-orders-tab.tsx",
-        "components/qr-check.tsx",
-        "components/reminders-tab.tsx",
-        "components/request-types-tab.tsx",
-        "components/site-survey-profiles-admin.tsx",
-        "components/site-survey-report-texts.tsx",
-        "components/site-survey-time-assumptions.tsx",
-        "components/stock-destinations-tab.tsx",
-        "components/stock-simulator.tsx",
-        "components/stock-tab.tsx",
-        "components/supply-order-statuses-tab.tsx",
-        "components/supply-tags-tab.tsx",
-        "components/technician-items.tsx",
-        "components/tools-assets.tsx",
-        "components/unit-products.tsx",
-        "components/user-manuals-tab.tsx",
-        "routes/_authenticated/chamados.tsx",
-        "routes/_authenticated/dashboard.tsx",
-        "routes/_authenticated/development.tsx",
-        "routes/_authenticated/site-survey.tsx",
-        "routes/reset-password.tsx"
-      ]
-    }
-  ],
-  "confirm_dialog": [
-    {
-      "tag": "div",
-      "variant": "",
-      "size": "",
-      "className": "rounded-lg border bg-background",
-      "icon": "",
-      "iconClass": "",
-      "label": "Confirmar exclusão",
-      "count": 22,
-      "files": [
-        "components/clients-tab.tsx",
-        "components/confirm-delete-button.tsx",
-        "components/erp-app-access-admin.tsx",
-        "components/homologation.tsx",
-        "components/materials-registry-tab.tsx",
-        "components/mytosis/flowchart.tsx",
-        "components/mytosis/kpis-tab.tsx",
-        "components/mytosis/node-attachments.tsx",
-        "components/mytosis/node-dialog.tsx",
-        "components/mytosis/processes-tab.tsx",
-        "components/mytosis/users-tab.tsx",
-        "components/reminders-tab.tsx",
-        "components/site-survey-luc-manager.tsx",
-        "components/site-survey-report.tsx",
-        "components/stock-tab.tsx",
-        "components/supply-allocation-selector.tsx",
-        "components/supply-order-statuses-tab.tsx",
-        "components/supply-tags-tab.tsx",
-        "components/tools-assets.tsx",
-        "routes/_authenticated/dashboard.tsx",
-        "routes/_authenticated/development.tsx",
-        "routes/_authenticated/site-survey.tsx"
-      ]
-    },
-    {
-      "tag": "div",
-      "variant": "",
-      "size": "",
-      "className": "rounded-md border-2 border-primary bg-background",
-      "icon": "",
-      "iconClass": "",
-      "label": "Confirmar exclusão",
-      "count": 0,
-      "files": []
-    }
-  ]
+ "plus": [
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "compactIcon",
+   "className": "",
+   "icon": "Plus",
+   "iconClass": "h-3.5 w-3.5",
+   "label": "",
+   "count": 4,
+   "files": [
+    "components/additional-step-types-tab.tsx",
+    "components/materials-registry-tab.tsx",
+    "components/project-type-fields.tsx",
+    "components/request-types-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "",
+   "size": "sm",
+   "className": "",
+   "icon": "Plus",
+   "iconClass": "mr-1 h-4 w-4",
+   "label": "Adicionar",
+   "count": 4,
+   "files": [
+    "components/bom-settings.tsx",
+    "components/stock-tab.tsx",
+    "components/unit-products.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "",
+   "size": "compactIcon",
+   "className": "",
+   "icon": "Plus",
+   "iconClass": "h-3.5 w-3.5",
+   "label": "",
+   "count": 4,
+   "files": [
+    "components/damage-reasons-tab.tsx",
+    "components/delivery-points-tab.tsx",
+    "components/material-stock-types-tab.tsx",
+    "components/stock-destinations-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "compactIcon",
+   "className": "",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 4,
+   "files": [
+    "components/site-survey-report-texts.tsx",
+    "components/site-survey-time-assumptions.tsx",
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "compactIcon",
+   "className": "",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 4,
+   "files": [
+    "components/legal/legal-workspace.tsx",
+    "components/legal/subject-responsibles.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "sm",
+   "className": "",
+   "icon": "Plus",
+   "iconClass": "h-4 w-4",
+   "label": "Adicionar ambiente",
+   "count": 3,
+   "files": [
+    "components/site-survey-environment-manager.tsx",
+    "components/site-survey-luc-manager.tsx",
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "action",
+   "size": "compactIcon",
+   "className": "",
+   "icon": "Plus",
+   "iconClass": "h-3.5 w-3.5",
+   "label": "",
+   "count": 3,
+   "files": [
+    "components/supply-order-statuses-tab.tsx",
+    "components/supply-tags-tab.tsx",
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "",
+   "size": "",
+   "className": "",
+   "icon": "Plus",
+   "iconClass": "mr-2 h-4 w-4",
+   "label": "",
+   "count": 2,
+   "files": [
+    "components/import-batches.tsx",
+    "components/myio-orders-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "compactIcon",
+   "className": "",
+   "icon": "Plus",
+   "iconClass": "h-5 w-5",
+   "label": "",
+   "count": 2,
+   "files": [
+    "components/site-survey-customer-questions.tsx",
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "sm",
+   "className": "",
+   "icon": "Plus",
+   "iconClass": "size-3.5",
+   "label": "Nova etapa",
+   "count": 2,
+   "files": [
+    "components/mytosis/flowchart.tsx",
+    "components/mytosis/kpis-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "icon",
+   "className": "text-primary",
+   "icon": "Plus",
+   "iconClass": "h-5 w-5",
+   "label": "openDialog()} aria-label=\"Novo objetivo\"",
+   "count": 2,
+   "files": [
+    "components/mytosis/okrs-tab.tsx",
+    "components/mytosis/users-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "compactIcon",
+   "className": "",
+   "icon": "Plus",
+   "iconClass": "h-3.5 w-3.5",
+   "label": "[...prev, ])",
+   "count": 2,
+   "files": [
+    "routes/_authenticated/dashboard.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "compactIcon",
+   "className": "mb-5 text-myio-green hover:text-myio-green",
+   "icon": "Plus",
+   "iconClass": "h-5 w-5",
+   "label": "",
+   "count": 2,
+   "files": [
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "compactIcon",
+   "className": "",
+   "icon": "Pencil",
+   "iconClass": "h-3.5 w-3.5",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/access-profile-definitions-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "action",
+   "size": "",
+   "className": "mt-4",
+   "icon": "Plus",
+   "iconClass": "mr-2 h-4 w-4",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/approval-workflow.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "",
+   "size": "compactIcon",
+   "className": "",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/client-categories-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "action",
+   "size": "",
+   "className": "whitespace-nowrap",
+   "icon": "Plus",
+   "iconClass": "mr-1 h-4 w-4",
+   "label": "[...current, ])",
+   "count": 1,
+   "files": [
+    "components/clients-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "action",
+   "size": "sm",
+   "className": "",
+   "icon": "Plus",
+   "iconClass": "mr-1 h-4 w-4",
+   "label": "Adicionar unidade",
+   "count": 1,
+   "files": [
+    "components/clients-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "sm",
+   "className": "h-7 gap-1 px-2 text-xs",
+   "icon": "Plus",
+   "iconClass": "h-3.5 w-3.5",
+   "label": "Nova opção",
+   "count": 1,
+   "files": [
+    "components/request-types-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "",
+   "size": "compactIcon",
+   "className": "",
+   "icon": "Pencil",
+   "iconClass": "h-3.5 w-3.5",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/site-survey-profiles-admin.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "",
+   "size": "sm",
+   "className": "w-full sm:w-auto",
+   "icon": "Plus",
+   "iconClass": "mr-1 h-4 w-4",
+   "label": "Adicionar ferramenta",
+   "count": 1,
+   "files": [
+    "components/tools-assets.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "",
+   "size": "",
+   "className": "self-end",
+   "icon": "Plus",
+   "iconClass": "h-3.5 w-3.5",
+   "label": "Nova conta",
+   "count": 1,
+   "files": [
+    "components/cash-flow/chart-of-accounts-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "icon",
+   "className": "",
+   "icon": "Plus",
+   "iconClass": "h-3.5 w-3.5",
+   "label": "e.stopPropagation()} onPointerDown= clas",
+   "count": 1,
+   "files": [
+    "components/mytosis/flowchart.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "icon",
+   "className": "h-7 w-7 rounded-lg",
+   "icon": "Plus",
+   "iconClass": "h-5 w-5",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/mytosis/flowchart.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "icon",
+   "className": "h-8 w-8",
+   "icon": "Plus",
+   "iconClass": "size-3.5",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/mytosis/kpis-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "sm",
+   "className": "justify-self-start",
+   "icon": "Plus",
+   "iconClass": "size-3.5",
+   "label": "Parágrafo",
+   "count": 1,
+   "files": [
+    "components/mytosis/processes-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "icon",
+   "className": "h-8 w-8",
+   "icon": "Plus",
+   "iconClass": "size-4",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/mytosis/processes-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "sm",
+   "className": "mt-4",
+   "icon": "Plus",
+   "iconClass": "size-3.5",
+   "label": "Seção",
+   "count": 1,
+   "files": [
+    "components/mytosis/processes-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "action",
+   "size": "icon",
+   "className": "rounded-full",
+   "icon": "Plus",
+   "iconClass": "h-5 w-5",
+   "label": "",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/chamados.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "compactIcon",
+   "className": "",
+   "icon": "Plus",
+   "iconClass": "h-4 w-4",
+   "label": "[...curren",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/dashboard.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "action",
+   "size": "",
+   "className": "",
+   "icon": "Plus",
+   "iconClass": "h-4 w-4",
+   "label": "Novo ticket",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/development.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "compactIcon",
+   "className": "border-0 text-myio-green shadow-none hover:bg-myio-green/10 hover:text-myio-green",
+   "icon": "Plus",
+   "iconClass": "h-5 w-5",
+   "label": "",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "compactIcon",
+   "className": "text-myio-green hover:text-myio-green",
+   "icon": "Plus",
+   "iconClass": "h-5 w-5",
+   "label": "",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  }
+ ],
+ "save": [
+  {
+   "tag": "Button",
+   "variant": "",
+   "size": "",
+   "className": "",
+   "icon": "",
+   "iconClass": "",
+   "label": "Salvar perfil",
+   "count": 27,
+   "files": [
+    "components/access-profile-definitions-tab.tsx",
+    "components/additional-step-types-tab.tsx",
+    "components/approval-workflow.tsx",
+    "components/cash-flow/cash-register-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "",
+   "className": "",
+   "icon": "",
+   "iconClass": "",
+   "label": "add.mutate(newType.replace(/\\|/g, \" \").t",
+   "count": 14,
+   "files": [
+    "components/legal/legal-workspace.tsx",
+    "components/mytosis/box-tasks.tsx",
+    "components/mytosis/connector-dialog.tsx",
+    "components/mytosis/flowchart.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "action",
+   "size": "",
+   "className": "",
+   "icon": "",
+   "iconClass": "",
+   "label": "Salvar",
+   "count": 4,
+   "files": [
+    "components/clients-tab.tsx",
+    "components/supply-order-statuses-tab.tsx",
+    "components/supply-tags-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "action",
+   "size": "sm",
+   "className": "",
+   "icon": "Save",
+   "iconClass": "h-4 w-4",
+   "label": "Salvar",
+   "count": 3,
+   "files": [
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "",
+   "size": "sm",
+   "className": "",
+   "icon": "",
+   "iconClass": "",
+   "label": "Salvar",
+   "count": 2,
+   "files": [
+    "components/material-detail.tsx",
+    "routes/_authenticated/development.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "",
+   "size": "",
+   "className": "",
+   "icon": "ClipboardCheck",
+   "iconClass": "h-4 w-4",
+   "label": "Salvar progresso",
+   "count": 2,
+   "files": [
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "sm",
+   "className": "",
+   "icon": "Percent",
+   "iconClass": "mr-1 h-4 w-4",
+   "label": "applyLoss.mutate(Number(loss.replace(\",\"",
+   "count": 1,
+   "files": [
+    "components/bom-settings.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "action",
+   "size": "sm",
+   "className": "",
+   "icon": "",
+   "iconClass": "",
+   "label": "Salvar",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  }
+ ],
+ "trash": [
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "compactIcon",
+   "className": "text-destructive hover:text-destructive",
+   "icon": "Trash2",
+   "iconClass": "h-3.5 w-3.5",
+   "label": "",
+   "count": 19,
+   "files": [
+    "components/access-profile-definitions-tab.tsx",
+    "components/approval-workflow.tsx",
+    "components/clients-tab.tsx",
+    "components/confirm-delete-button.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "compactIcon",
+   "className": "",
+   "icon": "Trash2",
+   "iconClass": "h-3.5 w-3.5",
+   "label": "",
+   "count": 7,
+   "files": [
+    "components/supply-order-statuses-tab.tsx",
+    "components/supply-tags-tab.tsx",
+    "routes/_authenticated/dashboard.tsx",
+    "routes/_authenticated/development.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "compactIcon",
+   "className": "",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 5,
+   "files": [
+    "components/legal/legal-workspace.tsx",
+    "components/legal/minutes-list.tsx",
+    "components/legal/subject-responsibles.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "icon",
+   "className": "h-7 w-7 text-primary",
+   "icon": "Trash2",
+   "iconClass": "size-3.5",
+   "label": "",
+   "count": 4,
+   "files": [
+    "components/mytosis/kpis-tab.tsx",
+    "components/mytosis/processes-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "compactIcon",
+   "className": "",
+   "icon": "Trash2",
+   "iconClass": "h-3.5 w-3.5 text-destructive",
+   "label": "",
+   "count": 3,
+   "files": [
+    "components/assembly-release.tsx",
+    "components/import-batches.tsx",
+    "components/myio-orders-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "action",
+   "size": "compactIcon",
+   "className": "",
+   "icon": "Trash2",
+   "iconClass": "h-3.5 w-3.5",
+   "label": "",
+   "count": 3,
+   "files": [
+    "components/clients-tab.tsx",
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "compactIcon",
+   "className": "",
+   "icon": "Trash2",
+   "iconClass": "h-3.5 w-3.5 text-primary-foreground",
+   "label": "",
+   "count": 2,
+   "files": [
+    "components/stock-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "icon",
+   "className": "",
+   "icon": "Trash2",
+   "iconClass": "size-3",
+   "label": "void remove(file.id, file.storage_path)",
+   "count": 2,
+   "files": [
+    "components/mytosis/node-attachments.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "compactIcon",
+   "className": "!h-6 !w-6 shrink-0 text-destructive hover:text-destructive",
+   "icon": "Trash2",
+   "iconClass": "h-3.5 w-3.5",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/materials-registry-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "compactIcon",
+   "className": "text-destructive",
+   "icon": "Trash2",
+   "iconClass": "h-3.5 w-3.5",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/reminders-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "action",
+   "size": "compactIcon",
+   "className": "group h-7 w-7 rounded-full hover:!text-action-hover-foreground focus-visible:!text-action-hover-foreground active:!text-action-hover-foreground",
+   "icon": "Trash2",
+   "iconClass": "h-3.5 w-3.5 group-hover:!text-action-hover-foreground group-focus-visible:!text-action-hover-foreground group-active:!text-action-hover-foreground",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/site-survey-screen-summary.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "compactIcon",
+   "className": "",
+   "icon": "Trash2",
+   "iconClass": "h-3.5 w-3.5",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/unit-products.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "",
+   "className": "",
+   "icon": "",
+   "iconClass": "",
+   "label": "Excluir",
+   "count": 1,
+   "files": [
+    "components/legal/legal-workspace.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "icon",
+   "className": "h-5 w-5 !bg-transparent hover:!bg-transparent [&_svg]:!size-3",
+   "icon": "Trash2",
+   "iconClass": "h-3 w-3",
+   "label": "— $ e todas as tarefas e subetapas abaix",
+   "count": 1,
+   "files": [
+    "components/mytosis/flowchart.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "icon",
+   "className": "h-7 w-7 rounded-lg",
+   "icon": "Trash2",
+   "iconClass": "size-3.5",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/mytosis/flowchart.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "sm",
+   "className": "",
+   "icon": "Trash2",
+   "iconClass": "size-3.5",
+   "label": "\" e todos os lançamentos?`)) deleteKpi.m",
+   "count": 1,
+   "files": [
+    "components/mytosis/kpis-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "icon",
+   "className": "text-primary",
+   "icon": "Trash2",
+   "iconClass": "h-4 w-4",
+   "label": "aria-label=\"Remover usuário\" title=\"Re",
+   "count": 1,
+   "files": [
+    "components/mytosis/users-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "compactIcon",
+   "className": "",
+   "icon": "Trash2",
+   "iconClass": "h-4 w-4",
+   "label": "",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/dashboard.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "destructive",
+   "size": "",
+   "className": "",
+   "icon": "Trash2",
+   "iconClass": "h-4 w-4",
+   "label": "Excluir ticket",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/development.tsx"
+   ]
+  },
+  {
+   "tag": "button",
+   "variant": "",
+   "size": "",
+   "className": "absolute -right-1.5 -top-1.5 z-10 flex h-6 w-6 items-center justify-center rounded-full border bg-background text-primary shadow-sm hover:bg-primary hover:text-primary-foreground",
+   "icon": "Trash2",
+   "iconClass": "h-3.5 w-3.5",
+   "label": "",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/development.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "compactIcon",
+   "className": "",
+   "icon": "Trash2",
+   "iconClass": "h-4 w-4",
+   "label": "",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "compactIcon",
+   "className": "shrink-0 text-myio-green hover:text-myio-green",
+   "icon": "Trash2",
+   "iconClass": "h-4 w-4",
+   "label": "",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  }
+ ],
+ "cancel": [
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "",
+   "className": "",
+   "icon": "",
+   "iconClass": "",
+   "label": "Cancelar",
+   "count": 49,
+   "files": [
+    "components/access-profile-definitions-tab.tsx",
+    "components/approval-workflow.tsx",
+    "components/assembly-release.tsx",
+    "components/distribution.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "action",
+   "size": "",
+   "className": "",
+   "icon": "",
+   "iconClass": "",
+   "label": "Cancelar",
+   "count": 6,
+   "files": [
+    "components/change-password-dialog.tsx",
+    "components/site-survey-client-answer-import.tsx",
+    "components/site-survey-facade-picker.tsx",
+    "components/site-survey-general-filter.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "",
+   "className": "",
+   "icon": "",
+   "iconClass": "",
+   "label": "Cancelar",
+   "count": 2,
+   "files": [
+    "components/myio-demand.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "sm",
+   "className": "",
+   "icon": "",
+   "iconClass": "",
+   "label": "Cancelar",
+   "count": 1,
+   "files": [
+    "components/material-detail.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "sm",
+   "className": "",
+   "icon": "",
+   "iconClass": "",
+   "label": "Cancelar",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/development.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "action",
+   "size": "sm",
+   "className": "",
+   "icon": "",
+   "iconClass": "",
+   "label": "Cancelar",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "icon",
+   "className": "",
+   "icon": "X",
+   "iconClass": "h-4 w-4",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/qr-check.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "compactIcon",
+   "className": "",
+   "icon": "X",
+   "iconClass": "h-3.5 w-3.5",
+   "label": "",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "destructive",
+   "size": "",
+   "className": "",
+   "icon": "X",
+   "iconClass": "h-4 w-4",
+   "label": "Cancelar visit",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  }
+ ],
+ "toggle": [
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "compactIcon",
+   "className": "",
+   "icon": "ChevronUp",
+   "iconClass": "h-3.5 w-3.5",
+   "label": "current =",
+   "count": 11,
+   "files": [
+    "components/access-profiles-tab.tsx",
+    "components/additional-step-types-tab.tsx",
+    "components/damage-reasons-tab.tsx",
+    "components/delivery-points-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "compactIcon",
+   "className": "",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 9,
+   "files": [
+    "components/client-categories-tab.tsx",
+    "components/site-survey-environment-manager.tsx",
+    "components/site-survey-luc-manager.tsx",
+    "components/site-survey-report-texts.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "compactIcon",
+   "className": "text-myio-green hover:text-myio-green",
+   "icon": "ChevronDown",
+   "iconClass": "h-5 w-5",
+   "label": "",
+   "count": 5,
+   "files": [
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "compactIcon",
+   "className": "",
+   "icon": "",
+   "iconClass": "",
+   "label": "setExpanded(allExpanded?new Set():new Se",
+   "count": 4,
+   "files": [
+    "components/legal/legal-workspace.tsx",
+    "components/supply-consolidation.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "compactIcon",
+   "className": "",
+   "icon": "ChevronUp",
+   "iconClass": "h-5 w-5",
+   "label": "",
+   "count": 3,
+   "files": [
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "",
+   "className": "w-full justify-between !bg-card text-foreground hover:!bg-muted sm:w-56",
+   "icon": "ChevronDown",
+   "iconClass": "h-4 w-4 shrink-0 opacity-60",
+   "label": "Selecione um modelo",
+   "count": 2,
+   "files": [
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "",
+   "className": "w-full justify-between !bg-myio-green/10 font-normal hover:!bg-myio-green/15",
+   "icon": "ChevronDown",
+   "iconClass": "h-4 w-4 shrink-0 opacity-50",
+   "label": "",
+   "count": 2,
+   "files": [
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  },
+  {
+   "tag": "button",
+   "variant": "",
+   "size": "",
+   "className": "",
+   "icon": "ChevronDown",
+   "iconClass": "h-5 w-5 shrink-0 text-primary",
+   "label": "toggle(name)} aria-expanded= className=\"",
+   "count": 1,
+   "files": [
+    "components/pending-groups.tsx"
+   ]
+  },
+  {
+   "tag": "button",
+   "variant": "",
+   "size": "",
+   "className": "inline-flex items-center gap-1 text-left",
+   "icon": "ChevronUp",
+   "iconClass": "h-3.5 w-3.5 text-primary",
+   "label": "())} aria-label=`",
+   "count": 1,
+   "files": [
+    "components/request-types-tab.tsx"
+   ]
+  },
+  {
+   "tag": "button",
+   "variant": "",
+   "size": "",
+   "className": "flex w-full items-center justify-between gap-3 bg-transparent px-1 py-2 text-left text-base font-semibold text-foreground",
+   "icon": "",
+   "iconClass": "",
+   "label": ") : null",
+   "count": 1,
+   "files": [
+    "components/site-survey-general-filter.tsx"
+   ]
+  },
+  {
+   "tag": "button",
+   "variant": "",
+   "size": "",
+   "className": "shrink-0 self-start p-1 text-primary",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/site-survey-luc-manager.tsx"
+   ]
+  },
+  {
+   "tag": "button",
+   "variant": "",
+   "size": "",
+   "className": "absolute right-2 top-1/2 z-10 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-background/85 text-foreground shadow-md ring-1 ring-border transition hover:bg-background sm:right-3 sm:h-11 sm:w-11",
+   "icon": "ChevronRight",
+   "iconClass": "h-5 w-5",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/site-survey-photo-viewer.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "compactIcon",
+   "className": "",
+   "icon": "ChevronDown",
+   "iconClass": "h-4 w-4",
+   "label": "setCollapsedPoints(allCollapsed ? new Se",
+   "count": 1,
+   "files": [
+    "components/site-survey-screen-summary.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "compactIcon",
+   "className": "col-start-2 row-start-1 sm:col-start-auto sm:row-start-auto",
+   "icon": "ChevronDown",
+   "iconClass": "h-4 w-4",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/site-survey-screen-summary.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "",
+   "className": "h-auto min-w-0 flex-1 justify-start gap-3 whitespace-normal p-0 text-left hover:bg-transparent",
+   "icon": "ChevronDown",
+   "iconClass": "h-5 w-5 shrink-0 text-primary",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/legal/minutes-list.tsx"
+   ]
+  },
+  {
+   "tag": "button",
+   "variant": "",
+   "size": "",
+   "className": "",
+   "icon": "ChevronDown",
+   "iconClass": "h-4 w-4 text-primary",
+   "label": "toggle(root.id)} aria-expanded= classNam",
+   "count": 1,
+   "files": [
+    "components/mytosis/export-dialog.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "",
+   "className": "h-auto min-w-0 justify-start gap-1 px-0 py-1 text-left text-[11px] font-normal text-foreground hover:text-primary",
+   "icon": "ChevronDown",
+   "iconClass": "size-3.5 shrink-0",
+   "label": "Gatilho: -",
+   "count": 1,
+   "files": [
+    "components/mytosis/flowchart.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "icon",
+   "className": "h-5 w-5 !bg-transparent hover:!bg-transparent",
+   "icon": "ChevronLeft",
+   "iconClass": "h-4 w-4",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/mytosis/flowchart.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "icon",
+   "className": "h-5 w-5 !bg-transparent hover:!bg-transparent",
+   "icon": "ChevronUp",
+   "iconClass": "h-4 w-4",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/mytosis/flowchart.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "icon",
+   "className": "h-7 w-7 shrink-0 text-primary",
+   "icon": "ChevronDown",
+   "iconClass": "size-4",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/mytosis/kpis-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "icon",
+   "className": "h-7 w-7 text-primary",
+   "icon": "ChevronDown",
+   "iconClass": "size-4",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/mytosis/processes-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "",
+   "className": "h-14 w-full justify-start rounded-none px-1 text-base !bg-transparent !text-foreground hover:!bg-muted hover:!text-foreground",
+   "icon": "Settings2",
+   "iconClass": "h-5 w-5 shrink-0",
+   "label": "",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/portal.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "compactIcon",
+   "className": "lg:hidden",
+   "icon": "ChevronUp",
+   "iconClass": "h-5 w-5",
+   "label": "",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "compactIcon",
+   "className": "order-last hidden shrink-0 lg:inline-flex",
+   "icon": "ChevronUp",
+   "iconClass": "h-5 w-5",
+   "label": "",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "compactIcon",
+   "className": "col-start-2 shrink-0 text-myio-green",
+   "icon": "ChevronUp",
+   "iconClass": "h-5 w-5",
+   "label": "",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "compactIcon",
+   "className": "",
+   "icon": "ChevronUp",
+   "iconClass": "h-4 w-4",
+   "label": "setInitialStepsExpanded(!(initialStepsEx",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "compactIcon",
+   "className": "shrink-0",
+   "icon": "ChevronUp",
+   "iconClass": "h-5 w-5",
+   "label": "",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "compactIcon",
+   "className": "",
+   "icon": "ChevronDown",
+   "iconClass": "rotate-180",
+   "label": "",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  }
+ ],
+ "pencil": [
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "compactIcon",
+   "className": "",
+   "icon": "Pencil",
+   "iconClass": "h-3.5 w-3.5",
+   "label": "",
+   "count": 33,
+   "files": [
+    "components/additional-step-types-tab.tsx",
+    "components/approval-workflow.tsx",
+    "components/assembly-release.tsx",
+    "components/cash-flow/cash-register-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "compactIcon",
+   "className": "",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 6,
+   "files": [
+    "components/client-categories-tab.tsx",
+    "components/site-survey-report-texts.tsx",
+    "components/site-survey-time-assumptions.tsx",
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "compactIcon",
+   "className": "!h-6 !w-6 shrink-0",
+   "icon": "Pencil",
+   "iconClass": "h-3.5 w-3.5",
+   "label": "",
+   "count": 2,
+   "files": [
+    "components/materials-registry-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "compactIcon",
+   "className": "",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 2,
+   "files": [
+    "components/legal/legal-workspace.tsx",
+    "components/legal/minutes-list.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "action",
+   "size": "compactIcon",
+   "className": "",
+   "icon": "Pencil",
+   "iconClass": "h-3.5 w-3.5",
+   "label": "",
+   "count": 2,
+   "files": [
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "sm",
+   "className": "",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/legal/legal-workspace.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "icon",
+   "className": "h-6 w-6 !text-primary",
+   "icon": "Pencil",
+   "iconClass": "h-3.5 w-3.5",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/mytosis/box-tasks.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "icon",
+   "className": "h-6 w-6 shrink-0 !text-primary",
+   "icon": "Pencil",
+   "iconClass": "h-4 w-4",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/mytosis/box-tasks.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "icon",
+   "className": "h-7 w-7 rounded-lg",
+   "icon": "Pencil",
+   "iconClass": "size-3.5",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/mytosis/flowchart.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "icon",
+   "className": "h-7 w-7 text-primary",
+   "icon": "Pencil",
+   "iconClass": "size-3.5",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/mytosis/kpis-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "sm",
+   "className": "",
+   "icon": "Pencil",
+   "iconClass": "size-3.5",
+   "label": "Editar KPI",
+   "count": 1,
+   "files": [
+    "components/mytosis/kpis-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "icon",
+   "className": "h-6 w-6",
+   "icon": "Pencil",
+   "iconClass": "h-3.5 w-3.5",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/mytosis/node-conversation.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "icon",
+   "className": "h-8 w-8",
+   "icon": "Pencil",
+   "iconClass": "size-3.5",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/mytosis/processes-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "",
+   "className": "",
+   "icon": "Pencil",
+   "iconClass": "h-4 w-4",
+   "label": "Solicitar",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  }
+ ],
+ "confirm": [
+  {
+   "tag": "Button",
+   "variant": "",
+   "size": "",
+   "className": "",
+   "icon": "",
+   "iconClass": "",
+   "label": "decide.mutate()} disabled=",
+   "count": 5,
+   "files": [
+    "components/approval-workflow.tsx",
+    "components/stock-tab.tsx",
+    "components/tools-assets.tsx",
+    "routes/_authenticated/dashboard.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "",
+   "className": "",
+   "icon": "",
+   "iconClass": "",
+   "label": "Concluir",
+   "count": 4,
+   "files": [
+    "components/homologation.tsx",
+    "components/mytosis/flowchart.tsx",
+    "components/mytosis/processes-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "sm",
+   "className": "h-7 text-xs",
+   "icon": "",
+   "iconClass": "",
+   "label": "Concluir",
+   "count": 1,
+   "files": [
+    "components/column-filter.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "",
+   "size": "",
+   "className": "",
+   "icon": "Check",
+   "iconClass": "h-4 w-4",
+   "label": "Concluir",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  }
+ ],
+ "sort": [
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "icon",
+   "className": "size-5 shrink-0 p-0 shadow-none !text-muted-foreground hover:!text-primary",
+   "icon": "ArrowUpDown",
+   "iconClass": "size-3",
+   "label": "",
+   "count": 3,
+   "files": [
+    "components/column-sort-button.tsx",
+    "components/approval-workflow.tsx",
+    "routes/_authenticated/dashboard.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "sm",
+   "className": "h-8 w-full items-center justify-start px-0 text-xs font-semibold !bg-transparent !text-foreground hover:!bg-transparent hover:!text-foreground",
+   "icon": "ArrowUp",
+   "iconClass": "h-3 w-3",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/site-survey-luc-manager.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "compactIcon",
+   "className": "",
+   "icon": "ArrowDownUp",
+   "iconClass": "h-4 w-4",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/legal/legal-workspace.tsx"
+   ]
+  },
+  {
+   "tag": "SelectTrigger",
+   "variant": "outline",
+   "size": "",
+   "className": "w-48",
+   "icon": "ArrowUpDown",
+   "iconClass": "mr-2 h-4 w-4",
+   "label": "Ordenar projetos",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/dashboard.tsx"
+   ]
+  }
+ ],
+ "move": [
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "compactIcon",
+   "className": "",
+   "icon": "ArrowUp",
+   "iconClass": "h-3.5 w-3.5",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/approval-workflow.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "compactIcon",
+   "className": "",
+   "icon": "ArrowDown",
+   "iconClass": "h-3.5 w-3.5",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/approval-workflow.tsx"
+   ]
+  }
+ ],
+ "summary": [
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "sm",
+   "className": "shrink-0 text-primary",
+   "icon": "ArrowUp",
+   "iconClass": "h-4 w-4",
+   "label": "Sumário",
+   "count": 1,
+   "files": [
+    "components/supply-manual-reader.tsx"
+   ]
+  }
+ ],
+ "filter": [
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "sm",
+   "className": "",
+   "icon": "Filter",
+   "iconClass": "size-3",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/column-filter.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "icon",
+   "className": "",
+   "icon": "Filter",
+   "iconClass": "size-3",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/column-filter.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "action",
+   "size": "sm",
+   "className": "h-8 shrink-0 gap-1 px-2 text-xs",
+   "icon": "Filter",
+   "iconClass": "h-3.5 w-3.5",
+   "label": "Filtro geral) : null",
+   "count": 1,
+   "files": [
+    "components/site-survey-general-filter.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "compactIcon",
+   "className": "!bg-transparent !text-primary",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/use-table-filters.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "sm",
+   "className": "w-full justify-start sm:w-[240px]",
+   "icon": "Filter",
+   "iconClass": "mr-2 h-4 w-4",
+   "label": "",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/dashboard.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "ghost",
+   "size": "icon",
+   "className": "h-7 w-7 !bg-transparent !text-primary hover:!bg-transparent hover:!text-primary",
+   "icon": "Filter",
+   "iconClass": "h-4 w-4",
+   "label": "",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/dashboard.tsx"
+   ]
+  }
+ ],
+ "add": [
+  {
+   "tag": "Button",
+   "variant": "",
+   "size": "sm",
+   "className": "",
+   "icon": "",
+   "iconClass": "",
+   "label": "Nova pergunta",
+   "count": 2,
+   "files": [
+    "components/supply-order-conversation.tsx",
+    "routes/_authenticated/development.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "sm",
+   "className": "",
+   "icon": "PackagePlus",
+   "iconClass": "mr-1 h-3 w-3",
+   "label": "Adicionar à caixa",
+   "count": 1,
+   "files": [
+    "components/homologation.tsx"
+   ]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "",
+   "className": "",
+   "icon": "Building2",
+   "iconClass": "h-4 w-4",
+   "label": "Nova conta bancária",
+   "count": 1,
+   "files": [
+    "components/cash-flow/cash-register-tab.tsx"
+   ]
+  }
+ ],
+ "close": [
+  {
+   "tag": "button",
+   "variant": "",
+   "size": "",
+   "className": "rounded-sm opacity-70 hover:opacity-100",
+   "icon": "X",
+   "iconClass": "h-4 w-4",
+   "label": "",
+   "name": "X das janelas (pop-ups)",
+   "count": 148,
+   "files": [
+    "components/access-profile-definitions-tab.tsx",
+    "components/additional-step-types-tab.tsx",
+    "components/approval-workflow.tsx",
+    "components/assembly-release.tsx",
+    "components/bom-settings.tsx",
+    "components/cash-flow/cash-register-tab.tsx",
+    "components/cash-flow/chart-of-accounts-tab.tsx",
+    "components/cash-flow/payables-tab.tsx",
+    "components/cde/cde-workspace.tsx",
+    "components/change-password-dialog.tsx",
+    "components/client-categories-tab.tsx",
+    "components/clients-map-dialog.tsx",
+    "components/clients-tab.tsx",
+    "components/cost-centers-tab.tsx",
+    "components/damage-reasons-tab.tsx",
+    "components/damaged-items.tsx",
+    "components/delivery-points-tab.tsx",
+    "components/distribution.tsx",
+    "components/homologation.tsx",
+    "components/import-batches.tsx",
+    "components/job-titles-tab.tsx",
+    "components/legal/legal-workspace.tsx",
+    "components/linked-record-deletion-dialog.tsx",
+    "components/material-detail.tsx",
+    "components/material-stock-types-tab.tsx",
+    "components/materials-registry-tab.tsx",
+    "components/myio-delivery-qr.tsx",
+    "components/myio-demand.tsx",
+    "components/myio-orders-tab.tsx",
+    "components/myio-product-image.tsx",
+    "components/mytosis/box-tasks.tsx",
+    "components/mytosis/connector-dialog.tsx",
+    "components/mytosis/export-dialog.tsx",
+    "components/mytosis/flowchart.tsx",
+    "components/mytosis/kpis-tab.tsx",
+    "components/mytosis/node-attachments.tsx",
+    "components/mytosis/node-dialog.tsx",
+    "components/mytosis/processes-tab.tsx",
+    "components/mytosis/split-dialog.tsx",
+    "components/reminders-tab.tsx",
+    "components/request-types-tab.tsx",
+    "components/site-survey-client-answer-import.tsx",
+    "components/site-survey-environment-manager.tsx",
+    "components/site-survey-facade-picker.tsx",
+    "components/site-survey-facade-thumbnail.tsx",
+    "components/site-survey-general-filter.tsx",
+    "components/site-survey-luc-manager.tsx",
+    "components/site-survey-profiles-admin.tsx",
+    "components/site-survey-proposal.tsx",
+    "components/site-survey-report-texts.tsx",
+    "components/site-survey-report.tsx",
+    "components/site-survey-screen-summary.tsx",
+    "components/site-survey-time-assumptions.tsx",
+    "components/site-survey-visit-delete.tsx",
+    "components/stock-destinations-tab.tsx",
+    "components/stock-meta.tsx",
+    "components/stock-simulator.tsx",
+    "components/stock-tab.tsx",
+    "components/supply-consolidation.tsx",
+    "components/supply-edit-purchase.tsx",
+    "components/supply-order-statuses-tab.tsx",
+    "components/supply-tags-tab.tsx",
+    "components/technician-items.tsx",
+    "components/tools-assets.tsx",
+    "components/unit-products.tsx",
+    "routes/_authenticated/chamados.tsx",
+    "routes/_authenticated/dashboard.tsx",
+    "routes/_authenticated/development.tsx",
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  },
+  {
+   "tag": "button",
+   "variant": "",
+   "size": "",
+   "className": "opacity-70 hover:opacity-100",
+   "icon": "X",
+   "iconClass": "h-4 w-4",
+   "label": "",
+   "name": "X dos painéis laterais",
+   "count": 2,
+   "files": [
+    "components/app-header.tsx",
+    "routes/_authenticated/portal.tsx"
+   ]
+  }
+ ],
+ "fields": [
+  {
+   "tag": "Input",
+   "variant": "",
+   "size": "",
+   "className": "",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 219,
+   "files": [
+    "components/access-profile-definitions-tab.tsx",
+    "components/additional-step-types-tab.tsx",
+    "components/address-autocomplete.tsx",
+    "components/approval-workflow.tsx"
+   ]
+  },
+  {
+   "tag": "SelectTrigger",
+   "variant": "",
+   "size": "",
+   "className": "",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 111,
+   "files": [
+    "components/approval-workflow.tsx",
+    "components/cash-flow/cash-register-tab.tsx",
+    "components/cash-flow/chart-of-accounts-tab.tsx",
+    "components/cash-flow/payables-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Textarea",
+   "variant": "",
+   "size": "",
+   "className": "",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 52,
+   "files": [
+    "components/address-autocomplete.tsx",
+    "components/approval-workflow.tsx",
+    "components/assembly-release.tsx",
+    "components/cost-centers-tab.tsx"
+   ]
+  },
+  {
+   "tag": "PasswordInput",
+   "variant": "",
+   "size": "",
+   "className": "",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 5,
+   "files": [
+    "components/change-password-dialog.tsx",
+    "routes/reset-password.tsx"
+   ]
+  },
+  {
+   "tag": "Input",
+   "variant": "",
+   "size": "",
+   "className": "w-24",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 4,
+   "files": [
+    "components/assembly-release.tsx",
+    "components/import-batches.tsx"
+   ]
+  },
+  {
+   "tag": "SelectTrigger",
+   "variant": "",
+   "size": "",
+   "className": "h-9",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 4,
+   "files": [
+    "components/clients-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Input",
+   "variant": "",
+   "size": "",
+   "className": "w-20",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 4,
+   "files": [
+    "components/myio-orders-tab.tsx",
+    "routes/_authenticated/dashboard.tsx"
+   ]
+  },
+  {
+   "tag": "SelectTrigger",
+   "variant": "",
+   "size": "",
+   "className": "h-8 w-full text-xs",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 3,
+   "files": [
+    "routes/_authenticated/dashboard.tsx"
+   ]
+  },
+  {
+   "tag": "SelectTrigger",
+   "variant": "",
+   "size": "",
+   "className": "w-full",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 2,
+   "files": [
+    "components/access-profile-definitions-tab.tsx",
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  },
+  {
+   "tag": "SelectTrigger",
+   "variant": "",
+   "size": "",
+   "className": "w-full sm:w-[280px]",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 2,
+   "files": [
+    "components/bom-settings.tsx"
+   ]
+  },
+  {
+   "tag": "SelectTrigger",
+   "variant": "",
+   "size": "",
+   "className": "h-8 text-xs",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 2,
+   "files": [
+    "components/column-filter.tsx",
+    "components/use-table-filters.tsx"
+   ]
+  },
+  {
+   "tag": "Textarea",
+   "variant": "",
+   "size": "",
+   "className": "min-h-9 resize-none",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 2,
+   "files": [
+    "components/cost-centers-tab.tsx",
+    "components/job-titles-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Input",
+   "variant": "",
+   "size": "",
+   "className": "w-40",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 2,
+   "files": [
+    "components/damaged-items.tsx",
+    "components/technician-items.tsx"
+   ]
+  },
+  {
+   "tag": "Input",
+   "variant": "",
+   "size": "",
+   "className": "min-w-40 flex-1",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 2,
+   "files": [
+    "components/homologation.tsx"
+   ]
+  },
+  {
+   "tag": "SelectTrigger",
+   "variant": "",
+   "size": "",
+   "className": "w-full sm:w-[220px]",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 2,
+   "files": [
+    "components/homologation.tsx"
+   ]
+  },
+  {
+   "tag": "Input",
+   "variant": "",
+   "size": "",
+   "className": "w-32",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 2,
+   "files": [
+    "components/reminders-tab.tsx"
+   ]
+  },
+  {
+   "tag": "SelectTrigger",
+   "variant": "",
+   "size": "",
+   "className": "w-full sm:w-64",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 2,
+   "files": [
+    "components/site-survey-general-filter.tsx",
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  },
+  {
+   "tag": "SelectTrigger",
+   "variant": "",
+   "size": "",
+   "className": "h-auto min-h-9 whitespace-normal text-left",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 2,
+   "files": [
+    "components/site-survey-report-texts.tsx"
+   ]
+  },
+  {
+   "tag": "Textarea",
+   "variant": "",
+   "size": "",
+   "className": "min-h-28",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 2,
+   "files": [
+    "routes/_authenticated/chamados.tsx",
+    "routes/_authenticated/development.tsx"
+   ]
+  },
+  {
+   "tag": "Input",
+   "variant": "",
+   "size": "",
+   "className": "bg-muted",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 2,
+   "files": [
+    "routes/_authenticated/dashboard.tsx"
+   ]
+  },
+  {
+   "tag": "Input",
+   "variant": "",
+   "size": "",
+   "className": "h-8 w-28",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/approval-workflow.tsx"
+   ]
+  },
+  {
+   "tag": "SelectTrigger",
+   "variant": "",
+   "size": "",
+   "className": "h-8 w-full min-w-0 max-w-full md:w-56",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/approval-workflow.tsx"
+   ]
+  },
+  {
+   "tag": "Input",
+   "variant": "",
+   "size": "",
+   "className": "w-28 text-right",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/bom-settings.tsx"
+   ]
+  },
+  {
+   "tag": "Input",
+   "variant": "",
+   "size": "",
+   "className": "w-28",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/bom-settings.tsx"
+   ]
+  },
+  {
+   "tag": "SelectTrigger",
+   "variant": "",
+   "size": "",
+   "className": "w-20 shrink-0",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/br-city-picker.tsx"
+   ]
+  },
+  {
+   "tag": "SelectTrigger",
+   "variant": "",
+   "size": "",
+   "className": "w-52",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/clients-map-dialog.tsx"
+   ]
+  },
+  {
+   "tag": "Input",
+   "variant": "",
+   "size": "",
+   "className": "col-span-3 md:col-span-1 md:col-start-2 md:row-start-1",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/clients-tab.tsx"
+   ]
+  },
+  {
+   "tag": "SelectTrigger",
+   "variant": "",
+   "size": "",
+   "className": "h-8 w-40",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/clients-tab.tsx"
+   ]
+  },
+  {
+   "tag": "SelectTrigger",
+   "variant": "",
+   "size": "",
+   "className": "h-8 w-64",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/import-batches.tsx"
+   ]
+  },
+  {
+   "tag": "SelectTrigger",
+   "variant": "",
+   "size": "",
+   "className": "max-w-64",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/materials-registry-tab.tsx"
+   ]
+  },
+  {
+   "tag": "SelectTrigger",
+   "variant": "",
+   "size": "",
+   "className": "h-8 w-52",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/myio-orders-tab.tsx"
+   ]
+  },
+  {
+   "tag": "SelectTrigger",
+   "variant": "",
+   "size": "",
+   "className": "w-64",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/reminders-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Textarea",
+   "variant": "",
+   "size": "",
+   "className": "bg-action/30 focus-visible:bg-action/40",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/site-survey-customer-questions.tsx"
+   ]
+  },
+  {
+   "tag": "Input",
+   "variant": "",
+   "size": "",
+   "className": "h-8 min-w-0 flex-1 text-xs",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/site-survey-general-filter.tsx"
+   ]
+  },
+  {
+   "tag": "SelectTrigger",
+   "variant": "",
+   "size": "",
+   "className": "w-48 max-w-full",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/site-survey-progress-chart.tsx"
+   ]
+  },
+  {
+   "tag": "Input",
+   "variant": "",
+   "size": "",
+   "className": "w-24 text-right",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/stock-simulator.tsx"
+   ]
+  },
+  {
+   "tag": "SelectTrigger",
+   "variant": "",
+   "size": "",
+   "className": "w-44",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/mytosis/users-tab.tsx"
+   ]
+  },
+  {
+   "tag": "SelectTrigger",
+   "variant": "",
+   "size": "",
+   "className": "h-8 w-44",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "components/mytosis/users-tab.tsx"
+   ]
+  },
+  {
+   "tag": "Input",
+   "variant": "",
+   "size": "",
+   "className": "h-12 border-erp-access-border bg-erp-access-field text-erp-landing-foreground",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "routes/index.tsx"
+   ]
+  },
+  {
+   "tag": "Input",
+   "variant": "",
+   "size": "",
+   "className": "h-12 border-erp-access-border bg-erp-access-field text-erp-landing-foreground placeholder:text-erp-landing-muted focus-visible:ring-primary",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "routes/index.tsx"
+   ]
+  },
+  {
+   "tag": "PasswordInput",
+   "variant": "",
+   "size": "",
+   "className": "h-12 border-erp-access-border bg-erp-access-field text-erp-landing-foreground focus-visible:ring-primary",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "routes/index.tsx"
+   ]
+  },
+  {
+   "tag": "SelectTrigger",
+   "variant": "",
+   "size": "",
+   "className": "w-full sm:w-[240px]",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/dashboard.tsx"
+   ]
+  },
+  {
+   "tag": "SelectTrigger",
+   "variant": "",
+   "size": "",
+   "className": "w-full sm:w-[28rem]",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/dashboard.tsx"
+   ]
+  },
+  {
+   "tag": "SelectTrigger",
+   "variant": "",
+   "size": "",
+   "className": "h-auto w-auto gap-1 rounded-full border-border bg-transparent px-2.5 py-0.5 text-xs font-normal text-foreground",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/dashboard.tsx"
+   ]
+  },
+  {
+   "tag": "SelectTrigger",
+   "variant": "",
+   "size": "",
+   "className": "h-7 text-xs",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/dashboard.tsx"
+   ]
+  },
+  {
+   "tag": "SelectTrigger",
+   "variant": "",
+   "size": "",
+   "className": "mt-1",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/development.tsx"
+   ]
+  },
+  {
+   "tag": "Textarea",
+   "variant": "",
+   "size": "",
+   "className": "bg-action/30 text-sm leading-snug md:text-sm read-only:cursor-default focus-visible:bg-action/40",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  },
+  {
+   "tag": "SelectTrigger",
+   "variant": "",
+   "size": "",
+   "className": "w-full sm:w-48",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  },
+  {
+   "tag": "Input",
+   "variant": "",
+   "size": "",
+   "className": "bg-muted/40",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  },
+  {
+   "tag": "SelectTrigger",
+   "variant": "",
+   "size": "",
+   "className": "h-10 rounded-none border-0 border-b border-myio-green bg-transparent px-0 shadow-none focus:ring-0",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  },
+  {
+   "tag": "SelectTrigger",
+   "variant": "",
+   "size": "",
+   "className": "min-w-0 flex-1",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  },
+  {
+   "tag": "Textarea",
+   "variant": "",
+   "size": "",
+   "className": "w-full",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  },
+  {
+   "tag": "Input",
+   "variant": "",
+   "size": "",
+   "className": "w-full min-w-0 appearance-none border-0 bg-transparent pr-10 shadow-none focus-visible:ring-0 [&::-webkit-calendar-picker-indicator]:opacity-0",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  },
+  {
+   "tag": "Input",
+   "variant": "",
+   "size": "",
+   "className": "min-w-0 max-w-full",
+   "icon": "",
+   "iconClass": "",
+   "label": "",
+   "count": 1,
+   "files": [
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  }
+ ],
+ "box": [
+  {
+   "tag": "div",
+   "variant": "",
+   "size": "",
+   "className": "rounded-xl border bg-card text-card-foreground shadow",
+   "icon": "",
+   "iconClass": "",
+   "label": "Box",
+   "count": 97,
+   "files": [
+    "components/access-profile-definitions-tab.tsx",
+    "components/access-profiles-tab.tsx",
+    "components/additional-step-types-tab.tsx",
+    "components/approval-workflow.tsx",
+    "components/assembly-release.tsx",
+    "components/cash-flow/cash-register-tab.tsx",
+    "components/cash-flow/chart-of-accounts-tab.tsx",
+    "components/cash-flow/payables-tab.tsx",
+    "components/client-categories-tab.tsx",
+    "components/clients-tab.tsx",
+    "components/cost-centers-tab.tsx",
+    "components/damage-reasons-tab.tsx",
+    "components/damaged-items.tsx",
+    "components/delivery-points-tab.tsx",
+    "components/distribution.tsx",
+    "components/erp-app-access-admin.tsx",
+    "components/external-sync.tsx",
+    "components/homologation.tsx",
+    "components/import-batches.tsx",
+    "components/job-titles-tab.tsx",
+    "components/material-stock-types-tab.tsx",
+    "components/materials-registry-tab.tsx",
+    "components/myio-demand.tsx",
+    "components/myio-orders-tab.tsx",
+    "components/qr-check.tsx",
+    "components/reminders-tab.tsx",
+    "components/request-types-tab.tsx",
+    "components/site-survey-profiles-admin.tsx",
+    "components/site-survey-report-texts.tsx",
+    "components/site-survey-time-assumptions.tsx",
+    "components/stock-destinations-tab.tsx",
+    "components/stock-simulator.tsx",
+    "components/stock-tab.tsx",
+    "components/supply-order-statuses-tab.tsx",
+    "components/supply-tags-tab.tsx",
+    "components/technician-items.tsx",
+    "components/tools-assets.tsx",
+    "components/unit-products.tsx",
+    "components/user-manuals-tab.tsx",
+    "routes/_authenticated/chamados.tsx",
+    "routes/_authenticated/dashboard.tsx",
+    "routes/_authenticated/development.tsx",
+    "routes/_authenticated/site-survey.tsx",
+    "routes/reset-password.tsx"
+   ]
+  }
+ ],
+ "confirm_dialog": [
+  {
+   "tag": "div",
+   "variant": "",
+   "size": "",
+   "className": "rounded-lg border bg-background",
+   "icon": "",
+   "iconClass": "",
+   "label": "Confirmar exclusão",
+   "count": 22,
+   "files": [
+    "components/clients-tab.tsx",
+    "components/confirm-delete-button.tsx",
+    "components/erp-app-access-admin.tsx",
+    "components/homologation.tsx",
+    "components/materials-registry-tab.tsx",
+    "components/mytosis/flowchart.tsx",
+    "components/mytosis/kpis-tab.tsx",
+    "components/mytosis/node-attachments.tsx",
+    "components/mytosis/node-dialog.tsx",
+    "components/mytosis/processes-tab.tsx",
+    "components/mytosis/users-tab.tsx",
+    "components/reminders-tab.tsx",
+    "components/site-survey-luc-manager.tsx",
+    "components/site-survey-report.tsx",
+    "components/stock-tab.tsx",
+    "components/supply-allocation-selector.tsx",
+    "components/supply-order-statuses-tab.tsx",
+    "components/supply-tags-tab.tsx",
+    "components/tools-assets.tsx",
+    "routes/_authenticated/dashboard.tsx",
+    "routes/_authenticated/development.tsx",
+    "routes/_authenticated/site-survey.tsx"
+   ]
+  },
+  {
+   "tag": "div",
+   "variant": "",
+   "size": "",
+   "className": "rounded-md border-2 border-primary bg-background",
+   "icon": "",
+   "iconClass": "",
+   "label": "Confirmar exclusão",
+   "count": 0,
+   "files": []
+  }
+ ]
 }
