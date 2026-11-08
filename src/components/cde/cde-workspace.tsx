@@ -103,7 +103,22 @@ export function CdeWorkspace() {
     const removed = new Set((data?.removed ?? []).filter((r) => r.group_key === g).map((r) => r.variant_key));
     const base = ((inventory[g] ?? []) as Omit<Variant, "key">[]).map((v) => ({ ...v, key: inventoryKey(v) }));
     const custom = (data?.models ?? []).filter((m) => m.group_key === g).map((m) => ({ key: `custom:${m.id}`, name: m.name, custom: true, tag: m.tag, variant: m.variant, size: m.size, className: m.class_name, icon: m.icon, iconClass: m.icon_class, label: m.label, style: (m.style ?? {}) as CdeStyle, count: 0, files: [] }));
-    return [...base, ...custom].filter((v) => !removed.has(v.key));
+    const all = [...base, ...custom];
+    const kept = all.filter((v) => !removed.has(v.key));
+    // Excluídos transferem seus usos ao padrão substituto (seguindo cadeias de substituição).
+    const repl = new Map((data?.removed ?? []).filter((r) => r.group_key === g).map((r) => [r.variant_key, r.replaced_by] as const));
+    const target = (k: string) => { let cur = k; for (let i = 0; i < 20 && repl.has(cur); i++) cur = repl.get(cur)!; return cur; };
+    const extra = new Map<string, number>();
+    all.filter((v) => removed.has(v.key)).forEach((v) => { const t = target(v.key); extra.set(t, (extra.get(t) ?? 0) + v.count); });
+    let result = kept.map((v) => ({ ...v, count: v.count + (extra.get(v.key) ?? 0) }));
+    // Grupos de padrão único: o padrão concentra todos os usos; os demais ficam com zero.
+    const std = standardsOf(g);
+    const single = !GROUPS.find((x) => x.key === g)?.multi;
+    if (single && std.length === 1 && result.some((v) => v.key === std[0])) {
+      const total = result.reduce((s, v) => s + v.count, 0);
+      result = result.map((v) => ({ ...v, count: v.key === std[0] ? total : 0 }));
+    }
+    return result;
   };
   const standardsOf = (g: GroupKey) => (data?.selected ?? []).filter((s) => s.group_key === g).map((s) => s.variant_key);
 
@@ -192,7 +207,7 @@ export function CdeWorkspace() {
                       <div key={v.key} className={cn("flex w-64 shrink-0 flex-col gap-2 rounded-lg border p-3", selected ? "border-primary bg-accent" : "border-border")}>
                         <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
                           <span className="truncate" title={v.style?.description || undefined}>{v.name ?? `Modelo ${i + 1}`}{v.custom ? " · criado no CDE" : ""}</span>
-                          <span className="flex items-center gap-1">{v.custom ? "novo" : `${v.count} uso${v.count > 1 ? "s" : ""}`}
+                          <span className="flex items-center gap-1">{v.custom && !v.count ? "novo" : `${v.count} uso${v.count === 1 ? "" : "s"}`}
                             <Button type="button" variant="outline" size="compactIcon" title={selected ? "Remova o padrão antes de excluir" : "Excluir modelo"} aria-label={`Excluir ${v.name ?? `Modelo ${i + 1}`}`} disabled={selected}
                               onClick={() => { if (!standards.length) return toast.error("Escolha primeiro um padrão para substituir este modelo."); setReplacement(standards.length === 1 ? standards[0] : ""); setDeleting({ group: g.key, model: v, label: v.name ?? `Modelo ${i + 1}` }); }}><Trash2 /></Button>
                           </span>
