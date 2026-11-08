@@ -145,3 +145,5 @@
 - [x] CDE: lógica de navegação (tela x pop-up, menus laterais/base, flutuantes)
 - [ ] Ligar ao CDE os grupos que ainda não se aplicam sozinhos (botões de ação, caixas de seleção, ordenação) conforme o usuário define os padrões
 - [x] CDE: editar texto dos botões + com texto (4.2) pelo lápis
+- [x] CDE seção 9: incluir todos os menus disponíveis no Menu principal
+- [x] CDE ícones: seta exibir/recolher por app, sem símbolo dentro do box

@@ -1,3 +1,4 @@
+import { TopIconStyleVars } from "@/components/cde/top-icon-style";
 import { PendingGroups } from "@/components/pending-groups";
 import { useState } from "react";
 import type React from "react";
@@ -115,6 +116,7 @@ function PortalPage() {
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-background sm:block sm:h-auto sm:min-h-screen sm:overflow-visible">
       <header className="sticky top-0 z-40 shrink-0 bg-accent text-accent-foreground sm:border-b sm:border-border sm:bg-card sm:text-foreground">
+      <TopIconStyleVars />
         <div className="app-header-workspace mx-auto max-w-7xl px-4 pb-9 pt-5 sm:flex sm:items-center sm:justify-between sm:gap-4 sm:px-6 sm:py-4">
           <div className="flex items-start justify-between gap-4 sm:block">
             <MyioPlatformLogo tone="light" className="h-10 sm:hidden" />
@@ -174,11 +176,11 @@ function PortalPage() {
           <div className="hidden min-w-0 items-center gap-2 sm:flex">
             <UserNameBlock userName={data.name} />
             {activeView === "users" ? (
-              <Button variant="ghost" size="icon" className="!bg-transparent !text-foreground shadow-none hover:!bg-transparent hover:!text-foreground" onClick={() => setActiveView("apps")} title="Início" aria-label="Voltar aos aplicativos">
+              <Button variant="ghost" size="icon" className="top-icon !bg-transparent !text-foreground shadow-none hover:!bg-transparent hover:!text-foreground" onClick={() => setActiveView("apps")} title="Início" aria-label="Voltar aos aplicativos">
                 <LayoutGrid className="h-4 w-4" />
               </Button>
             ) : null}
-            <DesktopHeaderMenu userName={data.name} onSignOut={handleSignOut} onChangePassword={() => setPasswordOpen(true)} buttonClass="!bg-transparent !text-foreground shadow-none hover:!bg-transparent hover:!text-foreground" />
+            <DesktopHeaderMenu userName={data.name} onSignOut={handleSignOut} onChangePassword={() => setPasswordOpen(true)} buttonClass="top-icon !bg-transparent !text-foreground shadow-none hover:!bg-transparent hover:!text-foreground" />
             <ChangePasswordDialog open={passwordOpen} onOpenChange={setPasswordOpen} />
           </div>
         </div>

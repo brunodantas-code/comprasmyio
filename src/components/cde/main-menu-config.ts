@@ -1,4 +1,4 @@
-import { ArrowLeft, BookOpen, ClipboardList, KeyRound, LayoutGrid, LifeBuoy, LogOut, Moon, Settings2 } from "lucide-react";
+import { ArrowLeft, BookOpen, ClipboardList, DollarSign, FileSignature, Filter, KeyRound, LayoutGrid, LifeBuoy, LogOut, Moon, Palette, Phone, Search, Settings, Settings2, UsersRound, Workflow } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -12,6 +12,15 @@ export const MENU_ITEMS = [
   { id: "access", label: "Acessos (somente Admin do ERP)", icon: Settings2 },
   { id: "pendentes", label: "Minhas Pendências", icon: ClipboardList, to: "/pendentes" },
   { id: "chamados", label: "Abrir chamado (Code)", icon: LifeBuoy, to: "/development", optional: true },
+  { id: "app_supply", label: "Supply", icon: Settings, to: "/dashboard", optional: true },
+  { id: "app_cash_flow", label: "Cash Flow", icon: DollarSign, to: "/cash-flow", optional: true },
+  { id: "app_crm", label: "CRM", icon: Filter, to: "/crm", optional: true },
+  { id: "app_legal", label: "Legal", icon: FileSignature, to: "/legal", optional: true },
+  { id: "app_rh", label: "RH", icon: UsersRound, to: "/rh", optional: true },
+  { id: "app_site_survey", label: "Site Survey", icon: Search, to: "/site-survey", optional: true },
+  { id: "app_opdesk", label: "OpDesk", icon: Phone, to: "/chamados", optional: true },
+  { id: "app_mytosis", label: "Mytosis", icon: Workflow, to: "/mytosis", optional: true },
+  { id: "app_cde", label: "CDE", icon: Palette, to: "/cde", optional: true },
 ] as const;
 /** Optional entries start hidden until an admin enables them in the CDE. */
 const OPTIONAL_IDS = MENU_ITEMS.filter((i) => "optional" in i).map((i) => i.id);

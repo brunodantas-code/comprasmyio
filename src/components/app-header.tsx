@@ -5,6 +5,7 @@ import { Moon, Sun } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { TopIconStyleVars } from "@/components/cde/top-icon-style";
 import { ArrowLeft, BookOpen, LayoutGrid, KeyRound, LogOut, Menu } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -34,10 +35,11 @@ export function AppHeader({ logo, children, supplyManual = false }: { logo: Reac
     navigate({ to: "/auth", replace: true });
   }
 
-  const iconButton = "shrink-0 !bg-transparent !text-foreground shadow-none hover:!bg-muted hover:!text-foreground";
+  const iconButton = "top-icon shrink-0 !bg-transparent !text-foreground shadow-none hover:!bg-muted hover:!text-foreground";
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-card">
+      <TopIconStyleVars />
       <div className="app-header-workspace mx-auto max-w-7xl px-4 pb-4 pt-5 sm:flex sm:min-h-[73px] sm:items-center sm:justify-between sm:gap-4 sm:px-6 sm:py-4">
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
           <Link to="/portal" className="flex min-w-0 items-center" title="Voltar aos aplicativos">{logo}</Link>
@@ -48,7 +50,7 @@ export function AppHeader({ logo, children, supplyManual = false }: { logo: Reac
         <div className="mt-5 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:mt-0 sm:flex sm:min-w-0 sm:justify-end">
           <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
             <UserNameBlock userName={userName} />
-            <Button asChild variant="ghost" size="icon" className="shrink-0 !bg-transparent !text-foreground shadow-none hover:!bg-transparent hover:!text-foreground" title="Início" aria-label="Voltar aos aplicativos">
+            <Button asChild variant="ghost" size="icon" className="top-icon shrink-0 !bg-transparent !text-foreground shadow-none hover:!bg-transparent hover:!text-foreground" title="Início" aria-label="Voltar aos aplicativos">
               <Link to="/portal"><LayoutGrid className="h-4 w-4" /></Link>
             </Button>
           </div>

@@ -9,6 +9,7 @@ import { CrmFunnelIcon } from "@/components/crm-funnel-icon";
 import { MytosisIcon } from "@/components/mytosis-icon";
 import { CdeIcon } from "@/components/cde-icon";
 import { CdeCategoryHeader } from "./cde-category-header";
+import { TopIconStyleEditor } from "./top-icon-style-editor";
 
 type Item = { label: string; icon: LucideIcon | React.ComponentType<{ className?: string }>; name: string };
 type Group = { title: string; items: Item[] };
@@ -56,17 +57,19 @@ function Tile({ it }: { it: Item }) {
 
 export function CdeAppIcons({ number, handle }: { number: number; handle?: import("react").ReactNode }) {
   const [open, setOpen] = useState(false);
+  const [openApps, setOpenApps] = useState<Set<string>>(new Set());
   return <section className="space-y-4">
     <CdeCategoryHeader handle={handle} number={number} title="Ícones dos Apps e menus" hint={`${APPS.length} apps · ícone do portal, barra inferior, submenus e ações para comparar padrões`} open={open} onToggle={() => setOpen(!open)} />
     {open ? <div className="space-y-4 p-4">
-      <div className="rounded-lg border border-border p-3"><div className="mb-2 text-sm font-semibold">Menu superior comum a todos os apps</div><div className="flex flex-wrap gap-3">{SHARED.map((it) => <Tile key={it.label} it={it} />)}</div></div>
-      {APPS.map((a) => { const AppIcon = a.icon; return <div key={a.name} className="flex flex-col gap-3 rounded-lg border border-border p-3 sm:flex-row">
-        <div className="flex w-28 shrink-0 flex-col items-center gap-1 text-center">
-          <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary"><AppIcon className="h-6 w-6" /></span>
+      <div className="rounded-lg border border-border p-3"><div className="mb-2 text-sm font-semibold">Menu superior comum a todos os apps</div><TopIconStyleEditor items={SHARED.slice(0, 2)} /><div className="mt-3 mb-1 text-xs text-muted-foreground">Ações dentro do menu</div><div className="flex flex-wrap gap-3">{SHARED.slice(2).map((it) => <Tile key={it.label} it={it} />)}</div></div>
+      {APPS.map((a) => { const AppIcon = a.icon; const isOpen = openApps.has(a.name); return <div key={a.name} className="space-y-2">
+        <button type="button" aria-expanded={isOpen} onClick={() => setOpenApps((p) => { const n = new Set(p); if (n.has(a.name)) n.delete(a.name); else n.add(a.name); return n; })} className="flex w-full items-center gap-3 text-left">
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary"><AppIcon className="h-5 w-5" /></span>
           <span className="text-sm font-semibold">{a.name}</span><span className="text-[0.6rem] text-muted-foreground/70">{a.iconName}</span>
-        </div>
-        <div className="min-w-0 flex-1 space-y-2">{a.groups.map((g) => <div key={g.title}><div className="mb-1 text-xs text-muted-foreground">{g.title}{g.title === "Barra inferior" ? " · sem botão flutuante" : ""}</div>
-          <div className="flex flex-wrap gap-3">{g.items.length ? g.items.map((it) => <Tile key={it.label} it={it} />) : <span className="text-xs text-muted-foreground">—</span>}</div></div>)}</div>
+          {isOpen ? <ChevronUp className="ml-auto h-4 w-4 text-primary" /> : <ChevronDown className="ml-auto h-4 w-4 text-primary" />}
+        </button>
+        {isOpen ? <div className="space-y-2 rounded-lg border border-border p-3">{a.groups.map((g) => <div key={g.title}><div className="mb-1 text-xs text-muted-foreground">{g.title}{g.title === "Barra inferior" ? " · sem botão flutuante" : ""}</div>
+          <div className="flex flex-wrap gap-3">{g.items.length ? g.items.map((it) => <Tile key={it.label} it={it} />) : <span className="text-xs text-muted-foreground">—</span>}</div></div>)}</div> : null}
       </div>; })}
     </div> : null}
   </section>;

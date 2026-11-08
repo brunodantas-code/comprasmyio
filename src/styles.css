@@ -379,3 +379,11 @@
     content: none;
   }
 }
+
+/* Top-bar icons: style chosen in CDE (top_icon_style) */
+.top-icon {
+  color: var(--ti-fg, var(--foreground)) !important;
+  background: var(--ti-bg, transparent) !important;
+  border: var(--ti-bw, 0px) solid var(--ti-bd, var(--border)) !important;
+  border-radius: var(--ti-r, 6px) !important;
+}
