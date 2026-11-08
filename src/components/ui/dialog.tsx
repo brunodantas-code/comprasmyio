@@ -43,11 +43,13 @@ const DialogContent = React.forwardRef<
       )}
       {...props}
     >
+      <div className="pointer-events-none sticky top-0 z-30 flex h-0 justify-end [.grid>&]:-mb-4">
+        <DialogPrimitive.Close className="pointer-events-auto -mr-1 rounded-sm bg-background p-0.5 opacity-70 ring-offset-background cursor-pointer transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
+          <CdeCloseIcon />
+          <span className="sr-only">Fechar</span>
+        </DialogPrimitive.Close>
+      </div>
       {children}
-      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background cursor-pointer transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
-        <CdeCloseIcon />
-        <span className="sr-only">Fechar</span>
-      </DialogPrimitive.Close>
     </DialogPrimitive.Content>
   </DialogPortal>
 ));
