@@ -28,7 +28,7 @@ function PendentesPage() {
       <main className="mx-auto max-w-7xl px-3 py-5 sm:px-6 sm:py-8">
         <div className="mb-6">
           <h1 className="flex items-center gap-2 text-2xl font-bold"><Bell className="h-6 w-6" />Central de Pendências</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Ações que aguardam sua decisão.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Ações que dependem de você...</p>
         </div>
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando pendências...</p> : (
           <div className="space-y-6">
