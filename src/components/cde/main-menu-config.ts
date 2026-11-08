@@ -9,23 +9,25 @@ export const MENU_ITEMS = [
   { id: "password", label: "Alterar senha", icon: KeyRound },
   { id: "logout", label: "Sair", icon: LogOut },
   { id: "portal", label: "Todos os apps", icon: LayoutGrid, to: "/portal", optional: true },
-  { id: "pendentes", label: "Minhas Pendências", icon: ClipboardList, to: "/pendentes", optional: true },
+  { id: "pendentes", label: "Minhas Pendências", icon: ClipboardList, to: "/pendentes" },
   { id: "chamados", label: "Abrir chamado (Code)", icon: LifeBuoy, to: "/chamados", optional: true },
 ] as const;
 /** Optional entries start hidden until an admin enables them in the CDE. */
 const OPTIONAL_IDS = MENU_ITEMS.filter((i) => "optional" in i).map((i) => i.id);
 export type MenuId = typeof MENU_ITEMS[number]["id"];
-export type MenuConfig = { order: MenuId[]; hidden: MenuId[] };
+export type MenuConfig = { order: MenuId[]; hidden: MenuId[]; v?: number };
+/** v2: Minhas Pendências became visible by default; older saved configs drop it from hidden once. */
+const CONFIG_VERSION = 2;
 export function parseMenuConfig(raw?: string): MenuConfig {
   const defaults = MENU_ITEMS.map((i) => i.id);
   try {
     const parsed = JSON.parse(raw ?? "{}");
     const valid = (v: unknown): v is MenuId => defaults.some((id) => id === v);
     const order: MenuId[] = Array.isArray(parsed.order) ? parsed.order.filter(valid) : [];
-    const hidden: MenuId[] = Array.isArray(parsed.hidden) ? parsed.hidden.filter(valid).filter((id: MenuId) => id !== "logout") : [];
+    const hidden: MenuId[] = Array.isArray(parsed.hidden) ? parsed.hidden.filter(valid).filter((id: MenuId) => id !== "logout" && (parsed.v >= CONFIG_VERSION || id !== "pendentes")) : [];
     const unseen = OPTIONAL_IDS.filter((id) => !order.includes(id));
-    return { order: [...new Set([...order, ...defaults])], hidden: [...new Set([...hidden, ...unseen])] };
-  } catch { return { order: defaults, hidden: [...OPTIONAL_IDS] }; }
+    return { order: [...new Set([...order, ...defaults])], hidden: [...new Set([...hidden, ...unseen])], v: CONFIG_VERSION };
+  } catch { return { order: defaults, hidden: [...OPTIONAL_IDS], v: CONFIG_VERSION }; }
 }
 export function useMainMenuConfig() {
   return useQuery({ queryKey: ["cde-main-menu"], queryFn: async () => {

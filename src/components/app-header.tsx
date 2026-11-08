@@ -1,3 +1,4 @@
+import { usePendingActions } from "@/hooks/use-pending-actions";
 import { activeTheme, toggleAppTheme } from "@/components/theme-toggle";
 import { Moon, Sun } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
@@ -66,15 +67,29 @@ type HeaderMenuProps = { userName: string; onSignOut: () => void; onChangePasswo
 function MainMenuEntries({ onSignOut, onChangePassword, supplyManual, itemClass }: Pick<HeaderMenuProps, "onSignOut" | "onChangePassword" | "supplyManual"> & { itemClass: string }) {
   const { data } = useMainMenuConfig();
   const config = data ?? parseMenuConfig();
+  const pendingTotal = usePendingActions().data?.total ?? 0;
   return config.order.filter((id) => !config.hidden.includes(id) && (id !== "manual" || supplyManual)).map((id) => {
     const item = MENU_ITEMS.find((i) => i.id === id);
     if (!item) return null;
     const Icon = item.icon;
-    if ("to" in item) return <Button key={id} asChild variant="ghost" className={itemClass}><Link to={item.to}><Icon className="h-5 w-5" />{item.label}</Link></Button>;
+    if ("to" in item) return <Button key={id} asChild variant="ghost" className={itemClass}><Link to={item.to}><Icon className="h-5 w-5" />{item.label}{id === "pendentes" ? <CountBadge count={pendingTotal} className="ml-auto" /> : null}</Link></Button>;
     if (id === "manual") return <Button key={id} asChild variant="ghost" className={itemClass}><Link to="/supply-manual"><Icon className="h-5 w-5" />{item.label}</Link></Button>;
     if (id === "theme") return <ThemeEntry key={id} className={itemClass} />;
     return <Button key={id} variant="ghost" className={`${itemClass}`} onClick={id === "logout" ? onSignOut : id === "password" ? onChangePassword : () => window.history.back()}><Icon className="h-5 w-5" />{item.label}</Button>;
   });
+}
+
+function CountBadge({ count, className = "" }: { count: number; className?: string }) {
+  if (count <= 0) return null;
+  return <span className={`flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold leading-none text-destructive-foreground ${className}`}>{count > 99 ? "99+" : count}</span>;
+}
+
+/** Red total on the three-bar button, only when Minhas Pendências is visible in the CDE menu. */
+function MenuTriggerBadge() {
+  const config = useMainMenuConfig().data ?? parseMenuConfig();
+  const total = usePendingActions().data?.total ?? 0;
+  if (config.hidden.includes("pendentes")) return null;
+  return <CountBadge count={total} className="absolute -right-1 -top-1" />;
 }
 
 function ThemeEntry({ className }: { className: string }) {
@@ -87,7 +102,7 @@ function ThemeEntry({ className }: { className: string }) {
 function MobileHeaderMenu({ userName, onSignOut, onChangePassword, buttonClass, supplyManual }: HeaderMenuProps) {
   return (
     <Sheet>
-      <SheetTrigger asChild><Button variant="ghost" size="icon" className={buttonClass} aria-label="Abrir menu"><Menu className="!h-6 !w-6" /></Button></SheetTrigger>
+      <SheetTrigger asChild><Button variant="ghost" size="icon" className={`relative ${buttonClass}`} aria-label="Abrir menu"><Menu className="!h-6 !w-6" /><MenuTriggerBadge /></Button></SheetTrigger>
       <SheetContent side="bottom" className="rounded-t-2xl px-5 pb-8">
         <SheetHeader><SheetTitle className="truncate text-left">{userName}</SheetTitle></SheetHeader>
         <nav className="mt-5 divide-y divide-border" aria-label="Menu do aplicativo">
@@ -104,8 +119,9 @@ export function DesktopHeaderMenu({ userName, onSignOut, onChangePassword, butto
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className={buttonClass} aria-label="Abrir menu">
+        <Button variant="ghost" size="icon" className={`relative ${buttonClass}`} aria-label="Abrir menu">
           <Menu className="!h-6 !w-6" />
+          <MenuTriggerBadge />
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" sideOffset={8} className="w-72 overflow-hidden rounded-lg border-border bg-popover p-0 shadow-lg">
