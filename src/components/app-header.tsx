@@ -109,10 +109,7 @@ export function DesktopHeaderMenu({ userName, onSignOut, onChangePassword, butto
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" sideOffset={8} className="w-72 overflow-hidden rounded-lg border-border bg-popover p-0 shadow-lg">
-        <div className="border-b border-border bg-muted/40 px-4 py-3">
-          <p className="truncate text-sm font-semibold text-foreground">{userName}</p>
-        </div>
-        <nav className="py-1" aria-label="Menu do aplicativo">
+        <nav className="py-1" aria-label={`Menu de ${userName}`}>
           <MainMenuEntries supplyManual={supplyManual} onSignOut={onSignOut} onChangePassword={onChangePassword} itemClass={itemClass} />
         </nav>
       </PopoverContent>
