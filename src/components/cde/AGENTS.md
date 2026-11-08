@@ -1,0 +1,1 @@
+- CDE: inventory.json is a code scan; admins' chosen standards live in cde_standards.
