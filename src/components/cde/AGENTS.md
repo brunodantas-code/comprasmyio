@@ -7,3 +7,4 @@
 - Shared SelectTrigger resolves fields_select standards dynamically; chosen appearance follows caller layout classes so selections update existing droplists without changing values or actions.
 - Model edits update custom IDs in place; inventory edits become custom models while preserving selected references and replacement history; UPDATE policies remain ERP-admin-only.
 - Portal app order is stored in cde_selected group app_order (JSON array of app keys) and read by the portal; unknown/missing apps fall back to default order.
+- New screens/improvements use CDE-connected shared components; ask only when a group lacks a chosen standard or a new element type appears.
