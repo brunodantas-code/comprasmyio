@@ -3012,7 +3012,7 @@ function OrdersTable({
         </TableHeader>
         <TableBody>
           {visibleOrders.map((o) => (
-            <TableRow key={o.id} lang="pt-BR" className="align-middle font-sans text-sm hyphens-auto [&>td]:h-36 [&>td]:py-3">
+            <TableRow key={o.id} lang="pt-BR" className="align-middle font-sans text-sm hyphens-auto [&>td]:h-24 [&>td]:py-3">
                <TableCell className="text-left font-bold">
                   <div className="inline-flex max-w-full flex-col items-start">
                     <div className="flex max-w-full flex-wrap items-center gap-1">

@@ -125,3 +125,4 @@
 - [x] Relatório de custo consolidado por Etiqueta (tela + PDF)
 - [x] Filtro consolidado (funil único) em Approvals, Solicitações e cabeçalhos
 - [x] Ícone Legal: incluir Atas de Reunião
+- [x] Altura das linhas do Approval reduzida ~1/3
