@@ -3,7 +3,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, Save } from "lucide-react";
+import { GripVertical, Minus, Plus, Save } from "lucide-react";
+import { AppTileFace } from "./app-tile";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -66,14 +67,29 @@ export function CdeAppOrder({ number }: { number: number }) {
   }
   return <section className="space-y-4">
     <CdeCategoryHeader number={number} title="Apps da página principal" hint="Ordem, fonte do nome e tamanho dos símbolos" open={open} onToggle={() => setOpen(!open)} />
-    {open && <div className="max-w-md p-4"><DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={move}><SortableContext items={order} strategy={verticalListSortingStrategy}>{order.map((id, i) => <Row key={id} id={id} index={i} />)}</SortableContext></DndContext>
+    {open && <div className="max-w-3xl p-4"><DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={move}><SortableContext items={order} strategy={verticalListSortingStrategy}>{order.map((id, i) => <Row key={id} id={id} index={i} />)}</SortableContext></DndContext>
       <Button variant="action" className="mt-3" onClick={save} disabled={saving || !draft}><Save className="h-4 w-4" />Salvar</Button>
       <div className="mt-6 space-y-3 border-t border-border pt-4">
         <p className="text-sm font-medium">Ícones da página principal</p>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div className="space-y-1"><Label>Fonte do nome</Label><Select value={String(tile.labelPx)} onValueChange={(v) => setTileDraft({ ...tile, labelPx: Number(v) })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{[11, 12, 13, 14, 15, 16].map((n) => <SelectItem key={n} value={String(n)}>{n} px</SelectItem>)}</SelectContent></Select></div>
-          <div className="space-y-1"><Label>Tamanho do símbolo</Label><Select value={String(tile.iconPct)} onValueChange={(v) => setTileDraft({ ...tile, iconPct: Number(v) })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{[80, 90, 100, 110].map((n) => <SelectItem key={n} value={String(n)}>{n}%</SelectItem>)}</SelectContent></Select></div>
+          <div className="space-y-1"><Label>Tamanho do ícone</Label>
+            <div className="flex h-9 items-center gap-2">
+              <Button variant="outline" size="compactIcon" aria-label="Diminuir ícone" title="Diminuir" disabled={tile.tilePct <= 70} onClick={() => setTileDraft({ ...tile, tilePct: tile.tilePct - 5 })}><Minus /></Button>
+              <span className="w-12 text-center text-sm tabular-nums">{tile.tilePct}%</span>
+              <Button variant="outline" size="compactIcon" aria-label="Aumentar ícone" title="Aumentar" disabled={tile.tilePct >= 140} onClick={() => setTileDraft({ ...tile, tilePct: tile.tilePct + 5 })}><Plus /></Button>
+            </div></div>
+          <div className="space-y-1"><Label>Tamanho do símbolo interno</Label>
+            <div className="flex h-9 items-center gap-2">
+              <Button variant="outline" size="compactIcon" aria-label="Diminuir símbolo" title="Diminuir" disabled={tile.iconPct <= 60} onClick={() => setTileDraft({ ...tile, iconPct: tile.iconPct - 5 })}><Minus /></Button>
+              <span className="w-12 text-center text-sm tabular-nums">{tile.iconPct}%</span>
+              <Button variant="outline" size="compactIcon" aria-label="Aumentar símbolo" title="Aumentar" disabled={tile.iconPct >= 140} onClick={() => setTileDraft({ ...tile, iconPct: tile.iconPct + 5 })}><Plus /></Button>
+            </div></div>
         </div>
+        <div className="space-y-1"><Label>Prévia</Label>
+          <div className="flex flex-wrap gap-3 rounded-xl border border-border bg-background p-3">
+            {order.map((key) => { const app = PORTAL_APPS.find((a) => a.key === key); return app ? <div key={key} style={{ zoom: tile.tilePct / 100 }} className="flex h-28 w-28 flex-col items-center justify-between overflow-hidden rounded-3xl bg-primary px-2 pb-2 pt-1.5 text-primary-foreground"><AppTileFace appKey={key} name={app.name} tile={tile} /></div> : null; })}
+          </div></div>
         <p className="text-xs text-muted-foreground">No celular, a fonte fica 2 px menor. Os símbolos mais finos recebem correção automática para parecerem do mesmo tamanho.</p>
         <Button variant="action" onClick={saveTile} disabled={saving || !tileDraft}><Save className="h-4 w-4" />Salvar</Button>
       </div></div>}
