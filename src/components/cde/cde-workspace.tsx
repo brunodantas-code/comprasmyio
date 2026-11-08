@@ -13,40 +13,25 @@ import { cn } from "@/lib/utils";
 import inventory from "./inventory.json";
 import { BORDERS, FILLS } from "@/components/mytosis/shapes";
 import { ColorCode } from "./color-code";
+import { FORMS, ICONS, TEXTS, WIDTHS, styleOf, type CdeStyle } from "./cde-render";
 import { CdeAppIcons } from "./cde-app-icons";
 import { FormatColorOptions } from "@/components/mytosis/format-color-options";
 
-type CdeStyle = { shape?: string; fill?: string; border?: string; borderWidth?: string; text?: string; description?: string };
-const FORMS = [
-  { key: "", label: "Padrão" }, { key: "square", label: "Quadrado", radius: "0" }, { key: "soft", label: "Arredondado", radius: "0.375rem" },
-  { key: "round", label: "Bem arredondado", radius: "0.75rem" }, { key: "pill", label: "Pílula", radius: "9999px" },
-] as const;
-const WIDTHS = [{ key: "", label: "Padrão" }, { key: "0", label: "Sem borda" }, { key: "1px", label: "Fina" }, { key: "2px", label: "Média" }, { key: "3px", label: "Grossa" }];
-const TEXTS = [{ key: "default", label: "Padrão", color: "currentColor" }, { key: "dark", label: "Escuro myio", color: "var(--myio-dark)" }, { key: "green", label: "Verde myio", color: "var(--myio-green)" }, { key: "white", label: "Branco", color: "var(--card)" }];
-/** Variáveis CSS + classes fixas com prioridade, para vencer os estilos !important dos botões. */
-function styleOf(st?: CdeStyle): { css: React.CSSProperties; cls: string } {
-  const css: Record<string, string> = {}; const cls: string[] = [];
-  if (!st) return { css, cls: "" };
-  const form = FORMS.find((f) => f.key === st.shape);
-  if (form && "radius" in form) { css["--cde-r"] = form.radius; cls.push("!rounded-[var(--cde-r)]"); }
-  if (st.fill && st.fill !== "none") { css["--cde-bg"] = FILLS.find((f) => f.key === st.fill)?.color ?? ""; cls.push("!bg-[var(--cde-bg)]"); }
-  if (st.border === "none") { cls.push("!border-0"); }
-  else if (st.border) { css["--cde-bd"] = BORDERS.find((b) => b.key === st.border)?.color ?? ""; cls.push("!border-[var(--cde-bd)] !border-solid"); }
-  if (st.borderWidth && st.border !== "none") { css["--cde-bw"] = st.borderWidth; cls.push("!border-[length:var(--cde-bw)] !border-solid"); }
-  if (st.text && st.text !== "default") { css["--cde-tx"] = TEXTS.find((t) => t.key === st.text)?.color ?? ""; cls.push("!text-[var(--cde-tx)]"); }
-  return { css: css as React.CSSProperties, cls: cls.join(" ") };
-}
-
 type Variant = { key: string; name?: string; custom?: boolean; tag: string; variant: string; size: string; className: string; icon: string; iconClass: string; label: string; count: number; files: string[]; style?: CdeStyle };
 
-const ICONS: Record<string, LucideIcon> = { ArrowDown, ArrowDownUp, ArrowUp, ArrowUpDown, Building2, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardCheck, Filter, PackagePlus, Pencil, Percent, Plus, Save, Settings2, Trash2, X };
+
 const VARIANTS = ["", "default", "outline", "ghost", "action", "secondary", "destructive", "link"];
 const SIZES = ["", "default", "sm", "lg", "icon", "compactIcon"];
 
-type GroupKey = keyof typeof inventory;
+type GroupKey = string;
+/** Subgrupos dos campos, separados pelo tipo do componente. */
+const FIELD_TAGS: Record<string, string[]> = { fields_input: ["Input"], fields_select: ["SelectTrigger"], fields_textarea: ["Textarea"], fields_password: ["PasswordInput"] };
 /** multi: grupos que admitem mais de um padrão (ex.: campos têm usos diferentes). */
 const GROUPS: { key: GroupKey; title: string; hint: string; multi?: boolean }[] = [
-  { key: "fields", title: "1. Campos para preenchimento", hint: "Caixas de texto, seletores e áreas de texto · admite vários padrões", multi: true },
+  { key: "fields_input", title: "1.1 Campos de texto e número", hint: "Caixas de uma linha · admite vários padrões", multi: true },
+  { key: "fields_select", title: "1.2 Listas suspensas (droplists)", hint: "Seletores de opções · admite vários padrões", multi: true },
+  { key: "fields_textarea", title: "1.3 Textos longos", hint: "Áreas de texto com várias linhas · admite vários padrões", multi: true },
+  { key: "fields_password", title: "1.4 Senhas", hint: "Campos de senha com olho · admite vários padrões", multi: true },
   { key: "filter", title: "2. Filtros", hint: "Botões de funil · padrão único" },
   { key: "sort", title: "3.1 Ordenar colunas e listas", hint: "Setas de ordem crescente/decrescente · padrão único" },
   { key: "move", title: "3.2 Mover para cima/baixo", hint: "Setas que reposicionam uma linha · padrão único" },
@@ -113,7 +98,8 @@ export function CdeWorkspace() {
 
   const groupModels = (g: GroupKey): Variant[] => {
     const removed = new Set((data?.removed ?? []).filter((r) => r.group_key === g).map((r) => r.variant_key));
-    const base = ((inventory[g] ?? []) as Omit<Variant, "key">[]).map((v) => ({ ...v, key: inventoryKey(v) }));
+    const src = FIELD_TAGS[g] ? ((inventory.fields as Omit<Variant, "key">[]).filter((v) => FIELD_TAGS[g].includes(v.tag))) : ((inventory as Record<string, unknown>)[g] ?? []) as Omit<Variant, "key">[];
+    const base = src.map((v) => ({ ...v, key: inventoryKey(v) }));
     const custom = (data?.models ?? []).filter((m) => m.group_key === g).map((m) => ({ key: `custom:${m.id}`, name: m.name, custom: true, tag: m.tag, variant: m.variant, size: m.size, className: m.class_name, icon: m.icon, iconClass: m.icon_class, label: m.label, style: (m.style ?? {}) as CdeStyle, count: 0, files: [] }));
     const all = [...base, ...custom];
     const kept = all.filter((v) => !removed.has(v.key));
@@ -237,7 +223,7 @@ export function CdeWorkspace() {
                 </span>
                 <span>{isOpen ? <ChevronUp className="h-4 w-4 shrink-0" /> : <ChevronDown className="h-4 w-4 shrink-0" />}</span>
               </button>
-              <Button type="button" variant="outline" size="compactIcon" title="Criar modelo" aria-label={`Criar modelo em ${g.title}`} onClick={() => { setDraft({ ...emptyDraft, tag: g.key === "fields" ? "Input" : "Button" }); setCreating(g.key); }}><Plus /></Button>
+              <Button type="button" variant="outline" size="compactIcon" title="Criar modelo" aria-label={`Criar modelo em ${g.title}`} onClick={() => { setDraft({ ...emptyDraft, tag: FIELD_TAGS[g.key]?.[0] ?? "Button" }); setCreating(g.key); }}><Plus /></Button>
             </div>
             {isOpen ? (
               <>
@@ -301,8 +287,8 @@ export function CdeWorkspace() {
             <div className="space-y-1 sm:col-span-2"><Label>Nome do modelo</Label><Input value={draft.name} maxLength={60} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder="Ex.: Campo de busca" /></div>
             <div className="space-y-1"><Label>Tipo</Label>
               <Select value={draft.tag} onValueChange={(tag) => setDraft({ ...draft, tag })}><SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{(creating === "fields" ? ["Input", "Textarea", "SelectTrigger"] : ["Button", "button"]).map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select></div>
-            {creating !== "fields" ? <>
+                <SelectContent>{(creating && FIELD_TAGS[creating] ? FIELD_TAGS[creating] : ["Button", "button"]).map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select></div>
+            {!(creating && FIELD_TAGS[creating]) ? <>
               <div className="space-y-1"><Label>Estilo</Label>
                 <Select value={draft.variant || "none"} onValueChange={(v) => setDraft({ ...draft, variant: v === "none" ? "" : v })}><SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>{VARIANTS.map((v) => <SelectItem key={v || "none"} value={v || "none"}>{v || "Padrão"}</SelectItem>)}</SelectContent></Select></div>

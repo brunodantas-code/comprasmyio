@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Check, ChevronDown, Filter, RotateCcw, Search } from "lucide-react";
+import { CdeButton } from "@/components/cde/cde-button";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -17,7 +18,7 @@ export function SiteSurveyGeneralFilter({ fields, value, onChange, countMatches 
   const sections = [...new Set(filtered.map((field) => field.section))];
   const update = (key: string, patch: Partial<FilterRule>) => setDraft((current) => ({ ...current, rules: { ...current.rules, [key]: { ...(current.rules[key] ?? { values: [] }), ...patch } } }));
   return <>
-    <Button type="button" size="sm" variant="action" className="h-8 shrink-0 gap-1 px-2 text-xs" aria-label="Filtro geral do checklist" title="Filtro geral do checklist" onClick={() => { setDraft(structuredClone(value)); setSearch(""); setExpanded(new Set(fields.filter((f) => activeFilterRules(value).some(([key]) => key === f.key)).map((f) => f.section))); setOpen(true); }}><Filter className="h-3.5 w-3.5" />Filtro geral{activeCount ? <span className="tabular-nums">({activeCount})</span> : null}</Button>
+    <CdeButton group="filter" screen="components/site-survey-general-filter.tsx" active={!!activeCount} className="h-8 shrink-0 gap-1 px-2 text-xs" aria-label="Filtro geral do checklist" title="Filtro geral do checklist" onClick={() => { setDraft(structuredClone(value)); setSearch(""); setExpanded(new Set(fields.filter((f) => activeFilterRules(value).some(([key]) => key === f.key)).map((f) => f.section))); setOpen(true); }}>Filtro geral{activeCount ? <span className="tabular-nums">({activeCount})</span> : null}</CdeButton>
     <Dialog open={open} onOpenChange={setOpen}><DialogContent className="flex max-h-[90dvh] min-h-0 w-[calc(100%-2rem)] flex-col gap-3 sm:max-w-4xl" aria-describedby={undefined}>
       <DialogHeader><DialogTitle>Filtro geral do checklist</DialogTitle></DialogHeader>
       <div className="flex flex-wrap items-center gap-3"><div className="relative min-w-0 flex-1"><Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" /><Input aria-label="Buscar pergunta ou resposta" placeholder="Buscar pergunta ou resposta" value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" /></div><Select value={draft.mode} onValueChange={(mode) => setDraft((current) => ({ ...current, mode: mode === "any" ? "any" : "all" }))}><SelectTrigger className="w-full sm:w-64" aria-label="Combinação dos filtros"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">Todas as perguntas selecionadas</SelectItem><SelectItem value="any">Qualquer pergunta selecionada</SelectItem></SelectContent></Select></div>

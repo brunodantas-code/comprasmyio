@@ -1,0 +1,2 @@
+CREATE POLICY "cde_selected read all" ON public.cde_selected FOR SELECT TO authenticated USING (true);
+CREATE POLICY "cde_models read all" ON public.cde_models FOR SELECT TO authenticated USING (true);

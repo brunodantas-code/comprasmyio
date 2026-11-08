@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ColumnFilter } from "@/components/column-filter";
+import { CdeButton } from "@/components/cde/cde-button";
 import { Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -52,7 +53,7 @@ export function TableFilterMenu<T>({ rows, columns, filters, onChange, clear }: 
   const column = columns.find(c => c.key === key) ?? columns[0];
   const active = columns.filter(c => isFilterActive(filters[c.key])).length;
   return <Popover open={open} onOpenChange={setOpen}>
-    <PopoverTrigger asChild><Button variant="ghost" size="compactIcon" aria-label="Filtros" title={active ? `Filtros (${active} ativos)` : "Filtros"} className={`!bg-transparent ${active ? "!text-primary" : "!text-foreground hover:!text-primary"}`}><Filter className="!size-5 stroke-[1.8]" /></Button></PopoverTrigger>
+    <PopoverTrigger asChild><CdeButton group="filter" screen="components/use-table-filters.tsx" active={!!active} aria-label="Filtros" title={active ? `Filtros (${active} ativos)` : "Filtros"} className="!bg-transparent [&_svg]:!size-5 [&_svg]:stroke-[1.8]" /></PopoverTrigger>
     <PopoverContent align="start" className="w-[min(18rem,calc(100vw-2rem))] space-y-3 p-3">
       <Select value={column?.key} onValueChange={setKey}>
         <SelectTrigger aria-label="Tipo de filtro" className="h-8 text-xs"><SelectValue /></SelectTrigger>

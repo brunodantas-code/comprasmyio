@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Filter } from "lucide-react";
+import { CdeButton } from "@/components/cde/cde-button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -90,8 +91,8 @@ export function ColumnFilter({
   if (embedded) return <div className="space-y-2">{content}</div>;
   return <Popover open={open} onOpenChange={setOpen}>
     <PopoverTrigger asChild>
-      {showLabel ? <Button type="button" variant="outline" size="sm" className={`h-7 gap-1 px-2 text-xs !bg-transparent ${active ? "border-primary !text-primary" : ""}`}><Filter className="size-3" />{label}</Button> :
-        <Button type="button" variant="ghost" size="icon" aria-label={`Filtrar ${label}`} title={`Filtrar ${label}`} className={`${compact ? "size-4" : "size-5"} shrink-0 p-0 align-middle !bg-transparent shadow-none ${active ? "!text-primary" : "!text-muted-foreground hover:!text-primary"}`}><Filter className="size-3" /></Button>}
+      {showLabel ? <CdeButton group="filter" screen="components/column-filter.tsx" active={active} className="h-7 gap-1 px-2 text-xs">{label}</CdeButton> :
+        <CdeButton group="filter" screen="components/column-filter.tsx" active={active} aria-label={`Filtrar ${label}`} title={`Filtrar ${label}`} className={`${compact ? "size-4" : "size-5"} shrink-0 p-0 align-middle !bg-transparent shadow-none`} />}
     </PopoverTrigger>
     <PopoverContent align="start" className="w-[min(18rem,calc(100vw-2rem))] space-y-2 p-3 text-left font-sans text-sm font-normal">{content}</PopoverContent>
   </Popover>;

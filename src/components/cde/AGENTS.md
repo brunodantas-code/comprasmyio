@@ -1,2 +1,3 @@
-- CDE models: custom models in cde_models (style jsonb via CSS vars), exclusions in cde_removed with replacement standard; standards in cde_selected (multi only for fields).
+- CDE models: custom models in cde_models (style jsonb via CSS vars), exclusions in cde_removed with replacement standard; standards in cde_selected (multi only for field subgroups fields_input/select/textarea/password, derived from inventory "fields" by tag).
 - CDE standards: one primary per single group plus optional secondary rows (is_primary=false, screens[] of inventory file paths); secondaries take uses of their screens, primary keeps the rest.
+- Live swap: screens render finalized groups through CdeButton (cde-button.tsx), which reads cde_selected at runtime (readable by all authenticated users); convert a group's screens to CdeButton once its standard is chosen and others excluded, and add the group to CdeGroup.
