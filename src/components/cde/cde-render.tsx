@@ -2,7 +2,8 @@ import { ArrowDown, ArrowDownUp, ArrowUp, ArrowUpDown, Building2, Check, Chevron
 import { BORDERS, FILLS } from "@/components/mytosis/shapes";
 
 export const ICONS: Record<string, LucideIcon> = { ArrowDown, ArrowDownUp, ArrowUp, ArrowUpDown, Building2, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardCheck, Filter, PackagePlus, Pencil, Percent, Plus, Save, Settings2, Trash2, X };
-export type CdeStyle = { shape?: string; fill?: string; border?: string; borderWidth?: string; text?: string; description?: string };
+export type CdeStyle = { shape?: string; fill?: string; border?: string; borderWidth?: string; text?: string; fontSize?: string; description?: string };
+export const FONT_SIZES = ["10px","11px","12px","13px","14px","16px","18px"];
 export const FORMS = [
   { key: "", label: "Padrão" }, { key: "square", label: "Quadrado", radius: "0" }, { key: "soft", label: "Arredondado", radius: "0.375rem" },
   { key: "round", label: "Bem arredondado", radius: "0.75rem" }, { key: "pill", label: "Pílula", radius: "9999px" }, { key: "circle", label: "Redonda (WhatsApp)", radius: "50%" },
@@ -20,6 +21,7 @@ export function styleOf(st?: CdeStyle): { css: React.CSSProperties; cls: string 
   else if (st.border) { css["--cde-bd"] = BORDERS.find((b) => b.key === st.border)?.color ?? ""; cls.push("!border-[var(--cde-bd)] !border-solid"); }
   if (st.borderWidth && st.border !== "none") { css["--cde-bw"] = st.borderWidth; cls.push("!border-[length:var(--cde-bw)] !border-solid"); }
   if (st.text && st.text !== "default") { css["--cde-tx"] = TEXTS.find((t) => t.key === st.text)?.color ?? ""; cls.push("!text-[var(--cde-tx)]"); }
+  if (st.fontSize) { css["--cde-fs"] = st.fontSize; cls.push("!text-[length:var(--cde-fs)]"); }
   return { css: css as React.CSSProperties, cls: cls.join(" ") };
 }
 

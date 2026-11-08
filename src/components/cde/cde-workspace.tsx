@@ -14,7 +14,7 @@ import inventory from "./inventory.json";
 import filterUsage from "./filter-usage.json";
 import { BORDERS, FILLS } from "@/components/mytosis/shapes";
 import { ColorCode } from "./color-code";
-import { FORMS, ICONS, TEXTS, WIDTHS, styleOf, type CdeStyle } from "./cde-render";
+import { FONT_SIZES, FORMS, ICONS, TEXTS, WIDTHS, styleOf, type CdeStyle } from "./cde-render";
 import { CdeAppIcons } from "./cde-app-icons";
 import { CdeNavigation } from "./cde-navigation";
 import { CdeNumber } from "./cde-button";
@@ -305,6 +305,7 @@ export function CdeWorkspace() {
                         <dl className="space-y-0.5 text-[0.7rem] leading-4 text-muted-foreground">
                           <div><b>Tipo:</b> {v.tag}{v.variant ? ` · ${v.variant}` : ""}{v.size ? ` · ${v.size}` : ""}</div>
                           {v.style && (v.style.fill || v.style.border) ? <div className="flex flex-wrap gap-x-2">{v.style.fill && v.style.fill !== "none" ? <span>Fundo <ColorCode color={FILLS.find((f) => f.key === v.style!.fill)?.color} /></span> : null}{v.style.border && v.style.border !== "none" ? <span>Borda <ColorCode color={BORDERS.find((b) => b.key === v.style!.border)?.color} /></span> : null}</div> : null}
+                          {v.style?.fontSize ? <div><b>Fonte:</b> {v.style.fontSize.replace("px", " px")}</div> : null}
                           {v.style?.description ? <div className="whitespace-pre-wrap break-words"><b>Descrição:</b> {v.style.description}</div> : null}
                           {v.className ? <div className="break-all"><b>Classes:</b> {v.className}</div> : null}
                           {v.icon ? <div className="break-all"><b>Ícone:</b> {v.icon} {v.iconClass}</div> : null}
@@ -387,6 +388,9 @@ export function CdeWorkspace() {
             <div className="space-y-1"><Label>Espessura da borda</Label>
               <Select value={draft.style.borderWidth || "none"} onValueChange={(v) => setDraft({ ...draft, style: { ...draft.style, borderWidth: v === "none" ? "" : v } })}><SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>{WIDTHS.map((f) => <SelectItem key={f.key || "none"} value={f.key || "none"}>{f.label}</SelectItem>)}</SelectContent></Select></div>
+            <div className="space-y-1"><Label>Tamanho da fonte</Label>
+              <Select value={draft.style.fontSize || "none"} onValueChange={(v) => setDraft({ ...draft, style: { ...draft.style, fontSize: v === "none" ? "" : v } })}><SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent><SelectItem value="none">Padrão</SelectItem>{FONT_SIZES.map((f) => <SelectItem key={f} value={f}>{f.replace("px", " px")}</SelectItem>)}</SelectContent></Select></div>
             <div className="sm:col-span-2"><FormatColorOptions label="Fundo" value={draft.style.fill ?? "none"} options={FILLS} showCode onChange={(fill) => setDraft({ ...draft, style: { ...draft.style, fill } })} /></div>
             <div className="sm:col-span-2"><FormatColorOptions label="Borda" value={draft.style.border ?? ""} options={[{ key: "none", label: "Sem borda", color: "transparent" }, ...BORDERS] as typeof BORDERS} showCode onChange={(border) => setDraft({ ...draft, style: { ...draft.style, border } })} border /></div>
             <div className="sm:col-span-2"><FormatColorOptions label="Cor do texto e ícone" value={draft.style.text ?? "default"} options={TEXTS} onChange={(text) => setDraft({ ...draft, style: { ...draft.style, text } })} /></div>

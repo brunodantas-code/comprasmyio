@@ -48,3 +48,4 @@
 - Mytosis branches/tasks collapse independently; new stages inherit source formatting. Question recipients are server-validated participants; Central reads unanswered addressed messages via an invoker RPC.
 - Mytosis company formats are keyed by shape in settings; choosing a shape resolves its standard, applying standards preserves shapes/custom boxes, and database guards enforce admin-only visual customization while editors retain content/dependency edits.
 - Mytosis title limits use size/font/shape; never truncate old titles. PDF captures the visible canvas on one proportional page. Node attachments use private owner/node paths, role-gated rows and signed URLs; object ownership checks avoid recursive RLS.
+- New screens and improvements must use CDE-connected shared components (CdeButton, SelectTrigger, filters, boxes, CdeNumber); ask the user only when a group has no chosen CDE standard or a new element type appears.
