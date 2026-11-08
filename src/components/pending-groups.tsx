@@ -34,7 +34,7 @@ export function PendingGroups({ items }: { items: PendingGroupItem[] }) {
             <span className="min-w-0 flex-1 text-sm font-semibold">{name}</span>
             <span className="flex h-7 min-w-7 items-center justify-center rounded-full bg-destructive px-2 text-xs font-bold text-destructive-foreground">{total > 99 ? "99+" : total}</span>
           </button>
-          {isOpen ? <div className="divide-y divide-border border-t border-border bg-muted/30 pl-6">{rows.map((r) => <div key={r.key}>{r.row}</div>)}</div> : null}
+          {isOpen ? <div className="divide-y divide-border border-t border-border bg-muted/30 pl-8">{rows.map((r) => <div key={r.key}>{r.row}</div>)}</div> : null}
         </div>;
       })}
     </div>
