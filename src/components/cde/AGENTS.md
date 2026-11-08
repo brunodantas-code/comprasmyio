@@ -1,1 +1,1 @@
-- CDE: inventory.json is a code scan; admins' chosen standards live in cde_standards.
+- CDE models: custom models in cde_models (style jsonb via CSS vars), exclusions in cde_removed with replacement standard; standards in cde_selected (multi only for fields).

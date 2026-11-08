@@ -1,0 +1,1 @@
+ALTER TABLE public.cde_models ADD COLUMN style jsonb NOT NULL DEFAULT '{}'::jsonb;

@@ -965,6 +965,99 @@ export type Database = {
           },
         ]
       }
+      cde_models: {
+        Row: {
+          class_name: string
+          created_at: string
+          created_by: string
+          group_key: string
+          icon: string
+          icon_class: string
+          id: string
+          label: string
+          name: string
+          size: string
+          style: Json
+          tag: string
+          variant: string
+        }
+        Insert: {
+          class_name?: string
+          created_at?: string
+          created_by: string
+          group_key: string
+          icon?: string
+          icon_class?: string
+          id?: string
+          label?: string
+          name: string
+          size?: string
+          style?: Json
+          tag?: string
+          variant?: string
+        }
+        Update: {
+          class_name?: string
+          created_at?: string
+          created_by?: string
+          group_key?: string
+          icon?: string
+          icon_class?: string
+          id?: string
+          label?: string
+          name?: string
+          size?: string
+          style?: Json
+          tag?: string
+          variant?: string
+        }
+        Relationships: []
+      }
+      cde_removed: {
+        Row: {
+          created_at: string
+          group_key: string
+          removed_by: string
+          replaced_by: string
+          variant_key: string
+        }
+        Insert: {
+          created_at?: string
+          group_key: string
+          removed_by: string
+          replaced_by: string
+          variant_key: string
+        }
+        Update: {
+          created_at?: string
+          group_key?: string
+          removed_by?: string
+          replaced_by?: string
+          variant_key?: string
+        }
+        Relationships: []
+      }
+      cde_selected: {
+        Row: {
+          chosen_by: string
+          created_at: string
+          group_key: string
+          variant_key: string
+        }
+        Insert: {
+          chosen_by: string
+          created_at?: string
+          group_key: string
+          variant_key: string
+        }
+        Update: {
+          chosen_by?: string
+          created_at?: string
+          group_key?: string
+          variant_key?: string
+        }
+        Relationships: []
+      }
       cde_standards: {
         Row: {
           chosen_by: string | null

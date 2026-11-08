@@ -126,3 +126,5 @@
 - [x] Filtro consolidado (funil único) em Approvals, Solicitações e cabeçalhos
 - [x] Ícone Legal: incluir Atas de Reunião
 - [x] Altura das linhas do Approval reduzida ~1/3
+- [x] CDE: borda, forma e cor de fundo (estilo Mytosis) com prévia ao criar modelo
+- [x] CDE: criar/excluir modelos; filtros com padrão único, campos com vários
