@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowDown, ArrowUp, ArrowUpDown, Building2, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardCheck, Filter, PackagePlus, Pencil, Percent, Plus, RotateCcw, Save, Settings2, Trash2, X, type LucideIcon } from "lucide-react";
+import { ArrowDown, ArrowDownUp, ArrowUp, ArrowUpDown, Building2, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardCheck, Filter, PackagePlus, Pencil, Percent, Plus, RotateCcw, Save, Settings2, Trash2, X, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -39,7 +39,7 @@ function styleOf(st?: CdeStyle): { css: React.CSSProperties; cls: string } {
 
 type Variant = { key: string; name?: string; custom?: boolean; tag: string; variant: string; size: string; className: string; icon: string; iconClass: string; label: string; count: number; files: string[]; style?: CdeStyle };
 
-const ICONS: Record<string, LucideIcon> = { ArrowDown, ArrowUp, ArrowUpDown, Building2, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardCheck, Filter, PackagePlus, Pencil, Percent, Plus, Save, Settings2, Trash2, X };
+const ICONS: Record<string, LucideIcon> = { ArrowDown, ArrowDownUp, ArrowUp, ArrowUpDown, Building2, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardCheck, Filter, PackagePlus, Pencil, Percent, Plus, Save, Settings2, Trash2, X };
 const VARIANTS = ["", "default", "outline", "ghost", "action", "secondary", "destructive", "link"];
 const SIZES = ["", "default", "sm", "lg", "icon", "compactIcon"];
 
@@ -48,7 +48,9 @@ type GroupKey = keyof typeof inventory;
 const GROUPS: { key: GroupKey; title: string; hint: string; multi?: boolean }[] = [
   { key: "fields", title: "1. Campos para preenchimento", hint: "Caixas de texto, seletores e áreas de texto · admite vários padrões", multi: true },
   { key: "filter", title: "2. Filtros", hint: "Botões de funil · padrão único" },
-  { key: "sort", title: "3. Ordenação", hint: "Setas de ordenar e mover · padrão único" },
+  { key: "sort", title: "3.1 Ordenar colunas e listas", hint: "Setas de ordem crescente/decrescente · padrão único" },
+  { key: "move", title: "3.2 Mover para cima/baixo", hint: "Setas que reposicionam uma linha · padrão único" },
+  { key: "summary", title: "3.3 Voltar ao Sumário", hint: "Link de retorno ao sumário · padrão único" },
   { key: "toggle", title: "4. Exibir/Recolher", hint: "Setas de expandir e recolher · padrão único" },
   { key: "plus", title: "5.1 Botões +", hint: "Padrão único" },
   { key: "add", title: "5.2 Adicionar / Novo (texto)", hint: "Padrão único" },
