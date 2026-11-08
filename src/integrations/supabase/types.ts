@@ -965,6 +965,27 @@ export type Database = {
           },
         ]
       }
+      cde_standards: {
+        Row: {
+          chosen_by: string | null
+          group_key: string
+          updated_at: string
+          variant_key: string
+        }
+        Insert: {
+          chosen_by?: string | null
+          group_key: string
+          updated_at?: string
+          variant_key: string
+        }
+        Update: {
+          chosen_by?: string | null
+          group_key?: string
+          updated_at?: string
+          variant_key?: string
+        }
+        Relationships: []
+      }
       client_categories: {
         Row: {
           active: boolean

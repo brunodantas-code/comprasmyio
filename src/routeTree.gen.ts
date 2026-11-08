@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedCashFlowRouteImport } from './routes/_authenticated/cash-flow'
+import { Route as AuthenticatedCdeRouteImport } from './routes/_authenticated/cde'
 import { Route as AuthenticatedChamadosRouteImport } from './routes/_authenticated/chamados'
 import { Route as AuthenticatedCrmRouteImport } from './routes/_authenticated/crm'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -49,6 +50,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const AuthenticatedCashFlowRoute = AuthenticatedCashFlowRouteImport.update({
   id: '/cash-flow',
   path: '/cash-flow',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCdeRoute = AuthenticatedCdeRouteImport.update({
+  id: '/cde',
+  path: '/cde',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedChamadosRoute = AuthenticatedChamadosRouteImport.update({
@@ -120,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/cash-flow': typeof AuthenticatedCashFlowRoute
+  '/cde': typeof AuthenticatedCdeRoute
   '/chamados': typeof AuthenticatedChamadosRoute
   '/crm': typeof AuthenticatedCrmRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -138,6 +145,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/cash-flow': typeof AuthenticatedCashFlowRoute
+  '/cde': typeof AuthenticatedCdeRoute
   '/chamados': typeof AuthenticatedChamadosRoute
   '/crm': typeof AuthenticatedCrmRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -158,6 +166,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/cash-flow': typeof AuthenticatedCashFlowRoute
+  '/_authenticated/cde': typeof AuthenticatedCdeRoute
   '/_authenticated/chamados': typeof AuthenticatedChamadosRoute
   '/_authenticated/crm': typeof AuthenticatedCrmRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -178,6 +187,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/cash-flow'
+    | '/cde'
     | '/chamados'
     | '/crm'
     | '/dashboard'
@@ -196,6 +206,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/cash-flow'
+    | '/cde'
     | '/chamados'
     | '/crm'
     | '/dashboard'
@@ -215,6 +226,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/_authenticated/cash-flow'
+    | '/_authenticated/cde'
     | '/_authenticated/chamados'
     | '/_authenticated/crm'
     | '/_authenticated/dashboard'
@@ -272,6 +284,13 @@ declare module '@tanstack/react-router' {
       path: '/cash-flow'
       fullPath: '/cash-flow'
       preLoaderRoute: typeof AuthenticatedCashFlowRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/cde': {
+      id: '/_authenticated/cde'
+      path: '/cde'
+      fullPath: '/cde'
+      preLoaderRoute: typeof AuthenticatedCdeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/chamados': {
@@ -363,6 +382,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedCashFlowRoute: typeof AuthenticatedCashFlowRoute
+  AuthenticatedCdeRoute: typeof AuthenticatedCdeRoute
   AuthenticatedChamadosRoute: typeof AuthenticatedChamadosRoute
   AuthenticatedCrmRoute: typeof AuthenticatedCrmRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
@@ -378,6 +398,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCashFlowRoute: AuthenticatedCashFlowRoute,
+  AuthenticatedCdeRoute: AuthenticatedCdeRoute,
   AuthenticatedChamadosRoute: AuthenticatedChamadosRoute,
   AuthenticatedCrmRoute: AuthenticatedCrmRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,

@@ -12,6 +12,7 @@ import { MyioPlatformLogo } from "@/components/myio-platform-logo";
 import { ErpAppAccessAdmin } from "@/components/erp-app-access-admin";
 import { CrmFunnelIcon } from "@/components/crm-funnel-icon";
 import { MytosisIcon } from "@/components/mytosis-icon";
+import { CdeIcon } from "@/components/cde-icon";
 import { usePendingActions } from "@/hooks/use-pending-actions";
 import { ChangePasswordDialog } from "@/components/change-password-dialog";
 import { ThemeMenuItem, ThemeToggle } from "@/components/theme-toggle";
@@ -79,7 +80,8 @@ function PortalPage() {
     { key: "chamados", name: "OpDesk", description: ["Suporte ao cliente", "e operação"], to: "/chamados" as const },
     { key: "development", name: "Code", description: ["Melhorias e Bugs"], to: "/development" as const },
     { key: "mytosis", name: "Mytosis", description: ["Fluxogramas", "e processos"], to: "/mytosis" as const },
-  ].filter((app) => data.appKeys.has(app.key) || (app.key === "chamados" && pendingActions?.isCustomerSupportAnalyst));
+    { key: "cde", name: "CDE", description: ["Padrões de", "interface"], to: "/cde" as const },
+  ].filter((app) => (app.key === "cde" ? data.isErpAdmin : data.appKeys.has(app.key)) || (app.key === "chamados" && pendingActions?.isCustomerSupportAnalyst));
   const mobileAppPages = Array.from({ length: Math.ceil(apps.length / 8) }, (_, pageIndex) => apps.slice(pageIndex * 8, pageIndex * 8 + 8));
 
   const renderApp = ({ key, name, description, to }: (typeof apps)[number]) => (
@@ -100,6 +102,7 @@ function PortalPage() {
           : key === "rh" ? <><span className="flex h-11 w-full translate-y-0.5 items-center justify-center sm:h-16 sm:translate-y-1" aria-hidden="true"><UsersRound className="h-11 w-11 stroke-[1.8] sm:h-16 sm:w-16" /></span><span className="text-xs font-normal leading-none sm:text-sm">{name}</span></>
           : key === "site_survey" ? <><span className="flex h-11 w-full translate-y-0.5 items-center justify-center sm:h-16 sm:translate-y-1" aria-hidden="true"><Search className="h-11 w-11 stroke-[2.8] sm:h-16 sm:w-16" /></span><span className="text-[0.65rem] font-normal leading-none sm:text-xs">{name}</span></>
           : key === "chamados" ? <><span className="flex h-11 w-full translate-y-0.5 items-center justify-center sm:h-16 sm:translate-y-1" aria-hidden="true"><Phone className="h-11 w-11 stroke-[2.4] sm:h-16 sm:w-16" /></span><span className="text-[0.65rem] font-normal leading-none sm:text-xs">{name}</span></>
+          : key === "cde" ? <><span className="flex h-11 w-full translate-y-0.5 items-center justify-center sm:h-16 sm:translate-y-1" aria-hidden="true"><CdeIcon className="h-11 w-11 stroke-[1.8] sm:h-16 sm:w-16" /></span><span className="text-xs font-normal leading-none sm:text-sm">{name}</span></>
           : key === "mytosis" ? <><span className="flex h-11 w-full translate-y-0.5 items-center justify-center sm:h-16 sm:translate-y-1" aria-hidden="true"><MytosisIcon className="h-11 w-11 stroke-[1.8] sm:h-16 sm:w-16" /></span><span className="text-[0.65rem] font-normal leading-none sm:text-xs">{name}</span></>
           : <><span className="flex h-11 w-full translate-y-0.5 items-center justify-center sm:h-16 sm:translate-y-1" aria-hidden="true"><CodeXml className="h-11 w-11 stroke-[2.8] sm:h-16 sm:w-16" /></span><span className="text-[0.65rem] font-normal leading-none sm:text-xs">{name}</span></>}
       </Link>
@@ -279,6 +282,13 @@ function PortalPage() {
                               <Phone className="h-14 w-14 stroke-[2.4] sm:h-16 sm:w-16" />
                             </span>
                             <span className="text-xs font-normal leading-none">{name}</span>
+                          </>
+                        ) : key === "cde" ? (
+                          <>
+                            <span className="flex h-14 w-full translate-y-1 items-center justify-center sm:h-16" aria-hidden="true">
+                              <CdeIcon className="h-14 w-14 stroke-[1.8] sm:h-16 sm:w-16" />
+                            </span>
+                            <span className="text-sm font-normal leading-none">{name}</span>
                           </>
                         ) : key === "mytosis" ? (
                           <>

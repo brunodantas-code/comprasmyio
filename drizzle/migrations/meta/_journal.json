@@ -1296,6 +1296,13 @@
       "when": 1794004577921,
       "tag": "0184_legal_participant_directory",
       "breakpoints": true
+    },
+    {
+      "idx": 185,
+      "version": "7",
+      "when": 1794160794284,
+      "tag": "0185_cde_standards",
+      "breakpoints": true
     }
   ]
 }
