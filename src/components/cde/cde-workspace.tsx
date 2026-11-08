@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import inventory from "./inventory.json";
 import { BORDERS, FILLS } from "@/components/mytosis/shapes";
 import { ColorCode } from "./color-code";
+import { CdeAppIcons } from "./cde-app-icons";
 import { FormatColorOptions } from "@/components/mytosis/format-color-options";
 
 type CdeStyle = { shape?: string; fill?: string; border?: string; borderWidth?: string; text?: string; description?: string };
@@ -225,6 +226,7 @@ export function CdeWorkspace() {
           </section>
         );
       })}
+      <CdeAppIcons number={6} />
 
       <Dialog open={!!creating} onOpenChange={(o) => !o && setCreating(null)}>
         <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
