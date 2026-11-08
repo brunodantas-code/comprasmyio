@@ -46,6 +46,22 @@ const APPS: App[] = [
   { name: "CDE", icon: CdeIcon, iconName: "CdeIcon", groups: [{ title: STD, items: [i("Criar modelo", Plus, "Plus")] }] },
 ];
 
+/** Submenu → main menu it belongs to, per app (used to draw the menu tree). */
+const SUB_PARENT: Record<string, Record<string, string>> = {
+  Supply: { "Novas Solicitações": "Solicitações", "Approvals (todos)": "Approvals", "Armazém (todos)": "Armazém", Clientes: "Cadastro", "Centro de Custo": "Cadastro", Etiquetas: "Cadastro", Cargos: "Cadastro", Lembretes: "Cadastro", Diversos: "Cadastro", "Manual do Usuário": "Cadastro", "Perfis de acesso": "Usuários e logs", "Alçadas/Organograma": "Usuários e logs", Logs: "Usuários e logs", Backup: "Usuários e logs" },
+  "Site Survey": { "Nova visita": "Visitas", "Realizar Visita": "Visitas", "Sanar Pendências": "Visitas", "Histórico de Visitas": "Visitas", "Perfis de acesso": "Usuários", Logs: "Usuários" },
+};
+
+function MenuTree({ app, groups }: { app: string; groups: Group[] }) {
+  const main = groups.find((g) => g.title === "Barra inferior")?.items ?? [];
+  const subs = groups.find((g) => g.title === "Submenus")?.items ?? [];
+  const map = SUB_PARENT[app] ?? {};
+  return <div className="space-y-2">{main.map((m) => { const children = subs.filter((s) => map[s.label] === m.label); return <div key={m.label} className="flex items-start gap-0 rounded-lg bg-muted/30 p-2">
+    <div className="shrink-0"><Tile it={m} /></div>
+    {children.length ? <div className="flex min-w-0 flex-1 items-start"><span className="mt-5 h-px w-6 shrink-0 bg-primary" /><div className="flex flex-wrap gap-3 border-l-2 border-primary pl-3">{children.map((c) => <Tile key={c.label} it={c} />)}</div></div> : <span className="ml-3 mt-4 text-xs text-muted-foreground">Sem submenus</span>}
+  </div>; })}</div>;
+}
+
 const SHARED: Item[] = [i("Início (todos os apps)", LayoutGrid, "LayoutGrid"), i("Menu", Menu, "Menu"), i("Voltar", ArrowLeft, "ArrowLeft"), i("Alterar senha", KeyRound, "KeyRound"), i("Sair", LogOut, "LogOut")];
 
 function Tile({ it }: { it: Item }) {
@@ -70,8 +86,8 @@ export function CdeAppIcons({ number, handle }: { number: number; handle?: impor
           <span className="text-sm font-semibold">{a.name}</span><span className="text-[0.6rem] text-muted-foreground/70">{a.iconName}</span>
           {isOpen ? <ChevronUp className="ml-auto h-4 w-4 text-primary" /> : <ChevronDown className="ml-auto h-4 w-4 text-primary" />}
         </button>
-        {isOpen ? <div className="space-y-2 rounded-lg border border-border p-3">{a.groups.map((g) => <div key={g.title}><div className="mb-1 text-xs text-muted-foreground">{g.title === "Barra inferior" ? "Menu principal do app" : g.title}</div>{g.title === "Barra inferior" ? <div className="mb-2"><CdeMenuType app={a.name} items={g.items} /></div> : null}
-          {g.items.length ? <CdeSortableIcons app={a.name} group={g.title} items={g.items} /> : <span className="text-xs text-muted-foreground">—</span>}</div>)}</div> : null}
+        {isOpen ? <div className="space-y-2 rounded-lg border border-border p-3">{a.groups.filter((g) => !(g.title === "Submenus" && SUB_PARENT[a.name])).map((g) => <div key={g.title}><div className="mb-1 text-xs text-muted-foreground">{g.title === "Barra inferior" ? "Menu principal do app" : g.title}</div>{g.title === "Barra inferior" ? <div className="mb-2"><CdeMenuType app={a.name} items={g.items} /></div> : null}
+          {g.items.length ? <CdeSortableIcons app={a.name} group={g.title} items={g.items} /> : <span className="text-xs text-muted-foreground">—</span>}</div>)}{SUB_PARENT[a.name] ? <div><div className="mb-1 text-xs text-muted-foreground">Menus e seus submenus</div><MenuTree app={a.name} groups={a.groups} /></div> : null}</div> : null}
       </div>; })}
     </div> : null}
   </section>;
