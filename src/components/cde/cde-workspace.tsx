@@ -90,6 +90,7 @@ export function CdeWorkspace() {
   const qc = useQueryClient();
   const [open, setOpen] = useState<Set<string>>(new Set(["plus"]));
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
+  const [expandedWhere, setExpandedWhere] = useState<Set<string>>(new Set());
   const [expandedHistory, setExpandedHistory] = useState<Set<string>>(new Set());
   const [creating, setCreating] = useState<GroupKey | null>(null);
   const [editing, setEditing] = useState<Variant | null>(null);
@@ -306,7 +307,6 @@ export function CdeWorkspace() {
                           {v.style?.description ? <div className="whitespace-pre-wrap break-words"><b>Descrição:</b> {v.style.description}</div> : null}
                           {v.className ? <div className="break-all"><b>Classes:</b> {v.className}</div> : null}
                           {v.icon ? <div className="break-all"><b>Ícone:</b> {v.icon} {v.iconClass}</div> : null}
-                          {v.files.length ? <div className="break-all"><b>Onde:</b> {v.files.join(", ")}</div> : null}
                         </dl>
                         <Button type="button" variant="action" size="sm" style={{ "--wa-bg": "var(--whatsapp-green)", "--wa-bd": "var(--whatsapp-border)", "--wa-tx": "var(--card)" } as React.CSSProperties} className="mt-auto !rounded-lg !border-2 !border-solid !border-[var(--wa-bd)] !bg-[var(--wa-bg)] !text-[var(--wa-tx)] hover:!brightness-110" disabled={toggleStandard.isPending || (isPrimary && !g.multi)} onClick={() => toggleStandard.mutate({ group: g.key, key: v.key, multi: g.multi })}>
                           {isPrimary ? <><Check className="h-4 w-4" />{g.multi ? "Padrão (remover)" : "Padrão principal"}</> : g.multi ? "Adicionar como padrão" : sec ? "Tornar principal" : "Escolher como padrão"}
@@ -321,6 +321,17 @@ export function CdeWorkspace() {
                     );
                   })}
                 </div>
+                {list.some((v) => v.files.length) ? (
+                  <div className="border-t border-border px-4 py-2 text-xs text-muted-foreground">
+                    <div className="flex items-center justify-between gap-2">
+                      <span>Onde é utilizado</span>
+                      <Button type="button" variant="ghost" size="compactIcon" className="text-primary hover:text-primary" aria-label={`${expandedWhere.has(g.key) ? "Recolher" : "Exibir"} onde é utilizado em ${g.title}`} aria-expanded={expandedWhere.has(g.key)} onClick={() => setExpandedWhere((c) => { const n = new Set(c); if (n.has(g.key)) n.delete(g.key); else n.add(g.key); return n; })}>
+                        {expandedWhere.has(g.key) ? <ChevronUp /> : <ChevronDown />}
+                      </Button>
+                    </div>
+                    {expandedWhere.has(g.key) ? <div className="mt-2 space-y-1">{list.map((v, i) => v.files.length ? <div key={v.key} className="break-all"><b>{v.name ?? `Modelo ${i + 1}`}:</b> {v.files.join(", ")}</div> : null)}</div> : null}
+                  </div>
+                ) : null}
                 {removed.length ? (
                   <div className="border-t border-border px-4 py-2 text-xs text-muted-foreground">
                     <div className="flex items-center justify-between gap-2">
