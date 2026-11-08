@@ -51,7 +51,7 @@ const GROUPS: { key: GroupKey; title: string; hint: string; multi?: boolean }[] 
   { key: "save", title: "4.3 Salvar", hint: "Padrão único" },
   { key: "cancel", title: "4.4 Cancelar", hint: "Padrão único" },
   { key: "confirm", title: "4.5 Confirmar / Concluir", hint: "Padrão único" },
-  { key: "close", title: "4.6 Fechar", hint: "Padrão único" },
+  { key: "close", title: "4.6 Fechar", hint: "X do canto das janelas e painéis · padrão único, aplicado ao vivo" },
   { key: "pencil", title: "4.7 Lápis (editar)", hint: "Padrão único" },
   { key: "trash", title: "4.8 Lixeira (excluir)", hint: "Padrão único" },
   { key: "box", title: "5.1 Boxes (cartões)", hint: "Forma, borda, espessura e fundo dos cartões · padrão único, aplicado ao vivo" },
