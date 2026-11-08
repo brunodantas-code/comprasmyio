@@ -70,7 +70,7 @@ function MainMenuEntries({ onSignOut, onChangePassword, supplyManual, itemClass 
     const Icon = item.icon;
     if ("to" in item) return <Button key={id} asChild variant="ghost" className={itemClass}><Link to={item.to}><Icon className="h-5 w-5" />{item.label}</Link></Button>;
     if (id === "manual") return <Button key={id} asChild variant="ghost" className={itemClass}><Link to="/supply-manual"><Icon className="h-5 w-5" />{item.label}</Link></Button>;
-    return <Button key={id} variant="ghost" className={`${itemClass} ${id === "logout" ? "!text-destructive hover:!text-destructive" : ""}`} onClick={id === "logout" ? onSignOut : id === "password" ? onChangePassword : () => window.history.back()}><Icon className="h-5 w-5" />{item.label}</Button>;
+    return <Button key={id} variant="ghost" className={`${itemClass}`} onClick={id === "logout" ? onSignOut : id === "password" ? onChangePassword : () => window.history.back()}><Icon className="h-5 w-5" />{item.label}</Button>;
   });
 }
 
