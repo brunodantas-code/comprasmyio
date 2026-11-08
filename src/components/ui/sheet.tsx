@@ -61,7 +61,7 @@ const SheetContent = React.forwardRef<
   <SheetPortal>
     <SheetOverlay />
     <SheetPrimitive.Content ref={ref} className={cn(sheetVariants({ side }), className)} {...props}>
-      <SheetPrimitive.Close className="sticky top-0 z-30 float-right -mt-2 -mr-2 rounded-sm bg-background p-0.5 cursor-pointer opacity-70 transition-opacity hover:opacity-100 focus:outline-none disabled:pointer-events-none">
+      <SheetPrimitive.Close className="sticky top-0 z-30 float-right -mt-2 -mr-2 rounded-sm bg-background p-0.5 outline-none ring-0 focus:ring-0 border-0 shadow-none cursor-pointer opacity-70 transition-opacity hover:opacity-100 focus:outline-none disabled:pointer-events-none">
         <CdeCloseIcon />
         <span className="sr-only">Fechar</span>
       </SheetPrimitive.Close>

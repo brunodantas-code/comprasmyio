@@ -43,8 +43,8 @@ const DialogContent = React.forwardRef<
       )}
       {...props}
     >
-      <div className="pointer-events-none sticky top-0 z-30 flex h-0 justify-end [.grid>&]:-mb-4">
-        <DialogPrimitive.Close className="pointer-events-auto -mr-1 rounded-sm bg-background p-0.5 opacity-70 ring-offset-background cursor-pointer transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
+      <div className="pointer-events-none sticky top-0 z-30 flex h-0 items-start justify-end [.grid>&]:-mb-4">
+        <DialogPrimitive.Close className="pointer-events-auto -mr-1 rounded-sm bg-background p-0.5 opacity-70 cursor-pointer transition-opacity hover:opacity-100 outline-none ring-0 focus:outline-none focus-visible:outline-none focus:ring-0 shadow-none border-0 disabled:pointer-events-none">
           <CdeCloseIcon />
           <span className="sr-only">Fechar</span>
         </DialogPrimitive.Close>
