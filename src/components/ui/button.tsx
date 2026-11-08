@@ -3,6 +3,7 @@ import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
+import { detectButtonGroup, useCdeLook } from "@/components/cde/cde-look";
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
@@ -67,12 +68,14 @@ function buttonText(node: React.ReactNode): string {
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, children, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, children, style, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
     const accessibleLabel = [buttonText(children), props["aria-label"], props.title].filter(Boolean).join(" ");
     const resolvedVariant = actionLabelPattern.test(accessibleLabel) ? "action" : variant;
+    // CDE: action buttons follow the chosen standard live; CdeButton passes its own style and is skipped.
+    const look = useCdeLook(style ? undefined : detectButtonGroup(children, [props["aria-label"], props.title].filter(Boolean).join(" ")));
     return (
-      <Comp className={cn(buttonVariants({ variant: resolvedVariant, size, className }))} ref={ref} {...props}>{children}</Comp>
+      <Comp className={cn(buttonVariants({ variant: resolvedVariant, size, className }), look.className)} style={style ?? (look.className ? look.style : undefined)} ref={ref} {...props}>{children}</Comp>
     );
   },
 );

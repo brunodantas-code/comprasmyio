@@ -1,0 +1,55 @@
+import * as React from "react";
+import { resolveCdeModel, useCdeStandards, type CdeGroup } from "./cde-button";
+import { styleOf } from "./cde-render";
+
+/** Groups applied automatically by shared ui components (Button/Input/Textarea). */
+export type AutoGroup = "save" | "cancel" | "confirm" | "trash" | "pencil" | "toggle" | "move" | "sort" | "fields_input" | "fields_textarea" | "fields_password";
+
+const ICON_GROUP: Record<string, AutoGroup> = {
+  Pencil: "pencil", PencilLine: "pencil", SquarePen: "pencil", PenLine: "pencil",
+  Trash: "trash", Trash2: "trash",
+  ChevronDown: "toggle", ChevronUp: "toggle",
+  ArrowUp: "move", ArrowDown: "move",
+  ArrowUpDown: "sort", ArrowDownUp: "sort",
+};
+
+function text(node: React.ReactNode): string {
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(text).join(" ");
+  if (React.isValidElement<{ children?: React.ReactNode }>(node)) return text(node.props.children);
+  return "";
+}
+function iconName(node: React.ReactNode): string | undefined {
+  const list = React.Children.toArray(node);
+  for (const n of list) {
+    if (React.isValidElement(n)) {
+      const t = n.type as { displayName?: string };
+      if (t?.displayName && ICON_GROUP[t.displayName]) return t.displayName;
+    }
+  }
+  return undefined;
+}
+
+/** Detects which CDE action group a button belongs to from its label or icon. */
+export function detectButtonGroup(children: React.ReactNode, label?: string): AutoGroup | undefined {
+  const t = `${text(children)} ${label ?? ""}`.toLowerCase();
+  if (/\b(salvar|salvando)\b/.test(t)) return "save";
+  if (/\b(cancelar|cancelando)\b/.test(t)) return "cancel";
+  if (/\b(confirmar|concluir|confirmando|concluindo)\b/.test(t)) return "confirm";
+  if (/\b(excluir|excluindo)\b/.test(t)) return "trash";
+  const icon = iconName(children);
+  return icon ? ICON_GROUP[icon] : undefined;
+}
+
+/** Visual (CDE style) of the chosen standard for a group; empty when no standard is chosen. */
+export function useCdeLook(group: AutoGroup | undefined, withClass = false): { className: string; style: React.CSSProperties } {
+  const { data } = useCdeStandards();
+  if (!group) return { className: "", style: {} };
+  const rows = (data?.selected ?? []).filter((s) => s.group_key === group && s.is_primary);
+  if (!rows.length) return { className: "", style: {} };
+  // Field subgroups may hold several standards: prefer the one with real customization.
+  const row = rows.find((r) => r.variant_key.startsWith("custom:") || (r.variant_key.split("|")[3] ?? "").trim()) ?? rows[0];
+  const m = resolveCdeModel({ selected: [row], models: data?.models ?? [] }, group as CdeGroup);
+  const { css, cls } = styleOf(m.style);
+  return { className: [withClass ? m.className : "", cls].filter(Boolean).join(" "), style: css };
+}
