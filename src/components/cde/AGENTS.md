@@ -14,3 +14,4 @@
 - `add-text-usage.json` lists current + buttons with text (shown in CDE 4.2); regenerate by scanning CdeButton group="plus"/<Plus/> with text when such buttons change.
 - Edited + button texts live in cde_selected group add_text (JSON map "screen|original"→text); CdeButton group=plus and CdeAddLabel apply them.
 - CDE category/subcategory order lives in cde_selected group cde_order ({cats, subs}); numbers are derived from position, never hardcoded.
+- Linked + buttons share one add_text key via "shared" in add-text-usage.json.

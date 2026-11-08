@@ -20,7 +20,7 @@ import { ColorCode } from "./color-code";
 import { FONT_SIZES, FORMS, ICONS, TEXTS, WIDTHS, styleOf, type CdeStyle } from "./cde-render";
 import { CdeAppIcons } from "./cde-app-icons";
 import { CdeNavigation } from "./cde-navigation";
-import { CdeButton, CdeNumber } from "./cde-button";
+import { CdeButton, CdeNumber, addTextKey } from "./cde-button";
 import { CdeMainMenu } from "./cde-main-menu";
 import { CdeAppOrder } from "./cde-app-order";
 import { CdeCategoryHeader } from "./cde-category-header";
@@ -334,7 +334,7 @@ export function CdeWorkspace() {
                 {g.key === "add" ? (
                   <div className="border-t border-border px-4 py-2 text-xs text-muted-foreground">
                     <div className="flex items-center justify-between gap-2">
-                      <span>Botões atuais com + e texto ({addTextUsage.length})</span>
+                      <span>Botões atuais com + e texto ({new Set(addTextUsage.map((e) => addTextKey(e.file, e.label))).size})</span>
                       <Button type="button" variant="ghost" size="compactIcon" className="text-primary hover:text-primary" aria-label={`${expandedWhere.has("add-text") ? "Recolher" : "Exibir"} botões atuais com + e texto`} aria-expanded={expandedWhere.has("add-text")} onClick={() => setExpandedWhere((c) => { const n = new Set(c); if (n.has("add-text")) n.delete("add-text"); else n.add("add-text"); return n; })}>
                         {expandedWhere.has("add-text") ? <ChevronUp /> : <ChevronDown />}
                       </Button>

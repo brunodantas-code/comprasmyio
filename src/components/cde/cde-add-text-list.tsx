@@ -8,7 +8,18 @@ import { Input } from "@/components/ui/input";
 import { CdeButton, addTextKey, parseAddTextOverrides, useCdeStandards } from "./cde-button";
 import addTextUsage from "./add-text-usage.json";
 
-type Entry = { file: string; line: number; label: string; dynamic?: boolean };
+type Entry = { file: string; line: number; label: string; dynamic?: boolean; shared?: string };
+
+/** One card per edited text: linked buttons and repeated screens appear once with all their screens. */
+function groupEntries(list: Entry[]) {
+  const map = new Map<string, { e: Entry; files: string[] }>();
+  for (const e of list) {
+    const k = addTextKey(e.file, e.label);
+    const g = map.get(k);
+    if (g) { if (!g.files.includes(e.file)) g.files.push(e.file); } else map.set(k, { e, files: [e.file] });
+  }
+  return [...map.values()];
+}
 
 /** CDE 4.2: current + buttons with text; admins edit each button's text in place. */
 export function CdeAddTextList() {
@@ -40,7 +51,7 @@ export function CdeAddTextList() {
 
   return (
     <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-      {(addTextUsage as Entry[]).map((e) => {
+      {groupEntries(addTextUsage as Entry[]).map(({ e, files }) => {
         const key = addTextKey(e.file, e.label);
         const edited = !!overrides[key];
         const id = `${e.file}:${e.line}`;
@@ -65,7 +76,7 @@ export function CdeAddTextList() {
                 ) : null}
               </div>
             )}
-            <span className="break-all">{e.file}{edited ? ` · original: ${e.label}` : ""}{e.dynamic ? " · texto definido pela tela" : ""}</span>
+            <span className="break-all">{files.join(" · ")}{edited ? ` · original: ${e.label}` : ""}{e.dynamic ? " · texto definido pela tela" : ""}</span>
           </div>
         );
       })}

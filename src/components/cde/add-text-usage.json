@@ -32,7 +32,8 @@
  {
   "file": "components/mytosis/flowchart.tsx",
   "line": 322,
-  "label": "Nova etapa"
+  "label": "Nova etapa",
+  "shared": "components/approval-workflow.tsx|Adicionar etapa"
  },
  {
   "file": "components/mytosis/kpis-tab.tsx",
@@ -62,7 +63,8 @@
  {
   "file": "components/site-survey-luc-manager.tsx",
   "line": 451,
-  "label": "Adicionar ambiente"
+  "label": "Adicionar ambiente",
+  "shared": "components/site-survey-environment-manager.tsx|Adicionar ambiente"
  },
  {
   "file": "components/stock-tab.tsx",

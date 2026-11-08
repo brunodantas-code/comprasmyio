@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import addTextUsage from "./add-text-usage.json";
 import { ICONS, styleOf, type CdeStyle } from "./cde-render";
 
 /** Grupos do CDE que já trocam ao vivo nas telas. */
@@ -68,7 +69,9 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
 export function parseAddTextOverrides(raw?: string | null): Record<string, string> {
   try { const v = JSON.parse(raw ?? "{}"); return v && typeof v === "object" && !Array.isArray(v) ? v : {}; } catch { return {}; }
 }
-export function addTextKey(screen: string, text: string) { return `${screen}|${text}`; }
+const ADD_TEXT_ALIASES: Record<string, string> = Object.fromEntries((addTextUsage as { file: string; label: string; shared?: string }[]).filter((e) => e.shared).map((e) => [`${e.file}|${e.label}`, e.shared!]));
+/** Override key; linked buttons (same meaning in several screens) share one edited text. */
+export function addTextKey(screen: string, text: string) { const k = `${screen}|${text}`; return ADD_TEXT_ALIASES[k] ?? k; }
 export function useCdeAddLabel(screen: string | undefined, text: ReactNode): ReactNode {
   const { data } = useCdeStandards();
   if (!screen || typeof text !== "string") return text;
