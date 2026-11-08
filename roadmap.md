@@ -149,3 +149,7 @@
 - [x] CDE ícones: seta exibir/recolher por app, sem símbolo dentro do box
 - [x] Ícone verde de 3 barras no Menu superior (CDE)
 - [x] Arraste e ordem automática dos ícones dos menus
+
+- [x] Manuais do Usuário dos demais apps (padrão Supply)
+- [x] Confirmar/Cancelar, setas exibir/recolher e + seguindo o padrão CDE (prints 08/11)
+- [x] Seta exibir/recolher no Menu principal (CDE)

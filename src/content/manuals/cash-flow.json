@@ -1,0 +1,215 @@
+{
+  "app": "Cash Flow",
+  "slug": "cash-flow",
+  "icon": "DollarSign",
+  "subtitle": "Contas a Pagar, Plano de Contas, Orçamento e Caixa",
+  "objetivo": [
+    "Classificar as contas a pagar vindas dos approvals do Supply, manter o plano de contas com o orçamento mensal e controlar o caixa, importando extratos e conciliando as saídas bancárias.",
+    "O app conecta o que foi aprovado ao que foi pago, preservando a origem de cada pagamento e o histórico financeiro."
+  ],
+  "para_quem": "Equipe financeira, CFO e administradores.",
+  "como_usar": "Siga o sumário ou os marcadores do PDF; os caminhos reproduzem os nomes dos menus. As ações dependem do perfil financeiro.",
+  "labels": [
+    "Contas a pagar",
+    "Plano de Contas",
+    "Caixa",
+    "Approvals recebidos",
+    "A classificar",
+    "Total pendente",
+    "Classificar",
+    "Classificar pagamento",
+    "Exibir todo o Plano de Contas",
+    "Emissão fiscal",
+    "Vencimento Original",
+    "Competência",
+    "Caixa (Previsão)",
+    "Salvar classificação",
+    "Abrir no myio supply",
+    "Histórico financeiro",
+    "A pagar",
+    "Pago",
+    "Parcialmente conciliado",
+    "Conciliado",
+    "Cancelado",
+    "Nova conta",
+    "Código",
+    "Nome",
+    "Natureza",
+    "Conta superior",
+    "Aceita lançamentos",
+    "Salvar",
+    "Editar conta",
+    "Salvar orçamento",
+    "Exercício",
+    "Total anual",
+    "Total mensal",
+    "Saldo disponível",
+    "Movimentações bancárias",
+    "Nova conta bancária",
+    "Importar extrato",
+    "Conta bancária",
+    "Arquivo OFX ou CSV",
+    "Gerar prévia",
+    "Confirmar importação",
+    "Classificar movimentação",
+    "Conciliar",
+    "Conciliar saída",
+    "Pagamento",
+    "Valor conciliado"
+  ],
+  "icons": {
+    "Contas a pagar": "ReceiptText",
+    "Plano de Contas": "ListTree",
+    "Caixa": "WalletCards"
+  },
+  "sections": [
+    {
+      "title": "Navegação e primeiros passos",
+      "blocks": [
+        {
+          "kind": "table",
+          "headers": [
+            "Área",
+            "Para que serve"
+          ],
+          "rows": [
+            [
+              "Contas a pagar",
+              "Classificar e acompanhar os pagamentos vindos dos approvals."
+            ],
+            [
+              "Plano de Contas",
+              "Manter as contas e o orçamento mensal de cada exercício."
+            ],
+            [
+              "Caixa",
+              "Contas bancárias, importação de extratos e conciliação."
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "O acesso exige o app liberado e perfil financeiro (Financeiro, CFO, Admin ou administrador do ERP). Aprovações de pagamento continuam no Cash Flow, separadas da fila do Supply."
+        }
+      ]
+    },
+    {
+      "title": "Contas a pagar",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "Os indicadores mostram Approvals recebidos, A classificar e Total pendente. A tabela tem filtro em cada cabeçalho."
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Em uma linha com situação Classificar, clique em Classificar.",
+            "Em Plano de Contas, busque pelo número ou nome, ou use Exibir todo o Plano de Contas.",
+            "Informe mês e ano de Emissão fiscal, Vencimento Original, Competência e Caixa (Previsão).",
+            "Clique em Salvar classificação; a situação passa para A pagar."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Clique no número do approval para ver detalhes, Abrir no myio supply e consultar o Histórico financeiro."
+        },
+        {
+          "kind": "table",
+          "headers": [
+            "Situação",
+            "Significado"
+          ],
+          "rows": [
+            [
+              "Classificar",
+              "Aguardando classificação contábil."
+            ],
+            [
+              "A pagar",
+              "Classificado."
+            ],
+            [
+              "Pago / Parcialmente conciliado / Conciliado",
+              "Andamento da conciliação bancária."
+            ],
+            [
+              "Cancelado",
+              "Fora do fluxo."
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Total pendente soma o valor integral dos registros não conciliados nem cancelados."
+        }
+      ]
+    },
+    {
+      "title": "Plano de Contas e orçamento",
+      "blocks": [
+        {
+          "kind": "steps",
+          "steps": [
+            "Clique em Nova conta.",
+            "Preencha Código, Nome e Natureza.",
+            "Em Conta superior, escolha a conta-mãe ou deixe como conta principal.",
+            "Marque Aceita lançamentos, se aplicável.",
+            "Clique em Salvar."
+          ]
+        },
+        {
+          "kind": "h",
+          "text": "Orçamento"
+        },
+        {
+          "kind": "p",
+          "text": "Escolha o Exercício, informe os valores de Jan a Dez e clique em Salvar orçamento na própria linha. Contas com subcontas são totalizadas automaticamente (Total anual e Total mensal)."
+        }
+      ]
+    },
+    {
+      "title": "Caixa: contas e extratos",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "Saldo disponível = saldo inicial + movimentações a partir da data do saldo."
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Clique em Nova conta bancária, preencha identificação, banco, agência, conta, saldo e data, e salve.",
+            "Clique em Importar extrato e escolha a Conta bancária.",
+            "Selecione o Arquivo OFX ou CSV; no CSV, indique as colunas de data, descrição e valor e clique em Gerar prévia.",
+            "Confira e clique em Confirmar importação."
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Linhas duplicadas e o mesmo arquivo reimportado são ignorados."
+        }
+      ]
+    },
+    {
+      "title": "Classificar e conciliar movimentações",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "Classificar movimentação permite escolher o Plano de Contas e ajustar Emissão fiscal e Competência; o mês de Caixa é o do extrato."
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Em uma saída não conciliada, clique em Conciliar.",
+            "Escolha o Pagamento.",
+            "Informe o Valor conciliado.",
+            "Clique em Conciliar."
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Não há exportação PDF ou Excel no Cash Flow; OFX e CSV são formatos de importação."
+        }
+      ]
+    }
+  ]
+}

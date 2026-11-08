@@ -32,13 +32,16 @@ function iconName(node: React.ReactNode): string | undefined {
 
 /** Detects which CDE action group a button belongs to from its label or icon. */
 export function detectButtonGroup(children: React.ReactNode, label?: string): AutoGroup | undefined {
-  const t = `${text(children)} ${label ?? ""}`.toLowerCase();
+  // A known icon wins (e.g. a chevron labelled "Recolher Salvar" is still a toggle).
+  const icon = iconName(children);
+  if (icon) return ICON_GROUP[icon];
+  const visible = text(children).trim();
+  const t = (visible || label || "").toLowerCase();
   if (/\b(salvar|salvando)\b/.test(t)) return "save";
   if (/\b(cancelar|cancelando)\b/.test(t)) return "cancel";
   if (/\b(confirmar|concluir|confirmando|concluindo)\b/.test(t)) return "confirm";
   if (/\b(excluir|excluindo)\b/.test(t)) return "trash";
-  const icon = iconName(children);
-  return icon ? ICON_GROUP[icon] : undefined;
+  return undefined;
 }
 
 /** Visual (CDE style) of the chosen standard for a group; empty when no standard is chosen. */

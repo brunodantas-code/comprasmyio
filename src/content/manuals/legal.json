@@ -1,0 +1,162 @@
+{
+  "app": "Legal",
+  "slug": "legal",
+  "icon": "FileSignature",
+  "subtitle": "Contratos, Atas de Reunião e Documentos Padrão",
+  "objetivo": [
+    "Organizar os contratos, as atas de reunião e os documentos padrão da empresa, com busca, ordenação por data e PDFs salvos junto de cada registro.",
+    "As atas registram participantes, assuntos, deliberações, responsáveis e assinaturas na tela, mantendo visíveis as assinaturas e ações pendentes."
+  ],
+  "para_quem": "Diretoria, jurídico, participantes de reuniões e administradores.",
+  "como_usar": "Siga o sumário ou os marcadores do PDF; os caminhos reproduzem os nomes dos menus e botões.",
+  "labels": [
+    "Contratos",
+    "Atas de Reunião",
+    "Documentos Padrão",
+    "Título",
+    "Assuntos",
+    "Data",
+    "Exibir todas",
+    "Recolher todas",
+    "Editar",
+    "Excluir",
+    "Nova ata",
+    "Data da Reunião",
+    "Local da Reunião",
+    "Adicionar participante",
+    "Descrição",
+    "Deliberações",
+    "Data de conclusão (opcional)",
+    "Adicionar assunto",
+    "Salvar",
+    "Salvar PDF",
+    "Assinaturas dos participantes",
+    "Assinar",
+    "Limpar",
+    "Confirmar assinatura",
+    "Refazer assinatura",
+    "Assinaturas pendentes",
+    "Voltar à ata",
+    "Novo contrato",
+    "Fornecedor ou cliente",
+    "Documento",
+    "Novo documento padrão",
+    "Seções",
+    "Adicionar seção",
+    "Cancelar"
+  ],
+  "icons": {
+    "Contratos": "FileSignature",
+    "Atas de Reunião": "Users",
+    "Documentos Padrão": "Files"
+  },
+  "sections": [
+    {
+      "title": "Navegação e primeiros passos",
+      "blocks": [
+        {
+          "kind": "table",
+          "headers": [
+            "Área",
+            "Para que serve"
+          ],
+          "rows": [
+            [
+              "Contratos",
+              "Guardar contratos com contraparte e documento."
+            ],
+            [
+              "Atas de Reunião",
+              "Registrar reuniões com assuntos, deliberações e assinaturas. Abre por padrão."
+            ],
+            [
+              "Documentos Padrão",
+              "Modelos em seções, com PDF."
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Em todas as áreas, filtre por Título, Assuntos ou documentos e Data, ordene por data, e use Exibir todas ou Recolher todas. Cada registro tem Editar, Excluir e, quando houver, o PDF."
+        }
+      ]
+    },
+    {
+      "title": "Criar uma ata",
+      "blocks": [
+        {
+          "kind": "steps",
+          "steps": [
+            "Entre em Atas de Reunião e clique em +.",
+            "Preencha Título, Data da Reunião e Local da Reunião.",
+            "Use Adicionar participante; busque usuários ou inclua participantes externos.",
+            "Em Assuntos, preencha título, Descrição e Deliberações.",
+            "Defina responsáveis e, se houver, Data de conclusão (opcional).",
+            "Use Adicionar assunto para outros itens.",
+            "Clique em Salvar."
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Obrigatórios: título, data, local, ao menos um participante e um assunto com título."
+        }
+      ]
+    },
+    {
+      "title": "Assinaturas e PDF",
+      "blocks": [
+        {
+          "kind": "steps",
+          "steps": [
+            "Em Assinaturas dos participantes, clique em Assinar.",
+            "Desenhe a assinatura na tela; use Limpar para recomeçar.",
+            "Clique em Confirmar assinatura e repita para todos.",
+            "Clique em Salvar PDF; o PDF fica na linha da ata."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Sem todas as assinaturas, aparece Assinaturas pendentes; use Voltar à ata. Refazer assinatura substitui uma assinatura."
+        },
+        {
+          "kind": "note",
+          "text": "Alterar título, data ou conteúdo limpa as assinaturas e invalida o PDF anterior."
+        }
+      ]
+    },
+    {
+      "title": "Pendências das atas",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "A lista indica assinaturas e ações pendentes: participante sem assinatura ou assunto com responsável e sem data de conclusão."
+        }
+      ]
+    },
+    {
+      "title": "Contratos e Documentos Padrão",
+      "blocks": [
+        {
+          "kind": "h",
+          "text": "Novo contrato"
+        },
+        {
+          "kind": "p",
+          "text": "Em Contratos, clique em +, preencha Título, Fornecedor ou cliente e, se quiser, anexe o Documento. Clique em Salvar."
+        },
+        {
+          "kind": "h",
+          "text": "Novo documento padrão"
+        },
+        {
+          "kind": "p",
+          "text": "Em Documentos Padrão, clique em +, preencha Título e as Seções (Adicionar seção) e use Salvar ou Salvar PDF. Não exige assinaturas."
+        },
+        {
+          "kind": "note",
+          "text": "Excluir remove o registro e seus documentos, após confirmação."
+        }
+      ]
+    }
+  ]
+}

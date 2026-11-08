@@ -70,8 +70,10 @@ function buttonText(node: React.ReactNode): string {
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, children, style, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
-    const accessibleLabel = [buttonText(children), props["aria-label"], props.title].filter(Boolean).join(" ");
-    const resolvedVariant = actionLabelPattern.test(accessibleLabel) ? "action" : variant;
+    const visibleText = buttonText(children).trim();
+    const accessibleLabel = visibleText || [props["aria-label"], props.title].filter(Boolean).join(" ");
+    // CdeButton (style passed) keeps its own CDE variant; never re-skin it by label.
+    const resolvedVariant = !style && actionLabelPattern.test(accessibleLabel) ? "action" : variant;
     // CDE: action buttons follow the chosen standard live; CdeButton passes its own style and is skipped.
     const look = useCdeLook(style ? undefined : detectButtonGroup(children, [props["aria-label"], props.title].filter(Boolean).join(" ")));
     return (

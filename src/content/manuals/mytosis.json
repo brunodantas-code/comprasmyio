@@ -1,0 +1,441 @@
+{
+  "app": "Mytosis",
+  "slug": "mytosis",
+  "icon": "MytosisIcon",
+  "subtitle": "OKRs, Fluxogramas, Processos e KPIs",
+  "objetivo": [
+    "Organizar os objetivos da empresa (OKRs) e suas tarefas, desenhar fluxogramas de etapas e dependências, documentar processos em texto e acompanhar indicadores (KPIs) com metas e resultados.",
+    "O app mostra quem é responsável por cada entrega, o que está pendente e como os processos se conectam, preservando conversas, histórico e versões em PDF."
+  ],
+  "para_quem": "Gestores, responsáveis por objetivos e processos, equipes envolvidas nas tarefas e administradores.",
+  "como_usar": "Siga o sumário ou os marcadores do PDF; os caminhos reproduzem os nomes dos menus. As ações mostradas dependem da permissão no Mytosis.",
+  "labels": [
+    "OKRs",
+    "Fluxogramas",
+    "Processos",
+    "KPIs",
+    "Usuários",
+    "Objetivos (OKRs)",
+    "Novo objetivo",
+    "Título",
+    "Descrição",
+    "Responsável",
+    "Data estimada de conclusão",
+    "% de conclusão",
+    "Salvar",
+    "Cancelar",
+    "Confirmar",
+    "Voltar aos OKRs",
+    "Consolidação de pendências",
+    "Por responsável",
+    "Por data",
+    "Localizador",
+    "Localizar box",
+    "Exibir tudo",
+    "Exportar fluxograma para PDF",
+    "Box padrão",
+    "Nova tarefa neste box",
+    "Tarefa associada (abaixo)",
+    "Tarefa associada (acima)",
+    "Tarefa dependente (à direita)",
+    "Subetapa (abaixo)",
+    "Etapa superior (acima)",
+    "Próxima etapa (à direita)",
+    "Importar fluxograma como bloco (abaixo)",
+    "Forma",
+    "Box predecessor (anterior)",
+    "Box sucessor (posterior)",
+    "Dividir próxima etapa",
+    "Gatilho:",
+    "Fundo",
+    "Borda",
+    "Cor do título",
+    "Demais envolvidos",
+    "Prazo",
+    "Pendente",
+    "Concluída",
+    "Conversa",
+    "Novo Processo",
+    "Nome do Processo",
+    "Seção",
+    "Parágrafo",
+    "Importar",
+    "Departamento",
+    "Editar Processo",
+    "Lançar resultado",
+    "Período",
+    "Valor",
+    "Observação",
+    "Meta",
+    "Periodicidade",
+    "Segmento",
+    "Unidade",
+    "Meta atingida",
+    "Atenção",
+    "Abaixo da meta",
+    "Sem lançamento",
+    "Administrador",
+    "Editor",
+    "Visualizador",
+    "Adicionar usuário",
+    "Remover usuário",
+    "Baixar PDF",
+    "Salvar versão",
+    "Versões salvas",
+    "Baixar versão",
+    "Minhas Pendências"
+  ],
+  "icons": {
+    "OKRs": "Target",
+    "Fluxogramas": "Workflow",
+    "Processos": "BookOpen",
+    "KPIs": "Gauge",
+    "Usuários": "UsersRound",
+    "Conversa": "MessageSquare",
+    "Minhas Pendências": "ListChecks"
+  },
+  "sections": [
+    {
+      "title": "Navegação e primeiros passos",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "O Mytosis reúne cinco áreas na barra inferior. Clique no nome da área para abri-la. No celular, os mesmos menus ficam na parte inferior da tela."
+        },
+        {
+          "kind": "table",
+          "headers": [
+            "Área",
+            "Para que serve"
+          ],
+          "rows": [
+            [
+              "OKRs",
+              "Objetivos, tarefas associadas, responsáveis, prazos e pendências."
+            ],
+            [
+              "Fluxogramas",
+              "Desenho de etapas, subetapas, dependências e vínculos entre fluxos."
+            ],
+            [
+              "Processos",
+              "Documentação em texto, com seções, parágrafos e fluxogramas vinculados."
+            ],
+            [
+              "KPIs",
+              "Indicadores com meta, periodicidade e resultados."
+            ],
+            [
+              "Usuários",
+              "Permissões de acesso ao Mytosis."
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "A ordem dos menus pode ser ajustada pelo administrador no CDE."
+        }
+      ]
+    },
+    {
+      "title": "Quem faz o quê",
+      "blocks": [
+        {
+          "kind": "table",
+          "headers": [
+            "Permissão",
+            "O que pode fazer"
+          ],
+          "rows": [
+            [
+              "Administrador",
+              "Edita boxes, usuários e padrões visuais (Box padrão)."
+            ],
+            [
+              "Editor",
+              "Cria e edita objetivos, tarefas, fluxogramas, processos e KPIs."
+            ],
+            [
+              "Visualizador",
+              "Somente consulta."
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Administradores do ERP são sempre Administradores no Mytosis. O criador ou o responsável por uma tarefa de OKR pode concluí-la, mesmo sem ser Editor."
+        }
+      ]
+    },
+    {
+      "title": "OKRs: criar e acompanhar objetivos",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "<b>Caminho:</b> OKRs → Objetivos (OKRs). A lista mostra Nº, Objetivo, Responsável, Prazo, Tarefas e Conclusão."
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Clique em Novo objetivo.",
+            "Preencha Título e Descrição.",
+            "Selecione o Responsável e a Data estimada de conclusão.",
+            "Informe % de conclusão quando o box não tiver tarefas abaixo; com tarefas, a conclusão é calculada.",
+            "Clique em Salvar."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Clique na linha do objetivo para abrir o desenho. Use Voltar aos OKRs para retornar."
+        },
+        {
+          "kind": "h",
+          "text": "Consolidação de pendências"
+        },
+        {
+          "kind": "p",
+          "text": "Alterne entre Por responsável e Por data. Clique em uma tarefa para localizar seu box. Prazos vencidos ficam destacados."
+        }
+      ]
+    },
+    {
+      "title": "Navegar pelo desenho",
+      "blocks": [
+        {
+          "kind": "table",
+          "headers": [
+            "Ferramenta",
+            "Uso"
+          ],
+          "rows": [
+            [
+              "Localizador",
+              "Digite o Nº do box e use Localizar box."
+            ],
+            [
+              "Exibir tudo",
+              "Abre todos os boxes e fluxos vinculados."
+            ],
+            [
+              "Setas dos boxes",
+              "Recolhem ou exibem boxes dependentes, boxes abaixo e tarefas."
+            ],
+            [
+              "Clipe",
+              "Aparece só quando o box tem anexos."
+            ],
+            [
+              "Arrastar",
+              "Editores soltam uma etapa sobre outro box para posicioná-la à direita dele."
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "A numeração segue a hierarquia completa, como 1.2.3."
+        }
+      ]
+    },
+    {
+      "title": "Adicionar boxes e dependências",
+      "blocks": [
+        {
+          "kind": "table",
+          "headers": [
+            "Em OKRs",
+            "Em Fluxogramas"
+          ],
+          "rows": [
+            [
+              "Nova tarefa neste box",
+              "Nova tarefa neste box"
+            ],
+            [
+              "Tarefa associada (abaixo)",
+              "Subetapa (abaixo)"
+            ],
+            [
+              "Tarefa associada (acima)",
+              "Etapa superior (acima)"
+            ],
+            [
+              "Tarefa dependente (à direita)",
+              "Próxima etapa (à direita)"
+            ],
+            [
+              "Importar fluxograma como bloco (abaixo)",
+              "Importar fluxograma como bloco (abaixo)"
+            ]
+          ]
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Abra o menu + do box e escolha a posição.",
+            "Preencha Título e Descrição e escolha a Forma.",
+            "Em OKRs, informe Responsável, data, peso e conclusão.",
+            "Marque as dependências em Box predecessor (anterior) e confira o Box sucessor (posterior).",
+            "Clique em Salvar."
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "A soma dos pesos das tarefas de um mesmo box não pode passar de 100%. Excluir um box exclui também o que está abaixo dele, após confirmação."
+        }
+      ]
+    },
+    {
+      "title": "Dividir etapas, vincular fluxos e formatar",
+      "blocks": [
+        {
+          "kind": "h",
+          "text": "Dividir próxima etapa"
+        },
+        {
+          "kind": "p",
+          "text": "Clique em Dividir próxima etapa, informe quantas etapas criar (1 a 100) e clique em Confirmar. As novas etapas herdam a formatação da origem."
+        },
+        {
+          "kind": "h",
+          "text": "Vincular a outro fluxograma"
+        },
+        {
+          "kind": "p",
+          "text": "Na edição de um box de processo, responda Sim em “Este fluxo é vinculado a outro fluxograma?”, escolha o box de origem e salve. No desenho, o vínculo aparece como Gatilho: com número e título."
+        },
+        {
+          "kind": "h",
+          "text": "Aparência"
+        },
+        {
+          "kind": "p",
+          "text": "Ajuste Fundo, Borda e Cor do título do box. Somente o Administrador usa Box padrão para definir o padrão de cada forma; boxes personalizados são preservados."
+        }
+      ]
+    },
+    {
+      "title": "Tarefas internas e Conversa",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "Nova tarefa neste box cria um item de checklist dentro do box, sem criar um novo box."
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Escolha Nova tarefa neste box.",
+            "Preencha Título e Descrição.",
+            "Em OKRs, selecione Responsável, Prazo e Demais envolvidos.",
+            "Clique em Salvar."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Em OKRs, a tarefa fica Pendente ou Concluída. A Conversa permite perguntas a um envolvido e respostas; perguntas sem resposta entram em Minhas Pendências."
+        },
+        {
+          "kind": "note",
+          "text": "Pendências da etapa anterior são apenas avisos: não impedem avançar. Em Fluxogramas não há responsável, prazo, conversa nem conclusão de tarefas."
+        }
+      ]
+    },
+    {
+      "title": "Processos",
+      "blocks": [
+        {
+          "kind": "steps",
+          "steps": [
+            "Entre em Processos e clique em Novo Processo.",
+            "Preencha Nome do Processo.",
+            "Use Seção para incluir seções e Parágrafo para o conteúdo; os parágrafos são numerados.",
+            "Arraste as seções para reordenar.",
+            "Em Fluxogramas, clique em Importar e escolha o fluxo.",
+            "Informe Departamento e Responsável das etapas vinculadas.",
+            "Clique em Salvar."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Para alterar, use Editar Processo. Remover o vínculo ou excluir o processo preserva o fluxograma original."
+        }
+      ]
+    },
+    {
+      "title": "KPIs",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "Cadastre o indicador com Nome, Descrição, Segmento, Responsável, Unidade, Meta e Periodicidade (Diário, Semanal ou Mensal)."
+        },
+        {
+          "kind": "p",
+          "text": "Para registrar a medição, use Lançar resultado, informe Período, Valor e, se quiser, Observação, e clique em Salvar."
+        },
+        {
+          "kind": "table",
+          "headers": [
+            "Situação",
+            "Regra"
+          ],
+          "rows": [
+            [
+              "Meta atingida",
+              "Resultado igual ou acima da meta."
+            ],
+            [
+              "Atenção",
+              "A partir de 80% da meta."
+            ],
+            [
+              "Abaixo da meta",
+              "Menos de 80% da meta."
+            ],
+            [
+              "Sem lançamento",
+              "Período sem resultado."
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Usuários e permissões",
+      "blocks": [
+        {
+          "kind": "steps",
+          "steps": [
+            "Entre em Usuários.",
+            "Escolha a pessoa.",
+            "Selecione Administrador, Editor ou Visualizador.",
+            "Clique em Adicionar usuário."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Trocar a permissão na tabela salva na hora. Remover usuário pede confirmação. Somente o Administrador vê esses controles."
+        }
+      ]
+    },
+    {
+      "title": "PDF e versões",
+      "blocks": [
+        {
+          "kind": "steps",
+          "steps": [
+            "No desenho, clique em Exportar fluxograma para PDF.",
+            "Escolha o fluxograma ou objetivo.",
+            "Clique em Baixar PDF."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "O PDF reproduz o que está visível na tela, em uma página proporcional: exiba ou recolha boxes antes de exportar. Salvar versão guarda o PDF em Versões salvas, no padrão V1 dd.mm.aa; use Baixar versão para abrir."
+        },
+        {
+          "kind": "note",
+          "text": "Não há exportação para Excel no Mytosis."
+        }
+      ]
+    }
+  ]
+}

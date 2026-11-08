@@ -1,0 +1,48 @@
+{
+  "app": "OpDesk",
+  "slug": "opdesk",
+  "icon": "Phone",
+  "subtitle": "Chamados de Campo, Reclamações e Assuntos Internos",
+  "objetivo": [
+    "Registrar e acompanhar problemas em campo, reclamações de clientes e assuntos internos, do registro até a confirmação do atendimento pelo solicitante.",
+    "O app reúne descrição, anexo, mensagens e histórico de cada chamado, inclusive os chamados abertos a partir de visitas do Site Survey."
+  ],
+  "para_quem": "Usuários que precisam abrir chamados, analistas de suporte ao cliente e administradores.",
+  "como_usar": "Siga o sumário ou os marcadores do PDF; os caminhos reproduzem os nomes dos campos e botões. As ações mostradas dependem do perfil de acesso.",
+  "labels": ["Acompanhamento", "Novo chamado", "Categoria", "Problema em campo", "Reclamação de cliente", "Outros assuntos internos", "Prioridade", "Título", "Descrição", "Anexo opcional (até 10 MB)", "Abrir chamado", "Anexos", "Mensagens", "Histórico", "Enviar", "Gestão do chamado", "Situação", "Responsável", "Observações internas", "Salvar andamento", "Aberto", "Em atendimento", "Aguardando", "Atendido pelo Suporte", "Concluído", "Cancelado", "Site Survey", "Visita"],
+  "icons": { "Novo chamado": "Plus", "Mensagens": "MessageSquare", "Histórico": "History", "Anexos": "Paperclip" },
+  "sections": [
+    { "title": "Navegação e primeiros passos", "blocks": [
+      { "kind": "p", "text": "O OpDesk abre direto no quadro Acompanhamento. O botão + abre o Novo chamado e o clique em uma linha abre os detalhes." },
+      { "kind": "table", "headers": ["Área", "Para que serve"], "rows": [["Novo chamado", "Registrar um problema, reclamação ou assunto interno."], ["Acompanhamento", "Consultar e filtrar os chamados."], ["Detalhe do chamado", "Ver anexos, conversar, atualizar o andamento e concluir."]] },
+      { "kind": "note", "text": "O administrador vê os chamados da plataforma; os demais veem os que abriram ou que foram atribuídos a eles." }
+    ] },
+    { "title": "Quem faz o quê", "blocks": [
+      { "kind": "table", "headers": ["Atuação", "Rotina"], "rows": [["Solicitante", "Abre o chamado, envia mensagens e confirma a conclusão."], ["Analista de suporte", "Atualiza situação, responsável e observações internas."], ["Administrador do ERP", "Atende chamados e pode ser escolhido como Responsável."]] }
+    ] },
+    { "title": "Abrir um chamado", "blocks": [
+      { "kind": "steps", "steps": ["Clique no botão + do Acompanhamento.", "Em Categoria, escolha Problema em campo, Reclamação de cliente ou Outros assuntos internos.", "Escolha a Prioridade: Baixa, Média, Alta ou Crítica.", "Preencha Título (3 a 120 caracteres) e Descrição (5 a 4.000 caracteres).", "Se quiser, inclua um arquivo em Anexo opcional (até 10 MB).", "Clique em Abrir chamado."] },
+      { "kind": "note", "text": "O chamado fica no nome de quem o abriu. Responsável e situação são definidos pelo suporte." }
+    ] },
+    { "title": "Acompanhamento e filtros", "blocks": [
+      { "kind": "p", "text": "A tabela mostra Nº, Visita, Solicitante, Categoria, Título, Prioridade, Situação e Data, com o filtro padrão em cada cabeçalho. Os mais recentes aparecem primeiro." },
+      { "kind": "p", "text": "Chamados vindos do Site Survey recebem o selo Site Survey e mostram o número da Visita." }
+    ] },
+    { "title": "Mensagens e anexos", "blocks": [
+      { "kind": "steps", "steps": ["Abra o chamado.", "Em Mensagens, escreva o texto.", "Clique em Enviar."] },
+      { "kind": "p", "text": "Em Anexos, clique no nome do arquivo para abri-lo em outra aba. Mensagens não podem ser editadas e não aceitam novos anexos." },
+      { "kind": "note", "text": "Chamados Concluído ou Cancelado não aceitam novas mensagens; as anteriores continuam visíveis." }
+    ] },
+    { "title": "Atender e atualizar o andamento", "blocks": [
+      { "kind": "steps", "steps": ["Abra o chamado e vá a Gestão do chamado.", "Escolha a Situação: Aberto, Em atendimento, Aguardando, Atendido pelo Suporte ou Cancelado.", "Escolha o Responsável ou deixe sem responsável.", "Preencha Observações internas, se necessário.", "Clique em Salvar andamento."] },
+      { "kind": "note", "text": "Apesar do nome, as Observações internas podem ser vistas pelo solicitante. Não registre ali informações sigilosas." }
+    ] },
+    { "title": "Confirmar a conclusão", "blocks": [
+      { "kind": "steps", "steps": ["O suporte marca Atendido pelo Suporte.", "O solicitante abre o chamado e confere o atendimento.", "O solicitante confirma a conclusão; o chamado passa a Concluído."] },
+      { "kind": "p", "text": "Depois de Concluído, o chamado fica apenas para consulta, com mensagens e Histórico preservados." }
+    ] },
+    { "title": "Dúvidas frequentes", "blocks": [
+      { "kind": "table", "headers": ["Pergunta", "Resposta"], "rows": [["Posso exportar os chamados?", "Não há exportação PDF ou Excel no OpDesk."], ["Posso excluir ou editar um chamado?", "Não. Complemente pelas Mensagens."], ["Por que não apareço como Responsável?", "A lista mostra administradores do ERP com acesso ao OpDesk."]] }
+    ] }
+  ]
+}

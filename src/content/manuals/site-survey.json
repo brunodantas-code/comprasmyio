@@ -1,0 +1,406 @@
+{
+  "app": "Site Survey",
+  "slug": "site-survey",
+  "icon": "Search",
+  "subtitle": "Visitas Técnicas, Checklists, Pendências e Relatórios",
+  "objetivo": [
+    "Organizar as visitas técnicas de pré-implantação: agendar, cadastrar lojas, quiosques e ambientes, preencher os checklists com fotos, sanar pendências e emitir os relatórios para o cliente e para as compras da myio.",
+    "O app preserva respostas, fotos, anexos, histórico de nomes e horários de cada ponto, e conecta o levantamento à proposta comercial e às aprovações de instalação."
+  ],
+  "para_quem": "Técnicos de campo, responsáveis pelo agendamento, revisores, equipe comercial e administradores.",
+  "como_usar": "Siga o sumário ou os marcadores do PDF; os caminhos reproduzem os nomes dos menus. As ações mostradas dependem do perfil de acesso.",
+  "labels": [
+    "Visitas",
+    "Nova visita",
+    "Realizar Visita",
+    "Sanar Pendências",
+    "Cadastrar visita realizada",
+    "Histórico de Visitas",
+    "Checklists",
+    "Cadastro",
+    "Usuários",
+    "Perfis de acesso",
+    "Logs",
+    "Cliente",
+    "Unidade / filial",
+    "Projeto",
+    "Técnico responsável",
+    "Checklist",
+    "Início",
+    "Término previsto",
+    "Término da visita",
+    "Contato no local",
+    "Telefone",
+    "Local da visita",
+    "Observações",
+    "Salvar visita",
+    "Agendada",
+    "Em andamento",
+    "Em revisão",
+    "Concluída",
+    "Cancelada",
+    "Relatório da visita",
+    "Proposta Comercial",
+    "Editar visita",
+    "Cancelar visita",
+    "Confirmar cancelamento",
+    "Loja",
+    "Quiosque",
+    "Ambiente",
+    "Loja vaga",
+    "Quiosque vago",
+    "Adicionar ambiente",
+    "LUC (opcional)",
+    "Não identificado",
+    "Nome do contrato",
+    "Localização (opcional)",
+    "Importar Cadastro",
+    "Conferir importação",
+    "Importar mesmo assim",
+    "Selecionar loja, quiosque ou ambiente",
+    "Salvar progresso",
+    "Concluir visita",
+    "Não se aplica",
+    "Pausar visita",
+    "Motivo da pausa",
+    "Confirmar pausa",
+    "Motivo do cancelamento",
+    "Pendências para o cliente",
+    "Tipo de relatório",
+    "Relatório completo",
+    "Relatório de compras",
+    "Intervenções do cliente",
+    "Equipamentos e ferramentas",
+    "Incluir no relatório",
+    "Selecionar pontos específicos",
+    "Substituir proposta",
+    "Baixar proposta",
+    "Novo modelo",
+    "Editar modelo",
+    "Usar modelo como base",
+    "Seções padrão",
+    "Fotos e anexos deste ambiente",
+    "Salvar",
+    "Confirmar",
+    "Cancelar"
+  ],
+  "icons": {
+    "Visitas": "CalendarDays",
+    "Checklists": "ClipboardCheck",
+    "Cadastro": "Package",
+    "Usuários": "UsersRound",
+    "Nova visita": "Plus",
+    "Histórico de Visitas": "FileText",
+    "Relatório da visita": "FileText",
+    "Proposta Comercial": "FileText",
+    "Sanar Pendências": "ClipboardCheck",
+    "Realizar Visita": "CalendarDays",
+    "Perfis de acesso": "ShieldCheck",
+    "Logs": "History"
+  },
+  "sections": [
+    {
+      "title": "Navegação e primeiros passos",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "O Site Survey reúne quatro áreas na barra inferior. Clique no nome da área para abrir seus submenus. No celular, os mesmos menus ficam na parte inferior da tela."
+        },
+        {
+          "kind": "table",
+          "headers": [
+            "Área",
+            "Submenus e finalidade"
+          ],
+          "rows": [
+            [
+              "Visitas",
+              "Nova visita, Realizar Visita, Sanar Pendências, Cadastrar visita realizada e Histórico de Visitas."
+            ],
+            [
+              "Checklists",
+              "Modelos, seções e perguntas dos levantamentos."
+            ],
+            [
+              "Cadastro",
+              "Listas usadas no levantamento: lojas, quiosques, tipos de ambiente, materiais, motivos."
+            ],
+            [
+              "Usuários",
+              "Usuários, Perfis de acesso e Logs."
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Os menus aparecem conforme o perfil. Nova visita e Cadastrar visita realizada exigem permissão de agendamento."
+        }
+      ]
+    },
+    {
+      "title": "Quem faz o quê",
+      "blocks": [
+        {
+          "kind": "table",
+          "headers": [
+            "Permissão",
+            "Rotina"
+          ],
+          "rows": [
+            [
+              "Criar e agendar",
+              "Abre novas visitas e registra visitas já realizadas."
+            ],
+            [
+              "Editar agendamentos",
+              "Corrige dados da visita."
+            ],
+            [
+              "Executar e preencher",
+              "Preenche checklists, fotos e pendências."
+            ],
+            [
+              "Revisar",
+              "Revisa levantamentos e corrige respostas."
+            ],
+            [
+              "Todas as visitas",
+              "Consulta visitas de todos os técnicos."
+            ],
+            [
+              "Excluir visitas",
+              "Exclui visitas."
+            ],
+            [
+              "Modelos de checklist / Cadastro e Diversos",
+              "Mantém modelos e listas."
+            ],
+            [
+              "Usuários, Perfis de acesso, Logs",
+              "Administra acessos e registros."
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Administradores do ERP têm todas as permissões. Os demais seguem o perfil ou o acesso individual customizado."
+        }
+      ]
+    },
+    {
+      "title": "Agendar uma visita",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "<b>Caminho:</b> Visitas → Nova visita."
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Informe Cliente e/ou Projeto, Unidade / filial, Técnico responsável e Checklist.",
+            "Preencha Início e, se quiser, Término previsto.",
+            "Informe Contato no local, Telefone e Local da visita (obrigatório).",
+            "Acrescente Observações, se necessário.",
+            "Clique em Salvar visita."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Os pontos (lojas, quiosques e ambientes) são cadastrados depois de salvar a visita."
+        },
+        {
+          "kind": "h",
+          "text": "Visita já realizada"
+        },
+        {
+          "kind": "p",
+          "text": "Em Visitas → Cadastrar visita realizada, informe também o Término da visita. O registro já nasce Concluída."
+        }
+      ]
+    },
+    {
+      "title": "Histórico de Visitas e situações",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "O Histórico de Visitas mostra totais por situação e a lista filtrável por número, cliente/projeto, técnico, agendamento, situação e pontos. A busca também encontra visitas pelo nome de uma loja, quiosque ou ambiente."
+        },
+        {
+          "kind": "table",
+          "headers": [
+            "Situação",
+            "Significado"
+          ],
+          "rows": [
+            [
+              "Agendada",
+              "Visita marcada."
+            ],
+            [
+              "Em andamento",
+              "Levantamento iniciado."
+            ],
+            [
+              "Em revisão",
+              "Aguardando revisão."
+            ],
+            [
+              "Concluída",
+              "Levantamento encerrado; não reabre."
+            ],
+            [
+              "Cancelada",
+              "Visita cancelada; o histórico é mantido."
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Pela visita, quem tem permissão acessa Relatório da visita, Proposta Comercial, Editar visita e Cancelar visita (com Confirmar cancelamento)."
+        }
+      ]
+    },
+    {
+      "title": "Cadastrar lojas, quiosques e ambientes",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "Dentro da visita, use Adicionar ambiente e escolha Loja, Quiosque, Ambiente, Loja vaga ou Quiosque vago."
+        },
+        {
+          "kind": "table",
+          "headers": [
+            "Tipo",
+            "Campos principais"
+          ],
+          "rows": [
+            [
+              "Loja / Quiosque",
+              "LUC (opcional) ou Não identificado, Nome do contrato, Localização (opcional), medidor, energia e/ou água, Checklist."
+            ],
+            [
+              "Ambiente",
+              "Nome do ambiente, Localização (opcional), medidor, energia e/ou água, Checklist e tipo de ambiente."
+            ],
+            [
+              "Loja vaga / Quiosque vago",
+              "LUC obrigatório; sem foto de fachada."
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Na edição de loja, escolha entre corrigir o cadastro ou registrar alteração de loja, mantendo o nome anterior no histórico. LUC repetido exige confirmação."
+        },
+        {
+          "kind": "h",
+          "text": "Importar planilha"
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Use Importar Cadastro e selecione .xlsx, .xls ou .csv.",
+            "Revise Conferir importação: linhas válidas e com pendência.",
+            "Se houver LUC repetido, use Importar mesmo assim ou volte à conferência."
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Realizar a visita",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "<b>Caminho:</b> Visitas → Realizar Visita → abra a visita."
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Preencha as etapas iniciais, quando aparecerem.",
+            "Em Selecionar loja, quiosque ou ambiente, escolha o ponto.",
+            "Responda às perguntas das seções e inclua as fotos pedidas.",
+            "Use Fotos e anexos deste ambiente para imagens e PDFs extras.",
+            "Use Salvar progresso quando quiser; as alterações também são salvas automaticamente.",
+            "Ao terminar o ponto, clique em Concluir visita."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Uma seção pode ser marcada como Não se aplica: as respostas são preservadas e a seção sai do resumo e das pendências."
+        },
+        {
+          "kind": "note",
+          "text": "Só uma pessoa edita um ponto por vez. As demais veem em modo consulta e podem apenas salvar a foto da fachada."
+        }
+      ]
+    },
+    {
+      "title": "Pausar ou cancelar um ponto",
+      "blocks": [
+        {
+          "kind": "steps",
+          "steps": [
+            "Para pausar, use Pausar visita, escolha o Motivo da pausa e clique em Confirmar pausa.",
+            "Para cancelar a loja, use Cancelar visita no ponto, escolha o Motivo do cancelamento e clique em Confirmar cancelamento."
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Respostas, fotos, anexos e histórico já registrados são preservados. Uma visita pausada precisa ser retomada antes da conclusão."
+        }
+      ]
+    },
+    {
+      "title": "Sanar pendências e respostas do cliente",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "Visitas → Sanar Pendências reúne visitas Em andamento ou Concluída com informações faltando. Os cartões mostram a etapa e a quantidade; as perguntas abrem em janela."
+        },
+        {
+          "kind": "p",
+          "text": "No histórico, Pendências para o cliente gera um PDF com campos para resposta. As respostas do cliente podem ser importadas depois."
+        },
+        {
+          "kind": "note",
+          "text": "Corrigir uma visita concluída não altera sua situação nem suas datas."
+        }
+      ]
+    },
+    {
+      "title": "Relatórios e Proposta Comercial",
+      "blocks": [
+        {
+          "kind": "steps",
+          "steps": [
+            "No histórico, clique em Relatório da visita.",
+            "Em Tipo de relatório, escolha Relatório completo, Relatório de compras, Intervenções do cliente ou Equipamentos e ferramentas.",
+            "Em Incluir no relatório, escolha todos os pontos, um tipo ou Selecionar pontos específicos.",
+            "Confira a prévia e gere o PDF."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Em Proposta Comercial, quem tem edição envia ou usa Substituir proposta; todos com acesso usam Baixar proposta. A proposta atualiza as quantidades contratadas."
+        }
+      ]
+    },
+    {
+      "title": "Checklists e Cadastro",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "Em Checklists, Novo modelo pede nome, descrição e permite Usar modelo como base ou copiar as Seções padrão. Editar modelo ajusta seções e perguntas, reordenáveis por arraste."
+        },
+        {
+          "kind": "p",
+          "text": "Em Cadastro ficam Lojas, Quiosques, Tipos de ambiente, Materiais e equipamentos, ferramentas, Ações para chamados e motivos de cancelamento e de pausa. Os títulos podem ser renomeados."
+        },
+        {
+          "kind": "note",
+          "text": "Excluir um modelo o retira de novas visitas, preservando o histórico das existentes."
+        }
+      ]
+    }
+  ]
+}

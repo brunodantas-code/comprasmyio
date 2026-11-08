@@ -1,0 +1,70 @@
+{
+  "app": "Code",
+  "slug": "code",
+  "icon": "CodeXml",
+  "subtitle": "Melhorias, Bugs, Conversa e Histórico dos Apps",
+  "objetivo": [
+    "Centralizar as solicitações de melhoria e a correção de problemas (bugs) de todos os apps da myio, do registro inicial até a confirmação da entrega pelo solicitante.",
+    "O app conecta quem solicita e quem desenvolve, preservando descrição, imagens, perguntas, respostas, solução proposta, observações e todo o histórico de cada ticket."
+  ],
+  "para_quem": "Todos os usuários que precisam pedir melhorias ou relatar problemas, e os administradores responsáveis pelo atendimento.",
+  "como_usar": "Siga o sumário ou os marcadores do PDF; os caminhos reproduzem os nomes dos campos e botões. As ações mostradas dependem do perfil de acesso.",
+  "labels": ["Tickets", "Novo ticket", "Acompanhamento", "Aplicativo", "Menu (opcional)", "Submenu (opcional)", "Tipo", "Melhoria", "Bug", "Título", "Descrição", "Prioridade", "Urgência", "Resultado esperado", "Prints e fotos (até 10 MB por imagem)", "Abrir ticket", "Conversa", "Nova pergunta", "Destinatário", "Enviar pergunta", "Responder", "Responder à pergunta", "Enviar resposta", "Gestão do ticket", "Situação", "Responsável pela execução", "Salvar andamento", "Solução Proposta (opcional)", "Salvar solução", "Observações", "Nova observação", "Adicionar observação", "Marcar como concluído", "Histórico", "Em aberto", "Em atendimento", "Aguardando resposta", "Atendido", "Concluído", "Excluído", "Anexar imagens", "Baixar anexo", "Anexos do chamado", "Editar título", "Salvar", "Cancelar", "Minhas Pendências", "Abrir chamado (Code)"],
+  "icons": { "Tickets": "Ticket", "Novo ticket": "Plus", "Conversa": "MessageSquare", "Histórico": "History", "Minhas Pendências": "ListChecks" },
+  "sections": [
+    { "title": "Navegação e primeiros passos", "blocks": [
+      { "kind": "p", "text": "O Code abre direto na tela <b>Tickets</b> (“Melhorias e bugs de todos os aplicativos”). Ela reúne a criação de solicitações e o acompanhamento; o detalhe de cada ticket abre ao clicar na linha." },
+      { "kind": "table", "headers": ["Área", "Para que serve"], "rows": [["Novo ticket", "Registrar uma melhoria ou um bug."], ["Acompanhamento", "Consultar, filtrar e abrir os tickets."], ["Detalhe do ticket", "Conversar, anexar imagens, acompanhar a solução e concluir."]] },
+      { "kind": "h", "text": "Atalho pelo menu de três barras" },
+      { "kind": "p", "text": "Em qualquer app, o menu de três barras pode exibir Abrir chamado (Code), que leva direto ao Code." },
+      { "kind": "note", "text": "O administrador vê todos os tickets da plataforma. Os demais usuários veem os tickets que abriram ou que foram atribuídos a eles." }
+    ] },
+    { "title": "Quem faz o quê", "blocks": [
+      { "kind": "table", "headers": ["Atuação", "Rotina principal"], "rows": [["Solicitante", "Abre o ticket, responde perguntas, anexa imagens, corrige o título e confirma a entrega."], ["Administrador do Code", "Administrador do ERP com acesso ao Code: atualiza a situação, define o responsável, registra solução e observações."], ["Responsável pela execução", "Administrador designado para desenvolver o ticket."], ["Destinatário de pergunta", "Usuário a quem uma pergunta foi direcionada; responde pela Conversa."]] },
+      { "kind": "note", "text": "Somente o solicitante conclui o ticket e somente ele exclui um ticket ainda Em aberto." }
+    ] },
+    { "title": "Abrir um ticket", "blocks": [
+      { "kind": "p", "text": "<b>Caminho:</b> Tickets → Novo ticket." },
+      { "kind": "steps", "steps": ["Em Aplicativo, escolha o app afetado (Supply, Cash Flow, CRM, Legal, RH, Code ou Site Survey).", "Se souber, informe Menu (opcional) e Submenu (opcional). Trocar o app limpa o menu; trocar o menu limpa o submenu.", "Em Tipo, escolha Melhoria ou Bug.", "Preencha Título e Descrição.", "Defina Prioridade (Baixa, Média, Alta ou Crítica) e Urgência (Normal ou Urgente).", "Descreva o Resultado esperado.", "Se quiser, anexe imagens em Prints e fotos (até 10 MB por imagem).", "Clique em Abrir ticket."] },
+      { "kind": "h", "text": "Campos e validações" },
+      { "kind": "table", "headers": ["Campo", "Regra"], "rows": [["Título", "De 3 a 120 caracteres."], ["Descrição", "De 10 a 4.000 caracteres."], ["Resultado esperado", "De 5 a 2.000 caracteres."], ["Imagens", "Somente imagens, até 10 MB cada; várias por vez."]] },
+      { "kind": "note", "text": "Se o ticket for gravado mas alguma imagem falhar, o aviso informa que o ticket já existe. Não abra outro: anexe a imagem pelo detalhe do ticket." }
+    ] },
+    { "title": "Acompanhamento e filtros", "blocks": [
+      { "kind": "p", "text": "A tabela de Acompanhamento mostra Nº, Solicitante, Aplicativo, Tipo, Título, Prioridade, Situação, Pergunta e Data. Cada cabeçalho tem o filtro padrão do ERP." },
+      { "kind": "table", "headers": ["Sinal na coluna Pergunta", "Significado"], "rows": [["?", "Pergunta aguardando sua resposta."], ["Aguardando outro usuário", "A resposta depende de outra pessoa."], ["—", "Sem pergunta pendente."]] },
+      { "kind": "note", "text": "Tickets Excluídos ficam ocultos. Para vê-los, filtre a coluna Situação por Excluído." }
+    ] },
+    { "title": "Detalhe do ticket", "blocks": [
+      { "kind": "p", "text": "O detalhe mostra número, título, aplicativo, menu e submenu, tipo, solicitante, data, descrição, resultado esperado, situação, prioridade e o destaque Urgente, quando houver." },
+      { "kind": "h", "text": "Corrigir o título" },
+      { "kind": "p", "text": "O solicitante usa Editar título, ajusta o texto e escolhe Salvar ou Cancelar. Disponível enquanto o ticket não estiver Concluído ou Excluído." }
+    ] },
+    { "title": "Conversa: perguntas e respostas", "blocks": [
+      { "kind": "p", "text": "A Conversa organiza perguntas numeradas e suas respostas, com autor, data e destinatário. Perguntas sem resposta exibem Aguardando resposta e aparecem em Minhas Pendências do destinatário." },
+      { "kind": "h", "text": "Enviar uma pergunta" },
+      { "kind": "steps", "steps": ["Abra o ticket e escolha Nova pergunta.", "Selecione o Destinatário.", "Escreva a pergunta e, se quiser, inclua imagens.", "Clique em Enviar pergunta."] },
+      { "kind": "h", "text": "Responder" },
+      { "kind": "steps", "steps": ["Escolha Responder.", "Se houver mais de uma pendente, selecione em Responder à pergunta.", "Escreva e clique em Enviar resposta."] },
+      { "kind": "note", "text": "O administrador pergunta até o ticket ficar Atendido. O solicitante ainda pode perguntar em ticket Atendido, até concluí-lo." }
+    ] },
+    { "title": "Imagens e anexos", "blocks": [
+      { "kind": "steps", "steps": ["Selecione arquivos em Prints e fotos (até 10 MB por imagem).", "Sem texto de mensagem, clique em Anexar imagens.", "Clique na miniatura para ver a imagem; use Baixar anexo para salvar."] },
+      { "kind": "p", "text": "Imagens enviadas com uma pergunta ou resposta ficam junto da mensagem; as enviadas sozinhas ficam em Anexos do chamado. A exclusão pede confirmação." }
+    ] },
+    { "title": "Atendimento pelo administrador", "blocks": [
+      { "kind": "p", "text": "<b>Caminho:</b> detalhe do ticket → Gestão do ticket." },
+      { "kind": "steps", "steps": ["Em Situação, escolha Em aberto, Em atendimento, Aguardando resposta ou Atendido.", "Em Responsável pela execução, escolha a pessoa ou Sem responsável.", "Clique em Salvar andamento."] },
+      { "kind": "h", "text": "Solução e observações" },
+      { "kind": "p", "text": "Preencha Solução Proposta (opcional) e clique em Salvar solução. Em Observações, escreva a Nova observação e clique em Adicionar observação. Edições e exclusões ficam registradas no Histórico; o texto original é preservado." }
+    ] },
+    { "title": "Situações, conclusão e Histórico", "blocks": [
+      { "kind": "table", "headers": ["Situação", "Significado"], "rows": [["Em aberto", "Recém-aberto; o solicitante ainda pode excluí-lo."], ["Em atendimento", "Em desenvolvimento."], ["Aguardando resposta", "Depende de uma resposta."], ["Atendido", "Entregue; aguarda conferência do solicitante."], ["Concluído", "Confirmado pelo solicitante."], ["Excluído", "Retirado da fila, preservado no histórico."]] },
+      { "kind": "steps", "steps": ["Abra um ticket Atendido.", "Confira a melhoria ou correção.", "Clique em Marcar como concluído."] },
+      { "kind": "p", "text": "O Histórico reúne abertura, mudanças de situação e responsável, solução, observações, edição de título e mensagens." }
+    ] },
+    { "title": "Dúvidas frequentes", "blocks": [
+      { "kind": "table", "headers": ["Pergunta", "Resposta"], "rows": [["Posso exportar os tickets?", "Não há exportação PDF ou Excel no Code; Baixar anexo baixa só a imagem."], ["Posso alterar a descrição?", "Não. Complemente pela Conversa para preservar o registro original."], ["Por que não vejo um ticket?", "Usuários comuns veem apenas tickets próprios ou atribuídos; excluídos exigem filtro."]] }
+    ] }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "app": "CDE",
+  "slug": "cde",
+  "icon": "CdeIcon",
+  "subtitle": "Padrões de Interface de Todos os Apps",
+  "objetivo": [
+    "Consolidar os padrões visuais e de navegação do ERP e dos apps: campos, filtros, ordenação, botões, boxes, mensagens, numeração, ícones, menu principal e página principal.",
+    "O padrão escolhido no CDE passa a valer nas telas que usam os componentes compartilhados, mantendo todos os apps com a mesma aparência."
+  ],
+  "para_quem": "Administradores do ERP e responsáveis pelo desenvolvimento dos apps.",
+  "como_usar": "Siga o sumário ou os marcadores do PDF. Ao entrar, as categorias aparecem recolhidas; abra a desejada pela seta.",
+  "labels": ["Campos para preenchimento", "Filtros", "Ordenação", "Botões de ação", "Boxes e mensagens", "Numeração de categorias e subcategorias", "Ícones dos Apps e menus", "Navegação (UI/UX)", "Menu principal", "Apps da página principal", "Recolher tudo", "Escolher como padrão", "Padrão principal", "Adicionar como padrão", "Padrão secundário por tela", "Tornar principal", "Criar modelo", "Editar modelo", "Nome do modelo", "Forma", "Espessura da borda", "Tamanho da fonte", "Fundo", "Borda", "Cor do texto e ícone", "Descrição do desenvolvedor", "Excluir modelo", "Substituir por", "Salvar", "Cancelar", "Excluir", "Histórico de exclusões", "Onde é utilizado", "Modo escuro", "Minhas Pendências", "Acessos"],
+  "icons": { "Filtros": "Filter", "Ordenação": "ArrowUpDown", "Botões de ação": "MousePointerClick", "Menu principal": "Menu", "Apps da página principal": "LayoutGrid" },
+  "sections": [
+    { "title": "Navegação e primeiros passos", "blocks": [
+      { "kind": "p", "text": "O CDE mostra as categorias numeradas. Cada categoria abre suas subcategorias pela seta; Recolher tudo fecha todas. Arraste pelo símbolo ao lado do número para reordenar; a numeração se ajusta sozinha." },
+      { "kind": "table", "headers": ["Categoria", "Conteúdo"], "rows": [["Campos para preenchimento", "Texto e número, listas suspensas, textos longos e senhas."], ["Filtros", "Funil padrão dos cabeçalhos."], ["Ordenação", "Ordenar, mover, voltar ao sumário e exibir/recolher."], ["Botões de ação", "+, Adicionar/Novo, Salvar, Cancelar, Confirmar, Fechar (X), lápis e lixeira."], ["Boxes e mensagens", "Cartões e mensagens de confirmação."], ["Numeração", "Números de categorias e subcategorias."], ["Ícones dos Apps e menus", "Ícones, tipo de menu e ordem dos menus de cada app."], ["Navegação (UI/UX)", "Tela x pop-up, menus e flutuantes (registro de decisão)."], ["Menu principal", "Itens do menu de três barras, nome do usuário e estilo dos ícones."], ["Apps da página principal", "Ordem e tamanho dos ícones dos apps."]] }
+    ] },
+    { "title": "Escolher um padrão", "blocks": [
+      { "kind": "steps", "steps": ["Abra a categoria e a subcategoria.", "Compare os modelos: prévia, cores (código em cinza claro), usos e Onde é utilizado.", "Clique em Escolher como padrão; o cartão passa a mostrar Padrão principal."] },
+      { "kind": "p", "text": "Campos para preenchimento aceitam vários padrões (Adicionar como padrão). Nos demais grupos há um padrão principal e, se necessário, um Padrão secundário por tela, aplicado só às telas marcadas; Tornar principal promove o secundário." }
+    ] },
+    { "title": "Criar e editar modelos", "blocks": [
+      { "kind": "steps", "steps": ["Clique em + (Criar modelo) na subcategoria.", "Preencha Nome do modelo.", "Ajuste Forma, Espessura da borda, Tamanho da fonte, Fundo, Borda e Cor do texto e ícone.", "Descreva o desejado em Descrição do desenvolvedor, se quiser.", "Confira a prévia e clique em Salvar."] },
+      { "kind": "p", "text": "O lápis de cada modelo abre Editar modelo. Editar um modelo original cria uma variante personalizada que o substitui." }
+    ] },
+    { "title": "Excluir e substituir modelos", "blocks": [
+      { "kind": "steps", "steps": ["Escolha antes o padrão que ficará no lugar.", "Em um modelo que não seja padrão, use Excluir modelo.", "Em Substituir por, escolha o substituto e clique em Excluir."] },
+      { "kind": "p", "text": "Os excluídos ficam em Histórico de exclusões, recolhido por padrão, e podem ser restaurados." }
+    ] },
+    { "title": "Menu principal e página principal", "blocks": [
+      { "kind": "p", "text": "Em Menu principal, arraste os itens do menu de três barras e escolha os visíveis (Minhas Pendências, Modo escuro, Acessos, atalhos dos apps). Defina o que aparece junto ao nome: nome, cargo e/ou perfil. Sair não pode ser ocultado." },
+      { "kind": "p", "text": "Em Apps da página principal, arraste os apps para definir a ordem e ajuste fonte, símbolo e tamanho do ícone com prévia; clique em Salvar." }
+    ] },
+    { "title": "Ícones, menus dos apps e navegação", "blocks": [
+      { "kind": "p", "text": "Em Ícones dos Apps e menus, cada app abre pela seta e mostra seus menus e submenus ligados por linhas. Arraste os ícones para reordenar; o tipo de menu pode ser escolhido com prévia." },
+      { "kind": "note", "text": "O tipo de menu e as decisões de Navegação (UI/UX) ficam registrados no CDE, mas não mudam a estrutura dos apps automaticamente; a mudança é aplicada sob pedido." }
+    ] },
+    { "title": "Regra para novas telas", "blocks": [
+      { "kind": "p", "text": "Toda tela nova ou melhoria usa os padrões escolhidos no CDE, sem botões ou campos feitos à parte. Quando um grupo ainda não tem padrão ou surge um tipo novo de elemento, a escolha é feita primeiro no CDE." }
+    ] }
+  ]
+}

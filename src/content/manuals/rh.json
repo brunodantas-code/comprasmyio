@@ -1,0 +1,25 @@
+{
+  "app": "RH",
+  "slug": "rh",
+  "icon": "UsersRound",
+  "subtitle": "Ficha Básica dos Técnicos",
+  "objetivo": [
+    "Consultar a ficha básica dos técnicos cadastrados no Supply e manter atualizado o celular de contato de cada um.",
+    "O celular atualizado é usado pelas demais rotinas que precisam contatar os técnicos."
+  ],
+  "para_quem": "Equipe de RH e gestores com acesso ao app.",
+  "como_usar": "Siga o sumário ou os marcadores do PDF; os caminhos reproduzem os nomes dos campos e botões.",
+  "labels": ["Técnicos", "Nome", "E-mail", "Celular", "Salvar", "Celular não cadastrado"],
+  "icons": { "Técnicos": "UsersRound" },
+  "sections": [
+    { "title": "Consultar técnicos", "blocks": [
+      { "kind": "p", "text": "A tela Técnicos mostra a quantidade de técnicos e a lista com filtros em Nome, E-mail e Celular." },
+      { "kind": "steps", "steps": ["Filtre pelo nome, e-mail ou celular.", "Clique na linha para abrir a ficha.", "Clique de novo para recolher."] },
+      { "kind": "note", "text": "Técnicos sem número mostram Celular não cadastrado." }
+    ] },
+    { "title": "Atualizar o celular", "blocks": [
+      { "kind": "steps", "steps": ["Abra a ficha do técnico.", "Digite o Celular com DDD, no formato (DDD) 9XXXX-XXXX.", "Clique em Salvar."] },
+      { "kind": "note", "text": "Nome e e-mail vêm do cadastro de usuários e não são alterados no RH. Não há exportação PDF ou Excel." }
+    ] }
+  ]
+}
