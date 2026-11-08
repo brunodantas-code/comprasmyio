@@ -14,8 +14,8 @@ export function CdeCategoryHeader({ number, title, hint, open, onToggle, action 
 }) {
   const content = <>
     <CdeNumber>{number}</CdeNumber>
-    <span className="min-w-0 flex-1"><span className="block text-lg font-semibold">{title}</span>
-      {hint && <span className="mt-0.5 block text-xs font-normal text-muted-foreground">{hint}</span>}
+    <span className="flex min-w-0 flex-1 items-baseline gap-3"><span className="shrink-0 text-lg font-semibold">{title}</span>
+      {hint && <span className="min-w-0 truncate text-xs font-normal text-muted-foreground" title={hint}>{hint}</span>}
     </span>
     {onToggle && (open ? <ChevronUp className="h-4 w-4 shrink-0" /> : <ChevronDown className="h-4 w-4 shrink-0" />)}
   </>;
