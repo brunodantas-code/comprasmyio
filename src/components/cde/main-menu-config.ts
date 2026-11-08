@@ -10,7 +10,7 @@ export const MENU_ITEMS = [
   { id: "logout", label: "Sair", icon: LogOut },
   { id: "portal", label: "Todos os apps", icon: LayoutGrid, to: "/portal", optional: true },
   { id: "pendentes", label: "Minhas Pendências", icon: ClipboardList, to: "/pendentes" },
-  { id: "chamados", label: "Abrir chamado (Code)", icon: LifeBuoy, to: "/chamados", optional: true },
+  { id: "chamados", label: "Abrir chamado (Code)", icon: LifeBuoy, to: "/development", optional: true },
 ] as const;
 /** Optional entries start hidden until an admin enables them in the CDE. */
 const OPTIONAL_IDS = MENU_ITEMS.filter((i) => "optional" in i).map((i) => i.id);
