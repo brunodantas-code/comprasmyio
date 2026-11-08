@@ -30,8 +30,9 @@ function styleOf(st?: CdeStyle): { css: React.CSSProperties; cls: string } {
   const form = FORMS.find((f) => f.key === st.shape);
   if (form && "radius" in form) { css["--cde-r"] = form.radius; cls.push("!rounded-[var(--cde-r)]"); }
   if (st.fill && st.fill !== "none") { css["--cde-bg"] = FILLS.find((f) => f.key === st.fill)?.color ?? ""; cls.push("!bg-[var(--cde-bg)]"); }
-  if (st.border) { css["--cde-bd"] = BORDERS.find((b) => b.key === st.border)?.color ?? ""; cls.push("!border-[var(--cde-bd)] !border-solid"); }
-  if (st.borderWidth) { css["--cde-bw"] = st.borderWidth; cls.push("!border-[length:var(--cde-bw)] !border-solid"); }
+  if (st.border === "none") { cls.push("!border-0"); }
+  else if (st.border) { css["--cde-bd"] = BORDERS.find((b) => b.key === st.border)?.color ?? ""; cls.push("!border-[var(--cde-bd)] !border-solid"); }
+  if (st.borderWidth && st.border !== "none") { css["--cde-bw"] = st.borderWidth; cls.push("!border-[length:var(--cde-bw)] !border-solid"); }
   if (st.text && st.text !== "default") { css["--cde-tx"] = TEXTS.find((t) => t.key === st.text)?.color ?? ""; cls.push("!text-[var(--cde-tx)]"); }
   return { css: css as React.CSSProperties, cls: cls.join(" ") };
 }
@@ -197,7 +198,7 @@ export function CdeWorkspace() {
                         <div className="flex min-h-14 items-center justify-center rounded-md bg-background p-2"><Preview v={v} /></div>
                         <dl className="space-y-0.5 text-[0.7rem] leading-4 text-muted-foreground">
                           <div><b>Tipo:</b> {v.tag}{v.variant ? ` · ${v.variant}` : ""}{v.size ? ` · ${v.size}` : ""}</div>
-                          {v.style && (v.style.fill || v.style.border) ? <div className="flex flex-wrap gap-x-2">{v.style.fill && v.style.fill !== "none" ? <span>Fundo <ColorCode color={FILLS.find((f) => f.key === v.style!.fill)?.color} /></span> : null}{v.style.border ? <span>Borda <ColorCode color={BORDERS.find((b) => b.key === v.style!.border)?.color} /></span> : null}</div> : null}
+                          {v.style && (v.style.fill || v.style.border) ? <div className="flex flex-wrap gap-x-2">{v.style.fill && v.style.fill !== "none" ? <span>Fundo <ColorCode color={FILLS.find((f) => f.key === v.style!.fill)?.color} /></span> : null}{v.style.border && v.style.border !== "none" ? <span>Borda <ColorCode color={BORDERS.find((b) => b.key === v.style!.border)?.color} /></span> : null}</div> : null}
                           {v.style?.description ? <div className="whitespace-pre-wrap break-words"><b>Descrição:</b> {v.style.description}</div> : null}
                           {v.className ? <div className="break-all"><b>Classes:</b> {v.className}</div> : null}
                           {v.icon ? <div className="break-all"><b>Ícone:</b> {v.icon} {v.iconClass}</div> : null}
@@ -230,7 +231,7 @@ export function CdeWorkspace() {
 
       <Dialog open={!!creating} onOpenChange={(o) => !o && setCreating(null)}>
         <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
-          <DialogHeader><DialogTitle>Criar modelo · {GROUPS.find((g) => g.key === creating)?.title}</DialogTitle></DialogHeader>
+          <DialogHeader className="flex-row items-center justify-between gap-3 space-y-0 pr-8"><DialogTitle>Criar modelo · {GROUPS.find((g) => g.key === creating)?.title}</DialogTitle><div className="flex min-h-12 min-w-24 items-center justify-center rounded-md border border-border bg-background px-3 py-2"><Preview v={draft} /></div></DialogHeader>
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1 sm:col-span-2"><Label>Nome do modelo</Label><Input value={draft.name} maxLength={60} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder="Ex.: Campo de busca" /></div>
             <div className="space-y-1"><Label>Tipo</Label>
@@ -256,12 +257,11 @@ export function CdeWorkspace() {
               <Select value={draft.style.borderWidth || "none"} onValueChange={(v) => setDraft({ ...draft, style: { ...draft.style, borderWidth: v === "none" ? "" : v } })}><SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>{WIDTHS.map((f) => <SelectItem key={f.key || "none"} value={f.key || "none"}>{f.label}</SelectItem>)}</SelectContent></Select></div>
             <div className="sm:col-span-2"><FormatColorOptions label="Fundo" value={draft.style.fill ?? "none"} options={FILLS} showCode onChange={(fill) => setDraft({ ...draft, style: { ...draft.style, fill } })} /></div>
-            <div className="sm:col-span-2"><FormatColorOptions label="Borda" value={draft.style.border ?? ""} options={BORDERS} showCode onChange={(border) => setDraft({ ...draft, style: { ...draft.style, border } })} border /></div>
+            <div className="sm:col-span-2"><FormatColorOptions label="Borda" value={draft.style.border ?? ""} options={[{ key: "none", label: "Sem borda", color: "transparent" }, ...BORDERS] as typeof BORDERS} showCode onChange={(border) => setDraft({ ...draft, style: { ...draft.style, border } })} border /></div>
             <div className="sm:col-span-2"><FormatColorOptions label="Cor do texto e ícone" value={draft.style.text ?? "default"} options={TEXTS} onChange={(text) => setDraft({ ...draft, style: { ...draft.style, text } })} /></div>
             <div className="space-y-1 sm:col-span-2"><Label>Descrição do desenvolvedor</Label><Textarea value={draft.style.description ?? ""} maxLength={1000} rows={3} onChange={(e) => setDraft({ ...draft, style: { ...draft.style, description: e.target.value } })} placeholder="Descreva como deseja o botão ou forma: uso, comportamento, cores, tamanho..." /></div>
             <div className="space-y-1 sm:col-span-2"><Label>Classes (opcional)</Label><Input value={draft.className} onChange={(e) => setDraft({ ...draft, className: e.target.value })} placeholder="h-8 text-sm" /></div>
           </div>
-          <div className="flex min-h-16 items-center justify-center rounded-md border border-border bg-background p-3"><Preview v={draft} /></div>
           <DialogFooter>
             <Button type="button" variant="action" onClick={() => setCreating(null)}>Cancelar</Button>
             <Button type="button" variant="action" disabled={create.isPending} onClick={() => creating && create.mutate(creating)}>Salvar</Button>

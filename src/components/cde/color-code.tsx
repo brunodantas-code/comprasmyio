@@ -7,10 +7,12 @@ export function useColorCode(color?: string) {
     if (!color) return setCode("");
     const el = document.createElement("span");
     el.style.color = color; document.body.appendChild(el);
-    const m = getComputedStyle(el).color.match(/[\d.]+/g); el.remove();
-    if (!m) return setCode("");
-    const [r, g, b, a] = m.map(Number);
-    setCode(a === 0 ? "" : "#" + [r, g, b].map((n) => Math.round(n).toString(16).padStart(2, "0")).join("").toUpperCase());
+    const computed = getComputedStyle(el).color; el.remove();
+    const cv = document.createElement("canvas"); cv.width = cv.height = 1;
+    const ctx = cv.getContext("2d"); if (!ctx) return setCode("");
+    ctx.fillStyle = computed; ctx.fillRect(0, 0, 1, 1);
+    const [r, g, b, a] = ctx.getImageData(0, 0, 1, 1).data;
+    setCode(a === 0 ? "" : "#" + [r, g, b].map((n) => n.toString(16).padStart(2, "0")).join("").toUpperCase());
   }, [color]);
   return code;
 }
