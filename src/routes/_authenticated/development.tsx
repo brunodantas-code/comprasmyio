@@ -26,6 +26,7 @@ import { SearchableSelect } from "@/components/ui/searchable-select";
 import { filterCodeUsers } from "@/lib/code-user-search";
 import { isCodeQuestionForUser, unansweredCodeQuestions } from "@/lib/code-pending";
 import { codeQuestionResponders } from "@/lib/code-pending";
+import { visibleCodeTickets } from "@/lib/code-ticket-list";
 
 type TicketStatus = "aberto" | "em_atendimento" | "aguardando_resposta" | "atendido" | "concluido" | "excluido";
 type Ticket = {
@@ -172,7 +173,7 @@ function DevelopmentPage() {
     { key: "question", label: "Perguntas", value: (t) => [data?.questionResponders.get(t.id)?.requester ? "Pergunta aguardando Solicitante" : "", data?.questionResponders.get(t.id)?.attendant ? "Pergunta aguardando Responsável" : ""].filter(Boolean).join("; ") },
     { key: "date", label: "Data", kind: "date", value: (t) => t.created_at.slice(0, 10), display: (t) => new Date(t.created_at).toLocaleDateString("pt-BR") },
   ]);
-  const filteredTickets = ticketFilters.filtered;
+  const filteredTickets = visibleCodeTickets(ticketFilters.filtered, ticketFilters.filters.status);
   useEffect(() => {
     if (!routeSearch.ticket || !data?.tickets.length) return;
     const linkedTicket = data.tickets.find((ticket) => ticket.id === routeSearch.ticket);

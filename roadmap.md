@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Monitoramento: excluídos ocultos por padrão; consulta explícita e limpeza do filtro conferidas na lista autenticada.
+- [x] Monitoramento: trigger compartilhado dos dois editores limpa etiqueta herdada ao mudar alocação; regressão temporária conferida para Projeto/Cliente/Estoque, sem alterar pedidos reais.
 - [x] CDE: histórico recolhido por padrão com seta em cada grupo; abertura e recolhimento conferidos.
 - [x] CDE: listas SelectTrigger seguem o padrão selecionado ao vivo; conferido no CDE e filtros do Supply.
 - [x] CDE: lápis para editar modelos com prévia; criar, editar, salvar e reabrir conferidos com modelo temporário removido.

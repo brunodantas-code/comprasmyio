@@ -1338,6 +1338,13 @@
       "when": 1794171569455,
       "tag": "0190_cde_admin_model_edit",
       "breakpoints": true
+    },
+    {
+      "idx": 191,
+      "version": "7",
+      "when": 1794171806187,
+      "tag": "0191_clear_inherited_supply_tag_on_reallocation",
+      "breakpoints": true
     }
   ]
 }

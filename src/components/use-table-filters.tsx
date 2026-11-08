@@ -38,7 +38,7 @@ export function useTableFilters<T>(rows: readonly T[], columns: FilterColumn<T>[
     return <span className="inline-flex items-center gap-1 whitespace-nowrap">{column?.label}{key === menuKey ? menu : null}</span>;
   };
   const searchText = (key: string) => filters[key]?.op === "contains" ? filters[key]?.value ?? "" : "";
-  return { filtered, header, control, menu, searchText, active: active.length, clear: () => setFilters({}) };
+  return { filtered, filters, header, control, menu, searchText, active: active.length, clear: () => setFilters({}) };
 }
 
 export function TableFilterMenu<T>({ rows, columns, filters, onChange, clear }: {
