@@ -2,9 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { ChevronDown, ChevronRight, ShieldCheck } from "lucide-react";
 import { useState } from "react";
-import { Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useTableFilters } from "@/components/use-table-filters";
 import { toast } from "sonner";
 import { getErpUsersAndAccess, setErpAppAccess, setErpUserActive } from "@/lib/erp-admin.functions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -42,9 +40,6 @@ export function ErpAppAccessAdmin() {
     onError: (error: Error) => toast.error(error.message),
   });
 
-  const [query, setQuery] = useState("");
-  const [status, setStatus] = useState<"all" | "active" | "inactive">("all");
-  const [appFilter, setAppFilter] = useState<string>("all");
   const [open, setOpen] = useState<Set<string>>(new Set());
   const toggle = (id: string) => setOpen((cur) => { const n = new Set(cur); if (n.has(id)) n.delete(id); else n.add(id); return n; });
   const saveActive = useServerFn(setErpUserActive);
@@ -57,35 +52,24 @@ export function ErpAppAccessAdmin() {
     onError: (error: Error) => toast.error(error.message),
   });
   const users = [...(data?.users ?? [])].sort((a, b) => Number(b.is_active) - Number(a.is_active));
-  const norm = (v: string) => v.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const accessSet = new Set((data?.accesses ?? []).map((access) => `${access.user_id}:${access.app_key}`));
-  const filtered = users.filter((u) => (status === "all" || (status === "active") === u.is_active)
-    && (appFilter === "all" || accessSet.has(`${u.id}:${appFilter}`))
-    && (!query.trim() || norm(`${u.full_name ?? ""} ${u.email ?? ""}`).includes(norm(query.trim()))));
+  const userFilters = useTableFilters(users, [
+    { key: "name", label: "Nome", value: (u) => u.full_name ?? "" },
+    { key: "email", label: "E-mail", value: (u) => u.email ?? "" },
+    { key: "status", label: "Situação", value: (u) => (u.is_active ? "Ativo" : "Inativo") },
+    ...APPS.map((app) => ({ key: `app_${app.key}`, label: app.label, value: (u: (typeof users)[number]) => (accessSet.has(`${u.id}:${app.key}`) ? "Com acesso" : "Sem acesso") })),
+  ]);
+  const filtered = userFilters.filtered;
   const adminSet = new Set(data?.adminIds ?? []);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2"><ShieldCheck className="h-5 w-5" />Usuários e aplicativos</CardTitle>
+        <CardTitle className="flex items-center gap-2"><ShieldCheck className="h-5 w-5" />Usuários e aplicativos{userFilters.menu}</CardTitle>
         <CardDescription>Libere os aplicativos do ERP sem alterar cargos ou perfis internos de cada app.</CardDescription>
       </CardHeader>
       <CardContent>
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando usuários...</p> : null}
-        <div className="mb-3 grid gap-2 sm:grid-cols-[minmax(0,1fr)_10rem_12rem]">
-          <div className="relative min-w-0">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar por nome ou e-mail" className="pl-9" aria-label="Buscar usuário" />
-          </div>
-          <Select value={status} onValueChange={(v) => setStatus(v as typeof status)}>
-            <SelectTrigger aria-label="Filtrar situação"><SelectValue /></SelectTrigger>
-            <SelectContent><SelectItem value="all">Todos</SelectItem><SelectItem value="active">Ativos</SelectItem><SelectItem value="inactive">Inativos</SelectItem></SelectContent>
-          </Select>
-          <Select value={appFilter} onValueChange={setAppFilter}>
-            <SelectTrigger aria-label="Filtrar por aplicativo"><SelectValue /></SelectTrigger>
-            <SelectContent><SelectItem value="all">Todos os apps</SelectItem>{APPS.map((a) => <SelectItem key={a.key} value={a.key}>Com {a.label}</SelectItem>)}</SelectContent>
-          </Select>
-        </div>
         {!isLoading ? <p className="mb-2 text-xs text-muted-foreground">{filtered.length} de {users.length} usuários</p> : null}
         <div className="divide-y divide-border">
           {filtered.map((user) => {
