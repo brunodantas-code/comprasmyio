@@ -64,10 +64,24 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
   children?: ReactNode;
 };
 
+/** Texto editado no CDE (grupo add_text) para um botão + com texto; devolve o original sem edição. */
+export function parseAddTextOverrides(raw?: string | null): Record<string, string> {
+  try { const v = JSON.parse(raw ?? "{}"); return v && typeof v === "object" && !Array.isArray(v) ? v : {}; } catch { return {}; }
+}
+export function addTextKey(screen: string, text: string) { return `${screen}|${text}`; }
+export function useCdeAddLabel(screen: string | undefined, text: ReactNode): ReactNode {
+  const { data } = useCdeStandards();
+  if (!screen || typeof text !== "string") return text;
+  const raw = data?.selected.find((s) => s.group_key === "add_text" && s.is_primary)?.variant_key;
+  const v = parseAddTextOverrides(raw)[addTextKey(screen, text)];
+  return v?.trim() ? v : text;
+}
+
 /** Botão que segue ao vivo o padrão escolhido no CDE para o grupo. */
 export const CdeButton = forwardRef<HTMLButtonElement, Props>(function CdeButton({ group, screen, active, className, children, type = "button", ...rest }, ref) {
   const { data } = useCdeStandards();
   const m = resolveCdeModel(data, group, screen);
+  const label = useCdeAddLabel(group === "plus" ? screen : undefined, children);
   const { css, cls } = styleOf(m.style);
   const Icon = ICONS[m.icon];
   return (
@@ -81,7 +95,7 @@ export const CdeButton = forwardRef<HTMLButtonElement, Props>(function CdeButton
       {...rest}
     >
       {Icon ? <Icon className={m.iconClass} /> : null}
-      {children}
+      {label}
     </Button>
   );
 });
@@ -106,4 +120,9 @@ export function CdeNumber({ children, subcategory = false }: { children: ReactNo
   const m = resolveCdeModel(data, subcategory ? "number_subsection" : "number_section", "components/cde/cde-workspace.tsx");
   const { css, cls } = styleOf(m.style);
   return <span style={css} className={cn("flex h-7 w-7 shrink-0 items-center justify-center text-sm font-bold", subcategory && "text-xs", m.className, cls)}>{children}</span>;
+}
+
+/** Inline label for + buttons that are not CdeButton; follows CDE text edits. */
+export function CdeAddLabel({ screen, text }: { screen: string; text: string }) {
+  return <>{useCdeAddLabel(screen, text)}</>;
 }

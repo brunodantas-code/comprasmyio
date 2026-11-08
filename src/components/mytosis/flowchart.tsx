@@ -1,3 +1,4 @@
+import { CdeAddLabel } from "@/components/cde/cde-button";
 import { confirmAction } from "@/components/confirm-dialog";
 import { ExportDialog } from "./export-dialog";
 import { NodePreview } from "./node-preview";
@@ -319,7 +320,7 @@ export function Flowchart({ data, canEdit, objectiveId, onObjectiveChange, focus
         {canEdit ? <Button variant="outline" size="icon" className="h-7 w-7 rounded-lg" onClick={() => openDialog({ mode: "create", kind: "objective", parentId: null, process })} aria-label={process ? "Novo fluxograma" : "Novo objetivo"} title={process ? "Novo fluxograma" : "Novo objetivo"}><Plus className="h-5 w-5" /></Button> : null}
         {process && objective && canEdit ? <Button variant="outline" size="icon" className="h-7 w-7 rounded-lg" aria-label="Editar fluxograma" title="Editar fluxograma" onClick={() => openDialog({ mode: "edit", node: objective })}><Pencil className="size-3.5" /></Button> : null}
         {process && objective && canEdit ? <Button variant="outline" size="icon" className="h-7 w-7 rounded-lg" aria-label="Excluir fluxograma" title="Excluir fluxograma" disabled={deleteNode.isPending} onClick={() => setConfirmDeleteFlow(true)}><Trash2 className="size-3.5" /></Button> : null}
-        {process && objective && canEdit ? <Button variant="outline" size="sm" onClick={() => openDialog({ mode: "create", kind: "task", parentId: objective.id, process: true })}><Plus className="size-3.5" />Nova etapa</Button> : null}
+        {process && objective && canEdit ? <Button variant="outline" size="sm" onClick={() => openDialog({ mode: "create", kind: "task", parentId: objective.id, process: true })}><Plus className="size-3.5" /><CdeAddLabel screen="components/mytosis/flowchart.tsx" text="Nova etapa" /></Button> : null}
       </div>
       <Dialog open={confirmDeleteFlow} onOpenChange={(open) => { if (!deleteNode.isPending) setConfirmDeleteFlow(open); }}>
         <DialogContent className="sm:max-w-sm">

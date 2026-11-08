@@ -32,7 +32,8 @@
  {
   "file": "components/myio-orders-tab.tsx",
   "line": 293,
-  "label": "Nova solicitação (texto variável)"
+  "label": "Nova solicitação (texto variável)",
+  "dynamic": true
  },
  {
   "file": "components/mytosis/flowchart.tsx",
