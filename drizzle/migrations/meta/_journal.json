@@ -1331,6 +1331,13 @@
       "when": 1794165468240,
       "tag": "0189_cde_standards_readable",
       "breakpoints": true
+    },
+    {
+      "idx": 190,
+      "version": "7",
+      "when": 1794171569455,
+      "tag": "0190_cde_admin_model_edit",
+      "breakpoints": true
     }
   ]
 }

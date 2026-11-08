@@ -1,7 +1,7 @@
 # Roadmap
-- [ ] CDE: histórico de exclusões recolhido por padrão com seta em cada grupo.
-- [ ] CDE: conferir aplicação do padrão de listas suspensas e corrigir a troca nas telas.
-- [ ] CDE: lápis para editar modelos já criados, com prévia e salvamento das alterações.
+- [x] CDE: histórico recolhido por padrão com seta em cada grupo; abertura e recolhimento conferidos.
+- [x] CDE: listas SelectTrigger seguem o padrão selecionado ao vivo; conferido no CDE e filtros do Supply.
+- [x] CDE: lápis para editar modelos com prévia; criar, editar, salvar e reabrir conferidos com modelo temporário removido.
 - [x] CDE: categorias sem box verde, Exibir/Recolher como 3.4 e sequência contínua até Menu Principal; tela conferida.
 - [x] CDE: apresentação substituída pela frase solicitada sobre modelos de UI/UX.
 - [x] CDE: setas nas categorias-mãe e subcategorias, preservando modelos ao recolher; computador/celular conferidos.

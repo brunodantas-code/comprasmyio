@@ -5,3 +5,4 @@
 - Use CdeCategoryHeader for every top-level CDE category so titles stay unframed and only subcategories use green bands.
 - Filter usage counts expand shared controls into logical consumer sites using filter-usage.json; exclude embedded editors and unused definitions, and validate this ledger against source when filter sites change.
 - Shared SelectTrigger resolves fields_select standards dynamically; chosen appearance follows caller layout classes so selections update existing droplists without changing values or actions.
+- Model edits update custom IDs in place; inventory edits become custom models while preserving selected references and replacement history; UPDATE policies remain ERP-admin-only.

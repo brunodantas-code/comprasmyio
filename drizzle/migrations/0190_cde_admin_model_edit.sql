@@ -1,0 +1,3 @@
+GRANT UPDATE ON public.cde_models, public.cde_removed TO authenticated;
+CREATE POLICY "cde_models update" ON public.cde_models FOR UPDATE TO authenticated USING (public.is_erp_admin(auth.uid())) WITH CHECK (public.is_erp_admin(auth.uid()));
+CREATE POLICY "cde_removed update" ON public.cde_removed FOR UPDATE TO authenticated USING (public.is_erp_admin(auth.uid())) WITH CHECK (public.is_erp_admin(auth.uid()));
