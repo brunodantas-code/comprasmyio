@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ChangePasswordDialog } from "@/components/change-password-dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { MENU_ITEMS, parseMenuConfig, useMainMenuConfig } from "@/components/cde/main-menu-config";
 
 export function AppHeader({ logo, children, supplyManual = false }: { logo: ReactNode; children?: ReactNode; supplyManual?: boolean }) {
   const navigate = useNavigate();
@@ -60,6 +61,18 @@ export function AppHeader({ logo, children, supplyManual = false }: { logo: Reac
 
 type HeaderMenuProps = { userName: string; onSignOut: () => void; onChangePassword: () => void; buttonClass: string; supplyManual?: boolean };
 
+function MainMenuEntries({ onSignOut, onChangePassword, supplyManual, itemClass }: Pick<HeaderMenuProps, "onSignOut" | "onChangePassword" | "supplyManual"> & { itemClass: string }) {
+  const { data } = useMainMenuConfig();
+  const config = data ?? parseMenuConfig();
+  return config.order.filter((id) => !config.hidden.includes(id) && (id !== "manual" || supplyManual)).map((id) => {
+    const item = MENU_ITEMS.find((i) => i.id === id);
+    if (!item) return null;
+    const Icon = item.icon;
+    if (id === "manual") return <Button key={id} asChild variant="ghost" className={itemClass}><Link to="/supply-manual"><Icon className="h-5 w-5" />{item.label}</Link></Button>;
+    return <Button key={id} variant="ghost" className={`${itemClass} ${id === "logout" ? "!text-destructive hover:!text-destructive" : ""}`} onClick={id === "logout" ? onSignOut : id === "password" ? onChangePassword : () => window.history.back()}><Icon className="h-5 w-5" />{item.label}</Button>;
+  });
+}
+
 function MobileHeaderMenu({ userName, onSignOut, onChangePassword, buttonClass, supplyManual }: HeaderMenuProps) {
   return (
     <Sheet>
@@ -67,10 +80,7 @@ function MobileHeaderMenu({ userName, onSignOut, onChangePassword, buttonClass, 
       <SheetContent side="bottom" className="rounded-t-2xl px-5 pb-8">
         <SheetHeader><SheetTitle className="truncate text-left">{userName}</SheetTitle></SheetHeader>
         <nav className="mt-5 divide-y divide-border" aria-label="Menu do aplicativo">
-          {supplyManual && <Button asChild variant="ghost" className="h-12 w-full justify-start rounded-none text-foreground hover:bg-muted"><Link to="/supply-manual"><BookOpen className="h-5 w-5" />Manual do Usuário</Link></Button>}
-          <Button variant="ghost" className="h-12 w-full justify-start rounded-none !bg-transparent !text-foreground hover:!bg-muted" onClick={() => window.history.back()}><ArrowLeft className="h-5 w-5" />Voltar</Button>
-          <Button variant="ghost" className="h-12 w-full justify-start rounded-none !bg-transparent !text-foreground hover:!bg-muted" onClick={onChangePassword}><KeyRound className="h-5 w-5" />Alterar senha</Button>
-          <Button variant="ghost" className="h-12 w-full justify-start rounded-none !bg-transparent !text-destructive hover:!bg-muted hover:!text-destructive" onClick={onSignOut}><LogOut className="h-5 w-5" />Sair</Button>
+          <MainMenuEntries supplyManual={supplyManual} onSignOut={onSignOut} onChangePassword={onChangePassword} itemClass="h-12 w-full justify-start rounded-none !bg-transparent !text-foreground hover:!bg-muted" />
         </nav>
       </SheetContent>
     </Sheet>
@@ -92,17 +102,7 @@ function DesktopHeaderMenu({ userName, onSignOut, onChangePassword, buttonClass,
           <p className="truncate text-sm font-semibold text-foreground">{userName}</p>
         </div>
         <nav className="py-1" aria-label="Menu do aplicativo">
-          {supplyManual && <Button asChild variant="ghost" className={itemClass}><Link to="/supply-manual"><BookOpen className="h-5 w-5" />Manual do Usuário</Link></Button>}
-          <Button variant="ghost" className={itemClass} onClick={() => window.history.back()}>
-            <ArrowLeft className="h-5 w-5" />Voltar
-          </Button>
-          <Button variant="ghost" className={itemClass} onClick={onChangePassword}>
-            <KeyRound className="h-5 w-5" />Alterar senha
-          </Button>
-          <div className="my-1 border-t border-border" />
-          <Button variant="ghost" className={`${itemClass} !text-destructive hover:!text-destructive`} onClick={onSignOut}>
-            <LogOut className="h-5 w-5" />Sair
-          </Button>
+          <MainMenuEntries supplyManual={supplyManual} onSignOut={onSignOut} onChangePassword={onChangePassword} itemClass={itemClass} />
         </nav>
       </PopoverContent>
     </Popover>

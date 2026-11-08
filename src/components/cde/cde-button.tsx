@@ -6,13 +6,15 @@ import { cn } from "@/lib/utils";
 import { ICONS, styleOf, type CdeStyle } from "./cde-render";
 
 /** Grupos do CDE que já trocam ao vivo nas telas. */
-export type CdeGroup = "filter" | "plus" | "box";
+export type CdeGroup = "filter" | "plus" | "box" | "number_section" | "number_subsection";
 
 /** Padrão usado enquanto o CDE carrega ou se nenhum padrão estiver escolhido. */
 const FALLBACK: Record<CdeGroup, string> = {
   filter: "Button|ghost|icon||Filter|size-3",
   plus: "Button|ghost|icon|text-primary|Plus|h-5 w-5",
   box: "div|||rounded-xl border bg-card text-card-foreground shadow||",
+  number_section: "span|||rounded-md bg-primary text-foreground||",
+  number_subsection: "span|||rounded-md bg-cde-number-soft text-primary||",
 };
 
 type Model = { variant: string; size: string; className: string; icon: string; iconClass: string; style?: CdeStyle };
@@ -87,4 +89,12 @@ export function useCdeBoxStyle(screen?: string) {
   const { data } = useCdeStandards();
   const m = resolveCdeModel(data, "box", screen);
   return { ...styleOf(m.style), className: m.className };
+}
+
+/** Fixed square dimensions also keep circular numbers truly round. */
+export function CdeNumber({ children, subcategory = false }: { children: ReactNode; subcategory?: boolean }) {
+  const { data } = useCdeStandards();
+  const m = resolveCdeModel(data, subcategory ? "number_subsection" : "number_section", "components/cde/cde-workspace.tsx");
+  const { css, cls } = styleOf(m.style);
+  return <span style={css} className={cn("flex h-7 w-7 shrink-0 items-center justify-center text-sm font-bold", subcategory && "text-xs", m.className, cls)}>{children}</span>;
 }

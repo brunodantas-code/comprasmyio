@@ -16,6 +16,8 @@ import { ColorCode } from "./color-code";
 import { FORMS, ICONS, TEXTS, WIDTHS, styleOf, type CdeStyle } from "./cde-render";
 import { CdeAppIcons } from "./cde-app-icons";
 import { CdeNavigation } from "./cde-navigation";
+import { CdeNumber } from "./cde-button";
+import { CdeMainMenu } from "./cde-main-menu";
 import { FormatColorOptions } from "@/components/mytosis/format-color-options";
 
 type Variant = { key: string; name?: string; custom?: boolean; tag: string; variant: string; size: string; className: string; icon: string; iconClass: string; label: string; count: number; files: string[]; style?: CdeStyle };
@@ -47,7 +49,11 @@ const GROUPS: { key: GroupKey; title: string; hint: string; multi?: boolean }[] 
   { key: "pencil", title: "5.7 Lápis (editar)", hint: "Padrão único" },
   { key: "trash", title: "5.8 Lixeira (excluir)", hint: "Padrão único" },
   { key: "box", title: "6. Boxes (cartões)", hint: "Forma, borda, espessura e fundo dos cartões · padrão único, aplicado ao vivo" },
+  { key: "number_section", title: "9.1 Numeração das categorias", hint: "Quadrada ou redonda · padrão principal e secundários por tela" },
+  { key: "number_subsection", title: "9.2 Numeração das subcategorias", hint: "Quadrada ou redonda · padrão principal e secundários por tela" },
 ];
+
+const NUMBER_MODELS: Record<string, Omit<Variant, "key">[]> = Object.fromEntries(["number_section", "number_subsection"].map((group) => [group, ["rounded-md", "rounded-full"].map((shape) => ({ tag: "span", variant: "", size: "", className: `${shape} ${group === "number_section" ? "bg-primary text-foreground" : "bg-cde-number-soft text-primary"}`, icon: "", iconClass: "", label: "1", count: 0, files: ["components/cde/cde-workspace.tsx"] }))]));
 
 /** Telas conhecidas pelo levantamento, com o app deduzido pelo caminho do arquivo. */
 const SCREENS = [...new Set(Object.values(inventory).flatMap((g) => (g as { files: string[] }[]).flatMap((v) => v.files)))].sort();
@@ -60,12 +66,13 @@ function screenApp(f: string) {
 }
 
 /** Categorias-mãe das subcategorias numeradas (ex.: 3 → 3.1, 3.2). */
-const PARENTS: Record<string, string> = { "1": "Campos para preenchimento", "3": "Ordenação", "5": "Botões de ação" };
+const PARENTS: Record<string, string> = { "1": "Campos para preenchimento", "3": "Ordenação", "5": "Botões de ação", "9": "Numeração de categorias e subcategorias" };
 
 const inventoryKey = (v: Omit<Variant, "key">) => [v.tag, v.variant, v.size, v.className, v.icon, v.iconClass].join("|");
 
 function Preview({ v }: { v: Pick<Variant, "tag" | "variant" | "size" | "className" | "icon" | "iconClass" | "label" | "style"> }) {
   const { css, cls } = styleOf(v.style);
+  if (v.tag === "span") return <span style={css} className={cn("flex h-7 w-7 shrink-0 items-center justify-center text-sm font-bold", v.className, cls)}>{v.label || "1"}</span>;
   if (v.tag === "div") return <div style={css} className={cn("flex h-14 w-48 items-center justify-center text-xs", v.className || "rounded-xl border bg-card shadow", cls)}>Box</div>;
   if (v.tag === "Textarea") return <Textarea style={css} className={cn("w-56", v.className, cls)} placeholder="Texto" readOnly />;
   if (["Input", "SelectTrigger", "PasswordInput"].includes(v.tag)) return <Input style={css} className={cn("w-56", v.className, cls)} placeholder={v.tag === "SelectTrigger" ? "Selecione…" : "Texto"} readOnly />;
@@ -99,12 +106,12 @@ export function CdeWorkspace() {
       return { selected: sel.data, models: models.data, removed: removed.data };
     },
   });
-  const refresh = () => qc.invalidateQueries({ queryKey: ["cde-data"] });
+  const refresh = () => { qc.invalidateQueries({ queryKey: ["cde-data"] }); qc.invalidateQueries({ queryKey: ["cde-standards"] }); };
   const uid = async () => (await supabase.auth.getUser()).data.user!.id;
 
   const groupModels = (g: GroupKey): Variant[] => {
     const removed = new Set((data?.removed ?? []).filter((r) => r.group_key === g).map((r) => r.variant_key));
-    const src = FIELD_TAGS[g] ? ((inventory.fields as Omit<Variant, "key">[]).filter((v) => FIELD_TAGS[g].includes(v.tag))) : ((inventory as Record<string, unknown>)[g] ?? []) as Omit<Variant, "key">[];
+    const src = NUMBER_MODELS[g] ?? (FIELD_TAGS[g] ? ((inventory.fields as Omit<Variant, "key">[]).filter((v) => FIELD_TAGS[g].includes(v.tag))) : ((inventory as Record<string, unknown>)[g] ?? []) as Omit<Variant, "key">[]);
     const base = src.map((v) => ({ ...v, key: inventoryKey(v) }));
     const custom = (data?.models ?? []).filter((m) => m.group_key === g).map((m) => ({ key: `custom:${m.id}`, name: m.name, custom: true, tag: m.tag, variant: m.variant, size: m.size, className: m.class_name, icon: m.icon, iconClass: m.icon_class, label: m.label, style: (m.style ?? {}) as CdeStyle, count: 0, files: [] }));
     const all = [...base, ...custom];
@@ -214,8 +221,8 @@ export function CdeWorkspace() {
         const showParent = parent && GROUPS[gi - 1]?.title.split(" ")[0].replace(/\.$/, "").split(".")[0] !== parent;
         const parentHeader = showParent ? (
           <div key={`p-${parent}`} className="flex items-center gap-3 pt-2">
-            <span className="flex h-8 min-w-8 items-center justify-center rounded-md bg-primary px-1.5 text-base font-bold">{parent}</span>
-            <h2 className="flex-1 border-b border-border pb-1 text-lg font-semibold">{PARENTS[parent!]}</h2>
+            <CdeNumber>{parent}</CdeNumber>
+            <h2 className="flex-1 text-lg font-semibold">{parent ? PARENTS[parent] : ""}</h2>
           </div>
         ) : null;
         const list = groupModels(g.key);
@@ -231,15 +238,15 @@ export function CdeWorkspace() {
             <div className="flex items-center gap-3 bg-accent px-5 py-2">
               <button type="button" onClick={() => setOpen((s) => { const n = new Set(s); if (n.has(g.key)) n.delete(g.key); else n.add(g.key); return n; })} className="flex min-w-0 flex-1 items-center gap-4 text-left">
                 <span className="flex flex-col">
-                  <span className="flex h-8 min-w-8 items-center justify-center rounded-md bg-primary px-1.5 text-base font-bold">{g.title.split(" ")[0].replace(/\.$/, "")}</span>
+                  <CdeNumber subcategory={!!parent}>{num}</CdeNumber>
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block border-b border-border pb-1 font-semibold">{g.title.split(" ").slice(1).join(" ")}</span>
+                  <span className="block font-semibold">{g.title.split(" ").slice(1).join(" ")}</span>
                   <span className="mt-0.5 block text-xs text-muted-foreground">{list.length} modelos · {g.hint}</span>
                 </span>
                 <span>{isOpen ? <ChevronUp className="h-4 w-4 shrink-0" /> : <ChevronDown className="h-4 w-4 shrink-0" />}</span>
               </button>
-              <Button type="button" variant="outline" size="compactIcon" title="Criar modelo" aria-label={`Criar modelo em ${g.title}`} onClick={() => { setDraft({ ...emptyDraft, tag: FIELD_TAGS[g.key]?.[0] ?? (g.key === "box" ? "div" : "Button") }); setCreating(g.key); }}><Plus /></Button>
+              <Button type="button" variant="outline" size="compactIcon" title="Criar modelo" aria-label={`Criar modelo em ${g.title}`} onClick={() => { setDraft({ ...emptyDraft, tag: FIELD_TAGS[g.key]?.[0] ?? (NUMBER_MODELS[g.key] ? "span" : g.key === "box" ? "div" : "Button"), label: NUMBER_MODELS[g.key] ? "1" : "" }); setCreating(g.key); }}><Plus /></Button>
             </div>
             {isOpen ? (
               <>
@@ -297,6 +304,7 @@ export function CdeWorkspace() {
       })}
       <CdeAppIcons number={7} />
       <CdeNavigation number={8} />
+      <CdeMainMenu />
 
       <Dialog open={!!creating} onOpenChange={(o) => !o && setCreating(null)}>
         <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
@@ -305,8 +313,8 @@ export function CdeWorkspace() {
             <div className="space-y-1 sm:col-span-2"><Label>Nome do modelo</Label><Input value={draft.name} maxLength={60} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder="Ex.: Campo de busca" /></div>
             <div className="space-y-1"><Label>Tipo</Label>
               <Select value={draft.tag} onValueChange={(tag) => setDraft({ ...draft, tag })}><SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{(creating && FIELD_TAGS[creating] ? FIELD_TAGS[creating] : (creating === "box" ? ["div"] : ["Button", "button"])).map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select></div>
-            {!(creating && FIELD_TAGS[creating]) ? <>
+                <SelectContent>{(creating && FIELD_TAGS[creating] ? FIELD_TAGS[creating] : (creating && NUMBER_MODELS[creating] ? ["span"] : creating === "box" ? ["div"] : ["Button", "button"])).map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select></div>
+            {!(creating && (FIELD_TAGS[creating] || NUMBER_MODELS[creating])) ? <>
               <div className="space-y-1"><Label>Estilo</Label>
                 <Select value={draft.variant || "none"} onValueChange={(v) => setDraft({ ...draft, variant: v === "none" ? "" : v })}><SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>{VARIANTS.map((v) => <SelectItem key={v || "none"} value={v || "none"}>{v || "Padrão"}</SelectItem>)}</SelectContent></Select></div>

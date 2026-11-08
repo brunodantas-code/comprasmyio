@@ -8,6 +8,7 @@ import {
 import { CrmFunnelIcon } from "@/components/crm-funnel-icon";
 import { MytosisIcon } from "@/components/mytosis-icon";
 import { CdeIcon } from "@/components/cde-icon";
+import { CdeNumber } from "./cde-button";
 
 type Item = { label: string; icon: LucideIcon | React.ComponentType<{ className?: string }>; name: string };
 type Group = { title: string; items: Item[] };
@@ -57,8 +58,8 @@ export function CdeAppIcons({ number }: { number: number }) {
   const [open, setOpen] = useState(false);
   return <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
     <button type="button" onClick={() => setOpen(!open)} className="flex w-full items-center gap-4 bg-accent px-5 py-2 text-left">
-      <span className="flex h-8 min-w-8 items-center justify-center rounded-md bg-primary px-1.5 text-base font-bold">{number}</span>
-      <span className="min-w-0 flex-1"><span className="block border-b border-border pb-1 font-semibold">Ícones dos Apps e menus</span>
+      <CdeNumber>{number}</CdeNumber>
+      <span className="min-w-0 flex-1"><span className="block font-semibold">Ícones dos Apps e menus</span>
         <span className="mt-0.5 block text-xs text-muted-foreground">{APPS.length} apps · ícone do portal, barra inferior, submenus e ações para comparar padrões</span></span>
       {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
     </button>

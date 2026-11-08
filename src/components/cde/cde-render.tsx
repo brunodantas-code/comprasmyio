@@ -5,7 +5,7 @@ export const ICONS: Record<string, LucideIcon> = { ArrowDown, ArrowDownUp, Arrow
 export type CdeStyle = { shape?: string; fill?: string; border?: string; borderWidth?: string; text?: string; description?: string };
 export const FORMS = [
   { key: "", label: "Padrão" }, { key: "square", label: "Quadrado", radius: "0" }, { key: "soft", label: "Arredondado", radius: "0.375rem" },
-  { key: "round", label: "Bem arredondado", radius: "0.75rem" }, { key: "pill", label: "Pílula", radius: "9999px" },
+  { key: "round", label: "Bem arredondado", radius: "0.75rem" }, { key: "pill", label: "Pílula", radius: "9999px" }, { key: "circle", label: "Redonda (WhatsApp)", radius: "50%" },
 ] as const;
 export const WIDTHS = [{ key: "", label: "Padrão" }, { key: "0", label: "Sem borda" }, { key: "1px", label: "Fina" }, { key: "2px", label: "Média" }, { key: "3px", label: "Grossa" }];
 export const TEXTS = [{ key: "default", label: "Padrão", color: "currentColor" }, { key: "dark", label: "Escuro myio", color: "var(--myio-dark)" }, { key: "green", label: "Verde myio", color: "var(--myio-green)" }, { key: "white", label: "Branco", color: "var(--card)" }];

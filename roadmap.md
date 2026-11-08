@@ -1,4 +1,6 @@
 # Roadmap
+- [x] CDE: títulos sem linhas, números menores, subcategorias verde-claras e modelos circulares com prévia; telas verificadas.
+- [x] CDE: menu principal com escolha de exibição e ordenação por arraste; salvamento e leitura pelo menu dos apps conferidos.
 - [x] Atas: vários responsáveis opcionais por assunto, preservando os anteriores; salvamento e reabertura com dois nomes conferidos no computador/celular.
 - [x] Atas: consolidação no padrão Minhas Pendências, bolinha vermelha para assinaturas/ações pendentes e responsável/data de conclusão opcionais por assunto; persistência, baixa da ação e telas computador/celular conferidas.
 - [x] Atas: participantes com busca digitável tolerante de usuários do ERP e inclusão de nomes externos; salvamento e reabertura conferidos no computador e celular.

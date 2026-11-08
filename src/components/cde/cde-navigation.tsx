@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { CdeNumber } from "./cde-button";
 
 type Pattern = { key: string; label: string; detail: string; uses: string; sketch: "screen" | "popup" | "confirm" | "bottom" | "top" | "side" | "floating" | "popover" | "collapse" | "tabs" };
 type Decision = { key: string; title: string; patterns: Pattern[] };
@@ -73,8 +74,8 @@ export function CdeNavigation({ number }: { number: number }) {
   return (
     <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
       <button type="button" onClick={() => setOpen(!open)} className="flex w-full items-center gap-4 bg-accent px-5 py-2 text-left">
-        <span className="flex h-8 min-w-8 items-center justify-center rounded-md bg-primary px-1.5 text-base font-bold">{number}</span>
-        <span className="min-w-0 flex-1"><span className="block border-b border-border pb-1 font-semibold">Navegação (UI/UX)</span>
+        <CdeNumber>{number}</CdeNumber>
+        <span className="min-w-0 flex-1"><span className="block font-semibold">Navegação (UI/UX)</span>
           <span className="mt-0.5 block text-xs text-muted-foreground">Tela x pop-up, menus superior, inferior e lateral, flutuantes e organização do conteúdo</span></span>
         {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
       </button>
@@ -82,7 +83,7 @@ export function CdeNavigation({ number }: { number: number }) {
         <div className="space-y-4 p-4">
           {DECISIONS.map((d, di) => (
             <div key={d.key}>
-              <div className="mb-2 text-sm font-semibold">{number}.{di + 1} {d.title}</div>
+              <div className="mb-2 flex items-center gap-3 text-sm font-semibold"><CdeNumber subcategory>{number}.{di + 1}</CdeNumber>{d.title}</div>
               <div className="flex flex-wrap gap-3">
                 {d.patterns.map((p) => {
                   const sel = chosen?.some((c) => c.group_key === d.key && c.variant_key === p.key);
