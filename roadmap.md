@@ -147,3 +147,5 @@
 - [x] CDE: editar texto dos botões + com texto (4.2) pelo lápis
 - [x] CDE seção 9: incluir todos os menus disponíveis no Menu principal
 - [x] CDE ícones: seta exibir/recolher por app, sem símbolo dentro do box
+- [x] Ícone verde de 3 barras no Menu superior (CDE)
+- [x] Arraste e ordem automática dos ícones dos menus

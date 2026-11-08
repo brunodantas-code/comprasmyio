@@ -1,3 +1,4 @@
+import { useMenuOrders, sortByMenuOrder } from "@/components/cde/menu-order";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { ListTree, ReceiptText, WalletCards } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,12 +31,14 @@ export const Route = createFileRoute("/_authenticated/cash-flow")({
 
 function CashFlowPage() {
   const user = Route.useRouteContext().user;
+  const { data: menuOrders } = useMenuOrders();
   const [section, setSection] = useState("payables");
   const tabs = [
     { value: "payables", label: "Contas a pagar", icon: ReceiptText },
     { value: "accounts", label: "Plano de Contas", icon: ListTree },
     { value: "cash", label: "Caixa", icon: WalletCards },
   ];
+  const orderedTabs = sortByMenuOrder(tabs, menuOrders?.["Cash Flow|Barra inferior"]);
   return (
     <div className="min-h-screen bg-background">
       <AppHeader logo={<MyioCashFlowLogo className="text-xl sm:text-2xl" />} />
@@ -49,7 +52,7 @@ function CashFlowPage() {
       </main>
       <nav className="fixed inset-x-3 bottom-3 z-50" aria-label="Navegação do Cash Flow">
         <div className="mx-auto grid max-w-md grid-cols-3 items-stretch rounded-[1.75rem] border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/90">
-          {tabs.map(({ value, label, icon: Icon }) => {
+          {orderedTabs.map(({ value, label, icon: Icon }) => {
             const active = section === value;
             return <Button key={value} type="button" variant="ghost" className={`h-auto min-w-0 rounded-[1.35rem] p-0 shadow-none ${active ? "!bg-primary/15 !text-primary hover:!bg-primary/20 hover:!text-primary" : "!bg-transparent !text-muted-foreground hover:!bg-muted hover:!text-foreground"}`} onClick={() => setSection(value)} aria-current={active ? "page" : undefined}><span className="flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 px-1"><Icon className="h-5 w-5 shrink-0" /><span className="max-w-full truncate text-[10px] font-semibold leading-none">{label}</span></span></Button>;
           })}

@@ -1,3 +1,4 @@
+import { useMenuOrders, sortByMenuOrder } from "@/components/cde/menu-order";
 import { CdeButton } from "@/components/cde/cde-button";
 import { ColumnFilter } from "@/components/column-filter";
 import { matchesColumnFilter, type ColumnFilterValue } from "@/lib/column-filters";
@@ -283,6 +284,7 @@ function SiteSurveyPage() {
     void invalidate();
   };
 
+  const { data: menuOrders } = useMenuOrders();
   visitsRef.current = data?.visits ?? [];
   if (isLoading || !data) return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Carregando Site Survey...</div>;
   const tabs = [
@@ -291,6 +293,7 @@ function SiteSurveyPage() {
     { value: "cadastro", label: "Cadastro", icon: Package, allowed: can("site_survey_cadastro") || can("site_survey_configuracoes") },
     { value: "usuarios", label: "Usuários", icon: UsersRound, allowed: can("site_survey_usuarios") || can("site_survey_perfis") || can("site_survey_logs") },
   ].filter((item) => item.allowed);
+  const orderedTabs = sortByMenuOrder(tabs, menuOrders?.["Site Survey|Barra inferior"]);
   const userTabs = [
     { value: "lista", label: "Usuários", icon: UsersRound, allowed: can("site_survey_usuarios") },
     { value: "perfis", label: "Perfis de acesso", icon: ShieldCheck, allowed: can("site_survey_perfis") },
@@ -362,7 +365,7 @@ function SiteSurveyPage() {
     </main>
     <nav className="fixed inset-x-3 bottom-3 z-50" aria-label="Navegação do Site Survey">
       <div className="mx-auto grid max-w-md grid-cols-4 items-stretch rounded-[1.75rem] border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/90">
-        {tabs.map(({ value, label, icon: Icon }) => {
+        {orderedTabs.map(({ value, label, icon: Icon }) => {
           const active = section === value;
           const hasSubmenu = value === "visitas" || value === "usuarios";
           const selectSection = () => setSection(value);

@@ -1,3 +1,4 @@
+import { useMenuOrders, sortByMenuOrder } from "@/components/cde/menu-order";
 import { CdeButton } from "@/components/cde/cde-button";
 import { TableFilterMenu } from "@/components/use-table-filters";
 import { TableReportActions, TableReportProvider, useRegisterTableReport } from "@/components/table-report-actions";
@@ -665,6 +666,7 @@ function Dashboard() {
     { value: "roles", label: "Consolidado por Cargo", allowed: me.canAccess("approvals_consolidado") },
   ].filter((tab) => tab.allowed);
   const activeApprovalSection = approvalSection ?? approvalTabs[0]?.value;
+  const { data: menuOrders } = useMenuOrders();
   const navigationTabs = [
     { value: "pedidos", label: "Solicitações", icon: ClipboardList, allowed: canSeeRequests },
     { value: "queue", label: "Approvals", icon: ShoppingCart, allowed: canSeeQueue },
@@ -672,6 +674,7 @@ function Dashboard() {
     { value: "projects", label: "Cadastro", icon: FolderKanban, allowed: canSeeRegistration },
     { value: "admin", label: "Usuários e logs", icon: Users, allowed: canSeeAdministration },
   ].filter((item) => item.allowed);
+  const orderedNavigationTabs = sortByMenuOrder(navigationTabs, menuOrders?.["Supply|Barra inferior"]);
 
 
   return (
@@ -773,7 +776,7 @@ function Dashboard() {
       </main>
       <nav className="fixed inset-x-3 bottom-3 z-50" aria-label="Navegação do Supply">
         <div className="mx-auto grid max-w-2xl grid-cols-5 items-stretch rounded-[1.75rem] border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/90">
-          {navigationTabs.map(({ value, label, icon: Icon }) => {
+          {orderedNavigationTabs.map(({ value, label, icon: Icon }) => {
             const active = activeSection === value;
             const submenuItems = value === "pedidos"
               ? [{ value: "mine", label: "Minhas Solicitações", icon: ClipboardList, allowed: me.canAccess("solicitacoes_minhas") }, { value: "new", label: "Novas Solicitações", icon: Plus, allowed: me.canAccess("solicitacoes_novas") }].filter((item) => item.allowed)

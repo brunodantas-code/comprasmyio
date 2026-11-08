@@ -17,3 +17,4 @@
 - Linked + buttons share one add_text key via "shared" in add-text-usage.json.
 - Dialog/Sheet X renders CdeCloseIcon (CDE group close); keep position in ui/, look in CDE.
 - Dialog/Sheet X is sticky at the top so it stays visible while long content scrolls.
+- App menu icon order lives in cde_selected group menu_order ("App|Group"→labels); apps sort tabs via sortByMenuOrder/useOrderedMenu (menu-order.ts).
