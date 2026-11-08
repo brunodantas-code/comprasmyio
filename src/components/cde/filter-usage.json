@@ -1,0 +1,137 @@
+[
+  {
+    "file": "components/access-profiles-tab.tsx",
+    "standard": 1,
+    "general": 0
+  },
+  {
+    "file": "components/approval-workflow.tsx",
+    "standard": 2,
+    "general": 0
+  },
+  {
+    "file": "components/assembly-release.tsx",
+    "standard": 1,
+    "general": 0
+  },
+  {
+    "file": "components/bom-settings.tsx",
+    "standard": 1,
+    "general": 0
+  },
+  {
+    "file": "components/cash-flow/cash-register-tab.tsx",
+    "standard": 1,
+    "general": 0
+  },
+  {
+    "file": "components/cash-flow/payables-tab.tsx",
+    "standard": 1,
+    "general": 0
+  },
+  {
+    "file": "components/clients-tab.tsx",
+    "standard": 1,
+    "general": 0
+  },
+  {
+    "file": "components/homologation.tsx",
+    "standard": 1,
+    "general": 0
+  },
+  {
+    "file": "components/import-batches.tsx",
+    "standard": 1,
+    "general": 0
+  },
+  {
+    "file": "components/legal/legal-workspace.tsx",
+    "standard": 1,
+    "general": 0
+  },
+  {
+    "file": "components/materials-registry-tab.tsx",
+    "standard": 2,
+    "general": 0
+  },
+  {
+    "file": "components/myio-orders-tab.tsx",
+    "standard": 1,
+    "general": 0
+  },
+  {
+    "file": "components/mytosis/kpis-tab.tsx",
+    "standard": 1,
+    "general": 0
+  },
+  {
+    "file": "components/site-survey-environment-manager.tsx",
+    "standard": 1,
+    "general": 1
+  },
+  {
+    "file": "components/site-survey-luc-manager.tsx",
+    "standard": 1,
+    "general": 1
+  },
+  {
+    "file": "components/site-survey-profiles-admin.tsx",
+    "standard": 1,
+    "general": 0
+  },
+  {
+    "file": "components/site-survey-screen-summary.tsx",
+    "standard": 1,
+    "general": 0
+  },
+  {
+    "file": "components/stock-simulator.tsx",
+    "standard": 2,
+    "general": 0
+  },
+  {
+    "file": "components/stock-tab.tsx",
+    "standard": 3,
+    "general": 0
+  },
+  {
+    "file": "components/supply-consolidation.tsx",
+    "standard": 1,
+    "general": 0
+  },
+  {
+    "file": "components/supply-tags-tab.tsx",
+    "standard": 1,
+    "general": 0
+  },
+  {
+    "file": "components/tools-assets.tsx",
+    "standard": 1,
+    "general": 0
+  },
+  {
+    "file": "routes/_authenticated/chamados.tsx",
+    "standard": 1,
+    "general": 0
+  },
+  {
+    "file": "routes/_authenticated/dashboard.tsx",
+    "standard": 4,
+    "general": 0
+  },
+  {
+    "file": "routes/_authenticated/development.tsx",
+    "standard": 1,
+    "general": 0
+  },
+  {
+    "file": "routes/_authenticated/rh.tsx",
+    "standard": 1,
+    "general": 0
+  },
+  {
+    "file": "routes/_authenticated/site-survey.tsx",
+    "standard": 3,
+    "general": 0
+  }
+]

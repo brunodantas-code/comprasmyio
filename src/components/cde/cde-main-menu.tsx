@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
-import { CdeNumber } from "./cde-button";
+import { CdeCategoryHeader } from "./cde-category-header";
 import { MENU_ITEMS, parseMenuConfig, useMainMenuConfig, type MenuId, type MenuConfig } from "./main-menu-config";
 
 function MenuRow({ id, checked, onChange }: { id: MenuId; checked: boolean; onChange: () => void }) {
@@ -22,7 +22,7 @@ function MenuRow({ id, checked, onChange }: { id: MenuId; checked: boolean; onCh
     <Checkbox aria-label={`Exibir ${item.label}`} checked={checked} disabled={id === "logout"} onCheckedChange={onChange} />
   </div>;
 }
-export function CdeMainMenu() {
+export function CdeMainMenu({ number }: { number: number }) {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<MenuConfig | null>(null);
   const [saving, setSaving] = useState(false);
@@ -50,10 +50,8 @@ export function CdeMainMenu() {
       setDraft(null); toast.success("Menu principal atualizado");
     } catch { toast.error("Não foi possível salvar o menu."); } finally { setSaving(false); }
   }
-  return <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-    <Button variant="ghost" className="flex h-auto w-full justify-start gap-4 rounded-none bg-accent px-5 py-2 text-left" onClick={() => setOpen(!open)}>
-      <CdeNumber>10</CdeNumber><span className="flex-1 font-semibold">Menu principal</span>{open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-    </Button>
+  return <section className="space-y-4">
+    <CdeCategoryHeader number={number} title="Menu principal" hint="Ícones, ordem e exibição das ações do menu dos apps" open={open} onToggle={() => setOpen(!open)} />
     {open && <div className="grid gap-6 p-4 sm:grid-cols-2"><div><DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={move}><SortableContext items={config.order} strategy={verticalListSortingStrategy}>{config.order.map((id) => <MenuRow key={id} id={id} checked={!config.hidden.includes(id)} onChange={() => setDraft({ ...config, hidden: config.hidden.includes(id) ? config.hidden.filter((v) => v !== id) : [...config.hidden, id] })} />)}</SortableContext></DndContext><Button variant="action" className="mt-3" onClick={save} disabled={saving || !draft}><Save className="h-4 w-4" />Salvar</Button></div>
       <div className="space-y-3"><h3 className="text-sm font-semibold">Prévia</h3><div className="max-w-72 overflow-hidden rounded-lg border border-border">{config.order.filter((id) => !config.hidden.includes(id)).map((id) => { const item = MENU_ITEMS.find((i) => i.id === id); if (!item) return null; const Icon = item.icon; return <div key={id} className="flex items-center gap-3 px-4 py-3 text-sm"><Icon className="h-5 w-5" />{item.label}</div>; })}</div></div>
     </div>}

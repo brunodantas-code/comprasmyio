@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import inventory from "./inventory.json";
+import filterUsage from "./filter-usage.json";
 import { BORDERS, FILLS } from "@/components/mytosis/shapes";
 import { ColorCode } from "./color-code";
 import { FORMS, ICONS, TEXTS, WIDTHS, styleOf, type CdeStyle } from "./cde-render";
@@ -18,6 +19,7 @@ import { CdeAppIcons } from "./cde-app-icons";
 import { CdeNavigation } from "./cde-navigation";
 import { CdeNumber } from "./cde-button";
 import { CdeMainMenu } from "./cde-main-menu";
+import { CdeCategoryHeader } from "./cde-category-header";
 import { FormatColorOptions } from "@/components/mytosis/format-color-options";
 
 type Variant = { key: string; name?: string; custom?: boolean; tag: string; variant: string; size: string; className: string; icon: string; iconClass: string; label: string; count: number; files: string[]; style?: CdeStyle };
@@ -39,18 +41,18 @@ const GROUPS: { key: GroupKey; title: string; hint: string; multi?: boolean }[] 
   { key: "sort", title: "3.1 Ordenar colunas e listas", hint: "Setas de ordem crescente/decrescente · padrão único" },
   { key: "move", title: "3.2 Mover para cima/baixo", hint: "Setas que reposicionam uma linha · padrão único" },
   { key: "summary", title: "3.3 Voltar ao Sumário", hint: "Link de retorno ao sumário · padrão único" },
-  { key: "toggle", title: "4. Exibir/Recolher", hint: "Setas de expandir e recolher · padrão único" },
-  { key: "plus", title: "5.1 Botões +", hint: "Padrão único" },
-  { key: "add", title: "5.2 Adicionar / Novo (texto)", hint: "Padrão único" },
-  { key: "save", title: "5.3 Salvar", hint: "Padrão único" },
-  { key: "cancel", title: "5.4 Cancelar", hint: "Padrão único" },
-  { key: "confirm", title: "5.5 Confirmar / Concluir", hint: "Padrão único" },
-  { key: "close", title: "5.6 Fechar", hint: "Padrão único" },
-  { key: "pencil", title: "5.7 Lápis (editar)", hint: "Padrão único" },
-  { key: "trash", title: "5.8 Lixeira (excluir)", hint: "Padrão único" },
-  { key: "box", title: "6. Boxes (cartões)", hint: "Forma, borda, espessura e fundo dos cartões · padrão único, aplicado ao vivo" },
-  { key: "number_section", title: "9.1 Numeração das categorias", hint: "Quadrada ou redonda · padrão principal e secundários por tela" },
-  { key: "number_subsection", title: "9.2 Numeração das subcategorias", hint: "Quadrada ou redonda · padrão principal e secundários por tela" },
+  { key: "toggle", title: "3.4 Exibir/Recolher", hint: "Setas de expandir e recolher · padrão único" },
+  { key: "plus", title: "4.1 Botões +", hint: "Padrão único" },
+  { key: "add", title: "4.2 Adicionar / Novo (texto)", hint: "Padrão único" },
+  { key: "save", title: "4.3 Salvar", hint: "Padrão único" },
+  { key: "cancel", title: "4.4 Cancelar", hint: "Padrão único" },
+  { key: "confirm", title: "4.5 Confirmar / Concluir", hint: "Padrão único" },
+  { key: "close", title: "4.6 Fechar", hint: "Padrão único" },
+  { key: "pencil", title: "4.7 Lápis (editar)", hint: "Padrão único" },
+  { key: "trash", title: "4.8 Lixeira (excluir)", hint: "Padrão único" },
+  { key: "box", title: "5. Boxes (cartões)", hint: "Forma, borda, espessura e fundo dos cartões · padrão único, aplicado ao vivo" },
+  { key: "number_section", title: "6.1 Numeração das categorias", hint: "Quadrada ou redonda · padrão principal e secundários por tela" },
+  { key: "number_subsection", title: "6.2 Numeração das subcategorias", hint: "Quadrada ou redonda · padrão principal e secundários por tela" },
 ];
 
 const NUMBER_MODELS: Record<string, Omit<Variant, "key">[]> = Object.fromEntries(["number_section", "number_subsection"].map((group) => [group, ["rounded-md", "rounded-full"].map((shape) => ({ tag: "span", variant: "", size: "", className: `${shape} ${group === "number_section" ? "bg-primary text-foreground" : "bg-cde-number-soft text-primary"}`, icon: "", iconClass: "", label: "1", count: 0, files: ["components/cde/cde-workspace.tsx"] }))]));
@@ -66,7 +68,7 @@ function screenApp(f: string) {
 }
 
 /** Categorias-mãe das subcategorias numeradas (ex.: 3 → 3.1, 3.2). */
-const PARENTS: Record<string, string> = { "1": "Campos para preenchimento", "3": "Ordenação", "5": "Botões de ação", "9": "Numeração de categorias e subcategorias" };
+const PARENTS: Record<string, string> = { "1": "Campos para preenchimento", "3": "Ordenação", "4": "Botões de ação", "6": "Numeração de categorias e subcategorias" };
 
 const inventoryKey = (v: Omit<Variant, "key">) => [v.tag, v.variant, v.size, v.className, v.icon, v.iconClass].join("|");
 
@@ -87,6 +89,7 @@ const emptyDraft = { name: "", tag: "Button", variant: "outline", size: "", clas
 export function CdeWorkspace() {
   const qc = useQueryClient();
   const [open, setOpen] = useState<Set<string>>(new Set(["plus"]));
+  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
   const [creating, setCreating] = useState<GroupKey | null>(null);
   const [draft, setDraft] = useState(emptyDraft);
   const [deleting, setDeleting] = useState<{ group: GroupKey; model: Variant; label: string } | null>(null);
@@ -112,7 +115,13 @@ export function CdeWorkspace() {
   const groupModels = (g: GroupKey): Variant[] => {
     const removed = new Set((data?.removed ?? []).filter((r) => r.group_key === g).map((r) => r.variant_key));
     const src = NUMBER_MODELS[g] ?? (FIELD_TAGS[g] ? ((inventory.fields as Omit<Variant, "key">[]).filter((v) => FIELD_TAGS[g].includes(v.tag))) : ((inventory as Record<string, unknown>)[g] ?? []) as Omit<Variant, "key">[]);
-    const base = src.map((v) => ({ ...v, key: inventoryKey(v) }));
+    const base = src.map((v) => {
+      if (g !== "filter") return { ...v, key: inventoryKey(v) };
+      const primaryDefinition = v.variant === "ghost" && v.size === "icon" && v.files.includes("components/column-filter.tsx");
+      const generalDefinition = v.files.includes("components/site-survey-general-filter.tsx");
+      const uses = filterUsage.filter((entry) => (generalDefinition ? entry.general : primaryDefinition ? entry.standard : 0) > 0);
+      return { ...v, key: inventoryKey(v), count: uses.reduce((total, entry) => total + (generalDefinition ? entry.general : entry.standard), 0), files: uses.map((entry) => entry.file) };
+    });
     const custom = (data?.models ?? []).filter((m) => m.group_key === g).map((m) => ({ key: `custom:${m.id}`, name: m.name, custom: true, tag: m.tag, variant: m.variant, size: m.size, className: m.class_name, icon: m.icon, iconClass: m.icon_class, label: m.label, style: (m.style ?? {}) as CdeStyle, count: 0, files: [] }));
     const all = [...base, ...custom];
     const kept = all.filter((v) => !removed.has(v.key));
@@ -130,10 +139,16 @@ export function CdeWorkspace() {
       const total = result.reduce((s, v) => s + v.count, 0);
       const secs = secondariesOf(g);
       const secCount = new Map<string, number>();
+      const filterScreens = new Set<string>();
       for (const sec of secs) {
         const scr = new Set(sec.screens);
         let n = 0;
-        for (const v of all) if (v.files.length) n += v.count * v.files.filter((f) => scr.has(f)).length / v.files.length;
+        if (g === "filter") {
+          for (const entry of filterUsage) if (scr.has(entry.file) && !filterScreens.has(entry.file)) {
+            n += entry.standard + entry.general;
+            filterScreens.add(entry.file);
+          }
+        } else for (const v of all) if (v.files.length) n += v.count * v.files.filter((f) => scr.has(f)).length / v.files.length;
         secCount.set(sec.variant_key, Math.round(n));
       }
       const used = [...secCount.values()].reduce((a, b) => a + b, 0);
@@ -210,20 +225,17 @@ export function CdeWorkspace() {
   });
 
   return (
-    <main className="app-workspace mx-auto max-w-7xl space-y-4 px-4 py-6 sm:px-6">
+    <main className="app-workspace mx-auto max-w-7xl space-y-4 overflow-x-clip px-4 py-6 sm:px-6">
       <div>
         <h1 className="text-xl font-semibold">Ambiente de Desenvolvimento Colaborativo</h1>
-        <p className="text-sm text-muted-foreground">Modelos usados hoje em todos os apps, agrupados por tipo. Escolha o padrão, crie novos modelos e exclua os que devem ser substituídos pelo padrão.</p>
+        <p className="text-sm text-muted-foreground">Modelos de UI/UX utilizados em todos os apps, agrupados por tipo. Crie e exclua modelos e selecione os que devem ser utilizados como padrão.</p>
       </div>
       {GROUPS.map((g, gi) => {
         const num = g.title.split(" ")[0].replace(/\.$/, "");
         const parent = num.includes(".") ? num.split(".")[0] : null;
         const showParent = parent && GROUPS[gi - 1]?.title.split(" ")[0].replace(/\.$/, "").split(".")[0] !== parent;
         const parentHeader = showParent ? (
-          <div key={`p-${parent}`} className="flex items-center gap-3 pt-2">
-            <CdeNumber>{parent}</CdeNumber>
-            <h2 className="flex-1 text-lg font-semibold">{parent ? PARENTS[parent] : ""}</h2>
-          </div>
+          <CdeCategoryHeader key={`p-${parent}`} number={parent} title={parent ? PARENTS[parent] : ""} open={!collapsedCategories.has(parent)} onToggle={() => setCollapsedCategories((s) => { const next = new Set(s); if (next.has(parent)) next.delete(parent); else next.add(parent); return next; })} />
         ) : null;
         const list = groupModels(g.key);
         const standards = standardsOf(g.key);
@@ -232,11 +244,12 @@ export function CdeWorkspace() {
         const nameOf = (key: string) => { const i = list.findIndex((v) => v.key === key); return i < 0 ? "Modelo excluído" : list[i].name ?? `Modelo ${i + 1}`; };
         const removed = (data?.removed ?? []).filter((r) => r.group_key === g.key);
         const isOpen = open.has(g.key);
+        if (parent && collapsedCategories.has(parent)) return showParent ? <div key={g.key}>{parentHeader}</div> : null;
         return (
           <div key={g.key} className="space-y-4">{parentHeader}
-          <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-            <div className="flex items-center gap-3 bg-accent px-5 py-2">
-              <button type="button" onClick={() => setOpen((s) => { const n = new Set(s); if (n.has(g.key)) n.delete(g.key); else n.add(g.key); return n; })} className="flex min-w-0 flex-1 items-center gap-4 text-left">
+          <section className={cn(parent ? "overflow-hidden rounded-xl border border-border bg-card shadow-sm" : "min-w-0 space-y-4")}>
+            {!parent ? <CdeCategoryHeader number={num} title={g.title.split(" ").slice(1).join(" ")} hint={`${list.length} modelos · ${g.hint}`} open={isOpen} onToggle={() => setOpen((s) => { const n = new Set(s); if (n.has(g.key)) n.delete(g.key); else n.add(g.key); return n; })} action={<Button type="button" variant="outline" size="compactIcon" title="Criar modelo" aria-label={`Criar modelo em ${g.title}`} onClick={() => { setDraft({ ...emptyDraft, tag: g.key === "box" ? "div" : "Button" }); setCreating(g.key); }}><Plus /></Button>} /> : <div className="flex items-center gap-3 bg-accent px-5 py-2">
+              <button type="button" aria-expanded={isOpen} onClick={() => setOpen((s) => { const n = new Set(s); if (n.has(g.key)) n.delete(g.key); else n.add(g.key); return n; })} className="flex min-w-0 flex-1 items-center gap-4 text-left">
                 <span className="flex flex-col">
                   <CdeNumber subcategory={!!parent}>{num}</CdeNumber>
                 </span>
@@ -247,10 +260,10 @@ export function CdeWorkspace() {
                 <span>{isOpen ? <ChevronUp className="h-4 w-4 shrink-0" /> : <ChevronDown className="h-4 w-4 shrink-0" />}</span>
               </button>
               <Button type="button" variant="outline" size="compactIcon" title="Criar modelo" aria-label={`Criar modelo em ${g.title}`} onClick={() => { setDraft({ ...emptyDraft, tag: FIELD_TAGS[g.key]?.[0] ?? (NUMBER_MODELS[g.key] ? "span" : g.key === "box" ? "div" : "Button"), label: NUMBER_MODELS[g.key] ? "1" : "" }); setCreating(g.key); }}><Plus /></Button>
-            </div>
+            </div>}
             {isOpen ? (
               <>
-                <div className="flex gap-3 overflow-x-auto p-4">
+                <div className="flex max-w-full gap-3 overflow-x-auto p-4">
                   {list.map((v, i) => {
                     const selected = standards.includes(v.key);
                     const isPrimary = primaries.includes(v.key);
@@ -304,7 +317,7 @@ export function CdeWorkspace() {
       })}
       <CdeAppIcons number={7} />
       <CdeNavigation number={8} />
-      <CdeMainMenu />
+      <CdeMainMenu number={9} />
 
       <Dialog open={!!creating} onOpenChange={(o) => !o && setCreating(null)}>
         <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">

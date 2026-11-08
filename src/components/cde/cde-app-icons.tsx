@@ -8,7 +8,7 @@ import {
 import { CrmFunnelIcon } from "@/components/crm-funnel-icon";
 import { MytosisIcon } from "@/components/mytosis-icon";
 import { CdeIcon } from "@/components/cde-icon";
-import { CdeNumber } from "./cde-button";
+import { CdeCategoryHeader } from "./cde-category-header";
 
 type Item = { label: string; icon: LucideIcon | React.ComponentType<{ className?: string }>; name: string };
 type Group = { title: string; items: Item[] };
@@ -56,13 +56,8 @@ function Tile({ it }: { it: Item }) {
 
 export function CdeAppIcons({ number }: { number: number }) {
   const [open, setOpen] = useState(false);
-  return <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-    <button type="button" onClick={() => setOpen(!open)} className="flex w-full items-center gap-4 bg-accent px-5 py-2 text-left">
-      <CdeNumber>{number}</CdeNumber>
-      <span className="min-w-0 flex-1"><span className="block font-semibold">Ícones dos Apps e menus</span>
-        <span className="mt-0.5 block text-xs text-muted-foreground">{APPS.length} apps · ícone do portal, barra inferior, submenus e ações para comparar padrões</span></span>
-      {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-    </button>
+  return <section className="space-y-4">
+    <CdeCategoryHeader number={number} title="Ícones dos Apps e menus" hint={`${APPS.length} apps · ícone do portal, barra inferior, submenus e ações para comparar padrões`} open={open} onToggle={() => setOpen(!open)} />
     {open ? <div className="space-y-4 p-4">
       <div className="rounded-lg border border-border p-3"><div className="mb-2 text-sm font-semibold">Menu superior comum a todos os apps</div><div className="flex flex-wrap gap-3">{SHARED.map((it) => <Tile key={it.label} it={it} />)}</div></div>
       {APPS.map((a) => { const AppIcon = a.icon; return <div key={a.name} className="flex flex-col gap-3 rounded-lg border border-border p-3 sm:flex-row">

@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { CdeNumber } from "./cde-button";
+import { CdeCategoryHeader } from "./cde-category-header";
 
 type Pattern = { key: string; label: string; detail: string; uses: string; sketch: "screen" | "popup" | "confirm" | "bottom" | "top" | "side" | "floating" | "popover" | "collapse" | "tabs" };
 type Decision = { key: string; title: string; patterns: Pattern[] };
@@ -72,13 +73,8 @@ export function CdeNavigation({ number }: { number: number }) {
     toast.success("Padrão de navegação registrado");
   };
   return (
-    <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-      <button type="button" onClick={() => setOpen(!open)} className="flex w-full items-center gap-4 bg-accent px-5 py-2 text-left">
-        <CdeNumber>{number}</CdeNumber>
-        <span className="min-w-0 flex-1"><span className="block font-semibold">Navegação (UI/UX)</span>
-          <span className="mt-0.5 block text-xs text-muted-foreground">Tela x pop-up, menus superior, inferior e lateral, flutuantes e organização do conteúdo</span></span>
-        {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-      </button>
+    <section className="space-y-4">
+      <CdeCategoryHeader number={number} title="Navegação (UI/UX)" hint="Tela x pop-up, menus superior, inferior e lateral, flutuantes e organização do conteúdo" open={open} onToggle={() => setOpen(!open)} />
       {open ? (
         <div className="space-y-4 p-4">
           {DECISIONS.map((d, di) => (

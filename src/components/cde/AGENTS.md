@@ -2,3 +2,5 @@
 - CDE standards: one primary per single group plus optional secondary rows (is_primary=false, screens[] of inventory file paths); secondaries take uses of their screens, primary keeps the rest.
 - Live swap: screens render finalized groups through CdeButton (cde-button.tsx), which reads cde_selected at runtime (readable by all authenticated users); convert a group's screens to CdeButton once its standard is chosen and others excluded, and add the group to CdeGroup.
 - CDE numbering uses separate number_section/number_subsection standards through CdeNumber; main_menu stores ordered/hidden action IDs in cde_selected.variant_key and AppHeader reads them without changing action permissions or the standalone home button.
+- Use CdeCategoryHeader for every top-level CDE category so titles stay unframed and only subcategories use green bands.
+- Filter usage counts expand shared controls into logical consumer sites using filter-usage.json; exclude embedded editors and unused definitions, and validate this ledger against source when filter sites change.

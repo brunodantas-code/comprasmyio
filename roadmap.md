@@ -1,4 +1,8 @@
 # Roadmap
+- [x] CDE: categorias sem box verde, Exibir/Recolher como 3.4 e sequência contínua até Menu Principal; tela conferida.
+- [x] CDE: apresentação substituída pela frase solicitada sobre modelos de UI/UX.
+- [x] CDE: setas nas categorias-mãe e subcategorias, preservando modelos ao recolher; computador/celular conferidos.
+- [x] CDE: auditoria identificou 39 pontos já ligados ao padrão; contador e lista de telas corrigidos, teste de inventário e tela conferidos.
 - [x] CDE: títulos sem linhas, números menores, subcategorias verde-claras e modelos circulares com prévia; telas verificadas.
 - [x] CDE: menu principal com escolha de exibição e ordenação por arraste; salvamento e leitura pelo menu dos apps conferidos.
 - [x] Atas: vários responsáveis opcionais por assunto, preservando os anteriores; salvamento e reabertura com dois nomes conferidos no computador/celular.
