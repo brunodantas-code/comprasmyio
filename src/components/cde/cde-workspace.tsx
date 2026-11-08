@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowDown, ArrowDownUp, ArrowUp, ArrowUpDown, Building2, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardCheck, Filter, PackagePlus, Pencil, Percent, Plus, RotateCcw, Save, Settings2, Trash2, X, type LucideIcon } from "lucide-react";
+import { ArrowDown, ArrowDownUp, ArrowUp, ArrowUpDown, Building2, Check, ChevronDown, ChevronsDownUp, ChevronLeft, ChevronRight, ChevronUp, ClipboardCheck, Filter, PackagePlus, Pencil, Percent, Plus, RotateCcw, Save, Settings2, Trash2, X, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -91,8 +91,9 @@ const emptyDraft = { name: "", tag: "Button", variant: "outline", size: "", clas
 
 export function CdeWorkspace() {
   const qc = useQueryClient();
-  const [open, setOpen] = useState<Set<string>>(new Set(["plus"]));
-  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
+  const [open, setOpen] = useState<Set<string>>(new Set());
+  const [collapseKey, setCollapseKey] = useState(0);
+  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(() => new Set(Object.keys(PARENTS)));
   const [expandedWhere, setExpandedWhere] = useState<Set<string>>(new Set());
   const [expandedHistory, setExpandedHistory] = useState<Set<string>>(new Set());
   const [creating, setCreating] = useState<GroupKey | null>(null);
@@ -252,7 +253,10 @@ export function CdeWorkspace() {
   return (
     <main className="app-workspace mx-auto max-w-7xl space-y-4 overflow-x-clip px-4 py-6 sm:px-6">
       <div>
+        <div className="flex items-center justify-between gap-3">
         <h1 className="text-xl font-semibold">Ambiente de Desenvolvimento Colaborativo</h1>
+        <Button type="button" variant="ghost" size="sm" className="shrink-0 gap-1 text-xs" title="Recolher tudo" aria-label="Recolher tudo" onClick={() => { setOpen(new Set()); setCollapsedCategories(new Set(Object.keys(PARENTS))); setExpandedWhere(new Set()); setExpandedHistory(new Set()); setCollapseKey((k) => k + 1); }}><ChevronsDownUp className="h-4 w-4" />Recolher tudo</Button>
+        </div>
         <p className="text-sm text-muted-foreground">Modelos de UI/UX utilizados em todos os apps, agrupados por tipo. Crie e exclua modelos e selecione os que devem ser utilizados como padrão.</p>
       </div>
       {GROUPS.map((g, gi) => {
@@ -378,10 +382,10 @@ export function CdeWorkspace() {
           </div>
         );
       })}
-      <CdeAppIcons number={7} />
-      <CdeNavigation number={8} />
-      <CdeMainMenu number={9} />
-      <CdeAppOrder number={10} />
+      <CdeAppIcons key={`CdeAppIcons-${collapseKey}`} number={7} />
+      <CdeNavigation key={`CdeNavigation-${collapseKey}`} number={8} />
+      <CdeMainMenu key={`CdeMainMenu-${collapseKey}`} number={9} />
+      <CdeAppOrder key={`CdeAppOrder-${collapseKey}`} number={10} />
 
       <Dialog open={!!creating} onOpenChange={(o) => { if (!o) { setCreating(null); setEditing(null); } }}>
         <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
