@@ -10,6 +10,7 @@ import { MytosisIcon } from "@/components/mytosis-icon";
 import { CdeIcon } from "@/components/cde-icon";
 import { CdeCategoryHeader } from "./cde-category-header";
 import { CdeSortableIcons } from "./cde-sortable-icons";
+import { CdeMenuType } from "./cde-menu-type";
 import { TopIconStyleEditor } from "./top-icon-style-editor";
 
 type Item = { label: string; icon: LucideIcon | React.ComponentType<{ className?: string }>; name: string };
@@ -69,7 +70,7 @@ export function CdeAppIcons({ number, handle }: { number: number; handle?: impor
           <span className="text-sm font-semibold">{a.name}</span><span className="text-[0.6rem] text-muted-foreground/70">{a.iconName}</span>
           {isOpen ? <ChevronUp className="ml-auto h-4 w-4 text-primary" /> : <ChevronDown className="ml-auto h-4 w-4 text-primary" />}
         </button>
-        {isOpen ? <div className="space-y-2 rounded-lg border border-border p-3">{a.groups.map((g) => <div key={g.title}><div className="mb-1 text-xs text-muted-foreground">{g.title}{g.title === "Barra inferior" ? " · sem botão flutuante" : ""}</div>
+        {isOpen ? <div className="space-y-2 rounded-lg border border-border p-3">{a.groups.map((g) => <div key={g.title}><div className="mb-1 text-xs text-muted-foreground">{g.title === "Barra inferior" ? "Menu principal do app" : g.title}</div>{g.title === "Barra inferior" ? <div className="mb-2"><CdeMenuType app={a.name} items={g.items} /></div> : null}
           {g.items.length ? <CdeSortableIcons app={a.name} group={g.title} items={g.items} /> : <span className="text-xs text-muted-foreground">—</span>}</div>)}</div> : null}
       </div>; })}
     </div> : null}
