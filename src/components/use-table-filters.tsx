@@ -22,22 +22,25 @@ export function useTableFilters<T>(rows: readonly T[], columns: FilterColumn<T>[
   const filtered = rows.filter((row) => active.every((column) =>
     matchesColumnFilter(column.kind ?? "text", column.value(row), display(column, row), filters[column.key]),
   ));
-  const control = (key: string, showLabel = false) => {
-    const column = columns.find((entry) => entry.key === key);
-    if (!column) return null;
-    return <ColumnFilter label={column.label} kind={column.kind ?? "text"} values={rows.map((row) => display(column, row))}
-      value={filters[key]} showLabel={showLabel} onChange={(value) => setFilters((current) => ({ ...current, [key]: value }))} />;
+  const menu = <TableFilterMenu rows={rows} columns={columns} filters={filters} onChange={(key, value) => setFilters(current => ({ ...current, [key]: value }))} clear={() => setFilters({})} />;
+  let controlShown = false;
+  const control = (key: string) => {
+    if (!columns.some((entry) => entry.key === key) || controlShown) return null;
+    controlShown = true;
+    return menu;
   };
+  // Filtro consolidado: um único funil, exibido junto ao primeiro cabeçalho renderizado.
+  let menuKey: string | undefined;
   const header = (key: string) => {
     const column = columns.find((entry) => entry.key === key);
-    return <span className="inline-flex items-center gap-1 whitespace-nowrap">{column?.label}{control(key)}</span>;
+    menuKey ??= key;
+    return <span className="inline-flex items-center gap-1 whitespace-nowrap">{column?.label}{key === menuKey ? menu : null}</span>;
   };
   const searchText = (key: string) => filters[key]?.op === "contains" ? filters[key]?.value ?? "" : "";
-  const menu = <TableFilterMenu rows={rows} columns={columns} filters={filters} onChange={(key, value) => setFilters(current => ({ ...current, [key]: value }))} clear={() => setFilters({})} />;
   return { filtered, header, control, menu, searchText, active: active.length, clear: () => setFilters({}) };
 }
 
-function TableFilterMenu<T>({ rows, columns, filters, onChange, clear }: {
+export function TableFilterMenu<T>({ rows, columns, filters, onChange, clear }: {
   rows: readonly T[];
   columns: FilterColumn<T>[];
   filters: Record<string, ColumnFilterValue | undefined>;
@@ -49,7 +52,7 @@ function TableFilterMenu<T>({ rows, columns, filters, onChange, clear }: {
   const column = columns.find(c => c.key === key) ?? columns[0];
   const active = columns.filter(c => isFilterActive(filters[c.key])).length;
   return <Popover open={open} onOpenChange={setOpen}>
-    <PopoverTrigger asChild><Button variant="ghost" size="compactIcon" aria-label="Filtrar atas" title={active ? `Filtros (${active} ativos)` : "Filtros"} className={`!bg-transparent ${active ? "!text-primary" : "!text-foreground hover:!text-primary"}`}><Filter className="!size-5 stroke-[1.8]" /></Button></PopoverTrigger>
+    <PopoverTrigger asChild><Button variant="ghost" size="compactIcon" aria-label="Filtros" title={active ? `Filtros (${active} ativos)` : "Filtros"} className={`!bg-transparent ${active ? "!text-primary" : "!text-foreground hover:!text-primary"}`}><Filter className="!size-5 stroke-[1.8]" /></Button></PopoverTrigger>
     <PopoverContent align="start" className="w-[min(18rem,calc(100vw-2rem))] space-y-3 p-3">
       <Select value={column?.key} onValueChange={setKey}>
         <SelectTrigger aria-label="Tipo de filtro" className="h-8 text-xs"><SelectValue /></SelectTrigger>

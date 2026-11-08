@@ -1,3 +1,4 @@
+import { TableFilterMenu } from "@/components/use-table-filters";
 import { TableReportActions, TableReportProvider, useRegisterTableReport } from "@/components/table-report-actions";
 import { ProjectTypeFields, useProjectTypes } from "@/components/project-type-fields";
 import { composeProjectName, splitProjectName } from "@/lib/project-naming";
@@ -2888,8 +2889,8 @@ function OrdersTable({
   const colFilter = (key: string, showLabel = false) => {
     const c = colByKey[key];
     if (!c) return null;
+    void showLabel;
     return <span className="inline-flex shrink-0 items-center gap-0">
-      <ColumnFilter compact label={c.label} kind={c.kind} showLabel={showLabel} values={orders.map(c.list)} value={cf[key]} onChange={(v) => setCf((prev) => ({ ...prev, [key]: v }))} />
       <ColumnSortButton compact label={c.label} direction={columnSort?.key === key ? columnSort.direction : undefined} onClick={() => setColumnSort((current) => current?.key !== key ? { key, direction: "asc" } : current.direction === "asc" ? { key, direction: "desc" } : undefined)} />
     </span>;
   };
@@ -2915,10 +2916,7 @@ function OrdersTable({
   return (
     <>
       <div className="mb-2 flex flex-wrap items-center gap-2 text-xs">
-        <span className="inline-flex items-center gap-1 text-muted-foreground">Filtros Adicionais
-          <Popover><PopoverTrigger asChild><Button variant="ghost" size="icon" className="h-7 w-7 !bg-transparent !text-primary hover:!bg-transparent hover:!text-primary" title="Filtros Adicionais" aria-label="Filtros Adicionais"><Filter className="h-4 w-4" /></Button></PopoverTrigger>
-          <PopoverContent align="start" className="w-80 space-y-3"><p className="text-sm font-medium">Filtros Adicionais</p>{["end", "notes", "received"].map(key => <div key={key} className="flex items-center justify-between gap-2 text-sm"><span>{colByKey[key]?.label}</span>{colFilter(key)}</div>)}</PopoverContent></Popover>
-        </span>
+        <TableFilterMenu rows={orders} columns={colDefs.filter(c => showRequester || c.key !== "req").map(c => ({ key: c.key, label: c.label, kind: c.kind, value: c.raw as (o: typeof orders[number]) => string | number | null | undefined, display: c.list }))} filters={cf} onChange={(key, value) => setCf(prev => ({ ...prev, [key]: value }))} clear={() => setCf({})} />
         {activeColFilters.length > 0 && (
           <>
             <span className="text-muted-foreground">{activeColFilters.length} filtro(s) ativo(s): {activeColFilters.map((c) => c.label).join(", ")}</span>
@@ -2930,7 +2928,6 @@ function OrdersTable({
       <div className="space-y-3 lg:hidden">
         <div className="flex flex-wrap gap-1.5">
           {colDefs.filter(c => !["end", "notes", "received"].includes(c.key)).map((c) => <span key={c.key}>{colFilter(c.key, true)}</span>)}
-          {activeColFilters.length > 0 && <Button type="button" variant="outline" size="sm" className="h-7 text-xs" onClick={() => setCf({})}>Limpar filtros</Button>}
         </div>
         {visibleOrders.map((o) => {
           const part = o.request_group_id ? stockParts?.get(o.request_group_id) : undefined;

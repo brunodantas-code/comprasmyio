@@ -77,7 +77,7 @@ const MODULES = [
   {
     icon: FileSignature,
     title: "Legal",
-    body: "Contratos e jurídico",
+    body: "Contratos, atas de reunião e jurídico",
     available: false,
   },
   {
