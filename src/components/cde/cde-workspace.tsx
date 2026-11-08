@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils";
 import inventory from "./inventory.json";
 import { BORDERS, FILLS } from "@/components/mytosis/shapes";
+import { ColorCode } from "./color-code";
 import { FormatColorOptions } from "@/components/mytosis/format-color-options";
 
 type CdeStyle = { shape?: string; fill?: string; border?: string; borderWidth?: string; text?: string; description?: string };
@@ -189,6 +190,7 @@ export function CdeWorkspace() {
                         <div className="flex min-h-14 items-center justify-center rounded-md bg-background p-2"><Preview v={v} /></div>
                         <dl className="space-y-0.5 text-[0.7rem] leading-4 text-muted-foreground">
                           <div><b>Tipo:</b> {v.tag}{v.variant ? ` · ${v.variant}` : ""}{v.size ? ` · ${v.size}` : ""}</div>
+                          {v.style && (v.style.fill || v.style.border) ? <div className="flex flex-wrap gap-x-2">{v.style.fill && v.style.fill !== "none" ? <span>Fundo <ColorCode color={FILLS.find((f) => f.key === v.style!.fill)?.color} /></span> : null}{v.style.border ? <span>Borda <ColorCode color={BORDERS.find((b) => b.key === v.style!.border)?.color} /></span> : null}</div> : null}
                           {v.style?.description ? <div className="whitespace-pre-wrap break-words"><b>Descrição:</b> {v.style.description}</div> : null}
                           {v.className ? <div className="break-all"><b>Classes:</b> {v.className}</div> : null}
                           {v.icon ? <div className="break-all"><b>Ícone:</b> {v.icon} {v.iconClass}</div> : null}
@@ -197,6 +199,7 @@ export function CdeWorkspace() {
                         <Button type="button" variant="action" size="sm" style={{ "--wa-bg": "var(--whatsapp-green)", "--wa-bd": "var(--whatsapp-border)", "--wa-tx": "var(--card)" } as React.CSSProperties} className="mt-auto !rounded-lg !border-2 !border-solid !border-[var(--wa-bd)] !bg-[var(--wa-bg)] !text-[var(--wa-tx)] hover:!brightness-110" disabled={toggleStandard.isPending || (selected && !g.multi)} onClick={() => toggleStandard.mutate({ group: g.key, key: v.key, multi: g.multi })}>
                           {selected ? <><Check className="h-4 w-4" />Padrão{g.multi ? " (remover)" : ""}</> : g.multi ? "Adicionar como padrão" : "Escolher como padrão"}
                         </Button>
+                        <div className="text-center"><ColorCode color="var(--whatsapp-green)" /> · <ColorCode color="var(--whatsapp-border)" /></div>
                       </div>
                     );
                   })}
@@ -244,8 +247,8 @@ export function CdeWorkspace() {
             <div className="space-y-1"><Label>Espessura da borda</Label>
               <Select value={draft.style.borderWidth || "none"} onValueChange={(v) => setDraft({ ...draft, style: { ...draft.style, borderWidth: v === "none" ? "" : v } })}><SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>{WIDTHS.map((f) => <SelectItem key={f.key || "none"} value={f.key || "none"}>{f.label}</SelectItem>)}</SelectContent></Select></div>
-            <div className="sm:col-span-2"><FormatColorOptions label="Fundo" value={draft.style.fill ?? "none"} options={FILLS} onChange={(fill) => setDraft({ ...draft, style: { ...draft.style, fill } })} /></div>
-            <div className="sm:col-span-2"><FormatColorOptions label="Borda" value={draft.style.border ?? ""} options={BORDERS} onChange={(border) => setDraft({ ...draft, style: { ...draft.style, border } })} border /></div>
+            <div className="sm:col-span-2"><FormatColorOptions label="Fundo" value={draft.style.fill ?? "none"} options={FILLS} showCode onChange={(fill) => setDraft({ ...draft, style: { ...draft.style, fill } })} /></div>
+            <div className="sm:col-span-2"><FormatColorOptions label="Borda" value={draft.style.border ?? ""} options={BORDERS} showCode onChange={(border) => setDraft({ ...draft, style: { ...draft.style, border } })} border /></div>
             <div className="sm:col-span-2"><FormatColorOptions label="Cor do texto e ícone" value={draft.style.text ?? "default"} options={TEXTS} onChange={(text) => setDraft({ ...draft, style: { ...draft.style, text } })} /></div>
             <div className="space-y-1 sm:col-span-2"><Label>Descrição do desenvolvedor</Label><Textarea value={draft.style.description ?? ""} maxLength={1000} rows={3} onChange={(e) => setDraft({ ...draft, style: { ...draft.style, description: e.target.value } })} placeholder="Descreva como deseja o botão ou forma: uso, comportamento, cores, tamanho..." /></div>
             <div className="space-y-1 sm:col-span-2"><Label>Classes (opcional)</Label><Input value={draft.className} onChange={(e) => setDraft({ ...draft, className: e.target.value })} placeholder="h-8 text-sm" /></div>
