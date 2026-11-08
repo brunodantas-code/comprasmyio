@@ -87,7 +87,7 @@ function PortalPage() {
     { key: "development", name: "Code", description: ["Melhorias e Bugs"], to: "/development" as const },
     { key: "mytosis", name: "Mytosis", description: ["Fluxogramas", "e processos"], to: "/mytosis" as const },
     { key: "cde", name: "CDE", description: ["Padrões de", "interface"], to: "/cde" as const },
-  ].filter((app) => (app.key === "cde" ? data.isErpAdmin : data.appKeys.has(app.key)) || (app.key === "chamados" && pendingActions?.isCustomerSupportAnalyst))
+  ].filter((app) => (app.key === "cde" ? (data.isErpAdmin || data.appKeys.has("cde")) : data.appKeys.has(app.key)) || (app.key === "chamados" && pendingActions?.isCustomerSupportAnalyst))
     .sort((a, b) => (appOrder ? appOrder.indexOf(a.key) - appOrder.indexOf(b.key) : 0));
   const mobileAppPages = Array.from({ length: Math.ceil(apps.length / 8) }, (_, pageIndex) => apps.slice(pageIndex * 8, pageIndex * 8 + 8));
 

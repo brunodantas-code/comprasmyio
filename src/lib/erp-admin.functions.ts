@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-const appKeySchema = z.enum(["supply", "cash_flow", "crm", "legal", "rh", "development", "site_survey", "chamados", "mytosis"]);
+const appKeySchema = z.enum(["supply", "cash_flow", "crm", "legal", "rh", "development", "site_survey", "chamados", "mytosis", "cde"]);
 
 async function assertErpAdmin(context: { supabase: any; userId: string }) {
   const { data, error } = await context.supabase
@@ -19,7 +19,7 @@ export const getErpUsersAndAccess = createServerFn({ method: "GET" })
     await assertErpAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const [{ data: profiles, error: profilesError }, { data: accesses, error: accessError }, { data: admins, error: adminsError }] = await Promise.all([
-      supabaseAdmin.from("profiles").select("id, full_name, email").is("deleted_at", null).order("full_name"),
+      supabaseAdmin.from("profiles").select("id, full_name, email, is_active").is("deleted_at", null).order("full_name"),
       supabaseAdmin.from("user_app_access").select("user_id, app_key"),
       supabaseAdmin.from("erp_admins").select("user_id"),
     ]);
@@ -53,5 +53,20 @@ export const setErpAppAccess = createServerFn({ method: "POST" })
         .eq("app_key", data.appKey);
       if (error) throw error;
     }
+    return { ok: true };
+  });
+
+export const setErpUserActive = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ userId: z.string().uuid(), active: z.boolean() }).parse(input))
+  .handler(async ({ data, context }) => {
+    await assertErpAdmin(context);
+    if (data.userId === context.userId && !data.active) throw new Error("Você não pode inativar o seu próprio usuário.");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("profiles").update({ is_active: data.active }).eq("id", data.userId);
+    if (error) throw error;
+    // Inactive users cannot sign in; reactivation lifts the block.
+    const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(data.userId, { ban_duration: data.active ? "none" : "876000h" });
+    if (authError) throw authError;
     return { ok: true };
   });

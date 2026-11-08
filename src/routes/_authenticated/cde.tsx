@@ -7,7 +7,8 @@ import { CdeWorkspace } from "@/components/cde/cde-workspace";
 export const Route = createFileRoute("/_authenticated/cde")({
   beforeLoad: async ({ context }) => {
     const { data } = await supabase.from("erp_admins").select("user_id").eq("user_id", context.user.id).maybeSingle();
-    if (!data) throw redirect({ to: "/portal" });
+    const { data: grant } = data ? { data: true } : await supabase.from("user_app_access").select("user_id").eq("user_id", context.user.id).eq("app_key", "cde").maybeSingle();
+    if (!grant) throw redirect({ to: "/portal" });
   },
   component: CdePage,
   head: () => ({

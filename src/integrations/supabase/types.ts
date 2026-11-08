@@ -3628,6 +3628,7 @@ export type Database = {
           email: string | null
           full_name: string
           id: string
+          is_active: boolean
           job_title_id: string | null
           manager_id: string | null
           mobile_phone: string | null
@@ -3646,6 +3647,7 @@ export type Database = {
           email?: string | null
           full_name?: string
           id: string
+          is_active?: boolean
           job_title_id?: string | null
           manager_id?: string | null
           mobile_phone?: string | null
@@ -3664,6 +3666,7 @@ export type Database = {
           email?: string | null
           full_name?: string
           id?: string
+          is_active?: boolean
           job_title_id?: string | null
           manager_id?: string | null
           mobile_phone?: string | null
