@@ -12,12 +12,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils";
 import inventory from "./inventory.json";
 import filterUsage from "./filter-usage.json";
+import addTextUsage from "./add-text-usage.json";
 import { BORDERS, FILLS } from "@/components/mytosis/shapes";
 import { ColorCode } from "./color-code";
 import { FONT_SIZES, FORMS, ICONS, TEXTS, WIDTHS, styleOf, type CdeStyle } from "./cde-render";
 import { CdeAppIcons } from "./cde-app-icons";
 import { CdeNavigation } from "./cde-navigation";
-import { CdeNumber } from "./cde-button";
+import { CdeButton, CdeNumber } from "./cde-button";
 import { CdeMainMenu } from "./cde-main-menu";
 import { CdeAppOrder } from "./cde-app-order";
 import { CdeCategoryHeader } from "./cde-category-header";
@@ -324,6 +325,26 @@ export function CdeWorkspace() {
                     );
                   })}
                 </div>
+                {g.key === "add" ? (
+                  <div className="border-t border-border px-4 py-2 text-xs text-muted-foreground">
+                    <div className="flex items-center justify-between gap-2">
+                      <span>Botões atuais com + e texto ({addTextUsage.length})</span>
+                      <Button type="button" variant="ghost" size="compactIcon" className="text-primary hover:text-primary" aria-label={`${expandedWhere.has("add-text") ? "Recolher" : "Exibir"} botões atuais com + e texto`} aria-expanded={expandedWhere.has("add-text")} onClick={() => setExpandedWhere((c) => { const n = new Set(c); if (n.has("add-text")) n.delete("add-text"); else n.add("add-text"); return n; })}>
+                        {expandedWhere.has("add-text") ? <ChevronUp /> : <ChevronDown />}
+                      </Button>
+                    </div>
+                    {expandedWhere.has("add-text") ? (
+                      <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                        {addTextUsage.map((e) => (
+                          <div key={`${e.file}:${e.line}`} className="flex min-w-0 flex-col gap-1 rounded-md border border-border p-2">
+                            <div><CdeButton group="plus" screen="components/cde/cde-workspace.tsx" type="button" tabIndex={-1}>{e.label}</CdeButton></div>
+                            <span className="break-all">{e.file}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                ) : null}
                 {list.some((v) => v.files.length) ? (
                   <div className="border-t border-border px-4 py-2 text-xs text-muted-foreground">
                     <div className="flex items-center justify-between gap-2">

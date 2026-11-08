@@ -1,0 +1,102 @@
+[
+ {
+  "file": "components/approval-workflow.tsx",
+  "line": 1173,
+  "label": "Adicionar etapa"
+ },
+ {
+  "file": "components/bom-settings.tsx",
+  "line": 431,
+  "label": "Adicionar"
+ },
+ {
+  "file": "components/cash-flow/chart-of-accounts-tab.tsx",
+  "line": 87,
+  "label": "Nova conta"
+ },
+ {
+  "file": "components/clients-tab.tsx",
+  "line": 213,
+  "label": "Filial"
+ },
+ {
+  "file": "components/clients-tab.tsx",
+  "line": 406,
+  "label": "Adicionar unidade"
+ },
+ {
+  "file": "components/import-batches.tsx",
+  "line": 362,
+  "label": "Nova importação"
+ },
+ {
+  "file": "components/myio-orders-tab.tsx",
+  "line": 293,
+  "label": "Nova solicitação (texto variável)"
+ },
+ {
+  "file": "components/mytosis/flowchart.tsx",
+  "line": 322,
+  "label": "Nova etapa"
+ },
+ {
+  "file": "components/mytosis/kpis-tab.tsx",
+  "line": 157,
+  "label": "Lançar resultado"
+ },
+ {
+  "file": "components/mytosis/processes-tab.tsx",
+  "line": 45,
+  "label": "Parágrafo"
+ },
+ {
+  "file": "components/mytosis/processes-tab.tsx",
+  "line": 102,
+  "label": "Seção"
+ },
+ {
+  "file": "components/request-types-tab.tsx",
+  "line": 286,
+  "label": "Nova opção"
+ },
+ {
+  "file": "components/site-survey-environment-manager.tsx",
+  "line": 112,
+  "label": "Adicionar ambiente"
+ },
+ {
+  "file": "components/site-survey-luc-manager.tsx",
+  "line": 451,
+  "label": "Adicionar ambiente"
+ },
+ {
+  "file": "components/stock-tab.tsx",
+  "line": 777,
+  "label": "Adicionar item"
+ },
+ {
+  "file": "components/stock-tab.tsx",
+  "line": 1683,
+  "label": "Adicionar item"
+ },
+ {
+  "file": "components/tools-assets.tsx",
+  "line": 435,
+  "label": "Adicionar ferramenta"
+ },
+ {
+  "file": "components/unit-products.tsx",
+  "line": 389,
+  "label": "Adicionar produto"
+ },
+ {
+  "file": "routes/_authenticated/development.tsx",
+  "line": 297,
+  "label": "Novo ticket"
+ },
+ {
+  "file": "routes/_authenticated/site-survey.tsx",
+  "line": 1409,
+  "label": "Técnico"
+ }
+]

@@ -11,3 +11,4 @@
 - Portal tiles read app_tile (label px, icon %, tile zoom %) from cde_selected; per-app optical scale lives in APP_ICON_OPTICAL.
 - main_menu config also stores userInfo (name/job/profile/both); every header renders it via UserNameBlock, never per-app badges.
 - Confirmations never use window.confirm: call confirmAction() (ConfirmDialogHost in __root) or ConfirmDeleteButton; AlertDialogContent reads the CDE confirm_dialog standard.
+- `add-text-usage.json` lists current + buttons with text (shown in CDE 4.2); regenerate by scanning CdeButton group="plus"/<Plus/> with text when such buttons change.
