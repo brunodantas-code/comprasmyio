@@ -40,8 +40,8 @@ export function ErpAppAccessAdmin() {
 
   const saveActive = useServerFn(setErpUserActive);
   const activate = useMutation({
-    mutationFn: saveActive,
-    onSuccess: (_r, v) => {
+    mutationFn: (v: { data: { userId: string; active: boolean } }) => saveActive(v),
+    onSuccess: (_r, v: { data: { userId: string; active: boolean } }) => {
       queryClient.invalidateQueries({ queryKey: ["erp-users-and-access"] });
       toast.success(v.data.active ? "Usuário ativado" : "Usuário inativado: não consegue mais entrar");
     },
