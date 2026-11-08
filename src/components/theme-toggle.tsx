@@ -5,7 +5,15 @@ import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
 type Theme = "light" | "dark";
 
-function activeTheme(): Theme {
+export function toggleAppTheme(): Theme {
+  const nextTheme: Theme = activeTheme() === "dark" ? "light" : "dark";
+  document.documentElement.classList.toggle("dark", nextTheme === "dark");
+  document.documentElement.style.colorScheme = nextTheme;
+  window.localStorage.setItem("myio-theme", nextTheme);
+  return nextTheme;
+}
+
+export function activeTheme(): Theme {
   return document.documentElement.classList.contains("dark") ? "dark" : "light";
 }
 

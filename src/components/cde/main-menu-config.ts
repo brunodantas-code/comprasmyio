@@ -1,10 +1,11 @@
-import { ArrowLeft, BookOpen, ClipboardList, KeyRound, LayoutGrid, LifeBuoy, LogOut } from "lucide-react";
+import { ArrowLeft, BookOpen, ClipboardList, KeyRound, LayoutGrid, LifeBuoy, LogOut, Moon } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export const MENU_ITEMS = [
   { id: "manual", label: "Manual do Usuário", icon: BookOpen },
   { id: "back", label: "Voltar", icon: ArrowLeft },
+  { id: "theme", label: "Modo escuro", icon: Moon },
   { id: "password", label: "Alterar senha", icon: KeyRound },
   { id: "logout", label: "Sair", icon: LogOut },
   { id: "portal", label: "Todos os apps", icon: LayoutGrid, to: "/portal", optional: true },

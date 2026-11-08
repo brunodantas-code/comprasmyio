@@ -16,6 +16,7 @@ import { MytosisIcon } from "@/components/mytosis-icon";
 import { CdeIcon } from "@/components/cde-icon";
 import { useAppOrder, useAppTile, APP_TILE_DEFAULT } from "@/components/cde/app-order-config";
 import { AppTileFace } from "@/components/cde/app-tile";
+import { DesktopHeaderMenu } from "@/components/app-header";
 import { usePendingActions } from "@/hooks/use-pending-actions";
 import { ChangePasswordDialog } from "@/components/change-password-dialog";
 import { ThemeMenuItem, ThemeToggle } from "@/components/theme-toggle";
@@ -188,24 +189,7 @@ function PortalPage() {
                 <Settings2 className="h-4 w-4" />
               </Button>
             ) : null}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="!bg-transparent !text-primary shadow-none hover:!bg-transparent hover:!text-primary" title="Menu do usuário" aria-label="Menu do usuário">
-                  <UserRound className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-52">
-                <DropdownMenuLabel className="truncate">{data.name}</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <ThemeMenuItem />
-                <DropdownMenuItem onSelect={() => setPasswordOpen(true)}>
-                  <KeyRound />Alterar senha
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={handleSignOut} className="text-destructive focus:text-destructive">
-                  <LogOut />Sair
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <DesktopHeaderMenu userName={data.name} onSignOut={handleSignOut} onChangePassword={() => setPasswordOpen(true)} buttonClass="!bg-transparent !text-primary shadow-none hover:!bg-transparent hover:!text-primary" />
             <ChangePasswordDialog open={passwordOpen} onOpenChange={setPasswordOpen} />
           </div>
         </div>

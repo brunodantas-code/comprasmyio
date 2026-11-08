@@ -1,4 +1,6 @@
-import { useState, type ReactNode } from "react";
+import { activeTheme, toggleAppTheme } from "@/components/theme-toggle";
+import { Moon, Sun } from "lucide-react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, BookOpen, Home, KeyRound, LogOut, Menu } from "lucide-react";
@@ -70,8 +72,16 @@ function MainMenuEntries({ onSignOut, onChangePassword, supplyManual, itemClass 
     const Icon = item.icon;
     if ("to" in item) return <Button key={id} asChild variant="ghost" className={itemClass}><Link to={item.to}><Icon className="h-5 w-5" />{item.label}</Link></Button>;
     if (id === "manual") return <Button key={id} asChild variant="ghost" className={itemClass}><Link to="/supply-manual"><Icon className="h-5 w-5" />{item.label}</Link></Button>;
+    if (id === "theme") return <ThemeEntry key={id} className={itemClass} />;
     return <Button key={id} variant="ghost" className={`${itemClass}`} onClick={id === "logout" ? onSignOut : id === "password" ? onChangePassword : () => window.history.back()}><Icon className="h-5 w-5" />{item.label}</Button>;
   });
+}
+
+function ThemeEntry({ className }: { className: string }) {
+  const [dark, setDark] = useState(false);
+  useEffect(() => setDark(activeTheme() === "dark"), []);
+  const Icon = dark ? Sun : Moon;
+  return <Button variant="ghost" className={className} onClick={() => setDark(toggleAppTheme() === "dark")}><Icon className="h-5 w-5" />{dark ? "Modo claro" : "Modo escuro"}</Button>;
 }
 
 function MobileHeaderMenu({ userName, onSignOut, onChangePassword, buttonClass, supplyManual }: HeaderMenuProps) {
@@ -88,7 +98,7 @@ function MobileHeaderMenu({ userName, onSignOut, onChangePassword, buttonClass, 
   );
 }
 
-function DesktopHeaderMenu({ userName, onSignOut, onChangePassword, buttonClass, supplyManual }: HeaderMenuProps) {
+export function DesktopHeaderMenu({ userName, onSignOut, onChangePassword, buttonClass, supplyManual }: HeaderMenuProps) {
   const itemClass = "h-10 w-full justify-start rounded-none px-4 !bg-transparent !text-foreground hover:!bg-muted hover:!text-foreground";
 
   return (
