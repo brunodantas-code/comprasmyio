@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ShieldCheck } from "lucide-react";
+import { ChevronDown, ChevronRight, ShieldCheck } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { getErpUsersAndAccess, setErpAppAccess, setErpUserActive } from "@/lib/erp-admin.functions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,6 +39,8 @@ export function ErpAppAccessAdmin() {
     onError: (error: Error) => toast.error(error.message),
   });
 
+  const [open, setOpen] = useState<Set<string>>(new Set());
+  const toggle = (id: string) => setOpen((cur) => { const n = new Set(cur); if (n.has(id)) n.delete(id); else n.add(id); return n; });
   const saveActive = useServerFn(setErpUserActive);
   const activate = useMutation({
     mutationFn: (v: { data: { userId: string; active: boolean } }) => saveActive(v),
@@ -59,21 +62,24 @@ export function ErpAppAccessAdmin() {
       </CardHeader>
       <CardContent>
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando usuários...</p> : null}
-        <div className="space-y-2">
-          {users.map((user) => (
-            <div key={user.id} className={`grid gap-4 rounded-md border${user.is_active ? "" : " opacity-60"} border-border p-3 lg:grid-cols-[minmax(12rem,16rem)_minmax(0,1fr)] lg:items-center`}>
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="break-words font-semibold">{user.full_name || "Sem nome"}</p>
-                  {adminSet.has(user.id) ? <Badge variant="outline">Admin do ERP</Badge> : null}
-                  <label className="ml-auto flex items-center gap-2 text-xs">
-                    <Switch checked={user.is_active} disabled={activate.isPending} onCheckedChange={(active) => { if (active || window.confirm(`Inativar ${user.full_name || user.email}? O usuário não conseguirá mais entrar.`)) activate.mutate({ data: { userId: user.id, active } }); }} aria-label={`Ativo: ${user.full_name || user.email || "usuário"}`} />
-                    <span className={user.is_active ? "" : "text-destructive"}>{user.is_active ? "Ativo" : "Inativo"}</span>
-                  </label>
-                </div>
-                <p className="break-all text-xs text-muted-foreground">{user.email}</p>
+        <div className="divide-y divide-border">
+          {users.map((user) => {
+            const isOpen = open.has(user.id);
+            return (
+            <div key={user.id} className={user.is_active ? "" : "opacity-60"}>
+              <div className="flex flex-wrap items-center gap-2 py-2">
+                <button type="button" onClick={() => toggle(user.id)} aria-expanded={isOpen} className="flex min-w-0 items-center gap-2 text-left">
+                  {isOpen ? <ChevronDown className="h-5 w-5 shrink-0 text-primary" /> : <ChevronRight className="h-5 w-5 shrink-0 text-primary" />}
+                  <span className="break-words font-semibold">{user.full_name || "Sem nome"}</span>
+                  <span className="break-all text-xs text-muted-foreground">{user.email}</span>
+                </button>
+                {adminSet.has(user.id) ? <Badge variant="outline">Admin do ERP</Badge> : null}
+                <label className="ml-auto flex items-center gap-2 text-xs">
+                  <Switch checked={user.is_active} disabled={activate.isPending} onCheckedChange={(active) => { if (active || window.confirm(`Inativar ${user.full_name || user.email}? O usuário não conseguirá mais entrar.`)) activate.mutate({ data: { userId: user.id, active } }); }} aria-label={`Ativo: ${user.full_name || user.email || "usuário"}`} />
+                  <span className={user.is_active ? "" : "text-destructive"}>{user.is_active ? "Ativo" : "Inativo"}</span>
+                </label>
               </div>
-              <div className="grid min-w-0 grid-cols-2 gap-x-4 gap-y-3 sm:grid-flow-col sm:grid-rows-2 sm:grid-cols-5 sm:gap-x-4">
+              {isOpen ? <div className="grid min-w-0 grid-cols-2 gap-x-4 gap-y-3 rounded-md border border-border p-3 sm:grid-flow-col sm:grid-rows-2 sm:grid-cols-5">
                 {APPS.map((app) => {
                   const checked = accessSet.has(`${user.id}:${app.key}`);
                   return (
@@ -88,9 +94,10 @@ export function ErpAppAccessAdmin() {
                     </label>
                   );
                 })}
-              </div>
+              </div> : null}
             </div>
-          ))}
+            );
+          })}
         </div>
       </CardContent>
     </Card>
