@@ -194,7 +194,7 @@ export function CdeWorkspace() {
                           {v.icon ? <div className="break-all"><b>Ícone:</b> {v.icon} {v.iconClass}</div> : null}
                           {v.files.length ? <div className="break-all"><b>Onde:</b> {v.files.join(", ")}</div> : null}
                         </dl>
-                        <Button type="button" variant="action" size="sm" className="mt-auto" disabled={toggleStandard.isPending || (selected && !g.multi)} onClick={() => toggleStandard.mutate({ group: g.key, key: v.key, multi: g.multi })}>
+                        <Button type="button" variant="action" size="sm" style={{ "--wa-bg": "var(--myio-green)", "--wa-bd": "color-mix(in oklab, var(--myio-green) 45%, var(--card))", "--wa-tx": "var(--card)" } as React.CSSProperties} className="mt-auto !rounded-full !border-2 !border-solid !border-[var(--wa-bd)] !bg-[var(--wa-bg)] !text-[var(--wa-tx)] hover:!brightness-110" disabled={toggleStandard.isPending || (selected && !g.multi)} onClick={() => toggleStandard.mutate({ group: g.key, key: v.key, multi: g.multi })}>
                           {selected ? <><Check className="h-4 w-4" />Padrão{g.multi ? " (remover)" : ""}</> : g.multi ? "Adicionar como padrão" : "Escolher como padrão"}
                         </Button>
                       </div>
