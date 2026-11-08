@@ -1,4 +1,7 @@
 # Roadmap
+- [ ] CDE: histórico de exclusões recolhido por padrão com seta em cada grupo.
+- [ ] CDE: conferir aplicação do padrão de listas suspensas e corrigir a troca nas telas.
+- [ ] CDE: lápis para editar modelos já criados, com prévia e salvamento das alterações.
 - [x] CDE: categorias sem box verde, Exibir/Recolher como 3.4 e sequência contínua até Menu Principal; tela conferida.
 - [x] CDE: apresentação substituída pela frase solicitada sobre modelos de UI/UX.
 - [x] CDE: setas nas categorias-mãe e subcategorias, preservando modelos ao recolher; computador/celular conferidos.

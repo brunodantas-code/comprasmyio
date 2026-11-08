@@ -90,7 +90,9 @@ export function CdeWorkspace() {
   const qc = useQueryClient();
   const [open, setOpen] = useState<Set<string>>(new Set(["plus"]));
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
+  const [expandedHistory, setExpandedHistory] = useState<Set<string>>(new Set());
   const [creating, setCreating] = useState<GroupKey | null>(null);
+  const [editing, setEditing] = useState<Variant | null>(null);
   const [draft, setDraft] = useState(emptyDraft);
   const [deleting, setDeleting] = useState<{ group: GroupKey; model: Variant; label: string } | null>(null);
   const [replacement, setReplacement] = useState("");
@@ -110,7 +112,11 @@ export function CdeWorkspace() {
     },
   });
   const refresh = () => { qc.invalidateQueries({ queryKey: ["cde-data"] }); qc.invalidateQueries({ queryKey: ["cde-standards"] }); };
-  const uid = async () => (await supabase.auth.getUser()).data.user!.id;
+  const uid = async () => {
+    const user = (await supabase.auth.getUser()).data.user;
+    if (!user) throw new Error("Sessão não encontrada.");
+    return user.id;
+  };
 
   const groupModels = (g: GroupKey): Variant[] => {
     const removed = new Set((data?.removed ?? []).filter((r) => r.group_key === g).map((r) => r.variant_key));
@@ -134,7 +140,7 @@ export function CdeWorkspace() {
     // Grupos de padrão único: o padrão concentra todos os usos; os demais ficam com zero.
     // Secundários ficam com os usos das telas associadas; o principal com o restante.
     const std = primariesOf(g);
-    const single = !GROUPS.find((x) => x.key === g)?.multi;
+    const single = !GROUPS.find((x) => x.key === g)?.multi || g === "fields_select";
     if (single && std.length === 1 && result.some((v) => v.key === std[0])) {
       const total = result.reduce((s, v) => s + v.count, 0);
       const secs = secondariesOf(g);
@@ -183,10 +189,25 @@ export function CdeWorkspace() {
   const create = useMutation({
     mutationFn: async (group: GroupKey) => {
       if (!draft.name.trim()) throw new Error("Informe o nome do modelo.");
-      const { error } = await supabase.from("cde_models").insert({ group_key: group, name: draft.name.trim(), tag: draft.tag, variant: draft.variant, size: draft.size, class_name: draft.className, icon: draft.icon, icon_class: draft.iconClass, label: draft.label, style: draft.style, created_by: await uid() });
-      if (error) throw error;
+      const values = { name: draft.name.trim(), tag: draft.tag, variant: draft.variant, size: draft.size, class_name: draft.className, icon: draft.icon, icon_class: draft.iconClass, label: draft.label, style: draft.style };
+      if (editing?.custom) {
+        const { error } = await supabase.from("cde_models").update(values).eq("id", editing.key.slice(7)).eq("group_key", group);
+        if (error) throw error;
+      } else {
+        const { data: model, error } = await supabase.from("cde_models").insert({ ...values, group_key: group, created_by: await uid() }).select("id").single();
+        if (error) throw error;
+        if (editing) {
+          const key = `custom:${model.id}`;
+          const selection = await supabase.from("cde_selected").update({ variant_key: key }).eq("group_key", group).eq("variant_key", editing.key);
+          if (selection.error) throw selection.error;
+          const replacements = await supabase.from("cde_removed").update({ replaced_by: key }).eq("group_key", group).eq("replaced_by", editing.key);
+          if (replacements.error) throw replacements.error;
+          const exclusion = await supabase.from("cde_removed").insert({ group_key: group, variant_key: editing.key, replaced_by: key, removed_by: await uid() });
+          if (exclusion.error) throw exclusion.error;
+        }
+      }
     },
-    onSuccess: () => { refresh(); setCreating(null); setDraft(emptyDraft); toast.success("Modelo criado"); },
+    onSuccess: () => { refresh(); setCreating(null); setEditing(null); setDraft(emptyDraft); toast.success(editing ? "Modelo atualizado" : "Modelo criado"); },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Não foi possível criar o modelo."),
   });
 
@@ -273,6 +294,7 @@ export function CdeWorkspace() {
                         <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
                           <span className="truncate" title={v.style?.description || undefined}>{v.name ?? `Modelo ${i + 1}`}{v.custom ? " · criado no CDE" : ""}</span>
                           <span className="flex items-center gap-1">{v.custom && !v.count ? "novo" : `${v.count} uso${v.count === 1 ? "" : "s"}`}
+                            <Button type="button" variant="outline" size="compactIcon" title="Editar modelo" aria-label={`Editar ${v.name ?? `Modelo ${i + 1}`} em ${g.title}`} onClick={() => { setEditing(v); setDraft({ name: v.name ?? `Modelo ${i + 1}`, tag: v.tag, variant: v.variant, size: v.size, className: v.className, icon: v.icon, iconClass: v.iconClass, label: v.label, style: { ...v.style } }); setCreating(g.key); }}><Pencil /></Button>
                             <Button type="button" variant="outline" size="compactIcon" title={selected ? "Remova o padrão antes de excluir" : "Excluir modelo"} aria-label={`Excluir ${v.name ?? `Modelo ${i + 1}`}`} disabled={selected}
                               onClick={() => { if (!standards.length) return toast.error("Escolha primeiro um padrão para substituir este modelo."); setReplacement(primaries.length === 1 ? primaries[0] : standards.length === 1 ? standards[0] : ""); setDeleting({ group: g.key, model: v, label: v.name ?? `Modelo ${i + 1}` }); }}><Trash2 /></Button>
                           </span>
@@ -301,12 +323,18 @@ export function CdeWorkspace() {
                 </div>
                 {removed.length ? (
                   <div className="border-t border-border px-4 py-2 text-xs text-muted-foreground">
-                    <b>Excluídos:</b> {removed.map((r) => (
+                    <div className="flex items-center justify-between gap-2">
+                      <span>Histórico de exclusões</span>
+                      <Button type="button" variant="ghost" size="compactIcon" className="text-primary hover:text-primary" aria-label={`${expandedHistory.has(g.key) ? "Recolher" : "Exibir"} histórico de exclusões de ${g.title}`} title={expandedHistory.has(g.key) ? "Recolher histórico de exclusões" : "Exibir histórico de exclusões"} aria-expanded={expandedHistory.has(g.key)} aria-controls={`cde-history-${g.key}`} onClick={() => setExpandedHistory((current) => { const next = new Set(current); if (next.has(g.key)) next.delete(g.key); else next.add(g.key); return next; })}>
+                        {expandedHistory.has(g.key) ? <ChevronUp /> : <ChevronDown />}
+                      </Button>
+                    </div>
+                    {expandedHistory.has(g.key) ? <div id={`cde-history-${g.key}`} className="mt-2">{removed.map((r) => (
                       <span key={r.variant_key} className="mr-3 inline-flex items-center gap-1">
                         {r.variant_key.startsWith("custom:") ? "Modelo criado" : r.variant_key.split("|").filter(Boolean).slice(0, 3).join(" · ")} → substituído por {nameOf(r.replaced_by)}
                         {!r.variant_key.startsWith("custom:") ? <Button type="button" variant="ghost" size="compactIcon" title="Restaurar" aria-label="Restaurar modelo" onClick={() => restore.mutate({ group: r.group_key, key: r.variant_key })}><RotateCcw /></Button> : null}
                       </span>
-                    ))}
+                    ))}</div> : null}
                   </div>
                 ) : null}
               </>
@@ -319,9 +347,9 @@ export function CdeWorkspace() {
       <CdeNavigation number={8} />
       <CdeMainMenu number={9} />
 
-      <Dialog open={!!creating} onOpenChange={(o) => !o && setCreating(null)}>
+      <Dialog open={!!creating} onOpenChange={(o) => { if (!o) { setCreating(null); setEditing(null); } }}>
         <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
-          <DialogHeader className="flex-row items-center justify-between gap-3 space-y-0 pr-8"><DialogTitle>Criar modelo · {GROUPS.find((g) => g.key === creating)?.title}</DialogTitle><div className="flex min-h-12 min-w-24 items-center justify-center rounded-md border border-border bg-background px-3 py-2"><Preview v={draft} /></div></DialogHeader>
+          <DialogHeader className="flex-row items-center justify-between gap-3 space-y-0 pr-8"><DialogTitle>{editing ? "Editar modelo" : "Criar modelo"} · {GROUPS.find((g) => g.key === creating)?.title}</DialogTitle><div className="flex min-h-12 min-w-24 items-center justify-center rounded-md border border-border bg-background px-3 py-2"><Preview v={draft} /></div></DialogHeader>
           <div className="grid gap-3 sm:grid-cols-2 [&_:is(input,textarea,button[role=combobox])]:!rounded-none [&_:is(input,textarea,button[role=combobox])]:!border-0 [&_:is(input,textarea,button[role=combobox])]:!border-b [&_:is(input,textarea,button[role=combobox])]:!border-myio-green [&_:is(input,textarea,button[role=combobox])]:!bg-transparent [&_:is(input,textarea,button[role=combobox])]:!px-0 [&_:is(input,textarea,button[role=combobox])]:!shadow-none [&_:is(input,textarea,button[role=combobox])]:!ring-0 [&_textarea]:!border-solid">
             <div className="space-y-1 sm:col-span-2"><Label>Nome do modelo</Label><Input value={draft.name} maxLength={60} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder="Ex.: Campo de busca" /></div>
             <div className="space-y-1"><Label>Tipo</Label>
@@ -353,7 +381,7 @@ export function CdeWorkspace() {
             <div className="space-y-1 sm:col-span-2"><Label>Classes (opcional)</Label><Input value={draft.className} onChange={(e) => setDraft({ ...draft, className: e.target.value })} placeholder="h-8 text-sm" /></div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="action" onClick={() => setCreating(null)}>Cancelar</Button>
+            <Button type="button" variant="action" onClick={() => { setCreating(null); setEditing(null); }}>Cancelar</Button>
             <Button type="button" variant="action" disabled={create.isPending} onClick={() => creating && create.mutate(creating)}>Salvar</Button>
           </DialogFooter>
         </DialogContent>

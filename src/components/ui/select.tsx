@@ -5,6 +5,8 @@ import * as SelectPrimitive from "@radix-ui/react-select";
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { resolveCdeModel, useCdeStandards } from "@/components/cde/cde-button";
+import { styleOf } from "@/components/cde/cde-render";
 
 const Select = SelectPrimitive.Root;
 
@@ -15,13 +17,21 @@ const SelectValue = SelectPrimitive.Value;
 const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
->(({ className, children, ...props }, ref) => (
+>(({ className, children, style, ...props }, ref) => {
+  const { data } = useCdeStandards();
+  const model = resolveCdeModel(data, "fields_select");
+  const selected = data?.selected.some((row) => row.group_key === "fields_select" && row.is_primary);
+  const appearance = styleOf(model.style);
+  return (
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
       "flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background cursor-pointer data-[placeholder]:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
       className,
+      selected ? model.className : undefined,
+      selected ? appearance.cls : undefined,
     )}
+    style={selected ? { ...style, ...appearance.css } : style}
     {...props}
   >
     {children}
@@ -29,7 +39,8 @@ const SelectTrigger = React.forwardRef<
       <ChevronDown className="h-4 w-4 opacity-50" />
     </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>
-));
+);
+});
 SelectTrigger.displayName = SelectPrimitive.Trigger.displayName;
 
 const SelectScrollUpButton = React.forwardRef<

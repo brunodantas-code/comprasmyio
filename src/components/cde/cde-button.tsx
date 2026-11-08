@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { ICONS, styleOf, type CdeStyle } from "./cde-render";
 
 /** Grupos do CDE que já trocam ao vivo nas telas. */
-export type CdeGroup = "filter" | "plus" | "box" | "number_section" | "number_subsection";
+export type CdeGroup = "filter" | "plus" | "box" | "number_section" | "number_subsection" | "fields_select";
 
 /** Padrão usado enquanto o CDE carrega ou se nenhum padrão estiver escolhido. */
 const FALLBACK: Record<CdeGroup, string> = {
@@ -15,6 +15,7 @@ const FALLBACK: Record<CdeGroup, string> = {
   box: "div|||rounded-xl border bg-card text-card-foreground shadow||",
   number_section: "span|||rounded-md bg-primary text-foreground||",
   number_subsection: "span|||rounded-md bg-cde-number-soft text-primary||",
+  fields_select: "SelectTrigger|||||",
 };
 
 type Model = { variant: string; size: string; className: string; icon: string; iconClass: string; style?: CdeStyle };
