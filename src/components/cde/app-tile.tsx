@@ -17,3 +17,13 @@ export function AppTileFace({ appKey, name, tile }: { appKey: string; name: stri
   return <><span className="flex h-11 w-full translate-y-0.5 items-center justify-center sm:h-16 sm:translate-y-1" aria-hidden="true"><Icon className="h-11 w-11 sm:h-16 sm:w-16" style={{ strokeWidth: stroke, transform: `scale(${scale})` }} /></span>
     <span className="font-normal leading-none text-[length:var(--tile-fs-m)] sm:text-[length:var(--tile-fs)]" style={{ "--tile-fs": `${tile.labelPx}px`, "--tile-fs-m": `${tile.labelPx - 2}px` } as React.CSSProperties}>{name}</span></>;
 }
+
+const APP_NAME_KEYS: Record<string, string> = { Supply: "supply", "Cash Flow": "cash_flow", CRM: "crm", Legal: "legal", RH: "rh", "Site Survey": "site_survey", Chamados: "chamados", OpDesk: "chamados", CDE: "cde", Mytosis: "mytosis", Code: "development" };
+
+/** Small app symbol for lists (e.g. pending groups), keyed by the app display name. */
+export function AppSymbol({ name, className }: { name: string; className?: string }) {
+  const key = APP_NAME_KEYS[name];
+  if (!key) return null;
+  const [Icon] = APP_ICONS[key];
+  return <Icon className={className} aria-hidden="true" />;
+}
