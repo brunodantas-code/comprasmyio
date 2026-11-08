@@ -15,7 +15,19 @@ export const MENU_ITEMS = [
 /** Optional entries start hidden until an admin enables them in the CDE. */
 const OPTIONAL_IDS = MENU_ITEMS.filter((i) => "optional" in i).map((i) => i.id);
 export type MenuId = typeof MENU_ITEMS[number]["id"];
-export type MenuConfig = { order: MenuId[]; hidden: MenuId[]; v?: number };
+export const USER_INFO_OPTIONS = [
+  { key: "name", label: "Somente o nome" },
+  { key: "job", label: "Nome e cargo" },
+  { key: "profile", label: "Nome e perfil de usuário" },
+  { key: "both", label: "Nome, cargo e perfil" },
+] as const;
+export type UserInfoMode = typeof USER_INFO_OPTIONS[number]["key"];
+export type MenuConfig = { order: MenuId[]; hidden: MenuId[]; v?: number; userInfo?: UserInfoMode };
+/** Text shown below the user name in every app header. */
+export function userInfoLine(mode: UserInfoMode | undefined, jobTitle?: string | null, profile?: string | null) {
+  const parts = mode === "job" ? [jobTitle] : mode === "profile" ? [profile] : mode === "both" ? [jobTitle, profile] : [];
+  return parts.filter(Boolean).join(" · ");
+}
 /** v2: Minhas Pendências became visible by default; older saved configs drop it from hidden once. */
 const CONFIG_VERSION = 2;
 export function parseMenuConfig(raw?: string): MenuConfig {
@@ -25,9 +37,10 @@ export function parseMenuConfig(raw?: string): MenuConfig {
     const valid = (v: unknown): v is MenuId => defaults.some((id) => id === v);
     const order: MenuId[] = Array.isArray(parsed.order) ? parsed.order.filter(valid) : [];
     const hidden: MenuId[] = Array.isArray(parsed.hidden) ? parsed.hidden.filter(valid).filter((id: MenuId) => id !== "logout" && (parsed.v >= CONFIG_VERSION || id !== "pendentes")) : [];
+    const userInfo: UserInfoMode = USER_INFO_OPTIONS.some((o) => o.key === parsed.userInfo) ? parsed.userInfo : "name";
     const unseen = OPTIONAL_IDS.filter((id) => !order.includes(id));
-    return { order: [...new Set([...order, ...defaults])], hidden: [...new Set([...hidden, ...unseen])], v: CONFIG_VERSION };
-  } catch { return { order: defaults, hidden: [...OPTIONAL_IDS], v: CONFIG_VERSION }; }
+    return { order: [...new Set([...order, ...defaults])], hidden: [...new Set([...hidden, ...unseen])], v: CONFIG_VERSION, userInfo };
+  } catch { return { order: defaults, hidden: [...OPTIONAL_IDS], v: CONFIG_VERSION, userInfo: "name" }; }
 }
 export function useMainMenuConfig() {
   return useQuery({ queryKey: ["cde-main-menu"], queryFn: async () => {

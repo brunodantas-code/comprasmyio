@@ -1,3 +1,5 @@
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
@@ -9,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { CdeCategoryHeader } from "./cde-category-header";
-import { MENU_ITEMS, parseMenuConfig, useMainMenuConfig, type MenuId, type MenuConfig } from "./main-menu-config";
+import { MENU_ITEMS, USER_INFO_OPTIONS, userInfoLine, parseMenuConfig, useMainMenuConfig, type MenuId, type MenuConfig } from "./main-menu-config";
 
 function MenuRow({ id, checked, onChange }: { id: MenuId; checked: boolean; onChange: () => void }) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
@@ -52,8 +54,9 @@ export function CdeMainMenu({ number }: { number: number }) {
   }
   return <section className="space-y-4">
     <CdeCategoryHeader number={number} title="Menu principal" hint="Ícones, ordem e exibição das ações do menu dos apps" open={open} onToggle={() => setOpen(!open)} />
-    {open && <div className="grid gap-6 p-4 sm:grid-cols-2"><div><DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={move}><SortableContext items={config.order} strategy={verticalListSortingStrategy}>{config.order.map((id) => <MenuRow key={id} id={id} checked={!config.hidden.includes(id)} onChange={() => setDraft({ ...config, hidden: config.hidden.includes(id) ? config.hidden.filter((v) => v !== id) : [...config.hidden, id] })} />)}</SortableContext></DndContext><Button variant="action" className="mt-3" onClick={save} disabled={saving || !draft}><Save className="h-4 w-4" />Salvar</Button></div>
-      <div className="space-y-3"><h3 className="text-sm font-semibold">Prévia</h3><div className="max-w-72 overflow-hidden rounded-lg border border-border">{config.order.filter((id) => !config.hidden.includes(id)).map((id) => { const item = MENU_ITEMS.find((i) => i.id === id); if (!item) return null; const Icon = item.icon; return <div key={id} className="flex items-center gap-3 px-4 py-3 text-sm"><Icon className="h-5 w-5" />{item.label}</div>; })}</div></div>
+    {open && <div className="grid gap-6 p-4 sm:grid-cols-2"><div><DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={move}><SortableContext items={config.order} strategy={verticalListSortingStrategy}>{config.order.map((id) => <MenuRow key={id} id={id} checked={!config.hidden.includes(id)} onChange={() => setDraft({ ...config, hidden: config.hidden.includes(id) ? config.hidden.filter((v) => v !== id) : [...config.hidden, id] })} />)}</SortableContext></DndContext><div className="mt-4 space-y-1"><Label>Informação abaixo do nome do usuário</Label><Select value={config.userInfo ?? "name"} onValueChange={(v) => setDraft({ ...config, userInfo: v as MenuConfig["userInfo"] })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{USER_INFO_OPTIONS.map((o) => <SelectItem key={o.key} value={o.key}>{o.label}</SelectItem>)}</SelectContent></Select></div>
+      <Button variant="action" className="mt-3" onClick={save} disabled={saving || !draft}><Save className="h-4 w-4" />Salvar</Button></div>
+      <div className="space-y-3"><h3 className="text-sm font-semibold">Prévia</h3><div className="max-w-72 text-right"><p className="text-sm font-semibold">Nome do Usuário</p>{userInfoLine(config.userInfo, "Cargo", "Perfil") ? <p className="text-xs text-muted-foreground">{userInfoLine(config.userInfo, "Cargo", "Perfil")}</p> : null}</div><div className="max-w-72 overflow-hidden rounded-lg border border-border">{config.order.filter((id) => !config.hidden.includes(id)).map((id) => { const item = MENU_ITEMS.find((i) => i.id === id); if (!item) return null; const Icon = item.icon; return <div key={id} className="flex items-center gap-3 px-4 py-3 text-sm"><Icon className="h-5 w-5" />{item.label}</div>; })}</div></div>
     </div>}
   </section>;
 }

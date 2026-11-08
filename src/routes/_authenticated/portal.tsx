@@ -16,7 +16,7 @@ import { MytosisIcon } from "@/components/mytosis-icon";
 import { CdeIcon } from "@/components/cde-icon";
 import { useAppOrder, useAppTile, APP_TILE_DEFAULT } from "@/components/cde/app-order-config";
 import { AppTileFace } from "@/components/cde/app-tile";
-import { DesktopHeaderMenu } from "@/components/app-header";
+import { DesktopHeaderMenu, UserNameBlock } from "@/components/app-header";
 import { usePendingActions } from "@/hooks/use-pending-actions";
 import { ChangePasswordDialog } from "@/components/change-password-dialog";
 import { ThemeMenuItem, ThemeToggle } from "@/components/theme-toggle";
@@ -166,13 +166,9 @@ function PortalPage() {
           </div>
           <div className="mt-8 sm:hidden">
             <p className="text-xl font-bold text-accent-foreground">Olá, {firstName}</p>
-            <p className="mt-1 text-sm text-accent-foreground/80">Plataforma ERP</p>
           </div>
           <div className="hidden min-w-0 items-center gap-2 sm:flex">
-            <div className="min-w-0 text-right">
-              <p className="truncate text-sm font-semibold">{data.name}</p>
-              <p className="text-xs text-muted-foreground">Plataforma ERP</p>
-            </div>
+            <UserNameBlock userName={data.name} />
             {activeView === "users" ? (
               <Button variant="ghost" size="icon" className="!bg-transparent !text-foreground shadow-none hover:!bg-transparent hover:!text-foreground" onClick={() => setActiveView("apps")} title="Início" aria-label="Voltar aos aplicativos">
                 <LayoutGrid className="h-4 w-4" />

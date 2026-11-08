@@ -1,3 +1,4 @@
+import { useCurrentUser } from "@/hooks/use-current-user";
 import { usePendingActions } from "@/hooks/use-pending-actions";
 import { activeTheme, toggleAppTheme } from "@/components/theme-toggle";
 import { Moon, Sun } from "lucide-react";
@@ -10,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ChangePasswordDialog } from "@/components/change-password-dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { MENU_ITEMS, parseMenuConfig, useMainMenuConfig } from "@/components/cde/main-menu-config";
+import { MENU_ITEMS, parseMenuConfig, useMainMenuConfig, userInfoLine } from "@/components/cde/main-menu-config";
 
 export function AppHeader({ logo, children, supplyManual = false }: { logo: ReactNode; children?: ReactNode; supplyManual?: boolean }) {
   const navigate = useNavigate();
@@ -46,7 +47,7 @@ export function AppHeader({ logo, children, supplyManual = false }: { logo: Reac
         </div>
         <div className="mt-5 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:mt-0 sm:flex sm:min-w-0 sm:justify-end">
           <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
-            <p className="min-w-0 truncate text-sm font-semibold">{userName}</p>
+            <UserNameBlock userName={userName} />
             <Button asChild variant="ghost" size="icon" className="shrink-0 !bg-transparent !text-foreground shadow-none hover:!bg-transparent hover:!text-foreground" title="Início" aria-label="Voltar aos aplicativos">
               <Link to="/portal"><LayoutGrid className="h-4 w-4" /></Link>
             </Button>
@@ -60,6 +61,14 @@ export function AppHeader({ logo, children, supplyManual = false }: { logo: Reac
       <ChangePasswordDialog open={passwordOpen} onOpenChange={setPasswordOpen} />
     </header>
   );
+}
+
+/** Name plus the CDE-chosen line (job title / access profile) shown in every app header. */
+export function UserNameBlock({ userName }: { userName: string }) {
+  const mode = useMainMenuConfig().data?.userInfo;
+  const { data: me } = useCurrentUser();
+  const line = userInfoLine(mode, me?.jobTitle?.name, me?.accessProfileName);
+  return <div className="min-w-0 text-right"><p className="truncate text-sm font-semibold">{userName}</p>{line ? <p className="truncate text-xs text-muted-foreground">{line}</p> : null}</div>;
 }
 
 type HeaderMenuProps = { userName: string; onSignOut: () => void; onChangePassword: () => void; buttonClass: string; supplyManual?: boolean };

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 vi.mock("@/integrations/supabase/client", () => ({ supabase: {} }));
-import { parseMenuConfig } from "./main-menu-config";
+import { parseMenuConfig, userInfoLine } from "./main-menu-config";
 describe("main menu choices", () => {
   it("keeps the selected icon order without duplicates", () => {
     expect(parseMenuConfig(JSON.stringify({ order: ["password", "back", "logout", "manual", "password"] })).order.slice(0, 4)).toEqual(["password", "back", "logout", "manual"]);
@@ -14,5 +14,11 @@ describe("main menu choices", () => {
   });
   it("shows an optional menu once it was saved as visible", () => {
     expect(parseMenuConfig(JSON.stringify({ order: ["chamados"], hidden: [] })).hidden).not.toContain("chamados");
+  });
+  it("shows only the name by default and the chosen job/profile line", () => {
+    expect(parseMenuConfig("{}").userInfo).toBe("name");
+    expect(userInfoLine("name", "CFO", "Admin")).toBe("");
+    expect(userInfoLine("job", "CFO", "Admin")).toBe("CFO");
+    expect(userInfoLine("both", "CFO", "Admin")).toBe("CFO · Admin");
   });
 });

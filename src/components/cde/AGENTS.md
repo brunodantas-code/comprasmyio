@@ -9,3 +9,4 @@
 - Portal app order is stored in cde_selected group app_order (JSON array of app keys) and read by the portal; unknown/missing apps fall back to default order.
 - New screens/improvements use CDE-connected shared components; ask only when a group lacks a chosen standard or a new element type appears.
 - Portal tiles read app_tile (label px, icon %, tile zoom %) from cde_selected; per-app optical scale lives in APP_ICON_OPTICAL.
+- main_menu config also stores userInfo (name/job/profile/both); every header renders it via UserNameBlock, never per-app badges.
