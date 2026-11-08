@@ -174,22 +174,22 @@ function PortalPage() {
               <p className="text-xs text-muted-foreground">Plataforma ERP</p>
             </div>
             {activeView === "users" ? (
-              <Button variant="ghost" size="icon" className="!bg-transparent !text-primary shadow-none hover:!bg-transparent hover:!text-primary" onClick={() => setActiveView("apps")} title="Início" aria-label="Voltar aos aplicativos">
+              <Button variant="ghost" size="icon" className="!bg-transparent !text-foreground shadow-none hover:!bg-transparent hover:!text-foreground" onClick={() => setActiveView("apps")} title="Início" aria-label="Voltar aos aplicativos">
                 <LayoutGrid className="h-4 w-4" />
               </Button>
             ) : null}
-            <Button asChild variant="ghost" size="icon" className="relative !bg-transparent !text-primary shadow-none hover:!bg-transparent hover:!text-primary" title="Central de Pendências" aria-label={`Central de Pendências: ${pendingActions?.total ?? 0}`}>
+            <Button asChild variant="ghost" size="icon" className="relative !bg-transparent !text-foreground shadow-none hover:!bg-transparent hover:!text-foreground" title="Central de Pendências" aria-label={`Central de Pendências: ${pendingActions?.total ?? 0}`}>
               <Link to="/pendentes">
                 <Bell className="h-5 w-5" />
                 {(pendingActions?.total ?? 0) > 0 ? <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">{(pendingActions?.total ?? 0) > 99 ? "99+" : pendingActions?.total}</span> : null}
               </Link>
             </Button>
             {data.isErpAdmin ? (
-              <Button variant="ghost" size="icon" className="!bg-transparent !text-primary shadow-none hover:!bg-transparent hover:!text-primary" onClick={() => setActiveView("users")} title="Acessos" aria-label="Acessos">
+              <Button variant="ghost" size="icon" className="!bg-transparent !text-foreground shadow-none hover:!bg-transparent hover:!text-foreground" onClick={() => setActiveView("users")} title="Acessos" aria-label="Acessos">
                 <Settings2 className="h-4 w-4" />
               </Button>
             ) : null}
-            <DesktopHeaderMenu userName={data.name} onSignOut={handleSignOut} onChangePassword={() => setPasswordOpen(true)} buttonClass="!bg-transparent !text-primary shadow-none hover:!bg-transparent hover:!text-primary" />
+            <DesktopHeaderMenu userName={data.name} onSignOut={handleSignOut} onChangePassword={() => setPasswordOpen(true)} buttonClass="!bg-transparent !text-foreground shadow-none hover:!bg-transparent hover:!text-foreground" />
             <ChangePasswordDialog open={passwordOpen} onOpenChange={setPasswordOpen} />
           </div>
         </div>

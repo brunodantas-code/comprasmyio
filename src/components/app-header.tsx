@@ -46,7 +46,7 @@ export function AppHeader({ logo, children, supplyManual = false }: { logo: Reac
         <div className="mt-5 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:mt-0 sm:flex sm:min-w-0 sm:justify-end">
           <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
             <p className="min-w-0 truncate text-sm font-semibold">{userName}</p>
-            <Button asChild variant="ghost" size="icon" className="shrink-0 !bg-transparent !text-primary shadow-none hover:!bg-transparent hover:!text-primary" title="Início" aria-label="Voltar aos aplicativos">
+            <Button asChild variant="ghost" size="icon" className="shrink-0 !bg-transparent !text-foreground shadow-none hover:!bg-transparent hover:!text-foreground" title="Início" aria-label="Voltar aos aplicativos">
               <Link to="/portal"><LayoutGrid className="h-4 w-4" /></Link>
             </Button>
           </div>
