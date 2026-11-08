@@ -1,3 +1,4 @@
+import { confirmAction } from "@/components/confirm-dialog";
 import { METER_ELECTRICAL_CATALOG_PURPOSE, meterElectricalItemsForPoint, formatPurchaseQuantity, groupMeterElectricalReportRows } from "@/lib/site-survey-meter-electrical";
 import { customerQuestionResponses, customerQuestions, isCustomerQuestion, numberedCustomerQuestions } from "@/lib/site-survey-questions";
 import { surveyPointType } from "@/lib/site-survey-point-type";
@@ -633,7 +634,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     if (!purchaseDraftItems.length) return;
     const { count, error } = await supabase.from("purchase_orders").select("id", { count: "exact", head: true }).eq("site_survey_visit_id", visit.id).neq("status", "cancelado");
     if (error) return toast.error(error.message);
-    if ((count ?? 0) > 0 && !window.confirm("Já existe uma solicitação de materiais originada desta visita. Deseja criar outra?")) return;
+    if ((count ?? 0) > 0 && !await confirmAction("Já existe uma solicitação de materiais originada desta visita. Deseja criar outra?")) return;
     saveSiteSurveyPurchaseDraft({ visitId: visit.id, surveyNumber: visit.survey_number, projectId: visit.project_id, clientId: visit.client_id, clientUnitId: visit.client_unit_id, items: purchaseDraftItems });
     window.location.assign("/dashboard?section=pedidos&subsection=new");
   };

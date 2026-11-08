@@ -1,3 +1,4 @@
+import { confirmAction } from "@/components/confirm-dialog";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { ChevronDown, ChevronRight, ShieldCheck } from "lucide-react";
@@ -84,7 +85,7 @@ export function ErpAppAccessAdmin() {
                 </button>
                 {adminSet.has(user.id) ? <Badge variant="outline">Admin do ERP</Badge> : null}
                 <label className="ml-auto flex items-center gap-2 text-xs">
-                  <Switch checked={user.is_active} disabled={activate.isPending} onCheckedChange={(active) => { if (active || window.confirm(`Inativar ${user.full_name || user.email}? O usuário não conseguirá mais entrar.`)) activate.mutate({ data: { userId: user.id, active } }); }} aria-label={`Ativo: ${user.full_name || user.email || "usuário"}`} />
+                  <Switch checked={user.is_active} disabled={activate.isPending} onCheckedChange={async (active) => { if (active || await confirmAction(`Inativar ${user.full_name || user.email}? O usuário não conseguirá mais entrar.`)) activate.mutate({ data: { userId: user.id, active } }); }} aria-label={`Ativo: ${user.full_name || user.email || "usuário"}`} />
                   <span className={user.is_active ? "" : "text-destructive"}>{user.is_active ? "Ativo" : "Inativo"}</span>
                 </label>
               </div>

@@ -1,3 +1,4 @@
+import { confirmAction } from "@/components/confirm-dialog";
 import { CdeButton } from "@/components/cde/cde-button";
 import { useTableFilters } from "@/components/use-table-filters";
 import { useMemo, useState } from "react";
@@ -148,14 +149,14 @@ export function KpisTab({ data, canEdit }: { data: MytosisData; canEdit: boolean
                   <td className="py-1.5 text-muted-foreground">{r.notes ?? ""}</td>
                   <td className="py-1.5 text-right">{canPost(k) ? <span className="inline-flex gap-1">
                     <Button variant="ghost" size="icon" className="h-7 w-7 text-primary" aria-label="Editar lançamento" onClick={() => setPosting({ kpi: k, period: r.period_start, value: String(r.value), notes: r.notes ?? "" })}><Pencil className="size-3.5" /></Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-primary" aria-label="Excluir lançamento" onClick={() => { if (window.confirm("Excluir este lançamento?")) deleteResult.mutate(r.id); }}><Trash2 className="size-3.5" /></Button>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-primary" aria-label="Excluir lançamento" onClick={async () => { if (await confirmAction("Excluir este lançamento?")) deleteResult.mutate(r.id); }}><Trash2 className="size-3.5" /></Button>
                   </span> : null}</td>
                 </tr>)}</tbody>
               </table>
               <div className="flex flex-wrap gap-2">
                 {canPost(k) ? <CdeButton group="plus" screen="components/mytosis/kpis-tab.tsx" onClick={() => setPosting({ kpi: k, period: periodStart(new Date(), k.frequency), value: "", notes: "" })}>Lançar resultado</CdeButton> : null}
                 {canEdit ? <Button variant="outline" size="sm" onClick={() => setDraft({ id: k.id, name: k.name, description: k.description ?? "", cost_center_id: k.cost_center_id, responsible_id: k.responsible_id, unit: k.unit, target: String(k.target), frequency: k.frequency })}><Pencil className="size-3.5" />Editar KPI</Button> : null}
-                {canEdit ? <Button variant="outline" size="sm" onClick={() => { if (window.confirm(`Excluir o KPI "${k.name}" e todos os lançamentos?`)) deleteKpi.mutate(k.id); }}><Trash2 className="size-3.5" />Excluir</Button> : null}
+                {canEdit ? <Button variant="outline" size="sm" onClick={async () => { if (await confirmAction(`Excluir o KPI "${k.name}" e todos os lançamentos?`)) deleteKpi.mutate(k.id); }}><Trash2 className="size-3.5" />Excluir</Button> : null}
               </div>
             </div> : null}
           </div>;

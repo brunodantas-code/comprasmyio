@@ -1,3 +1,4 @@
+import { confirmAction } from "@/components/confirm-dialog";
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -257,7 +258,7 @@ export function NodeDialog({ state, onClose, data, canEdit }: { state: NodeDialo
         {editing && !isProcess ? <NodeConversation nodeId={editing.id} data={data} /> : null}
         <NodeAttachments nodeId={editing?.id ?? createdId ?? undefined} canEdit={canEdit} pending={pendingFiles} onPendingChange={setPendingFiles} onBusyChange={setAttachmentsBusy} />
         <DialogFooter className="gap-2">
-          {editing && canEdit ? <Button variant="outline" onClick={() => { if (window.confirm(`Excluir ${numbers.get(editing.id) ?? editing.locator} e todas as tarefas abaixo dele?`)) remove.mutate(); }} disabled={remove.isPending}>Excluir</Button> : null}
+          {editing && canEdit ? <Button variant="outline" onClick={async () => { if (await confirmAction(`Excluir ${numbers.get(editing.id) ?? editing.locator} e todas as tarefas abaixo dele?`)) remove.mutate(); }} disabled={remove.isPending}>Excluir</Button> : null}
           <Button variant="outline" onClick={onClose} disabled={attachmentsBusy || save.isPending}>Cancelar</Button>
           {canEdit ? <Button variant="outline" onClick={() => save.mutate()} disabled={save.isPending || attachmentsBusy || titleTooLong || descriptionTooLong}>Salvar</Button> : null}
         </DialogFooter>

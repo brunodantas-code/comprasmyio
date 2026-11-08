@@ -1,3 +1,4 @@
+import { confirmAction } from "@/components/confirm-dialog";
 import { useTableFilters } from "@/components/use-table-filters";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -461,7 +462,7 @@ function UnitaryDropZone() {
         setOver(true);
       }}
       onDragLeave={() => setOver(false)}
-      onDrop={(e) => {
+      onDrop={async (e) => {
         e.preventDefault();
         setOver(false);
         try {
@@ -469,7 +470,7 @@ function UnitaryDropZone() {
             unit?: UnitRow;
             box?: HomologationRef;
           };
-          if (payload.unit && payload.box && window.confirm(`Confirma a retirada do dispositivo #${payload.unit.position} da caixa?`)) {
+          if (payload.unit && payload.box && await confirmAction(`Confirma a retirada do dispositivo #${payload.unit.position} da caixa?`)) {
             remove.mutate({ unit: payload.unit, box: payload.box });
           }
         } catch {

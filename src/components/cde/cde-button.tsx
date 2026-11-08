@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { ICONS, styleOf, type CdeStyle } from "./cde-render";
 
 /** Grupos do CDE que já trocam ao vivo nas telas. */
-export type CdeGroup = "filter" | "plus" | "box" | "number_section" | "number_subsection" | "fields_select";
+export type CdeGroup = "filter" | "plus" | "box" | "number_section" | "number_subsection" | "fields_select" | "confirm_dialog";
 
 /** Padrão usado enquanto o CDE carrega ou se nenhum padrão estiver escolhido. */
 const FALLBACK: Record<CdeGroup, string> = {
@@ -16,6 +16,7 @@ const FALLBACK: Record<CdeGroup, string> = {
   number_section: "span|||rounded-md bg-primary text-foreground||",
   number_subsection: "span|||rounded-md bg-cde-number-soft text-primary||",
   fields_select: "SelectTrigger|||||",
+  confirm_dialog: "div|||rounded-lg border bg-background||",
 };
 
 type Model = { variant: string; size: string; className: string; icon: string; iconClass: string; style?: CdeStyle };
@@ -89,6 +90,13 @@ export const CdeButton = forwardRef<HTMLButtonElement, Props>(function CdeButton
 export function useCdeBoxStyle(screen?: string) {
   const { data } = useCdeStandards();
   const m = resolveCdeModel(data, "box", screen);
+  return { ...styleOf(m.style), className: m.className };
+}
+
+/** Style of confirmation dialogs (exclusões etc.), chosen in CDE 5.2. */
+export function useCdeConfirmStyle() {
+  const { data } = useCdeStandards();
+  const m = resolveCdeModel(data, "confirm_dialog");
   return { ...styleOf(m.style), className: m.className };
 }
 

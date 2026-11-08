@@ -1,3 +1,4 @@
+import { confirmAction } from "@/components/confirm-dialog";
 import { CdeButton } from "@/components/cde/cde-button";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -73,7 +74,7 @@ export function UsersTab({ data }: { data: MytosisData }) {
                 <TableCell>{isAdmin ? (
                   <Select value={m.role} onValueChange={(role) => upsert.mutate({ userId: m.user_id, role })}><SelectTrigger className="h-8 w-44"><SelectValue /></SelectTrigger><SelectContent>{ROLES.map((r) => <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>)}</SelectContent></Select>
                 ) : ROLES.find((r) => r.value === m.role)?.label}</TableCell>
-                <TableCell>{isAdmin ? <Button variant="ghost" size="icon" className="text-primary" onClick={() => { if (window.confirm("Remover este usuário do Mytosis?")) remove.mutate(m.user_id); }} aria-label="Remover usuário" title="Remover usuário"><Trash2 className="h-4 w-4" /></Button> : null}</TableCell>
+                <TableCell>{isAdmin ? <Button variant="ghost" size="icon" className="text-primary" onClick={async () => { if (await confirmAction("Remover este usuário do Mytosis?")) remove.mutate(m.user_id); }} aria-label="Remover usuário" title="Remover usuário"><Trash2 className="h-4 w-4" /></Button> : null}</TableCell>
               </TableRow>
             )) : <TableRow><TableCell colSpan={4} className="py-10 text-center text-muted-foreground">Nenhum usuário cadastrado.</TableCell></TableRow>}
           </TableBody>

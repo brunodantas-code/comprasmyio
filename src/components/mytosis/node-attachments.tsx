@@ -1,3 +1,4 @@
+import { confirmAction } from "@/components/confirm-dialog";
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Download, File, Paperclip, Trash2 } from "lucide-react";
@@ -60,7 +61,7 @@ export function NodeAttachments({ nodeId, canEdit, pending = [], onPendingChange
     finally { await Promise.all([queryClient.invalidateQueries({ queryKey: ["mytosis-attachments", nodeId] }), queryClient.invalidateQueries({ queryKey: ["mytosis"] })]); setBusy(false); onBusyChange?.(false); }
   }
   async function remove(id: string, path: string) {
-    if (!window.confirm("Excluir este anexo?")) return;
+    if (!await confirmAction("Excluir este anexo?")) return;
     setBusy(true); onBusyChange?.(true);
     try {
       const storage = await supabase.storage.from(bucket).remove([path]);
