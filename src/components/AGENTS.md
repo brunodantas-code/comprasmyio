@@ -1,0 +1,1 @@
+- Signature and per-app manuals open from AppHeader's main menu (manualApp), since they serve every app.

@@ -31,3 +31,4 @@
 - Library retirement persists source keys in cde_selected.button_library_retired, never deletes app controls, and fails closed unless the inventory proves live CDE wiring and a valid chosen model.
 - Library text/group bindings use cde_selected.button_bindings keyed by original shared Button text; unsafe/dynamic or nonshared controls cannot save ineffective bindings.
 - Landing and portal share app ordering via public_app_order(), a narrow public read exposing only the order array, never other CDE records.
+- Icon-only shared Save controls resolve CDE secondary controls/save-icon before the primary.

@@ -48,6 +48,4 @@
 - Legal personal signature notifications share legalSignaturePendingItems and participant identity guards across portal and Central; count each meeting once and refresh after signing/deletion.
 - Shared dropdown menus inherit their trigger’s computed font size across portals; CDE fields_select font settings apply to both field and options.
 
-- Icon-only shared Save controls resolve the CDE secondary scope controls/save-icon before the primary, preserving text-button standards while exposing the compact model in CDE.
 - Shared Save/Delete controls preserve descriptive and in-progress labels; CDE label overrides apply only to generic Salvar/Excluir so destructive choices remain distinguishable.
-- Personal signature and per-app manual versions open from the shared AppHeader main menu (manualApp prop), not from Supply registries, because they serve every app.
