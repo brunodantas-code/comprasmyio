@@ -21,7 +21,8 @@ import { detectButtonGroup, readButtonBindings } from "./cde-look";
 import library from "./button-library.json";
 import { isSpecificAction } from "./action-standard";
 import { UsageLinks } from "./usage-links";
-import { libraryDescription, libraryUsageCounts } from "./library-details";
+import { libraryDescription } from "./library-details";
+import { consolidateLibrary, libraryModelKey } from "./library-models";
 
 const normalize = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
@@ -45,7 +46,7 @@ export function CdeButtonLibrary({ number, handle, onEdit }: { number: number; h
   const bindings = readButtonBindings(bindingRow?.variant_key);
   const retiredRow = data?.selected.find(s => s.group_key === "button_library_retired" && s.is_primary);
   const retired = readRetiredEntries(retiredRow?.variant_key);
-  const visibleLibrary = library.filter(b => !retired.includes(libraryEntryKey(b)));
+  const visibleLibrary = library;
   const bindingOf = (b: LibraryButton) => bindings[b.id] ?? bindings[b.label];
   const typeOf = (b: LibraryButton) => bindingOf(b)?.group || b.group || detectButtonGroup(<>{ICONS[b.icon] && (() => { const Icon = ICONS[b.icon]; return <Icon />; })()}{b.label}</>) || "action_standard";
   const classification = (b: LibraryButton) => {
@@ -55,6 +56,14 @@ export function CdeButtonLibrary({ number, handle, onEdit }: { number: number; h
     const model = data?.models.find(m => `custom:${m.id}` === (bindingOf(b)?.modelKey ?? row?.variant_key));
     return isSpecificAction({ group, className: b.className, customStyle: b.visualCustom, secondary: row ? !row.is_primary : false, modelStyle: model?.style as import("./cde-render").CdeStyle }) ? "Função específica" : "Padrão visual comum";
   };
+  const modelIdentity = (b: LibraryButton) => {
+    const group = typeOf(b);
+    const rows = data?.selected.filter(s => s.group_key === group) ?? [];
+    const row = rows.find(s => !s.is_primary && s.screens.includes(b.file)) ?? rows.find(s => s.is_primary);
+    return libraryModelKey(b, { group, model: bindingOf(b)?.modelKey ?? row?.variant_key ?? "source", label: bindingOf(b)?.label, preserveContent: bindingOf(b)?.preserveContent, bound: Boolean(bindingOf(b)) });
+  };
+  const models = consolidateLibrary(visibleLibrary, modelIdentity);
+  const usesOf = (b: LibraryButton) => models.find(m => m.key === modelIdentity(b))?.uses ?? [b];
   const filters = useTableFilters(visibleLibrary, [
     { key: "name", label: "Nome do botão", value: b => b.label },
     { key: "type", label: "Tipo / grupo CDE", value: typeOf },
@@ -67,9 +76,9 @@ export function CdeButtonLibrary({ number, handle, onEdit }: { number: number; h
     const value = (entry: LibraryButton) => sort === "type" ? typeOf(entry) : sort === "file" ? entry.file : entry.label;
     return (direction === "desc" ? -1 : 1) * value(a).localeCompare(value(b), "pt-BR", { sensitivity: "base", numeric: true });
   });
-  const cards = filtered;
-  const usesOf = (b: LibraryButton) => [b];
-  const scopeEntries = (button: LibraryButton) => scope === "checked" ? visibleLibrary.filter(b => checked.includes(libraryEntryKey(b))) : scope === "same" ? visibleLibrary.filter(b => b.label === button.label && typeOf(b) === typeOf(button)) : [button];
+  const matched = new Set(filtered.map(b => b.id));
+  const cards = models.filter(m => m.uses.some(b => matched.has(b.id))).map(m => m.representative).sort((a, b) => filtered.findIndex(s => s.id === a.id) - filtered.findIndex(s => s.id === b.id));
+  const scopeEntries = (button: LibraryButton) => scope === "checked" ? visibleLibrary.filter(b => checked.includes(libraryEntryKey(b))) : scope === "same" ? visibleLibrary.filter(b => b.label === button.label && typeOf(b) === typeOf(button)) : usesOf(button);
   function editCard(button: LibraryButton) {
     setEditingButton(button);
     setEditText(bindingOf(button)?.label ?? (button.dynamic ? "" : button.label === button.icon ? "" : button.label));
@@ -95,7 +104,7 @@ export function CdeButtonLibrary({ number, handle, onEdit }: { number: number; h
     } catch { toast.error("Não foi possível salvar o vínculo."); } finally { setSaving(false); }
   }
   async function removeCards(entries: LibraryButton[]) {
-    const uses = entries.flatMap(usesOf);
+    const uses = [...new Map(entries.flatMap(usesOf).map(b => [b.id, b])).values()];
     if (!uses.length) return;
     setReplacementKey("");
     setReplacing(uses);
@@ -104,7 +113,7 @@ export function CdeButtonLibrary({ number, handle, onEdit }: { number: number; h
     if (!replacementKey || !replacing.length) return;
     const chosen = data?.models.find(m => `custom:${m.id}` === replacementKey);
     if (!chosen) return;
-    if (!await confirmAction(`Substituir a aparência de ${replacing.length} uso(s) por ${chosen.name} e retirar seus cards? As funções continuam nas telas.`, { title: "Confirmar substituição" })) return;
+    if (!await confirmAction(`Substituir a aparência de ${replacing.length} uso(s) por ${chosen.name}? Os usos permanecem na biblioteca, consolidados por modelo, e as funções continuam nas telas.`, { title: "Confirmar substituição" })) return;
     setSaving(true);
     try {
       const user = (await supabase.auth.getUser()).data.user;
@@ -116,7 +125,8 @@ export function CdeButtonLibrary({ number, handle, onEdit }: { number: number; h
       if (bound.error) throw bound.error;
       const proof = [...(data?.selected ?? []).filter(s => s.group_key !== "button_bindings"), { group_key: "button_bindings", variant_key: JSON.stringify(next), is_primary: true, screens: [] }];
       if (replacing.some(entry => !canRetireLibraryEntry(entry, proof, data?.models ?? []))) throw new Error("Vínculo inválido");
-      const payload = { variant_key: JSON.stringify([...new Set([...retired, ...replacing.map(libraryEntryKey)])]), chosen_by: user.id };
+      const replacedIds = new Set(replacing.map(libraryEntryKey));
+      const payload = { variant_key: JSON.stringify(retired.filter(id => !replacedIds.has(id))), chosen_by: user.id };
       const result = retiredRow
         ? await supabase.from("cde_selected").update(payload).eq("group_key", "button_library_retired").eq("variant_key", retiredRow.variant_key)
         : await supabase.from("cde_selected").insert({ ...payload, group_key: "button_library_retired", is_primary: true });
@@ -125,19 +135,19 @@ export function CdeButtonLibrary({ number, handle, onEdit }: { number: number; h
       await qc.invalidateQueries({ queryKey: ["cde-data"] });
       setChecked([]);
       setReplacing([]);
-      toast.success("Cards retirados; botões preservados nas telas.");
+      toast.success("Modelos substituídos; usos consolidados e preservados.");
     } catch { toast.error("Não foi possível retirar os cards."); } finally { setSaving(false); }
   }
   return <section className="min-w-0 space-y-4">
-    <CdeCategoryHeader number={number} handle={handle} title="Biblioteca de botões em uso" hint={`${library.length} usos`} open={open} onToggle={() => setOpen(!open)} />
+    <CdeCategoryHeader number={number} handle={handle} title="Biblioteca de botões em uso" hint={`${models.length} modelos · ${library.length} usos`} open={open} onToggle={() => setOpen(!open)} />
     {open && <>
       <div className="flex items-center gap-2">
-        <Checkbox aria-label="Selecionar todos os cards visíveis" checked={cards.length > 0 && cards.every(b => checked.includes(libraryEntryKey(b)))} onCheckedChange={value => setChecked(value ? cards.map(libraryEntryKey) : [])} />
+        <Checkbox aria-label="Selecionar todos os cards visíveis" checked={cards.length > 0 && cards.flatMap(usesOf).every(b => checked.includes(libraryEntryKey(b)))} onCheckedChange={value => setChecked(value ? cards.flatMap(usesOf).map(libraryEntryKey) : [])} />
         <Button type="button" variant="ghost" size="compactIcon" title="Excluir cards selecionados" aria-label="Excluir cards selecionados" disabled={saving || !checked.length} onClick={() => removeCards(cards.filter(b => checked.includes(libraryEntryKey(b))))}><Trash2 /></Button>
         {checked.length > 0 && <span className="text-xs text-muted-foreground">{checked.length} selecionados</span>}
       </div>
       <div className="flex items-center gap-2">{filters.menu}<Popover><PopoverTrigger asChild><Button type="button" variant="ghost" size="compactIcon" aria-label="Ordenar botões" title="Ordenar botões"><ArrowUpDown /></Button></PopoverTrigger><PopoverContent align="start" className="w-64 space-y-3"><Select value={sort} onValueChange={setSort}><SelectTrigger aria-label="Ordenar por"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="name">Nome do botão</SelectItem><SelectItem value="type">Tipo / grupo CDE</SelectItem><SelectItem value="file">Local de uso</SelectItem></SelectContent></Select><Select value={direction} onValueChange={setDirection}><SelectTrigger aria-label="Sentido da ordenação"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="asc">A → Z</SelectItem><SelectItem value="desc">Z → A</SelectItem></SelectContent></Select></PopoverContent></Popover></div>
-      <p className="text-xs text-muted-foreground">{filtered.length} usos encontrados</p>
+      <p className="text-xs text-muted-foreground">{cards.length} modelos encontrados · {cards.flatMap(usesOf).length} usos</p>
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((b, index) => {
           const Icon = ICONS[b.icon];
@@ -145,11 +155,11 @@ export function CdeButtonLibrary({ number, handle, onEdit }: { number: number; h
           const label = options.find(s => search.trim() && normalize(s).includes(normalize(search))) || options.find(s => !/\.\.\.|…/.test(s)) || options[0];
           const group = typeOf(b);
           const description = libraryDescription(b, group);
-          const uses = libraryUsageCounts(b, library, typeOf);
+          const uses = usesOf(b);
           const content = <>{Icon && <Icon className="h-4 w-4" />}{label}</>;
           const unique = visibleLibrary.filter(entry => entry.label === b.label).length === 1;
           const approvalsLink = unique && b.file === "routes/_authenticated/dashboard.tsx" && ["Agrupar por Projeto e Cliente", "Custo por Etiqueta", "Indicadores de prazos"].includes(b.label);
-          return <article key={`${b.file}:${b.line}:${index}`} className="grid h-60 min-w-0 grid-cols-[minmax(0,1fr)_108px] grid-rows-[56px_48px_minmax(0,1fr)_24px] items-center gap-x-2 gap-y-1 rounded-md border border-border bg-card p-3">
+          return <article key={`${b.file}:${b.line}:${index}`} className="grid h-72 min-w-0 grid-cols-[minmax(0,1fr)_108px] grid-rows-[56px_48px_minmax(0,1fr)_72px] items-center gap-x-2 gap-y-1 rounded-md border border-border bg-card p-3">
             <div className="relative col-span-2 min-w-0">
             {approvalsLink && <Link to="/dashboard" search={{ section: "queue", subsection: "all" }} aria-label={`Abrir página de ${label}`} title="Abrir Todos os approvals" className="absolute inset-0 z-10 rounded-md focus-visible:ring-2 focus-visible:ring-ring" />}
             {unique && b.file === "routes/_authenticated/chamados.tsx" && <Link to="/chamados" search={{ chamado: undefined }} aria-label={`Abrir página de ${label}`} className="absolute inset-0 z-10 rounded-md focus-visible:ring-2 focus-visible:ring-ring" />}
@@ -159,12 +169,12 @@ export function CdeButtonLibrary({ number, handle, onEdit }: { number: number; h
             </div>
             </div>
             <p className="col-span-2 line-clamp-3 text-xs text-muted-foreground" title={description}>{description}</p>
-            <div className="min-w-0"><p className="truncate text-xs font-medium text-foreground" title={label}>{bindingOf(b)?.label || label}</p><p className="truncate text-xs text-muted-foreground" title={classification(b)}>{classification(b)}</p><p className="text-xs text-foreground" title="Locais no código, sem multiplicar pelas linhas exibidas na tela">{uses.here} uso neste local</p>{uses.sameFunction > 1 && <p className="text-xs text-muted-foreground">{uses.sameFunction} usos da mesma função</p>}</div>
+            <div className="min-w-0"><p className="truncate text-xs font-medium text-foreground" title={label}>{bindingOf(b)?.label || label}</p><p className="truncate text-xs text-muted-foreground" title={classification(b)}>{classification(b)}</p><p className="text-xs text-foreground" title="Locais no código, sem multiplicar pelas linhas exibidas na tela">{uses.length} uso{uses.length === 1 ? "" : "s"}</p></div>
             <div className="grid grid-cols-3 items-center justify-items-center">
-              <span className="flex h-9 w-9 items-center justify-center"><Checkbox aria-label={`Selecionar card ${b.label}`} checked={checked.includes(libraryEntryKey(b))} onCheckedChange={value => setChecked(prev => value ? [...new Set([...prev, libraryEntryKey(b)])] : prev.filter(k => k !== libraryEntryKey(b)))} /></span>
+              <span className="flex h-9 w-9 items-center justify-center"><Checkbox aria-label={`Selecionar card ${b.label}`} checked={uses.every(u => checked.includes(u.id))} onCheckedChange={value => setChecked(prev => value ? [...new Set([...prev, ...uses.map(u => u.id)])] : prev.filter(k => !uses.some(u => u.id === k)))} /></span>
               <span className="flex h-9 w-9 items-center justify-center"><Button type="button" variant="ghost" size="compactIcon" title={`Editar ${label}`} aria-label={`Editar ${label}`} onClick={() => editCard(b)}><Pencil /></Button></span><span className="flex h-9 w-9 items-center justify-center"><Button type="button" variant="ghost" size="compactIcon" title="Excluir card da biblioteca" aria-label={`Excluir card ${b.label}`} disabled={saving} onClick={() => removeCards([b])}><Trash2 /></Button></span>
             </div>
-            <div className="col-span-2 flex min-w-0 items-center text-xs text-muted-foreground"><span className="truncate" title={`${b.file}:${b.line}`}>{b.file.split("/").at(-1)}:{b.line}</span><UsageLinks file={b.file} /></div>
+            <div className="col-span-2 h-full min-w-0 overflow-y-auto text-xs text-muted-foreground"><p className="mb-1">Onde é utilizado ({uses.length})</p>{uses.map((u, i) => <div key={u.id} className="mb-1 flex min-w-0 items-center gap-1"><b>{i + 1}.</b><span className="truncate" title={`${u.file}:${u.line}`}>{u.file.split("/").at(-1)}:{u.line}</span><UsageLinks file={u.file} /></div>)}</div>
           </article>;
         })}
       </div>
@@ -172,17 +182,17 @@ export function CdeButtonLibrary({ number, handle, onEdit }: { number: number; h
     </>}
     <Dialog open={!!editingButton} onOpenChange={open => { if (!open) setEditingButton(null); }}><DialogContent className="max-h-[90vh] overflow-y-auto"><DialogHeader><DialogTitle>Editar botão e substituir modelo</DialogTitle></DialogHeader>
       <p className="break-words text-xs text-muted-foreground">{editingButton?.file}:{editingButton?.line}</p>
-      <Label>Aplicar a</Label><Select value={scope} onValueChange={setScope}><SelectTrigger aria-label="Aplicar a"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="one">Somente este uso</SelectItem><SelectItem value="same">Mesmo nome e função em todos os apps</SelectItem><SelectItem value="checked" disabled={!checked.length}>Usos selecionados ({checked.length})</SelectItem></SelectContent></Select>
+      <Label>Aplicar a</Label><Select value={scope} onValueChange={setScope}><SelectTrigger aria-label="Aplicar a"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="one">Todos os usos deste modelo ({editingButton ? usesOf(editingButton).length : 0})</SelectItem><SelectItem value="same">Mesmo nome e função em todos os apps</SelectItem><SelectItem value="checked" disabled={!checked.length}>Usos selecionados ({checked.length})</SelectItem></SelectContent></Select>
       <Label htmlFor="library-button-text">Texto alternativo (vazio = somente ícone)</Label><Input id="library-button-text" value={editText} disabled={editingButton?.dynamic} onChange={e => setEditText(e.target.value)} />
       {editingButton?.dynamic && <p className="text-xs text-muted-foreground">Conteúdo variável preservado.</p>}
       <Label>Padrão vinculado</Label><Select value={editGroup} onValueChange={v => { setEditGroup(v); setEditModel(""); }}><SelectTrigger aria-label="Padrão vinculado"><SelectValue placeholder="Escolher padrão" /></SelectTrigger><SelectContent>{[["action_standard","Padrão visual comum"],["plus","Adicionar (+)"],["add","Adicionar / Novo"],["save","Salvar"],["cancel","Cancelar"],["confirm","Confirmar / Concluir"],["trash","Excluir"],["pencil","Editar"],["toggle","Exibir / Recolher"],["move","Mover"],["sort","Ordenar"],["filter","Filtrar"],["close","X"],["send","Enviar"],["attach","Anexar"],["export","Exportar"],["clear","Limpar"],["organize","Organizar"]].map(([key, label]) => <SelectItem key={key} value={key}>{label}</SelectItem>)}</SelectContent></Select>
       <Label>Substituir por modelo</Label><Select value={editModel || "primary"} onValueChange={v => setEditModel(v === "primary" ? "" : v)}><SelectTrigger aria-label="Substituir por modelo"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="primary">Padrão principal do grupo</SelectItem>{data?.models.filter(m => ["Button", "button"].includes(m.tag)).map(m => <SelectItem key={m.id} value={`custom:${m.id}`}>{m.name || m.label || m.icon || "Modelo"}</SelectItem>)}</SelectContent></Select>
       <div className="flex flex-wrap justify-end gap-2"><Button variant="ghost" onClick={() => { if (editingButton) { onEdit(editingButton, editGroup, scopeEntries(editingButton).map(b => b.id), editModel); setEditingButton(null); } }}>Editar aparência</Button><Button disabled={saving || !editGroup || (!editModel && !data?.selected.some(s => s.group_key === editGroup && s.is_primary))} onClick={saveBinding}>Salvar substituição</Button></div>
     </DialogContent></Dialog>
-    <Dialog open={replacing.length > 0} onOpenChange={open => { if (!open) setReplacing([]); }}><DialogContent><DialogHeader><DialogTitle>Substituir e retirar da biblioteca</DialogTitle></DialogHeader>
+    <Dialog open={replacing.length > 0} onOpenChange={open => { if (!open) setReplacing([]); }}><DialogContent><DialogHeader><DialogTitle>Substituir e consolidar modelos</DialogTitle></DialogHeader>
       <p className="text-sm text-muted-foreground">{replacing.length} uso(s) selecionado(s)</p>
       <Label>Modelo substituto</Label><Select value={replacementKey} onValueChange={setReplacementKey}><SelectTrigger aria-label="Modelo substituto"><SelectValue placeholder="Escolher modelo" /></SelectTrigger><SelectContent>{data?.models.filter(m => ["Button", "button"].includes(m.tag)).map(m => <SelectItem key={m.id} value={`custom:${m.id}`}>{m.name}</SelectItem>)}</SelectContent></Select>
-      <div className="flex justify-end"><Button disabled={saving || !replacementKey} onClick={replaceAndRetire}>Substituir e retirar</Button></div>
+      <div className="flex justify-end"><Button disabled={saving || !replacementKey} onClick={replaceAndRetire}>Substituir e consolidar</Button></div>
     </DialogContent></Dialog>
   </section>;
 }

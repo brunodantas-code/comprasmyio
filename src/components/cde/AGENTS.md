@@ -28,10 +28,11 @@
 - Organize actions inherit the live Save look when no organize standard is selected; deadline indicators share this group to prevent visual drift.
 
 - Shared Save/Delete buttons resolve icon and label through CDE; the library aggregates their source locations to avoid presenting call sites as distinct models.
-- Library retirement persists source keys in cde_selected.button_library_retired, never deletes app controls, and fails closed unless the inventory proves live CDE wiring and a valid chosen model.
+- Library substitution validates live bindings before changing models; keep all source sites visible in consolidated model cards, including legacy retired sites, so audit totals never disappear.
 - Library bindings use cde_selected.button_bindings keyed by stable source-site ID (legacy label fallback); explicit modelKey replaces appearance per use or chosen set, while dynamic content remains intact.
 - Inventory and Vite instrumentation share the same TSX site parser; native controls keep their original rendering until explicitly bound, preventing unrelated visual changes.
 - Numbering counts come from scan-cde-numbering.ts and number-usage.json; count actual source sites per hierarchy, not fabricated repetitions from rendered records.
 - Library descriptions/counts use library-details.ts: distinguish one source site from equal-label/group sites and never estimate runtime row repetitions.
+- library-models.ts groups matching content/appearance/model identities, preserves unknown custom styles separately, and expands card edits/selections to every member ID.
 - Landing and portal share app ordering via public_app_order(), a narrow public read exposing only the order array, never other CDE records.
 - Icon-only shared Save controls resolve CDE secondary controls/save-icon before the primary.

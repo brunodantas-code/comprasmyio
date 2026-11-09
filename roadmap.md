@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Biblioteca consolidada: 543 modelos para 822 usos; Cancelar com 49 usos em um card, locais numerados e edição conjunta conferidos; diferenças preservadas, 14 testes e celular sem transbordamento.
 - [x] Biblioteca: descrição breve e quantidade por local, distinguindo usos da mesma função; Approval e celular conferidos, teste de contagem passou.
 - [x] Numeração: levantamento real de 16 locais principais e 10 secundários; 6.1 conferido com 16 usos, sem estimar repetições por registro.
 - [x] Navegação: padrão primeiro também em 8.4; Caixa suspensa conferida antes de Botão flutuante.
