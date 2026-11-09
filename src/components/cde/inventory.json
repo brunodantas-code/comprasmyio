@@ -2772,6 +2772,19 @@
    "files": [
     "components/table-report-actions.tsx"
    ]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "sm",
+   "className": "h-7 gap-1 px-2 text-xs",
+   "icon": "FileSpreadsheet",
+   "iconClass": "h-4 w-4",
+   "label": "Excel",
+   "count": 3,
+   "files": [
+    "components/table-report-actions.tsx"
+   ]
   }
  ]
 }
