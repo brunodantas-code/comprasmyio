@@ -2381,6 +2381,7 @@ export type Database = {
           author_id: string
           author_name: string
           created_at: string
+          deleted_at: string | null
           id: string
           message: string
           updated_at: string
@@ -2390,6 +2391,7 @@ export type Database = {
           author_id?: string
           author_name?: string
           created_at?: string
+          deleted_at?: string | null
           id?: string
           message: string
           updated_at?: string
@@ -2399,6 +2401,7 @@ export type Database = {
           author_id?: string
           author_name?: string
           created_at?: string
+          deleted_at?: string | null
           id?: string
           message?: string
           updated_at?: string
@@ -2420,6 +2423,7 @@ export type Database = {
           completed_by: string | null
           created_at: string
           created_by: string
+          due_date: string | null
           id: string
           record_id: string
           responsible_id: string
@@ -2435,6 +2439,7 @@ export type Database = {
           completed_by?: string | null
           created_at?: string
           created_by?: string
+          due_date?: string | null
           id?: string
           record_id: string
           responsible_id: string
@@ -2450,6 +2455,7 @@ export type Database = {
           completed_by?: string | null
           created_at?: string
           created_by?: string
+          due_date?: string | null
           id?: string
           record_id?: string
           responsible_id?: string

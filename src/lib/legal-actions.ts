@@ -1,9 +1,16 @@
 import { queryOptions } from '@tanstack/react-query';
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
-export const legalActionSchema = z.object({ title: z.string().trim().min(1).max(1000), responsible_id: z.string().uuid() });
+export const legalActionSchema = z.object({ title: z.string().trim().min(1).max(1000), responsible_id: z.string().uuid(), due_date: z.preprocess(value => value === '' || value === undefined ? null : value, z.string().date().nullable()) });
 export const legalObservationSchema = z.string().trim().min(1).max(4000);
-export type DraftLegalAction = { id: string; subject_id: string; title: string; responsible_id: string; responsible_name: string };
+export type DraftLegalAction = { id: string; subject_id: string; title: string; responsible_id: string; responsible_name: string; due_date?: string | null };
+export function legalActionDelayDays(action: { due_date?: string | null; completed_at: string | null }, today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' })) {
+  if (!action.due_date || action.completed_at) return 0;
+  return Math.max(0, Math.round((Date.parse(today) - Date.parse(action.due_date)) / 86400000));
+}
+export function canRemoveLegalObservation(authorId: string, userId?: string) {
+  return Boolean(userId && authorId === userId);
+}
 export function actionsForSavedSubjects(actions: DraftLegalAction[], subjectIds: string[]) {
   const ids = new Set(subjectIds);
   return actions.filter(action => ids.has(action.subject_id));
@@ -11,7 +18,7 @@ export function actionsForSavedSubjects(actions: DraftLegalAction[], subjectIds:
 export const legalTrackingOptions = queryOptions({ queryKey: ['legal-tracking'], queryFn: async () => {
   const [actions, observations, logs, users] = await Promise.all([
     supabase.from('legal_actions').select('*').order('sequence'),
-    supabase.from('legal_action_observations').select('*').order('created_at'),
+    supabase.from('legal_action_observations').select('*').is('deleted_at', null).order('created_at'),
     supabase.from('legal_subject_logs').select('*').order('created_at'),
     supabase.rpc('legal_participant_users'),
   ]);

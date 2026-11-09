@@ -1,5 +1,5 @@
 # Roadmap
-- [ ] Legal: mesma fonte em Deliberações/Ações, excluir Observações com confirmação/auditoria e prazo previsto por ação com atrasos; pedido recebido durante finalização, ainda não implementado.
+- [x] Legal: Deliberações/Ações em 14 px; exclusão de observações pelo autor com confirmação e histórico preservado; prazo por ação salvo e relido, atraso após vencimento e baixa ao concluir conferidos em ata temporária removida; computador/celular sem erros, 11 testes passaram.
 - [x] CDE: rótulos Ícone e Símbolo interno sem a palavra tamanho, conferidos na tela.
 - [x] CDE: disquete preto sem fundo/texto como padrão secundário de Salvar; controles compactos e modelo no CDE conferidos, principal com texto preservado.
 - [x] CDE: perguntas das seções e ações das atas usam marcadores de subcategoria; cores distintas conferidas no checklist e celular sem excesso lateral.

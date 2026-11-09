@@ -42,6 +42,7 @@
 - Portal app spacing and its CDE preview read gapX/gapY from app_tile; drafts apply only on Save to keep the preview and published choice consistent.
 - SearchableSelect resolves the live fields_select CDE standard on its outer field; CDE field previews render their own model without inheriting the active field look, so alternatives remain distinguishable.
 - New legal subject actions remain in the meeting editor draft until the subject is persisted; stable action IDs allow safe retries without duplicates, while existing actions retain independent tracking and audit.
+- Legal action deadlines are independent of actual completion timestamps; observation removal uses author-gated soft deletion with append-only audit so signed content and history remain intact.
 - Shared CDE action buttons with visible text must fit their icon and label without shrinking; icon-only model widths must not cause adjacent controls to overlap.
 
 - Legal personal signature notifications share legalSignaturePendingItems and participant identity guards across portal and Central; count each meeting once and refresh after signing/deletion.

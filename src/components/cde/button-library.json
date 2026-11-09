@@ -1223,7 +1223,7 @@
   },
   {
     "file": "components/cde/cde-app-order.tsx",
-    "line": 72,
+    "line": 74,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -1236,7 +1236,7 @@
   },
   {
     "file": "components/cde/cde-app-order.tsx",
-    "line": 79,
+    "line": 81,
     "tag": "Button",
     "label": "Diminuir ícone",
     "dynamic": false,
@@ -1249,7 +1249,7 @@
   },
   {
     "file": "components/cde/cde-app-order.tsx",
-    "line": 81,
+    "line": 83,
     "tag": "Button",
     "label": "Aumentar ícone",
     "dynamic": false,
@@ -1262,7 +1262,7 @@
   },
   {
     "file": "components/cde/cde-app-order.tsx",
-    "line": 85,
+    "line": 87,
     "tag": "Button",
     "label": "Diminuir símbolo",
     "dynamic": false,
@@ -1275,7 +1275,7 @@
   },
   {
     "file": "components/cde/cde-app-order.tsx",
-    "line": 87,
+    "line": 89,
     "tag": "Button",
     "label": "Aumentar símbolo",
     "dynamic": false,
@@ -1314,7 +1314,7 @@
   },
   {
     "file": "components/cde/cde-app-order.tsx",
-    "line": 102,
+    "line": 105,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -1327,7 +1327,7 @@
   },
   {
     "file": "components/cde/cde-app-order.tsx",
-    "line": 103,
+    "line": 106,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -1366,7 +1366,7 @@
   },
   {
     "file": "components/cde/cde-category-header.tsx",
-    "line": 25,
+    "line": 24,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -1376,6 +1376,19 @@
     "size": "",
     "className": "h-auto min-w-0 flex-1 justify-start gap-3 rounded-none p-0 text-left hover:bg-transparent",
     "group": ""
+  },
+  {
+    "file": "components/cde/cde-category-header.tsx",
+    "line": 27,
+    "tag": "CdeButton",
+    "label": "Sem nome fixo",
+    "dynamic": false,
+    "autoCdeSafe": true,
+    "icon": "",
+    "variant": "",
+    "size": "",
+    "className": "",
+    "group": "toggle"
   },
   {
     "file": "components/cde/cde-deadline-alerts.tsx",
@@ -1496,7 +1509,7 @@
   },
   {
     "file": "components/cde/cde-workspace.tsx",
-    "line": 105,
+    "line": 106,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -1509,7 +1522,7 @@
   },
   {
     "file": "components/cde/cde-workspace.tsx",
-    "line": 106,
+    "line": 107,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -1522,7 +1535,7 @@
   },
   {
     "file": "components/cde/cde-workspace.tsx",
-    "line": 291,
+    "line": 292,
     "tag": "CdeButton",
     "label": "Criar modelo",
     "dynamic": false,
@@ -1535,12 +1548,12 @@
   },
   {
     "file": "components/cde/cde-workspace.tsx",
-    "line": 292,
+    "line": 293,
     "tag": "button",
     "label": "modelos ·",
     "dynamic": true,
     "autoCdeSafe": false,
-    "icon": "CdeToggleIcon",
+    "icon": "",
     "variant": "",
     "size": "",
     "className": "flex min-w-0 flex-1 items-center gap-4 text-left",
@@ -1561,7 +1574,20 @@
   },
   {
     "file": "components/cde/cde-workspace.tsx",
-    "line": 316,
+    "line": 303,
+    "tag": "CdeButton",
+    "label": "Sem nome fixo",
+    "dynamic": false,
+    "autoCdeSafe": true,
+    "icon": "",
+    "variant": "",
+    "size": "",
+    "className": "",
+    "group": "toggle"
+  },
+  {
+    "file": "components/cde/cde-workspace.tsx",
+    "line": 317,
     "tag": "Button",
     "label": "Editar modelo",
     "dynamic": false,
@@ -1574,7 +1600,7 @@
   },
   {
     "file": "components/cde/cde-workspace.tsx",
-    "line": 317,
+    "line": 318,
     "tag": "Button",
     "label": "Trash2",
     "dynamic": false,
@@ -1587,7 +1613,7 @@
   },
   {
     "file": "components/cde/cde-workspace.tsx",
-    "line": 322,
+    "line": 323,
     "tag": "Button",
     "label": "Padrão (remover) / Padrão principal / Adicionar como padrão / Tornar principal / Escolher como padrão",
     "dynamic": true,
@@ -1600,7 +1626,7 @@
   },
   {
     "file": "components/cde/cde-workspace.tsx",
-    "line": 326,
+    "line": 327,
     "tag": "Button",
     "label": "s / Padrão secundário por tela",
     "dynamic": true,
@@ -1613,7 +1639,7 @@
   },
   {
     "file": "components/cde/cde-workspace.tsx",
-    "line": 338,
+    "line": 339,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -1626,7 +1652,7 @@
   },
   {
     "file": "components/cde/cde-workspace.tsx",
-    "line": 355,
+    "line": 356,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -1639,7 +1665,7 @@
   },
   {
     "file": "components/cde/cde-workspace.tsx",
-    "line": 367,
+    "line": 368,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -1652,7 +1678,7 @@
   },
   {
     "file": "components/cde/cde-workspace.tsx",
-    "line": 377,
+    "line": 378,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -1665,7 +1691,7 @@
   },
   {
     "file": "components/cde/cde-workspace.tsx",
-    "line": 383,
+    "line": 384,
     "tag": "Button",
     "label": "Restaurar modelo",
     "dynamic": false,
@@ -1678,7 +1704,7 @@
   },
   {
     "file": "components/cde/cde-workspace.tsx",
-    "line": 399,
+    "line": 400,
     "tag": "Button",
     "label": "Recolher tudo",
     "dynamic": false,
@@ -1691,7 +1717,7 @@
   },
   {
     "file": "components/cde/cde-workspace.tsx",
-    "line": 476,
+    "line": 477,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -1704,7 +1730,7 @@
   },
   {
     "file": "components/cde/cde-workspace.tsx",
-    "line": 477,
+    "line": 478,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -1717,7 +1743,7 @@
   },
   {
     "file": "components/cde/cde-workspace.tsx",
-    "line": 496,
+    "line": 497,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -1730,7 +1756,7 @@
   },
   {
     "file": "components/cde/cde-workspace.tsx",
-    "line": 497,
+    "line": 498,
     "tag": "Button",
     "label": "Excluir",
     "dynamic": false,
@@ -1743,7 +1769,7 @@
   },
   {
     "file": "components/cde/cde-workspace.tsx",
-    "line": 519,
+    "line": 520,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -1756,7 +1782,7 @@
   },
   {
     "file": "components/cde/cde-workspace.tsx",
-    "line": 520,
+    "line": 521,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -3225,7 +3251,7 @@
   },
   {
     "file": "components/legal/legal-workspace.tsx",
-    "line": 87,
+    "line": 99,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -3238,7 +3264,7 @@
   },
   {
     "file": "components/legal/legal-workspace.tsx",
-    "line": 88,
+    "line": 100,
     "tag": "Button",
     "label": "Ordenar por data",
     "dynamic": false,
@@ -3251,7 +3277,20 @@
   },
   {
     "file": "components/legal/legal-workspace.tsx",
-    "line": 88,
+    "line": 100,
+    "tag": "Button",
+    "label": "Recolher tudo",
+    "dynamic": false,
+    "autoCdeSafe": true,
+    "icon": "ChevronsDownUp",
+    "variant": "ghost",
+    "size": "sm",
+    "className": "gap-1 text-xs font-normal",
+    "group": ""
+  },
+  {
+    "file": "components/legal/legal-workspace.tsx",
+    "line": 100,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -3264,7 +3303,7 @@
   },
   {
     "file": "components/legal/legal-workspace.tsx",
-    "line": 91,
+    "line": 103,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -3277,7 +3316,7 @@
   },
   {
     "file": "components/legal/legal-workspace.tsx",
-    "line": 91,
+    "line": 103,
     "tag": "Button",
     "label": "Assinar documento",
     "dynamic": false,
@@ -3290,7 +3329,7 @@
   },
   {
     "file": "components/legal/legal-workspace.tsx",
-    "line": 91,
+    "line": 103,
     "tag": "Button",
     "label": "Editar",
     "dynamic": false,
@@ -3303,7 +3342,7 @@
   },
   {
     "file": "components/legal/legal-workspace.tsx",
-    "line": 91,
+    "line": 103,
     "tag": "Button",
     "label": "Excluir",
     "dynamic": false,
@@ -3316,7 +3355,7 @@
   },
   {
     "file": "components/legal/legal-workspace.tsx",
-    "line": 91,
+    "line": 103,
     "tag": "Button",
     "label": "PDF",
     "dynamic": false,
@@ -3329,7 +3368,7 @@
   },
   {
     "file": "components/legal/legal-workspace.tsx",
-    "line": 91,
+    "line": 103,
     "tag": "Button",
     "label": "Files",
     "dynamic": false,
@@ -3342,7 +3381,7 @@
   },
   {
     "file": "components/legal/legal-workspace.tsx",
-    "line": 94,
+    "line": 106,
     "tag": "Button",
     "label": "Icon",
     "dynamic": true,
@@ -3355,7 +3394,7 @@
   },
   {
     "file": "components/legal/legal-workspace.tsx",
-    "line": 97,
+    "line": 109,
     "tag": "CdeButton",
     "label": "Adicionar participante",
     "dynamic": false,
@@ -3368,7 +3407,7 @@
   },
   {
     "file": "components/legal/legal-workspace.tsx",
-    "line": 97,
+    "line": 109,
     "tag": "Button",
     "label": "Trash2",
     "dynamic": false,
@@ -3381,7 +3420,7 @@
   },
   {
     "file": "components/legal/legal-workspace.tsx",
-    "line": 99,
+    "line": 111,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -3394,7 +3433,7 @@
   },
   {
     "file": "components/legal/legal-workspace.tsx",
-    "line": 99,
+    "line": 111,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -3407,7 +3446,7 @@
   },
   {
     "file": "components/legal/legal-workspace.tsx",
-    "line": 99,
+    "line": 111,
     "tag": "Button",
     "label": "Trash2",
     "dynamic": false,
@@ -3420,7 +3459,7 @@
   },
   {
     "file": "components/legal/legal-workspace.tsx",
-    "line": 100,
+    "line": 112,
     "tag": "Button",
     "label": "Assinar ata",
     "dynamic": false,
@@ -3433,7 +3472,7 @@
   },
   {
     "file": "components/legal/legal-workspace.tsx",
-    "line": 101,
+    "line": 113,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -3446,7 +3485,7 @@
   },
   {
     "file": "components/legal/legal-workspace.tsx",
-    "line": 101,
+    "line": 113,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -3459,7 +3498,7 @@
   },
   {
     "file": "components/legal/legal-workspace.tsx",
-    "line": 101,
+    "line": 113,
     "tag": "Button",
     "label": "Salvar PDF",
     "dynamic": false,
@@ -3472,7 +3511,7 @@
   },
   {
     "file": "components/legal/legal-workspace.tsx",
-    "line": 104,
+    "line": 116,
     "tag": "Button",
     "label": "Voltar à ata",
     "dynamic": false,
@@ -3485,7 +3524,7 @@
   },
   {
     "file": "components/legal/legal-workspace.tsx",
-    "line": 105,
+    "line": 117,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -3498,7 +3537,7 @@
   },
   {
     "file": "components/legal/legal-workspace.tsx",
-    "line": 105,
+    "line": 117,
     "tag": "Button",
     "label": "Excluir",
     "dynamic": false,
@@ -3628,7 +3667,7 @@
   },
   {
     "file": "components/legal/subject-actions.tsx",
-    "line": 46,
+    "line": 54,
     "tag": "CdeButton",
     "label": "Adicionar ação",
     "dynamic": false,
@@ -3641,7 +3680,7 @@
   },
   {
     "file": "components/legal/subject-actions.tsx",
-    "line": 48,
+    "line": 56,
     "tag": "Button",
     "label": "Editar ação",
     "dynamic": false,
@@ -3654,7 +3693,7 @@
   },
   {
     "file": "components/legal/subject-actions.tsx",
-    "line": 49,
+    "line": 57,
     "tag": "CdeButton",
     "label": "Adicionar observação",
     "dynamic": false,
@@ -3667,7 +3706,7 @@
   },
   {
     "file": "components/legal/subject-actions.tsx",
-    "line": 49,
+    "line": 57,
     "tag": "Button",
     "label": "Editar observação",
     "dynamic": false,
@@ -3680,7 +3719,20 @@
   },
   {
     "file": "components/legal/subject-actions.tsx",
-    "line": 51,
+    "line": 57,
+    "tag": "Button",
+    "label": "Excluir observação",
+    "dynamic": false,
+    "autoCdeSafe": true,
+    "icon": "Trash2",
+    "variant": "ghost",
+    "size": "compactIcon",
+    "className": "",
+    "group": ""
+  },
+  {
+    "file": "components/legal/subject-actions.tsx",
+    "line": 59,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -3693,7 +3745,7 @@
   },
   {
     "file": "components/legal/subject-actions.tsx",
-    "line": 52,
+    "line": 60,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -3706,7 +3758,7 @@
   },
   {
     "file": "components/legal/subject-actions.tsx",
-    "line": 53,
+    "line": 61,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -9816,7 +9868,7 @@
   },
   {
     "file": "routes/_authenticated/portal.tsx",
-    "line": 127,
+    "line": 128,
     "tag": "Button",
     "label": "Abrir menu",
     "dynamic": false,
@@ -9829,7 +9881,7 @@
   },
   {
     "file": "routes/_authenticated/portal.tsx",
-    "line": 136,
+    "line": 137,
     "tag": "Button",
     "label": "Central de Pendências / 99+",
     "dynamic": true,
@@ -9842,7 +9894,7 @@
   },
   {
     "file": "routes/_authenticated/portal.tsx",
-    "line": 145,
+    "line": 146,
     "tag": "Button",
     "label": "Acessos",
     "dynamic": false,
@@ -9855,7 +9907,7 @@
   },
   {
     "file": "routes/_authenticated/portal.tsx",
-    "line": 158,
+    "line": 159,
     "tag": "Button",
     "label": "Alterar senha",
     "dynamic": false,
@@ -9868,7 +9920,7 @@
   },
   {
     "file": "routes/_authenticated/portal.tsx",
-    "line": 162,
+    "line": 163,
     "tag": "Button",
     "label": "Sair",
     "dynamic": false,
@@ -9881,7 +9933,7 @@
   },
   {
     "file": "routes/_authenticated/portal.tsx",
-    "line": 180,
+    "line": 181,
     "tag": "Button",
     "label": "Voltar aos aplicativos",
     "dynamic": false,
