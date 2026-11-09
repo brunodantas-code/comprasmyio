@@ -31,7 +31,12 @@ function scan(dir) {
             if (!ts.isJsxExpression(n)) ts.forEachChild(n, content);
           }
           if (ts.isJsxElement(node)) node.children.forEach(content);
-          const label = [...new Set(labels)].join(' / ') || value(opening.attributes, 'aria-label') || value(opening.attributes, 'title') || icons[0] || 'Sem nome fixo';
+          const contentLabel = [...new Set(labels)].join(' / ');
+          const sourceText = node.getText(source);
+          const descriptiveLabel = value(opening.attributes, 'aria-label') || value(opening.attributes, 'title')
+            || (sourceText.includes('approval_number') ? 'Abrir detalhes do Approval' : sourceText.includes('survey_number') ? 'Abrir checklist da visita' : '');
+          const placeholderOnly = /^[\s—–\-0/]*$/.test(contentLabel);
+          const label = placeholderOnly && descriptiveLabel ? descriptiveLabel : contentLabel || descriptiveLabel || icons[0] || 'Sem nome fixo';
           const hasAttribute = name => opening.attributes.properties.some(p => ts.isJsxAttribute(p) && p.name.getText(source) === name);
           const hasSpread = opening.attributes.properties.some(p => ts.isJsxSpreadAttribute(p));
           entries.push({ file: path.replace(/^src\//, ''), line: source.getLineAndCharacterOfPosition(node.getStart(source)).line + 1, tag, label, dynamic, autoCdeSafe: !dynamic && !hasAttribute('style') && !hasAttribute('asChild') && !hasSpread, icon: icons[0] || '', variant: value(opening.attributes, 'variant'), size: value(opening.attributes, 'size'), className: value(opening.attributes, 'className'), group: value(opening.attributes, 'group') });
