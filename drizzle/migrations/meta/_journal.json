@@ -1366,6 +1366,13 @@
       "when": 1794191908171,
       "tag": "0194_reimbursement_payment_accounts",
       "breakpoints": true
+    },
+    {
+      "idx": 195,
+      "version": "7",
+      "when": 1794194998970,
+      "tag": "0195_personal_signatures_and_verified_legal_signing",
+      "breakpoints": true
     }
   ]
 }

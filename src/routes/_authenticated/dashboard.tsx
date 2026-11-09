@@ -86,6 +86,7 @@ import { SupplyEditPurchase } from "@/components/supply-edit-purchase";
 import { SupplyOrderConversation } from "@/components/supply-order-conversation";
 import { MilestoneTimeline } from "@/components/milestone-timeline";
 import { UserManualsTab } from "@/components/user-manuals-tab";
+import { PersonalSignature } from "@/components/personal-signature";
 
 
 
@@ -733,6 +734,7 @@ function Dashboard() {
                   <Card className="p-4 sm:p-6">
                   <CardTitle className="mb-4">Diversos</CardTitle>
                   <div className="diversos-list">
+                    <PersonalSignature userId={me.id} />
                     <ReimbursementAccounts userId={me.id} />
                     <UserManualsTab />
                     <SupplyOrderStatusesTab userId={me.id} />

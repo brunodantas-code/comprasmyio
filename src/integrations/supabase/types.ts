@@ -2417,6 +2417,50 @@ export type Database = {
         }
         Relationships: []
       }
+      legal_signature_events: {
+        Row: {
+          content_hash: string
+          id: string
+          image: string
+          participant_id: string | null
+          record_id: string
+          record_updated_at: string
+          signed_at: string
+          signer_name: string
+          user_id: string
+        }
+        Insert: {
+          content_hash: string
+          id?: string
+          image: string
+          participant_id?: string | null
+          record_id: string
+          record_updated_at: string
+          signed_at?: string
+          signer_name: string
+          user_id: string
+        }
+        Update: {
+          content_hash?: string
+          id?: string
+          image?: string
+          participant_id?: string | null
+          record_id?: string
+          record_updated_at?: string
+          signed_at?: string
+          signer_name?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legal_signature_events_record_id_fkey"
+            columns: ["record_id"]
+            isOneToOne: false
+            referencedRelation: "legal_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       material_stock_types: {
         Row: {
           active: boolean
@@ -7592,6 +7636,24 @@ export type Database = {
         }
         Relationships: []
       }
+      user_signatures: {
+        Row: {
+          image: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          image: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          image?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       material_stock: {
@@ -7645,6 +7707,15 @@ export type Database = {
       admin_edit_purchase_approval: {
         Args: { _changes: Json; _items: Json; _order_id: string }
         Returns: undefined
+      }
+      apply_verified_legal_signature: {
+        Args: {
+          _expected_updated_at: string
+          _participant_id: string
+          _record_id: string
+          _user_id: string
+        }
+        Returns: string
       }
       can_create_supply_new_item: {
         Args: { _user_id: string }
@@ -7805,6 +7876,7 @@ export type Database = {
           id: string
         }[]
       }
+      legal_unsigned_content: { Args: { _content: Json }; Returns: Json }
       list_site_survey_visit_calls: {
         Args: { _visit_id: string }
         Returns: {

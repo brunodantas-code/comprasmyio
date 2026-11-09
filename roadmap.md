@@ -1,4 +1,7 @@
 # Roadmap
+- [x] Assinaturas: cadastro pessoal em Diversos, ação direta nas atas/documentos, confirmação de senha no servidor e data registrada; 15 testes passaram, sessão real abriu a confirmação e senha incorreta foi rejeitada sem assinar.
+- [x] Assinaturas: botões junto às bolinhas dos participantes na lista e editor; computador/celular conferidos sem transbordamento.
+- [ ] Assinaturas: confirmação positiva com assinatura real depende do usuário cadastrar seu traço e confirmar sua senha; não assinar atas reais em nome dele durante testes. Documentos anexados registram assinatura e data no app, sem modificar o arquivo original.
 - [x] Supply: divisória restaurada; conferida passando de 0 para 1 px após Em cotação.
 - [x] Lembretes: “Salvar” conferido em sessão autenticada.
 - [x] Cargos, Centros de Custo, Clientes e Projetos: “Salvar” conferido nas quatro telas.

@@ -1,4 +1,5 @@
-import { ChevronDown, ChevronRight, FileText, Pencil, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronRight, FileText, Pencil, Trash2, FileSignature } from 'lucide-react';
+import { canSignParticipant, signatureDate } from '@/lib/signatures';
 import { Button } from '@/components/ui/button';
 import { legalDate, legalPendingCount, legalSubjectResponsibles, parseLegalContent } from '@/lib/legal';
 import type { Database } from '@/integrations/supabase/types';
@@ -8,9 +9,10 @@ function PendingDot({ label }: { label: string }) {
   return <span role="img" aria-label={label} title={label} className="h-3 w-3 shrink-0 rounded-full bg-destructive" />;
 }
 
-export function MinutesList({ rows, expanded, toggle, edit, remove, openPdf }: {
+export function MinutesList({ rows, expanded, toggle, edit, remove, openPdf, user, sign }: {
   rows: RecordRow[]; expanded: Set<string>; toggle: (id: string) => void;
   edit: (row: RecordRow) => void; remove: (row: RecordRow) => void; openPdf: (path: string) => void;
+  user: { id: string; full_name: string } | null | undefined; sign: (row: RecordRow, participantId: string, name: string) => void;
 }) {
   return <div className="divide-y divide-border overflow-hidden rounded-md border border-border bg-card">
     {rows.map(row => {
@@ -51,7 +53,7 @@ export function MinutesList({ rows, expanded, toggle, edit, remove, openPdf }: {
               </div> : null}
             </div>
           </section>)}
-          <div className="space-y-2 border-t border-border px-4 py-4 text-sm sm:px-6"><h2 className="text-base font-semibold">Assinaturas dos participantes</h2>{content.participants.map(p => <p key={p.id} className="flex items-center gap-2"><span className="break-words">{p.name} — {p.signature && p.signedAt ? 'Assinatura registrada' : 'Aguardando assinatura'}</span>{!p.signature || !p.signedAt ? <PendingDot label={`Assinatura pendente de ${p.name}`} /> : null}</p>)}</div>
+          <div className="space-y-2 border-t border-border px-4 py-4 text-sm sm:px-6"><h2 className="text-base font-semibold">Assinaturas dos participantes</h2>{content.participants.map(p => <div key={p.id} className="flex items-center gap-2"><span className="min-w-0 break-words">{p.name} — {p.signature && p.signedAt ? `Assinado em ${signatureDate(p.signedAt)}` : 'Aguardando assinatura'}</span>{!p.signature || !p.signedAt ? <><PendingDot label={`Assinatura pendente de ${p.name}`} /><Button variant="outline" size="compactIcon" title={canSignParticipant(p,user) ? 'Assinar' : 'Somente este participante pode assinar'} disabled={!canSignParticipant(p,user)} aria-label={`Assinar como ${p.name}`} onClick={() => sign(row,p.id,p.name)}><FileSignature /></Button></> : null}</div>)}</div>
         </div> : null}
       </article>;
     })}

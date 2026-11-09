@@ -1,6 +1,6 @@
 export type LegalCategory = 'minutes' | 'contracts' | 'templates';
 export type LegalSubject = { id: string; title: string; description: string; decisions: string; responsible?: string; responsibles?: string[]; completionDate?: string };
-export type LegalParticipant = { id: string; name: string; signature: string; signedAt: string };
+export type LegalParticipant = { id: string; name: string; signature: string; signedAt: string; userId?: string; signedBy?: string };
 export type LegalContent = { location: string; counterpart: string; participants: LegalParticipant[]; subjects: LegalSubject[] };
 export function emptyLegalContent(): LegalContent { return { location: '', counterpart: '', participants: [], subjects: [] }; }
 export function parseLegalContent(value: unknown): LegalContent {
