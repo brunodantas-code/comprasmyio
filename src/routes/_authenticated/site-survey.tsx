@@ -1,6 +1,6 @@
 import { useAppMenuLayout } from "@/components/cde/cde-menu-type";
 import { useMenuOrders, sortByMenuOrder } from "@/components/cde/menu-order";
-import { CdeButton } from "@/components/cde/cde-button";
+import { CdeButton, CdeNumber, CdeNumberButton } from "@/components/cde/cde-button";
 import { ColumnFilter } from "@/components/column-filter";
 import { matchesColumnFilter, type ColumnFilterValue } from "@/lib/column-filters";
 import { useTableFilters } from "@/components/use-table-filters";
@@ -423,7 +423,7 @@ function ChecklistSection({ section, order, open, pendingCount, onToggle, skippe
   return <section className="overflow-hidden rounded-md border border-border bg-card transition-colors">
     <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-4 py-3 sm:flex sm:flex-nowrap">
       <Button type="button" variant="ghost" className="col-span-2 h-auto min-w-0 w-full justify-start whitespace-normal rounded-none !bg-card p-0 text-left !text-foreground hover:!bg-muted/50 hover:!text-foreground sm:w-auto sm:flex-1" onClick={onToggle} aria-expanded={open}>
-        <span className="flex w-full min-w-0 items-start gap-3"><span className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-sm bg-myio-green/10 text-sm font-bold text-foreground">{order}{pendingCount > 0 ? <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground ring-2 ring-card" aria-label={`${pendingCount} ${pendingCount === 1 ? "pendência" : "pendências"}`}>{pendingCount > 99 ? "99+" : pendingCount}</span> : null}</span><span className="min-w-0 flex-1"><span className="block break-words text-sm font-semibold text-foreground">{section.title}</span>{section.description ? <span className="block break-words text-xs font-normal text-muted-foreground">{section.description}</span> : null}</span></span>
+        <span className="flex w-full min-w-0 items-start gap-3"><CdeNumber className="relative" screen="routes/_authenticated/site-survey.tsx">{order}{pendingCount > 0 ? <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground ring-2 ring-card" aria-label={`${pendingCount} ${pendingCount === 1 ? "pendência" : "pendências"}`}>{pendingCount > 99 ? "99+" : pendingCount}</span> : null}</CdeNumber><span className="min-w-0 flex-1"><span className="block break-words text-sm font-semibold text-foreground">{section.title}</span>{section.description ? <span className="block break-words text-xs font-normal text-muted-foreground">{section.description}</span> : null}</span></span>
       </Button>
       {onSkippedChange ? <div data-survey-skip className="flex min-w-0 flex-wrap items-start gap-x-4 gap-y-2 text-xs font-normal text-muted-foreground sm:ml-auto sm:max-w-[28rem]">
         {onNotApplicableChange ? <label className="flex min-w-0 cursor-pointer items-start gap-1.5"><Checkbox disabled={readOnly} className="shrink-0" checked={Boolean(notApplicable)} onCheckedChange={(checked) => onNotApplicableChange(checked === true)} aria-label={`Não se aplica: ${section.title}`} /><span className="min-w-0 break-words leading-snug">Não se aplica</span></label> : null}
@@ -1603,10 +1603,7 @@ function SortableQuestionRow({ id, children }: { id: string; children: ReactNode
 
 function OrderHandle({ order, label, compact = false, variant = "section" }: { order: number; label: string; compact?: boolean; variant?: "section" | "question" }) {
   const sortable = useContext(SortableHandleContext);
-  const markerClassName = variant === "question"
-    ? "!bg-myio-green/10 !text-myio-green hover:!bg-myio-green/20 hover:!text-myio-green"
-    : "!bg-myio-green !text-primary-foreground hover:!bg-myio-green hover:!text-primary-foreground";
-  return <div className={`flex w-10 flex-col items-start gap-1 ${compact ? "self-start" : "self-start sm:pt-7"}`}><Button type="button" variant="ghost" className={`h-10 w-10 cursor-grab p-0 font-bold active:cursor-grabbing touch-none ${markerClassName}`} aria-label={label} title="Arrastar" {...sortable?.attributes} {...sortable?.listeners}><span className="tabular-nums">{order}</span></Button><span className="w-16 text-left text-[10px] leading-tight text-muted-foreground">Arrastar</span></div>;
+  return <div className={`flex w-10 flex-col items-start gap-1 ${compact ? "self-start" : "self-start sm:pt-7"}`}><CdeNumberButton screen="routes/_authenticated/site-survey.tsx" className="cursor-grab active:cursor-grabbing touch-none" aria-label={label} title="Arrastar" {...sortable?.attributes} {...sortable?.listeners}>{order}</CdeNumberButton><span className="w-16 text-left text-[10px] leading-tight text-muted-foreground">Arrastar</span></div>;
 }
 
 function SurveyCatalogAdmin({ data, onChanged }: { data: NonNullable<ReturnType<typeof useSurveyDataShape>>; onChanged: () => void }) {
@@ -1885,7 +1882,7 @@ function QuestionField({ number, question, answer, attachments, priorPhotos, onP
   const showDetail = (Boolean(config.detail) && conditionApplies) || showOtherDetail;
   const setAnswer = (value: string) => { setSelectedValue(value); onAnswerChange?.(value); };
    return <div data-survey-question-id={question.id} data-survey-photo-drop={config.photo && conditionApplies ? "" : undefined} onDragOver={(event) => { if (config.photo && conditionApplies && event.dataTransfer.types.includes("Files")) { event.preventDefault(); event.dataTransfer.dropEffect = "copy"; } }} onDrop={(event) => { if (!config.photo || !conditionApplies || !event.dataTransfer.files.length) return; event.preventDefault(); acceptPhoto(event.dataTransfer.files[0]); }} onPaste={(event) => { const file = Array.from(event.clipboardData.files).find((item) => item.type.startsWith("image/")); if (config.photo && conditionApplies && file) { event.preventDefault(); acceptPhoto(file); } }} className={`relative grid gap-3 rounded-md border border-myio-green/20 bg-myio-green/10 px-4 pb-4 pt-12 shadow-sm transition-shadow focus-within:border-myio-green/50 focus-within:shadow-md sm:px-5 sm:pb-5 sm:pt-12 ${showDetail || (config.photo && conditionApplies) ? "lg:grid-cols-[minmax(0,1.35fr)_minmax(260px,0.65fr)] lg:items-start lg:gap-5" : ""}`}>
-    <span className="absolute left-3 top-3 grid h-7 w-7 place-items-center rounded-sm bg-card text-xs font-bold tabular-nums text-myio-green shadow-sm ring-1 ring-myio-green/20" aria-hidden="true">{number}</span>
+    <CdeNumber screen="routes/_authenticated/site-survey.tsx" className="absolute left-3 top-3" aria-hidden="true">{number}</CdeNumber>
     <div className="min-w-0 space-y-2">
       <div className="flex min-w-0 flex-wrap items-center gap-2"><Label className={`text-sm font-semibold ${pending ? "text-destructive" : ""}`}>{question.prompt.replace(/\s*\*\s*$/, "")}</Label>{call?.id && call.number ? <Link to="/chamados" search={{ chamado: call.id }} aria-label={`Abrir histórico do chamado ${call.number}`}><Badge variant="outline" className="cursor-pointer border-myio-green/30 bg-myio-green/10 text-myio-green hover:bg-myio-green/20">Chamado #{call.number}</Badge></Link> : null}</div>
        {!config.photo_only ? <div className="flex min-w-0 flex-wrap items-center gap-x-5 gap-y-2">

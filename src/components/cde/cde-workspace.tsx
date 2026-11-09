@@ -63,7 +63,7 @@ const GROUPS: { key: GroupKey; title: string; hint: string; multi?: boolean }[] 
   { key: "organize", title: "4.13 Agrupar e consolidar", hint: "Agrupamento, consolidação e custo por etiqueta · padrão único, aplicado ao vivo" },
   { key: "box", title: "5.1 Boxes (cartões)", hint: "Forma, borda, espessura e fundo dos cartões · padrão único, aplicado ao vivo" },
   { key: "confirm_dialog", title: "5.2 Mensagens de confirmação", hint: "Janelas de exclusão e confirmação · padrão único, aplicado ao vivo" },
-  { key: "number_section", title: "6.1 Numeração das categorias", hint: "Quadrada ou redonda · padrão principal e secundários por tela" },
+  { key: "number_section", title: "6.1 Numeração sequencial dos apps", hint: "Categorias, assuntos, seções, perguntas e ações · padrão principal e secundários por tela" },
   { key: "number_subsection", title: "6.2 Numeração das subcategorias", hint: "Quadrada ou redonda · padrão principal e secundários por tela" },
   { key: "color_swatch", title: "11. Padrões para edição de cores", hint: "Amostras de cor · padrão único, aplicado em todos os apps" },
 ];
@@ -72,7 +72,7 @@ const NUMBER_MODELS: Record<string, Omit<Variant, "key">[]> = Object.fromEntries
 NUMBER_MODELS.color_swatch = ["rounded-none", "rounded-full"].map((shape) => ({ tag: "span", variant: "", size: "", className: `${shape} bg-primary`, icon: "", iconClass: "", label: " ", count: 0, files: ["components/mytosis/color-options.tsx", "components/mytosis/format-color-options.tsx", "components/cde/top-icon-style-editor.tsx", "components/cde/list-item-style.tsx"] }));
 
 /** Telas conhecidas pelo levantamento, com o app deduzido pelo caminho do arquivo. */
-const SCREENS = [...new Set(Object.values(inventory).flatMap((g) => (g as { files: string[] }[]).flatMap((v) => v.files)))].sort();
+const SCREENS = [...new Set([...Object.values(inventory).flatMap((g) => (g as { files: string[] }[]).flatMap((v) => v.files)), "components/legal/minutes-list.tsx", "components/legal/legal-workspace.tsx", "components/legal/subject-actions.tsx", "routes/_authenticated/site-survey.tsx", "components/site-survey-screen-summary.tsx", "components/mytosis/processes-tab.tsx", "components/mytosis/flowchart.tsx", "components/mytosis/node-preview.tsx", "components/supply-order-statuses-tab.tsx", "components/supply-manual-reader.tsx", "components/cde/cde-app-order.tsx", "components/cde/cde-sortable-icons.tsx"])].sort();
 const APP_BY_DIR: Record<string, string> = { mytosis: "Mytosis", "cash-flow": "Cash Flow", legal: "Legal", cde: "CDE", "site-survey": "Site Survey", opdesk: "OpDesk", code: "Code" };
 function screenApp(f: string) {
   const parts = f.split("/");

@@ -38,3 +38,4 @@
 - Registration lists/PDF/Excel share a pure checklist matcher and filtered rows with fresh authorized approvals; PDF uses pdf-lib AcroForm and Excel OOXML controls, independent of ERP data.
 - Proposals use private visit-keyed files; authenticated extraction syncs totals by trigger and stores group breakdown in proposal metadata. Environment remainders preserve unknown quantities as null.
 - No "Fechar" buttons; corner X closes dialogs.
+- Sequential UI markers across apps use CdeNumber/CdeNumberButton with their screen path; only nested CDE categories use the subsection group, so all other sequences inherit the main live numbering standard without changing stored values.

@@ -1,3 +1,4 @@
+import { CdeNumber } from "@/components/cde/cde-button";
 import { ChevronDown, ChevronRight, FileText, Pencil, Trash2, FileSignature, ChevronUp } from 'lucide-react';
 import { canSignParticipant, signatureDate } from '@/lib/signatures';
 import { Button } from '@/components/ui/button';
@@ -50,7 +51,7 @@ export function MinutesList({ rows, expanded, toggle, edit, remove, openPdf, use
             <div className="space-y-3 bg-primary/10 px-4 py-4 sm:px-6">
               <div className="flex items-center gap-2">{handle}<h2 className="flex-1 text-base font-semibold">Assunto {index+1}</h2><Button variant="ghost" size="compactIcon" aria-label={`${collapsed.has(subject.id)?'Exibir':'Recolher'} assunto ${index+1}`} onClick={()=>setCollapsed(prev=>{const n=new Set(prev);if(n.has(subject.id))n.delete(subject.id);else n.add(subject.id);return n;})}>{collapsed.has(subject.id)?<ChevronDown/>:<ChevronUp/>}</Button></div>
               <div className="flex items-start gap-3 sm:gap-4">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary text-sm font-semibold text-primary-foreground">{index + 1}</span>
+                <CdeNumber screen="components/legal/minutes-list.tsx">{index + 1}</CdeNumber>
                 <div className="grid min-w-0 flex-1 gap-4 sm:grid-cols-2">
                   <div className="flex min-w-0 flex-col"><h3 className="flex-1 break-words border-b border-border pb-2 font-semibold">{subject.title}</h3><p className="mt-1 text-xs text-muted-foreground">Título do assunto</p></div>
                   {!collapsed.has(subject.id) && <div className="flex min-w-0 flex-col"><p className="flex-1 whitespace-pre-wrap break-words border-b border-border pb-2">{subject.description || '—'}</p><p className="mt-1 text-xs text-muted-foreground">Descrição</p></div>}
@@ -60,7 +61,7 @@ export function MinutesList({ rows, expanded, toggle, edit, remove, openPdf, use
             </div>
             {!collapsed.has(subject.id) && <div className="space-y-3 border-t border-border px-4 py-4 sm:px-6">
               <h4 className="text-base font-semibold">Deliberações</h4>
-              {subject.decisions?.trim() ? <ol className="space-y-2">{subject.decisions.split(/\r?\n/).map(line => line.trim()).filter(Boolean).map((decision, decisionIndex) => <li key={decisionIndex} className="flex items-start gap-2"><span className="shrink-0">{decisionIndex + 1})</span><span className="min-w-0 whitespace-pre-wrap break-words">{decision.replace(/^\d+[.)]\s+/, '')}</span></li>)}</ol> : <p>—</p>}
+              {subject.decisions?.trim() ? <ol className="space-y-2">{subject.decisions.split(/\r?\n/).map(line => line.trim()).filter(Boolean).map((decision, decisionIndex) => <li key={decisionIndex} className="flex items-start gap-2"><CdeNumber screen="components/legal/minutes-list.tsx">{decisionIndex + 1}</CdeNumber><span className="min-w-0 whitespace-pre-wrap break-words">{decision.replace(/^\d+[.)]\s+/, '')}</span></li>)}</ol> : <p>—</p>}
               {legalSubjectResponsibles(subject).length > 0 || subject.completionDate ? <div className="grid gap-3 border-t border-border pt-3 sm:grid-cols-2">
                 {legalSubjectResponsibles(subject).length > 0 ? <p className="break-words"><span className="text-muted-foreground">Responsáveis: </span>{legalSubjectResponsibles(subject).join(', ')}</p> : null}
                 {subject.completionDate ? <p><span className="text-muted-foreground">Data de conclusão: </span>{legalDate(subject.completionDate)}</p> : null}

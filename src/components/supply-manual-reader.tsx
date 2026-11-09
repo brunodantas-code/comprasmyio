@@ -1,3 +1,4 @@
+import { CdeNumber } from "@/components/cde/cde-button";
 import { Fragment } from 'react';
 import { BookOpen, ClipboardList, ShoppingCart, Boxes, FolderKanban, Users, ArrowUp, Tag, Building2, Landmark, Briefcase, Bell, Layers3, Plus, ShieldCheck, CheckCircle2, ScrollText, DatabaseBackup } from 'lucide-react';
 import content from '@/content/supply-manual.json';
@@ -43,7 +44,7 @@ export function SupplyManualReader() {
       <h2 className="mb-5 text-xl font-semibold">Sumário</h2>
       <ol className="grid gap-2 md:grid-cols-2">{content.sections.map((section, i) => <li key={section.title}>
         <a href={`#capitulo-${i + 1}`} className="flex items-center gap-3 rounded-md px-2 py-2 hover:bg-accent">
-          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-accent text-sm font-semibold text-primary">{i + 1}</span>
+          <CdeNumber screen="components/supply-manual-reader.tsx">{i + 1}</CdeNumber>
           <span className="text-sm">{section.title}</span>
         </a>
       </li>)}</ol>

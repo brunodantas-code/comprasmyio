@@ -141,12 +141,23 @@ export function useCdeConfirmStyle() {
   return { ...styleOf(m.style), className: m.className };
 }
 
-/** Fixed square dimensions also keep circular numbers truly round. */
-export function CdeNumber({ children, subcategory = false }: { children: ReactNode; subcategory?: boolean }) {
+/** All sequential markers share the live numbering standard; hierarchy keeps its own group. */
+export function useCdeNumberStyle(screen?: string, subcategory = false) {
   const { data } = useCdeStandards();
-  const m = resolveCdeModel(data, subcategory ? "number_subsection" : "number_section", "components/cde/cde-workspace.tsx");
+  const m = resolveCdeModel(data, subcategory ? "number_subsection" : "number_section", screen);
   const { css, cls } = styleOf(m.style);
-  return <span style={css} className={cn("flex h-7 w-7 shrink-0 items-center justify-center text-sm font-bold", subcategory && "text-xs", m.className, cls)}>{children}</span>;
+  return { css, className: cn("inline-flex h-7 min-w-7 shrink-0 items-center justify-center px-1 text-sm font-bold tabular-nums", subcategory && "text-xs", m.className, cls) };
+}
+
+export function CdeNumber({ children, subcategory = false, screen = "components/cde/cde-workspace.tsx", className, ...props }: React.ComponentProps<"span"> & { subcategory?: boolean; screen?: string }) {
+  const look = useCdeNumberStyle(screen, subcategory);
+  return <span {...props} data-cde-number="" style={look.css} className={cn(look.className, className)}>{children}</span>;
+}
+
+/** Numeric drag/edit controls keep their behavior but use the same look as passive numbers. */
+export function CdeNumberButton({ children, screen, className, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { screen: string }) {
+  const look = useCdeNumberStyle(screen);
+  return <Button {...props} type={props.type ?? "button"} variant="ghost" data-cde-number="" style={look.css} className={cn(look.className, "p-0", className)}>{children}</Button>;
 }
 
 /** Inline label for + buttons that are not CdeButton; follows CDE text edits. */

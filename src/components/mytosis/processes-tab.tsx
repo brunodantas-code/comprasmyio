@@ -1,5 +1,5 @@
 import { confirmAction } from "@/components/confirm-dialog";
-import { CdeButton } from "@/components/cde/cde-button";
+import { CdeButton, CdeNumber, CdeNumberButton } from "@/components/cde/cde-button";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { DndContext, KeyboardSensor, PointerSensor, TouchSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
@@ -28,7 +28,7 @@ function SectionRow({ section, editing, onChange, onDelete }: { section: Numbere
   return <section ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }} className="border-b border-border py-4">
     <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
       <div className="flex min-w-0 items-center gap-3">
-        <Button variant="ghost" className="h-8 w-8 shrink-0 rounded-md !bg-primary/10 !text-primary p-0" {...attributes} {...listeners} aria-label={`Ordenar seção ${section.number}`} title="Ordenar seção" disabled={!editing}>{section.number}</Button>
+        <CdeNumberButton screen="components/mytosis/processes-tab.tsx" {...attributes} {...listeners} aria-label={`Ordenar seção ${section.number}`} title="Ordenar seção" disabled={!editing}>{section.number}</CdeNumberButton>
         {editing ? <Input aria-label={`Título da seção ${section.number}`} value={section.title} onChange={(e) => onChange({ ...section, title: e.target.value })} className="min-w-0 flex-1" /> : <h3 className="min-w-0 break-words text-base font-normal">{section.title}</h3>}
       </div>
       <div className="flex shrink-0 items-center gap-1">
@@ -38,7 +38,7 @@ function SectionRow({ section, editing, onChange, onDelete }: { section: Numbere
     </header>
     {open ? <div className="mt-4 grid gap-3">
       {section.paragraphs.map((paragraph) => <div key={paragraph.id} className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-3">
-        <span className="flex h-7 min-w-7 shrink-0 items-center justify-center rounded-md bg-primary/10 px-1 text-xs text-primary">{paragraph.number}</span>
+        <CdeNumber screen="components/mytosis/processes-tab.tsx">{paragraph.number}</CdeNumber>
         {editing ? <Textarea aria-label={`Parágrafo ${paragraph.number}`} value={paragraph.text} onChange={(e) => onChange({ ...section, paragraphs: section.paragraphs.map((p) => p.id === paragraph.id ? { id: p.id, text: e.target.value } : p) })} className="min-h-24" /> : <p className="min-w-0 whitespace-pre-wrap break-words text-sm leading-6">{paragraph.text}</p>}
         {editing ? <Button variant="ghost" size="icon" className="h-7 w-7 text-primary" aria-label={`Excluir parágrafo ${paragraph.number}`} title="Excluir parágrafo" onClick={async () => { if (await confirmAction("Excluir este parágrafo?")) onChange({ ...section, paragraphs: section.paragraphs.filter((p) => p.id !== paragraph.id) }); }}><Trash2 className="size-3.5" /></Button> : <span />}
       </div>)}

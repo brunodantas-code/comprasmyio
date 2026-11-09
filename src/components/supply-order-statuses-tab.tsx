@@ -1,3 +1,4 @@
+import { CdeNumber } from "@/components/cde/cde-button";
 import { CdeButton } from "@/components/cde/cde-button";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -174,7 +175,7 @@ function SortableStatusRow({ row, index, canManage, onSave, onRemove }: { row: O
                   <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
                     <span className="inline-flex items-center gap-2">
                       {canManage && <button type="button" {...attributes} {...listeners} className="cursor-grab touch-none text-muted-foreground active:cursor-grabbing" aria-label="Arrastar para reordenar"><GripVertical className="h-4 w-4" /></button>}
-                      <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full border border-border px-1 text-xs">{index + 1}</span>
+                      <CdeNumber screen="components/supply-order-statuses-tab.tsx">{index + 1}</CdeNumber>
                     </span>
                   </TableCell>
                   <TableCell className="font-medium">{row.label}</TableCell>

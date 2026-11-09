@@ -6,6 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { MENU_ORDER_GROUP, menuKey, sortByMenuOrder, useMenuOrders } from "./menu-order";
+import { CdeNumber } from "./cde-button";
 
 type Item = { label: string; icon: React.ComponentType<{ className?: string }>; name: string };
 
@@ -15,7 +16,7 @@ function SortableTile({ it, n }: { it: Item; n: number }) {
   return <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }} className={`flex w-28 items-start gap-1 ${isDragging ? "z-10 opacity-70" : ""}`}>
     <button type="button" {...attributes} {...listeners} aria-label={`Arrastar ${it.label}`} className="mt-3 cursor-grab touch-none text-primary active:cursor-grabbing"><GripVertical className="h-4 w-4" /></button>
     <div className="flex min-w-0 flex-1 flex-col items-center gap-1 text-center">
-      <span className="relative flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-background"><Icon className="h-5 w-5" /><span className="absolute -left-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-0.5 text-[9px] leading-none text-primary-foreground">{n}</span></span>
+      <span className="relative flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-background"><Icon className="h-5 w-5" /><CdeNumber screen="components/cde/cde-sortable-icons.tsx" className="absolute -left-3 -top-3">{n}</CdeNumber></span>
       <span className="text-[0.7rem] leading-tight">{it.label}</span>
       <span className="text-[0.6rem] leading-3 text-muted-foreground/70">{it.name}</span>
     </div>

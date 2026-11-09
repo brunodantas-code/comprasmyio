@@ -1,3 +1,4 @@
+import { CdeNumber } from "@/components/cde/cde-button";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
@@ -18,7 +19,7 @@ function Row({ id, index }: { id: string; index: number }) {
   const app = PORTAL_APPS.find((a) => a.key === id);
   return <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }} className="flex items-center gap-3 border-b border-border bg-card py-2">
     <Button variant="ghost" size="compactIcon" aria-label={`Mover ${app?.name}`} title={`Mover ${app?.name}`} {...attributes} {...listeners} className="touch-none"><GripVertical /></Button>
-    <span className="w-5 text-xs text-muted-foreground">{index + 1}</span><span className="flex-1 text-sm">{app?.name}</span>
+    <CdeNumber screen="components/cde/cde-app-order.tsx">{index + 1}</CdeNumber><span className="flex-1 text-sm">{app?.name}</span>
   </div>;
 }
 

@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Numeração sequencial ligada ao CDE em Atas (assuntos, deliberações e ações), Site Survey (seções, perguntas e histórico), Mytosis (seções, parágrafos, fluxos e boxes), cadastros Supply, sumário e ordenação CDE; círculos verdes atuais conferidos em sessão real nas atas e no checklist, computador/celular. Sete testes de ações/processos passaram; valores preservados.
 - [x] Legal: setas de exibir/recolher e arraste dos Assuntos com numeração automática no padrão CDE; sequência Segundo/Primeiro salva e relida em ata temporária removida.
 - [x] Legal: ações numeradas por Assunto após Deliberações, responsável e checkbox de conclusão; conclusão salva e relida após atualizar a página.
 - [x] Legal: observações por ação com autor/data e histórico ao final do Assunto no padrão Code; criação, releitura, histórico e computador/celular conferidos; pendências locais contam ações não concluídas. Registros temporários removidos.
