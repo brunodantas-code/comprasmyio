@@ -730,7 +730,9 @@ function Dashboard() {
                 {me.canAccess("cadastro_cargos") && <TabsContent value="cargos"><JobTitlesTab userId={me.id} /></TabsContent>}
                 {me.canAccess("cadastro_lembretes") && <TabsContent value="lembretes"><RemindersTab /></TabsContent>}
                 {me.canAccess("cadastro_diversos") && <TabsContent value="diversos">
-                  <div className="space-y-6">
+                  <Card className="p-4 sm:p-6">
+                  <CardTitle className="mb-4">Diversos</CardTitle>
+                  <div className="diversos-list">
                     <ReimbursementAccounts userId={me.id} />
                     <UserManualsTab />
                     <SupplyOrderStatusesTab userId={me.id} />
@@ -744,6 +746,7 @@ function Dashboard() {
                     <DamageReasonsTab />
                     <MaterialStockTypesTab />
                   </div>
+                  </Card>
                 </TabsContent>}
               </Tabs>
             </TabsContent>

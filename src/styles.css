@@ -404,3 +404,30 @@
 [role="menuitem"] { color: var(--li-text, inherit); }
 [role="menuitem"] svg { color: var(--li-fg, currentColor); }
 [role="menuitem"]:focus, [role="menuitem"][data-highlighted], [role="menuitem"][data-preview-hl] { background: var(--li-hl, var(--color-dropdown-highlight, var(--accent))) !important; }
+
+/* Diversos shares the compact disclosure rows used by access management. */
+.diversos-list > * {
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  padding: 0;
+}
+.diversos-list > * + * { border-top: 1px solid var(--border) !important; }
+.diversos-list > * > :first-child {
+  position: relative;
+  min-height: 48px;
+  padding: 10px 0 10px 40px;
+  margin: 0;
+  align-items: center;
+}
+.diversos-list > * > :first-child button[aria-expanded],
+.diversos-list > section > :first-child button[aria-label$="contas"] {
+  position: absolute;
+  left: 0;
+  top: 8px;
+}
+.diversos-list > * > :first-child button[aria-expanded="false"] svg,
+.diversos-list > section > :first-child button[aria-label="Exibir contas"] svg { rotate: -90deg; }
+.diversos-list > * > :first-child button[aria-expanded="true"] svg,
+.diversos-list > section > :first-child button[aria-label="Recolher contas"] svg { rotate: 180deg; }
