@@ -320,11 +320,11 @@ export function CdeWorkspace() {
                           </span>
                         </div>
                         <div className="flex h-20 shrink-0 items-center justify-center overflow-hidden rounded-md bg-background p-2"><Preview v={v} /></div>
-                        <Button type="button" variant="action" size="sm" style={{ "--wa-bg": "var(--whatsapp-green)", "--wa-bd": "var(--whatsapp-border)", "--wa-tx": "var(--card)" } as React.CSSProperties} className="mt-auto !rounded-lg !border-2 !border-solid !border-[var(--wa-bd)] !bg-[var(--wa-bg)] !text-[var(--wa-tx)] hover:!brightness-110" disabled={toggleStandard.isPending || (isPrimary && !g.multi)} onClick={() => toggleStandard.mutate({ group: g.key, key: v.key, multi: g.multi })}>
+                        <Button type="button" variant="action" size="sm" style={{ "--wa-bg": "var(--whatsapp-green)", "--wa-bd": "var(--whatsapp-border)", "--wa-tx": "var(--card)" } as React.CSSProperties} className="mt-auto !rounded-lg !border-2 !border-solid !border-[var(--wa-bd)] !bg-[var(--wa-bg)] !text-[var(--wa-tx)] hover:!brightness-110 disabled:!opacity-100" disabled={toggleStandard.isPending || (isPrimary && !g.multi)} onClick={() => toggleStandard.mutate({ group: g.key, key: v.key, multi: g.multi })}>
                           {isPrimary ? <><Check className="h-4 w-4" />{g.multi ? "Padrão (remover)" : "Padrão principal"}</> : g.multi ? "Adicionar como padrão" : sec ? "Tornar principal" : "Escolher como padrão"}
                         </Button>
                         {!g.multi && !isPrimary && primaries.length ? (
-                          <Button type="button" variant="outline" size="sm" onClick={() => { setScreenSearch(""); setSecondary({ group: g.key, key: v.key, label: v.name ?? `Modelo ${i + 1}`, screens: sec?.screens ?? [] }); }}>
+                          <Button type="button" variant="action" size="sm" style={{ "--wa-bg": "var(--whatsapp-green)", "--wa-bd": "var(--whatsapp-border)", "--wa-tx": "var(--card)" } as React.CSSProperties} className="!rounded-lg !border-2 !border-solid !border-[var(--wa-bd)] !bg-[var(--wa-bg)] !text-[var(--wa-tx)] hover:!brightness-110" onClick={() => { setScreenSearch(""); setSecondary({ group: g.key, key: v.key, label: v.name ?? `Modelo ${i + 1}`, screens: sec?.screens ?? [] }); }}>
                             {sec ? `Secundário · ${sec.screens.length} tela${sec.screens.length === 1 ? "" : "s"} (editar)` : "Padrão secundário por tela"}
                           </Button>
                         ) : null}
