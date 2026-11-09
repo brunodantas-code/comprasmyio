@@ -123,8 +123,9 @@ export function CdeToggleIcon({ open }: { open?: boolean }) {
 export function useCdeSwatchStyle() {
   const { data } = useCdeStandards();
   const m = resolveCdeModel(data, "color_swatch");
-  const { css, cls } = styleOf(m.style);
-  return { css, cls: cn(m.className, cls) };
+  // Swatches take only the CDE shape: fill/border/text would hide the palette colors being shown.
+  const { css, cls } = styleOf(m.style?.shape ? { shape: m.style.shape } : undefined);
+  return { css, cls };
 }
 
 /** Estilo de box (cartão) escolhido no CDE; vazio quando o padrão é o original. */
