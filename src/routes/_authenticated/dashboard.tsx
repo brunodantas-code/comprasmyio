@@ -2977,7 +2977,7 @@ function OrdersTable({
               <Row label="Previsão de entrega"><DeadlineForecast order={o} canEdit={canEdit} part="forecast" /></Row>
               <Row label="Status"><div className="flex flex-col items-start gap-1"><StatusHistoryDialog order={o} canEdit={canEdit} />{canEditRequester && o.status === "entregue" && <ConfirmReceiptActions order={o} />}</div></Row>
               <Row label="Código">
-                <InlineField order={o} field="passphrase" type="text" canEdit={canEdit} display={o.passphrase || "—"} maxLength={PASSPHRASE_MAX} />
+                <InlineField order={o} field="passphrase" type="text" canEdit={canEdit} display={o.passphrase || "—"} maxLength={PASSPHRASE_MAX} collapseSpaces />
               </Row>
             </div>
           );
@@ -3057,7 +3057,7 @@ function OrdersTable({
               </TableCell>
               <TableCell className="text-center"><div className="flex flex-col items-center gap-1"><StatusHistoryDialog order={o} canEdit={canEdit} />{canEditRequester && o.status === "entregue" && <ConfirmReceiptActions order={o} />}</div></TableCell>
               <TableCell className="text-sm break-words text-center">
-                <InlineField order={o} field="passphrase" type="text" canEdit={canEdit} display={o.passphrase || "—"} align="center" maxLength={PASSPHRASE_MAX} />
+                <InlineField order={o} field="passphrase" type="text" canEdit={canEdit} display={o.passphrase || "—"} align="center" maxLength={PASSPHRASE_MAX} collapseSpaces />
               </TableCell>
             </TableRow>
           ))}
@@ -3319,7 +3319,7 @@ function OrderReportDialog({
 
 
 function InlineField({
-  order, field, type, canEdit, display, align = "left", maxLength,
+  order, field, type, canEdit, display, align = "left", maxLength, collapseSpaces = false,
 }: {
   order: Order;
   field: "delivery_forecast" | "passphrase" | "buyer_notes";
@@ -3328,6 +3328,8 @@ function InlineField({
   display: string;
   align?: "left" | "center";
   maxLength?: number;
+  /** Collapses preserved space runs so long legacy values wrap inside the cell instead of overflowing. */
+  collapseSpaces?: boolean;
 }) {
   const qc = useQueryClient();
   const [editing, setEditing] = useState(false);
@@ -3368,14 +3370,15 @@ function InlineField({
   };
 
   const alignClass = align === "center" ? "text-center" : "text-left";
-  if (!canEdit) return <span className={`whitespace-pre-wrap ${alignClass}`}>{display}</span>;
+  const wrapClass = collapseSpaces ? "whitespace-normal break-all" : "whitespace-pre-wrap";
+  if (!canEdit) return <span className={`${wrapClass} ${alignClass}`}>{display}</span>;
 
   if (!editing) {
     return (
       <button
         type="button"
         onClick={() => { setValue((order[field] as string | null) ?? ""); setEditing(true); }}
-        className={`w-full rounded px-1 py-0.5 ${alignClass} whitespace-pre-wrap hover:bg-muted`}
+        className={`w-full rounded px-1 py-0.5 ${alignClass} ${wrapClass} hover:bg-muted`}
         title="Clique para editar"
       >
         {display}

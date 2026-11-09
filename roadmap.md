@@ -236,3 +236,7 @@
 - [x] Legal com indicação verde de disponível na entrada.
 
 - [x] Landing usa mesma ordem CDE do portal, com leitura pública restrita à ordem.
+
+- [x] CDE: destaque vermelho no local de destino ao abrir link de uso da biblioteca.
+- [x] Supply: coluna Codigo quebra dentro da celula (collapseSpaces no InlineField).
+- [ ] Biblioteca CDE: separar visualmente cards de botoes de funcao especifica dos botoes de acao padrao (Salvar, Cancelar, Fechar, Excluir, Adicionar etc.), seguindo o padrao visual do CDE.

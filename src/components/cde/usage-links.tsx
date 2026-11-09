@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ExternalLink } from "lucide-react";
+import { cdeHighlightHash } from "./cde-highlight";
 
 type UsageTarget = { to: "/dashboard" | "/cash-flow" | "/legal" | "/mytosis" | "/cde" | "/site-survey" | "/portal" | "/development" | "/chamados" | "/" | "/reset-password"; label: string; search?: { section: string; subsection: string } };
 const supply = (section: string, subsection: string): UsageTarget => ({ to: "/dashboard", label: "Supply", search: { section, subsection } });
@@ -40,7 +41,8 @@ export function usageTargets(file: string): UsageTarget[] {
   return [];
 }
 
-export function UsageLinks({ file }: { file: string }) {
+export function UsageLinks({ file, siteId }: { file: string; siteId?: string }) {
   const targets = usageTargets(file);
-  return <span className="ml-2 inline-flex flex-wrap gap-2">{targets.map(target => <Link key={`${target.to}:${target.search?.subsection ?? ""}`} to={target.to} search={target.search} target="_blank" rel="noopener noreferrer" title={`Abrir ${target.label} para verificar ${file}`} aria-label={`Ver uso de ${file} em ${target.label}`} className="inline-flex items-center gap-1 text-foreground hover:text-primary"><ExternalLink className="h-3 w-3" />{targets.length > 1 ? target.label : null}</Link>)}</span>;
+  const hash = siteId ? cdeHighlightHash(siteId) : undefined;
+  return <span className="ml-2 inline-flex flex-wrap gap-2">{targets.map(target => <Link key={`${target.to}:${target.search?.subsection ?? ""}`} to={target.to} search={target.search} hash={hash} target="_blank" rel="noopener noreferrer" title={`Abrir ${target.label} para verificar ${file}`} aria-label={`Ver uso de ${file} em ${target.label}`} className="inline-flex items-center gap-1 text-foreground hover:text-primary"><ExternalLink className="h-3 w-3" />{targets.length > 1 ? target.label : null}</Link>)}</span>;
 }

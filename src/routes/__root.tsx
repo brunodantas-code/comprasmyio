@@ -14,6 +14,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { ConfirmDialogHost } from "@/components/confirm-dialog";
+import { CdeHighlight } from "@/components/cde/cde-highlight";
 import { supabase } from "@/integrations/supabase/client";
 
 function NotFoundComponent() {
@@ -150,6 +151,7 @@ function RootComponent() {
       <Outlet />
       <Toaster richColors position="top-right" />
       <ConfirmDialogHost />
+      <CdeHighlight />
     </QueryClientProvider>
   );
 }
