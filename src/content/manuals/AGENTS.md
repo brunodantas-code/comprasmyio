@@ -1,0 +1,1 @@
+- Manual PDFs: sources in src/content/manuals/*.json, rendered by scripts/manuals/gen.py, versions in src/lib/user-manuals.ts; keeps every app in the Supply manual layout.
