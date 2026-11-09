@@ -163,3 +163,7 @@
 - [x] Seta exibir/recolher no Menu principal (CDE)
 
 - [x] Biblioteca CDE: cards compactos de 80 px, quatro colunas no desktop, lista contínua e lápis ligado ao editor do padrão vigente; botões sem vínculo informam a limitação sem salvar mudanças inoperantes.
+
+- [x] Approvals: agrupar/consolidar/custo/indicadores usam padrão Salvar; alertas só com símbolo e texto ao passar o cursor, tooltip conferido em sessão autenticada.
+
+- [x] Approvals: datas alinhadas e símbolos na linha inferior, espaços fixos conferidos na tabela.

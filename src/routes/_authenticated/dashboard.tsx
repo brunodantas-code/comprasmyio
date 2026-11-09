@@ -1,4 +1,5 @@
 import { SupplyItemsSummary } from "@/components/supply-items-summary";
+import { SupplyDeadlineAlert } from "@/components/supply-deadline-alert";
 import { SUPPLY_CODE_MAX, requestedDeadline, deadlineSignals } from "@/lib/supply-deadlines";
 import { useDeadlineAlerts } from "@/components/cde/cde-deadline-alerts";
 import { SupplyDeadlineIndicators } from "@/components/supply-deadline-indicators";
@@ -427,12 +428,12 @@ function DeadlineForecast({ order: o, canEdit, align, part }: { order: Order; ca
   const late = signals.forecastLate;
   return (
     <div className="space-y-1">
-      {part !== "forecast" && <div><div>{requested}</div>{signals.purchaseAlert && <span className="inline-flex text-destructive" title={signals.purchaseAlert === "critical" ? "Compra urgente: prazo de recebimento próximo ou vencido" : "Prazo de recebimento próximo; compra pendente"}>{signals.purchaseAlert === "critical" ? <AlertTriangle className="h-4 w-4" /> : <Bell className="h-4 w-4" />}</span>}{signals.overdue && <span className="text-xs text-destructive">Atrasado</span>}</div>}
-      {part !== "requested" && <div>
+      {part !== "forecast" && <div className="grid grid-rows-[28px_20px] items-center"><div className="whitespace-nowrap">{requested}</div><div className="flex h-5 items-center justify-center gap-1">{signals.purchaseAlert && <SupplyDeadlineAlert warning={signals.purchaseAlert !== "critical"} message={signals.purchaseAlert === "critical" ? "Compra urgente: prazo de recebimento próximo ou vencido" : "Prazo de recebimento próximo; compra pendente"} />}{signals.overdue && <SupplyDeadlineAlert message="Atrasado: prazo de recebimento vencido" />}</div></div>}
+      {part !== "requested" && <div className="grid grid-rows-[28px_20px] items-center">
         <div className={late ? "text-destructive" : undefined} title={late ? "Previsão depois do prazo solicitado" : undefined}>
           <InlineField order={o} field="delivery_forecast" type="date" canEdit={canEdit} display={o.delivery_forecast ? fmtDay(o.delivery_forecast) : "—"} align={align} />
         </div>
-        {late && <div className="text-xs text-destructive"><AlertTriangle className="inline h-4 w-4" /> Fora do prazo</div>}{signals.forecastOverdue && <div className="text-xs text-destructive"><AlertTriangle className="inline h-4 w-4" /> Entrega vencida</div>}
+        <div className="flex h-5 items-center justify-center gap-1">{late && <SupplyDeadlineAlert message="Fora do prazo: previsão de entrega depois do prazo de recebimento" />}{signals.forecastOverdue && <SupplyDeadlineAlert message="Entrega vencida: previsão ultrapassada sem status Entregue" />}</div>
       </div>}
     </div>
   );
