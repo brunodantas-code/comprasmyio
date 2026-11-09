@@ -63,6 +63,7 @@ export function SearchableSelect({ value, onChange, options, placeholder = "Digi
   const hasStandard = data?.selected.some(row => row.group_key === "fields_select" && row.is_primary);
   const appearance = styleOf(model.style);
   const selected = options.find((o) => o.value === value) ?? null;
+  const [optionFontSize, setOptionFontSize] = React.useState("14px");
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
   const [typing, setTyping] = React.useState(false);
@@ -77,6 +78,10 @@ export function SearchableSelect({ value, onChange, options, placeholder = "Digi
     const el = listRef.current?.querySelector<HTMLElement>(`[data-index="${active}"]`);
     el?.scrollIntoView({ block: "nearest" });
   }, [active]);
+
+  React.useLayoutEffect(() => {
+    if (open && inputRef.current) setOptionFontSize(getComputedStyle(inputRef.current).fontSize);
+  }, [open, model.style?.fontSize, model.className]);
 
   const close = () => { setOpen(false); setTyping(false); setQuery(""); };
   const pick = (option: SearchableOption) => { onChange(option.value); close(); inputRef.current?.blur(); };
@@ -126,6 +131,7 @@ export function SearchableSelect({ value, onChange, options, placeholder = "Digi
         </div>
       </PopoverAnchor>
       <PopoverContent
+        style={{ fontSize: optionFontSize }}
         align="start"
         className="w-[var(--radix-popover-trigger-width)] min-w-[16rem] p-1"
         onOpenAutoFocus={(e) => e.preventDefault()}
@@ -144,7 +150,7 @@ export function SearchableSelect({ value, onChange, options, placeholder = "Digi
                   role="option"
                   data-index={index}
                   aria-selected={index === active}
-                  className={cn("cursor-pointer rounded-sm px-2 py-1.5", index === active && "bg-dropdown-highlight text-dropdown-highlight-foreground", option.value === value && "font-medium", optionClassName)}
+                  className={cn("cursor-pointer rounded-sm px-2 py-1.5", index === active && "bg-dropdown-highlight text-dropdown-highlight-foreground", option.value === value && "font-medium", optionClassName, "!text-[length:inherit] [&>div:first-child]:!text-[length:inherit]")}
                   onMouseEnter={() => setActive(index)}
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => pick(option)}

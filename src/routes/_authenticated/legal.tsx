@@ -6,6 +6,7 @@ import { LegalWorkspace, legalRecordsOptions } from "@/components/legal/legal-wo
 import { legalTrackingOptions } from '@/lib/legal-actions';
 
 export const Route = createFileRoute("/_authenticated/legal")({
+  validateSearch: (search: Record<string, unknown>): { record?: string } => ({ record: typeof search.record === "string" ? search.record : undefined }),
   beforeLoad: async ({ context }) => {
     const { data } = await supabase.from("user_app_access").select("app_key").eq("user_id", context.user.id).eq("app_key", "legal").maybeSingle();
     if (!data) throw redirect({ to: "/portal" });
@@ -25,10 +26,11 @@ export const Route = createFileRoute("/_authenticated/legal")({
 });
 
 function LegalPage() {
+  const { record } = Route.useSearch();
   return (
     <div className="min-h-screen bg-background">
       <AppHeader logo={<MyioAppLogo appName="Legal" className="text-xl sm:text-2xl" />} />
-      <LegalWorkspace />
+      <LegalWorkspace key={record ?? "all"} initialRecordId={record} />
     </div>
   );
 }

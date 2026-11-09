@@ -1,4 +1,8 @@
 # Roadmap
+- [x] Legal: assinatura pessoal pendente no símbolo do app, Central e Minhas Pendências; links abrem a ata correta, conferidos com a conta do usuário.
+- [x] CDE: opções de listas suspensas herdam a fonte do campo; ajuste Fonte do campo e das opções no CDE. Campo e opções conferidos em 14px.
+- [x] Legal: dez assuntos existentes inicialmente recolhidos no editor; abertura individual conferida sem alterar a ata.
+- [x] Legal: legenda Título do assunto abaixo do campo em cinza menor; linha verde alinhada à base da numeração, computador/celular conferidos.
 - [x] Legal: dez assuntos inicialmente recolhidos, abertura individual e Recolher tudo conferidos; linhas abaixo das observações removidas e conferidas em tela; computador/celular, quatro testes passaram.
 - [x] CDE: controles + e − alinhados em faixa única, símbolos sem fundo na ordenação; interação e computador/celular conferidos, três testes passaram.
 - [x] Confirmações: botões CDE com texto preservam largura do conteúdo; Excluir passou de 36 para 67 px sem sobreposição; Cancelar conferido sem excluir atas, computador/celular.

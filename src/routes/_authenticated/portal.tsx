@@ -108,6 +108,7 @@ function PortalPage() {
         {key === "supply" && (pendingActions?.supply ?? 0) > 0 ? <PendingBadge count={pendingActions?.supply ?? 0} label="pendências no Supply" /> : null}
         {key === "development" && (pendingActions?.codeTickets ?? 0) > 0 ? <PendingBadge count={pendingActions?.codeTickets ?? 0} label="tickets pendentes no Code" /> : null}
         {key === "chamados" && (pendingActions?.supportCalls ?? 0) > 0 ? <PendingBadge count={pendingActions?.supportCalls ?? 0} label="chamados pendentes no OpDesk" /> : null}
+        {key === "legal" && (pendingActions?.legalSignatures ?? 0) > 0 ? <PendingBadge count={pendingActions?.legalSignatures ?? 0} label="assinaturas pendentes no Legal" /> : null}
         <AppTileFace appKey={key} name={name} tile={tile} />
       </Link>
       <p className="mt-2 w-20 max-w-full break-words text-center text-[0.68rem] leading-4 text-muted-foreground sm:mt-3 sm:w-28 sm:text-sm sm:leading-5">{description.map((line) => <span key={line} className="block sm:whitespace-nowrap">{line}</span>)}</p>
@@ -207,7 +208,8 @@ function PortalPage() {
                          {key === "supply" && (pendingActions?.supply ?? 0) > 0 ? <PendingBadge count={pendingActions?.supply ?? 0} label="pendências no Supply" /> : null}
                           {key === "development" && (pendingActions?.codeTickets ?? 0) > 0 ? <PendingBadge count={pendingActions?.codeTickets ?? 0} label="tickets pendentes no Code" /> : null}
                            {key === "chamados" && (pendingActions?.supportCalls ?? 0) > 0 ? <PendingBadge count={pendingActions?.supportCalls ?? 0} label="chamados pendentes no OpDesk" /> : null}
-                        <AppTileFace appKey={key} name={name} tile={tile} />
+                        {key === "legal" && (pendingActions?.legalSignatures ?? 0) > 0 ? <PendingBadge count={pendingActions?.legalSignatures ?? 0} label="assinaturas pendentes no Legal" /> : null}
+        <AppTileFace appKey={key} name={name} tile={tile} />
                      </Link>
                       <p className="mt-3 w-24 max-w-full break-words text-center text-xs leading-4 text-muted-foreground sm:w-28 sm:text-sm sm:leading-5">
                         {description.map((line) => <span key={line} className="block sm:whitespace-nowrap">{line}</span>)}
@@ -232,6 +234,7 @@ function PortalPage() {
       ...((pendingActions?.approvals ?? 0) > 0 ? [{ key: "approvals", app: "Supply", requester: "Você", count: pendingActions?.approvals ?? 0, row: <PendingRow icon={CheckCircle2} label="Aguardando minha aprovação" count={pendingActions?.approvals ?? 0} to="/pendentes" /> }] : []),
       ...((pendingActions?.supplyQueue ?? 0) > 0 ? [{ key: "queue", app: "Supply", requester: "Você", count: pendingActions?.supplyQueue ?? 0, row: <PendingRow icon={ShoppingCart} label="Compras e serviços a executar · Fila do Supply" count={pendingActions?.supplyQueue ?? 0} to="/dashboard" search={{ section: "queue", subsection: "supply" }} /> }] : []),
       ...((pendingActions?.userDeletions ?? 0) > 0 ? [{ key: "deletions", app: "Admin", requester: "Você", count: pendingActions?.userDeletions ?? 0, row: <PendingRow icon={ShieldCheck} label="Exclusões de usuários aguardando decisão" count={pendingActions?.userDeletions ?? 0} to="/dashboard" search={{ section: "admin", subsection: "usuarios" }} /> }] : []),
+      ...(pendingActions?.legalItems ?? []).map(item => ({ key: `legal-${item.recordId}`, app: "Legal", requester: "Você", count: 1, row: <PendingRow icon={FileSignature} label={`Assinatura da ata pendente · ${item.title}`} count={1} to="/legal" search={{ record: item.recordId }} /> })),
       ...(pendingActions?.supplyQuestions ?? []).map(q => ({ key: `sq-${q.orderId}`, app: "Supply", requester: "Solicitante", count: q.count, row: <PendingRow icon={MessageCircleQuestion} label={`${q.approvalNumber ?? "—"} · Pergunta aguardando sua resposta · ${q.title}`} count={q.count} to="/dashboard" search={{ order: q.orderId }} /> })),
       ...(pendingActions?.codeItems ?? []).map((ticket) => ({ key: `c-${ticket.ticketId}`, app: "Code", requester: ticket.reporterName ?? "Solicitante", count: 1, row: <PendingRow icon={ticket.reason === "responder" ? MessageCircleQuestion : ticket.reason === "notificado" ? Bell : CodeXml} label={`${ticket.ticketNumber} · ${ticket.reason === "responder" ? "Pergunta aguardando sua resposta" : ticket.reason === "notificado" ? "Nova pergunta direcionada a outro usuário" : ticket.reason === "aceitar" ? "Confirmar atendimento" : "Ticket aguardando atendimento"} · ${new Date(ticket.createdAt).toLocaleDateString("pt-BR")} · ${ticket.title.length > 60 ? `${ticket.title.slice(0, 60)}…` : ticket.title}`} count={1} to="/development" search={{ ticket: ticket.ticketId }} /> })),
       ...(pendingActions?.supportCallItems ?? []).map((call) => ({ key: `s-${call.callId}`, app: "Chamados", requester: call.reason === "confirmar" ? "Você" : "Clientes", count: 1, row: <PendingRow icon={Phone} label={`#${call.callNumber} · ${call.reason === "confirmar" ? "Confirmar conclusão" : call.title}`} count={1} to="/chamados" search={{ chamado: call.callId }} /> })),
@@ -250,9 +253,10 @@ function PendingBadge({ count, label }: { count: number; label: string }) {
   return <span className="absolute -right-2 -top-2 flex h-8 min-w-8 items-center justify-center rounded-full bg-destructive px-2 text-sm font-bold text-destructive-foreground shadow-md" aria-label={`${count} ${label}`}>{count > 99 ? "99+" : count}</span>;
 }
 
-function PendingRow({ icon: Icon, label, count, to, search }: { icon: typeof Bell; label: string; count: number; to: "/pendentes" | "/dashboard" | "/development" | "/chamados"; search?: { section: "admin"; subsection: "usuarios" } | { section: "queue"; subsection?: "supply" } | { ticket: string } | { chamado: string } | { order: string } }) {
-  const content = <><Icon className={`h-5 w-5 shrink-0${Icon === MessageCircleQuestion ? " text-destructive" : ""}`} /><span className="min-w-0 flex-1 text-sm font-medium">{label}</span></>;
+function PendingRow({ icon: Icon, label, count, to, search }: { icon: typeof Bell; label: string; count: number; to: "/legal" | "/pendentes" | "/dashboard" | "/development" | "/chamados"; search?: { record: string } | { section: "admin"; subsection: "usuarios" } | { section: "queue"; subsection?: "supply" } | { ticket: string } | { chamado: string } | { order: string } }) {
+  const content = <><Icon className={`h-5 w-5 shrink-0${(Icon === MessageCircleQuestion || Icon === FileSignature) ? " text-destructive" : ""}`} /><span className="min-w-0 flex-1 text-sm font-medium">{label}</span></>;
   if (to === "/pendentes") return <Link to="/pendentes" className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10">{content}</Link>;
+  if (to === "/legal") return <Link to="/legal" search={search && "record" in search ? search : {}} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10">{content}</Link>;
   if (to === "/development") return <Link to="/development" search={(search && "ticket" in search) ? search : { ticket: undefined }} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10">{content}</Link>;
   if (to === "/chamados") return <Link to="/chamados" search={(search && "chamado" in search) ? search : { chamado: undefined }} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10">{content}</Link>;
   if (to === "/dashboard" && search && "order" in search) return <Link to="/dashboard" search={{ order: search.order, section: undefined, subsection: undefined }} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10">{content}</Link>;

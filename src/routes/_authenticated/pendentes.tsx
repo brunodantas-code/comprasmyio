@@ -2,7 +2,7 @@ import { PendingGroups } from "@/components/pending-groups";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PendingForMe } from "@/components/approval-workflow";
 import { MyioLogo } from "@/components/myio-logo";
-import { Bell, CheckCircle2, CodeXml, Phone, ShieldCheck, ShoppingCart, MessageCircleQuestion } from "lucide-react";
+import { Bell, CheckCircle2, CodeXml, Phone, ShieldCheck, ShoppingCart, MessageCircleQuestion, FileSignature } from "lucide-react";
 import { usePendingActions } from "@/hooks/use-pending-actions";
 import { AppHeader } from "@/components/app-header";
 
@@ -37,6 +37,7 @@ function PendentesPage() {
       ...((data?.approvals ?? 0) > 0 ? [{ key: "approvals", app: "Supply", requester: "Você", count: data?.approvals ?? 0, row: <PendingLink icon={CheckCircle2} label="Aguardando minha aprovação" count={data?.approvals ?? 0} to="/pendentes" /> }] : []),
       ...((data?.supplyQueue ?? 0) > 0 ? [{ key: "queue", app: "Supply", requester: "Você", count: data?.supplyQueue ?? 0, row: <PendingLink icon={ShoppingCart} label="Compras e serviços a executar · Fila do Supply" count={data?.supplyQueue ?? 0} to="/dashboard" search={{ section: "queue", subsection: "supply" }} /> }] : []),
       ...((data?.userDeletions ?? 0) > 0 ? [{ key: "deletions", app: "Admin", requester: "Você", count: data?.userDeletions ?? 0, row: <PendingLink icon={ShieldCheck} label="Exclusões de usuários aguardando decisão" count={data?.userDeletions ?? 0} to="/dashboard" search={{ section: "admin", subsection: "usuarios" }} /> }] : []),
+      ...(data?.legalItems ?? []).map(item => ({ key: `legal-${item.recordId}`, app: "Legal", requester: "Você", count: 1, row: <PendingLink icon={FileSignature} label={`Assinatura da ata pendente · ${item.title}`} count={1} to="/legal" search={{ record: item.recordId }} /> })),
       ...(data?.supplyQuestions ?? []).map(q => ({ key: `sq-${q.orderId}`, app: "Supply", requester: "Solicitante", count: q.count, row: <PendingLink icon={MessageCircleQuestion} label={`${q.approvalNumber ?? "—"} · Pergunta aguardando sua resposta · ${q.title}`} count={q.count} to="/dashboard" search={{ order: q.orderId }} /> })),
       ...(data?.codeItems ?? []).map((ticket) => ({ key: `c-${ticket.ticketId}`, app: "Code", requester: ticket.reporterName ?? "Solicitante", count: 1, row: <PendingLink icon={ticket.reason === "responder" ? MessageCircleQuestion : ticket.reason === "notificado" ? Bell : CodeXml} label={`${ticket.ticketNumber} · ${ticket.reason === "responder" ? "Pergunta aguardando sua resposta" : ticket.reason === "notificado" ? "Nova pergunta direcionada a outro usuário" : ticket.reason === "aceitar" ? "Confirmar atendimento" : "Ticket aguardando atendimento"} · ${new Date(ticket.createdAt).toLocaleDateString("pt-BR")} · ${ticket.title.length > 60 ? `${ticket.title.slice(0, 60)}…` : ticket.title}`} count={1} to="/development" search={{ ticket: ticket.ticketId }} /> })),
       ...(data?.mytosisItems ?? []).map((q) => ({ key: `m-${q.message_id}`, app: "Mytosis", requester: q.author_name ?? "Solicitante", count: 1, row: <Link to="/mytosis" search={{ node: q.node_id, task: q.task_id ?? undefined }} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10"><MessageCircleQuestion className="h-5 w-5 shrink-0" /><span className="min-w-0 flex-1 text-sm font-medium">Mytosis · {q.node_title}{q.task_title ? ` · ${q.task_title}` : ""} · {q.question_text}</span></Link> })),
@@ -52,9 +53,10 @@ function PendentesPage() {
   );
 }
 
-function PendingLink({ icon: Icon, label, count, to, search }: { icon: typeof Bell; label: string; count: number; to: "/pendentes" | "/dashboard" | "/development" | "/chamados"; search?: { section: "admin"; subsection: "usuarios" } | { section: "queue"; subsection?: "supply" } | { ticket: string } | { chamado: string } | { order: string } }) {
-  const content = <><Icon className={`h-5 w-5 shrink-0${Icon === MessageCircleQuestion ? " text-destructive" : ""}`} /><span className="min-w-0 flex-1 text-sm font-medium">{label}</span></>;
+function PendingLink({ icon: Icon, label, count, to, search }: { icon: typeof Bell; label: string; count: number; to: "/legal" | "/pendentes" | "/dashboard" | "/development" | "/chamados"; search?: { record: string } | { section: "admin"; subsection: "usuarios" } | { section: "queue"; subsection?: "supply" } | { ticket: string } | { chamado: string } | { order: string } }) {
+  const content = <><Icon className={`h-5 w-5 shrink-0${(Icon === MessageCircleQuestion || Icon === FileSignature) ? " text-destructive" : ""}`} /><span className="min-w-0 flex-1 text-sm font-medium">{label}</span></>;
   if (to === "/pendentes") return <a href="#approvals" className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10">{content}</a>;
+  if (to === "/legal") return <Link to="/legal" search={search && "record" in search ? search : {}} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10">{content}</Link>;
   if (to === "/development") return <Link to="/development" search={(search && "ticket" in search) ? search : { ticket: undefined }} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10">{content}</Link>;
   if (to === "/chamados") return <Link to="/chamados" search={(search && "chamado" in search) ? search : { chamado: undefined }} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10">{content}</Link>;
   if (to === "/dashboard" && search && "order" in search) return <Link to="/dashboard" search={{ order: search.order, section: undefined, subsection: undefined }} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10">{content}</Link>;
