@@ -1,0 +1,132 @@
+[
+  {
+    "file": "components/cde/cde-app-order.tsx",
+    "line": 22,
+    "group": "number_section"
+  },
+  {
+    "file": "components/cde/cde-category-header.tsx",
+    "line": 17,
+    "group": "number_section"
+  },
+  {
+    "file": "components/cde/cde-navigation.tsx",
+    "line": 83,
+    "group": "number_subsection"
+  },
+  {
+    "file": "components/cde/cde-sortable-icons.tsx",
+    "line": 19,
+    "group": "number_section"
+  },
+  {
+    "file": "components/cde/cde-workspace.tsx",
+    "line": 313,
+    "group": "number_subsection"
+  },
+  {
+    "file": "components/legal/legal-workspace.tsx",
+    "line": 103,
+    "group": "number_section"
+  },
+  {
+    "file": "components/legal/legal-workspace.tsx",
+    "line": 111,
+    "group": "number_section"
+  },
+  {
+    "file": "components/legal/minutes-list.tsx",
+    "line": 60,
+    "group": "number_section"
+  },
+  {
+    "file": "components/legal/minutes-list.tsx",
+    "line": 69,
+    "group": "number_section"
+  },
+  {
+    "file": "components/legal/subject-actions.tsx",
+    "line": 56,
+    "group": "number_subsection"
+  },
+  {
+    "file": "components/mytosis/flowchart.tsx",
+    "line": 225,
+    "group": "number_section"
+  },
+  {
+    "file": "components/mytosis/flowchart.tsx",
+    "line": 336,
+    "group": "number_section"
+  },
+  {
+    "file": "components/mytosis/flowchart.tsx",
+    "line": 534,
+    "group": "number_section"
+  },
+  {
+    "file": "components/mytosis/node-preview.tsx",
+    "line": 26,
+    "group": "number_section"
+  },
+  {
+    "file": "components/mytosis/processes-tab.tsx",
+    "line": 31,
+    "group": "number_section"
+  },
+  {
+    "file": "components/mytosis/processes-tab.tsx",
+    "line": 41,
+    "group": "number_section"
+  },
+  {
+    "file": "components/site-survey-screen-summary.tsx",
+    "line": 214,
+    "group": "number_subsection"
+  },
+  {
+    "file": "components/site-survey-screen-summary.tsx",
+    "line": 214,
+    "group": "number_subsection"
+  },
+  {
+    "file": "components/site-survey-screen-summary.tsx",
+    "line": 214,
+    "group": "number_subsection"
+  },
+  {
+    "file": "components/site-survey-screen-summary.tsx",
+    "line": 215,
+    "group": "number_subsection"
+  },
+  {
+    "file": "components/site-survey-screen-summary.tsx",
+    "line": 215,
+    "group": "number_subsection"
+  },
+  {
+    "file": "components/supply-manual-reader.tsx",
+    "line": 47,
+    "group": "number_section"
+  },
+  {
+    "file": "components/supply-order-statuses-tab.tsx",
+    "line": 178,
+    "group": "number_section"
+  },
+  {
+    "file": "routes/_authenticated/site-survey.tsx",
+    "line": 426,
+    "group": "number_section"
+  },
+  {
+    "file": "routes/_authenticated/site-survey.tsx",
+    "line": 1606,
+    "group": "number_subsection"
+  },
+  {
+    "file": "routes/_authenticated/site-survey.tsx",
+    "line": 1885,
+    "group": "number_subsection"
+  }
+]

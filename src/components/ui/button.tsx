@@ -3,7 +3,7 @@ import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
-import { detectButtonGroup, useCdeLook, useButtonBinding } from "@/components/cde/cde-look";
+import { detectButtonGroup, useCdeLook, useButtonBinding, type AutoGroup } from "@/components/cde/cde-look";
 import { ICONS } from "@/components/cde/cde-render";
 import { isSpecificAction } from "@/components/cde/action-standard";
 
@@ -59,6 +59,8 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   asChild?: boolean;
   actionKind?: "standard" | "specific";
+  cdeId?: string;
+  cdeNative?: boolean;
 }
 
 const actionLabelPattern = /\b(salvar|salvando|salvo|excluir|excluindo|cancelar|cancelando|confirmar|confirmando|concluir|concluindo)\b/i;
@@ -71,18 +73,18 @@ function buttonText(node: React.ReactNode): string {
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, children, style, actionKind, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, children, style, actionKind, cdeId, cdeNative, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
     const visibleText = buttonText(children).trim();
     const accessibleLabel = visibleText || [props["aria-label"], props.title].filter(Boolean).join(" ");
     // CdeButton (style passed) keeps its own CDE variant; never re-skin it by label.
     const resolvedVariant = !style && actionLabelPattern.test(accessibleLabel) ? "action" : variant;
     // CDE: action buttons follow the chosen standard live; CdeButton passes its own style and is skipped.
-    const binding = useButtonBinding(accessibleLabel);
-    const group = binding?.group ?? detectButtonGroup(children, [props["aria-label"], props.title].filter(Boolean).join(" ")) ?? (visibleText && (!variant || ["default", "action", "outline", "secondary", "destructive"].includes(variant)) ? "action_standard" : undefined);
+    const binding = useButtonBinding(accessibleLabel, cdeId);
+    const group = binding?.group as AutoGroup | undefined ?? detectButtonGroup(children, [props["aria-label"], props.title].filter(Boolean).join(" ")) ?? (visibleText && (!variant || ["default", "action", "outline", "secondary", "destructive"].includes(variant)) ? "action_standard" : undefined);
     const specific = actionKind === "specific" || (!actionKind && isSpecificAction({ className, customStyle: !!style })) || !visibleText;
-    const look = useCdeLook(style ? undefined : group, true, group === "save" && !visibleText ? "controls/save-icon" : undefined, specific);
-    const standardSave = !style && !asChild && (group === "save" || group === "trash" || !!binding);
+    const look = useCdeLook((style || cdeNative) && !binding ? undefined : group, true, cdeId?.split("|")[0] ?? (group === "save" && !visibleText ? "controls/save-icon" : undefined), specific, binding?.modelKey);
+    const standardSave = !style && !asChild && (group === "save" || group === "trash");
     const SaveIcon = ICONS[look.icon || (group === "trash" ? "Trash2" : "Save")] ?? ICONS.Save;
     // CDE may rename a generic action, never its scope or in-progress state.
     const genericAction = /^(salvar|excluir)$/i.test(visibleText);
@@ -92,11 +94,14 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     // Send: CDE standard renders its icon, plus only the model's own text (empty = icon only); progress text stays.
     const sendStandard = !style && !asChild && group === "send" && !!(look.icon || look.variant) && !/enviando/i.test(visibleText);
     const SendIcon = ICONS[look.icon || "Send"] ?? ICONS.Save;
-    const content = sendStandard ? <><SendIcon className={look.iconClass || "h-4 w-4"} />{look.label?.trim() || null}</> : standardSave ? <><SaveIcon className={look.iconClass || "h-4 w-4"} />{visibleText ? actionLabel : null}</> : children;
+    const BoundIcon = look.icon ? ICONS[look.icon] : undefined;
+    const progress = /salvando|excluindo|enviando|gerando|carregando|processando|cancelando|confirmando|concluindo/i.test(visibleText);
+    const boundContent = binding && !asChild && !binding.preserveContent ? <>{BoundIcon && <BoundIcon className={look.iconClass || "h-4 w-4"} />}{progress ? children : binding.label || null}</> : undefined;
+    const content = binding?.preserveContent ? children : boundContent ?? (sendStandard ? <><SendIcon className={look.iconClass || "h-4 w-4"} />{look.label?.trim() || null}</> : standardSave ? <><SaveIcon className={look.iconClass || "h-4 w-4"} />{visibleText ? actionLabel : null}</> : children);
     const cdeVariant = look.variant ? look.variant as VariantProps<typeof buttonVariants>["variant"] : resolvedVariant;
     const cdeSize = look.size ? look.size as VariantProps<typeof buttonVariants>["size"] : size;
     return (
-      <Comp data-action-kind={group ? specific ? "specific" : "standard" : undefined} className={cn(buttonVariants({ variant: "data-cde-number" in props ? null : cdeVariant, size: cdeSize, className }), look.className, !asChild && visibleText && group && !(sendStandard && !look.label?.trim()) && ["!w-auto shrink-0", className?.includes("whitespace-normal") ? "!min-w-0" : "!min-w-max"])} style={style ?? (look.variant || look.className ? look.style : undefined)} ref={ref} {...(sendStandard && !look.label?.trim() && visibleText ? { "aria-label": visibleText, title: visibleText } : {})} {...props}>{content}</Comp>
+      <Comp data-cde-id={cdeId} data-action-kind={group ? specific ? "specific" : "standard" : undefined} className={cn(cdeNative && !binding ? className : buttonVariants({ variant: "data-cde-number" in props && !binding ? null : cdeVariant, size: cdeSize, className: binding ? undefined : className }), look.className, !asChild && (binding ? binding.label : visibleText) && group && !(sendStandard && !look.label?.trim()) && ["!w-auto shrink-0", className?.includes("whitespace-normal") ? "!min-w-0" : "!min-w-max"])} style={binding ? look.style : style ?? (look.variant || look.className ? look.style : undefined)} ref={ref} {...((binding && !binding.label || sendStandard && !look.label?.trim()) && visibleText ? { "aria-label": accessibleLabel, title: accessibleLabel } : {})} {...props}>{cdeNative && !binding ? children : content}</Comp>
     );
   },
 );

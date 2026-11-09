@@ -29,6 +29,8 @@ import { CdeButtonLibrary } from "./cde-button-library";
 import { CdeDeadlineAlerts } from "./cde-deadline-alerts";
 import { COMMON_ACTION_GROUPS } from "./action-standard";
 import { UsageLinks } from "./usage-links";
+import { readButtonBindings } from "./library-bindings";
+import numberUsage from "./number-usage.json";
 
 type Variant = { key: string; name?: string; custom?: boolean; tag: string; variant: string; size: string; className: string; icon: string; iconClass: string; label: string; count: number; files: string[]; uses?: { file: string; n: number }[]; style?: CdeStyle };
 
@@ -135,6 +137,7 @@ export function CdeWorkspace() {
   const [replacement, setReplacement] = useState("");
   const [secondary, setSecondary] = useState<{ group: GroupKey; key: string; label: string; screens: string[] } | null>(null);
   const [screenSearch, setScreenSearch] = useState("");
+  const [libraryEdit, setLibraryEdit] = useState<{ ids: string[]; label: string; dynamic: boolean } | null>(null);
 
   const { data } = useQuery({
     queryKey: ["cde-data"],
@@ -193,6 +196,15 @@ export function CdeWorkspace() {
       const rest = allUses.filter((u) => !claimed.has(u.file));
       result = result.map((v) => finish(v, v.key === std[0] ? rest : secUses.get(v.key) ?? []));
     }
+    if (g === "number_section" || g === "number_subsection") {
+      const uses = merge(numberUsage.filter(u => u.group === g).map(u => ({ file: u.file, n: 1 })));
+      const primary = primariesOf(g)[0];
+      const secondary = secondariesOf(g);
+      result = result.map(v => finish(v, uses.filter(u => {
+        const owner = secondary.find(s => s.screens.includes(u.file))?.variant_key ?? primary;
+        return owner === v.key;
+      })));
+    }
     return result;
   };
   const standardsOf = (g: GroupKey) => (data?.selected ?? []).filter((s) => s.group_key === g).map((s) => s.variant_key);
@@ -225,6 +237,20 @@ export function CdeWorkspace() {
       const visualChanged = !editing || draft.variant !== editing.variant || draft.size !== editing.size || draft.className !== editing.className || ["shape", "fill", "border", "borderWidth"].some(k => draft.style[k as keyof CdeStyle] !== editing.style?.[k as keyof CdeStyle]);
       const modelStyle = group !== "action_standard" && COMMON_ACTION_GROUPS.has(group) && visualChanged ? { ...draft.style, actionSpecific: true } : draft.style;
       const values = { name: draft.name.trim(), tag: draft.tag, variant: draft.variant, size: draft.size, class_name: draft.className, icon: draft.icon, icon_class: draft.iconClass, label: draft.label, style: modelStyle };
+      if (libraryEdit) {
+        const row = data?.selected.find(s => s.group_key === "button_bindings" && s.is_primary);
+        const bindings = readButtonBindings(row?.variant_key);
+        const existingKey = bindings[libraryEdit.ids[0]]?.modelKey;
+        const existing = existingKey?.startsWith("custom:") ? data?.models.find(m => m.id === existingKey.slice(7)) : undefined;
+        const request = existing ? supabase.from("cde_models").update({ ...values, style: { ...modelStyle, actionSpecific: true } }).eq("id", existing.id) : supabase.from("cde_models").insert({ ...values, group_key: group, style: { ...modelStyle, actionSpecific: true }, created_by: await uid() });
+        const { data: model, error } = await request.select("id").single();
+        if (error) throw error;
+        for (const id of libraryEdit.ids) bindings[id] = { group, label: draft.label, modelKey: `custom:${model.id}`, preserveContent: libraryEdit.dynamic };
+        const payload = { variant_key: JSON.stringify(bindings), chosen_by: await uid() };
+        const result = row ? await supabase.from("cde_selected").update(payload).eq("group_key", "button_bindings").eq("variant_key", row.variant_key) : await supabase.from("cde_selected").insert({ ...payload, group_key: "button_bindings", is_primary: true });
+        if (result.error) throw result.error;
+        return;
+      }
       if (editing?.custom) {
         const { error } = await supabase.from("cde_models").update(values).eq("id", editing.key.slice(7)).eq("group_key", group);
         if (error) throw error;
@@ -242,7 +268,7 @@ export function CdeWorkspace() {
         }
       }
     },
-    onSuccess: () => { refresh(); setCreating(null); setEditing(null); setDraft(emptyDraft); toast.success(editing ? "Modelo atualizado" : "Modelo criado"); },
+    onSuccess: () => { refresh(); setCreating(null); setEditing(null); setLibraryEdit(null); setDraft(emptyDraft); toast.success(editing ? "Modelo atualizado" : "Modelo criado e aplicado"); },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Não foi possível criar o modelo."),
   });
 
@@ -315,7 +341,7 @@ export function CdeWorkspace() {
                       <div key={v.key} data-cde-model={g.key} className={cn("flex h-60 w-64 shrink-0 flex-col gap-2 rounded-lg border p-3", selected ? "border-primary bg-accent" : "border-border")}>
                         <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
                           <span className="truncate" title={v.style?.description || undefined}>{v.name ?? `Modelo ${i + 1}`}{v.custom ? " · criado no CDE" : ""}</span>
-                          <span className="flex shrink-0 items-center gap-1 whitespace-nowrap">{g.key === "action_standard" ? "compartilhado" : v.custom && !v.count ? "novo" : `${v.count} uso${v.count === 1 ? "" : "s"}`}
+                          <span className="flex shrink-0 items-center gap-1 whitespace-nowrap" title={g.key.startsWith("number_") ? "Locais no código; cada local pode repetir o marcador em várias linhas" : undefined}>{g.key === "action_standard" ? "compartilhado" : v.custom && !v.count ? "novo" : `${v.count} uso${v.count === 1 ? "" : "s"}`}
                             <Button type="button" variant="outline" size="compactIcon" title="Editar modelo" aria-label={`Editar ${v.name ?? `Modelo ${i + 1}`} em ${g.title}`} onClick={() => { setEditing(v); setDraft({ name: v.name ?? `Modelo ${i + 1}`, tag: v.tag, variant: v.variant, size: v.size, className: v.className, icon: v.icon, iconClass: v.iconClass, label: v.label, style: { ...v.style } }); setCreating(g.key); }}><Pencil /></Button>
                             <Button type="button" variant="outline" size="compactIcon" title={selected ? "Remova o padrão antes de excluir" : "Excluir modelo"} aria-label={`Excluir ${v.name ?? `Modelo ${i + 1}`}`} disabled={selected}
                               onClick={() => { if (!standards.length) return toast.error("Escolha primeiro um padrão para substituir este modelo."); setReplacement(primaries.length === 1 ? primaries[0] : standards.length === 1 ? standards[0] : ""); setDeleting({ group: g.key, model: v, label: v.name ?? `Modelo ${i + 1}` }); }}><Trash2 /></Button>
@@ -424,14 +450,15 @@ export function CdeWorkspace() {
           if (cat === "nav") return <CdeNavigation key={`CdeNavigation-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "menu") return <CdeMainMenu key={`CdeMainMenu-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "apps") return <CdeAppOrder key={`CdeAppOrder-${collapseKey}`} number={ci + 1} handle={handle} />;
-          if (cat === "button_library") return <CdeButtonLibrary key={`CdeButtonLibrary-${collapseKey}`} number={ci + 1} handle={handle} onEdit={(button, group) => {
+          if (cat === "button_library") return <CdeButtonLibrary key={`CdeButtonLibrary-${collapseKey}`} number={ci + 1} handle={handle} onEdit={(button, group, ids, modelKey) => {
             if (!group) { toast.info("Este botão ainda não possui um padrão CDE vinculado. A edição visual precisa desse vínculo para ser aplicada no app."); return; }
             const rows = (data?.selected ?? []).filter(s => s.group_key === group);
             const selection = rows.find(s => !s.is_primary && s.screens.includes(button.file)) ?? rows.find(s => s.is_primary);
-            const model = groupModels(group).find(v => v.key === selection?.variant_key);
-            if (!model) { toast.info("Selecione primeiro um padrão para este grupo nos Botões de ação."); return; }
+            const model = groupModels(group).find(v => v.key === (modelKey || selection?.variant_key)) ?? groupModels("action_standard")[0];
+            if (!model) return;
+            setLibraryEdit({ ids: ids ?? [button.id], label: button.label, dynamic: button.dynamic });
             setEditing(model);
-            setDraft({ name: model.name ?? button.label, tag: model.tag, variant: model.variant, size: model.size, className: model.className, icon: model.icon, iconClass: model.iconClass, label: model.label, style: { ...model.style } });
+            setDraft({ name: modelKey ? model.name ?? button.label.slice(0, 60) : button.label.slice(0, 60), tag: "Button", variant: modelKey ? model.variant : button.variant || model.variant, size: modelKey ? model.size : button.size || model.size, className: modelKey ? model.className : button.className || model.className, icon: modelKey ? model.icon : button.icon || model.icon, iconClass: model.iconClass, label: modelKey ? model.label : button.dynamic || button.label === button.icon ? "" : button.label, style: { ...model.style, actionSpecific: true } });
             setCreating(group);
           }} />;
           if (cat === "deadline_alerts") return <CdeDeadlineAlerts key={`CdeDeadlineAlerts-${collapseKey}`} number={ci + 1} handle={handle} />;
@@ -439,7 +466,7 @@ export function CdeWorkspace() {
         }}
       </CdeSortableList>
 
-      <Dialog open={!!creating} onOpenChange={(o) => { if (!o) { setCreating(null); setEditing(null); } }}>
+      <Dialog open={!!creating} onOpenChange={(o) => { if (!o) { setCreating(null); setEditing(null); setLibraryEdit(null); } }}>
         <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
           <DialogHeader className="flex-row items-center justify-between gap-3 space-y-0 pr-8"><DialogTitle>{editing ? "Editar modelo" : "Criar modelo"} · {creating ? groupTitle(creating) : ""}</DialogTitle><div className="flex min-h-12 min-w-24 items-center justify-center px-3 py-2"><Preview v={draft} /></div></DialogHeader>
           <div className="grid gap-3 sm:grid-cols-2 [&_:is(input,textarea,button[role=combobox])]:!rounded-none [&_:is(input,textarea,button[role=combobox])]:!border-0 [&_:is(input,textarea,button[role=combobox])]:!border-b [&_:is(input,textarea,button[role=combobox])]:!border-myio-green [&_:is(input,textarea,button[role=combobox])]:!bg-transparent [&_:is(input,textarea,button[role=combobox])]:!px-0 [&_:is(input,textarea,button[role=combobox])]:!shadow-none [&_:is(input,textarea,button[role=combobox])]:!ring-0 [&_textarea]:!border-solid">
@@ -477,7 +504,7 @@ export function CdeWorkspace() {
             <div className="space-y-1 sm:col-span-2"><Label>Classes (opcional)</Label><Input value={draft.className} onChange={(e) => setDraft({ ...draft, className: e.target.value })} placeholder="h-8 text-sm" /></div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="action" onClick={() => { setCreating(null); setEditing(null); }}>Cancelar</Button>
+            <Button type="button" variant="action" onClick={() => { setCreating(null); setEditing(null); setLibraryEdit(null); }}>Cancelar</Button>
             <Button type="button" variant="action" disabled={create.isPending} onClick={() => creating && create.mutate(creating)}>Salvar</Button>
           </DialogFooter>
         </DialogContent>

@@ -1,4 +1,7 @@
 # Roadmap
+- [x] Numeração: levantamento real de 16 locais principais e 10 secundários; 6.1 conferido com 16 usos, sem estimar repetições por registro.
+- [x] Navegação: padrão primeiro também em 8.4; Caixa suspensa conferida antes de Botão flutuante.
+- [x] Biblioteca: 822 controles reais com identidade estável, edição por uso ou conjunto e substituição antes da retirada; salvar/reler/retirar conferidos em sessão real, celular sem transbordamento, 36 testes passaram; modelo temporário e vínculos restaurados.
 - [x] CDE: padrão principal removível sem excluir o modelo; seta verde retirada e seta preta preservada após recarga.
 - [x] CDE: links nos locais conhecidos de uso; perfis de acesso abertos no menu correto, computador/celular conferidos. Destinos compartilhados abrem o app; não abrem automaticamente diálogos internos.
 - [x] CDE: explicado o que falta para vincular, editar e substituir todos os botões da biblioteca; 874 usos levantados.

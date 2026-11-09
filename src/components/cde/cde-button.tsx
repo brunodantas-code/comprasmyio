@@ -44,7 +44,7 @@ export function useCdeStandards() {
     queryFn: async () => {
       const [sel, models] = await Promise.all([
         supabase.from("cde_selected").select("group_key,variant_key,is_primary,screens"),
-        supabase.from("cde_models").select("id,variant,size,class_name,icon,icon_class,label,style"),
+        supabase.from("cde_models").select("id,group_key,name,tag,variant,size,class_name,icon,icon_class,label,style"),
       ]);
       if (sel.error) throw sel.error;
       return { selected: sel.data ?? [], models: models.data ?? [] };
@@ -72,6 +72,7 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
   /** Destaca o botão (ex.: filtro aplicado fica verde). */
   active?: boolean;
   children?: ReactNode;
+  cdeId?: string;
 };
 
 /** Texto editado no CDE (grupo add_text) para um botão + com texto; devolve o original sem edição. */

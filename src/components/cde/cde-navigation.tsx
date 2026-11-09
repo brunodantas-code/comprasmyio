@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { CdeNumber } from "./cde-button";
 import { CdeCategoryHeader } from "./cde-category-header";
+import { standardsFirst } from "./model-order";
 
 type Pattern = { key: string; label: string; detail: string; uses: string; sketch: "screen" | "popup" | "confirm" | "bottom" | "top" | "side" | "floating" | "popover" | "collapse" | "tabs" };
 type Decision = { key: string; title: string; patterns: Pattern[] };
@@ -81,7 +82,7 @@ export function CdeNavigation({ number, handle }: { number: number; handle?: imp
             <div key={d.key}>
               <div className="mb-2 flex items-center gap-3 text-sm font-semibold"><CdeNumber subcategory>{number}.{di + 1}</CdeNumber>{d.title}</div>
               <div className="flex flex-wrap gap-3">
-                {d.patterns.map((p) => {
+                {standardsFirst(d.patterns, p => chosen?.some(c => c.group_key === d.key && c.variant_key === p.key) ?? false).map((p) => {
                   const sel = chosen?.some((c) => c.group_key === d.key && c.variant_key === p.key);
                   return (
                     <div key={p.key} className={cn("flex w-56 flex-col gap-2 rounded-lg border p-3", sel ? "border-primary bg-accent" : "border-border")}>

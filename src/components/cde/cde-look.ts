@@ -6,18 +6,12 @@ import { COMMON_ACTION_GROUPS, inheritActionLook } from "./action-standard";
 /** Groups applied automatically by shared ui components (Button/Input/Textarea). */
 export type AutoGroup = "action_standard" | "add" | "save" | "cancel" | "confirm" | "trash" | "pencil" | "toggle" | "move" | "sort" | "export" | "send" | "attach" | "clear" | "organize" | "fields_input" | "fields_textarea" | "fields_password";
 
-export type LibraryBinding = { group: AutoGroup; label: string };
-export function readButtonBindings(raw?: string): Record<string, LibraryBinding> {
-  try {
-    const value: unknown = JSON.parse(raw ?? "{}");
-    if (!value || typeof value !== "object" || Array.isArray(value)) return {};
-    return Object.fromEntries(Object.entries(value).filter(([, binding]) => binding && typeof binding === "object" && typeof binding.group === "string" && typeof binding.label === "string"));
-  } catch { return {}; }
-}
-export function useButtonBinding(label: string) {
+import { readButtonBindings, resolveButtonBinding } from "./library-bindings";
+export { readButtonBindings } from "./library-bindings";
+export function useButtonBinding(label: string, id?: string) {
   const { data } = useCdeStandards();
   const bindings = readButtonBindings(data?.selected.find(s => s.group_key === "button_bindings" && s.is_primary)?.variant_key);
-  return bindings[label.trim()];
+  return resolveButtonBinding(bindings, id, label);
 }
 
 const ICON_GROUP: Record<string, AutoGroup> = {
@@ -66,9 +60,10 @@ export function detectButtonGroup(children: React.ReactNode, label?: string): Au
 }
 
 /** Visual (CDE style) of the chosen standard for a group; empty when no standard is chosen. */
-export function useCdeLook(group: AutoGroup | undefined, withClass = false, screen?: string, specific = false): { className: string; style: React.CSSProperties; variant?: string; size?: string; icon?: string; iconClass?: string; label?: string } {
+export function useCdeLook(group: AutoGroup | undefined, withClass = false, screen?: string, specific = false, modelKey?: string): { className: string; style: React.CSSProperties; variant?: string; size?: string; icon?: string; iconClass?: string; label?: string } {
   const { data } = useCdeStandards();
   if (!group) return { className: "", style: {} };
+  if (modelKey) return primaryCdeLook(data, group, withClass, [{ group_key: group, variant_key: modelKey, is_primary: true, screens: [] }]);
   const effectiveGroup = group === "organize" && !(data?.selected ?? []).some(s => s.group_key === "organize" && s.is_primary) ? "save" : group;
   const rows = (data?.selected ?? []).filter((s) => s.group_key === effectiveGroup && (screen ? !s.is_primary && s.screens.includes(screen) : s.is_primary));
   const own = !rows.length && screen ? primaryCdeLook(data, effectiveGroup, withClass) : primaryCdeLook(data, effectiveGroup, withClass, rows);
