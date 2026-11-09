@@ -1,3 +1,4 @@
+import { ListItemStyleVars } from "@/components/cde/list-item-style";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { usePendingActions } from "@/hooks/use-pending-actions";
 import { activeTheme, toggleAppTheme } from "@/components/theme-toggle";
@@ -39,7 +40,7 @@ export function AppHeader({ logo, children, supplyManual = false }: { logo: Reac
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-card">
-      <TopIconStyleVars />
+      <TopIconStyleVars /><ListItemStyleVars />
       <div className="app-header-workspace mx-auto max-w-7xl px-4 pb-4 pt-5 sm:flex sm:min-h-[73px] sm:items-center sm:justify-between sm:gap-4 sm:px-6 sm:py-4">
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
           <Link to="/portal" className="flex min-w-0 items-center" title="Voltar aos aplicativos">{logo}</Link>

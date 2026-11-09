@@ -1,3 +1,4 @@
+import { ListItemStyleVars } from "@/components/cde/list-item-style";
 import { TopIconStyleVars } from "@/components/cde/top-icon-style";
 import { PendingGroups } from "@/components/pending-groups";
 import { useState } from "react";
@@ -116,7 +117,7 @@ function PortalPage() {
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-background sm:block sm:h-auto sm:min-h-screen sm:overflow-visible">
       <header className="sticky top-0 z-40 shrink-0 bg-accent text-accent-foreground sm:border-b sm:border-border sm:bg-card sm:text-foreground">
-      <TopIconStyleVars />
+      <TopIconStyleVars /><ListItemStyleVars />
         <div className="app-header-workspace mx-auto max-w-7xl px-4 pb-9 pt-5 sm:flex sm:items-center sm:justify-between sm:gap-4 sm:px-6 sm:py-4">
           <div className="flex items-start justify-between gap-4 sm:block">
             <MyioPlatformLogo tone="light" className="h-10 sm:hidden" />
