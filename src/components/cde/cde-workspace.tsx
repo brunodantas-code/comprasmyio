@@ -305,7 +305,7 @@ export function CdeWorkspace() {
             {isOpen ? (
               <>
                 <div className="flex max-w-full gap-3 overflow-x-auto p-4">
-                  {list.map((v, i) => {
+                  {list.map((v, i) => ({ v, i })).sort((a, b) => { const rank = (k: string) => primaries.includes(k) ? 0 : secs.some((x) => x.variant_key === k) ? 1 : 2; return rank(a.v.key) - rank(b.v.key) || a.i - b.i; }).map(({ v, i }) => {
                     const selected = standards.includes(v.key);
                     const isPrimary = primaries.includes(v.key);
                     const sec = secs.find((s) => s.variant_key === v.key);
