@@ -1,4 +1,5 @@
 - Legal uses loader-backed query data and app-scoped RLS for collaborative records. Storage paths are uploader/record/file and reads use expiring signed URLs.
 - Minutes require every participant's drawn signature before generating a signed PDF; changes invalidate signatures and stale PDFs so revised content is signed again.
 - Reusable owner-only signatures require access-password verification for every signing operation; a service-only atomic RPC binds the signer and timestamp, rejects stale content and records append-only events. Direct signature writes are blocked by the record guard.
+- Action tracking uses record/subject-keyed tables outside signed meeting content; database guards bind authors, assignees and completion dates, and append-only subject logs audit action and observation changes without invalidating meeting signatures.
 - Subject assignments use optional name arrays with legacy single-name fallback; shared helpers resolve names for editing, search, display, PDFs and pending actions, preserving older minutes.

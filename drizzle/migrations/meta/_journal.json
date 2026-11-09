@@ -1373,6 +1373,34 @@
       "when": 1794194998970,
       "tag": "0195_personal_signatures_and_verified_legal_signing",
       "breakpoints": true
+    },
+    {
+      "idx": 196,
+      "version": "7",
+      "when": 1794195354204,
+      "tag": "0196_legal_subject_action_tracking",
+      "breakpoints": true
+    },
+    {
+      "idx": 197,
+      "version": "7",
+      "when": 1794195441708,
+      "tag": "0197_legal_subject_revision_history",
+      "breakpoints": true
+    },
+    {
+      "idx": 198,
+      "version": "7",
+      "when": 1794195556616,
+      "tag": "0198_legal_tracking_record_cleanup",
+      "breakpoints": true
+    },
+    {
+      "idx": 199,
+      "version": "7",
+      "when": 1794195766646,
+      "tag": "0199_legal_record_revision_guard_alias",
+      "breakpoints": true
     }
   ]
 }

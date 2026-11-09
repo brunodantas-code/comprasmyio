@@ -2375,6 +2375,100 @@ export type Database = {
         }
         Relationships: []
       }
+      legal_action_observations: {
+        Row: {
+          action_id: string
+          author_id: string
+          author_name: string
+          created_at: string
+          id: string
+          message: string
+          updated_at: string
+        }
+        Insert: {
+          action_id: string
+          author_id?: string
+          author_name?: string
+          created_at?: string
+          id?: string
+          message: string
+          updated_at?: string
+        }
+        Update: {
+          action_id?: string
+          author_id?: string
+          author_name?: string
+          created_at?: string
+          id?: string
+          message?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legal_action_observations_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "legal_actions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      legal_actions: {
+        Row: {
+          archived: boolean
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          created_by: string
+          id: string
+          record_id: string
+          responsible_id: string
+          responsible_name: string
+          sequence: number
+          subject_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          archived?: boolean
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          record_id: string
+          responsible_id: string
+          responsible_name: string
+          sequence?: number
+          subject_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          archived?: boolean
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          record_id?: string
+          responsible_id?: string
+          responsible_name?: string
+          sequence?: number
+          subject_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legal_actions_record_id_fkey"
+            columns: ["record_id"]
+            isOneToOne: false
+            referencedRelation: "legal_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       legal_records: {
         Row: {
           category: string
@@ -2454,6 +2548,54 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "legal_signature_events_record_id_fkey"
+            columns: ["record_id"]
+            isOneToOne: false
+            referencedRelation: "legal_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      legal_subject_logs: {
+        Row: {
+          action_id: string | null
+          actor_id: string
+          actor_name: string
+          created_at: string
+          id: string
+          record_id: string
+          subject_id: string
+          text: string
+        }
+        Insert: {
+          action_id?: string | null
+          actor_id: string
+          actor_name: string
+          created_at?: string
+          id?: string
+          record_id: string
+          subject_id: string
+          text: string
+        }
+        Update: {
+          action_id?: string | null
+          actor_id?: string
+          actor_name?: string
+          created_at?: string
+          id?: string
+          record_id?: string
+          subject_id?: string
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legal_subject_logs_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "legal_actions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "legal_subject_logs_record_id_fkey"
             columns: ["record_id"]
             isOneToOne: false
             referencedRelation: "legal_records"

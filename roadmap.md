@@ -1,4 +1,7 @@
 # Roadmap
+- [x] Legal: setas de exibir/recolher e arraste dos Assuntos com numeração automática no padrão CDE; sequência Segundo/Primeiro salva e relida em ata temporária removida.
+- [x] Legal: ações numeradas por Assunto após Deliberações, responsável e checkbox de conclusão; conclusão salva e relida após atualizar a página.
+- [x] Legal: observações por ação com autor/data e histórico ao final do Assunto no padrão Code; criação, releitura, histórico e computador/celular conferidos; pendências locais contam ações não concluídas. Registros temporários removidos.
 - [x] Assinaturas: cadastro pessoal em Diversos, ação direta nas atas/documentos, confirmação de senha no servidor e data registrada; 15 testes passaram, sessão real abriu a confirmação e senha incorreta foi rejeitada sem assinar.
 - [x] Assinaturas: botões junto às bolinhas dos participantes na lista e editor; computador/celular conferidos sem transbordamento.
 - [ ] Assinaturas: confirmação positiva com assinatura real depende do usuário cadastrar seu traço e confirmar sua senha; não assinar atas reais em nome dele durante testes. Documentos anexados registram assinatura e data no app, sem modificar o arquivo original.
