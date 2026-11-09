@@ -17,7 +17,7 @@ export function UserManualsTab() {
     </CardHeader>
     <CollapsibleContent asChild><CardContent>
       <Table><TableHeader><TableRow><TableHead>App</TableHead><TableHead>Versão</TableHead><TableHead>Data</TableHead><TableHead>Situação</TableHead><TableHead>Revisão</TableHead><TableHead className="text-right">PDF</TableHead></TableRow></TableHeader>
-        <TableBody>{manualVersions.map(manual => <TableRow key={`${manual.app}-${manual.version}`}>
+        <TableBody>{manualVersions.filter(m => m.app === "Supply").map(manual => <TableRow key={`${manual.app}-${manual.version}`}>
           <TableCell>{manual.app}</TableCell><TableCell>V{manual.version}</TableCell><TableCell>{manual.date}</TableCell><TableCell>{manual.current ? 'Atual' : 'Anterior'}</TableCell><TableCell className="whitespace-normal">{manual.summary}</TableCell>
           <TableCell className="text-right"><Button asChild variant="ghost" size="compactIcon"><a href={manual.url} target="_blank" rel="noopener noreferrer" aria-label={`Abrir PDF do manual ${manual.app} V${manual.version}`} title={`Manual ${manual.app} V${manual.version}`}><FileText className="h-4 w-4" /></a></Button></TableCell>
         </TableRow>)}</TableBody>

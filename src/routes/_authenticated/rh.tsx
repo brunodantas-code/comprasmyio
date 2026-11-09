@@ -50,7 +50,7 @@ function RhPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <AppHeader logo={<MyioAppLogo appName="RH" className="text-xl sm:text-2xl" />} />
+      <AppHeader manualApp="RH" logo={<MyioAppLogo appName="RH" className="text-xl sm:text-2xl" />} />
       <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
         <div className="mb-5 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4">
           <div className="min-w-0"><h1 className="text-2xl font-bold">Técnicos</h1><p className="mt-1 text-sm text-muted-foreground">Ficha básica dos técnicos cadastrados no Supply.</p></div>

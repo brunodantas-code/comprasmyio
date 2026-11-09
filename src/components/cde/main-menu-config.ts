@@ -1,4 +1,4 @@
-import { ArrowLeft, BookOpen, ClipboardList, DollarSign, FileSignature, KeyRound, LayoutGrid, LifeBuoy, LogOut, Moon, Phone, Search, Settings, Settings2, UsersRound } from "lucide-react";
+import { PenLine, ArrowLeft, BookOpen, ClipboardList, DollarSign, FileSignature, KeyRound, LayoutGrid, LifeBuoy, LogOut, Moon, Phone, Search, Settings, Settings2, UsersRound } from "lucide-react";
 import { CrmFunnelIcon } from "@/components/crm-funnel-icon";
 import { MytosisIcon } from "@/components/mytosis-icon";
 import { CdeIcon } from "@/components/cde-icon";
@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const MENU_ITEMS = [
   { id: "manual", label: "Manual do Usuário", icon: BookOpen },
+  { id: "signature", label: "Minha assinatura", icon: PenLine },
   { id: "back", label: "Voltar", icon: ArrowLeft },
   { id: "theme", label: "Modo escuro", icon: Moon },
   { id: "password", label: "Alterar senha", icon: KeyRound },

@@ -26,7 +26,7 @@ export const Route = createFileRoute("/_authenticated/cde")({
 function CdePage() {
   return (
     <div className="min-h-screen bg-background">
-      <AppHeader logo={<MyioAppLogo appName="CDE" className="text-xl sm:text-2xl" />} />
+      <AppHeader manualApp="CDE" logo={<MyioAppLogo appName="CDE" className="text-xl sm:text-2xl" />} />
       <CdeWorkspace />
     </div>
   );

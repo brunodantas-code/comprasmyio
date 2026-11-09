@@ -90,7 +90,7 @@ function CallsPage() {
   useEffect(() => { const call = data?.calls.find((item) => item.id === routeSearch.chamado); if (call) setSelected(call); }, [data?.calls, routeSearch.chamado]);
   const refresh = () => { void qc.invalidateQueries({ queryKey: ["internal-calls"] }); void qc.invalidateQueries({ queryKey: ["pending-actions"] }); };
   return <div className="min-h-screen bg-background">
-    <AppHeader logo={<MyioAppLogo appName="OpDesk" className="text-base sm:text-2xl" />} />
+    <AppHeader manualApp="OpDesk" logo={<MyioAppLogo appName="OpDesk" className="text-base sm:text-2xl" />} />
     <main className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6">
       <div className="flex items-end justify-between gap-4"><div><Phone className="h-8 w-8 text-foreground" aria-hidden="true" /><p className="mt-2 text-muted-foreground">Problemas em campo, reclamações e assuntos internos.</p></div><NewCallDialog open={newOpen} onOpenChange={setNewOpen} userId={data?.userId} onCreated={refresh} /></div>
       <Card><CardHeader><CardTitle>Acompanhamento</CardTitle><CardDescription>{data?.isAdmin ? "Chamados internos da plataforma." : "Chamados abertos por você ou atribuídos a você."}</CardDescription></CardHeader><CardContent>

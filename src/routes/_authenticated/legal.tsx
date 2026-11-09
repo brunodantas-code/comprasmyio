@@ -29,7 +29,7 @@ function LegalPage() {
   const { record } = Route.useSearch();
   return (
     <div className="min-h-screen bg-background">
-      <AppHeader logo={<MyioAppLogo appName="Legal" className="text-xl sm:text-2xl" />} />
+      <AppHeader manualApp="Legal" logo={<MyioAppLogo appName="Legal" className="text-xl sm:text-2xl" />} />
       <LegalWorkspace key={record ?? "all"} initialRecordId={record} />
     </div>
   );

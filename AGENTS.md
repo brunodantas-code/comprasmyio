@@ -50,3 +50,4 @@
 
 - Icon-only shared Save controls resolve the CDE secondary scope controls/save-icon before the primary, preserving text-button standards while exposing the compact model in CDE.
 - Shared Save/Delete controls preserve descriptive and in-progress labels; CDE label overrides apply only to generic Salvar/Excluir so destructive choices remain distinguishable.
+- Personal signature and per-app manual versions open from the shared AppHeader main menu (manualApp prop), not from Supply registries, because they serve every app.

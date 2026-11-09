@@ -43,7 +43,7 @@ function CashFlowPage() {
   const orderedTabs = sortByMenuOrder(tabs, menuOrders?.["Cash Flow|Barra inferior"]);
   return (
     <div className="min-h-screen bg-background">
-      <AppHeader logo={<MyioCashFlowLogo className="text-xl sm:text-2xl" />} />
+      <AppHeader manualApp="Cash Flow" logo={<MyioCashFlowLogo className="text-xl sm:text-2xl" />} />
       <main className={`mx-auto max-w-[1500px] px-4 pb-28 pt-6 sm:px-6 ${ml.main}`}>
         <p className="mb-6 text-muted-foreground">Planejamento, pagamentos e posição bancária em um só lugar.</p>
         <Tabs value={section} onValueChange={setSection} className="space-y-5">

@@ -303,7 +303,7 @@ function SiteSurveyPage() {
   ].filter((item) => item.allowed);
 
   return <div className="min-h-screen bg-background">
-    <AppHeader logo={<MyioAppLogo appName="Site Survey" className="text-base sm:text-2xl" />} />
+    <AppHeader manualApp="Site Survey" logo={<MyioAppLogo appName="Site Survey" className="text-base sm:text-2xl" />} />
     <main className={`mx-auto max-w-7xl px-4 pb-28 pt-8 sm:px-6 ${ml.main}`}>
       <Tabs value={section} onValueChange={setSection}>
         <TabsContent value="visitas">

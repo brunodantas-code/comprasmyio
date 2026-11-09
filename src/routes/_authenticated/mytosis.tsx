@@ -76,7 +76,7 @@ function MytosisPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <AppHeader logo={<MyioAppLogo appName="Mytosis" className="text-xl sm:text-2xl" />} />
+      <AppHeader manualApp="Mytosis" logo={<MyioAppLogo appName="Mytosis" className="text-xl sm:text-2xl" />} />
       <main className={`mx-auto max-w-[1500px] px-4 pb-28 pt-6 sm:px-6 ${ml.main}`}>
         {section === "okrs" && !okrId ? <OkrsTab data={data} canEdit={canEdit} openDialog={setDialog} onOpenObjective={setOkrId} onLocate={(loc) => { const n = data.nodes.find((x) => x.locator === loc); let r = n; while (r?.parent_id) { const parent = r.parent_id; r = data.nodes.find((x) => x.id === parent); } if (r) { setOkrId(r.id); setOkrFocus(loc); } }} /> : null}
         {section === "okrs" && okrId ? <div className="space-y-3"><Button variant="ghost" className="text-primary" onClick={() => setOkrId("")}><ChevronLeft className="h-4 w-4" />Voltar aos OKRs</Button><Flowchart process={false} data={data} canEdit={canEdit} objectiveId={okrId} onObjectiveChange={setOkrId} focusLocator={okrFocus} onFocusHandled={() => setOkrFocus(null)} openDialog={setDialog} /></div> : null}
