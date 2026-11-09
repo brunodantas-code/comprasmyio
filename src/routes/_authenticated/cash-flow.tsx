@@ -1,3 +1,4 @@
+import { useAppMenuLayout } from "@/components/cde/cde-menu-type";
 import { useMenuOrders, sortByMenuOrder } from "@/components/cde/menu-order";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { ListTree, ReceiptText, WalletCards } from "lucide-react";
@@ -30,6 +31,7 @@ export const Route = createFileRoute("/_authenticated/cash-flow")({
 });
 
 function CashFlowPage() {
+  const ml = useAppMenuLayout("Cash Flow");
   const user = Route.useRouteContext().user;
   const { data: menuOrders } = useMenuOrders();
   const [section, setSection] = useState("payables");
@@ -42,7 +44,7 @@ function CashFlowPage() {
   return (
     <div className="min-h-screen bg-background">
       <AppHeader logo={<MyioCashFlowLogo className="text-xl sm:text-2xl" />} />
-      <main className="mx-auto max-w-[1500px] px-4 pb-28 pt-6 sm:px-6">
+      <main className={`mx-auto max-w-[1500px] px-4 pb-28 pt-6 sm:px-6 ${ml.main}`}>
         <p className="mb-6 text-muted-foreground">Planejamento, pagamentos e posição bancária em um só lugar.</p>
         <Tabs value={section} onValueChange={setSection} className="space-y-5">
           <TabsContent value="payables"><PayablesTab userId={user.id} /></TabsContent>
@@ -50,8 +52,8 @@ function CashFlowPage() {
           <TabsContent value="cash"><CashRegisterTab userId={user.id} /></TabsContent>
         </Tabs>
       </main>
-      <nav className="fixed inset-x-3 bottom-3 z-50" aria-label="Navegação do Cash Flow">
-        <div className="mx-auto grid max-w-md grid-cols-3 items-stretch rounded-[1.75rem] border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/90">
+      <nav className={`fixed inset-x-3 bottom-3 z-50 ${ml.nav}`} aria-label="Navegação do Cash Flow">
+        <div className={`mx-auto grid max-w-md grid-cols-3 items-stretch rounded-[1.75rem] border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/90 ${ml.grid}`}>
           {orderedTabs.map(({ value, label, icon: Icon }) => {
             const active = section === value;
             return <Button key={value} type="button" variant="ghost" className={`h-auto min-w-0 rounded-[1.35rem] p-0 shadow-none ${active ? "!bg-primary/15 !text-primary hover:!bg-primary/20 hover:!text-primary" : "!bg-transparent !text-muted-foreground hover:!bg-muted hover:!text-foreground"}`} onClick={() => setSection(value)} aria-current={active ? "page" : undefined}><span className="flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 px-1"><span className="menu-icon"><Icon className="h-5 w-5 shrink-0" /></span><span className="max-w-full truncate text-[10px] font-semibold leading-none">{label}</span></span></Button>;

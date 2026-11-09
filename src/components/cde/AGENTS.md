@@ -19,3 +19,4 @@
 - Dialog/Sheet X is sticky at the top so it stays visible while long content scrolls.
 - App menu icon order lives in cde_selected group menu_order ("App|Group"→labels); apps sort tabs via sortByMenuOrder/useOrderedMenu (menu-order.ts).
 - Shared Button/Input/Textarea apply CDE standards live via cde-look.ts (action buttons detected by label/icon: save, cancel, confirm, trash, pencil, toggle, move, sort; fields_*); never hardcode those looks per screen.
+- Every saved CDE choice must take effect in the apps immediately (production); options not yet wired stay disabled. Menu type (menu_type) drives app nav layout via useAppMenuLayout.

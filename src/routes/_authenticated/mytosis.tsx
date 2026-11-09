@@ -1,3 +1,4 @@
+import { useAppMenuLayout } from "@/components/cde/cde-menu-type";
 import { useMenuOrders, sortByMenuOrder } from "@/components/cde/menu-order";
 import { useEffect, useState } from "react";
 import { createFileRoute, redirect } from "@tanstack/react-router";
@@ -38,6 +39,7 @@ export const Route = createFileRoute("/_authenticated/mytosis")({
 type Section = "okrs" | "flow" | "processes" | "kpis" | "users";
 
 function MytosisPage() {
+  const ml = useAppMenuLayout("Mytosis");
   const { data, isLoading } = useMytosisData();
   const search = Route.useSearch();
   const [pendingTask, setPendingTask] = useState<TaskSelection>(null);
@@ -75,7 +77,7 @@ function MytosisPage() {
   return (
     <div className="min-h-screen bg-background">
       <AppHeader logo={<MyioAppLogo appName="Mytosis" className="text-xl sm:text-2xl" />} />
-      <main className="mx-auto max-w-[1500px] px-4 pb-28 pt-6 sm:px-6">
+      <main className={`mx-auto max-w-[1500px] px-4 pb-28 pt-6 sm:px-6 ${ml.main}`}>
         {section === "okrs" && !okrId ? <OkrsTab data={data} canEdit={canEdit} openDialog={setDialog} onOpenObjective={setOkrId} onLocate={(loc) => { const n = data.nodes.find((x) => x.locator === loc); let r = n; while (r?.parent_id) { const parent = r.parent_id; r = data.nodes.find((x) => x.id === parent); } if (r) { setOkrId(r.id); setOkrFocus(loc); } }} /> : null}
         {section === "okrs" && okrId ? <div className="space-y-3"><Button variant="ghost" className="text-primary" onClick={() => setOkrId("")}><ChevronLeft className="h-4 w-4" />Voltar aos OKRs</Button><Flowchart process={false} data={data} canEdit={canEdit} objectiveId={okrId} onObjectiveChange={setOkrId} focusLocator={okrFocus} onFocusHandled={() => setOkrFocus(null)} openDialog={setDialog} /></div> : null}
         {section === "flow" ? <Flowchart process data={data} canEdit={canEdit} objectiveId={currentObjective} onObjectiveChange={setObjectiveId} focusLocator={focusLocator} onFocusHandled={() => setFocusLocator(null)} openDialog={setDialog} /> : null}
@@ -85,8 +87,8 @@ function MytosisPage() {
       </main>
       <BoxTaskDialog selection={pendingTask} onSelect={setPendingTask} onClose={() => setPendingTask(null)} data={data} canEdit={canEdit} />
       <NodeDialog state={dialog} onClose={() => setDialog(null)} data={data} canEdit={canEdit} />
-      <nav className="fixed inset-x-3 bottom-3 z-50" aria-label="Navegação do Mytosis">
-        <div className="mx-auto grid max-w-lg grid-cols-5 items-stretch rounded-[1.75rem] border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/90">
+      <nav className={`fixed inset-x-3 bottom-3 z-50 ${ml.nav}`} aria-label="Navegação do Mytosis">
+        <div className={`mx-auto grid max-w-lg grid-cols-5 items-stretch rounded-[1.75rem] border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/90 ${ml.grid}`}>
           {orderedTabs.map(({ value, label, icon: Icon }) => {
             const active = section === value;
             return <Button key={value} type="button" variant="ghost" className={`h-auto min-w-0 rounded-[1.35rem] p-0 shadow-none ${active ? "!bg-primary/15 !text-primary hover:!bg-primary/20 hover:!text-primary" : "!bg-transparent !text-muted-foreground hover:!bg-muted hover:!text-foreground"}`} onClick={() => setSection(value)} aria-current={active ? "page" : undefined}><span className="flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 px-1"><span className="menu-icon"><Icon className="h-5 w-5 shrink-0" /></span><span className="max-w-full truncate text-[10px] font-semibold leading-none">{label}</span></span></Button>;

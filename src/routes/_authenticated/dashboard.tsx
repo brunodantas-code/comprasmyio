@@ -1,3 +1,4 @@
+import { useAppMenuLayout } from "@/components/cde/cde-menu-type";
 import { useMenuOrders, sortByMenuOrder } from "@/components/cde/menu-order";
 import { CdeButton } from "@/components/cde/cde-button";
 import { TableFilterMenu } from "@/components/use-table-filters";
@@ -598,6 +599,7 @@ function DeliveredFilter({
 }
 
 function Dashboard() {
+  const ml = useAppMenuLayout("Supply");
   useStatusCatalog();
   const qc = useQueryClient();
   const search = Route.useSearch();
@@ -683,7 +685,7 @@ function Dashboard() {
       </AppHeader>
 
       {linkedDialog}
-      <main className="mx-auto max-w-7xl px-3 pb-28 pt-5 sm:px-6 sm:pt-8">
+      <main className={`mx-auto max-w-7xl px-3 pb-28 pt-5 sm:px-6 sm:pt-8 ${ml.main}`}>
         <Tabs value={activeSection} onValueChange={setSection}>
 
           {canSeeRequests && <TabsContent value="pedidos">
@@ -774,8 +776,8 @@ function Dashboard() {
           </TabsContent>
         </Tabs>
       </main>
-      <nav className="fixed inset-x-3 bottom-3 z-50" aria-label="Navegação do Supply">
-        <div className="mx-auto grid max-w-2xl grid-cols-5 items-stretch rounded-[1.75rem] border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/90">
+      <nav className={`fixed inset-x-3 bottom-3 z-50 ${ml.nav}`} aria-label="Navegação do Supply">
+        <div className={`mx-auto grid max-w-2xl grid-cols-5 items-stretch rounded-[1.75rem] border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/90 ${ml.grid}`}>
           {orderedNavigationTabs.map(({ value, label, icon: Icon }) => {
             const active = activeSection === value;
             const submenuItems = value === "pedidos"
@@ -808,7 +810,7 @@ function Dashboard() {
             const item = <span className="flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 px-1"><span className="menu-icon"><Icon className="h-5 w-5 shrink-0" /></span><span className="max-w-full truncate text-[10px] font-semibold leading-none">{label}</span></span>;
             const itemClassName = `h-auto min-w-0 rounded-[1.35rem] p-0 shadow-none ${active ? "!bg-primary/15 !text-primary hover:!bg-primary/20 hover:!text-primary" : "!bg-transparent !text-muted-foreground hover:!bg-muted hover:!text-foreground"}`;
             if (!submenuItems.length) return <Button key={value} type="button" variant="ghost" className={itemClassName} onClick={selectMain} aria-current={active ? "page" : undefined}>{item}</Button>;
-            return <DropdownMenu key={value}><DropdownMenuTrigger asChild><Button type="button" variant="ghost" className={itemClassName} onClick={selectMain} aria-current={active ? "page" : undefined}>{item}</Button></DropdownMenuTrigger><DropdownMenuContent side="top" align="center" sideOffset={10} className="max-h-[70vh] w-64 overflow-y-auto rounded-lg p-1.5 shadow-xl"><DropdownMenuLabel>{label}</DropdownMenuLabel><DropdownMenuSeparator />{submenuItems.map(({ value: subValue, label: subLabel, icon: SubIcon }) => <DropdownMenuItem key={subValue} className="min-h-11 rounded-md" onSelect={() => { selectMain(); if (value === "pedidos") setRequestSection(subValue); else if (value === "queue") setApprovalSection(subValue); else if (value === "stock") setStockSection(subValue); else if (value === "projects") setRegistrationSection(subValue); else if (subValue.startsWith("workflow:")) { setAdministrationSection("workflow"); setWorkflowSection(subValue.slice("workflow:".length)); } else setAdministrationSection(subValue); }}><SubIcon className="h-4 w-4" /><span className="flex-1">{subLabel}</span>{selectedSubsection === subValue ? <Check className="h-4 w-4 text-primary" /> : null}</DropdownMenuItem>)}</DropdownMenuContent></DropdownMenu>;
+            return <DropdownMenu key={value}><DropdownMenuTrigger asChild><Button type="button" variant="ghost" className={itemClassName} onClick={selectMain} aria-current={active ? "page" : undefined}>{item}</Button></DropdownMenuTrigger><DropdownMenuContent side={ml.drop} align="center" sideOffset={10} className="max-h-[70vh] w-64 overflow-y-auto rounded-lg p-1.5 shadow-xl"><DropdownMenuLabel>{label}</DropdownMenuLabel><DropdownMenuSeparator />{submenuItems.map(({ value: subValue, label: subLabel, icon: SubIcon }) => <DropdownMenuItem key={subValue} className="min-h-11 rounded-md" onSelect={() => { selectMain(); if (value === "pedidos") setRequestSection(subValue); else if (value === "queue") setApprovalSection(subValue); else if (value === "stock") setStockSection(subValue); else if (value === "projects") setRegistrationSection(subValue); else if (subValue.startsWith("workflow:")) { setAdministrationSection("workflow"); setWorkflowSection(subValue.slice("workflow:".length)); } else setAdministrationSection(subValue); }}><SubIcon className="h-4 w-4" /><span className="flex-1">{subLabel}</span>{selectedSubsection === subValue ? <Check className="h-4 w-4 text-primary" /> : null}</DropdownMenuItem>)}</DropdownMenuContent></DropdownMenu>;
           })}
         </div>
       </nav>

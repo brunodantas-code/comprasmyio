@@ -64,14 +64,23 @@ export function CdeMenuType({ app, items }: { app: string; items: Item[] }) {
   return <div className="flex flex-wrap items-start gap-4">
     <div className="space-y-1"><div className="text-xs text-muted-foreground">Tipo de menu</div>
       <Select value={type} onValueChange={(v) => setDraft(v as MenuType)}><SelectTrigger className="h-8 w-64 text-xs"><SelectValue /></SelectTrigger>
-        <SelectContent>{MENU_TYPES.map((t) => <SelectItem key={t.key} value={t.key} className="text-xs">{t.label}</SelectItem>)}</SelectContent></Select></div>
+        <SelectContent>{MENU_TYPES.map((t) => <SelectItem key={t.key} value={t.key} disabled={t.key === "bottom_fab" || t.key === "hamburger"} className="text-xs">{t.label}{t.key === "bottom_fab" || t.key === "hamburger" ? " (em preparação)" : ""}</SelectItem>)}</SelectContent></Select></div>
     <Preview type={type} items={items} />
     {dirty ? <div className="flex items-end gap-2 self-end"><Button type="button" size="sm" variant="outline" onClick={() => setDraft(null)}>Cancelar</Button><Button type="button" size="sm" variant="outline" onClick={save}>Salvar</Button></div> : null}
   </div>;
 }
 
-/** Menu position for an app: "left"/"right" become a side bar on desktop (mobile keeps the bottom bar). */
-export function useAppMenuSide(app: string): "left" | "right" | null {
+/** Layout classes for an app's main menu per the CDE choice (desktop only; mobile keeps the bottom bar). */
+export function useAppMenuLayout(app: string) {
   const t = useMenuTypes().data?.[app];
-  return t === "left" || t === "right" ? t : null;
+  const side = t === "left" || t === "right" ? t : null;
+  const top = t === "top_tabs";
+  return {
+    side,
+    nav: side === "left" ? "lg:inset-x-auto lg:bottom-auto lg:left-3 lg:top-24 lg:w-24" : side === "right" ? "lg:inset-x-auto lg:bottom-auto lg:right-3 lg:top-24 lg:w-24" : top ? "lg:bottom-auto lg:top-[4.5rem]" : "",
+    grid: side ? "lg:!grid-cols-1 lg:gap-1" : "",
+    main: side === "left" ? "lg:!pb-8 lg:!pl-32" : side === "right" ? "lg:!pb-8 lg:!pr-32" : top ? "lg:!pb-8 lg:!pt-28" : "",
+    drop: (side === "left" ? "right" : side === "right" ? "left" : top ? "bottom" : "top") as "top" | "bottom" | "left" | "right",
+  };
 }
+export function useAppMenuSide(app: string) { return useAppMenuLayout(app).side; }
