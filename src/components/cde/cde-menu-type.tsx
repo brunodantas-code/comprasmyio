@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -42,10 +44,13 @@ function Preview({ type, items }: { type: MenuType; items: Item[] }) {
 export function CdeMenuType({ app, items }: { app: string; items: Item[] }) {
   const qc = useQueryClient();
   const { data } = useMenuTypes();
-  const type: MenuType = data?.[app] ?? "bottom";
-  async function change(v: string) {
-    const all = { ...(data ?? {}), [app]: v as MenuType };
-    qc.setQueryData(["cde-menu-type"], all);
+  const saved: MenuType = data?.[app] ?? "bottom";
+  const [draft, setDraft] = useState<MenuType | null>(null);
+  const type: MenuType = draft ?? saved;
+  const dirty = draft !== null && draft !== saved;
+  async function save() {
+    if (!draft) return;
+    const all = { ...(data ?? {}), [app]: draft };
     try {
       const user = (await supabase.auth.getUser()).data.user;
       if (!user) throw new Error();
@@ -53,13 +58,14 @@ export function CdeMenuType({ app, items }: { app: string; items: Item[] }) {
       const row = { variant_key: JSON.stringify(all), chosen_by: user.id };
       const r = existing.data ? await supabase.from("cde_selected").update(row).eq("group_key", GROUP).eq("variant_key", existing.data.variant_key) : await supabase.from("cde_selected").insert({ ...row, group_key: GROUP });
       if (r.error) throw r.error;
-      toast.success("Tipo de menu registrado");
+      toast.success("Tipo de menu registrado"); setDraft(null);
     } catch { toast.error("Não foi possível salvar (somente Admin)."); } finally { qc.invalidateQueries({ queryKey: ["cde-menu-type"] }); }
   }
   return <div className="flex flex-wrap items-start gap-4">
     <div className="space-y-1"><div className="text-xs text-muted-foreground">Tipo de menu</div>
-      <Select value={type} onValueChange={change}><SelectTrigger className="h-8 w-64 text-xs"><SelectValue /></SelectTrigger>
+      <Select value={type} onValueChange={(v) => setDraft(v as MenuType)}><SelectTrigger className="h-8 w-64 text-xs"><SelectValue /></SelectTrigger>
         <SelectContent>{MENU_TYPES.map((t) => <SelectItem key={t.key} value={t.key} className="text-xs">{t.label}</SelectItem>)}</SelectContent></Select></div>
     <Preview type={type} items={items} />
+    {dirty ? <div className="flex items-end gap-2 self-end"><Button type="button" size="sm" variant="outline" onClick={() => setDraft(null)}>Cancelar</Button><Button type="button" size="sm" variant="outline" onClick={save}>Salvar</Button></div> : null}
   </div>;
 }
