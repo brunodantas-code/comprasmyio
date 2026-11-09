@@ -39,3 +39,4 @@
 - Proposals use private visit-keyed files; authenticated extraction syncs totals by trigger and stores group breakdown in proposal metadata. Environment remainders preserve unknown quantities as null.
 - No "Fechar" buttons; corner X closes dialogs.
 - Sequential UI markers across apps use CdeNumber/CdeNumberButton with their screen path; only nested CDE categories use the subsection group, so all other sequences inherit the main live numbering standard without changing stored values.
+- Portal app spacing and its CDE preview read gapX/gapY from app_tile; drafts apply only on Save to keep the preview and published choice consistent.

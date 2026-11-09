@@ -32,15 +32,18 @@ export function useAppOrder() {
 }
 
 /** Tile look of portal apps: label font (desktop px; mobile is 2px smaller) and icon size (% of tile icon box). */
-export type AppTileConfig = { labelPx: number; iconPct: number; tilePct: number };
-export const APP_TILE_DEFAULT: AppTileConfig = { labelPx: 14, iconPct: 100, tilePct: 100 };
+export type AppTileConfig = { labelPx: number; iconPct: number; tilePct: number; gapX: number; gapY: number };
+export const APP_TILE_DEFAULT: AppTileConfig = { labelPx: 14, iconPct: 100, tilePct: 100, gapX: 32, gapY: 40 };
 /** Optical correction so glyphs with thin strokes or large inner padding look the same size as the others. */
 export const APP_ICON_OPTICAL: Record<string, number> = { supply: 1.15, mytosis: 1.2, cde: 1.2 };
 export function parseAppTile(raw?: string): AppTileConfig {
   try {
     const p = JSON.parse(raw ?? "{}");
     const labelPx = Number(p.labelPx), iconPct = Number(p.iconPct), tilePct = Number(p.tilePct);
-    return { labelPx: labelPx >= 10 && labelPx <= 18 ? labelPx : APP_TILE_DEFAULT.labelPx, iconPct: iconPct >= 60 && iconPct <= 140 ? iconPct : APP_TILE_DEFAULT.iconPct, tilePct: tilePct >= 70 && tilePct <= 140 ? tilePct : APP_TILE_DEFAULT.tilePct };
+    const gapX = Number(p.gapX), gapY = Number(p.gapY);
+    return { labelPx: labelPx >= 10 && labelPx <= 18 ? labelPx : APP_TILE_DEFAULT.labelPx, iconPct: iconPct >= 60 && iconPct <= 140 ? iconPct : APP_TILE_DEFAULT.iconPct, tilePct: tilePct >= 70 && tilePct <= 140 ? tilePct : APP_TILE_DEFAULT.tilePct,
+      gapX: Number.isFinite(gapX) && gapX >= 8 && gapX <= 80 ? gapX : APP_TILE_DEFAULT.gapX,
+      gapY: Number.isFinite(gapY) && gapY >= 8 && gapY <= 80 ? gapY : APP_TILE_DEFAULT.gapY };
   } catch { return APP_TILE_DEFAULT; }
 }
 export function useAppTile() {

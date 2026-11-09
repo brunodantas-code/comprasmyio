@@ -15,12 +15,12 @@ export function CdeCategoryHeader({ number, title, hint, open, onToggle, action,
 }) {
   const content = <>
     <CdeNumber>{number}</CdeNumber>
-    <span className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-3 gap-y-1"><span className="min-w-0 break-words text-lg font-semibold">{title}</span>
-      {hint && <span className="min-w-0 text-xs font-normal text-muted-foreground sm:truncate" title={hint}>{hint}</span>}
+    <span className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-3 gap-y-1"><span className="min-w-0 break-words text-sm font-normal">{title}</span>
+      {hint && <span className="min-w-0 whitespace-normal break-words text-xs font-normal text-muted-foreground sm:truncate" title={hint}>{hint}</span>}
     </span>
     {onToggle && <CdeToggleIcon open={open} />}
   </>;
-  return <div className="flex items-center gap-3 rounded-xl border border-border px-4 py-3">
+  return <div className="flex min-h-12 items-center gap-3 border-b border-border px-2 py-3">
     {handle}
     {onToggle ? <Button variant="ghost" aria-expanded={open} onClick={onToggle} className="h-auto min-w-0 flex-1 justify-start gap-3 rounded-none p-0 text-left hover:bg-transparent">{content}</Button>
       : <div className="flex min-w-0 flex-1 items-center gap-3">{content}</div>}

@@ -287,14 +287,14 @@ export function CdeWorkspace() {
         const removed = (data?.removed ?? []).filter((r) => r.group_key === g.key);
         const isOpen = open.has(g.key);
         return (
-          <section className={cn(parent ? "overflow-hidden rounded-xl border border-border bg-card shadow-sm" : "min-w-0 space-y-4")}>
+          <section className={cn(parent ? "min-w-0 overflow-hidden border-b border-border" : "min-w-0")}>
             {!parent ? <CdeCategoryHeader handle={handle} number={num} title={g.title.split(" ").slice(1).join(" ")} hint={`${list.length} modelos · ${g.hint}`} open={isOpen} onToggle={() => setOpen((s) => { const n = new Set(s); if (n.has(g.key)) n.delete(g.key); else n.add(g.key); return n; })} action={<CdeButton group="plus" screen="components/cde/cde-workspace.tsx" title="Criar modelo" aria-label={`Criar modelo em ${g.title}`} onClick={() => { setDraft({ ...emptyDraft, tag: (g.key === "box" || g.key === "confirm_dialog") ? "div" : "Button" }); setCreating(g.key); }} />} /> : <div className="flex items-center gap-3 bg-accent px-5 py-2">{handle}
               <button type="button" aria-expanded={isOpen} onClick={() => setOpen((s) => { const n = new Set(s); if (n.has(g.key)) n.delete(g.key); else n.add(g.key); return n; })} className="flex min-w-0 flex-1 items-center gap-4 text-left">
                 <span className="flex flex-col">
                   <CdeNumber subcategory={!!parent}>{num}</CdeNumber>
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block font-semibold">{g.title.split(" ").slice(1).join(" ")}</span>
+                  <span className="block text-sm font-normal">{g.title.split(" ").slice(1).join(" ")}</span>
                   <span className="mt-0.5 block text-xs text-muted-foreground">{list.length} modelos · {g.hint}</span>
                 </span>
                 <CdeToggleIcon open={isOpen} />
@@ -400,17 +400,17 @@ export function CdeWorkspace() {
         </div>
         <p className="text-sm text-muted-foreground">Modelos de UI/UX utilizados em todos os apps, agrupados por tipo. Crie e exclua modelos e selecione os que devem ser utilizados como padrão.</p>
       </div>
-      <CdeSortableList className="space-y-4" ids={cdeOrder.cats} labelOf={catLabel} onMove={(cats) => saveCdeOrder({ ...cdeOrder, cats })}>
+      <CdeSortableList className="space-y-0" ids={cdeOrder.cats} labelOf={catLabel} onMove={(cats) => saveCdeOrder({ ...cdeOrder, cats })}>
         {(cat, ci, handle) => {
           const n = String(ci + 1);
           if (cat.startsWith("p:")) {
             const pk = cat.slice(2);
             const subs = cdeOrder.subs[pk] ?? [];
             return (
-              <div className="space-y-4">
+              <div>
                 <CdeCategoryHeader handle={handle} number={n} title={PARENTS[pk]} open={!collapsedCategories.has(pk)} onToggle={() => setCollapsedCategories((s) => { const next = new Set(s); if (next.has(pk)) next.delete(pk); else next.add(pk); return next; })} />
                 {!collapsedCategories.has(pk) ? (
-                  <CdeSortableList className="space-y-4" ids={subs} labelOf={(k) => baseTitle(GROUPS.find((x) => x.key === k)?.title ?? k)} onMove={(ids) => saveCdeOrder({ ...cdeOrder, subs: { ...cdeOrder.subs, [pk]: ids } })}>
+                  <CdeSortableList className="space-y-0 py-2 pl-4 sm:pl-8" ids={subs} labelOf={(k) => baseTitle(GROUPS.find((x) => x.key === k)?.title ?? k)} onMove={(ids) => saveCdeOrder({ ...cdeOrder, subs: { ...cdeOrder.subs, [pk]: ids } })}>
                     {(key, si, subHandle) => renderGroup(GROUPS.find((x) => x.key === key)!, `${n}.${si + 1}`, n, subHandle)}
                   </CdeSortableList>
                 ) : null}

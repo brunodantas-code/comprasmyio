@@ -1,4 +1,7 @@
 # Roadmap
+- [x] Atas: apenas número circular CDE e título na leitura, sem “Assunto N”/legenda; arraste e legenda no editor. Cabeçalho reduzido de 161 para 92 px aberto e 45 px recolhido; computador/celular conferidos, oito testes passaram.
+- [x] Simplificar apresentação do CDE conforme Cadastro Supply, com divisórias simples e títulos menores; arraste renumerou 1→2 e ordem original foi restaurada, computador/celular conferidos.
+- [x] Espaçamento dos apps aumentado para 32/40 px; controles horizontal/vertical com prévia no item 11, salvamento 36 px relido no portal e retorno a 32 px conferidos; três testes passaram.
 - [x] Numeração sequencial ligada ao CDE em Atas (assuntos, deliberações e ações), Site Survey (seções, perguntas e histórico), Mytosis (seções, parágrafos, fluxos e boxes), cadastros Supply, sumário e ordenação CDE; círculos verdes atuais conferidos em sessão real nas atas e no checklist, computador/celular. Sete testes de ações/processos passaram; valores preservados.
 - [x] Legal: setas de exibir/recolher e arraste dos Assuntos com numeração automática no padrão CDE; sequência Segundo/Primeiro salva e relida em ata temporária removida.
 - [x] Legal: ações numeradas por Assunto após Deliberações, responsável e checkbox de conclusão; conclusão salva e relida após atualizar a página.

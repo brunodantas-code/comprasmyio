@@ -67,7 +67,7 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
     } catch { toast.error("Não foi possível salvar a ordem."); } finally { setSaving(false); }
   }
   return <section className="space-y-4">
-    <CdeCategoryHeader handle={handle} number={number} title="Apps da página principal" hint="Ordem, fonte do nome e tamanho dos símbolos" open={open} onToggle={() => setOpen(!open)} />
+    <CdeCategoryHeader handle={handle} number={number} title="Apps da página principal" hint="Ordem, fonte, tamanho e espaçamento" open={open} onToggle={() => setOpen(!open)} />
     {open && <div className="max-w-3xl p-4"><DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={move}><SortableContext items={order} strategy={verticalListSortingStrategy}>{order.map((id, i) => <Row key={id} id={id} index={i} />)}</SortableContext></DndContext>
       <Button variant="action" className="mt-3" onClick={save} disabled={saving || !draft}><Save className="h-4 w-4" />Salvar</Button>
       <div className="mt-6 space-y-3 border-t border-border pt-4">
@@ -87,12 +87,21 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
               <Button variant="outline" size="compactIcon" aria-label="Aumentar símbolo" title="Aumentar" disabled={tile.iconPct >= 140} onClick={() => setTileDraft({ ...tile, iconPct: tile.iconPct + 5 })}><Plus /></Button>
             </div></div>
         </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {([['gapX', 'Espaçamento horizontal'], ['gapY', 'Espaçamento vertical']] as const).map(([key, label]) => <div key={key} className="space-y-1"><Label>{label}</Label><div className="flex h-9 items-center gap-2">
+            <Button variant="outline" size="compactIcon" aria-label={`Diminuir ${label.toLowerCase()}`} title="Diminuir" disabled={tile[key] <= 8} onClick={() => setTileDraft({ ...tile, [key]: Math.max(8, tile[key] - 4) })}><Minus /></Button>
+            <span className="w-16 text-center text-sm tabular-nums">{tile[key]} px</span>
+            <Button variant="outline" size="compactIcon" aria-label={`Aumentar ${label.toLowerCase()}`} title="Aumentar" disabled={tile[key] >= 80} onClick={() => setTileDraft({ ...tile, [key]: Math.min(80, tile[key] + 4) })}><Plus /></Button>
+          </div></div>)}
+        </div>
         <div className="space-y-1"><Label>Prévia</Label>
-          <div className="flex flex-wrap gap-3 rounded-xl border border-border bg-background p-3">
+          <div aria-label="Prévia dos apps" style={{ columnGap: tile.gapX, rowGap: tile.gapY }} className="flex flex-wrap rounded-xl border border-border bg-background p-3">
             {order.map((key) => { const app = PORTAL_APPS.find((a) => a.key === key); return app ? <div key={key} style={{ zoom: tile.tilePct / 100 }} className="flex h-28 w-28 flex-col items-center justify-between overflow-hidden rounded-3xl bg-primary px-2 pb-2 pt-1.5 text-primary-foreground"><AppTileFace appKey={key} name={app.name} tile={tile} /></div> : null; })}
           </div></div>
         <p className="text-xs text-muted-foreground">No celular, a fonte fica 2 px menor. Os símbolos mais finos recebem correção automática para parecerem do mesmo tamanho.</p>
-        <Button variant="action" onClick={saveTile} disabled={saving || !tileDraft}><Save className="h-4 w-4" />Salvar</Button>
+        <div className="flex items-center gap-2"><Button variant="action" onClick={saveTile} disabled={saving || !tileDraft}><Save className="h-4 w-4" />Salvar</Button>
+          {tileDraft && <Button variant="action" disabled={saving} onClick={() => setTileDraft(null)}>Cancelar</Button>}
+        </div>
       </div></div>}
   </section>;
 }
