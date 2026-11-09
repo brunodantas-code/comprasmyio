@@ -1,4 +1,5 @@
 # Roadmap
+- [x] CDE item 12: biblioteca de botões em uso, busca digitável pelo nome, prévias e local de uso; busca e estado vazio conferidos em sessão autenticada.
 - [x] Amostras de cores quadradas nos seletores compartilhados do CDE/Mytosis e controle “Padrões para edição de cores”.
 - [x] Cor personalizada com símbolo de paleta no mesmo tamanho das amostras.
 - [x] Roxo/lilás myio disponíveis; prévia lilás e cancelamento conferidos sem alterar a escolha atual.
