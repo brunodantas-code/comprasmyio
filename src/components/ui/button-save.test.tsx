@@ -10,11 +10,16 @@ import { Button } from './button';
 
 describe('shared Save content', () => {
   for (const [label, Icon] of [['Salvar perfil', Check], ['Salvar perda', Percent]] as const) {
-    it(`normalizes ${label} to disk and Salvar`, () => {
+    it(`uses the disk while preserving ${label}`, () => {
       const html = renderToStaticMarkup(<Button><Icon />{label}</Button>);
       expect(html).toContain('lucide-save');
-      expect(html).toContain('Salvar');
-      expect(html).not.toContain(label);
+      expect(html).toContain(label);
+    });
+  }
+  for (const label of ['Excluir visita e manter chamados', 'Excluir visita e chamados', 'Excluir visita', 'Excluindo...', 'Salvando...', 'Salvar solução', 'Salvar andamento', 'Salvar PDF']) {
+    it(`preserves the action scope or progress state: ${label}`, () => {
+      const html = renderToStaticMarkup(<Button>{label}</Button>);
+      expect(html).toContain(label);
     });
   }
   it('preserves unrelated actions', () => {

@@ -81,11 +81,16 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const look = useCdeLook(style ? undefined : group, true, group === "save" && !visibleText ? "controls/save-icon" : undefined);
     const standardSave = !style && !asChild && (group === "save" || group === "trash" || !!binding);
     const SaveIcon = ICONS[look.icon || (group === "trash" ? "Trash2" : "Save")] ?? ICONS.Save;
-    const content = standardSave ? <><SaveIcon className={look.iconClass || "h-4 w-4"} />{visibleText ? binding?.label || look.label?.trim() || (group === "trash" ? "Excluir" : "Salvar") : null}</> : children;
+    // CDE may rename a generic action, never its scope or in-progress state.
+    const genericAction = /^(salvar|excluir)$/i.test(visibleText);
+    const actionLabel = group === "save" || group === "trash"
+      ? genericAction ? binding?.label || look.label?.trim() || visibleText : visibleText
+      : binding?.label || visibleText;
+    const content = standardSave ? <><SaveIcon className={look.iconClass || "h-4 w-4"} />{visibleText ? actionLabel : null}</> : children;
     const cdeVariant = look.variant ? look.variant as VariantProps<typeof buttonVariants>["variant"] : resolvedVariant;
     const cdeSize = look.size ? look.size as VariantProps<typeof buttonVariants>["size"] : size;
     return (
-      <Comp className={cn(buttonVariants({ variant: "data-cde-number" in props ? null : cdeVariant, size: cdeSize, className }), look.className, !asChild && visibleText && group && "!w-auto !min-w-max shrink-0")} style={style ?? (look.variant || look.className ? look.style : undefined)} ref={ref} {...props}>{content}</Comp>
+      <Comp className={cn(buttonVariants({ variant: "data-cde-number" in props ? null : cdeVariant, size: cdeSize, className }), look.className, !asChild && visibleText && group && ["!w-auto shrink-0", className?.includes("whitespace-normal") ? "!min-w-0" : "!min-w-max"])} style={style ?? (look.variant || look.className ? look.style : undefined)} ref={ref} {...props}>{content}</Comp>
     );
   },
 );
