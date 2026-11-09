@@ -3,7 +3,7 @@ import { resolveCdeModel, useCdeStandards, type CdeGroup } from "./cde-button";
 import { styleOf } from "./cde-render";
 
 /** Groups applied automatically by shared ui components (Button/Input/Textarea). */
-export type AutoGroup = "save" | "cancel" | "confirm" | "trash" | "pencil" | "toggle" | "move" | "sort" | "fields_input" | "fields_textarea" | "fields_password";
+export type AutoGroup = "save" | "cancel" | "confirm" | "trash" | "pencil" | "toggle" | "move" | "sort" | "export" | "fields_input" | "fields_textarea" | "fields_password";
 
 const ICON_GROUP: Record<string, AutoGroup> = {
   Pencil: "pencil", PencilLine: "pencil", SquarePen: "pencil", PenLine: "pencil",

@@ -2758,5 +2758,20 @@
    "count": 0,
    "files": []
   }
+ ],
+ "export": [
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "sm",
+   "className": "h-7 gap-1 px-2 text-xs",
+   "icon": "FileText",
+   "iconClass": "h-4 w-4",
+   "label": "PDF",
+   "count": 3,
+   "files": [
+    "components/table-report-actions.tsx"
+   ]
+  }
  ]
 }

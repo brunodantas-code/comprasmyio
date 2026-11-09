@@ -54,6 +54,7 @@ const GROUPS: { key: GroupKey; title: string; hint: string; multi?: boolean }[] 
   { key: "close", title: "4.6 Fechar", hint: "X do canto das janelas e painéis · padrão único, aplicado ao vivo" },
   { key: "pencil", title: "4.7 Lápis (editar)", hint: "Padrão único" },
   { key: "trash", title: "4.8 Lixeira (excluir)", hint: "Padrão único" },
+  { key: "export", title: "4.9 Exportar relatórios (PDF/Excel)", hint: "Botões PDF e Excel · padrão único, aplicado ao vivo" },
   { key: "box", title: "5.1 Boxes (cartões)", hint: "Forma, borda, espessura e fundo dos cartões · padrão único, aplicado ao vivo" },
   { key: "confirm_dialog", title: "5.2 Mensagens de confirmação", hint: "Janelas de exclusão e confirmação · padrão único, aplicado ao vivo" },
   { key: "number_section", title: "6.1 Numeração das categorias", hint: "Quadrada ou redonda · padrão principal e secundários por tela" },
