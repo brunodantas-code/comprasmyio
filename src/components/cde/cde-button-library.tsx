@@ -1,7 +1,9 @@
 import { useState, type ReactNode } from "react";
-import { Pencil, Search } from "lucide-react";
+import { ArrowUpDown, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useTableFilters } from "@/components/use-table-filters";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CdeCategoryHeader } from "./cde-category-header";
 import { CdeButton, type CdeGroup } from "./cde-button";
 import { ICONS } from "./cde-render";
@@ -13,12 +15,24 @@ const normalize = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, 
 export type LibraryButton = (typeof library)[number];
 export function CdeButtonLibrary({ number, handle, onEdit }: { number: number; handle?: ReactNode; onEdit: (button: LibraryButton, group?: string) => void }) {
   const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState("");
-  const filtered = library.filter(b => normalize(`${b.label} ${b.file}`).includes(normalize(search)));
+  const [sort, setSort] = useState("name");
+  const [direction, setDirection] = useState("asc");
+  const typeOf = (b: LibraryButton) => b.group || detectButtonGroup(b.label) || b.tag;
+  const filters = useTableFilters(library, [
+    { key: "name", label: "Nome do botão", value: b => b.label },
+    { key: "type", label: "Tipo / grupo CDE", value: typeOf },
+    { key: "file", label: "Local de uso", value: b => b.file },
+    { key: "icon", label: "Ícone", value: b => b.icon },
+  ]);
+  const search = filters.searchText("name");
+  const filtered = [...filters.filtered].sort((a, b) => {
+    const value = (entry: LibraryButton) => sort === "type" ? typeOf(entry) : sort === "file" ? entry.file : entry.label;
+    return (direction === "desc" ? -1 : 1) * value(a).localeCompare(value(b), "pt-BR", { sensitivity: "base", numeric: true });
+  });
   return <section className="min-w-0 space-y-4">
     <CdeCategoryHeader number={number} handle={handle} title="Biblioteca de botões em uso" hint={`${library.length} usos`} open={open} onToggle={() => setOpen(!open)} />
     {open && <>
-      <div className="relative max-w-md"><Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" /><Input aria-label="Buscar botão pelo nome" placeholder="Buscar botão pelo nome…" className="pl-9" value={search} onChange={e => setSearch(e.target.value)} /></div>
+      <div className="flex items-center gap-2">{filters.menu}<Popover><PopoverTrigger asChild><Button type="button" variant="ghost" size="compactIcon" aria-label="Ordenar botões" title="Ordenar botões"><ArrowUpDown /></Button></PopoverTrigger><PopoverContent align="start" className="w-64 space-y-3"><Select value={sort} onValueChange={setSort}><SelectTrigger aria-label="Ordenar por"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="name">Nome do botão</SelectItem><SelectItem value="type">Tipo / grupo CDE</SelectItem><SelectItem value="file">Local de uso</SelectItem></SelectContent></Select><Select value={direction} onValueChange={setDirection}><SelectTrigger aria-label="Sentido da ordenação"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="asc">A → Z</SelectItem><SelectItem value="desc">Z → A</SelectItem></SelectContent></Select></PopoverContent></Popover></div>
       <p className="text-xs text-muted-foreground">{filtered.length} usos encontrados</p>
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
         {filtered.map((b, index) => {

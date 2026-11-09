@@ -30,6 +30,11 @@
     "general": 0
   },
   {
+    "file": "components/cde/cde-button-library.tsx",
+    "standard": 1,
+    "general": 0
+  },
+  {
     "file": "components/clients-tab.tsx",
     "standard": 1,
     "general": 0
