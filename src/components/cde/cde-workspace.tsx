@@ -28,7 +28,7 @@ import { FormatColorOptions } from "@/components/mytosis/format-color-options";
 import { CdeButtonLibrary } from "./cde-button-library";
 import { CdeDeadlineAlerts } from "./cde-deadline-alerts";
 
-type Variant = { key: string; name?: string; custom?: boolean; tag: string; variant: string; size: string; className: string; icon: string; iconClass: string; label: string; count: number; files: string[]; style?: CdeStyle };
+type Variant = { key: string; name?: string; custom?: boolean; tag: string; variant: string; size: string; className: string; icon: string; iconClass: string; label: string; count: number; files: string[]; uses?: { file: string; n: number }[]; style?: CdeStyle };
 
 
 const VARIANTS = ["", "default", "outline", "ghost", "action", "secondary", "destructive", "link"];
@@ -155,43 +155,39 @@ export function CdeWorkspace() {
     const removed = new Set((data?.removed ?? []).filter((r) => r.group_key === g).map((r) => r.variant_key));
     const src = NUMBER_MODELS[g] ?? (FIELD_TAGS[g] ? ((inventory.fields as Omit<Variant, "key">[]).filter((v) => FIELD_TAGS[g].includes(v.tag))) : ((inventory as Record<string, unknown>)[g] ?? []) as Omit<Variant, "key">[]);
     const base = src.map((v) => {
-      if (g !== "filter") return { ...v, key: inventoryKey(v) };
+      if (g !== "filter") { const fc = (v as { fileCounts?: number[] }).fileCounts; return { ...v, key: inventoryKey(v), uses: v.files.map((f, i) => ({ file: f, n: fc?.[i] ?? 1 })) }; }
       const primaryDefinition = v.variant === "ghost" && v.size === "icon" && v.files.includes("components/column-filter.tsx");
       const generalDefinition = v.files.includes("components/site-survey-general-filter.tsx");
       const uses = filterUsage.filter((entry) => (generalDefinition ? entry.general : primaryDefinition ? entry.standard : 0) > 0);
-      return { ...v, key: inventoryKey(v), count: uses.reduce((total, entry) => total + (generalDefinition ? entry.general : entry.standard), 0), files: uses.map((entry) => entry.file) };
+      return { ...v, key: inventoryKey(v), count: uses.reduce((total, entry) => total + (generalDefinition ? entry.general : entry.standard), 0), files: uses.map((entry) => entry.file), uses: uses.map((entry) => ({ file: entry.file, n: generalDefinition ? entry.general : entry.standard })) };
     });
-    const custom = (data?.models ?? []).filter((m) => m.group_key === g).map((m) => ({ key: `custom:${m.id}`, name: m.name, custom: true, tag: m.tag, variant: m.variant, size: m.size, className: m.class_name, icon: m.icon, iconClass: m.icon_class, label: m.label, style: (m.style ?? {}) as CdeStyle, count: 0, files: [] }));
+    const custom = (data?.models ?? []).filter((m) => m.group_key === g).map((m) => ({ key: `custom:${m.id}`, name: m.name, custom: true, tag: m.tag, variant: m.variant, size: m.size, className: m.class_name, icon: m.icon, iconClass: m.icon_class, label: m.label, style: (m.style ?? {}) as CdeStyle, count: 0, files: [] as string[], uses: [] as { file: string; n: number }[] }));
     const all = [...base, ...custom];
     const kept = all.filter((v) => !removed.has(v.key));
     // Excluídos transferem seus usos ao padrão substituto (seguindo cadeias de substituição).
     const repl = new Map((data?.removed ?? []).filter((r) => r.group_key === g).map((r) => [r.variant_key, r.replaced_by] as const));
     const target = (k: string) => { let cur = k; for (let i = 0; i < 20 && repl.has(cur); i++) cur = repl.get(cur)!; return cur; };
-    const extra = new Map<string, number>();
-    all.filter((v) => removed.has(v.key)).forEach((v) => { const t = target(v.key); extra.set(t, (extra.get(t) ?? 0) + v.count); });
-    let result = kept.map((v) => ({ ...v, count: v.count + (extra.get(v.key) ?? 0) }));
+    const merge = (list: { file: string; n: number }[]) => { const m = new Map<string, number>(); for (const u of list) m.set(u.file, (m.get(u.file) ?? 0) + u.n); return [...m].map(([file, n]) => ({ file, n })); };
+    const extraUses = new Map<string, { file: string; n: number }[]>();
+    all.filter((v) => removed.has(v.key)).forEach((v) => { const t = target(v.key); extraUses.set(t, [...(extraUses.get(t) ?? []), ...v.uses]); });
+    const finish = (v: (typeof all)[number], uses: { file: string; n: number }[]) => { const u = merge(uses); return { ...v, uses: u, files: u.map((x) => x.file), count: u.reduce((a, x) => a + x.n, 0) }; };
+    let result = kept.map((v) => finish(v, [...v.uses, ...(extraUses.get(v.key) ?? [])]));
     // Grupos de padrão único: o padrão concentra todos os usos; os demais ficam com zero.
     // Secundários ficam com os usos das telas associadas; o principal com o restante.
     const std = primariesOf(g);
     const single = !GROUPS.find((x) => x.key === g)?.multi || Boolean(FIELD_TAGS[g]);
     if (single && std.length === 1 && result.some((v) => v.key === std[0])) {
-      const total = result.reduce((s, v) => s + v.count, 0);
-      const secs = secondariesOf(g);
-      const secCount = new Map<string, number>();
-      const filterScreens = new Set<string>();
-      for (const sec of secs) {
+      const allUses = merge(all.flatMap((v) => v.uses));
+      const claimed = new Set<string>();
+      const secUses = new Map<string, { file: string; n: number }[]>();
+      for (const sec of secondariesOf(g)) {
         const scr = new Set(sec.screens);
-        let n = 0;
-        if (g === "filter") {
-          for (const entry of filterUsage) if (scr.has(entry.file) && !filterScreens.has(entry.file)) {
-            n += entry.standard + entry.general;
-            filterScreens.add(entry.file);
-          }
-        } else for (const v of all) if (v.files.length) n += v.count * v.files.filter((f) => scr.has(f)).length / v.files.length;
-        secCount.set(sec.variant_key, Math.round(n));
+        const mine = allUses.filter((u) => scr.has(u.file) && !claimed.has(u.file));
+        mine.forEach((u) => claimed.add(u.file));
+        secUses.set(sec.variant_key, [...(secUses.get(sec.variant_key) ?? []), ...mine]);
       }
-      const used = [...secCount.values()].reduce((a, b) => a + b, 0);
-      result = result.map((v) => ({ ...v, count: v.key === std[0] ? Math.max(0, total - used) : secCount.get(v.key) ?? 0 }));
+      const rest = allUses.filter((u) => !claimed.has(u.file));
+      result = result.map((v) => finish(v, v.key === std[0] ? rest : secUses.get(v.key) ?? []));
     }
     return result;
   };
@@ -320,11 +316,11 @@ export function CdeWorkspace() {
                           </span>
                         </div>
                         <div className="flex h-20 shrink-0 items-center justify-center overflow-hidden rounded-md bg-background p-2"><Preview v={v} /></div>
-                        <Button type="button" variant="action" size="sm" style={{ "--wa-bg": "var(--whatsapp-green)", "--wa-bd": "var(--whatsapp-border)", "--wa-tx": "var(--card)" } as React.CSSProperties} className="mt-auto !rounded-lg !border-2 !border-solid !border-[var(--wa-bd)] !bg-[var(--wa-bg)] !text-[var(--wa-tx)] hover:!brightness-110 disabled:!opacity-100" disabled={toggleStandard.isPending || (isPrimary && !g.multi)} onClick={() => toggleStandard.mutate({ group: g.key, key: v.key, multi: g.multi })}>
+                        <Button type="button" variant="action" size="sm" style={{ "--wa-bg": "var(--whatsapp-green)", "--wa-bd": "var(--whatsapp-border)", "--wa-tx": "var(--card)" } as React.CSSProperties} className="mt-auto !h-9 !min-h-9 !py-0 !text-sm !rounded-lg !border-2 !border-solid !border-[var(--wa-bd)] !bg-[var(--wa-bg)] !text-[var(--wa-tx)] hover:!brightness-110 disabled:!opacity-100" disabled={toggleStandard.isPending || (isPrimary && !g.multi)} onClick={() => toggleStandard.mutate({ group: g.key, key: v.key, multi: g.multi })}>
                           {isPrimary ? <><Check className="h-4 w-4" />{g.multi ? "Padrão (remover)" : "Padrão principal"}</> : g.multi ? "Adicionar como padrão" : sec ? "Tornar principal" : "Escolher como padrão"}
                         </Button>
                         {!g.multi && !isPrimary && primaries.length ? (
-                          <Button type="button" variant="action" size="sm" style={{ "--wa-bg": "var(--whatsapp-green)", "--wa-bd": "var(--whatsapp-border)", "--wa-tx": "var(--card)" } as React.CSSProperties} className="!rounded-lg !border-2 !border-solid !border-[var(--wa-bd)] !bg-[var(--wa-bg)] !text-[var(--wa-tx)] hover:!brightness-110" onClick={() => { setScreenSearch(""); setSecondary({ group: g.key, key: v.key, label: v.name ?? `Modelo ${i + 1}`, screens: sec?.screens ?? [] }); }}>
+                          <Button type="button" variant="action" size="sm" style={{ "--wa-bg": "var(--whatsapp-green)", "--wa-bd": "var(--whatsapp-border)", "--wa-tx": "var(--card)" } as React.CSSProperties} className="!h-9 !min-h-9 !py-0 !text-sm !rounded-lg !border-2 !border-solid !border-[var(--wa-bd)] !bg-[var(--wa-bg)] !text-[var(--wa-tx)] hover:!brightness-110" onClick={() => { setScreenSearch(""); setSecondary({ group: g.key, key: v.key, label: v.name ?? `Modelo ${i + 1}`, screens: sec?.screens ?? [] }); }}>
                             {sec ? `Secundário · ${sec.screens.length} tela${sec.screens.length === 1 ? "" : "s"} (editar)` : "Padrão secundário por tela"}
                           </Button>
                         ) : null}
@@ -364,11 +360,11 @@ export function CdeWorkspace() {
                 {list.some((v) => v.files.length) ? (
                   <div className="border-t border-border px-4 py-2 text-xs text-muted-foreground">
                     <div className="flex items-center justify-between gap-2">
-                      <span>Onde é utilizado ({list.reduce((n, v) => n + v.files.length, 0)})</span>
+                      <span>Onde é utilizado ({list.reduce((n, v) => n + v.count, 0)})</span>
                       <CdeButton group="toggle" screen="components/cde/cde-workspace.tsx" aria-label={`${expandedWhere.has(g.key) ? "Recolher" : "Exibir"} onde é utilizado em ${g.title}`} aria-expanded={expandedWhere.has(g.key)} onClick={() => setExpandedWhere((c) => { const n = new Set(c); if (n.has(g.key)) n.delete(g.key); else n.add(g.key); return n; })}>
                         </CdeButton>
                     </div>
-                    {expandedWhere.has(g.key) ? <div className="mt-2 space-y-3">{list.map((v, i) => v.files.length ? <div key={v.key} data-cde-model={g.key} className="break-all"><b>{v.name ?? `Modelo ${i + 1}`} ({v.files.length}):</b><ol className="mt-1 space-y-1.5">{v.files.map((f, fi) => <li key={f} className="flex gap-2"><b className="shrink-0">{fi + 1}.</b><span>{f}</span></li>)}</ol></div> : null)}</div> : null}
+                    {expandedWhere.has(g.key) ? <div className="mt-2 space-y-3">{list.map((v, i) => v.files.length ? <div key={v.key} data-cde-model={g.key} className="break-all"><b>{v.name ?? `Modelo ${i + 1}`} ({v.count}):</b><ol className="mt-1 space-y-1.5">{(v.uses ?? v.files.map((file) => ({ file, n: 1 }))).map((u, fi) => <li key={u.file} className="flex gap-2"><b className="shrink-0">{fi + 1}.</b><span>{u.file}{u.n > 1 ? <b className="ml-1">({u.n})</b> : null}</span></li>)}</ol></div> : null)}</div> : null}
                   </div>
                 ) : null}
                 {removed.length ? (
