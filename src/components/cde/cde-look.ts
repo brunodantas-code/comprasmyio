@@ -37,6 +37,7 @@ export function detectButtonGroup(children: React.ReactNode, label?: string): Au
   if (icon) return ICON_GROUP[icon];
   const visible = text(children).trim();
   const t = (visible || label || "").toLowerCase();
+  if (/\b(pdf|excel|exportar)\b/.test(t)) return "export";
   if (/\b(limpar|limpando)\b/.test(t)) return "clear";
   if (/\b(anexar|anexando)\b/.test(t)) return "attach";
   if (/\b(enviar|enviando)\b/.test(t)) return "send";

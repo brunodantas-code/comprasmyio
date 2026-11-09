@@ -1,3 +1,7 @@
+import { SupplyItemsSummary } from "@/components/supply-items-summary";
+import { SUPPLY_CODE_MAX, requestedDeadline, deadlineSignals } from "@/lib/supply-deadlines";
+import { useDeadlineAlerts } from "@/components/cde/cde-deadline-alerts";
+import { SupplyDeadlineIndicators } from "@/components/supply-deadline-indicators";
 import { useAppMenuLayout } from "@/components/cde/cde-menu-type";
 import { useMenuOrders, sortByMenuOrder } from "@/components/cde/menu-order";
 import { CdeButton } from "@/components/cde/cde-button";
@@ -410,25 +414,26 @@ function useStatusCatalog() {
   return { custom, active: custom.filter((r) => r.active), customLabel: (id?: string | null) => (id ? custom.find((r) => r.id === id)?.label : undefined), order };
 }
 
-const PASSPHRASE_MAX = 20;
+const PASSPHRASE_MAX = SUPPLY_CODE_MAX;
 const NO_DEADLINE_MODELS = ["reembolso", "pagamento"];
 const fmtDay = (d: string) => new Date(d + "T00:00:00").toLocaleDateString("pt-BR");
 
 /** Prazo pedido pelo solicitante x previsão informada por Compras; traço quando não se aplica. */
-function DeadlineForecast({ order: o, canEdit, align }: { order: Order; canEdit?: boolean; align?: "center" }) {
+function DeadlineForecast({ order: o, canEdit, align, part }: { order: Order; canEdit?: boolean; align?: "center"; part?: "requested" | "forecast" }) {
+  const config = useDeadlineAlerts();
+  const signals = deadlineSignals(o, config);
   if (NO_DEADLINE_MODELS.includes(o.request_model ?? "")) return <span className="text-muted-foreground">-</span>;
-  const requested = o.deadline_type === "customizado" ? (o.deadline_date ? fmtDay(o.deadline_date) : "—") : DEADLINE_LABELS[o.deadline_type];
-  const late = !!(o.delivery_forecast && o.deadline_type === "customizado" && o.deadline_date && o.delivery_forecast > o.deadline_date);
+  const requested = signals.deadline ? fmtDay(signals.deadline) : "—";
+  const late = signals.forecastLate;
   return (
     <div className="space-y-1">
-      <div><div className="text-xs text-muted-foreground">Solicitado até</div><div>{requested}</div></div>
-      <div className="border-t pt-1">
-        <div className="text-xs text-muted-foreground">Previsão de Compras</div>
+      {part !== "forecast" && <div><div>{requested}</div>{signals.purchaseAlert && <span className="inline-flex text-destructive" title={signals.purchaseAlert === "critical" ? "Compra urgente: prazo de recebimento próximo ou vencido" : "Prazo de recebimento próximo; compra pendente"}>{signals.purchaseAlert === "critical" ? <AlertTriangle className="h-4 w-4" /> : <Bell className="h-4 w-4" />}</span>}{signals.overdue && <span className="text-xs text-destructive">Atrasado</span>}</div>}
+      {part !== "requested" && <div>
         <div className={late ? "text-destructive" : undefined} title={late ? "Previsão depois do prazo solicitado" : undefined}>
           <InlineField order={o} field="delivery_forecast" type="date" canEdit={canEdit} display={o.delivery_forecast ? fmtDay(o.delivery_forecast) : "—"} align={align} />
         </div>
-        {late && <div className="text-xs text-destructive">Após o prazo</div>}
-      </div>
+        {late && <div className="text-xs text-destructive"><AlertTriangle className="inline h-4 w-4" /> Fora do prazo</div>}{signals.forecastOverdue && <div className="text-xs text-destructive"><AlertTriangle className="inline h-4 w-4" /> Entrega vencida</div>}
+      </div>}
     </div>
   );
 }
@@ -2841,6 +2846,7 @@ function OrdersTable({
     }, new Map<string, PurchaseOrderItem[]>()),
   });
   const statusCatalog = useStatusCatalog();
+  const deadlineConfig = useDeadlineAlerts();
 
   const allocationOf = (o: Order) => o.allocation_type === "cliente"
     ? [clients?.find((client) => client.id === o.client_id)?.name, clientUnits?.find((unit) => unit.id === o.client_unit_id)?.name].filter(Boolean).join(" — ") || "Cliente"
@@ -2865,8 +2871,10 @@ function OrdersTable({
     { key: "valor", label: "Valor Total", kind: "number", raw: (o) => o.estimated_value ?? null, list: (o) => (o.estimated_value != null ? formatBRL(o.estimated_value) : "") },
     { key: "dest", label: "Destinatário", kind: "text", raw: (o) => o.recipient, list: (o) => o.recipient ?? "" },
     { key: "end", label: "Endereço", kind: "text", raw: (o) => o.delivery_point, list: (o) => o.delivery_point ?? "" },
-    { key: "prazo", label: "Solicitado até", kind: "date", raw: (o) => (noDeadline(o) ? null : o.deadline_date), list: (o) => (noDeadline(o) ? "" : o.deadline_type === "customizado" ? (o.deadline_date ? fmtDay(o.deadline_date) : "") : DEADLINE_LABELS[o.deadline_type] ?? "") },
-    { key: "prev", label: "Previsão de Compras", kind: "date", raw: (o) => (noDeadline(o) ? null : o.delivery_forecast), list: (o) => (!noDeadline(o) && o.delivery_forecast ? fmtDay(o.delivery_forecast) : "") },
+    { key: "prazo", label: "Prazo de recebimento", kind: "date", raw: (o) => requestedDeadline(o), list: (o) => (noDeadline(o) ? "" : o.deadline_type === "customizado" ? (o.deadline_date ? fmtDay(o.deadline_date) : "") : DEADLINE_LABELS[o.deadline_type] ?? "") },
+    { key: "prev", label: "Previsão de entrega", kind: "date", raw: (o) => (noDeadline(o) ? null : o.delivery_forecast), list: (o) => (!noDeadline(o) && o.delivery_forecast ? fmtDay(o.delivery_forecast) : "") },
+    { key: "atrasados", label: "Atrasados", kind: "text", raw: (o) => deadlineSignals(o, deadlineConfig).overdue || deadlineSignals(o, deadlineConfig).forecastOverdue ? "Sim" : "Não", list: (o) => deadlineSignals(o, deadlineConfig).overdue || deadlineSignals(o, deadlineConfig).forecastOverdue ? "Sim" : "Não" },
+    { key: "fora_prazo", label: "Fora do prazo", kind: "text", raw: (o) => deadlineSignals(o, deadlineConfig).outOfTime ? "Sim" : "Não", list: (o) => deadlineSignals(o, deadlineConfig).outOfTime ? "Sim" : "Não" },
     { key: "status", label: "Status", kind: "text", raw: statusLabelOf, list: statusLabelOf },
     { key: "received", label: "Atualização do recebimento", kind: "date", raw: (o) => ["entregue", "recebido_ok", "recebido_problema"].includes(o.status) ? o.updated_at : null, list: (o) => ["entregue", "recebido_ok", "recebido_problema"].includes(o.status) ? fmtDay(o.updated_at) : "" },
     { key: "passe", label: "Código", kind: "text", raw: (o) => o.passphrase, list: (o) => o.passphrase ?? "" },
@@ -2902,6 +2910,7 @@ function OrdersTable({
   return (
     <>
       <div className="mb-2 flex flex-wrap items-center gap-2 text-xs">
+        <SupplyDeadlineIndicators orders={visibleOrders} />
         <TableFilterMenu rows={orders} columns={colDefs.filter(c => showRequester || c.key !== "req").map(c => ({ key: c.key, label: c.label, kind: c.kind, value: c.raw as (o: typeof orders[number]) => string | number | null | undefined, display: c.list }))} filters={cf} onChange={(key, value) => setCf(prev => ({ ...prev, [key]: value }))} clear={() => setCf({})} />
         {activeColFilters.length > 0 && (
           <>
@@ -2935,11 +2944,7 @@ function OrdersTable({
                    )}
                  </div>
               </Row>
-              <Row label="Itens da Solicitação">
-                {(groupedOrderItems?.get(o.id) ?? []).length ? (
-                   <ul className="space-y-1">{groupedOrderItems?.get(o.id)?.map((row) => <li key={row.id} className="text-sm"><span className="font-medium">{row.item_name}</span> <span className="text-xs text-muted-foreground">× {row.quantity}</span>{/^https?:\/\//i.test(row.item_link ?? "") && <a href={row.item_link ?? ""} target="_blank" rel="noopener noreferrer" className="flex w-fit items-center gap-1 text-primary hover:underline">Abrir link <ExternalLink className="h-3 w-3" /></a>}</li>)}</ul>
-                 ) : <span className="text-sm break-words">{o.item_name || "—"}{/^https?:\/\//i.test(o.item_link ?? "") && <a href={o.item_link ?? ""} target="_blank" rel="noopener noreferrer" className="flex w-fit items-center gap-1 text-primary hover:underline">Abrir link <ExternalLink className="h-3 w-3" /></a>}</span>}
-              </Row>
+              <Row label="Itens da Solicitação"><SupplyItemsSummary items={(groupedOrderItems?.get(o.id) ?? []).length ? groupedOrderItems?.get(o.id) ?? [] : [{item_name:o.item_name || "—",quantity:o.quantity,item_link:o.item_link}]} /></Row>
               <Row label="Tipo">
                 <div className="font-medium">{requestTypeLabel(o, requestTypes)}</div>
               </Row>
@@ -2964,9 +2969,8 @@ function OrdersTable({
               <Row label="Valor Total">{formatBRL(o.estimated_value)}</Row>
               <Row label="Destinatário">{o.recipient || "—"}</Row>
               <Row label={o.delivery_mode === "retirada" ? "Endereço de Retirada" : "Endereço de Entrega"}>{o.delivery_point}</Row>
-              <Row label="Prazo">
-                <DeadlineForecast order={o} canEdit={canEdit} />
-              </Row>
+              <Row label="Prazo de recebimento"><DeadlineForecast order={o} part="requested" /></Row>
+              <Row label="Previsão de entrega"><DeadlineForecast order={o} canEdit={canEdit} part="forecast" /></Row>
               <Row label="Status"><div className="flex flex-col items-start gap-1"><StatusHistoryDialog order={o} canEdit={canEdit} />{canEditRequester && o.status === "entregue" && <ConfirmReceiptActions order={o} />}</div></Row>
               <Row label="Código">
                 <InlineField order={o} field="passphrase" type="text" canEdit={canEdit} display={o.passphrase || "—"} maxLength={PASSPHRASE_MAX} />
@@ -2984,14 +2988,15 @@ function OrdersTable({
         <TableHeader className="[&_tr]:border-b">
           <TableRow className="border-b">
             <TableHead className="w-[11%] text-left"><span className="inline-flex max-w-full items-center gap-0.5"><span className="min-w-0 whitespace-normal break-words">Approval</span>{colFilter("approval")}</span></TableHead>
-            <TableHead className="w-[15%] text-center"><span className="inline-flex max-w-full items-center gap-0.5"><span className="min-w-0 whitespace-normal break-words">Itens da Solicitação</span>{colFilter("itens")}</span></TableHead>
+            <TableHead className="w-[12%] text-center"><span className="inline-flex max-w-full items-center gap-0.5"><span className="min-w-0 whitespace-normal break-words">Itens da Solicitação</span>{colFilter("itens")}</span></TableHead>
             <TableHead className="w-[9%] text-center"><span className="inline-flex max-w-full items-center gap-0.5"><span className="min-w-0 whitespace-normal break-words">Tipo</span>{colFilter("tipo")}</span></TableHead>
             <TableHead className="w-[10%] text-center"><span className="inline-flex max-w-full items-center gap-0.5"><span className="min-w-0 whitespace-normal break-words">Alocação</span>{colFilter("aloc")}</span></TableHead>
             {showRequester && <TableHead className="w-[11%] text-center"><span className="inline-flex max-w-full items-center gap-0.5"><span className="min-w-0 whitespace-normal break-words">Solicitante</span>{colFilter("req")}</span></TableHead>}
             <TableHead className="w-[6%] text-center"><span className="inline-flex max-w-full items-center gap-0.5"><span className="min-w-0 whitespace-nowrap">Qtd</span>{colFilter("qtd")}</span></TableHead>
             <TableHead className="w-[10%] text-center"><span className="inline-flex max-w-full items-center gap-0.5"><span className="min-w-0 whitespace-normal break-words">Valor Total</span>{colFilter("valor")}</span></TableHead>
             <TableHead className="w-[12%] text-center"><span className="inline-flex max-w-full items-center gap-0.5"><span className="min-w-0 whitespace-normal break-words">Destinatário</span>{colFilter("dest")}</span></TableHead>
-            <TableHead className="w-[13%] text-center"><span className="inline-flex items-center gap-0.5">Prazo <span className="inline-flex shrink-0 gap-0.5">{colFilter("prazo")}{colFilter("prev")}</span></span></TableHead>
+            <TableHead className="w-[9%] text-center"><span className="inline-flex items-center gap-0.5"><span>Prazo de recebimento</span>{colFilter("prazo")}</span></TableHead>
+            <TableHead className="w-[9%] text-center"><span className="inline-flex items-center gap-0.5"><span>Previsão de entrega</span>{colFilter("prev")}</span></TableHead>
             <TableHead className="w-[10%] text-center"><span className="inline-flex max-w-full items-center gap-0.5"><span className="min-w-0 whitespace-normal break-words">Status</span>{colFilter("status")}</span></TableHead>
             <TableHead className="w-[10%] text-center"><span className="inline-flex max-w-full items-center gap-0.5"><span className="min-w-0 whitespace-normal">Código</span>{colFilter("passe")}</span></TableHead>
           </TableRow>
@@ -3015,11 +3020,7 @@ function OrdersTable({
                    )}
                  </div>
               </TableCell>
-              <TableCell>
-                {(groupedOrderItems?.get(o.id) ?? []).length ? (
-                   <ul className="space-y-1">{groupedOrderItems?.get(o.id)?.map((row) => <li key={row.id} className="text-sm break-words"><span>{row.item_name}</span> <span className="text-xs text-muted-foreground">× {row.quantity}</span>{/^https?:\/\//i.test(row.item_link ?? "") && <a href={row.item_link ?? ""} target="_blank" rel="noopener noreferrer" className="flex w-fit items-center gap-1 text-primary hover:underline">Abrir link <ExternalLink className="h-3 w-3" /></a>}</li>)}</ul>
-                 ) : <span className="text-sm break-words">{o.item_name || "—"}{/^https?:\/\//i.test(o.item_link ?? "") && <a href={o.item_link ?? ""} target="_blank" rel="noopener noreferrer" className="flex w-fit items-center gap-1 text-primary hover:underline">Abrir link <ExternalLink className="h-3 w-3" /></a>}</span>}
-              </TableCell>
+              <TableCell><SupplyItemsSummary items={(groupedOrderItems?.get(o.id) ?? []).length ? groupedOrderItems?.get(o.id) ?? [] : [{item_name:o.item_name || "—",quantity:o.quantity,item_link:o.item_link}]} /></TableCell>
               <TableCell className="text-center">
                 <div className="break-words">{requestTypeLabel(o, requestTypes)}</div>
               </TableCell>
@@ -3046,7 +3047,9 @@ function OrdersTable({
               <TableCell className="text-center text-sm tabular-nums">{formatBRL(o.estimated_value)}</TableCell>
               <TableCell className="text-sm break-words text-center">{o.recipient || "—"}</TableCell>
               <TableCell className="text-sm break-words text-center">
-                <DeadlineForecast order={o} canEdit={canEdit} align="center" />
+                <DeadlineForecast order={o} part="requested" align="center" />
+              </TableCell>
+              <TableCell className="text-center"><DeadlineForecast order={o} canEdit={canEdit} part="forecast" align="center" />
               </TableCell>
               <TableCell className="text-center"><div className="flex flex-col items-center gap-1"><StatusHistoryDialog order={o} canEdit={canEdit} />{canEditRequester && o.status === "entregue" && <ConfirmReceiptActions order={o} />}</div></TableCell>
               <TableCell className="text-sm break-words text-center">
@@ -3327,6 +3330,7 @@ function InlineField({
 
   const save = useMutation({
     mutationFn: async (next: string) => {
+      if (field === "passphrase" && next.length > SUPPLY_CODE_MAX) throw new Error("Código permite no máximo 10 caracteres.");
       const v = next || null;
       const patch =
         field === "delivery_forecast" ? { delivery_forecast: v }
@@ -3395,10 +3399,12 @@ function InlineField({
       type={type}
       value={value}
       maxLength={maxLength}
+      onPaste={(e) => { if (maxLength && e.clipboardData.getData("text").length + value.length > maxLength) toast.error(`Código permite no máximo ${maxLength} caracteres.`); }}
       disabled={save.isPending}
       onChange={(e) => setValue(e.target.value)}
       onBlur={commit}
       onKeyDown={(e) => {
+        if (maxLength && value.length >= maxLength && e.key.length === 1 && !e.ctrlKey && !e.metaKey) toast.error(`Código permite no máximo ${maxLength} caracteres.`);
         if (e.key === "Enter") commit();
         if (e.key === "Escape") setEditing(false);
       }}
