@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Approvals: separar prazo de recebimento/previsão de entrega, limitar Palavra-chave a 10 caracteres, configurar alertas 7/3 dias no CDE e filtros de atrasos; definir medição dos tempos e causas.
 - [x] CDE item 12: biblioteca de botões em uso, busca digitável pelo nome, prévias e local de uso; busca e estado vazio conferidos em sessão autenticada.
 - [x] Amostras de cores quadradas nos seletores compartilhados do CDE/Mytosis e controle “Padrões para edição de cores”.
 - [x] Cor personalizada com símbolo de paleta no mesmo tamanho das amostras.
