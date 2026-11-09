@@ -40,3 +40,5 @@
 - No "Fechar" buttons; corner X closes dialogs.
 - Sequential UI markers across apps use CdeNumber/CdeNumberButton with their screen path; only nested CDE categories use the subsection group, so all other sequences inherit the main live numbering standard without changing stored values.
 - Portal app spacing and its CDE preview read gapX/gapY from app_tile; drafts apply only on Save to keep the preview and published choice consistent.
+- SearchableSelect resolves the live fields_select CDE standard on its outer field; CDE field previews render their own model without inheriting the active field look, so alternatives remain distinguishable.
+- New legal subject actions remain in the meeting editor draft until the subject is persisted; stable action IDs allow safe retries without duplicates, while existing actions retain independent tracking and audit.

@@ -98,8 +98,8 @@ function Preview({ v }: { v: Pick<Variant, "tag" | "variant" | "size" | "classNa
   const { css, cls } = styleOf(v.style);
   if (v.tag === "span") return <span style={css} className={cn("flex h-7 w-7 shrink-0 items-center justify-center text-sm font-bold", v.className, cls)}>{v.label || "1"}</span>;
   if (v.tag === "div") return <div style={css} className={cn("flex h-14 w-48 items-center justify-center text-xs", v.className || "rounded-xl border bg-card shadow", cls)}>{v.label || "Box"}</div>;
-  if (v.tag === "Textarea") return <Textarea style={css} className={cn("w-56", v.className, cls)} placeholder="Texto" readOnly />;
-  if (["Input", "SelectTrigger", "PasswordInput"].includes(v.tag)) return <Input style={css} className={cn("w-56", v.className, cls)} placeholder={v.tag === "SelectTrigger" ? "Selecione…" : "Texto"} readOnly />;
+  if (v.tag === "Textarea") return <textarea style={css} className={cn("min-h-[60px] w-56 rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground", v.className, cls)} placeholder="Texto" readOnly />;
+  if (["Input", "SelectTrigger", "PasswordInput"].includes(v.tag)) return <input style={css} className={cn("h-9 w-56 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground", v.className, cls)} placeholder={v.tag === "SelectTrigger" ? "Selecione…" : "Texto"} readOnly />;
   const Icon = ICONS[v.icon];
   const content = <>{Icon ? <Icon className={v.iconClass} /> : null}{v.label && !/[=()]/.test(v.label) ? v.label : null}</>;
   if (v.tag === "button") return <button type="button" style={css} className={cn(v.className, cls)}>{content}</button>;
@@ -172,7 +172,7 @@ export function CdeWorkspace() {
     // Grupos de padrão único: o padrão concentra todos os usos; os demais ficam com zero.
     // Secundários ficam com os usos das telas associadas; o principal com o restante.
     const std = primariesOf(g);
-    const single = !GROUPS.find((x) => x.key === g)?.multi || g === "fields_select";
+    const single = !GROUPS.find((x) => x.key === g)?.multi || Boolean(FIELD_TAGS[g]);
     if (single && std.length === 1 && result.some((v) => v.key === std[0])) {
       const total = result.reduce((s, v) => s + v.count, 0);
       const secs = secondariesOf(g);

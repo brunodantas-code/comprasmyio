@@ -1,6 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { legalActionSchema, legalObservationSchema, pendingLegalActions } from './legal-actions';
+import { actionsForSavedSubjects, legalActionSchema, legalObservationSchema, pendingLegalActions } from './legal-actions';
 describe('ações dos assuntos',()=>{
+ it('mantém ações de assunto novo para salvar junto à ata e descarta assuntos retirados',()=>{
+  const action = {id:'a',subject_id:'novo',title:'Contratar',responsible_id:'11111111-1111-4111-8111-111111111111',responsible_name:'Responsável'};
+  expect(actionsForSavedSubjects([action],['novo'])).toEqual([action]);
+  expect(actionsForSavedSubjects([action],['outro'])).toEqual([]);
+ });
  it('cada ação exige texto e responsável',()=>{
   expect(legalActionSchema.safeParse({title:'Contratar',responsible_id:''}).success).toBe(false);
   expect(legalActionSchema.safeParse({title:'',responsible_id:'11111111-1111-4111-8111-111111111111'}).success).toBe(false);

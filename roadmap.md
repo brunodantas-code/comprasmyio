@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Legal: ação de Assunto novo criada no pop-up, salva junto à ata e relida após recarga; Recolher tudo junto a Ordenar conferido; ata temporária removida, 11 testes passaram.
+- [x] Campos: modelo de linha verde incluído e selecionado em 1.1, textos longos e senhas; listas pesquisáveis ligadas ao CDE e prévias independentes; digitação, participantes, computador/celular conferidos.
 - [x] Atas: apenas número circular CDE e título na leitura, sem “Assunto N”/legenda; arraste e legenda no editor. Cabeçalho reduzido de 161 para 92 px aberto e 45 px recolhido; computador/celular conferidos, oito testes passaram.
 - [x] Simplificar apresentação do CDE conforme Cadastro Supply, com divisórias simples e títulos menores; arraste renumerou 1→2 e ordem original foi restaurada, computador/celular conferidos.
 - [x] Espaçamento dos apps aumentado para 32/40 px; controles horizontal/vertical com prévia no item 11, salvamento 36 px relido no portal e retorno a 32 px conferidos; três testes passaram.
