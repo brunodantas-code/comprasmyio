@@ -28,7 +28,7 @@ export function CdeButtonLibrary({ number, handle, onEdit }: { number: number; h
           const group = b.group || detectButtonGroup(<>{Icon && <Icon />}{label}</>);
           const content = <>{Icon && <Icon className="h-4 w-4" />}{label}</>;
           return <article key={`${b.file}:${b.line}:${index}`} className="grid h-20 min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-1 rounded-md border border-border bg-card p-2">
-            <div className="flex min-w-0 items-center justify-center overflow-auto [&_button]:max-w-full [&_button]:whitespace-normal" inert>
+            <div className="relative isolate flex h-12 min-w-0 items-center justify-center overflow-hidden [contain:layout_paint] [&_button]:!static [&_button]:!m-0 [&_button]:!max-h-full [&_button]:!max-w-full [&_button]:!translate-x-0 [&_button]:!translate-y-0 [&_button]:!whitespace-normal [&_button]:!overflow-hidden" inert>
               {b.tag === "CdeButton" && b.group ? <CdeButton group={b.group as CdeGroup} screen={b.file}>{label === b.icon ? null : label}</CdeButton> : b.tag === "button" ? <button type="button" className={b.className}>{content}</button> : <Button type="button" variant={(b.variant || undefined) as never} size={(b.size || undefined) as never} className={b.className}>{content}</Button>}
             </div>
             <Button type="button" variant="ghost" size="compactIcon" className="shrink-0" title={`Editar ${label}`} aria-label={`Editar ${label}`} onClick={() => onEdit(b, group)}><Pencil /></Button>

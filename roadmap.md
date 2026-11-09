@@ -167,3 +167,5 @@
 - [x] Approvals: agrupar/consolidar/custo/indicadores usam padrão Salvar; alertas só com símbolo e texto ao passar o cursor, tooltip conferido em sessão autenticada.
 
 - [x] Approvals: datas alinhadas e símbolos na linha inferior, espaços fixos conferidos na tabela.
+
+- [x] CDE: prévias da biblioteca contidas nos cards; Foto anterior/Próxima foto e demais controles conferidos antes/depois sem alterar o Site Survey.
