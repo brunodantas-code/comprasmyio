@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Legal: dez assuntos inicialmente recolhidos, abertura individual e Recolher tudo conferidos; linhas abaixo das observações removidas e conferidas em tela; computador/celular, quatro testes passaram.
 - [x] CDE: controles + e − alinhados em faixa única, símbolos sem fundo na ordenação; interação e computador/celular conferidos, três testes passaram.
 - [x] Confirmações: botões CDE com texto preservam largura do conteúdo; Excluir passou de 36 para 67 px sem sobreposição; Cancelar conferido sem excluir atas, computador/celular.
 - [x] Legal: ação de Assunto novo criada no pop-up, salva junto à ata e relida após recarga; Recolher tudo junto a Ordenar conferido; ata temporária removida, 11 testes passaram.

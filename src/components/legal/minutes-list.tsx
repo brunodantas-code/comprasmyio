@@ -19,7 +19,7 @@ export function MinutesList({ rows, expanded, toggle, edit, remove, openPdf, use
   edit: (row: RecordRow) => void; remove: (row: RecordRow) => void; openPdf: (path: string) => void;
   user: { id: string; full_name: string } | null | undefined; sign: (row: RecordRow, participantId: string, name: string) => void;
 }) {
-  const [collapsed,setCollapsed]=useState<Set<string>>(new Set());
+  const [openedSubjects,setOpenedSubjects]=useState<Set<string>>(new Set());
   const { data: tracking } = useSuspenseQuery(legalTrackingOptions);
   return <div className="divide-y divide-border overflow-hidden rounded-md border border-border bg-card">
     {rows.map(row => {
@@ -47,11 +47,11 @@ export function MinutesList({ rows, expanded, toggle, edit, remove, openPdf, use
                 <CdeNumber screen="components/legal/minutes-list.tsx">{index + 1}</CdeNumber>
                 <h2 className="min-w-0 flex-1 break-words text-sm font-semibold">{subject.title}</h2>
                 {legalSubjectResponsibles(subject).length > 0 && !subject.completionDate ? <PendingDot label={`Ação pendente de ${legalSubjectResponsibles(subject).join(', ')}`} /> : null}
-                <Button variant="ghost" size="compactIcon" aria-label={`${collapsed.has(subject.id)?'Exibir':'Recolher'} assunto ${index+1}`} onClick={()=>setCollapsed(prev=>{const n=new Set(prev);if(n.has(subject.id))n.delete(subject.id);else n.add(subject.id);return n;})}>{collapsed.has(subject.id)?<ChevronDown/>:<ChevronUp/>}</Button>
+                <Button variant="ghost" size="compactIcon" aria-expanded={openedSubjects.has(subject.id)} aria-label={`${openedSubjects.has(subject.id)?'Recolher':'Exibir'} assunto ${index+1}`} onClick={()=>setOpenedSubjects(prev=>{const n=new Set(prev);if(n.has(subject.id))n.delete(subject.id);else n.add(subject.id);return n;})}>{openedSubjects.has(subject.id)?<ChevronUp/>:<ChevronDown/>}</Button>
               </div>
-              {!collapsed.has(subject.id) && <div className="pl-10"><p className="whitespace-pre-wrap break-words">{subject.description || '—'}</p><p className="mt-1 text-xs text-muted-foreground">Descrição</p></div>}
+              {openedSubjects.has(subject.id) && <div className="pl-10"><p className="whitespace-pre-wrap break-words">{subject.description || '—'}</p><p className="mt-1 text-xs text-muted-foreground">Descrição</p></div>}
             </div>
-            {!collapsed.has(subject.id) && <div className="space-y-3 border-t border-border px-4 py-4 sm:px-6">
+            {openedSubjects.has(subject.id) && <div className="space-y-3 border-t border-border px-4 py-4 sm:px-6">
               <h4 className="text-base font-semibold">Deliberações</h4>
               {subject.decisions?.trim() ? <ol className="space-y-2">{subject.decisions.split(/\r?\n/).map(line => line.trim()).filter(Boolean).map((decision, decisionIndex) => <li key={decisionIndex} className="flex items-start gap-2"><CdeNumber screen="components/legal/minutes-list.tsx">{decisionIndex + 1}</CdeNumber><span className="min-w-0 whitespace-pre-wrap break-words">{decision.replace(/^\d+[.)]\s+/, '')}</span></li>)}</ol> : <p>—</p>}
               {legalSubjectResponsibles(subject).length > 0 || subject.completionDate ? <div className="grid gap-3 border-t border-border pt-3 sm:grid-cols-2">
