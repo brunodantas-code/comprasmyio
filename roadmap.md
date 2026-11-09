@@ -240,3 +240,4 @@
 - [x] CDE: destaque vermelho no local de destino ao abrir link de uso da biblioteca.
 - [x] Supply: coluna Codigo quebra dentro da celula (collapseSpaces no InlineField).
 - [ ] Biblioteca CDE: separar visualmente cards de botoes de funcao especifica dos botoes de acao padrao (Salvar, Cancelar, Fechar, Excluir, Adicionar etc.), seguindo o padrao visual do CDE.
+- [x] CDE: biblioteca separa botões padrão e funções específicas.
