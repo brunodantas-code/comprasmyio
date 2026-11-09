@@ -155,8 +155,8 @@ export function CdeNumber({ children, subcategory = false, screen = "components/
 }
 
 /** Numeric drag/edit controls keep their behavior but use the same look as passive numbers. */
-export function CdeNumberButton({ children, screen, className, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { screen: string }) {
-  const look = useCdeNumberStyle(screen);
+export function CdeNumberButton({ children, screen, subcategory = false, className, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { screen: string; subcategory?: boolean }) {
+  const look = useCdeNumberStyle(screen, subcategory);
   return <Button {...props} type={props.type ?? "button"} variant="ghost" data-cde-number="" style={look.css} className={cn(look.className, "p-0", className)}>{children}</Button>;
 }
 

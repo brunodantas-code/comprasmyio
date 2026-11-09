@@ -72,9 +72,10 @@ const NUMBER_MODELS: Record<string, Omit<Variant, "key">[]> = Object.fromEntries
 NUMBER_MODELS.color_swatch = ["rounded-none", "rounded-full"].map((shape) => ({ tag: "span", variant: "", size: "", className: `${shape} bg-primary`, icon: "", iconClass: "", label: " ", count: 0, files: ["components/mytosis/color-options.tsx", "components/mytosis/format-color-options.tsx", "components/cde/top-icon-style-editor.tsx", "components/cde/list-item-style.tsx"] }));
 
 /** Telas conhecidas pelo levantamento, com o app deduzido pelo caminho do arquivo. */
-const SCREENS = [...new Set([...Object.values(inventory).flatMap((g) => (g as { files: string[] }[]).flatMap((v) => v.files)), "components/legal/minutes-list.tsx", "components/legal/legal-workspace.tsx", "components/legal/subject-actions.tsx", "routes/_authenticated/site-survey.tsx", "components/site-survey-screen-summary.tsx", "components/mytosis/processes-tab.tsx", "components/mytosis/flowchart.tsx", "components/mytosis/node-preview.tsx", "components/supply-order-statuses-tab.tsx", "components/supply-manual-reader.tsx", "components/cde/cde-app-order.tsx", "components/cde/cde-sortable-icons.tsx"])].sort();
+const SCREENS = [...new Set([...Object.values(inventory).flatMap((g) => (g as { files: string[] }[]).flatMap((v) => v.files)), "controls/save-icon", "components/legal/minutes-list.tsx", "components/legal/legal-workspace.tsx", "components/legal/subject-actions.tsx", "routes/_authenticated/site-survey.tsx", "components/site-survey-screen-summary.tsx", "components/mytosis/processes-tab.tsx", "components/mytosis/flowchart.tsx", "components/mytosis/node-preview.tsx", "components/supply-order-statuses-tab.tsx", "components/supply-manual-reader.tsx", "components/cde/cde-app-order.tsx", "components/cde/cde-sortable-icons.tsx"])].sort();
 const APP_BY_DIR: Record<string, string> = { mytosis: "Mytosis", "cash-flow": "Cash Flow", legal: "Legal", cde: "CDE", "site-survey": "Site Survey", opdesk: "OpDesk", code: "Code" };
 function screenApp(f: string) {
+  if (f === "controls/save-icon") return "Todos os apps · Salvar somente com disquete";
   const parts = f.split("/");
   if (parts[0] === "components" && parts.length > 2) return APP_BY_DIR[parts[1]] ?? parts[1];
   if (parts[0] === "routes") return parts[parts.length - 1].replace(/\.tsx$/, "").replace(/^_authenticated\./, "");

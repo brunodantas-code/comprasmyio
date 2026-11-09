@@ -76,13 +76,13 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
         <p className="text-sm font-medium">Ícones da página principal</p>
         <div role="group" aria-label="Ajustes dos ícones da página principal" className="grid w-full max-w-5xl grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-5">
           <div className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">Fonte do nome</Label><Select value={String(tile.labelPx)} onValueChange={(v) => setTileDraft({ ...tile, labelPx: Number(v) })}><SelectTrigger className="h-9"><SelectValue /></SelectTrigger><SelectContent>{[11, 12, 13, 14, 15, 16].map((n) => <SelectItem key={n} value={String(n)}>{n} px</SelectItem>)}</SelectContent></Select></div>
-          <div className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">Tamanho do ícone</Label>
+          <div className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">Ícone</Label>
             <div className="grid h-9 w-36 grid-cols-[2rem_5rem_2rem] items-center justify-items-center">
               <Button variant="outline" size="compactIcon" aria-label="Diminuir ícone" title="Diminuir" disabled={tile.tilePct <= 70} onClick={() => setTileDraft({ ...tile, tilePct: tile.tilePct - 5 })}><Minus /></Button>
               <span className="w-20 text-center text-sm tabular-nums">{tile.tilePct}%</span>
               <Button variant="outline" size="compactIcon" aria-label="Aumentar ícone" title="Aumentar" disabled={tile.tilePct >= 140} onClick={() => setTileDraft({ ...tile, tilePct: tile.tilePct + 5 })}><Plus /></Button>
             </div></div>
-          <div className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">Tamanho do símbolo interno</Label>
+          <div className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">Símbolo interno</Label>
             <div className="grid h-9 w-36 grid-cols-[2rem_5rem_2rem] items-center justify-items-center">
               <Button variant="outline" size="compactIcon" aria-label="Diminuir símbolo" title="Diminuir" disabled={tile.iconPct <= 60} onClick={() => setTileDraft({ ...tile, iconPct: tile.iconPct - 5 })}><Minus /></Button>
               <span className="w-20 text-center text-sm tabular-nums">{tile.iconPct}%</span>

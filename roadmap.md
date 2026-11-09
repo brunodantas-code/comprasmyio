@@ -1,4 +1,8 @@
 # Roadmap
+- [ ] Legal: mesma fonte em Deliberações/Ações, excluir Observações com confirmação/auditoria e prazo previsto por ação com atrasos; pedido recebido durante finalização, ainda não implementado.
+- [x] CDE: rótulos Ícone e Símbolo interno sem a palavra tamanho, conferidos na tela.
+- [x] CDE: disquete preto sem fundo/texto como padrão secundário de Salvar; controles compactos e modelo no CDE conferidos, principal com texto preservado.
+- [x] CDE: perguntas das seções e ações das atas usam marcadores de subcategoria; cores distintas conferidas no checklist e celular sem excesso lateral.
 - [x] Legal: assinatura pessoal pendente no símbolo do app, Central e Minhas Pendências; links abrem a ata correta, conferidos com a conta do usuário.
 - [x] CDE: opções de listas suspensas herdam a fonte do campo; ajuste Fonte do campo e das opções no CDE. Campo e opções conferidos em 14px.
 - [x] Legal: dez assuntos existentes inicialmente recolhidos no editor; abertura individual conferida sem alterar a ata.

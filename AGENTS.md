@@ -38,7 +38,7 @@
 - Registration lists/PDF/Excel share a pure checklist matcher and filtered rows with fresh authorized approvals; PDF uses pdf-lib AcroForm and Excel OOXML controls, independent of ERP data.
 - Proposals use private visit-keyed files; authenticated extraction syncs totals by trigger and stores group breakdown in proposal metadata. Environment remainders preserve unknown quantities as null.
 - No "Fechar" buttons; corner X closes dialogs.
-- Sequential UI markers across apps use CdeNumber/CdeNumberButton with their screen path; only nested CDE categories use the subsection group, so all other sequences inherit the main live numbering standard without changing stored values.
+- Sequential UI markers across apps use CdeNumber/CdeNumberButton with their screen path; nested CDE categories, Site Survey questions and Legal actions use the subsection group; top-level sequences inherit the main live numbering standard without changing stored values.
 - Portal app spacing and its CDE preview read gapX/gapY from app_tile; drafts apply only on Save to keep the preview and published choice consistent.
 - SearchableSelect resolves the live fields_select CDE standard on its outer field; CDE field previews render their own model without inheriting the active field look, so alternatives remain distinguishable.
 - New legal subject actions remain in the meeting editor draft until the subject is persisted; stable action IDs allow safe retries without duplicates, while existing actions retain independent tracking and audit.
@@ -46,3 +46,5 @@
 
 - Legal personal signature notifications share legalSignaturePendingItems and participant identity guards across portal and Central; count each meeting once and refresh after signing/deletion.
 - Shared dropdown menus inherit their trigger’s computed font size across portals; CDE fields_select font settings apply to both field and options.
+
+- Icon-only shared Save controls resolve the CDE secondary scope controls/save-icon before the primary, preserving text-button standards while exposing the compact model in CDE.

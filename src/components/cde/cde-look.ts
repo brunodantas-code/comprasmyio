@@ -64,15 +64,21 @@ export function detectButtonGroup(children: React.ReactNode, label?: string): Au
 }
 
 /** Visual (CDE style) of the chosen standard for a group; empty when no standard is chosen. */
-export function useCdeLook(group: AutoGroup | undefined, withClass = false): { className: string; style: React.CSSProperties; variant?: string; size?: string; icon?: string; iconClass?: string; label?: string } {
+export function useCdeLook(group: AutoGroup | undefined, withClass = false, screen?: string): { className: string; style: React.CSSProperties; variant?: string; size?: string; icon?: string; iconClass?: string; label?: string } {
   const { data } = useCdeStandards();
   if (!group) return { className: "", style: {} };
   const effectiveGroup = group === "organize" && !(data?.selected ?? []).some(s => s.group_key === "organize" && s.is_primary) ? "save" : group;
-  const rows = (data?.selected ?? []).filter((s) => s.group_key === effectiveGroup && s.is_primary);
+  const rows = (data?.selected ?? []).filter((s) => s.group_key === effectiveGroup && (screen ? !s.is_primary && s.screens.includes(screen) : s.is_primary));
+  if (!rows.length && screen) return primaryCdeLook(data, effectiveGroup, withClass);
+  return primaryCdeLook(data, effectiveGroup, withClass, rows);
+}
+
+function primaryCdeLook(data: ReturnType<typeof useCdeStandards>["data"], effectiveGroup: AutoGroup, withClass: boolean, selectedRows?: NonNullable<ReturnType<typeof useCdeStandards>["data"]>["selected"]) {
+  const rows = selectedRows ?? (data?.selected ?? []).filter(s => s.group_key === effectiveGroup && s.is_primary);
   if (!rows.length) return { className: "", style: {} };
   // Field subgroups may hold several standards: prefer the one with real customization.
   const row = rows.find((r) => r.variant_key.startsWith("custom:") || (r.variant_key.split("|")[3] ?? "").trim()) ?? rows[0];
-  const m = resolveCdeModel({ selected: [row], models: data?.models ?? [] }, effectiveGroup as CdeGroup);
+  const m = resolveCdeModel({ selected: [{ ...row, is_primary: true }], models: data?.models ?? [] }, effectiveGroup as CdeGroup);
   const { css, cls } = styleOf(m.style);
   const custom = row.variant_key.startsWith("custom:") ? data?.models.find(model => model.id === row.variant_key.slice(7)) : undefined;
   return { className: [withClass ? m.className : "", cls].filter(Boolean).join(" "), style: css, variant: m.variant, size: m.size, icon: m.icon, iconClass: m.iconClass, label: custom?.label };
