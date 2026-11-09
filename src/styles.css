@@ -414,6 +414,12 @@
   padding: 0;
 }
 .diversos-list > * + * { border-top: 1px solid var(--border) !important; }
+.diversos-list > * > :first-child .font-semibold,
+.diversos-list > section > :first-child h3 {
+  font-size: var(--text-sm);
+  line-height: var(--text-sm--line-height);
+  font-weight: 600;
+}
 .diversos-list > * > :first-child {
   position: relative;
   min-height: 48px;
