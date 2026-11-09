@@ -364,11 +364,11 @@ export function CdeWorkspace() {
                 {list.some((v) => v.files.length) ? (
                   <div className="border-t border-border px-4 py-2 text-xs text-muted-foreground">
                     <div className="flex items-center justify-between gap-2">
-                      <span>Onde é utilizado</span>
+                      <span>Onde é utilizado ({list.reduce((n, v) => n + v.files.length, 0)})</span>
                       <CdeButton group="toggle" screen="components/cde/cde-workspace.tsx" aria-label={`${expandedWhere.has(g.key) ? "Recolher" : "Exibir"} onde é utilizado em ${g.title}`} aria-expanded={expandedWhere.has(g.key)} onClick={() => setExpandedWhere((c) => { const n = new Set(c); if (n.has(g.key)) n.delete(g.key); else n.add(g.key); return n; })}>
                         </CdeButton>
                     </div>
-                    {expandedWhere.has(g.key) ? <div className="mt-2 space-y-1">{list.map((v, i) => v.files.length ? <div key={v.key} data-cde-model={g.key} className="break-all"><b>{v.name ?? `Modelo ${i + 1}`}:</b> {v.files.join(", ")}</div> : null)}</div> : null}
+                    {expandedWhere.has(g.key) ? <div className="mt-2 space-y-3">{list.map((v, i) => v.files.length ? <div key={v.key} data-cde-model={g.key} className="break-all"><b>{v.name ?? `Modelo ${i + 1}`} ({v.files.length}):</b><ol className="mt-1 space-y-1.5">{v.files.map((f, fi) => <li key={f} className="flex gap-2"><b className="shrink-0">{fi + 1}.</b><span>{f}</span></li>)}</ol></div> : null)}</div> : null}
                   </div>
                 ) : null}
                 {removed.length ? (
