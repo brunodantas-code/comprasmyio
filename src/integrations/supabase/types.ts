@@ -3955,6 +3955,7 @@ export type Database = {
           quantity: number
           recipient: string
           recipient_user_id: string | null
+          reimbursement_account_id: string | null
           request_group_id: string | null
           request_model: string
           request_subtype: string | null
@@ -4009,6 +4010,7 @@ export type Database = {
           quantity?: number
           recipient?: string
           recipient_user_id?: string | null
+          reimbursement_account_id?: string | null
           request_group_id?: string | null
           request_model?: string
           request_subtype?: string | null
@@ -4063,6 +4065,7 @@ export type Database = {
           quantity?: number
           recipient?: string
           recipient_user_id?: string | null
+          reimbursement_account_id?: string | null
           request_group_id?: string | null
           request_model?: string
           request_subtype?: string | null
@@ -4140,6 +4143,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "purchase_orders_reimbursement_account_id_fkey"
+            columns: ["reimbursement_account_id"]
+            isOneToOne: false
+            referencedRelation: "reimbursement_accounts"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "purchase_orders_request_type_fkey"
             columns: ["request_type"]
             isOneToOne: false
@@ -4193,6 +4203,69 @@ export type Database = {
             columns: ["tool_asset_id"]
             isOneToOne: false
             referencedRelation: "tool_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reimbursement_accounts: {
+        Row: {
+          active: boolean
+          created_at: string
+          details: Json
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          details: Json
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          details?: Json
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      reimbursement_destinations: {
+        Row: {
+          account_id: string
+          created_at: string
+          details: Json
+          order_id: string
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          details: Json
+          order_id: string
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          details?: Json
+          order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reimbursement_destinations_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "reimbursement_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reimbursement_destinations_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "purchase_orders"
             referencedColumns: ["id"]
           },
         ]

@@ -1,4 +1,8 @@
 # Roadmap
+- [x] Code: Salvar de Gestão do ticket alinhado à direita e conferido na tela.
+- [x] Cadastro → Diversos: contas bancárias/PIX PF/PJ pessoais, com inclusão, edição e retirada para próximos pedidos.
+- [x] Reembolsos: escolha da conta no pedido e cópia histórica privada nos detalhes Supply/Cash Flow.
+- [x] Reembolsos: cadastro, releitura, seleção, solicitação e destino salvos conferidos no computador/celular; registros fictícios removidos. Quatro testes passaram; acesso do pagador conectado, sem sessão de outra pessoa para conferência visual.
 - [x] CDE: prévia preserva tamanho/aparência real (185×32 px igual ao botão original); seleção, lápis e lixeira alinhados; computador/celular conferidos.
 - [x] Avisos de prazo com fundo cinza-claro e texto escuro; cinza existe nas opções de fundo do CDE, sem configuração própria do tooltip; tela conferida.
 - [x] Code: altura padrão preservada e etiqueta Aguardando resposta sem quebra, conferida em sessão autenticada.

@@ -1,3 +1,4 @@
+import { ReimbursementAccounts, ReimbursementDestination } from "@/components/reimbursement-accounts";
 import { SupplyItemsSummary } from "@/components/supply-items-summary";
 import { SupplyDeadlineAlert } from "@/components/supply-deadline-alert";
 import { SUPPLY_CODE_MAX, requestedDeadline, deadlineSignals } from "@/lib/supply-deadlines";
@@ -730,6 +731,7 @@ function Dashboard() {
                 {me.canAccess("cadastro_lembretes") && <TabsContent value="lembretes"><RemindersTab /></TabsContent>}
                 {me.canAccess("cadastro_diversos") && <TabsContent value="diversos">
                   <div className="space-y-6">
+                    <ReimbursementAccounts userId={me.id} />
                     <UserManualsTab />
                     <SupplyOrderStatusesTab userId={me.id} />
                     <ClientCategoriesTab />
@@ -1316,6 +1318,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
   const travelDeparture = travelLegs[0]?.departure ?? "";
   const travelReturn = travelLegs[0]?.return ?? "";
   type ReembolsoLeg = { description: string; value: string; date: string };
+  const [reimbursementAccountId, setReimbursementAccountId] = useState("");
   const [reembolsoLegs, setReembolsoLegs] = useState<ReembolsoLeg[]>([{ description: "", value: "", date: "" }]);
   const updateReembolsoLeg = (i: number, patch: Partial<ReembolsoLeg>) =>
     setReembolsoLegs((prev) => prev.map((l, idx) => (idx === i ? { ...l, ...patch } : l)));
@@ -1432,6 +1435,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
     setTravelType("");
     setTravelLegs([{ destination: "", departure: "", return: "" }]);
     setReembolsoLegs([{ description: "", value: "", date: "" }]);
+    setReimbursementAccountId("");
     setPaymentDescription("");
     setPaymentValue("0");
     setPaymentDate("");
@@ -1527,6 +1531,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
           tag_id: resolveSupplyTag(resolvedAllocation.allocation_type, tagId),
           parent_order_id: null,
           payment_date: requestModel === "pagamento" ? paymentDate : null,
+          reimbursement_account_id: requestModel === "reembolso" ? reimbursementAccountId || null : null,
           site_survey_visit_id: siteSurveyDraft?.visitId ?? null,
 
           item_name: values.item_name,
@@ -1654,6 +1659,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
         }
       }
       if (isReembolso) {
+        if (!reimbursementAccountId) return toast.error("Escolha a conta bancária ou PIX para o reembolso.");
         for (let i = 0; i < reembolsoLegs.length; i++) {
           const leg = reembolsoLegs[i];
           const n = i + 1;
@@ -1895,6 +1901,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
 
             {requestModel === "reembolso" && (
               <div className="mt-2 space-y-3">
+                <ReimbursementAccounts userId={userId} value={reimbursementAccountId} onChange={setReimbursementAccountId} />
                 {reembolsoLegs.map((leg, i) => (
                   <div key={i} className="rounded-md border p-3 space-y-3">
                     <div className="flex items-center justify-between">
@@ -3217,6 +3224,7 @@ function OrderReportDialog({
         </DialogHeader>
 
         <div className="space-y-6 font-sans">
+          {(order.request_model === "reembolso" || order.request_type === "reembolso") && <ReimbursementDestination orderId={order.id} />}
           <section className="grid grid-cols-2 gap-4 md:grid-cols-3">
             <Row label="Item" value={order.item_name} />
             <Row label="Tipo(s)" value={(relatedOrders ?? [{ request_type: order.request_type, travel_type: order.travel_type }]).map((related) => requestTypeLabel(related, requestTypes)).filter((v, i, a) => a.indexOf(v) === i).join(" + ")} />
