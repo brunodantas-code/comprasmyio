@@ -297,9 +297,9 @@ export function CdeWorkspace() {
                   <span className="block text-sm font-normal">{g.title.split(" ").slice(1).join(" ")}</span>
                   <span className="mt-0.5 block text-xs text-muted-foreground">{list.length} modelos · {g.hint}</span>
                 </span>
-                <CdeToggleIcon open={isOpen} />
               </button>
               <CdeButton group="plus" screen="components/cde/cde-workspace.tsx" title="Criar modelo" aria-label={`Criar modelo em ${g.title}`} onClick={() => { setDraft({ ...emptyDraft, tag: FIELD_TAGS[g.key]?.[0] ?? (NUMBER_MODELS[g.key] ? "span" : (g.key === "box" || g.key === "confirm_dialog") ? "div" : "Button"), label: NUMBER_MODELS[g.key] ? "1" : "" }); setCreating(g.key); }} />
+              <CdeButton group="toggle" screen="components/cde/cde-workspace.tsx" title={`${isOpen ? "Recolher" : "Exibir"} ${g.title}`} aria-label={`${isOpen ? "Recolher" : "Exibir"} ${g.title}`} aria-expanded={isOpen} onClick={() => setOpen((s) => { const n = new Set(s); if (n.has(g.key)) n.delete(g.key); else n.add(g.key); return n; })} />
             </div>}
             {isOpen ? (
               <>
