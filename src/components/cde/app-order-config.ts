@@ -25,9 +25,9 @@ export function parseAppOrder(raw?: string): string[] {
 }
 export function useAppOrder() {
   return useQuery({ queryKey: ["cde-app-order"], queryFn: async () => {
-    const { data, error } = await supabase.from("cde_selected").select("variant_key").eq("group_key", "app_order").eq("is_primary", true).maybeSingle();
+    const { data, error } = await supabase.rpc("public_app_order");
     if (error) throw error;
-    return parseAppOrder(data?.variant_key);
+    return parseAppOrder(data ?? undefined);
   } });
 }
 

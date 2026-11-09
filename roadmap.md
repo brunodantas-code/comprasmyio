@@ -173,3 +173,17 @@
 - [x] Biblioteca CDE: filtro consolidado por nome/tipo/local/ícone e ordenação A–Z/Z–A por nome/tipo/local, conferidos em sessão autenticada.
 
 - [x] Padronizar Salvar e Excluir com símbolos/textos CDE e reunir locais de uso na biblioteca.
+- [x] Biblioteca CDE: seleção múltipla e retirada persistente, confirmação e bloqueio sem padrão; testados com restauração.
+
+- [x] Cards com prévia, título e controles separados; dimensões uniformes e celular sem overflow.
+
+- [x] Edição de texto e vínculo em botões compartilhados estáticos; salvamento/releitura conferidos. Usos dinâmicos/não compartilhados bloqueados para evitar escolhas sem efeito.
+
+- [x] Links para controles únicos de Todos os approvals e rotas Code/OpDesk; Agrupar abre a página correta. Entrar verde/branco conferido.
+- [ ] Mapear demais botões específicos para sua tela exata; depende de mapeamento individual ainda não implementado.
+
+- [x] CDE exibido na página de entrada.
+
+- [x] Legal com indicação verde de disponível na entrada.
+
+- [x] Landing usa mesma ordem CDE do portal, com leitura pública restrita à ordem.

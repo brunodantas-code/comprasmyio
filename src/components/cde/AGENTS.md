@@ -28,3 +28,6 @@
 - Organize actions inherit the live Save look when no organize standard is selected; deadline indicators share this group to prevent visual drift.
 
 - Shared Save/Delete buttons resolve icon and label through CDE; the library aggregates their source locations to avoid presenting call sites as distinct models.
+- Library retirement persists source keys in cde_selected.button_library_retired, never deletes app controls, and fails closed unless the inventory proves live CDE wiring and a valid chosen model.
+- Library text/group bindings use cde_selected.button_bindings keyed by original shared Button text; unsafe/dynamic or nonshared controls cannot save ineffective bindings.
+- Landing and portal share app ordering via public_app_order(), a narrow public read exposing only the order array, never other CDE records.

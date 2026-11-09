@@ -24,7 +24,7 @@ function scan(dir) {
             if (ts.isJsxText(n)) { const s = n.text.replace(/\s+/g, ' ').trim(); if (s) labels.push(s); }
             if (ts.isJsxExpression(n) && n.expression) {
               dynamic = true;
-              function literals(x) { if (ts.isStringLiteral(x) || ts.isNoSubstitutionTemplateLiteral(x)) { if (x.text.trim()) labels.push(x.text.trim()); } else ts.forEachChild(x, literals); }
+              function literals(x) { if (ts.isJsxAttribute(x)) return; if (ts.isStringLiteral(x) || ts.isNoSubstitutionTemplateLiteral(x)) { if (x.text.trim()) labels.push(x.text.trim()); } else ts.forEachChild(x, literals); }
               literals(n.expression);
             }
             if (ts.isJsxSelfClosingElement(n)) icons.push(n.tagName.getText(source));
@@ -32,7 +32,9 @@ function scan(dir) {
           }
           if (ts.isJsxElement(node)) node.children.forEach(content);
           const label = [...new Set(labels)].join(' / ') || value(opening.attributes, 'aria-label') || value(opening.attributes, 'title') || icons[0] || 'Sem nome fixo';
-          entries.push({ file: path.replace(/^src\//, ''), line: source.getLineAndCharacterOfPosition(node.getStart(source)).line + 1, tag, label, dynamic, icon: icons[0] || '', variant: value(opening.attributes, 'variant'), size: value(opening.attributes, 'size'), className: value(opening.attributes, 'className'), group: value(opening.attributes, 'group') });
+          const hasAttribute = name => opening.attributes.properties.some(p => ts.isJsxAttribute(p) && p.name.getText(source) === name);
+          const hasSpread = opening.attributes.properties.some(p => ts.isJsxSpreadAttribute(p));
+          entries.push({ file: path.replace(/^src\//, ''), line: source.getLineAndCharacterOfPosition(node.getStart(source)).line + 1, tag, label, dynamic, autoCdeSafe: !dynamic && !hasAttribute('style') && !hasAttribute('asChild') && !hasSpread, icon: icons[0] || '', variant: value(opening.attributes, 'variant'), size: value(opening.attributes, 'size'), className: value(opening.attributes, 'className'), group: value(opening.attributes, 'group') });
         }
       }
       ts.forEachChild(node, visit);

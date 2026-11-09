@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label";
 import { MyioPlatformLogo } from "@/components/myio-platform-logo";
 import { CrmFunnelIcon } from "@/components/crm-funnel-icon";
 import { MytosisIcon } from "@/components/mytosis-icon";
+import { CdeIcon } from "@/components/cde-icon";
+import { PORTAL_APPS, useAppOrder } from "@/components/cde/app-order-config";
 import { toast } from "sonner";
 import { z } from "zod";
 import {
@@ -44,6 +46,7 @@ export const Route = createFileRoute("/")({
 });
 
 const MODULES = [
+  { icon: CdeIcon, title: "CDE", body: "Padrões de interface", available: true },
   {
     icon: Settings,
     title: "Supply",
@@ -78,7 +81,7 @@ const MODULES = [
     icon: FileSignature,
     title: "Legal",
     body: "Contratos, atas de reunião e jurídico",
-    available: false,
+    available: true,
   },
   {
     icon: UsersRound,
@@ -106,6 +109,12 @@ const signInSchema = z.object({
 });
 
 export function Landing() {
+  const { data: appOrder } = useAppOrder();
+  const orderedModules = [...MODULES].sort((a, b) => {
+    const key = (name: string) => PORTAL_APPS.find(app => app.name === name)?.key ?? "";
+    const order = appOrder ?? PORTAL_APPS.map(app => app.key);
+    return order.indexOf(key(a.title)) - order.indexOf(key(b.title));
+  });
   const [signedIn, setSignedIn] = useState(false);
   const [loading, setLoading] = useState(false);
   const [recovering, setRecovering] = useState(false);
@@ -196,7 +205,7 @@ export function Landing() {
           </p>
 
           <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 min-[960px]:gap-3">
-            {MODULES.map(({ icon: Icon, title, body, available }) => (
+            {orderedModules.map(({ icon: Icon, title, body, available }) => (
               <div
                 key={title}
                 className={`flex h-28 min-w-0 items-center gap-3 rounded-lg border border-erp-landing-border bg-erp-landing-panel p-3 transition-colors hover:border-primary/50 sm:h-24 sm:p-3 ${available ? "" : "opacity-60"}`}
@@ -251,7 +260,7 @@ export function Landing() {
                   </div>
                   <PasswordInput id="landing-password" name="password" autoComplete="current-password" required className="h-12 border-erp-access-border bg-erp-access-field text-erp-landing-foreground focus-visible:ring-primary" toggleClassName="text-erp-landing-muted hover:text-erp-landing-foreground" />
                 </div>
-                <Button type="submit" size="lg" className="h-12 w-full" disabled={loading}>
+                <Button type="submit" size="lg" className="erp-entry-button h-12 w-full" disabled={loading}>
                   {loading ? "Entrando..." : "Entrar na plataforma"}
                   {!loading && <ArrowRight className="h-5 w-5" />}
                 </Button>

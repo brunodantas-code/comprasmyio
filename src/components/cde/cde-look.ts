@@ -5,6 +5,20 @@ import { styleOf } from "./cde-render";
 /** Groups applied automatically by shared ui components (Button/Input/Textarea). */
 export type AutoGroup = "save" | "cancel" | "confirm" | "trash" | "pencil" | "toggle" | "move" | "sort" | "export" | "send" | "attach" | "clear" | "organize" | "fields_input" | "fields_textarea" | "fields_password";
 
+export type LibraryBinding = { group: AutoGroup; label: string };
+export function readButtonBindings(raw?: string): Record<string, LibraryBinding> {
+  try {
+    const value: unknown = JSON.parse(raw ?? "{}");
+    if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+    return Object.fromEntries(Object.entries(value).filter(([, binding]) => binding && typeof binding === "object" && typeof binding.group === "string" && typeof binding.label === "string"));
+  } catch { return {}; }
+}
+export function useButtonBinding(label: string) {
+  const { data } = useCdeStandards();
+  const bindings = readButtonBindings(data?.selected.find(s => s.group_key === "button_bindings" && s.is_primary)?.variant_key);
+  return bindings[label.trim()];
+}
+
 const ICON_GROUP: Record<string, AutoGroup> = {
   Pencil: "pencil", PencilLine: "pencil", SquarePen: "pencil", PenLine: "pencil",
   Trash: "trash", Trash2: "trash",

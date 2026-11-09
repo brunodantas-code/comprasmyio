@@ -1352,6 +1352,13 @@
       "when": 1794176137868,
       "tag": "0192_user_active_and_cde_app",
       "breakpoints": true
+    },
+    {
+      "idx": 193,
+      "version": "7",
+      "when": 1794190040892,
+      "tag": "0193_public_app_order_only",
+      "breakpoints": true
     }
   ]
 }

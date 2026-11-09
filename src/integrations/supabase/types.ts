@@ -7813,6 +7813,7 @@ export type Database = {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
       }
+      public_app_order: { Args: never; Returns: string }
       reallocate_allocation_link: {
         Args: {
           _destination_id: string

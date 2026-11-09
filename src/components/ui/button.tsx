@@ -3,7 +3,7 @@ import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
-import { detectButtonGroup, useCdeLook } from "@/components/cde/cde-look";
+import { detectButtonGroup, useCdeLook, useButtonBinding } from "@/components/cde/cde-look";
 import { ICONS } from "@/components/cde/cde-render";
 
 const buttonVariants = cva(
@@ -76,11 +76,12 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     // CdeButton (style passed) keeps its own CDE variant; never re-skin it by label.
     const resolvedVariant = !style && actionLabelPattern.test(accessibleLabel) ? "action" : variant;
     // CDE: action buttons follow the chosen standard live; CdeButton passes its own style and is skipped.
-    const group = detectButtonGroup(children, [props["aria-label"], props.title].filter(Boolean).join(" "));
+    const binding = useButtonBinding(accessibleLabel);
+    const group = binding?.group ?? detectButtonGroup(children, [props["aria-label"], props.title].filter(Boolean).join(" "));
     const look = useCdeLook(style ? undefined : group, true);
-    const standardSave = !style && !asChild && (group === "save" || group === "trash");
+    const standardSave = !style && !asChild && (group === "save" || group === "trash" || !!binding);
     const SaveIcon = ICONS[look.icon || (group === "trash" ? "Trash2" : "Save")] ?? ICONS.Save;
-    const content = standardSave ? <><SaveIcon className={look.iconClass || "h-4 w-4"} />{visibleText ? look.label?.trim() || (group === "trash" ? "Excluir" : "Salvar") : null}</> : children;
+    const content = standardSave ? <><SaveIcon className={look.iconClass || "h-4 w-4"} />{visibleText ? binding?.label || look.label?.trim() || (group === "trash" ? "Excluir" : "Salvar") : null}</> : children;
     const cdeVariant = look.variant ? look.variant as VariantProps<typeof buttonVariants>["variant"] : resolvedVariant;
     const cdeSize = look.size ? look.size as VariantProps<typeof buttonVariants>["size"] : size;
     return (
