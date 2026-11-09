@@ -620,6 +620,7 @@ function Dashboard() {
   const [registrationSection, setRegistrationSection] = useState(search.subsection);
   const [administrationSection, setAdministrationSection] = useState(search.subsection);
   const [workflowSection, setWorkflowSection] = useState("organograma");
+  const { data: menuOrders } = useMenuOrders();
 
   if (meLoading || !me) {
     return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Carregando...</div>;
@@ -668,7 +669,6 @@ function Dashboard() {
     { value: "roles", label: "Consolidado por Cargo", allowed: me.canAccess("approvals_consolidado") },
   ].filter((tab) => tab.allowed);
   const activeApprovalSection = approvalSection ?? approvalTabs[0]?.value;
-  const { data: menuOrders } = useMenuOrders();
   const navigationTabs = [
     { value: "pedidos", label: "Solicitações", icon: ClipboardList, allowed: canSeeRequests },
     { value: "queue", label: "Approvals", icon: ShoppingCart, allowed: canSeeQueue },

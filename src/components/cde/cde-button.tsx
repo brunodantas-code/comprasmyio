@@ -1,13 +1,13 @@
 import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import addTextUsage from "./add-text-usage.json";
 import { ICONS, styleOf, type CdeStyle } from "./cde-render";
 
 /** Grupos do CDE que já trocam ao vivo nas telas. */
-export type CdeGroup = "filter" | "plus" | "box" | "number_section" | "number_subsection" | "fields_select" | "confirm_dialog" | "close";
+export type CdeGroup = "filter" | "plus" | "box" | "number_section" | "number_subsection" | "fields_select" | "confirm_dialog" | "close" | "toggle" | "color_swatch";
 
 /** Padrão usado enquanto o CDE carrega ou se nenhum padrão estiver escolhido. */
 const FALLBACK: Record<CdeGroup, string> = {
@@ -19,6 +19,8 @@ const FALLBACK: Record<CdeGroup, string> = {
   fields_select: "SelectTrigger|||||",
   confirm_dialog: "div|||rounded-lg border bg-background||",
   close: "button|||rounded-sm opacity-70 hover:opacity-100|X|h-4 w-4",
+  toggle: "Button|ghost|compactIcon|text-primary|ChevronDown|h-4 w-4",
+  color_swatch: "span|||rounded-none||",
 };
 
 type Model = { variant: string; size: string; className: string; icon: string; iconClass: string; style?: CdeStyle };
@@ -98,11 +100,28 @@ export const CdeButton = forwardRef<HTMLButtonElement, Props>(function CdeButton
       className={cn(m.className, cls, active ? "!text-primary" : group === "filter" ? "!text-foreground hover:!text-primary" : "", className)}
       {...rest}
     >
-      {Icon ? <Icon className={m.iconClass} /> : null}
+      {group === "toggle" ? (rest["aria-expanded"] ? <ICONS.ChevronUp className={m.iconClass} /> : <ICONS.ChevronDown className={m.iconClass} />) : Icon ? <Icon className={m.iconClass} /> : null}
       {label}
     </Button>
   );
 });
+
+/** Inline arrow for a labelled expanding header; shares the toggle look without styling its text. */
+export function CdeToggleIcon({ open }: { open?: boolean }) {
+  const { data } = useCdeStandards();
+  const m = resolveCdeModel(data, "toggle", "components/cde/cde-workspace.tsx");
+  const { css, cls } = styleOf(m.style);
+  const Icon = open ? ICONS.ChevronUp : ICONS.ChevronDown;
+  return <span style={css} className={cn(buttonVariants({ variant: (m.variant || "ghost") as never, size: (m.size || "compactIcon") as never }), "ml-auto shrink-0", m.className, cls)}><Icon className={m.iconClass || "h-4 w-4"} /></span>;
+}
+
+/** Every color picker shares the saved swatch shape; square until a choice is saved. */
+export function useCdeSwatchStyle() {
+  const { data } = useCdeStandards();
+  const m = resolveCdeModel(data, "color_swatch");
+  const { css, cls } = styleOf(m.style);
+  return { css, cls: cn(m.className, cls) };
+}
 
 /** Estilo de box (cartão) escolhido no CDE; vazio quando o padrão é o original. */
 export function useCdeBoxStyle(screen?: string) {

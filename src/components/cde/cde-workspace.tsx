@@ -20,7 +20,7 @@ import { ColorCode } from "./color-code";
 import { FONT_SIZES, FORMS, ICONS, TEXTS, WIDTHS, styleOf, type CdeStyle } from "./cde-render";
 import { CdeAppIcons } from "./cde-app-icons";
 import { CdeNavigation } from "./cde-navigation";
-import { CdeButton, CdeNumber, addTextKey } from "./cde-button";
+import { CdeButton, CdeNumber, CdeToggleIcon, addTextKey } from "./cde-button";
 import { CdeMainMenu } from "./cde-main-menu";
 import { CdeAppOrder } from "./cde-app-order";
 import { CdeCategoryHeader } from "./cde-category-header";
@@ -59,9 +59,11 @@ const GROUPS: { key: GroupKey; title: string; hint: string; multi?: boolean }[] 
   { key: "confirm_dialog", title: "5.2 Mensagens de confirmação", hint: "Janelas de exclusão e confirmação · padrão único, aplicado ao vivo" },
   { key: "number_section", title: "6.1 Numeração das categorias", hint: "Quadrada ou redonda · padrão principal e secundários por tela" },
   { key: "number_subsection", title: "6.2 Numeração das subcategorias", hint: "Quadrada ou redonda · padrão principal e secundários por tela" },
+  { key: "color_swatch", title: "11. Padrões para edição de cores", hint: "Amostras de cor · padrão único, aplicado em todos os apps" },
 ];
 
 const NUMBER_MODELS: Record<string, Omit<Variant, "key">[]> = Object.fromEntries(["number_section", "number_subsection"].map((group) => [group, ["rounded-md", "rounded-full"].map((shape) => ({ tag: "span", variant: "", size: "", className: `${shape} ${group === "number_section" ? "bg-primary text-foreground" : "bg-cde-number-soft text-primary"}`, icon: "", iconClass: "", label: "1", count: 0, files: ["components/cde/cde-workspace.tsx"] }))]));
+NUMBER_MODELS.color_swatch = ["rounded-none", "rounded-full"].map((shape) => ({ tag: "span", variant: "", size: "", className: `${shape} bg-primary`, icon: "", iconClass: "", label: " ", count: 0, files: ["components/mytosis/color-options.tsx", "components/mytosis/format-color-options.tsx", "components/cde/top-icon-style-editor.tsx", "components/cde/list-item-style.tsx"] }));
 
 /** Telas conhecidas pelo levantamento, com o app deduzido pelo caminho do arquivo. */
 const SCREENS = [...new Set(Object.values(inventory).flatMap((g) => (g as { files: string[] }[]).flatMap((v) => v.files)))].sort();
@@ -289,7 +291,7 @@ export function CdeWorkspace() {
                   <span className="block font-semibold">{g.title.split(" ").slice(1).join(" ")}</span>
                   <span className="mt-0.5 block text-xs text-muted-foreground">{list.length} modelos · {g.hint}</span>
                 </span>
-                <span>{isOpen ? <ChevronUp className="h-4 w-4 shrink-0" /> : <ChevronDown className="h-4 w-4 shrink-0" />}</span>
+                <CdeToggleIcon open={isOpen} />
               </button>
               <CdeButton group="plus" screen="components/cde/cde-workspace.tsx" title="Criar modelo" aria-label={`Criar modelo em ${g.title}`} onClick={() => { setDraft({ ...emptyDraft, tag: FIELD_TAGS[g.key]?.[0] ?? (NUMBER_MODELS[g.key] ? "span" : (g.key === "box" || g.key === "confirm_dialog") ? "div" : "Button"), label: NUMBER_MODELS[g.key] ? "1" : "" }); setCreating(g.key); }} />
             </div>}
@@ -301,24 +303,16 @@ export function CdeWorkspace() {
                     const isPrimary = primaries.includes(v.key);
                     const sec = secs.find((s) => s.variant_key === v.key);
                     return (
-                      <div key={v.key} className={cn("flex w-64 shrink-0 flex-col gap-2 rounded-lg border p-3", selected ? "border-primary bg-accent" : "border-border")}>
+                      <div key={v.key} data-cde-model={g.key} className={cn("flex h-60 w-64 shrink-0 flex-col gap-2 rounded-lg border p-3", selected ? "border-primary bg-accent" : "border-border")}>
                         <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
                           <span className="truncate" title={v.style?.description || undefined}>{v.name ?? `Modelo ${i + 1}`}{v.custom ? " · criado no CDE" : ""}</span>
-                          <span className="flex items-center gap-1">{v.custom && !v.count ? "novo" : `${v.count} uso${v.count === 1 ? "" : "s"}`}
+                          <span className="flex shrink-0 items-center gap-1 whitespace-nowrap">{v.custom && !v.count ? "novo" : `${v.count} uso${v.count === 1 ? "" : "s"}`}
                             <Button type="button" variant="outline" size="compactIcon" title="Editar modelo" aria-label={`Editar ${v.name ?? `Modelo ${i + 1}`} em ${g.title}`} onClick={() => { setEditing(v); setDraft({ name: v.name ?? `Modelo ${i + 1}`, tag: v.tag, variant: v.variant, size: v.size, className: v.className, icon: v.icon, iconClass: v.iconClass, label: v.label, style: { ...v.style } }); setCreating(g.key); }}><Pencil /></Button>
                             <Button type="button" variant="outline" size="compactIcon" title={selected ? "Remova o padrão antes de excluir" : "Excluir modelo"} aria-label={`Excluir ${v.name ?? `Modelo ${i + 1}`}`} disabled={selected}
                               onClick={() => { if (!standards.length) return toast.error("Escolha primeiro um padrão para substituir este modelo."); setReplacement(primaries.length === 1 ? primaries[0] : standards.length === 1 ? standards[0] : ""); setDeleting({ group: g.key, model: v, label: v.name ?? `Modelo ${i + 1}` }); }}><Trash2 /></Button>
                           </span>
                         </div>
-                        <div className="flex min-h-14 items-center justify-center rounded-md bg-background p-2"><Preview v={v} /></div>
-                        <dl className="space-y-0.5 text-[0.7rem] leading-4 text-muted-foreground">
-                          <div><b>Tipo:</b> {v.tag}{v.variant ? ` · ${v.variant}` : ""}{v.size ? ` · ${v.size}` : ""}</div>
-                          {v.style && (v.style.fill || v.style.border) ? <div className="flex flex-wrap gap-x-2">{v.style.fill && v.style.fill !== "none" ? <span>Fundo <ColorCode color={FILLS.find((f) => f.key === v.style!.fill)?.color} /></span> : null}{v.style.border && v.style.border !== "none" ? <span>Borda <ColorCode color={BORDERS.find((b) => b.key === v.style!.border)?.color} /></span> : null}</div> : null}
-                          {v.style?.fontSize ? <div><b>Fonte:</b> {v.style.fontSize.replace("px", " px")}</div> : null}
-                          {v.style?.description ? <div className="whitespace-pre-wrap break-words"><b>Descrição:</b> {v.style.description}</div> : null}
-                          {v.className ? <div className="break-all"><b>Classes:</b> {v.className}</div> : null}
-                          {v.icon ? <div className="break-all"><b>Ícone:</b> {v.icon} {v.iconClass}</div> : null}
-                        </dl>
+                        <div className="flex h-20 shrink-0 items-center justify-center overflow-hidden rounded-md bg-background p-2"><Preview v={v} /></div>
                         <Button type="button" variant="action" size="sm" style={{ "--wa-bg": "var(--whatsapp-green)", "--wa-bd": "var(--whatsapp-border)", "--wa-tx": "var(--card)" } as React.CSSProperties} className="mt-auto !rounded-lg !border-2 !border-solid !border-[var(--wa-bd)] !bg-[var(--wa-bg)] !text-[var(--wa-tx)] hover:!brightness-110" disabled={toggleStandard.isPending || (isPrimary && !g.multi)} onClick={() => toggleStandard.mutate({ group: g.key, key: v.key, multi: g.multi })}>
                           {isPrimary ? <><Check className="h-4 w-4" />{g.multi ? "Padrão (remover)" : "Padrão principal"}</> : g.multi ? "Adicionar como padrão" : sec ? "Tornar principal" : "Escolher como padrão"}
                         </Button>
@@ -332,13 +326,28 @@ export function CdeWorkspace() {
                     );
                   })}
                 </div>
+                <div className="border-t border-border px-4 py-2 text-xs text-muted-foreground">
+                  <div className="flex items-center justify-between gap-2">
+                    <span>Detalhes dos modelos</span>
+                    <CdeButton group="toggle" screen="components/cde/cde-workspace.tsx" aria-label={`${expandedWhere.has(`details-${g.key}`) ? "Recolher" : "Exibir"} detalhes dos modelos de ${g.title}`} aria-expanded={expandedWhere.has(`details-${g.key}`)} onClick={() => setExpandedWhere((s) => { const n = new Set(s); const key = `details-${g.key}`; if (n.has(key)) n.delete(key); else n.add(key); return n; })} />
+                  </div>
+                  {expandedWhere.has(`details-${g.key}`) ? <div className="mt-2 space-y-3">{list.map((v, i) => <dl key={v.key} className="space-y-1 break-words">
+                    <dt className="font-medium">{v.name ?? `Modelo ${i + 1}`}</dt>
+                    <dd>Tipo: {v.tag}{v.variant ? ` · ${v.variant}` : ""}{v.size ? ` · ${v.size}` : ""}</dd>
+                    {v.style?.fontSize ? <dd>Fonte: {v.style.fontSize.replace("px", " px")}</dd> : null}
+                    {v.style?.fill ? <dd>Fundo: <ColorCode color={FILLS.find((f) => f.key === v.style?.fill)?.color} /></dd> : null}
+                    {v.style?.border ? <dd>Borda: <ColorCode color={BORDERS.find((b) => b.key === v.style?.border)?.color} /></dd> : null}
+                    {v.style?.description ? <dd className="whitespace-pre-wrap">Descrição: {v.style.description}</dd> : null}
+                    {v.className ? <dd>Classes: {v.className}</dd> : null}
+                    {v.icon ? <dd>Ícone: {v.icon} {v.iconClass}</dd> : null}
+                  </dl>)}</div> : null}
+                </div>
                 {g.key === "add" ? (
                   <div className="border-t border-border px-4 py-2 text-xs text-muted-foreground">
                     <div className="flex items-center justify-between gap-2">
                       <span>Botões atuais com + e texto ({new Set(addTextUsage.map((e) => addTextKey(e.file, e.label))).size})</span>
-                      <Button type="button" variant="ghost" size="compactIcon" className="text-primary hover:text-primary" aria-label={`${expandedWhere.has("add-text") ? "Recolher" : "Exibir"} botões atuais com + e texto`} aria-expanded={expandedWhere.has("add-text")} onClick={() => setExpandedWhere((c) => { const n = new Set(c); if (n.has("add-text")) n.delete("add-text"); else n.add("add-text"); return n; })}>
-                        {expandedWhere.has("add-text") ? <ChevronUp /> : <ChevronDown />}
-                      </Button>
+                      <CdeButton group="toggle" screen="components/cde/cde-workspace.tsx" aria-label={`${expandedWhere.has("add-text") ? "Recolher" : "Exibir"} botões atuais com + e texto`} aria-expanded={expandedWhere.has("add-text")} onClick={() => setExpandedWhere((c) => { const n = new Set(c); if (n.has("add-text")) n.delete("add-text"); else n.add("add-text"); return n; })}>
+                        </CdeButton>
                     </div>
                     {expandedWhere.has("add-text") ? (
                       <CdeAddTextList />
@@ -349,20 +358,18 @@ export function CdeWorkspace() {
                   <div className="border-t border-border px-4 py-2 text-xs text-muted-foreground">
                     <div className="flex items-center justify-between gap-2">
                       <span>Onde é utilizado</span>
-                      <Button type="button" variant="ghost" size="compactIcon" className="text-primary hover:text-primary" aria-label={`${expandedWhere.has(g.key) ? "Recolher" : "Exibir"} onde é utilizado em ${g.title}`} aria-expanded={expandedWhere.has(g.key)} onClick={() => setExpandedWhere((c) => { const n = new Set(c); if (n.has(g.key)) n.delete(g.key); else n.add(g.key); return n; })}>
-                        {expandedWhere.has(g.key) ? <ChevronUp /> : <ChevronDown />}
-                      </Button>
+                      <CdeButton group="toggle" screen="components/cde/cde-workspace.tsx" aria-label={`${expandedWhere.has(g.key) ? "Recolher" : "Exibir"} onde é utilizado em ${g.title}`} aria-expanded={expandedWhere.has(g.key)} onClick={() => setExpandedWhere((c) => { const n = new Set(c); if (n.has(g.key)) n.delete(g.key); else n.add(g.key); return n; })}>
+                        </CdeButton>
                     </div>
-                    {expandedWhere.has(g.key) ? <div className="mt-2 space-y-1">{list.map((v, i) => v.files.length ? <div key={v.key} className="break-all"><b>{v.name ?? `Modelo ${i + 1}`}:</b> {v.files.join(", ")}</div> : null)}</div> : null}
+                    {expandedWhere.has(g.key) ? <div className="mt-2 space-y-1">{list.map((v, i) => v.files.length ? <div key={v.key} data-cde-model={g.key} className="break-all"><b>{v.name ?? `Modelo ${i + 1}`}:</b> {v.files.join(", ")}</div> : null)}</div> : null}
                   </div>
                 ) : null}
                 {removed.length ? (
                   <div className="border-t border-border px-4 py-2 text-xs text-muted-foreground">
                     <div className="flex items-center justify-between gap-2">
                       <span>Histórico de exclusões</span>
-                      <Button type="button" variant="ghost" size="compactIcon" className="text-primary hover:text-primary" aria-label={`${expandedHistory.has(g.key) ? "Recolher" : "Exibir"} histórico de exclusões de ${g.title}`} title={expandedHistory.has(g.key) ? "Recolher histórico de exclusões" : "Exibir histórico de exclusões"} aria-expanded={expandedHistory.has(g.key)} aria-controls={`cde-history-${g.key}`} onClick={() => setExpandedHistory((current) => { const next = new Set(current); if (next.has(g.key)) next.delete(g.key); else next.add(g.key); return next; })}>
-                        {expandedHistory.has(g.key) ? <ChevronUp /> : <ChevronDown />}
-                      </Button>
+                      <CdeButton group="toggle" screen="components/cde/cde-workspace.tsx" aria-label={`${expandedHistory.has(g.key) ? "Recolher" : "Exibir"} histórico de exclusões de ${g.title}`} title={expandedHistory.has(g.key) ? "Recolher histórico de exclusões" : "Exibir histórico de exclusões"} aria-expanded={expandedHistory.has(g.key)} aria-controls={`cde-history-${g.key}`} onClick={() => setExpandedHistory((current) => { const next = new Set(current); if (next.has(g.key)) next.delete(g.key); else next.add(g.key); return next; })}>
+                        </CdeButton>
                     </div>
                     {expandedHistory.has(g.key) ? <div id={`cde-history-${g.key}`} className="mt-2">{removed.map((r) => (
                       <span key={r.variant_key} className="mr-3 inline-flex items-center gap-1">

@@ -9,7 +9,7 @@ export const FORMS = [
   { key: "round", label: "Bem arredondado", radius: "0.75rem" }, { key: "pill", label: "Pílula", radius: "9999px" }, { key: "circle", label: "Redonda (WhatsApp)", radius: "50%" },
 ] as const;
 export const WIDTHS = [{ key: "", label: "Padrão" }, { key: "0", label: "Sem borda" }, { key: "1px", label: "Fina" }, { key: "2px", label: "Média" }, { key: "3px", label: "Grossa" }];
-export const TEXTS = [{ key: "default", label: "Padrão", color: "currentColor" }, { key: "dark", label: "Escuro myio", color: "var(--myio-dark)" }, { key: "green", label: "Verde myio", color: "var(--myio-green)" }, { key: "white", label: "Branco", color: "var(--card)" }];
+export const TEXTS = [{ key: "default", label: "Padrão", color: "currentColor" }, { key: "dark", label: "Escuro myio", color: "var(--myio-dark)" }, { key: "green", label: "Verde myio", color: "var(--myio-green)" }, { key: "purple", label: "Roxo myio", color: "var(--myio-purple)" }, { key: "purple-mid", label: "Lilás myio", color: "var(--mytosis-purple-mid)" }, { key: "white", label: "Branco", color: "var(--card)" }];
 /** Variáveis CSS + classes fixas com prioridade, para vencer os estilos !important dos botões. */
 export function styleOf(st?: CdeStyle): { css: React.CSSProperties; cls: string } {
   const css: Record<string, string> = {}; const cls: string[] = [];

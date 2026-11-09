@@ -75,9 +75,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     // CdeButton (style passed) keeps its own CDE variant; never re-skin it by label.
     const resolvedVariant = !style && actionLabelPattern.test(accessibleLabel) ? "action" : variant;
     // CDE: action buttons follow the chosen standard live; CdeButton passes its own style and is skipped.
-    const look = useCdeLook(style ? undefined : detectButtonGroup(children, [props["aria-label"], props.title].filter(Boolean).join(" ")));
+    const look = useCdeLook(style ? undefined : detectButtonGroup(children, [props["aria-label"], props.title].filter(Boolean).join(" ")), true);
+    const cdeVariant = look.variant ? look.variant as VariantProps<typeof buttonVariants>["variant"] : resolvedVariant;
+    const cdeSize = look.size ? look.size as VariantProps<typeof buttonVariants>["size"] : size;
     return (
-      <Comp className={cn(buttonVariants({ variant: resolvedVariant, size, className }), look.className)} style={style ?? (look.className ? look.style : undefined)} ref={ref} {...props}>{children}</Comp>
+      <Comp className={cn(buttonVariants({ variant: cdeVariant, size: cdeSize, className }), look.className)} style={style ?? (look.variant || look.className ? look.style : undefined)} ref={ref} {...props}>{children}</Comp>
     );
   },
 );

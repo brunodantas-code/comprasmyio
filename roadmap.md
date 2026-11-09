@@ -1,4 +1,8 @@
 # Roadmap
+- [x] Amostras de cores quadradas nos seletores compartilhados do CDE/Mytosis e controle “Padrões para edição de cores”.
+- [x] Cor personalizada com símbolo de paleta no mesmo tamanho das amostras.
+- [x] Roxo/lilás myio disponíveis; prévia lilás e cancelamento conferidos sem alterar a escolha atual.
+- [x] Supply com lápis/lixeira pretos sem borda; setas ligadas ao CDE e cards uniformes 256×240, conferidos em sessão autenticada. Corrigida abertura do Supply por hook após retorno inicial.
 - [x] Monitoramento: excluídos ocultos por padrão; consulta explícita e limpeza do filtro conferidas na lista autenticada.
 - [x] Monitoramento: trigger compartilhado dos dois editores limpa etiqueta herdada ao mudar alocação; regressão temporária conferida para Projeto/Cliente/Estoque, sem alterar pedidos reais.
 - [x] CDE: histórico recolhido por padrão com seta em cada grupo; abertura e recolhimento conferidos.

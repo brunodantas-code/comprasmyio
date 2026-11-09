@@ -45,7 +45,7 @@ export function detectButtonGroup(children: React.ReactNode, label?: string): Au
 }
 
 /** Visual (CDE style) of the chosen standard for a group; empty when no standard is chosen. */
-export function useCdeLook(group: AutoGroup | undefined, withClass = false): { className: string; style: React.CSSProperties } {
+export function useCdeLook(group: AutoGroup | undefined, withClass = false): { className: string; style: React.CSSProperties; variant?: string; size?: string } {
   const { data } = useCdeStandards();
   if (!group) return { className: "", style: {} };
   const rows = (data?.selected ?? []).filter((s) => s.group_key === group && s.is_primary);
@@ -54,5 +54,5 @@ export function useCdeLook(group: AutoGroup | undefined, withClass = false): { c
   const row = rows.find((r) => r.variant_key.startsWith("custom:") || (r.variant_key.split("|")[3] ?? "").trim()) ?? rows[0];
   const m = resolveCdeModel({ selected: [row], models: data?.models ?? [] }, group as CdeGroup);
   const { css, cls } = styleOf(m.style);
-  return { className: [withClass ? m.className : "", cls].filter(Boolean).join(" "), style: css };
+  return { className: [withClass ? m.className : "", cls].filter(Boolean).join(" "), style: css, variant: m.variant, size: m.size };
 }

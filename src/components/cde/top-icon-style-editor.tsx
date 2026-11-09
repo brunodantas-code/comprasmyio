@@ -3,16 +3,30 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Palette } from "lucide-react";
+import { useCdeSwatchStyle } from "./cde-button";
+import { cn } from "@/lib/utils";
 import { TOP_ICON_DEFAULT, TOP_ICON_GROUP, topIconVars, useTopIconStyle, type TopIconStyle } from "./top-icon-style";
 
 type Item = { label: string; icon: React.ComponentType<{ className?: string }>; name: string };
-const COLORS = ["", "#000000", "#21A961", "#42D898", "#E8F7EF", "#FFFFFF", "#6B7280", "#D1D5DB"];
+const COLORS = [
+  { value: "", label: "Padrão" }, { value: "var(--foreground)", label: "Preto" },
+  { value: "var(--whatsapp-green)", label: "Verde myio" }, { value: "var(--whatsapp-border)", label: "Verde médio" },
+  { value: "var(--mytosis-green-soft)", label: "Verde claro" },
+  { value: "var(--myio-purple)", label: "Roxo myio" }, { value: "var(--mytosis-purple-mid)", label: "Lilás myio" },
+  { value: "var(--mytosis-purple-soft)", label: "Lilás claro" },
+  { value: "var(--card)", label: "Branco" }, { value: "var(--muted-foreground)", label: "Cinza" }, { value: "var(--border)", label: "Cinza claro" },
+];
 
-function Swatches({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+export function CdeColorSwatches({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  const swatch = useCdeSwatchStyle();
   return <div className="space-y-1"><div className="text-xs text-muted-foreground">{label}</div>
-    <div className="flex flex-wrap items-center gap-1.5">{COLORS.map((c) => <button key={c || "auto"} type="button" title={c || "Padrão"} onClick={() => onChange(c)}
-      className={`h-6 w-6 rounded border ${value === c ? "ring-2 ring-primary ring-offset-1" : "border-border"}`} style={c ? { background: c } : undefined}>{c ? null : <span className="text-[9px]">auto</span>}</button>)}
-      <input type="color" aria-label={`${label} personalizada`} value={value || "#000000"} onChange={(e) => onChange(e.target.value)} className="h-6 w-8 cursor-pointer rounded border border-border bg-transparent" />
+    <div className="flex flex-wrap items-center gap-1.5">{COLORS.map(({ value: c, label: name }) => <button key={c || "auto"} type="button" title={name} aria-label={`${label}: ${name}`} onClick={() => onChange(c)}
+      className={cn("h-6 w-6 border", value === c ? "ring-2 ring-primary ring-offset-1" : "border-border", swatch.cls)} style={{ ...swatch.css, ...(c ? { background: c } : {}) }}>{c ? null : <span className="text-[9px]">auto</span>}</button>)}
+      <label title="Cor personalizada" style={swatch.css} className={cn("relative flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center border border-border bg-background", swatch.cls)}>
+        <Palette className="h-4 w-4 text-foreground" />
+        <input type="color" aria-label={`${label} personalizada`} value={value.startsWith("#") ? value : "#000000"} onChange={(e) => onChange(e.target.value)} className="absolute inset-0 h-full w-full cursor-pointer opacity-0" />
+      </label>
       <span className="text-[0.6rem] text-muted-foreground/60">{value || "padrão"}</span></div></div>;
 }
 
@@ -41,9 +55,9 @@ export function TopIconStyleEditor({ items }: { items: Item[] }) {
       <span className="top-icon flex h-10 w-10 items-center justify-center"><Icon className="h-5 w-5" /></span>
       <span className="text-[0.7rem] leading-tight">{it.label}</span><span className="text-[0.6rem] text-muted-foreground/70">{it.name}</span></div>; })}</div>
     <div className="grid gap-3 sm:grid-cols-3">
-      <Swatches label="Cor do símbolo" value={s.fg} onChange={(fg) => set({ fg })} />
-      <Swatches label="Cor de fundo" value={s.bg} onChange={(bg) => set({ bg })} />
-      <Swatches label="Cor da borda" value={s.border} onChange={(border) => set({ border })} />
+      <CdeColorSwatches label="Cor do símbolo" value={s.fg} onChange={(fg) => set({ fg })} />
+      <CdeColorSwatches label="Cor de fundo" value={s.bg} onChange={(bg) => set({ bg })} />
+      <CdeColorSwatches label="Cor da borda" value={s.border} onChange={(border) => set({ border })} />
     </div>
     <div className="flex flex-wrap items-center gap-4 text-xs">
       <label className="flex items-center gap-2">Espessura da borda
