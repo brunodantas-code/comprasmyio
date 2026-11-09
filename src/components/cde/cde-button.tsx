@@ -7,7 +7,7 @@ import addTextUsage from "./add-text-usage.json";
 import { ICONS, styleOf, type CdeStyle } from "./cde-render";
 
 /** Grupos do CDE que já trocam ao vivo nas telas. */
-export type CdeGroup = "filter" | "plus" | "box" | "number_section" | "number_subsection" | "fields_select" | "confirm_dialog" | "close" | "toggle" | "color_swatch";
+export type CdeGroup = "filter" | "plus" | "box" | "number_section" | "number_subsection" | "fields_select" | "confirm_dialog" | "close" | "toggle" | "color_swatch" | "send" | "attach";
 
 /** Padrão usado enquanto o CDE carrega ou se nenhum padrão estiver escolhido. */
 const FALLBACK: Record<CdeGroup, string> = {
@@ -21,6 +21,8 @@ const FALLBACK: Record<CdeGroup, string> = {
   close: "button|||rounded-sm opacity-70 hover:opacity-100|X|h-4 w-4",
   toggle: "Button|ghost|compactIcon|text-primary|ChevronDown|h-4 w-4",
   color_swatch: "span|||rounded-none||",
+  send: "Button|outline|default||Send|h-4 w-4",
+  attach: "Button|outline|default||Paperclip|h-4 w-4",
 };
 
 type Model = { variant: string; size: string; className: string; icon: string; iconClass: string; style?: CdeStyle };

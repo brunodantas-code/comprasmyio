@@ -2759,6 +2759,54 @@
    "files": []
   }
  ],
+ "send": [
+  {
+   "tag": "Button",
+   "variant": "",
+   "size": "",
+   "className": "",
+   "icon": "Send",
+   "iconClass": "h-4 w-4",
+   "label": "Enviar resposta",
+   "count": 1,
+   "files": ["routes/_authenticated/development.tsx"]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "",
+   "className": "",
+   "icon": "Send",
+   "iconClass": "h-4 w-4",
+   "label": "Enviar pergunta",
+   "count": 3,
+   "files": ["components/supply-order-conversation.tsx", "components/mytosis/node-conversation.tsx", "components/mytosis/box-tasks.tsx"]
+  }
+ ],
+ "attach": [
+  {
+   "tag": "Button",
+   "variant": "",
+   "size": "",
+   "className": "",
+   "icon": "Send",
+   "iconClass": "h-4 w-4",
+   "label": "Anexar imagens",
+   "count": 1,
+   "files": ["routes/_authenticated/development.tsx"]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "icon",
+   "className": "",
+   "icon": "Paperclip",
+   "iconClass": "h-4 w-4",
+   "label": "",
+   "count": 1,
+   "files": ["components/mytosis/node-attachments.tsx"]
+  }
+ ],
  "export": [
   {
    "tag": "Button",
