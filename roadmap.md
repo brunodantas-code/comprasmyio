@@ -1,4 +1,13 @@
 # Roadmap
+- [x] Supply: divisória restaurada; conferida passando de 0 para 1 px após Em cotação.
+- [x] Lembretes: “Salvar” conferido em sessão autenticada.
+- [x] Cargos, Centros de Custo, Clientes e Projetos: “Salvar” conferido nas quatro telas.
+- [x] Projetos: X preto sem fundo verde; confirmação aberta e cancelada sem alterar registros.
+- [x] Todos os approvals: ações na mesma linha com filtro primeiro; computador/celular conferidos.
+- [x] Consolidação: explicado que filtros podem ser reunidos, mas agrupamento é função distinta; sem remoção não solicitada.
+- [x] Consolidação: PDF seguindo o padrão de exportação do CDE, conferido visualmente.
+- [x] Portal: sete apps por linha em 1083 px, preservando thumbnails.
+- [x] Entrada: boxes com o fundo e desfoque de Acesse sua conta; computador/celular conferidos.
 - [x] Diversos: setas sem sobreposição, filtro único em Dispositivos e + visível nos cadastros com inclusão existente; formulário de criação conferido sem gravar dados fictícios. Manuais e Dispositivos preservam seus fluxos próprios de cadastro.
 - [x] Code: Salvar de Gestão do ticket alinhado à direita e conferido na tela.
 - [x] Cadastro → Diversos: contas bancárias/PIX PF/PJ pessoais, com inclusão, edição e retirada para próximos pedidos.

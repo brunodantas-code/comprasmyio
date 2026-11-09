@@ -208,7 +208,7 @@ export function Landing() {
             {orderedModules.map(({ icon: Icon, title, body, available }) => (
               <div
                 key={title}
-                className={`flex h-28 min-w-0 items-center gap-3 rounded-lg border border-erp-landing-border bg-erp-landing-panel p-3 transition-colors hover:border-primary/50 sm:h-24 sm:p-3 ${available ? "" : "opacity-60"}`}
+                className={`relative z-10 flex h-28 min-w-0 items-center gap-3 rounded-lg border border-erp-landing-border bg-erp-access p-3 backdrop-blur-2xl transition-colors hover:border-primary/50 sm:h-24 sm:p-3 ${available ? "" : "opacity-60"}`}
               >
                 <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-md ${available ? "bg-primary text-primary-foreground" : "bg-erp-landing-border text-erp-landing-muted"}`}>
                   <Icon className="h-5 w-5" />

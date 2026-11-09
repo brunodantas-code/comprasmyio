@@ -195,7 +195,7 @@ function PortalPage() {
                   <div className="no-scrollbar -mx-3 flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain px-3 pb-2 sm:hidden">
                     {mobileAppPages.map((pageApps, pageIndex) => <div key={pageIndex} className="grid w-full shrink-0 snap-start grid-cols-4 gap-x-1 gap-y-7">{pageApps.map(renderApp)}</div>)}
                  </div>
-                 <div className="hidden grid-cols-3 gap-x-3 gap-y-8 sm:grid lg:grid-cols-6 lg:gap-x-4">
+                 <div className="hidden flex-wrap gap-x-6 gap-y-8 sm:flex">
                   {apps.map(({ key, name, description, to }) => (
                      <div key={key} style={{ zoom: tile.tilePct / 100 }} className="flex w-24 min-w-0 snap-start justify-self-center flex-col items-center text-center sm:w-28 sm:justify-self-start">
                       <Link

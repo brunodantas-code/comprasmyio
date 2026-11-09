@@ -109,7 +109,7 @@ export function SupplyOrderStatusesTab({ userId }: { userId: string }) {
             <TableHeader><TableRow><TableHead>Sequência</TableHead><TableHead>Nome</TableHead><TableHead>Tipo</TableHead><TableHead>Situação</TableHead><TableHead /></TableRow></TableHeader>
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
             <SortableContext items={list.map((r) => r.id)} strategy={verticalListSortingStrategy}>
-            <TableBody>
+            <TableBody className="[&_tr:last-child]:border-b">
               {list.map((r, i) => (
                 <SortableStatusRow key={r.id} row={r} index={i} canManage={!!canManage} onSave={(v) => save.mutate({ ...v, id: r.id })} onRemove={() => remove.mutate(r)} />
               ))}

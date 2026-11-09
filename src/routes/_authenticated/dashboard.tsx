@@ -2624,9 +2624,15 @@ function BuyerQueue({ mode = "all" }: { mode?: ApprovalListMode }) {
         </div>
       ));
     }
-    return <OrdersTable orders={list} projectName={projectName} requesterName={requesterName} showRequester canEdit={canManageOperationalStatus} canDelete />;
+    return <OrdersTable orders={list} projectName={projectName} requesterName={requesterName} showRequester canEdit={canManageOperationalStatus} canDelete toolbarActions={organizeActions} />;
   };
 
+  const organizeActions = <>
+    <Button type="button" variant={groupByProject ? "default" : "outline"} size="sm" onClick={() => setGroupByProject((v) => !v)}>Agrupar por Projeto e Cliente</Button>
+    <SupplyConsolidation />
+    <Button type="button" size="sm" variant={showTagCosts ? "default" : "outline"} onClick={() => setShowTagCosts((v) => !v)}><Tag className="h-3.5 w-3.5" /> Custo por Etiqueta</Button>
+    <Button type="button" size="sm" variant="outline" title="Exportar custo por Etiqueta em PDF" aria-label="Exportar custo por Etiqueta em PDF" disabled={!tagCosts.groups.length} onClick={() => tagCosts.exportPdf()}><FileText className="h-3.5 w-3.5" /></Button>
+  </>;
   return (
     <TableReportProvider><Card>
       <CardHeader>
@@ -2648,23 +2654,7 @@ function BuyerQueue({ mode = "all" }: { mode?: ApprovalListMode }) {
           <p className="text-sm text-muted-foreground">Nada por aqui.</p>
         ) : (
           <div className="space-y-2">
-            <div className="flex flex-wrap justify-start gap-2">
-              <Button
-                type="button"
-                variant={groupByProject ? "default" : "outline"} className={groupByProject ? "!bg-primary !text-primary-foreground hover:!bg-primary/90 hover:!text-primary-foreground" : undefined}
-                size="sm"
-                onClick={() => setGroupByProject((v) => !v)}
-              >
-                Agrupar por Projeto e Cliente
-              </Button>
-              <SupplyConsolidation />
-              <Button type="button" size="sm" variant={showTagCosts ? "default" : "outline"} className={showTagCosts ? "!bg-primary !text-primary-foreground hover:!bg-primary/90 hover:!text-primary-foreground" : undefined} onClick={() => setShowTagCosts((v) => !v)}>
-                <Tag className="h-3.5 w-3.5" /> Custo por Etiqueta
-              </Button>
-              <Button type="button" size="sm" variant="outline" title="Exportar custo por Etiqueta em PDF" aria-label="Exportar custo por Etiqueta em PDF" disabled={!tagCosts.groups.length} onClick={() => tagCosts.exportPdf()}>
-                <FileText className="h-3.5 w-3.5" />
-              </Button>
-            </div>
+            {(groupByProject || showTagCosts) && <div className="flex items-center gap-2 overflow-x-auto">{organizeActions}</div>}
             {showTagCosts ? <SupplyTagCostReport /> : renderOrders(filtered)}
           </div>
         )}
@@ -2821,7 +2811,7 @@ function AdminEditApprovalDialog({ order, items }: { order: Order; items: Approv
 }
 
 function OrdersTable({
-  orders, projectName, requesterName, showRequester, canEdit, canDelete, canEditRequester, stockParts,
+  orders, projectName, requesterName, showRequester, canEdit, canDelete, canEditRequester, stockParts, toolbarActions,
 }: {
   orders: Order[];
   projectName: (id: string) => string;
@@ -2831,6 +2821,7 @@ function OrdersTable({
   canDelete?: boolean;
   canEditRequester?: boolean;
   stockParts?: Map<string, StockPart>;
+  toolbarActions?: React.ReactNode;
 }) {
   const { data: me } = useCurrentUser();
   const { data: requestTypes } = useRequestTypes();
@@ -2920,8 +2911,9 @@ function OrdersTable({
 
   return (
     <>
-      <div className="mb-2 flex flex-wrap items-center gap-2 text-xs">
+      <div className="mb-2 flex items-center gap-2 overflow-x-auto py-1 text-xs [&>*]:shrink-0">
         <TableFilterMenu rows={orders} columns={colDefs.filter(c => showRequester || c.key !== "req").map(c => ({ key: c.key, label: c.label, kind: c.kind, value: c.raw as (o: typeof orders[number]) => string | number | null | undefined, display: c.list }))} filters={cf} onChange={(key, value) => setCf(prev => ({ ...prev, [key]: value }))} clear={() => setCf({})} />
+        {toolbarActions}
         <SupplyDeadlineIndicators orders={visibleOrders} />
         <TableReportActions title={showRequester ? "Todos os approvals" : "Minhas Solicitações"} />
         {activeColFilters.length > 0 && (
@@ -3867,7 +3859,7 @@ function ProjectsAdmin({ userId }: { userId: string }) {
               <MoneyInput id="p-budget" className="w-full" value={budgetVal} onChange={setBudgetVal} required placeholder="0,00" />
             </div>
             <div className="flex min-w-0 flex-col gap-2"><Label htmlFor="p-desc">Descrição</Label><Input id="p-desc" name="description" /></div>
-            <Button type="submit" className="w-full whitespace-nowrap xl:w-auto" disabled={create.isPending}>Criar</Button>
+            <Button type="submit" className="w-full whitespace-nowrap xl:w-auto" disabled={create.isPending}>Salvar</Button>
             </div>
           </form>
           )}
@@ -3932,7 +3924,7 @@ function ProjectsAdmin({ userId }: { userId: string }) {
                                  <Button type="button" variant="ghost" size="compactIcon" aria-label="Marcar como implantado" title="Marcar como implantado" className="text-blue-600 hover:text-blue-800" onClick={() => { setStatusDialog({ id: p.id, name: p.name, action: "implantado" }); setStatusDate(new Date().toISOString().slice(0, 10)); }}>
                                    <CheckCircle2 className="h-3.5 w-3.5" />
                                 </Button>
-                                 <Button type="button" variant="ghost" size="compactIcon" aria-label="Cancelar projeto" title="Cancelar projeto" className="text-destructive hover:text-destructive/80" onClick={() => { setStatusDialog({ id: p.id, name: p.name, action: "cancelado" }); setStatusDate(new Date().toISOString().slice(0, 10)); }}>
+                                 <Button type="button" variant="ghost" size="compactIcon" style={{}} aria-label="Cancelar projeto" title="Cancelar projeto" className="!text-foreground hover:!text-foreground !bg-transparent hover:!bg-transparent border-0 shadow-none" onClick={() => { setStatusDialog({ id: p.id, name: p.name, action: "cancelado" }); setStatusDate(new Date().toISOString().slice(0, 10)); }}>
                                    <XCircle className="h-3.5 w-3.5" />
                                 </Button>
                               </>

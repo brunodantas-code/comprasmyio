@@ -187,7 +187,7 @@ export function RemindersTab() {
               onClick={() => newUserId ? create.mutate(newUserId) : toast.error("Selecione o usuário")}
               disabled={create.isPending}
             >
-              {create.isPending ? "Criando..." : "Criar lembrete"}
+              {create.isPending ? "Salvando..." : "Salvar"}
             </Button>
           </div>
 

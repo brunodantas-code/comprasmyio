@@ -211,7 +211,7 @@ export function ClientsTab({ userId }: { userId: string }) {
           <CardTitle>Novo cliente</CardTitle>
           <div className="flex items-center gap-2">
             <CdeButton group="plus" screen="components/clients-tab.tsx" type="button" onClick={() => setNewUnits((current) => [...current, { name: "", city: "", state: "" }])}>Filial</CdeButton>
-            <Button type="submit" form="new-client-form" variant="action" className="whitespace-nowrap px-6" disabled={create.isPending}>Criar</Button>
+            <Button type="submit" form="new-client-form" variant="action" className="whitespace-nowrap px-6" disabled={create.isPending}>Salvar</Button>
           </div>
         </CardHeader>
         <CardContent>
