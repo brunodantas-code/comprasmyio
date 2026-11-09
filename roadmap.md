@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Diversos: setas sem sobreposição, filtro único em Dispositivos e + visível nos cadastros com inclusão existente; formulário de criação conferido sem gravar dados fictícios. Manuais e Dispositivos preservam seus fluxos próprios de cadastro.
 - [x] Code: Salvar de Gestão do ticket alinhado à direita e conferido na tela.
 - [x] Cadastro → Diversos: contas bancárias/PIX PF/PJ pessoais, com inclusão, edição e retirada para próximos pedidos.
 - [x] Reembolsos: escolha da conta no pedido e cópia histórica privada nos detalhes Supply/Cash Flow.

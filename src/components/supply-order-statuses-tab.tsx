@@ -95,7 +95,7 @@ export function SupplyOrderStatusesTab({ userId }: { userId: string }) {
       <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0">
         <CardTitle>Status das Solicitações</CardTitle>
         <div className="flex items-center gap-1">
-          {expanded && canManage && <StatusDialog onSave={(v) => save.mutate(v)} />}
+          {canManage && <StatusDialog onSave={(v) => save.mutate(v)} />}
           <CollapsibleTrigger asChild><Button size="compactIcon" variant="ghost" aria-label={expanded ? "Recolher Status das Solicitações" : "Expandir Status das Solicitações"}>{expanded ? <ChevronUp /> : <ChevronDown />}</Button></CollapsibleTrigger>
         </div>
       </CardHeader>

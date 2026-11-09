@@ -95,7 +95,7 @@ export function StockDestinationsTab() {
     <Card>
       <CardHeader className="flex flex-row items-start justify-between gap-4">
         <div><CardTitle>Destinos de Estoque</CardTitle>{expanded && <CardDescription>Os destinos ativos ficam disponíveis nas movimentações de dispositivos.</CardDescription>}</div>
-        <div className="flex items-center gap-1"><CollapsibleContent><DestinationDialog
+        <div className="flex items-center gap-1"><DestinationDialog
           title="Novo destino de estoque"
           description="Cadastre uma nova opção para a lista de destinos."
           defaultPosition={Math.max(0, ...(destinations ?? []).map((item) => item.position)) + 1}
@@ -104,7 +104,7 @@ export function StockDestinationsTab() {
           trigger={<CdeButton group="plus" screen="components/stock-destinations-tab.tsx" aria-label="Criar destino de estoque" title="Criar destino"></CdeButton>}
           open={createOpen}
           onOpenChange={setCreateOpen}
-        /></CollapsibleContent><CollapsibleTrigger asChild><Button size="compactIcon" variant="ghost" aria-label={expanded ? "Recolher Destinos de Estoque" : "Expandir Destinos de Estoque"} title={expanded ? "Recolher" : "Expandir"}>{expanded ? <ChevronUp className="h-3.5 w-3.5"  /> : <ChevronDown className="h-3.5 w-3.5"  />}</Button></CollapsibleTrigger></div>
+        /><CollapsibleTrigger asChild><Button size="compactIcon" variant="ghost" aria-label={expanded ? "Recolher Destinos de Estoque" : "Expandir Destinos de Estoque"} title={expanded ? "Recolher" : "Expandir"}>{expanded ? <ChevronUp className="h-3.5 w-3.5"  /> : <ChevronDown className="h-3.5 w-3.5"  />}</Button></CollapsibleTrigger></div>
       </CardHeader>
       <CollapsibleContent asChild><CardContent>
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : (

@@ -123,7 +123,7 @@ export function AdditionalStepTypesTab() {
       <Card>
         <CardHeader className="flex flex-row items-start justify-between gap-4">
           <div><CardTitle>Tipos de Etapa Adicional</CardTitle>{expanded && <CardDescription>Os tipos ativos ficam disponíveis nas Etapas Adicionais.</CardDescription>}</div>
-          <div className="flex items-center gap-1"><CollapsibleContent><Dialog open={createOpen} onOpenChange={(open) => { setCreateOpen(open); if (!open) setName(""); }}>
+          <div className="flex items-center gap-1"><Dialog open={createOpen} onOpenChange={(open) => { setCreateOpen(open); if (!open) setName(""); }}>
             <DialogTrigger asChild><CdeButton group="plus" screen="components/additional-step-types-tab.tsx" aria-label="Criar tipo de etapa adicional" title="Criar tipo"></CdeButton></DialogTrigger>
             <DialogContent>
               <DialogHeader><DialogTitle>Novo tipo de etapa adicional</DialogTitle><DialogDescription>Cadastre um novo item para esta lista.</DialogDescription></DialogHeader>
@@ -132,7 +132,7 @@ export function AdditionalStepTypesTab() {
                 <DialogFooter><Button type="submit" disabled={create.isPending}>Criar</Button></DialogFooter>
               </form>
             </DialogContent>
-          </Dialog></CollapsibleContent><CollapsibleTrigger asChild><Button size="compactIcon" variant="ghost" aria-label={expanded ? "Recolher Tipos de Etapa Adicional" : "Expandir Tipos de Etapa Adicional"} title={expanded ? "Recolher" : "Expandir"}>{expanded ? <ChevronUp className="h-3.5 w-3.5"  /> : <ChevronDown className="h-3.5 w-3.5"  />}</Button></CollapsibleTrigger></div>
+          </Dialog><CollapsibleTrigger asChild><Button size="compactIcon" variant="ghost" aria-label={expanded ? "Recolher Tipos de Etapa Adicional" : "Expandir Tipos de Etapa Adicional"} title={expanded ? "Recolher" : "Expandir"}>{expanded ? <ChevronUp className="h-3.5 w-3.5"  /> : <ChevronDown className="h-3.5 w-3.5"  />}</Button></CollapsibleTrigger></div>
         </CardHeader>
         <CollapsibleContent asChild><CardContent>
           {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : (

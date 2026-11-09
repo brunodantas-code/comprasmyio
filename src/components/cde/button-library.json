@@ -5593,7 +5593,7 @@
     "file": "components/reimbursement-accounts.tsx",
     "line": 54,
     "tag": "CdeButton",
-    "label": "Conta",
+    "label": "Adicionar conta",
     "dynamic": false,
     "autoCdeSafe": true,
     "icon": "",
@@ -8581,7 +8581,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 770,
+    "line": 773,
     "tag": "BackupButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -8594,7 +8594,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 820,
+    "line": 823,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -8607,7 +8607,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 821,
+    "line": 824,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -8620,7 +8620,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 1117,
+    "line": 1120,
     "tag": "Button",
     "label": "Sim, é este item",
     "dynamic": false,
@@ -8633,7 +8633,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 1125,
+    "line": 1128,
     "tag": "Button",
     "label": "Não, continuar com item novo",
     "dynamic": false,
@@ -8646,7 +8646,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 1876,
+    "line": 1879,
     "tag": "ConfirmDeleteButton",
     "label": "Remover solicitação?",
     "dynamic": false,
@@ -8659,7 +8659,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 1876,
+    "line": 1879,
     "tag": "Button",
     "label": "Remover solicitação",
     "dynamic": false,
@@ -8672,7 +8672,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 1896,
+    "line": 1899,
     "tag": "CdeButton",
     "label": "Adicionar",
     "dynamic": false,
@@ -8685,7 +8685,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 1910,
+    "line": 1913,
     "tag": "ConfirmDeleteButton",
     "label": "Remover reembolso?",
     "dynamic": false,
@@ -8698,7 +8698,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 1910,
+    "line": 1913,
     "tag": "Button",
     "label": "Remover reembolso",
     "dynamic": false,
@@ -8711,7 +8711,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 1930,
+    "line": 1933,
     "tag": "CdeButton",
     "label": "Adicionar",
     "dynamic": false,
@@ -8724,7 +8724,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 2199,
+    "line": 2202,
     "tag": "ConfirmDeleteButton",
     "label": "Remover material?",
     "dynamic": false,
@@ -8737,7 +8737,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 2205,
+    "line": 2208,
     "tag": "Button",
     "label": "Remover material",
     "dynamic": false,
@@ -8750,7 +8750,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 2217,
+    "line": 2220,
     "tag": "CdeButton",
     "label": "Adicionar material",
     "dynamic": false,
@@ -8763,7 +8763,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 2363,
+    "line": 2366,
     "tag": "Button",
     "label": "Verificando estoque... / Enviando... / Salvar",
     "dynamic": true,
@@ -8776,7 +8776,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 2382,
+    "line": 2385,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -8789,7 +8789,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 2383,
+    "line": 2386,
     "tag": "Button",
     "label": "Confirmar",
     "dynamic": false,
@@ -8802,7 +8802,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 2649,
+    "line": 2652,
     "tag": "Button",
     "label": "Agrupar por Projeto e Cliente",
     "dynamic": false,
@@ -8815,7 +8815,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 2658,
+    "line": 2661,
     "tag": "Button",
     "label": "Custo por Etiqueta",
     "dynamic": false,
@@ -8828,7 +8828,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 2661,
+    "line": 2664,
     "tag": "Button",
     "label": "Exportar custo por Etiqueta em PDF",
     "dynamic": false,
@@ -8841,7 +8841,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 2797,
+    "line": 2800,
     "tag": "Button",
     "label": "Editar Approval",
     "dynamic": false,
@@ -8854,7 +8854,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 2805,
+    "line": 2808,
     "tag": "Button",
     "label": "Digite ou selecione",
     "dynamic": true,
@@ -8867,7 +8867,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 2812,
+    "line": 2815,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -8880,7 +8880,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 2812,
+    "line": 2815,
     "tag": "Button",
     "label": "Salvando... / Salvar alterações",
     "dynamic": true,
@@ -8893,7 +8893,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 2896,
+    "line": 2899,
     "tag": "ColumnSortButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -8906,7 +8906,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 2927,
+    "line": 2930,
     "tag": "Button",
     "label": "Limpar filtros",
     "dynamic": false,
@@ -8919,7 +8919,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3217,
+    "line": 3220,
     "tag": "button",
     "label": "Ver relatório completo",
     "dynamic": true,
@@ -8932,7 +8932,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3380,
+    "line": 3383,
     "tag": "button",
     "label": "Clique para editar",
     "dynamic": true,
@@ -8945,7 +8945,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3536,
+    "line": 3539,
     "tag": "Button",
     "label": "Editar solicitação pendente como solicitante",
     "dynamic": false,
@@ -8958,7 +8958,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3637,
+    "line": 3640,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -8971,7 +8971,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3638,
+    "line": 3641,
     "tag": "Button",
     "label": "Salvando... / Salvar",
     "dynamic": true,
@@ -8984,7 +8984,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3668,
+    "line": 3671,
     "tag": "Button",
     "label": "Excluir solicitação",
     "dynamic": false,
@@ -8997,7 +8997,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3867,
+    "line": 3870,
     "tag": "Button",
     "label": "Criar",
     "dynamic": false,
@@ -9010,7 +9010,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3910,
+    "line": 3913,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -9023,7 +9023,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3929,
+    "line": 3932,
     "tag": "Button",
     "label": "Marcar como implantado",
     "dynamic": false,
@@ -9036,7 +9036,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3932,
+    "line": 3935,
     "tag": "Button",
     "label": "Cancelar projeto",
     "dynamic": false,
@@ -9049,7 +9049,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3938,
+    "line": 3941,
     "tag": "Button",
     "label": "Reativar projeto",
     "dynamic": false,
@@ -9062,7 +9062,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3956,
+    "line": 3959,
     "tag": "Button",
     "label": "Excluir projeto",
     "dynamic": false,
@@ -9075,7 +9075,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4080,
+    "line": 4083,
     "tag": "Button",
     "label": "Editar projeto",
     "dynamic": false,
@@ -9088,7 +9088,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4140,
+    "line": 4143,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -9101,7 +9101,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4161,
+    "line": 4164,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -9114,7 +9114,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4419,
+    "line": 4422,
     "tag": "Button",
     "label": "Rejeitar",
     "dynamic": false,
@@ -9127,7 +9127,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4420,
+    "line": 4423,
     "tag": "Button",
     "label": "Aprovar exclusão",
     "dynamic": false,
@@ -9140,7 +9140,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4461,
+    "line": 4464,
     "tag": "Button",
     "label": "Solicitar exclusão",
     "dynamic": false,
@@ -9153,7 +9153,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4584,
+    "line": 4587,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -9166,7 +9166,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4686,
+    "line": 4689,
     "tag": "Button",
     "label": "Gerar backup",
     "dynamic": false,
@@ -9179,7 +9179,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4699,
+    "line": 4702,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -9192,7 +9192,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4700,
+    "line": 4703,
     "tag": "Button",
     "label": "Confirmar e baixar",
     "dynamic": true,

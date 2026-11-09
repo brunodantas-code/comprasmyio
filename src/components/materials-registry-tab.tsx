@@ -257,7 +257,7 @@ export function MaterialsRegistryTab({ canCreate = false }: { canCreate?: boolea
           {expanded && <CardDescription>Itens cadastrados e disponíveis para novas solicitações.</CardDescription>}
         </div>
         <div className="flex items-center gap-1">
-          {canCreate && <CollapsibleContent><AddMaterialDialog categories={activeCategories} /></CollapsibleContent>}
+          {canCreate && <AddMaterialDialog categories={activeCategories} />}
           <CollapsibleTrigger asChild>
             <Button size="compactIcon" variant="ghost" aria-label={expanded ? "Recolher Materiais" : "Expandir Materiais"} title={expanded ? "Recolher" : "Expandir"}>
               {expanded ? <ChevronUp className="h-3.5 w-3.5"  /> : <ChevronDown className="h-3.5 w-3.5"  />}
@@ -329,7 +329,7 @@ export function MyioDevicesRegistryTab() {
       <CollapsibleContent asChild>
         <CardContent className="space-y-4">
           {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : !devices.length ? <p className="text-sm text-muted-foreground">Nenhum dispositivo encontrado.</p> : <Table>
-            <TableHeader><TableRow><TableHead>{tableFilters.header("name")}{tableFilters.control("description")}</TableHead><TableHead>{tableFilters.header("code")}</TableHead><TableHead className="w-16" /></TableRow></TableHeader>
+            <TableHeader><TableRow><TableHead><span className="inline-flex items-center gap-1">Dispositivo{tableFilters.menu}</span></TableHead><TableHead>Cód. Fabricante</TableHead><TableHead className="w-16" /></TableRow></TableHeader>
             <TableBody>{filtered.map((device) => <TableRow key={device.id}>
               <TableCell><div className="font-medium">{device.name}</div>{device.description && <div className="max-w-xl truncate text-xs text-muted-foreground">{device.description}</div>}</TableCell>
               <TableCell>{device.manufacturer_code || "—"}</TableCell>

@@ -421,13 +421,14 @@
   margin: 0;
   align-items: center;
 }
-.diversos-list > * > :first-child button[aria-expanded],
+.diversos-list > * > :first-child button[aria-label^="Expandir "],
+.diversos-list > * > :first-child button[aria-label^="Recolher "],
 .diversos-list > section > :first-child button[aria-label$="contas"] {
   position: absolute;
   left: 0;
   top: 8px;
 }
-.diversos-list > * > :first-child button[aria-expanded="false"] svg,
+.diversos-list > * > :first-child button[aria-label^="Expandir "] svg,
 .diversos-list > section > :first-child button[aria-label="Exibir contas"] svg { rotate: -90deg; }
-.diversos-list > * > :first-child button[aria-expanded="true"] svg,
+.diversos-list > * > :first-child button[aria-label^="Recolher "] svg,
 .diversos-list > section > :first-child button[aria-label="Recolher contas"] svg { rotate: 180deg; }
