@@ -60,6 +60,7 @@ const GROUPS: { key: GroupKey; title: string; hint: string; multi?: boolean }[] 
   { key: "send", title: "4.10 Enviar (respostas e perguntas)", hint: "Padrão único, aplicado ao vivo" },
   { key: "attach", title: "4.11 Anexar (imagens e arquivos)", hint: "Padrão único, aplicado ao vivo" },
   { key: "clear", title: "4.12 Limpar", hint: "Limpar campos e filtros · padrão único, aplicado ao vivo" },
+  { key: "organize", title: "4.13 Agrupar e consolidar", hint: "Agrupamento, consolidação e custo por etiqueta · padrão único, aplicado ao vivo" },
   { key: "box", title: "5.1 Boxes (cartões)", hint: "Forma, borda, espessura e fundo dos cartões · padrão único, aplicado ao vivo" },
   { key: "confirm_dialog", title: "5.2 Mensagens de confirmação", hint: "Janelas de exclusão e confirmação · padrão único, aplicado ao vivo" },
   { key: "number_section", title: "6.1 Numeração das categorias", hint: "Quadrada ou redonda · padrão principal e secundários por tela" },

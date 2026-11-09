@@ -213,22 +213,22 @@ function DevelopmentPage() {
                      <TableHead className="w-[13%]">{ticketFilters.header("reporter")}</TableHead>
                      <TableHead className="w-[11%]">{ticketFilters.header("app")}</TableHead>
                      <TableHead className="w-[8%]">{ticketFilters.header("type")}</TableHead>
-                     <TableHead className="w-[24%]">{ticketFilters.header("title")}</TableHead>
+                     <TableHead className="w-[21%]">{ticketFilters.header("title")}</TableHead>
                      <TableHead className="w-[10%]">{ticketFilters.header("priority")}</TableHead>
-                     <TableHead className="w-[12%]">{ticketFilters.header("status")}</TableHead>
+                     <TableHead className="w-[15%]">{ticketFilters.header("status")}</TableHead>
                      <TableHead className="w-[9%]">{ticketFilters.header("question")}</TableHead>
                      <TableHead className="w-[8%]">{ticketFilters.header("date")}</TableHead>
                    </TableRow>
                  </TableHeader>
                 <TableBody>{filteredTickets.map((ticket) => (
-                  <TableRow key={ticket.id} className="cursor-pointer" onClick={() => setSelectedTicket(ticket)}>
+                  <TableRow key={ticket.id} className="h-12 cursor-pointer [&>td]:py-2" onClick={() => setSelectedTicket(ticket)}>
                     <TableCell className="font-semibold">{ticket.ticket_number}</TableCell>
                      <TableCell>{profileNames.get(ticket.reporter_id) ?? "Usuário"}</TableCell>
                     <TableCell>{APP_NAMES[ticket.app_key] ?? ticket.app_key}</TableCell>
                     <TableCell><Badge variant="outline" className="font-normal">{ticket.ticket_type === "bug" ? "Bug" : "Melhoria"}</Badge></TableCell>
                     <TableCell className="md:truncate font-medium">{ticket.title}</TableCell>
                     <TableCell>{PRIORITY_NAMES[ticket.priority]}</TableCell>
-                    <TableCell><Badge variant="outline" className="font-normal">{STATUS_NAMES[ticket.status]}</Badge></TableCell>
+                    <TableCell><Badge variant="outline" className="whitespace-nowrap text-xs font-normal">{STATUS_NAMES[ticket.status]}</Badge></TableCell>
                     <TableCell>{unansweredCodeQuestions(data?.questionMessages ?? []).some(q => q.ticket_id === ticket.id) ? unansweredCodeQuestions(data?.questionMessages ?? []).some(q => q.ticket_id === ticket.id && isCodeQuestionForUser(q, ticket.reporter_id, data?.userId ?? "", Boolean(data?.isAdmin))) ? <span className="inline-flex shrink-0 text-destructive" title="Pergunta aguardando sua resposta" aria-label="Pergunta aguardando sua resposta"><MessageCircleQuestion className="h-5 w-5" /></span> : <span className="inline-flex shrink-0 text-muted-foreground" title="Aguardando resposta de outro usuário" aria-label="Aguardando resposta de outro usuário"><MessageCircleMore className="h-5 w-5" /></span> : <span className="text-muted-foreground">-</span>}</TableCell>
                     <TableCell className="whitespace-nowrap">{new Date(ticket.created_at).toLocaleDateString("pt-BR")}</TableCell>
                   </TableRow>

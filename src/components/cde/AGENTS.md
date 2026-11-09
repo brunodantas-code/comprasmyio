@@ -22,3 +22,4 @@
 - Every saved CDE choice must take effect in the apps immediately (production); options not yet wired stay disabled. Menu type (menu_type) drives app nav layout via useAppMenuLayout.
 - Shared Button resolves CDE variants before screen defaults; model cards use fixed dimensions with technical details outside. All color pickers read color_swatch shape through useCdeSwatchStyle without overriding their palette values.
 - Button library counts static TSX call sites, not runtime instances; regenerate button-library.json with scripts/scan-cde-buttons.mjs whenever button sites change, retaining dynamic labels and source locations for auditing.
+- Supply deadline alerts share pure supply-deadlines helpers and CDE deadline_alerts settings; timing indicators read authorized logs/approval decisions and never use updated_at as delivery time or invent causal attribution.

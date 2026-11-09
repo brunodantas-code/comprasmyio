@@ -3,7 +3,7 @@ import { resolveCdeModel, useCdeStandards, type CdeGroup } from "./cde-button";
 import { styleOf } from "./cde-render";
 
 /** Groups applied automatically by shared ui components (Button/Input/Textarea). */
-export type AutoGroup = "save" | "cancel" | "confirm" | "trash" | "pencil" | "toggle" | "move" | "sort" | "export" | "send" | "attach" | "clear" | "fields_input" | "fields_textarea" | "fields_password";
+export type AutoGroup = "save" | "cancel" | "confirm" | "trash" | "pencil" | "toggle" | "move" | "sort" | "export" | "send" | "attach" | "clear" | "organize" | "fields_input" | "fields_textarea" | "fields_password";
 
 const ICON_GROUP: Record<string, AutoGroup> = {
   Pencil: "pencil", PencilLine: "pencil", SquarePen: "pencil", PenLine: "pencil",
@@ -38,6 +38,7 @@ export function detectButtonGroup(children: React.ReactNode, label?: string): Au
   const visible = text(children).trim();
   const t = (visible || label || "").toLowerCase();
   if (/\b(pdf|excel|exportar)\b/.test(t)) return "export";
+  if (/\b(agrupar|consolidar)\b|custo por etiqueta/.test(t)) return "organize";
   if (/\b(limpar|limpando)\b/.test(t)) return "clear";
   if (/\b(anexar|anexando)\b/.test(t)) return "attach";
   if (/\b(enviar|enviando)\b/.test(t)) return "send";

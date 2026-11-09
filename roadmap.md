@@ -1,6 +1,7 @@
 # Roadmap
-- [ ] Approvals: itens adicionais/descrições longas em pop-up, linhas uniformes e botões de relatórios/agrupamento seguindo CDE.
-- [ ] Approvals: separar prazo de recebimento/previsão de entrega, limitar Palavra-chave a 10 caracteres, configurar alertas 7/3 dias no CDE e filtros de atrasos; definir medição dos tempos e causas.
+- [x] Code: altura padrão preservada e etiqueta Aguardando resposta sem quebra, conferida em sessão autenticada.
+- [x] Approvals: itens adicionais/descrições longas em pop-up, linhas de pedidos 96 px; exportação ligada ao CDE e agrupamento/consolidação em grupo próprio para escolha.
+- [x] Approvals: datas separadas, Código 10 caracteres, alertas 7/3 configuráveis no item 13 do CDE, filtros e indicadores de histórico; 20 testes passaram. Causas sem prova aparecem como não registradas.
 - [x] CDE item 12: biblioteca de botões em uso, busca digitável pelo nome, prévias e local de uso; busca e estado vazio conferidos em sessão autenticada.
 - [x] Amostras de cores quadradas nos seletores compartilhados do CDE/Mytosis e controle “Padrões para edição de cores”.
 - [x] Cor personalizada com símbolo de paleta no mesmo tamanho das amostras.

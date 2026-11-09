@@ -2759,6 +2759,11 @@
    "files": []
   }
  ],
+ "organize": [
+  { "tag": "Button", "variant": "outline", "size": "sm", "className": "", "icon": "", "iconClass": "", "label": "Agrupar por Projeto e Cliente", "count": 1, "files": ["routes/_authenticated/dashboard.tsx"] },
+  { "tag": "Button", "variant": "outline", "size": "sm", "className": "", "icon": "Layers3", "iconClass": "h-4 w-4", "label": "Consolidar itens", "count": 1, "files": ["components/supply-consolidation.tsx"] },
+  { "tag": "Button", "variant": "outline", "size": "sm", "className": "", "icon": "Tag", "iconClass": "h-4 w-4", "label": "Custo por Etiqueta", "count": 1, "files": ["routes/_authenticated/dashboard.tsx"] }
+ ],
  "clear": [
   {
    "tag": "Button",
