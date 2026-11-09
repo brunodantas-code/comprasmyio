@@ -32,5 +32,6 @@
 - Library bindings use cde_selected.button_bindings keyed by stable source-site ID (legacy label fallback); explicit modelKey replaces appearance per use or chosen set, while dynamic content remains intact.
 - Inventory and Vite instrumentation share the same TSX site parser; native controls keep their original rendering until explicitly bound, preventing unrelated visual changes.
 - Numbering counts come from scan-cde-numbering.ts and number-usage.json; count actual source sites per hierarchy, not fabricated repetitions from rendered records.
+- Library descriptions/counts use library-details.ts: distinguish one source site from equal-label/group sites and never estimate runtime row repetitions.
 - Landing and portal share app ordering via public_app_order(), a narrow public read exposing only the order array, never other CDE records.
 - Icon-only shared Save controls resolve CDE secondary controls/save-icon before the primary.

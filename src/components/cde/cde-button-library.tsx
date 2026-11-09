@@ -21,6 +21,7 @@ import { detectButtonGroup, readButtonBindings } from "./cde-look";
 import library from "./button-library.json";
 import { isSpecificAction } from "./action-standard";
 import { UsageLinks } from "./usage-links";
+import { libraryDescription, libraryUsageCounts } from "./library-details";
 
 const normalize = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
@@ -143,10 +144,12 @@ export function CdeButtonLibrary({ number, handle, onEdit }: { number: number; h
           const options = b.label.split(" / ");
           const label = options.find(s => search.trim() && normalize(s).includes(normalize(search))) || options.find(s => !/\.\.\.|…/.test(s)) || options[0];
           const group = typeOf(b);
+          const description = libraryDescription(b, group);
+          const uses = libraryUsageCounts(b, library, typeOf);
           const content = <>{Icon && <Icon className="h-4 w-4" />}{label}</>;
           const unique = visibleLibrary.filter(entry => entry.label === b.label).length === 1;
           const approvalsLink = unique && b.file === "routes/_authenticated/dashboard.tsx" && ["Agrupar por Projeto e Cliente", "Custo por Etiqueta", "Indicadores de prazos"].includes(b.label);
-          return <article key={`${b.file}:${b.line}:${index}`} className="grid h-40 min-w-0 grid-cols-[minmax(0,1fr)_108px] grid-rows-[56px_minmax(0,1fr)_24px] items-center gap-x-2 gap-y-1 rounded-md border border-border bg-card p-3">
+          return <article key={`${b.file}:${b.line}:${index}`} className="grid h-60 min-w-0 grid-cols-[minmax(0,1fr)_108px] grid-rows-[56px_48px_minmax(0,1fr)_24px] items-center gap-x-2 gap-y-1 rounded-md border border-border bg-card p-3">
             <div className="relative col-span-2 min-w-0">
             {approvalsLink && <Link to="/dashboard" search={{ section: "queue", subsection: "all" }} aria-label={`Abrir página de ${label}`} title="Abrir Todos os approvals" className="absolute inset-0 z-10 rounded-md focus-visible:ring-2 focus-visible:ring-ring" />}
             {unique && b.file === "routes/_authenticated/chamados.tsx" && <Link to="/chamados" search={{ chamado: undefined }} aria-label={`Abrir página de ${label}`} className="absolute inset-0 z-10 rounded-md focus-visible:ring-2 focus-visible:ring-ring" />}
@@ -155,7 +158,8 @@ export function CdeButtonLibrary({ number, handle, onEdit }: { number: number; h
               {b.tag === "CdeButton" && b.group ? <CdeButton cdeId={b.id} group={b.group as CdeGroup} screen={b.file}>{label === b.icon ? null : label}</CdeButton> : <Button cdeId={b.id} cdeNative={b.tag === "button"} type="button" variant={(b.variant || undefined) as never} size={(b.size || undefined) as never} className={b.className}>{content}</Button>}
             </div>
             </div>
-            <div className="min-w-0"><p className="truncate text-xs font-medium text-foreground" title={label}>{bindingOf(b)?.label || label}</p><p className="truncate text-xs text-muted-foreground" title={classification(b)}>{classification(b)}</p></div>
+            <p className="col-span-2 line-clamp-3 text-xs text-muted-foreground" title={description}>{description}</p>
+            <div className="min-w-0"><p className="truncate text-xs font-medium text-foreground" title={label}>{bindingOf(b)?.label || label}</p><p className="truncate text-xs text-muted-foreground" title={classification(b)}>{classification(b)}</p><p className="text-xs text-foreground" title="Locais no código, sem multiplicar pelas linhas exibidas na tela">{uses.here} uso neste local</p>{uses.sameFunction > 1 && <p className="text-xs text-muted-foreground">{uses.sameFunction} usos da mesma função</p>}</div>
             <div className="grid grid-cols-3 items-center justify-items-center">
               <span className="flex h-9 w-9 items-center justify-center"><Checkbox aria-label={`Selecionar card ${b.label}`} checked={checked.includes(libraryEntryKey(b))} onCheckedChange={value => setChecked(prev => value ? [...new Set([...prev, libraryEntryKey(b)])] : prev.filter(k => k !== libraryEntryKey(b)))} /></span>
               <span className="flex h-9 w-9 items-center justify-center"><Button type="button" variant="ghost" size="compactIcon" title={`Editar ${label}`} aria-label={`Editar ${label}`} onClick={() => editCard(b)}><Pencil /></Button></span><span className="flex h-9 w-9 items-center justify-center"><Button type="button" variant="ghost" size="compactIcon" title="Excluir card da biblioteca" aria-label={`Excluir card ${b.label}`} disabled={saving} onClick={() => removeCards([b])}><Trash2 /></Button></span>

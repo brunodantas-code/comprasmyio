@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Biblioteca: descrição breve e quantidade por local, distinguindo usos da mesma função; Approval e celular conferidos, teste de contagem passou.
 - [x] Numeração: levantamento real de 16 locais principais e 10 secundários; 6.1 conferido com 16 usos, sem estimar repetições por registro.
 - [x] Navegação: padrão primeiro também em 8.4; Caixa suspensa conferida antes de Botão flutuante.
 - [x] Biblioteca: 822 controles reais com identidade estável, edição por uso ou conjunto e substituição antes da retirada; salvar/reler/retirar conferidos em sessão real, celular sem transbordamento, 36 testes passaram; modelo temporário e vínculos restaurados.
