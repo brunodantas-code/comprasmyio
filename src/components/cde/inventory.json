@@ -2759,6 +2759,30 @@
    "files": []
   }
  ],
+ "clear": [
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "sm",
+   "className": "h-7 text-xs",
+   "icon": "",
+   "iconClass": "",
+   "label": "Limpar",
+   "count": 1,
+   "files": ["components/column-filter.tsx"]
+  },
+  {
+   "tag": "Button",
+   "variant": "outline",
+   "size": "sm",
+   "className": "h-7 text-xs",
+   "icon": "",
+   "iconClass": "",
+   "label": "Limpar todos os filtros",
+   "count": 1,
+   "files": ["components/use-table-filters.tsx"]
+  }
+ ],
  "send": [
   {
    "tag": "Button",
