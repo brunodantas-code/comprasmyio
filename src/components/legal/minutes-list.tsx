@@ -8,6 +8,19 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { legalTrackingOptions, pendingLegalActions } from '@/lib/legal-actions';
 import { SubjectActions } from './subject-actions';
 import { useState } from 'react';
+import { toast } from 'sonner';
+import { legalPdf } from '@/lib/legal-pdf';
+import type { LegalContent } from '@/lib/legal';
+
+async function exportMinutesPdf(title: string, date: string | null, content: LegalContent) {
+  try {
+    const blob = await legalPdf(title, date, content, true);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = `${title.replace(/[\\/:*?"<>|]+/g, '-').slice(0, 120) || 'ata'}.pdf`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 30000);
+  } catch { toast.error('Não foi possível exportar o PDF'); }
+}
 
 type RecordRow = Database['public']['Tables']['legal_records']['Row'];
 function PendingDot({ label }: { label: string }) {
@@ -37,7 +50,7 @@ export function MinutesList({ rows, expanded, toggle, edit, remove, openPdf, use
           {pending.total > 0 ? <PendingDot label={`${pending.signatures} assinatura(s) e ${pending.actions} ação(ões) pendentes`} /> : null}
           <Button variant="outline" size="compactIcon" title="Editar" aria-label={`Editar ${row.title}`} onClick={() => edit(row)}><Pencil /></Button>
           <Button variant="outline" size="compactIcon" title="Excluir" aria-label={`Excluir ${row.title}`} onClick={() => remove(row)}><Trash2 /></Button>
-          {row.pdf_path ? <Button variant="outline" size="compactIcon" title="PDF" aria-label={`Abrir PDF de ${row.title}`} onClick={() => { if (row.pdf_path) openPdf(row.pdf_path); }}><FileText /></Button> : null}
+          <Button variant="outline" size="compactIcon" title={row.pdf_path ? 'PDF assinado' : 'Exportar PDF'} aria-label={`${row.pdf_path ? 'Abrir PDF assinado' : 'Exportar PDF'} de ${row.title}`} onClick={() => { if (row.pdf_path) openPdf(row.pdf_path); else void exportMinutesPdf(row.title, row.meeting_date, content); }}><FileText /></Button>
         </div>
         {open ? <div className="border-t border-border bg-background">
           <div className="space-y-2 px-4 py-4 text-sm sm:px-6"><p><span className="text-muted-foreground">Local: </span>{content.location}</p><p className="break-words"><span className="text-muted-foreground">Participantes: </span>{content.participants.map(p => p.name).join(', ')}</p></div>
