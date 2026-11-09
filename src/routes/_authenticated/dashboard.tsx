@@ -2464,7 +2464,7 @@ function MyOrders({ userId, canManageDevices }: { userId: string; canManageDevic
       <TableReportProvider><Card>
         <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <CardTitle className="flex flex-wrap items-center gap-2">Minhas Solicitações<TableReportActions title="Minhas Solicitações" /></CardTitle>
+            <CardTitle className="flex flex-wrap items-center gap-2">Minhas Solicitações</CardTitle>
             <CardDescription>Acompanhe o status de suas solicitações de Materiais, Serviços, Viagens, Reembolsos e Contratação de RH.</CardDescription>
           </div>
         </CardHeader>
@@ -2628,7 +2628,7 @@ function BuyerQueue({ mode = "all" }: { mode?: ApprovalListMode }) {
     <TableReportProvider><Card>
       <CardHeader>
         <div>
-          <CardTitle className="flex flex-wrap items-center gap-2">{mode === "supply" ? "Fila do Supply" : mode === "mine-supply" ? "Meus com Supply" : "Todos os approvals"}<TableReportActions title={mode === "supply" ? "Fila do Supply" : mode === "mine-supply" ? "Meus com Supply" : "Todos os approvals"} /></CardTitle>
+          <CardTitle className="flex flex-wrap items-center gap-2">{mode === "supply" ? "Fila do Supply" : mode === "mine-supply" ? "Meus com Supply" : "Todos os approvals"}</CardTitle>
           <CardDescription>
             {mode === "supply"
               ? "Pedidos aprovados que aguardam atuação do Time de Supply."
@@ -2918,8 +2918,9 @@ function OrdersTable({
   return (
     <>
       <div className="mb-2 flex flex-wrap items-center gap-2 text-xs">
-        <SupplyDeadlineIndicators orders={visibleOrders} />
         <TableFilterMenu rows={orders} columns={colDefs.filter(c => showRequester || c.key !== "req").map(c => ({ key: c.key, label: c.label, kind: c.kind, value: c.raw as (o: typeof orders[number]) => string | number | null | undefined, display: c.list }))} filters={cf} onChange={(key, value) => setCf(prev => ({ ...prev, [key]: value }))} clear={() => setCf({})} />
+        <SupplyDeadlineIndicators orders={visibleOrders} />
+        <TableReportActions title={showRequester ? "Todos os approvals" : "Minhas Solicitações"} />
         {activeColFilters.length > 0 && (
           <>
             <span className="text-muted-foreground">{activeColFilters.length} filtro(s) ativo(s): {activeColFilters.map((c) => c.label).join(", ")}</span>
