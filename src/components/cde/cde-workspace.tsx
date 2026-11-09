@@ -28,6 +28,7 @@ import { FormatColorOptions } from "@/components/mytosis/format-color-options";
 import { CdeButtonLibrary } from "./cde-button-library";
 import { CdeDeadlineAlerts } from "./cde-deadline-alerts";
 import { COMMON_ACTION_GROUPS } from "./action-standard";
+import { UsageLinks } from "./usage-links";
 
 type Variant = { key: string; name?: string; custom?: boolean; tag: string; variant: string; size: string; className: string; icon: string; iconClass: string; label: string; count: number; files: string[]; uses?: { file: string; n: number }[]; style?: CdeStyle };
 
@@ -321,8 +322,8 @@ export function CdeWorkspace() {
                           </span>
                         </div>
                         <div className="flex h-20 shrink-0 items-center justify-center overflow-hidden rounded-md bg-background p-2"><Preview v={v} /></div>
-                        <Button type="button" variant="action" size="sm" style={{ "--wa-bg": "var(--whatsapp-green)", "--wa-bd": "var(--whatsapp-border)", "--wa-tx": "var(--card)" } as React.CSSProperties} className="mt-auto !h-9 !min-h-9 !py-0 !text-sm !rounded-lg !border-2 !border-solid !border-[var(--wa-bd)] !bg-[var(--wa-bg)] !text-[var(--wa-tx)] hover:!brightness-110 disabled:!opacity-100" disabled={toggleStandard.isPending || (isPrimary && !g.multi)} onClick={() => toggleStandard.mutate({ group: g.key, key: v.key, multi: g.multi })}>
-                          {isPrimary ? <><Check className="h-4 w-4" />{g.multi ? "Padrão (remover)" : "Padrão principal"}</> : g.multi ? "Adicionar como padrão" : sec ? "Tornar principal" : "Escolher como padrão"}
+                        <Button type="button" variant="action" size="sm" style={{ "--wa-bg": "var(--whatsapp-green)", "--wa-bd": "var(--whatsapp-border)", "--wa-tx": "var(--card)" } as React.CSSProperties} className="mt-auto !h-9 !min-h-9 !py-0 !text-sm !rounded-lg !border-2 !border-solid !border-[var(--wa-bd)] !bg-[var(--wa-bg)] !text-[var(--wa-tx)] hover:!brightness-110 disabled:!opacity-100" disabled={toggleStandard.isPending} title={isPrimary ? "Remover a seleção de padrão sem excluir o modelo" : undefined} onClick={() => toggleStandard.mutate({ group: g.key, key: v.key, multi: g.multi })}>
+                          {isPrimary ? <><Check className="h-4 w-4" />{g.multi ? "Padrão (remover)" : "Padrão principal (remover)"}</> : g.multi ? "Adicionar como padrão" : sec ? "Tornar principal" : "Escolher como padrão"}
                         </Button>
                         {!g.multi && !isPrimary && primaries.length ? (
                           <Button type="button" variant="action" size="sm" style={{ "--wa-bg": "var(--whatsapp-green)", "--wa-bd": "var(--whatsapp-border)", "--wa-tx": "var(--card)" } as React.CSSProperties} className="!h-9 !min-h-9 !py-0 !text-sm !rounded-lg !border-2 !border-solid !border-[var(--wa-bd)] !bg-[var(--wa-bg)] !text-[var(--wa-tx)] hover:!brightness-110" onClick={() => { setScreenSearch(""); setSecondary({ group: g.key, key: v.key, label: v.name ?? `Modelo ${i + 1}`, screens: sec?.screens ?? [] }); }}>
@@ -369,7 +370,7 @@ export function CdeWorkspace() {
                       <CdeButton group="toggle" screen="components/cde/cde-workspace.tsx" aria-label={`${expandedWhere.has(g.key) ? "Recolher" : "Exibir"} onde é utilizado em ${g.title}`} aria-expanded={expandedWhere.has(g.key)} onClick={() => setExpandedWhere((c) => { const n = new Set(c); if (n.has(g.key)) n.delete(g.key); else n.add(g.key); return n; })}>
                         </CdeButton>
                     </div>
-                    {expandedWhere.has(g.key) ? <div className="mt-2 space-y-3">{list.map((v, i) => v.files.length ? <div key={v.key} data-cde-model={g.key} className="break-all"><b>{v.name ?? `Modelo ${i + 1}`} ({v.count}):</b><ol className="mt-1 space-y-1.5">{(v.uses ?? v.files.map((file) => ({ file, n: 1 }))).map((u, fi) => <li key={u.file} className="flex gap-2"><b className="shrink-0">{fi + 1}.</b><span>{u.file}{u.n > 1 ? <b className="ml-1">({u.n})</b> : null}</span></li>)}</ol></div> : null)}</div> : null}
+                    {expandedWhere.has(g.key) ? <div className="mt-2 space-y-3">{list.map((v, i) => v.files.length ? <div key={v.key} data-cde-model={g.key} className="break-all"><b>{v.name ?? `Modelo ${i + 1}`} ({v.count}):</b><ol className="mt-1 space-y-1.5">{(v.uses ?? v.files.map((file) => ({ file, n: 1 }))).map((u, fi) => <li key={u.file} className="flex gap-2"><b className="shrink-0">{fi + 1}.</b><span>{u.file}{u.n > 1 ? <b className="ml-1">({u.n})</b> : null}<UsageLinks file={u.file} /></span></li>)}</ol></div> : null)}</div> : null}
                   </div>
                 ) : null}
                 {removed.length ? (

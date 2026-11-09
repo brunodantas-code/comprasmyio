@@ -1,4 +1,7 @@
 # Roadmap
+- [x] CDE: padrão principal removível sem excluir o modelo; seta verde retirada e seta preta preservada após recarga.
+- [x] CDE: links nos locais conhecidos de uso; perfis de acesso abertos no menu correto, computador/celular conferidos. Destinos compartilhados abrem o app; não abrem automaticamente diálogos internos.
+- [x] CDE: explicado o que falta para vincular, editar e substituir todos os botões da biblioteca; 874 usos levantados.
 - [x] CDE: padrão visual comum selecionado em 4.14, largura pelo texto e classificação de funções específicas; Salvar/Cancelar com fundo/cantos comuns conferidos em sessão real, edição e celular sem erros; testes de classificação e identidade passaram.
 - [x] Monitoramento: textos específicos de Salvar/Excluir e progresso preservados; 16 testes passaram. Confirmações reais abertas e canceladas; escolhas com chamados simulados conferidas em 1280/390 px sem transbordamento ou exclusões.
 - [x] Legal: Deliberações/Ações em 14 px; exclusão de observações pelo autor com confirmação e histórico preservado; prazo por ação salvo e relido, atraso após vencimento e baixa ao concluir conferidos em ata temporária removida; computador/celular sem erros, 11 testes passaram.
