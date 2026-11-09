@@ -5,12 +5,14 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import addTextUsage from "./add-text-usage.json";
 import { ICONS, styleOf, type CdeStyle } from "./cde-render";
+import { COMMON_ACTION_GROUPS, isSpecificAction } from "./action-standard";
 
 /** Grupos do CDE que já trocam ao vivo nas telas. */
-export type CdeGroup = "filter" | "plus" | "box" | "number_section" | "number_subsection" | "fields_select" | "confirm_dialog" | "close" | "toggle" | "color_swatch" | "send" | "attach" | "clear" | "organize";
+export type CdeGroup = "action_standard" | "filter" | "plus" | "box" | "number_section" | "number_subsection" | "fields_select" | "confirm_dialog" | "close" | "toggle" | "color_swatch" | "send" | "attach" | "clear" | "organize";
 
 /** Padrão usado enquanto o CDE carrega ou se nenhum padrão estiver escolhido. */
 const FALLBACK: Record<CdeGroup, string> = {
+  action_standard: "Button|outline|default|||",
   filter: "Button|ghost|icon||Filter|size-3",
   plus: "Button|ghost|icon|text-primary|Plus|h-5 w-5",
   box: "div|||rounded-xl border bg-card text-card-foreground shadow||",
@@ -92,16 +94,20 @@ export const CdeButton = forwardRef<HTMLButtonElement, Props>(function CdeButton
   const { data } = useCdeStandards();
   const m = resolveCdeModel(data, group, screen);
   const label = useCdeAddLabel(group === "plus" ? screen : undefined, children);
-  const { css, cls } = styleOf(m.style);
+  const specific = !children || isSpecificAction({ className, modelStyle: m.style, secondary: data?.selected.some(s => s.group_key === group && !s.is_primary && !!screen && s.screens.includes(screen)) });
+  const common = resolveCdeModel(data, "action_standard");
+  const visual = COMMON_ACTION_GROUPS.has(group) && !specific ? common : m;
+  const { css, cls } = styleOf(visual.style);
   const Icon = ICONS[m.icon];
   return (
     <Button
       ref={ref}
       type={type}
-      variant={(m.variant || undefined) as never}
-      size={(children ? "sm" : m.size || undefined) as never}
+      actionKind={specific ? "specific" : "standard"}
+      variant={(visual.variant || undefined) as never}
+      size={(visual.size || undefined) as never}
       style={css}
-      className={cn(m.className, cls, active ? "!text-primary" : group === "filter" ? "!text-foreground hover:!text-primary" : "", className)}
+      className={cn(visual.className, cls, children && "!w-auto !min-w-max shrink-0", active ? "!text-primary" : group === "filter" ? "!text-foreground hover:!text-primary" : "", className)}
       {...rest}
     >
       {group === "toggle" ? (rest["aria-expanded"] ? <ICONS.ChevronUp className={m.iconClass} /> : <ICONS.ChevronDown className={m.iconClass} />) : Icon ? <Icon className={m.iconClass} /> : null}

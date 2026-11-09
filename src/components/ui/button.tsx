@@ -5,6 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { detectButtonGroup, useCdeLook, useButtonBinding } from "@/components/cde/cde-look";
 import { ICONS } from "@/components/cde/cde-render";
+import { isSpecificAction } from "@/components/cde/action-standard";
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
@@ -57,6 +58,7 @@ const buttonVariants = cva(
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   asChild?: boolean;
+  actionKind?: "standard" | "specific";
 }
 
 const actionLabelPattern = /\b(salvar|salvando|salvo|excluir|excluindo|cancelar|cancelando|confirmar|confirmando|concluir|concluindo)\b/i;
@@ -69,7 +71,7 @@ function buttonText(node: React.ReactNode): string {
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, children, style, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, children, style, actionKind, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
     const visibleText = buttonText(children).trim();
     const accessibleLabel = visibleText || [props["aria-label"], props.title].filter(Boolean).join(" ");
@@ -77,8 +79,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const resolvedVariant = !style && actionLabelPattern.test(accessibleLabel) ? "action" : variant;
     // CDE: action buttons follow the chosen standard live; CdeButton passes its own style and is skipped.
     const binding = useButtonBinding(accessibleLabel);
-    const group = binding?.group ?? detectButtonGroup(children, [props["aria-label"], props.title].filter(Boolean).join(" "));
-    const look = useCdeLook(style ? undefined : group, true, group === "save" && !visibleText ? "controls/save-icon" : undefined);
+    const group = binding?.group ?? detectButtonGroup(children, [props["aria-label"], props.title].filter(Boolean).join(" ")) ?? (visibleText && (!variant || ["default", "action", "outline", "secondary", "destructive"].includes(variant)) ? "action_standard" : undefined);
+    const specific = actionKind === "specific" || (!actionKind && isSpecificAction({ className, customStyle: !!style })) || !visibleText;
+    const look = useCdeLook(style ? undefined : group, true, group === "save" && !visibleText ? "controls/save-icon" : undefined, specific);
     const standardSave = !style && !asChild && (group === "save" || group === "trash" || !!binding);
     const SaveIcon = ICONS[look.icon || (group === "trash" ? "Trash2" : "Save")] ?? ICONS.Save;
     // CDE may rename a generic action, never its scope or in-progress state.
@@ -93,7 +96,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const cdeVariant = look.variant ? look.variant as VariantProps<typeof buttonVariants>["variant"] : resolvedVariant;
     const cdeSize = look.size ? look.size as VariantProps<typeof buttonVariants>["size"] : size;
     return (
-      <Comp className={cn(buttonVariants({ variant: "data-cde-number" in props ? null : cdeVariant, size: cdeSize, className }), look.className, !asChild && visibleText && group && !(sendStandard && !look.label?.trim()) && ["!w-auto shrink-0", className?.includes("whitespace-normal") ? "!min-w-0" : "!min-w-max"])} style={style ?? (look.variant || look.className ? look.style : undefined)} ref={ref} {...(sendStandard && !look.label?.trim() && visibleText ? { "aria-label": visibleText, title: visibleText } : {})} {...props}>{content}</Comp>
+      <Comp data-action-kind={group ? specific ? "specific" : "standard" : undefined} className={cn(buttonVariants({ variant: "data-cde-number" in props ? null : cdeVariant, size: cdeSize, className }), look.className, !asChild && visibleText && group && !(sendStandard && !look.label?.trim()) && ["!w-auto shrink-0", className?.includes("whitespace-normal") ? "!min-w-0" : "!min-w-max"])} style={style ?? (look.variant || look.className ? look.style : undefined)} ref={ref} {...(sendStandard && !look.label?.trim() && visibleText ? { "aria-label": visibleText, title: visibleText } : {})} {...props}>{content}</Comp>
     );
   },
 );

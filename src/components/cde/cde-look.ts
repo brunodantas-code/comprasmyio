@@ -1,9 +1,10 @@
 import * as React from "react";
 import { resolveCdeModel, useCdeStandards, type CdeGroup } from "./cde-button";
 import { styleOf } from "./cde-render";
+import { COMMON_ACTION_GROUPS, inheritActionLook } from "./action-standard";
 
 /** Groups applied automatically by shared ui components (Button/Input/Textarea). */
-export type AutoGroup = "save" | "cancel" | "confirm" | "trash" | "pencil" | "toggle" | "move" | "sort" | "export" | "send" | "attach" | "clear" | "organize" | "fields_input" | "fields_textarea" | "fields_password";
+export type AutoGroup = "action_standard" | "add" | "save" | "cancel" | "confirm" | "trash" | "pencil" | "toggle" | "move" | "sort" | "export" | "send" | "attach" | "clear" | "organize" | "fields_input" | "fields_textarea" | "fields_password";
 
 export type LibraryBinding = { group: AutoGroup; label: string };
 export function readButtonBindings(raw?: string): Record<string, LibraryBinding> {
@@ -60,17 +61,23 @@ export function detectButtonGroup(children: React.ReactNode, label?: string): Au
   if (/\b(cancelar|cancelando)\b/.test(t)) return "cancel";
   if (/\b(confirmar|concluir|confirmando|concluindo)\b/.test(t)) return "confirm";
   if (/\b(excluir|excluindo)\b/.test(t)) return "trash";
+  if (/\b(adicionar|criar|novo|nova)\b/.test(t)) return "add";
   return undefined;
 }
 
 /** Visual (CDE style) of the chosen standard for a group; empty when no standard is chosen. */
-export function useCdeLook(group: AutoGroup | undefined, withClass = false, screen?: string): { className: string; style: React.CSSProperties; variant?: string; size?: string; icon?: string; iconClass?: string; label?: string } {
+export function useCdeLook(group: AutoGroup | undefined, withClass = false, screen?: string, specific = false): { className: string; style: React.CSSProperties; variant?: string; size?: string; icon?: string; iconClass?: string; label?: string } {
   const { data } = useCdeStandards();
   if (!group) return { className: "", style: {} };
   const effectiveGroup = group === "organize" && !(data?.selected ?? []).some(s => s.group_key === "organize" && s.is_primary) ? "save" : group;
   const rows = (data?.selected ?? []).filter((s) => s.group_key === effectiveGroup && (screen ? !s.is_primary && s.screens.includes(screen) : s.is_primary));
-  if (!rows.length && screen) return primaryCdeLook(data, effectiveGroup, withClass);
-  return primaryCdeLook(data, effectiveGroup, withClass, rows);
+  const own = !rows.length && screen ? primaryCdeLook(data, effectiveGroup, withClass) : primaryCdeLook(data, effectiveGroup, withClass, rows);
+  const row = rows[0];
+  const modelStyle = row?.variant_key.startsWith("custom:") ? data?.models.find(m => m.id === row.variant_key.slice(7))?.style as import("./cde-render").CdeStyle | undefined : undefined;
+  if (!COMMON_ACTION_GROUPS.has(group) || specific || rows.some(r => !r.is_primary) || modelStyle?.actionSpecific || (group === "confirm" && modelStyle?.actionSpecific !== false)) return own;
+  const commonGroup = data?.selected.some(s => s.group_key === "action_standard" && s.is_primary) ? "action_standard" : "save";
+  const common = primaryCdeLook(data, commonGroup, true);
+  return common.variant ? inheritActionLook(own, common) : own;
 }
 
 function primaryCdeLook(data: ReturnType<typeof useCdeStandards>["data"], effectiveGroup: AutoGroup, withClass: boolean, selectedRows?: NonNullable<ReturnType<typeof useCdeStandards>["data"]>["selected"]) {

@@ -19,6 +19,7 @@ import { canRetireLibraryEntry, libraryEntryKey, readRetiredEntries } from "./li
 import { ICONS } from "./cde-render";
 import { detectButtonGroup, readButtonBindings, type AutoGroup } from "./cde-look";
 import library from "./button-library.json";
+import { isSpecificAction } from "./action-standard";
 
 const normalize = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
@@ -40,11 +41,19 @@ export function CdeButtonLibrary({ number, handle, onEdit }: { number: number; h
   const retired = readRetiredEntries(retiredRow?.variant_key);
   const visibleLibrary = library.filter(b => !retired.includes(libraryEntryKey(b)));
   const typeOf = (b: LibraryButton) => bindings[b.label]?.group || b.group || detectButtonGroup(<>{ICONS[b.icon] && (() => { const Icon = ICONS[b.icon]; return <Icon />; })()}{b.label}</>) || b.tag;
+  const classification = (b: LibraryButton) => {
+    const group = typeOf(b);
+    const rows = data?.selected.filter(s => s.group_key === group) ?? [];
+    const row = rows.find(s => !s.is_primary && s.screens.includes(b.file)) ?? rows.find(s => s.is_primary);
+    const model = data?.models.find(m => `custom:${m.id}` === row?.variant_key);
+    return isSpecificAction({ group, className: b.className, customStyle: b.visualCustom, secondary: row ? !row.is_primary : false, modelStyle: model?.style as import("./cde-render").CdeStyle }) ? "Função específica" : "Padrão visual comum";
+  };
   const filters = useTableFilters(visibleLibrary, [
     { key: "name", label: "Nome do botão", value: b => b.label },
     { key: "type", label: "Tipo / grupo CDE", value: typeOf },
     { key: "file", label: "Local de uso", value: b => b.file },
     { key: "icon", label: "Ícone", value: b => b.icon },
+    { key: "classification", label: "Classificação visual", value: classification },
   ]);
   const search = filters.searchText("name");
   const filtered = [...filters.filtered].sort((a, b) => {
@@ -53,8 +62,8 @@ export function CdeButtonLibrary({ number, handle, onEdit }: { number: number; h
   });
   const saveUses = filtered.filter(b => typeOf(b) === "save");
   const deleteUses = filtered.filter(b => typeOf(b) === "trash");
-  const cards = filtered.filter(b => (typeOf(b) !== "save" || b === saveUses[0]) && (typeOf(b) !== "trash" || b === deleteUses[0]));
-  const usesOf = (b: LibraryButton) => typeOf(b) === "save" ? saveUses : typeOf(b) === "trash" ? deleteUses : [b];
+  const cards = filtered.filter(b => classification(b) === "Função específica" || ((typeOf(b) !== "save" || b === saveUses[0]) && (typeOf(b) !== "trash" || b === deleteUses[0])));
+  const usesOf = (b: LibraryButton) => classification(b) === "Função específica" ? [b] : typeOf(b) === "save" ? saveUses.filter(b => classification(b) === "Padrão visual comum") : typeOf(b) === "trash" ? deleteUses.filter(b => classification(b) === "Padrão visual comum") : [b];
   function editCard(button: LibraryButton) {
     setEditingButton(button);
     setEditText(bindings[button.label]?.label || button.label);
@@ -114,7 +123,7 @@ export function CdeButtonLibrary({ number, handle, onEdit }: { number: number; h
           const options = b.label.split(" / ");
           const label = options.find(s => search.trim() && normalize(s).includes(normalize(search))) || options.find(s => !/\.\.\.|…/.test(s)) || options[0];
           const group = bindings[b.label]?.group || b.group || detectButtonGroup(<>{Icon && <Icon />}{label}</>);
-          const uses = group === "trash" ? deleteUses : saveUses;
+          const uses = usesOf(b);
           const content = <>{Icon && <Icon className="h-4 w-4" />}{label}</>;
           const unique = visibleLibrary.filter(entry => entry.label === b.label).length === 1;
           const approvalsLink = unique && b.file === "routes/_authenticated/dashboard.tsx" && ["Agrupar por Projeto e Cliente", "Custo por Etiqueta", "Indicadores de prazos"].includes(b.label);
@@ -127,7 +136,7 @@ export function CdeButtonLibrary({ number, handle, onEdit }: { number: number; h
               {b.tag === "CdeButton" && b.group ? <CdeButton group={b.group as CdeGroup} screen={b.file}>{label === b.icon ? null : label}</CdeButton> : b.tag === "button" ? <button type="button" className={b.className}>{content}</button> : <Button type="button" variant={(b.variant || undefined) as never} size={(b.size || undefined) as never} className={b.className}>{content}</Button>}
             </div>
             </div>
-            <div className="min-w-0"><p className="truncate text-xs font-medium text-foreground" title={label}>{bindings[b.label]?.label || (group === "save" ? "Salvar" : group === "trash" ? "Excluir" : label)}</p><p className="truncate text-xs text-muted-foreground">{group || "Sem padrão vinculado"}</p></div>
+            <div className="min-w-0"><p className="truncate text-xs font-medium text-foreground" title={label}>{bindings[b.label]?.label || label}</p><p className="truncate text-xs text-muted-foreground" title={classification(b)}>{classification(b)}</p></div>
             <div className="grid grid-cols-3 items-center justify-items-center">
               <span className="flex h-9 w-9 items-center justify-center"><Checkbox aria-label={`Selecionar card ${b.label}`} checked={checked.includes(libraryEntryKey(b))} onCheckedChange={value => setChecked(prev => value ? [...new Set([...prev, libraryEntryKey(b)])] : prev.filter(k => k !== libraryEntryKey(b)))} /></span>
               <span className="flex h-9 w-9 items-center justify-center"><Button type="button" variant="ghost" size="compactIcon" title={`Editar ${label}`} aria-label={`Editar ${label}`} onClick={() => editCard(b)}><Pencil /></Button></span><span className="flex h-9 w-9 items-center justify-center"><Button type="button" variant="ghost" size="compactIcon" title="Excluir card da biblioteca" aria-label={`Excluir card ${b.label}`} disabled={saving} onClick={() => removeCards([b])}><Trash2 /></Button></span>

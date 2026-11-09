@@ -1,4 +1,5 @@
 # Roadmap
+- [x] CDE: padrão visual comum selecionado em 4.14, largura pelo texto e classificação de funções específicas; Salvar/Cancelar com fundo/cantos comuns conferidos em sessão real, edição e celular sem erros; testes de classificação e identidade passaram.
 - [x] Monitoramento: textos específicos de Salvar/Excluir e progresso preservados; 16 testes passaram. Confirmações reais abertas e canceladas; escolhas com chamados simulados conferidas em 1280/390 px sem transbordamento ou exclusões.
 - [x] Legal: Deliberações/Ações em 14 px; exclusão de observações pelo autor com confirmação e histórico preservado; prazo por ação salvo e relido, atraso após vencimento e baixa ao concluir conferidos em ata temporária removida; computador/celular sem erros, 11 testes passaram.
 - [x] CDE: rótulos Ícone e Símbolo interno sem a palavra tamanho, conferidos na tela.

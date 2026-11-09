@@ -49,3 +49,4 @@
 - Shared dropdown menus inherit their trigger’s computed font size across portals; CDE fields_select font settings apply to both field and options.
 
 - Shared Save/Delete controls preserve descriptive and in-progress labels; CDE label overrides apply only to generic Salvar/Excluir so destructive choices remain distinguishable.
+- Action appearance inherits cde_selected action_standard; actionSpecific models, secondary scopes and explicit visual overrides are specific functions, retaining identity and content-sized width.

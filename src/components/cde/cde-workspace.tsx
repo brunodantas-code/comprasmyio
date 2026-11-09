@@ -27,6 +27,7 @@ import { CdeCategoryHeader } from "./cde-category-header";
 import { FormatColorOptions } from "@/components/mytosis/format-color-options";
 import { CdeButtonLibrary } from "./cde-button-library";
 import { CdeDeadlineAlerts } from "./cde-deadline-alerts";
+import { COMMON_ACTION_GROUPS } from "./action-standard";
 
 type Variant = { key: string; name?: string; custom?: boolean; tag: string; variant: string; size: string; className: string; icon: string; iconClass: string; label: string; count: number; files: string[]; uses?: { file: string; n: number }[]; style?: CdeStyle };
 
@@ -48,6 +49,7 @@ const GROUPS: { key: GroupKey; title: string; hint: string; multi?: boolean }[] 
   { key: "move", title: "3.2 Mover para cima/baixo", hint: "Setas que reposicionam uma linha · padrão único" },
   { key: "summary", title: "3.3 Voltar ao Sumário", hint: "Link de retorno ao sumário · padrão único" },
   { key: "toggle", title: "3.4 Exibir/Recolher", hint: "Setas de expandir e recolher · padrão único" },
+  { key: "action_standard", title: "4.0 Padrão visual comum", hint: "Altura, fundo, bordas e cantos dos botões de ação" },
   { key: "plus", title: "4.1 Botões +", hint: "Padrão único" },
   { key: "add", title: "4.2 Adicionar / Novo (texto)", hint: "Padrão único" },
   { key: "save", title: "4.3 Salvar", hint: "Padrão único" },
@@ -70,6 +72,7 @@ const GROUPS: { key: GroupKey; title: string; hint: string; multi?: boolean }[] 
 
 const NUMBER_MODELS: Record<string, Omit<Variant, "key">[]> = Object.fromEntries(["number_section", "number_subsection"].map((group) => [group, ["rounded-md", "rounded-full"].map((shape) => ({ tag: "span", variant: "", size: "", className: `${shape} ${group === "number_section" ? "bg-primary text-foreground" : "bg-cde-number-soft text-primary"}`, icon: "", iconClass: "", label: "1", count: 0, files: ["components/cde/cde-workspace.tsx"] }))]));
 NUMBER_MODELS.color_swatch = ["rounded-none", "rounded-full"].map((shape) => ({ tag: "span", variant: "", size: "", className: `${shape} bg-primary`, icon: "", iconClass: "", label: " ", count: 0, files: ["components/mytosis/color-options.tsx", "components/mytosis/format-color-options.tsx", "components/cde/top-icon-style-editor.tsx", "components/cde/list-item-style.tsx"] }));
+const ACTION_MODELS: Omit<Variant, "key">[] = [{ tag: "Button", variant: "outline", size: "default", className: "", icon: "Save", iconClass: "h-4 w-4", label: "Salvar", count: 0, files: [] }];
 
 /** Telas conhecidas pelo levantamento, com o app deduzido pelo caminho do arquivo. */
 const SCREENS = [...new Set([...Object.values(inventory).flatMap((g) => (g as { files: string[] }[]).flatMap((v) => v.files)), "controls/save-icon", "components/legal/minutes-list.tsx", "components/legal/legal-workspace.tsx", "components/legal/subject-actions.tsx", "routes/_authenticated/site-survey.tsx", "components/site-survey-screen-summary.tsx", "components/mytosis/processes-tab.tsx", "components/mytosis/flowchart.tsx", "components/mytosis/node-preview.tsx", "components/supply-order-statuses-tab.tsx", "components/supply-manual-reader.tsx", "components/cde/cde-app-order.tsx", "components/cde/cde-sortable-icons.tsx"])].sort();
@@ -153,7 +156,7 @@ export function CdeWorkspace() {
 
   const groupModels = (g: GroupKey): Variant[] => {
     const removed = new Set((data?.removed ?? []).filter((r) => r.group_key === g).map((r) => r.variant_key));
-    const src = NUMBER_MODELS[g] ?? (FIELD_TAGS[g] ? ((inventory.fields as Omit<Variant, "key">[]).filter((v) => FIELD_TAGS[g].includes(v.tag))) : ((inventory as Record<string, unknown>)[g] ?? []) as Omit<Variant, "key">[]);
+    const src = (g === "action_standard" ? ACTION_MODELS : NUMBER_MODELS[g]) ?? (FIELD_TAGS[g] ? ((inventory.fields as Omit<Variant, "key">[]).filter((v) => FIELD_TAGS[g].includes(v.tag))) : ((inventory as Record<string, unknown>)[g] ?? []) as Omit<Variant, "key">[]);
     const base = src.map((v) => {
       if (g !== "filter") { const fc = (v as { fileCounts?: number[] }).fileCounts; return { ...v, key: inventoryKey(v), uses: v.files.map((f, i) => ({ file: f, n: fc?.[i] ?? 1 })) }; }
       const primaryDefinition = v.variant === "ghost" && v.size === "icon" && v.files.includes("components/column-filter.tsx");
@@ -218,7 +221,9 @@ export function CdeWorkspace() {
   const create = useMutation({
     mutationFn: async (group: GroupKey) => {
       if (!draft.name.trim()) throw new Error("Informe o nome do modelo.");
-      const values = { name: draft.name.trim(), tag: draft.tag, variant: draft.variant, size: draft.size, class_name: draft.className, icon: draft.icon, icon_class: draft.iconClass, label: draft.label, style: draft.style };
+      const visualChanged = !editing || draft.variant !== editing.variant || draft.size !== editing.size || draft.className !== editing.className || ["shape", "fill", "border", "borderWidth"].some(k => draft.style[k as keyof CdeStyle] !== editing.style?.[k as keyof CdeStyle]);
+      const modelStyle = group !== "action_standard" && COMMON_ACTION_GROUPS.has(group) && visualChanged ? { ...draft.style, actionSpecific: true } : draft.style;
+      const values = { name: draft.name.trim(), tag: draft.tag, variant: draft.variant, size: draft.size, class_name: draft.className, icon: draft.icon, icon_class: draft.iconClass, label: draft.label, style: modelStyle };
       if (editing?.custom) {
         const { error } = await supabase.from("cde_models").update(values).eq("id", editing.key.slice(7)).eq("group_key", group);
         if (error) throw error;
@@ -309,7 +314,7 @@ export function CdeWorkspace() {
                       <div key={v.key} data-cde-model={g.key} className={cn("flex h-60 w-64 shrink-0 flex-col gap-2 rounded-lg border p-3", selected ? "border-primary bg-accent" : "border-border")}>
                         <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
                           <span className="truncate" title={v.style?.description || undefined}>{v.name ?? `Modelo ${i + 1}`}{v.custom ? " · criado no CDE" : ""}</span>
-                          <span className="flex shrink-0 items-center gap-1 whitespace-nowrap">{v.custom && !v.count ? "novo" : `${v.count} uso${v.count === 1 ? "" : "s"}`}
+                          <span className="flex shrink-0 items-center gap-1 whitespace-nowrap">{g.key === "action_standard" ? "compartilhado" : v.custom && !v.count ? "novo" : `${v.count} uso${v.count === 1 ? "" : "s"}`}
                             <Button type="button" variant="outline" size="compactIcon" title="Editar modelo" aria-label={`Editar ${v.name ?? `Modelo ${i + 1}`} em ${g.title}`} onClick={() => { setEditing(v); setDraft({ name: v.name ?? `Modelo ${i + 1}`, tag: v.tag, variant: v.variant, size: v.size, className: v.className, icon: v.icon, iconClass: v.iconClass, label: v.label, style: { ...v.style } }); setCreating(g.key); }}><Pencil /></Button>
                             <Button type="button" variant="outline" size="compactIcon" title={selected ? "Remova o padrão antes de excluir" : "Excluir modelo"} aria-label={`Excluir ${v.name ?? `Modelo ${i + 1}`}`} disabled={selected}
                               onClick={() => { if (!standards.length) return toast.error("Escolha primeiro um padrão para substituir este modelo."); setReplacement(primaries.length === 1 ? primaries[0] : standards.length === 1 ? standards[0] : ""); setDeleting({ group: g.key, model: v, label: v.name ?? `Modelo ${i + 1}` }); }}><Trash2 /></Button>
@@ -454,6 +459,7 @@ export function CdeWorkspace() {
               <div className="space-y-1"><Label>Texto</Label><Input value={draft.label} maxLength={40} onChange={(e) => setDraft({ ...draft, label: e.target.value })} /></div>
               <div className="space-y-1"><Label>Classes do ícone</Label><Input value={draft.iconClass} onChange={(e) => setDraft({ ...draft, iconClass: e.target.value })} placeholder="h-4 w-4" /></div>
             </> : null}
+            {creating && COMMON_ACTION_GROUPS.has(creating) && creating !== "action_standard" ? <div className="space-y-1 sm:col-span-2"><Label>Classificação visual</Label><Select value={draft.style.actionSpecific || (creating === "confirm" && draft.style.actionSpecific !== false) ? "specific" : "standard"} onValueChange={v => setDraft({ ...draft, style: { ...draft.style, actionSpecific: v === "specific" } })}><SelectTrigger aria-label="Classificação visual"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="standard">Padrão visual comum</SelectItem><SelectItem value="specific">Botão de função específica</SelectItem></SelectContent></Select></div> : null}
             <div className="space-y-1"><Label>Forma</Label>
               <Select value={draft.style.shape || "none"} onValueChange={(v) => setDraft({ ...draft, style: { ...draft.style, shape: v === "none" ? "" : v } })}><SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>{FORMS.map((f) => <SelectItem key={f.key || "none"} value={f.key || "none"}>{f.label}</SelectItem>)}</SelectContent></Select></div>
