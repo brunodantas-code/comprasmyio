@@ -421,7 +421,16 @@ export function CdeWorkspace() {
           if (cat === "nav") return <CdeNavigation key={`CdeNavigation-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "menu") return <CdeMainMenu key={`CdeMainMenu-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "apps") return <CdeAppOrder key={`CdeAppOrder-${collapseKey}`} number={ci + 1} handle={handle} />;
-          if (cat === "button_library") return <CdeButtonLibrary key={`CdeButtonLibrary-${collapseKey}`} number={ci + 1} handle={handle} />;
+          if (cat === "button_library") return <CdeButtonLibrary key={`CdeButtonLibrary-${collapseKey}`} number={ci + 1} handle={handle} onEdit={(button, group) => {
+            if (!group) { toast.info("Este botão ainda não possui um padrão CDE vinculado. A edição visual precisa desse vínculo para ser aplicada no app."); return; }
+            const rows = (data?.selected ?? []).filter(s => s.group_key === group);
+            const selection = rows.find(s => !s.is_primary && s.screens.includes(button.file)) ?? rows.find(s => s.is_primary);
+            const model = groupModels(group).find(v => v.key === selection?.variant_key);
+            if (!model) { toast.info("Selecione primeiro um padrão para este grupo nos Botões de ação."); return; }
+            setEditing(model);
+            setDraft({ name: model.name ?? button.label, tag: model.tag, variant: model.variant, size: model.size, className: model.className, icon: model.icon, iconClass: model.iconClass, label: model.label, style: { ...model.style } });
+            setCreating(group);
+          }} />;
           if (cat === "deadline_alerts") return <CdeDeadlineAlerts key={`CdeDeadlineAlerts-${collapseKey}`} number={ci + 1} handle={handle} />;
           return renderGroup(GROUPS.find((x) => x.key === cat)!, n, null, handle);
         }}

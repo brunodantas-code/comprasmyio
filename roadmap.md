@@ -161,3 +161,5 @@
 - [x] Manuais do Usuário dos demais apps (padrão Supply)
 - [x] Confirmar/Cancelar, setas exibir/recolher e + seguindo o padrão CDE (prints 08/11)
 - [x] Seta exibir/recolher no Menu principal (CDE)
+
+- [x] Biblioteca CDE: cards compactos de 80 px, quatro colunas no desktop, lista contínua e lápis ligado ao editor do padrão vigente; botões sem vínculo informam a limitação sem salvar mudanças inoperantes.

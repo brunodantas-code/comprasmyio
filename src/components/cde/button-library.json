@@ -1513,7 +1513,7 @@
   },
   {
     "file": "components/cde/cde-workspace.tsx",
-    "line": 467,
+    "line": 476,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -1525,7 +1525,7 @@
   },
   {
     "file": "components/cde/cde-workspace.tsx",
-    "line": 468,
+    "line": 477,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -1537,7 +1537,7 @@
   },
   {
     "file": "components/cde/cde-workspace.tsx",
-    "line": 487,
+    "line": 496,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -1549,7 +1549,7 @@
   },
   {
     "file": "components/cde/cde-workspace.tsx",
-    "line": 488,
+    "line": 497,
     "tag": "Button",
     "label": "Excluir",
     "dynamic": false,
@@ -1561,7 +1561,7 @@
   },
   {
     "file": "components/cde/cde-workspace.tsx",
-    "line": 510,
+    "line": 519,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -1573,7 +1573,7 @@
   },
   {
     "file": "components/cde/cde-workspace.tsx",
-    "line": 511,
+    "line": 520,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
