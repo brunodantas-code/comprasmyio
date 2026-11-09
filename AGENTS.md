@@ -10,7 +10,6 @@
 <!-- LOVABLE:END -->
 - Code lists share pending logic to prevent drift.
 - Code hides deleted rows by default; Supply clears inherited Internal tags on reallocation via its shared trigger.
-
 - Supply uses recipient IDs, not names; RLS preserves recipient reads. Personal queues union requester/recipient IDs without duplicates; actions stay gated.
 - Supply allocation uses a shared exclusive selector and resolver; purchase-order triggers derive project-owned client/unit IDs and reject conflicting direct allocations, so client consolidation counts each order once while preserving independent cost centers.
 - Supply new-request values use a shared schema guard and insert-only database validation for targeted request models; material unit values are entered and persisted for all authorized requesters, preserving historical orders and unrelated workflows.
@@ -34,12 +33,10 @@
 - Facade pickers bypass checklist autosave. Bounded recognition preserves manual names, discards closed-dialog results and never gates saving.
 - Facade attachment triggers only clear facade pending fields; guarded explicit starts and the first nonempty persisted checklist response register point start, excluding retrospective manual visits.
 - RLS uses effective menus/app grants; shared files follow record access and uploads bind owners, preserving authorized collaboration. Survey previews lazy-load/cache private images; uploads use lazy compression, a serial queue and retry cache with prepared-file metadata to bound memory.
-
 - Pending cards reuse the guarded editor by section; optional answer.observation stays separate from required details.
 - Completed surveys never reopen; History remediation preserves status/dates. Customer Q&A resolves stored, point then visit-template Section 7 independently of pending groups; history includes original customer-question sections after template switches, preserving questions and replies for all point types. Models copy independently.
 - Registration lists/PDF/Excel share a pure checklist matcher and filtered rows with fresh authorized approvals; PDF uses pdf-lib AcroForm and Excel OOXML controls, independent of ERP data.
 - Proposals use private visit-keyed files; authenticated extraction syncs totals by trigger and stores group breakdown in proposal metadata. Environment remainders preserve unknown quantities as null.
-
 - Mytosis (OKRs/fluxogramas) keeps hierarchy in `mytosis_nodes.parent_id` (vertical) and dependencies in `mytosis_links` (horizontal); progress, phases, critical path and pending reports are pure functions in `src/lib/mytosis.ts` so the canvas and report never diverge. Access comes from `mytosis_role()` (ERP admin > member role > app grant as viewer).
 - Mytosis process trees use is_process=true without dates/progress; imports copy subtrees/internal links. Split uses an authenticated invoker RPC to atomically create parallel successors and direct links, preserving originals and RLS.
 - Mytosis numbers/search use compact hierarchy paths; dependencies order siblings without adding levels. Drag moves use an authenticated invoker RPC; IDs/locators stay stable.
@@ -49,5 +46,3 @@
 - Mytosis company formats are keyed by shape in settings; choosing a shape resolves its standard, applying standards preserves shapes/custom boxes, and database guards enforce admin-only visual customization while editors retain content/dependency edits.
 - Mytosis title limits use size/font/shape; never truncate old titles. PDF captures the visible canvas on one proportional page. Node attachments use private owner/node paths, role-gated rows and signed URLs; object ownership checks avoid recursive RLS.
 - No "Fechar" buttons; corner X closes dialogs.
-
-- The CDE button library reuses the active model editor, resolving screen-specific standards before the primary; unbound buttons cannot save ineffective visual edits.
