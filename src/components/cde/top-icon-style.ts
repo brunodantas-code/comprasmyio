@@ -23,6 +23,7 @@ export function topIconVars(s: TopIconStyle): Record<string, string> {
     "--ti-bd": s.border || "var(--border)",
     "--ti-bw": `${s.borderWidth}px`,
     "--ti-r": `${s.radius}px`,
+    "--mi-fg": s.fg || "currentColor",
   };
 }
 /** Applies the saved style to every .top-icon on the page. */

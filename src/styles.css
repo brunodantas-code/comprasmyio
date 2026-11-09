@@ -387,3 +387,12 @@
   border: var(--ti-bw, 0px) solid var(--ti-bd, var(--border)) !important;
   border-radius: var(--ti-r, 6px) !important;
 }
+
+/* App menu icons (bottom bars): same CDE rule as top icons, keeps active color when symbol color is auto */
+.menu-icon {
+  display: inline-flex; align-items: center; justify-content: center; padding: 3px;
+  color: var(--mi-fg, currentColor);
+  background: var(--ti-bg, transparent);
+  border: var(--ti-bw, 0px) solid var(--ti-bd, var(--border));
+  border-radius: var(--ti-r, 6px);
+}

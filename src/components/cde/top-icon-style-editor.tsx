@@ -33,7 +33,7 @@ export function TopIconStyleEditor({ items }: { items: Item[] }) {
       const r = existing.data ? await supabase.from("cde_selected").update(row).eq("group_key", TOP_ICON_GROUP).eq("variant_key", existing.data.variant_key) : await supabase.from("cde_selected").insert({ ...row, group_key: TOP_ICON_GROUP });
       if (r.error) throw r.error;
       await qc.invalidateQueries({ queryKey: ["cde-top-icon-style"] });
-      setDraft(null); toast.success("Ícones da barra superior atualizados");
+      setDraft(null); toast.success("Regra dos ícones aplicada a todos os apps");
     } catch { toast.error("Não foi possível salvar (somente Admin)."); } finally { setSaving(false); }
   }
   return <div className="space-y-3">
