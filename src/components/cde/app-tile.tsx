@@ -10,6 +10,12 @@ const APP_ICONS: Record<string, [React.ComponentType<{ className?: string; style
   site_survey: [Search, 2.8], chamados: [Phone, 2.4], cde: [CdeIcon, 1.8], mytosis: [MytosisIcon, 1.8], development: [CodeXml, 2.8],
 };
 
+export const APP_DESCRIPTIONS: Record<string, string[]> = {
+  supply: ["Solicitações", "e Estoque"], cash_flow: ["Gestão financeira"], crm: ["Vendas e", "Relacionamento"],
+  legal: ["Contratos", "Atas de Reunião", "Jurídico"], rh: ["Gestão de Pessoas"], site_survey: ["Visitas técnicas"],
+  chamados: ["Suporte ao cliente", "e operação"], development: ["Melhorias e Bugs"], mytosis: ["Fluxogramas", "e processos"], cde: ["Padrões de", "interface"],
+};
+
 /** Symbol + name inside a portal app tile; shared by the portal and the CDE preview. */
 export function AppTileFace({ appKey, name, tile }: { appKey: string; name: string; tile: AppTileConfig }) {
   const [Icon, stroke] = APP_ICONS[appKey] ?? [CodeXml, 2.8];

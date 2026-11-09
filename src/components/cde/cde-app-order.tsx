@@ -5,7 +5,7 @@ import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, us
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Minus, Plus, Save } from "lucide-react";
-import { AppTileFace } from "./app-tile";
+import { APP_DESCRIPTIONS, AppTileFace } from "./app-tile";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -68,7 +68,7 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
   }
   return <section className="space-y-4">
     <CdeCategoryHeader handle={handle} number={number} title="Apps da página principal" hint="Ordem, fonte, tamanho e espaçamento" open={open} onToggle={() => setOpen(!open)} />
-    {open && <div className="max-w-3xl p-4"><DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={move}><SortableContext items={order} strategy={verticalListSortingStrategy}>{order.map((id, i) => <Row key={id} id={id} index={i} />)}</SortableContext></DndContext>
+    {open && <div className="w-full min-w-0 py-4"><DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={move}><SortableContext items={order} strategy={verticalListSortingStrategy}>{order.map((id, i) => <Row key={id} id={id} index={i} />)}</SortableContext></DndContext>
       <Button variant="action" className="mt-3" onClick={save} disabled={saving || !draft}><Save className="h-4 w-4" />Salvar</Button>
       <div className="mt-6 space-y-3 border-t border-border pt-4">
         <p className="text-sm font-medium">Ícones da página principal</p>
@@ -95,8 +95,11 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
           </div></div>)}
         </div>
         <div className="space-y-1"><Label>Prévia</Label>
-          <div aria-label="Prévia dos apps" style={{ columnGap: tile.gapX, rowGap: tile.gapY }} className="flex flex-wrap rounded-xl border border-border bg-background p-3">
-            {order.map((key) => { const app = PORTAL_APPS.find((a) => a.key === key); return app ? <div key={key} style={{ zoom: tile.tilePct / 100 }} className="flex h-28 w-28 flex-col items-center justify-between overflow-hidden rounded-3xl bg-primary px-2 pb-2 pt-1.5 text-primary-foreground"><AppTileFace appKey={key} name={app.name} tile={tile} /></div> : null; })}
+          <div aria-label="Prévia dos apps" style={{ columnGap: tile.gapX, rowGap: tile.gapY }} className="flex w-full flex-wrap bg-background py-10 sm:py-14">
+            {order.map((key) => { const app = PORTAL_APPS.find((a) => a.key === key); return app ? <div key={key} style={{ zoom: tile.tilePct / 100 }} className="flex w-20 min-w-0 flex-col items-center text-center sm:w-28">
+              <div className="relative flex h-20 w-20 flex-col items-center justify-between rounded-2xl border-2 border-primary bg-primary px-1.5 pb-2 pt-1 text-primary-foreground sm:h-28 sm:w-28 sm:rounded-3xl sm:px-2 sm:pt-1.5"><AppTileFace appKey={key} name={app.name} tile={tile} /></div>
+              <p className="mt-2 w-20 max-w-full break-words text-center text-[0.68rem] leading-4 text-muted-foreground sm:mt-3 sm:w-28 sm:text-sm sm:leading-5">{APP_DESCRIPTIONS[key]?.map(line => <span key={line} className="block sm:whitespace-nowrap">{line}</span>)}</p>
+            </div> : null; })}
           </div></div>
         <p className="text-xs text-muted-foreground">No celular, a fonte fica 2 px menor. Os símbolos mais finos recebem correção automática para parecerem do mesmo tamanho.</p>
         <div className="flex items-center gap-2"><Button variant="action" onClick={saveTile} disabled={saving || !tileDraft}><Save className="h-4 w-4" />Salvar</Button>
