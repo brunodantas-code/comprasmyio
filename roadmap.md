@@ -1,4 +1,6 @@
 # Roadmap
+- [x] CDE: controles + e − alinhados em faixa única, símbolos sem fundo na ordenação; interação e computador/celular conferidos, três testes passaram.
+- [x] Confirmações: botões CDE com texto preservam largura do conteúdo; Excluir passou de 36 para 67 px sem sobreposição; Cancelar conferido sem excluir atas, computador/celular.
 - [x] Legal: ação de Assunto novo criada no pop-up, salva junto à ata e relida após recarga; Recolher tudo junto a Ordenar conferido; ata temporária removida, 11 testes passaram.
 - [x] Campos: modelo de linha verde incluído e selecionado em 1.1, textos longos e senhas; listas pesquisáveis ligadas ao CDE e prévias independentes; digitação, participantes, computador/celular conferidos.
 - [x] Atas: apenas número circular CDE e título na leitura, sem “Assunto N”/legenda; arraste e legenda no editor. Cabeçalho reduzido de 161 para 92 px aberto e 45 px recolhido; computador/celular conferidos, oito testes passaram.

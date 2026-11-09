@@ -85,7 +85,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const cdeVariant = look.variant ? look.variant as VariantProps<typeof buttonVariants>["variant"] : resolvedVariant;
     const cdeSize = look.size ? look.size as VariantProps<typeof buttonVariants>["size"] : size;
     return (
-      <Comp className={cn(buttonVariants({ variant: cdeVariant, size: cdeSize, className }), look.className)} style={style ?? (look.variant || look.className ? look.style : undefined)} ref={ref} {...props}>{content}</Comp>
+      <Comp className={cn(buttonVariants({ variant: cdeVariant, size: cdeSize, className }), look.className, !asChild && visibleText && group && "!w-auto !min-w-max shrink-0")} style={style ?? (look.variant || look.className ? look.style : undefined)} ref={ref} {...props}>{content}</Comp>
     );
   },
 );

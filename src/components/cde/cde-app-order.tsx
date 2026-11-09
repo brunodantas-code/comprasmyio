@@ -5,7 +5,7 @@ import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, us
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Minus, Plus, Save } from "lucide-react";
-import { APP_DESCRIPTIONS, AppTileFace } from "./app-tile";
+import { APP_DESCRIPTIONS, AppSymbol, AppTileFace } from "./app-tile";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,7 +19,9 @@ function Row({ id, index }: { id: string; index: number }) {
   const app = PORTAL_APPS.find((a) => a.key === id);
   return <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }} className="flex items-center gap-3 border-b border-border bg-card py-2">
     <Button variant="ghost" size="compactIcon" aria-label={`Mover ${app?.name}`} title={`Mover ${app?.name}`} {...attributes} {...listeners} className="touch-none"><GripVertical /></Button>
-    <CdeNumber screen="components/cde/cde-app-order.tsx">{index + 1}</CdeNumber><span className="flex-1 text-sm">{app?.name}</span>
+    <CdeNumber screen="components/cde/cde-app-order.tsx">{index + 1}</CdeNumber>
+    <span className="flex h-7 w-7 shrink-0 items-center justify-center text-foreground"><AppSymbol name={app?.name ?? ""} className="h-5 w-5" /></span>
+    <span className="flex-1 text-sm">{app?.name}</span>
   </div>;
 }
 
@@ -72,25 +74,23 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
       <Button variant="action" className="mt-3" onClick={save} disabled={saving || !draft}><Save className="h-4 w-4" />Salvar</Button>
       <div className="mt-6 space-y-3 border-t border-border pt-4">
         <p className="text-sm font-medium">Ícones da página principal</p>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <div className="space-y-1"><Label>Fonte do nome</Label><Select value={String(tile.labelPx)} onValueChange={(v) => setTileDraft({ ...tile, labelPx: Number(v) })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{[11, 12, 13, 14, 15, 16].map((n) => <SelectItem key={n} value={String(n)}>{n} px</SelectItem>)}</SelectContent></Select></div>
-          <div className="space-y-1"><Label>Tamanho do ícone</Label>
-            <div className="flex h-9 items-center gap-2">
+        <div role="group" aria-label="Ajustes dos ícones da página principal" className="grid w-full max-w-5xl grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">Fonte do nome</Label><Select value={String(tile.labelPx)} onValueChange={(v) => setTileDraft({ ...tile, labelPx: Number(v) })}><SelectTrigger className="h-9"><SelectValue /></SelectTrigger><SelectContent>{[11, 12, 13, 14, 15, 16].map((n) => <SelectItem key={n} value={String(n)}>{n} px</SelectItem>)}</SelectContent></Select></div>
+          <div className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">Tamanho do ícone</Label>
+            <div className="grid h-9 w-36 grid-cols-[2rem_5rem_2rem] items-center justify-items-center">
               <Button variant="outline" size="compactIcon" aria-label="Diminuir ícone" title="Diminuir" disabled={tile.tilePct <= 70} onClick={() => setTileDraft({ ...tile, tilePct: tile.tilePct - 5 })}><Minus /></Button>
-              <span className="w-12 text-center text-sm tabular-nums">{tile.tilePct}%</span>
+              <span className="w-20 text-center text-sm tabular-nums">{tile.tilePct}%</span>
               <Button variant="outline" size="compactIcon" aria-label="Aumentar ícone" title="Aumentar" disabled={tile.tilePct >= 140} onClick={() => setTileDraft({ ...tile, tilePct: tile.tilePct + 5 })}><Plus /></Button>
             </div></div>
-          <div className="space-y-1"><Label>Tamanho do símbolo interno</Label>
-            <div className="flex h-9 items-center gap-2">
+          <div className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">Tamanho do símbolo interno</Label>
+            <div className="grid h-9 w-36 grid-cols-[2rem_5rem_2rem] items-center justify-items-center">
               <Button variant="outline" size="compactIcon" aria-label="Diminuir símbolo" title="Diminuir" disabled={tile.iconPct <= 60} onClick={() => setTileDraft({ ...tile, iconPct: tile.iconPct - 5 })}><Minus /></Button>
-              <span className="w-12 text-center text-sm tabular-nums">{tile.iconPct}%</span>
+              <span className="w-20 text-center text-sm tabular-nums">{tile.iconPct}%</span>
               <Button variant="outline" size="compactIcon" aria-label="Aumentar símbolo" title="Aumentar" disabled={tile.iconPct >= 140} onClick={() => setTileDraft({ ...tile, iconPct: tile.iconPct + 5 })}><Plus /></Button>
             </div></div>
-        </div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {([['gapX', 'Espaçamento horizontal'], ['gapY', 'Espaçamento vertical']] as const).map(([key, label]) => <div key={key} className="space-y-1"><Label>{label}</Label><div className="flex h-9 items-center gap-2">
+          {([['gapX', 'Espaçamento horizontal'], ['gapY', 'Espaçamento vertical']] as const).map(([key, label]) => <div key={key} className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">{label}</Label><div className="grid h-9 w-36 grid-cols-[2rem_5rem_2rem] items-center justify-items-center">
             <Button variant="outline" size="compactIcon" aria-label={`Diminuir ${label.toLowerCase()}`} title="Diminuir" disabled={tile[key] <= 8} onClick={() => setTileDraft({ ...tile, [key]: Math.max(8, tile[key] - 4) })}><Minus /></Button>
-            <span className="w-16 text-center text-sm tabular-nums">{tile[key]} px</span>
+            <span className="w-20 text-center text-sm tabular-nums">{tile[key]} px</span>
             <Button variant="outline" size="compactIcon" aria-label={`Aumentar ${label.toLowerCase()}`} title="Aumentar" disabled={tile[key] >= 80} onClick={() => setTileDraft({ ...tile, [key]: Math.min(80, tile[key] + 4) })}><Plus /></Button>
           </div></div>)}
         </div>
