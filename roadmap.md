@@ -1,4 +1,6 @@
 # Roadmap
+- [x] CDE: prévia preserva tamanho/aparência real (185×32 px igual ao botão original); seleção, lápis e lixeira alinhados; computador/celular conferidos.
+- [x] Avisos de prazo com fundo cinza-claro e texto escuro; cinza existe nas opções de fundo do CDE, sem configuração própria do tooltip; tela conferida.
 - [x] Code: altura padrão preservada e etiqueta Aguardando resposta sem quebra, conferida em sessão autenticada.
 - [x] Approvals: itens adicionais/descrições longas em pop-up, linhas de pedidos 96 px; exportação ligada ao CDE e agrupamento/consolidação em grupo próprio para escolha.
 - [x] Approvals: datas separadas, Código 10 caracteres, alertas 7/3 configuráveis no item 13 do CDE, filtros e indicadores de histórico; 20 testes passaram. Causas sem prova aparecem como não registradas.
