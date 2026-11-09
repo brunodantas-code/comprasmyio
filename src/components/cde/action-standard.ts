@@ -8,6 +8,7 @@ export function isSpecificAction(options: { group?: string; label?: string; clas
 }
 
 /** Keep action identity (icon/label), inherit only the shared visual geometry and palette. */
-export function inheritActionLook<T extends { variant?: string; size?: string; className: string; style: React.CSSProperties }>(own: T, common: T): T {
+type ActionVisual = { variant?: string; size?: string; className: string; style: React.CSSProperties };
+export function inheritActionLook<T extends ActionVisual>(own: T, common: ActionVisual): T {
   return { ...own, variant: common.variant, size: common.size, className: common.className, style: common.style };
 }
