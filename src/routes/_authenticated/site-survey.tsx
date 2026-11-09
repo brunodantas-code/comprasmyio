@@ -1,3 +1,4 @@
+import { useAppMenuSide } from "@/components/cde/cde-menu-type";
 import { useMenuOrders, sortByMenuOrder } from "@/components/cde/menu-order";
 import { CdeButton } from "@/components/cde/cde-button";
 import { ColumnFilter } from "@/components/column-filter";
@@ -286,6 +287,7 @@ function SiteSurveyPage() {
 
   const { data: menuOrders } = useMenuOrders();
   visitsRef.current = data?.visits ?? [];
+  const side = useAppMenuSide("Site Survey");
   if (isLoading || !data) return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Carregando Site Survey...</div>;
   const tabs = [
     { value: "visitas", label: "Visitas", icon: CalendarDays, allowed: can("site_survey_visitas_minhas") || can("site_survey_visitas_todas") },
@@ -302,7 +304,7 @@ function SiteSurveyPage() {
 
   return <div className="min-h-screen bg-background">
     <AppHeader logo={<MyioAppLogo appName="Site Survey" className="text-base sm:text-2xl" />} />
-    <main className="mx-auto max-w-7xl px-4 pb-28 pt-8 sm:px-6">
+    <main className={`mx-auto max-w-7xl px-4 pb-28 pt-8 sm:px-6 ${side === "left" ? "lg:pb-8 lg:pl-32" : side === "right" ? "lg:pb-8 lg:pr-32" : ""}`}>
       <Tabs value={section} onValueChange={setSection}>
         <TabsContent value="visitas">
           <Tabs value={visitsSection} onValueChange={setVisitsSection}>
@@ -363,8 +365,8 @@ function SiteSurveyPage() {
         </TabsContent>
       </Tabs>
     </main>
-    <nav className="fixed inset-x-3 bottom-3 z-50" aria-label="Navegação do Site Survey">
-      <div className="mx-auto grid max-w-md grid-cols-4 items-stretch rounded-[1.75rem] border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/90">
+    <nav className={`fixed inset-x-3 bottom-3 z-50 ${side === "left" ? "lg:inset-x-auto lg:bottom-auto lg:left-3 lg:top-24 lg:w-24" : side === "right" ? "lg:inset-x-auto lg:bottom-auto lg:right-3 lg:top-24 lg:w-24" : ""}`} aria-label="Navegação do Site Survey">
+      <div className={`mx-auto grid max-w-md grid-cols-4 items-stretch ${side ? "lg:grid-cols-1 lg:gap-1" : ""} rounded-[1.75rem] border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/90`}>
         {orderedTabs.map(({ value, label, icon: Icon }) => {
           const active = section === value;
           const hasSubmenu = value === "visitas" || value === "usuarios";
@@ -375,7 +377,7 @@ function SiteSurveyPage() {
           const submenuItems = value === "visitas"
             ? [...(can("site_survey_agendar") ? [{ value: "nova", label: "Nova visita", icon: Plus }] : []), { value: "minhas", label: "Realizar Visita", icon: CalendarDays }, { value: "pendencias", label: "Sanar Pendências", icon: ClipboardCheck }, ...(can("site_survey_agendar") ? [{ value: "realizada", label: "Cadastrar visita realizada", icon: ClipboardCheck }] : []), { value: "resumo", label: "Histórico de Visitas", icon: FileText }]
             : userTabs;
-          return <DropdownMenu key={value}><DropdownMenuTrigger asChild><Button type="button" variant="ghost" className={itemClassName} onClick={selectSection} aria-current={active ? "page" : undefined}>{item}</Button></DropdownMenuTrigger><DropdownMenuContent side="top" align="center" sideOffset={10} className="w-56 rounded-lg p-1.5 shadow-xl"><DropdownMenuLabel>{label}</DropdownMenuLabel><DropdownMenuSeparator />{submenuItems.map(({ value: subValue, label: subLabel, icon: SubIcon }) => { const subActive = value === "visitas" ? visitsSection === subValue : userSection === subValue; return <DropdownMenuItem key={subValue} className="min-h-11 rounded-md" onSelect={() => { selectSection(); if (value === "visitas") setVisitsSection(subValue); else setUserSection(subValue); }}><SubIcon className="h-4 w-4" /><span className="flex-1">{subLabel}</span>{subActive ? <Check className="h-4 w-4 text-primary" /> : null}</DropdownMenuItem>; })}</DropdownMenuContent></DropdownMenu>;
+          return <DropdownMenu key={value}><DropdownMenuTrigger asChild><Button type="button" variant="ghost" className={itemClassName} onClick={selectSection} aria-current={active ? "page" : undefined}>{item}</Button></DropdownMenuTrigger><DropdownMenuContent side={side ? (side === "left" ? "right" : "left") : "top"} align="center" sideOffset={10} className="w-56 rounded-lg p-1.5 shadow-xl"><DropdownMenuLabel>{label}</DropdownMenuLabel><DropdownMenuSeparator />{submenuItems.map(({ value: subValue, label: subLabel, icon: SubIcon }) => { const subActive = value === "visitas" ? visitsSection === subValue : userSection === subValue; return <DropdownMenuItem key={subValue} className="min-h-11 rounded-md" onSelect={() => { selectSection(); if (value === "visitas") setVisitsSection(subValue); else setUserSection(subValue); }}><SubIcon className="h-4 w-4" /><span className="flex-1">{subLabel}</span>{subActive ? <Check className="h-4 w-4 text-primary" /> : null}</DropdownMenuItem>; })}</DropdownMenuContent></DropdownMenu>;
         })}
       </div>
     </nav>

@@ -17,7 +17,7 @@ export const MENU_TYPES = [
 type MenuType = typeof MENU_TYPES[number]["key"];
 const GROUP = "menu_type";
 
-function useMenuTypes() {
+export function useMenuTypes() {
   return useQuery({ queryKey: ["cde-menu-type"], queryFn: async () => {
     const { data } = await supabase.from("cde_selected").select("variant_key").eq("group_key", GROUP).eq("is_primary", true).maybeSingle();
     try { return JSON.parse(data?.variant_key ?? "{}") as Record<string, MenuType>; } catch { return {}; }
@@ -68,4 +68,10 @@ export function CdeMenuType({ app, items }: { app: string; items: Item[] }) {
     <Preview type={type} items={items} />
     {dirty ? <div className="flex items-end gap-2 self-end"><Button type="button" size="sm" variant="outline" onClick={() => setDraft(null)}>Cancelar</Button><Button type="button" size="sm" variant="outline" onClick={save}>Salvar</Button></div> : null}
   </div>;
+}
+
+/** Menu position for an app: "left"/"right" become a side bar on desktop (mobile keeps the bottom bar). */
+export function useAppMenuSide(app: string): "left" | "right" | null {
+  const t = useMenuTypes().data?.[app];
+  return t === "left" || t === "right" ? t : null;
 }
