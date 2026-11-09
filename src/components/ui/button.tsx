@@ -86,11 +86,14 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const actionLabel = group === "save" || group === "trash"
       ? genericAction ? binding?.label || look.label?.trim() || visibleText : visibleText
       : binding?.label || visibleText;
-    const content = standardSave ? <><SaveIcon className={look.iconClass || "h-4 w-4"} />{visibleText ? actionLabel : null}</> : children;
+    // Send: CDE standard renders its icon, plus only the model's own text (empty = icon only); progress text stays.
+    const sendStandard = !style && !asChild && group === "send" && !!(look.icon || look.variant) && !/enviando/i.test(visibleText);
+    const SendIcon = ICONS[look.icon || "Send"] ?? ICONS.Save;
+    const content = sendStandard ? <><SendIcon className={look.iconClass || "h-4 w-4"} />{look.label?.trim() || null}</> : standardSave ? <><SaveIcon className={look.iconClass || "h-4 w-4"} />{visibleText ? actionLabel : null}</> : children;
     const cdeVariant = look.variant ? look.variant as VariantProps<typeof buttonVariants>["variant"] : resolvedVariant;
     const cdeSize = look.size ? look.size as VariantProps<typeof buttonVariants>["size"] : size;
     return (
-      <Comp className={cn(buttonVariants({ variant: "data-cde-number" in props ? null : cdeVariant, size: cdeSize, className }), look.className, !asChild && visibleText && group && ["!w-auto shrink-0", className?.includes("whitespace-normal") ? "!min-w-0" : "!min-w-max"])} style={style ?? (look.variant || look.className ? look.style : undefined)} ref={ref} {...props}>{content}</Comp>
+      <Comp className={cn(buttonVariants({ variant: "data-cde-number" in props ? null : cdeVariant, size: cdeSize, className }), look.className, !asChild && visibleText && group && !(sendStandard && !look.label?.trim()) && ["!w-auto shrink-0", className?.includes("whitespace-normal") ? "!min-w-0" : "!min-w-max"])} style={style ?? (look.variant || look.className ? look.style : undefined)} ref={ref} {...(sendStandard && !look.label?.trim() && visibleText ? { "aria-label": visibleText, title: visibleText } : {})} {...props}>{content}</Comp>
     );
   },
 );
