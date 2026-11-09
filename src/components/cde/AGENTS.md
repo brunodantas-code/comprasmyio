@@ -26,3 +26,5 @@
 - Supply deadline alerts share pure supply-deadlines helpers and CDE deadline_alerts settings; timing indicators read authorized logs/approval decisions and never use updated_at as delivery time or invent causal attribution.
 
 - Organize actions inherit the live Save look when no organize standard is selected; deadline indicators share this group to prevent visual drift.
+
+- Shared Save/Delete buttons resolve icon and label through CDE; the library aggregates their source locations to avoid presenting call sites as distinct models.

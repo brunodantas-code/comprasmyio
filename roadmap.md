@@ -171,3 +171,5 @@
 - [x] CDE: prévias da biblioteca contidas nos cards; Foto anterior/Próxima foto e demais controles conferidos antes/depois sem alterar o Site Survey.
 
 - [x] Biblioteca CDE: filtro consolidado por nome/tipo/local/ícone e ordenação A–Z/Z–A por nome/tipo/local, conferidos em sessão autenticada.
+
+- [x] Padronizar Salvar e Excluir com símbolos/textos CDE e reunir locais de uso na biblioteca.

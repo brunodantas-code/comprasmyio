@@ -42,7 +42,7 @@ export function useCdeStandards() {
     queryFn: async () => {
       const [sel, models] = await Promise.all([
         supabase.from("cde_selected").select("group_key,variant_key,is_primary,screens"),
-        supabase.from("cde_models").select("id,variant,size,class_name,icon,icon_class,style"),
+        supabase.from("cde_models").select("id,variant,size,class_name,icon,icon_class,label,style"),
       ]);
       if (sel.error) throw sel.error;
       return { selected: sel.data ?? [], models: models.data ?? [] };

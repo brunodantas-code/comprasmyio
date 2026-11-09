@@ -4,6 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 import { detectButtonGroup, useCdeLook } from "@/components/cde/cde-look";
+import { ICONS } from "@/components/cde/cde-render";
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
@@ -75,11 +76,15 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     // CdeButton (style passed) keeps its own CDE variant; never re-skin it by label.
     const resolvedVariant = !style && actionLabelPattern.test(accessibleLabel) ? "action" : variant;
     // CDE: action buttons follow the chosen standard live; CdeButton passes its own style and is skipped.
-    const look = useCdeLook(style ? undefined : detectButtonGroup(children, [props["aria-label"], props.title].filter(Boolean).join(" ")), true);
+    const group = detectButtonGroup(children, [props["aria-label"], props.title].filter(Boolean).join(" "));
+    const look = useCdeLook(style ? undefined : group, true);
+    const standardSave = !style && !asChild && (group === "save" || group === "trash");
+    const SaveIcon = ICONS[look.icon || (group === "trash" ? "Trash2" : "Save")] ?? ICONS.Save;
+    const content = standardSave ? <><SaveIcon className={look.iconClass || "h-4 w-4"} />{visibleText ? look.label?.trim() || (group === "trash" ? "Excluir" : "Salvar") : null}</> : children;
     const cdeVariant = look.variant ? look.variant as VariantProps<typeof buttonVariants>["variant"] : resolvedVariant;
     const cdeSize = look.size ? look.size as VariantProps<typeof buttonVariants>["size"] : size;
     return (
-      <Comp className={cn(buttonVariants({ variant: cdeVariant, size: cdeSize, className }), look.className)} style={style ?? (look.variant || look.className ? look.style : undefined)} ref={ref} {...props}>{children}</Comp>
+      <Comp className={cn(buttonVariants({ variant: cdeVariant, size: cdeSize, className }), look.className)} style={style ?? (look.variant || look.className ? look.style : undefined)} ref={ref} {...props}>{content}</Comp>
     );
   },
 );
