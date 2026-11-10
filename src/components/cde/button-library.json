@@ -6677,7 +6677,7 @@
   {
     "id": "components/personal-todos/todo-section.tsx|ad5d0f9a8d461131|0",
     "file": "components/personal-todos/todo-section.tsx",
-    "line": 31,
+    "line": 50,
     "tag": "Button",
     "label": "Meus To Do's",
     "dynamic": true,
@@ -6690,9 +6690,24 @@
     "group": ""
   },
   {
+    "id": "components/personal-todos/todo-section.tsx|0057bcec5b9428b6|0",
+    "file": "components/personal-todos/todo-section.tsx",
+    "line": 51,
+    "tag": "Button",
+    "label": "Ordenar tarefas",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "ArrowUpDown",
+    "variant": "ghost",
+    "size": "compactIcon",
+    "className": "!text-foreground !bg-transparent !border-0",
+    "group": ""
+  },
+  {
     "id": "components/personal-todos/todo-section.tsx|beea634c953439df|0",
     "file": "components/personal-todos/todo-section.tsx",
-    "line": 32,
+    "line": 51,
     "tag": "CdeButton",
     "label": "Novo To Do",
     "dynamic": false,
@@ -6705,18 +6720,18 @@
     "group": "plus"
   },
   {
-    "id": "components/personal-todos/todo-section.tsx|f76bfc5c2d90c6da|0",
+    "id": "components/personal-todos/todo-section.tsx|0ab47e2fcfbf8fff|0",
     "file": "components/personal-todos/todo-section.tsx",
-    "line": 34,
+    "line": 53,
     "tag": "Button",
-    "label": "# / · / - / / / Sem conclusão prevista",
+    "label": "· / - / / / Sem conclusão prevista",
     "dynamic": true,
     "visualCustom": false,
     "autoCdeSafe": true,
     "icon": "",
     "variant": "ghost",
     "size": "",
-    "className": "!h-auto !max-w-none !w-full !justify-start !bg-transparent px-4 py-3 text-left",
+    "className": "!h-auto !max-w-none !w-full !min-w-0 !justify-start !bg-transparent px-3 py-3 text-left",
     "group": ""
   },
   {

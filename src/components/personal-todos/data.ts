@@ -12,6 +12,14 @@ export const personalTodosOptions = (userId: string) => queryOptions({
     return { tasks: tasks.data ?? [], messages: messages.data ?? [], users: users.data ?? [] };
   }, refetchInterval: 30000,
 });
+export const todoPreferencesOptions = (userId: string) => queryOptions({
+  queryKey: ["todo-preferences", userId],
+  queryFn: async () => {
+    const result = await supabase.from("personal_todo_preferences").select("*").eq("user_id", userId).maybeSingle();
+    if (result.error) throw result.error;
+    return result.data;
+  },
+});
 export async function uploadTodoImages(todoId: string, userId: string, files: File[], messageId?: string) {
   for (const file of files) {
     if (!file.type.startsWith("image/") || !file.size || file.size > 10 * 1024 * 1024) throw new Error("Selecione imagens de até 10 MB.");

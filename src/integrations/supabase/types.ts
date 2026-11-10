@@ -3962,6 +3962,32 @@ export type Database = {
           },
         ]
       }
+      personal_todo_preferences: {
+        Row: {
+          ordered_ids: string[]
+          sort_mode: string
+          user_id: string
+        }
+        Insert: {
+          ordered_ids?: string[]
+          sort_mode?: string
+          user_id: string
+        }
+        Update: {
+          ordered_ids?: string[]
+          sort_mode?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "personal_todo_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       personal_todos: {
         Row: {
           completed_at: string | null
