@@ -8561,6 +8561,7 @@ export type Database = {
         Args: { _target_user_id: string }
         Returns: string
       }
+      reset_site_survey_visit: { Args: { _visit_id: string }; Returns: number }
       save_code_observation: {
         Args: { _observation_id?: string; _text: string; _ticket_id: string }
         Returns: string

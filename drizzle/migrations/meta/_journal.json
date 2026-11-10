@@ -1499,6 +1499,13 @@
       "when": 1794342235931,
       "tag": "0213_code_requester_question_reopens_attendance",
       "breakpoints": true
+    },
+    {
+      "idx": 214,
+      "version": "7",
+      "when": 1794348140182,
+      "tag": "0214_reset_site_survey_visit",
+      "breakpoints": true
     }
   ]
 }
