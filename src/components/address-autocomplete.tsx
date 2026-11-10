@@ -196,6 +196,7 @@ export function AddressAutocomplete({
           id={`${name}-search`}
           autoComplete="off"
           className={cn("pl-9 pr-9", confirmed && "border-green-500")}
+          style={{ paddingLeft: "2.25rem", paddingRight: "2.25rem" }}
           placeholder="Digite o endereço ou selecione uma opção do Google"
           value={query}
           onChange={(e) => {

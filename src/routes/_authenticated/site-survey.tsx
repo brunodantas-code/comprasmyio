@@ -1422,7 +1422,7 @@ function StandardSectionPicker({ sections, selectedIds, onChange, disabled }: { 
   const [open, setOpen] = useState(false);
   const selected = new Set(selectedIds);
   const label = selectedIds.length === 0 ? "Não se aplica" : selectedIds.length === 1 ? sections.find((section) => section.id === selectedIds[0])?.title ?? "1 seção selecionada" : `${selectedIds.length} seções selecionadas`;
-  return <div className="space-y-2"><Label>Seções padrão</Label><Popover open={open && !disabled} onOpenChange={(next) => setOpen(disabled ? false : next)}><PopoverTrigger asChild><Button type="button" variant="outline" role="combobox" aria-expanded={open} disabled={disabled} className="w-full justify-between !bg-myio-green/10 font-normal hover:!bg-myio-green/15"><span className="truncate">{disabled ? "Disponível sem modelo base" : label}</span><ChevronDown className="h-4 w-4 shrink-0 opacity-50" /></Button></PopoverTrigger><PopoverContent className="w-(--radix-popover-trigger-width) p-0" align="start"><Command><CommandInput placeholder="Buscar seção padrão..." /><CommandList><CommandEmpty>Nenhuma seção encontrada.</CommandEmpty><CommandGroup>{sections.map((section, index) => <CommandItem key={section.id} value={`${index + 1} ${section.title}`} onSelect={() => onChange(selected.has(section.id) ? selectedIds.filter((id) => id !== section.id) : [...selectedIds, section.id])}><Checkbox checked={selected.has(section.id)} className="pointer-events-none" /><span className="truncate">{index + 1}. {section.title}</span></CommandItem>)}</CommandGroup></CommandList></Command></PopoverContent></Popover></div>;
+  return <div className="space-y-2"><Label>Seções padrão</Label><Popover open={open && !disabled} onOpenChange={(next) => setOpen(disabled ? false : next)}><PopoverTrigger asChild><Button type="button" variant="outline" role="combobox" aria-expanded={open} disabled={disabled} className="!flex !w-full !max-w-none justify-between !bg-myio-green/10 font-normal hover:!bg-myio-green/15"><span className="truncate">{disabled ? "Disponível sem modelo base" : label}</span><ChevronDown className="h-4 w-4 shrink-0 opacity-50" /></Button></PopoverTrigger><PopoverContent className="w-(--radix-popover-trigger-width) p-0" align="start"><Command><CommandInput placeholder="Buscar seção padrão..." /><CommandList><CommandEmpty>Nenhuma seção encontrada.</CommandEmpty><CommandGroup>{sections.map((section, index) => <CommandItem key={section.id} value={`${index + 1} ${section.title}`} onSelect={() => onChange(selected.has(section.id) ? selectedIds.filter((id) => id !== section.id) : [...selectedIds, section.id])}><Checkbox checked={selected.has(section.id)} className="pointer-events-none" /><span className="truncate">{index + 1}. {section.title}</span></CommandItem>)}</CommandGroup></CommandList></Command></PopoverContent></Popover></div>;
 }
 
 function ChecklistAdmin({ data, onChanged }: { data: NonNullable<ReturnType<typeof useSurveyDataShape>>; onChanged: () => void }) {
@@ -1916,7 +1916,7 @@ function FormSelect({ name, label, options, defaultValue, value, onChange, optio
     setOpen(false);
   };
 
-  return <div className="space-y-2">
+  return <div className="flex flex-col gap-2">
     <Label>{label}</Label>
     <input type="hidden" name={name} value={selectedValue} />
     <Popover open={open} onOpenChange={setOpen}>
