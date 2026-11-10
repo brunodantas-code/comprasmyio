@@ -1415,6 +1415,13 @@
       "when": 1794272533461,
       "tag": "0201_legal_minutes_resignature_on_edit",
       "breakpoints": true
+    },
+    {
+      "idx": 202,
+      "version": "7",
+      "when": 1794273240370,
+      "tag": "0202_legal_subject_completions",
+      "breakpoints": true
     }
   ]
 }

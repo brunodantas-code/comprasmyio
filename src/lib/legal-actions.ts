@@ -22,14 +22,15 @@ export function actionsForSavedSubjects(actions: DraftLegalAction[], subjectIds:
   return actions.filter(action => ids.has(action.subject_id));
 }
 export const legalTrackingOptions = queryOptions({ queryKey: ['legal-tracking'], queryFn: async () => {
-  const [actions, observations, logs, users] = await Promise.all([
+  const [actions, observations, logs, users, completions] = await Promise.all([
     supabase.from('legal_actions').select('*').order('sequence'),
     supabase.from('legal_action_observations').select('*').is('deleted_at', null).order('created_at'),
     supabase.from('legal_subject_logs').select('*').order('created_at'),
     supabase.rpc('legal_participant_users'),
+    supabase.from('legal_subject_completions').select('*'),
   ]);
-  for (const result of [actions, observations, logs, users]) if (result.error) throw result.error;
-  return { actions: actions.data ?? [], observations: observations.data ?? [], logs: logs.data ?? [], users: users.data ?? [] };
+  for (const result of [actions, observations, logs, users, completions]) if (result.error) throw result.error;
+  return { actions: actions.data ?? [], observations: observations.data ?? [], logs: logs.data ?? [], users: users.data ?? [], completions: completions.data ?? [] };
 } });
 export function pendingLegalActions(actions: { completed_at: string | null; archived: boolean }[]) {
   return actions.filter(a => !a.archived && !a.completed_at).length;

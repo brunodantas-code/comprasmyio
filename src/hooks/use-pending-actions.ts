@@ -30,7 +30,7 @@ export function usePendingActions() {
       if (authError || !authData.user) throw authError ?? new Error("Sessão não encontrada");
       const userId = authData.user.id;
 
-      const [stepsResult, deletionsResult, codeResult, codeMessagesResult, supplyQueueResult, supportCallsResult, mytosisResult, codeAdminResult, codeAccessResult, legalResult, legalActionsResult] = await Promise.all([
+      const [stepsResult, deletionsResult, codeResult, codeMessagesResult, supplyQueueResult, supportCallsResult, mytosisResult, codeAdminResult, codeAccessResult, legalResult, legalActionsResult, legalCompletionsResult, legalAllActionsResult] = await Promise.all([
         supabase
           .from("approval_steps")
           .select("order_id, step_index, approver_id, status, purchase_orders(requester_id)")
@@ -59,6 +59,8 @@ export function usePendingActions() {
         supabase.from("user_app_access").select("user_id").eq("user_id", userId).eq("app_key", "development").maybeSingle(),
         supabase.from("legal_records").select("id,title,category,content,created_by").eq("category", "minutes"),
         supabase.from("legal_actions").select("record_id,subject_id,responsible_id,completed_at,archived").eq("responsible_id", userId),
+        supabase.from("legal_subject_completions").select("record_id,subject_id"),
+        supabase.from("legal_actions").select("record_id,subject_id,archived"),
       ]);
 
       if (stepsResult.error) throw stepsResult.error;
@@ -73,7 +75,7 @@ export function usePendingActions() {
 
       if (legalResult.error) throw legalResult.error;
       if (legalActionsResult.error) throw legalActionsResult.error;
-      const legalItems = legalSignaturePendingItems(legalResult.data ?? [], { id: userId, full_name: currentUser?.full_name ?? "" }, legalActionsResult.data ?? []);
+      const legalItems = legalSignaturePendingItems(legalResult.data ?? [], { id: userId, full_name: currentUser?.full_name ?? "" }, legalActionsResult.data ?? [], legalCompletionsResult.data ?? [], legalAllActionsResult.data ?? []);
       const legalCount = legalItems.reduce((sum, item) => sum + item.count, 0);
 
       const isAdmin = currentUser?.isAdmin ?? false;

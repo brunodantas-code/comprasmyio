@@ -10,7 +10,12 @@ import { SubjectActions } from './subject-actions';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { legalPdf } from '@/lib/legal-pdf';
-import { legalSignaturePendingItems } from '@/lib/legal-pending';
+import { legalSignaturePendingItems, openDeliberations } from '@/lib/legal-pending';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
 import type { LegalContent } from '@/lib/legal';
 
 async function exportMinutesPdf(title: string, date: string | null, content: LegalContent) {
@@ -35,13 +40,26 @@ export function MinutesList({ rows, expanded, toggle, edit, remove, openPdf, use
 }) {
   const [openedSubjects,setOpenedSubjects]=useState<Set<string>>(new Set());
   const { data: tracking } = useSuspenseQuery(legalTrackingOptions);
-  return <div className="divide-y divide-border overflow-hidden rounded-md border border-border bg-card">
-    {rows.map(row => {
+  const queryClient = useQueryClient();
+  const [pendingUserId, setPendingUserId] = useState('all');
+  const pendingUser = tracking.users.find(u => u.id === pendingUserId);
+  const badgeUser = pendingUser ?? user;
+  const shownRows = pendingUser ? rows.filter(r => legalSignaturePendingItems([r], pendingUser, tracking.actions, tracking.completions).length > 0) : rows;
+  const toggleDeliberation = async (recordId: string, subjectId: string, done: boolean) => {
+    const { error } = done ? await supabase.from('legal_subject_completions').insert({ record_id: recordId, subject_id: subjectId }) : await supabase.from('legal_subject_completions').delete().eq('record_id', recordId).eq('subject_id', subjectId);
+    if (error) { toast.error(error.message); return; }
+    await queryClient.invalidateQueries({ queryKey: ['legal-tracking'] }); void queryClient.invalidateQueries({ queryKey: ['pending-actions'] });
+  };
+  return <div className="space-y-3">
+    <div className="flex items-center justify-end gap-2 text-sm"><Label htmlFor="legal-pending-user" className="text-muted-foreground">Pendências de</Label><Select value={pendingUserId} onValueChange={setPendingUserId}><SelectTrigger id="legal-pending-user" className="w-56"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">Todos os usuários</SelectItem>{tracking.users.map(u => <SelectItem key={u.id} value={u.id}>{u.full_name}</SelectItem>)}</SelectContent></Select></div>
+    {pendingUser && shownRows.length === 0 ? <p className="text-sm text-muted-foreground">Nenhuma pendência de {pendingUser.full_name}.</p> : null}
+    <div className="divide-y divide-border overflow-hidden rounded-md border border-border bg-card">
+    {shownRows.map(row => {
       const content = parseLegalContent(row.content);
       const pending = legalPendingCount(content);
       pending.actions += pendingLegalActions(tracking.actions.filter(a=>a.record_id===row.id && content.subjects.some(s=>s.id===a.subject_id)));
       pending.total = pending.signatures + pending.actions;
-      const mine = user ? legalSignaturePendingItems([row], user, tracking.actions)[0] : undefined;
+      const mine = badgeUser ? legalSignaturePendingItems([row], badgeUser, tracking.actions, tracking.completions)[0] : undefined;
       const open = expanded.has(row.id);
       return <article key={row.id}>
         <div className="flex items-center gap-1 px-2 py-3 sm:gap-2 sm:px-4">
@@ -49,7 +67,7 @@ export function MinutesList({ rows, expanded, toggle, edit, remove, openPdf, use
             {open ? <ChevronDown className="h-5 w-5 shrink-0 text-primary" /> : <ChevronRight className="h-5 w-5 shrink-0 text-primary" />}
             <span className="min-w-0 flex-1"><span className="block break-words text-sm font-semibold text-foreground">{row.title}</span><span className="block text-xs font-normal text-muted-foreground">{legalDate(row.meeting_date)}</span></span>
           </button>
-          {mine ? <span role="status" title={`${mine.signature ? (mine.revision ? 'Nova assinatura pendente (edição da ata anterior)' : 'Assinatura pendente') : ''}${mine.signature && mine.actions ? ' e ' : ''}${mine.actions ? `${mine.actions} ação(ões) pendente(s)` : ''}`} aria-label={`${mine.count} pendência(s) suas nesta ata`} className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold leading-none text-destructive-foreground">{mine.count > 99 ? '99+' : mine.count}</span> : null}
+          {mine ? <span role="status" title={`${mine.signature ? (mine.revision ? 'Nova assinatura pendente (edição da ata anterior)' : 'Assinatura pendente') : ''}${mine.signature && mine.actions ? ' e ' : ''}${mine.actions ? `${mine.actions} ação(ões) pendente(s)` : ''}`} aria-label={`${mine.count} pendência(s) nesta ata${pendingUser ? ` de ${pendingUser.full_name}` : ''}`} className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold leading-none text-destructive-foreground">{mine.count > 99 ? '99+' : mine.count}</span> : null}
           <Button variant="outline" size="compactIcon" title="Editar" aria-label={`Editar ${row.title}`} onClick={() => edit(row)}><Pencil /></Button>
           <Button variant="outline" size="compactIcon" title="Excluir" aria-label={`Excluir ${row.title}`} onClick={() => remove(row)}><Trash2 /></Button>
           <Button variant="outline" size="compactIcon" title={row.pdf_path ? 'PDF assinado' : 'Exportar PDF'} aria-label={`${row.pdf_path ? 'Abrir PDF assinado' : 'Exportar PDF'} de ${row.title}`} onClick={() => { if (row.pdf_path) openPdf(row.pdf_path); else void exportMinutesPdf(row.title, row.meeting_date, content); }}><FileText /></Button>
@@ -61,7 +79,7 @@ export function MinutesList({ rows, expanded, toggle, edit, remove, openPdf, use
               <div className="flex items-center gap-3">
                 <CdeNumber screen="components/legal/minutes-list.tsx">{index + 1}</CdeNumber>
                 <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-3"><h2 className="min-w-0 break-words text-sm font-semibold">{subject.title}</h2>{(()=>{const open=tracking.actions.filter(a=>a.record_id===row.id&&a.subject_id===subject.id&&!a.archived&&!a.completed_at);if(!open.length)return null;const mine=user?open.filter(a=>a.responsible_id===user.id).length:0;return <span className="text-xs font-normal text-muted-foreground">{open.length} {open.length===1?'ação em aberto':'ações em aberto'} · {mine} {mine===1?'sua':'suas'}</span>;})()}</div>
-                {legalSubjectResponsibles(subject).length > 0 && !subject.completionDate ? <PendingDot label={`Ação pendente de ${legalSubjectResponsibles(subject).join(', ')}`} /> : null}
+                {openDeliberations(row.id, [subject], tracking.actions, tracking.completions).length ? <PendingDot label={`Deliberação pendente de ${legalSubjectResponsibles(subject).join(', ')}`} /> : null}
                 <Button variant="ghost" size="compactIcon" aria-expanded={openedSubjects.has(subject.id)} aria-label={`${openedSubjects.has(subject.id)?'Recolher':'Exibir'} assunto ${index+1}`} onClick={()=>setOpenedSubjects(prev=>{const n=new Set(prev);if(n.has(subject.id))n.delete(subject.id);else n.add(subject.id);return n;})}>{openedSubjects.has(subject.id)?<ChevronUp/>:<ChevronDown/>}</Button>
               </div>
               {openedSubjects.has(subject.id) && <div className="pl-10"><p className="whitespace-pre-wrap break-words">{subject.description || '—'}</p><p className="mt-1 text-xs text-muted-foreground">Descrição</p></div>}
@@ -70,7 +88,7 @@ export function MinutesList({ rows, expanded, toggle, edit, remove, openPdf, use
               <h4 className="text-sm font-semibold">Deliberações</h4>
               {subject.decisions?.trim() ? <ol className="space-y-2">{subject.decisions.split(/\r?\n/).map(line => line.trim()).filter(Boolean).map((decision, decisionIndex) => <li key={decisionIndex} className="flex items-start gap-2"><CdeNumber screen="components/legal/minutes-list.tsx">{decisionIndex + 1}</CdeNumber><span className="min-w-0 whitespace-pre-wrap break-words">{decision.replace(/^\d+[.)]\s+/, '')}</span></li>)}</ol> : <p>—</p>}
               {legalSubjectResponsibles(subject).length > 0 || subject.completionDate ? <div className="grid gap-3 border-t border-border pt-3 sm:grid-cols-2">
-                {legalSubjectResponsibles(subject).length > 0 ? <p className="break-words"><span className="text-muted-foreground">Responsáveis: </span>{legalSubjectResponsibles(subject).join(', ')}</p> : null}
+                {legalSubjectResponsibles(subject).length > 0 ? <p className="flex items-start gap-2 break-words">{!tracking.actions.some(a=>a.record_id===row.id&&a.subject_id===subject.id&&!a.archived) ? <Checkbox className="mt-0.5" checked={tracking.completions.some(c=>c.record_id===row.id&&c.subject_id===subject.id)} aria-label="Concluir deliberação" title="Concluir deliberação (sem ações cadastradas)" onCheckedChange={v=>toggleDeliberation(row.id,subject.id,Boolean(v))} /> : null}<span><span className="text-muted-foreground">Responsáveis: </span>{legalSubjectResponsibles(subject).join(', ')}</span></p> : null}
                 {subject.completionDate ? <p><span className="text-muted-foreground">Data de conclusão: </span>{legalDate(subject.completionDate)}</p> : null}
               </div> : null}
               <SubjectActions recordId={row.id} subjectId={subject.id} userId={user?.id} />
@@ -80,5 +98,6 @@ export function MinutesList({ rows, expanded, toggle, edit, remove, openPdf, use
         </div> : null}
       </article>;
     })}
+    </div>
   </div>;
 }

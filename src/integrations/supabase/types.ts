@@ -2561,6 +2561,35 @@ export type Database = {
           },
         ]
       }
+      legal_subject_completions: {
+        Row: {
+          completed_at: string
+          completed_by: string
+          record_id: string
+          subject_id: string
+        }
+        Insert: {
+          completed_at?: string
+          completed_by?: string
+          record_id: string
+          subject_id: string
+        }
+        Update: {
+          completed_at?: string
+          completed_by?: string
+          record_id?: string
+          subject_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legal_subject_completions_record_id_fkey"
+            columns: ["record_id"]
+            isOneToOne: false
+            referencedRelation: "legal_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       legal_subject_logs: {
         Row: {
           action_id: string | null

@@ -31,3 +31,12 @@ d2('rótulo de reassinatura', () => {
     e2(label2({ signature: true, actions: 0, title: 'Ata X' })).toBe('Assinatura da ata pendente · Ata X');
   });
 });
+
+import { legalSignaturePendingItems as items3 } from './legal-pending';
+d2('deliberação com responsável', () => {
+  const rec = { id: 'r', title: 'Ata', category: 'minutes', created_by: 'x', content: { participants: [], subjects: [{ id: 's', title: 'A', description: '', decisions: 'Fazer', responsibles: ['Ana'] }] } };
+  i2('é pendência sem ações até ser concluída', () => {
+    e2(items3([rec], { id: 'u', full_name: 'Ana' })[0]?.count).toBe(1);
+    e2(items3([rec], { id: 'u', full_name: 'Ana' }, [], [{ record_id: 'r', subject_id: 's' }])).toHaveLength(0);
+  });
+});
