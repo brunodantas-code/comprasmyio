@@ -43,7 +43,7 @@ export function usePendingActions() {
           .eq("status", "pendente"),
         supabase
           .from("development_tickets")
-          .select("id, ticket_number, title, reporter_id, status, created_at"),
+          .select("id, ticket_number, title, reporter_id, assignee_id, status, created_at"),
         supabase
           .from("development_ticket_messages")
           .select("id, ticket_id, author_id, message_type, parent_message_id, recipient_id, requester_seen_at"),

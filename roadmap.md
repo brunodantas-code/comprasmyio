@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Code: atendimento atribuído gera pendência somente para o responsável; perguntas explícitas preservadas e perguntas antigas seguem a atribuição. Regressão reproduzida e 25 testes passaram; chamado 19 aberto pela Central com Leonardo. Conta de João não exercitada em tela, exclusão da pendência coberta por teste.
 - [x] CDE: corrigida falha por configuração no endereço; salvamento de lixeira sem texto e releitura conferidos, configuração original restaurada, 19 testes passaram.
 - [x] Central: Meus To Do's separados dos apps, prazo, compartilhamento, conversa, observações, anexos privados e histórico; criação/releitura/conclusão/exclusão e pergunta compartilhada conferidas em tela, celular 366px sem excesso; resposta vinculada coberta por teste e guarda, não exercitada na conta de outro participante.
 - [x] Biblioteca consolidada: 543 modelos para 822 usos; Cancelar com 49 usos em um card, locais numerados e edição conjunta conferidos; diferenças preservadas, 14 testes e celular sem transbordamento.

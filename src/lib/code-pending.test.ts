@@ -3,6 +3,20 @@ import { codePendingItems, codeQuestionResponders, unansweredCodeQuestions, type
 const ticket: PendingCodeTicket = { id: 'ticket8', ticket_number: 8, title: 'Cidades', reporter_id: 'alexandre', status: 'atendido', created_at: '2026-10-28' };
 const question: PendingCodeMessage = { id: 'question1', ticket_id: 'ticket8', author_id: 'alexandre', message_type: 'question', parent_message_id: null };
 describe('Perguntas nas pendências do Code', () => {
+  const assignedTicket = { ...ticket, ticket_number: 19, status: 'em_atendimento', assignee_id: 'leonardo' };
+  it('não atribui o atendimento do chamado 19 ao João Couto quando Leonardo é o responsável', () => {
+    expect(codePendingItems([assignedTicket], [], 'joao-couto', true)).toEqual([]);
+  });
+  it('mantém o atendimento do chamado 19 nas pendências do responsável Leonardo', () => {
+    expect(codePendingItems([assignedTicket], [], 'leonardo', true)[0]?.reason).toBe('atender');
+  });
+  it('direciona perguntas antigas sem destinatário ao responsável atribuído', () => {
+    expect(codePendingItems([assignedTicket], [question], 'joao-couto', true)).toEqual([]);
+    expect(codePendingItems([assignedTicket], [question], 'leonardo', true)[0]?.reason).toBe('responder');
+  });
+  it('preserva pergunta explicitamente dirigida ao João mesmo com atendimento atribuído ao Leonardo', () => {
+    expect(codePendingItems([assignedTicket], [{ ...question, recipient_id: 'joao-couto' }], 'joao-couto', true)[0]?.reason).toBe('responder');
+  });
   it('direciona a resposta somente ao usuário selecionado, mesmo sem ser admin ou solicitante', () => {
     const directed = { ...question, author_id: 'leonardo', recipient_id: 'outro' };
     expect(codePendingItems([ticket], [directed], 'outro', false)[0]?.reason).toBe('responder');
