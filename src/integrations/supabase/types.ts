@@ -2423,6 +2423,7 @@ export type Database = {
           completed_by: string | null
           created_at: string
           created_by: string
+          display_order: number | null
           due_date: string | null
           id: string
           record_id: string
@@ -2439,6 +2440,7 @@ export type Database = {
           completed_by?: string | null
           created_at?: string
           created_by?: string
+          display_order?: number | null
           due_date?: string | null
           id?: string
           record_id: string
@@ -2455,6 +2457,7 @@ export type Database = {
           completed_by?: string | null
           created_at?: string
           created_by?: string
+          display_order?: number | null
           due_date?: string | null
           id?: string
           record_id?: string
@@ -8084,6 +8087,14 @@ export type Database = {
           full_name: string
           id: string
         }[]
+      }
+      legal_reorder_actions: {
+        Args: {
+          p_action_ids: string[]
+          p_record_id: string
+          p_subject_id: string
+        }
+        Returns: undefined
       }
       legal_subject_visible: {
         Args: { _record_id: string; _subject_id: string }

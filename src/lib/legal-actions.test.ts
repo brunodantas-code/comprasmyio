@@ -1,6 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { actionsForSavedSubjects, legalActionSchema, legalObservationSchema, pendingLegalActions, legalActionDelayDays, canRemoveLegalObservation } from './legal-actions';
+import { actionsForSavedSubjects, legalActionSchema, legalObservationSchema, pendingLegalActions, legalActionDelayDays, canRemoveLegalObservation, orderedLegalActions } from './legal-actions';
 describe('ações dos assuntos',()=>{
+ it('renumera pela ordem salva preservando identidade e conclusão',()=>{
+  const actions=[{id:'primeira',sequence:1,display_order:2,completed_at:null},{id:'segunda',sequence:2,display_order:1,completed_at:'2026-11-09'}];
+  expect(orderedLegalActions(actions).map((action,index)=>({id:action.id,number:index+1,completed:action.completed_at}))).toEqual([{id:'segunda',number:1,completed:'2026-11-09'},{id:'primeira',number:2,completed:null}]);
+  expect(orderedLegalActions([{sequence:2},{sequence:1}]).map(a=>a.sequence)).toEqual([1,2]);
+ });
  it('salva prazo por ação sem exigir alteração de ações antigas',()=>{
   const action = {title:'Contratar',responsible_id:'11111111-1111-4111-8111-111111111111'};
   expect(legalActionSchema.parse({...action,due_date:'2026-11-09'}).due_date).toBe('2026-11-09');
