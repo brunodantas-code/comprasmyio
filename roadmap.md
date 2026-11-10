@@ -1,4 +1,6 @@
 # Roadmap
+- [x] To Do: etiquetas em lista suspensa pesquisável; seleção de duas etiquetas e remoção individual conferidas em tela.
+- [x] Etiquetas: cifrão e avião no catálogo CDE; símbolos ghost pretos por padrão, cor editável; seleção, salvamento/releitura e exclusão temporária confirmados em tela.
 - [x] Anexos To Do/Code: clipe sem bordas, galeria, arraste/colagem e miniaturas; conferidos em ambas as telas e celular.
 - [x] To Do: etiquetas pessoais com cores/símbolos CDE no lugar de Tipo; cadastro/edição/exclusão na Central, vínculo/filtro e + do compartilhamento ghost preto. Vínculo salvo/relido, exclusões confirmadas, celular e oito testes conferidos.
 - [x] Legal: assuntos com totalizador pessoal numerado de ações/responsabilidade sem ações, respeitando filtro; assinaturas somente junto aos participantes. Dez testes passaram; filtro João exibiu 1 no assunto correto em ata real, sem alterar dados.

@@ -6722,7 +6722,7 @@
   {
     "id": "components/personal-todos/labels.tsx|9a972f9e858c9c9b|0",
     "file": "components/personal-todos/labels.tsx",
-    "line": 65,
+    "line": 66,
     "tag": "Button",
     "label": "Gerenciar etiquetas",
     "dynamic": false,
@@ -6737,7 +6737,7 @@
   {
     "id": "components/personal-todos/labels.tsx|4ef09820402572fd|0",
     "file": "components/personal-todos/labels.tsx",
-    "line": 66,
+    "line": 67,
     "tag": "Button",
     "label": "Editar etiqueta",
     "dynamic": false,
@@ -6752,7 +6752,7 @@
   {
     "id": "components/personal-todos/labels.tsx|0744f7bf89e702b9|0",
     "file": "components/personal-todos/labels.tsx",
-    "line": 66,
+    "line": 67,
     "tag": "Button",
     "label": "Excluir etiqueta",
     "dynamic": false,
@@ -6767,7 +6767,7 @@
   {
     "id": "components/personal-todos/labels.tsx|c3a1d9154b743849|0",
     "file": "components/personal-todos/labels.tsx",
-    "line": 67,
+    "line": 68,
     "tag": "Button",
     "label": "Nova etiqueta",
     "dynamic": false,
@@ -6782,11 +6782,11 @@
   {
     "id": "components/personal-todos/labels.tsx|fc0887a8802ec0ee|0",
     "file": "components/personal-todos/labels.tsx",
-    "line": 68,
+    "line": 69,
     "tag": "Button",
     "label": "Icon",
     "dynamic": false,
-    "visualCustom": false,
+    "visualCustom": true,
     "autoCdeSafe": true,
     "icon": "Icon",
     "variant": "ghost",
@@ -6797,7 +6797,7 @@
   {
     "id": "components/personal-todos/labels.tsx|2388ca47daed9c6c|0",
     "file": "components/personal-todos/labels.tsx",
-    "line": 68,
+    "line": 69,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -6812,7 +6812,7 @@
   {
     "id": "components/personal-todos/labels.tsx|891aaa11be57c820|0",
     "file": "components/personal-todos/labels.tsx",
-    "line": 68,
+    "line": 69,
     "tag": "Button",
     "label": "Salvando... / Salvar",
     "dynamic": true,
