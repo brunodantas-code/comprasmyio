@@ -1,4 +1,6 @@
 # Roadmap
+- [x] To Do: destinatários disponíveis ao dono; confirmação e compartilhamento antes de enviar; envio persistido e relido na tela após atualização das consultas, com histórico; tarefas temporárias excluídas. Disquete ghost preto para observações; dez testes passaram.
+- [x] To Do: Cancelar somente X ghost preto alinhado ao disquete no editor, conferido em tela.
 - [x] To Do: etiquetas em lista suspensa pesquisável; seleção de duas etiquetas e remoção individual conferidas em tela.
 - [x] Etiquetas: cifrão e avião no catálogo CDE; símbolos ghost pretos por padrão, cor editável; seleção, salvamento/releitura e exclusão temporária confirmados em tela.
 - [x] Anexos To Do/Code: clipe sem bordas, galeria, arraste/colagem e miniaturas; conferidos em ambas as telas e celular.

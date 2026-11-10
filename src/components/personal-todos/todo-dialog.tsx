@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { History, Paperclip, Save, Send, Trash2, Plus, Pencil } from "lucide-react";
+import { History, Paperclip, Save, Send, Trash2, Plus, Pencil, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -13,7 +13,7 @@ import { SearchableSelect } from "@/components/ui/searchable-select";
 import { confirmAction } from "@/components/confirm-dialog";
 import { MilestoneTimeline } from "@/components/milestone-timeline";
 import { CdeNumber } from "@/components/cde/cde-button";
-import { todoSchema, TODO_STATUSES, TODO_STATUS_OPTIONS, todoSelectableStatus, unansweredTodoQuestions, type PersonalTodo, type TodoMessage } from "@/lib/personal-todos";
+import { todoSchema, TODO_STATUSES, TODO_STATUS_OPTIONS, todoSelectableStatus, todoConversationUsers, unansweredTodoQuestions, type PersonalTodo, type TodoMessage } from "@/lib/personal-todos";
 import { ImageAttachmentField } from "@/components/image-attachment-field";
 import { uploadTodoImages } from "./data";
 import { todoLabelsOptions, TodoLabelChoices, saveTodoLabels } from "./labels";
@@ -66,11 +66,19 @@ export function TodoDialog({ task, userId, users, messages, onClose }: { task: P
   const unanswered = unansweredTodoQuestions(taskMessages);
   const pending = unanswered.filter(q => q.recipient_id === userId);
   const answering = mode === "answer" && pending.length > 0;
-  const participants = users.filter(p => p.id !== userId && (p.id === task?.owner_id || shared.includes(p.id)));
+  const participants = todoConversationUsers(users, userId, task?.owner_id ?? userId, shared);
   const send = useMutation({ mutationFn: async (kind: "conversation" | "observation") => {
     if (!task) return;
     const value = (kind === "observation" ? observation : text).trim();
     if (!value && !files.length) throw new Error("Digite uma mensagem.");
+    if (kind === "conversation" && !answering && recipient && ![task.owner_id, ...task.shared_user_ids].includes(recipient)) {
+      if (!owner || !participants.some(p => p.id === recipient)) throw new Error("Destinatário inválido.");
+      if (!await confirmAction(`Compartilhar a tarefa e seu histórico com ${nameFor(recipient)} para iniciar a conversa?`, { title: "Compartilhar tarefa" })) return false;
+      const sharedIds = [...new Set([...task.shared_user_ids, recipient])];
+      const result = await supabase.from("personal_todos").update({ shared_user_ids: sharedIds }).eq("id", task.id).select("id").single();
+      if (result.error) throw result.error;
+      setShared(sharedIds);
+    }
     let messageId: string | undefined;
     if (value) {
       const parent = answering ? pending.find(q => q.id === reply) ?? pending[0] : undefined;
@@ -78,7 +86,7 @@ export function TodoDialog({ task, userId, users, messages, onClose }: { task: P
       if (result.error) throw result.error; messageId = result.data.id;
     }
     try { await uploadTodoImages(task.id, userId, files, messageId); } catch { toast.error("Mensagem salva, mas alguns anexos não foram enviados."); }
-  }, onSuccess: async () => { setText(""); setObservation(""); setFiles([]); setFileKey(k => k + 1); await refresh(); toast.success("Registro salvo"); }, onError: () => toast.error("Não foi possível enviar. Confira o destinatário e a pergunta.") });
+  }, onSuccess: async (result) => { if (result === false) return; setText(""); setObservation(""); setFiles([]); setFileKey(k => k + 1); await refresh(); toast.success("Registro salvo"); }, onError: () => toast.error("Não foi possível enviar. Confira o destinatário e a pergunta.") });
   async function openImage(path: string, name: string) { const r = await supabase.storage.from("personal-todo-attachments").createSignedUrl(path, 300); if (r.error) return toast.error("Não foi possível abrir a imagem."); setPreview({ url: r.data.signedUrl, name }); }
   const attachments = (messageId: string | null) => <div className="flex flex-wrap gap-2">{details.data?.attachments.filter(a => a.message_id === messageId).map(a => <span key={a.id} className="flex items-center gap-1"><Button variant="ghost" size="sm" onClick={() => openImage(a.storage_path, a.file_name)}><Paperclip className="size-4" /><span className="max-w-48 truncate">{a.file_name}</span></Button>{active && a.uploaded_by === userId && <Button variant="ghost" size="compactIcon" title="Excluir anexo" aria-label="Excluir anexo" onClick={async () => { if (!await confirmAction(`Excluir o anexo “${a.file_name}”?`)) return; const r = await supabase.from("personal_todo_attachments").delete().eq("id", a.id); if (r.error) return toast.error("Não foi possível excluir."); await supabase.storage.from("personal-todo-attachments").remove([a.storage_path]); await refresh(); }}><Trash2 /></Button>}</span>)}</div>;
   return <><Dialog open onOpenChange={open => { if (!open) onClose(); }}><DialogContent className="!min-w-0 !w-[calc(100vw-1.5rem)] !max-w-2xl max-h-[90vh] overflow-x-hidden overflow-y-auto [&>*]:min-w-0 [&_p]:break-words [&_p]:[overflow-wrap:anywhere]"><DialogHeader><DialogTitle className="break-words">{task ? `${task.todo_number} — ${task.title}` : "Novo To Do"}</DialogTitle></DialogHeader>
@@ -93,7 +101,7 @@ export function TodoDialog({ task, userId, users, messages, onClose }: { task: P
       <Label>Compartilhar com</Label><div className="flex items-center gap-2"><SearchableSelect aria-label="Compartilhar com" value={person} onChange={setPerson} options={users.filter(p => p.id !== userId && !shared.includes(p.id)).map(p => ({ value: p.id, label: p.full_name }))} placeholder="Buscar usuário" /><Button type="button" variant="ghost" size="compactIcon" data-todo-participant-add="true" aria-label="Adicionar participante" title="Adicionar participante" disabled={!person} onClick={() => { setShared(s => [...s, person]); setPerson(""); }}><Plus /></Button></div>
       {shared.map(id => <div key={id} className="flex items-center justify-between text-sm"><span>{nameFor(id)}</span><Button type="button" variant="ghost" size="compactIcon" aria-label={`Remover ${nameFor(id)}`} title="Remover participante" onClick={async () => { if (await confirmAction(`Remover ${nameFor(id)} do compartilhamento?`)) setShared(s => s.filter(p => p !== id)); }}><Trash2 /></Button></div>)}
       <div className="space-y-1"><Label htmlFor="todo-files">Prints e fotos (até 10 MB por imagem)</Label><ImageAttachmentField id="todo-files" files={files} onChange={setFiles} />
-      <div className="flex justify-end gap-2">{task && <Button type="button" variant="outline" onClick={() => setEditing(false)}>Cancelar</Button>}<Button type="submit" variant="ghost" size="compactIcon" aria-label={save.isPending ? "Salvando..." : "Salvar"} title={save.isPending ? "Salvando..." : "Salvar"} disabled={save.isPending}><Save /></Button></div></div>
+      <div className="flex items-center justify-end gap-2">{task && <Button type="button" variant="ghost" size="compactIcon" className="!text-foreground !bg-transparent !border-0" aria-label="Cancelar" title="Cancelar" onClick={() => setEditing(false)}><X /></Button>}<Button type="submit" variant="ghost" size="compactIcon" aria-label={save.isPending ? "Salvando..." : "Salvar"} title={save.isPending ? "Salvando..." : "Salvar"} disabled={save.isPending}><Save /></Button></div></div>
     </form> : task && <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2"><span className="text-xs text-muted-foreground">{nameFor(task.owner_id)} · {new Date(task.created_at).toLocaleString("pt-BR")}</span>{owner && active && <Button variant="ghost" size="compactIcon" title="Editar tarefa" aria-label="Editar tarefa" onClick={() => setEditing(true)}><Pencil /></Button>}</div>
       <p className="text-sm">{TODO_STATUSES[task.status]} · Prioridade {task.priority} · {task.urgency === "urgente" ? "Urgente" : "Normal"}</p>
@@ -105,10 +113,10 @@ export function TodoDialog({ task, userId, users, messages, onClose }: { task: P
       <section className="space-y-3 border-t border-border pt-4"><h3 className="text-sm font-semibold">Conversa</h3>{questions.flatMap((q, i) => [q, ...taskMessages.filter(a => a.parent_message_id === q.id)].map(m => <div key={m.id} className={`rounded-md border border-border p-3 text-sm ${m.message_type === "answer" ? "ml-6 bg-primary/10" : "bg-muted/50"}`}><div className="flex flex-wrap items-center gap-2"><CdeNumber subcategory>{i + 1}</CdeNumber><span>{m.message_type === "question" ? "Pergunta" : "Resposta"} · {nameFor(m.author_id)}</span><span className="text-xs text-muted-foreground">{new Date(m.created_at).toLocaleString("pt-BR")}</span></div><p className="mt-2 whitespace-pre-wrap break-words">{m.message}</p>{m.message_type === "question" && <p className="text-xs text-muted-foreground">Para: {nameFor(m.recipient_id ?? "")}</p>}{unanswered.some(u => u.id === m.id) && <p className="text-xs text-destructive">Aguardando resposta</p>}{attachments(m.id)}</div>))}
       {active && <div className="space-y-2">{pending.length > 0 && <div className="flex gap-2"><Button size="sm" variant={mode === "answer" ? "default" : "outline"} onClick={() => setMode("answer")}>Responder</Button><Button size="sm" variant={mode === "question" ? "default" : "outline"} onClick={() => setMode("question")}>Nova pergunta</Button></div>}
       {answering ? <Select value={reply || pending[0]?.id} onValueChange={setReply}><SelectTrigger aria-label="Responder à pergunta"><SelectValue /></SelectTrigger><SelectContent>{pending.map(q => <SelectItem key={q.id} value={q.id}>{q.message}</SelectItem>)}</SelectContent></Select> : <SearchableSelect aria-label="Destinatário da pergunta" value={recipient} onChange={setRecipient} options={participants.map(p => ({ value: p.id, label: p.full_name }))} placeholder="Destinatário da pergunta" />}
-      <Label htmlFor="todo-message">{answering ? "Resposta" : "Nova pergunta"}</Label><Textarea id="todo-message" value={text} onChange={e => setText(e.target.value)} maxLength={4000} />
+      <div className="flex items-center justify-between gap-2"><Label htmlFor="todo-message">{answering ? "Resposta" : "Nova pergunta"}</Label><Button variant="ghost" size="compactIcon" title={answering ? "Enviar resposta" : "Enviar pergunta"} aria-label={answering ? "Enviar resposta" : "Enviar pergunta"} disabled={send.isPending || (!text.trim() && !files.length) || (Boolean(text.trim()) && !answering && !recipient)} onClick={() => send.mutate("conversation")}><Send /></Button></div><Textarea id="todo-message" value={text} onChange={e => setText(e.target.value)} maxLength={4000} />
       <Label htmlFor="todo-message-files">Prints e fotos</Label><ImageAttachmentField key={fileKey} id="todo-message-files" files={files} onChange={setFiles} />
-      <div className="flex justify-end"><Button title={answering ? "Enviar resposta" : "Enviar pergunta"} aria-label={answering ? "Enviar resposta" : "Enviar pergunta"} disabled={send.isPending || (!text.trim() && !files.length) || (Boolean(text.trim()) && !answering && !recipient)} onClick={() => send.mutate("conversation")}><Send /></Button></div></div>}</section>
-      <section className="space-y-3 border-t border-border pt-4"><h3 className="text-sm font-semibold">Observações</h3>{taskMessages.filter(m => m.message_type === "observation").map(m => <div key={m.id}><p className="whitespace-pre-wrap break-words text-sm">{m.message}</p><p className="text-xs text-muted-foreground">{nameFor(m.author_id)} · {new Date(m.created_at).toLocaleString("pt-BR")}</p>{attachments(m.id)}</div>)}{active && <><Label htmlFor="todo-observation">Nova observação</Label><Textarea id="todo-observation" value={observation} onChange={e => setObservation(e.target.value)} maxLength={4000} /><div className="flex justify-end"><Button disabled={!observation.trim() || send.isPending} onClick={() => send.mutate("observation")}>Salvar observação</Button></div></>}</section>
+      </div>}</section>
+      <section className="space-y-3 border-t border-border pt-4"><h3 className="text-sm font-semibold">Observações</h3>{taskMessages.filter(m => m.message_type === "observation").map(m => <div key={m.id}><p className="whitespace-pre-wrap break-words text-sm">{m.message}</p><p className="text-xs text-muted-foreground">{nameFor(m.author_id)} · {new Date(m.created_at).toLocaleString("pt-BR")}</p>{attachments(m.id)}</div>)}{active && <><Label htmlFor="todo-observation">Nova observação</Label><Textarea id="todo-observation" value={observation} onChange={e => setObservation(e.target.value)} maxLength={4000} /><div className="flex justify-end"><Button variant="ghost" size="compactIcon" aria-label="Salvar observação" title="Salvar observação" disabled={!observation.trim() || send.isPending} onClick={() => send.mutate("observation")}><Save /></Button></div></>}</section>
       <section className="space-y-3 border-t border-border pt-4"><h3 className="flex items-center gap-2 text-sm font-semibold"><History className="size-4" />Histórico</h3><MilestoneTimeline entries={(details.data?.logs ?? []).map(l => ({ id: l.id, created_at: l.created_at, text: `${l.text}\npor ${nameFor(l.actor_id)}` }))} /></section>
     </div>}
   </DialogContent></Dialog><Dialog open={Boolean(preview)} onOpenChange={open => { if (!open) setPreview(null); }}><DialogContent className="max-w-4xl"><DialogHeader><DialogTitle>{preview?.name}</DialogTitle></DialogHeader>{preview && <img src={preview.url} alt={preview.name} className="max-h-[70vh] w-full object-contain" />}</DialogContent></Dialog></>;

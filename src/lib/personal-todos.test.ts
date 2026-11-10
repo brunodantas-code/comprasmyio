@@ -1,8 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { todoPendingItems, unansweredTodoQuestions, todoSchema, TODO_STATUS_OPTIONS, todoSelectableStatus, type PersonalTodo, type TodoMessage } from "./personal-todos";
+import { todoPendingItems, unansweredTodoQuestions, todoSchema, TODO_STATUS_OPTIONS, todoSelectableStatus, todoConversationUsers, type PersonalTodo, type TodoMessage } from "./personal-todos";
 const task = { id: "task", owner_id: "owner", shared_user_ids: ["peer"], status: "aberto" } as PersonalTodo;
 const question = { id: "q", todo_id: "task", author_id: "owner", recipient_id: "peer", message_type: "question", parent_message_id: null } as TodoMessage;
 describe("personal tasks", () => {
+  it("allows the owner to choose another user even before sharing", () => {
+    expect(todoConversationUsers([{id: "owner"}, {id: "peer"}], "owner", "owner", [])).toEqual([{id: "peer"}]);
+  });
+  it("limits shared-user conversation choices to existing participants", () => {
+    expect(todoConversationUsers([{id: "owner"}, {id: "peer"}, {id: "outsider"}], "peer", "owner", ["peer"])).toEqual([{id: "owner"}]);
+  });
   it("offers only open, in-progress and completed states", () => {
     expect(Object.keys(TODO_STATUS_OPTIONS)).toEqual(["aberto", "em_atendimento", "concluido"]);
   });

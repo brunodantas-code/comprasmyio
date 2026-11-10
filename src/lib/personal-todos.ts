@@ -13,6 +13,9 @@ export const TODO_STATUSES: Record<string, string> = { ...TODO_STATUS_OPTIONS, a
 export function todoSelectableStatus(status: string) {
   return status === "aguardando_resposta" || status === "atendido" ? "em_atendimento" : status;
 }
+export function todoConversationUsers<T extends { id: string }>(users: T[], userId: string, ownerId: string, sharedIds: string[]) {
+  return users.filter(p => p.id !== userId && (ownerId === userId || p.id === ownerId || sharedIds.includes(p.id)));
+}
 export function unansweredTodoQuestions(messages: TodoMessage[]) {
   const answered = new Set(messages.filter(m => m.message_type === "answer").map(m => m.parent_message_id));
   return messages.filter(m => m.message_type === "question" && !answered.has(m.id));
