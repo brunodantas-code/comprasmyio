@@ -22,3 +22,12 @@ describe('assinaturas pessoais pendentes', () => {
     expect(items.map(i => i.count)).toEqual([2]);
   });
 });
+
+import { legalPendingLabel as label2 } from './legal-pending';
+import { describe as d2, it as i2, expect as e2 } from 'vitest';
+d2('rótulo de reassinatura', () => {
+  i2('indica edição da ata anterior', () => {
+    e2(label2({ signature: true, actions: 0, title: 'Ata X', revision: 2 })).toBe('Nova assinatura pendente: edição 2 da ata anteriormente assinada · Ata X');
+    e2(label2({ signature: true, actions: 0, title: 'Ata X' })).toBe('Assinatura da ata pendente · Ata X');
+  });
+});

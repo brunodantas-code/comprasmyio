@@ -1408,6 +1408,13 @@
       "when": 1794245080592,
       "tag": "0200_legal_action_deadlines_observation_removal",
       "breakpoints": true
+    },
+    {
+      "idx": 201,
+      "version": "7",
+      "when": 1794272533461,
+      "tag": "0201_legal_minutes_resignature_on_edit",
+      "breakpoints": true
     }
   ]
 }

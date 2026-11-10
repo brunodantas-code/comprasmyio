@@ -1,12 +1,12 @@
 export type LegalCategory = 'minutes' | 'contracts' | 'templates';
 export type LegalSubject = { id: string; title: string; description: string; decisions: string; responsible?: string; responsibles?: string[]; completionDate?: string };
 export type LegalParticipant = { id: string; name: string; signature: string; signedAt: string; userId?: string; signedBy?: string };
-export type LegalContent = { location: string; counterpart: string; participants: LegalParticipant[]; subjects: LegalSubject[] };
+export type LegalContent = { location: string; counterpart: string; participants: LegalParticipant[]; subjects: LegalSubject[]; revision?: number; lastEditAt?: string };
 export function emptyLegalContent(): LegalContent { return { location: '', counterpart: '', participants: [], subjects: [] }; }
 export function parseLegalContent(value: unknown): LegalContent {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return emptyLegalContent();
   const v = value as Record<string, unknown>;
-  return { location: typeof v.location === 'string' ? v.location : '', counterpart: typeof v.counterpart === 'string' ? v.counterpart : '', participants: Array.isArray(v.participants) ? v.participants as LegalParticipant[] : [], subjects: Array.isArray(v.subjects) ? v.subjects as LegalSubject[] : [] };
+  return { location: typeof v.location === 'string' ? v.location : '', counterpart: typeof v.counterpart === 'string' ? v.counterpart : '', participants: Array.isArray(v.participants) ? v.participants as LegalParticipant[] : [], subjects: Array.isArray(v.subjects) ? v.subjects as LegalSubject[] : [], ...(typeof v.revision === 'number' ? { revision: v.revision } : {}), ...(typeof v.lastEditAt === 'string' ? { lastEditAt: v.lastEditAt } : {}) };
 }
 export function allParticipantsSigned(content: LegalContent) { return content.participants.length > 0 && content.participants.every(p => p.name.trim() && p.signature && p.signedAt); }
 export function clearLegalSignatures(content: LegalContent): LegalContent { return { ...content, participants: content.participants.map(p => ({ ...p, signature: '', signedAt: '' })) }; }

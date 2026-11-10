@@ -10,11 +10,11 @@ export function legalSignaturePendingItems(records: readonly { id: string; title
     const signature = content.participants.some(participant => canSignParticipant(participant, user) && (!participant.signature || !participant.signedAt));
     const subjectIds = new Set(content.subjects.map(s => s.id));
     const openActions = actions.filter(a => a.record_id === record.id && subjectIds.has(a.subject_id) && a.responsible_id === user.id && !a.archived && !a.completed_at).length;
-    return { recordId: record.id, title: record.title, requesterId: record.created_by, signature, actions: openActions, count: (signature ? 1 : 0) + openActions };
+    return { recordId: record.id, title: record.title, requesterId: record.created_by, signature, revision: content.revision ?? 0, actions: openActions, count: (signature ? 1 : 0) + openActions };
   }).filter(item => item.count > 0);
 }
 
-export function legalPendingLabel(item: { signature: boolean; actions: number; title: string }) {
-  const parts = [item.signature ? 'Assinatura da ata pendente' : null, item.actions ? `${item.actions} ${item.actions === 1 ? 'ação pendente' : 'ações pendentes'}` : null].filter(Boolean);
+export function legalPendingLabel(item: { signature: boolean; actions: number; title: string; revision?: number }) {
+  const parts = [item.signature ? (item.revision ? `Nova assinatura pendente: edição ${item.revision} da ata anteriormente assinada` : 'Assinatura da ata pendente') : null, item.actions ? `${item.actions} ${item.actions === 1 ? 'ação pendente' : 'ações pendentes'}` : null].filter(Boolean);
   return `${parts.join(' e ')} · ${item.title}`;
 }
