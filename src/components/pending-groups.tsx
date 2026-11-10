@@ -28,13 +28,13 @@ export function PendingGroups({ items }: { items: PendingGroupItem[] }) {
         const isOpen = open.has(name);
         const total = rows.reduce((s, r) => s + r.count, 0);
         return <div key={name}>
-          <button type="button" onClick={() => toggle(name)} aria-expanded={isOpen} className="!flex !w-full !max-w-none items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-primary/10">
+          <div className="transition-colors hover:bg-primary/10 focus-within:bg-primary/10"><button type="button" onClick={() => toggle(name)} aria-expanded={isOpen} className="!flex !w-full !max-w-none items-center gap-3 !bg-transparent px-4 py-3 text-left">
             {isOpen ? <ChevronDown className="h-5 w-5 shrink-0 text-primary" /> : <ChevronRight className="h-5 w-5 shrink-0 text-primary" />}
             {groupBy === "app" ? <AppSymbol name={name} className="h-5 w-5 shrink-0 text-foreground" /> : null}
             <span className="min-w-0 flex-1 text-sm font-semibold">{name}</span>
             <span className="flex h-7 min-w-7 items-center justify-center rounded-full bg-destructive px-2 text-xs font-bold text-destructive-foreground">{total > 99 ? "99+" : total}</span>
-          </button>
-          {isOpen ? <div className="divide-y divide-border border-t border-border bg-muted/30 pl-8">{rows.map((r) => <div key={r.key}>{r.row}</div>)}</div> : null}
+          </button></div>
+          {isOpen ? <div className="divide-y divide-border border-t border-border bg-muted/30">{rows.map((r) => <div key={r.key} className="pl-8 transition-colors hover:bg-primary/10 focus-within:bg-primary/10 [&>a]:!bg-transparent">{r.row}</div>)}</div> : null}
         </div>;
       })}
     </div>
