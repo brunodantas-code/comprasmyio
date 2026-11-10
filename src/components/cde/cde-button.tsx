@@ -109,7 +109,7 @@ export const CdeButton = forwardRef<HTMLButtonElement, Props>(function CdeButton
       variant={(visual.variant || undefined) as never}
       size={(visual.size || undefined) as never}
       style={css}
-      className={cn(visual.className, cls, children && "!w-auto !min-w-max shrink-0", active ? "!text-primary" : group === "filter" ? "!text-foreground hover:!text-primary" : "", className)}
+      className={cn(visual.className, cls, children && "!w-auto !min-w-max shrink-0", group !== "filter" && active ? "!text-primary" : "", className, group === "filter" && "!border-0 !bg-transparent hover:!bg-muted focus-visible:!bg-muted", group === "filter" && (active ? "!text-primary hover:!text-primary focus-visible:!text-primary" : "!text-foreground hover:!text-foreground focus-visible:!text-foreground"))}
       {...rest}
     >
       {group === "toggle" ? (rest["aria-expanded"] ? <ICONS.ChevronUp className={m.iconClass} /> : <ICONS.ChevronDown className={m.iconClass} />) : Icon ? <Icon className={m.iconClass} /> : null}
