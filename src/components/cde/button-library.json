@@ -10035,11 +10035,11 @@
     "group": ""
   },
   {
-    "id": "components/image-attachment-field.tsx|3d5ec1f3b958d470|0",
+    "id": "components/image-attachment-field.tsx|42d6b043ae12e86d|0",
     "file": "components/image-attachment-field.tsx",
     "line": 17,
     "tag": "Button",
-    "label": "Selecionar da galeria ou arraste e cole o arquivo nesse campo.",
+    "label": "Selecione da galeria ou arraste e cole o arquivo neste campo",
     "dynamic": false,
     "visualCustom": false,
     "autoCdeSafe": true,
