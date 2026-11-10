@@ -58,7 +58,7 @@ export function MinutesList({ rows, expanded, toggle, edit, remove, openPdf, use
             <div className="space-y-2 bg-primary/10 px-4 py-2 sm:px-6">
               <div className="flex items-center gap-3">
                 <CdeNumber screen="components/legal/minutes-list.tsx">{index + 1}</CdeNumber>
-                <h2 className="min-w-0 flex-1 break-words text-sm font-semibold">{subject.title}</h2>
+                <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-3"><h2 className="min-w-0 break-words text-sm font-semibold">{subject.title}</h2>{(()=>{const open=tracking.actions.filter(a=>a.record_id===row.id&&a.subject_id===subject.id&&!a.archived&&!a.completed_at);if(!open.length)return null;const mine=user?open.filter(a=>a.responsible_id===user.id).length:0;return <span className="text-xs font-normal text-muted-foreground">{open.length} {open.length===1?'ação em aberto':'ações em aberto'} · {mine} {mine===1?'sua':'suas'}</span>;})()}</div>
                 {legalSubjectResponsibles(subject).length > 0 && !subject.completionDate ? <PendingDot label={`Ação pendente de ${legalSubjectResponsibles(subject).join(', ')}`} /> : null}
                 <Button variant="ghost" size="compactIcon" aria-expanded={openedSubjects.has(subject.id)} aria-label={`${openedSubjects.has(subject.id)?'Recolher':'Exibir'} assunto ${index+1}`} onClick={()=>setOpenedSubjects(prev=>{const n=new Set(prev);if(n.has(subject.id))n.delete(subject.id);else n.add(subject.id);return n;})}>{openedSubjects.has(subject.id)?<ChevronUp/>:<ChevronDown/>}</Button>
               </div>

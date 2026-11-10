@@ -30,7 +30,7 @@ export function usePendingActions() {
       if (authError || !authData.user) throw authError ?? new Error("Sessão não encontrada");
       const userId = authData.user.id;
 
-      const [stepsResult, deletionsResult, codeResult, codeMessagesResult, supplyQueueResult, supportCallsResult, mytosisResult, codeAdminResult, codeAccessResult, legalResult] = await Promise.all([
+      const [stepsResult, deletionsResult, codeResult, codeMessagesResult, supplyQueueResult, supportCallsResult, mytosisResult, codeAdminResult, codeAccessResult, legalResult, legalActionsResult] = await Promise.all([
         supabase
           .from("approval_steps")
           .select("order_id, step_index, approver_id, status, purchase_orders(requester_id)")
@@ -58,6 +58,7 @@ export function usePendingActions() {
         supabase.from("erp_admins").select("user_id").eq("user_id", userId).maybeSingle(),
         supabase.from("user_app_access").select("user_id").eq("user_id", userId).eq("app_key", "development").maybeSingle(),
         supabase.from("legal_records").select("id,title,category,content,created_by").eq("category", "minutes"),
+        supabase.from("legal_actions").select("record_id,subject_id,responsible_id,completed_at,archived").eq("responsible_id", userId),
       ]);
 
       if (stepsResult.error) throw stepsResult.error;
@@ -71,7 +72,9 @@ export function usePendingActions() {
       if (codeAccessResult.error) throw codeAccessResult.error;
 
       if (legalResult.error) throw legalResult.error;
-      const legalItems = legalSignaturePendingItems(legalResult.data ?? [], { id: userId, full_name: currentUser?.full_name ?? "" });
+      if (legalActionsResult.error) throw legalActionsResult.error;
+      const legalItems = legalSignaturePendingItems(legalResult.data ?? [], { id: userId, full_name: currentUser?.full_name ?? "" }, legalActionsResult.data ?? []);
+      const legalCount = legalItems.reduce((sum, item) => sum + item.count, 0);
 
       const isAdmin = currentUser?.isAdmin ?? false;
       const steps = (stepsResult.data ?? []) as ApprovalStep[];
@@ -113,7 +116,7 @@ export function usePendingActions() {
 
       return {
         legalItems,
-        legalSignatures: legalItems.length,
+        legalSignatures: legalCount,
         supplyQuestions,
         mytosisItems: mytosisResult.data ?? [],
         mytosisQuestions: mytosisResult.data?.length ?? 0,
@@ -126,7 +129,7 @@ export function usePendingActions() {
         supportCallItems,
         isCustomerSupportAnalyst: currentUser?.isCustomerSupportAnalyst ?? false,
         supply: pendingApprovals + pendingUserDeletions + pendingSupplyQueue + supplyQuestionCount,
-        total: legalItems.length + pendingApprovals + pendingUserDeletions + pendingCodeTickets + pendingSupplyQueue + supportCalls + supplyQuestionCount + (mytosisResult.data?.length ?? 0),
+        total: legalCount + pendingApprovals + pendingUserDeletions + pendingCodeTickets + pendingSupplyQueue + supportCalls + supplyQuestionCount + (mytosisResult.data?.length ?? 0),
       };
     },
     staleTime: 30_000,

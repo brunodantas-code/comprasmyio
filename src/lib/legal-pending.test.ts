@@ -15,4 +15,10 @@ describe('assinaturas pessoais pendentes', () => {
   it('reconhece participantes antigos pelo nome e assinatura sem data continua pendente', () => {
     expect(legalSignaturePendingItems([record([{ name: ' Leonardo Roedel ', signature: 'imagem' }])], user)).toHaveLength(1);
   });
+  it('soma as ações em aberto do usuário, ignorando concluídas, arquivadas e de outros', () => {
+    const r = { id: 'ata', title: 'Ata', category: 'minutes', created_by: 'autor', content: { participants: [], subjects: [{ id: 's1', title: 'A' }] } };
+    const a = (o: object) => ({ record_id: 'ata', subject_id: 's1', responsible_id: 'leonardo', completed_at: null, archived: false, ...o });
+    const items = legalSignaturePendingItems([r], user, [a({}), a({}), a({ completed_at: '2026-11-09' }), a({ archived: true }), a({ responsible_id: 'outro' })]);
+    expect(items.map(i => i.count)).toEqual([2]);
+  });
 });
