@@ -23,6 +23,7 @@ import { DesktopHeaderMenu, UserNameBlock } from "@/components/app-header";
 import { usePendingActions } from "@/hooks/use-pending-actions";
 import { ChangePasswordDialog } from "@/components/change-password-dialog";
 import { ThemeMenuItem, ThemeToggle } from "@/components/theme-toggle";
+import { TodoSection } from "@/components/personal-todos/todo-section";
 
 export const Route = createFileRoute("/_authenticated/portal")({
   validateSearch: (search: Record<string, unknown>): { view?: "users" } => (search.view === "users" ? { view: "users" } : {}),
@@ -226,7 +227,8 @@ function PortalPage() {
               </div>
             )}
 
-            {(pendingActions?.total ?? 0) > 0 ? (
+            <div className="mt-8"><TodoSection /></div>
+            {(pendingActions?.total ?? 0) > (pendingActions?.todoCount ?? 0) ? (
               <section className="mt-12" aria-labelledby="pending-title">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <h2 id="pending-title" className="flex items-center gap-2 text-xl font-bold"><Bell className="h-5 w-5" />Minhas pendências</h2>

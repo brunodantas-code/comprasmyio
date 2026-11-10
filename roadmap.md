@@ -1,6 +1,6 @@
 # Roadmap
 - [x] CDE: corrigida falha por configuração no endereço; salvamento de lixeira sem texto e releitura conferidos, configuração original restaurada, 19 testes passaram.
-- [ ] Central: criar Meus To Do's com tarefas pessoais compartilháveis, padrão Code, conclusão prevista e conversa com perguntas/respostas, sem Aplicativo/Menu/Submenu.
+- [x] Central: Meus To Do's separados dos apps, prazo, compartilhamento, conversa, observações, anexos privados e histórico; criação/releitura/conclusão/exclusão e pergunta compartilhada conferidas em tela, celular 366px sem excesso; resposta vinculada coberta por teste e guarda, não exercitada na conta de outro participante.
 - [x] Biblioteca consolidada: 543 modelos para 822 usos; Cancelar com 49 usos em um card, locais numerados e edição conjunta conferidos; diferenças preservadas, 14 testes e celular sem transbordamento.
 - [x] Biblioteca: descrição breve e quantidade por local, distinguindo usos da mesma função; Approval e celular conferidos, teste de contagem passou.
 - [x] Numeração: levantamento real de 16 locais principais e 10 secundários; 6.1 conferido com 16 usos, sem estimar repetições por registro.

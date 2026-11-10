@@ -6,15 +6,16 @@ import { MyioLogo } from "@/components/myio-logo";
 import { Bell, CheckCircle2, CodeXml, Phone, ShieldCheck, ShoppingCart, MessageCircleQuestion, FileSignature } from "lucide-react";
 import { usePendingActions } from "@/hooks/use-pending-actions";
 import { AppHeader } from "@/components/app-header";
+import { TodoSection } from "@/components/personal-todos/todo-section";
 
 export const Route = createFileRoute("/_authenticated/pendentes")({
   component: PendentesPage,
   head: () => ({
     meta: [
       { title: "Central de Pendências | myio ERP" },
-      { name: "description", content: "Ações aguardando sua decisão nos aplicativos da plataforma myio ERP." },
+      { name: "description", content: "Tarefas pessoais compartilhadas, conversas e ações aguardando sua decisão na Central de Pendências myio ERP." },
       { property: "og:title", content: "Central de Pendências | myio ERP" },
-      { property: "og:description", content: "Ações aguardando sua decisão nos aplicativos da plataforma myio ERP." },
+      { property: "og:description", content: "Tarefas pessoais compartilhadas, conversas e ações aguardando sua decisão na Central de Pendências myio ERP." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -31,9 +32,10 @@ function PendentesPage() {
           <h1 className="flex items-center gap-2 text-2xl font-bold"><Bell className="h-6 w-6" />Central de Pendências</h1>
           <p className="mt-1 text-sm text-muted-foreground">Ações que dependem de você...</p>
         </div>
+        <div className="mb-6"><TodoSection /></div>
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando pendências...</p> : (
           <div className="space-y-6">
-            {(data?.total ?? 0) > 0 ? (
+            {(data?.total ?? 0) > (data?.todoCount ?? 0) ? (
               <PendingGroups items={[
       ...((data?.approvals ?? 0) > 0 ? [{ key: "approvals", app: "Supply", requester: "Você", count: data?.approvals ?? 0, row: <PendingLink icon={CheckCircle2} label="Aguardando minha aprovação" count={data?.approvals ?? 0} to="/pendentes" /> }] : []),
       ...((data?.supplyQueue ?? 0) > 0 ? [{ key: "queue", app: "Supply", requester: "Você", count: data?.supplyQueue ?? 0, row: <PendingLink icon={ShoppingCart} label="Compras e serviços a executar · Fila do Supply" count={data?.supplyQueue ?? 0} to="/dashboard" search={{ section: "queue", subsection: "supply" }} /> }] : []),

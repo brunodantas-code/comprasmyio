@@ -6,6 +6,7 @@ import { supplyPendingQuestions } from "@/lib/supply-conversation";
 
 import { legalSignaturePendingItems } from "@/lib/legal-pending";
 import { mergeConfidentialSubjects } from "@/lib/legal";
+import { todoPendingItems } from "@/lib/personal-todos";
 
 type ApprovalStep = {
   order_id: string;
@@ -79,6 +80,10 @@ export function usePendingActions() {
       if (legalActionsResult.error) throw legalActionsResult.error;
       const legalItems = legalSignaturePendingItems((legalResult.data ?? []).map(r => ({ ...r, content: mergeConfidentialSubjects(r.content, r.id, legalConfidentialResult.data ?? []) })), { id: userId, full_name: currentUser?.full_name ?? "" }, legalActionsResult.data ?? [], legalCompletionsResult.data ?? [], legalAllActionsResult.data ?? []);
       const legalCount = legalItems.reduce((sum, item) => sum + item.count, 0);
+      const [todoTasks, todoMessages] = await Promise.all([supabase.from("personal_todos").select("*"), supabase.from("personal_todo_messages").select("*")]);
+      if (todoTasks.error) throw todoTasks.error;
+      if (todoMessages.error) throw todoMessages.error;
+      const todos = todoPendingItems(todoTasks.data ?? [], todoMessages.data ?? [], userId);
 
       const isAdmin = currentUser?.isAdmin ?? false;
       const steps = (stepsResult.data ?? []) as ApprovalStep[];
@@ -119,6 +124,8 @@ export function usePendingActions() {
       const supportCalls = supportCallItems.length;
 
       return {
+        todos,
+        todoCount: todos.length,
         legalItems,
         legalSignatures: legalCount,
         supplyQuestions,
@@ -133,7 +140,7 @@ export function usePendingActions() {
         supportCallItems,
         isCustomerSupportAnalyst: currentUser?.isCustomerSupportAnalyst ?? false,
         supply: pendingApprovals + pendingUserDeletions + pendingSupplyQueue + supplyQuestionCount,
-        total: legalCount + pendingApprovals + pendingUserDeletions + pendingCodeTickets + pendingSupplyQueue + supportCalls + supplyQuestionCount + (mytosisResult.data?.length ?? 0),
+        total: todos.length + legalCount + pendingApprovals + pendingUserDeletions + pendingCodeTickets + pendingSupplyQueue + supportCalls + supplyQuestionCount + (mytosisResult.data?.length ?? 0),
       };
     },
     staleTime: 30_000,

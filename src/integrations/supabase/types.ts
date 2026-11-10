@@ -3777,6 +3777,188 @@ export type Database = {
           },
         ]
       }
+      personal_todo_attachments: {
+        Row: {
+          created_at: string
+          file_name: string
+          id: string
+          message_id: string | null
+          storage_path: string
+          todo_id: string
+          uploaded_by: string
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          id?: string
+          message_id?: string | null
+          storage_path: string
+          todo_id: string
+          uploaded_by?: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          id?: string
+          message_id?: string | null
+          storage_path?: string
+          todo_id?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "personal_todo_attachments_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "personal_todo_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "personal_todo_attachments_todo_id_fkey"
+            columns: ["todo_id"]
+            isOneToOne: false
+            referencedRelation: "personal_todos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      personal_todo_logs: {
+        Row: {
+          actor_id: string
+          created_at: string
+          id: string
+          text: string
+          todo_id: string
+        }
+        Insert: {
+          actor_id: string
+          created_at?: string
+          id?: string
+          text: string
+          todo_id: string
+        }
+        Update: {
+          actor_id?: string
+          created_at?: string
+          id?: string
+          text?: string
+          todo_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "personal_todo_logs_todo_id_fkey"
+            columns: ["todo_id"]
+            isOneToOne: false
+            referencedRelation: "personal_todos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      personal_todo_messages: {
+        Row: {
+          author_id: string
+          created_at: string
+          id: string
+          message: string
+          message_type: string
+          parent_message_id: string | null
+          recipient_id: string | null
+          todo_id: string
+        }
+        Insert: {
+          author_id?: string
+          created_at?: string
+          id?: string
+          message: string
+          message_type: string
+          parent_message_id?: string | null
+          recipient_id?: string | null
+          todo_id: string
+        }
+        Update: {
+          author_id?: string
+          created_at?: string
+          id?: string
+          message?: string
+          message_type?: string
+          parent_message_id?: string | null
+          recipient_id?: string | null
+          todo_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "personal_todo_messages_parent_message_id_fkey"
+            columns: ["parent_message_id"]
+            isOneToOne: false
+            referencedRelation: "personal_todo_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "personal_todo_messages_todo_id_fkey"
+            columns: ["todo_id"]
+            isOneToOne: false
+            referencedRelation: "personal_todos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      personal_todos: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          description: string
+          due_date: string | null
+          expected_result: string
+          id: string
+          owner_id: string
+          priority: string
+          proposed_solution: string
+          shared_user_ids: string[]
+          status: string
+          task_type: string
+          title: string
+          todo_number: number
+          updated_at: string
+          urgency: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          description: string
+          due_date?: string | null
+          expected_result?: string
+          id?: string
+          owner_id?: string
+          priority?: string
+          proposed_solution?: string
+          shared_user_ids?: string[]
+          status?: string
+          task_type?: string
+          title: string
+          todo_number?: never
+          updated_at?: string
+          urgency?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          description?: string
+          due_date?: string | null
+          expected_result?: string
+          id?: string
+          owner_id?: string
+          priority?: string
+          proposed_solution?: string
+          shared_user_ids?: string[]
+          status?: string
+          task_type?: string
+          title?: string
+          todo_number?: never
+          updated_at?: string
+          urgency?: string
+        }
+        Relationships: []
+      }
       product_boms: {
         Row: {
           component_material_id: string
@@ -8177,6 +8359,13 @@ export type Database = {
       normalize_site_survey_point_name: {
         Args: { _value: string }
         Returns: string
+      }
+      personal_todo_users: {
+        Args: never
+        Returns: {
+          full_name: string
+          id: string
+        }[]
       }
       primary_role: {
         Args: { _user_id: string }
