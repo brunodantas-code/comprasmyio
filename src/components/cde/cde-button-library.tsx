@@ -28,7 +28,7 @@ import { saveLibrarySelection } from "./save-library-selection";
 const normalize = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
 export type LibraryButton = (typeof library)[number];
-export function CdeButtonLibrary({ number, handle, onEdit }: { number: number; handle?: ReactNode; onEdit: (button: LibraryButton, group?: string, ids?: string[], modelKey?: string) => void }) {
+export function CdeButtonLibrary({ number, handle, onEdit, nameSearch = "" }: { number: number; handle?: ReactNode; nameSearch?: string; onEdit: (button: LibraryButton, group?: string, ids?: string[], modelKey?: string) => void }) {
   const [open, setOpen] = useState(false);
   const [sort, setSort] = useState("name");
   const [direction, setDirection] = useState("asc");
@@ -72,8 +72,8 @@ export function CdeButtonLibrary({ number, handle, onEdit }: { number: number; h
     { key: "icon", label: "Ícone", value: b => b.icon },
     { key: "classification", label: "Classificação visual", value: classification },
   ]);
-  const search = filters.searchText("name");
-  const filtered = [...filters.filtered].sort((a, b) => {
+  const search = nameSearch || filters.searchText("name");
+  const filtered = filters.filtered.filter(b => normalize([b.label, bindingOf(b)?.label].filter(Boolean).join(" ")).includes(normalize(nameSearch.trim()))).sort((a, b) => {
     const value = (entry: LibraryButton) => sort === "type" ? typeOf(entry) : sort === "file" ? entry.file : entry.label;
     return (direction === "desc" ? -1 : 1) * value(a).localeCompare(value(b), "pt-BR", { sensitivity: "base", numeric: true });
   });
@@ -132,8 +132,8 @@ export function CdeButtonLibrary({ number, handle, onEdit }: { number: number; h
     } catch { toast.error("Não foi possível retirar os cards."); } finally { setSaving(false); }
   }
   return <section className="min-w-0 space-y-4">
-    <CdeCategoryHeader number={number} handle={handle} title="Biblioteca de botões em uso" hint={`${models.length} modelos · ${library.length} usos`} open={open} onToggle={() => setOpen(!open)} />
-    {open && <>
+    <CdeCategoryHeader number={number} handle={handle} title="Biblioteca de botões em uso" hint={`${models.length} modelos · ${library.length} usos`} open={open || !!nameSearch.trim()} onToggle={() => setOpen(!open)} />
+    {(open || !!nameSearch.trim()) && <>
       <div className="flex items-center gap-2">
         <Checkbox aria-label="Selecionar todos os cards visíveis" checked={cards.length > 0 && cards.flatMap(usesOf).every(b => checked.includes(libraryEntryKey(b)))} onCheckedChange={value => setChecked(value ? cards.flatMap(usesOf).map(libraryEntryKey) : [])} />
         <Button type="button" variant="ghost" size="compactIcon" title="Excluir cards selecionados" aria-label="Excluir cards selecionados" disabled={saving || !checked.length} onClick={() => removeCards(cards.filter(b => checked.includes(libraryEntryKey(b))))}><Trash2 /></Button>

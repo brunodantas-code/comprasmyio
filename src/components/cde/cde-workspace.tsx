@@ -121,6 +121,7 @@ export function CdeWorkspace() {
   const qc = useQueryClient();
   const [open, setOpen] = useState<Set<string>>(new Set());
   const [collapseKey, setCollapseKey] = useState(0);
+  const [buttonSearch, setButtonSearch] = useState("");
   const { order: cdeOrder, save: saveCdeOrder } = useCdeOrder(CDE_DEFAULT_ORDER);
   const catLabel = (c: string) => c.startsWith("p:") ? PARENTS[c.slice(2)] : EXTRA_LABELS[c] ?? baseTitle(GROUPS.find((x) => x.key === c)?.title ?? c);
   const groupTitle = (key: string) => {
@@ -423,9 +424,12 @@ export function CdeWorkspace() {
   return (
     <main className="app-workspace mx-auto max-w-7xl space-y-4 overflow-x-clip px-4 py-6 sm:px-6">
       <div>
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-xl font-semibold">Ambiente de Desenvolvimento Colaborativo</h1>
+        <div className="flex min-w-0 items-center gap-3">
+        <Input aria-label="Buscar botão pelo nome" placeholder="Nome do botão…" className="w-48 min-w-0" value={buttonSearch} onChange={e => setButtonSearch(e.target.value)} />
         <Button type="button" variant="ghost" size="sm" className="shrink-0 gap-1 text-xs" title="Recolher tudo" aria-label="Recolher tudo" onClick={() => { setOpen(new Set()); setCollapsedCategories(new Set(Object.keys(PARENTS))); setExpandedWhere(new Set()); setExpandedHistory(new Set()); setCollapseKey((k) => k + 1); }}><ChevronsDownUp className="h-4 w-4" />Recolher tudo</Button>
+        </div>
         </div>
         <p className="text-sm text-muted-foreground">Modelos de UI/UX utilizados em todos os apps, agrupados por tipo. Crie e exclua modelos e selecione os que devem ser utilizados como padrão.</p>
       </div>
@@ -450,7 +454,7 @@ export function CdeWorkspace() {
           if (cat === "nav") return <CdeNavigation key={`CdeNavigation-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "menu") return <CdeMainMenu key={`CdeMainMenu-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "apps") return <CdeAppOrder key={`CdeAppOrder-${collapseKey}`} number={ci + 1} handle={handle} />;
-          if (cat === "button_library") return <CdeButtonLibrary key={`CdeButtonLibrary-${collapseKey}`} number={ci + 1} handle={handle} onEdit={(button, group, ids, modelKey) => {
+          if (cat === "button_library") return <CdeButtonLibrary key={`CdeButtonLibrary-${collapseKey}`} nameSearch={buttonSearch} number={ci + 1} handle={handle} onEdit={(button, group, ids, modelKey) => {
             if (!group) { toast.info("Este botão ainda não possui um padrão CDE vinculado. A edição visual precisa desse vínculo para ser aplicada no app."); return; }
             const rows = (data?.selected ?? []).filter(s => s.group_key === group);
             const selection = rows.find(s => !s.is_primary && s.screens.includes(button.file)) ?? rows.find(s => s.is_primary);

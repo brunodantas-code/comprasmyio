@@ -1697,7 +1697,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|f857b332789216e5|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 320,
+    "line": 321,
     "tag": "CdeButton",
     "label": "Criar modelo",
     "dynamic": false,
@@ -1712,7 +1712,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|5da02bf919be1fcb|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 321,
+    "line": 322,
     "tag": "button",
     "label": "modelos ·",
     "dynamic": true,
@@ -1727,7 +1727,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|fa8c7d49a4be2739|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 330,
+    "line": 331,
     "tag": "CdeButton",
     "label": "Criar modelo",
     "dynamic": false,
@@ -1742,7 +1742,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|f791d685d80483f8|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 331,
+    "line": 332,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -1757,7 +1757,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|bf4bc59b3127d3cb|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 345,
+    "line": 346,
     "tag": "Button",
     "label": "Editar modelo",
     "dynamic": false,
@@ -1772,7 +1772,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|bc74324fa1e657bf|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 346,
+    "line": 347,
     "tag": "Button",
     "label": "Trash2",
     "dynamic": false,
@@ -1787,7 +1787,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|266e760c60109aa6|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 351,
+    "line": 352,
     "tag": "Button",
     "label": "Padrão (remover) / Padrão principal (remover) / Adicionar como padrão / Tornar principal / Escolher como padrão",
     "dynamic": true,
@@ -1802,7 +1802,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|388711b738ca490e|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 355,
+    "line": 356,
     "tag": "Button",
     "label": "s / Padrão secundário por tela",
     "dynamic": true,
@@ -1817,7 +1817,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|ad4583041c4a5fe6|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 367,
+    "line": 368,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -1832,7 +1832,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|957651bdfdf19f94|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 384,
+    "line": 385,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -1847,7 +1847,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|b621c28901e39486|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 396,
+    "line": 397,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -1862,7 +1862,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|fca6be028ea11516|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 406,
+    "line": 407,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -1877,7 +1877,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|df7a84e1a6a84f82|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 412,
+    "line": 413,
     "tag": "Button",
     "label": "Restaurar modelo",
     "dynamic": false,
@@ -1892,7 +1892,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|ca37ea1739cd7ac2|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 428,
+    "line": 431,
     "tag": "Button",
     "label": "Recolher tudo",
     "dynamic": false,
@@ -1907,7 +1907,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|d28478a4de1b6b68|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 507,
+    "line": 511,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -1922,7 +1922,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|fd8d2b22c3bed015|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 508,
+    "line": 512,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -1937,7 +1937,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|758d89a80b0968e2|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 527,
+    "line": 531,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -1952,7 +1952,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|5bfeb96807f40237|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 528,
+    "line": 532,
     "tag": "Button",
     "label": "Excluir",
     "dynamic": false,
@@ -1967,7 +1967,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|558b9c4f599890d9|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 550,
+    "line": 554,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -1982,7 +1982,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|3acf816df56366de|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 551,
+    "line": 555,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -6726,12 +6726,12 @@
     "tag": "Button",
     "label": "Gerenciar etiquetas",
     "dynamic": false,
-    "visualCustom": false,
+    "visualCustom": true,
     "autoCdeSafe": true,
     "icon": "Tag",
     "variant": "ghost",
     "size": "compactIcon",
-    "className": "",
+    "className": "!text-foreground hover:!text-foreground",
     "group": ""
   },
   {
