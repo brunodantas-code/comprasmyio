@@ -40,6 +40,11 @@
     "general": 0
   },
   {
+    "file": "components/erp-app-access-admin.tsx",
+    "standard": 1,
+    "general": 0
+  },
+  {
     "file": "components/homologation.tsx",
     "standard": 1,
     "general": 0
@@ -66,6 +71,11 @@
   },
   {
     "file": "components/mytosis/kpis-tab.tsx",
+    "standard": 1,
+    "general": 0
+  },
+  {
+    "file": "components/personal-todos/todo-section.tsx",
     "standard": 1,
     "general": 0
   },
