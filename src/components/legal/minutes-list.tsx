@@ -46,6 +46,7 @@ export function MinutesList({ rows, expanded, toggle, edit, remove, openPdf, use
   const [pendingUserId, setPendingUserId] = useState('all');
   const [onlyConfidential, setOnlyConfidential] = useState(false);
   const pendingUser = tracking.users.find(u => u.id === pendingUserId);
+  const filteredView = pendingUserId !== 'all' || onlyConfidential;
   const badgeUser = pendingUser ?? user;
   const shownRows = (pendingUser ? rows.filter(r => legalSignaturePendingItems([r], pendingUser, tracking.actions, tracking.completions).length > 0) : rows).filter(r => !onlyConfidential || parseLegalContent(r.content).subjects.some(s => s.confidential));
   const hasConfidential = rows.some(r => parseLegalContent(r.content).subjects.some(s => s.confidential));
@@ -77,7 +78,7 @@ export function MinutesList({ rows, expanded, toggle, edit, remove, openPdf, use
           <Button variant="outline" size="compactIcon" title={row.pdf_path ? 'PDF assinado' : 'Exportar PDF'} aria-label={`${row.pdf_path ? 'Abrir PDF assinado' : 'Exportar PDF'} de ${row.title}`} onClick={() => { if (row.pdf_path) openPdf(row.pdf_path); else void exportMinutesPdf(row.title, row.meeting_date, content); }}><FileText /></Button>
         </div>
         {open ? <div className="border-t border-border bg-background">
-          <div className="space-y-2 px-4 py-4 text-sm sm:px-6"><p><span className="text-muted-foreground">Local: </span>{content.location}</p><p className="break-words"><span className="text-muted-foreground">Participantes: </span>{content.participants.map(p => p.name).join(', ')}</p></div>
+          {!filteredView && <div className="space-y-2 px-4 py-4 text-sm sm:px-6"><p><span className="text-muted-foreground">Local: </span>{content.location}</p><p className="break-words"><span className="text-muted-foreground">Participantes: </span>{content.participants.map(p => p.name).join(', ')}</p></div>}
           {content.subjects.map((subject,index)=>onlyConfidential && !subject.confidential ? null : <section key={subject.id} className="border-t border-border text-sm" aria-label={`Assunto ${index + 1}: ${subject.title}`}>
             <div className="space-y-2 bg-primary/10 px-4 py-2 sm:px-6">
               <div className="flex items-center gap-3">
@@ -98,7 +99,7 @@ export function MinutesList({ rows, expanded, toggle, edit, remove, openPdf, use
               <SubjectActions recordId={row.id} subjectId={subject.id} userId={user?.id} />
             </div>}
           </section>)}
-          <div className="space-y-2 border-t border-border px-4 py-4 text-sm sm:px-6"><h2 className="text-base font-semibold">Assinaturas dos participantes</h2>{content.revision && content.participants.some(p => !p.signature || !p.signedAt) ? <p className="text-xs text-destructive">Assinatura pendente referente à edição {content.revision} da ata anteriormente assinada. Confira as alterações no Histórico.</p> : null}{content.participants.map(p => <div key={p.id} className="flex items-center gap-2"><span className="min-w-0 break-words">{p.name} — {p.signature && p.signedAt ? `Assinado em ${signatureDate(p.signedAt)}` : 'Aguardando assinatura'}</span>{!p.signature || !p.signedAt ? <><PendingDot label={`Assinatura pendente de ${p.name}`} /><Button variant="outline" size="compactIcon" title={canSignParticipant(p,user) ? 'Assinar' : 'Somente este participante pode assinar'} disabled={!canSignParticipant(p,user)} aria-label={`Assinar como ${p.name}`} onClick={() => sign(row,p.id,p.name)}><FileSignature /></Button></> : null}</div>)}</div>
+          {!filteredView && <div className="space-y-2 border-t border-border px-4 py-4 text-sm sm:px-6"><h2 className="text-base font-semibold">Assinaturas dos participantes</h2>{content.revision && content.participants.some(p => !p.signature || !p.signedAt) ? <p className="text-xs text-destructive">Assinatura pendente referente à edição {content.revision} da ata anteriormente assinada. Confira as alterações no Histórico.</p> : null}{content.participants.map(p => <div key={p.id} className="flex items-center gap-2"><span className="min-w-0 break-words">{p.name} — {p.signature && p.signedAt ? `Assinado em ${signatureDate(p.signedAt)}` : 'Aguardando assinatura'}</span>{!p.signature || !p.signedAt ? <><PendingDot label={`Assinatura pendente de ${p.name}`} /><Button variant="outline" size="compactIcon" title={canSignParticipant(p,user) ? 'Assinar' : 'Somente este participante pode assinar'} disabled={!canSignParticipant(p,user)} aria-label={`Assinar como ${p.name}`} onClick={() => sign(row,p.id,p.name)}><FileSignature /></Button></> : null}</div>)}</div>}
         </div> : null}
       </article>;
     })}
