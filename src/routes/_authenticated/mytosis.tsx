@@ -29,7 +29,7 @@ export const Route = createFileRoute("/_authenticated/mytosis")({
       { title: "Mytosis | Fluxogramas e processos" },
       { name: "description", content: "OKRs, tarefas e fluxogramas de processos com caminho crítico e pendências por responsável." },
       { property: "og:title", content: "Mytosis | Fluxogramas e processos" },
-      { property: "og:description", content: "Ferramenta de OKRs e To Do's da plataforma myio ERP." },
+      { property: "og:description", content: "Ferramenta de OKRs e To Dos da plataforma myio ERP." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

@@ -1,4 +1,6 @@
 # Roadmap
+- [x] To Dos: anexos salvos em miniaturas clicáveis de 96 px; envio, releitura, abertura ampliada e exclusão confirmada conferidos em tarefa temporária removida.
+- [x] Nome visível corrigido para “Meus To Dos”, sem apóstrofo; conferido na Central.
 - [x] Central: setas de To Dos, Code e Legal pretas, com dimensões iguais vindas do CDE; comparação em tela confirmou 16 × 16 px nos três grupos.
 - [x] Esclarecer plural inglês: “To Dos” não usa apóstrofo; resposta enviada sem alterar o nome por iniciativa própria.
 - [x] To Do: sem números na lista e diálogo; arraste pessoal salvo e relido após recarga; menu ghost preto com vencimento, prioridade, título, criação e situação. Dezesseis testes passaram; tarefas temporárias excluídas; celular 390 px sem excesso lateral.

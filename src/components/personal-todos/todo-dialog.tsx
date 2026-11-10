@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { History, Paperclip, Save, Send, Trash2, Plus, Pencil, X } from "lucide-react";
+import { History, Save, Send, Trash2, Plus, Pencil, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -17,6 +17,7 @@ import { todoSchema, TODO_STATUSES, TODO_STATUS_OPTIONS, todoSelectableStatus, t
 import { ImageAttachmentField } from "@/components/image-attachment-field";
 import { uploadTodoImages } from "./data";
 import { todoLabelsOptions, TodoLabelChoices, saveTodoLabels } from "./labels";
+import { TodoAttachmentThumbnail } from "./attachment-thumbnail";
 
 type Person = { id: string; full_name: string };
 export function TodoDialog({ task, userId, users, messages, onClose }: { task: PersonalTodo | null; userId: string; users: Person[]; messages: TodoMessage[]; onClose: () => void }) {
@@ -88,7 +89,7 @@ export function TodoDialog({ task, userId, users, messages, onClose }: { task: P
     try { await uploadTodoImages(task.id, userId, files, messageId); } catch { toast.error("Mensagem salva, mas alguns anexos não foram enviados."); }
   }, onSuccess: async (result) => { if (result === false) return; setText(""); setObservation(""); setFiles([]); setFileKey(k => k + 1); await refresh(); toast.success("Registro salvo"); }, onError: () => toast.error("Não foi possível enviar. Confira o destinatário e a pergunta.") });
   async function openImage(path: string, name: string) { const r = await supabase.storage.from("personal-todo-attachments").createSignedUrl(path, 300); if (r.error) return toast.error("Não foi possível abrir a imagem."); setPreview({ url: r.data.signedUrl, name }); }
-  const attachments = (messageId: string | null) => <div className="flex flex-wrap gap-2">{details.data?.attachments.filter(a => a.message_id === messageId).map(a => <span key={a.id} className="flex items-center gap-1"><Button variant="ghost" size="sm" onClick={() => openImage(a.storage_path, a.file_name)}><Paperclip className="size-4" /><span className="max-w-48 truncate">{a.file_name}</span></Button>{active && a.uploaded_by === userId && <Button variant="ghost" size="compactIcon" title="Excluir anexo" aria-label="Excluir anexo" onClick={async () => { if (!await confirmAction(`Excluir o anexo “${a.file_name}”?`)) return; const r = await supabase.from("personal_todo_attachments").delete().eq("id", a.id); if (r.error) return toast.error("Não foi possível excluir."); await supabase.storage.from("personal-todo-attachments").remove([a.storage_path]); await refresh(); }}><Trash2 /></Button>}</span>)}</div>;
+  const attachments = (messageId: string | null) => <div className="flex flex-wrap gap-2">{details.data?.attachments.filter(a => a.message_id === messageId).map(a => <span key={a.id} className="flex items-center gap-1"><TodoAttachmentThumbnail path={a.storage_path} name={a.file_name} onOpen={() => void openImage(a.storage_path, a.file_name)} />{active && a.uploaded_by === userId && <Button variant="ghost" size="compactIcon" title="Excluir anexo" aria-label="Excluir anexo" onClick={async () => { if (!await confirmAction(`Excluir o anexo “${a.file_name}”?`)) return; const r = await supabase.from("personal_todo_attachments").delete().eq("id", a.id); if (r.error) return toast.error("Não foi possível excluir."); await supabase.storage.from("personal-todo-attachments").remove([a.storage_path]); await refresh(); }}><Trash2 /></Button>}</span>)}</div>;
   return <><Dialog open onOpenChange={open => { if (!open) onClose(); }}><DialogContent className="!min-w-0 !w-[calc(100vw-1.5rem)] !max-w-2xl max-h-[90vh] overflow-x-hidden overflow-y-auto [&>*]:min-w-0 [&_p]:break-words [&_p]:[overflow-wrap:anywhere]"><DialogHeader><DialogTitle className="break-words">{task ? task.title : "Novo To Do"}</DialogTitle></DialogHeader>
     {editing && owner ? <form className="space-y-4" onSubmit={e => { e.preventDefault(); save.mutate(e.currentTarget); }}>
       <div className="grid gap-4 sm:grid-cols-2"><TodoLabelChoices labels={labelData?.labels ?? []} selected={selectedLabels} onChange={setChosenLabels} />

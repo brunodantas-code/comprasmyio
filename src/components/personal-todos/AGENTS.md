@@ -1,3 +1,4 @@
 - Personal tasks remain separate from Code records; owner-only updates, explicit UUID sharing, private task-keyed attachments and append-only message/log guards preserve task privacy and conversation integrity.
 - TodoSection is shared by the Central and portal; todoPendingItems counts each open accessible task once, with unanswered questions identified by recipient and parent-message IDs.
 - Task labels and their links are personal per user (including shared tasks); reuse CDE color swatches and icon registry, so categorization never changes task access or ownership.
+- Saved attachments use TodoAttachmentThumbnail with short-lived signed URLs, preserving private access and the existing full-image viewer.
