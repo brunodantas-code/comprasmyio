@@ -189,5 +189,5 @@ export function CdeLockIcon({ screen, className }: { screen?: string; className?
   const m = resolveCdeModel(data, "restricted", screen);
   const { css, cls } = styleOf(m.style);
   const Icon = ICONS[m.icon] ?? ICONS.Lock;
-  return <span style={css} aria-hidden="true" className={cn("inline-flex shrink-0 items-center", m.className, cls, className)}>{Icon ? <Icon className={m.iconClass || "h-3.5 w-3.5"} /> : null}</span>;
+  return <span style={css} aria-hidden="true" className={cn("inline-flex shrink-0 items-center", m.className, cls, className)}>{Icon ? <Icon strokeWidth={3} className={m.iconClass || "h-3.5 w-3.5"} /> : null}</span>;
 }
