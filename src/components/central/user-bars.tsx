@@ -15,7 +15,7 @@ export function UserPendingBars({ data }: { data: UserBar[] }) {
       <BarChart3 className="h-4 w-4 shrink-0 text-foreground" />
     </button>
     <Dialog open={open} onOpenChange={setOpen}><DialogContent className="max-w-3xl"><DialogHeader><DialogTitle>Pendências por usuário</DialogTitle></DialogHeader>
-      <div style={{ height: Math.max(240, sorted.length * 32) }}><ResponsiveContainer width="100%" height="100%"><BarChart data={sorted} layout="vertical" margin={{ left: 8, right: 32 }}><XAxis type="number" allowDecimals={false} tick={{ fontSize: 12 }} /><YAxis type="category" dataKey="name" width={170} tick={{ fontSize: 12 }} /><Tooltip formatter={(v) => [v, 'Pendências']} /><Bar dataKey="total" fill="var(--primary)" radius={[0, 3, 3, 0]}><LabelList dataKey="total" position="right" fontSize={12} /></Bar></BarChart></ResponsiveContainer></div>
+      <div style={{ height: Math.max(240, sorted.length * 32) }}><ResponsiveContainer width="100%" height="100%"><BarChart data={sorted} layout="vertical" margin={{ left: 8, right: 32 }}><XAxis type="number" hide /><YAxis type="category" dataKey="name" width={170} tick={{ fontSize: 12 }} /><Tooltip formatter={(v) => [v, 'Pendências']} /><Bar dataKey="total" fill="var(--primary)" radius={[0, 3, 3, 0]}><LabelList dataKey="total" position="right" fontSize={12} /></Bar></BarChart></ResponsiveContainer></div>
     </DialogContent></Dialog>
   </>;
 }
