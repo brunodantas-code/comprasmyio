@@ -68,6 +68,7 @@ const GROUPS: { key: GroupKey; title: string; hint: string; multi?: boolean }[] 
   { key: "organize", title: "4.13 Agrupar e consolidar", hint: "Agrupamento, consolidação e custo por etiqueta · padrão único, aplicado ao vivo" },
   { key: "box", title: "5.1 Boxes (cartões)", hint: "Forma, borda, espessura e fundo dos cartões · padrão único, aplicado ao vivo" },
   { key: "confirm_dialog", title: "5.2 Mensagens de confirmação", hint: "Janelas de exclusão e confirmação · padrão único, aplicado ao vivo" },
+  { key: "restricted", title: "5.3 Acesso restrito (cadeado)", hint: "Símbolo dos assuntos confidenciais · padrão único, aplicado ao vivo" },
   { key: "number_section", title: "6.1 Numeração sequencial dos apps", hint: "Categorias, assuntos, seções, perguntas e ações · padrão principal e secundários por tela" },
   { key: "number_subsection", title: "6.2 Numeração das subcategorias", hint: "Quadrada ou redonda · padrão principal e secundários por tela" },
   { key: "color_swatch", title: "11. Padrões para edição de cores", hint: "Amostras de cor · padrão único, aplicado em todos os apps" },

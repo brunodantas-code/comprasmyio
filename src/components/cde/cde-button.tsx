@@ -8,7 +8,7 @@ import { ICONS, styleOf, type CdeStyle } from "./cde-render";
 import { COMMON_ACTION_GROUPS, isSpecificAction } from "./action-standard";
 
 /** Grupos do CDE que já trocam ao vivo nas telas. */
-export type CdeGroup = "action_standard" | "filter" | "plus" | "box" | "number_section" | "number_subsection" | "fields_select" | "confirm_dialog" | "close" | "toggle" | "color_swatch" | "send" | "attach" | "clear" | "organize";
+export type CdeGroup = "action_standard" | "filter" | "plus" | "box" | "number_section" | "number_subsection" | "fields_select" | "confirm_dialog" | "close" | "toggle" | "color_swatch" | "send" | "attach" | "clear" | "organize" | "restricted";
 
 /** Padrão usado enquanto o CDE carrega ou se nenhum padrão estiver escolhido. */
 const FALLBACK: Record<CdeGroup, string> = {
@@ -27,6 +27,7 @@ const FALLBACK: Record<CdeGroup, string> = {
   attach: "Button|outline|default||Paperclip|h-4 w-4",
   clear: "Button|outline|sm||||",
   organize: "Button|outline|sm||||",
+  restricted: "span|ghost||text-foreground|Lock|h-3.5 w-3.5",
 };
 
 type Model = { variant: string; size: string; className: string; icon: string; iconClass: string; style?: CdeStyle };
@@ -180,4 +181,13 @@ export function CdeCloseIcon() {
   const { css, cls } = styleOf(m.style);
   const Icon = ICONS[m.icon] ?? ICONS.X;
   return <span style={css} className={cn("inline-flex items-center justify-center", cls)}><Icon className={m.iconClass || "h-4 w-4"} /></span>;
+}
+
+/** Cadeado dos itens de acesso restrito; segue o padrão do CDE (5.3). */
+export function CdeLockIcon({ screen, className }: { screen?: string; className?: string }) {
+  const { data } = useCdeStandards();
+  const m = resolveCdeModel(data, "restricted", screen);
+  const { css, cls } = styleOf(m.style);
+  const Icon = ICONS[m.icon] ?? ICONS.Lock;
+  return <span style={css} aria-hidden="true" className={cn("inline-flex shrink-0 items-center", m.className, cls, className)}>{Icon ? <Icon className={m.iconClass || "h-3.5 w-3.5"} /> : null}</span>;
 }

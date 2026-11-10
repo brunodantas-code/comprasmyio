@@ -242,3 +242,4 @@
 - [ ] Biblioteca CDE: separar visualmente cards de botoes de funcao especifica dos botoes de acao padrao (Salvar, Cancelar, Fechar, Excluir, Adicionar etc.), seguindo o padrao visual do CDE.
 - [x] CDE: biblioteca separa botões padrão e funções específicas.
 - [x] Legal: filtro de pendências por usuário nas atas
+- [x] Legal: cadeado dos assuntos restritos registrado no CDE

@@ -3743,5 +3743,23 @@
         3
       ]
     }
+  ],
+  "restricted": [
+    {
+      "tag": "span",
+      "variant": "ghost",
+      "size": "",
+      "className": "text-foreground",
+      "icon": "Lock",
+      "iconClass": "h-3.5 w-3.5",
+      "label": "",
+      "count": 1,
+      "files": [
+        "components/legal/minutes-list.tsx"
+      ],
+      "fileCounts": [
+        1
+      ]
+    }
   ]
 }

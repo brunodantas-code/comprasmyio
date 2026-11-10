@@ -1,7 +1,7 @@
-import { ArrowDown, ArrowDownUp, ArrowUp, ArrowUpDown, Building2, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardCheck, FileSpreadsheet, FileText, Filter, Layers3, Tag, PackagePlus, Paperclip, Pencil, Percent, Plus, Save, Send, Settings2, Trash2, Upload, X, type LucideIcon } from "lucide-react";
+import { ArrowDown, ArrowDownUp, ArrowUp, ArrowUpDown, Building2, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardCheck, FileSpreadsheet, FileText, Filter, Layers3, Lock, Tag, PackagePlus, Paperclip, Pencil, Percent, Plus, Save, Send, Settings2, Trash2, Upload, X, type LucideIcon } from "lucide-react";
 import { BORDERS, FILLS } from "@/components/mytosis/shapes";
 
-export const ICONS: Record<string, LucideIcon> = { ArrowDown, ArrowDownUp, ArrowUp, ArrowUpDown, Building2, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardCheck, FileSpreadsheet, FileText, Filter, Layers3, Tag, PackagePlus, Paperclip, Pencil, Percent, Plus, Save, Send, Settings2, Trash2, Upload, X };
+export const ICONS: Record<string, LucideIcon> = { Lock, ArrowDown, ArrowDownUp, ArrowUp, ArrowUpDown, Building2, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardCheck, FileSpreadsheet, FileText, Filter, Layers3, Tag, PackagePlus, Paperclip, Pencil, Percent, Plus, Save, Send, Settings2, Trash2, Upload, X };
 export type CdeStyle = { shape?: string; fill?: string; border?: string; borderWidth?: string; text?: string; fontSize?: string; description?: string; actionSpecific?: boolean };
 export const FONT_SIZES = ["10px","11px","12px","13px","14px","16px","18px"];
 export const FORMS = [
