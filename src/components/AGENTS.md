@@ -1,1 +1,2 @@
 - Signature and per-app manuals open from AppHeader's main menu (manualApp), since they serve every app.
+- Code and personal tasks share ImageAttachmentField for gallery, drop, paste and temporary thumbnails; persistence and attachment authorization remain in each caller.

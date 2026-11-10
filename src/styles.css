@@ -420,6 +420,17 @@
 [role="menuitem"]:focus, [role="menuitem"][data-highlighted], [role="menuitem"][data-preview-hl] { background: var(--li-hl, var(--color-dropdown-highlight, var(--accent))) !important; }
 
 /* Diversos shares the compact disclosure rows used by access management. */
+@layer base {
+[data-todo-participant-add],
+[data-todo-participant-add] svg {
+  color: var(--foreground) !important;
+}
+[data-todo-participant-add] {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+}
 .diversos-list > * {
   border: 0 !important;
   border-radius: 0 !important;

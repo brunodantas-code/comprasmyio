@@ -3822,6 +3822,66 @@ export type Database = {
           },
         ]
       }
+      personal_todo_label_links: {
+        Row: {
+          label_id: string
+          owner_id: string
+          todo_id: string
+        }
+        Insert: {
+          label_id: string
+          owner_id?: string
+          todo_id: string
+        }
+        Update: {
+          label_id?: string
+          owner_id?: string
+          todo_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "personal_todo_label_links_label_id_owner_id_fkey"
+            columns: ["label_id", "owner_id"]
+            isOneToOne: false
+            referencedRelation: "personal_todo_labels"
+            referencedColumns: ["id", "owner_id"]
+          },
+          {
+            foreignKeyName: "personal_todo_label_links_todo_id_fkey"
+            columns: ["todo_id"]
+            isOneToOne: false
+            referencedRelation: "personal_todos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      personal_todo_labels: {
+        Row: {
+          color: string
+          created_at: string
+          icon: string
+          id: string
+          name: string
+          owner_id: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          icon?: string
+          id?: string
+          name: string
+          owner_id?: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          icon?: string
+          id?: string
+          name?: string
+          owner_id?: string
+        }
+        Relationships: []
+      }
       personal_todo_logs: {
         Row: {
           actor_id: string

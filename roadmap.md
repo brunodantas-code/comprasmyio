@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Anexos To Do/Code: clipe sem bordas, galeria, arraste/colagem e miniaturas; conferidos em ambas as telas e celular.
+- [x] To Do: etiquetas pessoais com cores/símbolos CDE no lugar de Tipo; cadastro/edição/exclusão na Central, vínculo/filtro e + do compartilhamento ghost preto. Vínculo salvo/relido, exclusões confirmadas, celular e oito testes conferidos.
 - [x] Legal: assuntos com totalizador pessoal numerado de ações/responsabilidade sem ações, respeitando filtro; assinaturas somente junto aos participantes. Dez testes passaram; filtro João exibiu 1 no assunto correto em ata real, sem alterar dados.
 - [x] Code: atendimento atribuído gera pendência somente para o responsável; perguntas explícitas preservadas e perguntas antigas seguem a atribuição. Regressão reproduzida e 25 testes passaram; chamado 19 aberto pela Central com Leonardo. Conta de João não exercitada em tela, exclusão da pendência coberta por teste.
 - [x] CDE: corrigida falha por configuração no endereço; salvamento de lixeira sem texto e releitura conferidos, configuração original restaurada, 19 testes passaram.
