@@ -32,7 +32,7 @@ export function PendingGroups({ items, leading }: { items: PendingGroupItem[]; l
         return <div key={name}>
           <div className="transition-colors hover:bg-primary/10 focus-within:bg-primary/10"><button type="button" onClick={() => toggle(name)} aria-expanded={isOpen} className="!flex !w-full !max-w-none items-center gap-3 !bg-transparent px-4 py-3 text-left">
             <CdeDisclosureIcon open={isOpen} screen="components/pending-groups.tsx" />
-            {groupBy === "app" ? <AppSymbol name={name} className="h-5 w-5 shrink-0 text-foreground" /> : null}
+            {groupBy === "app" ? <AppSymbol name={name} className="h-5 w-5 shrink-0 text-foreground" /> : <span aria-hidden className="h-5 w-5 shrink-0" />}
             <span className="w-40 max-w-[40vw] shrink-0 break-words text-sm font-semibold">{name}</span>
             <span className="flex h-7 min-w-7 items-center justify-center rounded-full bg-destructive px-2 text-xs font-bold text-destructive-foreground">{total > 99 ? "99+" : total}</span>
           </button></div>
