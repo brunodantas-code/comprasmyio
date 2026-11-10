@@ -2087,7 +2087,7 @@
   {
     "id": "components/central/dashboard.tsx|05963756db27b385|0",
     "file": "components/central/dashboard.tsx",
-    "line": 21,
+    "line": 23,
     "tag": "Button",
     "label": "I",
     "dynamic": false,
@@ -2102,7 +2102,7 @@
   {
     "id": "components/central/dashboard.tsx|79eb85757896196c|0",
     "file": "components/central/dashboard.tsx",
-    "line": 23,
+    "line": 25,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -2115,9 +2115,24 @@
     "group": ""
   },
   {
+    "id": "components/central/dashboard.tsx|c7ad81a85e9150ef|0",
+    "file": "components/central/dashboard.tsx",
+    "line": 25,
+    "tag": "button",
+    "label": "unassigned / Sem responsável",
+    "dynamic": true,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "CdeDisclosureIcon",
+    "variant": "",
+    "size": "",
+    "className": "flex w-full items-center gap-3 px-2 py-3 text-left transition-colors hover:bg-primary/10",
+    "group": ""
+  },
+  {
     "id": "components/central/dashboard.tsx|33adedf1438e8f09|0",
     "file": "components/central/dashboard.tsx",
-    "line": 23,
+    "line": 25,
     "tag": "Button",
     "label": "Abrir pendência",
     "dynamic": false,
