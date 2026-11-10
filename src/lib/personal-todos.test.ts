@@ -1,8 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { todoPendingItems, unansweredTodoQuestions, todoSchema, type PersonalTodo, type TodoMessage } from "./personal-todos";
+import { todoPendingItems, unansweredTodoQuestions, todoSchema, TODO_STATUS_OPTIONS, todoSelectableStatus, type PersonalTodo, type TodoMessage } from "./personal-todos";
 const task = { id: "task", owner_id: "owner", shared_user_ids: ["peer"], status: "aberto" } as PersonalTodo;
 const question = { id: "q", todo_id: "task", author_id: "owner", recipient_id: "peer", message_type: "question", parent_message_id: null } as TodoMessage;
 describe("personal tasks", () => {
+  it("offers only open, in-progress and completed states", () => {
+    expect(Object.keys(TODO_STATUS_OPTIONS)).toEqual(["aberto", "em_atendimento", "concluido"]);
+  });
+  it("resolves historical intermediate states to in-progress", () => {
+    expect(todoSelectableStatus("aguardando_resposta")).toBe("em_atendimento");
+    expect(todoSelectableStatus("atendido")).toBe("em_atendimento");
+    expect(todoSelectableStatus("concluido")).toBe("concluido");
+  });
   it("counts personal open tasks once", () => expect(todoPendingItems([task], [question], "owner").map(t => t.count)).toEqual([1]));
   it("includes shared tasks and pending questions for their recipient", () => expect(todoPendingItems([task], [question], "peer")[0].questions).toBe(1));
   it("excludes unrelated users", () => expect(todoPendingItems([task], [question], "outsider")).toEqual([]));

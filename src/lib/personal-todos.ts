@@ -8,7 +8,11 @@ export const todoSchema = z.object({
   urgency: z.enum(["normal", "urgente"]), expected_result: z.string().max(2000), proposed_solution: z.string().max(4000),
   due_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable(), shared_user_ids: z.array(z.string().uuid()),
 });
-export const TODO_STATUSES: Record<string, string> = { aberto: "Em aberto", em_atendimento: "Em execução", aguardando_resposta: "Aguardando resposta", atendido: "Executado", concluido: "Concluído", excluido: "Excluído" };
+export const TODO_STATUS_OPTIONS = { aberto: "Em aberto", em_atendimento: "Em execução", concluido: "Concluída" };
+export const TODO_STATUSES: Record<string, string> = { ...TODO_STATUS_OPTIONS, aguardando_resposta: "Em execução", atendido: "Em execução", excluido: "Excluída" };
+export function todoSelectableStatus(status: string) {
+  return status === "aguardando_resposta" || status === "atendido" ? "em_atendimento" : status;
+}
 export function unansweredTodoQuestions(messages: TodoMessage[]) {
   const answered = new Set(messages.filter(m => m.message_type === "answer").map(m => m.parent_message_id));
   return messages.filter(m => m.message_type === "question" && !answered.has(m.id));
