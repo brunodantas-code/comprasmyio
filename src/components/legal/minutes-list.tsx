@@ -10,6 +10,7 @@ import { SubjectActions } from './subject-actions';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { legalPdf } from '@/lib/legal-pdf';
+import { legalSignaturePendingItems } from '@/lib/legal-pending';
 import type { LegalContent } from '@/lib/legal';
 
 async function exportMinutesPdf(title: string, date: string | null, content: LegalContent) {
@@ -40,6 +41,7 @@ export function MinutesList({ rows, expanded, toggle, edit, remove, openPdf, use
       const pending = legalPendingCount(content);
       pending.actions += pendingLegalActions(tracking.actions.filter(a=>a.record_id===row.id && content.subjects.some(s=>s.id===a.subject_id)));
       pending.total = pending.signatures + pending.actions;
+      const mine = user ? legalSignaturePendingItems([row], user, tracking.actions)[0] : undefined;
       const open = expanded.has(row.id);
       return <article key={row.id}>
         <div className="flex items-center gap-1 px-2 py-3 sm:gap-2 sm:px-4">
@@ -47,7 +49,7 @@ export function MinutesList({ rows, expanded, toggle, edit, remove, openPdf, use
             {open ? <ChevronDown className="h-5 w-5 shrink-0 text-primary" /> : <ChevronRight className="h-5 w-5 shrink-0 text-primary" />}
             <span className="min-w-0 flex-1"><span className="block break-words text-sm font-semibold text-foreground">{row.title}</span><span className="block text-xs font-normal text-muted-foreground">{legalDate(row.meeting_date)}</span></span>
           </button>
-          {pending.total > 0 ? <PendingDot label={`${pending.signatures} assinatura(s)${content.revision ? ' (edição da ata anterior)' : ''} e ${pending.actions} ação(ões) pendentes`} /> : null}
+          {mine ? <span role="status" title={`${mine.signature ? (mine.revision ? 'Nova assinatura pendente (edição da ata anterior)' : 'Assinatura pendente') : ''}${mine.signature && mine.actions ? ' e ' : ''}${mine.actions ? `${mine.actions} ação(ões) pendente(s)` : ''}`} aria-label={`${mine.count} pendência(s) suas nesta ata`} className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold leading-none text-destructive-foreground">{mine.count > 99 ? '99+' : mine.count}</span> : null}
           <Button variant="outline" size="compactIcon" title="Editar" aria-label={`Editar ${row.title}`} onClick={() => edit(row)}><Pencil /></Button>
           <Button variant="outline" size="compactIcon" title="Excluir" aria-label={`Excluir ${row.title}`} onClick={() => remove(row)}><Trash2 /></Button>
           <Button variant="outline" size="compactIcon" title={row.pdf_path ? 'PDF assinado' : 'Exportar PDF'} aria-label={`${row.pdf_path ? 'Abrir PDF assinado' : 'Exportar PDF'} de ${row.title}`} onClick={() => { if (row.pdf_path) openPdf(row.pdf_path); else void exportMinutesPdf(row.title, row.meeting_date, content); }}><FileText /></Button>
