@@ -1,3 +1,4 @@
+import { DependencyEditor } from "@/components/central/dependency-editor";
 import { ReimbursementAccounts, ReimbursementDestination } from "@/components/reimbursement-accounts";
 import { SupplyItemsSummary } from "@/components/supply-items-summary";
 import { SupplyDeadlineAlert } from "@/components/supply-deadline-alert";
@@ -3216,6 +3217,7 @@ function OrderReportDialog({
       <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Relatório da solicitação {order.approval_number ?? ""}</DialogTitle>
+          <DependencyEditor kind="supply" sourceId={order.id} />
           <DialogDescription>Histórico completo: dados, aprovações, alterações e observações.</DialogDescription>
         </DialogHeader>
 

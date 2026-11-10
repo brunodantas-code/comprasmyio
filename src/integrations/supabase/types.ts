@@ -1085,6 +1085,69 @@ export type Database = {
         }
         Relationships: []
       }
+      central_dependencies: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          milestone: string
+          predecessor_id: string
+          predecessor_kind: string
+          successor_id: string
+          successor_kind: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          milestone?: string
+          predecessor_id: string
+          predecessor_kind: string
+          successor_id: string
+          successor_kind: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          milestone?: string
+          predecessor_id?: string
+          predecessor_kind?: string
+          successor_id?: string
+          successor_kind?: string
+        }
+        Relationships: []
+      }
+      central_dependency_logs: {
+        Row: {
+          action: string
+          actor_id: string
+          after_value: Json | null
+          before_value: Json | null
+          created_at: string
+          dependency_id: string
+          id: string
+        }
+        Insert: {
+          action: string
+          actor_id: string
+          after_value?: Json | null
+          before_value?: Json | null
+          created_at?: string
+          dependency_id: string
+          id?: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string
+          after_value?: Json | null
+          before_value?: Json | null
+          created_at?: string
+          dependency_id?: string
+          id?: string
+        }
+        Relationships: []
+      }
       client_categories: {
         Row: {
           active: boolean
@@ -8215,6 +8278,11 @@ export type Database = {
       }
       can_view_site_survey_visit: {
         Args: { _user_id: string; _visit_id: string }
+        Returns: boolean
+      }
+      central_admin_snapshot: { Args: never; Returns: Json }
+      central_source_exists: {
+        Args: { i: string; k: string }
         Returns: boolean
       }
       code_can_open: { Args: never; Returns: boolean }

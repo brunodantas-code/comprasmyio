@@ -1,3 +1,7 @@
+import { Suspense } from "react";
+import { useCurrentUser } from "@/hooks/use-current-user";
+import { Button } from "@/components/ui/button";
+import { CentralDashboard } from "@/components/central/dashboard";
 import { legalPendingLabel } from "@/lib/legal-pending";
 import { PendingGroups } from "@/components/pending-groups";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -9,6 +13,7 @@ import { AppHeader } from "@/components/app-header";
 import { TodoSection } from "@/components/personal-todos/todo-section";
 
 export const Route = createFileRoute("/_authenticated/pendentes")({
+  validateSearch: (s: Record<string, unknown>): { central?: string; user?: string; app?: string; sort?: string; view?: string } => ({ central: s.central === "all" ? "all" : "mine", user: typeof s.user === "string" ? s.user : "", app: typeof s.app === "string" ? s.app : "", sort: ["due", "app"].includes(String(s.sort)) ? String(s.sort) : "critical", view: ["flow", "timeline"].includes(String(s.view)) ? String(s.view) : "users" }),
   component: PendentesPage,
   head: () => ({
     meta: [
@@ -24,6 +29,11 @@ export const Route = createFileRoute("/_authenticated/pendentes")({
 
 function PendentesPage() {
   const { data, isLoading } = usePendingActions();
+  const { data: me } = useCurrentUser();
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const adminView = me?.isAdmin && search.central === "all";
+  const change = (patch: Record<string,string>) => { void navigate({ search: prev => ({ ...prev, ...patch }) }); };
   return (
     <div className="min-h-screen bg-background">
       <AppHeader logo={<MyioLogo className="text-xl sm:text-2xl" />} />
@@ -32,7 +42,8 @@ function PendentesPage() {
           <h1 className="flex items-center gap-2 text-2xl font-bold"><Bell className="h-6 w-6" />Central de Pendências</h1>
           <p className="mt-1 text-sm text-muted-foreground">Ações que dependem de você...</p>
         </div>
-        <div className="mb-6"><TodoSection /></div>
+        {me?.isAdmin && <div className="mb-6 flex gap-2"><Button variant="ghost" aria-pressed={!adminView} onClick={() => change({central:"mine"})}>Minhas Pendências</Button><Button variant="ghost" aria-pressed={!!adminView} onClick={() => change({central:"all"})}>Todas as Pendências</Button></div>}
+        {adminView ? <Suspense fallback={<p>Carregando Dashboard...</p>}><CentralDashboard user={search.user ?? ""} app={search.app ?? ""} sort={search.sort ?? "critical"} view={search.view ?? "users"} onChange={change} /></Suspense> : <><div className="mb-6"><TodoSection /></div>
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando pendências...</p> : (
           <div className="space-y-6">
             {(data?.total ?? 0) > (data?.todoCount ?? 0) ? (
@@ -51,6 +62,7 @@ function PendentesPage() {
             {(data?.total ?? 0) === 0 ? <p className="rounded-md border border-dashed border-border p-8 text-center text-sm text-muted-foreground">Nenhuma pendência no momento.</p> : null}
           </div>
         )}
+        </>}
       </main>
     </div>
   );

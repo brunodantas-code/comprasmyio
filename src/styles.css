@@ -1,6 +1,7 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
+@import "@xyflow/react/dist/style.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -463,3 +464,6 @@
 .diversos-list > section > :first-child button[aria-label="Exibir contas"] svg { rotate: -90deg; }
 .diversos-list > * > :first-child button[aria-label^="Recolher "] svg,
 .diversos-list > section > :first-child button[aria-label="Recolher contas"] svg { rotate: 180deg; }
+
+.central-flow { --xy-node-background-color: var(--card); --xy-node-color: var(--foreground); --xy-node-border: 1px solid var(--border); --xy-edge-stroke: var(--foreground); --xy-edge-label-background-color: var(--background); --xy-edge-label-color: var(--foreground); --xy-controls-button-background-color: var(--card); --xy-controls-button-color: var(--foreground); --xy-background-pattern-dots-color: var(--border); }
+.central-flow .central-flow-node { background: var(--card); color: var(--foreground); border: 1px solid var(--border); border-radius: 6px; padding: 12px; }
