@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Central: setas de To Dos, Code e Legal pretas, com dimensões iguais vindas do CDE; comparação em tela confirmou 16 × 16 px nos três grupos.
+- [x] Esclarecer plural inglês: “To Dos” não usa apóstrofo; resposta enviada sem alterar o nome por iniciativa própria.
 - [x] To Do: sem números na lista e diálogo; arraste pessoal salvo e relido após recarga; menu ghost preto com vencimento, prioridade, título, criação e situação. Dezesseis testes passaram; tarefas temporárias excluídas; celular 390 px sem excesso lateral.
 - [x] To Do: destinatários disponíveis ao dono; confirmação e compartilhamento antes de enviar; envio persistido e relido na tela após atualização das consultas, com histórico; tarefas temporárias excluídas. Disquete ghost preto para observações; dez testes passaram.
 - [x] To Do: Cancelar somente X ghost preto alinhado ao disquete no editor, conferido em tela.

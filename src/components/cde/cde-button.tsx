@@ -119,6 +119,14 @@ export const CdeButton = forwardRef<HTMLButtonElement, Props>(function CdeButton
 });
 
 /** Inline arrow for a labelled expanding header; shares the toggle look without styling its text. */
+export function CdeDisclosureIcon({ open, screen }: { open: boolean; screen: string }) {
+  const { data } = useCdeStandards();
+  const m = resolveCdeModel(data, "toggle", screen);
+  const { css, cls } = styleOf(m.style);
+  const Icon = open ? ICONS.ChevronDown : ICONS.ChevronRight;
+  return <span style={css} className={cn("inline-flex shrink-0 items-center justify-center !text-foreground", m.iconClass || "h-4 w-4", cls)}><Icon className="!size-full" /></span>;
+}
+
 export function CdeToggleIcon({ open }: { open?: boolean }) {
   const { data } = useCdeStandards();
   const m = resolveCdeModel(data, "toggle", "components/cde/cde-workspace.tsx");

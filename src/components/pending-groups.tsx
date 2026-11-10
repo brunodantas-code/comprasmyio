@@ -1,5 +1,5 @@
 import { useMemo, useState, type ReactNode } from "react";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { CdeDisclosureIcon } from "@/components/cde/cde-button";
 import { cn } from "@/lib/utils";
 import { AppSymbol } from "@/components/cde/app-tile";
 import { Button } from "@/components/ui/button";
@@ -30,7 +30,7 @@ export function PendingGroups({ items }: { items: PendingGroupItem[] }) {
         const total = rows.reduce((s, r) => s + r.count, 0);
         return <div key={name}>
           <div className="transition-colors hover:bg-primary/10 focus-within:bg-primary/10"><button type="button" onClick={() => toggle(name)} aria-expanded={isOpen} className="!flex !w-full !max-w-none items-center gap-3 !bg-transparent px-4 py-3 text-left">
-            {isOpen ? <ChevronDown className="h-5 w-5 shrink-0 text-primary" /> : <ChevronRight className="h-5 w-5 shrink-0 text-primary" />}
+            <CdeDisclosureIcon open={isOpen} screen="components/pending-groups.tsx" />
             {groupBy === "app" ? <AppSymbol name={name} className="h-5 w-5 shrink-0 text-foreground" /> : null}
             <span className="min-w-0 flex-1 text-sm font-semibold">{name}</span>
             <span className="flex h-7 min-w-7 items-center justify-center rounded-full bg-destructive px-2 text-xs font-bold text-destructive-foreground">{total > 99 ? "99+" : total}</span>
