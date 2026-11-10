@@ -5,6 +5,15 @@ type PendingAction = { record_id: string; subject_id: string; responsible_id: st
 
 type SubjectCompletion = { record_id: string; subject_id: string };
 
+/** Subject badges count only this user's work, never meeting signatures. */
+export function legalSubjectPendingCount(recordId: string, subject: LegalSubject, user: { id: string; full_name: string } | null | undefined, actions: readonly PendingAction[], completions: readonly SubjectCompletion[]) {
+  if (!user) return 0;
+  const ownActions = actions.filter(a => a.record_id === recordId && a.subject_id === subject.id && a.responsible_id === user.id && !a.archived && !a.completed_at).length;
+  const norm = (name: string) => name.trim().toLowerCase();
+  const ownDeliberation = openDeliberations(recordId, [subject], actions, completions).some(s => legalSubjectResponsibles(s).some(name => norm(name) === norm(user.full_name)));
+  return ownActions + (ownDeliberation ? 1 : 0);
+}
+
 /** Deliberations assigned to responsibles with no tracked actions stay pending until marked done. */
 export function openDeliberations(recordId: string, subjects: readonly LegalSubject[], actions: readonly { record_id: string; subject_id: string; archived: boolean }[], completions: readonly SubjectCompletion[]) {
   return subjects.filter(s => legalSubjectResponsibles(s).length > 0 && !actions.some(a => a.record_id === recordId && a.subject_id === s.id && !a.archived) && !completions.some(c => c.record_id === recordId && c.subject_id === s.id));

@@ -1,6 +1,26 @@
 import { describe, expect, it } from 'vitest';
-import { legalSignaturePendingItems } from './legal-pending';
+import { legalSignaturePendingItems, legalSubjectPendingCount } from './legal-pending';
+import { parseLegalContent } from './legal';
 const user = { id: 'leonardo', full_name: 'Leonardo Roedel' };
+describe('totalizador pessoal do assunto', () => {
+  const subject = parseLegalContent({ subjects: [{ id: 's', title: 'Assunto', responsibles: ['João Paulo Couto'] }] }).subjects[0];
+  const joao = { id: 'joao', full_name: 'João Paulo Couto' };
+  it('mostra responsabilidade sem ações somente para João, não para Leonardo', () => {
+    expect(legalSubjectPendingCount('ata', subject, joao, [], [])).toBe(1);
+    expect(legalSubjectPendingCount('ata', subject, user, [], [])).toBe(0);
+  });
+  it('conta as três ações do Leonardo e não as de João nem a responsabilidade do assunto com ações', () => {
+    const action = { record_id: 'ata', subject_id: 's', responsible_id: 'leonardo', completed_at: null, archived: false };
+    const actions = [action, action, action, { ...action, responsible_id: 'joao' }];
+    expect(legalSubjectPendingCount('ata', subject, user, actions, [])).toBe(3);
+    expect(legalSubjectPendingCount('ata', subject, joao, actions, [])).toBe(1);
+  });
+  it('retira a responsabilidade concluída e ignora assinaturas pendentes de terceiros', () => {
+    expect(legalSubjectPendingCount('ata', subject, joao, [], [{ record_id: 'ata', subject_id: 's' }])).toBe(0);
+    const content = parseLegalContent({ participants: [{ name: 'Outro', userId: 'outro' }], subjects: [{ id: 's', title: 'Sem responsável' }] });
+    expect(legalSubjectPendingCount('ata', content.subjects[0], user, [], [])).toBe(0);
+  });
+});
 const record = (participants: unknown[], category = 'minutes') => ({ id: 'ata', title: 'Ata', category, created_by: 'autor', content: { participants } });
 describe('assinaturas pessoais pendentes', () => {
   it('inclui a ata que aguarda Leonardo sem duplicar participantes', () => {
