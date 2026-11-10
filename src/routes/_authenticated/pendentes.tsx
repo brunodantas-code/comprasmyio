@@ -37,7 +37,7 @@ function PendentesPage() {
   const change = (patch: Record<string,string>) => { void navigate({ search: prev => ({ ...prev, ...patch }) }); };
   return (
     <div className="min-h-screen bg-background">
-      <AppHeader logo={<MyioLogo className="text-xl sm:text-2xl" />} />
+      <AppHeader logo={<MyioLogo className="text-xl sm:text-2xl" label={null} />} />
       <main className="mx-auto max-w-7xl px-3 py-5 sm:px-6 sm:py-8">
         <div className="mb-6">
           <h1 className="flex items-center gap-2 text-2xl font-bold"><Bell className="h-6 w-6" />Central de Pendências</h1>
