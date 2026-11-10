@@ -263,3 +263,6 @@
 - [x] CDE: biblioteca separa botões padrão e funções específicas.
 - [x] Legal: filtro de pendências por usuário nas atas
 - [x] Legal: cadeado dos assuntos restritos registrado no CDE
+- [ ] To Dos: disquete de salvar reposicionado no cabeçalho do pop-up (conferir no preview).
+- [ ] To Dos: exibir tarefas concluídas em grupo recolhível; histórico fica dentro de cada tarefa (seção Histórico).
+- [x] Dúvida respondida: exclusão de To Dos pela lixeira ao lado de "Situação", com confirmação.
