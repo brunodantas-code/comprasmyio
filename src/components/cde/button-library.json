@@ -6570,17 +6570,17 @@
     "group": ""
   },
   {
-    "id": "components/personal-todos/todo-dialog.tsx|891aaa11be57c820|0",
+    "id": "components/personal-todos/todo-dialog.tsx|6f7ad6a28f23d7c0|0",
     "file": "components/personal-todos/todo-dialog.tsx",
     "line": 96,
     "tag": "Button",
-    "label": "Salvando... / Salvar",
-    "dynamic": true,
+    "label": "Save",
+    "dynamic": false,
     "visualCustom": false,
     "autoCdeSafe": true,
-    "icon": "",
-    "variant": "",
-    "size": "",
+    "icon": "Save",
+    "variant": "ghost",
+    "size": "compactIcon",
     "className": "",
     "group": ""
   },

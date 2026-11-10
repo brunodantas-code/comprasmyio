@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { History, Paperclip, Send, Trash2, Plus, Pencil } from "lucide-react";
+import { History, Paperclip, Save, Send, Trash2, Plus, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -92,8 +92,8 @@ export function TodoDialog({ task, userId, users, messages, onClose }: { task: P
       <div className="sm:col-span-2"><Label htmlFor="todo-solution">Solução proposta <span className="text-xs font-normal text-muted-foreground">opcional</span></Label><Textarea id="todo-solution" name="proposed_solution" maxLength={4000} defaultValue={task?.proposed_solution} /></div></div>
       <Label>Compartilhar com</Label><div className="flex items-center gap-2"><SearchableSelect aria-label="Compartilhar com" value={person} onChange={setPerson} options={users.filter(p => p.id !== userId && !shared.includes(p.id)).map(p => ({ value: p.id, label: p.full_name }))} placeholder="Buscar usuário" /><Button type="button" variant="ghost" size="compactIcon" data-todo-participant-add="true" aria-label="Adicionar participante" title="Adicionar participante" disabled={!person} onClick={() => { setShared(s => [...s, person]); setPerson(""); }}><Plus /></Button></div>
       {shared.map(id => <div key={id} className="flex items-center justify-between text-sm"><span>{nameFor(id)}</span><Button type="button" variant="ghost" size="compactIcon" aria-label={`Remover ${nameFor(id)}`} title="Remover participante" onClick={async () => { if (await confirmAction(`Remover ${nameFor(id)} do compartilhamento?`)) setShared(s => s.filter(p => p !== id)); }}><Trash2 /></Button></div>)}
-      <Label htmlFor="todo-files">Prints e fotos (até 10 MB por imagem)</Label><ImageAttachmentField id="todo-files" files={files} onChange={setFiles} />
-      <div className="flex justify-end gap-2">{task && <Button type="button" variant="outline" onClick={() => setEditing(false)}>Cancelar</Button>}<Button type="submit" disabled={save.isPending}>{save.isPending ? "Salvando..." : "Salvar"}</Button></div>
+      <div className="space-y-1"><Label htmlFor="todo-files">Prints e fotos (até 10 MB por imagem)</Label><ImageAttachmentField id="todo-files" files={files} onChange={setFiles} />
+      <div className="flex justify-end gap-2">{task && <Button type="button" variant="outline" onClick={() => setEditing(false)}>Cancelar</Button>}<Button type="submit" variant="ghost" size="compactIcon" aria-label={save.isPending ? "Salvando..." : "Salvar"} title={save.isPending ? "Salvando..." : "Salvar"} disabled={save.isPending}><Save /></Button></div></div>
     </form> : task && <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2"><span className="text-xs text-muted-foreground">{nameFor(task.owner_id)} · {new Date(task.created_at).toLocaleString("pt-BR")}</span>{owner && active && <Button variant="ghost" size="compactIcon" title="Editar tarefa" aria-label="Editar tarefa" onClick={() => setEditing(true)}><Pencil /></Button>}</div>
       <p className="text-sm">{TODO_STATUSES[task.status]} · Prioridade {task.priority} · {task.urgency === "urgente" ? "Urgente" : "Normal"}</p>
