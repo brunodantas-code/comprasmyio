@@ -1,8 +1,9 @@
 # Roadmap
-- [ ] Central Admin: dashboard por responsável, filtros/ordenações, sem To Dos pessoais.
-- [ ] Central Admin: dependências entre apps com marcos de conclusão, guarda contra ciclos e histórico.
-- [ ] Central Admin: vínculos nas ações Legal, chamados Code e pedidos Supply; fluxo e cronograma.
-- [ ] Verificar leitura Admin, segurança não Admin, vínculo/releitura/remoção e sequência visual.
+- [x] Central: grupo “Prazo crítico” com pendências que vencem hoje, independente do App; nome “To Dos” e bolinhas após nomes, alinhadas.
+- [x] Central Admin: dashboard por responsável, filtros/ordenações, sem To Dos pessoais.
+- [x] Central Admin: dependências entre apps com marcos de conclusão, guarda contra ciclos e histórico.
+- [x] Central Admin: vínculos nas ações Legal, chamados Code e pedidos Supply; fluxo e cronograma.
+- [x] Leitura Admin, vínculo/releitura/remoção e fluxo com dois nós/uma aresta conferidos em sessão real; três vencimentos de hoje e celular sem transbordamento; 36 testes passaram. Segurança não Admin conferida nas políticas/guarda, sem sessão de outro usuário.
 - [x] To Dos: anexos salvos em miniaturas clicáveis de 96 px; envio, releitura, abertura ampliada e exclusão confirmada conferidos em tarefa temporária removida.
 - [x] Nome visível corrigido para “Meus To Dos”, sem apóstrofo; conferido na Central.
 - [x] Central: setas de To Dos, Code e Legal pretas, com dimensões iguais vindas do CDE; comparação em tela confirmou 16 × 16 px nos três grupos.

@@ -1,0 +1,5 @@
+- Central Admin reads a guarded snapshot RPC through an authenticated server function; the snapshot never includes personal To Dos or their conversations.
+- Dependencies store stable source kind/ID pairs instead of duplicating tasks; source completion and milestone evaluation stay in shared pure helpers, preserving existing app permissions and commands.
+- Cross-app edges are Admin-only, source-validated, audited and serialized by an advisory lock to reject concurrent cyclic inserts; canceled or missing sources never release successors.
+- React Flow is lazy-loaded for the administrative graph and Dagre lays out the dependency DAG; graph coordinates never alter source records or due dates.
+- Due-today highlights use the São Paulo calendar and RLS-authorized current-user records; shared To Dos appear only in the personal view, never Admin snapshots.

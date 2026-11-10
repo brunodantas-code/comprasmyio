@@ -8,7 +8,7 @@ export type PendingGroupItem = { key: string; app: string; requester: string; co
 type GroupBy = "app" | "requester";
 
 /** Groups pending rows by app or requester, with a red total and collapsible content. */
-export function PendingGroups({ items }: { items: PendingGroupItem[] }) {
+export function PendingGroups({ items, leading }: { items: PendingGroupItem[]; leading?: ReactNode }) {
   const [groupBy, setGroupBy] = useState<GroupBy>("app");
   const [open, setOpen] = useState<Set<string>>(new Set());
   const groups = useMemo(() => {
@@ -25,6 +25,7 @@ export function PendingGroups({ items }: { items: PendingGroupItem[] }) {
       ))}
     </div>
     <div className="divide-y divide-border overflow-hidden rounded-md border border-border bg-card">
+      {leading}
       {groups.map(([name, rows]) => {
         const isOpen = open.has(name);
         const total = rows.reduce((s, r) => s + r.count, 0);
@@ -32,7 +33,7 @@ export function PendingGroups({ items }: { items: PendingGroupItem[] }) {
           <div className="transition-colors hover:bg-primary/10 focus-within:bg-primary/10"><button type="button" onClick={() => toggle(name)} aria-expanded={isOpen} className="!flex !w-full !max-w-none items-center gap-3 !bg-transparent px-4 py-3 text-left">
             <CdeDisclosureIcon open={isOpen} screen="components/pending-groups.tsx" />
             {groupBy === "app" ? <AppSymbol name={name} className="h-5 w-5 shrink-0 text-foreground" /> : null}
-            <span className="min-w-0 flex-1 text-sm font-semibold">{name}</span>
+            <span className="w-40 max-w-[40vw] shrink-0 break-words text-sm font-semibold">{name}</span>
             <span className="flex h-7 min-w-7 items-center justify-center rounded-full bg-destructive px-2 text-xs font-bold text-destructive-foreground">{total > 99 ? "99+" : total}</span>
           </button></div>
           {isOpen ? <div className="divide-y divide-border border-t border-border bg-muted/30">{rows.map((r) => <div key={r.key} className="pl-8 transition-colors hover:bg-primary/10 focus-within:bg-primary/10 [&>a]:!bg-transparent">{r.row}</div>)}</div> : null}

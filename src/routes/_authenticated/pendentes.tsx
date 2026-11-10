@@ -1,3 +1,4 @@
+import { CriticalGroup } from "@/components/central/critical-group";
 import { Suspense } from "react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,7 @@ import { AppHeader } from "@/components/app-header";
 import { TodoSection } from "@/components/personal-todos/todo-section";
 
 export const Route = createFileRoute("/_authenticated/pendentes")({
-  validateSearch: (s: Record<string, unknown>): { central?: string; user?: string; app?: string; sort?: string; view?: string } => ({ central: s.central === "all" ? "all" : "mine", user: typeof s.user === "string" ? s.user : "", app: typeof s.app === "string" ? s.app : "", sort: ["due", "app"].includes(String(s.sort)) ? String(s.sort) : "critical", view: ["flow", "timeline"].includes(String(s.view)) ? String(s.view) : "users" }),
+  validateSearch: (s: Record<string, unknown>): { central?: string; user?: string; app?: string; sort?: string; view?: string; todo?: string } => ({ todo: typeof s.todo === "string" ? s.todo : undefined, central: s.central === "all" ? "all" : "mine", user: typeof s.user === "string" ? s.user : "", app: typeof s.app === "string" ? s.app : "", sort: ["due", "app"].includes(String(s.sort)) ? String(s.sort) : "critical", view: ["flow", "timeline"].includes(String(s.view)) ? String(s.view) : "users" }),
   component: PendentesPage,
   head: () => ({
     meta: [
@@ -43,11 +44,11 @@ function PendentesPage() {
           <p className="mt-1 text-sm text-muted-foreground">Ações que dependem de você...</p>
         </div>
         {me?.isAdmin && <div className="mb-6 flex gap-2"><Button variant="ghost" aria-pressed={!adminView} onClick={() => change({central:"mine"})}>Minhas Pendências</Button><Button variant="ghost" aria-pressed={!!adminView} onClick={() => change({central:"all"})}>Todas as Pendências</Button></div>}
-        {adminView ? <Suspense fallback={<p>Carregando Dashboard...</p>}><CentralDashboard user={search.user ?? ""} app={search.app ?? ""} sort={search.sort ?? "critical"} view={search.view ?? "users"} onChange={change} /></Suspense> : <><div className="mb-6"><TodoSection /></div>
+        {adminView ? <Suspense fallback={<p>Carregando Dashboard...</p>}><CentralDashboard user={search.user ?? ""} app={search.app ?? ""} sort={search.sort ?? "critical"} view={search.view ?? "users"} onChange={change} /></Suspense> : <><div className="mb-6"><TodoSection key={search.todo ?? "list"} initialTask={search.todo} /></div>
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando pendências...</p> : (
           <div className="space-y-6">
-            {(data?.total ?? 0) > (data?.todoCount ?? 0) ? (
-              <PendingGroups items={[
+            {(
+              <PendingGroups leading={<CriticalGroup />} items={[
       ...((data?.approvals ?? 0) > 0 ? [{ key: "approvals", app: "Supply", requester: "Você", count: data?.approvals ?? 0, row: <PendingLink icon={CheckCircle2} label="Aguardando minha aprovação" count={data?.approvals ?? 0} to="/pendentes" /> }] : []),
       ...((data?.supplyQueue ?? 0) > 0 ? [{ key: "queue", app: "Supply", requester: "Você", count: data?.supplyQueue ?? 0, row: <PendingLink icon={ShoppingCart} label="Compras e serviços a executar · Fila do Supply" count={data?.supplyQueue ?? 0} to="/dashboard" search={{ section: "queue", subsection: "supply" }} /> }] : []),
       ...((data?.userDeletions ?? 0) > 0 ? [{ key: "deletions", app: "Admin", requester: "Você", count: data?.userDeletions ?? 0, row: <PendingLink icon={ShieldCheck} label="Exclusões de usuários aguardando decisão" count={data?.userDeletions ?? 0} to="/dashboard" search={{ section: "admin", subsection: "usuarios" }} /> }] : []),
@@ -57,7 +58,7 @@ function PendentesPage() {
       ...(data?.mytosisItems ?? []).map((q) => ({ key: `m-${q.message_id}`, app: "Mytosis", requester: q.author_name ?? "Solicitante", count: 1, row: <Link to="/mytosis" search={{ node: q.node_id, task: q.task_id ?? undefined }} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10"><MessageCircleQuestion className="h-5 w-5 shrink-0" /><span className="min-w-0 flex-1 text-sm font-medium">Mytosis · {q.node_title}{q.task_title ? ` · ${q.task_title}` : ""} · {q.question_text}</span></Link> })),
       ...(data?.supportCallItems ?? []).map((call) => ({ key: `s-${call.callId}`, app: "Chamados", requester: call.reason === "confirmar" ? "Você" : "Clientes", count: 1, row: <PendingLink icon={Phone} label={`#${call.callNumber} · ${call.reason === "confirmar" ? "Confirmar conclusão" : call.title}`} count={1} to="/chamados" search={{ chamado: call.callId }} /> })),
     ]} />
-            ) : null}
+            )}
             {(data?.approvals ?? 0) > 0 ? <section id="approvals"><PendingForMe /></section> : null}
             {(data?.total ?? 0) === 0 ? <p className="rounded-md border border-dashed border-border p-8 text-center text-sm text-muted-foreground">Nenhuma pendência no momento.</p> : null}
           </div>
