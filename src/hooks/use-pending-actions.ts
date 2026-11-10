@@ -5,6 +5,7 @@ import { codePendingItems } from "@/lib/code-pending";
 import { supplyPendingQuestions } from "@/lib/supply-conversation";
 
 import { legalSignaturePendingItems } from "@/lib/legal-pending";
+import { mergeConfidentialSubjects } from "@/lib/legal";
 
 type ApprovalStep = {
   order_id: string;
@@ -30,7 +31,7 @@ export function usePendingActions() {
       if (authError || !authData.user) throw authError ?? new Error("Sessão não encontrada");
       const userId = authData.user.id;
 
-      const [stepsResult, deletionsResult, codeResult, codeMessagesResult, supplyQueueResult, supportCallsResult, mytosisResult, codeAdminResult, codeAccessResult, legalResult, legalActionsResult, legalCompletionsResult, legalAllActionsResult] = await Promise.all([
+      const [stepsResult, deletionsResult, codeResult, codeMessagesResult, supplyQueueResult, supportCallsResult, mytosisResult, codeAdminResult, codeAccessResult, legalResult, legalActionsResult, legalCompletionsResult, legalAllActionsResult, legalConfidentialResult] = await Promise.all([
         supabase
           .from("approval_steps")
           .select("order_id, step_index, approver_id, status, purchase_orders(requester_id)")
@@ -61,6 +62,7 @@ export function usePendingActions() {
         supabase.from("legal_actions").select("record_id,subject_id,responsible_id,completed_at,archived").eq("responsible_id", userId),
         supabase.from("legal_subject_completions").select("record_id,subject_id"),
         supabase.from("legal_actions").select("record_id,subject_id,archived"),
+        supabase.from("legal_confidential_subjects").select("record_id,subject_id,position,subject"),
       ]);
 
       if (stepsResult.error) throw stepsResult.error;
@@ -75,7 +77,7 @@ export function usePendingActions() {
 
       if (legalResult.error) throw legalResult.error;
       if (legalActionsResult.error) throw legalActionsResult.error;
-      const legalItems = legalSignaturePendingItems(legalResult.data ?? [], { id: userId, full_name: currentUser?.full_name ?? "" }, legalActionsResult.data ?? [], legalCompletionsResult.data ?? [], legalAllActionsResult.data ?? []);
+      const legalItems = legalSignaturePendingItems((legalResult.data ?? []).map(r => ({ ...r, content: mergeConfidentialSubjects(r.content, r.id, legalConfidentialResult.data ?? []) })), { id: userId, full_name: currentUser?.full_name ?? "" }, legalActionsResult.data ?? [], legalCompletionsResult.data ?? [], legalAllActionsResult.data ?? []);
       const legalCount = legalItems.reduce((sum, item) => sum + item.count, 0);
 
       const isAdmin = currentUser?.isAdmin ?? false;

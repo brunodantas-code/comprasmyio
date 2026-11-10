@@ -1422,6 +1422,20 @@
       "when": 1794273240370,
       "tag": "0202_legal_subject_completions",
       "breakpoints": true
+    },
+    {
+      "idx": 203,
+      "version": "7",
+      "when": 1794273730339,
+      "tag": "0203_legal_confidential_subjects",
+      "breakpoints": true
+    },
+    {
+      "idx": 204,
+      "version": "7",
+      "when": 1794273748949,
+      "tag": "0204_legal_confidential_subject_cascade_safe",
+      "breakpoints": true
     }
   ]
 }

@@ -48,3 +48,14 @@ describe('Atas do Legal', () => {
     expect(legalSearchText('Reunião semanal', content)).not.toContain('financeiro');
   });
 });
+import { mergeConfidentialSubjects, splitConfidentialSubjects, parseLegalContent as plc } from './legal';
+import { describe as dc, it as ic, expect as ec } from 'vitest';
+dc('assuntos confidenciais', () => {
+  ic('saem do conteúdo compartilhado e voltam na mesma posição para Admin', () => {
+    const c = { location: '', counterpart: '', participants: [], subjects: [{ id: 'a', title: 'A', description: '', decisions: '' }, { id: 'b', title: 'B', description: '', decisions: '', confidential: true }, { id: 'c', title: 'C', description: '', decisions: '' }] };
+    const split = splitConfidentialSubjects(c);
+    ec(split.content.subjects.map(s => s.id)).toEqual(['a', 'c']);
+    const merged = plc(mergeConfidentialSubjects(split.content, 'r', split.confidential.map(x => ({ record_id: 'r', subject_id: x.subject.id, position: x.position, subject: x.subject }))));
+    ec(merged.subjects.map(s => s.id)).toEqual(['a', 'b', 'c']);
+  });
+});

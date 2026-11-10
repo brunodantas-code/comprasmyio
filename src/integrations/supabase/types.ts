@@ -2475,6 +2475,38 @@ export type Database = {
           },
         ]
       }
+      legal_confidential_subjects: {
+        Row: {
+          position: number
+          record_id: string
+          subject: Json
+          subject_id: string
+          updated_at: string
+        }
+        Insert: {
+          position?: number
+          record_id: string
+          subject: Json
+          subject_id: string
+          updated_at?: string
+        }
+        Update: {
+          position?: number
+          record_id?: string
+          subject?: Json
+          subject_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legal_confidential_subjects_record_id_fkey"
+            columns: ["record_id"]
+            isOneToOne: false
+            referencedRelation: "legal_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       legal_records: {
         Row: {
           category: string
@@ -8052,6 +8084,10 @@ export type Database = {
           full_name: string
           id: string
         }[]
+      }
+      legal_subject_visible: {
+        Args: { _record_id: string; _subject_id: string }
+        Returns: boolean
       }
       legal_unsigned_content: { Args: { _content: Json }; Returns: Json }
       list_site_survey_visit_calls: {

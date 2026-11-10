@@ -1,5 +1,5 @@
 import { CdeNumber } from "@/components/cde/cde-button";
-import { ChevronDown, ChevronRight, FileText, Pencil, Trash2, FileSignature, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronRight, FileText, Pencil, Trash2, FileSignature, ChevronUp, Lock } from 'lucide-react';
 import { canSignParticipant, signatureDate } from '@/lib/signatures';
 import { Button } from '@/components/ui/button';
 import { legalDate, legalPendingCount, legalSubjectResponsibles, parseLegalContent } from '@/lib/legal';
@@ -44,16 +44,18 @@ export function MinutesList({ rows, expanded, toggle, edit, remove, openPdf, use
   const queryClient = useQueryClient();
   const minutesAlerts = useMinutesAlerts();
   const [pendingUserId, setPendingUserId] = useState('all');
+  const [onlyConfidential, setOnlyConfidential] = useState(false);
   const pendingUser = tracking.users.find(u => u.id === pendingUserId);
   const badgeUser = pendingUser ?? user;
-  const shownRows = pendingUser ? rows.filter(r => legalSignaturePendingItems([r], pendingUser, tracking.actions, tracking.completions).length > 0) : rows;
+  const shownRows = (pendingUser ? rows.filter(r => legalSignaturePendingItems([r], pendingUser, tracking.actions, tracking.completions).length > 0) : rows).filter(r => !onlyConfidential || parseLegalContent(r.content).subjects.some(s => s.confidential));
+  const hasConfidential = rows.some(r => parseLegalContent(r.content).subjects.some(s => s.confidential));
   const toggleDeliberation = async (recordId: string, subjectId: string, done: boolean) => {
     const { error } = done ? await supabase.from('legal_subject_completions').insert({ record_id: recordId, subject_id: subjectId }) : await supabase.from('legal_subject_completions').delete().eq('record_id', recordId).eq('subject_id', subjectId);
     if (error) { toast.error(error.message); return; }
     await queryClient.invalidateQueries({ queryKey: ['legal-tracking'] }); void queryClient.invalidateQueries({ queryKey: ['pending-actions'] });
   };
   return <div className="space-y-3">
-    <div className="flex items-center justify-end gap-2 text-sm"><Label htmlFor="legal-pending-user" className="text-muted-foreground">Pendências de</Label><Select value={pendingUserId} onValueChange={setPendingUserId}><SelectTrigger id="legal-pending-user" className="w-56"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">Todos os usuários</SelectItem>{tracking.users.map(u => <SelectItem key={u.id} value={u.id}>{u.full_name}</SelectItem>)}</SelectContent></Select></div>
+    <div className="flex flex-wrap items-center justify-end gap-2 text-sm">{hasConfidential ? <label className="mr-4 flex items-center gap-2 text-muted-foreground"><Checkbox checked={onlyConfidential} onCheckedChange={v=>setOnlyConfidential(Boolean(v))} />Somente assuntos de acesso restrito</label> : null}<Label htmlFor="legal-pending-user" className="text-muted-foreground">Pendências de</Label><Select value={pendingUserId} onValueChange={setPendingUserId}><SelectTrigger id="legal-pending-user" className="w-56"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">Todos os usuários</SelectItem>{tracking.users.map(u => <SelectItem key={u.id} value={u.id}>{u.full_name}</SelectItem>)}</SelectContent></Select></div>
     {pendingUser && shownRows.length === 0 ? <p className="text-sm text-muted-foreground">Nenhuma pendência de {pendingUser.full_name}.</p> : null}
     <div className="divide-y divide-border overflow-hidden rounded-md border border-border bg-card">
     {shownRows.map(row => {
@@ -76,11 +78,11 @@ export function MinutesList({ rows, expanded, toggle, edit, remove, openPdf, use
         </div>
         {open ? <div className="border-t border-border bg-background">
           <div className="space-y-2 px-4 py-4 text-sm sm:px-6"><p><span className="text-muted-foreground">Local: </span>{content.location}</p><p className="break-words"><span className="text-muted-foreground">Participantes: </span>{content.participants.map(p => p.name).join(', ')}</p></div>
-          {content.subjects.map((subject,index)=><section key={subject.id} className="border-t border-border text-sm" aria-label={`Assunto ${index + 1}: ${subject.title}`}>
+          {content.subjects.map((subject,index)=>onlyConfidential && !subject.confidential ? null : <section key={subject.id} className="border-t border-border text-sm" aria-label={`Assunto ${index + 1}: ${subject.title}`}>
             <div className="space-y-2 bg-primary/10 px-4 py-2 sm:px-6">
               <div className="flex items-center gap-3">
                 <CdeNumber screen="components/legal/minutes-list.tsx">{index + 1}</CdeNumber>
-                <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-3"><h2 className="min-w-0 break-words text-sm font-semibold">{subject.title}</h2>{(()=>{const open=tracking.actions.filter(a=>a.record_id===row.id&&a.subject_id===subject.id&&!a.archived&&!a.completed_at);if(!open.length)return null;const mine=user?open.filter(a=>a.responsible_id===user.id).length:0;const late=open.filter(a=>legalActionDelayDays(a)>0).length;const soon=open.filter(a=>legalActionDueSoonDays(a,minutesAlerts.warningDays)!==null).length;return <><span className="text-xs font-normal text-muted-foreground">{open.length} {open.length===1?'ação em aberto':'ações em aberto'} · {mine} {mine===1?'sua':'suas'}</span>{late||soon?<span className="text-xs font-medium text-destructive">{[late?`${late} ${late===1?'atrasada':'atrasadas'}`:null,soon?`${soon} em prazo crítico`:null].filter(Boolean).join(' · ')}</span>:null}</>;})()}</div>
+                <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-3"><h2 className="min-w-0 break-words text-sm font-semibold">{subject.title}</h2>{subject.confidential ? <span className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground" title="Visível somente para Admin"><Lock className="h-3 w-3" />Acesso restrito</span> : null}{(()=>{const open=tracking.actions.filter(a=>a.record_id===row.id&&a.subject_id===subject.id&&!a.archived&&!a.completed_at);if(!open.length)return null;const mine=user?open.filter(a=>a.responsible_id===user.id).length:0;const late=open.filter(a=>legalActionDelayDays(a)>0).length;const soon=open.filter(a=>legalActionDueSoonDays(a,minutesAlerts.warningDays)!==null).length;return <><span className="text-xs font-normal text-muted-foreground">{open.length} {open.length===1?'ação em aberto':'ações em aberto'} · {mine} {mine===1?'sua':'suas'}</span>{late||soon?<span className="text-xs font-medium text-destructive">{[late?`${late} ${late===1?'atrasada':'atrasadas'}`:null,soon?`${soon} em prazo crítico`:null].filter(Boolean).join(' · ')}</span>:null}</>;})()}</div>
                 {openDeliberations(row.id, [subject], tracking.actions, tracking.completions).length ? <PendingDot label={`Deliberação pendente de ${legalSubjectResponsibles(subject).join(', ')}`} /> : null}
                 <Button variant="ghost" size="compactIcon" aria-expanded={openedSubjects.has(subject.id)} aria-label={`${openedSubjects.has(subject.id)?'Recolher':'Exibir'} assunto ${index+1}`} onClick={()=>setOpenedSubjects(prev=>{const n=new Set(prev);if(n.has(subject.id))n.delete(subject.id);else n.add(subject.id);return n;})}>{openedSubjects.has(subject.id)?<ChevronUp/>:<ChevronDown/>}</Button>
               </div>
