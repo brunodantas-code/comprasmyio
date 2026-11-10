@@ -36,3 +36,4 @@
 - library-models.ts groups matching content/appearance/model identities, preserves unknown custom styles separately, and expands card edits/selections to every member ID.
 - Landing and portal share app ordering via public_app_order(), a narrow public read exposing only the order array, never other CDE records.
 - Icon-only shared Save controls resolve CDE secondary controls/save-icon before the primary.
+- Library JSON writes share saveLibrarySelection with bounded group/primary URL filters and returned-row verification, avoiding bulk-consolidation URL limits.

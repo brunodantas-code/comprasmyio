@@ -31,6 +31,7 @@ import { COMMON_ACTION_GROUPS } from "./action-standard";
 import { UsageLinks } from "./usage-links";
 import { readButtonBindings } from "./library-bindings";
 import numberUsage from "./number-usage.json";
+import { saveLibrarySelection } from "./save-library-selection";
 
 type Variant = { key: string; name?: string; custom?: boolean; tag: string; variant: string; size: string; className: string; icon: string; iconClass: string; label: string; count: number; files: string[]; uses?: { file: string; n: number }[]; style?: CdeStyle };
 
@@ -247,9 +248,7 @@ export function CdeWorkspace() {
         const { data: model, error } = await request.select("id").single();
         if (error) throw error;
         for (const id of libraryEdit.ids) bindings[id] = { group, label: draft.label, modelKey: `custom:${model.id}`, preserveContent: libraryEdit.dynamic };
-        const payload = { variant_key: JSON.stringify(bindings), chosen_by: await uid() };
-        const result = row ? await supabase.from("cde_selected").update(payload).eq("group_key", "button_bindings").eq("variant_key", row.variant_key) : await supabase.from("cde_selected").insert({ ...payload, group_key: "button_bindings", is_primary: true });
-        if (result.error) throw result.error;
+        await saveLibrarySelection("button_bindings", JSON.stringify(bindings), await uid(), Boolean(row));
         return;
       }
       if (editing?.custom) {

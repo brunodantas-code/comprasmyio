@@ -23,6 +23,7 @@ import { isSpecificAction } from "./action-standard";
 import { UsageLinks } from "./usage-links";
 import { libraryDescription } from "./library-details";
 import { consolidateLibrary, libraryModelKey } from "./library-models";
+import { saveLibrarySelection } from "./save-library-selection";
 
 const normalize = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
@@ -94,9 +95,7 @@ export function CdeButtonLibrary({ number, handle, onEdit }: { number: number; h
       if (!user) throw new Error("Sessão não encontrada");
       const next = { ...bindings };
       for (const entry of scopeEntries(editingButton)) next[entry.id] = { group: editGroup, label: editText.trim(), preserveContent: entry.dynamic, ...(editModel ? { modelKey: editModel } : {}) };
-      const payload = { variant_key: JSON.stringify(next), chosen_by: user.id };
-      const result = bindingRow ? await supabase.from("cde_selected").update(payload).eq("group_key", "button_bindings").eq("variant_key", bindingRow.variant_key) : await supabase.from("cde_selected").insert({ ...payload, group_key: "button_bindings", is_primary: true });
-      if (result.error) throw result.error;
+      await saveLibrarySelection("button_bindings", JSON.stringify(next), user.id, Boolean(bindingRow));
       await qc.invalidateQueries({ queryKey: ["cde-standards"] });
       await qc.invalidateQueries({ queryKey: ["cde-data"] });
       setEditingButton(null);
@@ -120,17 +119,11 @@ export function CdeButtonLibrary({ number, handle, onEdit }: { number: number; h
       if (!user) throw new Error("Sessão não encontrada");
       const next = { ...bindings };
       for (const entry of replacing) next[entry.id] = { group: chosen.group_key, modelKey: replacementKey, label: bindingOf(entry)?.label ?? (entry.label === entry.icon ? "" : entry.label), preserveContent: entry.dynamic };
-      const boundPayload = { variant_key: JSON.stringify(next), chosen_by: user.id };
-      const bound = bindingRow ? await supabase.from("cde_selected").update(boundPayload).eq("group_key", "button_bindings").eq("variant_key", bindingRow.variant_key) : await supabase.from("cde_selected").insert({ ...boundPayload, group_key: "button_bindings", is_primary: true });
-      if (bound.error) throw bound.error;
       const proof = [...(data?.selected ?? []).filter(s => s.group_key !== "button_bindings"), { group_key: "button_bindings", variant_key: JSON.stringify(next), is_primary: true, screens: [] }];
       if (replacing.some(entry => !canRetireLibraryEntry(entry, proof, data?.models ?? []))) throw new Error("Vínculo inválido");
+      await saveLibrarySelection("button_bindings", JSON.stringify(next), user.id, Boolean(bindingRow));
       const replacedIds = new Set(replacing.map(libraryEntryKey));
-      const payload = { variant_key: JSON.stringify(retired.filter(id => !replacedIds.has(id))), chosen_by: user.id };
-      const result = retiredRow
-        ? await supabase.from("cde_selected").update(payload).eq("group_key", "button_library_retired").eq("variant_key", retiredRow.variant_key)
-        : await supabase.from("cde_selected").insert({ ...payload, group_key: "button_library_retired", is_primary: true });
-      if (result.error) throw result.error;
+      await saveLibrarySelection("button_library_retired", JSON.stringify(retired.filter(id => !replacedIds.has(id))), user.id, Boolean(retiredRow));
       await qc.invalidateQueries({ queryKey: ["cde-standards"] });
       await qc.invalidateQueries({ queryKey: ["cde-data"] });
       setChecked([]);
