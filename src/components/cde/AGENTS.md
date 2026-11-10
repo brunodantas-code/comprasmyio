@@ -23,7 +23,7 @@
 - Shared Button resolves CDE variants before screen defaults; model cards use fixed dimensions with technical details outside. All color pickers read color_swatch shape through useCdeSwatchStyle without overriding their palette values.
 - Button library counts static TSX call sites, not runtime instances; regenerate button-library.json with scripts/scan-cde-buttons.mjs whenever button sites change, retaining dynamic labels and source locations for auditing.
 - The CDE button library reuses the active model editor, resolving screen-specific standards before the primary; unbound buttons cannot save ineffective visual edits.
-- Supply deadline alerts share pure supply-deadlines helpers and CDE deadline_alerts settings; timing indicators read authorized logs/approval decisions and never use updated_at as delivery time or invent causal attribution.
+- Deadline alerts (CDE "Alertas de Prazo") keep every app in one deadline_alerts JSON with a key per app (minutes for Legal); Supply shares pure supply-deadlines helpers; timing indicators read authorized logs/approval decisions and never use updated_at as delivery time or invent causal attribution.
 
 - Organize actions inherit the live Save look when no organize standard is selected; deadline indicators share this group to prevent visual drift.
 

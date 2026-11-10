@@ -9,6 +9,16 @@ export function parseDeadlineAlerts(raw?: string | null): DeadlineAlerts {
   } catch { /* default */ }
   return DEFAULT_DEADLINE_ALERTS;
 }
+export const DEFAULT_MINUTES_ALERTS = { warningDays: 3 };
+export type MinutesAlerts = typeof DEFAULT_MINUTES_ALERTS;
+/** Minutes action alert lives in the same CDE deadline_alerts JSON under "minutes". */
+export function parseMinutesAlerts(raw?: string | null): MinutesAlerts {
+  try {
+    const v = JSON.parse(raw || '{}')?.minutes;
+    if (Number.isInteger(v?.warningDays) && v.warningDays >= 0 && v.warningDays <= 365) return { warningDays: v.warningDays };
+  } catch { /* default */ }
+  return DEFAULT_MINUTES_ALERTS;
+}
 const dateOnly = (d: string) => d.slice(0, 10);
 const day = (d: string) => Date.parse(`${dateOnly(d)}T00:00:00Z`);
 export const daysBetween = (a: string, b: string) => (day(b) - day(a)) / 86400000;

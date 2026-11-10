@@ -8,6 +8,12 @@ export function legalActionDelayDays(action: { due_date?: string | null; complet
   if (!action.due_date || action.completed_at) return 0;
   return Math.max(0, Math.round((Date.parse(today) - Date.parse(action.due_date)) / 86400000));
 }
+/** Days until due when inside the CDE warning window (0 = due today); null when not alerting. */
+export function legalActionDueSoonDays(action: { due_date?: string | null; completed_at: string | null }, warningDays: number, today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' })) {
+  if (!action.due_date || action.completed_at) return null;
+  const left = Math.round((Date.parse(action.due_date) - Date.parse(today)) / 86400000);
+  return left >= 0 && left <= warningDays ? left : null;
+}
 export function canRemoveLegalObservation(authorId: string, userId?: string) {
   return Boolean(userId && authorId === userId);
 }
