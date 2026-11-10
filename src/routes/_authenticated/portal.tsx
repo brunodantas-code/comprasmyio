@@ -22,6 +22,8 @@ import { AppTileFace } from "@/components/cde/app-tile";
 import { DesktopHeaderMenu, UserNameBlock } from "@/components/app-header";
 import { usePendingActions } from "@/hooks/use-pending-actions";
 import { ChangePasswordDialog } from "@/components/change-password-dialog";
+import { PersonalSignature } from "@/components/personal-signature";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ThemeMenuItem, ThemeToggle } from "@/components/theme-toggle";
 import { TodoSection } from "@/components/personal-todos/todo-section";
 
@@ -65,6 +67,7 @@ function PortalPage() {
       ]);
       if (accessError) throw accessError;
       return {
+        userId,
         name: profile?.full_name || profile?.email || authData.user.email || "Usuário",
         appKeys: new Set([...(accesses ?? []).map((access) => access.app_key), ...(mytosisRole ? ["mytosis"] : [])]),
         isErpAdmin: Boolean(erpAdmin),
@@ -73,6 +76,7 @@ function PortalPage() {
   });
 
   const [passwordOpen, setPasswordOpen] = useState(false);
+  const [signatureOpen, setSignatureOpen] = useState(false);
   async function handleSignOut() {
     await queryClient.cancelQueries();
     queryClient.clear();
@@ -184,7 +188,7 @@ function PortalPage() {
                 <LayoutGrid className="h-4 w-4" />
               </Button>
             ) : null}
-            <DesktopHeaderMenu userName={data.name} onSignOut={handleSignOut} onChangePassword={() => setPasswordOpen(true)} buttonClass="top-icon !bg-transparent !text-foreground shadow-none hover:!bg-transparent hover:!text-foreground" />
+            <DesktopHeaderMenu userName={data.name} onSignOut={handleSignOut} onChangePassword={() => setPasswordOpen(true)} onOpenSignature={() => setSignatureOpen(true)} buttonClass="top-icon !bg-transparent !text-foreground shadow-none hover:!bg-transparent hover:!text-foreground" />
             <ChangePasswordDialog open={passwordOpen} onOpenChange={setPasswordOpen} />
           </div>
         </div>
@@ -248,6 +252,12 @@ function PortalPage() {
           {data.isErpAdmin ? <TabsContent value="users"><ErpAppAccessAdmin /></TabsContent> : null}
         </Tabs>
       </main>
+      <Dialog open={signatureOpen} onOpenChange={setSignatureOpen}>
+        <DialogContent className="max-h-[90dvh] overflow-y-auto">
+          <DialogHeader><DialogTitle>Minha assinatura</DialogTitle></DialogHeader>
+          <PersonalSignature userId={data.userId} initiallyOpen />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

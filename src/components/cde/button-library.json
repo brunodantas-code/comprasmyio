@@ -11492,7 +11492,7 @@
   {
     "id": "routes/_authenticated/portal.tsx|ec8dd428ebba42fc|0",
     "file": "routes/_authenticated/portal.tsx",
-    "line": 130,
+    "line": 134,
     "tag": "Button",
     "label": "Abrir menu",
     "dynamic": false,
@@ -11507,7 +11507,7 @@
   {
     "id": "routes/_authenticated/portal.tsx|0e5786b90feec389|0",
     "file": "routes/_authenticated/portal.tsx",
-    "line": 139,
+    "line": 143,
     "tag": "Button",
     "label": "Central de Pendências / 99+",
     "dynamic": true,
@@ -11522,7 +11522,7 @@
   {
     "id": "routes/_authenticated/portal.tsx|1c29ae1e690838c9|0",
     "file": "routes/_authenticated/portal.tsx",
-    "line": 148,
+    "line": 152,
     "tag": "Button",
     "label": "Acessos",
     "dynamic": false,
@@ -11537,7 +11537,7 @@
   {
     "id": "routes/_authenticated/portal.tsx|8c241111bf0e5d35|0",
     "file": "routes/_authenticated/portal.tsx",
-    "line": 161,
+    "line": 165,
     "tag": "Button",
     "label": "Alterar senha",
     "dynamic": false,
@@ -11552,7 +11552,7 @@
   {
     "id": "routes/_authenticated/portal.tsx|b8c70403f3f234cd|0",
     "file": "routes/_authenticated/portal.tsx",
-    "line": 165,
+    "line": 169,
     "tag": "Button",
     "label": "Sair",
     "dynamic": false,
@@ -11567,7 +11567,7 @@
   {
     "id": "routes/_authenticated/portal.tsx|d0125df1157dca00|0",
     "file": "routes/_authenticated/portal.tsx",
-    "line": 183,
+    "line": 187,
     "tag": "Button",
     "label": "Voltar aos aplicativos",
     "dynamic": false,
