@@ -2,6 +2,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AppSymbol } from "@/components/cde/app-tile";
+import { Button } from "@/components/ui/button";
 
 export type PendingGroupItem = { key: string; app: string; requester: string; count: number; row: ReactNode };
 type GroupBy = "app" | "requester";
@@ -20,7 +21,7 @@ export function PendingGroups({ items }: { items: PendingGroupItem[] }) {
     <div className="flex items-center justify-end gap-2 text-xs text-muted-foreground">
       <span>Agrupar por</span>
       {([["app", "App"], ["requester", "Solicitante"]] as const).map(([value, label]) => (
-        <button key={value} type="button" aria-pressed={groupBy === value} onClick={() => { setGroupBy(value); setOpen(new Set()); }} className={cn("h-8 w-28 rounded-md border px-2 text-center transition-colors", groupBy === value ? "border-primary bg-primary text-primary-foreground" : "border-primary text-primary hover:bg-primary hover:text-primary-foreground")}>{label}</button>
+        <Button key={value} type="button" variant="ghost" size="sm" aria-pressed={groupBy === value} onClick={() => { setGroupBy(value); setOpen(new Set()); }} className={cn("h-8 w-28 border-0 px-2 text-center shadow-none", groupBy === value ? "font-semibold underline underline-offset-4" : "font-normal")}>{label}</Button>
       ))}
     </div>
     <div className="divide-y divide-border overflow-hidden rounded-md border border-border bg-card">
