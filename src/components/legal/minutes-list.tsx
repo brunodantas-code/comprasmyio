@@ -43,10 +43,10 @@ export function MinutesList({ rows, expanded, toggle, edit, remove, openPdf, use
       const open = expanded.has(row.id);
       return <article key={row.id}>
         <div className="flex items-center gap-1 px-2 py-3 sm:gap-2 sm:px-4">
-          <Button variant="ghost" className="h-auto min-w-0 flex-1 justify-start gap-3 whitespace-normal p-0 text-left hover:bg-transparent" aria-expanded={open} aria-label={`${open ? 'Recolher' : 'Exibir'} ${row.title}`} onClick={() => toggle(row.id)}>
+          <button type="button" className="flex h-auto min-w-0 flex-1 items-center justify-start gap-3 rounded-md bg-transparent p-0 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-expanded={open} aria-label={`${open ? 'Recolher' : 'Exibir'} ${row.title}`} onClick={() => toggle(row.id)}>
             {open ? <ChevronDown className="h-5 w-5 shrink-0 text-primary" /> : <ChevronRight className="h-5 w-5 shrink-0 text-primary" />}
             <span className="min-w-0 flex-1"><span className="block break-words text-sm font-semibold text-foreground">{row.title}</span><span className="block text-xs font-normal text-muted-foreground">{legalDate(row.meeting_date)}</span></span>
-          </Button>
+          </button>
           {pending.total > 0 ? <PendingDot label={`${pending.signatures} assinatura(s) e ${pending.actions} ação(ões) pendentes`} /> : null}
           <Button variant="outline" size="compactIcon" title="Editar" aria-label={`Editar ${row.title}`} onClick={() => edit(row)}><Pencil /></Button>
           <Button variant="outline" size="compactIcon" title="Excluir" aria-label={`Excluir ${row.title}`} onClick={() => remove(row)}><Trash2 /></Button>
