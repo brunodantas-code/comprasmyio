@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { legalDate, legalPendingCount, legalSubjectResponsibles, parseLegalContent } from '@/lib/legal';
 import type { Database } from '@/integrations/supabase/types';
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { legalTrackingOptions, pendingLegalActions } from '@/lib/legal-actions';
+import { legalActionDelayDays, legalActionDueSoonDays, legalTrackingOptions, pendingLegalActions } from '@/lib/legal-actions';
+import { useMinutesAlerts } from '@/components/cde/cde-deadline-alerts';
 import { SubjectActions } from './subject-actions';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -41,6 +42,7 @@ export function MinutesList({ rows, expanded, toggle, edit, remove, openPdf, use
   const [openedSubjects,setOpenedSubjects]=useState<Set<string>>(new Set());
   const { data: tracking } = useSuspenseQuery(legalTrackingOptions);
   const queryClient = useQueryClient();
+  const minutesAlerts = useMinutesAlerts();
   const [pendingUserId, setPendingUserId] = useState('all');
   const pendingUser = tracking.users.find(u => u.id === pendingUserId);
   const badgeUser = pendingUser ?? user;
@@ -78,7 +80,7 @@ export function MinutesList({ rows, expanded, toggle, edit, remove, openPdf, use
             <div className="space-y-2 bg-primary/10 px-4 py-2 sm:px-6">
               <div className="flex items-center gap-3">
                 <CdeNumber screen="components/legal/minutes-list.tsx">{index + 1}</CdeNumber>
-                <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-3"><h2 className="min-w-0 break-words text-sm font-semibold">{subject.title}</h2>{(()=>{const open=tracking.actions.filter(a=>a.record_id===row.id&&a.subject_id===subject.id&&!a.archived&&!a.completed_at);if(!open.length)return null;const mine=user?open.filter(a=>a.responsible_id===user.id).length:0;return <span className="text-xs font-normal text-muted-foreground">{open.length} {open.length===1?'ação em aberto':'ações em aberto'} · {mine} {mine===1?'sua':'suas'}</span>;})()}</div>
+                <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-3"><h2 className="min-w-0 break-words text-sm font-semibold">{subject.title}</h2>{(()=>{const open=tracking.actions.filter(a=>a.record_id===row.id&&a.subject_id===subject.id&&!a.archived&&!a.completed_at);if(!open.length)return null;const mine=user?open.filter(a=>a.responsible_id===user.id).length:0;const late=open.filter(a=>legalActionDelayDays(a)>0).length;const soon=open.filter(a=>legalActionDueSoonDays(a,minutesAlerts.warningDays)!==null).length;return <><span className="text-xs font-normal text-muted-foreground">{open.length} {open.length===1?'ação em aberto':'ações em aberto'} · {mine} {mine===1?'sua':'suas'}</span>{late||soon?<span className="text-xs font-medium text-destructive">{[late?`${late} ${late===1?'atrasada':'atrasadas'}`:null,soon?`${soon} em prazo crítico`:null].filter(Boolean).join(' · ')}</span>:null}</>;})()}</div>
                 {openDeliberations(row.id, [subject], tracking.actions, tracking.completions).length ? <PendingDot label={`Deliberação pendente de ${legalSubjectResponsibles(subject).join(', ')}`} /> : null}
                 <Button variant="ghost" size="compactIcon" aria-expanded={openedSubjects.has(subject.id)} aria-label={`${openedSubjects.has(subject.id)?'Recolher':'Exibir'} assunto ${index+1}`} onClick={()=>setOpenedSubjects(prev=>{const n=new Set(prev);if(n.has(subject.id))n.delete(subject.id);else n.add(subject.id);return n;})}>{openedSubjects.has(subject.id)?<ChevronUp/>:<ChevronDown/>}</Button>
               </div>
