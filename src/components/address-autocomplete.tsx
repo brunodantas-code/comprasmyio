@@ -42,6 +42,7 @@ export function AddressAutocomplete({
   required,
   label = "Ponto de entrega",
   detailsName,
+  referencePlaceholder,
   allowDeliveryPoints = true,
   modeName,
   defaultMode = "entrega",
@@ -51,6 +52,7 @@ export function AddressAutocomplete({
   required?: boolean;
   label?: string;
   detailsName?: string;
+  referencePlaceholder?: string;
   allowDeliveryPoints?: boolean;
   /** Quando informado, exibe a escolha Entrega/Retirada e envia o valor neste campo do formulário. */
   modeName?: string;
@@ -171,7 +173,7 @@ export function AddressAutocomplete({
           <input type="hidden" name={modeName} value={mode} />
         </div>
       )}
-      <Label htmlFor={`${name}-search`}>{pickup ? "Ponto de retirada" : label}</Label>
+      <Label htmlFor={`${name}-search`} className="block">{pickup ? "Ponto de retirada" : label}</Label>
       {allowDeliveryPoints && deliveryPoints && deliveryPoints.length > 0 && (
         <SearchableSelect aria-label={pickup ? "Selecionar ponto de retirada" : "Selecionar ponto de entrega"} clearable={false} placeholder="Digite ou selecione um ponto cadastrado" value={deliveryPoints.find((point) => point.address === addressValue)?.code ?? "manual"} options={[...deliveryPoints.map((point) => ({ value: point.code, label: point.name, keywords: point.address })), { value: "manual", label: "Outro endereço" }]} onChange={(code) => {
           if (code === "manual") {
@@ -189,7 +191,7 @@ export function AddressAutocomplete({
           setSuggestions([]);
         }} />
       )}
-      {manualMode && <Label htmlFor={`${name}-search`} className="text-xs text-muted-foreground">Rua e número</Label>}
+      {manualMode && <Label htmlFor={`${name}-search`} className="block text-xs text-muted-foreground">Rua e número</Label>}
       <div className="relative">
         <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
@@ -238,19 +240,19 @@ export function AddressAutocomplete({
         </p>
       )}
       {manualMode && (
-        <div className="grid gap-2 sm:grid-cols-2">
-          <div className="space-y-1">
+        <div className="grid items-end gap-2 sm:grid-cols-2">
+          <div className="flex min-w-0 flex-col gap-2">
             <Label htmlFor={`${name}-complement`} className="text-xs text-muted-foreground">Complemento</Label>
             <Input id={`${name}-complement`} placeholder="Ex.: Sala 12, Bloco B" value={complement} onChange={(e) => setComplement(e.target.value)} />
           </div>
-          <div className="space-y-1">
+          <div className="flex min-w-0 flex-col gap-2">
             <Label htmlFor={`${name}-city`} className="text-xs text-muted-foreground">UF e Cidade</Label>
             <BrCityPicker id={`${name}-city`} value={city} onChange={setCity} />
           </div>
         </div>
       )}
       <Textarea
-        placeholder={pickup ? "Referência para retirada (ex.: falar com João na recepção)" : "Referência para entrega (ex.: com João no portão)"}
+        placeholder={referencePlaceholder ?? (pickup ? "Referência para retirada (ex.: falar com João na recepção)" : "Referência para entrega (ex.: com João no portão)")}
         value={details}
         onChange={(e) => setDetails(e.target.value)}
         rows={2}

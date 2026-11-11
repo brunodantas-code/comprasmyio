@@ -182,7 +182,7 @@
   {
     "id": "components/address-autocomplete.tsx|839b24c761040dcb|0",
     "file": "components/address-autocomplete.tsx",
-    "line": 166,
+    "line": 168,
     "tag": "Button",
     "label": "entrega / Entrega / Retirada",
     "dynamic": true,
@@ -197,7 +197,7 @@
   {
     "id": "components/address-autocomplete.tsx|1b6be41cc47bc250|0",
     "file": "components/address-autocomplete.tsx",
-    "line": 217,
+    "line": 220,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -958,21 +958,6 @@
     "size": "",
     "className": "",
     "group": "plus"
-  },
-  {
-    "id": "components/br-city-picker.tsx|16c7e6e3b6b2b401|0",
-    "file": "components/br-city-picker.tsx",
-    "line": 41,
-    "tag": "Button",
-    "label": "Digite a cidade / (fora da lista)",
-    "dynamic": true,
-    "visualCustom": false,
-    "autoCdeSafe": true,
-    "icon": "ChevronsUpDown",
-    "variant": "outline",
-    "size": "",
-    "className": "min-w-0 flex-1 justify-between font-normal !text-foreground",
-    "group": ""
   },
   {
     "id": "components/cash-flow/cash-register-tab.tsx|dd0d86d1523796d8|0",
@@ -2081,13 +2066,13 @@
     "icon": "CdeDisclosureIcon",
     "variant": "",
     "size": "",
-    "className": "flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-primary/10",
+    "className": "!flex !w-full !max-w-none items-center gap-3 !bg-transparent px-4 py-3 text-left",
     "group": ""
   },
   {
     "id": "components/central/dashboard.tsx|05963756db27b385|0",
     "file": "components/central/dashboard.tsx",
-    "line": 23,
+    "line": 24,
     "tag": "Button",
     "label": "I",
     "dynamic": false,
@@ -2100,24 +2085,39 @@
     "group": ""
   },
   {
-    "id": "components/central/dashboard.tsx|79eb85757896196c|0",
+    "id": "components/central/dashboard.tsx|99af609e1187feb3|0",
     "file": "components/central/dashboard.tsx",
-    "line": 25,
-    "tag": "Button",
+    "line": 26,
+    "tag": "button",
+    "label": "none / Sem prazo",
+    "dynamic": true,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "CdeDisclosureIcon",
+    "variant": "",
+    "size": "",
+    "className": "flex w-full items-center gap-3 px-2 py-3 text-left transition-colors hover:bg-primary/10",
+    "group": ""
+  },
+  {
+    "id": "components/central/dashboard.tsx|7782c6a9cd678d1f|0",
+    "file": "components/central/dashboard.tsx",
+    "line": 26,
+    "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
     "visualCustom": false,
     "autoCdeSafe": true,
     "icon": "",
-    "variant": "ghost",
+    "variant": "",
     "size": "",
-    "className": "!h-auto !justify-start whitespace-normal text-left",
+    "className": "break-words text-left text-sm text-foreground hover:text-primary",
     "group": ""
   },
   {
     "id": "components/central/dashboard.tsx|c7ad81a85e9150ef|0",
     "file": "components/central/dashboard.tsx",
-    "line": 25,
+    "line": 26,
     "tag": "button",
     "label": "unassigned / Sem responsável",
     "dynamic": true,
@@ -2132,7 +2132,7 @@
   {
     "id": "components/central/dashboard.tsx|33adedf1438e8f09|0",
     "file": "components/central/dashboard.tsx",
-    "line": 25,
+    "line": 26,
     "tag": "Button",
     "label": "Abrir pendência",
     "dynamic": false,
@@ -2187,6 +2187,21 @@
     "variant": "ghost",
     "size": "compactIcon",
     "className": "!text-foreground !bg-transparent !border-0",
+    "group": ""
+  },
+  {
+    "id": "components/central/user-bars.tsx|b5876f983330552e|0",
+    "file": "components/central/user-bars.tsx",
+    "line": 13,
+    "tag": "button",
+    "label": "Expandir gráfico de pendências por usuário",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "XAxis",
+    "variant": "",
+    "size": "",
+    "className": "flex h-24 w-64 items-end gap-2 rounded-md px-1 text-left hover:bg-muted",
     "group": ""
   },
   {
@@ -6780,6 +6795,51 @@
     "group": ""
   },
   {
+    "id": "components/personal-todos/todo-dialog.tsx|21d5940a9811eec7|0",
+    "file": "components/personal-todos/todo-dialog.tsx",
+    "line": 93,
+    "tag": "Button",
+    "label": "Editar título e dados",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "Pencil",
+    "variant": "ghost",
+    "size": "compactIcon",
+    "className": "!text-foreground !bg-transparent !border-0",
+    "group": ""
+  },
+  {
+    "id": "components/personal-todos/todo-dialog.tsx|6f7ad6a28f23d7c0|0",
+    "file": "components/personal-todos/todo-dialog.tsx",
+    "line": 93,
+    "tag": "Button",
+    "label": "Save",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "Save",
+    "variant": "ghost",
+    "size": "compactIcon",
+    "className": "",
+    "group": ""
+  },
+  {
+    "id": "components/personal-todos/todo-dialog.tsx|52b395288684afb3|0",
+    "file": "components/personal-todos/todo-dialog.tsx",
+    "line": 93,
+    "tag": "Button",
+    "label": "Excluir tarefa",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "Trash2",
+    "variant": "ghost",
+    "size": "compactIcon",
+    "className": "",
+    "group": ""
+  },
+  {
     "id": "components/personal-todos/todo-dialog.tsx|e6e63c8b8adedc3c|0",
     "file": "components/personal-todos/todo-dialog.tsx",
     "line": 102,
@@ -6825,21 +6885,6 @@
     "group": ""
   },
   {
-    "id": "components/personal-todos/todo-dialog.tsx|6f7ad6a28f23d7c0|0",
-    "file": "components/personal-todos/todo-dialog.tsx",
-    "line": 105,
-    "tag": "Button",
-    "label": "Save",
-    "dynamic": false,
-    "visualCustom": false,
-    "autoCdeSafe": true,
-    "icon": "Save",
-    "variant": "ghost",
-    "size": "compactIcon",
-    "className": "",
-    "group": ""
-  },
-  {
     "id": "components/personal-todos/todo-dialog.tsx|4143cf65abdcd33c|0",
     "file": "components/personal-todos/todo-dialog.tsx",
     "line": 107,
@@ -6849,21 +6894,6 @@
     "visualCustom": false,
     "autoCdeSafe": true,
     "icon": "Pencil",
-    "variant": "ghost",
-    "size": "compactIcon",
-    "className": "",
-    "group": ""
-  },
-  {
-    "id": "components/personal-todos/todo-dialog.tsx|a1c98edf6ffb0ff3|0",
-    "file": "components/personal-todos/todo-dialog.tsx",
-    "line": 113,
-    "tag": "Button",
-    "label": "Excluir tarefa",
-    "dynamic": false,
-    "visualCustom": false,
-    "autoCdeSafe": true,
-    "icon": "Trash2",
     "variant": "ghost",
     "size": "compactIcon",
     "className": "",
@@ -6930,24 +6960,24 @@
     "group": ""
   },
   {
-    "id": "components/personal-todos/todo-section.tsx|17d24dbccfa6e155|0",
+    "id": "components/personal-todos/todo-section.tsx|e0eaf0541461e1ef|0",
     "file": "components/personal-todos/todo-section.tsx",
-    "line": 50,
-    "tag": "Button",
+    "line": 52,
+    "tag": "button",
     "label": "To Dos",
     "dynamic": true,
     "visualCustom": false,
     "autoCdeSafe": true,
     "icon": "CdeDisclosureIcon",
-    "variant": "ghost",
+    "variant": "",
     "size": "",
-    "className": "!h-auto !max-w-none !min-w-0 !w-full sm:!w-auto !basis-full sm:!basis-auto sm:flex-1 !justify-start gap-3 !bg-transparent px-4 py-3",
+    "className": "flex w-full basis-full sm:w-auto sm:basis-auto sm:flex-1 min-w-0 items-center justify-start gap-3 bg-transparent px-4 py-3 text-foreground",
     "group": ""
   },
   {
     "id": "components/personal-todos/todo-section.tsx|0057bcec5b9428b6|0",
     "file": "components/personal-todos/todo-section.tsx",
-    "line": 51,
+    "line": 53,
     "tag": "Button",
     "label": "Ordenar tarefas",
     "dynamic": false,
@@ -6962,7 +6992,7 @@
   {
     "id": "components/personal-todos/todo-section.tsx|beea634c953439df|0",
     "file": "components/personal-todos/todo-section.tsx",
-    "line": 51,
+    "line": 53,
     "tag": "CdeButton",
     "label": "Novo To Do",
     "dynamic": false,
@@ -6977,9 +7007,39 @@
   {
     "id": "components/personal-todos/todo-section.tsx|0ab47e2fcfbf8fff|0",
     "file": "components/personal-todos/todo-section.tsx",
-    "line": 53,
+    "line": 55,
     "tag": "Button",
     "label": "· / - / / / Sem conclusão prevista",
+    "dynamic": true,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "",
+    "variant": "ghost",
+    "size": "",
+    "className": "!h-auto !max-w-none !w-full !min-w-0 !justify-start !bg-transparent hover:!bg-transparent px-3 py-3 text-left",
+    "group": ""
+  },
+  {
+    "id": "components/personal-todos/todo-section.tsx|3b6db2b3ec61401f|0",
+    "file": "components/personal-todos/todo-section.tsx",
+    "line": 55,
+    "tag": "Button",
+    "label": "Concluídas",
+    "dynamic": true,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "CdeDisclosureIcon",
+    "variant": "ghost",
+    "size": "",
+    "className": "!h-auto !w-full !justify-start gap-3 !bg-transparent px-4 py-3",
+    "group": ""
+  },
+  {
+    "id": "components/personal-todos/todo-section.tsx|fe3fa39d2b6d4770|0",
+    "file": "components/personal-todos/todo-section.tsx",
+    "line": 55,
+    "tag": "Button",
+    "label": "Concluída / pt-BR",
     "dynamic": true,
     "visualCustom": false,
     "autoCdeSafe": true,
@@ -7704,7 +7764,7 @@
     "visualCustom": false,
     "autoCdeSafe": true,
     "icon": "FileSpreadsheet",
-    "variant": "outline",
+    "variant": "ghost",
     "size": "sm",
     "className": "",
     "group": ""
@@ -7719,7 +7779,7 @@
     "visualCustom": false,
     "autoCdeSafe": true,
     "icon": "FileText",
-    "variant": "outline",
+    "variant": "ghost",
     "size": "sm",
     "className": "",
     "group": ""
@@ -7734,7 +7794,7 @@
     "visualCustom": false,
     "autoCdeSafe": true,
     "icon": "Download",
-    "variant": "outline",
+    "variant": "ghost",
     "size": "sm",
     "className": "",
     "group": ""
@@ -7757,7 +7817,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|58d6c4ad412fd74c|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 452,
+    "line": 453,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -7772,7 +7832,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|c5b513be3f2f114c|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 452,
+    "line": 453,
     "tag": "Button",
     "label": "ChevronDown",
     "dynamic": false,
@@ -7787,7 +7847,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|d93ef7dc6b935baa|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 452,
+    "line": 453,
     "tag": "Button",
     "label": "Editar ambiente",
     "dynamic": false,
@@ -7802,14 +7862,14 @@
   {
     "id": "components/site-survey-luc-manager.tsx|9c04296342489c55|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 458,
+    "line": 459,
     "tag": "Button",
     "label": "Colorido",
     "dynamic": false,
     "visualCustom": false,
     "autoCdeSafe": true,
     "icon": "FileText",
-    "variant": "outline",
+    "variant": "ghost",
     "size": "sm",
     "className": "",
     "group": ""
@@ -7817,14 +7877,14 @@
   {
     "id": "components/site-survey-luc-manager.tsx|3a9a35e239a29535|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 459,
+    "line": 460,
     "tag": "Button",
     "label": "Preto e branco",
     "dynamic": false,
     "visualCustom": false,
     "autoCdeSafe": true,
     "icon": "FileText",
-    "variant": "outline",
+    "variant": "ghost",
     "size": "sm",
     "className": "",
     "group": ""
@@ -7832,7 +7892,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|d9d23398d9014c37|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 474,
+    "line": 475,
     "tag": "Button",
     "label": "Digite ou selecione",
     "dynamic": true,
@@ -7847,7 +7907,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|e52ebf226858bf17|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 476,
+    "line": 477,
     "tag": "Button",
     "label": "Analisando fachada... / Identificar pela fachada",
     "dynamic": true,
@@ -7862,7 +7922,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|ef6c7eca62e8f970|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 480,
+    "line": 481,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -7877,7 +7937,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|891aaa11be57c820|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 480,
+    "line": 481,
     "tag": "Button",
     "label": "Salvando... / Salvar",
     "dynamic": true,
@@ -7892,7 +7952,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|44ddb90f890d7aea|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 483,
+    "line": 484,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -7907,7 +7967,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|12ee4b1f51a6a7cc|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 483,
+    "line": 484,
     "tag": "Button",
     "label": "Importando...",
     "dynamic": true,
@@ -8547,6 +8607,21 @@
     "variant": "destructive",
     "size": "",
     "className": "",
+    "group": ""
+  },
+  {
+    "id": "components/site-survey-visit-reset.tsx|18b15a99e314a23e|0",
+    "file": "components/site-survey-visit-reset.tsx",
+    "line": 14,
+    "tag": "Button",
+    "label": "Reiniciar visita",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "RotateCcw",
+    "variant": "ghost",
+    "size": "compactIcon",
+    "className": "text-foreground",
     "group": ""
   },
   {
@@ -10802,7 +10877,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|439484d97dcb8080|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3867,
+    "line": 3866,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -10817,7 +10892,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|4df33b65fce17228|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3910,
+    "line": 3913,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -10832,7 +10907,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|dbe7afbb506329df|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3929,
+    "line": 3932,
     "tag": "Button",
     "label": "Marcar como implantado",
     "dynamic": false,
@@ -10847,7 +10922,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|2e3048fb239fe8e0|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3932,
+    "line": 3935,
     "tag": "Button",
     "label": "Cancelar projeto",
     "dynamic": false,
@@ -10862,7 +10937,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|2865b23725fc6c87|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3938,
+    "line": 3941,
     "tag": "Button",
     "label": "Reativar projeto",
     "dynamic": false,
@@ -10877,7 +10952,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|5ecf0ecc993a5786|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3956,
+    "line": 3959,
     "tag": "Button",
     "label": "Excluir projeto",
     "dynamic": false,
@@ -10892,7 +10967,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|47a894e7a4e2f49b|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4080,
+    "line": 4083,
     "tag": "Button",
     "label": "Editar projeto",
     "dynamic": false,
@@ -10907,7 +10982,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|439484d97dcb8080|1",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4140,
+    "line": 4143,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -10922,7 +10997,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|231a7abf9009e9c1|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4161,
+    "line": 4164,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -10937,7 +11012,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|b4d91fdc5984745b|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4419,
+    "line": 4422,
     "tag": "Button",
     "label": "Rejeitar",
     "dynamic": false,
@@ -10952,7 +11027,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|8ddc1293855b9a2d|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4420,
+    "line": 4423,
     "tag": "Button",
     "label": "Aprovar exclusão",
     "dynamic": false,
@@ -10967,7 +11042,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|b1ce6de64c432f1a|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4461,
+    "line": 4464,
     "tag": "Button",
     "label": "Solicitar exclusão",
     "dynamic": false,
@@ -10982,7 +11057,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|4df33b65fce17228|1",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4584,
+    "line": 4587,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -10997,7 +11072,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|a60f755b5ed09042|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4686,
+    "line": 4689,
     "tag": "Button",
     "label": "Gerar backup",
     "dynamic": false,
@@ -11012,7 +11087,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|aaa6dc3d2bb41971|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4699,
+    "line": 4702,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -11027,7 +11102,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|4e0d335dec619872|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4700,
+    "line": 4703,
     "tag": "Button",
     "label": "Confirmar e baixar",
     "dynamic": true,
@@ -11612,7 +11687,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|ac945105a5c23f7e|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 338,
+    "line": 340,
     "tag": "Button",
     "label": "ChevronDown",
     "dynamic": false,
@@ -11627,7 +11702,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|5ec1af00d6519c78|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 342,
+    "line": 344,
     "tag": "Button",
     "label": "0",
     "dynamic": true,
@@ -11642,7 +11717,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|713ba9c5794a10c8|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 342,
+    "line": 344,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -11657,7 +11732,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|713ba9c5794a10c8|1",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 347,
+    "line": 349,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -11672,7 +11747,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|18e24e5d4f0bf28c|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 347,
+    "line": 349,
     "tag": "Button",
     "label": "Cancelar visita",
     "dynamic": false,
@@ -11687,7 +11762,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|d98f88bcac7f7ca3|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 376,
+    "line": 378,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -11702,7 +11777,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|d98f88bcac7f7ca3|1",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 380,
+    "line": 382,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -11715,24 +11790,24 @@
     "group": ""
   },
   {
-    "id": "routes/_authenticated/site-survey.tsx|5a82e46145dd8b09|0",
+    "id": "routes/_authenticated/site-survey.tsx|6efa3dc1e94aeb94|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 409,
+    "line": 411,
     "tag": "Button",
-    "label": "Salvando... / Salvar visita",
-    "dynamic": true,
+    "label": "Salvar visita",
+    "dynamic": false,
     "visualCustom": false,
     "autoCdeSafe": true,
-    "icon": "",
-    "variant": "",
-    "size": "",
+    "icon": "Save",
+    "variant": "ghost",
+    "size": "compactIcon",
     "className": "",
     "group": ""
   },
   {
     "id": "routes/_authenticated/site-survey.tsx|bd181d466152b0dc|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 411,
+    "line": 413,
     "tag": "Button",
     "label": "Editar visita",
     "dynamic": false,
@@ -11745,9 +11820,24 @@
     "group": ""
   },
   {
+    "id": "routes/_authenticated/site-survey.tsx|6efa3dc1e94aeb94|1",
+    "file": "routes/_authenticated/site-survey.tsx",
+    "line": 413,
+    "tag": "Button",
+    "label": "Salvar visita",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "Save",
+    "variant": "ghost",
+    "size": "compactIcon",
+    "className": "pointer-events-auto",
+    "group": ""
+  },
+  {
     "id": "routes/_authenticated/site-survey.tsx|d49e4e791f5a0781|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 425,
+    "line": 427,
     "tag": "Button",
     "label": "99+",
     "dynamic": true,
@@ -11762,7 +11852,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|8bc3eee31c830b6d|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 432,
+    "line": 434,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -11777,7 +11867,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|bfc5973a1cb7b304|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 434,
+    "line": 436,
     "tag": "Button",
     "label": "Recolher",
     "dynamic": false,
@@ -11792,7 +11882,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|eb6e7bef40ac0532|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1087,
+    "line": 1089,
     "tag": "CdeButton",
     "label": "Adicionar material ou equipamento",
     "dynamic": false,
@@ -11807,7 +11897,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|5da2603f1e976dd6|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1268,
+    "line": 1270,
     "tag": "CdeButton",
     "label": "Adicionar pergunta para o cliente",
     "dynamic": false,
@@ -11822,7 +11912,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|7a806b9fa8219d6e|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1268,
+    "line": 1270,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -11837,7 +11927,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|439484d97dcb8080|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1275,
+    "line": 1277,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -11852,7 +11942,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|d544fb3391e461fb|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1275,
+    "line": 1277,
     "tag": "Button",
     "label": "Editar pergunta",
     "dynamic": false,
@@ -11867,7 +11957,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|38d156755e802bc9|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1275,
+    "line": 1277,
     "tag": "Button",
     "label": "Excluir pergunta",
     "dynamic": false,
@@ -11882,7 +11972,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|614842c25317fc69|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1275,
+    "line": 1277,
     "tag": "Button",
     "label": "Marcar como respondida",
     "dynamic": false,
@@ -11897,7 +11987,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|e5d2f83f38509a8f|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1275,
+    "line": 1277,
     "tag": "Button",
     "label": "Editar resposta",
     "dynamic": false,
@@ -11912,7 +12002,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|4378a0ac946bcd55|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1275,
+    "line": 1277,
     "tag": "Button",
     "label": "Excluir resposta",
     "dynamic": false,
@@ -11927,7 +12017,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|416baeba9e5b01c6|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1275,
+    "line": 1277,
     "tag": "Button",
     "label": "Salvar resposta",
     "dynamic": false,
@@ -11942,7 +12032,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|da7717f93bee3775|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1275,
+    "line": 1277,
     "tag": "Button",
     "label": "facade",
     "dynamic": true,
@@ -11957,7 +12047,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|3394c832318ddb2a|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1281,
+    "line": 1283,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -11972,7 +12062,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|439484d97dcb8080|1",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1281,
+    "line": 1283,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -11987,7 +12077,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|15635c027a3c1428|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1290,
+    "line": 1292,
     "tag": "Button",
     "label": "Fechar",
     "dynamic": false,
@@ -12002,7 +12092,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|439484d97dcb8080|2",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1290,
+    "line": 1292,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -12017,7 +12107,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|15635c027a3c1428|1",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1290,
+    "line": 1292,
     "tag": "Button",
     "label": "Fechar",
     "dynamic": false,
@@ -12032,7 +12122,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|7a676072b624c695|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1294,
+    "line": 1296,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -12047,7 +12137,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|77fc7b4651293671|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1296,
+    "line": 1298,
     "tag": "Button",
     "label": "Salvar progresso",
     "dynamic": false,
@@ -12062,7 +12152,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|a27a426d016ecb18|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1300,
+    "line": 1302,
     "tag": "Button",
     "label": "Recolher loja ou ambiente",
     "dynamic": false,
@@ -12077,7 +12167,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|8b6798b19c37cab7|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1300,
+    "line": 1302,
     "tag": "Button",
     "label": "Selecione ou pesquise o LUC ou nome da loja",
     "dynamic": true,
@@ -12092,7 +12182,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|bfb469600aba7b26|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1300,
+    "line": 1302,
     "tag": "Button",
     "label": "pt-BR / 2-digit / Iniciar visita",
     "dynamic": true,
@@ -12107,7 +12197,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|f6f4c14a5f3dd90d|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1300,
+    "line": 1302,
     "tag": "Button",
     "label": "Retomar visita / Pausar visita",
     "dynamic": true,
@@ -12122,7 +12212,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|77fc7b4651293671|1",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1304,
+    "line": 1306,
     "tag": "Button",
     "label": "Salvar progresso",
     "dynamic": false,
@@ -12137,7 +12227,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|02e049f45483919f|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1304,
+    "line": 1306,
     "tag": "Button",
     "label": "Conferindo... / Concluir visita",
     "dynamic": true,
@@ -12152,7 +12242,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|8a8731df53351ea9|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1304,
+    "line": 1306,
     "tag": "Button",
     "label": "Cancelar visita",
     "dynamic": false,
@@ -12167,7 +12257,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|f579d3c586485846|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1321,
+    "line": 1323,
     "tag": "Button",
     "label": "Recolher visita",
     "dynamic": false,
@@ -12182,7 +12272,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|f579d3c586485846|1",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1389,
+    "line": 1391,
     "tag": "Button",
     "label": "Recolher visita",
     "dynamic": false,
@@ -12197,7 +12287,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|ebe2e887f7ebc777|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1389,
+    "line": 1391,
     "tag": "Button",
     "label": "Iniciar visita",
     "dynamic": false,
@@ -12212,7 +12302,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|378be691e293d2cc|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1389,
+    "line": 1391,
     "tag": "Button",
     "label": "Concluir",
     "dynamic": false,
@@ -12227,7 +12317,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|06d552b413eac24c|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1389,
+    "line": 1391,
     "tag": "Button",
     "label": "Solicitar ajustes",
     "dynamic": false,
@@ -12242,7 +12332,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|1cd36a073b3e717e|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1413,
+    "line": 1415,
     "tag": "CdeButton",
     "label": "Técnico",
     "dynamic": false,
@@ -12257,7 +12347,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|8bc3eee31c830b6d|1",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1417,
+    "line": 1419,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -12272,7 +12362,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|d7080aff7892e375|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1417,
+    "line": 1419,
     "tag": "Button",
     "label": "Selecione um modelo",
     "dynamic": false,
@@ -12287,7 +12377,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|5443eedbdbe51c70|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1424,
+    "line": 1426,
     "tag": "Button",
     "label": "Disponível sem modelo base",
     "dynamic": true,
@@ -12296,13 +12386,13 @@
     "icon": "ChevronDown",
     "variant": "outline",
     "size": "",
-    "className": "w-full justify-between !bg-myio-green/10 font-normal hover:!bg-myio-green/15",
+    "className": "!flex !w-full !max-w-none justify-between !bg-myio-green/10 font-normal hover:!bg-myio-green/15",
     "group": ""
   },
   {
     "id": "routes/_authenticated/site-survey.tsx|686366697b299307|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1545,
+    "line": 1547,
     "tag": "Button",
     "label": "new",
     "dynamic": true,
@@ -12317,7 +12407,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|20e22cc6beda2b60|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1545,
+    "line": 1547,
     "tag": "CdeButton",
     "label": "Criar modelo",
     "dynamic": false,
@@ -12332,7 +12422,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|5498a86b6f4701e2|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1545,
+    "line": 1547,
     "tag": "Button",
     "label": "edit",
     "dynamic": true,
@@ -12347,7 +12437,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|289c2e2cfafb5df7|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1545,
+    "line": 1547,
     "tag": "Button",
     "label": "ChevronDown",
     "dynamic": true,
@@ -12362,7 +12452,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|7d0a9d25ab7e8fda|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1545,
+    "line": 1547,
     "tag": "Button",
     "label": "Salvar modelo",
     "dynamic": false,
@@ -12377,7 +12467,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|f4e9ed1e0d392d4a|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1545,
+    "line": 1547,
     "tag": "Button",
     "label": "sections",
     "dynamic": true,
@@ -12392,7 +12482,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|4d4be3b720f9f28d|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1545,
+    "line": 1547,
     "tag": "CdeButton",
     "label": "Adicionar seção",
     "dynamic": false,
@@ -12407,7 +12497,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|b0e331627f4ba3a5|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1545,
+    "line": 1547,
     "tag": "Button",
     "label": "Editar seção",
     "dynamic": false,
@@ -12422,7 +12512,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|8c6f20b2bb48f18a|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1545,
+    "line": 1547,
     "tag": "Button",
     "label": "Salvar seção",
     "dynamic": false,
@@ -12437,7 +12527,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|58556371ae221833|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1545,
+    "line": 1547,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -12452,7 +12542,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|9b901d6be1ac92a2|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1545,
+    "line": 1547,
     "tag": "CdeButton",
     "label": "Adicionar pergunta",
     "dynamic": false,
@@ -12467,7 +12557,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|d9521549804d6823|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1545,
+    "line": 1547,
     "tag": "Button",
     "label": "Editar pergunta",
     "dynamic": false,
@@ -12482,7 +12572,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|59e987744915d1a4|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1545,
+    "line": 1547,
     "tag": "Button",
     "label": "Salvar pergunta",
     "dynamic": false,
@@ -12497,7 +12587,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|e325e236904d1ee7|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1545,
+    "line": 1547,
     "tag": "CdeButton",
     "label": "Adicionar pergunta",
     "dynamic": false,
@@ -12512,7 +12602,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|439484d97dcb8080|3",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1681,
+    "line": 1683,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -12527,7 +12617,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|db59ed42a6bf9277|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1683,
+    "line": 1685,
     "tag": "CdeButton",
     "label": "Criar novo cadastro",
     "dynamic": false,
@@ -12542,7 +12632,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|4fc6a91fd6777a16|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1688,
+    "line": 1690,
     "tag": "Button",
     "label": "Editar cadastro",
     "dynamic": false,
@@ -12557,7 +12647,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|57d3f889944ca8fd|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1688,
+    "line": 1690,
     "tag": "CdeButton",
     "label": "Adicionar item",
     "dynamic": false,
@@ -12572,7 +12662,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|231a7abf9009e9c1|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1688,
+    "line": 1690,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -12587,7 +12677,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|aa96a102ec9d5d01|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1689,
+    "line": 1691,
     "tag": "Button",
     "label": "Editar",
     "dynamic": false,
@@ -12602,7 +12692,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|439484d97dcb8080|4",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1690,
+    "line": 1692,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -12617,7 +12707,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|273714851aff6a4a|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1694,
+    "line": 1696,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -12632,7 +12722,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|891aaa11be57c820|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1694,
+    "line": 1696,
     "tag": "Button",
     "label": "Salvando... / Salvar",
     "dynamic": true,
@@ -12647,7 +12737,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|eaec305d10b6c1a1|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1695,
+    "line": 1697,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -12662,7 +12752,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|891aaa11be57c820|1",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1695,
+    "line": 1697,
     "tag": "Button",
     "label": "Salvando... / Salvar",
     "dynamic": true,
@@ -12677,7 +12767,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|632a5db14784c7ce|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1718,
+    "line": 1720,
     "tag": "Button",
     "label": "Remover acesso",
     "dynamic": false,
@@ -12692,7 +12782,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|640c09521c9ba752|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1801,
+    "line": 1803,
     "tag": "Button",
     "label": "Escolher anexos para excluir",
     "dynamic": false,
@@ -12707,7 +12797,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|3df0f39e6b06c033|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1821,
+    "line": 1823,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -12722,7 +12812,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|03802a8f57d2d9b0|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1832,
+    "line": 1834,
     "tag": "Button",
     "label": "FileText",
     "dynamic": true,
@@ -12737,7 +12827,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|5d8b32552a03bf1e|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1840,
+    "line": 1842,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -12752,7 +12842,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|cf05cb89eb9438a0|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1901,
+    "line": 1903,
     "tag": "Button",
     "label": "Escolher ou arrastar arquivo",
     "dynamic": true,
@@ -12765,24 +12855,9 @@
     "group": ""
   },
   {
-    "id": "routes/_authenticated/site-survey.tsx|d9d23398d9014c37|0",
-    "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1923,
-    "tag": "Button",
-    "label": "Digite ou selecione",
-    "dynamic": true,
-    "visualCustom": false,
-    "autoCdeSafe": true,
-    "icon": "ChevronDown",
-    "variant": "outline",
-    "size": "",
-    "className": "w-full justify-between !bg-myio-green/10 font-normal hover:!bg-myio-green/15",
-    "group": ""
-  },
-  {
     "id": "routes/_authenticated/site-survey.tsx|37e77b77ac2e703f|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1982,
+    "line": 1961,
     "tag": "Button",
     "label": "Abrir calendário",
     "dynamic": false,
@@ -12791,7 +12866,7 @@
     "icon": "CalendarDays",
     "variant": "ghost",
     "size": "compactIcon",
-    "className": "absolute right-1 top-1/2 -translate-y-1/2 text-muted-foreground",
+    "className": "absolute right-1 top-1/2 -translate-y-1/2",
     "group": ""
   },
   {

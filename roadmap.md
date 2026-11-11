@@ -1,4 +1,15 @@
 # Roadmap
+- [x] Projetos: descrição abaixo dos demais campos, com múltiplas linhas.
+- [x] Site Survey: listas da edição de visita seguem o padrão CDE, sem fundo verde próprio.
+- [x] Calendário sem moldura própria e ícone duplicado; conferido em computador/celular.
+- [x] Separar Local da visita e Rua e número em linhas próprias.
+- [x] Visitas: substituir referência para entrega por referência do local.
+- [x] Alinhar linhas verdes e aplicar CDE ao campo de cidade; busca/seleção conferidas sem salvar a visita.
+- [x] Edição de visita: disquete preto ghost no topo, alinhado ao X (mesma posição vertical conferida).
+- [x] Retirar cliente/projeto repetido junto ao número, mantendo a coluna própria.
+- [x] Renomear coluna para Nº da Visita e padronizar botões indicados em preto ghost.
+- [x] Aplicar o padrão CDE ao conjunto de botões das novas capturas; barra e relatório/proposta conferidos.
+- [x] Retirar filtros adicionais do cabeçalho, seguindo Approvals e Solicitações; filtros por coluna preservados.
 - [x] Central: grupo “Prazo crítico” com pendências que vencem hoje, independente do App; nome “To Dos” e bolinhas após nomes, alinhadas.
 - [x] Central Admin: dashboard por responsável, filtros/ordenações, sem To Dos pessoais.
 - [x] Central Admin: dependências entre apps com marcos de conclusão, guarda contra ciclos e histórico.

@@ -50,6 +50,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -268,7 +269,7 @@ function SiteSurveyPage() {
     return (visitsSection === "resumo" || !visit.is_manual_entry && (visit.status === "agendada" || visit.status === "em_andamento") && (data?.isErpAdmin || visit.technician_id === data?.userId)) && (visitsSection !== "resumo" || statusFilter === "todos" || visit.status === statusFilter) && haystack.includes(search.toLocaleLowerCase("pt-BR"));
   });
   const visitFilters = useTableFilters(scopedVisits, [
-    { key: "number", label: "Nº / Abrir", kind: "number", value: v => v.survey_number },
+    { key: "number", label: "Nº da Visita", kind: "number", value: v => v.survey_number },
     { key: "client", label: "Cliente / Projeto", value: v => [names.clients.get(v.client_id ?? ""), names.projects.get(v.project_id ?? "")].filter(Boolean).join(" — ") },
     { key: "technician", label: "Técnico", value: v => names.technicians.get(v.technician_id) },
     { key: "date", label: "Agendamento", kind: "date", value: v => v.scheduled_start.slice(0,10), display: v => new Date(v.scheduled_start).toLocaleDateString("pt-BR") },
@@ -340,7 +341,7 @@ function SiteSurveyPage() {
                  {filtered.map((visit) => {
                    const visitExpanded = selected?.id === visit.id;
                    return <div key={visit.id} className={`${visitsListOpen ? "" : "lg:hidden"} grid gap-3 border-b border-border px-4 py-3 last:border-0 lg:grid-cols-[250px_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_150px_200px] lg:items-center lg:py-4`}>
-                        <div className="flex min-w-0 items-start justify-between gap-2"><Button type="button" variant="ghost" className="h-auto min-w-0 flex-1 items-start justify-start gap-2 whitespace-normal !bg-transparent !p-0 text-left text-sm shadow-none hover:!bg-transparent" aria-pressed={selected?.id === visit.id} aria-label={`Abrir checklist da visita ${String(visit.survey_number).padStart(12, "0")}${names.projects.get(visit.project_id ?? "") ? `, projeto ${names.projects.get(visit.project_id ?? "")}` : ""}`} onClick={() => void toggleVisit(visit)}><span title="Abrir checklist" className="shrink-0 font-semibold !text-foreground hover:underline">{String(visit.survey_number).padStart(12, "0")}</span>{names.projects.get(visit.project_id ?? "") ? <span className="min-w-0 break-words font-normal text-muted-foreground">{names.projects.get(visit.project_id ?? "")}</span> : null}</Button><div className="flex shrink-0 items-center gap-1">{visitsSection === "resumo" ? <><SiteSurveyReportButton visit={visit} clients={data.clients} units={data.units} projects={data.projects} technicians={data.technicians} questions={data.questions} sections={data.sections} assumptions={data.timeAssumptions} /><SiteSurveyProposalButton visitId={visit.id} visitNumber={visit.survey_number} canEdit={data.permissions.has("site_survey_editar")} /></> : null}<Button type="button" size="compactIcon" variant="ghost" className="lg:hidden" aria-label={`${selected?.id === visit.id ? "Recolher" : "Exibir"} visita ${visit.survey_number}`} title={selected?.id === visit.id ? "Recolher visita" : "Exibir visita"} aria-expanded={selected?.id === visit.id} onClick={() => void toggleVisit(visit)}>{selected?.id === visit.id ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}</Button></div></div>
+                        <div className="flex min-w-0 items-start justify-between gap-2"><Button type="button" variant="ghost" className="h-auto min-w-0 flex-1 items-start justify-start gap-2 whitespace-normal !bg-transparent !p-0 text-left text-sm shadow-none hover:!bg-transparent" aria-pressed={selected?.id === visit.id} aria-label={`Abrir checklist da visita ${String(visit.survey_number).padStart(12, "0")}${names.projects.get(visit.project_id ?? "") ? `, projeto ${names.projects.get(visit.project_id ?? "")}` : ""}`} onClick={() => void toggleVisit(visit)}><span title="Abrir checklist" className="shrink-0 font-semibold !text-foreground hover:underline">{String(visit.survey_number).padStart(12, "0")}</span></Button><div className="flex shrink-0 items-center gap-1">{visitsSection === "resumo" ? <><SiteSurveyReportButton visit={visit} clients={data.clients} units={data.units} projects={data.projects} technicians={data.technicians} questions={data.questions} sections={data.sections} assumptions={data.timeAssumptions} /><SiteSurveyProposalButton visitId={visit.id} visitNumber={visit.survey_number} canEdit={data.permissions.has("site_survey_editar")} /></> : null}<Button type="button" size="compactIcon" variant="ghost" className="lg:hidden" aria-label={`${selected?.id === visit.id ? "Recolher" : "Exibir"} visita ${visit.survey_number}`} title={selected?.id === visit.id ? "Recolher visita" : "Exibir visita"} aria-expanded={selected?.id === visit.id} onClick={() => void toggleVisit(visit)}>{selected?.id === visit.id ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}</Button></div></div>
                      <div className={`${visitExpanded ? "" : "hidden"} min-w-0 lg:block`}><p className="truncate text-sm font-medium">{names.clients.get(visit.client_id ?? "") ?? names.projects.get(visit.project_id ?? "") ?? "—"}</p>{visit.client_id && visit.project_id ? <p className="truncate text-xs text-muted-foreground">{names.projects.get(visit.project_id)}</p> : null}</div>
                      <span className={`${visitExpanded ? "" : "hidden"} truncate text-sm lg:block`}>{names.technicians.get(visit.technician_id) ?? "—"}</span>
                      <div className={`${visitExpanded ? "" : "hidden"} text-sm lg:block`}><p>{new Date(visit.scheduled_start).toLocaleDateString("pt-BR")}</p><p className="text-xs text-muted-foreground">{new Date(visit.scheduled_start).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</p></div>
@@ -407,9 +408,9 @@ function VisitDialog({ data, visit, onSaved, inline = false, manual = false }: {
     if (result.error) throw result.error;
   }, onSuccess: () => { toast.success(visit ? "Visita atualizada" : manual ? "Visita realizada cadastrada" : "Visita agendada"); setOpen(false); onSaved(); }, onError: (error: Error) => toast.error(error.message) });
   const localDate = (value?: string | null) => value ? new Date(value).toISOString().slice(0, 16) : "";
-  const form = <form onSubmit={(event) => { event.preventDefault(); save.mutate(event.currentTarget); }} className="space-y-5">{inline ? <div className="space-y-1.5"><h2 className="text-lg font-semibold">{manual ? "Cadastrar visita realizada" : "Nova visita técnica"}</h2><p className="text-sm text-muted-foreground">Informe o cliente, o responsável, a data e o local. Os ambientes serão cadastrados após salvar a OS.</p></div> : <DialogHeader><DialogTitle>{visit ? "Editar visita" : "Nova visita técnica"}</DialogTitle><DialogDescription>Informe o cliente, o responsável, a data e o local. Os ambientes serão cadastrados após salvar a OS.</DialogDescription></DialogHeader>}<div className="grid gap-4 sm:grid-cols-2"><FormSelect name="client_id" label="Cliente" value={clientId} onChange={setClientId} options={data.clients} optional /><FormSelect name="client_unit_id" label="Unidade / filial" defaultValue={visit?.client_unit_id ?? "none"} options={data.units.filter((unit) => clientId === "none" || unit.client_id === clientId)} optional /><FormSelect name="project_id" label="Projeto" value={projectId} onChange={setProjectId} options={data.projects} optional /><FormSelect name="technician_id" label="Técnico responsável" defaultValue={visit?.technician_id ?? data.userId} options={data.technicians.map((item) => ({ id: item.id, name: item.full_name || item.email || "Técnico" }))} /><FormSelect name="template_id" label="Checklist" defaultValue={visit?.template_id ?? "none"} options={data.templates.filter((item) => item.active)} optional /><div /></div><div className="grid gap-4 sm:grid-cols-2"><DateTimeInput name="scheduled_start" label="Início" defaultValue={localDate(visit?.scheduled_start)} required /><DateTimeInput name="scheduled_end" label={manual || visit?.is_manual_entry ? "Término da visita" : "Término previsto"} defaultValue={localDate(visit?.scheduled_end)} /><LabeledInput name="contact_name" label="Contato no local" defaultValue={visit?.contact_name ?? ""} /><PhoneInput name="contact_phone" label="Telefone" defaultValue={visit?.contact_phone ?? ""} /></div><AddressAutocomplete name="address" label="Local da visita" defaultValue={visit?.address} allowDeliveryPoints={false} required /><div className="space-y-2"><Label htmlFor="survey-notes">Observações</Label><Textarea id="survey-notes" name="notes" defaultValue={visit?.notes ?? ""} rows={3} /></div><DialogFooter><Button type="submit" disabled={save.isPending}>{save.isPending ? "Salvando..." : "Salvar visita"}</Button></DialogFooter></form>;
+  const form = <form id={`survey-visit-form-${visit?.id ?? (manual ? "manual" : "new")}`} onSubmit={(event) => { event.preventDefault(); save.mutate(event.currentTarget); }} className="space-y-5">{inline ? <div className="space-y-1.5"><h2 className="text-lg font-semibold">{manual ? "Cadastrar visita realizada" : "Nova visita técnica"}</h2><p className="text-sm text-muted-foreground">Informe o cliente, o responsável, a data e o local. Os ambientes serão cadastrados após salvar a OS.</p></div> : <DialogHeader><DialogTitle>{visit ? "Editar visita" : "Nova visita técnica"}</DialogTitle><DialogDescription>Informe o cliente, o responsável, a data e o local. Os ambientes serão cadastrados após salvar a OS.</DialogDescription></DialogHeader>}<div className="grid gap-4 sm:grid-cols-2"><FormSelect name="client_id" label="Cliente" value={clientId} onChange={setClientId} options={data.clients} optional /><FormSelect name="client_unit_id" label="Unidade / filial" defaultValue={visit?.client_unit_id ?? "none"} options={data.units.filter((unit) => clientId === "none" || unit.client_id === clientId)} optional /><FormSelect name="project_id" label="Projeto" value={projectId} onChange={setProjectId} options={data.projects} optional /><FormSelect name="technician_id" label="Técnico responsável" defaultValue={visit?.technician_id ?? data.userId} options={data.technicians.map((item) => ({ id: item.id, name: item.full_name || item.email || "Técnico" }))} /><FormSelect name="template_id" label="Checklist" defaultValue={visit?.template_id ?? "none"} options={data.templates.filter((item) => item.active)} optional /><div /></div><div className="grid gap-4 sm:grid-cols-2"><DateTimeInput name="scheduled_start" label="Início" defaultValue={localDate(visit?.scheduled_start)} required /><DateTimeInput name="scheduled_end" label={manual || visit?.is_manual_entry ? "Término da visita" : "Término previsto"} defaultValue={localDate(visit?.scheduled_end)} /><LabeledInput name="contact_name" label="Contato no local" defaultValue={visit?.contact_name ?? ""} /><PhoneInput name="contact_phone" label="Telefone" defaultValue={visit?.contact_phone ?? ""} /></div><AddressAutocomplete name="address" label="Local da visita" defaultValue={visit?.address} allowDeliveryPoints={false} referencePlaceholder="Referência do local da visita (ex.: acesso ou ponto de encontro)" required /><div className="space-y-2"><Label htmlFor="survey-notes">Observações</Label><Textarea id="survey-notes" name="notes" defaultValue={visit?.notes ?? ""} rows={3} /></div>{inline ? <div className="flex justify-end"><Button type="submit" variant="ghost" size="compactIcon" aria-label="Salvar visita" title="Salvar visita" disabled={save.isPending}><Save className="h-4 w-4" /></Button></div> : null}</form>;
   if (inline) return <div className="max-w-3xl py-2">{form}</div>;
-  return <Dialog open={open} onOpenChange={(next) => { setOpen(next); if (next) { setClientId(visit?.client_id ?? "none"); setProjectId(visit?.project_id ?? "none"); } }}><DialogTrigger asChild><Button size="compactIcon" variant="ghost" title="Editar visita" aria-label="Editar visita"><Pencil className="h-3.5 w-3.5" /></Button></DialogTrigger><DialogContent className="max-h-[92vh] max-w-3xl overflow-y-auto">{form}</DialogContent></Dialog>;
+  return <Dialog open={open} onOpenChange={(next) => { setOpen(next); if (next) { setClientId(visit?.client_id ?? "none"); setProjectId(visit?.project_id ?? "none"); } }}><DialogTrigger asChild><Button size="compactIcon" variant="ghost" title="Editar visita" aria-label="Editar visita"><Pencil className="h-3.5 w-3.5" /></Button></DialogTrigger><DialogContent className="max-h-[92vh] max-w-3xl overflow-y-auto"><div className="pointer-events-none sticky top-0 z-30 -mt-4 -mb-4 flex h-0 justify-end pr-8"><Button form={`survey-visit-form-${visit?.id ?? "new"}`} type="submit" variant="ghost" size="compactIcon" className="pointer-events-auto" aria-label="Salvar visita" title="Salvar visita" disabled={save.isPending}><Save className="h-4 w-4" /></Button></div>{form}</DialogContent></Dialog>;
 }
 
 const NOT_APPLICABLE_SECTION_PREFIX = "not-applicable:";
@@ -1906,41 +1907,18 @@ function QuestionField({ number, question, answer, attachments, priorPhotos, onP
 }
 
 function FormSelect({ name, label, options, defaultValue, value, onChange, optional = false }: { name: string; label: string; options: Named[]; defaultValue?: string; value?: string; onChange?: (value: string) => void; optional?: boolean }) {
-  const [open, setOpen] = useState(false);
   const [internalValue, setInternalValue] = useState(defaultValue ?? (optional ? "none" : ""));
   const selectedValue = value ?? internalValue;
-  const selectedLabel = selectedValue === "none" ? "Não se aplica" : options.find((item) => item.id === selectedValue)?.name;
-  const choose = (next: string) => {
-    if (value === undefined) setInternalValue(next);
-    onChange?.(next);
-    setOpen(false);
-  };
-
-  return <div className="flex flex-col gap-2">
+  return <div className="flex min-w-0 flex-col gap-2">
     <Label>{label}</Label>
     <input type="hidden" name={name} value={selectedValue} />
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button type="button" variant="outline" role="combobox" aria-expanded={open} className="w-full justify-between !bg-myio-green/10 font-normal hover:!bg-myio-green/15">
-          <span className={selectedLabel ? "truncate" : "truncate text-muted-foreground"}>{selectedLabel ?? "Digite ou selecione"}</span>
-          <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-(--radix-popover-trigger-width) p-0" align="start">
-        <Command>
-          <CommandInput placeholder={`Buscar ${label.toLocaleLowerCase("pt-BR")}...`} />
-          <CommandList>
-            <CommandEmpty>Nenhuma opção encontrada.</CommandEmpty>
-            <CommandGroup>
-              {optional ? <CommandItem value="Não se aplica" onSelect={() => choose("none")}><Check className={selectedValue === "none" ? "opacity-100" : "opacity-0"} />Não se aplica</CommandItem> : null}
-              {options.map((item) => <CommandItem key={item.id} value={item.name} onSelect={() => choose(item.id)}><Check className={selectedValue === item.id ? "opacity-100" : "opacity-0"} />{item.name}</CommandItem>)}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+    <SearchableSelect aria-label={label} value={selectedValue} clearable={false} placeholder="Digite ou selecione" options={[
+      ...(optional ? [{ value: "none", label: "Não se aplica" }] : []),
+      ...options.map((item) => ({ value: item.id, label: item.name })),
+    ]} onChange={(next) => { if (value === undefined) setInternalValue(next); onChange?.(next); }} />
   </div>;
 }
+
 function LabeledInput({ name, label, type = "text", defaultValue, placeholder, required, min, step }: { name: string; label: string; type?: string; defaultValue?: string; placeholder?: string; required?: boolean; min?: string; step?: string }) { return <div className="space-y-2"><Label htmlFor={name}>{label}</Label><Input id={name} name={name} type={type} defaultValue={defaultValue} placeholder={placeholder} required={required} min={min} step={step} /></div>; }
 function formatMobilePhone(value: string) {
   let digits = value.replace(/\D/g, "");
@@ -1978,9 +1956,9 @@ function DateTimeInput({ name, label, defaultValue = "", required = false }: { n
   return <div className="min-w-0 space-y-2">
     <Label htmlFor={`${name}-date`}>{label}</Label>
     <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_7rem] gap-2 overflow-hidden">
-      <div className="relative min-w-0 overflow-hidden rounded-md border border-input bg-background shadow-sm focus-within:ring-1 focus-within:ring-ring">
-        <Input ref={dateInputRef} id={`${name}-date`} className="w-full min-w-0 appearance-none border-0 bg-transparent pr-10 shadow-none focus-visible:ring-0 [&::-webkit-calendar-picker-indicator]:opacity-0" type="date" value={date} onChange={(event) => setDate(event.target.value)} required={required} aria-label={`${label}: data`} />
-        <Button type="button" variant="ghost" size="compactIcon" className="absolute right-1 top-1/2 -translate-y-1/2 text-muted-foreground" onClick={openCalendar} aria-label={`Abrir calendário de ${label.toLocaleLowerCase("pt-BR")}`} title="Abrir calendário">
+      <div className="relative min-w-0">
+        <Input ref={dateInputRef} id={`${name}-date`} className="w-full min-w-0 appearance-none [&::-webkit-calendar-picker-indicator]:hidden" type="date" value={date} onChange={(event) => setDate(event.target.value)} required={required} aria-label={`${label}: data`} />
+        <Button type="button" variant="ghost" size="compactIcon" className="absolute right-1 top-1/2 -translate-y-1/2" onClick={openCalendar} actionKind="standard" aria-label={`Abrir calendário de ${label.toLocaleLowerCase("pt-BR")}`} title="Abrir calendário">
           <CalendarDays className="h-4 w-4" />
         </Button>
       </div>

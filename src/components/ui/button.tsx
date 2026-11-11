@@ -39,7 +39,12 @@ const buttonVariants = cva(
       },
       {
         size: "compactIcon",
-        variant: ["ghost", "outline"],
+        variant: "ghost",
+        className: "border-0 !bg-transparent !text-foreground hover:!bg-muted hover:!text-foreground",
+      },
+      {
+        size: "compactIcon",
+        variant: "outline",
         className: "border-0 !bg-transparent !text-myio-green hover:!bg-muted hover:!text-myio-green",
       },
       {
@@ -81,8 +86,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const resolvedVariant = !style && actionLabelPattern.test(accessibleLabel) ? "action" : variant;
     // CDE: action buttons follow the chosen standard live; CdeButton passes its own style and is skipped.
     const binding = useButtonBinding(accessibleLabel, cdeId);
-    const group = binding?.group as AutoGroup | undefined ?? detectButtonGroup(children, [props["aria-label"], props.title].filter(Boolean).join(" ")) ?? (visibleText && (!variant || ["default", "action", "outline", "secondary", "destructive"].includes(variant)) ? "action_standard" : undefined);
-    const specific = actionKind === "specific" || (!actionKind && isSpecificAction({ className, customStyle: !!style })) || !visibleText;
+    const group = binding?.group as AutoGroup | undefined ?? detectButtonGroup(children, [props["aria-label"], props.title].filter(Boolean).join(" ")) ?? (actionKind === "standard" || visibleText && (!variant || ["default", "action", "outline", "secondary", "destructive"].includes(variant)) ? "action_standard" : undefined);
+    const specific = actionKind === "specific" || (!actionKind && (isSpecificAction({ className, customStyle: !!style }) || !visibleText));
     const look = useCdeLook((style || cdeNative) && !binding ? undefined : group, true, cdeId?.split("|")[0] ?? (group === "save" && !visibleText ? "controls/save-icon" : undefined), specific, binding?.modelKey);
     const standardSave = !style && !asChild && (group === "save" || group === "trash");
     const SaveIcon = ICONS[look.icon || (group === "trash" ? "Trash2" : "Save")] ?? ICONS.Save;
