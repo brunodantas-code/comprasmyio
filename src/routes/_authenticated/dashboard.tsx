@@ -3834,8 +3834,8 @@ function ProjectsAdmin({ userId }: { userId: string }) {
           ) : (
           <form onSubmit={onCreate} className="space-y-4">
             <div className={newProjectClientId
-              ? "grid items-end gap-4 xl:pb-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)_minmax(0,1fr)_minmax(0,0.9fr)_11rem_minmax(0,1fr)_auto]"
-              : "grid items-end gap-4 xl:pb-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)_minmax(0,1fr)_11rem_minmax(0,1fr)_auto]"}>
+              ? "grid items-end gap-4 xl:pb-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)_minmax(0,1fr)_minmax(0,0.9fr)_11rem_auto]"
+              : "grid items-end gap-4 xl:pb-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)_minmax(0,1fr)_11rem_auto]"}>
             <ProjectTypeFields idPrefix="p" projectType={newProjectType} shortName={newProjectShortName} onTypeChange={setNewProjectType} onNameChange={setNewProjectShortName} inlineLayout />
             <div className="flex min-w-0 flex-col gap-2">
               <Label>Cliente</Label>
@@ -3863,8 +3863,11 @@ function ProjectsAdmin({ userId }: { userId: string }) {
               <Label htmlFor="p-budget">Orçamento aprovado (R$)</Label>
               <MoneyInput id="p-budget" className="w-full" value={budgetVal} onChange={setBudgetVal} required placeholder="0,00" />
             </div>
-            <div className="flex min-w-0 flex-col gap-2"><Label htmlFor="p-desc">Descrição</Label><Input id="p-desc" name="description" /></div>
             <Button type="submit" className="w-full whitespace-nowrap xl:w-auto" disabled={create.isPending}>Salvar</Button>
+            </div>
+            <div className="flex min-w-0 flex-col gap-2">
+              <Label htmlFor="p-desc">Descrição</Label>
+              <Textarea id="p-desc" name="description" rows={3} className="w-full resize-y break-words" />
             </div>
           </form>
           )}
