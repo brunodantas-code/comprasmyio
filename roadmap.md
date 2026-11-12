@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Botão + Ambiente ao lado do título "Selecionar loja, quiosque ou ambiente"; abre o cadastro no computador e no celular sem estourar a tela.
+- [x] Depósito cadastrado como tipo de ambiente no catálogo, disciplina Energia (elétrica).
 - [x] Exibir totalizadores de visitas realizadas e a realizar mesmo com gráfico recolhido; 80/198 conferidos em Vila Velha, canceladas excluídas, teste passou.
 - [x] Escada no cabeçalho de Materiais e equipamentos: existentes marcados, seleção salva e relida em Localiza com estado original restaurado; computador/celular e três testes conferidos.
 - [x] Reorganizar cadastro: ações e Filtro geral logo acima do cabeçalho; sem foto abaixo de Foto; perguntas acima da importação de respostas; posições, checkboxes e busca conferidos no computador/celular.
