@@ -49,7 +49,7 @@ export function SiteSurveyProgressChart({ points, technicians, visitNumber, resp
     return result.filter((day) => showsSurveyProgressDay(visitNumber, day.day));
   }, [completed, consolidated, selectedId, visitNumber]);
 
-  return <section className="min-w-0 max-w-full space-y-4 border-t border-border pt-5" aria-label="Avanço das visitas">
+  return <section className="min-w-0 max-w-full space-y-4" aria-label="Avanço das visitas">
     <div className="flex items-center justify-between gap-3">
       <h3 className="font-bold">Avanço das visitas</h3>
       <Button type="button" variant="ghost" size="compactIcon" aria-label={open ? "Recolher gráficos de visitas" : "Exibir gráficos de visitas"} title={open ? "Recolher gráficos" : "Exibir gráficos"} aria-expanded={open} aria-controls={`survey-progress-${visitNumber}`} onClick={() => setOpen((current) => !current)}><CdeDisclosureIcon open={open} direction="vertical" screen="components/site-survey-progress-chart.tsx" /></Button>
