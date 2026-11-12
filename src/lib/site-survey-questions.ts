@@ -3,10 +3,13 @@ export type SurveyAnswerType = "radio" | "multiselect" | "textarea" | "number";
 export function matchesSurveyPointSearch(point: { label: string; completionStatus: string }, query: string): boolean {
   const normalize = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR").trim();
   let text = normalize(query);
-  const unfinished = /\bnao\s+concluida\b/.test(text);
-  const finished = !unfinished && /\bconcluida\b/.test(text);
+  const statusWord = "conclu(?:i(?:d(?:a(?:s)?)?)?)?";
+  const unfinishedPattern = new RegExp(`\\bnao\\s+${statusWord}\\b`);
+  const finishedPattern = new RegExp(`\\b${statusWord}\\b`);
+  const unfinished = unfinishedPattern.test(text);
+  const finished = !unfinished && finishedPattern.test(text);
   if (unfinished && point.completionStatus !== "pendente" || finished && point.completionStatus !== "concluida") return false;
-  text = text.replace(/\bnao\s+concluida\b|\bconcluida\b/g, "").trim();
+  text = text.replace(new RegExp(`\\bnao\\s+${statusWord}\\b|\\b${statusWord}\\b`, "g"), "").trim();
   const label = normalize(point.label);
   return text.split(/\s+/).filter(Boolean).every((word) => label.includes(word));
 }

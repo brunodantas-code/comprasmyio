@@ -7,6 +7,17 @@ test("Concluída na busca mostra somente lojas concluídas", () => {
   assert.equal(matchesSurveyPointSearch({ label: "LUC 12 — Loja", completionStatus: "concluida" }, "Concluída"), true);
   assert.equal(matchesSurveyPointSearch({ label: "LUC 12 — Loja", completionStatus: "pendente" }, "Concluída"), false);
 });
+test("Trecho conclu da captura filtra lojas concluídas enquanto digita", () => {
+  for (const query of ["conclu", "concluí", "concluíd", "concluída", "concluídas"]) {
+    assert.equal(matchesSurveyPointSearch({ label: "Loja", completionStatus: "concluida" }, query), true);
+    assert.equal(matchesSurveyPointSearch({ label: "Loja", completionStatus: "pendente" }, query), false);
+  }
+});
+test("Não conclu parcial filtra pendentes e permite combinar LUC", () => {
+  assert.equal(matchesSurveyPointSearch({ label: "LUC 12 — Loja", completionStatus: "pendente" }, "não conclu 12"), true);
+  assert.equal(matchesSurveyPointSearch({ label: "LUC 12 — Loja", completionStatus: "concluida" }, "não conclu 12"), false);
+  assert.equal(matchesSurveyPointSearch({ label: "LUC 12 — Loja", completionStatus: "cancelada" }, "não conclu"), false);
+});
 test("Não concluída não se confunde com Concluída nem com cancelada", () => {
   assert.equal(matchesSurveyPointSearch({ label: "LUC 12 — Loja", completionStatus: "pendente" }, "Não concluída"), true);
   for (const completionStatus of ["concluida", "cancelada"]) assert.equal(matchesSurveyPointSearch({ label: "Loja", completionStatus }, "nao concluida"), false);

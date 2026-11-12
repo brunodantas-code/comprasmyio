@@ -1,4 +1,8 @@
 # Roadmap
+- [x] Incluir seta Exibir/Recolher nos gráficos, inicialmente recolhidos; abertura no computador, recolhimento no celular e quantidades preservadas conferidos.
+- [x] Corrigir busca por Concluída e Não concluída: reconhece “conclu” durante digitação; 48 concluídas, 228 pendentes, combinação LUC no celular e limpeza para 276 pontos conferidas; 19 testes passaram.
+- [x] Inserir quantidade acima de cada barra, em cinza como os eixos; 10, 8 e 29 conferidos no computador/celular.
+- [x] Excluir somente os gráficos de 10 e 11/11/2026 da visita indicada; 12/11 preservado, dados reais e três testes conferidos.
 - [x] Retornar o gráfico de barras verdes de visitas com datas originais de conclusão; dados reais, filtro por técnico e largura 390 px conferidos, sem erros.
 - [x] Site Survey: acelerar Exibir/Recolher sem perder respostas ou impedir salvamentos.
 - [x] Site Survey: alinhar opções do item 3 no mesmo padrão do item 2.

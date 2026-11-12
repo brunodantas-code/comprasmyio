@@ -1,9 +1,12 @@
 import { useMemo, useState } from "react";
-import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, LabelList, Tooltip, XAxis, YAxis } from "recharts";
 import { ChartContainer } from "@/components/ui/chart";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { showsSurveyProgressDay } from "@/lib/site-survey-progress";
+import { Button } from "@/components/ui/button";
+import { CdeDisclosureIcon } from "@/components/cde/cde-button";
 
 type FinishedPoint = { id: string; completion_status: string; completed_at: string | null; completed_by: string | null };
 type Technician = { id: string; full_name: string; email: string | null };
@@ -16,7 +19,8 @@ function completionSlot(iso: string) {
   return { day: `${parts.year}-${parts.month}-${parts.day}`, hour: Number(parts.hour) };
 }
 
-export function SiteSurveyProgressChart({ points, technicians }: { points: FinishedPoint[]; technicians: Technician[] }) {
+export function SiteSurveyProgressChart({ points, technicians, visitNumber }: { points: FinishedPoint[]; technicians: Technician[]; visitNumber: number }) {
+  const [open, setOpen] = useState(false);
   const [consolidated, setConsolidated] = useState(true);
   const [technicianId, setTechnicianId] = useState("");
   const completed = useMemo(() => points.filter((point) => point.completion_status === "concluida" && point.completed_at && !Number.isNaN(Date.parse(point.completed_at))), [points]);
@@ -41,17 +45,20 @@ export function SiteSurveyProgressChart({ points, technicians }: { points: Finis
       result.push({ day, label: `${day.slice(8, 10)}/${day.slice(5, 7)}/${day.slice(0, 4)}`, total: hours.reduce((sum, item) => sum + item.visits, 0), hours });
       cursor.setUTCDate(cursor.getUTCDate() + 1);
     }
-    return result;
-  }, [completed, consolidated, selectedId]);
+    return result.filter((day) => showsSurveyProgressDay(visitNumber, day.day));
+  }, [completed, consolidated, selectedId, visitNumber]);
 
   return <section className="min-w-0 max-w-full space-y-4 border-t border-border pt-5" aria-label="Avanço das visitas">
-    <div className="flex flex-wrap items-end justify-between gap-3">
-      <div><h3 className="font-bold">Avanço das visitas</h3><p className="text-sm text-muted-foreground">Visitas concluídas por dia e hora</p></div>
+    <div className="flex items-center justify-between gap-3">
+      <h3 className="font-bold">Avanço das visitas</h3>
+      <Button type="button" variant="ghost" size="compactIcon" aria-label={open ? "Recolher gráficos de visitas" : "Exibir gráficos de visitas"} title={open ? "Recolher gráficos" : "Exibir gráficos"} aria-expanded={open} aria-controls={`survey-progress-${visitNumber}`} onClick={() => setOpen((current) => !current)}><CdeDisclosureIcon open={open} screen="components/site-survey-progress-chart.tsx" /></Button>
+    </div>
+    {open ? <div id={`survey-progress-${visitNumber}`} className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-2"><Checkbox id="survey-progress-consolidated" checked={consolidated} onCheckedChange={(checked) => setConsolidated(checked === true)} /><Label htmlFor="survey-progress-consolidated">Consolidado</Label></div>
         <Select value={selectedId} onValueChange={setTechnicianId} disabled={consolidated || !finishers.length}><SelectTrigger aria-label="Técnico" className="w-48 max-w-full"><SelectValue placeholder="Selecione o técnico" /></SelectTrigger><SelectContent>{finishers.map((person) => <SelectItem key={person.id} value={person.id}>{person.name}</SelectItem>)}</SelectContent></Select>
       </div>
-    </div>
-    {!completed.length ? <p className="text-sm text-muted-foreground">Ainda não há visitas concluídas para exibir.</p> : !days.length ? <p className="text-sm text-muted-foreground">Nenhuma visita concluída para este técnico.</p> : <div className="space-y-5">{days.map((day) => <div key={day.day} className="min-w-0 space-y-1"><div className="flex items-center justify-between text-sm"><span className="font-semibold">{day.label}</span><span className="text-muted-foreground">{day.total} {day.total === 1 ? "visita" : "visitas"}</span></div><div className="w-full overflow-x-auto"><ChartContainer config={{ visits: { label: "Visitas", color: "var(--primary)" } }} className="h-44 min-w-0 w-full aspect-auto"><BarChart data={day.hours} margin={{ top: 8, right: 12, bottom: 4, left: 0 }} barCategoryGap="12%"><CartesianGrid vertical={false} stroke="var(--border)" /><XAxis dataKey="hour" tick={{ fontSize: 10 }} interval="preserveStartEnd" minTickGap={12} axisLine={false} tickLine={false} /><YAxis allowDecimals={false} width={64} tickMargin={8} tick={{ fontSize: 11 }} axisLine={false} tickLine={false} label={{ value: "Qtd. de visitas", angle: -90, position: "insideLeft", style: { fill: "var(--muted-foreground)", fontSize: 10, textAnchor: "middle" }, offset: 12 }} /><Tooltip formatter={(value: number) => [value, "Visitas"]} labelFormatter={(hour) => `${day.label} às ${hour}`} /><Bar dataKey="visits" fill="var(--primary)" radius={[2, 2, 0, 0]} maxBarSize={24} /></BarChart></ChartContainer></div></div>)}</div>}
+    {!completed.length ? <p className="text-sm text-muted-foreground">Ainda não há visitas concluídas para exibir.</p> : !days.length ? <p className="text-sm text-muted-foreground">Nenhuma visita concluída para este técnico.</p> : <div className="space-y-5">{days.map((day) => <div key={day.day} className="min-w-0 space-y-1"><div className="flex items-center justify-between text-sm"><span className="font-semibold">{day.label}</span><span className="text-muted-foreground">{day.total} {day.total === 1 ? "visita" : "visitas"}</span></div><div className="w-full overflow-x-auto"><ChartContainer config={{ visits: { label: "Visitas", color: "var(--primary)" } }} className="h-44 min-w-0 w-full aspect-auto"><BarChart data={day.hours} margin={{ top: 20, right: 12, bottom: 4, left: 0 }} barCategoryGap="12%"><CartesianGrid vertical={false} stroke="var(--border)" /><XAxis dataKey="hour" tick={{ fontSize: 10 }} interval="preserveStartEnd" minTickGap={12} axisLine={false} tickLine={false} /><YAxis allowDecimals={false} width={64} tickMargin={8} tick={{ fontSize: 11 }} axisLine={false} tickLine={false} label={{ value: "Qtd. de visitas", angle: -90, position: "insideLeft", style: { fill: "var(--muted-foreground)", fontSize: 10, textAnchor: "middle" }, offset: 12 }} /><Tooltip formatter={(value: number) => [value, "Visitas"]} labelFormatter={(hour) => `${day.label} às ${hour}`} /><Bar dataKey="visits" fill="var(--primary)" radius={[2, 2, 0, 0]} maxBarSize={24}><LabelList dataKey="visits" position="top" offset={6} fill="var(--muted-foreground)" fontSize={11} fontWeight={400} formatter={(value: unknown) => Number(value) > 0 ? String(value) : ""} /></Bar></BarChart></ChartContainer></div></div>)}</div>}
+    </div> : null}
   </section>;
 }
