@@ -1,7 +1,36 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { customerHistorySectionIds, pendingCustomerQuestions, customerQuestionResponses, registrationCustomerQuestion, showsCustomerQuestions } from "./site-survey-questions";
+import { customerHistorySectionIds, pendingCustomerQuestions, customerQuestionResponses, registrationCustomerQuestion, showsCustomerQuestions, withRegisteredTechnicians, matchesSurveyPointSearch } from "./site-survey-questions";
+
+test("Concluída na busca mostra somente lojas concluídas", () => {
+  assert.equal(matchesSurveyPointSearch({ label: "LUC 12 — Loja", completionStatus: "concluida" }, "Concluída"), true);
+  assert.equal(matchesSurveyPointSearch({ label: "LUC 12 — Loja", completionStatus: "pendente" }, "Concluída"), false);
+});
+test("Não concluída não se confunde com Concluída nem com cancelada", () => {
+  assert.equal(matchesSurveyPointSearch({ label: "LUC 12 — Loja", completionStatus: "pendente" }, "Não concluída"), true);
+  for (const completionStatus of ["concluida", "cancelada"]) assert.equal(matchesSurveyPointSearch({ label: "Loja", completionStatus }, "nao concluida"), false);
+});
+test("Busca combina situação com LUC ou nome e preserva busca comum", () => {
+  const point = { label: "LUC 12 — Le Biscuit", completionStatus: "pendente" };
+  assert.equal(matchesSurveyPointSearch(point, "não concluída 12"), true);
+  assert.equal(matchesSurveyPointSearch(point, "Le Biscuit não concluída"), true);
+  assert.equal(matchesSurveyPointSearch(point, "não concluída 99"), false);
+  assert.equal(matchesSurveyPointSearch(point, "Biscuit"), true);
+  assert.equal(matchesSurveyPointSearch(point, ""), true);
+});
+
+test("Técnico cadastrado satisfaz a pergunta da equipe sem resposta comum e preserva EPIs", () => {
+  const answers = withRegisteredTechnicians(new Map([["epi", "Não é necessário"]]), [{ id: "team", question_key: "shopping_maintenance_companions" }, { id: "epi" }], [{ technician_id: "leandro", mobile_phone: "(21) 98766-9243" }]);
+  assert.deepEqual(answers.get("team"), ["leandro"]);
+  assert.equal(answers.get("epi"), "Não é necessário");
+});
+
+test("Resposta antiga não encobre uma equipe sem técnico válido", () => {
+  const questions = [{ id: "team", question_key: "shopping_maintenance_companions" }];
+  assert.deepEqual(withRegisteredTechnicians(new Map([["team", ["old"]]]), questions, []).get("team"), []);
+  assert.deepEqual(withRegisteredTechnicians(new Map(), questions, [{ technician_id: "leandro", mobile_phone: "" }]).get("team"), []);
+});
 
 test("Sanar Pendências não lista nem permite perguntas para o cliente", () => {
   assert.equal(showsCustomerQuestions("pending"), false);

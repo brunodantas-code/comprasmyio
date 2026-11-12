@@ -405,6 +405,10 @@
 
 /* App menu icons (bottom bars): same CDE rule as top icons, keeps active color when symbol color is auto */
 @media (max-width: 1023px) {
+  /* Safari zooms focused text fields below 16px; keep native pinch zoom enabled. */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]), textarea {
+    font-size: max(16px, 1em) !important;
+  }
   .app-navigation {
     bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px) + var(--app-nav-viewport-bottom, 0px));
   }

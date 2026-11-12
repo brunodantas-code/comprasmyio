@@ -1,4 +1,14 @@
 # Roadmap
+- [ ] Site Survey: acelerar Exibir/Recolher sem perder respostas ou impedir salvamentos.
+- [ ] Site Survey: alinhar opções do item 3 no mesmo padrão do item 2.
+- [ ] Verificar o início da visita ao fotografar a fachada e informar a regra atual.
+- [ ] Site Survey: abreviar nomes longos com reticências sem ampliar a largura da tela.
+- [ ] Localizar e informar onde está o gráfico de acompanhamento das visitas.
+- [ ] Mobile: evitar ampliação automática ao selecionar Material/Equipamento.
+- [ ] Mobile: impedir que o menu suba sobre a busca ao abrir o teclado.
+- [ ] Site Survey: incluir X na busca de lojas para limpar o texto digitado.
+- [ ] Site Survey: corrigir a pendência da equipe com técnico cadastrado e resposta de EPIs salva.
+- [ ] Site Survey: integrar Concluída/Não concluída à busca por LUC/nome, removendo o filtro separado no mobile e desktop.
 - [x] Mobile: menus compartilhados ancorados à área visível e área segura; rolagem, alturas 650/844/900 e abertura de Nova visita conferidas. Deslocamento original não reproduzido no Chromium; Safari físico não disponível.
 - [x] Portal mobile: quatro apps por linha, sem páginas/rolagem lateral; dez apps conferidos em 320/390/600 px, independente do tamanho e espaçamento desktop.
 - [x] CDE: prévia mobile com mesma grade do portal, conferida no celular/computador e após aumento do tamanho desktop sem salvar; 15 testes de padrões existentes passaram.

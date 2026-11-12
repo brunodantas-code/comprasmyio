@@ -1,5 +1,30 @@
 export type SurveyAnswerType = "radio" | "multiselect" | "textarea" | "number";
 
+export function matchesSurveyPointSearch(point: { label: string; completionStatus: string }, query: string): boolean {
+  const normalize = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR").trim();
+  let text = normalize(query);
+  const unfinished = /\bnao\s+concluida\b/.test(text);
+  const finished = !unfinished && /\bconcluida\b/.test(text);
+  if (unfinished && point.completionStatus !== "pendente" || finished && point.completionStatus !== "concluida") return false;
+  text = text.replace(/\bnao\s+concluida\b|\bconcluida\b/g, "").trim();
+  const label = normalize(point.label);
+  return text.split(/\s+/).filter(Boolean).every((word) => label.includes(word));
+}
+
+/** The team selector persists in its own table, not in ordinary answer controls. */
+export function withRegisteredTechnicians(
+  answers: Map<string, unknown>,
+  questions: { id: string; question_key?: string | null }[],
+  technicians: { technician_id: string; mobile_phone: string }[],
+): Map<string, unknown> {
+  const resolved = new Map(answers);
+  const ids = technicians.filter((item) => item.technician_id && /^\+?[0-9 ()-]{8,24}$/.test(item.mobile_phone.trim())).map((item) => item.technician_id);
+  for (const question of questions) {
+    if (question.question_key === "shopping_maintenance_companions") resolved.set(question.id, ids);
+  }
+  return resolved;
+}
+
 export function simplifiedAnswerType(type: string): SurveyAnswerType {
   if (type === "multiselect" || type === "number") return type;
   return type === "text" || type === "textarea" ? "textarea" : "radio";
