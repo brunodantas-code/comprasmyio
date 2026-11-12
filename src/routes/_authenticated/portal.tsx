@@ -198,7 +198,7 @@ function PortalPage() {
           <TabsContent value="apps">
             {apps.length ? (
                <>
-                  <div aria-label="Aplicativos disponíveis no mobile" className="mobile-app-grid pb-2 sm:hidden">
+                  <div aria-label="Aplicativos disponíveis no mobile" className="mobile-app-grid grid pb-2 sm:hidden">
                     {apps.map(renderApp)}
                  </div>
                  <div aria-label="Aplicativos disponíveis" style={{ columnGap: tile.gapX, rowGap: tile.gapY }} className="hidden flex-wrap sm:flex">

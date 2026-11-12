@@ -102,7 +102,7 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
             </div> : null; })}
           </div></div>
         <div className="space-y-1"><Label>Prévia mobile</Label>
-          <div aria-label="Prévia mobile dos apps" className="mobile-app-grid w-full max-w-[390px] bg-background px-3 py-8">
+          <div aria-label="Prévia mobile dos apps" className="mobile-app-grid grid w-full max-w-[390px] bg-background px-3 py-8">
             {order.map(key => { const app = PORTAL_APPS.find(a => a.key === key); return app ? <div key={key} className="flex min-w-0 flex-col items-center text-center">
               <div className="mobile-app-tile relative flex flex-col items-center justify-between rounded-2xl border-2 border-primary bg-primary px-1 pb-2 pt-1 text-primary-foreground"><AppTileFace appKey={key} name={app.name} tile={tile} mobile /></div>
               <p className="mt-2 w-full break-words text-center text-[0.68rem] leading-4 text-muted-foreground">{APP_DESCRIPTIONS[key]?.map(line => <span key={line} className="block">{line}</span>)}</p>
