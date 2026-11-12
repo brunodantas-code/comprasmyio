@@ -1,4 +1,5 @@
 import { useAppMenuLayout } from "@/components/cde/cde-menu-type";
+import { AppNavigation } from "@/components/ui/app-navigation";
 import { useMenuOrders, sortByMenuOrder } from "@/components/cde/menu-order";
 import { useEffect, useState } from "react";
 import { createFileRoute, redirect } from "@tanstack/react-router";
@@ -87,14 +88,14 @@ function MytosisPage() {
       </main>
       <BoxTaskDialog selection={pendingTask} onSelect={setPendingTask} onClose={() => setPendingTask(null)} data={data} canEdit={canEdit} />
       <NodeDialog state={dialog} onClose={() => setDialog(null)} data={data} canEdit={canEdit} />
-      <nav className={`fixed inset-x-3 bottom-3 z-50 ${ml.nav}`} aria-label="Navegação do Mytosis">
+      <AppNavigation className={ml.nav} aria-label="Navegação do Mytosis">
         <div className={`mx-auto grid max-w-lg grid-cols-5 items-stretch rounded-[1.75rem] border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/90 ${ml.grid}`}>
           {orderedTabs.map(({ value, label, icon: Icon }) => {
             const active = section === value;
             return <Button key={value} type="button" variant="ghost" className={`h-auto min-w-0 rounded-[1.35rem] p-0 shadow-none ${active ? "!bg-primary/15 !text-primary hover:!bg-primary/20 hover:!text-primary" : "!bg-transparent !text-muted-foreground hover:!bg-muted hover:!text-foreground"}`} onClick={() => setSection(value)} aria-current={active ? "page" : undefined}><span className="flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 px-1"><span className="menu-icon"><Icon className="h-5 w-5 shrink-0" /></span><span className="max-w-full truncate text-[10px] font-semibold leading-none">{label}</span></span></Button>;
           })}
         </div>
-      </nav>
+      </AppNavigation>
     </div>
   );
 }

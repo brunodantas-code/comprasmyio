@@ -101,23 +101,22 @@ function PortalPage() {
     { key: "cde", name: "CDE", description: ["Padrões de", "interface"], to: "/cde" as const },
   ].filter((app) => (app.key === "cde" ? (data.isErpAdmin || data.appKeys.has("cde")) : data.appKeys.has(app.key)) || (app.key === "chamados" && pendingActions?.isCustomerSupportAnalyst))
     .sort((a, b) => (appOrder ? appOrder.indexOf(a.key) - appOrder.indexOf(b.key) : 0));
-  const mobileAppPages = Array.from({ length: Math.ceil(apps.length / 8) }, (_, pageIndex) => apps.slice(pageIndex * 8, pageIndex * 8 + 8));
 
   const renderApp = ({ key, name, description, to }: (typeof apps)[number]) => (
-    <div key={key} style={{ zoom: tile.tilePct / 100 }} className="flex w-20 min-w-0 justify-self-center flex-col items-center text-center sm:w-28 sm:justify-self-start">
+    <div key={key} className="flex min-w-0 flex-col items-center text-center">
       <Link
         to={to}
         aria-label={`Acessar ${name}`}
         title={`Acessar ${name}`}
-        className="group relative flex h-20 w-20 flex-col items-center justify-between rounded-2xl border-2 border-primary bg-primary px-1.5 pb-2 pt-1 text-primary-foreground outline-none transition-transform hover:scale-105 hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 sm:h-28 sm:w-28 sm:rounded-3xl sm:px-2 sm:pb-2 sm:pt-1.5"
+        className="mobile-app-tile group relative flex flex-col items-center justify-between rounded-2xl border-2 border-primary bg-primary px-1 pb-2 pt-1 text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring"
       >
         {key === "supply" && (pendingActions?.supply ?? 0) > 0 ? <PendingBadge count={pendingActions?.supply ?? 0} label="pendências no Supply" /> : null}
         {key === "development" && (pendingActions?.codeTickets ?? 0) > 0 ? <PendingBadge count={pendingActions?.codeTickets ?? 0} label="tickets pendentes no Code" /> : null}
         {key === "chamados" && (pendingActions?.supportCalls ?? 0) > 0 ? <PendingBadge count={pendingActions?.supportCalls ?? 0} label="chamados pendentes no OpDesk" /> : null}
         {key === "legal" && (pendingActions?.legalSignatures ?? 0) > 0 ? <PendingBadge count={pendingActions?.legalSignatures ?? 0} label="pendências no Legal" /> : null}
-        <AppTileFace appKey={key} name={name} tile={tile} />
+        <AppTileFace appKey={key} name={name} tile={tile} mobile />
       </Link>
-      <p className="mt-2 w-20 max-w-full break-words text-center text-[0.68rem] leading-4 text-muted-foreground sm:mt-3 sm:w-28 sm:text-sm sm:leading-5">{description.map((line) => <span key={line} className="block sm:whitespace-nowrap">{line}</span>)}</p>
+      <p className="mt-2 w-full break-words text-center text-[0.68rem] leading-4 text-muted-foreground">{description.map((line) => <span key={line} className="block">{line}</span>)}</p>
     </div>
   );
 
@@ -199,8 +198,8 @@ function PortalPage() {
           <TabsContent value="apps">
             {apps.length ? (
                <>
-                  <div className="no-scrollbar -mx-3 flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain px-3 pb-2 sm:hidden">
-                    {mobileAppPages.map((pageApps, pageIndex) => <div key={pageIndex} style={{ columnGap: tile.gapX / 4, rowGap: tile.gapY }} className="grid w-full shrink-0 snap-start grid-cols-4">{pageApps.map(renderApp)}</div>)}
+                  <div aria-label="Aplicativos disponíveis no mobile" className="mobile-app-grid pb-2 sm:hidden">
+                    {apps.map(renderApp)}
                  </div>
                  <div aria-label="Aplicativos disponíveis" style={{ columnGap: tile.gapX, rowGap: tile.gapY }} className="hidden flex-wrap sm:flex">
                   {apps.map(({ key, name, description, to }) => (

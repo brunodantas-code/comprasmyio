@@ -94,13 +94,21 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
             <Button variant="outline" size="compactIcon" aria-label={`Aumentar ${label.toLowerCase()}`} title="Aumentar" disabled={tile[key] >= 80} onClick={() => setTileDraft({ ...tile, [key]: Math.min(80, tile[key] + 4) })}><Plus /></Button>
           </div></div>)}
         </div>
-        <div className="space-y-1"><Label>Prévia</Label>
+        <div className="space-y-1"><Label>Prévia desktop</Label>
           <div aria-label="Prévia dos apps" style={{ columnGap: tile.gapX, rowGap: tile.gapY }} className="flex w-full flex-wrap bg-background py-10 sm:py-14">
             {order.map((key) => { const app = PORTAL_APPS.find((a) => a.key === key); return app ? <div key={key} style={{ zoom: tile.tilePct / 100 }} className="flex w-20 min-w-0 flex-col items-center text-center sm:w-28">
               <div className="relative flex h-20 w-20 flex-col items-center justify-between rounded-2xl border-2 border-primary bg-primary px-1.5 pb-2 pt-1 text-primary-foreground sm:h-28 sm:w-28 sm:rounded-3xl sm:px-2 sm:pt-1.5"><AppTileFace appKey={key} name={app.name} tile={tile} /></div>
               <p className="mt-2 w-20 max-w-full break-words text-center text-[0.68rem] leading-4 text-muted-foreground sm:mt-3 sm:w-28 sm:text-sm sm:leading-5">{APP_DESCRIPTIONS[key]?.map(line => <span key={line} className="block sm:whitespace-nowrap">{line}</span>)}</p>
             </div> : null; })}
           </div></div>
+        <div className="space-y-1"><Label>Prévia mobile</Label>
+          <div aria-label="Prévia mobile dos apps" className="mobile-app-grid w-full max-w-[390px] bg-background px-3 py-8">
+            {order.map(key => { const app = PORTAL_APPS.find(a => a.key === key); return app ? <div key={key} className="flex min-w-0 flex-col items-center text-center">
+              <div className="mobile-app-tile relative flex flex-col items-center justify-between rounded-2xl border-2 border-primary bg-primary px-1 pb-2 pt-1 text-primary-foreground"><AppTileFace appKey={key} name={app.name} tile={tile} mobile /></div>
+              <p className="mt-2 w-full break-words text-center text-[0.68rem] leading-4 text-muted-foreground">{APP_DESCRIPTIONS[key]?.map(line => <span key={line} className="block">{line}</span>)}</p>
+            </div> : null; })}
+          </div>
+        </div>
         <p className="text-xs text-muted-foreground">No celular, a fonte fica 2 px menor. Os símbolos mais finos recebem correção automática para parecerem do mesmo tamanho.</p>
         <div className="flex items-center gap-2"><Button variant="action" onClick={saveTile} disabled={saving || !tileDraft}><Save className="h-4 w-4" />Salvar</Button>
           {tileDraft && <Button variant="action" disabled={saving} onClick={() => setTileDraft(null)}>Cancelar</Button>}

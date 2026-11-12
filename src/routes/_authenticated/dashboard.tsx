@@ -6,6 +6,7 @@ import { SUPPLY_CODE_MAX, requestedDeadline, deadlineSignals } from "@/lib/suppl
 import { useDeadlineAlerts } from "@/components/cde/cde-deadline-alerts";
 import { SupplyDeadlineIndicators } from "@/components/supply-deadline-indicators";
 import { useAppMenuLayout } from "@/components/cde/cde-menu-type";
+import { AppNavigation } from "@/components/ui/app-navigation";
 import { useMenuOrders, sortByMenuOrder } from "@/components/cde/menu-order";
 import { CdeButton } from "@/components/cde/cde-button";
 import { TableFilterMenu } from "@/components/use-table-filters";
@@ -788,7 +789,7 @@ function Dashboard() {
           </TabsContent>
         </Tabs>
       </main>
-      <nav className={`fixed inset-x-3 bottom-3 z-50 ${ml.nav}`} aria-label="Navegação do Supply">
+      <AppNavigation className={ml.nav} aria-label="Navegação do Supply">
         <div className={`mx-auto grid max-w-2xl grid-cols-5 items-stretch rounded-[1.75rem] border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/90 ${ml.grid}`}>
           {orderedNavigationTabs.map(({ value, label, icon: Icon }) => {
             const active = activeSection === value;
@@ -825,7 +826,7 @@ function Dashboard() {
             return <DropdownMenu key={value}><DropdownMenuTrigger asChild><Button type="button" variant="ghost" className={itemClassName} onClick={selectMain} aria-current={active ? "page" : undefined}>{item}</Button></DropdownMenuTrigger><DropdownMenuContent side={ml.drop} align="center" sideOffset={10} className="max-h-[70vh] w-64 overflow-y-auto rounded-lg p-1.5 shadow-xl"><DropdownMenuLabel>{label}</DropdownMenuLabel><DropdownMenuSeparator />{submenuItems.map(({ value: subValue, label: subLabel, icon: SubIcon }) => <DropdownMenuItem key={subValue} className="min-h-11 rounded-md" onSelect={() => { selectMain(); if (value === "pedidos") setRequestSection(subValue); else if (value === "queue") setApprovalSection(subValue); else if (value === "stock") setStockSection(subValue); else if (value === "projects") setRegistrationSection(subValue); else if (subValue.startsWith("workflow:")) { setAdministrationSection("workflow"); setWorkflowSection(subValue.slice("workflow:".length)); } else setAdministrationSection(subValue); }}><SubIcon className="h-4 w-4" /><span className="flex-1">{subLabel}</span>{selectedSubsection === subValue ? <Check className="h-4 w-4 text-primary" /> : null}</DropdownMenuItem>)}</DropdownMenuContent></DropdownMenu>;
           })}
         </div>
-      </nav>
+      </AppNavigation>
     </div>
   );
 }

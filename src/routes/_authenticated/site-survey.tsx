@@ -1,4 +1,5 @@
 import { useAppMenuLayout } from "@/components/cde/cde-menu-type";
+import { AppNavigation } from "@/components/ui/app-navigation";
 import { useMenuOrders, sortByMenuOrder } from "@/components/cde/menu-order";
 import { CdeButton, CdeNumber, CdeNumberButton } from "@/components/cde/cde-button";
 import { ColumnFilter } from "@/components/column-filter";
@@ -367,7 +368,7 @@ function SiteSurveyPage() {
         </TabsContent>
       </Tabs>
     </main>
-    <nav className={`fixed inset-x-3 bottom-3 z-50 ${ml.nav}`} aria-label="Navegação do Site Survey">
+    <AppNavigation className={ml.nav} aria-label="Navegação do Site Survey">
       <div className={`mx-auto grid max-w-md grid-cols-4 items-stretch ${ml.grid} rounded-[1.75rem] border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/90`}>
         {orderedTabs.map(({ value, label, icon: Icon }) => {
           const active = section === value;
@@ -382,7 +383,7 @@ function SiteSurveyPage() {
           return <DropdownMenu key={value}><DropdownMenuTrigger asChild><Button type="button" variant="ghost" className={itemClassName} onClick={selectSection} aria-current={active ? "page" : undefined}>{item}</Button></DropdownMenuTrigger><DropdownMenuContent side={ml.drop} align="center" sideOffset={10} className="w-56 rounded-lg p-1.5 shadow-xl"><DropdownMenuLabel>{label}</DropdownMenuLabel><DropdownMenuSeparator />{submenuItems.map(({ value: subValue, label: subLabel, icon: SubIcon }) => { const subActive = value === "visitas" ? visitsSection === subValue : userSection === subValue; return <DropdownMenuItem key={subValue} className="min-h-11 rounded-md" onSelect={() => { selectSection(); if (value === "visitas") setVisitsSection(subValue); else setUserSection(subValue); }}><SubIcon className="h-4 w-4" /><span className="flex-1">{subLabel}</span>{subActive ? <Check className="h-4 w-4 text-primary" /> : null}</DropdownMenuItem>; })}</DropdownMenuContent></DropdownMenu>;
         })}
       </div>
-    </nav>
+    </AppNavigation>
   </div>;
 }
 

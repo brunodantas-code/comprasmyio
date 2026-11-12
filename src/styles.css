@@ -404,6 +404,24 @@
 }
 
 /* App menu icons (bottom bars): same CDE rule as top icons, keeps active color when symbol color is auto */
+@media (max-width: 1023px) {
+  .app-navigation {
+    bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px) + var(--app-nav-viewport-bottom, 0px));
+  }
+}
+
+.mobile-app-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: 0.5rem;
+  row-gap: 2.5rem;
+}
+.mobile-app-grid > * { min-width: 0; }
+.mobile-app-tile {
+  width: min(5rem, 100%);
+  aspect-ratio: 1;
+}
+
 .menu-icon {
   display: inline-flex; align-items: center; justify-content: center; padding: 3px;
   color: var(--mi-fg, currentColor);

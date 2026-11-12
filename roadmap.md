@@ -1,4 +1,7 @@
 # Roadmap
+- [x] Mobile: menus compartilhados ancorados à área visível e área segura; rolagem, alturas 650/844/900 e abertura de Nova visita conferidas. Deslocamento original não reproduzido no Chromium; Safari físico não disponível.
+- [x] Portal mobile: quatro apps por linha, sem páginas/rolagem lateral; dez apps conferidos em 320/390/600 px, independente do tamanho e espaçamento desktop.
+- [x] CDE: prévia mobile com mesma grade do portal, conferida no celular/computador e após aumento do tamanho desktop sem salvar; 15 testes de padrões existentes passaram.
 - [x] Projetos: descrição abaixo dos demais campos, com múltiplas linhas.
 - [x] Site Survey: listas da edição de visita seguem o padrão CDE, sem fundo verde próprio.
 - [x] Calendário sem moldura própria e ícone duplicado; conferido em computador/celular.

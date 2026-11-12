@@ -1,4 +1,5 @@
 import { useAppMenuLayout } from "@/components/cde/cde-menu-type";
+import { AppNavigation } from "@/components/ui/app-navigation";
 import { useMenuOrders, sortByMenuOrder } from "@/components/cde/menu-order";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { ListTree, ReceiptText, WalletCards } from "lucide-react";
@@ -52,14 +53,14 @@ function CashFlowPage() {
           <TabsContent value="cash"><CashRegisterTab userId={user.id} /></TabsContent>
         </Tabs>
       </main>
-      <nav className={`fixed inset-x-3 bottom-3 z-50 ${ml.nav}`} aria-label="Navegação do Cash Flow">
+      <AppNavigation className={ml.nav} aria-label="Navegação do Cash Flow">
         <div className={`mx-auto grid max-w-md grid-cols-3 items-stretch rounded-[1.75rem] border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/90 ${ml.grid}`}>
           {orderedTabs.map(({ value, label, icon: Icon }) => {
             const active = section === value;
             return <Button key={value} type="button" variant="ghost" className={`h-auto min-w-0 rounded-[1.35rem] p-0 shadow-none ${active ? "!bg-primary/15 !text-primary hover:!bg-primary/20 hover:!text-primary" : "!bg-transparent !text-muted-foreground hover:!bg-muted hover:!text-foreground"}`} onClick={() => setSection(value)} aria-current={active ? "page" : undefined}><span className="flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 px-1"><span className="menu-icon"><Icon className="h-5 w-5 shrink-0" /></span><span className="max-w-full truncate text-[10px] font-semibold leading-none">{label}</span></span></Button>;
           })}
         </div>
-      </nav>
+      </AppNavigation>
     </div>
   );
 }
