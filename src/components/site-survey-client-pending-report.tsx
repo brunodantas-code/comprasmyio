@@ -3,7 +3,7 @@ import { Download, LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { buildClientPendingGroups, duplicateNamePoints, unidentifiedLucPoints, splitUnidentifiedByName, vacantShopPoints, type ClientPendingPoint, type ClientPendingResponse } from "@/lib/site-survey-client-pending";
+import { buildClientPendingGroups, duplicateNamePoints, unidentifiedLucPoints, splitUnidentifiedByName, vacantShopPoints, facadeIdMismatchPoints, type ClientPendingPoint, type ClientPendingResponse } from "@/lib/site-survey-client-pending";
 import nunitoRegularUrl from "@/assets/fonts/nunito-regular.ttf?url";
 import nunitoBoldUrl from "@/assets/fonts/nunito-bold.ttf?url";
 import { surveyPointType } from "@/lib/site-survey-point-type";
@@ -102,15 +102,15 @@ export function SiteSurveyClientPendingReport({ visit, client, unit, project, po
       const loadPoints = async () => {
         const fresh: ClientPendingPoint[] = [];
         for (let from = 0; ; from += 1000) {
-          const result = await supabase.from("site_survey_visit_lucs").select("id,luc_number,shop_name,location,meter_number,point_type,classification_type").eq("visit_id", visit.id).eq("active", true).order("id").range(from, from + 999);
+          const result = await supabase.from("site_survey_visit_lucs").select("id,luc_number,shop_name,location,meter_number,point_type,classification_type,facade_id_ok").eq("visit_id", visit.id).eq("active", true).order("id").range(from, from + 999);
           if (result.error) throw new Error(result.error.message);
-          fresh.push(...(result.data ?? []).map((point) => ({ value: `luc:${point.id}`, label: [point.luc_number ? `LUC ${point.luc_number}` : "", point.shop_name, point.location].filter(Boolean).join(" — "), pointType: surveyPointType(point), lucNumber: point.luc_number, name: point.shop_name, location: point.location, meterNumber: point.meter_number })));
+          fresh.push(...(result.data ?? []).map((point) => ({ value: `luc:${point.id}`, label: [point.luc_number ? `LUC ${point.luc_number}` : "", point.shop_name, point.location].filter(Boolean).join(" — "), pointType: surveyPointType(point), lucNumber: point.luc_number, name: point.shop_name, location: point.location, meterNumber: point.meter_number, facadeIdOk: point.facade_id_ok })));
           if ((result.data?.length ?? 0) < 1000) break;
         }
         for (let from = 0; ; from += 1000) {
-const result = await supabase.from("site_survey_visit_environments").select("id,name,location,point_type,luc_number").eq("visit_id", visit.id).eq("active", true).order("id").range(from, from + 999);
+const result = await supabase.from("site_survey_visit_environments").select("id,name,location,point_type,luc_number,facade_id_ok").eq("visit_id", visit.id).eq("active", true).order("id").range(from, from + 999);
           if (result.error) throw new Error(result.error.message);
-          fresh.push(...(result.data ?? []).map((point) => ({ value: `environment:${point.id}`, label: [point.luc_number ? `LUC ${point.luc_number}` : "", point.name, point.location].filter(Boolean).join(" — "), location: point.location, lucNumber: point.luc_number, pointType: surveyPointType(point, "environment") })));
+          fresh.push(...(result.data ?? []).map((point) => ({ value: `environment:${point.id}`, label: [point.luc_number ? `LUC ${point.luc_number}` : "", point.name, point.location].filter(Boolean).join(" — "), location: point.location, facadeIdOk: point.facade_id_ok, lucNumber: point.luc_number, pointType: surveyPointType(point, "environment") })));
           if ((result.data?.length ?? 0) < 1000) break;
         }
         return fresh;
@@ -401,6 +401,20 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
             pdf.setFont("Nunito", "normal"); pdf.setFontSize(7); pdf.setTextColor(...ink);
             pdf.text("OK", cell.cell.x + 6.5, midY + 1.2);
           },
+        });
+        advanceTable();
+      }
+      const mismatched = facadeIdMismatchPoints(freshPoints.length ? freshPoints : points);
+      if (mismatched.length) {
+        sectionHeading("LUCs com identificação divergente na fachada", `Confirme os ${mismatched.length} ponto(s) abaixo, cuja identificação na foto da fachada não confere com a lista fornecida.`);
+        autoTable(pdf, {
+          startY: y, theme: "plain", margin: { top: 20, bottom: 20, left: 14, right: 14 },
+          styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: 1.8, overflow: "linebreak", valign: "middle" },
+          headStyles: { fontStyle: "bold", textColor: accent, lineWidth: { bottom: 0.3 }, lineColor: green },
+          rowPageBreak: "avoid", showHead: "everyPage",
+          columnStyles: { 0: { cellWidth: 30 }, 1: { cellWidth: 82 }, 2: { cellWidth: 70 } },
+          head: [["LUC", "Nome", "Localização"]],
+          body: mismatched.map((point) => [point.lucNumber?.trim() || "Sem LUC", point.name ?? point.label, point.location || "—"]),
         });
       }
       const pages = pdf.getNumberOfPages();

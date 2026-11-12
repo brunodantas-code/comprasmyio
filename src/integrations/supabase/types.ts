@@ -6442,6 +6442,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           environment_type_id: string | null
+          facade_id_ok: boolean | null
           id: string
           last_progress_at: string | null
           location: string | null
@@ -6466,6 +6467,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           environment_type_id?: string | null
+          facade_id_ok?: boolean | null
           id?: string
           last_progress_at?: string | null
           location?: string | null
@@ -6490,6 +6492,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           environment_type_id?: string | null
+          facade_id_ok?: boolean | null
           id?: string
           last_progress_at?: string | null
           location?: string | null
@@ -6646,6 +6649,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           environment_type_id: string | null
+          facade_id_ok: boolean | null
           id: string
           last_progress_at: string | null
           location: string | null
@@ -6675,6 +6679,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           environment_type_id?: string | null
+          facade_id_ok?: boolean | null
           id?: string
           last_progress_at?: string | null
           location?: string | null
@@ -6704,6 +6709,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           environment_type_id?: string | null
+          facade_id_ok?: boolean | null
           id?: string
           last_progress_at?: string | null
           location?: string | null

@@ -1,6 +1,6 @@
 import { isCustomerQuestion, pendingCustomerQuestions } from "@/lib/site-survey-questions";
 
-export type ClientPendingPoint = { value: string; label: string; pointType: string; lucNumber?: string | null; name?: string; location?: string | null; meterNumber?: string | null };
+export type ClientPendingPoint = { value: string; label: string; pointType: string; lucNumber?: string | null; name?: string; location?: string | null; meterNumber?: string | null; facadeIdOk?: boolean | null };
 export function unidentifiedLucPoints(points: ClientPendingPoint[]) {
   return points.filter((point) => {
     if (point.pointType !== "shop" && point.pointType !== "kiosk" && point.pointType !== "vacant" && point.pointType !== "vacant_kiosk") return false;
@@ -127,4 +127,9 @@ export function buildClientPendingGroups(points: ClientPendingPoint[], responses
       if (orderA.num !== orderB.num) return orderA.num - orderB.num;
       return a.label.localeCompare(b.label, "pt-BR");
     });
+}
+/** Points whose facade identification does not match the client's list ("ID ok?" = Não). */
+export function facadeIdMismatchPoints(points: ClientPendingPoint[]) {
+  return points.filter((point) => point.facadeIdOk === false)
+    .sort((a, b) => (a.lucNumber ?? "").localeCompare(b.lucNumber ?? "", "pt-BR", { numeric: true }) || (a.name ?? a.label).localeCompare(b.name ?? b.label, "pt-BR"));
 }
