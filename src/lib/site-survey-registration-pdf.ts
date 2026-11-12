@@ -51,7 +51,7 @@ async function thumbnail(attachment: FacadeThumbnailAttachment, grayscale: boole
   } catch { return undefined; } finally { URL.revokeObjectURL(url); }
 }
 
-export async function buildRegistrationPdf(rows: RegistrationPdfRow[], clientName?: string, projectName?: string, grayscale = false) {
+export async function buildRegistrationPdf(rows: RegistrationPdfRow[], clientName?: string, projectName?: string, grayscale = false, statusLabel?: string) {
   const [{ jsPDF }, { default: autoTable }, { PDFDocument }, regular, bold] = await Promise.all([import("jspdf"), import("jspdf-autotable"), import("pdf-lib"), loadFont(nunitoRegularUrl), loadFont(nunitoBoldUrl)]);
   const fields: { page: number; x: number; y: number; checked: boolean; name: string }[] = [];
   // Serial decoding bounds memory even when originals are large.
@@ -69,7 +69,7 @@ export async function buildRegistrationPdf(rows: RegistrationPdfRow[], clientNam
   pdf.setTextColor(...ink);
   if (hasClient) { pdf.setFontSize(15); pdf.text(String(clientName), 14, lineY); lineY += 7; }
   if (hasProject) { pdf.setFontSize(13); pdf.text(`Implantação ${String(projectName)}`, 14, lineY); lineY += 6; }
-  pdf.setFontSize(11); pdf.text("Cadastro de lojas, quiosques e ambientes", 14, lineY);
+  pdf.setFontSize(11); pdf.text(`Cadastro de lojas, quiosques e ambientes${statusLabel ? ` — ${statusLabel}` : ""}`, 14, lineY);
   const ruleY = lineY + 5;
   const infoY = lineY + 12;
   pdf.setDrawColor(...green); pdf.line(14, ruleY, 196, ruleY);

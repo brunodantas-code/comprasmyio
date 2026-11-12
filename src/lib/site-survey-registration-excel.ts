@@ -22,7 +22,7 @@ const STYLES = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleShe
 const esc = (value: string) => value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const col = (index: number) => String.fromCharCode(66 + index); // data starts at column B
 
-export async function buildRegistrationExcel(rows: RegistrationExportRow[], clientName = "") {
+export async function buildRegistrationExcel(rows: RegistrationExportRow[], clientName = "", statusLabel?: string) {
   const withMeter = rows.some((row) => row.meter && row.meter !== "—");
   const columns: Array<{ title: string; width: number; align: "left" | "center"; value: (row: RegistrationExportRow) => string | boolean }> = [
     { title: "LUC", width: 13, align: "center", value: (row) => row.luc },
@@ -43,7 +43,7 @@ export async function buildRegistrationExcel(rows: RegistrationExportRow[], clie
   const countCell = (c: string) => `<c r="${c}5" s="4"><f>COUNTIF(${c}${first}:${c}${last},TRUE)</f><v>${rows.filter((row) => (c === waterCol ? row.water : row.energy)).length}</v></c>`;
   const sheetRows = [
     `<row r="2" ht="33" customHeight="1">${strCell("B2", clientName.trim() || "Cliente", 1)}</row>`,
-    `<row r="3" ht="25" customHeight="1">${strCell("B3", "Cadastro de lojas, quiosques e ambientes", 2)}</row>`,
+    `<row r="3" ht="25" customHeight="1">${strCell("B3", `Cadastro de lojas, quiosques e ambientes${statusLabel ? ` — ${statusLabel}` : ""}`, 2)}</row>`,
     `<row r="5" ht="25" customHeight="1">${strCell(`${labelCol}5`, "Total selecionado", 3)}${countCell(waterCol)}${countCell(energyCol)}</row>`,
     `<row r="6" ht="22" customHeight="1">${columns.map((column, index) => strCell(`${col(index)}6`, column.title, column.align === "center" ? 6 : 5)).join("")}</row>`,
     ...rows.map((row, rowIndex) => {

@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Histórico: filtro Todas/Não concluídas/Concluídas/Canceladas; 87 pontos não concluídos conferidos na tela e nos downloads PDF/Excel, computador e celular.
 - [x] Botão + Ambiente ao lado do título "Selecionar loja, quiosque ou ambiente"; abre o cadastro no computador e no celular sem estourar a tela.
 - [x] Depósito cadastrado como tipo de ambiente no catálogo, disciplina Energia (elétrica).
 - [x] Exibir totalizadores de visitas realizadas e a realizar mesmo com gráfico recolhido; 80/198 conferidos em Vila Velha, canceladas excluídas, teste passou.
