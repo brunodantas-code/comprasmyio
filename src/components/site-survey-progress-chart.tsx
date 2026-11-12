@@ -4,7 +4,7 @@ import { ChartContainer } from "@/components/ui/chart";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { showsSurveyProgressDay } from "@/lib/site-survey-progress";
+import { showsSurveyProgressDay, surveyProgressTechnicianId } from "@/lib/site-survey-progress";
 import { Button } from "@/components/ui/button";
 import { CdeDisclosureIcon } from "@/components/cde/cde-button";
 
@@ -19,11 +19,11 @@ function completionSlot(iso: string) {
   return { day: `${parts.year}-${parts.month}-${parts.day}`, hour: Number(parts.hour) };
 }
 
-export function SiteSurveyProgressChart({ points, technicians, visitNumber }: { points: FinishedPoint[]; technicians: Technician[]; visitNumber: number }) {
+export function SiteSurveyProgressChart({ points, technicians, visitNumber, responsibleTechnicianId }: { points: FinishedPoint[]; technicians: Technician[]; visitNumber: number; responsibleTechnicianId: string | null }) {
   const [open, setOpen] = useState(false);
   const [consolidated, setConsolidated] = useState(true);
   const [technicianId, setTechnicianId] = useState("");
-  const completed = useMemo(() => points.filter((point) => point.completion_status === "concluida" && point.completed_at && !Number.isNaN(Date.parse(point.completed_at))), [points]);
+  const completed = useMemo(() => points.filter((point) => point.completion_status === "concluida" && point.completed_at && !Number.isNaN(Date.parse(point.completed_at))).map((point) => ({ ...point, completed_by: surveyProgressTechnicianId(responsibleTechnicianId, point.completed_by) })), [points, responsibleTechnicianId]);
   const finishers = useMemo(() => [...new Set(completed.map((point) => point.completed_by).filter((id): id is string => Boolean(id)))].map((id) => ({ id, name: technicians.find((person) => person.id === id)?.full_name || technicians.find((person) => person.id === id)?.email || "Técnico não identificado" })).sort((a, b) => a.name.localeCompare(b.name, "pt-BR")), [completed, technicians]);
   const selectedId = finishers.some((person) => person.id === technicianId) ? technicianId : finishers[0]?.id ?? "";
   const days = useMemo(() => {

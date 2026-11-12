@@ -18,7 +18,7 @@
 - Payment approvals recognize the active finance role or job title (an inactive legacy title must not block); above the joint-approval threshold, eligible joint approvers join finance and the requester never self-approves.
 - Personal approval lists/counts use assigned approver, not Admin access, avoiding duplicate parallel tasks. Admin edits preserve decisions/logs; type changes re-evaluate pending chains; payment allocation uses exclusive destinations.
 - Supply “Item novo” authorizes catalog inserts for Fábrica, Terceiros and Ferramentas via effective profile/individual permission and authenticated owner; it does not grant stock editing or movement rights.
-- Survey charts use original dates and visit-scoped display exclusions; stored records stay intact.
+- Survey charts use original dates, scoped exclusions and assigned technician, not recorder; records stay intact.
 - Survey deletion atomically checks OpDesk links and offers keep/delete; OpDesk retains visit number.
 - Code images use private ticket attachments: message images stay with replies, standalone images with tickets. Open tickets allow new questions before answers; answers link to the other participant's pending question. Shared conversation guards keep reply access independent of new-question access and stale composer modes; conclusion guards require the reporter.
 - Code observations use append-only ticket-log revisions through an admin-authorized RPC, while proposed solutions are separately guarded and audited; this preserves original notes and every edit without widening ticket permissions.
