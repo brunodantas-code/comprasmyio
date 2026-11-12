@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Retornar o gráfico de barras verdes de visitas com datas originais de conclusão; dados reais, filtro por técnico e largura 390 px conferidos, sem erros.
 - [x] Site Survey: acelerar Exibir/Recolher sem perder respostas ou impedir salvamentos.
 - [x] Site Survey: alinhar opções do item 3 no mesmo padrão do item 2.
 - [x] Verificar o início da visita ao fotografar a fachada e informar a regra atual.
