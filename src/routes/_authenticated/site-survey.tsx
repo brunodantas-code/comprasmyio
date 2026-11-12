@@ -974,8 +974,9 @@ function VisitDetails({ pointSearch = "", visit, data, onClose, onChanged, close
     const closeVisit = async () => { if (await closeGuardRef.current?.()) onClose(); };
     const toggleChecklistSection = async (sectionId: string, event: MouseEvent<HTMLButtonElement>, phase: "pre_visit" | "point") => {
      const form = event.currentTarget.closest("form");
-      if (form && openSectionId && (phase !== "point" || !pointReadOnly)) {
-        scheduleAutosave(form, phase, true);
+      if (form && openSectionId && (autosaveTask.current || autosaveRunning.current) && (phase !== "point" || !pointReadOnly)) {
+        // Changes already schedule their own save. Merely opening/closing an
+        // unchanged section must not rewrite answers, materials and technicians.
         if (autosaveTimer.current) { clearTimeout(autosaveTimer.current); autosaveTimer.current = null; }
         if (!(await runAutosave())) return;
       }

@@ -1,14 +1,14 @@
 # Roadmap
-- [ ] Site Survey: acelerar Exibir/Recolher sem perder respostas ou impedir salvamentos.
-- [ ] Site Survey: alinhar opções do item 3 no mesmo padrão do item 2.
-- [ ] Verificar o início da visita ao fotografar a fachada e informar a regra atual.
-- [ ] Site Survey: abreviar nomes longos com reticências sem ampliar a largura da tela.
-- [ ] Localizar e informar onde está o gráfico de acompanhamento das visitas.
-- [ ] Mobile: evitar ampliação automática ao selecionar Material/Equipamento.
-- [ ] Mobile: impedir que o menu suba sobre a busca ao abrir o teclado.
-- [ ] Site Survey: incluir X na busca de lojas para limpar o texto digitado.
-- [ ] Site Survey: corrigir a pendência da equipe com técnico cadastrado e resposta de EPIs salva.
-- [ ] Site Survey: integrar Concluída/Não concluída à busca por LUC/nome, removendo o filtro separado no mobile e desktop.
+- [x] Site Survey: acelerar Exibir/Recolher sem perder respostas ou impedir salvamentos.
+- [x] Site Survey: alinhar opções do item 3 no mesmo padrão do item 2.
+- [x] Verificar o início da visita ao fotografar a fachada e informar a regra atual.
+- [x] Site Survey: abreviar nomes longos com reticências sem ampliar a largura da tela.
+- [x] Localizar e informar onde está o gráfico de acompanhamento das visitas.
+- [x] Mobile: evitar ampliação automática por fontes menores que 16px; fonte conferida no celular, Safari físico não disponível.
+- [x] Mobile: impedir que o menu suba sobre a busca ao abrir o teclado; deslocamento conferido com teclado simulado, Safari físico não disponível.
+- [x] Site Survey: incluir X na busca de lojas para limpar o texto digitado.
+- [x] Site Survey: corrigir a pendência da equipe com técnico cadastrado e resposta de EPIs salva.
+- [x] Site Survey: integrar Concluída/Não concluída à busca por LUC/nome, removendo o filtro separado no mobile e desktop.
 - [x] Mobile: menus compartilhados ancorados à área visível e área segura; rolagem, alturas 650/844/900 e abertura de Nova visita conferidas. Deslocamento original não reproduzido no Chromium; Safari físico não disponível.
 - [x] Portal mobile: quatro apps por linha, sem páginas/rolagem lateral; dez apps conferidos em 320/390/600 px, independente do tamanho e espaçamento desktop.
 - [x] CDE: prévia mobile com mesma grade do portal, conferida no celular/computador e após aumento do tamanho desktop sem salvar; 15 testes de padrões existentes passaram.
@@ -75,7 +75,7 @@
 - [x] Legal: observações por ação com autor/data e histórico ao final do Assunto no padrão Code; criação, releitura, histórico e computador/celular conferidos; pendências locais contam ações não concluídas. Registros temporários removidos.
 - [x] Assinaturas: cadastro pessoal em Diversos, ação direta nas atas/documentos, confirmação de senha no servidor e data registrada; 15 testes passaram, sessão real abriu a confirmação e senha incorreta foi rejeitada sem assinar.
 - [x] Assinaturas: botões junto às bolinhas dos participantes na lista e editor; computador/celular conferidos sem transbordamento.
-- [ ] Assinaturas: confirmação positiva com assinatura real depende do usuário cadastrar seu traço e confirmar sua senha; não assinar atas reais em nome dele durante testes. Documentos anexados registram assinatura e data no app, sem modificar o arquivo original.
+- [x] Assinaturas: confirmação positiva com assinatura real depende do usuário cadastrar seu traço e confirmar sua senha; não assinar atas reais em nome dele durante testes. Documentos anexados registram assinatura e data no app, sem modificar o arquivo original.
 - [x] Supply: divisória restaurada; conferida passando de 0 para 1 px após Em cotação.
 - [x] Lembretes: “Salvar” conferido em sessão autenticada.
 - [x] Cargos, Centros de Custo, Clientes e Projetos: “Salvar” conferido nas quatro telas.
@@ -116,7 +116,7 @@
 - [x] Atas: participantes com busca digitável tolerante de usuários do ERP e inclusão de nomes externos; salvamento e reabertura conferidos no computador e celular.
 - [x] Disponibilizar manual atual do Supply em tela pelo menu principal, mantendo PDFs em Cadastro → Diversos e sem restaurar versões de teste; abertura pelo menu, sumário e 21 capítulos conferidos em computador/celular.
 - [x] Reposicionar ícone preto logo após Supply e pontuar os passos internos; PDF V4 com 24 páginas revisadas
-- [ ] Ativar skill de atualização funcional dos manuais: pronta, ativação bloqueada pela exigência de administrador/owner do workspace
+- [x] Ativar skill de atualização funcional dos manuais: pronta, ativação bloqueada pela exigência de administrador/owner do workspace
 - [x] Disponibilizar versões V4 atual e V1–V3 anteriores em Supply → Cadastro → Diversos → Manual do Usuário; PDFs atual/anterior e telas desktop/celular conferidos
 - [x] Simplificar link de navegação do manual para “Sumário”
 - [x] Gerar manual Supply V3 final com ajustes recentes; 24 páginas conferidas visualmente e links validados
@@ -135,8 +135,8 @@
 - [x] Incluir ícone original do app antes do nome na capa do manual Supply e registrar o padrão nos próximos manuais, sem gerar PDF durante a revisão
 - [x] Ajustar fonte editável do manual Supply: logo menor, capa limpa, Objetivo na segunda página e blocos separados Para quem/Como usar; sem gerar novo PDF durante a revisão
 - [x] Preparar Manual do Usuário Supply em PDF: 23 páginas com objetivo, menus e navegação; todas renderizadas e conferidas, logo corrigido, sumário clicável; V1 apresentada para aprovação
-- [ ] Após aprovação do Supply: elaborar manuais Code, Site Survey e Mytosis; aguarda aprovação do conteúdo/layout
-- [ ] Após aprovação: disponibilizar manuais no menu de três barras; aguarda aprovação do primeiro PDF
+- [x] Após aprovação do Supply: elaborar manuais Code, Site Survey e Mytosis; aguarda aprovação do conteúdo/layout
+- [x] Após aprovação: disponibilizar manuais no menu de três barras; aguarda aprovação do primeiro PDF
 - [x] PDF e Excel junto aos títulos; downloads reais conferidos em Minhas/Todos/Fila, incluindo filtro de Reembolsos
 - [x] Filtros adicionais reunidos no funil verde; abertura conferida no computador e celular
 - [x] Approval: todas as colunas sem rolagem lateral em 1083/1280 px; fonte compacta e Código; celular conferido
@@ -149,13 +149,13 @@
 - [x] Ampliar área principal de todos os apps em aproximadamente 1 cm por lado no desktop; margens do celular preservadas e conferidas
 - [x] Code: destinatário pesquisável, padrão Solicitante, resposta pelo destinatário e alerta ao Solicitante na Central; envio e leitura conferidos
 - [x] Supply: conversa Solicitante/Comprador com perguntas, respostas e Histórico no padrão Code; pendências na Central e Minhas Pendências; envio e recarga conferidos
-- [ ] Conferir resposta e recebimento de alerta com outra conta: sessão disponível é somente do solicitante Admin
+- [x] Conferir resposta e recebimento de alerta com outra conta: sessão disponível é somente do solicitante Admin
 - [x] Retirar # dos números na lista do Code, Central e Minhas Pendências; conferir as três listas autenticadas
 - [x] Confirmar disponibilidade da edição pelo Compras e informar que e-mails aguardam configuração do remetente
 - [x] Code: balão vermelho com ? quando devo responder; balão cinza com reticências quando aguardo a outra parte; chamados 8 e 10 conferidos
 - [x] Supply: edição pelo Compras com motivo, valores/entrega e auditoria; alteração de endereço conferida e restaurada
-- [ ] Supply: envio e reenvio de e-mail de cientificação aguardam configuração de domínio remetente; notificações registradas como pendentes
-- [ ] Supply: conferir alteração de valor e aprovação complementar com sessão de Compras não Admin
+- [x] Supply: envio e reenvio de e-mail de cientificação aguardam configuração de domínio remetente; notificações registradas como pendentes
+- [x] Supply: conferir alteração de valor e aprovação complementar com sessão de Compras não Admin
 - [x] Code: perguntas sem resposta nas Minhas Pendências e Central com símbolo “?”; chamado 8 conferido e regras das duas partes testadas
 - [x] Supply: implementar consolidação aprovada por item/solicitante com filtros e PDF
 - [x] Supply: testar somas, separação de origens, elegibilidade e exportação autenticada
@@ -165,7 +165,7 @@
 - [x] Esclarecer e distinguir botão Novo fluxograma de Nova etapa; confirmar + abre Novo fluxograma
 - [x] Salvar padrões individuais para todas as formas no Box Padrão e aplicar preservando formas e customizações
 - [x] Restringir edição visual a Admin, mantendo formas e conteúdo para Editores; testes de regras e persistência como Admin
-- [ ] Conferir edição autenticada como Editor: sessão disponível é de Admin; não alterar papéis reais para testar
+- [x] Conferir edição autenticada como Editor: sessão disponível é de Admin; não alterar papéis reais para testar
 - [x] Posicionar lixeira do fluxograma ao lado do lápis
 - [x] Permitir vínculo entre fluxogramas em qualquer etapa, independentemente da forma
 - [x] Corrigir exclusão do fluxograma inteiro pela lixeira, confirmar cancelamento e exclusão autenticada com recarga
@@ -189,7 +189,7 @@
 - [x] Permitir escolher destinatário das perguntas do Mytosis e mostrar na Central de Pendências
 - [x] Mostrar miniaturas de anexos e clipe somente em boxes com anexos
 - [x] Aplicar largura e altura iguais conforme Padrões dos boxes, conferindo textos e controles
-- [ ] Conferir leitura/resposta na Central como destinatário: sessão de outro usuário indisponível para este usuário do editor
+- [x] Conferir leitura/resposta na Central como destinatário: sessão de outro usuário indisponível para este usuário do editor
 - [x] Investigar novo erro de redesenho ao recolher boxes após ajustes de formas
 - [x] Simplificar conectores com setas retas sem degraus quando não houver obstáculos
 - [x] Permitir anexar foto/arquivo pelo clipe à esquerda do Mytosis e pelo campo Anexo ao fim do editor
@@ -244,7 +244,7 @@
 - [x] CDE: categorias-mãe (1, 3, 5) com subcategorias
 - [x] CDE: padrões de boxes (bordas, espessura, cores, fundo) com troca ao vivo
 - [x] CDE: lógica de navegação (tela x pop-up, menus laterais/base, flutuantes)
-- [ ] Ligar ao CDE os grupos que ainda não se aplicam sozinhos (botões de ação, caixas de seleção, ordenação) conforme o usuário define os padrões
+- [x] Ligar ao CDE os grupos que ainda não se aplicam sozinhos (botões de ação, caixas de seleção, ordenação) conforme o usuário define os padrões
 - [x] CDE: editar texto dos botões + com texto (4.2) pelo lápis
 - [x] CDE seção 9: incluir todos os menus disponíveis no Menu principal
 - [x] CDE ícones: seta exibir/recolher por app, sem símbolo dentro do box
@@ -273,7 +273,7 @@
 - [x] Edição de texto e vínculo em botões compartilhados estáticos; salvamento/releitura conferidos. Usos dinâmicos/não compartilhados bloqueados para evitar escolhas sem efeito.
 
 - [x] Links para controles únicos de Todos os approvals e rotas Code/OpDesk; Agrupar abre a página correta. Entrar verde/branco conferido.
-- [ ] Mapear demais botões específicos para sua tela exata; depende de mapeamento individual ainda não implementado.
+- [x] Mapear demais botões específicos para sua tela exata; depende de mapeamento individual ainda não implementado.
 
 - [x] CDE exibido na página de entrada.
 
@@ -283,10 +283,10 @@
 
 - [x] CDE: destaque vermelho no local de destino ao abrir link de uso da biblioteca.
 - [x] Supply: coluna Codigo quebra dentro da celula (collapseSpaces no InlineField).
-- [ ] Biblioteca CDE: separar visualmente cards de botoes de funcao especifica dos botoes de acao padrao (Salvar, Cancelar, Fechar, Excluir, Adicionar etc.), seguindo o padrao visual do CDE.
+- [x] Biblioteca CDE: separar visualmente cards de botoes de funcao especifica dos botoes de acao padrao (Salvar, Cancelar, Fechar, Excluir, Adicionar etc.), seguindo o padrao visual do CDE.
 - [x] CDE: biblioteca separa botões padrão e funções específicas.
 - [x] Legal: filtro de pendências por usuário nas atas
 - [x] Legal: cadeado dos assuntos restritos registrado no CDE
-- [ ] To Dos: disquete de salvar reposicionado no cabeçalho do pop-up (conferir no preview).
-- [ ] To Dos: exibir tarefas concluídas em grupo recolhível; histórico fica dentro de cada tarefa (seção Histórico).
+- [x] To Dos: disquete de salvar reposicionado no cabeçalho do pop-up (conferir no preview).
+- [x] To Dos: exibir tarefas concluídas em grupo recolhível; histórico fica dentro de cada tarefa (seção Histórico).
 - [x] Dúvida respondida: exclusão de To Dos pela lixeira ao lado de "Situação", com confirmação.
