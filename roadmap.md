@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Reorganizar cadastro: ações e Filtro geral logo acima do cabeçalho; sem foto abaixo de Foto; perguntas acima da importação de respostas; posições, checkboxes e busca conferidos no computador/celular.
 - [x] Corrigir sobreposição da lupa no filtro geral do checklist; separação conferida no computador e no celular.
 - [x] Esclarecer filtro de lojas com visitas iniciadas: não há opção exclusiva; Não concluída inclui também as não iniciadas.
 - [x] Separar Ações de Instalação aprovada e alinhar à direita sobre seus ícones; colunas independentes conferidas.
