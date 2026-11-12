@@ -406,7 +406,7 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
       }
       const mismatched = facadeIdMismatchPoints(freshPoints.length ? freshPoints : points);
       if (mismatched.length) {
-        sectionHeading("LUCs com identificação divergente na fachada", `Confirme os ${mismatched.length} ponto(s) abaixo, cuja identificação na foto da fachada não confere com a lista fornecida.`);
+        sectionHeading("Identificação e/ou LUC divergente na lista fornecida pela cliente", `Confirme os ${mismatched.length} ponto(s) abaixo, cuja identificação na foto da fachada não confere com a lista fornecida.`);
         autoTable(pdf, {
           startY: y, theme: "plain", margin: { top: 20, bottom: 20, left: 14, right: 14 },
           styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: 1.8, overflow: "linebreak", valign: "middle" },
