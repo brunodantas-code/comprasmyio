@@ -83,3 +83,9 @@ test("Resposta salva permanece pendente até confirmação manual", () => {
 test("Perguntas de outros pontos não acrescentam seções ao histórico", () => {
   assert.deepEqual([...customerHistorySectionIds([question], [])], []);
 });
+
+test("bare não filters by the Não concluída tag", () => {
+  assert.equal(matchesSurveyPointSearch({ label: "LUC Não identificado — Vivo", completionStatus: "concluida" }, "não"), false);
+  assert.equal(matchesSurveyPointSearch({ label: "LUC 1 — Loja", completionStatus: "pendente" }, "não"), true);
+  assert.equal(matchesSurveyPointSearch({ label: "LUC 1 — Loja", completionStatus: "pendente" }, "nao co"), true);
+});

@@ -6,11 +6,14 @@ export function matchesSurveyPointSearch(point: { label: string; completionStatu
   const statusWord = "conclu(?:i(?:d(?:a(?:s)?)?)?)?";
   const unfinishedPattern = new RegExp(`\\bnao\\s+${statusWord}\\b`);
   const finishedPattern = new RegExp(`\\b${statusWord}\\b`);
+  // A bare "não" or partial "não c..." is the start of the "Não concluída" tag.
+  if ("nao concluida".startsWith(text) && text.startsWith("nao")) text = "nao concluida";
   const unfinished = unfinishedPattern.test(text);
   const finished = !unfinished && finishedPattern.test(text);
   if (unfinished && point.completionStatus !== "pendente" || finished && point.completionStatus !== "concluida") return false;
   text = text.replace(new RegExp(`\\bnao\\s+${statusWord}\\b|\\b${statusWord}\\b`, "g"), "").trim();
-  const label = normalize(point.label);
+  const tag = point.completionStatus === "concluida" ? "concluida" : point.completionStatus === "cancelada" ? "cancelada" : "nao concluida";
+  const label = normalize(`${point.label} ${tag}`);
   return text.split(/\s+/).filter(Boolean).every((word) => label.includes(word));
 }
 
