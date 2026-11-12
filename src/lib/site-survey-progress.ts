@@ -8,3 +8,10 @@ export function showsSurveyProgressDay(visitNumber: number, day: string): boolea
 export function surveyProgressTechnicianId(responsibleId: string | null, recordedBy: string | null): string | null {
   return responsibleId || recordedBy;
 }
+
+export function surveyVisitTotals(points: Array<{ completion_status: string }>) {
+  return {
+    completed: points.filter((point) => point.completion_status === "concluida").length,
+    remaining: points.filter((point) => point.completion_status !== "concluida" && point.completion_status !== "cancelada").length,
+  };
+}

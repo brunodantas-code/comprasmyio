@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Exibir totalizadores de visitas realizadas e a realizar mesmo com gráfico recolhido; 80/198 conferidos em Vila Velha, canceladas excluídas, teste passou.
+- [x] Escada no cabeçalho de Materiais e equipamentos: existentes marcados, seleção salva e relida em Localiza com estado original restaurado; computador/celular e três testes conferidos.
 - [x] Reorganizar cadastro: ações e Filtro geral logo acima do cabeçalho; sem foto abaixo de Foto; perguntas acima da importação de respostas; posições, checkboxes e busca conferidos no computador/celular.
 - [x] Corrigir sobreposição da lupa no filtro geral do checklist; separação conferida no computador e no celular.
 - [x] Esclarecer filtro de lojas com visitas iniciadas: não há opção exclusiva; Não concluída inclui também as não iniciadas.

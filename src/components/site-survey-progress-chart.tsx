@@ -4,7 +4,7 @@ import { ChartContainer } from "@/components/ui/chart";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { showsSurveyProgressDay, surveyProgressTechnicianId } from "@/lib/site-survey-progress";
+import { showsSurveyProgressDay, surveyProgressTechnicianId, surveyVisitTotals } from "@/lib/site-survey-progress";
 import { Button } from "@/components/ui/button";
 import { CdeDisclosureIcon } from "@/components/cde/cde-button";
 
@@ -23,6 +23,7 @@ export function SiteSurveyProgressChart({ points, technicians, visitNumber, resp
   const [open, setOpen] = useState(false);
   const [consolidated, setConsolidated] = useState(true);
   const [technicianId, setTechnicianId] = useState("");
+  const totals = surveyVisitTotals(points);
   const completed = useMemo(() => points.filter((point) => point.completion_status === "concluida" && point.completed_at && !Number.isNaN(Date.parse(point.completed_at))).map((point) => ({ ...point, completed_by: surveyProgressTechnicianId(responsibleTechnicianId, point.completed_by) })), [points, responsibleTechnicianId]);
   const finishers = useMemo(() => [...new Set(completed.map((point) => point.completed_by).filter((id): id is string => Boolean(id)))].map((id) => ({ id, name: technicians.find((person) => person.id === id)?.full_name || technicians.find((person) => person.id === id)?.email || "Técnico não identificado" })).sort((a, b) => a.name.localeCompare(b.name, "pt-BR")), [completed, technicians]);
   const selectedId = finishers.some((person) => person.id === technicianId) ? technicianId : finishers[0]?.id ?? "";
@@ -53,6 +54,7 @@ export function SiteSurveyProgressChart({ points, technicians, visitNumber, resp
       <h3 className="font-bold">Avanço das visitas</h3>
       <Button type="button" variant="ghost" size="compactIcon" aria-label={open ? "Recolher gráficos de visitas" : "Exibir gráficos de visitas"} title={open ? "Recolher gráficos" : "Exibir gráficos"} aria-expanded={open} aria-controls={`survey-progress-${visitNumber}`} onClick={() => setOpen((current) => !current)}><CdeDisclosureIcon open={open} direction="vertical" screen="components/site-survey-progress-chart.tsx" /></Button>
     </div>
+    <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm text-muted-foreground" aria-label="Total de visitas"><span>Realizadas: <strong className="font-semibold text-foreground">{totals.completed}</strong></span><span>A realizar: <strong className="font-semibold text-foreground">{totals.remaining}</strong></span></div>
     {open ? <div id={`survey-progress-${visitNumber}`} className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-2"><Checkbox id="survey-progress-consolidated" checked={consolidated} onCheckedChange={(checked) => setConsolidated(checked === true)} /><Label htmlFor="survey-progress-consolidated">Consolidado</Label></div>

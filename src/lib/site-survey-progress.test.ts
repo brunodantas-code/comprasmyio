@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { showsSurveyProgressDay, surveyProgressTechnicianId } from "./site-survey-progress";
+import { showsSurveyProgressDay, surveyProgressTechnicianId, surveyVisitTotals } from "./site-survey-progress";
 
 test("10/11/2026 não mostra gráfico na visita indicada", () => {
   assert.equal(showsSurveyProgressDay(202611100001, "2026-11-10"), false);
@@ -23,4 +23,8 @@ test("Vila Velha atribui o gráfico a Leandro Silva, mesmo com conclusão regist
 test("Sem responsável cadastrado preserva a identificação disponível", () => {
   assert.equal(surveyProgressTechnicianId(null, "recorder"), "recorder");
   assert.equal(surveyProgressTechnicianId(null, null), null);
+});
+
+test("Totalizadores contam concluídas e a realizar, sem incluir canceladas", () => {
+  assert.deepEqual(surveyVisitTotals([{ completion_status: "concluida" }, { completion_status: "concluida" }, { completion_status: "pendente" }, { completion_status: "cancelada" }]), { completed: 2, remaining: 1 });
 });
