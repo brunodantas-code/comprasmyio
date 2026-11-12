@@ -1506,6 +1506,13 @@
       "when": 1794348140182,
       "tag": "0214_reset_site_survey_visit",
       "breakpoints": true
+    },
+    {
+      "idx": 215,
+      "version": "7",
+      "when": 1794478056959,
+      "tag": "0215_restrict_selected_catalog_reads_and_todo_files",
+      "breakpoints": true
     }
   ]
 }
