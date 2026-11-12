@@ -1,4 +1,7 @@
 # Roadmap
+- [x] Corrigir sobreposição da lupa no filtro geral do checklist; separação conferida no computador e no celular.
+- [x] Esclarecer filtro de lojas com visitas iniciadas: não há opção exclusiva; Não concluída inclui também as não iniciadas.
+- [x] Separar Ações de Instalação aprovada e alinhar à direita sobre seus ícones; colunas independentes conferidas.
 - [x] Incluir seta Exibir/Recolher nos gráficos, inicialmente recolhidos; abertura no computador, recolhimento no celular e quantidades preservadas conferidos.
 - [x] Corrigir busca por Concluída e Não concluída: reconhece “conclu” durante digitação; 48 concluídas, 228 pendentes, combinação LUC no celular e limpeza para 276 pontos conferidas; 19 testes passaram.
 - [x] Inserir quantidade acima de cada barra, em cinza como os eixos; 10, 8 e 29 conferidos no computador/celular.
