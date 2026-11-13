@@ -17,6 +17,7 @@ import {
   CodeXml,
   DollarSign,
   FileSignature,
+  Lightbulb,
   Phone,
   Search,
   Settings,
@@ -46,6 +47,7 @@ export const Route = createFileRoute("/")({
 });
 
 const MODULES = [
+  { icon: Lightbulb, title: "Wishlist", body: "Desejos e inovação", available: true },
   { icon: CdeIcon, title: "CDE", body: "Padrões de interface", available: true },
   {
     icon: Settings,

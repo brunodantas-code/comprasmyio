@@ -11,6 +11,7 @@ export const PORTAL_APPS = [
   { key: "chamados", name: "OpDesk" },
   { key: "development", name: "Code" },
   { key: "mytosis", name: "Mytosis" },
+  { key: "wishlist", name: "Wishlist" },
   { key: "cde", name: "CDE" },
 ] as const;
 const DEFAULT = PORTAL_APPS.map((a) => a.key as string);

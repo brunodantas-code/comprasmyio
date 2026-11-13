@@ -10,6 +10,7 @@ Status operacional de approval aprovado só pode ser alterado pelo Time de Suppl
 Botões de ação sempre com fundo verde e ícones/textos pretos; lilás somente em títulos explicitamente solicitados.
 
 ## Memories
+- [Finalidade do Wishlist](mem://features/wishlist-purpose) — Inovação no Wishlist; bugs/melhorias no Code; projetos futuros no myio Projects
 - [Função operacional adicional](features/additional-operational-function.md) — Cargo define alçadas; função adicional Time de Supply libera fila e ações sem alterar a hierarquia
 - [Regra de sync de QR externos](mem://features/external-qr-sync) — Só sincroniza QRs da homologation_units; externos desconhecidos são ignorados/removidos
 - [Desconto único de estoque por QR](mem://features/stock-single-deduction) — QR homologado desconta estoque 1x só; mudança de setor é rastreio, nunca nova saída; estoque nunca negativo

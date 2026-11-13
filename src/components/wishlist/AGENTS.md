@@ -1,0 +1,3 @@
+- Wishlist uses separate shared, app-granted tables, never personal tasks or Code tickets, to retain innovation ownership and collaboration boundaries.
+- Only idealizers or ERP admins edit ideas and roadmap planning; assigned users complete their own steps, while immutable messages link answers to verified recipients.
+- Export stable idea/step IDs, originator and conversation for future Projects import; never insert innovation ideas into Supply's commercial projects table.

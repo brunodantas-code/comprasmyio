@@ -1,4 +1,8 @@
 # Roadmap
+- [x] Wishlist: app compartilhado para usuários ativos, com idealizador, data e resumo da descrição por linha; lista e cadastro conferidos.
+- [x] Wishlist: perguntas, respostas vinculadas e contribuições com histórico protegido; perguntas/contribuições persistidas; respostas cobertas por testes/guarda, sem sessão do destinatário.
+- [x] Wishlist: roadmap com responsável, prazo e conclusão; exportação para futura migração ao myio Projects conferida, sem tocar projetos comerciais do Supply.
+- [x] Wishlist: cadastro, conversa, exportação, histórico, autoria protegida e exclusão confirmada conferidos; portal/celulares 320/390 px sem excesso lateral; biblioteca CDE atualizada; 31 testes passaram.
 - [x] Vila Velha: 18 pontos adicionados marcados com + junto à foto; filtro Origem aplicado e lista de 18 conferida.
 - [x] Cadastro completo, pontos selecionados para instalação e Proposta Comercial separados em blocos independentes, inicialmente recolhidos; computador/celular conferidos.
 - [x] Histórico: ações pretas junto ao cabeçalho; demais controles à direita acima; perguntas para o cliente no seletor de situação; computador/celular conferidos.

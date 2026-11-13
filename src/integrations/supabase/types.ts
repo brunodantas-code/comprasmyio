@@ -8203,6 +8203,211 @@ export type Database = {
         }
         Relationships: []
       }
+      wishlist_ideas: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          description: string
+          expected_result: string
+          id: string
+          idealizer_id: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          description: string
+          expected_result?: string
+          id?: string
+          idealizer_id?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          description?: string
+          expected_result?: string
+          id?: string
+          idealizer_id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wishlist_ideas_idealizer_id_fkey"
+            columns: ["idealizer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wishlist_logs: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          id: string
+          idea_id: string
+          text: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          idea_id: string
+          text: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          idea_id?: string
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wishlist_logs_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wishlist_logs_idea_id_fkey"
+            columns: ["idea_id"]
+            isOneToOne: false
+            referencedRelation: "wishlist_ideas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wishlist_messages: {
+        Row: {
+          author_id: string
+          created_at: string
+          id: string
+          idea_id: string
+          message: string
+          message_type: string
+          parent_message_id: string | null
+          recipient_id: string | null
+        }
+        Insert: {
+          author_id?: string
+          created_at?: string
+          id?: string
+          idea_id: string
+          message: string
+          message_type: string
+          parent_message_id?: string | null
+          recipient_id?: string | null
+        }
+        Update: {
+          author_id?: string
+          created_at?: string
+          id?: string
+          idea_id?: string
+          message?: string
+          message_type?: string
+          parent_message_id?: string | null
+          recipient_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wishlist_messages_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wishlist_messages_idea_id_fkey"
+            columns: ["idea_id"]
+            isOneToOne: false
+            referencedRelation: "wishlist_ideas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wishlist_messages_parent_message_id_fkey"
+            columns: ["parent_message_id"]
+            isOneToOne: false
+            referencedRelation: "wishlist_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wishlist_messages_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wishlist_roadmap_steps: {
+        Row: {
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          deleted_at: string | null
+          description: string
+          due_date: string | null
+          id: string
+          idea_id: string
+          position: number
+          responsible_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          description?: string
+          due_date?: string | null
+          id?: string
+          idea_id: string
+          position?: number
+          responsible_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          description?: string
+          due_date?: string | null
+          id?: string
+          idea_id?: string
+          position?: number
+          responsible_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wishlist_roadmap_steps_idea_id_fkey"
+            columns: ["idea_id"]
+            isOneToOne: false
+            referencedRelation: "wishlist_ideas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wishlist_roadmap_steps_responsible_id_fkey"
+            columns: ["responsible_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       material_stock: {
@@ -8610,6 +8815,14 @@ export type Database = {
           _session_id: string
         }
         Returns: Json
+      }
+      wishlist_can_access: { Args: never; Returns: boolean }
+      wishlist_users: {
+        Args: never
+        Returns: {
+          full_name: string
+          id: string
+        }[]
       }
       wrap_mytosis_node: {
         Args: { _new_id: string; _node_id: string }

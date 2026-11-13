@@ -20,6 +20,7 @@ const APPS = [
   { key: "chamados", label: "OpDesk" },
   { key: "development", label: "Code" },
   { key: "mytosis", label: "Mytosis" },
+  { key: "wishlist", label: "Wishlist" },
   { key: "cde", label: "CDE" },
 ] as const;
 
@@ -89,7 +90,7 @@ export function ErpAppAccessAdmin() {
                   <span className={user.is_active ? "" : "text-destructive"}>{user.is_active ? "Ativo" : "Inativo"}</span>
                 </label>
               </div>
-              {isOpen ? <div className="grid min-w-0 grid-cols-2 gap-x-4 gap-y-3 rounded-md border border-border p-3 sm:grid-flow-col sm:grid-rows-2 sm:grid-cols-5">
+              {isOpen ? <div className="grid min-w-0 grid-cols-2 gap-x-4 gap-y-3 rounded-md border border-border p-3 sm:grid-cols-4 lg:grid-cols-6">
                 {APPS.map((app) => {
                   const checked = accessSet.has(`${user.id}:${app.key}`);
                   return (

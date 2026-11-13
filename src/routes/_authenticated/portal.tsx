@@ -98,6 +98,7 @@ function PortalPage() {
     { key: "chamados", name: "OpDesk", description: ["Suporte ao cliente", "e operação"], to: "/chamados" as const },
     { key: "development", name: "Code", description: ["Melhorias e Bugs"], to: "/development" as const },
     { key: "mytosis", name: "Mytosis", description: ["Fluxogramas", "e processos"], to: "/mytosis" as const },
+    { key: "wishlist", name: "Wishlist", description: ["Desejos e", "inovação"], to: "/wishlist" as const },
     { key: "cde", name: "CDE", description: ["Padrões de", "interface"], to: "/cde" as const },
   ].filter((app) => (app.key === "cde" ? (data.isErpAdmin || data.appKeys.has("cde")) : data.appKeys.has(app.key)) || (app.key === "chamados" && pendingActions?.isCustomerSupportAnalyst))
     .sort((a, b) => (appOrder ? appOrder.indexOf(a.key) - appOrder.indexOf(b.key) : 0));

@@ -26,6 +26,7 @@ import { Route as AuthenticatedPortalRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedRhRouteImport } from './routes/_authenticated/rh'
 import { Route as AuthenticatedSiteSurveyRouteImport } from './routes/_authenticated/site-survey'
 import { Route as AuthenticatedSupplyManualRouteImport } from './routes/_authenticated/supply-manual'
+import { Route as AuthenticatedWishlistRouteImport } from './routes/_authenticated/wishlist'
 import { Route as ApiPublicHooksSyncProductStatusRouteImport } from './routes/api/public/hooks/sync-product-status'
 
 const IndexRoute = IndexRouteImport.update({
@@ -114,6 +115,11 @@ const AuthenticatedSupplyManualRoute =
     path: '/supply-manual',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedWishlistRoute = AuthenticatedWishlistRouteImport.update({
+  id: '/wishlist',
+  path: '/wishlist',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const ApiPublicHooksSyncProductStatusRoute =
   ApiPublicHooksSyncProductStatusRouteImport.update({
     id: '/api/public/hooks/sync-product-status',
@@ -138,6 +144,7 @@ export interface FileRoutesByFullPath {
   '/rh': typeof AuthenticatedRhRoute
   '/site-survey': typeof AuthenticatedSiteSurveyRoute
   '/supply-manual': typeof AuthenticatedSupplyManualRoute
+  '/wishlist': typeof AuthenticatedWishlistRoute
   '/api/public/hooks/sync-product-status': typeof ApiPublicHooksSyncProductStatusRoute
 }
 export interface FileRoutesByTo {
@@ -157,6 +164,7 @@ export interface FileRoutesByTo {
   '/rh': typeof AuthenticatedRhRoute
   '/site-survey': typeof AuthenticatedSiteSurveyRoute
   '/supply-manual': typeof AuthenticatedSupplyManualRoute
+  '/wishlist': typeof AuthenticatedWishlistRoute
   '/api/public/hooks/sync-product-status': typeof ApiPublicHooksSyncProductStatusRoute
 }
 export interface FileRoutesById {
@@ -178,6 +186,7 @@ export interface FileRoutesById {
   '/_authenticated/rh': typeof AuthenticatedRhRoute
   '/_authenticated/site-survey': typeof AuthenticatedSiteSurveyRoute
   '/_authenticated/supply-manual': typeof AuthenticatedSupplyManualRoute
+  '/_authenticated/wishlist': typeof AuthenticatedWishlistRoute
   '/api/public/hooks/sync-product-status': typeof ApiPublicHooksSyncProductStatusRoute
 }
 export interface FileRouteTypes {
@@ -199,6 +208,7 @@ export interface FileRouteTypes {
     | '/rh'
     | '/site-survey'
     | '/supply-manual'
+    | '/wishlist'
     | '/api/public/hooks/sync-product-status'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -218,6 +228,7 @@ export interface FileRouteTypes {
     | '/rh'
     | '/site-survey'
     | '/supply-manual'
+    | '/wishlist'
     | '/api/public/hooks/sync-product-status'
   id:
     | '__root__'
@@ -238,6 +249,7 @@ export interface FileRouteTypes {
     | '/_authenticated/rh'
     | '/_authenticated/site-survey'
     | '/_authenticated/supply-manual'
+    | '/_authenticated/wishlist'
     | '/api/public/hooks/sync-product-status'
   fileRoutesById: FileRoutesById
 }
@@ -370,6 +382,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSupplyManualRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/wishlist': {
+      id: '/_authenticated/wishlist'
+      path: '/wishlist'
+      fullPath: '/wishlist'
+      preLoaderRoute: typeof AuthenticatedWishlistRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/hooks/sync-product-status': {
       id: '/api/public/hooks/sync-product-status'
       path: '/api/public/hooks/sync-product-status'
@@ -394,6 +413,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedRhRoute: typeof AuthenticatedRhRoute
   AuthenticatedSiteSurveyRoute: typeof AuthenticatedSiteSurveyRoute
   AuthenticatedSupplyManualRoute: typeof AuthenticatedSupplyManualRoute
+  AuthenticatedWishlistRoute: typeof AuthenticatedWishlistRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -410,6 +430,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedRhRoute: AuthenticatedRhRoute,
   AuthenticatedSiteSurveyRoute: AuthenticatedSiteSurveyRoute,
   AuthenticatedSupplyManualRoute: AuthenticatedSupplyManualRoute,
+  AuthenticatedWishlistRoute: AuthenticatedWishlistRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
