@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Vila Velha: 18 pontos adicionados marcados com + junto à foto; filtro Origem aplicado e lista de 18 conferida.
+- [x] Cadastro completo, pontos selecionados para instalação e Proposta Comercial separados em blocos independentes, inicialmente recolhidos; computador/celular conferidos.
 - [x] Histórico: ações pretas junto ao cabeçalho; demais controles à direita acima; perguntas para o cliente no seletor de situação; computador/celular conferidos.
 - [x] Histórico: filtro Todas/Não concluídas/Concluídas/Canceladas; 87 pontos não concluídos conferidos na tela e nos downloads PDF/Excel, computador e celular.
 - [x] Botão + Ambiente ao lado do título "Selecionar loja, quiosque ou ambiente"; abre o cadastro no computador e no celular sem estourar a tela.
