@@ -49,7 +49,7 @@ import { compareColumnValues, type SortDirection } from "@/lib/column-sort";
 import { isFilterActive, matchesColumnFilter, type ColumnFilterValue, type FilterKind } from "@/lib/column-filters";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { toast } from "sonner";
-import { ArrowLeft, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, Users, ScrollText, Filter, Boxes, Building2, Plane, Landmark, Briefcase, Layers3, ArrowUpDown, CalendarDays } from "lucide-react";
+import { ArrowLeft, ExternalLink, ClipboardList, ShoppingCart, FolderKanban, FolderTree, Users, ScrollText, Filter, Boxes, Building2, Plane, Landmark, Briefcase, Layers3, ArrowUpDown, CalendarDays } from "lucide-react";
 import { Plus, Trash2, Paperclip, Loader2, DatabaseBackup, Check, CheckCircle2, XCircle, RotateCcw, Pencil, Bell, ShieldCheck, AlertTriangle, Tag, FileText } from "lucide-react";
 import { ApprovalWorkflow, MyApprovalFlows, PendingApprovalsByRole, PendingForMe, type ApprovalListOrder } from "@/components/approval-workflow";
 import { z } from "zod";
@@ -2652,7 +2652,7 @@ function BuyerQueue({ mode = "all" }: { mode?: ApprovalListMode }) {
   };
 
   const organizeActions = <>
-    <Button type="button" variant={groupByProject ? "default" : "outline"} size="sm" onClick={() => setGroupByProject((v) => !v)}>Agrupar por Projeto e Cliente</Button>
+    <Button type="button" variant={groupByProject ? "default" : "outline"} size="sm" onClick={() => setGroupByProject((v) => !v)}><FolderTree className="h-3.5 w-3.5" /> Agrupar por Projeto e Cliente</Button>
     <SupplyConsolidation />
     <Button type="button" size="sm" variant={showTagCosts ? "default" : "outline"} onClick={() => setShowTagCosts((v) => !v)}><Tag className="h-3.5 w-3.5" /> Custo por Etiqueta</Button>
     {showTagCosts && <Button type="button" size="sm" variant="outline" title="Exportar custo por Etiqueta em PDF" aria-label="Exportar custo por Etiqueta em PDF" disabled={!tagCosts.groups.length} onClick={() => tagCosts.exportPdf()}><FileText className="h-3.5 w-3.5" /></Button>}
