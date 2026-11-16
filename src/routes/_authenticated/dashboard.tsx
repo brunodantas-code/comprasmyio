@@ -1886,7 +1886,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                       <div className="flex flex-wrap gap-4 text-sm" role="radiogroup" aria-label="Tipo de passagem">
                         {([[true, "Somente ida"], [false, "Ida e volta"]] as const).map(([ow, label]) => (
                           <label key={label} className="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name={`trip_mode_${i}`} checked={!!leg.oneWay === ow} onChange={() => updateLeg(i, ow ? { oneWay: true, return: "" } : { oneWay: false })} />
+                            <input type="radio" className="accent-myio-green" name={`trip_mode_${i}`} checked={!!leg.oneWay === ow} onChange={() => updateLeg(i, ow ? { oneWay: true, return: "" } : { oneWay: false })} />
                             {label}
                           </label>
                         ))}
