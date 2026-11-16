@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Teste somente na Fila do Supply: botão Ordenar com escolha de coluna, crescente/decrescente e restaurar; setas individuais retiradas somente nessa tela. Filtros sem qualquer alteração. Approval nos dois sentidos/restauração e Valor Total numérico conferidos na conta Leonardo; computador/celular e Todos os approvals com ordenação antiga conferidos. 8 testes passaram; registros intactos, não publicado.
 - [x] Esclarecer possibilidade de reunir ordenações em um botão com escolha da coluna e sentido; nenhuma alteração de ordenação autorizada nesta pergunta.
 - [x] Supply: ícone de agrupamento à esquerda de Agrupar por Projeto e Cliente, vinculado ao CDE; 3 grupos reais e retorno à lista conferidos, sem alterar pedidos; visível em 1280/1073/390 px, 7 testes passaram. Não publicado.
 - [x] Supply: botão com funil à esquerda e texto Filtros à direita; computador 1280/1073 px e celular 390 px conferidos. Filtros Tipo Materiais + Solicitante Bruno combinaram 4 linhas; limpeza conferida, registros intactos e aparência CDE preservada.

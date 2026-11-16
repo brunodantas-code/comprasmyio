@@ -56,3 +56,4 @@
 - Table headers constrain and wrap label/control groups; inline grid sort controls use content-sized widths to keep neighboring headings clear without changing CDE appearance.
 - Code uses shared status badges in list/details and a pure text matcher; search intersects existing column filters without changing sorting or ticket access.
 - TableFilterMenu accepts an opt-in trigger label after its CDE icon so toolbar filters are explicit without widening icon-only table headers.
+- OrdersTable enables TableSortMenu only through consolidatedSort in the Supply execution queue; other screens retain column sorting and exports reuse the same sorted rows.

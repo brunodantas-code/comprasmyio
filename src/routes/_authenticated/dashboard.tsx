@@ -45,6 +45,7 @@ import { ptBR } from "date-fns/locale";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ColumnFilter } from "@/components/column-filter";
 import { ColumnSortButton } from "@/components/column-sort-button";
+import { TableSortMenu } from "@/components/table-sort-menu";
 import { compareColumnValues, type SortDirection } from "@/lib/column-sort";
 import { isFilterActive, matchesColumnFilter, type ColumnFilterValue, type FilterKind } from "@/lib/column-filters";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
@@ -2644,11 +2645,11 @@ function BuyerQueue({ mode = "all" }: { mode?: ApprovalListMode }) {
             <h4 className="text-sm font-semibold">{groupLabel(pid)}</h4>
             <span className="text-xs text-muted-foreground">{plist.length} pedido(s)</span>
           </div>
-          <OrdersTable orders={plist} projectName={projectName} requesterName={requesterName} showRequester canEdit={canManageOperationalStatus} canDelete />
+          <OrdersTable orders={plist} projectName={projectName} requesterName={requesterName} showRequester canEdit={canManageOperationalStatus} canDelete consolidatedSort={mode === "supply"} />
         </div>
       ));
     }
-    return <OrdersTable orders={list} projectName={projectName} requesterName={requesterName} showRequester canEdit={canManageOperationalStatus} canDelete toolbarActions={organizeActions} />;
+    return <OrdersTable orders={list} projectName={projectName} requesterName={requesterName} showRequester canEdit={canManageOperationalStatus} canDelete toolbarActions={organizeActions} consolidatedSort={mode === "supply"} />;
   };
 
   const organizeActions = <>
@@ -2835,7 +2836,7 @@ function AdminEditApprovalDialog({ order, items }: { order: Order; items: Approv
 }
 
 function OrdersTable({
-  orders, projectName, requesterName, showRequester, canEdit, canDelete, canEditRequester, stockParts, toolbarActions,
+  orders, projectName, requesterName, showRequester, canEdit, canDelete, canEditRequester, stockParts, toolbarActions, consolidatedSort = false,
 }: {
   orders: Order[];
   projectName: (id: string) => string;
@@ -2846,6 +2847,7 @@ function OrdersTable({
   canEditRequester?: boolean;
   stockParts?: Map<string, StockPart>;
   toolbarActions?: React.ReactNode;
+  consolidatedSort?: boolean;
 }) {
   const { data: me } = useCurrentUser();
   const { data: requestTypes } = useRequestTypes();
@@ -2907,6 +2909,7 @@ function OrdersTable({
   ];
   const colByKey = Object.fromEntries(colDefs.map((c) => [c.key, c]));
   const colFilter = (key: string, showLabel = false) => {
+    if (consolidatedSort) return null;
     const c = colByKey[key];
     if (!c) return null;
     void showLabel;
@@ -2937,6 +2940,7 @@ function OrdersTable({
     <>
       <div className="mb-2 flex items-center gap-2 overflow-x-auto py-1 text-xs [&>*]:shrink-0">
         <TableFilterMenu triggerLabel="Filtros" rows={orders} columns={colDefs.filter(c => showRequester || c.key !== "req").map(c => ({ key: c.key, label: c.label, kind: c.kind, value: c.raw as (o: typeof orders[number]) => string | number | null | undefined, display: c.list }))} filters={cf} onChange={(key, value) => setCf(prev => ({ ...prev, [key]: value }))} clear={() => setCf({})} />
+        {consolidatedSort && <TableSortMenu columns={colDefs} value={columnSort} onChange={setColumnSort} />}
         {toolbarActions}
         <SupplyDeadlineIndicators orders={visibleOrders} />
         <TableReportActions title={showRequester ? "Todos os approvals" : "Minhas Solicitações"} />
