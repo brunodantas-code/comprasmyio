@@ -60,6 +60,10 @@
   --color-status: var(--status);
   --color-status-foreground: var(--status-foreground);
   --color-status-border: var(--status-border);
+  --color-code-completed: var(--code-completed);
+  --color-code-completed-foreground: var(--code-completed-foreground);
+  --color-code-attended: var(--code-attended);
+  --color-code-attended-foreground: var(--code-attended-foreground);
   --color-action: var(--action);
   --color-action-foreground: var(--action-foreground);
   --color-action-border: var(--action-border);
@@ -122,6 +126,10 @@
   --mytosis-gray-line: color-mix(in oklab, var(--myio-dark) 35%, white);
   --mytosis-text-dark: #000000;
   --mytosis-text-light: #ffffff;
+  --code-completed: oklch(0 0 0);
+  --code-completed-foreground: oklch(1 0 0);
+  --code-attended: color-mix(in oklab, var(--myio-green) 24%, white);
+  --code-attended-foreground: oklch(0.15 0 0);
   --erp-landing: oklch(0.18 0.09 300);
   --erp-landing-soft: oklch(0.27 0.12 300);
   --erp-landing-foreground: oklch(0.99 0 0);

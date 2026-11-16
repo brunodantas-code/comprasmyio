@@ -1,6 +1,7 @@
 # Roadmap
 - [x] Code: corrigir sobreposição dos títulos e ícones no cabeçalho; conferidos em 768/1073/1280 px, com ordenação e filtros funcionando.
-- [ ] Code: melhorar diferenciação visual das situações e apresentação dos filtros combinados; aguarda a sugestão que Leonardo começou a enviar.
+- [x] Cabeçalhos compartilhados e próprios lidos; proteção de quebra no Table/filtro comum, prazos do Supply limitados à coluna e ordenação do Cadastro Site Survey sem largura integral. Demais listas usam colunas automáticas, espaços próprios ou títulos sem controles. Supply/Site Survey conferidos por código, não em tela (carregamento não concluído na verificação).
+- [x] Code: ordenação preservada; cores aplicadas à lista e detalhes; busca Contém/Não contém e X; dois filtros combinados e removidos separadamente conferidos em sessão real. Computador/celular sem sobreposição, 14 testes passaram; registros e permissões preservados. Não publicado.
 - [x] Supply: Entrega/Retirada com seletor verde e destaque persistente; endereço com símbolos separados; aviso de endereço exclusivo do pedido. Conferidos no computador/celular com sessão real, sem gravar pedidos.
 - [x] Descrever as melhorias de entrega/retirada para registro na resposta final.
 - [x] Code: confirmação antes de Concluir e reabertura pelo Solicitante ou Atendente atribuído; motivo obrigatório, Em atendimento e Histórico preservado.

@@ -52,3 +52,5 @@
 - Shared Save/Delete controls preserve descriptive and in-progress labels; CDE label overrides apply only to generic Salvar/Excluir so destructive choices remain distinguishable.
 - Action appearance inherits cde_selected action_standard; actionSpecific models, secondary scopes and explicit visual overrides are specific functions, retaining identity and content-sized width.
 - AddressAutocomplete uses RadioGroup for delivery mode and separate flex slots for address icons, preventing CDE button styles or field spacing from hiding selection or overlapping text; manual addresses remain order-only.
+- Table headers constrain and wrap label/control groups; inline grid sort controls use content-sized widths to keep neighboring headings clear without changing CDE appearance.
+- Code uses shared status badges in list/details and a pure text matcher; search intersects existing column filters without changing sorting or ticket access.

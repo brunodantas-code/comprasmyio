@@ -3013,8 +3013,8 @@ function OrdersTable({
             <TableHead className="w-[6%] text-center"><span className="inline-flex max-w-full items-center gap-0.5"><span className="min-w-0 whitespace-nowrap">Qtd</span>{colFilter("qtd")}</span></TableHead>
             <TableHead className="w-[10%] text-center"><span className="inline-flex max-w-full items-center gap-0.5"><span className="min-w-0 whitespace-normal break-words">Valor Total</span>{colFilter("valor")}</span></TableHead>
             <TableHead className="w-[12%] text-center"><span className="inline-flex max-w-full items-center gap-0.5"><span className="min-w-0 whitespace-normal break-words">Destinatário</span>{colFilter("dest")}</span></TableHead>
-            <TableHead className="w-[9%] text-center"><span className="inline-flex items-center gap-0.5"><span>Prazo de recebimento</span>{colFilter("prazo")}</span></TableHead>
-            <TableHead className="w-[9%] text-center"><span className="inline-flex items-center gap-0.5"><span>Previsão de entrega</span>{colFilter("prev")}</span></TableHead>
+            <TableHead className="w-[9%] text-center"><span className="inline-flex max-w-full items-center gap-0.5"><span className="min-w-0 whitespace-normal break-words">Prazo de recebimento</span>{colFilter("prazo")}</span></TableHead>
+            <TableHead className="w-[9%] text-center"><span className="inline-flex max-w-full items-center gap-0.5"><span className="min-w-0 whitespace-normal break-words">Previsão de entrega</span>{colFilter("prev")}</span></TableHead>
             <TableHead className="w-[10%] text-center"><span className="inline-flex max-w-full items-center gap-0.5"><span className="min-w-0 whitespace-normal break-words">Status</span>{colFilter("status")}</span></TableHead>
             <TableHead className="w-[10%] text-center"><span className="inline-flex max-w-full items-center gap-0.5"><span className="min-w-0 whitespace-normal">Código</span>{colFilter("passe")}</span></TableHead>
           </TableRow>
