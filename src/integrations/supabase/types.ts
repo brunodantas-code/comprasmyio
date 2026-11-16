@@ -8800,6 +8800,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      reopen_code_ticket: {
+        Args: { _reason: string; _ticket_id: string }
+        Returns: undefined
+      }
       reposition_mytosis_node: {
         Args: { _node_id: string; _target_id: string }
         Returns: undefined

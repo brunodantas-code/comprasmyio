@@ -2535,21 +2535,6 @@
     "group": ""
   },
   {
-    "id": "components/code-app-attendants.tsx|b100813c46433da8|0",
-    "file": "components/code-app-attendants.tsx",
-    "line": 35,
-    "tag": "Button",
-    "label": "Save",
-    "dynamic": false,
-    "visualCustom": false,
-    "autoCdeSafe": true,
-    "icon": "Save",
-    "variant": "ghost",
-    "size": "icon",
-    "className": "",
-    "group": ""
-  },
-  {
     "id": "components/column-filter.tsx|a1c4375ad9f68da5|0",
     "file": "components/column-filter.tsx",
     "line": 87,
@@ -10635,6 +10620,66 @@
     "group": ""
   },
   {
+    "id": "components/code-app-attendants.tsx|b100813c46433da8|0",
+    "file": "components/code-app-attendants.tsx",
+    "line": 35,
+    "tag": "Button",
+    "label": "Save",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "Save",
+    "variant": "ghost",
+    "size": "icon",
+    "className": "",
+    "group": ""
+  },
+  {
+    "id": "components/code-ticket-lifecycle-actions.tsx|2f0e3d808735e575|0",
+    "file": "components/code-ticket-lifecycle-actions.tsx",
+    "line": 65,
+    "tag": "Button",
+    "label": "Concluindo... / Concluir",
+    "dynamic": true,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "Check",
+    "variant": "",
+    "size": "",
+    "className": "",
+    "group": ""
+  },
+  {
+    "id": "components/code-ticket-lifecycle-actions.tsx|3a26ab6305f624cd|0",
+    "file": "components/code-ticket-lifecycle-actions.tsx",
+    "line": 66,
+    "tag": "Button",
+    "label": "Reabrir chamado",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "RotateCcw",
+    "variant": "",
+    "size": "",
+    "className": "",
+    "group": ""
+  },
+  {
+    "id": "components/code-ticket-lifecycle-actions.tsx|973489276dd0db89|0",
+    "file": "components/code-ticket-lifecycle-actions.tsx",
+    "line": 72,
+    "tag": "Button",
+    "label": "Reabrindo... / Reabrir chamado",
+    "dynamic": true,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "RotateCcw",
+    "variant": "",
+    "size": "",
+    "className": "",
+    "group": ""
+  },
+  {
     "id": "routes/__root.tsx|2c9ad702fbb1a32f|0",
     "file": "routes/__root.tsx",
     "line": 59,
@@ -11477,7 +11522,7 @@
   {
     "id": "routes/_authenticated/development.tsx|ef39484aea8cfa8c|0",
     "file": "routes/_authenticated/development.tsx",
-    "line": 307,
+    "line": 310,
     "tag": "CdeButton",
     "label": "Novo ticket",
     "dynamic": false,
@@ -11492,7 +11537,7 @@
   {
     "id": "routes/_authenticated/development.tsx|4326c24b72e751db|0",
     "file": "routes/_authenticated/development.tsx",
-    "line": 323,
+    "line": 326,
     "tag": "Button",
     "label": "Salvando... / Abrir ticket",
     "dynamic": true,
@@ -11507,7 +11552,7 @@
   {
     "id": "routes/_authenticated/development.tsx|57f2f76e217bbbe7|0",
     "file": "routes/_authenticated/development.tsx",
-    "line": 570,
+    "line": 564,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -11522,7 +11567,7 @@
   {
     "id": "routes/_authenticated/development.tsx|c1afb91f8138d082|0",
     "file": "routes/_authenticated/development.tsx",
-    "line": 570,
+    "line": 564,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -11537,7 +11582,7 @@
   {
     "id": "routes/_authenticated/development.tsx|9b658b40f9c5646b|0",
     "file": "routes/_authenticated/development.tsx",
-    "line": 570,
+    "line": 564,
     "tag": "Button",
     "label": "Editar título",
     "dynamic": false,
@@ -11552,7 +11597,7 @@
   {
     "id": "routes/_authenticated/development.tsx|38405033f3fd35f2|0",
     "file": "routes/_authenticated/development.tsx",
-    "line": 576,
+    "line": 570,
     "tag": "Button",
     "label": "Editar Solução Proposta",
     "dynamic": false,
@@ -11567,7 +11612,7 @@
   {
     "id": "routes/_authenticated/development.tsx|c2fa9b2d282ef3e0|0",
     "file": "routes/_authenticated/development.tsx",
-    "line": 576,
+    "line": 570,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -11582,7 +11627,7 @@
   {
     "id": "routes/_authenticated/development.tsx|a4de803bd1b437a9|0",
     "file": "routes/_authenticated/development.tsx",
-    "line": 576,
+    "line": 570,
     "tag": "Button",
     "label": "Salvar solução",
     "dynamic": false,
@@ -11597,7 +11642,7 @@
   {
     "id": "routes/_authenticated/development.tsx|0e173a4dab9617f4|0",
     "file": "routes/_authenticated/development.tsx",
-    "line": 577,
+    "line": 571,
     "tag": "Button",
     "label": "Pencil",
     "dynamic": false,
@@ -11612,7 +11657,7 @@
   {
     "id": "routes/_authenticated/development.tsx|b71532fb7261cb85|0",
     "file": "routes/_authenticated/development.tsx",
-    "line": 577,
+    "line": 571,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -11627,7 +11672,7 @@
   {
     "id": "routes/_authenticated/development.tsx|cddbae4ad2165560|0",
     "file": "routes/_authenticated/development.tsx",
-    "line": 577,
+    "line": 571,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -11642,7 +11687,7 @@
   {
     "id": "routes/_authenticated/development.tsx|41be3c6d59626b61|0",
     "file": "routes/_authenticated/development.tsx",
-    "line": 577,
+    "line": 571,
     "tag": "Button",
     "label": "Responder",
     "dynamic": false,
@@ -11657,7 +11702,7 @@
   {
     "id": "routes/_authenticated/development.tsx|cbc4dc9a9897b4df|0",
     "file": "routes/_authenticated/development.tsx",
-    "line": 577,
+    "line": 571,
     "tag": "Button",
     "label": "Nova pergunta",
     "dynamic": false,
@@ -11672,7 +11717,7 @@
   {
     "id": "routes/_authenticated/development.tsx|49db3fd468cd8dce|0",
     "file": "routes/_authenticated/development.tsx",
-    "line": 577,
+    "line": 571,
     "tag": "Button",
     "label": "Salvar / Enviando... / Enviar resposta / Enviar pergunta",
     "dynamic": true,
@@ -11687,7 +11732,7 @@
   {
     "id": "routes/_authenticated/development.tsx|2e64df68b099ec77|0",
     "file": "routes/_authenticated/development.tsx",
-    "line": 578,
+    "line": 572,
     "tag": "Button",
     "label": "Salvar andamento",
     "dynamic": false,
@@ -11700,24 +11745,9 @@
     "group": ""
   },
   {
-    "id": "routes/_authenticated/development.tsx|b5e0146675651d0d|0",
-    "file": "routes/_authenticated/development.tsx",
-    "line": 579,
-    "tag": "Button",
-    "label": "Concluindo... / Marcar como concluído",
-    "dynamic": true,
-    "visualCustom": false,
-    "autoCdeSafe": true,
-    "icon": "",
-    "variant": "",
-    "size": "",
-    "className": "",
-    "group": ""
-  },
-  {
     "id": "routes/_authenticated/development.tsx|bf2566c5989d97f7|0",
     "file": "routes/_authenticated/development.tsx",
-    "line": 580,
+    "line": 573,
     "tag": "Button",
     "label": "Excluir ticket",
     "dynamic": false,
@@ -11732,7 +11762,7 @@
   {
     "id": "routes/_authenticated/development.tsx|265ab77290d019b8|0",
     "file": "routes/_authenticated/development.tsx",
-    "line": 582,
+    "line": 575,
     "tag": "Button",
     "label": "Editar observação anterior",
     "dynamic": false,
@@ -11747,7 +11777,7 @@
   {
     "id": "routes/_authenticated/development.tsx|955dd808d40d91c7|0",
     "file": "routes/_authenticated/development.tsx",
-    "line": 582,
+    "line": 575,
     "tag": "Button",
     "label": "Excluir observação",
     "dynamic": false,
@@ -11762,7 +11792,7 @@
   {
     "id": "routes/_authenticated/development.tsx|1288f51ab3c8fb5f|0",
     "file": "routes/_authenticated/development.tsx",
-    "line": 583,
+    "line": 576,
     "tag": "Button",
     "label": "Editar observação",
     "dynamic": false,
@@ -11777,7 +11807,7 @@
   {
     "id": "routes/_authenticated/development.tsx|6cdde2f3dc439172|0",
     "file": "routes/_authenticated/development.tsx",
-    "line": 583,
+    "line": 576,
     "tag": "Button",
     "label": "Excluir observação",
     "dynamic": false,
@@ -11792,7 +11822,7 @@
   {
     "id": "routes/_authenticated/development.tsx|87f6a866c4328bad|0",
     "file": "routes/_authenticated/development.tsx",
-    "line": 584,
+    "line": 577,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -11807,7 +11837,7 @@
   {
     "id": "routes/_authenticated/development.tsx|787c12da9e7af0b0|0",
     "file": "routes/_authenticated/development.tsx",
-    "line": 584,
+    "line": 577,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -11822,7 +11852,7 @@
   {
     "id": "routes/_authenticated/development.tsx|f628076fbb1664d3|0",
     "file": "routes/_authenticated/development.tsx",
-    "line": 600,
+    "line": 593,
     "tag": "Button",
     "label": "Baixar anexo",
     "dynamic": false,
@@ -11837,7 +11867,7 @@
   {
     "id": "routes/_authenticated/development.tsx|c89a9cf317c33605|0",
     "file": "routes/_authenticated/development.tsx",
-    "line": 616,
+    "line": 609,
     "tag": "button",
     "label": "Excluir anexo",
     "dynamic": false,
@@ -11852,7 +11882,7 @@
   {
     "id": "routes/_authenticated/development.tsx|a6c9a689c0a4c33f|0",
     "file": "routes/_authenticated/development.tsx",
-    "line": 616,
+    "line": 609,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,

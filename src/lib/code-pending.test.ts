@@ -3,6 +3,12 @@ import { codePendingItems, codeQuestionResponders, unansweredCodeQuestions, type
 const ticket: PendingCodeTicket = { id: 'ticket8', ticket_number: 8, title: 'Cidades', reporter_id: 'alexandre', assignee_id: 'leonardo', status: 'atendido', created_at: '2026-10-28' };
 const question: PendingCodeMessage = { id: 'question1', ticket_id: 'ticket8', author_id: 'alexandre', message_type: 'question', parent_message_id: null };
 describe('Perguntas nas pendências do Code', () => {
+  it('reabertura do chamado 20 retorna a pendência somente ao Atendente atribuído', () => {
+    const reopened = { ...ticket, ticket_number: 20, status: 'em_atendimento' };
+    expect(codePendingItems([reopened], [], 'leonardo', true)).toEqual([expect.objectContaining({ ticketNumber: 20, reason: 'atender' })]);
+    expect(codePendingItems([reopened], [], 'joao-couto', true)).toEqual([]);
+    expect(codePendingItems([reopened], [], 'alexandre', false)).toEqual([]);
+  });
   it('não distribui chamados sem Admin vinculado a todos os Admins', () => {
     const unassigned = { ...ticket, status: 'aberto', assignee_id: null };
     expect(codePendingItems([unassigned], [question], 'leonardo', true)).toEqual([]);

@@ -1541,6 +1541,13 @@
       "when": 1794838707618,
       "tag": "0219_code_keep_configured_attendant",
       "breakpoints": true
+    },
+    {
+      "idx": 220,
+      "version": "7",
+      "when": 1794839886193,
+      "tag": "0220_code_confirmed_ticket_reopening",
+      "breakpoints": true
     }
   ]
 }

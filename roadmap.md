@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Code: confirmação antes de Concluir e reabertura pelo Solicitante ou Atendente atribuído; motivo obrigatório, Em atendimento e Histórico preservado.
+- [x] Code: cancelar, concluir, reabrir como Solicitante e como Atendente diferente, leitura após recarga e retorno à Central conferidos; reabertura direta/sem motivo rejeitada, celular sem excesso; 53 testes passaram. Chamado 20 preservado; solução descrita para registro.
 - [x] Code: menu Usuários com Admin por aplicativo, atribuição automática e redistribuição auditada dos chamados em andamento; vínculos iniciais não presumidos.
 - [x] Code: vínculo salvo/relido, chamado automaticamente atribuído e aberto pela Central; celular sem transbordamento; testes cobrem exclusividade entre Admins. Cinco chamados temporários e vínculo de teste removidos.
 - [x] Wishlist: app compartilhado para usuários ativos, com idealizador, data e resumo da descrição por linha; lista e cadastro conferidos.
