@@ -4660,7 +4660,7 @@ function StatusHistoryDialog({ order, canEdit }: { order: Order; canEdit?: boole
                 a_caminho: "comprado_aguardando",
               };
               const statusKey = (rawStatus && (legacyMap[rawStatus] ?? (rawStatus as Order["status"]))) as Order["status"] | undefined;
-              const label = d.para_custom ?? (statusKey && STATUS_LABELS[statusKey] ? STATUS_LABELS[statusKey] : (rawStatus ?? l.action));
+              const label = d.para_custom ?? (statusKey && STATUS_LABELS[statusKey] ? orderStatusLabel(order, statusKey) : (rawStatus ?? l.action));
               const cls = statusKey && STATUS_CLASSES[statusKey] ? STATUS_CLASSES[statusKey] : STATUS_BADGE_BASE;
               return (
                 <li key={l.id} className="flex items-start gap-3 border-l-2 border-muted pl-3">

@@ -8,14 +8,19 @@ import { consolidateTagCosts } from "@/lib/supply-tags";
 
 const money = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const STATUS: Record<string, string> = { pendente: "Pendente", comprado_aguardando: "Comprado", entregue: "Entregue", recebido_ok: "Recebido", recebido_problema: "Recebido c/ problema", cancelado: "Cancelado" };
-type Row = { id: string; tag_id: string | null; status: string; estimated_value: number | null; approval_number: string | null; item_name: string; created_at: string; requester_id: string | null };
+const PHYSICAL = new Set(["materiais", "dispositivos", "importacao", "maquinas_equipamentos_e_eletrodometicos"]);
+/** Entregue só para itens físicos; Reembolso/Pagamento = Pago; demais = Concluído. */
+const statusOf = (r: { status: string; request_type: string | null; request_model: string | null }) =>
+  r.status !== "entregue" || PHYSICAL.has(r.request_type ?? "") ? STATUS[r.status] ?? r.status
+  : ["reembolso", "pagamento"].some((k) => r.request_type === k || r.request_model === k) ? "Pago" : "Concluído";
+type Row = { id: string; tag_id: string | null; status: string; estimated_value: number | null; approval_number: string | null; item_name: string; created_at: string; requester_id: string | null; request_type: string | null; request_model: string | null };
 
 export function useTagCostReport() {
   const { data: tags } = useSupplyTags();
   const { data: orders } = useQuery({
     queryKey: ["supply_tag_cost_orders"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("purchase_orders").select("id,tag_id,status,estimated_value,approval_number,item_name,created_at,requester_id").not("tag_id", "is", null).order("created_at");
+      const { data, error } = await supabase.from("purchase_orders").select("id,tag_id,status,estimated_value,approval_number,item_name,created_at,requester_id,request_type,request_model").not("tag_id", "is", null).order("created_at");
       if (error) throw error;
       return data as Row[];
     },
@@ -45,7 +50,7 @@ export function useTagCostReport() {
     const body: string[][] = [];
     for (const g of groups) {
       body.push([g.tag.name + (g.tag.active ? "" : " (inativa)"), `${g.count} solicitação(ões)`, "", money(g.total)]);
-      for (const r of g.rows) body.push(["", `${r.approval_number ?? "—"} | ${r.item_name}`, `${date(r.created_at)} | ${(r.requester_id && names?.get(r.requester_id)) || "—"} | ${STATUS[r.status] ?? r.status}`, money(Number(r.estimated_value ?? 0))]);
+      for (const r of g.rows) body.push(["", `${r.approval_number ?? "—"} | ${r.item_name}`, `${date(r.created_at)} | ${(r.requester_id && names?.get(r.requester_id)) || "—"} | ${statusOf(r)}`, money(Number(r.estimated_value ?? 0))]);
     }
     autoTable(doc, { startY: 28, head: [["Etiqueta", "Solicitação", "Data / Solicitante / Situação", "Valor"]], body, theme: "plain", styles: { fontSize: 8, cellPadding: 2 }, columnStyles: { 3: { halign: "right" } }, didParseCell: (d) => { if (d.section === "body" && d.row.raw && (d.row.raw as string[])[0]) d.cell.styles.fontStyle = "bold"; } });
     doc.save("Supply-custo-por-etiqueta.pdf");
@@ -77,7 +82,7 @@ export function SupplyTagCostReport() {
                 {open.has(g.tag.id) && g.rows.map((r) => (
                   <TableRow key={r.id}>
                     <TableCell className="pl-8 text-sm text-muted-foreground">{r.approval_number ?? "—"} · {r.item_name}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{date(r.created_at)} · {(r.requester_id && names?.get(r.requester_id)) || "—"} · {STATUS[r.status] ?? r.status}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{date(r.created_at)} · {(r.requester_id && names?.get(r.requester_id)) || "—"} · {statusOf(r)}</TableCell>
                     <TableCell className="text-right text-sm text-muted-foreground">{money(Number(r.estimated_value ?? 0))}</TableCell>
                   </TableRow>
                 ))}
