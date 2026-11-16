@@ -57,8 +57,8 @@ export function WishlistConversation({ idea, messages, users, userId }: { idea: 
       {!ownMessages.length && <p className="text-sm text-muted-foreground">Nenhuma conversa registrada.</p>}
     </div>
     <div className="flex flex-wrap gap-2" role="group" aria-label="Tipo de mensagem">
-      {forMe.length > 0 && <Button variant={answering ? "secondary" : "ghost"} size="sm" onClick={() => setMode("answer")}>Responder</Button>}
-      <Button variant={mode === "question" ? "secondary" : "ghost"} size="sm" onClick={() => setMode("question")}>Nova pergunta</Button>
+      {forMe.length > 0 && <Button variant="ghost" size="sm" className={answering ? "underline underline-offset-4 font-semibold" : undefined} onClick={() => setMode("answer")}>Responder</Button>}
+      <Button variant="ghost" size="sm" className={mode === "question" ? "underline underline-offset-4 font-semibold" : undefined} onClick={() => setMode("question")}>Nova pergunta</Button>
       <Button variant={mode === "contribution" ? "secondary" : "ghost"} size="sm" onClick={() => setMode("contribution")}>Contribuir com a ideia</Button>
     </div>
     {answering ? <div className="space-y-1"><Label>Pergunta a responder</Label><Select value={selectedReply?.id ?? ""} onValueChange={setReplyId}><SelectTrigger aria-label="Pergunta a responder" className="w-full min-w-0"><SelectValue /></SelectTrigger><SelectContent>{forMe.map(q => <SelectItem key={q.id} value={q.id}>{q.message}</SelectItem>)}</SelectContent></Select></div>

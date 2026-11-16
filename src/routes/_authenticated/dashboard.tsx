@@ -1893,19 +1893,21 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                         ))}
                       </div>
                     )}
-                    <div className="grid gap-4 md:grid-cols-3 items-end">
+                    <div className="space-y-4">
                       <div className="space-y-2">
                         <Label htmlFor={`travel_destination_${i}`}>{travelType === "aluguel_veiculos" ? "Cidade e UF de retirada" : "Cidade e UF de destino"}</Label>
                         <BrCityPicker id={`travel_destination_${i}`} value={leg.destination} onChange={(destination) => updateLeg(i, { destination })} />
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor={`travel_departure_${i}`}>{travelType === "aluguel_veiculos" ? "Data de retirada" : "Data de ida"}</Label>
-                        <Input id={`travel_departure_${i}`} type="date" value={leg.departure} onChange={(e) => updateLeg(i, { departure: e.target.value })} />
+                      <div className="grid gap-4 md:grid-cols-2 items-end">
+                        <div className="space-y-2">
+                          <Label htmlFor={`travel_departure_${i}`}>{travelType === "aluguel_veiculos" ? "Data de retirada" : "Data de ida"}</Label>
+                          <Input id={`travel_departure_${i}`} type="date" value={leg.departure} onChange={(e) => updateLeg(i, { departure: e.target.value })} />
+                        </div>
+                        {!(travelType === "passagens" && leg.oneWay) && <div className="space-y-2">
+                          <Label htmlFor={`travel_return_${i}`}>{travelType === "aluguel_veiculos" ? "Data de devolução" : "Data de retorno"}</Label>
+                          <Input id={`travel_return_${i}`} type="date" value={leg.return} min={leg.departure || undefined} onChange={(e) => updateLeg(i, { return: e.target.value })} />
+                        </div>}
                       </div>
-                      {!(travelType === "passagens" && leg.oneWay) && <div className="space-y-2">
-                        <Label htmlFor={`travel_return_${i}`}>{travelType === "aluguel_veiculos" ? "Data de devolução" : "Data de retorno"}</Label>
-                        <Input id={`travel_return_${i}`} type="date" value={leg.return} min={leg.departure || undefined} onChange={(e) => updateLeg(i, { return: e.target.value })} />
-                      </div>}
                     </div>
                   </div>
                 ))}
