@@ -229,7 +229,7 @@ function DevelopmentPage() {
           <CardContent>
             <div className="mb-2 flex flex-wrap gap-2 md:hidden">{["number", "reporter", "app", "type", "title", "priority", "status", "question", "date"].map(key => <span key={key}>{ticketFilters.header(key)}</span>)}</div>
             {isLoading ? <p className="py-8 text-center text-sm text-muted-foreground">Carregando tickets...</p> : (
-              <Table className="table-fixed md:min-w-[900px]">
+              <Table className="table-auto md:min-w-[1100px]">
                  <TableHeader>
                    <TableRow>
                      <TableHead className="w-[5%]">{sortHeader("number")}</TableHead>
@@ -249,7 +249,7 @@ function DevelopmentPage() {
                      <TableCell>{profileNames.get(ticket.reporter_id) ?? "Usuário"}</TableCell>
                     <TableCell>{APP_NAMES[ticket.app_key] ?? ticket.app_key}</TableCell>
                     <TableCell><Badge variant="outline" className="font-normal">{ticket.ticket_type === "bug" ? "Bug" : "Melhoria"}</Badge></TableCell>
-                    <TableCell className="md:truncate font-medium">{ticket.title}</TableCell>
+                    <TableCell className="md:max-w-[20rem] md:truncate font-medium">{ticket.title}</TableCell>
                     <TableCell>{PRIORITY_NAMES[ticket.priority]}</TableCell>
                     <TableCell><Badge variant="outline" className="whitespace-nowrap text-xs font-normal">{STATUS_NAMES[ticket.status]}</Badge></TableCell>
                     <TableCell>{unansweredCodeQuestions(data?.questionMessages ?? []).some(q => q.ticket_id === ticket.id) ? unansweredCodeQuestions(data?.questionMessages ?? []).some(q => q.ticket_id === ticket.id && isCodeQuestionForUser(q, ticket.reporter_id, data?.userId ?? "", Boolean(data?.isAdmin), ticket.assignee_id)) ? <span className="inline-flex shrink-0 text-destructive" title="Pergunta aguardando sua resposta" aria-label="Pergunta aguardando sua resposta"><MessageCircleQuestion className="h-5 w-5" /></span> : <span className="inline-flex shrink-0 text-muted-foreground" title="Aguardando resposta de outro usuário" aria-label="Aguardando resposta de outro usuário"><MessageCircleMore className="h-5 w-5" /></span> : <span className="text-muted-foreground">-</span>}</TableCell>

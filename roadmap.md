@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Code: corrigir sobreposição dos títulos e ícones no cabeçalho; conferidos em 768/1073/1280 px, com ordenação e filtros funcionando.
+- [ ] Code: melhorar diferenciação visual das situações e apresentação dos filtros combinados; aguarda a sugestão que Leonardo começou a enviar.
 - [x] Supply: Entrega/Retirada com seletor verde e destaque persistente; endereço com símbolos separados; aviso de endereço exclusivo do pedido. Conferidos no computador/celular com sessão real, sem gravar pedidos.
 - [x] Descrever as melhorias de entrega/retirada para registro na resposta final.
 - [x] Code: confirmação antes de Concluir e reabertura pelo Solicitante ou Atendente atribuído; motivo obrigatório, Em atendimento e Histórico preservado.
