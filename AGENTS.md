@@ -57,3 +57,5 @@
 - Code uses shared status badges in list/details and a pure text matcher; search intersects existing column filters without changing sorting or ticket access.
 - TableFilterMenu accepts an opt-in trigger label after its CDE icon so toolbar filters are explicit without widening icon-only table headers.
 - OrdersTable enables TableSortMenu only through consolidatedSort in the Supply execution queue; other screens retain column sorting and exports reuse the same sorted rows.
+- TableReportActions opts into shared CDE action sizing with compact=false only in the Supply execution queue; legacy consumers stay compact and sorting is independent.
+- Reimbursement search indexes authorized account details, normalizes punctuation and accents, and preserves account IDs and historical payment destinations.

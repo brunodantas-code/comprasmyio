@@ -2645,11 +2645,11 @@ function BuyerQueue({ mode = "all" }: { mode?: ApprovalListMode }) {
             <h4 className="text-sm font-semibold">{groupLabel(pid)}</h4>
             <span className="text-xs text-muted-foreground">{plist.length} pedido(s)</span>
           </div>
-          <OrdersTable orders={plist} projectName={projectName} requesterName={requesterName} showRequester canEdit={canManageOperationalStatus} canDelete consolidatedSort={mode === "supply"} />
+          <OrdersTable orders={plist} projectName={projectName} requesterName={requesterName} showRequester canEdit={canManageOperationalStatus} canDelete consolidatedSort={mode === "supply"} reportCompact={mode !== "supply"} />
         </div>
       ));
     }
-    return <OrdersTable orders={list} projectName={projectName} requesterName={requesterName} showRequester canEdit={canManageOperationalStatus} canDelete toolbarActions={organizeActions} consolidatedSort={mode === "supply"} />;
+    return <OrdersTable orders={list} projectName={projectName} requesterName={requesterName} showRequester canEdit={canManageOperationalStatus} canDelete toolbarActions={organizeActions} consolidatedSort={mode === "supply"} reportCompact={mode !== "supply"} />;
   };
 
   const organizeActions = <>
@@ -2836,7 +2836,7 @@ function AdminEditApprovalDialog({ order, items }: { order: Order; items: Approv
 }
 
 function OrdersTable({
-  orders, projectName, requesterName, showRequester, canEdit, canDelete, canEditRequester, stockParts, toolbarActions, consolidatedSort = false,
+  orders, projectName, requesterName, showRequester, canEdit, canDelete, canEditRequester, stockParts, toolbarActions, consolidatedSort = false, reportCompact = true,
 }: {
   orders: Order[];
   projectName: (id: string) => string;
@@ -2848,6 +2848,7 @@ function OrdersTable({
   stockParts?: Map<string, StockPart>;
   toolbarActions?: React.ReactNode;
   consolidatedSort?: boolean;
+  reportCompact?: boolean;
 }) {
   const { data: me } = useCurrentUser();
   const { data: requestTypes } = useRequestTypes();
@@ -2943,7 +2944,7 @@ function OrdersTable({
         {consolidatedSort && <TableSortMenu columns={colDefs} value={columnSort} onChange={setColumnSort} />}
         {toolbarActions}
         <SupplyDeadlineIndicators orders={visibleOrders} />
-        <TableReportActions title={showRequester ? "Todos os approvals" : "Minhas Solicitações"} />
+        <TableReportActions title={showRequester ? "Todos os approvals" : "Minhas Solicitações"} compact={reportCompact} />
         {activeColFilters.length > 0 && (
           <>
             <span className="text-muted-foreground">{activeColFilters.length} filtro(s) ativo(s): {activeColFilters.map((c) => c.label).join(", ")}</span>

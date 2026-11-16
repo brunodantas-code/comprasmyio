@@ -46,7 +46,7 @@ export function WishlistConversation({ idea, messages, users, userId }: { idea: 
       <p className="mt-2 whitespace-pre-wrap break-words text-sm [overflow-wrap:anywhere]">{message.message}</p>
       {message.message_type === "question" && <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
         <span>Para: {name(message.recipient_id)}{pending.some(q => q.id === message.id) ? " · Aguardando resposta" : " · Respondida"}</span>
-        {canAnswerWishlistQuestion(message, userId, ownMessages) && <Button variant="ghost" size="sm" onClick={() => { setMode("answer"); setReplyId(message.id); }}>Responder</Button>}
+        {canAnswerWishlistQuestion(message, userId, ownMessages) && <Button variant="ghost" size="sm" actionKind="standard" onClick={() => { setMode("answer"); setReplyId(message.id); }}>Responder</Button>}
       </div>}
     </article>
   );
@@ -57,8 +57,8 @@ export function WishlistConversation({ idea, messages, users, userId }: { idea: 
       {!ownMessages.length && <p className="text-sm text-muted-foreground">Nenhuma conversa registrada.</p>}
     </div>
     <div className="flex flex-wrap gap-2" role="group" aria-label="Tipo de mensagem">
-      {forMe.length > 0 && <Button variant="ghost" size="sm" className={answering ? "underline underline-offset-4 font-semibold" : undefined} onClick={() => setMode("answer")}>Responder</Button>}
-      <Button variant="ghost" size="sm" className={mode === "question" ? "underline underline-offset-4 font-semibold" : undefined} onClick={() => setMode("question")}>Nova pergunta</Button>
+      {forMe.length > 0 && <Button variant="ghost" size="sm" actionKind="standard" aria-pressed={answering} className={answering ? "underline underline-offset-4" : undefined} onClick={() => setMode("answer")}>Responder</Button>}
+      <Button variant="ghost" size="sm" actionKind="standard" aria-pressed={mode === "question"} className={mode === "question" ? "underline underline-offset-4" : undefined} onClick={() => setMode("question")}>Nova pergunta</Button>
       <Button variant={mode === "contribution" ? "secondary" : "ghost"} size="sm" onClick={() => setMode("contribution")}>Contribuir com a ideia</Button>
     </div>
     {answering ? <div className="space-y-1"><Label>Pergunta a responder</Label><Select value={selectedReply?.id ?? ""} onValueChange={setReplyId}><SelectTrigger aria-label="Pergunta a responder" className="w-full min-w-0"><SelectValue /></SelectTrigger><SelectContent>{forMe.map(q => <SelectItem key={q.id} value={q.id}>{q.message}</SelectItem>)}</SelectContent></Select></div>

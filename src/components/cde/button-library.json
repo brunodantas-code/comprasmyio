@@ -9760,8 +9760,8 @@
     "autoCdeSafe": true,
     "icon": "",
     "variant": "outline",
-    "size": "sm",
-    "className": "h-7 gap-1 px-2 text-xs",
+    "size": "",
+    "className": "",
     "group": ""
   },
   {
@@ -9775,8 +9775,8 @@
     "autoCdeSafe": true,
     "icon": "FileSpreadsheet",
     "variant": "outline",
-    "size": "sm",
-    "className": "h-7 gap-1 px-2 text-xs",
+    "size": "",
+    "className": "",
     "group": ""
   },
   {
@@ -10374,7 +10374,7 @@
     "visualCustom": false,
     "autoCdeSafe": true,
     "icon": "",
-    "variant": "",
+    "variant": "ghost",
     "size": "sm",
     "className": "",
     "group": ""
@@ -10389,7 +10389,7 @@
     "visualCustom": false,
     "autoCdeSafe": true,
     "icon": "",
-    "variant": "",
+    "variant": "ghost",
     "size": "sm",
     "className": "",
     "group": ""
@@ -11717,7 +11717,7 @@
   {
     "id": "routes/_authenticated/development.tsx|41be3c6d59626b61|0",
     "file": "routes/_authenticated/development.tsx",
-    "line": 571,
+    "line": 602,
     "tag": "Button",
     "label": "Responder",
     "dynamic": false,
@@ -11732,7 +11732,7 @@
   {
     "id": "routes/_authenticated/development.tsx|cbc4dc9a9897b4df|0",
     "file": "routes/_authenticated/development.tsx",
-    "line": 571,
+    "line": 602,
     "tag": "Button",
     "label": "Nova pergunta",
     "dynamic": false,
