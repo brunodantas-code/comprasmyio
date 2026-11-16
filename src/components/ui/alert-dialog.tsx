@@ -4,7 +4,6 @@ import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
 import { useCdeConfirmStyle } from "@/components/cde/cde-button";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
-import { useCdeLook } from "@/components/cde/cde-look";
 
 const AlertDialog = AlertDialogPrimitive.Root;
 
@@ -91,8 +90,7 @@ const AlertDialogAction = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Action>,
   React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Action>
 >(({ className, style, ...props }, ref) => {
-  const look = useCdeLook("action_standard");
-  return <AlertDialogPrimitive.Action ref={ref} className={cn(buttonVariants({ variant: "action" }), "order-1 w-full sm:order-none sm:w-auto", className, look.className)} style={style ?? look.style} {...props} />;
+  return <AlertDialogPrimitive.Action ref={ref} className={cn(buttonVariants({ variant: "ghost" }), "order-1 w-full sm:order-none sm:w-auto", "!border-0 !shadow-none !bg-transparent !text-foreground hover:!bg-muted", className)} style={style} {...props} />;
 });
 AlertDialogAction.displayName = AlertDialogPrimitive.Action.displayName;
 
@@ -100,8 +98,7 @@ const AlertDialogCancel = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Cancel>,
   React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Cancel>
 >(({ className, style, ...props }, ref) => {
-  const look = useCdeLook("action_standard");
-  return <AlertDialogPrimitive.Cancel ref={ref} className={cn(buttonVariants({ variant: "action" }), "order-2 mt-0 w-full sm:order-none sm:w-auto", className, look.className)} style={style ?? look.style} {...props} />;
+  return <AlertDialogPrimitive.Cancel ref={ref} className={cn(buttonVariants({ variant: "ghost" }), "order-2 mt-0 w-full sm:order-none sm:w-auto", "!border-0 !shadow-none !bg-transparent !text-foreground hover:!bg-muted", className)} style={style} {...props} />;
 });
 AlertDialogCancel.displayName = AlertDialogPrimitive.Cancel.displayName;
 
