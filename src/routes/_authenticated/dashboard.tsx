@@ -61,6 +61,7 @@ import { SupplyTagsTab, useSupplyTags } from "@/components/supply-tags-tab";
 import { SupplyOrderStatusesTab, useOrderStatuses } from "@/components/supply-order-statuses-tab";
 import { SupplyTagCostReport, useTagCostReport } from "@/components/supply-tag-cost-report";
 import { resolveSupplyTag } from "@/lib/supply-tags";
+import { canConfirmPhysicalReceipt, fulfillmentFilterLabel, hasPhysicalDelivery } from "@/lib/supply-fulfillment";
 import { JobTitlesTab, useJobTitles } from "@/components/job-titles-tab";
 import { RemindersTab } from "@/components/reminders-tab";
 import { AdditionalStepTypesTab } from "@/components/additional-step-types-tab";
@@ -409,9 +410,8 @@ const STATUS_LABELS: Record<Order["status"], string> = {
 };
 
 /** Entregue só se aplica a itens físicos; demais tipos mostram conclusão ou pagamento. */
-const PHYSICAL_REQUEST_TYPES = new Set(["materiais", "dispositivos", "importacao", "maquinas_equipamentos_e_eletrodometicos"]);
 function orderStatusLabel(o: { status: Order["status"]; request_type?: string | null; request_model?: string | null }, status: Order["status"] = o.status): string {
-  if (status !== "entregue" || PHYSICAL_REQUEST_TYPES.has(o.request_type ?? "")) return STATUS_LABELS[status];
+  if (status !== "entregue" || hasPhysicalDelivery(o)) return STATUS_LABELS[status];
   const paid = ["reembolso", "pagamento"].includes(o.request_type ?? "") || ["reembolso", "pagamento"].includes(o.request_model ?? "");
   return paid ? "Pago" : "Concluído";
 }
@@ -508,7 +508,7 @@ function StatusMultiFilter({ selected, setSelected }: { selected: Order["status"
     : selected.length === 0
     ? "Nenhum status"
     : selected.length === 1
-    ? STATUS_LABELS[selected[0]]
+    ? fulfillmentFilterLabel(selected[0], STATUS_LABELS[selected[0]])
     : `${selected.length} status`;
   return (
     <Popover>
@@ -530,7 +530,7 @@ function StatusMultiFilter({ selected, setSelected }: { selected: Order["status"
             <label key={k} className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent">
               <Checkbox checked={selected.includes(k)} onCheckedChange={() => toggle(k)} />
               <span className={`inline-block h-2 w-2 rounded-full ${STATUS_CLASSES[k].split(" ")[0]}`} />
-              {STATUS_LABELS[k]}
+              {fulfillmentFilterLabel(k, STATUS_LABELS[k])}
             </label>
           ))}
         </div>
@@ -542,11 +542,11 @@ function StatusMultiFilter({ selected, setSelected }: { selected: Order["status"
 type DeliveredMode = "all" | "this_week" | "this_month" | "from_date" | "hide_all";
 
 const DELIVERED_LABELS: Record<DeliveredMode, string> = {
-  all: "Mostrar todos os entregues",
-  this_week: "Entregues só desta semana",
-  this_month: "Entregues só deste mês",
-  from_date: "Entregues a partir de...",
-  hide_all: "Ocultar todos os entregues",
+  all: "Mostrar Entregue / Concluído / Pago",
+  this_week: "Entregue / Concluído / Pago nesta semana",
+  this_month: "Entregue / Concluído / Pago neste mês",
+  from_date: "Entregue / Concluído / Pago a partir de...",
+  hide_all: "Ocultar Entregue / Concluído / Pago",
 };
 
 function sortProblemFirst(orders: Order[]): Order[] {
@@ -2901,7 +2901,7 @@ function OrdersTable({
     { key: "prev", label: "Previsão de entrega", kind: "date", raw: (o) => (noDeadline(o) ? null : o.delivery_forecast), list: (o) => (!noDeadline(o) && o.delivery_forecast ? fmtDay(o.delivery_forecast) : "") },
     { key: "atrasados", label: "Atrasados", kind: "text", raw: (o) => deadlineSignals(o, deadlineConfig).overdue || deadlineSignals(o, deadlineConfig).forecastOverdue ? "Sim" : "Não", list: (o) => deadlineSignals(o, deadlineConfig).overdue || deadlineSignals(o, deadlineConfig).forecastOverdue ? "Sim" : "Não" },
     { key: "fora_prazo", label: "Fora do prazo", kind: "text", raw: (o) => deadlineSignals(o, deadlineConfig).outOfTime ? "Sim" : "Não", list: (o) => deadlineSignals(o, deadlineConfig).outOfTime ? "Sim" : "Não" },
-    { key: "status", label: "Status", kind: "text", raw: statusLabelOf, list: statusLabelOf },
+    { key: "status", label: "Status", kind: "text", raw: (o) => o.custom_status_id ? statusLabelOf(o) : fulfillmentFilterLabel(o.status, statusLabelOf(o)), list: (o) => o.custom_status_id ? statusLabelOf(o) : fulfillmentFilterLabel(o.status, statusLabelOf(o)) },
     { key: "received", label: "Atualização do recebimento", kind: "date", raw: (o) => ["entregue", "recebido_ok", "recebido_problema"].includes(o.status) ? o.updated_at : null, list: (o) => ["entregue", "recebido_ok", "recebido_problema"].includes(o.status) ? fmtDay(o.updated_at) : "" },
     { key: "passe", label: "Código", kind: "text", raw: (o) => o.passphrase, list: (o) => o.passphrase ?? "" },
   ];
@@ -2924,7 +2924,7 @@ function OrdersTable({
     : filteredOrders;
 
   const reportColumns = colDefs.filter(c => !["notes", "end", "received"].includes(c.key));
-  useRegisterTableReport({ columns: reportColumns.map(c => c.label === "Itens" ? "Itens da Solicitação" : c.label), rows: visibleOrders.map(order => reportColumns.map(c => c.kind === "number" ? Number(c.raw(order) ?? 0) : c.list(order) || "—")) });
+  useRegisterTableReport({ columns: reportColumns.map(c => c.label === "Itens" ? "Itens da Solicitação" : c.label), rows: visibleOrders.map(order => reportColumns.map(c => c.key === "status" ? statusLabelOf(order) : c.kind === "number" ? Number(c.raw(order) ?? 0) : c.list(order) || "—")) });
 
   const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
     <div className="grid grid-cols-[minmax(0,96px)_minmax(0,1fr)] gap-2 border-t border-border/60 py-1.5 first:border-t-0">
@@ -2999,7 +2999,7 @@ function OrdersTable({
               <Row label={o.delivery_mode === "retirada" ? "Endereço de Retirada" : "Endereço de Entrega"}>{o.delivery_point}</Row>
               <Row label="Prazo de recebimento"><DeadlineForecast order={o} part="requested" /></Row>
               <Row label="Previsão de entrega"><DeadlineForecast order={o} canEdit={canEdit} part="forecast" /></Row>
-              <Row label="Status"><div className="flex flex-col items-start gap-1"><StatusHistoryDialog order={o} canEdit={canEdit} />{canEditRequester && o.status === "entregue" && <ConfirmReceiptActions order={o} />}</div></Row>
+              <Row label="Status"><div className="flex flex-col items-start gap-1"><StatusHistoryDialog order={o} canEdit={canEdit} />{canEditRequester && canConfirmPhysicalReceipt(o) && <ConfirmReceiptActions order={o} />}</div></Row>
               <Row label="Código">
                 <InlineField order={o} field="passphrase" type="text" canEdit={canEdit} display={o.passphrase || "—"} maxLength={PASSPHRASE_MAX} collapseSpaces />
               </Row>
@@ -3079,7 +3079,7 @@ function OrdersTable({
               </TableCell>
               <TableCell className="text-center"><DeadlineForecast order={o} canEdit={canEdit} part="forecast" align="center" />
               </TableCell>
-              <TableCell className="text-center"><div className="flex flex-col items-center gap-1"><StatusHistoryDialog order={o} canEdit={canEdit} />{canEditRequester && o.status === "entregue" && <ConfirmReceiptActions order={o} />}</div></TableCell>
+              <TableCell className="text-center"><div className="flex flex-col items-center gap-1"><StatusHistoryDialog order={o} canEdit={canEdit} />{canEditRequester && canConfirmPhysicalReceipt(o) && <ConfirmReceiptActions order={o} />}</div></TableCell>
               <TableCell className="text-sm break-words text-center">
                 <InlineField order={o} field="passphrase" type="text" canEdit={canEdit} display={o.passphrase || "—"} align="center" maxLength={PASSPHRASE_MAX} collapseSpaces />
               </TableCell>

@@ -2,6 +2,13 @@ import { describe, expect, it } from 'vitest';
 import { deadlineSignals, parseDeadlineAlerts, requestedDeadline, orderTiming, SUPPLY_CODE_MAX, type DeadlineOrder } from './supply-deadlines';
 const order: DeadlineOrder = { id: '1', created_at: '2026-11-01T12:00:00Z', deadline_type: 'customizado', deadline_date: '2026-11-10', delivery_forecast: null, status: 'pendente' };
 describe('Supply deadlines', () => {
+  it.each(['servicos', 'viagens'])('retains %s completion in overdue statistics as attended', (request_model) => {
+    const result = orderTiming({ ...order, request_model, delivery_forecast: '2026-11-09' }, [{ order_id: '1', action: 'status_alterado', details: { para: 'entregue' }, created_at: '2026-11-12' }], []);
+    expect(result.kind).toBe('attended');
+    expect(result.delivered).toBe('2026-11-12');
+    expect(result.late).toBe(true);
+    expect(result.markers).toContain('Atendida após a previsão');
+  });
   it('starts warning seven days before receipt', () => expect(deadlineSignals(order, undefined, '2026-11-03').purchaseAlert).toBe('warning'));
   it('starts critical alert three days before receipt', () => expect(deadlineSignals(order, undefined, '2026-11-07').purchaseAlert).toBe('critical'));
   it('does not warn eight days before', () => expect(deadlineSignals(order, undefined, '2026-11-02').purchaseAlert).toBeNull());

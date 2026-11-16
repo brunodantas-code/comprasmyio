@@ -7,19 +7,15 @@ import { supplyPendingQuestions } from "@/lib/supply-conversation";
 import { legalSignaturePendingItems } from "@/lib/legal-pending";
 import { mergeConfidentialSubjects } from "@/lib/legal";
 import { todoPendingItems } from "@/lib/personal-todos";
+import { pendingApprovalSteps, type ApprovalStepOrder } from "@/lib/approval-pending";
 
 type ApprovalStep = {
   order_id: string;
   step_index: number;
   approver_id: string | null;
   status: string;
-  purchase_orders: { requester_id: string } | { requester_id: string }[] | null;
+  purchase_orders: ApprovalStepOrder | ApprovalStepOrder[] | null;
 };
-
-function requesterId(step: ApprovalStep) {
-  const order = Array.isArray(step.purchase_orders) ? step.purchase_orders[0] : step.purchase_orders;
-  return order?.requester_id ?? null;
-}
 
 export function usePendingActions() {
   const { data: currentUser } = useCurrentUser();
@@ -35,7 +31,7 @@ export function usePendingActions() {
       const [stepsResult, deletionsResult, codeResult, codeMessagesResult, supplyQueueResult, supportCallsResult, mytosisResult, codeAdminResult, codeAccessResult, legalResult, legalActionsResult, legalCompletionsResult, legalAllActionsResult, legalConfidentialResult] = await Promise.all([
         supabase
           .from("approval_steps")
-          .select("order_id, step_index, approver_id, status, purchase_orders(requester_id)")
+          .select("order_id, step_index, approver_id, status, purchase_orders(requester_id,approval_status,status)")
           .eq("status", "pendente"),
         supabase
           .from("user_deletion_requests")
@@ -87,13 +83,7 @@ export function usePendingActions() {
 
       const isAdmin = currentUser?.isAdmin ?? false;
       const steps = (stepsResult.data ?? []) as ApprovalStep[];
-      const pendingApprovals = steps.filter((step) => {
-        if (requesterId(step) === userId) return false;
-        if (step.approver_id !== userId) return false;
-        return !steps.some(
-          (earlier) => earlier.order_id === step.order_id && earlier.step_index < step.step_index,
-        );
-      }).length;
+      const pendingApprovals = pendingApprovalSteps(steps, userId).length;
       const pendingUserDeletions = isAdmin
         ? (deletionsResult.data ?? []).filter((request) => request.requested_by !== userId).length
         : 0;

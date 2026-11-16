@@ -1,7 +1,9 @@
+import { fulfillmentKind } from './supply-fulfillment';
+
 export const SUPPLY_CODE_MAX = 10;
 export const DEFAULT_DEADLINE_ALERTS = { warningDays: 7, criticalDays: 3 };
 export type DeadlineAlerts = typeof DEFAULT_DEADLINE_ALERTS;
-export type DeadlineOrder = { id: string; created_at: string; deadline_type: string; deadline_date: string | null; delivery_forecast: string | null; status: string; request_model?: string | null };
+export type DeadlineOrder = { id: string; created_at: string; deadline_type: string; deadline_date: string | null; delivery_forecast: string | null; status: string; request_model?: string | null; request_type?: string | null };
 export function parseDeadlineAlerts(raw?: string | null): DeadlineAlerts {
   try {
     const v = JSON.parse(raw || '{}');
@@ -55,8 +57,10 @@ export function orderTiming(o: DeadlineOrder, logs: TimingLog[], approvals: Timi
   const approved = chain.length && chain.every(a => a.status === 'aprovado' && a.decided_at) ? chain.map(a => a.decided_at || '').sort().at(-1) ?? null : null;
   const purchased = transition(['comprado_aguardando']);
   const delivered = transition(['entregue', 'recebido_ok', 'recebido_problema']);
+  const kind = fulfillmentKind(o);
+  const completedLabel = kind === 'delivered' ? 'Entregue' : kind === 'paid' ? 'Pago' : 'Atendida';
   const deadline = requestedDeadline(o);
   const late = !!deadline && !!delivered && dateOnly(delivered) > deadline;
-  const markers = [deadline && dateOnly(o.created_at) >= deadline ? 'Solicitado no prazo final ou após' : '', deadline && approved && dateOnly(approved) > deadline ? 'Aprovado após o prazo' : '', deadline && purchased && dateOnly(purchased) > deadline ? 'Comprado após o prazo' : '', delivered && o.delivery_forecast && dateOnly(delivered) > o.delivery_forecast ? 'Entregue após a previsão' : ''].filter(Boolean);
-  return { approved, purchased, delivered, late, markers, requestToApproval: approved ? daysBetween(o.created_at, approved) : null, approvalToPurchase: approved && purchased ? daysBetween(approved, purchased) : null, purchaseToDelivery: purchased && delivered ? daysBetween(purchased, delivered) : null };
+  const markers = [deadline && dateOnly(o.created_at) >= deadline ? 'Solicitado no prazo final ou após' : '', deadline && approved && dateOnly(approved) > deadline ? 'Aprovado após o prazo' : '', deadline && purchased && dateOnly(purchased) > deadline ? 'Comprado após o prazo' : '', delivered && o.delivery_forecast && dateOnly(delivered) > o.delivery_forecast ? `${completedLabel} após a previsão` : ''].filter(Boolean);
+  return { approved, purchased, delivered, kind, late, markers, requestToApproval: approved ? daysBetween(o.created_at, approved) : null, approvalToPurchase: approved && purchased ? daysBetween(approved, purchased) : null, purchaseToDelivery: purchased && delivered ? daysBetween(purchased, delivered) : null };
 }

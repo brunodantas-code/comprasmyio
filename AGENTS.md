@@ -14,10 +14,11 @@
 - Supply uses recipient IDs, not names; RLS preserves recipient reads. Personal queues union requester/recipient IDs without duplicates; actions stay gated.
 - Supply allocation uses a shared exclusive selector and resolver; purchase-order triggers derive project-owned client/unit IDs and reject conflicting direct allocations, so client consolidation counts each order once while preserving independent cost centers.
 - Supply new-request values use a shared schema guard and insert-only database validation for targeted request models; material unit values are entered and persisted for all authorized requesters, preserving historical orders and unrelated workflows.
+- Supply fulfillment helpers classify physical receipt and timing statistics by request model, preserving historical status values while separating delivery, attendance and payment labels.
 - Approval views stay under Supply bottom navigation. Execution opens `supply`, decisions `mine`; payment approvals stay in Cash Flow, outside Supply execution/counts.
 - Supply PDF: mobile PDF.js; desktop tab.
 - Payment approvals recognize the active finance role or job title (an inactive legacy title must not block); above the joint-approval threshold, eligible joint approvers join finance and the requester never self-approves.
-- Personal approval lists/counts use assigned approver, not Admin access, avoiding duplicate parallel tasks. Admin edits preserve decisions/logs; type changes re-evaluate pending chains; payment allocation uses exclusive destinations.
+- Personal approval lists/counts share an actionable-step helper; assigned approvers read orders/items/logs through an identity-bound RLS helper and decide through a guarded, order-locked RPC, preventing blank rows, self-approval and silent RLS updates. Admin edits preserve decisions/logs; type changes re-evaluate pending chains; payment allocation uses exclusive destinations.
 - Supply “Item novo” authorizes catalog inserts for Fábrica, Terceiros and Ferramentas via effective profile/individual permission and authenticated owner; it does not grant stock editing or movement rights.
 - Survey charts use original dates, scoped exclusions and assigned technician, not recorder; records stay intact.
 - Survey deletion atomically checks OpDesk links and offers keep/delete; OpDesk retains visit number.

@@ -8657,6 +8657,10 @@ export type Database = {
         Returns: boolean
       }
       is_access_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_assigned_order_approver: {
+        Args: { _order_id: string }
+        Returns: boolean
+      }
       is_customer_support_analyst: {
         Args: { _user_id: string }
         Returns: boolean

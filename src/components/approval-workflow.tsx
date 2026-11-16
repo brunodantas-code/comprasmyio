@@ -35,6 +35,7 @@ import { cn } from "@/lib/utils";
 import { ColumnSortButton } from "@/components/column-sort-button";
 import { compareColumnValues, type SortDirection, type SortValue } from "@/lib/column-sort";
 import type { FilterKind } from "@/lib/column-filters";
+import { pendingApprovalSteps } from "@/lib/approval-pending";
 
 const BRL = (v: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(v ?? 0));
@@ -395,24 +396,7 @@ export function PendingForMe({ renderEditAction }: { renderEditAction?: EditActi
 
   const mine = useMemo(() => {
     if (!steps || !me) return [] as StepRow[];
-    const byOrder = new Map<string, StepRow[]>();
-    steps.forEach((s) => {
-      const arr = byOrder.get(s.order_id) ?? [];
-      arr.push(s);
-      byOrder.set(s.order_id, arr);
-    });
-    return steps.filter((s) => {
-      if (s.status !== "pendente") return false;
-      // Nunca aprovar a própria solicitação — sempre sobe para o superior
-      if (s.purchase_orders?.requester_id === me.id) return false;
-      // Acesso Admin não transforma etapas de outros cargos em pendências pessoais.
-      if (s.approver_id !== me.id) return false;
-      const earlier = (byOrder.get(s.order_id) ?? []).filter(
-        (o) => o.step_index < s.step_index && o.status === "pendente"
-      );
-      if (earlier.length !== 0) return false;
-      return true;
-    });
+    return pendingApprovalSteps(steps, me.id);
   }, [steps, me]);
 
   const sortDefs: { key: string; label: string; kind: FilterKind; value: (s: StepRow) => SortValue }[] = [
