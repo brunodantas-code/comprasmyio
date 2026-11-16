@@ -4,7 +4,7 @@ import { Check, Loader2, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { useDeliveryPoints } from "@/components/delivery-points-tab";
 import { BrCityPicker } from "@/components/br-city-picker";
@@ -163,19 +163,20 @@ export function AddressAutocomplete({
       {modeName && (
         <div className="space-y-2">
           <Label>Modalidade</Label>
-          <div className="flex gap-2" role="radiogroup" aria-label="Entrega ou Retirada">
+          <RadioGroup value={mode} onValueChange={(value) => { if (value === "entrega" || value === "retirada") setMode(value); }} className="flex flex-wrap gap-3" aria-label="Entrega ou Retirada">
             {(["entrega", "retirada"] as const).map((value) => (
-              <Button key={value} type="button" variant="outline" role="radio" aria-checked={mode === value} onClick={() => setMode(value)} className={mode === value ? "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground" : undefined}>
+              <Label key={value} htmlFor={`${name}-mode-${value}`} className="flex min-h-9 cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-foreground has-[[data-state=checked]]:bg-accent has-[[data-state=checked]]:text-accent-foreground">
+                <RadioGroupItem id={`${name}-mode-${value}`} value={value} />
                 {value === "entrega" ? "Entrega" : "Retirada"}
-              </Button>
+              </Label>
             ))}
-          </div>
+          </RadioGroup>
           <input type="hidden" name={modeName} value={mode} />
         </div>
       )}
       <Label htmlFor={`${name}-search`} className="block">{pickup ? "Ponto de retirada" : label}</Label>
       {allowDeliveryPoints && deliveryPoints && deliveryPoints.length > 0 && (
-        <SearchableSelect aria-label={pickup ? "Selecionar ponto de retirada" : "Selecionar ponto de entrega"} clearable={false} placeholder="Digite ou selecione um ponto cadastrado" value={deliveryPoints.find((point) => point.address === addressValue)?.code ?? "manual"} options={[...deliveryPoints.map((point) => ({ value: point.code, label: point.name, keywords: point.address })), { value: "manual", label: "Outro endereço" }]} onChange={(code) => {
+        <SearchableSelect aria-label={pickup ? "Selecionar ponto de retirada" : "Selecionar ponto de entrega"} clearable={false} placeholder="Digite ou selecione um ponto cadastrado" value={deliveryPoints.find((point) => point.address === addressValue)?.code ?? "manual"} options={[...deliveryPoints.map((point) => ({ value: point.code, label: point.name, keywords: point.address })), { value: "manual", label: "Outro endereço (somente neste pedido)", keywords: "provisório temporário" }]} onChange={(code) => {
           if (code === "manual") {
             setAddress("");
             setQuery("");
@@ -191,14 +192,19 @@ export function AddressAutocomplete({
           setSuggestions([]);
         }} />
       )}
+      {allowDeliveryPoints && manualMode && (
+        <p id={`${name}-address-scope`} className="text-xs text-muted-foreground">
+          Este endereço será salvo apenas neste pedido. Não será adicionado aos pontos cadastrados para compras futuras.
+        </p>
+      )}
       {manualMode && <Label htmlFor={`${name}-search`} className="block text-xs text-muted-foreground">Rua e número</Label>}
-      <div className="relative">
-        <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <div className="relative flex min-w-0 items-center gap-2">
+        <MapPin aria-hidden="true" className="h-4 w-4 shrink-0 text-muted-foreground" />
         <Input
           id={`${name}-search`}
           autoComplete="off"
-          className={cn("pl-9 pr-9", confirmed && "border-green-500")}
-          style={{ paddingLeft: "2.25rem", paddingRight: "2.25rem" }}
+          className="min-w-0 flex-1"
+          aria-describedby={allowDeliveryPoints && manualMode ? `${name}-address-scope` : undefined}
           placeholder="Digite o endereço ou selecione uma opção do Google"
           value={query}
           onChange={(e) => {
@@ -209,21 +215,22 @@ export function AddressAutocomplete({
           onFocus={() => suggestions.length > 0 && setOpen(true)}
         />
         {loading ? (
-          <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+          <Loader2 aria-label="Consultando endereço" className="h-4 w-4 shrink-0 animate-spin text-muted-foreground" />
         ) : confirmed ? (
-          <Check className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-green-600" />
+          <Check aria-label="Endereço selecionado" className="h-4 w-4 shrink-0 text-myio-green" />
         ) : null}
         {open && suggestions.length > 0 && (
-          <ul className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border bg-popover p-1 shadow-md">
+          <ul className="absolute top-full z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border bg-popover p-1 shadow-md">
             {suggestions.map((s) => (
               <li key={s.id}>
-                <button
+                <Button
                   type="button"
-                  className="w-full rounded-sm px-2 py-2 text-left text-sm hover:bg-accent"
+                  variant="ghost"
+                  className="h-auto w-full justify-start whitespace-normal rounded-sm px-2 py-2 text-left text-sm"
                   onClick={() => void pick(s)}
                 >
                   {s.text}
-                </button>
+                </Button>
               </li>
             ))}
           </ul>

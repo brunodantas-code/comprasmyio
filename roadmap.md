@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Supply: Entrega/Retirada com seletor verde e destaque persistente; endereço com símbolos separados; aviso de endereço exclusivo do pedido. Conferidos no computador/celular com sessão real, sem gravar pedidos.
+- [x] Descrever as melhorias de entrega/retirada para registro na resposta final.
 - [x] Code: confirmação antes de Concluir e reabertura pelo Solicitante ou Atendente atribuído; motivo obrigatório, Em atendimento e Histórico preservado.
 - [x] Code: cancelar, concluir, reabrir como Solicitante e como Atendente diferente, leitura após recarga e retorno à Central conferidos; reabertura direta/sem motivo rejeitada, celular sem excesso; 53 testes passaram. Chamado 20 preservado; solução descrita para registro.
 - [x] Code: menu Usuários com Admin por aplicativo, atribuição automática e redistribuição auditada dos chamados em andamento; vínculos iniciais não presumidos.
