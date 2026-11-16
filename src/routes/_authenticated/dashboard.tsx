@@ -1843,7 +1843,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
         ) : !projects?.length ? (
           <p className="text-sm text-muted-foreground">Nenhum projeto disponível. Peça a um admin para criar um.</p>
         ) : (
-          <form ref={formRef} onSubmit={onSubmit} className="space-y-4">
+          <form ref={formRef} onSubmit={onSubmit} className="space-y-4 pt-4">
             {siteSurveyDraft ? <div className="border-l-2 border-myio-green bg-muted/40 px-3 py-2 text-sm"><p className="font-semibold">Solicitação gerada a partir do Site Survey SS-{String(siteSurveyDraft.surveyNumber).padStart(12, "0")}</p><p className="text-muted-foreground">Selecione o item cadastrado correspondente a cada sugestão antes de enviar.</p></div> : null}
             {baseRequestModel === "viagens" && (
               <div className="grid gap-4 md:grid-cols-2">
