@@ -34,7 +34,7 @@ import { SearchableSelect } from "@/components/ui/searchable-select";
 import { filterCodeUsers } from "@/lib/code-user-search";
 import { isCodeQuestionForUser, unansweredCodeQuestions } from "@/lib/code-pending";
 import { codeQuestionResponders } from "@/lib/code-pending";
-import { visibleCodeTickets } from "@/lib/code-ticket-list";
+import { CdeDisclosureIcon } from "@/components/cde/cde-button";
 import { CodeAppAttendants } from "@/components/code-app-attendants";
 import { CodeTicketLifecycleActions } from "@/components/code-ticket-lifecycle-actions";
 import { UsersRound, X } from "lucide-react";
@@ -195,10 +195,26 @@ function DevelopmentPage() {
   const [sorting, setSorting] = useState<{ key: string; direction: SortDirection }>();
   const sortColumn = ticketColumns.find((column) => column.key === sorting?.key);
   const sortedTickets = sortColumn && sorting ? [...ticketFilters.filtered].sort((a, b) => compareColumnValues(sortColumn.kind ?? "text", sortColumn.value(a), sortColumn.value(b), sorting.direction)) : ticketFilters.filtered;
-  const filteredTickets = visibleCodeTickets(sortedTickets, ticketFilters.filters.status).filter(ticket => matchesCodeTicketSearch([
+  const [showDeleted, setShowDeleted] = useState(false);
+  const matchingTickets = sortedTickets.filter(ticket => matchesCodeTicketSearch([
     ...ticketColumns.map(column => String(column.display?.(ticket) ?? column.value(ticket) ?? "")),
     ticket.description, ticket.expected_result, ticket.proposed_solution ?? "",
   ], { op: searchOp, value: searchText }));
+  const filteredTickets = matchingTickets.filter(ticket => ticket.status !== "excluido");
+  const deletedTickets = matchingTickets.filter(ticket => ticket.status === "excluido");
+  const renderRow = (ticket: (typeof sortedTickets)[number]) => (
+                  <TableRow key={ticket.id} className="md:h-12 cursor-pointer [&>td]:py-2" onClick={() => setSelectedTicket(ticket)}>
+                    <TableCell className="font-semibold">{ticket.ticket_number}</TableCell>
+                     <TableCell>{profileNames.get(ticket.reporter_id) ?? "Usuário"}</TableCell>
+                    <TableCell>{APP_NAMES[ticket.app_key] ?? ticket.app_key}</TableCell>
+                    <TableCell><Badge variant="outline" className="font-normal">{ticket.ticket_type === "bug" ? "Bug" : "Melhoria"}</Badge></TableCell>
+                    <TableCell className="md:max-w-[20rem] md:truncate font-medium">{ticket.title}</TableCell>
+                    <TableCell>{PRIORITY_NAMES[ticket.priority]}</TableCell>
+                    <TableCell><CodeStatusBadge status={ticket.status} label={STATUS_NAMES[ticket.status]} /></TableCell>
+                    <TableCell>{unansweredCodeQuestions(data?.questionMessages ?? []).some(q => q.ticket_id === ticket.id) ? unansweredCodeQuestions(data?.questionMessages ?? []).some(q => q.ticket_id === ticket.id && isCodeQuestionForUser(q, ticket.reporter_id, data?.userId ?? "", Boolean(data?.isAdmin), ticket.assignee_id)) ? <span className="inline-flex shrink-0 text-destructive" title="Pergunta aguardando sua resposta" aria-label="Pergunta aguardando sua resposta"><MessageCircleQuestion className="h-5 w-5" /></span> : <span className="inline-flex shrink-0 text-muted-foreground" title="Aguardando resposta de outro usuário" aria-label="Aguardando resposta de outro usuário"><MessageCircleMore className="h-5 w-5" /></span> : <span className="text-muted-foreground">-</span>}</TableCell>
+                    <TableCell className="whitespace-nowrap">{new Date(ticket.created_at).toLocaleDateString("pt-BR")}</TableCell>
+                  </TableRow>
+                 );
   const sortHeader = (key: string) => {
     const column = ticketColumns.find((entry) => entry.key === key);
     if (!column) return null;
@@ -258,21 +274,10 @@ function DevelopmentPage() {
                      <TableHead className="w-[8%]">{sortHeader("date")}</TableHead>
                    </TableRow>
                  </TableHeader>
-                <TableBody>{filteredTickets.map((ticket) => (
-                  <TableRow key={ticket.id} className="md:h-12 cursor-pointer [&>td]:py-2" onClick={() => setSelectedTicket(ticket)}>
-                    <TableCell className="font-semibold">{ticket.ticket_number}</TableCell>
-                     <TableCell>{profileNames.get(ticket.reporter_id) ?? "Usuário"}</TableCell>
-                    <TableCell>{APP_NAMES[ticket.app_key] ?? ticket.app_key}</TableCell>
-                    <TableCell><Badge variant="outline" className="font-normal">{ticket.ticket_type === "bug" ? "Bug" : "Melhoria"}</Badge></TableCell>
-                    <TableCell className="md:max-w-[20rem] md:truncate font-medium">{ticket.title}</TableCell>
-                    <TableCell>{PRIORITY_NAMES[ticket.priority]}</TableCell>
-                    <TableCell><CodeStatusBadge status={ticket.status} label={STATUS_NAMES[ticket.status]} /></TableCell>
-                    <TableCell>{unansweredCodeQuestions(data?.questionMessages ?? []).some(q => q.ticket_id === ticket.id) ? unansweredCodeQuestions(data?.questionMessages ?? []).some(q => q.ticket_id === ticket.id && isCodeQuestionForUser(q, ticket.reporter_id, data?.userId ?? "", Boolean(data?.isAdmin), ticket.assignee_id)) ? <span className="inline-flex shrink-0 text-destructive" title="Pergunta aguardando sua resposta" aria-label="Pergunta aguardando sua resposta"><MessageCircleQuestion className="h-5 w-5" /></span> : <span className="inline-flex shrink-0 text-muted-foreground" title="Aguardando resposta de outro usuário" aria-label="Aguardando resposta de outro usuário"><MessageCircleMore className="h-5 w-5" /></span> : <span className="text-muted-foreground">-</span>}</TableCell>
-                    <TableCell className="whitespace-nowrap">{new Date(ticket.created_at).toLocaleDateString("pt-BR")}</TableCell>
-                  </TableRow>
-                 ))}{!filteredTickets.length ? <TableRow><TableCell colSpan={9} className="h-24 text-center text-muted-foreground">Nenhum ticket encontrado.</TableCell></TableRow> : null}</TableBody>
+                <TableBody>{filteredTickets.map(renderRow)}{!filteredTickets.length ? <TableRow><TableCell colSpan={9} className="h-24 text-center text-muted-foreground">Nenhum ticket encontrado.</TableCell></TableRow> : null}</TableBody>
               </Table>
             )}
+            {deletedTickets.length ? <div className="mt-4 border-t pt-3"><button type="button" className="flex items-center gap-2 text-sm font-semibold" aria-expanded={showDeleted} onClick={() => setShowDeleted(v => !v)}>Histórico de excluídos ({deletedTickets.length})<CdeDisclosureIcon open={showDeleted} screen="/development" direction="vertical" /></button>{showDeleted ? <Table className="mt-2"><TableBody>{deletedTickets.map(renderRow)}</TableBody></Table> : null}</div> : null}
           </CardContent>
         </Card>
       </main>
