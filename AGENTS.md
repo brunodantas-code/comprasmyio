@@ -8,7 +8,7 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
-- Code lists share pending logic to prevent drift.
+- Code queues share assignee-only pending logic; app-attendant triggers assign new tickets and audit redistribution of unfinished tickets to avoid duplicate Admin tasks.
 - Code hides deleted rows by default; Supply clears inherited Internal tags on reallocation via its shared trigger.
 - Supply uses recipient IDs, not names; RLS preserves recipient reads. Personal queues union requester/recipient IDs without duplicates; actions stay gated.
 - Supply allocation uses a shared exclusive selector and resolver; purchase-order triggers derive project-owned client/unit IDs and reject conflicting direct allocations, so client consolidation counts each order once while preserving independent cost centers.

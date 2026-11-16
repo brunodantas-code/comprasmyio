@@ -1527,6 +1527,20 @@
       "when": 1794591106970,
       "tag": "0217_wishlist_shared_innovation",
       "breakpoints": true
+    },
+    {
+      "idx": 218,
+      "version": "7",
+      "when": 1794838340561,
+      "tag": "0218_code_app_attendants",
+      "breakpoints": true
+    },
+    {
+      "idx": 219,
+      "version": "7",
+      "when": 1794838707618,
+      "tag": "0219_code_keep_configured_attendant",
+      "breakpoints": true
     }
   ]
 }

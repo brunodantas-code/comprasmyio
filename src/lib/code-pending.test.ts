@@ -1,8 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { codePendingItems, codeQuestionResponders, unansweredCodeQuestions, type PendingCodeTicket, type PendingCodeMessage } from './code-pending';
-const ticket: PendingCodeTicket = { id: 'ticket8', ticket_number: 8, title: 'Cidades', reporter_id: 'alexandre', status: 'atendido', created_at: '2026-10-28' };
+const ticket: PendingCodeTicket = { id: 'ticket8', ticket_number: 8, title: 'Cidades', reporter_id: 'alexandre', assignee_id: 'leonardo', status: 'atendido', created_at: '2026-10-28' };
 const question: PendingCodeMessage = { id: 'question1', ticket_id: 'ticket8', author_id: 'alexandre', message_type: 'question', parent_message_id: null };
 describe('Perguntas nas pendências do Code', () => {
+  it('não distribui chamados sem Admin vinculado a todos os Admins', () => {
+    const unassigned = { ...ticket, status: 'aberto', assignee_id: null };
+    expect(codePendingItems([unassigned], [question], 'leonardo', true)).toEqual([]);
+    expect(codePendingItems([unassigned], [], 'joao-couto', true)).toEqual([]);
+  });
   const assignedTicket = { ...ticket, ticket_number: 19, status: 'em_atendimento', assignee_id: 'leonardo' };
   it('não atribui o atendimento do chamado 19 ao João Couto quando Leonardo é o responsável', () => {
     expect(codePendingItems([assignedTicket], [], 'joao-couto', true)).toEqual([]);

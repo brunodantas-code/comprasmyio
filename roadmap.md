@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Code: menu Usuários com Admin por aplicativo, atribuição automática e redistribuição auditada dos chamados em andamento; vínculos iniciais não presumidos.
+- [x] Code: vínculo salvo/relido, chamado automaticamente atribuído e aberto pela Central; celular sem transbordamento; testes cobrem exclusividade entre Admins. Cinco chamados temporários e vínculo de teste removidos.
 - [x] Wishlist: app compartilhado para usuários ativos, com idealizador, data e resumo da descrição por linha; lista e cadastro conferidos.
 - [x] Wishlist: perguntas, respostas vinculadas e contribuições com histórico protegido; perguntas/contribuições persistidas; respostas cobertas por testes/guarda, sem sessão do destinatário.
 - [x] Wishlist: roadmap com responsável, prazo e conclusão; exportação para futura migração ao myio Projects conferida, sem tocar projetos comerciais do Supply.

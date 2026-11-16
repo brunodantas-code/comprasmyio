@@ -1279,6 +1279,42 @@ export type Database = {
           },
         ]
       }
+      code_app_attendants: {
+        Row: {
+          app_key: string
+          attendant_id: string
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          app_key: string
+          attendant_id: string
+          updated_at?: string
+          updated_by?: string
+        }
+        Update: {
+          app_key?: string
+          attendant_id?: string
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "code_app_attendants_app_key_fkey"
+            columns: ["app_key"]
+            isOneToOne: true
+            referencedRelation: "erp_apps"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "code_app_attendants_attendant_id_fkey"
+            columns: ["attendant_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cost_centers: {
         Row: {
           active: boolean

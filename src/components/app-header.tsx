@@ -18,11 +18,11 @@ import { PersonalSignature } from "@/components/personal-signature";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MENU_ITEMS, parseMenuConfig, useMainMenuConfig, userInfoLine } from "@/components/cde/main-menu-config";
 
-export function AppHeader({ logo, children, supplyManual = false, manualApp }: { logo: ReactNode; children?: ReactNode; supplyManual?: boolean; manualApp?: string }) {
+export function AppHeader({ logo, children, supplyManual = false, manualApp, menuActions }: { logo: ReactNode; children?: ReactNode; supplyManual?: boolean; manualApp?: string; menuActions?: MenuAction[] }) {
   const [manualOpen, setManualOpen] = useState(false);
   const [signatureOpen, setSignatureOpen] = useState(false);
   const { data: me } = useCurrentUser();
-  const extra = { manualApp, onOpenManual: () => setManualOpen(true), onOpenSignature: () => setSignatureOpen(true) };
+  const extra = { manualApp, menuActions, onOpenManual: () => setManualOpen(true), onOpenSignature: () => setSignatureOpen(true) };
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [passwordOpen, setPasswordOpen] = useState(false);
@@ -83,10 +83,11 @@ export function UserNameBlock({ userName }: { userName: string }) {
   return <div className="min-w-0 text-right"><p className="truncate text-sm font-semibold">{userName}</p>{line ? <p className="truncate text-xs text-muted-foreground">{line}</p> : null}</div>;
 }
 
-type MenuExtras = { manualApp?: string; onOpenManual?: () => void; onOpenSignature?: () => void };
+type MenuAction = { label: string; icon: ReactNode; onClick: () => void };
+type MenuExtras = { manualApp?: string; onOpenManual?: () => void; onOpenSignature?: () => void; menuActions?: MenuAction[] };
 type HeaderMenuProps = MenuExtras & { userName: string; onSignOut: () => void; onChangePassword: () => void; buttonClass: string; supplyManual?: boolean };
 
-function MainMenuEntries({ onSignOut, onChangePassword, supplyManual, itemClass, manualApp, onOpenManual, onOpenSignature }: MenuExtras & Pick<HeaderMenuProps, "onSignOut" | "onChangePassword" | "supplyManual"> & { itemClass: string }) {
+function MainMenuEntries({ onSignOut, onChangePassword, supplyManual, itemClass, manualApp, onOpenManual, onOpenSignature, menuActions }: MenuExtras & Pick<HeaderMenuProps, "onSignOut" | "onChangePassword" | "supplyManual"> & { itemClass: string }) {
   const { data } = useMainMenuConfig();
   const config = data ?? parseMenuConfig();
   const pendingTotal = usePendingActions().data?.total ?? 0;
@@ -96,7 +97,7 @@ function MainMenuEntries({ onSignOut, onChangePassword, supplyManual, itemClass,
     const { data: row } = await supabase.from("erp_admins").select("user_id").eq("user_id", auth.user.id).maybeSingle();
     return !!row;
   } });
-  return config.order.filter((id) => !config.hidden.includes(id) && (id !== "manual" || supplyManual || !!manualApp) && (id !== "access" || isErpAdmin)).map((id) => {
+  return <>{menuActions?.map(action => <Button key={action.label} variant="ghost" className={itemClass} onClick={action.onClick}>{action.icon}{action.label}</Button>)}{config.order.filter((id) => !config.hidden.includes(id) && (id !== "manual" || supplyManual || !!manualApp) && (id !== "access" || isErpAdmin)).map((id) => {
     const item = MENU_ITEMS.find((i) => i.id === id);
     if (!item) return null;
     const Icon = item.icon;
@@ -107,7 +108,7 @@ function MainMenuEntries({ onSignOut, onChangePassword, supplyManual, itemClass,
     if (id === "access") return <Button key={id} asChild variant="ghost" className={itemClass}><Link to="/portal" search={{ view: "users" }}><Icon className="h-5 w-5" />Acessos</Link></Button>;
     if (id === "theme") return <ThemeEntry key={id} className={itemClass} />;
     return <Button key={id} variant="ghost" className={`${itemClass}`} onClick={id === "logout" ? onSignOut : id === "password" ? onChangePassword : () => window.history.back()}><Icon className="h-5 w-5" />{item.label}</Button>;
-  });
+  })}</>;
 }
 
 function CountBadge({ count, className = "" }: { count: number; className?: string }) {

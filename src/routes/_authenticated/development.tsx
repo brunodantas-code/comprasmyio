@@ -30,6 +30,8 @@ import { filterCodeUsers } from "@/lib/code-user-search";
 import { isCodeQuestionForUser, unansweredCodeQuestions } from "@/lib/code-pending";
 import { codeQuestionResponders } from "@/lib/code-pending";
 import { visibleCodeTickets } from "@/lib/code-ticket-list";
+import { CodeAppAttendants } from "@/components/code-app-attendants";
+import { UsersRound } from "lucide-react";
 
 type TicketStatus = "aberto" | "em_atendimento" | "aguardando_resposta" | "atendido" | "concluido" | "excluido";
 type Ticket = {
@@ -73,6 +75,10 @@ const APP_NAMES: Record<string, string> = {
   rh: "RH",
   development: "Code",
   site_survey: "Site Survey",
+  chamados: "OpDesk",
+  mytosis: "Mytosis",
+  cde: "CDE",
+  wishlist: "Wishlist",
 };
 const STATUS_NAMES: Record<TicketStatus, string> = {
   aberto: "Em aberto",
@@ -137,6 +143,7 @@ function DevelopmentPage() {
   const navigate = useNavigate();
   const routeSearch = Route.useSearch();
   const [createOpen, setCreateOpen] = useState(false);
+  const [usersOpen, setUsersOpen] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
 
 
@@ -190,7 +197,8 @@ function DevelopmentPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <AppHeader manualApp="Code" logo={<MyioAppLogo appName="Code" className="text-base sm:text-2xl" />} />
+      <AppHeader manualApp="Code" logo={<MyioAppLogo appName="Code" className="text-base sm:text-2xl" />} menuActions={data?.isAdmin ? [{ label: "Usuários", icon: <UsersRound className="h-5 w-5" />, onClick: () => setUsersOpen(true) }] : undefined} />
+      {data?.isAdmin ? <CodeAppAttendants open={usersOpen} onOpenChange={setUsersOpen} admins={data.codeAdmins} appNames={APP_NAMES} /> : null}
       <main className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
