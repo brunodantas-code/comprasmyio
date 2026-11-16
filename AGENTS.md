@@ -56,6 +56,6 @@
 - Table headers constrain and wrap label/control groups; inline grid sort controls use content-sized widths to keep neighboring headings clear without changing CDE appearance.
 - Code uses shared status badges in list/details and a pure text matcher; search intersects existing column filters without changing sorting or ticket access.
 - TableFilterMenu accepts an opt-in trigger label after its CDE icon so toolbar filters are explicit without widening icon-only table headers.
-- OrdersTable enables TableSortMenu only through consolidatedSort in the Supply execution queue; other screens retain column sorting and exports reuse the same sorted rows.
-- TableReportActions opts into shared CDE action sizing with compact=false only in the Supply execution queue; legacy consumers stay compact and sorting is independent.
-- Reimbursement search indexes authorized account details, normalizes punctuation and accents, and preserves account IDs and historical payment destinations.
+- Only Supply execution enables consolidatedSort and compact=false reports; other screens retain column sorting/compact exports and all reports reuse sorted rows.
+- Reimbursement search normalizes authorized details; IDs and historical destinations remain unchanged.
+- AppAccessLink opens external CRM in a new tab without ERP credentials; portal visibility and /crm retain existing app grants, while CRM owns login.

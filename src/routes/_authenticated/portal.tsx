@@ -19,6 +19,7 @@ import { MytosisIcon } from "@/components/mytosis-icon";
 import { CdeIcon } from "@/components/cde-icon";
 import { useAppOrder, useAppTile, APP_TILE_DEFAULT } from "@/components/cde/app-order-config";
 import { AppTileFace } from "@/components/cde/app-tile";
+import { AppAccessLink } from "@/components/app-access-link";
 import { DesktopHeaderMenu, UserNameBlock } from "@/components/app-header";
 import { usePendingActions } from "@/hooks/use-pending-actions";
 import { ChangePasswordDialog } from "@/components/change-password-dialog";
@@ -105,7 +106,8 @@ function PortalPage() {
 
   const renderApp = ({ key, name, description, to }: (typeof apps)[number]) => (
     <div key={key} className="flex min-w-0 flex-col items-center text-center">
-      <Link
+      <AppAccessLink
+        appKey={key}
         to={to}
         aria-label={`Acessar ${name}`}
         title={`Acessar ${name}`}
@@ -116,7 +118,7 @@ function PortalPage() {
         {key === "chamados" && (pendingActions?.supportCalls ?? 0) > 0 ? <PendingBadge count={pendingActions?.supportCalls ?? 0} label="chamados pendentes no OpDesk" /> : null}
         {key === "legal" && (pendingActions?.legalSignatures ?? 0) > 0 ? <PendingBadge count={pendingActions?.legalSignatures ?? 0} label="pendências no Legal" /> : null}
         <AppTileFace appKey={key} name={name} tile={tile} mobile />
-      </Link>
+      </AppAccessLink>
       <p className="mt-2 w-full break-words text-center text-[0.68rem] leading-4 text-muted-foreground">{description.map((line) => <span key={line} className="block">{line}</span>)}</p>
     </div>
   );
@@ -205,7 +207,8 @@ function PortalPage() {
                  <div aria-label="Aplicativos disponíveis" style={{ columnGap: tile.gapX, rowGap: tile.gapY }} className="hidden flex-wrap sm:flex">
                   {apps.map(({ key, name, description, to }) => (
                      <div key={key} style={{ zoom: tile.tilePct / 100 }} className="flex w-24 min-w-0 snap-start justify-self-center flex-col items-center text-center sm:w-28 sm:justify-self-start">
-                      <Link
+                      <AppAccessLink
+                        appKey={key}
                         to={to}
                         aria-label={`Acessar ${name}`}
                         title={`Acessar ${name}`}
@@ -216,7 +219,7 @@ function PortalPage() {
                            {key === "chamados" && (pendingActions?.supportCalls ?? 0) > 0 ? <PendingBadge count={pendingActions?.supportCalls ?? 0} label="chamados pendentes no OpDesk" /> : null}
                         {key === "legal" && (pendingActions?.legalSignatures ?? 0) > 0 ? <PendingBadge count={pendingActions?.legalSignatures ?? 0} label="pendências no Legal" /> : null}
         <AppTileFace appKey={key} name={name} tile={tile} />
-                     </Link>
+                     </AppAccessLink>
                       <p className="mt-3 w-24 max-w-full break-words text-center text-xs leading-4 text-muted-foreground sm:w-28 sm:text-sm sm:leading-5">
                         {description.map((line) => <span key={line} className="block sm:whitespace-nowrap">{line}</span>)}
                       </p>

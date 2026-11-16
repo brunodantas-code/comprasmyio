@@ -77,7 +77,7 @@ const MODULES = [
     icon: CrmFunnelIcon,
     title: "CRM",
     body: "Vendas e relacionamento",
-    available: false,
+    available: true,
   },
   {
     icon: FileSignature,

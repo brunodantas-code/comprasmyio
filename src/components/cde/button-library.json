@@ -13453,5 +13453,20 @@
     "size": "",
     "className": "w-full",
     "group": ""
+  },
+  {
+    "id": "routes/_authenticated/crm.tsx|64832c0e4e643c26|0",
+    "file": "routes/_authenticated/crm.tsx",
+    "line": 36,
+    "tag": "Button",
+    "label": "Abrir CRM",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "ExternalLink",
+    "variant": "",
+    "size": "",
+    "className": "mt-6",
+    "group": ""
   }
 ]
