@@ -1315,13 +1315,13 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
   const [files, setFiles] = useState<File[]>([]);
   const [deadlineType, setDeadlineType] = useState<Order["deadline_type"]>("esta_semana");
   const [deadlineDate, setDeadlineDate] = useState("");
-  type TravelLeg = { destination: string; departure: string; return: string };
+  type TravelLeg = { destination: string; departure: string; return: string; oneWay?: boolean };
   const [travelLegs, setTravelLegs] = useState<TravelLeg[]>([{ destination: "", departure: "", return: "" }]);
   const updateLeg = (i: number, patch: Partial<TravelLeg>) =>
     setTravelLegs((prev) => prev.map((l, idx) => (idx === i ? { ...l, ...patch } : l)));
   const travelDestination = travelLegs[0]?.destination ?? "";
   const travelDeparture = travelLegs[0]?.departure ?? "";
-  const travelReturn = travelLegs[0]?.return ?? "";
+  const travelReturn = travelLegs[0]?.oneWay ? "" : travelLegs[0]?.return ?? "";
   type ReembolsoLeg = { description: string; value: string; date: string };
   const [reimbursementAccountId, setReimbursementAccountId] = useState("");
   const [reembolsoLegs, setReembolsoLegs] = useState<ReembolsoLeg[]>([{ description: "", value: "", date: "" }]);
@@ -1559,9 +1559,9 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
           request_subtype: baseRequestModel === "viagens" ? travelType : (requestSubtype || null),
           travel_destination: requestModel === "viagens" ? travelDestination.trim() : null,
           travel_departure: requestModel === "viagens" ? travelDeparture : null,
-          travel_return: requestModel === "viagens" ? travelReturn : null,
+          travel_return: requestModel === "viagens" && travelReturn ? travelReturn : null,
           travel_legs: requestModel === "viagens"
-            ? travelLegs.map((l) => ({ destination: l.destination.trim(), departure: l.departure, return: l.return }))
+            ? travelLegs.map((l) => ({ destination: l.destination.trim(), departure: l.departure, return: travelType === "passagens" && l.oneWay ? "" : l.return, ...(travelType === "passagens" ? { one_way: !!l.oneWay } : {}) }))
             : requestModel === "reembolso"
             ? reembolsoLegs.map((l) => ({ description: l.description.trim(), value: Number(l.value), date: l.date }))
             : requestModel === "rh"
@@ -1659,6 +1659,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
           if (leg.destination.trim().length < 2) return toast.error(`Solicitação ${n}: informe ${destLabel}`);
           if (!(await import("@/data/br-cities.json")).default.includes(leg.destination.trim())) return toast.error(`Solicitação ${n}: selecione ${destLabel} na lista de cidades`);
           if (!leg.departure) return toast.error(`Solicitação ${n}: informe ${depLabel}`);
+          if (travelType === "passagens" && leg.oneWay) continue;
           if (!leg.return) return toast.error(`Solicitação ${n}: informe ${retLabel}`);
           if (leg.return < leg.departure) return toast.error(`Solicitação ${n}: ${retLabel} não pode ser anterior a ${depLabel}`);
         }
@@ -1881,6 +1882,16 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                         <ConfirmDeleteButton title="Remover solicitação?" description={`Confirma a remoção da solicitação ${i + 1} desta viagem?`} ariaLabel="Remover solicitação" confirmLabel="Remover" onConfirm={() => setTravelLegs((prev) => prev.filter((_, idx) => idx !== i))} trigger={<Button type="button" variant="ghost" size="compactIcon" className="text-destructive hover:text-destructive" title="Remover solicitação" aria-label="Remover solicitação"><Trash2 className="h-3.5 w-3.5" /></Button>} />
                       )}
                     </div>
+                    {travelType === "passagens" && (
+                      <div className="flex flex-wrap gap-4 text-sm" role="radiogroup" aria-label="Tipo de passagem">
+                        {([[true, "Somente ida"], [false, "Ida e volta"]] as const).map(([ow, label]) => (
+                          <label key={label} className="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name={`trip_mode_${i}`} checked={!!leg.oneWay === ow} onChange={() => updateLeg(i, ow ? { oneWay: true, return: "" } : { oneWay: false })} />
+                            {label}
+                          </label>
+                        ))}
+                      </div>
+                    )}
                     <div className="grid gap-4 md:grid-cols-3 items-end">
                       <div className="space-y-2">
                         <Label htmlFor={`travel_destination_${i}`}>{travelType === "aluguel_veiculos" ? "Cidade e UF de retirada" : "Cidade e UF de destino"}</Label>
@@ -1890,10 +1901,10 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                         <Label htmlFor={`travel_departure_${i}`}>{travelType === "aluguel_veiculos" ? "Data de retirada" : "Data de ida"}</Label>
                         <Input id={`travel_departure_${i}`} type="date" value={leg.departure} onChange={(e) => updateLeg(i, { departure: e.target.value })} />
                       </div>
-                      <div className="space-y-2">
+                      {!(travelType === "passagens" && leg.oneWay) && <div className="space-y-2">
                         <Label htmlFor={`travel_return_${i}`}>{travelType === "aluguel_veiculos" ? "Data de devolução" : "Data de retorno"}</Label>
                         <Input id={`travel_return_${i}`} type="date" value={leg.return} min={leg.departure || undefined} onChange={(e) => updateLeg(i, { return: e.target.value })} />
-                      </div>
+                      </div>}
                     </div>
                   </div>
                 ))}
