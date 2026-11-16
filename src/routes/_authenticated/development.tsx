@@ -2,7 +2,9 @@ import { DependencyEditor } from "@/components/central/dependency-editor";
 import { ImageAttachmentField } from "@/components/image-attachment-field";
 import { confirmAction } from "@/components/confirm-dialog";
 import { CdeButton } from "@/components/cde/cde-button";
-import { useTableFilters } from "@/components/use-table-filters";
+import { ColumnSortButton } from "@/components/column-sort-button";
+import { compareColumnValues, type SortDirection } from "@/lib/column-sort";
+import { useTableFilters, type FilterColumn } from "@/components/use-table-filters";
 import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
@@ -173,7 +175,7 @@ function DevelopmentPage() {
   });
 
   const profileNames = useMemo(() => new Map((data?.profiles ?? []).map((profile) => [profile.id, profile.full_name || profile.email || "Usuário"])), [data?.profiles]);
-  const ticketFilters = useTableFilters(data?.tickets ?? [], [
+  const ticketColumns: FilterColumn<Ticket>[] = [
     { key: "number", label: "Nº", kind: "number", value: (t) => t.ticket_number },
     { key: "reporter", label: "Solicitante", value: (t) => profileNames.get(t.reporter_id) ?? "Usuário" },
     { key: "app", label: "Aplicativo", value: (t) => APP_NAMES[t.app_key] ?? t.app_key },
@@ -183,8 +185,17 @@ function DevelopmentPage() {
     { key: "status", label: "Situação", value: (t) => STATUS_NAMES[t.status] },
     { key: "question", label: "Perguntas", value: (t) => [data?.questionResponders.get(t.id)?.requester ? "Pergunta aguardando Solicitante" : "", data?.questionResponders.get(t.id)?.attendant ? "Pergunta aguardando Responsável" : ""].filter(Boolean).join("; ") },
     { key: "date", label: "Data", kind: "date", value: (t) => t.created_at.slice(0, 10), display: (t) => new Date(t.created_at).toLocaleDateString("pt-BR") },
-  ]);
-  const filteredTickets = visibleCodeTickets(ticketFilters.filtered, ticketFilters.filters.status);
+  ];
+  const ticketFilters = useTableFilters(data?.tickets ?? [], ticketColumns);
+  const [sorting, setSorting] = useState<{ key: string; direction: SortDirection }>();
+  const sortColumn = ticketColumns.find((column) => column.key === sorting?.key);
+  const sortedTickets = sortColumn && sorting ? [...ticketFilters.filtered].sort((a, b) => compareColumnValues(sortColumn.kind ?? "text", sortColumn.value(a), sortColumn.value(b), sorting.direction)) : ticketFilters.filtered;
+  const filteredTickets = visibleCodeTickets(sortedTickets, ticketFilters.filters.status);
+  const sortHeader = (key: string) => {
+    const column = ticketColumns.find((entry) => entry.key === key);
+    if (!column) return null;
+    return <span className="inline-flex items-center gap-1 whitespace-nowrap">{ticketFilters.header(key)}<ColumnSortButton label={column.label} direction={sorting?.key === key ? sorting.direction : undefined} onClick={() => setSorting((current) => current?.key !== key ? { key, direction: "asc" } : current.direction === "asc" ? { key, direction: "desc" } : undefined)} /></span>;
+  };
   useEffect(() => {
     const selectedId = routeSearch.ticket ?? selectedTicket?.id;
     if (!selectedId || !data?.tickets.length) return;
@@ -221,15 +232,15 @@ function DevelopmentPage() {
               <Table className="table-fixed md:min-w-[900px]">
                  <TableHeader>
                    <TableRow>
-                     <TableHead className="w-[5%]">{ticketFilters.header("number")}</TableHead>
-                     <TableHead className="w-[13%]">{ticketFilters.header("reporter")}</TableHead>
-                     <TableHead className="w-[11%]">{ticketFilters.header("app")}</TableHead>
-                     <TableHead className="w-[8%]">{ticketFilters.header("type")}</TableHead>
-                     <TableHead className="w-[21%]">{ticketFilters.header("title")}</TableHead>
-                     <TableHead className="w-[10%]">{ticketFilters.header("priority")}</TableHead>
-                     <TableHead className="w-[15%]">{ticketFilters.header("status")}</TableHead>
-                     <TableHead className="w-[9%]">{ticketFilters.header("question")}</TableHead>
-                     <TableHead className="w-[8%]">{ticketFilters.header("date")}</TableHead>
+                     <TableHead className="w-[5%]">{sortHeader("number")}</TableHead>
+                     <TableHead className="w-[13%]">{sortHeader("reporter")}</TableHead>
+                     <TableHead className="w-[11%]">{sortHeader("app")}</TableHead>
+                     <TableHead className="w-[8%]">{sortHeader("type")}</TableHead>
+                     <TableHead className="w-[21%]">{sortHeader("title")}</TableHead>
+                     <TableHead className="w-[10%]">{sortHeader("priority")}</TableHead>
+                      <TableHead className="w-[15%]">{sortHeader("status")}</TableHead>
+                     <TableHead className="w-[9%]">{sortHeader("question")}</TableHead>
+                     <TableHead className="w-[8%]">{sortHeader("date")}</TableHead>
                    </TableRow>
                  </TableHeader>
                 <TableBody>{filteredTickets.map((ticket) => (
