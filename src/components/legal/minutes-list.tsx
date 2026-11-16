@@ -9,6 +9,9 @@ import { legalActionDelayDays, legalActionDueSoonDays, legalTrackingOptions, pen
 import { useMinutesAlerts } from '@/components/cde/cde-deadline-alerts';
 import { SubjectActions } from './subject-actions';
 import { useState } from 'react';
+import { Input } from '@/components/ui/input';
+import { X } from 'lucide-react';
+import { OP_LABELS, matchesColumnFilter, isFilterActive, type FilterOp } from '@/lib/column-filters';
 import { toast } from 'sonner';
 import { legalPdf } from '@/lib/legal-pdf';
 import { legalSignaturePendingItems, legalSubjectPendingCount } from '@/lib/legal-pending';
@@ -45,10 +48,18 @@ export function MinutesList({ rows, expanded, toggle, edit, remove, openPdf, use
   const minutesAlerts = useMinutesAlerts();
   const [pendingUserId, setPendingUserId] = useState('all');
   const [onlyConfidential, setOnlyConfidential] = useState(false);
+  const [searchOp, setSearchOp] = useState<FilterOp>('contains');
+  const [searchText, setSearchText] = useState('');
+  const searchFilter = { op: searchOp, value: searchText };
+  const searchActive = isFilterActive(searchFilter);
+  const negativeSearch = searchOp === 'not_contains' || searchOp === 'not_equals';
+  const textsMatch = (texts: string[]) => { const list = texts.length ? texts : ['']; return negativeSearch ? list.every(t => matchesColumnFilter('text', t, t, searchFilter)) : list.some(t => matchesColumnFilter('text', t, t, searchFilter)); };
+  const subjectTexts = (recordId: string, subject: { id: string; title: string; description?: string | null; decisions?: string | null }) => [subject.title, subject.description ?? '', subject.decisions ?? '', ...tracking.actions.filter(a => a.record_id === recordId && a.subject_id === subject.id && !a.archived).map(a => a.title)].filter(t => t.trim());
+  const subjectMatches = (recordId: string, subject: Parameters<typeof subjectTexts>[1]) => !searchActive || textsMatch(subjectTexts(recordId, subject));
   const pendingUser = tracking.users.find(u => u.id === pendingUserId);
-  const filteredView = pendingUserId !== 'all' || onlyConfidential;
+  const filteredView = pendingUserId !== 'all' || onlyConfidential || searchActive;
   const badgeUser = pendingUser ?? user;
-  const shownRows = (pendingUser ? rows.filter(r => legalSignaturePendingItems([r], pendingUser, tracking.actions, tracking.completions).length > 0) : rows).filter(r => !onlyConfidential || parseLegalContent(r.content).subjects.some(s => s.confidential));
+  const shownRows = (pendingUser ? rows.filter(r => legalSignaturePendingItems([r], pendingUser, tracking.actions, tracking.completions).length > 0) : rows).filter(r => !onlyConfidential || parseLegalContent(r.content).subjects.some(s => s.confidential)).filter(r => { if (!searchActive) return true; const c = parseLegalContent(r.content); const texts = [r.title, ...c.subjects.flatMap(sj => subjectTexts(r.id, sj))].filter(t => t.trim()); return textsMatch(texts); });
   const hasConfidential = rows.some(r => parseLegalContent(r.content).subjects.some(s => s.confidential));
   const toggleDeliberation = async (recordId: string, subjectId: string, done: boolean) => {
     const { error } = done ? await supabase.from('legal_subject_completions').insert({ record_id: recordId, subject_id: subjectId }) : await supabase.from('legal_subject_completions').delete().eq('record_id', recordId).eq('subject_id', subjectId);
@@ -56,7 +67,8 @@ export function MinutesList({ rows, expanded, toggle, edit, remove, openPdf, use
     await queryClient.invalidateQueries({ queryKey: ['legal-tracking'] }); void queryClient.invalidateQueries({ queryKey: ['pending-actions'] });
   };
   return <div className="space-y-3">
-    <div className="flex flex-wrap items-center justify-end gap-2 text-sm">{hasConfidential ? <label title="Somente assuntos de acesso restrito" className="mr-4 flex cursor-pointer items-center gap-2"><Checkbox aria-label="Somente assuntos de acesso restrito" checked={onlyConfidential} onCheckedChange={v=>setOnlyConfidential(Boolean(v))} /><CdeLockIcon screen="components/legal/minutes-list.tsx" /></label> : null}<Label htmlFor="legal-pending-user" className="text-muted-foreground">Pendências de</Label><Select value={pendingUserId} onValueChange={setPendingUserId}><SelectTrigger id="legal-pending-user" className="w-56"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">Todos os usuários</SelectItem>{tracking.users.map(u => <SelectItem key={u.id} value={u.id}>{u.full_name}</SelectItem>)}</SelectContent></Select></div>
+    <div className="flex flex-wrap items-center justify-end gap-2 text-sm">{hasConfidential ? <label title="Somente assuntos de acesso restrito" className="mr-4 flex cursor-pointer items-center gap-2"><Checkbox aria-label="Somente assuntos de acesso restrito" checked={onlyConfidential} onCheckedChange={v=>setOnlyConfidential(Boolean(v))} /><CdeLockIcon screen="components/legal/minutes-list.tsx" /></label> : null}<div className="mr-4 flex items-center gap-2"><Select value={searchOp} onValueChange={v => setSearchOp(v as FilterOp)}><SelectTrigger aria-label="Condição da busca" className="w-36"><SelectValue /></SelectTrigger><SelectContent>{OP_LABELS.text.map(o => <SelectItem key={o.op} value={o.op}>{o.label}</SelectItem>)}</SelectContent></Select>{searchOp !== 'empty' && searchOp !== 'not_empty' ? <div className="relative w-56"><Input aria-label="Buscar ações e assuntos, inclusive concluídos" placeholder="Buscar ação ou assunto" value={searchText} onChange={e => setSearchText(e.target.value)} className="pr-8" />{searchText ? <Button type="button" variant="ghost" size="compactIcon" className="absolute right-0 top-1/2 -translate-y-1/2" aria-label="Limpar busca" title="Limpar busca" onClick={() => setSearchText('')}><X /></Button> : null}</div> : null}</div><Label htmlFor="legal-pending-user" className="text-muted-foreground">Pendências de</Label><Select value={pendingUserId} onValueChange={setPendingUserId}><SelectTrigger id="legal-pending-user" className="w-56"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">Todos os usuários</SelectItem>{tracking.users.map(u => <SelectItem key={u.id} value={u.id}>{u.full_name}</SelectItem>)}</SelectContent></Select></div>
+    {searchActive && shownRows.length === 0 ? <p className="text-sm text-muted-foreground">Nenhuma ata encontrada para a busca.</p> : null}
     {pendingUser && shownRows.length === 0 ? <p className="text-sm text-muted-foreground">Nenhuma pendência de {pendingUser.full_name}.</p> : null}
     <div className="divide-y divide-border overflow-hidden rounded-md border border-border bg-card">
     {shownRows.map(row => {
@@ -79,7 +91,7 @@ export function MinutesList({ rows, expanded, toggle, edit, remove, openPdf, use
         </div>
         {open ? <div className="border-t border-border bg-background">
           {!filteredView && <div className="space-y-2 px-4 py-4 text-sm sm:px-6"><p><span className="text-muted-foreground">Local: </span>{content.location}</p><p className="break-words"><span className="text-muted-foreground">Participantes: </span>{content.participants.map(p => p.name).join(', ')}</p></div>}
-          {content.subjects.map((subject,index)=>onlyConfidential && !subject.confidential ? null : <section key={subject.id} className="border-t border-border text-sm" aria-label={`Assunto ${index + 1}: ${subject.title}`}>
+          {content.subjects.map((subject,index)=>(onlyConfidential && !subject.confidential) || !subjectMatches(row.id, subject) ? null : <section key={subject.id} className="border-t border-border text-sm" aria-label={`Assunto ${index + 1}: ${subject.title}`}>
             <div className="space-y-2 bg-primary/10 px-4 py-2 sm:px-6">
               <div className="flex items-center gap-3">
                 <CdeNumber screen="components/legal/minutes-list.tsx">{index + 1}</CdeNumber>
