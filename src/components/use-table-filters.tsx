@@ -35,7 +35,7 @@ export function useTableFilters<T>(rows: readonly T[], columns: FilterColumn<T>[
   const header = (key: string) => {
     const column = columns.find((entry) => entry.key === key);
     menuKey ??= key;
-    return <span className="inline-flex max-w-full flex-wrap items-center gap-1"><span className="min-w-0 break-words">{column?.label}</span>{key === menuKey ? <span className="inline-flex shrink-0">{menu}</span> : null}</span>;
+    return <span className="inline-flex max-w-full flex-nowrap items-center gap-1"><span className="min-w-0 break-words">{column?.label}</span>{key === menuKey ? <span className="inline-flex shrink-0">{menu}</span> : null}</span>;
   };
   const searchText = (key: string) => filters[key]?.op === "contains" ? filters[key]?.value ?? "" : "";
   return { filtered, filters, header, control, menu, searchText, active: active.length, setFilter: (key: string, value: ColumnFilterValue | undefined) => setFilters(current => ({ ...current, [key]: value })), clear: () => setFilters({}) };
