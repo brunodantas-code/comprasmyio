@@ -408,6 +408,14 @@ const STATUS_LABELS: Record<Order["status"], string> = {
   recebido_problema: "Não Conforme",
 };
 
+/** Entregue só se aplica a itens físicos; demais tipos mostram conclusão ou pagamento. */
+const PHYSICAL_REQUEST_TYPES = new Set(["materiais", "dispositivos", "importacao", "maquinas_equipamentos_e_eletrodometicos"]);
+function orderStatusLabel(o: { status: Order["status"]; request_type?: string | null; request_model?: string | null }, status: Order["status"] = o.status): string {
+  if (status !== "entregue" || PHYSICAL_REQUEST_TYPES.has(o.request_type ?? "")) return STATUS_LABELS[status];
+  const paid = ["reembolso", "pagamento"].includes(o.request_type ?? "") || ["reembolso", "pagamento"].includes(o.request_model ?? "");
+  return paid ? "Pago" : "Concluído";
+}
+
 /** Aplica nomes do Cadastro → Status às situações originais e devolve as situações de acompanhamento ativas. */
 function useStatusCatalog() {
   const { data } = useOrderStatuses();
@@ -2874,7 +2882,7 @@ function OrdersTable({
     : !o.for_stock && o.allocation_type !== "interna" && o.project_id ? "Projeto" : null;
   const [cf, setCf] = useState<Record<string, ColumnFilterValue | undefined>>({});
   const [columnSort, setColumnSort] = useState<{ key: string; direction: SortDirection }>();
-  const statusLabelOf = (o: Order) => (o.custom_status_id ? statusCatalog.custom.find((r) => r.id === o.custom_status_id)?.label : undefined) ?? STATUS_LABELS[o.status];
+  const statusLabelOf = (o: Order) => (o.custom_status_id ? statusCatalog.custom.find((r) => r.id === o.custom_status_id)?.label : undefined) ?? orderStatusLabel(o);
   const itemsTextOf = (o: Order) => { const rows = groupedOrderItems?.get(o.id) ?? []; return rows.length ? rows.map((r) => r.item_name).join(", ") : (o.item_name ?? ""); };
   const noDeadline = (o: Order) => o.request_model === "reembolso" || o.request_model === "pagamento" || o.request_type === "reembolso" || o.request_type === "pagamento";
   type ColDef = { key: string; label: string; kind: FilterKind; raw: (o: Order) => string | number | null | undefined; list: (o: Order) => string };
@@ -3249,7 +3257,7 @@ function OrderReportDialog({
             <Row label={order.delivery_mode === "retirada" ? "Endereço de retirada" : "Endereço de entrega"} value={order.delivery_point} />
             <Row label="Prazo" value={`${DEADLINE_LABELS[order.deadline_type]}${order.deadline_date ? ` — ${new Date(order.deadline_date + "T00:00:00").toLocaleDateString("pt-BR")}` : ""}`} />
             <Row label="Previsão de entrega" value={order.delivery_forecast ? new Date(order.delivery_forecast + "T00:00:00").toLocaleDateString("pt-BR") : "—"} />
-            <Row label="Status" value={STATUS_LABELS[order.status]} />
+            <Row label="Status" value={orderStatusLabel(order)} />
             <Row label="Código" value={order.passphrase || "—"} />
             <Row label="Criado em" value={fmtDateTime(order.created_at)} />
             {order.payment_date && <Row label="Data do pagamento" value={new Date(order.payment_date + "T00:00:00").toLocaleDateString("pt-BR")} />}
@@ -4605,7 +4613,7 @@ function StatusHistoryDialog({ order, canEdit }: { order: Order; canEdit?: boole
           ) : rejected ? (
             <Badge className={STATUS_BADGE_NEUTRAL}>Rejeitado</Badge>
           ) : (
-            <Badge className={STATUS_BADGE_NEUTRAL}>{customLabel ?? STATUS_LABELS[order.status]}</Badge>
+            <Badge className={STATUS_BADGE_NEUTRAL}>{customLabel ?? orderStatusLabel(order)}</Badge>
           )}
         </button>
       </DialogTrigger>
@@ -4625,7 +4633,7 @@ function StatusHistoryDialog({ order, canEdit }: { order: Order; canEdit?: boole
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 {(BUYER_STATUS_KEYS.includes(order.status) ? BUYER_STATUS_KEYS : [...BUYER_STATUS_KEYS, order.status]).map((v) => (
-                  <SelectItem key={v} value={v}>{STATUS_LABELS[v]}</SelectItem>
+                  <SelectItem key={v} value={v}>{orderStatusLabel(order, v)}</SelectItem>
                 ))}
                 {statusCatalog.custom.filter((r) => r.active || r.id === order.custom_status_id).map((r) => (
                   <SelectItem key={r.id} value={`c:${r.id}`}>{r.label}</SelectItem>
