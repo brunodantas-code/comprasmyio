@@ -2647,7 +2647,7 @@ function BuyerQueue({ mode = "all" }: { mode?: ApprovalListMode }) {
     <Button type="button" variant={groupByProject ? "default" : "outline"} size="sm" onClick={() => setGroupByProject((v) => !v)}>Agrupar por Projeto e Cliente</Button>
     <SupplyConsolidation />
     <Button type="button" size="sm" variant={showTagCosts ? "default" : "outline"} onClick={() => setShowTagCosts((v) => !v)}><Tag className="h-3.5 w-3.5" /> Custo por Etiqueta</Button>
-    <Button type="button" size="sm" variant="outline" title="Exportar custo por Etiqueta em PDF" aria-label="Exportar custo por Etiqueta em PDF" disabled={!tagCosts.groups.length} onClick={() => tagCosts.exportPdf()}><FileText className="h-3.5 w-3.5" /></Button>
+    {showTagCosts && <Button type="button" size="sm" variant="outline" title="Exportar custo por Etiqueta em PDF" aria-label="Exportar custo por Etiqueta em PDF" disabled={!tagCosts.groups.length} onClick={() => tagCosts.exportPdf()}><FileText className="h-3.5 w-3.5" /></Button>}
   </>;
   return (
     <TableReportProvider><Card>
