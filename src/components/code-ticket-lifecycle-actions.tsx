@@ -62,7 +62,7 @@ export function CodeTicketLifecycleActions({ ticket, userId, isCodeAdmin, onChan
 
   if (!canConcludeCodeTicket(ticket.status, ticket.reporter_id === userId) && !canReopenCodeTicket(ticket, userId, isCodeAdmin)) return null;
   return <div className="flex flex-wrap items-center gap-2">
-    {canConcludeCodeTicket(ticket.status, ticket.reporter_id === userId) ? <Button type="button" onClick={requestConclusion} disabled={confirming || conclude.isPending}><Check className="h-4 w-4" />{conclude.isPending ? "Concluindo..." : "Concluir"}</Button> : null}
+    {canConcludeCodeTicket(ticket.status, ticket.reporter_id === userId) ? <Button type="button" cdeNative className="bg-code-completed text-code-completed-foreground hover:bg-code-completed/85" onClick={requestConclusion} disabled={confirming || conclude.isPending}><Check className="h-4 w-4" />{conclude.isPending ? "Concluindo..." : "Marcar como concluído"}</Button> : null}
     {canReopenCodeTicket(ticket, userId, isCodeAdmin) ? <Button type="button" actionKind="standard" onClick={() => setReopenOpen(true)}><RotateCcw className="h-4 w-4" />Reabrir chamado</Button> : null}
     <Dialog open={reopenOpen} onOpenChange={(open) => { if (reopen.isPending) return; setReopenOpen(open); if (!open) setReason(""); }}>
       <DialogContent className="max-w-lg" onEscapeKeyDown={(event) => { if (reopen.isPending) event.preventDefault(); }} onPointerDownOutside={(event) => { if (reopen.isPending) event.preventDefault(); }}>
