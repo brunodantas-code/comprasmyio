@@ -322,3 +322,4 @@
 - [x] Dúvida respondida: exclusão de To Dos pela lixeira ao lado de "Situação", com confirmação.
 - [x] Supply: datas de ida e volta abaixo de UF e Cidade, cidade em largura completa; conferido na tela (destino 508 px em linha própria, datas na linha seguinte).
 - [x] Responder e Nova pergunta padronizados em Code, Supply e Wishlist: ghost preto, mesmo tamanho, modo ativo com sublinhado e negrito (Wishlist não usa mais fundo cinza). Conferido por código; botões só aparecem para o destinatário da pergunta.
+- [x] Filtros múltiplos em Approvals, Solicitações e demais listas (padrão Tickets)
