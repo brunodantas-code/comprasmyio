@@ -1620,6 +1620,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const form = e.currentTarget;
     if (baseRequestModel === "viagens" && !travelType) return toast.error("Selecione o que deseja solicitar");
     if ((baseRequestModel === "materiais" || baseRequestModel === "servicos") && subtypeOptions.length > 0 && !requestSubtype) return toast.error("Selecione o que deseja solicitar");
     const isMateriais = requestModel === "materiais";
@@ -1710,7 +1711,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
       try { resolveSupplyAllocation(forStock ? "estoque" : allocTarget, projectId, clientId, clientUnitId, projects ?? []); }
       catch (error) { return toast.error(error instanceof Error ? error.message : "Alocação inválida."); }
     }
-    const fd = new FormData(e.currentTarget);
+    const fd = new FormData(form);
     const parsed = newOrderSchema.safeParse({
       project_id: isRh ? (projectId || undefined) : (allocTarget === "projeto" && !forStock ? projectId : undefined),
       item_name: isReembolso
