@@ -421,6 +421,8 @@ export function PendingForMe({ renderEditAction }: { renderEditAction?: EditActi
     qc.invalidateQueries({ queryKey: ["approval-steps"] });
     qc.invalidateQueries({ queryKey: ["orders"] });
     qc.invalidateQueries({ queryKey: ["pending-actions"] });
+    qc.invalidateQueries({ queryKey: ["critical-pending"] });
+    qc.invalidateQueries({ queryKey: ["central-admin"] });
   };
 
   const financialMine = mine.filter((s) => s.purchase_orders?.request_model !== "dispositivos");

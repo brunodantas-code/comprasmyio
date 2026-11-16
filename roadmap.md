@@ -1,4 +1,6 @@
 # Roadmap
+- [ ] Supply: mostrar ícone de funil à esquerda e texto Filtros à direita no botão indicado nos prints, preservando filtros combinados e aparência CDE.
+- [ ] Central Admin e Prazo crítico: usar a mesma regra das aprovações pessoais, ignorando decisões encerradas e autoaprovação; preservar execução, histórico e permissões; testar e conferir alertas na conta disponível.
 - [x] Aprovação sem dados: identificada NF Resorte, approval 202610020001, R$ 13.000; leitura do aprovador e decisão atômica corrigidas. Aprovar/Rejeitar com histórico e releitura conferidos em pedidos temporários na conta de Leonardo; sessão de Alexandre não disponível. Solicitação original e aprovação conjunta preservadas; orientação enviada.
 - [x] Supply: Recebimento oculto em serviços no computador/celular; filtro Entregue / Concluído / Pago conferido; Serviços/Viagens preservadas como Atendidas nos indicadores. 48 testes passaram; alterações de tela não publicadas.
 - [x] Code: corrigir sobreposição dos títulos e ícones no cabeçalho; conferidos em 768/1073/1280 px, com ordenação e filtros funcionando.

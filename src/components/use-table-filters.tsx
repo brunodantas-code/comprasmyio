@@ -42,12 +42,13 @@ export function useTableFilters<T>(rows: readonly T[], columns: FilterColumn<T>[
   return { filtered, filters, header, control, menu, searchText, active: active.length, setFilter: (key: string, value: ColumnFilterValue | undefined) => setFilters(current => ({ ...current, [key]: value })), clear: () => setFilters({}) };
 }
 
-export function TableFilterMenu<T>({ rows, columns, filters, onChange, clear }: {
+export function TableFilterMenu<T>({ rows, columns, filters, onChange, clear, triggerLabel }: {
   rows: readonly T[];
   columns: FilterColumn<T>[];
   filters: Record<string, ColumnFilterValue | undefined>;
   onChange: (key: string, value: ColumnFilterValue | undefined) => void;
   clear: () => void;
+  triggerLabel?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [key, setKey] = useState(columns[0]?.key ?? "");
@@ -56,7 +57,7 @@ export function TableFilterMenu<T>({ rows, columns, filters, onChange, clear }: 
   const activeColumns = columns.filter(c => isFilterActive(filters[c.key]));
   const describe = (c: FilterColumn<T>) => { const v = filters[c.key]; return v?.selected?.join(", ") || [v?.value, v?.value2].filter(Boolean).join(" — ") || "ativo"; };
   return <span className="inline-flex shrink-0 items-center gap-1 text-sm text-muted-foreground"><Popover open={open} onOpenChange={setOpen}>
-    <PopoverTrigger asChild><CdeButton group="filter" screen="components/use-table-filters.tsx" active={!!active} aria-label="Filtros" title={active ? `Filtros (${active} ativos)` : "Filtros"} className="!bg-transparent [&_svg]:!size-5 [&_svg]:stroke-[1.8]" /></PopoverTrigger>
+    <PopoverTrigger asChild><CdeButton group="filter" screen="components/use-table-filters.tsx" active={!!active} aria-label="Filtros" title={active ? `Filtros (${active} ativos)` : "Filtros"} className="!bg-transparent gap-2 [&_svg]:!size-5 [&_svg]:stroke-[1.8]">{triggerLabel}</CdeButton></PopoverTrigger>
     <PopoverContent align="start" className="w-[min(18rem,calc(100vw-2rem))] space-y-3 p-3">
       <Select value={column?.key} onValueChange={setKey}>
         <SelectTrigger aria-label="Tipo de filtro" className="h-8 text-xs"><SelectValue /></SelectTrigger>

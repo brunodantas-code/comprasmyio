@@ -5,7 +5,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { LayoutList,GitBranch,CalendarDays,ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select,SelectTrigger,SelectValue,SelectContent,SelectItem } from '@/components/ui/select';
-import { centralItems,blockers,criticality,type CentralItem } from '@/lib/central-pending';
+import { centralItems,centralPendingItems,blockers,criticality,type CentralItem } from '@/lib/central-pending';
 import { useDeadlineAlerts,useMinutesAlerts } from '@/components/cde/cde-deadline-alerts';
 import { centralOptions } from './data';
 import { UserPendingBars } from './user-bars';
@@ -14,7 +14,7 @@ const Flow=lazy(()=>import('./flow'));
 export function CentralDashboard({user,app,sort,view,onChange}:{user:string;app:string;sort:string;view:string;onChange:(patch:Record<string,string>)=>void}){
  const [openUsers,setOpenUsers]=useState<Set<string>>(new Set());const toggleUser=(id:string)=>setOpenUsers(s=>{const n=new Set(s);if(n.has(id))n.delete(id);else n.add(id);return n;});
  const {data}=useSuspenseQuery(centralOptions);const navigate=useNavigate();const all=centralItems(data);const today=new Date().toLocaleDateString('en-CA',{timeZone:'America/Sao_Paulo'});const legal=useMinutesAlerts();const supply=useDeadlineAlerts();const score=(i:CentralItem)=>criticality(i,today,legal.warningDays,supply.criticalDays);
- const pending=all.filter(i=>!i.completed&&!i.canceled&&(i.users.length>0||i.kind==='code'||i.kind==='supply'||i.kind==='support'));
+ const pending=centralPendingItems(all);
  const shown=pending.filter(i=>(!user||i.users.includes(user)||user==='unassigned'&&!i.users.length)&&(!app||i.app===app)).sort((a,b)=>sort==='due'?(a.due??'9999').localeCompare(b.due??'9999'):sort==='app'?a.app.localeCompare(b.app)||a.title.localeCompare(b.title):score(b)-score(a)||(a.due??'9999').localeCompare(b.due??'9999'));
  const name=(id:string)=>data.users.find(u=>u.id===id)?.full_name??'Usuário';
  const open=(i:CentralItem)=>{if(i.kind==='code')void navigate({to:'/development',search:{ticket:i.recordId}});else if(i.app==='Legal')void navigate({to:'/legal',search:{record:i.recordId}});else if(i.app==='Mytosis')void navigate({to:'/mytosis',search:{node:i.recordId,task:i.kind==='mytosis_task'?i.sourceId:undefined}});else if(i.kind==='support')void navigate({to:'/chamados',search:{chamado:i.recordId}});else if(i.kind==='user_deletion')void navigate({to:'/dashboard',search:{section:'admin',subsection:'usuarios'}});else void navigate({to:'/dashboard',search:{order:i.recordId,section:undefined,subsection:undefined}});};

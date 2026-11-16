@@ -2936,7 +2936,7 @@ function OrdersTable({
   return (
     <>
       <div className="mb-2 flex items-center gap-2 overflow-x-auto py-1 text-xs [&>*]:shrink-0">
-        <TableFilterMenu rows={orders} columns={colDefs.filter(c => showRequester || c.key !== "req").map(c => ({ key: c.key, label: c.label, kind: c.kind, value: c.raw as (o: typeof orders[number]) => string | number | null | undefined, display: c.list }))} filters={cf} onChange={(key, value) => setCf(prev => ({ ...prev, [key]: value }))} clear={() => setCf({})} />
+        <TableFilterMenu triggerLabel="Filtros" rows={orders} columns={colDefs.filter(c => showRequester || c.key !== "req").map(c => ({ key: c.key, label: c.label, kind: c.kind, value: c.raw as (o: typeof orders[number]) => string | number | null | undefined, display: c.list }))} filters={cf} onChange={(key, value) => setCf(prev => ({ ...prev, [key]: value }))} clear={() => setCf({})} />
         {toolbarActions}
         <SupplyDeadlineIndicators orders={visibleOrders} />
         <TableReportActions title={showRequester ? "Todos os approvals" : "Minhas Solicitações"} />
