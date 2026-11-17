@@ -513,6 +513,8 @@
 @layer base {
   .cde-th { text-align: var(--th-align); vertical-align: var(--th-valign); background: var(--th-bg); color: var(--th-color); }
   :where(thead) > tr { border-color: var(--th-border); }
+  .cde-title { color: var(--title-color, inherit); background: var(--title-bg, transparent); border: 1px solid var(--title-border, transparent); }
+  .cde-subtitle { color: var(--sub-color, inherit); background: var(--sub-bg, transparent); border: 1px solid var(--sub-border, transparent); }
   .cde-td { text-align: var(--td-align); vertical-align: var(--td-valign); color: var(--td-color); }
   :where(tbody) > tr { background-color: var(--td-bg); border-color: var(--td-border); }
   /* Botões, links e grupos de ações dentro das células acompanham o alinhamento escolhido */

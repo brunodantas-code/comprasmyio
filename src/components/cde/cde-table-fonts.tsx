@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { CardDescription, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -46,7 +47,7 @@ export function CdeTableFonts({ number, handle }: { number: number; handle?: imp
 
   return (
     <section className="space-y-4">
-      <CdeCategoryHeader handle={handle} number={number} title="Cabeçalhos e Listas" hint="Fontes, alinhamento e ordem das colunas das listas de dados em todos os apps" open={open} onToggle={() => setOpen(!open)} />
+      <CdeCategoryHeader handle={handle} number={number} title="Cabeçalhos e Listas" hint="Fontes, cores, títulos e subtítulos, alinhamento e ordem das colunas das listas de dados em todos os apps" open={open} onToggle={() => setOpen(!open)} />
       {open && (
         <div className="w-full min-w-0 space-y-4 py-4">
           <div role="group" aria-label="Fontes de cabeçalhos e filtros" className="grid w-full max-w-3xl grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
@@ -77,11 +78,12 @@ export function CdeTableFonts({ number, handle }: { number: number; handle?: imp
             ))}
           </div>
           <div role="group" aria-label="Cores dos cabeçalhos e listas" className="grid w-full max-w-5xl grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-3">
-            {([["headerBg", "Cabeçalhos — fundo"], ["headerText", "Cabeçalhos — texto"], ["headerBorder", "Cabeçalhos — borda"], ["cellBg", "Listas — fundo"], ["cellText", "Listas — texto"], ["cellBorder", "Listas — borda"]] as [HeaderColorKind, string][]).map(([k, l]) => <ColorPick key={k} kind={k} label={l} value={fonts[k]} onChange={(v) => setDraft({ ...fonts, [k]: v })} />)}
+            {([["headerBg", "Cabeçalhos — fundo"], ["headerText", "Cabeçalhos — texto"], ["headerBorder", "Cabeçalhos — borda"], ["cellBg", "Listas — fundo"], ["cellText", "Listas — texto"], ["cellBorder", "Listas — borda"], ["titleBg", "Títulos — fundo"], ["titleText", "Títulos — texto"], ["titleBorder", "Títulos — borda"], ["subBg", "Subtítulos — fundo"], ["subText", "Subtítulos — texto"], ["subBorder", "Subtítulos — borda"]] as [HeaderColorKind, string][]).map(([k, l]) => <ColorPick key={k} kind={k} label={l} value={fonts[k]} onChange={(v) => setDraft({ ...fonts, [k]: v })} />)}
           </div>
           <div className="space-y-1">
             <Label>Prévia</Label>
-            <div aria-label="Prévia das fontes" className="max-w-2xl rounded-md border border-border p-3">
+            <div aria-label="Prévia das fontes" className="max-w-2xl rounded-md border border-border p-3" style={tableAlignVars(fonts) as React.CSSProperties}>
+              <div className="mb-3 space-y-1"><CardTitle>Minhas Solicitações</CardTitle><CardDescription>Acompanhe o status de suas solicitações de Materiais, Serviços, Viagens, Reembolsos e Contratação de RH.</CardDescription></div>
               <div className="mb-2 flex items-center justify-end gap-2" style={{ fontSize: fonts.filterPx }}>
                 <span className="text-muted-foreground">Contém</span>
                 <span className="text-muted-foreground">Buscar</span>
