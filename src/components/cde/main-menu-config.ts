@@ -37,6 +37,13 @@ export const USER_INFO_OPTIONS = [
 ] as const;
 export type UserInfoMode = typeof USER_INFO_OPTIONS[number]["key"];
 export type MenuConfig = { order: MenuId[]; hidden: MenuId[]; v?: number; userInfo?: UserInfoMode };
+/** Home omits redundant navigation and leads with visible personal pending actions. */
+export function menuOrderForContext(config: MenuConfig, homePage = false): MenuId[] {
+  const visible = config.order.filter((id) => !config.hidden.includes(id));
+  if (!homePage) return visible;
+  const home = visible.filter((id) => id !== "back" && id !== "portal");
+  return home.includes("pendentes") ? ["pendentes", ...home.filter((id) => id !== "pendentes")] : home;
+}
 /** Text shown below the user name in every app header. */
 export function userInfoLine(mode: UserInfoMode | undefined, jobTitle?: string | null, profile?: string | null) {
   const parts = mode === "job" ? [jobTitle] : mode === "profile" ? [profile] : mode === "both" ? [jobTitle, profile] : [];

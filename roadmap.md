@@ -1,4 +1,8 @@
 # Roadmap
+- [x] Mensagens: concordância com Alexandre; recomendação de mostrar “Resposta 2 · Leonardo Roedel”, sem “Destinatário” no autor; pergunta respondida, conversa não alterada.
+- [x] Home Page: menu sem Voltar/Todos os apps, iniciando por Minhas Pendências e preservando a ordem CDE das demais ações; navegação mantida em Acessos/outros apps.
+- [x] Menu principal: mesmo HeaderMenu completo do Desktop no portal e nos apps, inclusive Mobile; aparência, ícones, nomes, ordem e visibilidade CDE compartilhados, sem mudar permissões.
+- [x] Menus conferidos em 1280/1085/390/320 px e alturas 1800/844/811/700/650: mesma aparência de 288 px, sem excesso lateral; senha/assinatura/tema/Central/Acessos abriram, menu fechou nas ações; 16 testes passaram, CDE salvo e dados preservados, sem erros de tela.
 - [x] Code: prévia isolada de “Marcar como concluído” com check/texto alinhados, padrão CDE e borda fina preta de 1 px; salvamento somente por disquete. Computador/celular conferidos e imagem preparada para apresentação, sem alteração da tela ou dos chamados.
 - [x] Code: prévia aprovada somente em “Marcar como concluído”; botão ligado ao padrão Confirmar/Concluir do CDE com borda fina preta e texto/ícone alinhados. Computador/celular e confirmação/cancelamento/recarga conferidos com Atendido simulado apenas no navegador (nenhum chamado próprio nesse estado); 20 testes passaram, nenhum chamado alterado.
 - [x] Salvamentos preservados nesta alteração: usuário aprovou a prévia somente para “Marcar como concluído”.

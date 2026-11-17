@@ -13,11 +13,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ChangePasswordDialog } from "@/components/change-password-dialog";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { AppManualDialog } from "@/components/app-manual-dialog";
 import { PersonalSignature } from "@/components/personal-signature";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { MENU_ITEMS, parseMenuConfig, useMainMenuConfig, userInfoLine } from "@/components/cde/main-menu-config";
+import { MENU_ITEMS, menuOrderForContext, parseMenuConfig, useMainMenuConfig, userInfoLine } from "@/components/cde/main-menu-config";
 
 export function AppHeader({ logo, children, supplyManual = false, manualApp, menuActions }: { logo: ReactNode; children?: ReactNode; supplyManual?: boolean; manualApp?: string; menuActions?: MenuAction[] }) {
   const [manualOpen, setManualOpen] = useState(false);
@@ -53,7 +52,7 @@ export function AppHeader({ logo, children, supplyManual = false, manualApp, men
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
           <Link to="/portal" className="flex min-w-0 items-center" title="Voltar aos aplicativos">{logo}</Link>
           <div className="flex shrink-0 items-center gap-1 sm:hidden">
-            <MobileHeaderMenu supplyManual={supplyManual} {...extra} userName={userName} onSignOut={signOut} onChangePassword={() => setPasswordOpen(true)} buttonClass={iconButton} />
+            <HeaderMenu supplyManual={supplyManual} {...extra} userName={userName} onSignOut={signOut} onChangePassword={() => setPasswordOpen(true)} buttonClass={iconButton} />
           </div>
         </div>
         <div className="mt-5 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:mt-0 sm:flex sm:min-w-0 sm:justify-end">
@@ -65,7 +64,7 @@ export function AppHeader({ logo, children, supplyManual = false, manualApp, men
           </div>
           {children}
           <div className="hidden shrink-0 items-center gap-1 sm:flex">
-            <DesktopHeaderMenu supplyManual={supplyManual} {...extra} userName={userName} onSignOut={signOut} onChangePassword={() => setPasswordOpen(true)} buttonClass={iconButton} />
+            <HeaderMenu supplyManual={supplyManual} {...extra} userName={userName} onSignOut={signOut} onChangePassword={() => setPasswordOpen(true)} buttonClass={iconButton} />
           </div>
         </div>
       </div>
@@ -86,9 +85,9 @@ export function UserNameBlock({ userName }: { userName: string }) {
 
 type MenuAction = { label: string; icon: ReactNode; onClick: () => void };
 type MenuExtras = { manualApp?: string; onOpenManual?: () => void; onOpenSignature?: () => void; menuActions?: MenuAction[] };
-type HeaderMenuProps = MenuExtras & { userName: string; onSignOut: () => void; onChangePassword: () => void; buttonClass: string; supplyManual?: boolean };
+type HeaderMenuProps = MenuExtras & { userName: string; onSignOut: () => void; onChangePassword: () => void; buttonClass: string; supplyManual?: boolean; homePage?: boolean };
 
-function MainMenuEntries({ onSignOut, onChangePassword, supplyManual, itemClass, manualApp, onOpenManual, onOpenSignature, menuActions }: MenuExtras & Pick<HeaderMenuProps, "onSignOut" | "onChangePassword" | "supplyManual"> & { itemClass: string }) {
+function MainMenuEntries({ onSignOut, onChangePassword, supplyManual, homePage, itemClass, manualApp, onOpenManual, onOpenSignature, menuActions }: MenuExtras & Pick<HeaderMenuProps, "onSignOut" | "onChangePassword" | "supplyManual" | "homePage"> & { itemClass: string }) {
   const { data } = useMainMenuConfig();
   const config = data ?? parseMenuConfig();
   const pendingTotal = usePendingActions().data?.total ?? 0;
@@ -98,7 +97,7 @@ function MainMenuEntries({ onSignOut, onChangePassword, supplyManual, itemClass,
     const { data: row } = await supabase.from("erp_admins").select("user_id").eq("user_id", auth.user.id).maybeSingle();
     return !!row;
   } });
-  return <>{menuActions?.map(action => <Button key={action.label} variant="ghost" className={itemClass} onClick={action.onClick}>{action.icon}{action.label}</Button>)}{config.order.filter((id) => !config.hidden.includes(id) && (id !== "manual" || supplyManual || !!manualApp) && (id !== "access" || isErpAdmin)).map((id) => {
+  return <>{menuActions?.map(action => <Button key={action.label} variant="ghost" className={itemClass} onClick={action.onClick}>{action.icon}{action.label}</Button>)}{menuOrderForContext(config, homePage).filter((id) => (id !== "manual" || supplyManual || !!manualApp) && (id !== "access" || isErpAdmin)).map((id) => {
     const item = MENU_ITEMS.find((i) => i.id === id);
     if (!item) return null;
     const Icon = item.icon;
@@ -132,34 +131,22 @@ function ThemeEntry({ className }: { className: string }) {
   return <Button variant="ghost" className={className} onClick={() => setDark(toggleAppTheme() === "dark")}><Icon className="h-5 w-5" />{dark ? "Modo claro" : "Modo escuro"}</Button>;
 }
 
-function MobileHeaderMenu({ userName, onSignOut, onChangePassword, buttonClass, supplyManual, ...extra }: HeaderMenuProps) {
-  return (
-    <Sheet>
-      <SheetTrigger asChild><Button variant="ghost" size="icon" className={`relative ${buttonClass}`} aria-label="Abrir menu"><Menu className="!h-6 !w-6" /><MenuTriggerBadge /></Button></SheetTrigger>
-      <SheetContent side="bottom" className="rounded-t-2xl px-5 pb-8">
-        <SheetHeader><SheetTitle className="truncate text-left">{userName}</SheetTitle></SheetHeader>
-        <nav className="mt-5 divide-y divide-border" aria-label="Menu do aplicativo">
-          <MainMenuEntries {...extra} supplyManual={supplyManual} onSignOut={onSignOut} onChangePassword={onChangePassword} itemClass="h-12 w-full justify-start rounded-none !bg-transparent !text-foreground hover:!bg-muted" />
-        </nav>
-      </SheetContent>
-    </Sheet>
-  );
-}
-
-export function DesktopHeaderMenu({ userName, onSignOut, onChangePassword, buttonClass, supplyManual, ...extra }: HeaderMenuProps) {
+/** The desktop CDE menu is shared by every app and viewport. */
+export function HeaderMenu({ userName, onSignOut, onChangePassword, buttonClass, supplyManual, homePage, ...extra }: HeaderMenuProps) {
+  const [open, setOpen] = useState(false);
   const itemClass = "h-10 w-full justify-start rounded-none px-4 !bg-transparent !text-foreground hover:!bg-muted hover:!text-foreground";
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button variant="ghost" size="icon" className={`relative ${buttonClass}`} aria-label="Abrir menu">
           <Menu className="!h-6 !w-6" />
           <MenuTriggerBadge />
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" sideOffset={8} className="w-72 overflow-hidden rounded-lg border-border bg-popover p-0 shadow-lg">
-        <nav className="py-1" aria-label={`Menu de ${userName}`}>
-          <MainMenuEntries {...extra} supplyManual={supplyManual} onSignOut={onSignOut} onChangePassword={onChangePassword} itemClass={itemClass} />
+      <PopoverContent align="end" sideOffset={8} collisionPadding={12} className="max-h-[var(--radix-popover-content-available-height)] w-72 max-w-[calc(100vw-1.5rem)] overflow-y-auto rounded-lg border-border bg-popover p-0 shadow-lg">
+        <nav className="py-1" aria-label={`Menu de ${userName}`} onClick={() => setOpen(false)}>
+          <MainMenuEntries {...extra} supplyManual={supplyManual} homePage={homePage} onSignOut={onSignOut} onChangePassword={onChangePassword} itemClass={itemClass} />
         </nav>
       </PopoverContent>
     </Popover>

@@ -7,28 +7,22 @@ import { useState } from "react";
 import type React from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { MessageCircleQuestion, Bell, CheckCircle2, ChevronRight, CodeXml, DollarSign, FileSignature, Home, LayoutGrid, Menu, Moon, Phone, Search, Settings, Settings2, ShieldCheck, ShoppingCart, UserRound, UsersRound, LogOut, KeyRound } from "lucide-react";
+import { MessageCircleQuestion, Bell, CheckCircle2, CodeXml, FileSignature, LayoutGrid, Phone, ShieldCheck, ShoppingCart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { MyioPlatformLogo } from "@/components/myio-platform-logo";
 import { ErpAppAccessAdmin } from "@/components/erp-app-access-admin";
-import { CrmFunnelIcon } from "@/components/crm-funnel-icon";
-import { MytosisIcon } from "@/components/mytosis-icon";
-import { CdeIcon } from "@/components/cde-icon";
 import { useAppOrder, useAppTile, APP_TILE_DEFAULT, appTileColorVars, homeHeaderVars, homeHeaderLogoTone, mobileTileVars } from "@/components/cde/app-order-config";
 import { AppTileFace } from "@/components/cde/app-tile";
 import { CorporateBanner } from "@/components/corporate/corporate-banner";
 import { DEFAULT_PORTAL_SECTIONS, usePortalSections } from "@/components/corporate/portal-sections";
 import { AppAccessLink } from "@/components/app-access-link";
-import { DesktopHeaderMenu, UserNameBlock } from "@/components/app-header";
+import { HeaderMenu, UserNameBlock } from "@/components/app-header";
 import { usePendingActions } from "@/hooks/use-pending-actions";
 import { ChangePasswordDialog } from "@/components/change-password-dialog";
 import { PersonalSignature } from "@/components/personal-signature";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ThemeMenuItem, ThemeToggle } from "@/components/theme-toggle";
 import { TodoSection } from "@/components/personal-todos/todo-section";
 
 export const Route = createFileRoute("/_authenticated/portal")({
@@ -53,7 +47,6 @@ function PortalPage() {
   const navigateView = useNavigate();
   const activeView: "apps" | "users" = search.view === "users" ? "users" : "apps";
   const setActiveView = (view: "apps" | "users") => navigateView({ to: "/portal", search: view === "users" ? { view: "users" } : {} });
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { data: pendingActions } = usePendingActions();
   const { data: appOrder } = useAppOrder();
   const tile = useAppTile().data ?? APP_TILE_DEFAULT;
@@ -132,57 +125,12 @@ function PortalPage() {
       <header style={homeHeaderVars(tile) as React.CSSProperties} className="home-page-header sticky top-0 z-40 shrink-0 sm:border-b sm:border-border">
       <TopIconStyleVars /><ListItemStyleVars />
         <div className="app-header-workspace mx-auto max-w-7xl px-4 pb-9 pt-5 sm:flex sm:items-center sm:justify-between sm:gap-4 sm:px-6 sm:py-4">
-          <div className="flex items-start justify-between gap-4 sm:block">
-            <MyioPlatformLogo tone={homeHeaderLogoTone(tile, true)} className="h-10 sm:hidden" />
-            <MyioPlatformLogo tone={homeHeaderLogoTone(tile)} className="hidden h-10 sm:inline-flex" />
-            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="shrink-0 !bg-transparent !p-0 !text-[color:var(--home-header-text,var(--accent-foreground))] shadow-none hover:!bg-transparent sm:hidden" aria-label="Abrir menu">
-                  <Menu className="!h-8 !w-8 stroke-[2]" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="max-h-[78vh] overflow-y-auto rounded-t-3xl border-x-0 border-b-0 px-5 pb-8 pt-5 sm:hidden">
-                <SheetHeader className="mb-5 text-center">
-                  <SheetTitle>Menu</SheetTitle>
-                </SheetHeader>
-                <nav aria-label="Menu do portal" className="divide-y divide-border">
-                  <Button asChild variant="ghost" className="h-14 w-full justify-start rounded-none px-1 text-base !bg-transparent !text-foreground hover:!bg-muted hover:!text-foreground">
-                    <Link to="/pendentes" onClick={() => setMobileMenuOpen(false)}>
-                      <Bell className="h-5 w-5 shrink-0" />
-                      <span className="min-w-0 flex-1 text-left">Central de Pendências</span>
-                      {(pendingActions?.total ?? 0) > 0 ? <AlertMarker count={pendingActions?.total ?? 0} /> : null}
-                      <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
-                    </Link>
-                  </Button>
-                  {data.isErpAdmin ? (
-                    <Button variant="ghost" className="h-14 w-full justify-start rounded-none px-1 text-base !bg-transparent !text-foreground hover:!bg-muted hover:!text-foreground" onClick={() => { setActiveView("users"); setMobileMenuOpen(false); }}>
-                      <Settings2 className="h-5 w-5 shrink-0" />
-                      <span className="min-w-0 flex-1 text-left">Acessos</span>
-                      <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
-                    </Button>
-                  ) : null}
-                  <div className="grid min-h-14 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-1 [&_button]:!bg-transparent [&_button]:!text-foreground [&_button:hover]:!bg-muted">
-                    <div className="flex min-w-0 items-center gap-2 text-base font-medium">
-                      <Moon className="h-5 w-5 shrink-0" />
-                      <span>Tema</span>
-                    </div>
-                    <ThemeToggle />
-                  </div>
-                  <Button variant="ghost" className="h-14 w-full justify-start rounded-none px-1 text-base !bg-transparent !text-foreground hover:!bg-muted hover:!text-foreground" onClick={() => { setMobileMenuOpen(false); setPasswordOpen(true); }}>
-                    <KeyRound className="h-5 w-5 shrink-0" />
-                    <span className="min-w-0 flex-1 text-left">Alterar senha</span>
-                  </Button>
-                  <Button variant="ghost" className="h-14 w-full justify-start rounded-none px-1 text-base !bg-transparent !text-destructive hover:!bg-muted hover:!text-destructive" onClick={handleSignOut}>
-                    <LogOut className="h-5 w-5 shrink-0" />
-                    <span className="min-w-0 flex-1 text-left">Sair</span>
-                  </Button>
-                </nav>
-                <div className="mt-6 rounded-xl bg-muted px-4 py-3">
-                  <p className="truncate text-sm font-semibold">{data.name}</p>
-                  <p className="text-xs text-muted-foreground">Menu do usuário</p>
-                </div>
-              </SheetContent>
-            </Sheet>
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 sm:block">
+            <div className="min-w-0"><MyioPlatformLogo tone={homeHeaderLogoTone(tile, true)} className="h-10 sm:hidden" />
+            <MyioPlatformLogo tone={homeHeaderLogoTone(tile)} className="hidden h-10 sm:inline-flex" /></div>
+            <div className="shrink-0 sm:hidden">
+              <HeaderMenu homePage={activeView === "apps"} userName={data.name} onSignOut={handleSignOut} onChangePassword={() => setPasswordOpen(true)} onOpenSignature={() => setSignatureOpen(true)} buttonClass="top-icon !bg-transparent !text-foreground shadow-none hover:!bg-transparent hover:!text-foreground" />
+            </div>
           </div>
           <div className="mt-8 sm:hidden">
             <p className="text-xl font-bold">Olá, {firstName}</p>
@@ -194,8 +142,7 @@ function PortalPage() {
                 <LayoutGrid className="h-4 w-4" />
               </Button>
             ) : null}
-            <DesktopHeaderMenu userName={data.name} onSignOut={handleSignOut} onChangePassword={() => setPasswordOpen(true)} onOpenSignature={() => setSignatureOpen(true)} buttonClass="top-icon !bg-transparent !text-foreground shadow-none hover:!bg-transparent hover:!text-foreground" />
-            <ChangePasswordDialog open={passwordOpen} onOpenChange={setPasswordOpen} />
+            <HeaderMenu homePage={activeView === "apps"} userName={data.name} onSignOut={handleSignOut} onChangePassword={() => setPasswordOpen(true)} onOpenSignature={() => setSignatureOpen(true)} buttonClass="top-icon !bg-transparent !text-foreground shadow-none hover:!bg-transparent hover:!text-foreground" />
           </div>
         </div>
       </header>
@@ -261,6 +208,7 @@ function PortalPage() {
           {data.isErpAdmin ? <TabsContent value="users"><ErpAppAccessAdmin /></TabsContent> : null}
         </Tabs>
       </main>
+      <ChangePasswordDialog open={passwordOpen} onOpenChange={setPasswordOpen} />
       <Dialog open={signatureOpen} onOpenChange={setSignatureOpen}>
         <DialogContent className="max-h-[90dvh] overflow-y-auto">
           <DialogHeader><DialogTitle>Minha assinatura</DialogTitle></DialogHeader>
