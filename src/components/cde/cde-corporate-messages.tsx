@@ -118,7 +118,7 @@ export function CdeCorporateMessages({ number, handle }: { number: number; handl
       </div>}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <button type="button" className="flex items-center gap-2 text-sm font-medium" aria-expanded={historyOpen} onClick={() => setHistoryOpen((v) => !v)}>Histórico de mensagens ({all.length})<CdeDisclosureIcon open={historyOpen} screen="components/cde/cde-corporate-messages.tsx" direction="vertical" /></button>
-        {historyOpen && <div className="relative w-full max-w-xs"><Search className="pointer-events-none absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" /><Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar mensagem" aria-label="Buscar mensagem" className="pl-6 text-[length:var(--filter-fs)]" /></div>}
+        {historyOpen && <div className="relative w-full max-w-xs"><Search className="pointer-events-none absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" /><Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar mensagem" aria-label="Buscar mensagem" className="!pl-7 text-[length:var(--filter-fs)]" style={{ paddingLeft: 28 }} /></div>}
       </div>
       {historyOpen && <Table>
         <TableHeader><TableRow><TableHead>Mensagem</TableHead><TableHead>Exibição</TableHead><TableHead>Inatividade</TableHead><TableHead>Criada por</TableHead><TableHead>Situação</TableHead><TableHead /></TableRow></TableHeader>
