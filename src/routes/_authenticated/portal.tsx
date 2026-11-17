@@ -150,7 +150,7 @@ function PortalPage() {
                     <Link to="/pendentes" onClick={() => setMobileMenuOpen(false)}>
                       <Bell className="h-5 w-5 shrink-0" />
                       <span className="min-w-0 flex-1 text-left">Central de Pendências</span>
-                      {(pendingActions?.total ?? 0) > 0 ? <span className="flex h-7 min-w-7 items-center justify-center rounded-full bg-status px-2 text-xs font-bold text-status-foreground">{(pendingActions?.total ?? 0) > 99 ? "99+" : pendingActions?.total}</span> : null}
+                      {(pendingActions?.total ?? 0) > 0 ? <AlertMarker count={pendingActions?.total ?? 0} /> : null}
                       <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
                     </Link>
                   </Button>
@@ -212,7 +212,12 @@ function PortalPage() {
                  </div>
                  <div aria-label="Aplicativos disponíveis" style={{ columnGap: tile.gapX, rowGap: tile.gapY }} className="hidden flex-wrap sm:flex">
                   {apps.map(({ key, name, description, to }) => (
-                     <div key={key} style={{ zoom: tile.tilePct / 100 }} className="flex w-24 min-w-0 snap-start justify-self-center flex-col items-center text-center sm:w-28 sm:justify-self-start">
+                     <div key={key} className="relative min-w-0 snap-start justify-self-center sm:justify-self-start">
+                         {key === "supply" && (pendingActions?.supply ?? 0) > 0 ? <PendingBadge count={pendingActions?.supply ?? 0} label="pendências no Supply" /> : null}
+                          {key === "development" && (pendingActions?.codeTickets ?? 0) > 0 ? <PendingBadge count={pendingActions?.codeTickets ?? 0} label="tickets pendentes no Code" /> : null}
+                           {key === "chamados" && (pendingActions?.supportCalls ?? 0) > 0 ? <PendingBadge count={pendingActions?.supportCalls ?? 0} label="chamados pendentes no OpDesk" /> : null}
+                        {key === "legal" && (pendingActions?.legalSignatures ?? 0) > 0 ? <PendingBadge count={pendingActions?.legalSignatures ?? 0} label="pendências no Legal" /> : null}
+                     <div style={{ zoom: tile.tilePct / 100 }} className="flex w-24 min-w-0 flex-col items-center text-center sm:w-28">
                       <AppAccessLink
                         appKey={key}
                         to={to}
@@ -220,15 +225,12 @@ function PortalPage() {
                         title={`Acessar ${name}`}
                         className="group relative flex h-24 w-24 flex-col items-center justify-between rounded-3xl border-2 border-[color:var(--tile-border,var(--primary))] bg-[var(--tile-fill,var(--primary))] px-2 pb-2 pt-1.5 text-primary-foreground outline-none transition-transform hover:scale-105 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 sm:h-28 sm:w-28"
                       >
-                         {key === "supply" && (pendingActions?.supply ?? 0) > 0 ? <PendingBadge count={pendingActions?.supply ?? 0} label="pendências no Supply" /> : null}
-                          {key === "development" && (pendingActions?.codeTickets ?? 0) > 0 ? <PendingBadge count={pendingActions?.codeTickets ?? 0} label="tickets pendentes no Code" /> : null}
-                           {key === "chamados" && (pendingActions?.supportCalls ?? 0) > 0 ? <PendingBadge count={pendingActions?.supportCalls ?? 0} label="chamados pendentes no OpDesk" /> : null}
-                        {key === "legal" && (pendingActions?.legalSignatures ?? 0) > 0 ? <PendingBadge count={pendingActions?.legalSignatures ?? 0} label="pendências no Legal" /> : null}
         <AppTileFace appKey={key} name={name} tile={tile} />
                      </AppAccessLink>
                       <p className="mt-3 w-24 max-w-full break-words text-center text-xs leading-4 text-[color:var(--tile-below,var(--muted-foreground))] sm:w-28 sm:text-sm sm:leading-5">
                         {description.map((line) => <span key={line} className="block sm:whitespace-nowrap">{line}</span>)}
                       </p>
+                     </div>
                      </div>
                    ))}
                  </div>
@@ -270,7 +272,7 @@ function PortalPage() {
 }
 
 function PendingBadge({ count, label }: { count: number; label: string }) {
-  return <AlertMarker count={count} className="absolute -right-2 -top-2 shadow-md" aria-label={`${count} ${label}`} />;
+  return <AlertMarker count={count} className="pointer-events-none absolute -right-2 -top-2 z-10" aria-label={`${count} ${label}`} />;
 }
 
 function PendingRow({ icon: Icon, label, count, to, search, number }: { icon: typeof Bell; label: string; number?: string | number; count: number; to: "/legal" | "/pendentes" | "/dashboard" | "/development" | "/chamados"; search?: { record: string } | { section: "admin"; subsection: "usuarios" } | { section: "queue"; subsection?: "supply" } | { ticket: string } | { chamado: string } | { order: string } }) {
