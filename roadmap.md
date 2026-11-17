@@ -349,3 +349,4 @@
 - [x] Ordenação de cabeçalhos no CDE (arraste)
 - [x] Preenchimento (fundo) dos ícones dos apps no item 11 do CDE
 - [x] Lilás e roxo myio nas cores da página principal
+- [x] Mensagens corporativas na tela principal + histórico no CDE

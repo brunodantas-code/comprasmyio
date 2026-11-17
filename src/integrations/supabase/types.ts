@@ -1315,6 +1315,36 @@ export type Database = {
           },
         ]
       }
+      corporate_messages: {
+        Row: {
+          created_at: string
+          created_by: string
+          ends_at: string | null
+          id: string
+          message: string
+          starts_at: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          ends_at?: string | null
+          id?: string
+          message: string
+          starts_at?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          ends_at?: string | null
+          id?: string
+          message?: string
+          starts_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       cost_centers: {
         Row: {
           active: boolean

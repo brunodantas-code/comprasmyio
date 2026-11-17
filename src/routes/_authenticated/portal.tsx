@@ -19,6 +19,7 @@ import { MytosisIcon } from "@/components/mytosis-icon";
 import { CdeIcon } from "@/components/cde-icon";
 import { useAppOrder, useAppTile, APP_TILE_DEFAULT, appTileColorVars } from "@/components/cde/app-order-config";
 import { AppTileFace } from "@/components/cde/app-tile";
+import { CorporateBanner } from "@/components/corporate/corporate-banner";
 import { AppAccessLink } from "@/components/app-access-link";
 import { DesktopHeaderMenu, UserNameBlock } from "@/components/app-header";
 import { usePendingActions } from "@/hooks/use-pending-actions";
@@ -199,6 +200,7 @@ function PortalPage() {
       <main className="no-scrollbar relative z-10 -mt-3 min-h-0 flex-1 overflow-y-auto rounded-t-xl bg-[var(--portal-bg,var(--background))] px-3 py-10 sm:mx-auto sm:mt-0 sm:min-h-0 sm:max-w-7xl sm:overflow-visible sm:rounded-none sm:px-6 sm:py-14">
         <Tabs value={activeView} onValueChange={(value) => setActiveView(value as "apps" | "users")}>
           <TabsContent value="apps">
+            <CorporateBanner />
             {apps.length ? (
                <>
                   <div aria-label="Aplicativos disponíveis no mobile" className="mobile-app-grid grid pb-2 sm:hidden">
