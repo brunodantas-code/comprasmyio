@@ -360,3 +360,4 @@
 - [x] Cores de borda, fundo e texto dos cabeçalhos (CDE Cabeçalhos e Listas)
 - [x] Cores de texto, fundo e borda das listas + prévia dos cabeçalhos funcionando
 - [ ] CRM Fase 3: Propostas
+- [x] Botões Escolher/Adicionar como padrão do CDE no padrão visual comum

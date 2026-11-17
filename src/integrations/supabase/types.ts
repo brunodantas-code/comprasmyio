@@ -1914,6 +1914,208 @@ export type Database = {
         }
         Relationships: []
       }
+      crm_proposta_itens: {
+        Row: {
+          ambiente: string | null
+          categoria: string
+          created_at: string
+          id: string
+          modelo: string | null
+          nome: string
+          observacao: string | null
+          ordem: number
+          preco_mensal_unit: number
+          preco_setup_unit: number
+          proposta_id: string
+          quantidade: number
+          unidade: string
+        }
+        Insert: {
+          ambiente?: string | null
+          categoria?: string
+          created_at?: string
+          id?: string
+          modelo?: string | null
+          nome: string
+          observacao?: string | null
+          ordem?: number
+          preco_mensal_unit?: number
+          preco_setup_unit?: number
+          proposta_id: string
+          quantidade?: number
+          unidade?: string
+        }
+        Update: {
+          ambiente?: string | null
+          categoria?: string
+          created_at?: string
+          id?: string
+          modelo?: string | null
+          nome?: string
+          observacao?: string | null
+          ordem?: number
+          preco_mensal_unit?: number
+          preco_setup_unit?: number
+          proposta_id?: string
+          quantidade?: number
+          unidade?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_proposta_itens_proposta_id_fkey"
+            columns: ["proposta_id"]
+            isOneToOne: false
+            referencedRelation: "crm_propostas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_proposta_pendencias: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          proposta_id: string
+          resolucao: string | null
+          resolvido_em: string | null
+          resolvido_por: string | null
+          status: string
+          texto: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          proposta_id: string
+          resolucao?: string | null
+          resolvido_em?: string | null
+          resolvido_por?: string | null
+          status?: string
+          texto: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          proposta_id?: string
+          resolucao?: string | null
+          resolvido_em?: string | null
+          resolvido_por?: string | null
+          status?: string
+          texto?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_proposta_pendencias_proposta_id_fkey"
+            columns: ["proposta_id"]
+            isOneToOne: false
+            referencedRelation: "crm_propostas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_propostas: {
+        Row: {
+          condicoes: Json
+          created_at: string
+          created_by: string | null
+          data_proposta: string
+          id: string
+          incompleta: boolean
+          numero: string
+          observacoes: string | null
+          oportunidade_id: string
+          status: string
+          template_id: string | null
+          total_mensal: number
+          total_setup: number
+          updated_at: string
+          versao: number
+        }
+        Insert: {
+          condicoes?: Json
+          created_at?: string
+          created_by?: string | null
+          data_proposta?: string
+          id?: string
+          incompleta?: boolean
+          numero?: string
+          observacoes?: string | null
+          oportunidade_id: string
+          status?: string
+          template_id?: string | null
+          total_mensal?: number
+          total_setup?: number
+          updated_at?: string
+          versao?: number
+        }
+        Update: {
+          condicoes?: Json
+          created_at?: string
+          created_by?: string | null
+          data_proposta?: string
+          id?: string
+          incompleta?: boolean
+          numero?: string
+          observacoes?: string | null
+          oportunidade_id?: string
+          status?: string
+          template_id?: string | null
+          total_mensal?: number
+          total_setup?: number
+          updated_at?: string
+          versao?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_propostas_oportunidade_id_fkey"
+            columns: ["oportunidade_id"]
+            isOneToOne: false
+            referencedRelation: "crm_oportunidades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_propostas_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "crm_templates_proposta"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_templates_proposta: {
+        Row: {
+          ativo: boolean
+          codigo: string
+          condicoes_padrao: Json
+          escopo: string | null
+          id: string
+          introducao: string | null
+          nome: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          codigo: string
+          condicoes_padrao?: Json
+          escopo?: string | null
+          id?: string
+          introducao?: string | null
+          nome: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          codigo?: string
+          condicoes_padrao?: Json
+          escopo?: string | null
+          id?: string
+          introducao?: string | null
+          nome?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       damage_reasons: {
         Row: {
           active: boolean

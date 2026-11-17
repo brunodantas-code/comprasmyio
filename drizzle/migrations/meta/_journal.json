@@ -1583,6 +1583,13 @@
       "when": 1794920823697,
       "tag": "0225_restrict_lookup_reads_to_registered_users",
       "breakpoints": true
+    },
+    {
+      "idx": 226,
+      "version": "7",
+      "when": 1794923218517,
+      "tag": "0226_crm_propostas",
+      "breakpoints": true
     }
   ]
 }
