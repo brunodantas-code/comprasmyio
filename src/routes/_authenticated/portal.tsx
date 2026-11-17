@@ -111,7 +111,7 @@ function PortalPage() {
         to={to}
         aria-label={`Acessar ${name}`}
         title={`Acessar ${name}`}
-        className="mobile-app-tile group relative flex flex-col items-center justify-between rounded-2xl border-2 border-[color:var(--tile-border,var(--primary))] bg-primary px-1 pb-2 pt-1 text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring"
+        className="mobile-app-tile group relative flex flex-col items-center justify-between rounded-2xl border-2 border-[color:var(--tile-border,var(--primary))] bg-[var(--tile-fill,var(--primary))] px-1 pb-2 pt-1 text-primary-foreground outline-none hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring"
       >
         {key === "supply" && (pendingActions?.supply ?? 0) > 0 ? <PendingBadge count={pendingActions?.supply ?? 0} label="pendências no Supply" /> : null}
         {key === "development" && (pendingActions?.codeTickets ?? 0) > 0 ? <PendingBadge count={pendingActions?.codeTickets ?? 0} label="tickets pendentes no Code" /> : null}
@@ -212,7 +212,7 @@ function PortalPage() {
                         to={to}
                         aria-label={`Acessar ${name}`}
                         title={`Acessar ${name}`}
-                        className="group relative flex h-24 w-24 flex-col items-center justify-between rounded-3xl border-2 border-[color:var(--tile-border,var(--primary))] bg-primary px-2 pb-2 pt-1.5 text-primary-foreground outline-none transition-transform hover:scale-105 hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 sm:h-28 sm:w-28"
+                        className="group relative flex h-24 w-24 flex-col items-center justify-between rounded-3xl border-2 border-[color:var(--tile-border,var(--primary))] bg-[var(--tile-fill,var(--primary))] px-2 pb-2 pt-1.5 text-primary-foreground outline-none transition-transform hover:scale-105 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 sm:h-28 sm:w-28"
                       >
                          {key === "supply" && (pendingActions?.supply ?? 0) > 0 ? <PendingBadge count={pendingActions?.supply ?? 0} label="pendências no Supply" /> : null}
                           {key === "development" && (pendingActions?.codeTickets ?? 0) > 0 ? <PendingBadge count={pendingActions?.codeTickets ?? 0} label="tickets pendentes no Code" /> : null}

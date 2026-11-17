@@ -1,0 +1,815 @@
+[
+  {
+    "id": "components/access-profile-definitions-tab.tsx|0",
+    "file": "components/access-profile-definitions-tab.tsx",
+    "line": 134,
+    "context": "Perfis cadastrados",
+    "headers": [
+      "Nome",
+      "Acessos",
+      "Ativo",
+      "(sem título)"
+    ]
+  },
+  {
+    "id": "components/additional-step-types-tab.tsx|0",
+    "file": "components/additional-step-types-tab.tsx",
+    "line": 139,
+    "context": "Novo tipo de etapa adicional",
+    "headers": [
+      "Nome",
+      "Ativo",
+      "(sem título)"
+    ]
+  },
+  {
+    "id": "components/approval-workflow.tsx|0",
+    "file": "components/approval-workflow.tsx",
+    "line": 348,
+    "context": "Histórico de auditoria",
+    "headers": [
+      "Data/Hora",
+      "Usuário",
+      "Papel/Alçada",
+      "Ação",
+      "Justificativa / Comentário"
+    ]
+  },
+  {
+    "id": "components/approval-workflow.tsx|1",
+    "file": "components/approval-workflow.tsx",
+    "line": 455,
+    "context": "Histórico de auditoria",
+    "headers": [
+      "Approval",
+      "Tipo",
+      "Solicitante",
+      "Valor unitário",
+      "Quantidade",
+      "Valor Total",
+      "Projeto ou Cliente",
+      "(sem título)"
+    ]
+  },
+  {
+    "id": "components/approval-workflow.tsx|2",
+    "file": "components/approval-workflow.tsx",
+    "line": 1168,
+    "context": "Nova Etapa Adicional",
+    "headers": [
+      "Ordem",
+      "Etapa",
+      "Tipo",
+      "Tipos de Solicitação",
+      "Responsável",
+      "Ativa",
+      "(sem título)"
+    ]
+  },
+  {
+    "id": "components/approval-workflow.tsx|3",
+    "file": "components/approval-workflow.tsx",
+    "line": 1424,
+    "context": "Alçadas de Dispositivos myio",
+    "headers": [
+      "Usuário",
+      "Automática até",
+      "Faixa 2 até",
+      "Faixa 3 até"
+    ]
+  },
+  {
+    "id": "components/approval-workflow.tsx|4",
+    "file": "components/approval-workflow.tsx",
+    "line": 1445,
+    "context": "Alçadas de Dispositivos myio",
+    "headers": [
+      "Usuário",
+      "Aprovado por (cargo)",
+      "Automática até",
+      "Faixa 2 até",
+      "Faixa 3 até",
+      "Sequência atual"
+    ]
+  },
+  {
+    "id": "components/approval-workflow.tsx|5",
+    "file": "components/approval-workflow.tsx",
+    "line": 1789,
+    "context": "Organograma de Aprovação",
+    "headers": [
+      "Cargo",
+      "Usuários no cargo",
+      "N-1",
+      "N+1"
+    ]
+  },
+  {
+    "id": "components/assembly-release.tsx|0",
+    "file": "components/assembly-release.tsx",
+    "line": 874,
+    "context": "Excluir liberação",
+    "headers": [
+      "Data",
+      "Dispositivos",
+      "Quantidade",
+      "Responsáveis",
+      "Foto",
+      "Observações",
+      "(sem título) (condicional)"
+    ]
+  },
+  {
+    "id": "components/bom-settings.tsx|0",
+    "file": "components/bom-settings.tsx",
+    "line": 366,
+    "context": "Regras de componentes por dispositivo",
+    "headers": [
+      "Componente",
+      "Qtd. por unidade",
+      "Com perda",
+      "(sem título)"
+    ]
+  },
+  {
+    "id": "components/cash-flow/cash-register-tab.tsx|0",
+    "file": "components/cash-flow/cash-register-tab.tsx",
+    "line": 89,
+    "context": "Movimentações bancárias",
+    "headers": [
+      "Data",
+      "Descrição",
+      "Conta bancária",
+      "Plano de Contas",
+      "Referências",
+      "Valor",
+      "Situação",
+      "(sem título)"
+    ]
+  },
+  {
+    "id": "components/cash-flow/cash-register-tab.tsx|1",
+    "file": "components/cash-flow/cash-register-tab.tsx",
+    "line": 129,
+    "context": "Importar extrato",
+    "headers": [
+      "Data",
+      "Descrição",
+      "Valor"
+    ]
+  },
+  {
+    "id": "components/cash-flow/payables-tab.tsx|0",
+    "file": "components/cash-flow/payables-tab.tsx",
+    "line": 46,
+    "context": "Contas a pagar",
+    "headers": [
+      "Approval",
+      "Descrição",
+      "Alocação",
+      "Centro de custo",
+      "Referências",
+      "Valor",
+      "Conta",
+      "Situação"
+    ]
+  },
+  {
+    "id": "components/client-categories-tab.tsx|0",
+    "file": "components/client-categories-tab.tsx",
+    "line": 46,
+    "context": "Categorias de Clientes",
+    "headers": [
+      "Nome",
+      "Ordem",
+      "Ativa",
+      "(sem título)"
+    ]
+  },
+  {
+    "id": "components/clients-tab.tsx|0",
+    "file": "components/clients-tab.tsx",
+    "line": 276,
+    "context": "Clientes",
+    "headers": [
+      "Nome fantasia",
+      "Razão social",
+      "Categoria",
+      "Cidade",
+      "UF",
+      "CNPJ",
+      "(sem título)"
+    ]
+  },
+  {
+    "id": "components/clients-tab.tsx|1",
+    "file": "components/clients-tab.tsx",
+    "line": 411,
+    "context": "Clientes",
+    "headers": [
+      "Nome fantasia",
+      "Categoria",
+      "Cidade",
+      "UF",
+      "CNPJ",
+      "Status",
+      "(sem título)"
+    ]
+  },
+  {
+    "id": "components/cost-centers-tab.tsx|0",
+    "file": "components/cost-centers-tab.tsx",
+    "line": 118,
+    "context": "Centros de custo",
+    "headers": [
+      "Nome",
+      "Código",
+      "Descrição",
+      "(sem título)"
+    ]
+  },
+  {
+    "id": "components/damage-reasons-tab.tsx|0",
+    "file": "components/damage-reasons-tab.tsx",
+    "line": 46,
+    "context": "Motivos de Avaria",
+    "headers": [
+      "Nome",
+      "Ordem",
+      "Ativo",
+      "(sem título)"
+    ]
+  },
+  {
+    "id": "components/damaged-items.tsx|0",
+    "file": "components/damaged-items.tsx",
+    "line": 540,
+    "context": "Itens Avariados",
+    "headers": [
+      "Data",
+      "Produto",
+      "Qtd.",
+      "Origem",
+      "Motivo",
+      "Foto",
+      "Situação",
+      "Ações"
+    ]
+  },
+  {
+    "id": "components/delivery-points-tab.tsx|0",
+    "file": "components/delivery-points-tab.tsx",
+    "line": 50,
+    "context": "Pontos de Entrega",
+    "headers": [
+      "Nome",
+      "Endereço",
+      "Ordem",
+      "Padrão",
+      "Ativo",
+      "(sem título)"
+    ]
+  },
+  {
+    "id": "components/distribution.tsx|0",
+    "file": "components/distribution.tsx",
+    "line": 296,
+    "context": "Expedição",
+    "headers": [
+      "Produto",
+      "Quantidade",
+      "Baixa"
+    ]
+  },
+  {
+    "id": "components/distribution.tsx|1",
+    "file": "components/distribution.tsx",
+    "line": 769,
+    "context": "Pedidos em transporte",
+    "headers": [
+      "Produto",
+      "Quantidade",
+      "Baixa"
+    ]
+  },
+  {
+    "id": "components/distribution.tsx|2",
+    "file": "components/distribution.tsx",
+    "line": 1022,
+    "context": "Mercadoria perdida",
+    "headers": [
+      "Produto",
+      "Quantidade",
+      "Baixa"
+    ]
+  },
+  {
+    "id": "components/external-sync.tsx|0",
+    "file": "components/external-sync.tsx",
+    "line": 66,
+    "context": "",
+    "headers": [
+      "Produto",
+      "Código do QR",
+      "Status",
+      "Atualizado em"
+    ]
+  },
+  {
+    "id": "components/homologation.tsx|0",
+    "file": "components/homologation.tsx",
+    "line": 1229,
+    "context": "Caixas",
+    "headers": [
+      "Caixa",
+      "Dispositivo",
+      "Dispositivos",
+      "QR Code da caixa",
+      "Homologada em"
+    ]
+  },
+  {
+    "id": "components/import-batches.tsx|0",
+    "file": "components/import-batches.tsx",
+    "line": 527,
+    "context": "Nova importação",
+    "headers": [
+      "Item",
+      "Origem",
+      "Qtd"
+    ]
+  },
+  {
+    "id": "components/import-batches.tsx|1",
+    "file": "components/import-batches.tsx",
+    "line": 621,
+    "context": "Importações",
+    "headers": [
+      "Importação",
+      "Itens",
+      "Anexos",
+      "Criada em",
+      "Status",
+      "(sem título)"
+    ]
+  },
+  {
+    "id": "components/job-titles-tab.tsx|0",
+    "file": "components/job-titles-tab.tsx",
+    "line": 124,
+    "context": "Cargos",
+    "headers": [
+      "Nome",
+      "Nome abreviado",
+      "Descrição",
+      "(sem título)"
+    ]
+  },
+  {
+    "id": "components/material-stock-types-tab.tsx|0",
+    "file": "components/material-stock-types-tab.tsx",
+    "line": 76,
+    "context": "Categorias de Materiais",
+    "headers": [
+      "Nome",
+      "Ordem",
+      "Ativo",
+      "(sem título)"
+    ]
+  },
+  {
+    "id": "components/materials-registry-tab.tsx|0",
+    "file": "components/materials-registry-tab.tsx",
+    "line": 270,
+    "context": "Materiais",
+    "headers": [
+      "Material",
+      "Categoria",
+      "Cód. Fabricante",
+      "(sem título)"
+    ]
+  },
+  {
+    "id": "components/materials-registry-tab.tsx|1",
+    "file": "components/materials-registry-tab.tsx",
+    "line": 331,
+    "context": "Dispositivos myio",
+    "headers": [
+      "Dispositivo",
+      "Cód. Fabricante",
+      "(sem título)"
+    ]
+  },
+  {
+    "id": "components/myio-demand.tsx|0",
+    "file": "components/myio-demand.tsx",
+    "line": 554,
+    "context": "Ordens de Expedição",
+    "headers": [
+      "Produto",
+      "Exigido",
+      "Em estoque",
+      "Situação"
+    ]
+  },
+  {
+    "id": "components/myio-demand.tsx|1",
+    "file": "components/myio-demand.tsx",
+    "line": 707,
+    "context": "Fila de produção",
+    "headers": [
+      "Produto",
+      "A produzir",
+      "Projetos"
+    ]
+  },
+  {
+    "id": "components/myio-orders-tab.tsx|0",
+    "file": "components/myio-orders-tab.tsx",
+    "line": 534,
+    "context": "Solicitações de Dispositivos myio",
+    "headers": [
+      "Projeto",
+      "Cliente",
+      "Approval",
+      "Reposição",
+      "Entrega",
+      "Produtos",
+      "Status",
+      "(sem título) (condicional)"
+    ]
+  },
+  {
+    "id": "components/mytosis/okrs-tab.tsx|0",
+    "file": "components/mytosis/okrs-tab.tsx",
+    "line": 28,
+    "context": "Objetivos (OKRs)",
+    "headers": [
+      "Nº",
+      "Objetivo",
+      "Responsável",
+      "Prazo",
+      "Tarefas",
+      "Conclusão"
+    ]
+  },
+  {
+    "id": "components/mytosis/okrs-tab.tsx|1",
+    "file": "components/mytosis/okrs-tab.tsx",
+    "line": 61,
+    "context": "Consolidação de pendências",
+    "headers": [
+      "Nº",
+      "Tarefa",
+      "Objetivo",
+      "responsible",
+      "Conclusão"
+    ]
+  },
+  {
+    "id": "components/mytosis/users-tab.tsx|0",
+    "file": "components/mytosis/users-tab.tsx",
+    "line": 67,
+    "context": "Usuários do Mytosis",
+    "headers": [
+      "Usuário",
+      "E-mail",
+      "Permissão",
+      "(sem título)"
+    ]
+  },
+  {
+    "id": "components/request-types-tab.tsx|0",
+    "file": "components/request-types-tab.tsx",
+    "line": 127,
+    "context": "Tipos de Solicitação",
+    "headers": [
+      "Nome",
+      "Modelo",
+      "Ativo",
+      "(sem título)"
+    ]
+  },
+  {
+    "id": "components/site-survey-profiles-admin.tsx|0",
+    "file": "components/site-survey-profiles-admin.tsx",
+    "line": 54,
+    "context": "Perfis cadastrados",
+    "headers": [
+      "Nome",
+      "Acessos",
+      "Ativo",
+      "(sem título)"
+    ]
+  },
+  {
+    "id": "components/stock-destinations-tab.tsx|0",
+    "file": "components/stock-destinations-tab.tsx",
+    "line": 111,
+    "context": "Destinos de Estoque",
+    "headers": [
+      "Nome",
+      "Ordem",
+      "Ativo",
+      "(sem título)"
+    ]
+  },
+  {
+    "id": "components/stock-simulator.tsx|0",
+    "file": "components/stock-simulator.tsx",
+    "line": 132,
+    "context": "Simulador de estoque por dispositivo",
+    "headers": [
+      "Dispositivo",
+      "Quantidade"
+    ]
+  },
+  {
+    "id": "components/stock-simulator.tsx|1",
+    "file": "components/stock-simulator.tsx",
+    "line": 177,
+    "context": "Simulador de estoque por dispositivo",
+    "headers": [
+      "Componente",
+      "Entrada"
+    ]
+  },
+  {
+    "id": "components/stock-simulator.tsx|2",
+    "file": "components/stock-simulator.tsx",
+    "line": 313,
+    "context": "Capacidade de produção",
+    "headers": [
+      "Dispositivo",
+      "Pode produzir",
+      "Componente limitante"
+    ]
+  },
+  {
+    "id": "components/stock-simulator.tsx|3",
+    "file": "components/stock-simulator.tsx",
+    "line": 389,
+    "context": "Componentes limitantes —",
+    "headers": [
+      "Componente",
+      "Pode produzir",
+      "Em estoque",
+      "Por unidade"
+    ]
+  },
+  {
+    "id": "components/stock-tab.tsx|0",
+    "file": "components/stock-tab.tsx",
+    "line": 224,
+    "context": "",
+    "headers": [
+      "Data",
+      "Descrição",
+      "Tipo",
+      "Qtd.",
+      "Motivo",
+      "Responsável"
+    ]
+  },
+  {
+    "id": "components/stock-tab.tsx|1",
+    "file": "components/stock-tab.tsx",
+    "line": 1150,
+    "context": "Zerar estoque —",
+    "headers": [
+      "Descrição",
+      "Cód. Myio (condicional)",
+      "Cód. Fabricante (condicional)",
+      "Saldo",
+      "Imagem (condicional)",
+      "(sem título)"
+    ]
+  },
+  {
+    "id": "components/stock-tab.tsx|2",
+    "file": "components/stock-tab.tsx",
+    "line": 1902,
+    "context": "Insumos de Instalação",
+    "headers": [
+      "Descrição",
+      "Cód. Myio",
+      "Cód. Fabricante",
+      "Saldo",
+      "Imagem",
+      "(sem título)"
+    ]
+  },
+  {
+    "id": "components/supply-deadline-indicators.tsx|0",
+    "file": "components/supply-deadline-indicators.tsx",
+    "line": 19,
+    "context": "Indicadores de prazos",
+    "headers": [
+      "Pedido",
+      "Aprovação",
+      "Compra",
+      "Entrega / Atendimento / Pagamento",
+      "Ocorrências registradas"
+    ]
+  },
+  {
+    "id": "components/supply-order-statuses-tab.tsx|0",
+    "file": "components/supply-order-statuses-tab.tsx",
+    "line": 109,
+    "context": "Status das Solicitações",
+    "headers": [
+      "Sequência",
+      "Nome",
+      "Tipo",
+      "Situação",
+      "(sem título)"
+    ]
+  },
+  {
+    "id": "components/supply-tag-cost-report.tsx|0",
+    "file": "components/supply-tag-cost-report.tsx",
+    "line": 73,
+    "context": "",
+    "headers": [
+      "Etiqueta",
+      "Solicitações",
+      "Valor estimado"
+    ]
+  },
+  {
+    "id": "components/supply-tags-tab.tsx|0",
+    "file": "components/supply-tags-tab.tsx",
+    "line": 104,
+    "context": "Etiquetas",
+    "headers": [
+      "Nome",
+      "Descrição",
+      "Situação",
+      "Criada por",
+      "Data",
+      "(sem título)"
+    ]
+  },
+  {
+    "id": "components/technician-items.tsx|0",
+    "file": "components/technician-items.tsx",
+    "line": 478,
+    "context": "Produtos com os técnicos",
+    "headers": [
+      "Produto",
+      "Quantidade",
+      "QR code / Foto",
+      "Saída",
+      "Ações"
+    ]
+  },
+  {
+    "id": "components/tools-assets.tsx|0",
+    "file": "components/tools-assets.tsx",
+    "line": 562,
+    "context": "Ferramentas / Ativos",
+    "headers": [
+      "Ferramenta / Ativo",
+      "Cód. Myio",
+      "Cód. Fabricante",
+      "Saldo",
+      "Imagem",
+      "(sem título)"
+    ]
+  },
+  {
+    "id": "components/tools-assets.tsx|1",
+    "file": "components/tools-assets.tsx",
+    "line": 658,
+    "context": "Movimentações recentes",
+    "headers": [
+      "Data",
+      "Ferramenta",
+      "Tipo",
+      "Qtd",
+      "Destino",
+      "Responsável"
+    ]
+  },
+  {
+    "id": "components/unit-products.tsx|0",
+    "file": "components/unit-products.tsx",
+    "line": 506,
+    "context": "Adicionar produto na unidade",
+    "headers": [
+      "Produto",
+      "Cliente",
+      "Projeto",
+      "Etiqueta (QR)",
+      "Instalado em",
+      "Ações"
+    ]
+  },
+  {
+    "id": "components/user-manuals-tab.tsx|0",
+    "file": "components/user-manuals-tab.tsx",
+    "line": 19,
+    "context": "Manual do Usuário",
+    "headers": [
+      "App",
+      "Versão",
+      "Data",
+      "Situação",
+      "Revisão",
+      "PDF"
+    ]
+  },
+  {
+    "id": "routes/_authenticated/chamados.tsx|0",
+    "file": "routes/_authenticated/chamados.tsx",
+    "line": 98,
+    "context": "Acompanhamento",
+    "headers": [
+      "Nº",
+      "Visita",
+      "Solicitante",
+      "Categoria",
+      "Título",
+      "Prioridade",
+      "Situação",
+      "Data"
+    ]
+  },
+  {
+    "id": "routes/_authenticated/dashboard.tsx|0",
+    "file": "routes/_authenticated/dashboard.tsx",
+    "line": 3020,
+    "context": "Itens e valores",
+    "headers": [
+      "Approval",
+      "Itens da Solicitação",
+      "Tipo",
+      "Alocação",
+      "Solicitante (condicional)",
+      "Qtd",
+      "Valor Total",
+      "Destinatário",
+      "Prazo de recebimento",
+      "Previsão de entrega",
+      "Status",
+      "Código"
+    ]
+  },
+  {
+    "id": "routes/_authenticated/dashboard.tsx|1",
+    "file": "routes/_authenticated/dashboard.tsx",
+    "line": 3308,
+    "context": "Aprovações",
+    "headers": [
+      "Etapa",
+      "Aprovador",
+      "Situação",
+      "Decidido em",
+      "Comentário"
+    ]
+  },
+  {
+    "id": "routes/_authenticated/dashboard.tsx|2",
+    "file": "routes/_authenticated/dashboard.tsx",
+    "line": 3927,
+    "context": "Projetos",
+    "headers": [
+      "Nome do projeto",
+      "Orçamento",
+      "Solicitado",
+      "% do orçamento",
+      "Status",
+      "Data"
+    ]
+  },
+  {
+    "id": "routes/_authenticated/dashboard.tsx|3",
+    "file": "routes/_authenticated/dashboard.tsx",
+    "line": 4771,
+    "context": "Logs de pedidos",
+    "headers": [
+      "Quando",
+      "Ação",
+      "Pedido",
+      "Quem",
+      "Detalhes"
+    ]
+  },
+  {
+    "id": "routes/_authenticated/development.tsx|0",
+    "file": "routes/_authenticated/development.tsx",
+    "line": 263,
+    "context": "Acompanhamento",
+    "headers": [
+      "Nº",
+      "Solicitante",
+      "Aplicativo",
+      "Tipo",
+      "Título",
+      "Prioridade",
+      "Situação",
+      "Perguntas",
+      "Data"
+    ]
+  }
+]

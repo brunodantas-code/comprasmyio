@@ -39,17 +39,29 @@ export const APP_TILE_COLORS = {
     { key: "padrao", label: "Cinza claro", value: "var(--background)", dark: false },
     { key: "branco", label: "Branco", value: "var(--myio-white)", dark: false },
     { key: "verde_claro", label: "Verde claro myio", value: "var(--myio-green-tint)", dark: false },
+    { key: "lilas", label: "Lilás myio", value: "var(--myio-lilac)", dark: false },
+    { key: "roxo", label: "Roxo myio", value: "var(--myio-purple)", dark: true },
     { key: "escuro", label: "Escuro myio", value: "var(--myio-dark)", dark: true },
+  ],
+  fill: [
+    { key: "padrao", label: "Verde myio", value: "var(--myio-green)", dark: false },
+    { key: "roxo", label: "Roxo myio", value: "var(--myio-purple)", dark: true },
+    { key: "escuro", label: "Escuro myio", value: "var(--myio-dark)", dark: true },
+    { key: "branco", label: "Branco", value: "var(--myio-white)", dark: false },
+    { key: "verde_claro", label: "Verde claro myio", value: "var(--myio-green-tint)", dark: false },
+    { key: "lilas", label: "Lilás myio", value: "var(--myio-lilac)", dark: false },
   ],
   border: [
     { key: "padrao", label: "Verde myio (igual ao ícone)", value: "var(--myio-green)", dark: false },
     { key: "escuro", label: "Escuro myio", value: "var(--myio-dark)", dark: true },
     { key: "roxo", label: "Roxo myio", value: "var(--myio-purple)", dark: true },
     { key: "branco", label: "Branco", value: "var(--myio-white)", dark: false },
+    { key: "lilas", label: "Lilás myio", value: "var(--myio-lilac)", dark: false },
   ],
   inside: [
     { key: "padrao", label: "Escuro myio", value: "var(--myio-dark)", dark: true },
     { key: "branco", label: "Branco", value: "var(--myio-white)", dark: false },
+    { key: "roxo", label: "Roxo myio", value: "var(--myio-purple)", dark: true },
   ],
   below: [
     { key: "padrao", label: "Cinza", value: "var(--muted-foreground)", dark: true },
@@ -60,15 +72,15 @@ export const APP_TILE_COLORS = {
   ],
 } as const;
 export type AppTileColorKind = keyof typeof APP_TILE_COLORS;
-export type AppTileConfig = { labelPx: number; iconPct: number; tilePct: number; gapX: number; gapY: number; bg: string; border: string; inside: string; below: string };
-export const APP_TILE_DEFAULT: AppTileConfig = { labelPx: 14, iconPct: 100, tilePct: 100, gapX: 32, gapY: 40, bg: "padrao", border: "padrao", inside: "padrao", below: "padrao" };
+export type AppTileConfig = { labelPx: number; iconPct: number; tilePct: number; gapX: number; gapY: number; bg: string; fill: string; border: string; inside: string; below: string };
+export const APP_TILE_DEFAULT: AppTileConfig = { labelPx: 14, iconPct: 100, tilePct: 100, gapX: 32, gapY: 40, bg: "padrao", fill: "padrao", border: "padrao", inside: "padrao", below: "padrao" };
 export function appTileColor(kind: AppTileColorKind, key: string) {
   const list = APP_TILE_COLORS[kind] as readonly { key: string; label: string; value: string; dark: boolean }[];
   return list.find((o) => o.key === key) ?? list[0];
 }
 /** Portal CSS variables for the chosen colours (background, tile border, text inside and below the tiles). */
 export function appTileColorVars(tile: AppTileConfig): Record<string, string> {
-  return { "--portal-bg": appTileColor("bg", tile.bg).value, "--tile-border": appTileColor("border", tile.border).value, "--tile-inside": appTileColor("inside", tile.inside).value, "--tile-below": appTileColor("below", tile.below).value };
+  return { "--portal-bg": appTileColor("bg", tile.bg).value, "--tile-fill": appTileColor("fill", tile.fill).value, "--tile-border": appTileColor("border", tile.border).value, "--tile-inside": appTileColor("inside", tile.inside).value, "--tile-below": appTileColor("below", tile.below).value };
 }
 /** True when the description text would vanish on the chosen background (same light/dark side). */
 export function appTileLowContrast(tile: AppTileConfig) {
@@ -84,7 +96,7 @@ export function parseAppTile(raw?: string): AppTileConfig {
     return { labelPx: labelPx >= 10 && labelPx <= 18 ? labelPx : APP_TILE_DEFAULT.labelPx, iconPct: iconPct >= 60 && iconPct <= 140 ? iconPct : APP_TILE_DEFAULT.iconPct, tilePct: tilePct >= 70 && tilePct <= 140 ? tilePct : APP_TILE_DEFAULT.tilePct,
       gapX: Number.isFinite(gapX) && gapX >= 8 && gapX <= 80 ? gapX : APP_TILE_DEFAULT.gapX,
       gapY: Number.isFinite(gapY) && gapY >= 8 && gapY <= 80 ? gapY : APP_TILE_DEFAULT.gapY,
-      bg: appTileColor("bg", String(p.bg ?? "")).key, border: appTileColor("border", String(p.border ?? "")).key,
+      bg: appTileColor("bg", String(p.bg ?? "")).key, fill: appTileColor("fill", String(p.fill ?? "")).key, border: appTileColor("border", String(p.border ?? "")).key,
       inside: appTileColor("inside", String(p.inside ?? "")).key, below: appTileColor("below", String(p.below ?? "")).key };
   } catch { return APP_TILE_DEFAULT; }
 }

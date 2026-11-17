@@ -27,16 +27,16 @@ function Row({ id, index }: { id: string; index: number }) {
   </div>;
 }
 
-const COLOR_FIELDS: [AppTileColorKind, string][] = [["bg", "Fundo da página"], ["border", "Borda dos ícones"], ["inside", "Texto dentro do ícone"], ["below", "Texto abaixo do ícone"]];
+const COLOR_FIELDS: [AppTileColorKind, string][] = [["bg", "Fundo da página"], ["fill", "Preenchimento dos ícones"], ["border", "Borda dos ícones"], ["inside", "Texto dentro do ícone"], ["below", "Texto abaixo do ícone"]];
 
 /** Brand-only colour picker: options come from APP_TILE_COLORS, swatch shape follows CDE color_swatch. */
 function ColorChoice({ kind, label, value, onChange }: { kind: AppTileColorKind; label: string; value: string; onChange: (v: string) => void }) {
   const swatch = useCdeSwatchStyle();
-  const dot = (color: string) => <span aria-hidden="true" style={{ background: color, ...swatch.css }} className={`inline-block h-4 w-4 shrink-0 rounded-full border border-border ${swatch.cls}`} />;
+  const dot = (color: string) => <span aria-hidden="true" style={{ background: color, ...swatch.css }} className={`block h-4 w-4 shrink-0 rounded-full border border-border ${swatch.cls}`} />;
   const current = appTileColor(kind, value);
   return <div className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">{label}</Label>
-    <Select value={current.key} onValueChange={onChange}><SelectTrigger className="h-9" aria-label={label}><span className="flex min-w-0 items-center gap-2">{dot(current.value)}<span className="truncate">{current.label}</span></span></SelectTrigger>
-      <SelectContent>{APP_TILE_COLORS[kind].map((o) => <SelectItem key={o.key} value={o.key}><span className="flex items-center gap-2">{dot(o.value)}{o.label}</span></SelectItem>)}</SelectContent></Select></div>;
+    <Select value={current.key} onValueChange={onChange}><SelectTrigger className="h-9" aria-label={label}><span style={{ display: "inline-flex", alignItems: "center", gap: 10, lineHeight: 1 }} className="min-w-0">{dot(current.value)}<span className="truncate" style={{ lineHeight: "16px" }}>{current.label}</span></span></SelectTrigger>
+      <SelectContent>{APP_TILE_COLORS[kind].map((o) => <SelectItem key={o.key} value={o.key}><span style={{ display: "inline-flex", alignItems: "center", gap: 10, lineHeight: "16px" }}>{dot(o.value)}<span>{o.label}</span></span></SelectItem>)}</SelectContent></Select></div>;
 }
 
 export function CdeAppOrder({ number, handle }: { number: number; handle?: import("react").ReactNode }) {
@@ -109,21 +109,21 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
           </div></div>)}
         </div>
         <p className="pt-2 text-sm font-medium">Cores da página principal (Manual da Marca myio)</p>
-        <div role="group" aria-label="Cores da página principal" className="grid w-full max-w-5xl grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div role="group" aria-label="Cores da página principal" className="grid w-full max-w-5xl grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-5">
           {COLOR_FIELDS.map(([kind, label]) => <ColorChoice key={kind} kind={kind} label={label} value={tile[kind]} onChange={(v) => setTileDraft({ ...tile, [kind]: v })} />)}
         </div>
         {appTileLowContrast(tile) && <p className="text-xs text-destructive">O texto abaixo dos ícones fica pouco visível neste fundo; escolha uma cor de texto contrastante.</p>}
         <div className="space-y-1"><Label>Prévia desktop</Label>
           <div aria-label="Prévia dos apps" style={{ columnGap: tile.gapX, rowGap: tile.gapY, ...appTileColorVars(tile) } as React.CSSProperties} className="flex w-full flex-wrap bg-[var(--portal-bg)] px-4 py-10 sm:py-14">
             {order.map((key) => { const app = PORTAL_APPS.find((a) => a.key === key); return app ? <div key={key} style={{ zoom: tile.tilePct / 100 }} className="flex w-20 min-w-0 flex-col items-center text-center sm:w-28">
-              <div className="relative flex h-20 w-20 flex-col items-center justify-between rounded-2xl border-2 border-[color:var(--tile-border)] bg-primary px-1.5 pb-2 pt-1 text-primary-foreground sm:h-28 sm:w-28 sm:rounded-3xl sm:px-2 sm:pt-1.5"><AppTileFace appKey={key} name={app.name} tile={tile} /></div>
+              <div className="relative flex h-20 w-20 flex-col items-center justify-between rounded-2xl border-2 border-[color:var(--tile-border)] bg-[var(--tile-fill)] px-1.5 pb-2 pt-1 text-primary-foreground sm:h-28 sm:w-28 sm:rounded-3xl sm:px-2 sm:pt-1.5"><AppTileFace appKey={key} name={app.name} tile={tile} /></div>
               <p className="mt-2 w-20 max-w-full break-words text-center text-[0.68rem] leading-4 text-[color:var(--tile-below)] sm:mt-3 sm:w-28 sm:text-sm sm:leading-5">{APP_DESCRIPTIONS[key]?.map(line => <span key={line} className="block sm:whitespace-nowrap">{line}</span>)}</p>
             </div> : null; })}
           </div></div>
         <div className="space-y-1"><Label>Prévia mobile</Label>
           <div aria-label="Prévia mobile dos apps" style={appTileColorVars(tile) as React.CSSProperties} className="mobile-app-grid grid w-full max-w-[390px] bg-[var(--portal-bg)] px-3 py-8">
             {order.map(key => { const app = PORTAL_APPS.find(a => a.key === key); return app ? <div key={key} className="flex min-w-0 flex-col items-center text-center">
-              <div className="mobile-app-tile relative flex flex-col items-center justify-between rounded-2xl border-2 border-[color:var(--tile-border)] bg-primary px-1 pb-2 pt-1 text-primary-foreground"><AppTileFace appKey={key} name={app.name} tile={tile} mobile /></div>
+              <div className="mobile-app-tile relative flex flex-col items-center justify-between rounded-2xl border-2 border-[color:var(--tile-border)] bg-[var(--tile-fill)] px-1 pb-2 pt-1 text-primary-foreground"><AppTileFace appKey={key} name={app.name} tile={tile} mobile /></div>
               <p className="mt-2 w-full break-words text-center text-[0.68rem] leading-4 text-[color:var(--tile-below)]">{APP_DESCRIPTIONS[key]?.map(line => <span key={line} className="block">{line}</span>)}</p>
             </div> : null; })}
           </div>

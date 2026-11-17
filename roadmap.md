@@ -345,3 +345,7 @@
 - [x] CRM Fase 1 (banco): migração 0222 criou crm_empresas, crm_contatos, crm_papeis_contato, crm_fases_funil, crm_leads, crm_lead_contatos, crm_lead_origens, crm_etapas_lead, crm_oportunidades, crm_atividades (timeline imutável + motivo obrigatório em fase terminal) e crm_municipios; RLS por acesso ao app CRM, configurações só Admin ERP; sementes de fases/etapas/papéis inseridas. CRM original intacto.
 - [ ] CRM Fase 2: telas principais no ERP (Dashboard, Leads, Empresas/Contatos, Funil, Oportunidades) no padrão CDE.
 - [ ] CRM Fase 6: migração dos dados — aguarda export do banco atual do CRM (backup-db.sh com João Paulo).
+- [x] Espaçamento/alinhamento das bolinhas de cor no item 11 do CDE
+- [x] Ordenação de cabeçalhos no CDE (arraste)
+- [x] Preenchimento (fundo) dos ícones dos apps no item 11 do CDE
+- [x] Lilás e roxo myio nas cores da página principal

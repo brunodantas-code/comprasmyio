@@ -37,3 +37,4 @@
 - Landing and portal share app ordering via public_app_order(), a narrow public read exposing only the order array, never other CDE records.
 - Icon-only shared Save controls resolve CDE secondary controls/save-icon before the primary.
 - Library JSON writes share saveLibrarySelection with bounded group/primary URL filters and returned-row verification, avoiding bulk-consolidation URL limits.
+- Table column order: scripts/cde-table-sites.ts inventories <Table> headers (table-library.json, regenerate with scan-cde-tables.mjs) and Vite injects cdeTableId/data-cde-col; shared TableRow permutes cells from cde_selected table_column_order, so lists with dynamic header .map are excluded.

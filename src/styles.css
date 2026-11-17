@@ -123,6 +123,7 @@
   /* Tons derivados da marca para o fundo da página principal (CDE app_tile) */
   --myio-white: #ffffff;
   --myio-green-tint: color-mix(in oklab, var(--myio-green) 8%, white);
+  --myio-lilac: color-mix(in oklab, var(--myio-purple) 12%, white);
   /* Paleta do Mytosis: só tons das cores da marca */
   --mytosis-green-soft: color-mix(in oklab, var(--myio-green) 14%, white);
   --mytosis-green-mid: color-mix(in oklab, var(--myio-green) 45%, white);

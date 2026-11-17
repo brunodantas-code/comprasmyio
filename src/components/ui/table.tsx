@@ -1,9 +1,31 @@
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
+import { columnPermutation, useTableColumnOrders } from "@/components/cde/table-column-order";
 
-const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
-  ({ className, ...props }, ref) => {
+/** CDE column order: header row computes the permutation; body rows with the same cell count reuse it. */
+type TableOrderCtx = { saved?: number[]; perm: { current: number[] | null } };
+const TableOrderContext = React.createContext<TableOrderCtx | null>(null);
+const HeaderContext = React.createContext(false);
+
+function permuteChildren(children: React.ReactNode, ctx: TableOrderCtx | null, inHeader: boolean) {
+  if (!ctx?.saved) return children;
+  const items = React.Children.toArray(children);
+  if (inHeader) {
+    const present = items.map((c, i) => { const v = React.isValidElement(c) ? (c.props as Record<string, unknown>)["data-cde-col"] : undefined; return typeof v === "number" ? v : i; });
+    ctx.perm.current = columnPermutation(present, ctx.saved);
+  }
+  const perm = ctx.perm.current;
+  if (!perm || perm.length !== items.length) return children;
+  return perm.map((i) => items[i]);
+}
+
+const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement> & { cdeTableId?: string }>(
+  ({ className, cdeTableId, ...props }, ref) => {
+    const { data: orders } = useTableColumnOrders();
+    const perm = React.useRef<number[] | null>(null);
+    const saved = cdeTableId ? orders?.[cdeTableId] : undefined;
+    const orderCtx = React.useMemo<TableOrderCtx | null>(() => (saved ? { saved, perm } : null), [saved]);
     const innerRef = React.useRef<HTMLTableElement | null>(null);
 
     // Rotula cada célula com o texto do cabeçalho, para o modo empilhado no celular.
@@ -30,6 +52,7 @@ const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableE
     });
 
     return (
+      <TableOrderContext.Provider value={orderCtx}>
       <div className="relative w-full overflow-hidden rounded-md border border-border md:max-h-[calc(100vh-14rem)] md:overflow-auto">
         <table
           ref={(node) => {
@@ -42,6 +65,7 @@ const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableE
           {...props}
         />
       </div>
+      </TableOrderContext.Provider>
     );
   },
 );
@@ -52,6 +76,7 @@ const TableHeader = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
+  <HeaderContext.Provider value={true}>
   <thead
     ref={ref}
     className={cn(
@@ -60,6 +85,7 @@ const TableHeader = React.forwardRef<
     )}
     {...props}
   />
+  </HeaderContext.Provider>
 ));
 TableHeader.displayName = "TableHeader";
 
@@ -84,7 +110,10 @@ const TableFooter = React.forwardRef<
 TableFooter.displayName = "TableFooter";
 
 const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTMLTableRowElement>>(
-  ({ className, ...props }, ref) => (
+  ({ className, children, ...props }, ref) => {
+    const ctx = React.useContext(TableOrderContext);
+    const inHeader = React.useContext(HeaderContext);
+    return (
     <tr
       ref={ref}
       className={cn(
@@ -92,8 +121,9 @@ const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTML
         className,
       )}
       {...props}
-    />
-  ),
+    >{permuteChildren(children, ctx, inHeader)}</tr>
+    );
+  },
 );
 TableRow.displayName = "TableRow";
 
