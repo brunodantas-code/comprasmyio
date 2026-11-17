@@ -11,7 +11,7 @@ export const CATEGORIAS_ITEM = [
 ] as const;
 
 export type Condicoes = { contrato_meses: number; parcelas_setup: number; validade_dias: number; observacoes?: string | null; contrato_referencia?: string | null };
-export type ItemProposta = { id?: string; categoria: string; nome: string; modelo: string | null; unidade: string; quantidade: number; preco_setup_unit: number; preco_mensal_unit: number; ambiente: string | null; observacao: string | null };
+export type ItemProposta = { id?: string; categoria: string; nome: string; modelo: string | null; unidade: string; quantidade: number; preco_setup_unit: number; preco_mensal_unit: number; ambiente: string | null; observacao: string | null; tabela_item_id?: string | null };
 export type Pendencia = { id: string; texto: string; status: "aberta" | "resolvida" | "nao_se_aplica"; resolucao: string | null };
 
 const r2 = (n: number) => Math.round(n * 100) / 100;

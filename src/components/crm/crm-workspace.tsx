@@ -1,3 +1,4 @@
+import { CrmCustos } from "./crm-custos";
 import { useMemo, useRef, useState } from "react";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { DndContext, PointerSensor, useDraggable, useDroppable, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
@@ -18,7 +19,7 @@ import { PropostasSection } from "./crm-propostas";
 import { CrmRecordDialog, nn, num, type FieldSpec } from "./crm-record-dialog";
 import { LEAD_ORIGENS, brl, funnelSummary, matchesSearch, needsReason, origemLabel, overdueActions, parseLeadsCsv, pipelineTotals, type Fase } from "./crm-logic";
 
-export type CrmSection = "painel" | "leads" | "empresas" | "funil" | "oportunidades" | "propostas";
+export type CrmSection = "painel" | "leads" | "empresas" | "funil" | "oportunidades" | "propostas" | "precos";
 const today = () => new Date(Date.now() - 3 * 3600000).toISOString().slice(0, 10);
 const br = (d: string | null) => (d ? d.slice(0, 10).split("-").reverse().join("/") : "—");
 const uid = async () => { const u = (await supabase.auth.getUser()).data.user; if (!u) throw new Error("Sessão expirada."); return u.id; };
@@ -48,6 +49,7 @@ export function CrmWorkspace({ section }: { section: CrmSection }) {
     {section === "funil" && <Funil {...ctx} />}
     {section === "oportunidades" && <Oportunidades {...ctx} />}
     {section === "propostas" && <PropostasSection data={data} />}
+    {section === "precos" && <CrmCustos />}
     <EmpresaDialog value={empresa} onClose={() => setEmpresa(null)} refresh={refresh} />
     <ContatoDialog value={contato} data={data} onClose={() => setContato(null)} refresh={refresh} />
     <LeadDialog value={lead} data={data} onClose={() => setLead(null)} refresh={refresh} />

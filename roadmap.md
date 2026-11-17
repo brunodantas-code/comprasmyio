@@ -373,3 +373,4 @@
 - [x] CDE Tags: criar, renomear e excluir (vinculando a outra tag)
 - [x] Item Tags (16) fora do padrão no cabeçalho
 - [x] CDE: item Aparência do CDE (categorias/subcategorias)
+- [x] CRM Fase 4: Custeio e Preços

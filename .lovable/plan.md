@@ -28,7 +28,7 @@ Trazer o CRM (hoje em crm-myio.vercel.app, app Next.js separado com login e banc
 - Geração de DOCX (modelos atuais precisam ser enviados — estão fora do arquivo de código).
 - Levantamento por arquivos com IA via Lovable AI (substitui a integração atual).
 
-### Fase 4 — Custeio e Preços
+### Fase 4 — Custeio e Preços — CONCLUÍDA (tabela de preços, kits, lotes, parâmetros, memória de cálculo)
 - Insumos, produtos, kits, tabelas de preço, regras de medição/composição, análise de custos e motor de cálculo.
 
 ### Fase 5 — Configurações e integrações

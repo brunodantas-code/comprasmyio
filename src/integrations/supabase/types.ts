@@ -1473,6 +1473,44 @@ export type Database = {
           },
         ]
       }
+      crm_custo_base_produto: {
+        Row: {
+          cif: number
+          componentes_myio: number
+          id: string
+          lote_id: string
+          mod_assembling: number
+          pre_setup_fabrica: number
+          produto: string
+        }
+        Insert: {
+          cif?: number
+          componentes_myio?: number
+          id?: string
+          lote_id: string
+          mod_assembling?: number
+          pre_setup_fabrica?: number
+          produto: string
+        }
+        Update: {
+          cif?: number
+          componentes_myio?: number
+          id?: string
+          lote_id?: string
+          mod_assembling?: number
+          pre_setup_fabrica?: number
+          produto?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_custo_base_produto_lote_id_fkey"
+            columns: ["lote_id"]
+            isOneToOne: false
+            referencedRelation: "crm_lotes_custo"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_empresas: {
         Row: {
           cidade: string | null
@@ -1595,6 +1633,48 @@ export type Database = {
           probabilidade?: number
           tempo_max_dias?: number | null
           tipo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      crm_kits: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          custo_3os_imp: number
+          custo_3os_nac: number
+          grupo: string
+          id: string
+          nome: string
+          observacoes: string | null
+          ordem: number
+          produto: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          custo_3os_imp?: number
+          custo_3os_nac?: number
+          grupo: string
+          id?: string
+          nome: string
+          observacoes?: string | null
+          ordem?: number
+          produto: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          custo_3os_imp?: number
+          custo_3os_nac?: number
+          grupo?: string
+          id?: string
+          nome?: string
+          observacoes?: string | null
+          ordem?: number
+          produto?: string
           updated_at?: string
         }
         Relationships: []
@@ -1774,6 +1854,39 @@ export type Database = {
           },
         ]
       }
+      crm_lotes_custo: {
+        Row: {
+          codigo: string
+          created_at: string
+          descricao: string | null
+          id: string
+          status: string
+          updated_at: string
+          vigencia_fim: string | null
+          vigencia_inicio: string
+        }
+        Insert: {
+          codigo: string
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          status?: string
+          updated_at?: string
+          vigencia_fim?: string | null
+          vigencia_inicio?: string
+        }
+        Update: {
+          codigo?: string
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          status?: string
+          updated_at?: string
+          vigencia_fim?: string | null
+          vigencia_inicio?: string
+        }
+        Relationships: []
+      }
       crm_municipios: {
         Row: {
           id: number
@@ -1914,6 +2027,45 @@ export type Database = {
         }
         Relationships: []
       }
+      crm_parametros_motor: {
+        Row: {
+          aliquota_iss_estimada: number
+          circuitos_por_central: number
+          custo_hora_padrao: number
+          custo_mensal_servir_padrao: number
+          faixa_locacao_max: number
+          faixa_locacao_min: number
+          id: number
+          multiplicador_margem_locacao: number
+          teto_margem_servicos: number
+          updated_at: string
+        }
+        Insert: {
+          aliquota_iss_estimada?: number
+          circuitos_por_central?: number
+          custo_hora_padrao?: number
+          custo_mensal_servir_padrao?: number
+          faixa_locacao_max?: number
+          faixa_locacao_min?: number
+          id?: number
+          multiplicador_margem_locacao?: number
+          teto_margem_servicos?: number
+          updated_at?: string
+        }
+        Update: {
+          aliquota_iss_estimada?: number
+          circuitos_por_central?: number
+          custo_hora_padrao?: number
+          custo_mensal_servir_padrao?: number
+          faixa_locacao_max?: number
+          faixa_locacao_min?: number
+          id?: number
+          multiplicador_margem_locacao?: number
+          teto_margem_servicos?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       crm_proposta_itens: {
         Row: {
           ambiente: string | null
@@ -1928,6 +2080,7 @@ export type Database = {
           preco_setup_unit: number
           proposta_id: string
           quantidade: number
+          tabela_item_id: string | null
           unidade: string
         }
         Insert: {
@@ -1943,6 +2096,7 @@ export type Database = {
           preco_setup_unit?: number
           proposta_id: string
           quantidade?: number
+          tabela_item_id?: string | null
           unidade?: string
         }
         Update: {
@@ -1958,6 +2112,7 @@ export type Database = {
           preco_setup_unit?: number
           proposta_id?: string
           quantidade?: number
+          tabela_item_id?: string | null
           unidade?: string
         }
         Relationships: [
@@ -1965,6 +2120,60 @@ export type Database = {
             foreignKeyName: "crm_proposta_itens_proposta_id_fkey"
             columns: ["proposta_id"]
             isOneToOne: false
+            referencedRelation: "crm_propostas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_proposta_itens_tabela_item_id_fkey"
+            columns: ["tabela_item_id"]
+            isOneToOne: false
+            referencedRelation: "crm_tabela_precos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_proposta_memoria: {
+        Row: {
+          calculado_em: string
+          centrais_existentes: number
+          custo_hora: number
+          custo_mensal_servir: number
+          frete_site: number
+          horas_implantacao: number
+          lote_codigo: string | null
+          mobilizacao: number
+          proposta_id: string
+          resultado: Json
+        }
+        Insert: {
+          calculado_em?: string
+          centrais_existentes?: number
+          custo_hora?: number
+          custo_mensal_servir?: number
+          frete_site?: number
+          horas_implantacao?: number
+          lote_codigo?: string | null
+          mobilizacao?: number
+          proposta_id: string
+          resultado?: Json
+        }
+        Update: {
+          calculado_em?: string
+          centrais_existentes?: number
+          custo_hora?: number
+          custo_mensal_servir?: number
+          frete_site?: number
+          horas_implantacao?: number
+          lote_codigo?: string | null
+          mobilizacao?: number
+          proposta_id?: string
+          resultado?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_proposta_memoria_proposta_id_fkey"
+            columns: ["proposta_id"]
+            isOneToOne: true
             referencedRelation: "crm_propostas"
             referencedColumns: ["id"]
           },
@@ -2079,6 +2288,87 @@ export type Database = {
             columns: ["template_id"]
             isOneToOne: false
             referencedRelation: "crm_templates_proposta"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_tabela_precos: {
+        Row: {
+          ativo: boolean
+          categoria: string
+          created_at: string
+          id: string
+          modelo: string | null
+          nome: string
+          ordem: number
+          preco_mensal: number
+          preco_setup: number
+          unidade: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          categoria?: string
+          created_at?: string
+          id?: string
+          modelo?: string | null
+          nome: string
+          ordem?: number
+          preco_mensal?: number
+          preco_setup?: number
+          unidade?: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          categoria?: string
+          created_at?: string
+          id?: string
+          modelo?: string | null
+          nome?: string
+          ordem?: number
+          preco_mensal?: number
+          preco_setup?: number
+          unidade?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      crm_tabela_precos_custo: {
+        Row: {
+          custo_manual: number | null
+          item_id: string
+          kit_id: string | null
+          markup_percentual: number
+          updated_at: string
+        }
+        Insert: {
+          custo_manual?: number | null
+          item_id: string
+          kit_id?: string | null
+          markup_percentual?: number
+          updated_at?: string
+        }
+        Update: {
+          custo_manual?: number | null
+          item_id?: string
+          kit_id?: string | null
+          markup_percentual?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_tabela_precos_custo_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: true
+            referencedRelation: "crm_tabela_precos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_tabela_precos_custo_kit_id_fkey"
+            columns: ["kit_id"]
+            isOneToOne: false
+            referencedRelation: "crm_kits"
             referencedColumns: ["id"]
           },
         ]

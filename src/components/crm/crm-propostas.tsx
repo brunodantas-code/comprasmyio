@@ -1,3 +1,5 @@
+import { useCusteio } from "./crm-custos";
+import { MemoriaCalculo } from "./crm-memoria";
 import { useEffect, useMemo, useState } from "react";
 import { queryOptions, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { Check, CopyPlus, FileDown, Plus, RotateCcw, Save, Trash2, Ban } from "lucide-react";
@@ -107,6 +109,8 @@ function PropostaEditor({ id, data, templates, onClose, onOpen }: { id: string |
     },
   });
   const d = detail.data;
+  const custeio = useCusteio().data;
+  const daTabela = (custeio?.tabela ?? []).filter((t) => t.ativo);
   const [itens, setItens] = useState<ItemProposta[]>([]);
   const [cond, setCond] = useState<Condicoes>(parseCondicoes({}));
   const [tpl, setTpl] = useState(""); const [dataProp, setDataProp] = useState(""); const [obs, setObs] = useState("");
@@ -135,7 +139,7 @@ function PropostaEditor({ id, data, templates, onClose, onOpen }: { id: string |
         const keep = new Set(itens.map((i) => i.id).filter(Boolean));
         const removed = d.itens.filter((i) => i.id && !keep.has(i.id)).map((i) => i.id!);
         if (removed.length) { const r = await supabase.from("crm_proposta_itens").delete().in("id", removed); if (r.error) throw r.error; }
-        const row = (i: ItemProposta, ordem: number) => ({ proposta_id: d.proposta.id, categoria: i.categoria, nome: i.nome.trim(), modelo: i.modelo?.trim() || null, unidade: i.unidade.trim() || "un", quantidade: i.quantidade, preco_setup_unit: i.preco_setup_unit, preco_mensal_unit: i.preco_mensal_unit, ambiente: i.ambiente?.trim() || null, observacao: i.observacao?.trim() || null, ordem });
+        const row = (i: ItemProposta, ordem: number) => ({ proposta_id: d.proposta.id, categoria: i.categoria, nome: i.nome.trim(), modelo: i.modelo?.trim() || null, unidade: i.unidade.trim() || "un", quantidade: i.quantidade, preco_setup_unit: i.preco_setup_unit, preco_mensal_unit: i.preco_mensal_unit, ambiente: i.ambiente?.trim() || null, observacao: i.observacao?.trim() || null, tabela_item_id: i.tabela_item_id ?? null, ordem });
         for (const [k, i] of itens.entries()) {
           const r = i.id ? await supabase.from("crm_proposta_itens").update(row(i, k)).eq("id", i.id) : await supabase.from("crm_proposta_itens").insert(row(i, k));
           if (r.error) throw r.error;
@@ -162,7 +166,7 @@ function PropostaEditor({ id, data, templates, onClose, onOpen }: { id: string |
       if (vs.error) throw vs.error;
       const ins = await supabase.from("crm_propostas").insert({ numero: d.proposta.numero, versao: proximaVersao((vs.data ?? []).map((x) => x.versao)), oportunidade_id: d.proposta.oportunidade_id, template_id: d.proposta.template_id, condicoes: d.proposta.condicoes as never, observacoes: d.proposta.observacoes }).select("id").single();
       if (ins.error) throw ins.error;
-      if (d.itens.length) { const r = await supabase.from("crm_proposta_itens").insert(d.itens.map((i, k) => ({ proposta_id: ins.data.id, categoria: i.categoria, nome: i.nome, modelo: i.modelo, unidade: i.unidade, quantidade: i.quantidade, preco_setup_unit: i.preco_setup_unit, preco_mensal_unit: i.preco_mensal_unit, ambiente: i.ambiente, observacao: i.observacao, ordem: k }))); if (r.error) throw r.error; }
+      if (d.itens.length) { const r = await supabase.from("crm_proposta_itens").insert(d.itens.map((i, k) => ({ proposta_id: ins.data.id, categoria: i.categoria, nome: i.nome, modelo: i.modelo, unidade: i.unidade, quantidade: i.quantidade, preco_setup_unit: i.preco_setup_unit, preco_mensal_unit: i.preco_mensal_unit, ambiente: i.ambiente, observacao: i.observacao, tabela_item_id: i.tabela_item_id ?? null, ordem: k }))); if (r.error) throw r.error; }
       const abertas = d.pendencias.filter((p) => p.status === "aberta");
       if (abertas.length) { const r = await supabase.from("crm_proposta_pendencias").insert(abertas.map((p) => ({ proposta_id: ins.data.id, texto: p.texto }))); if (r.error) throw r.error; }
       await qc.invalidateQueries({ queryKey: ["crm-propostas"] }); toast.success("Nova versão criada"); onOpen(ins.data.id);
@@ -242,8 +246,11 @@ function PropostaEditor({ id, data, templates, onClose, onOpen }: { id: string |
               <TableCell>{rascunho && <Button variant="ghost" size="icon" aria-label="Remover item" title="Remover item" onClick={() => setItens(itens.filter((_, x) => x !== k))}><Trash2 /></Button>}</TableCell>
             </TableRow>)}
               {!itens.length && <TableRow><TableCell colSpan={12} className="text-muted-foreground">Nenhum item.</TableCell></TableRow>}</TableBody></Table>
-          {rascunho && <Button variant="ghost" onClick={() => setItens([...itens, emptyItem()])}><Plus className="h-4 w-4" />Adicionar item</Button>}
+          {rascunho && <div className="flex flex-wrap items-end gap-2"><Button variant="ghost" onClick={() => setItens([...itens, emptyItem()])}><Plus className="h-4 w-4" />Adicionar item</Button>
+            {daTabela.length > 0 && <Select value="" onValueChange={(v) => { const t = daTabela.find((x) => x.id === v); if (t) setItens([...itens, { ...emptyItem(), categoria: t.categoria, nome: t.nome, modelo: t.modelo, unidade: t.unidade, quantidade: 1, preco_setup_unit: t.preco_setup, preco_mensal_unit: t.preco_mensal, tabela_item_id: t.id }]); }}><SelectTrigger aria-label="Adicionar da tabela de preços" className="w-64"><SelectValue placeholder="Adicionar da tabela de preços" /></SelectTrigger><SelectContent>{daTabela.map((t) => <SelectItem key={t.id} value={t.id}>{t.nome}{t.modelo ? ` · ${t.modelo}` : ""}</SelectItem>)}</SelectContent></Select>}</div>}
         </section>
+
+        {custeio?.admin && <MemoriaCalculo propostaId={d.proposta.id} itens={itens} contratoMeses={cond.contrato_meses} totalSetup={tot.setup} totalMensal={tot.mensal} custeio={custeio} />}
 
         <section className="space-y-2">
           <h2 className="text-base font-medium">Pendências</h2>

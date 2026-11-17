@@ -1,3 +1,4 @@
 - CRM opportunities are never deleted (their activity timeline is append-only); closing uses lost/disqualified phases with a reason.
 - CRM screens use shared CDE-bound components (Table, Input, Select, Button) and pure rules in crm-logic.ts.
 - Proposals: items/totals/incompleteness/status guards live in DB triggers (crm_proposta_*); items editable only in draft, changes after sending go through a new version (same numero); DOCX is generated client-side with the docx package (proposta-docx.ts).
+- CRM pricing/costing: price list (crm_tabela_precos) readable by CRM users; costs, kits, batches, engine parameters and proposal cost memory are ERP-admin-only tables; pure rules in custeio-logic.ts and the ported motor-custeio.ts (keep it identical to the legacy CRM engine).
