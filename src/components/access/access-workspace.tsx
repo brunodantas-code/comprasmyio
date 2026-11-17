@@ -9,6 +9,7 @@ import { AccessProfilesTab } from "@/components/access-profiles-tab";
 import { SiteSurveyProfilesAdmin } from "@/components/site-survey-profiles-admin";
 import { UsersTab } from "@/components/mytosis/users-tab";
 import { CodeAttendantsPanel } from "@/components/code-app-attendants";
+import { AppSymbol } from "@/components/cde/app-tile";
 import { accessProfileApps, type AccessCapabilities } from "@/lib/access-management";
 import { UsersAdmin } from "./users-admin";
 import { SurveyUsersAdmin } from "./survey-users-admin";
@@ -52,7 +53,7 @@ export function AccessWorkspace({ capabilities, section, app, onChange }: { capa
     {active === "usuarios" && capabilities.erpAdmin ? <ErpAppAccessAdmin /> : null}
     {active === "cadastro" && capabilities.supplyAdmin ? <UsersAdmin /> : null}
     {active === "perfis" ? <Tabs value={selectedApp} onValueChange={value => onChange({ section: "perfis", app: value })}>
-      <nav aria-label="Aplicativos em Acessos" className="mb-5 flex flex-wrap gap-2">{apps.map(key => <Button key={key} variant="ghost" aria-pressed={selectedApp === key} className={selectedApp === key ? "font-semibold underline underline-offset-4" : "font-normal"} onClick={() => onChange({ section: "perfis", app: key })}>{APP_NAMES[key] ?? key}</Button>)}</nav>
+      <nav aria-label="Aplicativos em Acessos" className="mb-5 flex flex-wrap gap-2">{apps.map(key => <Button key={key} variant="ghost" aria-pressed={selectedApp === key} className={selectedApp === key ? "font-semibold underline underline-offset-4" : "font-normal"} onClick={() => onChange({ section: "perfis", app: key })}><AppSymbol name={APP_NAMES[key] ?? key} className="size-4 shrink-0" />{APP_NAMES[key] ?? key}</Button>)}</nav>
       {capabilities.supplyAdmin ? <TabsContent value="supply"><div className="space-y-6"><AccessProfileDefinitionsTab /><AccessProfilesTab /></div></TabsContent> : null}
       {capabilities.surveyUsers || capabilities.surveyProfiles ? <TabsContent value="site_survey"><div className="space-y-6">{capabilities.surveyUsers ? <SurveyUsersAdmin /> : null}{capabilities.surveyProfiles ? <SiteSurveyProfilesAdmin /> : null}</div></TabsContent> : null}
       {capabilities.mytosisAdmin ? <TabsContent value="mytosis"><MytosisAccess /></TabsContent> : null}

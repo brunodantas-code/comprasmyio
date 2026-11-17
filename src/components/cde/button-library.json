@@ -11942,7 +11942,7 @@
   {
     "id": "components/access/access-workspace.tsx|fc8c45ec8ac31349|0",
     "file": "components/access/access-workspace.tsx",
-    "line": 51,
+    "line": 52,
     "tag": "Button",
     "label": "item.icon",
     "dynamic": true,
@@ -11955,15 +11955,15 @@
     "group": ""
   },
   {
-    "id": "components/access/access-workspace.tsx|8ac90b38851ebaf8|0",
+    "id": "components/access/access-workspace.tsx|5af89f8b2175717b|0",
     "file": "components/access/access-workspace.tsx",
-    "line": 55,
+    "line": 56,
     "tag": "Button",
-    "label": "Sem nome fixo",
+    "label": "AppSymbol",
     "dynamic": true,
     "visualCustom": false,
     "autoCdeSafe": true,
-    "icon": "",
+    "icon": "AppSymbol",
     "variant": "ghost",
     "size": "",
     "className": "",
